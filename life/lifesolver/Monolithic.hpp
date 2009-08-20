@@ -52,7 +52,7 @@ public:
 
     void   solveJac(vector_type&       _muk,
                     const vector_type& _res,
-                    const double       _linearRelTol);
+                    const Real       _linearRelTol);
 
     template <typename SolverType>
     void iterateMonolithic(vector_type& rhs, vector_type& sol, matrix_ptrtype prec, SolverType linearSolver); // used for monolithic
@@ -76,7 +76,7 @@ public:
 
     void buildSystem();
     void addDiagonalEntries(Real& entry, matrix_ptrtype & bigMatrix);
-    void setup();
+    void setupFluidSolid();
 
     virtual    boost::shared_ptr<EpetraMap>& couplingVariableMap(){return M_monolithicMap;}
 
@@ -108,9 +108,6 @@ public:
 
 protected:
 
-    void resetHeAndFluid(){}
-    //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
-    void solidInit(const std::string& dOrder);
     //void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
     void variablesInit(const std::string& dOrder);
 

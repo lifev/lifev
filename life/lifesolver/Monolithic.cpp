@@ -48,9 +48,9 @@ Monolithic::~Monolithic()
 }
 
 
-void Monolithic::setup()
+void Monolithic::setupFluidSolid()
 {
-    super::setup();
+    super::setupFluidSolid();
 
 
             // Added here the code to build the bigMap!!
@@ -411,7 +411,7 @@ Monolithic::evalResidual( vector_type&       res,
                 //                M_epetraWorldComm->Barrier();
                 chronoFluid.start();
 
-                M_meshMotion->iterate();
+                M_meshMotion->iterate( *M_BCh_mesh );
                 M_meshMotion->updateDispDiff();
                 //                this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                 //                                        this->veloFluidMesh());
@@ -537,7 +537,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
 
 void  Monolithic::solveJac(vector_type         &_step,
                            const vector_type   &_res,
-                           const double         /*_linearRelTol*/)
+                           const Real         /*_linearRelTol*/)
 {
 
     std::cout << "solveJac: NormInf res " << _res.NormInf() << std::endl;
@@ -603,7 +603,7 @@ Monolithic::iterateMesh(const vector_type& disp)
 
                 //                M_epetraWorldComm->Barrier();
 
-                M_meshMotion->iterate();
+                M_meshMotion->iterate(*M_BCh_mesh);
 
                 //                this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                 //                                        this->veloFluidMesh());
@@ -686,19 +686,6 @@ diagonalScale(vector_type& rhs, matrix_ptrtype matrFull)
     matrFull->getEpetraMatrix().InvColMaxs(diagonal);
     matrFull->getEpetraMatrix().LeftScale(diagonal);
     rhs.getEpetraVector().Multiply(1, rhs.getEpetraVector(), diagonal,0);
-}
-
-
-//void Monolithic::solidInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
-void Monolithic::solidInit(const std::string& dOrder)
-{   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
-														dOrder,
-                                                       //*refFE_struct,
-                                                       //*qR_struct,
-                                                       //*bdQr_struct,
-                                                       3,
-                                                       *M_epetraComm));
 }
 
 //void Monolithic::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)

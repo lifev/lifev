@@ -47,15 +47,15 @@ defOmegaF  = 0.01 # matters only with  precond = 2
 # if updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
 # if updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit).
 #                        Deprecated when using exactJacobian (better to set ifSemiImplicit=1)
-updateEvery = 1
+updateEvery = -1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
-abstol     =  1.e-10
-reltol     =  1.e-6
-etamax     = 1.e-10 # tolerance of the interface problem (GMRES),
+abstol     = 0.e-5
+reltol     = 1.e-5
+etamax     = 1.e-5 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
                     # else (e.g.)            etamax = 1.e-3
-semiImplicit = false # (only valid for method = exactJacobian and monolithic).
+semiImplicit = false # (only valid for method = exactJacobian or monolithic).
 maxSubIter = 100
 #monolithic = 0
 
@@ -80,24 +80,33 @@ save       = 1
 [fluid]
 
 useShapeDerivatives = true
+absorbing_bc		= true
 
 [./physics]
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
 [../time_discretization]
-initialtime		= 0
-endtime			= 0.01
-timestep		= 0.001
+initialtime		= 0.
+endtime			= 0.001
+timestep		= 0.0001
 BDF_order		= 1
 
+# end of fluid preconditioner parameters
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+reuse      = true
+
 [../space_discretization]
-mesh_dir  = ./ # the directory where the mesh file is
+mesh_dir  = ./Mesh/ # the directory where the mesh file is
+#mesh_file = stent-fluid-coarse.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
-vel_order       = P1            # P1, P1Bubble, P2
-press_order     = P1            # P1, P2
+#mesh_file = tube.mesh  # mesh file
 
-
+vel_order		= P1Bubble		# P1, P1Bubble, P2
+press_order		= P1			# P1, P2
 
 [../miscellaneous]
 verbose   = 1
@@ -109,68 +118,123 @@ factor    = 1
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all # none
+output          = all  #none
 conv            = rhs
 max_iter        = 100
+max_iter_reuse  = 100
 kspace          = 100
 tol             = 1.e-10    # AztecOO tolerance
 
-# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+[../prec]
+prectype        = Ifpack
 reuse           = true
-overlap         = 2
-droptol         = 1.e-5
-fill            = 4
-athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
-rthr            = 1
-relax_value     = 1
+displayList     = true
 
-[../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.2
-reuse      = true
+[./ifpack]
+prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+overlap         = 2
+
+[./relaxation]
+type                   = Jacobi
+damping_factor         = 1.
+sweeps                 = 1
+min_diagonal_value     = 0
+zero_starting_solution = true
+
+[../partitioner]
+type                   = metis
+#overlap                = 0
+local_parts            = 1
+root_node              = 0
+use_symmetric_graph    = true
+
+[../amesos]
+solvertype             = Amesos_KLU
+
+[../fact]
+drop_tolerance         = 1.e-5
+level-of-fill          = 1
+ilut_level-of-fill     = 1
+absolute_threshold     = 0.
+relative_threshold     = 0.
+relax_value            = 0.
+
+[../schwarz]
+combine_mode           = true
+reordering_type        = none
+filter_singletons      = false
+# end of fluid preconditioner parameters
 
 [lin_fluid]
-[../solver]
+
+[./solver]
 solver          = gmres
 scaling         = none
-output          = all # none
+output          = all  #none
 conv            = rhs
 max_iter        = 100
 kspace          = 100
-tol             = 1.e-10    # AztecOO tolerance
+tol             = 1.e-5    # AztecOO tolerance
 
-# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+prectype        = Ifpack
 reuse           = true
-overlap         = 2
-droptol         = 1.e-5
-fill            = 4
-athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
-rthr            = 1
-relax_value     = 1
+displayList     = false
 
+[./ifpack]
+prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+overlap         = 2
+
+[./relaxation]
+type                   = "Jacobi"
+damping_factor         = 1.
+sweeps                 = 1
+min_diagonal_value     = 0
+zero_starting_solution = true
+
+[../partitioner]
+type                   = metis
+#overlap                = 0
+local_parts            = 1
+root_node              = 0
+use_symmetric_graph    = true
+
+[../amesos]
+solvertype             = Amesos_KLU
+
+[../fact]
+drop_tolerance         = 1.e-5
+level-of-fill          = 1
+ilut_level-of-fill     = 1
+absolute_threshold     = 0.
+relative_threshold     = 0.
+relax_value            = 0.
+
+[../schwarz]
+combine_mode           = true
+reordering_type        = none
+filter_singletons      = false
+# end of fluid preconditioner parameters
 
 [solid]
 
 [./physics]
-density   = 1.2               # density
-young     = 3.0E6
-poisson   = 0.30
+material_flag   = 1 #,2
+young           = 3.0E6 #,1.9E9
+poisson         = 0.30 #,0.30
+
+density         = 1.2					# density
+thickness		= 0.1
 
 [../time_discretization]
-initialtime		= 0.
-endtime			= 0.01
-timestep		= 0.001
+timestep		= 0.0001
 
 [../space_discretization]
-mesh_dir  = ./  # the directory where the mesh file is
+mesh_dir  = ./Mesh/  # the directory where the mesh file is
+#mesh_file = stent-solid-coarse.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
+#mesh_file = vessel.mesh  # mesh file
 order     = P1
-
 
 [../miscellaneous]
 factor    = 12
@@ -183,28 +247,36 @@ maxiter = 1
 abstol  = 1.e-8
 linesearch = 0
 
-
-[../prec]
-reuse           = true
-overlap         = 2
-droptol         = 1.e-5
-fill            = 2
-
 [../solver]
-output          = all # none
-max_iter        = 30
+output          = all
+max_iter        = 100
 poly_ord        = 5
-kspace          = 30
+kspace          = 100
 precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
 tol             = 1.e-10
 
 
+[../prec]
+prectype        = Ifpack
+reuse           = true
+overlap         = 2
+
+[./ifpack]
+
+[./fact]
+droptol         = 1.e-5
+fill            = 2
+
+[../amesos]
+solvertype      = Amesos_Umfpack
+
+
 [mesh_motion]
 
 [./solver]
-output          = all # none
+output          = all
 max_iter        = 300
 poly_ord        = 5
 kspace          = 40
@@ -214,16 +286,32 @@ ilut_fill       = 4
 tol             = 1.e-10
 keep_info       = 1
 
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = Ifpack
+reuse           = true
+
+[./ifpack]
+prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+droptol         = 1.e-5
+fill            = 4
+relax_value     = 1
+overlap         = 1
+
+[./amesos]
+solvertype      = Amesos_Umfpack
+
 [jacobian]
 
 solver   = gmres;
 poly_ord = 5;
 kspace   = 40;
 conv     = rhs;
+
 ]])
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
           ln -sf ../../data/mesh/inria/vessel20.mesh;
-          ../../test_fsi/test_fsi -c],[0],[ignore],[ignore])
+          mpirun -np 4  ../../test_fsi/test_fsi -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
 #

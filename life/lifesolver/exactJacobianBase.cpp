@@ -78,14 +78,19 @@ exactJacobian::setDataFromGetPot( GetPot const& data )
 
 }
 
-
 void
-exactJacobian::setup()
+exactJacobian::setupFEspace()
 {
     setLinearFluid(true);
     setLinearSolid(true);
 
-    super::setup();
+    super::setupFEspace();
+}
+
+void
+exactJacobian::setupFluidSolid()
+{
+    super::setupFluidSolid();
 
     M_epetraOper.reset( new Epetra_ExactJacobian(this));
 
@@ -120,12 +125,32 @@ exactJacobian::setup()
 
 //    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
+
+
+UInt
+exactJacobian::imposeFlux( void )
+{
+	UInt numLM = super::imposeFlux();
+
+    std::vector<BCName> fluxVector = M_BCh_du->getBCWithType( Flux );
+    if( numLM != (static_cast<UInt>(fluxVector.size())) )
+    	ERROR_MSG("Different number of fluxes imposed on Fluid and on LinearFluid");
+
+    UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
+                + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
+
+    for ( UInt i = 0; i < numLM; ++i )
+    	M_BCh_du->setOffset( fluxVector[i], offset + i );
+
+    return numLM;
+}
+
 //
 // Residual computation
 //
 
 void exactJacobian::eval(const vector_type& _disp,
-                         const int          iter)
+                         const UInt          iter)
 {
     Chrono chronoFluid, chronoSolid, chronoInterface;
 
@@ -154,7 +179,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     if (this->isFluid())
     {
-        this->M_meshMotion->iterate();
+        this->M_meshMotion->iterate(*M_BCh_mesh);
         this->M_meshMotion->updateDispDiff();
 
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
@@ -316,7 +341,7 @@ void exactJacobian::evalResidual(vector_type&       res,
 
 void  exactJacobian::solveJac(vector_type         &_muk,
                               const vector_type   &_res,
-                              const double         _linearRelTol)
+                              const Real         _linearRelTol)
 {
     if (this->isFluid()) M_fluid->reusePrec();
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
@@ -448,7 +473,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
                 //to be used when we correct the other lines
                 if(true || ( !this->M_ej->dataFluid().isSemiImplicit() /*|| this->M_ej->dataFluid().semiImplicit()==-1*/))
                     {
-                        M_ej->meshMotion().iterate();
+                        M_ej->meshMotion().iterate(*M_ej->BCh_harmonicExtension());
                         //std::cout<<" mesh motion iterated!!!"<<std::endl;
                     }
 

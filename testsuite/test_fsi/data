@@ -78,7 +78,6 @@ mesh_file = tube20.mesh  # mesh file
 
 vel_order		= P1Bubble		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
-numLM			= 1				# Lagrange Multipliers
 
 [../miscellaneous]
 verbose   = 1

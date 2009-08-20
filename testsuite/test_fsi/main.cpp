@@ -18,7 +18,7 @@
 */
 
 #ifdef TWODIM
-#error test_fsi cannot be compiled in 2D
+	#error test_fsi cannot be compiled in 2D
 #endif
 
 #include <boost/timer.hpp>
@@ -60,6 +60,9 @@ namespace
 	static bool regEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 }
+using namespace LifeV;
+
+
 
 
 #define PI 3.141592653589793
@@ -67,17 +70,17 @@ class bc_adaptor
 {
 public:
 
-    bc_adaptor( LifeV::FSIOperator &_oper ):
-            M_oper   ( _oper )
+    bc_adaptor( FSIOperator& Operator ):
+            M_oper   ( Operator )
     {
-    	LifeV::Real area0	= 0.78540;
-    	//LifeV::Real area0	= M_oper.fluid().area(3);
-        LifeV::Real area	= area0;
+    	Real area0	= 0.78540;
+    	//Real area0	= M_oper.fluid().area(3);
+        Real area	= area0;
 
-        LifeV::Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
+        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
 							(1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
 
-        LifeV::Real qn		= M_oper.fluid().flux(3);
+        Real qn		= M_oper.fluid().flux(3);
 
     	M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
 							- beta*std::sqrt(area0);
@@ -96,24 +99,23 @@ public:
         std::cout << "------------------------------------------------------------" << std::endl;
     }
 
-    LifeV::Real operator()(LifeV::Real /*__time*/,
-                           LifeV::Real /*__x*/,
-                           LifeV::Real /*__y*/,
-                           LifeV::Real /*__z*/,
-                           LifeV::ID   __i)
+    Real operator()( Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/, ID id)
     {
-        switch(__i)
+        switch( id )
         {
             case 1:
                 return 0.;
                 break;
+
             case 2:
             	return 0.;
                 break;
+
             case 3:
                 //return 0.;
                 return -M_outflow;
                 break;
+
             default:
                 ERROR_MSG("This entrie is not allowed: disp_adatptor");
                 break;
@@ -121,23 +123,28 @@ public:
 
         return 0.;
     }
+
 private:
 
-    LifeV::FSIOperator&		M_oper;
-    LifeV::Real				M_outflow;
+    FSIOperator& M_oper;
+    Real         M_outflow;
 };
+
+
+
+
 
 class Problem
 {
 public:
 
-	typedef boost::shared_ptr<LifeV::FSISolver>				fsi_solver_ptr;
+	typedef boost::shared_ptr<FSISolver>                    fsi_solver_ptr;
 
-    typedef LifeV::FSIOperator::vector_type					vector_type;
-    typedef LifeV::FSIOperator::vector_ptrtype				vector_ptrtype;
+    typedef FSIOperator::vector_type                        vector_type;
+    typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
 
-    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>	filter_type;
-    typedef boost::shared_ptr<filter_type>					filter_ptrtype;
+    typedef Ensight<FSIOperator::mesh_type>                 filter_type;
+    typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
     /*!
       This routine sets up the problem:
@@ -147,45 +154,52 @@ public:
 
       -# initialize and setup the FSIsolver
     */
-    Problem( GetPot const& data_file, std::string _oper = "" )
+    Problem( const GetPot& dataFile, std::string method = "" )
     {
-    	using namespace LifeV;
+#ifdef DEBUG
+    	Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+#endif
+    	M_fsi = fsi_solver_ptr( new FSISolver( method ) );
 
-    	Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
-		//DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
+    	MPI_Barrier( MPI_COMM_WORLD );
 
-    	M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
-    	//M_fsi = fsi_solver_ptr(  new FSISolver( _oper ) );
+#ifdef DEBUG
+		Debug( 10000 ) << "Setting up data from GetPot \n";
+#endif
+    	M_fsi->setDataFromGetPot( dataFile );
 
-    	Debug( 10000 ) << _oper << " set \n";
-		//M_fsi->setup( data_file );
+    	MPI_Barrier( MPI_COMM_WORLD );
 
-    	MPI_Barrier(MPI_COMM_WORLD);
-
-		//M_fsi->setSourceTerms( fZero, fZero );
+#ifdef DEBUG
     	Debug( 10000 ) << "Setting up the BC \n";
+#endif
+    	//M_fsi->setSourceTerms( fZero, fZero );
+		M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
+		M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension(*M_fsi->FSIOper()));
+		M_fsi->setSolidBC(BCh_solid(*M_fsi->FSIOper()));
+		M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->FSIOper()));
+		M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->FSIOper()));
 
-    	M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
-    	M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->FSIOper()));
-    	M_fsi->setSolidBC(BCh_solid(*M_fsi->FSIOper()));
-    	M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->FSIOper()));
-    	M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->FSIOper()));
+		M_absorbingBC = dataFile("fluid/absorbing_bc", false);
+		std::cout << "   absorbing BC = " << M_absorbingBC << std::endl;
 
-    	M_absorbingBC = data_file("fluid/absorbing_bc", false);
-    	std::cout << "   absorbing BC = " << M_absorbingBC << std::endl;
+    	MPI_Barrier( MPI_COMM_WORLD );
 
-    	Debug( 10000 ) << "BC set\n";
-
-    	//Debug( 10000 ) << "Setting up the FSISolver \n";
-
-    	bool restart = data_file("problem/restart",false);
-    	M_Tstart = 0.;
+#ifdef DEBUG
+		Debug( 10000 ) << "Setting up the problem \n";
+#endif
+    	M_fsi->setup( );
 
     	//M_fsi->resetFSISolvers();
 
-    	if (M_fsi->isFluid())
+    	MPI_Barrier( MPI_COMM_WORLD );
+
+#ifdef DEBUG
+		Debug( 10000 ) << "Setting up Ensight \n";
+#endif
+    	if ( M_fsi->isFluid() )
     	{
-    		M_ensightFluid.reset( new  filter_type( data_file, "fixedPtFluid") );
+    		M_ensightFluid.reset( new  filter_type( dataFile, "fixedPtFluid") );
 
     		M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
@@ -201,13 +215,9 @@ public:
     		M_ensightFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
 										UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
     	}
-
-    	if (M_fsi->isSolid())
+    	if ( M_fsi->isSolid() )
     	{
-    		M_ensightSolid.reset( new  filter_type ( data_file, "fixedPtSolid") );
-
-    		//assert( M_fsi->FSIOper()->uFESpace().get() );
-    		//assert( M_fsi->FSIOper()->uFESpace().mesh().get() );
+    		M_ensightSolid.reset( new  filter_type ( dataFile, "fixedPtSolid") );
 
     		M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
@@ -219,24 +229,26 @@ public:
 										UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
     	}
 
-    	if (restart)
+    	bool restart = dataFile("problem/restart",false);
+    	M_Tstart = 0.;
+    	if ( restart )
     	{
-    		std::string velFName  = data_file("fluid/miscellaneous/velname"  ,"vel");
-    		std::string pressName = data_file("fluid/miscellaneous/pressname","press");
-    		std::string velwName  = data_file("fluid/miscellaneous/velwname", "velw");
-    		std::string depName   = data_file("solid/miscellaneous/depname"  ,"dep");
-    		std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
-    		M_Tstart= data_file("problem/Tstart"   ,0.);
+    		std::string velFName  = dataFile("fluid/miscellaneous/velname"  ,"vel");
+    		std::string pressName = dataFile("fluid/miscellaneous/pressname","press");
+    		std::string velwName  = dataFile("fluid/miscellaneous/velwname", "velw");
+    		std::string depName   = dataFile("solid/miscellaneous/depname"  ,"dep");
+    		std::string velSName  = dataFile("solid/miscellaneous/velname"  ,"velw");
+    		M_Tstart = dataFile("problem/Tstart"   ,0.);
     		std::cout << "Starting time = " << M_Tstart << std::endl;
 
     		//M_fsi->initialize(velFName, pressName, velwName, depName, velSName, M_Tstart);
 
-    		if (M_fsi->isFluid())
+    		if ( M_fsi->isFluid() )
     		{
     			M_ensightFluid->import(M_Tstart, M_fsi->timeStep());
     			M_fsi->FSIOper()->initializeFluid( *M_velAndPressure, *M_fluidDisp );
     		}
-    		if (M_fsi->isSolid())
+    		if ( M_fsi->isSolid() )
     		{
     			M_ensightSolid->import(M_Tstart, M_fsi->timeStep());
 				M_fsi->FSIOper()->initializeSolid( *M_solidDisp, *M_solidVel );
@@ -253,19 +265,20 @@ public:
       This routine runs the temporal loop
     */
     void
-    run( double dt, double T)
+    run( Real dt, Real T)
 	{
     	std::ofstream ofile;
 
     	bool const isFluidLeader( M_fsi->FSIOper()->isFluid() && M_fsi->FSIOper()->isLeader() );
-    	if (isFluidLeader) ofile.open("fluxes.res");
+    	if ( isFluidLeader )
+    		ofile.open( "fluxes.res" );
 
     	boost::timer _overall_timer;
 
-    	double flux;
+    	Real flux;
     	int _i = 1;
 
-    	//double time=M_Tstart;
+    	//Real time=M_Tstart;
 
 		//if ( M_fsi->isFluid() )
     	//{
@@ -285,13 +298,13 @@ public:
 			//M_ensightFluid->postProcess( time );
 		//}
 
-    	for (double time = M_Tstart + dt; time <= T; time += dt, ++_i)
+    	for ( Real time = M_Tstart + dt; time <= T; time += dt, ++_i )
     	{
     		boost::timer _timer;
 
-    		if (M_absorbingBC && M_fsi->isFluid())
+    		if ( M_absorbingBC && M_fsi->isFluid() )
 			{
-				LifeV::BCFunctionBase outFlow;
+				BCFunctionBase outFlow;
 				outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
 				M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
 			}
@@ -300,15 +313,24 @@ public:
 
     		if ( M_fsi->isFluid() )
             {
-				if (isFluidLeader) ofile << time << " ";
-    			flux = M_fsi->FSIOper()->fluid().flux(2);
-				if (isFluidLeader) ofile << flux << " ";
+				if ( isFluidLeader )
+					ofile << time << " ";
+
+				flux = M_fsi->FSIOper()->fluid().flux(2);
+				if ( isFluidLeader )
+					ofile << flux << " ";
+
 				flux = M_fsi->FSIOper()->fluid().flux(3);
-				if (isFluidLeader) ofile << flux << " ";
+				if ( isFluidLeader )
+					ofile << flux << " ";
+
 				flux = M_fsi->FSIOper()->fluid().pressure(2);
-				if (isFluidLeader) ofile << flux << " ";
+				if ( isFluidLeader )
+					ofile << flux << " ";
+
 				flux = M_fsi->FSIOper()->fluid().pressure(3);
-				if (isFluidLeader) ofile << flux << " " << std::endl;
+				if ( isFluidLeader )
+					ofile << flux << " " << std::endl;
 
 				*M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
 				*M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
@@ -322,7 +344,7 @@ public:
     			M_ensightSolid->postProcess( time );
     		}
 
-				std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
+			std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
     	}
 
 		std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
@@ -332,10 +354,7 @@ public:
 private:
 
 	fsi_solver_ptr M_fsi;
-	double         M_Tstart;
-    //LifeV::DataNavierStokes< LifeV::RegionMesh3D<LifeV::LinearTetra> > M_dataNS;
-
-	MPI_Comm*      M_comm;
+	Real           M_Tstart;
 
 	bool           M_absorbingBC;
 
@@ -348,117 +367,118 @@ private:
 	vector_ptrtype M_solidVel;
 };
 
+
+
+
+
 struct FSIChecker
 {
-    FSIChecker( GetPot const& _data_file ):
-        data_file( _data_file ),
-        Oper     ( _data_file( "problem/method", "exactJacobian" ) ),
-        prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+    FSIChecker( const GetPot&      dataFile ):
+        M_dataFile( dataFile ),
+        M_method  ( dataFile( "problem/method", "exactJacobian" ) )
         {}
 
-    FSIChecker( GetPot const& _data_file,
-                std::string _oper):
-        data_file( _data_file ),
-        Oper     ( _oper ),
-        prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+    FSIChecker( const GetPot&      dataFile,
+                const std::string& method   ):
+        M_dataFile ( dataFile ),
+        M_method   ( method )
         {}
 
     void operator()()
 	{
-    	boost::shared_ptr<Problem> fsip;
+    	boost::shared_ptr<Problem> FSIproblem;
 
     	try
     	{
-    		std::cout << "calling problem constructor ... " << std::flush;
-    		fsip = boost::shared_ptr<Problem>( new Problem( data_file, Oper ) );
-    		std::cout << "problem set" << std::endl;
-
-    		//fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
-    		//std::cout << "in operator 1" << std::endl;
-    		//fsip->fsiSolver()->FSIOper()->fluid().postProcess();
-			//fsip->fsiSolver()->FSIOper()->solid().postProcess();
-
-    		fsip->fsiSolver()->FSIOper()->setPreconditioner( prec );
-
-			//std::cout << "in operator 2" << std::endl;
-			//fsip->fsiSolver()->FSIOper()->fluid().postProcess();
-    		fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
+    		FSIproblem = boost::shared_ptr<Problem> ( new Problem( M_dataFile, M_method ) );
+    		FSIproblem->run( FSIproblem->fsiSolver()->timeStep(), FSIproblem->fsiSolver()->timeEnd() );
     	}
-    	catch ( std::exception const& _ex )
+    	catch ( const std::exception& _ex )
     	{
     		std::cout << "caught exception :  " << _ex.what() << "\n";
     	}
 
-    	//@disp = fsip->fsiSolver()->FSIOper()->displacementOnInterface();
+    	//disp = fsip->fsiSolver()->FSIOper()->displacementOnInterface();
 	}
 
-	GetPot                data_file;
-	std::string           Oper;
-	LifeV::Preconditioner prec;
-	LifeV::Vector         disp;
+	GetPot                M_dataFile;
+	std::string           M_method;
+	//Vector                 disp;
 };
 
-int main(int argc, char** argv)
-{
 
+
+
+
+int main( int argc, char** argv )
+{
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    std::cout << "% using MPI" << std::endl;
+	std::cout << "MPI Initialization" << std::endl;
+	MPI_Init( &argc, &argv );
 #else
-    std::cout << "% using serial Version" << std::endl;
+    std::cout << "Serial Version" << std::endl;
 #endif
 
-    LifeV::Chrono chrono;
+    Chrono chrono;
     chrono.start();
 
-    GetPot command_line(argc,argv);
-    string data_file_name = command_line.follow("data", 2, "-f","--file");
-    GetPot data_file(data_file_name);
+    GetPot command_line( argc, argv );
+    std::string dataFileName = command_line.follow( "data", 2, "-f", "--file" );
+    GetPot dataFile( dataFileName );
 
+    int returnValue = EXIT_FAILURE;
+
+/*
     const bool check = command_line.search(2, "-c", "--check");
-
     if (check)
     {
-        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        FSIChecker _ej_check( dataFile, "exactJacobian" );
 
-        FSIChecker _ej_check( data_file, "exactJacobian" );
         _ej_check();
 
-        LifeV::Debug( 10000 ) << "_ej_disp size : "  << static_cast<double> (_ej_check.disp.size()) << "\n";
-        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        Debug( 10000 ) << "_ej_disp size : "  << static_cast<Real> (_ej_check.disp.size()) << "\n";
+        Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        FSIChecker _sp_check( dataFile, "steklovPoincare" );
 
-        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-        FSIChecker _sp_check( data_file, "steklovPoincare" );
         _sp_check();
 
+        Debug( 10000 ) << "_fp_disp size : "  << static_cast<Real> (_sp_check.disp.size()) << "\n";
+        Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-        LifeV::Debug( 10000 ) << "_fp_disp size : "  << static_cast<double> (_sp_check.disp.size()) << "\n";
-        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        Real norm1 = norm_2( _ej_check.disp - _sp_check.disp );
 
-        double norm1 = LifeV::norm_2( _ej_check.disp - _sp_check.disp );
-
-        std::cout << "norm_2(EJ displacement)          = " << LifeV::norm_2( _ej_check.disp ) << " \n"
-                  << "norm_2(SP displacement)          = " << LifeV::norm_2( _sp_check.disp ) << " \n"
+        std::cout << "norm_2(EJ displacement)          = " << norm_2( _ej_check.disp ) << " \n"
+                  << "norm_2(SP displacement)          = " << norm_2( _sp_check.disp ) << " \n"
                   << "norm_2(displacement error EJ/SP) = " << norm1 << "\n";
 
-#ifdef HAVE_MPI
-        MPI_Finalize();
-#endif
-        if (norm1 < 1e-04) return 0;
-        else return -1;
+        if (norm1 < 1e-04)
+        	returnValue = EXIT_SUCCESS;
+        else
+        	returnValue = EXIT_FAILURE;
     }
     else
     {
-        FSIChecker _sp_check( data_file );
+
+        FSIChecker _sp_check( dataFile );
         _sp_check();
+
+        returnValue = EXIT_SUCCESS;
     }
+*/
+
+    FSIChecker FSIProblem( dataFile );
+    FSIProblem();
+
+    returnValue = EXIT_SUCCESS;
 
     std::cout << "Total sum up " << chrono.diff_cumul() << " s." << std::endl;
 
 #ifdef HAVE_MPI
-    MPI_Finalize();
+	std::cout << "MPI Finalization" << std::endl;
+	MPI_Finalize();
 #endif
 
-    return 0;
+    return returnValue;
 }

@@ -105,11 +105,7 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
 
 
 #ifdef FLUX
-    int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
-        _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
     BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
-    std::cout << "numTotalDofs = " << numTotalDofs << std::endl;
-    BCh_fluid->setOffset("InFlow", numTotalDofs);
 #else
     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
 #endif
@@ -184,10 +180,6 @@ FSIOperator::fluid_bchandler_type BCh_fluidLin(FSIOperator &_oper)
 
 #ifdef FLUX
     BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
-    int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
-        _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
-
-    BCh_fluidLin->setOffset("InFlow", numTotalDofs);
 #else
     //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
 #endif

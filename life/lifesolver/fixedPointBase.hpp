@@ -54,7 +54,7 @@ public:
 
     void solveJac     (vector_type&       _muk,
                        const vector_type& _res,
-                       const double       _linearRelTol);
+                       const Real       _linearRelTol);
 
     void setUpBC     ();
 
@@ -62,7 +62,9 @@ public:
 
     void setDataFromGetPot( GetPot const& data );
 
-    void setup();
+    void setupFEspace();
+
+    void setupFluidSolid();
 
     //vector_type& displacement()    {return *M_displacement;}
     //vector_type& residual()        {return *M_stress;}
@@ -90,7 +92,7 @@ private:
     boost::shared_ptr< Ensight< RegionMesh3D<LinearTetra> > > M_ensightFluid;
     boost::shared_ptr<vector_type>                            M_velAndPressure;
 
-    void eval( const vector_type& disp, int status );
+    void eval( const vector_type& disp, UInt status );
 
 //    FSIOperator* createFP(){ return new fixedPoint(); }
 //    static bool              reg;

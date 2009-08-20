@@ -70,8 +70,18 @@ fixedPoint::setDataFromGetPot( GetPot const& data )
 
 }
 
+
 void
-fixedPoint::setup()
+fixedPoint::setupFEspace()
+{
+    super::setLinearFluid(false);
+    super::setLinearSolid(false);
+
+    super::setupFEspace();
+}
+
+void
+fixedPoint::setupFluidSolid()
 {
     // call FSIOperator setup()
 
@@ -80,7 +90,7 @@ fixedPoint::setup()
     super::setLinearFluid(false);
     super::setLinearSolid(false);
 
-    super::setup();
+    super::setupFluidSolid();
 
     if ( this->isFluid() )
         {
@@ -114,7 +124,7 @@ fixedPoint::setup()
 }
 
 void fixedPoint::eval( const vector_type& _disp,
-                       int                iter)
+                       UInt                iter)
 {
     // If M_updateEvery == 1, normal fixedPoint algorithm
     // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
@@ -149,7 +159,7 @@ void fixedPoint::eval( const vector_type& _disp,
 
     if (this->isFluid())
     {
-        this->M_meshMotion->iterate();
+        this->M_meshMotion->iterate(*M_BCh_mesh);
 
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
@@ -326,7 +336,7 @@ void fixedPoint::evalResidual(vector_type &res, const vector_type& disp, UInt it
 
 void  fixedPoint::solveJac(vector_type        &muk,
                            const vector_type  &res,
-                           const double   /*_linearRelTol*/)
+                           const Real   /*_linearRelTol*/)
 {
     if (M_nbEval == 1) M_aitkFS.restart();
 

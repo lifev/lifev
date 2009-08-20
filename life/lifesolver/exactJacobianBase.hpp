@@ -61,12 +61,14 @@ public:
                       const UInt          _iter);
     void solveJac(vector_type       &_muk,
                   const vector_type &_res,
-                  const double       _linearRelTol);
+                  const Real       _linearRelTol);
 
     void solveLinearFluid();
     void solveLinearSolid();
 
-    void setup();
+    void setupFEspace();
+
+    void setupFluidSolid();
 
     void setDataFromGetPot( GetPot const& data );
 
@@ -134,6 +136,9 @@ public:
 
 
 private:
+
+    UInt imposeFlux( );
+
     int M_updateEvery;
 
 //     boost::shared_ptr<vector_type>       M_residualFSI;
@@ -153,7 +158,7 @@ private:
 
 //     bc_vector_interface     M_bcvFluidLoadToStructure;
 
-    void eval(const vector_type& _res, int status);
+    void eval(const vector_type& _res, UInt status);
 
 //    dataJacobian                         M_dataJacobian;
 
