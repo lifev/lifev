@@ -97,7 +97,7 @@ public:
 
     NSStabilization stabilization() const;
 
-    int             numLM() const;
+    //int             numLM() const;
     //! a way to obtain the Mean Flux, Mean Pressure and
     //! Mean Area at a section defined by z=z_data.
     UInt computeMeanValuesPerSection() const;
@@ -131,7 +131,7 @@ protected:
 
     //! Lagrange Multipliers numbers
 
-    int             M_numLM;
+    //int             M_numLM;
 
 private:
 
@@ -187,7 +187,7 @@ DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     M_uOrder                     (dataNavierStokes.M_uOrder),
     M_pOrder                     (dataNavierStokes.M_pOrder),
     M_stab_method                (dataNavierStokes.M_stab_method),
-    M_numLM                      (dataNavierStokes.M_numLM),
+    //M_numLM                      (dataNavierStokes.M_numLM),
     M_computeMeanValuesPerSection(dataNavierStokes.M_computeMeanValuesPerSection),
     M_NbZSections                (dataNavierStokes.M_NbZSections),
     M_ToleranceSection           (dataNavierStokes.M_ToleranceSection),
@@ -228,7 +228,7 @@ setup(  const GetPot& dfile )
 
     M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/space_discretization/stabilization", "none") ) );
 
-    M_numLM       = dfile( "fluid/space_discretization/numLM", 0);
+    //M_numLM       = dfile( "fluid/space_discretization/numLM", 0);
 
     // semi-implicit and shape derivatives
     M_semiImplicit = dfile("problem/semiImplicit", false) ;
@@ -379,11 +379,11 @@ NSStabilization DataNavierStokes<Mesh>::stabilization() const
 
 
 // Lagrange Multipliers number
-template <typename Mesh>
-int  DataNavierStokes<Mesh>::numLM() const
-{
-    return M_numLM;
-}
+//template <typename Mesh>
+//int  DataNavierStokes<Mesh>::numLM() const
+//{
+//    return M_numLM;
+//}
 
 //! Mean Values per Sections
 //! compute (0) or not (1) the mean values per sections
