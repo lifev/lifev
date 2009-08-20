@@ -86,20 +86,25 @@ public:
                   {
                       FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
                   }
-           Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
-//            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
-            M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+#ifdef DEBUG
+			Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+#endif
+			M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
 
+			MPI_Barrier( MPI_COMM_WORLD );
 
+#ifdef DEBUG
+			Debug( 10000 ) << "Setting up data from GetPot \n";
+#endif
+			M_fsi->setDataFromGetPot( data_file );
 
-            Debug( 10000 ) << _oper << " set \n";
+			MPI_Barrier( MPI_COMM_WORLD );
 
-            MPI_Barrier(MPI_COMM_WORLD);
-
-//            M_fsi->setSourceTerms( fZero, fZero );
-
-            Debug( 10000 ) << "Setting up the BC \n";
+#ifdef DEBUG
+			Debug( 10000 ) << "Setting up the BC \n";
+#endif
+			//M_fsi->setSourceTerms( fZero, fZero );
             //if(!_oper.compare("fullMonolithic"))
                 //M_fsi->setBCh_HEInterface(BCh_HEInterface(*M_fsi->FSIOper()));
             M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper()));
@@ -107,8 +112,17 @@ public:
             M_fsi->setSolidBC(BCh_monolithicSolid(*M_fsi->FSIOper()));
             //            M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->FSIOper()));
             //            M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->FSIOper()));
-            Debug( 10000 ) << "BC set\n";
 
+			MPI_Barrier( MPI_COMM_WORLD );
+
+#ifdef DEBUG
+			Debug( 10000 ) << "Setting up the problem \n";
+#endif
+			M_fsi->setup( );
+
+			//M_fsi->resetFSISolvers();
+
+			MPI_Barrier( MPI_COMM_WORLD );
 
             int restart = data_file("problem/restart",0);
             M_Tstart = 0.;
