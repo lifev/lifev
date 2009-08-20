@@ -100,7 +100,7 @@ gammaPress = 0.2
 reuse      = true
 
 [../space_discretization]
-mesh_dir  = ./Mesh/ # the directory where the mesh file is
+mesh_dir  = ./ # the directory where the mesh file is
 #mesh_file = stent-fluid-coarse.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
@@ -230,7 +230,7 @@ thickness		= 0.1
 timestep		= 0.0001
 
 [../space_discretization]
-mesh_dir  = ./Mesh/  # the directory where the mesh file is
+mesh_dir  = ./  # the directory where the mesh file is
 #mesh_file = stent-solid-coarse.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 #mesh_file = vessel.mesh  # mesh file
@@ -311,7 +311,7 @@ conv     = rhs;
 ]])
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
           ln -sf ../../data/mesh/inria/vessel20.mesh;
-          mpirun -np 4  ../../test_fsi/test_fsi -c],[0],[ignore],[ignore])
+          mpirun -n 4  ../../test_fsi/test_fsi -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
 #
