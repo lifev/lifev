@@ -101,16 +101,16 @@ public:
 
     //! Constructor
 	/*!
-	 * \param oper				- FSIOperator
+	 * \param Oper				- FSIOperator
 	 */
-	BCInterfaceFSIFunction( const boost::shared_ptr<FSIOperator>& oper );
+	BCInterfaceFSIFunction( const boost::shared_ptr<FSIOperator>& Oper );
 
     //! Constructor
 	/*!
 	 * \param data				- BC data loaded from GetPot file
-	 * \param oper				- FSIOperator
+	 * \param Oper				- FSIOperator
 	 */
-	BCInterfaceFSIFunction( const BCInterfaceData& data, const boost::shared_ptr<FSIOperator>& oper );
+	BCInterfaceFSIFunction( const BCInterfaceData& data, const boost::shared_ptr<FSIOperator>& Oper );
 
 	//! Copy constructor
 	/*!

@@ -35,9 +35,9 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFSIFunction::BCInterfaceFSIFunction( const boost::shared_ptr<FSIOperator>& oper ) :
+BCInterfaceFSIFunction::BCInterfaceFSIFunction( const boost::shared_ptr<FSIOperator>& Oper ) :
 	BCInterfaceFunction		( ),
-	M_FSIOperator			( oper ),
+	M_FSIOperator			( Oper ),
 	M_flag					( ),
 	M_mapFSIList			( ),
 	M_FSIList				( ),
@@ -53,9 +53,9 @@ BCInterfaceFSIFunction::BCInterfaceFSIFunction( const boost::shared_ptr<FSIOpera
 
 
 BCInterfaceFSIFunction::BCInterfaceFSIFunction( const BCInterfaceData& data,
-												const boost::shared_ptr<FSIOperator>& oper ) :
+												const boost::shared_ptr<FSIOperator>& Oper ) :
 	BCInterfaceFunction		( ),
-	M_FSIOperator			( oper ),
+	M_FSIOperator			( Oper ),
 	M_flag					( ),
 	M_mapFSIList			( ),
 	M_FSIList				( ),

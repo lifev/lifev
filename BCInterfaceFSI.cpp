@@ -36,9 +36,9 @@ namespace LifeV {
 //! Constructor & Destructor
 // ===================================================
 BCInterfaceFSI::BCInterfaceFSI( const BCInterfaceData& data,
-								const boost::shared_ptr<FSIOperator>& oper ) :
+								const boost::shared_ptr<FSIOperator>& Oper ) :
 	M_baseString			( data.get_baseString() ),
-	M_FSIOperator			( oper ),
+	M_FSIOperator			( Oper ),
 	M_base					( )
 {
 #ifdef DEBUG
