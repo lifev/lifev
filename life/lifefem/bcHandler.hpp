@@ -302,8 +302,19 @@ public:
     const BCBase& GetBCWithFlag(const EntityFlag&) const;
 
     // get the BC number from the list using its name
-
     UInt getBCbyName(const std::string _BCName) const;
+
+    //! Get a vector list of BC with specific type. The list contains the BCName of the BC.
+    /*!
+      \param type - the BC type to be inserted in the list
+    */
+    std::vector<BCName> getBCWithType( const BCType& type );
+
+    //! Get the number of BC with specific type.
+    /*!
+      \param type - the BC type to be counted
+    */
+    UInt getNumberBCWithType( const BCType& type );
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
@@ -314,11 +325,7 @@ public:
     //! specific BC offset
     void setOffset( std::string const& name, int offset );
 
-    //! returns a copy of the number of fluxes imposed
-    const UInt getFluxes( )const {return BCHandler::M_fluxes;}
-
     //@}
-    static UInt M_fluxes;
 
 private:
     //! number of BC to be stored

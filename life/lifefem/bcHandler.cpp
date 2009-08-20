@@ -37,7 +37,6 @@
 
 namespace LifeV
 {
-UInt BCHandler::M_fluxes=0;
 
 BCHandler::BCHandler( const ID& nbc, BCHints hint ):
     M_bdUpdateDone( 0 ),
@@ -82,8 +81,6 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf, comp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
-    if(type==3)//Flux
-        ++BCHandler::M_fluxes;
 }
 
 
@@ -96,8 +93,6 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
-    if(type==3)//Flux
-        ++BCHandler::M_fluxes;
 }
 
 void BCHandler::addBC( const std::string& name,
@@ -110,8 +105,6 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf, nComp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
-    if(type==3)//Flux
-        ++BCHandler::M_fluxes;
 }
 
 
@@ -135,8 +128,6 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcv ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
-    if(type==3)//Flux
-        ++BCHandler::M_fluxes;
 }
 
 
@@ -151,8 +142,6 @@ BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcv, nComp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
-    if(type==3)//Flux
-        ++BCHandler::M_fluxes;
 }
 void BCHandler::addBC( const std::string& name,
                        const EntityFlag& flag,
@@ -163,8 +152,6 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
-    if(type==3)//Flux
-        ++BCHandler::M_fluxes;
 }
 
 
@@ -377,6 +364,35 @@ const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
 
     return iBC;
 }
+
+
+
+std::vector<BCName>
+BCHandler::getBCWithType( const BCType& type )
+{
+	std::vector<BCName> vectorName;
+
+	for( size_type i = 0; i < M_bcList.size(); ++i )
+		if( M_bcList[i].type() == type)
+			vectorName.push_back( M_bcList[i].name() );
+
+	return vectorName;
+}
+
+
+
+UInt
+BCHandler::getNumberBCWithType( const BCType& type )
+{
+	UInt typeNumber = 0;
+
+	for( size_type i = 0; i < M_bcList.size(); ++i )
+		if( M_bcList[i].type() == type)
+			++typeNumber;
+
+	return typeNumber;
+}
+
 
 
 BCType BCHandler::boundaryType(const EntityFlag& aFlag) const
