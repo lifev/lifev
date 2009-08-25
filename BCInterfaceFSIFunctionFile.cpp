@@ -35,13 +35,30 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( const boost::shared_ptr<FSIOperator>& Oper ) :
-	BCInterfaceFunctionFile		( ),
-	BCInterfaceFSIFunction		( Oper )
+BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( ) :
+	BCInterfaceFunction							( ),
+	BCInterfaceOperatorFunction<FSIOperator>	( ),
+	BCInterfaceFunctionFile						( ),
+	BCInterfaceFSIFunction						( )
 {
 
 #ifdef DEBUG
-	Debug( 5025 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( void )" << "\n";
+	Debug( 5026 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( void )" << "\n";
+#endif
+
+}
+
+
+
+BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( const boost::shared_ptr<FSIOperator>& Oper ) :
+	BCInterfaceFunction							( ),
+	BCInterfaceOperatorFunction<FSIOperator>	( ),
+	BCInterfaceFunctionFile						( ),
+	BCInterfaceFSIFunction						( Oper )
+{
+
+#ifdef DEBUG
+	Debug( 5026 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( Oper )" << "\n";
 #endif
 
 }
@@ -50,12 +67,14 @@ BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( const boost::shared_ptr<
 
 BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( const BCInterfaceData& data,
 														const boost::shared_ptr<FSIOperator>& Oper ) :
-	BCInterfaceFunctionFile		( ),
-	BCInterfaceFSIFunction		( Oper )
+	BCInterfaceFunction							( ),
+	BCInterfaceOperatorFunction<FSIOperator>	( ),
+	BCInterfaceFunctionFile						( ),
+	BCInterfaceFSIFunction						( Oper )
 {
 
 #ifdef DEBUG
-	Debug( 5025 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile" << "\n";
+	Debug( 5026 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( data, Oper)" << "\n";
 #endif
 
 	this->setData( data );
@@ -64,9 +83,10 @@ BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( const BCInterfaceData& d
 
 
 BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( const BCInterfaceFSIFunctionFile& function ) :
-	BCInterfaceFunction			( function ), //To avoid warning!
-	BCInterfaceFunctionFile		( function ),
-	BCInterfaceFSIFunction		( function )
+	BCInterfaceFunction							( function ),
+	BCInterfaceOperatorFunction<FSIOperator>	( function ),
+	BCInterfaceFunctionFile						( function ),
+	BCInterfaceFSIFunction						( function )
 {
 }
 

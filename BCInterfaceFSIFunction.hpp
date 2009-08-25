@@ -46,6 +46,7 @@
 #include <string>
 
 #include <lifemc/lifefem/BCInterfaceData.hpp>
+#include <lifemc/lifefem/BCInterfaceOperatorFunction.hpp>
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
 
 
@@ -85,7 +86,7 @@ namespace LifeV {
  *	s_young
  *
  */
-class BCInterfaceFSIFunction : public virtual BCInterfaceFunction
+class BCInterfaceFSIFunction : 	public virtual BCInterfaceOperatorFunction<FSIOperator>
 //     :
 //     public LifeV::Application
 {
@@ -98,6 +99,9 @@ public:
 	/** @name Constructors & Destructor
      */
     //@{
+
+    //! Constructor
+	BCInterfaceFSIFunction();
 
     //! Constructor
 	/*!
@@ -123,55 +127,7 @@ public:
 
     //@}
 
-
-	/** @name Methods
-     */
-    //@{
-
-	//! Operator =
-	/*!
-	 * \param function			- BCInterfaceFSIFunction
-	 */
-	BCInterfaceFSIFunction& operator=( const BCInterfaceFSIFunction& function );
-
-	//! Set data
-	/*!
-	 * \param data				- BC data loaded from GetPot file
-	 */
-	void setData( const BCInterfaceData& data );
-
-	//! Compare function
-	/*!
-	 * \param data				- BC data loaded from GetPot file
-	 */
-	bool compare( const BCInterfaceData& data );
-
-	//@}
-
-protected:
-
-	enum FSIList
-	{
-		f_area,
-		f_flux,
-		f_pressure,
-		s_density,
-		s_poisson,
-		s_thickness,
-		s_young,
-	};
-
-	// ===================================================
-	//! Private variables
-	// ===================================================
-
-	boost::shared_ptr<FSIOperator>						M_FSIOperator;
-	BCFlag												M_flag;
-	std::map<std::string,FSIList>						M_mapFSIList;
-	std::set<FSIList>									M_FSIList;
-	Real												M_oldTime;
-
-
+private:
 
 	// ===================================================
 	//! Private functions
@@ -181,9 +137,9 @@ protected:
 	*/
 	//@{
 
-	inline void createFSIAccessList( void );
+	void createAccessList( void );
 
-	void addFSIVariables( const Real& t );
+	void addOperatorVariables( const Real& t );
 
 	//@}
 };

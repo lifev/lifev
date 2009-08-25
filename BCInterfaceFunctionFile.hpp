@@ -148,35 +148,40 @@ public:
     /*!
      * \param function			- BCInterfaceFunctionFile
      */
-    BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
+    virtual BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
 
     //! Set data
     /*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-    void setData( const BCInterfaceData& data );
+    virtual void setData( const BCInterfaceData& data );
 
 	//! Compare function
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-    bool compare( const BCInterfaceData& data );
+    virtual bool compare( const BCInterfaceData& data );
 
     //@}
 
 protected:
 
 	// ===================================================
-	//! Private variables
+	//! Protected variables
 	// ===================================================
 
 	std::string											M_fileName;
+
+private:
+
+	// ===================================================
+	//! Private variables
+	// ===================================================
+
 	std::vector<std::string>							M_variables;
 	std::vector<Real>									M_scale;
 	std::map< std::string, std::vector<Real> >			M_data;
 	std::vector<Real>::iterator							M_dataIterator;
-
-
 
 	// ===================================================
 	//! Private functions

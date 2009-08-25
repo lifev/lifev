@@ -35,17 +35,26 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFSIFunction::BCInterfaceFSIFunction( const boost::shared_ptr<FSIOperator>& Oper ) :
-	BCInterfaceFunction		( ),
-	M_FSIOperator			( Oper ),
-	M_flag					( ),
-	M_mapFSIList			( ),
-	M_FSIList				( ),
-	M_oldTime				( -1.0 ) // Negative time
+BCInterfaceFSIFunction::BCInterfaceFSIFunction( ) :
+	BCInterfaceFunction							( ),
+	BCInterfaceOperatorFunction<FSIOperator>	( )
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction( void )" << "\n";
+	Debug( 5025 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction( void )" << "\n";
+#endif
+
+}
+
+
+
+BCInterfaceFSIFunction::BCInterfaceFSIFunction( const boost::shared_ptr<FSIOperator>& Oper ) :
+	BCInterfaceFunction							( ),
+	BCInterfaceOperatorFunction<FSIOperator>	( Oper )
+{
+
+#ifdef DEBUG
+	Debug( 5025 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction( Oper )" << "\n";
 #endif
 
 }
@@ -54,16 +63,12 @@ BCInterfaceFSIFunction::BCInterfaceFSIFunction( const boost::shared_ptr<FSIOpera
 
 BCInterfaceFSIFunction::BCInterfaceFSIFunction( const BCInterfaceData& data,
 												const boost::shared_ptr<FSIOperator>& Oper ) :
-	BCInterfaceFunction		( ),
-	M_FSIOperator			( Oper ),
-	M_flag					( ),
-	M_mapFSIList			( ),
-	M_FSIList				( ),
-	M_oldTime				( -1.0 ) // Negative time
+	BCInterfaceFunction							( ),
+	BCInterfaceOperatorFunction<FSIOperator>	( Oper )
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction" << "\n";
+	Debug( 5025 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction( data, Oper )" << "\n";
 #endif
 
 	this->setData( data );
@@ -72,61 +77,9 @@ BCInterfaceFSIFunction::BCInterfaceFSIFunction( const BCInterfaceData& data,
 
 
 BCInterfaceFSIFunction::BCInterfaceFSIFunction( const BCInterfaceFSIFunction& function ) :
-	BCInterfaceFunction		( function ),
-	M_FSIOperator			( function.M_FSIOperator ),
-	M_flag					( function.M_flag ),
-	M_mapFSIList			( function.M_mapFSIList ),
-	M_FSIList				( function.M_FSIList ),
-	M_oldTime				( function.M_oldTime )
+	BCInterfaceFunction							( function ),
+	BCInterfaceOperatorFunction<FSIOperator>	( function )
 {
-}
-
-
-
-
-
-// ===================================================
-//! Methods
-// ===================================================
-BCInterfaceFSIFunction&
-BCInterfaceFSIFunction::operator=( const BCInterfaceFSIFunction& function )
-{
-    if ( this != &function )
-    {
-    	BCInterfaceFunction::operator=( function );
-    	M_FSIOperator	= function.M_FSIOperator;
-    	M_flag			= function.M_flag;
-    	M_mapFSIList	= function.M_mapFSIList;
-    	M_FSIList		= function.M_FSIList;
-    	M_oldTime		= function.M_oldTime;
-    }
-
-	return *this;
-}
-
-
-
-void
-BCInterfaceFSIFunction::setData( const BCInterfaceData& data )
-{
-
-#ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceFSIFunction::setData" << "\n";
-#endif
-
-	M_flag = data.get_flag();
-
-	BCInterfaceFunction::setData( data );
-
-	createFSIAccessList();
-}
-
-
-
-bool
-BCInterfaceFSIFunction::compare( const BCInterfaceData& data )
-{
-	return M_baseString.compare( data.get_baseString() ) == 0 && M_comV == data.get_comV() && M_flag == data.get_flag();
 }
 
 
@@ -136,72 +89,68 @@ BCInterfaceFSIFunction::compare( const BCInterfaceData& data )
 // ===================================================
 //! Private functions
 // ===================================================
-inline void
-BCInterfaceFSIFunction::createFSIAccessList( void )
+void
+BCInterfaceFSIFunction::createAccessList( void )
 {
-	//Create mapFSIList
-	M_mapFSIList["f_area"]		= f_area;
-	M_mapFSIList["f_flux"]		= f_flux;
-	M_mapFSIList["f_pressure"]	= f_pressure;
-	M_mapFSIList["s_density"]	= s_density;
-	M_mapFSIList["s_poisson"]	= s_poisson;
-	M_mapFSIList["s_thickness"]	= s_thickness;
-	M_mapFSIList["s_young"]		= s_young;
+#ifdef DEBUG
+	Debug( 5025 ) << "BCInterfaceFSIFunction::createAccessList" << "\n";
+#endif
+	//Create mapList
+	M_mapList["f_area"]			= f_area;
+	M_mapList["f_flux"]			= f_flux;
+	M_mapList["f_pressure"]		= f_pressure;
+	M_mapList["s_density"]		= s_density;
+	M_mapList["s_poisson"]		= s_poisson;
+	M_mapList["s_thickness"]	= s_thickness;
+	M_mapList["s_young"]		= s_young;
 
-	//Create FSIList
-	M_FSIList.clear();
-	for ( std::map<std::string, FSIList>::iterator j = M_mapFSIList.begin() ; j != M_mapFSIList.end() ; ++j )
-		if ( boost::find_first( M_baseString, j->first ) )
-			M_FSIList.insert( j->second );
+	//Create list
+	BCInterfaceOperatorFunction<FSIOperator>::createAccessList();
 }
 
 
 
-inline void
-BCInterfaceFSIFunction::addFSIVariables( const Real& t )
+void
+BCInterfaceFSIFunction::addOperatorVariables( const Real& t )
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceFSIFunction::addFSIVariables  " << "\n";
+	Debug( 5025 ) << "BCInterfaceFSIFunction::addOperatorVariables  " << "\n";
 #endif
 
-	//Check if FSIVariables have to been updated
-	if ( t == M_oldTime )
-		return;
-	M_oldTime = t;
+	BCInterfaceOperatorFunction<FSIOperator>::addOperatorVariables( t );
 
-
-	// Create/Update FSIVariables
-	for ( std::set<FSIList>::iterator j = M_FSIList.begin() ; j != M_FSIList.end() ; ++j )
+	// Create/Update variables for FSI problem
+	for ( std::set<operatorList>::iterator j = M_list.begin() ; j != M_list.end() ; ++j )
 		switch ( *j )
 		{
 			// f_ -> FLUID
 			case f_area :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_FSIOperator->fluid().area( M_flag )  << "\n";
+				Debug( 5025 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().area( M_flag )  << "\n";
 #endif
-				M_parser->setVariable( "f_area", M_FSIOperator->fluid().area( M_flag ) );
+				setVariable( "f_area", M_operator->fluid().area( M_flag ) );
 
 				break;
 
 			case f_flux :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_FSIOperator->fluid().flux( M_flag )  << "\n";
+				Debug( 5025 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().flux( M_flag )  << "\n";
 #endif
 
-				M_parser->setVariable( "f_flux", M_FSIOperator->fluid().flux( M_flag ) );
+				setVariable( "f_flux", M_operator->fluid().flux( M_flag ) );
 
 				break;
 
 			case f_pressure :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_FSIOperator->fluid().pressure( M_flag )  << "\n";
+				Debug( 5025 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().pressure( M_flag )  << "\n";
 #endif
 
-				M_parser->setVariable( "f_pressure", M_FSIOperator->fluid().pressure( M_flag ) );
+				setVariable( "f_pressure", M_operator->fluid().pressure( M_flag ) );
 
 				break;
 
@@ -211,40 +160,40 @@ BCInterfaceFSIFunction::addFSIVariables( const Real& t )
 			case s_density :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                                   s_density: " << M_FSIOperator->solid().rho()  << "\n";
+				Debug( 5025 ) << "                                                   s_density: " << M_operator->solid().rho()  << "\n";
 #endif
 
-				M_parser->setVariable( "s_density", M_FSIOperator->solid().rho() );
+				setVariable( "s_density", M_operator->solid().rho() );
 
 				break;
 
 			case s_poisson :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                                   s_poisson: " << M_FSIOperator->solid().poisson()  << "\n";
+				Debug( 5025 ) << "                                                   s_poisson: " << M_operator->solid().poisson()  << "\n";
 #endif
 
-				M_parser->setVariable( "s_poisson", M_FSIOperator->solid().poisson() );
+				setVariable( "s_poisson", M_operator->solid().poisson() );
 
 				break;
 
 			case s_thickness :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                                 s_thickness: " << M_FSIOperator->solid().thickness()  << "\n";
+				Debug( 5025 ) << "                                                 s_thickness: " << M_operator->solid().thickness()  << "\n";
 #endif
 
-				M_parser->setVariable( "s_thickness", M_FSIOperator->solid().thickness() );
+				setVariable( "s_thickness", M_operator->solid().thickness() );
 
 				break;
 
 			case s_young :
 
 #ifdef DEBUG
-				Debug( 5024 ) << "                                                     s_young: " << M_FSIOperator->solid().young()  << "\n";
+				Debug( 5025 ) << "                                                     s_young: " << M_operator->solid().young()  << "\n";
 #endif
 
-				M_parser->setVariable( "s_young", M_FSIOperator->solid().young() );
+				setVariable( "s_young", M_operator->solid().young() );
 
 				break;
 		}

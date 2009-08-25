@@ -38,8 +38,8 @@ namespace LifeV {
 BCInterfaceFunction::BCInterfaceFunction( ) :
 	M_baseString				( ),
 	M_comV						( ),
-	M_base						( ),
 	M_parser					( ),
+	M_base						( ),
 	M_mapID						( )
 {
 
@@ -54,13 +54,13 @@ BCInterfaceFunction::BCInterfaceFunction( ) :
 BCInterfaceFunction::BCInterfaceFunction( const BCInterfaceData& data ) :
 	M_baseString				( ),
 	M_comV						( ),
-	M_base						( ),
 	M_parser					( ),
+	M_base						( ),
 	M_mapID						( )
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction" << "\n";
+	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
 #endif
 
 	this->setData( data );
@@ -71,8 +71,8 @@ BCInterfaceFunction::BCInterfaceFunction( const BCInterfaceData& data ) :
 BCInterfaceFunction::BCInterfaceFunction( const BCInterfaceFunction& function ) :
 	M_baseString	( function.M_baseString ),
 	M_comV			( function.M_comV ),
-	M_base			( function.M_base ),
 	M_parser		( function.M_parser ),
+	M_base			( function.M_base ),
 	M_mapID			( function.M_mapID )
 {
 }
@@ -91,8 +91,8 @@ BCInterfaceFunction::operator=( const BCInterfaceFunction& function )
     {
     	M_baseString	= function.M_baseString;
     	M_comV			= function.M_comV;
-    	M_base			= function.M_base;
     	M_parser 		= function.M_parser;
+    	M_base			= function.M_base;
     	M_mapID			= function.M_mapID;
     }
 
@@ -186,7 +186,7 @@ BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, cons
 
 	this->dataInterpolation();
 
-	this->addFSIVariables( t );
+	this->addOperatorVariables( t );
 
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
@@ -211,7 +211,7 @@ BCInterfaceFunction::FunctionID( const Real& t, const Real& x, const Real& y, co
 
 	this->dataInterpolation();
 
-	this->addFSIVariables( t );
+	this->addOperatorVariables( t );
 
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::FunctionID: " << "\n";

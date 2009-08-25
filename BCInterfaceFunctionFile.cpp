@@ -60,7 +60,7 @@ BCInterfaceFunctionFile::BCInterfaceFunctionFile( const BCInterfaceData& data ) 
 {
 
 #ifdef DEBUG
-	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile" << "\n";
+	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
 #endif
 
 	this->setData( data );

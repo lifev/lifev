@@ -88,6 +88,9 @@ public:
     //@{
 
     //! Constructor
+	BCInterfaceFSIFunctionFile();
+
+    //! Constructor
 	/*!
 	 * \param Oper				- FSIOperator
 	 */

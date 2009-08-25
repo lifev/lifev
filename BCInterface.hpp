@@ -48,6 +48,8 @@
 #include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
 #include <lifemc/lifefem/BCInterfaceFunctionFile.hpp>
+//#include <lifemc/lifefem/BCInterfaceOseenFunction.hpp>
+//#include <lifemc/lifefem/BCInterfaceOseenFunctionFile.hpp>
 #include <lifemc/lifefem/BCInterfaceFSI.hpp>
 #include <lifemc/lifefem/BCInterfaceFSIFunction.hpp>
 #include <lifemc/lifefem/BCInterfaceFSIFunctionFile.hpp>
@@ -201,11 +203,17 @@ public:
      */
     //@{
 
-	//! Set an FSIOperator (need only for FSI and FSIFunction boundary conditions)
+	//! Set an FSIOperator (need only for FSI, FSIFunction and FSIFunctionFile boundary conditions)
     /*!
      * \param Oper			- FSIOperator
      */
 	void setFSIOperator( const boost::shared_ptr<FSIOperator>& Oper ) { M_FSIOperator = Oper; }
+
+	//! Set an Oseen (need only for OseenFunction and OseenFunctionFile boundary conditions)
+    /*!
+     * \param Oper			- Oseen
+     */
+//	   void setOseen( const boost::shared_ptr<Oseen>& Oper ) { M_Oseen = Oper; }
 
 	//! Set manually Handler parameters: you need it only if you are adding manually some parameters by calling addBC
     /*!
@@ -261,7 +269,7 @@ public:
 
 private:
 
-	enum BCBaseList{ function, functionFile, FSI, FSIfunction, FSIfunctionFile };
+	enum BCBaseList{ function, functionFile, OSEENfunction, OSEENfunctionFile, FSI, FSIfunction, FSIfunctionFile };
 
 	// ===================================================
 	//! Private variables
@@ -298,6 +306,17 @@ private:
 	static std::map<std::string,size_type>									M_mapFunctionFile;
 	static std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >		M_vectorFunctionFile;
 
+	/*
+	// Oseen
+	boost::shared_ptr< Oseen<mesh_type> >									M_Oseen;
+
+	// Oseen Function
+	static std::map<std::string,size_type>									M_mapOseenFunction;
+	static std::vector< boost::shared_ptr<BCInterfaceOseenFunction> >		M_vectorOseenFunction;
+
+	static std::map<std::string,size_type>									M_mapOseenFunctionFile;
+	static std::vector< boost::shared_ptr<BCInterfaceOseenFunctionFile> >	M_vectorOseenFunctionFile;
+	*/
 	// FSIOperator
 	boost::shared_ptr<FSIOperator>											M_FSIOperator;
 

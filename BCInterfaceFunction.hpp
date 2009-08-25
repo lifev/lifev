@@ -159,7 +159,7 @@ public:
     /*!
      * \param function			- BCInterfaceFunction
      */
-    BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
+    virtual BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
 
     //! Set data
     /*!
@@ -188,13 +188,38 @@ public:
 protected:
 
 	// ===================================================
-	//! Private variables
+	//! Protected variables
 	// ===================================================
 
 	std::string											M_baseString;
 	BCComV												M_comV;
-	BCFunctionBase 										M_base;
 	boost::shared_ptr<SpiritParser>						M_parser;
+
+
+
+	// ===================================================
+	//! Protected functions
+	// ===================================================
+
+	/** @name Protected functions
+	 */
+	//@{
+
+	//! dataInterpolation
+	virtual inline void dataInterpolation( void ) {}
+
+	//! addFSIVariables
+	virtual inline void addOperatorVariables( const Real& /*t*/ ) {}
+
+    //@}
+
+private:
+
+	// ===================================================
+	//! Private variables
+	// ===================================================
+
+	BCFunctionBase 										M_base;
 	std::map<ID, ID>									M_mapID;
 
 
@@ -206,12 +231,6 @@ protected:
 	/** @name Private functions
 	 */
 	//@{
-
-	//! dataInterpolation
-	virtual inline void dataInterpolation( void ) {}
-
-	//! addFSIVariables
-	virtual inline void addFSIVariables( const Real& /*t*/ ) {}
 
     //! SetFunction
     void setFunction( void );

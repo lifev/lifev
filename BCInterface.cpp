@@ -38,7 +38,13 @@ std::map<std::string,size_type>									BCInterface::M_mapFunction;
 
 std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >		BCInterface::M_vectorFunctionFile;
 std::map<std::string,size_type>									BCInterface::M_mapFunctionFile;
+/*
+std::vector< boost::shared_ptr<BCInterfaceOseenFunction> >		BCInterface::M_vectorOseenFunction;
+std::map<std::string,size_type>									BCInterface::M_mapOseenFunction;
 
+std::vector< boost::shared_ptr<BCInterfaceOseenFunctionFile> >	BCInterface::M_vectorOseenFunctionFile;
+std::map<std::string,size_type>									BCInterface::M_mapOseenFunctionFile;
+*/
 std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >		BCInterface::M_vectorFSIFunction;
 std::map<std::string,size_type>									BCInterface::M_mapFSIFunction;
 
@@ -62,6 +68,7 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	M_mapBase					( ),
 	M_data						( ),
 	M_base						( ),
+//	M_Oseen						( ),
 	M_FSIOperator				( ),
 	M_vectorFSI					( )
 
@@ -87,6 +94,8 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	//Set mapBase
 	M_mapBase["function"] 			= function;
 	M_mapBase["functionFile"] 		= functionFile;
+//	M_mapBase["OSEENfunction"]		= OSEENfunction;
+//	M_mapBase["OSEENfunctionFile"]	= OSEENfunctionFile;
 	M_mapBase["FSI"]				= FSI;
 	M_mapBase["FSIfunction"]		= FSIfunction;
 	M_mapBase["FSIfunctionFile"]	= FSIfunctionFile;
@@ -113,6 +122,7 @@ BCInterface::BCInterface( const BCInterface& interface ) :
 	M_mapBase				( interface.M_mapBase ),
 	M_data					( interface.M_data ),
 	M_base					( interface.M_base ),
+//	M_Oseen					( interface.M_Oseen ),
 	M_FSIOperator			( interface.M_FSIOperator ),
 	M_vectorFSI				( interface.M_vectorFSI )
 {
@@ -138,6 +148,7 @@ BCInterface::operator=( const BCInterface& interface )
     	M_mapBase				= interface.M_mapBase;
     	M_data					= interface.M_data;
     	M_base					= interface.M_base;
+//    	M_Oseen					= interface.M_Oseen;
     	M_FSIOperator			= interface.M_FSIOperator;
     	M_vectorFSI				= interface.M_vectorFSI;
     }
@@ -210,7 +221,25 @@ BCInterface::buildHandler( void )
 				addBCManager( M_vectorFunctionFile[M_mapFunctionFile[M_data.get_baseString()]]->getBase() );
 
 				break;
+/*
+			case OSEENfunction :
 
+				if ( newBase( M_mapOseenFunction, M_vectorOseenFunction ) )
+					addBase( M_vectorOseenFunction, M_Oseen );
+
+				addBCManager( M_vectorOseenFunction.back()->getBase() );
+
+				break;
+
+			case OSEENfunctionFile :
+
+				if ( newBase( M_mapOseenFunctionFile, M_vectorOseenFunctionFile ) )
+					addBase( M_vectorOseenFunctionFile, M_Oseen );
+
+				addBCManager( M_vectorOseenFunctionFile.back()->getBase() );
+
+				break;
+*/
 			case FSI :
 
 				addBase( M_vectorFSI, M_FSIOperator );
