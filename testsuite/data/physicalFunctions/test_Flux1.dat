@@ -11,7 +11,7 @@ function	= 'a*t+b'
 #function	= '(0,0,a*t+b)'
 
 variables	=   't				a		b'
-scale		= 	'10				1		1'
+scale		= 	'1				1		1'
 
 # Items must be sorted by the first column value!
 data		=  '0.000000000		-1000	0
