@@ -61,17 +61,72 @@ namespace LifeV {
 
 
 
+/*!
+ * \class BCInterfaceFSI - Fake class for non-FSI problems.
+ * \brief Fake class for non-FSI problems
+ *
+ *  @author Cristiano Malossi
+ *  @see
+ *
+ */
+template <class Operator>
+class BCInterfaceFSI
+//     :
+//     public LifeV::Application
+{
+public:
+
+	/** @name Constructors & Destructor
+     */
+    //@{
+
+	BCInterfaceFSI( )											{}
+	BCInterfaceFSI( const BCInterfaceData<Operator>& /*data*/ ) {}
+	BCInterfaceFSI( const BCInterfaceFSI& /*fsi*/ ) 			{}
+    ~BCInterfaceFSI() 											{}
+
+    //@}
+
+
+
+
+    /** @name Methods
+     */
+    //@{
+
+	BCInterfaceFSI& operator=( const BCInterfaceFSI& /*fsi*/ ) 	{}
+	void setData( const BCInterfaceData<Operator>& /*data*/ )	{}
+	bool compare( const BCInterfaceData<Operator>& /*data*/ )	{ return true; }
+
+    //@}
+
+
+
+    /** @name Get functions
+     */
+    //@{
+
+    BCVectorInterface& getBase()								{ return *M_base; }
+
+    //@}
+
+private:
+
+	boost::shared_ptr<BCVectorInterface>						M_base;
+};
+
+
+
+
 
 /*!
- * \class BCInterfaceFSI
+ * \class BCInterfaceFSI - Specialized template implementation for FSI problems.
  * \brief LifeV bcVector wrapper for BCInterface (FSI problems).
  *
  *  @author Cristiano Malossi
  *  @see
  *
  *  This class allows to use impose interface conditions for FSI problems.
- *
- *
  *
  *  <b>DETAILS:</b>
  *
@@ -100,41 +155,61 @@ namespace LifeV {
  *	To get the base for the boundary condition call the getBase function.
  *
  */
-class BCInterfaceFSI
+template <>
+class BCInterfaceFSI<FSIOperator>
 //     :
 //     public LifeV::Application
 {
 public:
-
-	// ===================================================
-	//! Public functions
-	// ===================================================
 
 	/** @name Constructors & Destructor
      */
     //@{
 
     //! Constructor
+	BCInterfaceFSI( );
+
+    //! Constructor
 	/*!
 	 * \param data				- BC data loaded from GetPot file
-	 * \param Oper				- FSIOperator
 	 */
-	BCInterfaceFSI( const BCInterfaceData& data, const boost::shared_ptr<FSIOperator>& Oper );
+	BCInterfaceFSI( const BCInterfaceData<FSIOperator>& data );
 
 	//! Copy constructor
 	/*!
 	 * \param fsiOperator		- BCInterfaceFSI
 	 */
-	BCInterfaceFSI( const BCInterfaceFSI& fsiOperator );
+	BCInterfaceFSI( const BCInterfaceFSI& fsi );
+
+    //! Destructor
+    ~BCInterfaceFSI() {}
+
+    //@}
+
+
+
+
+    /** @name Methods
+     */
+    //@{
 
 	//! Operator =
 	/*!
 	 * \param fsiOperator		- BCInterfaceFSI
 	 */
-	BCInterfaceFSI& operator=( const BCInterfaceFSI& fsiOperator );
+	BCInterfaceFSI& operator=( const BCInterfaceFSI& fsi );
 
-    //! Destructor
-    ~BCInterfaceFSI() {}
+	//! Set data
+	/*!
+	 * \param data				- BC data loaded from GetPot file
+	 */
+	void setData( const BCInterfaceData<FSIOperator>& data );
+
+	//! Compare function
+	/*!
+	 * \param data				- BC data loaded from GetPot file
+	 */
+	bool compare( const BCInterfaceData<FSIOperator>& data );
 
     //@}
 
@@ -149,6 +224,17 @@ public:
     //@}
 
 private:
+
+	/** @name Private functions
+	*/
+	//@{
+
+	inline void checkMethod( void );
+
+	template <class method>
+	inline void checkFunction( void );
+
+    //@}
 
 	enum FSIMethod
 	{
@@ -173,34 +259,12 @@ private:
 		StructureToFluid
 	};
 
-	// ===================================================
-	//! Private variables
-	// ===================================================
-
+	boost::shared_ptr<FSIOperator>						M_operator;
 	std::string											M_baseString;
-	boost::shared_ptr<FSIOperator>						M_FSIOperator;
 	boost::shared_ptr<BCVectorInterface>				M_base;
 
 	std::map<std::string, FSIMethod> 					M_mapMethod;
 	std::map<std::string, FSIFunction> 					M_mapFunction;
-
-
-
-	// ===================================================
-	//! Private functions
-	// ===================================================
-
-	/** @name Private functions
-	*/
-	//@{
-
-	//! checkMethod
-	inline void checkMethod( void );
-
-	template <class method>
-	inline void checkFunction( void );
-
-    //@}
 };
 
 
@@ -208,20 +272,33 @@ private:
 
 
 // ===================================================
-//! Template function
+//! Private functions
 // ===================================================
 template <class method>
 inline void
-BCInterfaceFSI::checkFunction( void )
+BCInterfaceFSI<FSIOperator>::checkFunction( void )
 {
-	method *operMethod = dynamic_cast<method *>(&*M_FSIOperator);
+	method *operMethod = dynamic_cast<method *>(&*M_operator);
+
+	//Set mapFunction
+	M_mapFunction["DerFluidLoadToFluid"]				= DerFluidLoadToFluid;
+	M_mapFunction["DerFluidLoadToStructure"]			= DerFluidLoadToStructure;
+	M_mapFunction["DerHarmonicExtensionVelToFluid"]		= DerHarmonicExtensionVelToFluid;
+	M_mapFunction["DerStructureDispToSolid"]			= DerStructureDispToSolid;
+	M_mapFunction["FluidInterfaceDisp"]					= FluidInterfaceDisp;
+	M_mapFunction["FluidLoadToStructure"]				= FluidLoadToStructure;
+	M_mapFunction["HarmonicExtensionVelToFluid"] 		= HarmonicExtensionVelToFluid;
+	M_mapFunction["SolidLoadToStructure"]				= SolidLoadToStructure;
+	M_mapFunction["StructureDispToHarmonicExtension"]	= StructureDispToHarmonicExtension;
+	M_mapFunction["StructureDispToSolid"]				= StructureDispToSolid;
+	M_mapFunction["StructureToFluid"]					= StructureToFluid;
 
 	switch ( M_mapFunction[M_baseString] )
 	{
 		case DerFluidLoadToFluid :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
 			break;
@@ -229,10 +306,12 @@ BCInterfaceFSI::checkFunction( void )
 		case DerFluidLoadToStructure :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
+		    if ( !M_operator->isSolid() )
+		    	return;
 
-			operMethod->setDerFluidLoadToStructure( M_FSIOperator->sigmaSolidRepeated() );
+			operMethod->setDerFluidLoadToStructure( M_operator->sigmaSolidRepeated() );
 
 	        M_base = operMethod->bcvDerFluidLoadToStructure();
 
@@ -241,10 +320,13 @@ BCInterfaceFSI::checkFunction( void )
 		case DerHarmonicExtensionVelToFluid :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
-			operMethod->setDerHarmonicExtensionVelToFluid( M_FSIOperator->derVeloFluidMesh() );
+		    if ( !M_operator->isFluid() )
+		    	return;
+
+			operMethod->setDerHarmonicExtensionVelToFluid( M_operator->derVeloFluidMesh() );
 
 	        M_base = operMethod->bcvDerHarmonicExtensionVelToFluid();
 
@@ -253,7 +335,7 @@ BCInterfaceFSI::checkFunction( void )
 		case DerStructureDispToSolid :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          DerStructureDispToSolid" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
 			break;
@@ -261,10 +343,10 @@ BCInterfaceFSI::checkFunction( void )
 		case FluidInterfaceDisp :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          FluidInterfaceDisp" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
-			//operMethod->FluidInterfaceDisp( (LifeV::Vector&) M_FSIOperator->lambdaFluidRepeated() );
+			//operMethod->FluidInterfaceDisp( (LifeV::Vector&) M_operator->lambdaFluidRepeated() );
 
 	        //M_base = operMethod->bcvFluidInterfaceDisp();
 
@@ -273,10 +355,13 @@ BCInterfaceFSI::checkFunction( void )
 		case FluidLoadToStructure :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          FluidLoadToStructure" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
-			operMethod->setFluidLoadToStructure( M_FSIOperator->sigmaSolidRepeated() );
+		    if ( !M_operator->isSolid() )
+		    	return;
+
+			operMethod->setFluidLoadToStructure( M_operator->sigmaSolidRepeated() );
 
 	        M_base = operMethod->bcvFluidLoadToStructure();
 
@@ -285,34 +370,42 @@ BCInterfaceFSI::checkFunction( void )
 		case HarmonicExtensionVelToFluid :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
-			M_FSIOperator->setHarmonicExtensionVelToFluid( M_FSIOperator->veloFluidMesh() );
+		    if ( !M_operator->isFluid() )
+		    	return;
 
-			M_base = M_FSIOperator->bcvHarmonicExtensionVelToFluid();
+			M_operator->setHarmonicExtensionVelToFluid( M_operator->veloFluidMesh() );
+
+			M_base = M_operator->bcvHarmonicExtensionVelToFluid();
 
 			break;
 
 		case SolidLoadToStructure :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          SolidLoadToStructure" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
+		    if ( !M_operator->isFluid() )
+		    	return;
 
-			M_FSIOperator->setSolidLoadToStructure( M_FSIOperator->minusSigmaFluidRepeated() );
+			M_operator->setSolidLoadToStructure( M_operator->minusSigmaFluidRepeated() );
 
-			M_base = M_FSIOperator->bcvSolidLoadToStructure();
+			M_base = M_operator->bcvSolidLoadToStructure();
 
 			break;
 
 		case StructureDispToHarmonicExtension :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
-			operMethod->setStructureDispToHarmonicExtension( M_FSIOperator->lambdaFluidRepeated() );
+		    if ( !M_operator->isFluid() )
+		    	return;
+
+			operMethod->setStructureDispToHarmonicExtension( M_operator->lambdaFluidRepeated() );
 
 	        M_base = operMethod->bcvStructureDispToHarmonicExtension();
 
@@ -321,7 +414,7 @@ BCInterfaceFSI::checkFunction( void )
 		case StructureDispToSolid :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          StructureDispToSolid" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
 			break;
@@ -329,13 +422,16 @@ BCInterfaceFSI::checkFunction( void )
 		case StructureToFluid :
 
 #ifdef DEBUG
-			Debug( 5023 ) << "BCInterfaceFSI::checkFunction                          StructureToFluid" << "\n";
+			Debug( 5029 ) << "BCInterfaceFSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
-			M_FSIOperator->setStructureToFluid( M_FSIOperator->veloFluidMesh() );
-			M_FSIOperator->setStructureToFluidParametres();
+		    if ( !M_operator->isFluid() )
+		    	return;
 
-			M_base = M_FSIOperator->bcvStructureToFluid();
+			M_operator->setStructureToFluid( M_operator->veloFluidMesh() );
+			M_operator->setStructureToFluidParametres();
+
+			M_base = M_operator->bcvStructureToFluid();
 
 			break;
 	}

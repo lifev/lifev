@@ -3,7 +3,7 @@
   This file is part of the LifeV Applications.
 
   Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-       Date: 2009-07-22
+       Date: 2009-08-27
 
   Copyright (C) 2009 EPFL
 
@@ -23,13 +23,13 @@
   USA
 */
 /**
-   \file BCInterfaceFSIFunctionFile.hpp
+   \file BCInterfaceOseenFunctionFile.hpp
    \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-   \date 2009-07-22
+   \date 2009-08-27
  */
 
-#ifndef __BCInterfaceFSIFunctionFile_H
-#define __BCInterfaceFSIFunctionFile_H 1
+#ifndef __BCInterfaceOseenFunctionFile_H
+#define __BCInterfaceOseenFunctionFile_H 1
 
 
 
@@ -41,7 +41,7 @@
 #include <life/lifecore/life.hpp>
 
 #include <lifemc/lifefem/BCInterfaceOperatorFunctionFile.hpp>
-#include <lifemc/lifefem/BCInterfaceFSIFunction.hpp>
+#include <lifemc/lifefem/BCInterfaceOseenFunction.hpp>
 
 
 
@@ -57,18 +57,18 @@ namespace LifeV {
 
 
 /*!
- * \class BCInterfaceFSIFunctionFile
- * \brief LifeV bcFunction wrapper for BCInterface (FSI problems).
+ * \class BCInterfaceOseenFunctionFile
+ * \brief LifeV bcFunction wrapper for BCInterface (Oseen problems).
  *
  *  @author Cristiano Malossi
  *  @see
  *
- *  This class is a specialization of BCInterfaceOperatorFunctionFile class for FSI problems.
+ *  This class is a specialization of BCInterfaceOperatorFunctionFile class for Oseen problems.
  *
  */
 template <class Operator>
-class BCInterfaceFSIFunctionFile : 	public BCInterfaceOperatorFunctionFile<Operator>,
-									public BCInterfaceFSIFunction<Operator>
+class BCInterfaceOseenFunctionFile : 	public BCInterfaceOperatorFunctionFile<Operator>,
+										public BCInterfaceOseenFunction<Operator>
 //     :
 //     public LifeV::Application
 {
@@ -79,32 +79,32 @@ public:
     //@{
 
     //! Constructor
-	BCInterfaceFSIFunctionFile();
+	BCInterfaceOseenFunctionFile();
 
     //! Constructor
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-	BCInterfaceFSIFunctionFile( const BCInterfaceData<Operator>& data );
+	BCInterfaceOseenFunctionFile( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function			- BCInterfaceFSIFunctionFile
+	 * \param function			- BCInterfaceOseenFunctionFile
 	 */
-	BCInterfaceFSIFunctionFile( const BCInterfaceFSIFunctionFile& function );
+	BCInterfaceOseenFunctionFile( const BCInterfaceOseenFunctionFile& function );
 
     //! Destructor
-    ~BCInterfaceFSIFunctionFile() {}
+    ~BCInterfaceOseenFunctionFile() {}
 
     //@}
 
 };
 
 //! Factory create function
-template <>
-inline BCInterfaceFunction<FSIOperator>* createOperatorFunctionFile<FSIOperator>()
+template <> template <typename Mesh, typename SolverType>
+inline BCInterfaceFunction< Oseen<Mesh, SolverType> >* createOperatorFunction< Oseen<Mesh, SolverType> >()
 {
-	return new BCInterfaceFSIFunctionFile<FSIOperator>();
+	return new BCInterfaceOseenFunctionFile< Oseen<Mesh, SolverType> >();
 }
 
 
@@ -113,16 +113,16 @@ inline BCInterfaceFunction<FSIOperator>* createOperatorFunctionFile<FSIOperator>
 //! Constructors
 // ===================================================
 template <class Operator>
-BCInterfaceFSIFunctionFile<Operator>::BCInterfaceFSIFunctionFile( ) :
+BCInterfaceOseenFunctionFile<Operator>::BCInterfaceOseenFunctionFile( ) :
 	BCInterfaceFunction<Operator>				( ),
 	BCInterfaceFunctionFile<Operator>			( ),
 	BCInterfaceOperatorFunction<Operator>		( ),
 	BCInterfaceOperatorFunctionFile<Operator>	( ),
-	BCInterfaceFSIFunction<Operator>			( )
+	BCInterfaceOseenFunction<Operator>			( )
 {
 
 #ifdef DEBUG
-	Debug( 5026 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( void )" << "\n";
+	Debug( 5026 ) << "BCInterfaceOseenFunctionFile::BCInterfaceOseenFunctionFile( void )" << "\n";
 #endif
 
 }
@@ -130,16 +130,16 @@ BCInterfaceFSIFunctionFile<Operator>::BCInterfaceFSIFunctionFile( ) :
 
 
 template <class Operator>
-BCInterfaceFSIFunctionFile<Operator>::BCInterfaceFSIFunctionFile( const BCInterfaceData<Operator>& data ) :
+BCInterfaceOseenFunctionFile<Operator>::BCInterfaceOseenFunctionFile( const BCInterfaceData<Operator>& data ) :
 	BCInterfaceFunction<Operator>				( ),
 	BCInterfaceFunctionFile<Operator>			( ),
 	BCInterfaceOperatorFunction<Operator>		( ),
 	BCInterfaceOperatorFunctionFile<Operator>	( ),
-	BCInterfaceFSIFunction<Operator>			( )
+	BCInterfaceOseenFunction<Operator>			( )
 {
 
 #ifdef DEBUG
-	Debug( 5026 ) << "BCInterfaceFSIFunctionFile::BCInterfaceFSIFunctionFile( data )" << "\n";
+	Debug( 5026 ) << "BCInterfaceOseenFunctionFile::BCInterfaceOseenFunctionFile( data )" << "\n";
 #endif
 
 	this->setData( data );
@@ -148,15 +148,15 @@ BCInterfaceFSIFunctionFile<Operator>::BCInterfaceFSIFunctionFile( const BCInterf
 
 
 template <class Operator>
-BCInterfaceFSIFunctionFile<Operator>::BCInterfaceFSIFunctionFile( const BCInterfaceFSIFunctionFile& function ) :
+BCInterfaceOseenFunctionFile<Operator>::BCInterfaceOseenFunctionFile( const BCInterfaceOseenFunctionFile& function ) :
 	BCInterfaceFunction<Operator>				( function ),
 	BCInterfaceFunctionFile<Operator>			( function ),
 	BCInterfaceOperatorFunction<Operator>		( function ),
 	BCInterfaceOperatorFunctionFile<Operator>	( function ),
-	BCInterfaceFSIFunction<Operator>			( function )
+	BCInterfaceOseenFunction<Operator>			( function )
 {
 }
 
 } // Namespace LifeV
 
-#endif /* __BCInterfaceFSIFunctionFile_H */
+#endif /* __BCInterfaceOseenFunctionFile_H */

@@ -67,7 +67,7 @@ namespace LifeV {
  *
  *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
  *  functions type for boundary conditions, using a GetPot file containing a function string and a
- *  table of discrete data (for example a Flux or a Pressure depending on time).
+ *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *
  *
  *
@@ -104,15 +104,14 @@ namespace LifeV {
  *  				1.000000000		4.00'
  *
  */
-class BCInterfaceFunctionFile : public virtual BCInterfaceFunction
+template <typename Operator>
+class BCInterfaceFunctionFile : public virtual BCInterfaceFunction<Operator>
 //     :
 //     public LifeV::Application
 {
 public:
 
-	// ===================================================
-	//! Public functions
-	// ===================================================
+	typedef BCInterfaceFunction<Operator>				super;
 
 	/** @name Constructors & Destructor
      */
@@ -125,7 +124,7 @@ public:
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-	BCInterfaceFunctionFile( const BCInterfaceData& data );
+	BCInterfaceFunctionFile( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
@@ -154,51 +153,293 @@ public:
     /*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-    virtual void setData( const BCInterfaceData& data );
+    virtual void setData( const BCInterfaceData<Operator>& data );
 
 	//! Compare function
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-    virtual bool compare( const BCInterfaceData& data );
+    virtual bool compare( const BCInterfaceData<Operator>& data );
 
     //@}
 
 protected:
 
-	// ===================================================
-	//! Protected variables
-	// ===================================================
-
-	std::string											M_fileName;
+	std::string												M_fileName;
 
 private:
 
-	// ===================================================
-	//! Private variables
-	// ===================================================
-
-	std::vector<std::string>							M_variables;
-	std::vector<Real>									M_scale;
-	std::map< std::string, std::vector<Real> >			M_data;
-	std::vector<Real>::iterator							M_dataIterator;
-
-	// ===================================================
-	//! Private functions
-	// ===================================================
+	std::vector<std::string>								M_variables;
+	std::vector<Real>										M_scale;
+	std::map< std::string, std::vector<Real> >				M_data;
+	std::vector<Real>::iterator								M_dataIterator;
 
 	/** @name Private functions
 	 */
 	//@{
 
     //! loadData
-    void loadData( const GetPot& dataFile );
+    inline void loadData( const GetPot& dataFile );
 
 	//! Linear interpolation (extrapolation) between two values of the data.
-	void dataInterpolation( void );
+	inline void dataInterpolation( void );
 
     //@}
 };
+
+//! Factory create function
+template <typename Operator>
+inline BCInterfaceFunction<Operator>* createFunctionFile()
+{
+	return new BCInterfaceFunctionFile<Operator>();
+}
+
+
+
+// ===================================================
+//! Constructors
+// ===================================================
+template <typename Operator>
+BCInterfaceFunctionFile<Operator>::BCInterfaceFunctionFile( ) :
+	BCInterfaceFunction<Operator>	( ),
+	M_fileName						( ),
+	M_variables						( ),
+	M_scale							( ),
+	M_data							( ),
+	M_dataIterator					( )
+{
+
+#ifdef DEBUG
+	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( void )" << "\n";
+#endif
+
+}
+
+
+
+template <typename Operator>
+BCInterfaceFunctionFile<Operator>::BCInterfaceFunctionFile( const BCInterfaceData<Operator>& data ) :
+	BCInterfaceFunction<Operator>	( ),
+	M_fileName						( ),
+	M_variables						( ),
+	M_scale							( ),
+	M_data							( ),
+	M_dataIterator					( )
+{
+
+#ifdef DEBUG
+	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
+#endif
+
+	this->setData( data );
+}
+
+
+
+template <typename Operator>
+BCInterfaceFunctionFile<Operator>::BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function ) :
+	BCInterfaceFunction<Operator>	( function ),
+	M_fileName						( function.M_fileName ),
+	M_variables						( function.M_variables ),
+	M_scale							( function.M_scale ),
+	M_data							( function.M_data ),
+	M_dataIterator					( function.M_dataIterator )
+{
+}
+
+
+
+
+
+// ===================================================
+//! Methods
+// ===================================================
+template <typename Operator>
+BCInterfaceFunctionFile<Operator>&
+BCInterfaceFunctionFile<Operator>::operator=( const BCInterfaceFunctionFile& function )
+{
+	if ( this != &function )
+	{
+		super::operator=( function );
+		M_fileName		= function.M_fileName;
+		M_variables		= function.M_variables;
+		M_scale			= function.M_scale;
+		M_data			= function.M_data;
+		M_dataIterator	= function.M_dataIterator;
+	}
+
+	return *this;
+}
+
+
+
+template <typename Operator>
+void
+BCInterfaceFunctionFile<Operator>::setData( const BCInterfaceData<Operator>& data )
+{
+	M_fileName = data.get_baseString();	//The base string contains the file name
+
+	//Load data from file
+	GetPot dataFile( M_fileName );
+	loadData( dataFile );
+
+#ifdef DEBUG
+	Debug( 5022 ) << "BCInterfaceFunctionFile::setData             fileName: " << M_fileName  << "\n";
+	Debug( 5022 ) << "                                             function: " << data.get_baseString()  << "\n";
+#endif
+
+	//Create a new data container with the correct base string
+	BCInterfaceData<Operator> newData = data;
+	newData.set_baseString( dataFile( "function", "Undefined" ) ); // Now it contains the real base string
+	super::setData( newData );
+}
+
+
+
+template <typename Operator>
+bool
+BCInterfaceFunctionFile<Operator>::compare( const BCInterfaceData<Operator>& data )
+{
+	return M_fileName.compare( data.get_baseString() ) == 0 && super::M_comV == data.get_comV();
+}
+
+
+
+
+
+// ===================================================
+//! Private functions
+// ===================================================
+template <typename Operator>
+inline void
+BCInterfaceFunctionFile<Operator>::loadData( const GetPot& dataFile )
+{
+
+	//Set variables
+	UInt variablesNumber = dataFile.vector_variable_size( "variables" );
+
+	M_variables.clear();
+	M_variables.reserve( variablesNumber );
+
+	M_scale.clear();
+	M_scale.reserve( variablesNumber );
+
+	for ( UInt j(0) ; j < variablesNumber ; ++j )
+	{
+		M_variables.push_back( dataFile( "variables", "unknown", j ) );
+		M_scale.push_back( dataFile( "scale", 1.0, j ) );
+	}
+
+#ifdef DEBUG
+	std::stringstream output;
+	output << "BCInterfaceFunctionFile::loadData           variables: ";
+	for ( UInt j(0) ; j < variablesNumber ; ++j )
+		output << M_variables[j] << "  ";
+
+	output << "\n                                                           scale: ";
+	for ( UInt j(0) ; j < variablesNumber ; ++j )
+		output << M_scale[j] << "  ";
+
+	Debug( 5022 ) << output.str() << "\n";
+#endif
+
+
+
+	//Load data
+	UInt dataLines = dataFile.vector_variable_size( "data" ) / variablesNumber;
+
+	M_data.clear();
+	for ( UInt j(0) ; j < variablesNumber ; ++j )
+		M_data[M_variables[j]].reserve( dataLines );
+
+	for ( UInt i(0) ; i < dataLines ; ++i )
+		for ( UInt j(0) ; j < variablesNumber ; ++j )
+			M_data[ M_variables[j] ].push_back( M_scale[j] * dataFile( "data", 0.0, i*variablesNumber + j ) );
+
+#ifdef DEBUG
+	output.str("");
+	output << "                                                 data:";
+	for ( UInt i(0) ; i < dataLines ; ++i )
+	{
+		if (i > 0)
+			output << "                                                                 ";
+
+		for ( UInt j(0) ; j < variablesNumber ; ++j )
+			output << " " << M_data[ M_variables[j] ][i];
+		output << "\n";
+	}
+	Debug( 5022 ) << output.str();
+#endif
+
+
+
+	//Initialize iterator
+	M_dataIterator = M_data[M_variables[0]].begin();
+}
+
+
+
+
+template <typename Operator>
+inline void
+BCInterfaceFunctionFile<Operator>::dataInterpolation( void )
+{
+	//Get variable
+	Real X = super::M_parser->getVariable( M_variables[0] );
+
+#ifdef DEBUG
+	Debug( 5022 ) << "                                                    variable: " << X  << "\n";
+#endif
+
+
+
+	//Move Iterator
+	for ( ; ; )
+	{
+
+#ifdef DEBUG
+		Debug( 5022 ) << "                                       iterator  position   : " << static_cast<Real> ( M_dataIterator - M_data[ M_variables[0] ].begin() )  << "\n";
+		Debug( 5022 ) << "                                       variable (position)  : " << *M_dataIterator << "\n";
+		Debug( 5022 ) << "                                       variable (position+1): " << *(M_dataIterator+1) << "\n";
+#endif
+
+		if (X >= *M_dataIterator && X <= *(M_dataIterator+1) )
+			break;
+
+		if ( X > *M_dataIterator )
+		{
+			if ( M_dataIterator+1 == M_data[ M_variables[0] ].end() )
+				break;
+			else
+				++M_dataIterator;
+		}
+		else
+		{
+			if ( M_dataIterator == M_data[ M_variables[0] ].begin() )
+				break;
+			else
+				--M_dataIterator;
+		}
+	}
+
+
+
+	//Linear interpolation (extrapolation if X > xB)
+	Real xA, xB, A, B;
+	for ( UInt j(1), position = static_cast<UInt> (M_dataIterator - M_data[ M_variables[0] ].begin()) ; j < static_cast<UInt> (M_variables.size()) ; ++j )
+	{
+		xA	= M_data[ M_variables[0] ][position];
+		xB	= M_data[ M_variables[0] ][position+1];
+		A 	= M_data[ M_variables[j] ][position];
+		B 	= M_data[ M_variables[j] ][position+1];
+
+		super::M_parser->setVariable( M_variables[j], A+(B-A)/(xB-xA)*(X-xA) );
+
+#ifdef DEBUG
+		Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
+#endif
+	}
+}
 
 } // Namespace LifeV
 

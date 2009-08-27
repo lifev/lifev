@@ -33,66 +33,90 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructor & Destructor
+//! Constructors
 // ===================================================
-BCInterfaceFSI::BCInterfaceFSI( const BCInterfaceData& data,
-								const boost::shared_ptr<FSIOperator>& Oper ) :
-	M_baseString			( data.get_baseString() ),
-	M_FSIOperator			( Oper ),
-	M_base					( )
+BCInterfaceFSI<FSIOperator>::BCInterfaceFSI( ) :
+	M_operator							( ),
+	M_baseString						( ),
+	M_base								( )
 {
+
 #ifdef DEBUG
-	Debug( 5023 ) << "BCInterfaceFSI::BCInterfaceFSI" << "\n";
+	Debug( 5029 ) << "BCInterfaceFSI::BCInterfaceFSI( void )" << "\n";
 #endif
 
-	//Set mapMethod
-	M_mapMethod["exactJacobian"]						= EXACTJACOBIAN;
-	M_mapMethod["fixedPoint"]							= FIXEDPOINT;
-	M_mapMethod["monolithic"]							= MONOLITHIC;
-	M_mapMethod["steklovPoincare"]						= STEKLOVPOINCARE;
-
-	//Set mapFunction
-	M_mapFunction["DerFluidLoadToFluid"]				= DerFluidLoadToFluid;
-	M_mapFunction["DerFluidLoadToStructure"]			= DerFluidLoadToStructure;
-	M_mapFunction["DerHarmonicExtensionVelToFluid"]		= DerHarmonicExtensionVelToFluid;
-	M_mapFunction["DerStructureDispToSolid"]			= DerStructureDispToSolid;
-	M_mapFunction["FluidInterfaceDisp"]					= FluidInterfaceDisp;
-	M_mapFunction["FluidLoadToStructure"]				= FluidLoadToStructure;
-	M_mapFunction["HarmonicExtensionVelToFluid"] 		= HarmonicExtensionVelToFluid;
-	M_mapFunction["SolidLoadToStructure"]				= SolidLoadToStructure;
-	M_mapFunction["StructureDispToHarmonicExtension"]	= StructureDispToHarmonicExtension;
-	M_mapFunction["StructureDispToSolid"]				= StructureDispToSolid;
-	M_mapFunction["StructureToFluid"]					= StructureToFluid;
-
-	checkMethod( );
 }
 
 
 
-BCInterfaceFSI::BCInterfaceFSI( const BCInterfaceFSI& fsiOperator ) :
-	M_baseString	( fsiOperator.M_baseString ),
-	M_FSIOperator	( fsiOperator.M_FSIOperator ),
-	M_base			( fsiOperator.M_base ),
-	M_mapMethod		( fsiOperator.M_mapMethod ),
-	M_mapFunction	( fsiOperator.M_mapFunction )
+BCInterfaceFSI<FSIOperator>::BCInterfaceFSI( const BCInterfaceData<FSIOperator>& data ) :
+	M_operator							( ),
+	M_baseString						( ),
+	M_base								( )
+{
+
+#ifdef DEBUG
+	Debug( 5029 ) << "BCInterfaceFSI::BCInterfaceFSI( data )" << "\n";
+#endif
+
+	this->setData( data );
+}
+
+
+
+BCInterfaceFSI<FSIOperator>::BCInterfaceFSI( const BCInterfaceFSI& fsi ) :
+	M_operator							( fsi.M_operator ),
+	M_baseString						( fsi.M_baseString ),
+	M_base								( fsi.M_base ),
+	M_mapMethod							( fsi.M_mapMethod ),
+	M_mapFunction						( fsi.M_mapFunction )
 {
 }
 
 
 
-BCInterfaceFSI&
-BCInterfaceFSI::operator=( const BCInterfaceFSI& fsiOperator )
+
+
+// ===================================================
+//! Methods
+// ===================================================
+BCInterfaceFSI<FSIOperator>&
+BCInterfaceFSI<FSIOperator>::operator=( const BCInterfaceFSI& fsi )
 {
-    if ( this != &fsiOperator )
+    if ( this != &fsi )
     {
-    	M_baseString	= fsiOperator.M_baseString;
-    	M_FSIOperator	= fsiOperator.M_FSIOperator;
-    	M_base			= fsiOperator.M_base;
-    	M_mapMethod		= fsiOperator.M_mapMethod;
-    	M_mapFunction	= fsiOperator.M_mapFunction;
+    	M_operator							= fsi.M_operator;
+    	M_baseString						= fsi.M_baseString;
+    	M_base								= fsi.M_base;
+    	M_mapMethod							= fsi.M_mapMethod;
+    	M_mapFunction						= fsi.M_mapFunction;
     }
 
 	return *this;
+}
+
+
+
+void
+BCInterfaceFSI<FSIOperator>::setData( const BCInterfaceData<FSIOperator>& data )
+{
+
+#ifdef DEBUG
+	Debug( 5029 ) << "BCInterfaceFSIFunctionFile::setData" << "\n";
+#endif
+
+	M_operator		= data.get_operator();
+	M_baseString	= data.get_baseString();
+
+	this->checkMethod();
+}
+
+
+
+bool
+BCInterfaceFSI<FSIOperator>::compare( const BCInterfaceData<FSIOperator>& data )
+{
+	return	M_baseString.compare( data.get_baseString() ) == 0; //&& add compare for Operator!
 }
 
 
@@ -103,14 +127,20 @@ BCInterfaceFSI::operator=( const BCInterfaceFSI& fsiOperator )
 //! Private functions
 // ===================================================
 inline void
-BCInterfaceFSI::checkMethod( void )
+BCInterfaceFSI<FSIOperator>::checkMethod( void )
 {
-	switch ( M_mapMethod[M_FSIOperator->method()] )
+	//Set mapMethod
+	M_mapMethod["exactJacobian"]	= EXACTJACOBIAN;
+	M_mapMethod["fixedPoint"]		= FIXEDPOINT;
+	M_mapMethod["monolithic"]		= MONOLITHIC;
+	M_mapMethod["steklovPoincare"]	= STEKLOVPOINCARE;
+
+	switch ( M_mapMethod[M_operator->method()] )
 	{
 			case EXACTJACOBIAN :
 
 #ifdef DEBUG
-				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            exactJacobian" << "\n";
+				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
 				checkFunction<exactJacobian>();
@@ -120,7 +150,7 @@ BCInterfaceFSI::checkMethod( void )
 			case FIXEDPOINT :
 
 #ifdef DEBUG
-				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            fixedPoint" << "\n";
+				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
 				checkFunction<fixedPoint>();
@@ -130,7 +160,7 @@ BCInterfaceFSI::checkMethod( void )
 			case MONOLITHIC :
 
 #ifdef DEBUG
-				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            monolithic" << "\n";
+				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            monolithic" << "\n";
 #endif
 
 				//checkFunction<monolithic>();
@@ -140,7 +170,7 @@ BCInterfaceFSI::checkMethod( void )
 			case STEKLOVPOINCARE :
 
 #ifdef DEBUG
-				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            steklovPoincare" << "\n";
+				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
 				//checkFunction<steklovPoincare>();

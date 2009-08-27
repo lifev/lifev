@@ -69,6 +69,7 @@ typedef std::vector<ID>								BCComV;
  *  @see
  *
  */
+template <class Operator>
 class BCInterfaceData
 {
 public:
@@ -115,24 +116,18 @@ public:
      */
     //@{
 
-	void set_name( const BCName& name ) 					{ M_name = name; }
-
-	void set_flag( const BCFlag& flag ) 					{ M_flag = flag; }
-
-	void set_type( const BCType& type ) 					{ M_type = type; }
-
-	void set_mode( const BCMode& mode ) 					{ M_mode = mode; }
-
-	void set_comV( const BCComV& comV ) 					{ M_comV = comV; }
-
-	void set_comV( const UInt&   comV ) 					{ M_comV.push_back( comV ); }
-
-	void set_comV( const UInt&   comV, const UInt& index ) 	{ M_comV[index] = comV; }
-
-	void set_baseString( const std::string& baseString ) 	{
-																M_baseString = baseString;
-																boost::replace_all( M_baseString, " ",  "" );
-															}
+	void set_operator( const boost::shared_ptr<Operator>& Oper) { M_operator = Oper; }
+	void set_name( const BCName& name ) 						{ M_name = name; }
+	void set_flag( const BCFlag& flag ) 						{ M_flag = flag; }
+	void set_type( const BCType& type ) 						{ M_type = type; }
+	void set_mode( const BCMode& mode ) 						{ M_mode = mode; }
+	void set_comV( const BCComV& comV ) 						{ M_comV = comV; }
+	void set_comV( const UInt&   comV ) 						{ M_comV.push_back( comV ); }
+	void set_comV( const UInt&   comV, const UInt& index ) 		{ M_comV[index] = comV; }
+	void set_baseString( const std::string& baseString ) 		{
+																	M_baseString = baseString;
+																	boost::replace_all( M_baseString, " ",  "" );
+																}
 
     //@}
 
@@ -142,24 +137,20 @@ public:
      */
     //@{
 
-	const BCName& 		get_name() 			const { return M_name; }
-
-	const BCFlag& 		get_flag() 			const { return M_flag; }
-
-	const BCType& 		get_type() 			const { return M_type; }
-
-	const BCMode& 		get_mode() 			const { return M_mode; }
-
-	const BCComV& 		get_comV() 			const { return M_comV; }
-
-	const ID& 			get_comN() 			const { return M_comV.front(); }
-
-	const std::string& 	get_baseString()	const { return M_baseString; }
+	const boost::shared_ptr<Operator>& 	get_operator()		const { return M_operator; }
+	const BCName& 						get_name() 			const { return M_name; }
+	const BCFlag& 						get_flag() 			const { return M_flag; }
+	const BCType& 						get_type() 			const { return M_type; }
+	const BCMode& 						get_mode() 			const { return M_mode; }
+	const BCComV& 						get_comV() 			const { return M_comV; }
+	const ID& 							get_comN() 			const { return M_comV.front(); }
+	const std::string& 					get_baseString()	const { return M_baseString; }
 
     //@}
 
 private:
 
+	boost::shared_ptr<Operator>							M_operator;
 	BCName												M_name;
 	BCFlag 												M_flag;
 	BCType 												M_type;
@@ -167,6 +158,71 @@ private:
 	BCComV 												M_comV;
 	std::string											M_baseString;
 };
+
+
+
+
+
+// ===================================================
+//! Constructors
+// ===================================================
+template <class Operator>
+BCInterfaceData<Operator>::BCInterfaceData( ) :
+	M_operator		( ),
+	M_name			( ),
+	M_flag			( ),
+	M_type			( ),
+	M_mode			( ),
+	M_comV			( ),
+	M_baseString	( )
+{}
+
+
+
+template <class Operator>
+BCInterfaceData<Operator>::BCInterfaceData( const BCInterfaceData& data ) :
+	M_operator		( data.M_operator ),
+	M_name			( data.M_name ),
+	M_flag			( data.M_flag ),
+	M_type			( data.M_type ),
+	M_mode			( data.M_mode ),
+	M_comV			( data.M_comV ),
+	M_baseString	( data.M_baseString )
+{}
+
+
+template <class Operator>
+BCInterfaceData<Operator>&
+BCInterfaceData<Operator>::operator=( const BCInterfaceData& data )
+{
+	if ( this != &data )
+	{
+		M_operator		= data.M_operator;
+		M_name			= data.M_name;
+		M_flag			= data.M_flag;
+		M_type			= data.M_type;
+		M_mode			= data.M_mode;
+		M_comV			= data.M_comV;
+		M_baseString	= data.M_baseString;
+	}
+
+	return *this;
+}
+
+
+
+
+
+// ===================================================
+//! Methods
+// ===================================================
+template <class Operator>
+void
+BCInterfaceData<Operator>::reset_comV( const UInt& components )
+{
+	M_comV.clear();
+	M_comV.reserve( components );
+}
 
 } // Namespace LifeV
 

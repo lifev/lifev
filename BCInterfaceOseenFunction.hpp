@@ -3,7 +3,7 @@
   This file is part of the LifeV Applications.
 
   Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-       Date: 2009-07-15
+       Date: 2009-08-27
 
   Copyright (C) 2009 EPFL
 
@@ -25,11 +25,11 @@
 /**
    \file BCInterfaceFSIFunction.hpp
    \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-   \date 2009-07-15
+   \date 2009-08-27
  */
 
-#ifndef __BCInterfaceFSIFunction_H
-#define __BCInterfaceFSIFunction_H 1
+#ifndef __BCInterfaceOseenFunction_H
+#define __BCInterfaceOseenFunction_H 1
 
 
 
@@ -41,7 +41,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcFunction.hpp>
 
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/Oseen.hpp>
 
 #include <string>
 
@@ -62,8 +62,8 @@ namespace LifeV {
 
 
 /*!
- * \class BCInterfaceFSIFunction
- * \brief LifeV bcFunction wrapper for BCInterface (FSI problems).
+ * \class BCInterfaceOseenFunction
+ * \brief LifeV bcFunction wrapper for BCInterface (Oseen problems).
  *
  *  @author Cristiano Malossi
  *  @see
@@ -77,14 +77,10 @@ namespace LifeV {
  *	f_area
  *	f_flux
  *	f_pressure
- *	s_density
- *	s_poisson
- *	s_thickness
- *	s_young
  *
  */
 template <class Operator>
-class BCInterfaceFSIFunction : 	public virtual BCInterfaceOperatorFunction<Operator>
+class BCInterfaceOseenFunction : 	public virtual BCInterfaceOperatorFunction<Operator>
 //     :
 //     public LifeV::Application
 {
@@ -97,22 +93,22 @@ public:
     //@{
 
     //! Constructor
-	BCInterfaceFSIFunction();
+	BCInterfaceOseenFunction();
 
     //! Constructor
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-	BCInterfaceFSIFunction( const BCInterfaceData<Operator>& data );
+	BCInterfaceOseenFunction( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function			- BCInterfaceFSIFunction
+	 * \param function			- BCInterfaceOseenFunction
 	 */
-	BCInterfaceFSIFunction( const BCInterfaceFSIFunction& function );
+	BCInterfaceOseenFunction( const BCInterfaceOseenFunction& function );
 
     //! Destructor
-    ~BCInterfaceFSIFunction() {}
+    ~BCInterfaceOseenFunction() {}
 
     //@}
 
@@ -130,10 +126,10 @@ private:
 };
 
 //! Factory create function
-template <>
-inline BCInterfaceFunction<FSIOperator>* createOperatorFunction<FSIOperator>()
+template <> template <typename Mesh, typename SolverType>
+inline BCInterfaceFunction< Oseen<Mesh, SolverType> >* createOperatorFunction< Oseen<Mesh, SolverType> >()
 {
-	return new BCInterfaceFSIFunction<FSIOperator>();
+	return new BCInterfaceOseenFunction< Oseen<Mesh, SolverType> >();
 }
 
 
@@ -142,13 +138,13 @@ inline BCInterfaceFunction<FSIOperator>* createOperatorFunction<FSIOperator>()
 //! Constructors
 // ===================================================
 template <class Operator>
-BCInterfaceFSIFunction<Operator>::BCInterfaceFSIFunction( ) :
+BCInterfaceOseenFunction<Operator>::BCInterfaceOseenFunction( ) :
 	BCInterfaceFunction<Operator>			( ),
 	BCInterfaceOperatorFunction<Operator>	( )
 {
 
 #ifdef DEBUG
-	Debug( 5025 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction( void )" << "\n";
+	Debug( 5027 ) << "BCInterfaceOseenFunction::BCInterfaceOseenFunction( void )" << "\n";
 #endif
 
 }
@@ -156,13 +152,13 @@ BCInterfaceFSIFunction<Operator>::BCInterfaceFSIFunction( ) :
 
 
 template <class Operator>
-BCInterfaceFSIFunction<Operator>::BCInterfaceFSIFunction( const BCInterfaceData<Operator>& data ) :
+BCInterfaceOseenFunction<Operator>::BCInterfaceOseenFunction( const BCInterfaceData<Operator>& data ) :
 	BCInterfaceFunction<Operator>			( ),
 	BCInterfaceOperatorFunction<Operator>	( )
 {
 
 #ifdef DEBUG
-	Debug( 5025 ) << "BCInterfaceFSIFunction::BCInterfaceFSIFunction( data )" << "\n";
+	Debug( 5027 ) << "BCInterfaceOseenFunction::BCInterfaceOseenFunction( data )" << "\n";
 #endif
 
 	this->setData( data );
@@ -171,7 +167,7 @@ BCInterfaceFSIFunction<Operator>::BCInterfaceFSIFunction( const BCInterfaceData<
 
 
 template <class Operator>
-BCInterfaceFSIFunction<Operator>::BCInterfaceFSIFunction( const BCInterfaceFSIFunction& function ) :
+BCInterfaceOseenFunction<Operator>::BCInterfaceOseenFunction( const BCInterfaceOseenFunction& function ) :
 	BCInterfaceFunction<Operator>			( function ),
 	BCInterfaceOperatorFunction<Operator>	( function )
 {
@@ -186,19 +182,15 @@ BCInterfaceFSIFunction<Operator>::BCInterfaceFSIFunction( const BCInterfaceFSIFu
 // ===================================================
 template <class Operator>
 inline void
-BCInterfaceFSIFunction<Operator>::createAccessList( void )
+BCInterfaceOseenFunction<Operator>::createAccessList( void )
 {
 #ifdef DEBUG
-	Debug( 5025 ) << "BCInterfaceFSIFunction::createAccessList" << "\n";
+	Debug( 5027 ) << "BCInterfaceOseenFunction::createAccessList" << "\n";
 #endif
 	//Create mapList
 	super::M_mapList["f_area"]		= super::f_area;
 	super::M_mapList["f_flux"]		= super::f_flux;
 	super::M_mapList["f_pressure"]	= super::f_pressure;
-	super::M_mapList["s_density"]	= super::s_density;
-	super::M_mapList["s_poisson"]	= super::s_poisson;
-	super::M_mapList["s_thickness"]	= super::s_thickness;
-	super::M_mapList["s_young"]		= super::s_young;
 
 	//Create list
 	super::createAccessList();
@@ -208,11 +200,11 @@ BCInterfaceFSIFunction<Operator>::createAccessList( void )
 
 template <class Operator>
 inline void
-BCInterfaceFSIFunction<Operator>::addOperatorVariables( const Real& t )
+BCInterfaceOseenFunction<Operator>::addOperatorVariables( const Real& t )
 {
 
 #ifdef DEBUG
-	Debug( 5025 ) << "BCInterfaceFSIFunction::addOperatorVariables  " << "\n";
+	Debug( 5027 ) << "BCInterfaceOseenFunction::addOperatorVariables  " << "\n";
 #endif
 
 	//Check if the variables have been already updated
@@ -229,72 +221,29 @@ BCInterfaceFSIFunction<Operator>::addOperatorVariables( const Real& t )
 			case super::f_area :
 
 #ifdef DEBUG
-				Debug( 5025 ) << "                                                   f_area(" << static_cast<Real> (super::M_flag) << "): " << super::M_operator->fluid().area( super::M_flag )  << "\n";
+				Debug( 5027 ) << "                                                   f_area(" << static_cast<Real> (super::M_flag) << "): " << super::M_operator->area( super::M_flag )  << "\n";
 #endif
-				setVariable( "f_area", super::M_operator->fluid().area( super::M_flag ) );
+				setVariable( "f_area", super::M_operator->area( super::M_flag ) );
 
 				break;
 
 			case super::f_flux :
 
 #ifdef DEBUG
-				Debug( 5025 ) << "                                                   f_flux(" << static_cast<Real> (super::M_flag) << "): " << super::M_operator->fluid().flux( super::M_flag )  << "\n";
+				Debug( 5027 ) << "                                                   f_flux(" << static_cast<Real> (super::M_flag) << "): " << super::M_operator->flux( super::M_flag )  << "\n";
 #endif
 
-				setVariable( "f_flux", super::M_operator->fluid().flux( super::M_flag ) );
+				setVariable( "f_flux", super::M_operator->flux( super::M_flag ) );
 
 				break;
 
 			case super::f_pressure :
 
 #ifdef DEBUG
-				Debug( 5025 ) << "                                               f_pressure(" << static_cast<Real> (super::M_flag) << "): " << super::M_operator->fluid().pressure( super::M_flag )  << "\n";
+				Debug( 5027 ) << "                                               f_pressure(" << static_cast<Real> (super::M_flag) << "): " << super::M_operator->pressure( super::M_flag )  << "\n";
 #endif
 
-				setVariable( "f_pressure", super::M_operator->fluid().pressure( super::M_flag ) );
-
-				break;
-
-
-
-			// s_ -> SOLID
-			case super::s_density :
-
-#ifdef DEBUG
-				Debug( 5025 ) << "                                                   s_density: " << super::M_operator->solid().rho()  << "\n";
-#endif
-
-				setVariable( "s_density", super::M_operator->solid().rho() );
-
-				break;
-
-			case super::s_poisson :
-
-#ifdef DEBUG
-				Debug( 5025 ) << "                                                   s_poisson: " << super::M_operator->solid().poisson()  << "\n";
-#endif
-
-				setVariable( "s_poisson", super::M_operator->solid().poisson() );
-
-				break;
-
-			case super::s_thickness :
-
-#ifdef DEBUG
-				Debug( 5025 ) << "                                                 s_thickness: " << super::M_operator->solid().thickness()  << "\n";
-#endif
-
-				setVariable( "s_thickness", super::M_operator->solid().thickness() );
-
-				break;
-
-			case super::s_young :
-
-#ifdef DEBUG
-				Debug( 5025 ) << "                                                     s_young: " << super::M_operator->solid().young()  << "\n";
-#endif
-
-				setVariable( "s_young", super::M_operator->solid().young() );
+				setVariable( "f_pressure", super::M_operator->pressure( super::M_flag ) );
 
 				break;
 		}
@@ -302,4 +251,4 @@ BCInterfaceFSIFunction<Operator>::addOperatorVariables( const Real& t )
 
 } // Namespace LifeV
 
-#endif /* __BCInterfaceFSIFunction_H */
+#endif /* __BCInterfaceOseenFunction_H */

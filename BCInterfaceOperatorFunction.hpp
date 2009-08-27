@@ -41,9 +41,6 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcFunction.hpp>
 
-//#include <life/lifesolver/Oseen.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
-
 #include <string>
 
 #include <lifemc/lifefem/BCInterfaceData.hpp>
@@ -93,15 +90,13 @@ namespace LifeV {
  *
  */
 template <class Operator>
-class BCInterfaceOperatorFunction : public virtual BCInterfaceFunction
+class BCInterfaceOperatorFunction : public virtual BCInterfaceFunction<Operator>
 //     :
 //     public LifeV::Application
 {
 public:
 
-	// ===================================================
-	//! Public functions
-	// ===================================================
+	typedef BCInterfaceFunction<Operator>			super;
 
 	/** @name Constructors & Destructor
      */
@@ -112,9 +107,9 @@ public:
 
 	//! Constructor
 	/*!
-	 * \param Oper				- Operator
+	 * \param data				- BC data loaded from GetPot file
 	 */
-	BCInterfaceOperatorFunction( const boost::shared_ptr<Operator>& Oper );
+	BCInterfaceOperatorFunction( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
@@ -142,13 +137,13 @@ public:
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-	virtual void setData( const BCInterfaceData& data );
+	virtual void setData( const BCInterfaceData<Operator>& data );
 
 	//! Compare function
 	/*!
 	 * \param data				- BC data loaded from GetPot file
 	 */
-	virtual bool compare( const BCInterfaceData& data );
+	virtual bool compare( const BCInterfaceData<Operator>& data );
 
 	//! Set variable function
 	/*!
@@ -160,6 +155,16 @@ public:
 	//@}
 
 protected:
+
+	/** @name Protected functions
+	*/
+	//@{
+
+	virtual inline void createAccessList( void );
+
+	virtual inline void addOperatorVariables( const Real& /*t*/ ) {}
+
+	//@}
 
 	//List of all available operators
 	enum operatorList
@@ -173,101 +178,85 @@ protected:
 		s_young,
 	};
 
-	// ===================================================
-	//! Protected variables
-	// ===================================================
-
 	boost::shared_ptr<Operator>							M_operator;
 	BCFlag												M_flag;
 	std::set<operatorList>								M_list;
 	std::map<std::string, operatorList>					M_mapList;
-
-
-
-	// ===================================================
-	//! Protected functions
-	// ===================================================
-
-	/** @name Protected functions
-	*/
-	//@{
-
-	virtual inline void createAccessList( void );
-
-	virtual inline void addOperatorVariables( const Real& t );
-
-	//@}
-
-private:
-
-	// ===================================================
-	//! Private variables
-	// ===================================================
-
 	Real												M_oldTime;
 };
 
-
+template <typename Operator>
+inline BCInterfaceFunction<Operator>* createOperatorFunction()
+{
+	return new BCInterfaceOperatorFunction<Operator>();
+}
 
 
 
 // ===================================================
-//! Template function
+//! Constructors
 // ===================================================
 template <class Operator>
 BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( ) :
-	BCInterfaceFunction		( ),
-	M_operator				( ),
-	M_flag					( ),
-	M_list					( ),
-	M_mapList				( ),
-	M_oldTime				( -1.0 ) // Negative time
+	BCInterfaceFunction<Operator>	( ),
+	M_operator						( ),
+	M_flag							( ),
+	M_list							( ),
+	M_mapList						( ),
+	M_oldTime						( -1.0 ) // Negative time
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( void )" << "\n";
+	Debug( 5023 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( void )" << "\n";
 #endif
 
 }
 
 template <class Operator>
-BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( const boost::shared_ptr<Operator>& Oper ) :
-	BCInterfaceFunction		( ),
-	M_operator				( Oper ),
-	M_flag					( ),
-	M_list					( ),
-	M_mapList				( ),
-	M_oldTime				( -1.0 ) // Negative time
+BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( const BCInterfaceData<Operator>& data ) :
+	BCInterfaceFunction<Operator>	( ),
+	M_operator						( ),
+	M_flag							( ),
+	M_list							( ),
+	M_mapList						( ),
+	M_oldTime						( -1.0 ) // Negative time
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( Oper )" << "\n";
+	Debug( 5023 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( data )" << "\n";
 #endif
 
+	this->setData( data );
 }
 
 
 
 template <class Operator>
 BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( const BCInterfaceOperatorFunction& function ) :
-	BCInterfaceFunction		( function ),
-	M_operator				( function.M_operator ),
-	M_flag					( function.M_flag ),
-	M_list					( function.M_list ),
-	M_mapList				( function.M_mapList ),
-	M_oldTime				( function.M_oldTime )
+	BCInterfaceFunction<Operator>	( function ),
+	M_operator						( function.M_operator ),
+	M_flag							( function.M_flag ),
+	M_list							( function.M_list ),
+	M_mapList						( function.M_mapList ),
+	M_oldTime						( function.M_oldTime )
 {
 }
 
 
 
+
+
+// ===================================================
+//! Methods
+// ===================================================
 template <class Operator>
 BCInterfaceOperatorFunction<Operator>&
 BCInterfaceOperatorFunction<Operator>::operator=( const BCInterfaceOperatorFunction& function )
 {
     if ( this != &function )
     {
-    	BCInterfaceFunction::operator=( function );
+    	super::operator=( function );
+
     	M_operator		= function.M_operator;
     	M_flag			= function.M_flag;
     	M_list			= function.M_list;
@@ -282,16 +271,17 @@ BCInterfaceOperatorFunction<Operator>::operator=( const BCInterfaceOperatorFunct
 
 template <class Operator>
 void
-BCInterfaceOperatorFunction<Operator>::setData( const BCInterfaceData& data )
+BCInterfaceOperatorFunction<Operator>::setData( const BCInterfaceData<Operator>& data )
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunction::setData" << "\n";
+	Debug( 5023 ) << "BCInterfaceOperatorFunction::setData" << "\n";
 #endif
 
-	M_flag = data.get_flag();
+	M_operator	= data.get_operator();
+	M_flag		= data.get_flag();
 
-	BCInterfaceFunction::setData( data );
+	super::setData( data );
 
 	this->createAccessList();
 }
@@ -300,9 +290,10 @@ BCInterfaceOperatorFunction<Operator>::setData( const BCInterfaceData& data )
 
 template <class Operator>
 bool
-BCInterfaceOperatorFunction<Operator>::compare( const BCInterfaceData& data )
+BCInterfaceOperatorFunction<Operator>::compare( const BCInterfaceData<Operator>& data )
 {
-	return M_baseString.compare( data.get_baseString() ) == 0 && M_comV == data.get_comV() && M_flag == data.get_flag();
+	return	super::M_baseString.compare( data.get_baseString() ) == 0	&&
+			super::M_comV == data.get_comV() && M_flag == data.get_flag();
 }
 
 
@@ -311,43 +302,30 @@ template <class Operator>
 inline void
 BCInterfaceOperatorFunction<Operator>::setVariable( const std::string& name, const Real& value )
 {
-	M_parser->setVariable( name, value );
+	super::M_parser->setVariable( name, value );
 }
 
 
 
+
+
+// ===================================================
+//! Protected functions
+// ===================================================
 template <class Operator>
 inline void
 BCInterfaceOperatorFunction<Operator>::createAccessList( void )
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunction::createAccessList" << "\n";
+	Debug( 5023 ) << "BCInterfaceOperatorFunction::createAccessList" << "\n";
 #endif
 
 	//Create list
 	M_list.clear();
 	for ( typename std::map<std::string, operatorList>::iterator j = M_mapList.begin() ; j != M_mapList.end() ; ++j )
-		if ( boost::find_first( M_baseString, j->first ) )
+		if ( boost::find_first( super::M_baseString, j->first ) )
 			M_list.insert( j->second );
-}
-
-
-
-template <class Operator>
-inline void
-BCInterfaceOperatorFunction<Operator>::addOperatorVariables( const Real& t )
-{
-
-#ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunction::addOperatorVariables  " << "\n";
-#endif
-
-	//Check if the variables have been already updated
-	if ( t == M_oldTime )
-		return;
-
-	M_oldTime = t;
 }
 
 } // Namespace LifeV
