@@ -101,7 +101,7 @@ public:
 	BCInterfaceOperatorFunctionFile( const BCInterfaceOperatorFunctionFile& function );
 
     //! Destructor
-    ~BCInterfaceOperatorFunctionFile() {}
+	virtual ~BCInterfaceOperatorFunctionFile() {}
 
     //@}
 

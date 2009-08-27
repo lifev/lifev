@@ -112,7 +112,7 @@ public:
 	BCInterfaceFSIFunction( const BCInterfaceFSIFunction& function );
 
     //! Destructor
-    ~BCInterfaceFSIFunction() {}
+	virtual ~BCInterfaceFSIFunction() {}
 
     //@}
 

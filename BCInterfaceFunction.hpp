@@ -136,7 +136,7 @@ public:
 	BCInterfaceFunction( const BCInterfaceFunction& function );
 
     //! Destructor
-    ~BCInterfaceFunction() {}
+    virtual ~BCInterfaceFunction() {}
 
     //@}
 
