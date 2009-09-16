@@ -187,16 +187,33 @@ public:
         returns number of iterations. If negative, the solver did not converge,
         the preconditionar has been recomputed, and a second solution is tried
     */
+    template<typename PrecType>
     int solveSystem(  vector_type&     rhsFull,
                       vector_type&     sol,
-                      matrix_ptrtype&  prec,
+                      PrecType&  prec,
                       bool const       reuse,
-                      bool const       retry=true);
+                      bool const       retry=true  );
+
+//     int solveSystem(  vector_type&     rhsFull,
+//                       vector_type&     sol,
+//                       matrix_ptrtype&  prec,
+//                       bool const       reuse,
+//                       bool const       retry=true);
 
     void setUpPrec(const GetPot& dataFile,  const std::string& section);
     void setPrec(prec_raw_type* prec);
 
     prec_type& getPrec(){return M_prec;}
+
+  void buildPreconditioner( matrix_ptrtype& prec);
+  void  precReset(prec_type& prec);
+
+
+  template<typename PrecType>
+  void buildPreconditioner( PrecType& prec);
+
+  template<typename PrecType>
+  void  precReset(PrecType& prec);
 
 private:
 
@@ -205,16 +222,96 @@ private:
     AztecOO                M_solver;
 
     Teuchos::ParameterList M_TrilinosParameterList;
+    Displayer              M_Displayer;
 
     int                    M_maxIter;
     double                 M_tol;
     int                    M_maxIterSolver;
     int                    M_maxIterForReuse;
-    Displayer              M_Displayer;
 };
+
+template<typename PrecType>
+int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
+                                  vector_type&      sol,
+                                  PrecType&        prec,
+                                  bool const        reuse,
+                                  bool const        retry)
+
+{
+
+    Chrono chrono;
+    M_Displayer.leaderPrint("      Setting up the solver ...                \n");
+
+    if ( !M_prec->set() || !reuse  )
+    {
+      buildPreconditioner(prec);
+      setPreconditioner(M_prec);
+    }
+    else
+    {
+        M_Displayer.leaderPrint("      Reusing  precond ...                \n");
+    }
+
+    M_Displayer.leaderPrint("      Solving system ...                       \n");
+
+    chrono.start();
+    int numIter = solve(sol, rhsFull);
+    chrono.stop();
+    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
+
+    // If we do not want to retry, return now.
+    // otherwise rebuild the preconditioner and solve again:
+    if (numIter >= M_maxIterSolver && retry)
+    {
+        chrono.start();
+
+        M_Displayer.leaderPrint("     Iterative solver failed, numiter = " , numIter);
+        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
+        M_Displayer.leaderPrint("     retrying:          ");
+
+        if (prec.get())
+        {
+            precReset(M_prec);
+            buildPreconditioner(prec);
+            setPreconditioner(M_prec);
+        }
+        chrono.stop();
+        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+        // Solving again, but only once (retry = false)
+        numIter = solveSystem(rhsFull, sol,
+                              prec, reuse, false);
+
+        if (numIter >= M_maxIterSolver)
+            M_Displayer.leaderPrint(" ERROR: Iterative solver failed again.\n");
+        return -numIter;
+    }
+    return numIter;
+
+
+//     Chrono chrono;
+//     setPreconditioner(prec);
+//     chrono.start();
+//     int numIter = solve(sol, rhsFull);
+//     chrono.stop();
+//     M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
+//     return numiter;
+}
+
+
+
+template<typename PrecType>
+void SolverTrilinos::buildPreconditioner( PrecType& prec)
+  {
+    M_prec=prec;
+  }
+
+template<typename PrecType>
+void SolverTrilinos::precReset( PrecType& prec)
+{}
 
 // } // namespace Epetra
 } // namespace LifeV
+
 
 #endif /* __SolverTrilinos_H */
 
