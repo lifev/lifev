@@ -439,6 +439,19 @@ FSISolver::setInvLinSolidBC( const solid_bchandler_type& bc_dsolid_inv )
     if ( this->isSolid() )
         M_oper->setInvLinSolidBC( bc_dsolid_inv );
 }
+void FSISolver::setFluxBC(fluid_bchandler_type bc_fluid)
+ {
+     if (this->isFluid())
+         M_oper->setFluxBC(bc_fluid);
+ }
+
+ void
+ FSISolver::setRobinBC(fluid_bchandler_type bc_Robin)
+ {
+     if (this->isFluid())
+         M_oper->setRobinBC(bc_Robin);
+ }
+
 
 // void
 // FSISolver::setReducedLinFluidBC( const fluid_bchandler_type& bc_dredfluid )

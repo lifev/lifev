@@ -180,6 +180,8 @@ public:
     void setSolidBC              ( const solid_bchandler_type& bc_solid );
     void setLinSolidBC           ( const solid_bchandler_type& bc_dsolid );
     void setInvLinSolidBC        ( const solid_bchandler_type& bc_dsolid_inv );
+    void setFluxBC              (fluid_bchandler_type bc_fluid);
+    void setRobinBC              (fluid_bchandler_type bc_fluid);
 //     void setReducedLinFluidBC    ( const fluid_bchandler_type& bc_dredfluid );
 //     void setInvReducedLinFluidBC ( const fluid_bchandler_type& bc_dredfluid_inv );
 
@@ -210,8 +212,10 @@ public:
     void iterate( const Real& time );
 
     void showMe() {}
-
-    //@}
+  void initialize(vector_type& solInit)
+{
+    *M_lambda=solInit;
+  }
 
 private:
 
