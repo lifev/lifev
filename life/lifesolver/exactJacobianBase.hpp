@@ -134,7 +134,7 @@ public:
          }
     }
 
-
+  Displayer const& getDisplayer(){return displayer();}
 private:
 
     UInt imposeFlux( );
