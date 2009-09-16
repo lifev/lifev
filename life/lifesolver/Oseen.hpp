@@ -431,7 +431,7 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
-    M_Displayer              ( comm ),
+    M_Displayer              ( &comm ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultiplier),
     M_matrMass               ( ),
     M_matrMassPr             ( ),
@@ -491,7 +491,7 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
-    M_Displayer              ( comm ),
+    M_Displayer              ( &comm ),
     M_localMap               ( monolithicMap ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -548,7 +548,7 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
-    M_Displayer              ( comm ),
+    M_Displayer              ( &comm ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultipliers ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -815,8 +815,8 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
 
 
-    for (UInt ii = nDimensions*dim_u(); ii < nDimensions*dim_u() + dim_p(); ++ii)
-        M_matrStokes->set_mat_inc( ii ,ii, 0. );
+    //    for (UInt ii = nDimensions*dim_u(); ii < nDimensions*dim_u() + dim_p(); ++ii)
+    //  M_matrStokes->set_mat_inc( ii ,ii, 0. ); not scalable!!!
 
     if(M_isDiagonalBlockPrec == true)
         {
