@@ -207,7 +207,8 @@ public:
     void setUp( const GetPot& dataFile );
 
     void initialize( const Function& d0, const Function& w0 );
-    void initialize( const vector_type&, const vector_type& );
+    void initialize( const vector_type& d0, const vector_type& w0);
+    void initializeVel( const vector_type& w0);
 
     void postProcess();
 
@@ -359,7 +360,7 @@ VenantKirchhofSolver( const data_type&          data,
     M_FESpace                    ( dFESpace ),
     M_BCh                        ( &BCh ),
     M_comm                       ( &comm ),
-    M_Displayer                  ( comm ),
+    M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_linearSolver               ( new SolverType( comm ) ),
     //    M_prec                       ( ),//new prec_raw_type() ),
@@ -408,7 +409,7 @@ VenantKirchhofSolver( const data_type& data,
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
     M_comm                       ( &comm ),
-    M_Displayer                  ( comm ),
+    M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
@@ -460,7 +461,7 @@ VenantKirchhofSolver( const data_type& data,
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
     M_comm                       ( &comm ),
-    M_Displayer                  ( comm ),
+    M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_linearSolver               ( ),
     //M_prec                      ( ),//new prec_raw_type() ),
@@ -626,7 +627,14 @@ void VenantKirchhofSolver<Mesh, SolverType>::
 initialize( const vector_type& disp, const vector_type& vel)
 {
     M_disp = disp;
-    M_vel  = vel;
+    initializeVel(vel);
+}
+
+template <typename Mesh, typename SolverType>
+void VenantKirchhofSolver<Mesh, SolverType>::
+initializeVel( const vector_type& vel)
+{
+    M_vel = vel;
 }
 
 
