@@ -59,8 +59,8 @@ namespace LifeV
 class Displayer
 {
 public:
-	Displayer( const bool verbose = true );
-    Displayer( Epetra_Comm& comm );
+    Displayer( const Epetra_Comm* comm=0);
+	Displayer( const bool verbose);
     virtual ~Displayer() {}
 
     /*! To print one message.
@@ -96,7 +96,10 @@ public:
     /*!
       Return true if it is process 0 of the communicator
     */
-    inline bool isLeader() const { return M_verbose; }
+    inline bool isLeader() const
+  {
+      return M_verbose;
+  }
 
     /*!
       Return the communicator
@@ -105,8 +108,8 @@ public:
 
 protected:
 
-	Epetra_Comm*								M_comm;
-    bool										M_verbose;
+  const Epetra_Comm*								M_comm;
+  bool										M_verbose;
 
 };
 

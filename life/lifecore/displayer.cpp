@@ -37,10 +37,13 @@ Displayer::Displayer( const bool verbose ):
 {
 }
 
-Displayer::Displayer( Epetra_Comm& comm ):
-	M_comm					( &comm ),
-	M_verbose				( M_comm->MyPID() == 0 )
+
+Displayer::Displayer(const Epetra_Comm* comm):
+  M_comm                   ( comm ),
+  M_verbose                ( true )
 {
+  if(M_comm)
+    M_verbose=M_comm->MyPID()==0;
 }
 
 } // Namespace LifeV
