@@ -66,7 +66,7 @@ SolverAmesos::SolverAmesos(Epetra_Comm& comm)
     M_redistribute         (true),
     M_printTiming          (false),
     M_printStatus          (false),
-    M_Displayer            (comm),
+    M_Displayer            (&comm),
     M_comm                 (comm)
 {
 }
