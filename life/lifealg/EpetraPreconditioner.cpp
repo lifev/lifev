@@ -35,8 +35,11 @@ namespace LifeV
 // namespace Epetra
 // {
 
-EpetraPreconditioner::EpetraPreconditioner():
-        M_Oper()
+EpetraPreconditioner::EpetraPreconditioner(const Epetra_Comm* comm):
+  M_displayer(comm),
+  M_overlapLevel(0),
+  M_Oper(),
+  M_List()
 {
 }
 
