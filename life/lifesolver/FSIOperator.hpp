@@ -166,6 +166,8 @@ public:
 
     virtual void updateSystem( const vector_type& /*displacement*/ );
 
+  Epetra_Comm& worldComm(){ return *M_epetraWorldComm; }
+
     virtual void couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter );
 
     virtual void solveJac( vector_type&       _muk,
@@ -191,6 +193,10 @@ public:
 //     void solveLinearFluid();
 //     void solveLinearSolid();
 
+  virtual void setFluxBC             (fluid_bchandler_type bc_fluid){}
+
+  virtual void setRobinBC             (fluid_bchandler_type bc_solid){}
+
     void transferFluidOnInterface( const vector_type& _vec1, vector_type& _vec2 );
 
     //works in serial but no yet in parallel
@@ -213,7 +219,7 @@ public:
 
     bool isLeader() const;
 
-    Displayer displayer();
+    Displayer const& displayer();
 
     //@}
 
@@ -410,6 +416,10 @@ public:
     void setFluidLoadToStructure             ( const vector_type& load,  UInt type = 0 );
     void setDerFluidLoadToStructure          ( const vector_type& dload, UInt type = 0 );
     void setDerFluidLoadToFluid              ( const vector_type& dload, UInt type = 0 );
+    void setMixteOuterWall(function_type const& dload, function_type const& E);
+    BCFunctionMixte& bcfMixteOuterWall()
+        {return M_bcfMixteOuterWall;}
+
 //     void setDerReducedFluidLoadToStructure   ( vector_type &dload, UInt type = 0 );
 //     void setDerStructureAccToReducedFluid    ( vector_type &acc,   UInt type = 0 );
 
@@ -525,7 +535,7 @@ protected:
     bc_vector_interface                               M_bcvDerFluidLoadToStructure;
     bc_vector_interface                               M_bcvDerFluidLoadToFluid;
     bc_vector_interface                               M_bcvDerStructureDispToSolid;
-//     BCFunctionMixte                                   M_bcfMixteOuterWall;
+    BCFunctionMixte                                   M_bcfMixteOuterWall;
 
 //     bc_vector_interface                               M_bcvDerReducedFluidLoadToStructure;
 //     bc_vector_interface                               M_bcvDerStructureAccToReducedFluid;

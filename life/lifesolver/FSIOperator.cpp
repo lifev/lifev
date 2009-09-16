@@ -163,7 +163,8 @@ FSIOperator::setDataFromGetPot( const GetPot& dataFile )
 void
 FSIOperator::setupFEspace()
 {
-	displayer().leaderPrint("FSIOperator: setting RefFE and QuadRule ... ");
+	    if( M_epetraComm->MyPID()==0)
+        std::cout<< "FSIOperator: setting RefFE and QuadRule ... ";
 	std::string uOrder = M_dataFluid->uOrder();
 	std::string pOrder = M_dataFluid->pOrder();
 	std::string dOrder = M_dataSolid->order();
@@ -180,7 +181,8 @@ FSIOperator::setupFEspace()
     const QuadRule* qR_struct(0);
     const QuadRule* bdQr_struct(0);
 
-    displayer().leaderPrint("velocity order = ", uOrder, "\n");
+    Displayer disp(M_epetraWorldComm);
+    disp.leaderPrint("velocity order = ", uOrder, "\n");
     if ( uOrder.compare("P2") == 0 )
     {
         refFE_vel = &feTetraP2;
@@ -207,7 +209,7 @@ FSIOperator::setupFEspace()
                 exit(0);
             }
 
-    displayer().leaderPrint("pressure order = ", pOrder, "\n");
+    disp.leaderPrint("pressure order = ", pOrder, "\n");
     if ( pOrder.compare("P2") == 0 )
     {
         refFE_press = &feTetraP2;
@@ -228,7 +230,7 @@ FSIOperator::setupFEspace()
     		exit(0);
     	}
 
-    displayer().leaderPrint("structure order = ", dOrder, "\n");
+    disp.leaderPrint("structure order = ", dOrder, "\n");
     if ( dOrder.compare("P2") == 0 )
     {
         refFE_struct = &feTetraP2;
@@ -248,13 +250,13 @@ FSIOperator::setupFEspace()
 			exit(0);
 		}
     M_epetraWorldComm->Barrier();
-    displayer().leaderPrint("ok.\n");
+    disp.leaderPrint("ok.\n");
 
 
 
 
 
-    displayer().leaderPrint("FSIOperator: building the fluid FESpace ... ");
+    disp.leaderPrint("FSIOperator: building the fluid FESpace ... ");
     if (this->isFluid())
     {
         M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_dataFluid->mesh(), *M_epetraComm));
@@ -310,13 +312,13 @@ FSIOperator::setupFEspace()
                                                             *M_epetraComm));
     }
     M_epetraWorldComm->Barrier();
-    displayer().leaderPrint("fluid: ok.\n");
+    disp.leaderPrint("fluid: ok.\n");
 
 
 
 
 
-    displayer().leaderPrint("FSIOperator: building the solid FESpace ... ");
+    disp.leaderPrint("FSIOperator: building the solid FESpace ... ");
     if (this->isSolid())
     {
     	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( *M_dataSolid->mesh(), *M_epetraComm ) );
@@ -339,7 +341,7 @@ FSIOperator::setupFEspace()
                                                            *M_epetraComm));
     }
     M_epetraWorldComm->Barrier();
-	displayer().leaderPrint("solid: ok.\n");
+	disp.leaderPrint("solid: ok.\n");
 }
 
 
@@ -347,7 +349,8 @@ FSIOperator::setupFEspace()
 void
 FSIOperator::setupDOF( void )
 {
-    displayer().leaderPrint("FSIOperator: setting DOF ... " );
+    Displayer disp(M_epetraWorldComm);
+    disp.leaderPrint("FSIOperator: setting DOF ... " );
     Dof uDof(*M_dataFluid->mesh(), M_uFESpace->refFE());
 //     Dof pDof(*M_dataFluid->mesh(), M_pFESpace->refFE());
     Dof dDof(*M_dataSolid->mesh(), M_dFESpace->refFE());
@@ -385,13 +388,13 @@ FSIOperator::setupDOF( void )
 										    M_interfaceTolerance );
 
 	M_epetraWorldComm->Barrier();
-	displayer().leaderPrint(" done.\n");
+	disp.leaderPrint(" done.\n");
 
 
 
 
 	// now we build the sigma and lambda variables on each proc
-	displayer().leaderPrint("FSIOperator: building fluid variables ... ");
+	disp.leaderPrint("FSIOperator: building fluid variables ... ");
 
 	std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
 
@@ -415,12 +418,12 @@ FSIOperator::setupDOF( void )
 											  pointerToDofs,
 											  1,
 											  *M_epetraWorldComm ));
-	displayer().leaderPrint(" done.\n");
+	disp.leaderPrint(" done.\n");
 	M_epetraWorldComm->Barrier();
 
 
 
-	displayer().leaderPrint("FSIOperator: building solid variables ... ");
+	disp.leaderPrint("FSIOperator: building solid variables ... ");
 
 	std::vector<int> dofInterfaceSolid;
 	dofInterfaceSolid.reserve(M_dofStructureToSolid->locDofMap().size());
@@ -445,17 +448,17 @@ FSIOperator::setupDOF( void )
 											  *M_epetraWorldComm ));
 
 	M_epetraWorldComm->Barrier();
-	displayer().leaderPrint(" done.\n");
+	disp.leaderPrint(" done.\n");
 
 
 
-	displayer().leaderPrint("FSIOperator: variables initialization ... ");
+	disp.leaderPrint("FSIOperator: variables initialization ... ");
 
 	//variablesInit( refFE_struct, bdQr_struct, qR_struct);
 	variablesInit( M_dataSolid->order() );
 
 	M_epetraWorldComm->Barrier();
-	displayer().leaderPrint(" done.\n");
+	disp.leaderPrint(" done.\n");
 
 	//    M_dofStructureToHarmonicExtension->showMe(true, std::cout);
 	//    M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
@@ -867,28 +870,17 @@ FSIOperator::isLeader() const
 
 
 
-Displayer
+Displayer const&
 FSIOperator::displayer()
 {
-    if ( isFluid() )
+    if ( isFluid() &&  M_fluid.get())
     {
-    	if ( M_fluid.get() == 0 )
-    	{
-    		Displayer displayer( M_epetraComm->MyPID() == 0 );
-    		return displayer;
-    	}
-
         return M_fluid->getDisplayer();
     }
 
-    if ( M_solid.get() == 0 )
-    {
-    	//Undefined structure does not display anything
-    	Displayer displayer( false );
-        return displayer;
-    }
-
-    return M_solid->getDisplayer();
+    if( M_solid.get() )
+        return M_solid->getDisplayer();
+    std::cout<<"displayer not ready"<<std::endl;
 }
 
 
@@ -1261,6 +1253,11 @@ FSIOperator::setDerFluidLoadToFluid( const vector_type& dload, UInt type )
                                      type );
 }
 
+void FSIOperator::setMixteOuterWall(function_type const& dload, function_type const& E)
+{
+    M_bcfMixteOuterWall.setFunctions_Mixte(dload,
+                                           E);
+}
 
 
 // void
@@ -1313,7 +1310,8 @@ FSIOperator::imposeFlux( void )
 {
     std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
     UInt numLM = static_cast<UInt>( fluxVector.size() );
-    displayer().leaderPrint( " numLM = ", numLM, "\n" );
+    if( M_epetraComm->MyPID()==0)
+        std::cout<< " numLM = "<< numLM<<std::endl;
 
     UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
                 + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
