@@ -66,12 +66,14 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
                const DataType& t, VectorType& U )
 {
     VectorType bRepeated(b.getMap(),Repeated);
+    bool globalassemble=false;
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
         {
             switch ( BCh[ i ].type() )
                 {
                 case Essential:  // Essential boundary conditions (Dirichlet)
+                    globalassemble=true;
                     break;
                 case Natural:  // Natural boundary conditions (Neumann)
                     if(BCh[ i ].isUDep())
@@ -95,8 +97,8 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
     bRepeated.GlobalAssemble();
 
     b += bRepeated;
-
-    A.GlobalAssemble();
+    if(globalassemble)
+        A.GlobalAssemble();
 
 
     // Loop on boundary conditions
@@ -182,7 +184,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
 {
 
     VectorType bRepeated(b.getMap(),Repeated);
-
+    bool globalassemble=false;
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
         {
@@ -190,24 +192,25 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
             switch ( BCh[ i ].type() )
                 {
                 case Essential:  // Essential boundary conditions (Dirichlet)
+                    globalassemble=true;
                     break;
                 case Natural:  // Natural boundary conditions (Neumann)
-                    bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset());
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
                     bcMixteManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
                     break;
                 case Flux:
-                    bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+i);
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
                 }
         }
-
     bRepeated.GlobalAssemble();
     b += bRepeated;
-    A.GlobalAssemble();
+    if(globalassemble)
+        A.GlobalAssemble();
 
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
@@ -240,7 +243,7 @@ void bcManageMatrix( MatrixType&      A,
                      const DataType&  t = 0 )
 {
 
-
+    bool globalassemble=false;
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
         {
@@ -248,6 +251,7 @@ void bcManageMatrix( MatrixType&      A,
             switch ( BCh[ i ].type() )
                 {
                 case Essential:  // Essential boundary conditions (Dirichlet)
+                    globalassemble=true;
                 case Natural:  // Natural boundary conditions (Neumann)
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
@@ -257,8 +261,8 @@ void bcManageMatrix( MatrixType&      A,
                     ERROR_MSG( "This BC type is not yet implemented" );
                 }
         }
-
-    A.GlobalAssemble();
+    if(globalassemble)
+        A.GlobalAssemble();
 
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
@@ -2022,8 +2026,9 @@ void bcFluxManage( MatrixType&     A,
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
-    offset += BCb.offset();
-
+    //offset += BCb.fluxFlag();
+    if(!offset)//tricky way to understand if I am in the monolithic case ore not.
+        offset += BCb.offset();
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
 
@@ -2037,8 +2042,10 @@ void bcFluxManage( MatrixType&     A,
 
     const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
+    //std::cout<<"offset "<<offset<<std::endl;
     b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
 
+    //std::cout<<"step1"<<std::endl;
     if ( !BCb.dataVector() )
         {
             DataType x = 0., y = 0., z = 0.;
