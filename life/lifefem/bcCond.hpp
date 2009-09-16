@@ -430,6 +430,8 @@ public:
             return a.flag() == flag;
         }
 
+    static UInt M_fluxes;
+
 private:
     bool                                  _M_isUDep;
 

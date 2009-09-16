@@ -70,6 +70,10 @@ BCBase::BCBase( const std::string& name,
     _M_offset( -1 ),
     _M_finalised( false )
 {
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
     UInt nComp;
     switch ( _M_mode = mode )
         {
@@ -123,6 +127,11 @@ BCBase::BCBase( const std::string& name,
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
 
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
+
 }
 
 
@@ -150,6 +159,10 @@ BCBase::BCBase( const std::string& name,
     if ( mode != Component ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
 }
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
@@ -195,6 +208,10 @@ BCBase::BCBase( const std::string& name,
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
 }
 
 
@@ -225,6 +242,11 @@ BCBase::BCBase( const std::string& name,
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
+
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
 }
 
 BCBase::BCBase( const std::string&     name,
@@ -246,6 +268,10 @@ BCBase::BCBase( const std::string&     name,
     if ( _M_mode != Component ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
 }
 BCBase::BCBase( const std::string&  name,
                 const EntityFlag&   flag,
@@ -286,6 +312,10 @@ BCBase::BCBase( const std::string&  name,
         default:
             ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
 }
 BCBase::BCBase( const std::string&  name,
                 const EntityFlag&   flag,
@@ -313,6 +343,10 @@ BCBase::BCBase( const std::string&  name,
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
 
+    if(type==3)//flux
+      {
+	++BCBase::M_fluxes;
+      }
 }
 
 
@@ -724,6 +758,6 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
     return out;
 }
 
-
+  UInt BCBase::M_fluxes(0);
 
 }
