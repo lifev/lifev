@@ -46,6 +46,8 @@
 #include <Ifpack_ILU.h>
 
 #include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/displayer.hpp>
+
 #include <life/lifearray/EpetraMatrix.hpp>
 
 namespace LifeV
@@ -72,7 +74,7 @@ public:
      */
     //@{
     //! default constructor.
-    EpetraPreconditioner();
+    EpetraPreconditioner(const Epetra_Comm* comm=0);
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
@@ -112,11 +114,14 @@ public:
 
 protected:
 
+    Displayer               M_displayer;
+
     int                     M_overlapLevel;
 
     operator_type           M_Oper;
 
     Teuchos::ParameterList  M_List;
+
 
 private:
 
