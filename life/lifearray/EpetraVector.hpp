@@ -165,6 +165,11 @@ public:
     EpetraVector& subset(const EpetraVector& _vector,
                                    const int           offset = 0);
 
+    EpetraVector& subset(const EpetraVector& _vector,
+			 const EpetraMap& map,
+			 const UInt           offset1,
+			 const UInt           offset2);
+
     //! if the map is not the same, try to import values
     EpetraVector& operator+=(const EpetraVector& _vector);
     EpetraVector& operator-=(const EpetraVector& _vector);

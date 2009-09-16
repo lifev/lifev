@@ -533,14 +533,25 @@ subset(const EpetraVector& _vector,
 {
     (*this) *= 0;
 
-    int numMyEntries = M_epetraVector.MyLength ();
-    const int*    gids       = BlockMap().MyGlobalElements();
+    this->subset(_vector, getMap(), offset, 0);
+      return *this;
+}
+
+EpetraVector& EpetraVector::
+subset(const EpetraVector& _vector,
+       const EpetraMap&    map,
+       const UInt           offset1,
+       const UInt           offset2)
+{
+  (*this) *= 0;
+   const int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
+   const UInt    numMyEntries= map.getMap(M_maptype)->NumMyElements();
 
     // eg:  p = (u,p) or u = (u,p)
-    for (int i = 0; i < numMyEntries; ++i)
+    for (UInt i = 0; i < numMyEntries; ++i)
         {
             //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
-            (*this)[gids[i]] += _vector(gids[i]+offset);
+            (*this)[gids[i]+offset2] += _vector(gids[i]+offset1);
         }
 
     return *this;
