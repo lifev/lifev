@@ -207,7 +207,7 @@ public:
     void setUp( const GetPot& dataFile );
 
     void initialize( const Function& d0, const Function& w0 );
-    void initialize( const vector_type& d0, const vector_type& w0);
+  void initialize( vector_ptrtype d0,  vector_ptrtype w0=vector_ptrtype());
     void initializeVel( const vector_type& w0);
 
     void postProcess();
@@ -624,10 +624,11 @@ buildSystem(matrix_ptrtype massStiff)
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
-initialize( const vector_type& disp, const vector_type& vel)
+initialize( vector_ptrtype disp, vector_ptrtype vel)
 {
-    M_disp = disp;
-    initializeVel(vel);
+    M_disp = *disp;
+    if(vel.get())
+      initializeVel(*vel);
 }
 
 template <typename Mesh, typename SolverType>
