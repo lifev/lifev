@@ -135,7 +135,9 @@ public:
     vector_type const& disp()     const {return M_disp;}
 
 
-    void setDisplacement(const vector_type &disp) { M_disp = disp;}
+  void setDisplacement(const vector_type &disp) { M_disp = disp;}
+  void setDispOld(const vector_type &disp)  {    M_dispOld=disp;  }
+
 
     //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > _mesh.getRefFE().nbNodes)
 //     template <typename Mesh>
