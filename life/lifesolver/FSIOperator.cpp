@@ -651,8 +651,8 @@ FSIOperator::initializeFluid( const vector_type& velAndPressure,
 
 
 void
-FSIOperator::initializeSolid( const vector_type& displacement,
-                              const vector_type& velocity )
+FSIOperator::initializeSolid( vector_ptrtype displacement,
+                              vector_ptrtype velocity )
 {
     this->solid().initialize( displacement, velocity);
 }

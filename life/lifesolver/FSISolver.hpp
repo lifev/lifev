@@ -100,6 +100,7 @@ public:
     typedef solid_value_type::data_type								data_solid;
 
     typedef FSIOperator::vector_type								vector_type;
+    typedef FSIOperator::vector_ptrtype								vector_ptrtype;
 
     //@}
 
@@ -180,8 +181,8 @@ public:
     void setSolidBC              ( const solid_bchandler_type& bc_solid );
     void setLinSolidBC           ( const solid_bchandler_type& bc_dsolid );
     void setInvLinSolidBC        ( const solid_bchandler_type& bc_dsolid_inv );
-    void setFluxBC              (fluid_bchandler_type bc_fluid);
-    void setRobinBC              (fluid_bchandler_type bc_fluid);
+    void setFluxBC              (const fluid_bchandler_type& bc_fluid);
+    void setRobinBC              (const fluid_bchandler_type& bc_fluid);
 //     void setReducedLinFluidBC    ( const fluid_bchandler_type& bc_dredfluid );
 //     void setInvReducedLinFluidBC ( const fluid_bchandler_type& bc_dredfluid_inv );
 
@@ -200,7 +201,8 @@ public:
     void initialize( const fluid_function& u0,
                      const fluid_function& p0,
                      const solid_function& d0,
-                     const solid_function& w0 );
+                     const solid_function& w0,
+                     const fluid_function& df0=fluid_function() );
 
     void initialize( const std::string& /*velFName*/,
                      const std::string& /*pressName*/,
@@ -212,10 +214,12 @@ public:
     void iterate( const Real& time );
 
     void showMe() {}
-  void initialize(vector_type& solInit)
+    void initialize(vector_type& solInit)
 {
     *M_lambda=solInit;
   }
+
+    virtual void initialize(vector_ptrtype u0, vector_ptrtype v0=vector_ptrtype());
 
 private:
 

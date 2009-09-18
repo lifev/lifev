@@ -146,6 +146,19 @@ public:
 
     //@}
 
+  virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+			   FSIOperator::fluid_type::value_type::Function const& p0,
+			   FSIOperator::solid_type::value_type::Function const& d0,
+			   FSIOperator::solid_type::value_type::Function const& w0,
+			   FSIOperator::fluid_type::value_type::Function const& df0=FSIOperator::solid_type::value_type::Function())
+        {
+            Debug( 6220 ) << "FSIOperator:: solid init \n";
+            if (this->isSolid())
+	      solid().initialize(d0, w0);
+            Debug( 6220 ) << "FSIOperator:: fluid init \n";
+            if (this->isFluid())
+              fluid().initialize(u0, p0);
+        }
 
 
     /** @name Methods
@@ -183,8 +196,8 @@ public:
     void initializeFluid( const vector_type& velAndPressure,
                           const vector_type& displacement );
 
-    void initializeSolid( const vector_type& displacement,
-                          const vector_type& velocity );
+    void initializeSolid( vector_ptrtype displacement,
+                          vector_ptrtype velocity );
 
     void updateJacobian ( const vector_type& sol, const int& iter );
 
@@ -208,6 +221,10 @@ public:
     //! MONOLITHIC Solver methods - Implemented there
 //     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
+    virtual vector_ptrtype const& un()              {assert(false); }
+    virtual  void initialize( vector_ptrtype /*u0*/){assert(false); }
+    virtual void setupBDF(vector_type const& /*u0*/){}
+
 
     //@}
 

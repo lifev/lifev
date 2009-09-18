@@ -225,9 +225,19 @@ FSISolver::FSISolver( const std::string& method ):
 }
 
 
-
-
-
+void
+FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
+{
+    if(!u0.get())
+	M_lambda.reset(new vector_type(*M_oper->couplingVariableMap())); // couplingVariableMap()
+    else
+      M_lambda=u0;
+    if(!v0.get())
+      M_lambdaDot.reset(new vector_type(*M_oper->couplingVariableMap()));
+    else
+      M_lambdaDot=v0;
+    M_oper->setupBDF(*M_lambda);
+}
 // ===================================================
 //! Methods
 // ===================================================
@@ -269,7 +279,6 @@ FSISolver::setup( void )
 }
 
 
-
 void
 FSISolver::initialize( const std::string& /*velFName*/,
                        const std::string& /*pressName*/,
@@ -283,20 +292,14 @@ FSISolver::initialize( const std::string& /*velFName*/,
 }
 
 
-
 void
-FSISolver::initialize( const fluid_function& u0,
-                       const fluid_function& p0,
-                       const solid_function& d0,
-                       const solid_function& w0 )
+FSISolver::initialize( fluid_function const& u0,
+                       fluid_function const& p0,
+                       solid_function const& d0,
+                       solid_function const& w0,
+                       fluid_function const& df0)
 {
-	Debug( 6220 ) << "FSISover:: solid init \n";
-	if ( this->isSolid() )
-		M_oper->solid().initialize(d0, w0);
-
-	Debug( 6220 ) << "FSISover:: fluid init \n";
-	if ( this->isFluid() )
-		M_oper->fluid().initialize(u0, p0);
+    M_oper->initialize(u0, p0 , d0, w0, df0);
 }
 
 
@@ -439,14 +442,14 @@ FSISolver::setInvLinSolidBC( const solid_bchandler_type& bc_dsolid_inv )
     if ( this->isSolid() )
         M_oper->setInvLinSolidBC( bc_dsolid_inv );
 }
-void FSISolver::setFluxBC(fluid_bchandler_type bc_fluid)
+void FSISolver::setFluxBC(fluid_bchandler_type const& bc_fluid)
  {
      if (this->isFluid())
          M_oper->setFluxBC(bc_fluid);
  }
 
  void
- FSISolver::setRobinBC(fluid_bchandler_type bc_Robin)
+ FSISolver::setRobinBC(fluid_bchandler_type const& bc_Robin)
  {
      if (this->isFluid())
          M_oper->setRobinBC(bc_Robin);
