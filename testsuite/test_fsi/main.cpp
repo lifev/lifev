@@ -251,7 +251,7 @@ public:
     		if ( M_fsi->isSolid() )
     		{
     			M_ensightSolid->import(M_Tstart, M_fsi->timeStep());
-				M_fsi->FSIOper()->initializeSolid( *M_solidDisp, *M_solidVel );
+				M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
     		}
 
     	}

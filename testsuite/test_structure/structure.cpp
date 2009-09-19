@@ -285,11 +285,11 @@ Structure::run3d()
     Real dt = dataStructure.getTimeStep();
     Real T  = dataStructure.getEndTime();
 
-    EpetraVector disp(solid.disp(), Unique);
-    EpetraVector vel (solid.vel(), Unique);
+    vector_ptrtype disp(new vector_type(solid.disp(), Unique));
+    vector_ptrtype vel(new vector_type(solid.vel(), Unique));
 
-    dFESpace.interpolate(d0, disp, 0.0);
-    dFESpace.interpolate(w0, vel , 0.0);
+    dFESpace.interpolate(d0, *disp, 0.0);
+    dFESpace.interpolate(w0, *vel , 0.0);
 
     if (verbose) std::cout << "S- initialization ... ";
 
