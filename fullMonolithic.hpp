@@ -48,7 +48,7 @@ public:
     virtual ~fullMonolithic(){}
     ///destructor
 
-    void couplingMatrix(matrix_ptrtype & bigMatrix, bool solidCoupling=true);
+    void couplingMatrix(matrix_ptrtype & bigMatrix, int solidCoupling=31);
     void couplingRhs(vector_ptrtype rhs);
 
     void   evalResidual(vector_type&        res,
@@ -95,15 +95,23 @@ public:
     matrix_ptrtype getMatrixPtr(){return this->M_monolithicMatrix;}
     vector_ptrtype uk(){return M_uk;}
     vector_type& meshVel();
-    virtual  const vector_type& meshDisp()const
+    const vector_type& meshDisp()const
     {
-        if(this->M_dataFluid->useShapeDerivatives()==true)
-            return this->M_meshMotion->dispOld();
-        else
-            return (super::meshDisp());
+      //        if(this->M_dataFluid->useShapeDerivatives()==true)
+      return this->M_meshMotion->dispOld();
+//         else
+//             return (super::meshDisp());
     }
 
+  void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+                     FSIOperator::solid_type::value_type::Function const& p0,
+                     FSIOperator::solid_type::value_type::Function const& d0,
+		   FSIOperator::solid_type::value_type::Function const& w0,
+		   FSIOperator::solid_type::value_type::Function const& df0 );
+
     private:
+
+  void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
 
     boost::shared_ptr<EpetraMap>   M_mapWithoutMesh;
     vector_ptrtype                       M_uk;

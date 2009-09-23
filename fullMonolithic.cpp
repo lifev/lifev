@@ -50,6 +50,7 @@ fullMonolithic::setupFluidSolid()
     UInt offset = M_monolithicMap->getMap(Unique)->NumGlobalElements();
     M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
     M_BCh_mesh->setOffset(offset);
+
     *this->M_monolithicMap += this->M_mmFESpace->map();
     /* OBSOLETE
     if(M_dataFluid->useShapeDerivatives())
@@ -58,7 +59,7 @@ fullMonolithic::setupFluidSolid()
             M_solid->setOperator(*M_epetraOper);
             }*/
     //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
-    vector_type u0(*M_monolithicMap);
+    vector_type u0(*this->M_monolithicMap);
     M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
     M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
@@ -74,62 +75,43 @@ fullMonolithic::setupFluidSolid()
                                                   *M_mmFESpace,
                                                   *M_epetraComm,
                                                   *M_monolithicMap));
-    //    offset = M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof();
-    //M_solid.reset(dynamic_cast<solidInterface*>(&(*M_solid)));
-//     *(dynamic_cast<solidInterface*>(&(*M_solid)))= solid_raw_type(dataSolid(),
-//                                                   *M_dFESpace,
-//                                                   *M_epetraComm,
-//                                                   *M_monolithicMap,
-//                                                   offset,
-//                                                   M_uFESpace
-//                                                   );
-     M_solid.reset(new solid_raw_type(dataSolid(),
-                                      *M_dFESpace,
-                                      *M_epetraComm,
-                                      *M_monolithicMap,
-                                      M_offset
-                                      ));
+    M_solid.reset(new solid_raw_type(dataSolid(),
+                                     *M_dFESpace,
+                                     *M_epetraComm,
+                                     *M_monolithicMap,
+                                     M_offset
+                                     ));
 
 }
-
-//fullMonolithic::fullMonolithic():
-//    super()
-//{
-//}
-
 
 void
 fullMonolithic::updateSystem(const vector_type& solution)
 {
-    //    M_meshVel.reset(new vector_type(M_meshMotion->dispDeltaDiff()));
     super::updateSystem(solution);
     M_uk.reset(new vector_type(solution));
-
-//     UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof() + M_dFESpace->dof().numTotalDof()*nDimensions + nDimensions*M_interface);
-
-//     vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
-//     meshDispDiff->subset(solution, offset);
-//     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
 }
 
 void
-fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix, bool solidCoupling)
+fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix, int coupling)
 {
-    super::couplingMatrix(fullMMatrix, solidCoupling);
-    //UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof());
-    UInt solidFluidInterface(M_solidAndFluidDim + nDimensions*M_interface);
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
-    std::map<ID, ID>::const_iterator ITrow;
-    for(UInt dim = 0; dim < nDimensions; ++dim)
+    if(coupling-16>=0)
     {
-        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
-        {
-            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+      UInt solidFluidInterface(M_solidAndFluidDim + nDimensions*M_interface);
+      std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+      std::map<ID, ID>::const_iterator ITrow;
+      for(UInt dim = 0; dim < nDimensions; ++dim)
+	{
+	  for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+	    {
+	      if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
-                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->getTimeStep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
+		  fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->getTimeStep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
                 }
-        }
+	    }
+	}
+      coupling-=16;
     }
+    super::couplingMatrix(fullMMatrix, coupling);
 }
 
 void
@@ -153,7 +135,6 @@ fullMonolithic::evalResidual( vector_type&       res,
     if(iter == 0)
         {
             M_nbEval = 0; // new time step
-            //            this->M_solid->resetPrec();
         }
     else
         {
@@ -162,15 +143,7 @@ fullMonolithic::evalResidual( vector_type&       res,
     if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
         {
             this->M_beta.reset(new vector_type(M_uFESpace->map()));
-//             if(iter == 0)
-//                 {
-//                 this->M_rhs.reset(new vector_type(*M_monolithicMap)) ;
-//                 this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
-//                }
-
-            //            M_dispOld.reset(new vector_type(M_meshMotion->dispOld()));
             UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-            //std::cout<<"offset: "<<offset<<std::endl;
 
             vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
 
@@ -181,23 +154,15 @@ fullMonolithic::evalResidual( vector_type&       res,
             M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
             double alpha = 1/M_dataFluid->getTimeStep();
 
-
-            //meshDispDiff.reset(new vector_type(M_meshMotion->disp(), Repeated));//just to repeat it
-
             *meshDispDiff -= M_meshMotion->dispOld();
 
             vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
             this->moveMesh(mmRep);
-            //mmRep *= alpha;
 
-            //*************ADDED****************
-            *meshDispDiff *= 0;
-            mmRep *= 0;
             meshDispDiff->subset(*M_un, offset); //if the mesh motion is at the previous time step in the convective term
             *meshDispDiff -= M_meshMotion->dispOld();
             *meshDispDiff *= alpha;
             mmRep = *meshDispDiff;
-            //****************END OF ADDED*********************
 
             this->interpolateVelocity(mmRep, *this->M_beta);
             //            *this->M_beta *= -alpha; //HE solution scaled!
@@ -209,6 +174,8 @@ fullMonolithic::evalResidual( vector_type&       res,
             M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
             if(iter==0)
                 *this->M_rhs               += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->getTimeStep() );
+	    std::cout<<"norm inf of the initial rhs: "<<M_rhs->NormInf()<<std::endl;
+
             M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
 
             M_fluid->getFluidMatrix( *M_monolithicMatrix);
@@ -218,17 +185,8 @@ fullMonolithic::evalResidual( vector_type&       res,
                           {*/
             if(iter == 0)
                 super::couplingRhs( this->M_rhs, this->M_un);
-                    /*
-                    M_solid->buildSystem();
-                    M_solid->rescaleMatrices();
-                    M_solid->updateCoupling(*M_couplingMatrix);
-                    firstIter=false;
-
-                    M_meshMotion->computeMatrix();
-                    }*/
-            //          M_meshMotion->rescaleMatrix(dt);
             this->updateMatrix(*M_monolithicMatrix);
-            //            this->setDispSolid(disp);
+
             if(iter == 0)
                 {
                     super::updateSolidSystem(this->M_rhs);
@@ -238,55 +196,49 @@ fullMonolithic::evalResidual( vector_type&       res,
             M_meshMotion->applyBoundaryConditions(*M_rhsFull, *M_BCh_mesh);
             M_meshMotion->setMatrix(M_monolithicMatrix);
 
+	    if ( !M_BCh_flux->bdUpdateDone() )
+	      M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+	    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+
+	    M_BCh_flux->setOffset(M_offset-M_fluxes);
+	    M_BCh_Robin->setOffset(M_offset);
+	    if ( !M_BCh_Robin->bdUpdateDone() )
+	      M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+	    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+
             super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
-            if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5)
+            if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8 && M_DDBlockPrec<11)
             {
                 if(!M_robinCoupling.get())
                     {
                         M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
                         super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
                         M_robinCoupling->GlobalAssemble();
-                        M_robinCoupling->spy("robinCoupling");
                     }
-                //super::applyPreconditioner(M_robinCoupling);
-                //this->M_solid->evalResidual( disp, res, false);
             }
 
-
-           if(M_DDBlockPrec!=5)
-               M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
-           //M_monolithicMatrix->spy("monolithicMatrix");
+            if(M_DDBlockPrec!=5 && M_DDBlockPrec<9)
+	      M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
         }
-    //else
-    //{
     super::evalResidual( disp, M_rhsFull, res, false );
-            //}
-
 }
 
 void fullMonolithic::solveJac(vector_type       &_muk,
               const vector_type &_res,
               const Real       _linearRelTol)
 {
-    /*    this->M_solid->setFullPreconditioner(M_bigPrecPtr);
-    Real entry(1.e-3);
-    addDiagonalEntries(entry,M_bigPrecPtr);
-    M_bigPrecPtr->GlobalAssemble();
-    M_bigPrecPtr->spy("bigPrecPtr");*/
     vector_ptrtype rhs(new vector_type(_res));
     if(M_dataFluid->useShapeDerivatives())
         {
             if(M_DDBlockPrec==6)
                 {
-                    M_bigPrecPtr.reset(new matrix_type(*M_monolithicMatrix));
-                    //bigPrecPtr->GlobalAssemble();
+                    M_precMatrPtr.reset(new matrix_type(*M_monolithicMatrix));
                 }
             matrix_ptrtype monolithicMatrix(new matrix_type(*M_monolithicMap));
             *monolithicMatrix+=*M_monolithicMatrix;
             this->shapeDerivatives(monolithicMatrix,*M_uk /*subX*/);
             monolithicMatrix->GlobalAssemble();
             M_monolithicMatrix=monolithicMatrix;
-            //M_monolithicMatrix->Globalassemble();
 
             meshMotion().updateDispDiff();//updates M_dispDiff to xk-xn
         }
@@ -294,7 +246,7 @@ void fullMonolithic::solveJac(vector_type       &_muk,
         {
         case 1:
             {
-                M_meshMotion->setMatrix(M_bigPrecPtr);
+                M_meshMotion->setMatrix(M_precMatrPtr);
             }
             break;
         case 2:
@@ -311,22 +263,228 @@ void fullMonolithic::solveJac(vector_type       &_muk,
         case 6:
             {
                 super::applyPreconditioner(M_robinCoupling, rhs);
-                super::applyPreconditioner(M_robinCoupling, M_bigPrecPtr);
-		M_bigPrecPtr->GlobalAssemble();
+                super::applyPreconditioner(M_robinCoupling, M_precMatrPtr);
+		M_precMatrPtr->GlobalAssemble();
             }
             break;
+        case 9://like 6 but with composed prec.
+            {
+	      M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+	      M_fluid->getFluidMatrix( *M_fluidBlock);
+	      M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
+ 	      *M_fluidBlock+=*M_solidBlock;
+	      addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
+	      couplingMatrix(M_fluidBlock, 15);
 
-        default:
-            {}
+	      M_BCh_Robin->setOffset(M_offset);
+	      M_BCh_flux->setOffset(M_offset-M_fluxes);
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+	      bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+	      M_fluidBlock->GlobalAssemble();
+	      bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+	      super::applyPreconditioner(M_robinCoupling, rhs);
+	      super::applyPreconditioner(M_robinCoupling, M_fluidBlock);
+	      M_fluidBlock->GlobalAssemble();
+	      M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
+
+
+	      if(M_precPtr->set())
+		{
+		  M_precPtr->replace(M_fluidOper, 0);
+		}
+	      else
+		{
+		  M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap));
+		  addDiagonalEntries(1., M_solidBlockPrec, mapWithoutMesh(), 0);
+		  couplingMatrix(M_solidBlockPrec, 16);
+		  M_meshMotion->setMatrix(M_solidBlockPrec);
+		  M_solidBlockPrec->GlobalAssemble();
+		  M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+		  M_precPtr->push_back(M_solidOper);
+		}
+            }
             break;
+        case 10:
+            {
+	      M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+	      M_fluid->getFluidMatrix( *M_fluidBlock);
+	      M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
+	      *M_fluidBlock+=*M_solidBlock;
+	      addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
+	      couplingMatrix(M_fluidBlock, 15);
+	      //*M_fluidBlock+=*M_SDMatrix;
+	      this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/);
+
+	      M_BCh_Robin->setOffset(M_offset);
+	      bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+	      M_BCh_flux->setOffset(M_offset-M_fluxes);
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+
+	      bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+
+	      super::applyPreconditioner(M_robinCoupling, rhs);
+	      super::applyPreconditioner(M_robinCoupling, M_fluidBlock);
+	      M_fluidBlock->GlobalAssemble();
+	      M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
+
+
+	      if(M_precPtr->set())
+		{
+		  M_precPtr->replace(M_fluidOper, 1);
+		}
+	      else
+		{
+		  M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap));
+		  addDiagonalEntries(1., M_solidBlockPrec, mapWithoutMesh(), 0);
+		  M_meshMotion->setMatrix(M_solidBlockPrec);
+		  M_solidBlockPrec->GlobalAssemble();
+
+		  M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+		  M_precPtr->buildPreconditioner(M_solidOper);
+		  M_precPtr->push_back(M_fluidOper);
+		}
+            }
+	    break;
+        case 11://P1, P2, P3
+	  {
+	      M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+	      M_fluid->getFluidMatrix( *M_fluidBlock);
+	      M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
+	      addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
+	      addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
+	      couplingMatrix(M_fluidBlock, 7);
+	      //*M_fluidBlock+=*M_SDMatrix;
+	      this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/);
+
+	      M_BCh_flux->setOffset(M_offset-M_fluxes);
+	      if ( !M_BCh_flux->bdUpdateDone() )
+		M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );//to kill
+
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+
+	      M_fluidBlock->GlobalAssemble();
+
+	      M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
+
+	      if(M_precPtr->set())
+		{
+		  M_precPtr->replace(M_fluidOper, 2);
+		}
+	      else
+		{
+		  M_meshBlock.reset(new matrix_type(*M_monolithicMap));
+		  addDiagonalEntries(1., M_meshBlock, mapWithoutMesh(), 0);
+		  M_meshMotion->setMatrix(M_meshBlock);
+		  couplingMatrix(M_meshBlock, 16);
+		  M_meshBlock->GlobalAssemble();
+
+
+		  M_meshOper.reset(new IfpackComposedPrec::operator_raw_type(*M_meshBlock));
+
+
+		  M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
+		  *M_solidBlockPrec += *M_solidBlock;
+		  addDiagonalEntries(1., M_solidBlockPrec, M_uFESpace->map() );
+		  addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map()+M_fluxes , M_uFESpace->dof().numTotalDof()*nDimensions );
+		  addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
+		  addDiagonalEntries(1., M_solidBlockPrec, M_mmFESpace->map(), M_solidAndFluidDim + nDimensions*M_interface);
+		  M_BCh_Robin->setOffset(M_offset);
+		  bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+		  bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+		  M_solidBlockPrec->GlobalAssemble();
+
+		  M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+
+		  M_precPtr->buildPreconditioner(M_solidOper);
+		  M_precPtr->push_back(M_meshOper);
+		  M_precPtr->push_back(M_fluidOper);
+		}
+	  }
+	  break;
+        case 12://P1, P2, P3
+	  {
+	      M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+	      M_fluid->getFluidMatrix( *M_fluidBlock);
+	      M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
+	      addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
+	      addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
+	      couplingMatrix(M_fluidBlock, 7);
+	      //this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/);
+
+	      M_BCh_flux->setOffset(M_offset-M_fluxes);
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+	      bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+	      //	      M_fluidBlock->GlobalAssemble();
+	      M_fluidBlock->GlobalAssemble();
+	      //M_fluidBlock->spy("fb");
+	      M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
+
+	      if(M_precPtr->set())
+		{
+		  M_precPtr->replace(M_fluidOper, 2);
+		}
+	      else
+		{
+		  M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
+		  *M_solidBlockPrec += *M_solidBlock;
+		  addDiagonalEntries(1., M_solidBlockPrec, M_uFESpace->map() );
+		  addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map(), M_uFESpace->dof().numTotalDof()*nDimensions );
+		  addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
+		  addDiagonalEntries(1., M_solidBlockPrec, M_mmFESpace->map(), M_solidAndFluidDim + nDimensions*M_interface);
+		  M_BCh_Robin->setOffset(M_offset);
+		  bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+		  bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+		  M_solidBlockPrec->GlobalAssemble();
+
+		  M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+
+
+		  M_meshBlock.reset(new matrix_type(*M_monolithicMap));
+		  addDiagonalEntries(1., M_meshBlock, mapWithoutMesh(), 0);
+		  M_meshMotion->setMatrix(M_meshBlock);
+		  //*M_meshBlock += *M_SDMatrix;
+		  this->shapeDerivatives(M_meshBlock,*M_uk /*subX*/);
+		  M_meshBlock->GlobalAssemble();
+
+		  M_meshOper.reset(new IfpackComposedPrec::operator_raw_type(*M_meshBlock));
+
+		  M_precPtr->buildPreconditioner(M_meshOper);
+		  M_precPtr->push_back(M_solidOper);
+		  M_precPtr->push_back(M_fluidOper);
+		}
+	  }
+	  break;
+        default:
+	  {}
+	  break;
         }
     super::setMatrix(*M_monolithicMatrix);
     super::solveJac(_muk, *rhs, _linearRelTol);
-    //    *M_uk += _muk;
-    //    UInt offset(uFESpace().dof().numTotalDof()*nDimensions +pFESpace().dof().numTotalDof() +dFESpace().map().getMap(Unique)->NumGlobalElements() + dimInterface());
-    //    vector_type meshIncrement(M_mmFESpace->map());
-    //    meshIncrement.subset(_muk, offset);
-    //    M_meshMotion->updateDeltaDisp(meshIncrement);
+}
+
+void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+				 FSIOperator::solid_type::value_type::Function const& p0,
+				 FSIOperator::solid_type::value_type::Function const& d0,
+				 FSIOperator::solid_type::value_type::Function const& w0,
+				 FSIOperator::solid_type::value_type::Function const& df0 )
+{
+  super::initialize(u0, p0, d0, w0, df0);
+
+  vector_type df(M_mmFESpace->map());
+  M_mmFESpace->interpolate(df0, df, M_dataSolid->getTime());
+
+  M_un->add(df, M_solidAndFluidDim+dimInterface());
+
+  std::cout<<  M_un->NormInf()<<"==>normInf di un"<<std::endl;
+  M_meshMotion->setDisplacement(df);
+  //  M_bdf->initialize_unk(*M_un);
 }
 
 #ifdef UNDEFINED //OBSOLETE
