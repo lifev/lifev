@@ -201,7 +201,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
                     bcMixteManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
                     break;
                 case Flux:
-                    bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+i);
+                    bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+BCh[i].offset());
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -2026,9 +2026,9 @@ void bcFluxManage( MatrixType&     A,
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
-    //offset += BCb.fluxFlag();
-    if(!offset)//tricky way to understand if I am in the monolithic case ore not.
-        offset += BCb.offset();
+    ////offset += BCb.fluxFlag();
+    //    if(!offset)//tricky way to understand if I am in the monolithic case or not.
+    //        offset += BCb.offset();
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
 
