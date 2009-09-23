@@ -637,7 +637,7 @@ Monolithic::evalResidual( vector_type&       res,
                             robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
                             M_robinCoupling->GlobalAssemble();
                         }
-                    this->applyPreconditioner(M_robinCoupling, M_rhs);
+                    this->applyPreconditioner(M_robinCoupling, M_rhsFull);
                 }
 
             if(M_DDBlockPrec!=5 && M_DDBlockPrec!=7 &&M_DDBlockPrec!=8)
