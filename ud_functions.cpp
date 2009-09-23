@@ -269,8 +269,18 @@ Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
+Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+  return -29;//*e-1*5; // circa [(110-60)*(133.332*10)]/[10*(2.08-1.85)] (il 10 x via dei mm, il 133... x via dei mmHg)
+  // (vedi paper di Liu, Dang, etc). Nel loro grafico sono invertite x e y. 5e1 invece di e5 xche' d e'
+  // riscalato * il timestep, che e' 5e-4
+}
 
 
+Real hydro(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+ {
+ return -1.33*1e5;
+ }
 
 Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
@@ -292,6 +302,13 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
     break;
   }
   return 0;
+}
+
+
+Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+  if(t<=0.003)
+    return -1.3332e4;//1.3332e5;
 }
 
 
