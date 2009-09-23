@@ -28,6 +28,8 @@
 #define OUTERWALL 10
 #define RING  2
 #define RING2 3
+#define INOUTEDGE 20
+#define INEDGE 30
 
 namespace LifeV
 {
@@ -54,13 +56,13 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
         Debug(10000) << "EJ harmonic extension\n";
         Monolithic *EJOper = dynamic_cast<Monolithic *>(&_oper);
         EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
-        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
+        BCh_he->addBC("Interface", OUTERWALL, Essential, Full,
         *EJOper->bcvStructureDispToHarmonicExtension(), 3);
     }
    else if (_oper.method() == "fullMonolithic")
     {
 
-        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
+        BCh_he->addBC("Interface", OUTERWALL, Essential, Full,
         bcf, 3);
     }
 
