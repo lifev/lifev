@@ -26,6 +26,9 @@
 
 
 #include <life/lifesolver/FSIOperator.hpp>
+
+#include <lifemc/lifealg/IfpackComposedPrec.hpp>
+#include <lifemc/lifealg/ComposedPreconditioner.hpp>
 //#include <Epetra_IntVector.h>
 
 namespace LifeV
@@ -37,8 +40,10 @@ public:
 
     typedef FSIOperator                            super;
     typedef FSIOperator::fluid_type::value_type::matrix_type   matrix_type;
-    typedef boost::shared_ptr<matrix_type>                    matrix_ptrtype;
-    typedef SolverTrilinos                                      solver_type;
+    typedef IfpackComposedPrec                                 prec_raw_type;
+    typedef boost::shared_ptr<matrix_type>                     matrix_ptrtype;
+    typedef boost::shared_ptr<prec_raw_type>                       prec_type;
+    typedef SolverTrilinos                                     solver_type;
 
 
     // constructors
@@ -66,6 +71,29 @@ public:
        \param _muk: output, solution at the current Newton step
        \param _res: nonlinear residual
        \param _linearRelTol: not used
+       The preconditioner type is usually an algebraic additive Schwarz. The following values
+       assigned to the field DDBlockPrec in the data file correspond to different variants:
+
+       DDBlockPrec = 0 is AAS on a the system matrix. Can give problem in parallel, we suggest to use DDBlockPrec = 2 instead
+       DDBlockPrec = 2 is AAS on a the system matrix, where the system is left-premultiplied times a preconditioner
+       that mix the interface boundary conditions
+       DDBlockPrec = 3 only for testing purposes
+       DDBlockPrec = 4 only for testing purposes
+       DDBlockPrec = 5 no preconditioner is set (if you use the native Aztecoo preconditioners set this option)
+
+       Only for the Monolithic Geometry-Convective Explicit:
+       DDBlockPrec = 1 is AAS on a Dirichlet-Neumann preconditioner
+       DDBlockPrec = 7 is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+       DDBlockPrec = 8 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+
+       Only for the fullMonolithic Convective Explicit:
+       DDBlockPrec = 6 is AAS on the quasi-newton matrix
+       DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy
+       DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy
+       DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy, composing
+       3 preconditioners
+       DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, composing
+       3 preconditioners
     */
     virtual void   solveJac(vector_type&       _muk,
                     const vector_type& _res,
@@ -91,23 +119,18 @@ public:
     void monolithicToInterface(    vector_type& _lambdaSolid, const vector_type& _sol) ;
 
     /**
-       restricts a vector with a monolithic map on the solid map
-       \param _dispSolid: vector on the solid domain
-       \param _disp: monolithic vector
-    */
-    void monolithicToSolid(const vector_type& _disp, vector_type& _dispSolid);
-
-    /**
        sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
     */
     void setDispSolid(const vector_type& sol);
 
+
     /**
-        restricts a vector with a monolithic map on the fluid map
+        restricts a vector with a monolithic map on another map that must
+	have a sequential numbering (not the interface map)
        \param _dispFluid: vector on the fluid domain
        \param _disp: monolithic vector
     */
-    void monolithicToFluid(const vector_type& _disp, vector_type& _dispFluid);
+  void monolithicToX(const vector_type& _disp, vector_type& _dispFluid, EpetraMap& map, UInt offset=(UInt)0);
 
     /**
        iterates the mesh
@@ -159,17 +182,12 @@ public:
 
     //!get the total dimension of the FS interface
     const UInt dimInterface() const {return nDimensions*M_interface ;}
+    vector_ptrtype const& un(){return M_un;}
+
 
     void setupSystem( );
     void setUp( const GetPot& dataFile );
 
-protected:
-
-template <typename SolverType>
-/**
-\small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
- */
-void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec, SolverType linearSolver);
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix
        \param entry: entry
@@ -178,7 +196,35 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
        \param offset: offset from which starts the insertion
        \param replace=false: flag stating wether the diagonal elements already exist or have to be inserted in the map
    */
-    void addDiagonalEntries(Real entry, matrix_ptrtype matrix, EpetraMap& Map, UInt offset=0, bool replacs=false);
+    void addDiagonalEntries(Real entry, matrix_ptrtype matrix, const EpetraMap& Map, UInt offset=0, bool replacs=false);
+
+
+    /**
+       \small initialize with functions
+     */
+  virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+			   FSIOperator::solid_type::value_type::Function const& p0,
+			   FSIOperator::solid_type::value_type::Function const& d0,
+			   FSIOperator::solid_type::value_type::Function const& w0,
+			   FSIOperator::solid_type::value_type::Function const& df0);
+
+    /**
+       \small initialize the current solution vector. Note: this is not sufficient for the correct initialization
+       of bdf!
+     */
+  void initialize( vector_ptrtype u0)
+  {M_un=u0;}
+
+
+protected:
+
+  void setupBDF( vector_type const& u0);
+
+template <typename SolverType, typename PrecOperator>
+/**
+\small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
+ */
+void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperator prec, SolverType linearSolver);
 
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix
@@ -195,13 +241,14 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
       \param bigMatrix: the coupling matrix to be built
       \param couplingSolid: if false the solid coupling part is neglected in the matrix
     */
-    virtual void couplingMatrix(matrix_ptrtype & bigMatrix, bool couplingSolid = true);
+    virtual void couplingMatrix(matrix_ptrtype & bigMatrix, int couplingSolid = 31);
 
     /**
        \small adds the part due to coupling to the rhs
        \param rhs: right hand side
        \param un: current solution
     */
+
     void couplingRhs( vector_ptrtype rhs , vector_ptrtype un );
 
     /**
@@ -215,7 +262,7 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
 
 
     /**
-       \small Method to replace a block in the matrix with a zero block. It is inefficient and works only serially. It is implemented only for testing purposes.
+       \small Method to replace a block in the matrix with a zero block. It is inefficient and works only serially. It is implemented only for testing different preconditioners.
     */
     void zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration , const std::map<ID, ID>& map, UInt rowOffset=0, UInt colOffset=0);
 
@@ -278,28 +325,48 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
     void shiftSolution(){}
 
     void couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype& /*lambdaDot*/, bool& /*firstIter*/)
-{    displayer().leaderPrint("norm( solution ) init = ", lambda->NormInf() );}
+  {    M_solid->getDisplayer().leaderPrint("norm( solution ) init = ", lambda->NormInf() );}
+
+   void setFluxBC             (fluid_bchandler_type bc_fluid);
+
+   void setRobinBC             (fluid_bchandler_type bc_solid);
 
 virtual  const vector_type& meshDisp()const{return this->M_meshMotion->disp();}
-virtual  const vector_type&  veloFluidMesh() const;
-virtual vector_type& veloFluidMesh();
+//virtual  const vector_type&  veloFluidMesh() const;
+//virtual vector_type& veloFluidMesh();
 
 protected:
 
+    //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
+  void solidInit(std::string const& dOrder);
+
 	//void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
-	void variablesInit(const std::string& dOrder);
+
+  void variablesInit(std::string const& dOrder);
+
+    const fluid_bchandler_type& BCh_flux()                      const { return M_BCh_flux; }
+
 
     boost::shared_ptr<EpetraMap>                      M_monolithicMap;
     matrix_ptrtype                                    M_couplingMatrix;
     UInt                                              M_interface;
     EpetraMap                                         M_interfaceMap;///the solid interface map
+    EpetraMap                                         M_monolithicInterfaceMap;
     boost::shared_ptr<vector_type>                    M_beta;
     matrix_ptrtype                                    M_monolithicMatrix;
-    matrix_ptrtype                                    M_bigPrecPtr;
+    matrix_ptrtype                                    M_precMatrPtr;
+    prec_type                                         M_precPtr;
     UInt                                              M_DDBlockPrec;
     boost::shared_ptr<vector_type>                    M_rhsFull;
 
+    fluid_bchandler_type                              M_BCh_flux;
+    solid_bchandler_type                              M_BCh_Robin;
+    UInt                                              M_fluxes;
+
 private:
+
+  void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0);
+
     int                                               M_updateEvery;
     boost::shared_ptr<vector_type>                    M_numerationInterface;
 #if OBSOLETE
@@ -316,40 +383,38 @@ protected:
 //! coefficient of the Robin preconditioner
     Real                                              M_alphaf;
 //! coefficient of the Robin preconditioner
-    Real                                              M_alphas;
-    UInt                                              M_offset;
-    UInt                                              M_solidAndFluidDim;
+  Real                                              M_alphas;
+  UInt                                              M_offset;
+  UInt                                              M_solidAndFluidDim;
+  IfpackComposedPrec::operator_type                 M_solidOper;
+  IfpackComposedPrec::operator_type                 M_fluidOper;
+  IfpackComposedPrec::operator_type                 M_meshOper;
+    matrix_ptrtype                                    M_fluidBlock;
+    matrix_ptrtype                                    M_solidBlock;
+    matrix_ptrtype                                    M_solidBlockPrec;
+    matrix_ptrtype                                    M_meshBlock;
+    boost::shared_ptr<solver_type>                    M_linearSolver;
 private:
     bool                                              M_diagonalScale;
     bool                                              M_reusePrec;
     bool                                              M_resetPrec;
     UInt                                              M_maxIterSolver;
-    boost::shared_ptr<solver_type>                    M_linearSolver;
-    matrix_ptrtype                                    M_fluidBlock;
-    matrix_ptrtype                                    M_solidBlock;
 };
 
 
-template <typename SolverType>
+template <typename SolverType, typename PrecOperator>
 void Monolithic::
-iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec, SolverType linearSolver)
+iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperator prec, SolverType linearSolver)
 {
+  M_solid->getDisplayer().leaderPrint("    preconditioner type : ", M_DDBlockPrec );
     Chrono chrono;
 
     M_solid->getDisplayer().leaderPrint("    Solving the system ... \n" );
 
     M_solid->getDisplayer().leaderPrint("    Updating the boundary conditions ... ");
 
-    chrono.start();
-
-    // boundary conditions applied in the residual evaluation
-    //M_monolithicMatrix->spy("j");
-    //prec->spy("p");
-
-    chrono.stop();
-    M_solid->getDisplayer().leaderPrintMax("done in ", chrono.diff() );
-
     M_linearSolver->setMatrix(*M_monolithicMatrix);
+
     int numIter = M_linearSolver->solveSystem( rhs, step, prec, (M_reusePrec)&&(!M_resetPrec));
 
     if (numIter < 0)
