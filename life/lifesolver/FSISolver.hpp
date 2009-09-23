@@ -211,15 +211,11 @@ public:
                      const std::string& /*velSName*/,
                      const Real&        /*Tstart = 0.*/);
 
+    virtual void initialize(vector_ptrtype u0, vector_ptrtype v0=vector_ptrtype());
+
     void iterate( const Real& time );
 
     void showMe() {}
-    void initialize(vector_type& solInit)
-{
-    *M_lambda=solInit;
-  }
-
-    virtual void initialize(vector_ptrtype u0, vector_ptrtype v0=vector_ptrtype());
 
 private:
 

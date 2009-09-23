@@ -146,20 +146,6 @@ public:
 
     //@}
 
-  virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-			   FSIOperator::fluid_type::value_type::Function const& p0,
-			   FSIOperator::solid_type::value_type::Function const& d0,
-			   FSIOperator::solid_type::value_type::Function const& w0,
-			   FSIOperator::fluid_type::value_type::Function const& df0=FSIOperator::solid_type::value_type::Function())
-        {
-            Debug( 6220 ) << "FSIOperator:: solid init \n";
-            if (this->isSolid())
-	      solid().initialize(d0, w0);
-            Debug( 6220 ) << "FSIOperator:: fluid init \n";
-            if (this->isFluid())
-              fluid().initialize(u0, p0);
-        }
-
 
     /** @name Methods
      */
@@ -179,8 +165,6 @@ public:
 
     virtual void updateSystem( const vector_type& /*displacement*/ );
 
-  Epetra_Comm& worldComm(){ return *M_epetraWorldComm; }
-
     virtual void couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter );
 
     virtual void solveJac( vector_type&       _muk,
@@ -192,6 +176,22 @@ public:
                                const UInt         _iter ) = 0;
 
     virtual void shiftSolution();
+
+    virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+                             FSIOperator::fluid_type::value_type::Function const& p0,
+                             FSIOperator::solid_type::value_type::Function const& d0,
+                             FSIOperator::solid_type::value_type::Function const& w0,
+                             FSIOperator::fluid_type::value_type::Function const& df0=FSIOperator::solid_type::value_type::Function())
+    {
+        Debug( 6220 ) << "FSIOperator:: solid init \n";
+        if (this->isSolid())
+            solid().initialize(d0, w0);
+        Debug( 6220 ) << "FSIOperator:: fluid init \n";
+        if (this->isFluid())
+            fluid().initialize(u0, p0);
+    }
+
+
 
     void initializeFluid( const vector_type& velAndPressure,
                           const vector_type& displacement );
@@ -219,7 +219,7 @@ public:
     void transferInterfaceOnSolid( const vector_type& _vec1, vector_type& _vec2 );
 
     //! MONOLITHIC Solver methods - Implemented there
-//     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
+    //     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
     virtual vector_ptrtype const& un()              {assert(false); }
     virtual  void initialize( vector_ptrtype /*u0*/){assert(false); }
@@ -270,7 +270,7 @@ public:
     const vector_type& minusSigmaFluidRepeated()                  const { return *M_minusSigmaFluidRepeated; }
 
     string             algorithm()	                              const { return M_algorithm;}
-    std::string        method()                                   const { return M_method; }
+    std::string       method()                                   const { return M_method; }
 
     vector_type&       Alphaf()                                   const { return *M_Alphaf;}
     Real               time()                                     const { return M_time; }
@@ -279,7 +279,7 @@ public:
     Preconditioner     preconditioner()                           const { return M_precond; }
     DDNPreconditioner  DDNpreconditioner()                        const { return M_DDNprecond; }
 
-    Epetra_Comm&       worldComm()                                const { return *M_epetraWorldComm; }
+    Epetra_Comm &       worldComm()                                const { return *M_epetraWorldComm; }
 
     bool isFluid()                                                const { return M_isFluid; }
     bool isSolid()                                                const { return M_isSolid; }
@@ -329,8 +329,7 @@ public:
             boost::shared_ptr<EpetraMap>& solidInterfaceMap()              { return M_solidInterfaceMap; }
     virtual boost::shared_ptr<EpetraMap>& couplingVariableMap()            { return M_solidInterfaceMap; }
 
-    //vector_type displacementOnInterface();
-//     BCFunctionMixte& bcfMixteOuterWall()                                { return M_bcfMixteOuterWall; }
+    BCFunctionMixte& bcfMixteOuterWall()                                   { return M_bcfMixteOuterWall; }
 
     bc_vector_interface bcvStructureDisptoFluid()                 const { return M_bcvStructureDispToFluid; }
     bc_vector_interface bcvStructureToFluid()                     const { return M_bcvStructureToFluid; }
@@ -354,6 +353,8 @@ public:
     const solid_bchandler_type& BCh_solid()                       const { return M_BCh_d; }
     const solid_bchandler_type& BCh_dz()                          const { return M_BCh_dz; }
     const solid_bchandler_type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
+    virtual const fluid_bchandler_type& BCh_flux()                      const {}
+
 
 //     quasi_newton_type getReducedLinFluid()                              { return M_reducedLinFluid; }
 //     UInt reducedFluid()                                                 { return M_reducedFluid; }
@@ -434,8 +435,6 @@ public:
     void setDerFluidLoadToStructure          ( const vector_type& dload, UInt type = 0 );
     void setDerFluidLoadToFluid              ( const vector_type& dload, UInt type = 0 );
     void setMixteOuterWall(function_type const& dload, function_type const& E);
-    BCFunctionMixte& bcfMixteOuterWall()
-        {return M_bcfMixteOuterWall;}
 
 //     void setDerReducedFluidLoadToStructure   ( vector_type &dload, UInt type = 0 );
 //     void setDerStructureAccToReducedFluid    ( vector_type &acc,   UInt type = 0 );
