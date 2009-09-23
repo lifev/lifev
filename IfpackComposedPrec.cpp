@@ -36,10 +36,11 @@ namespace LifeV
 {
 
 
-IfpackComposedPrec::IfpackComposedPrec():
-        super (),
-        M_Prec(),
-        M_OperVector(0)
+IfpackComposedPrec::IfpackComposedPrec(const Epetra_Comm* comm):
+  super (comm),
+  M_Prec(),
+  M_OperVector(0),
+  M_precType()
 {
 }
 
@@ -80,7 +81,7 @@ IfpackComposedPrec::buildPreconditioner(operator_type& oper,
 
 int
 IfpackComposedPrec::createIfpackPrec(operator_type& oper,
-                                     ComposedPreconditioner::prec_type& prec)
+                                     prec_raw_type::prec_type& prec)
 {
     M_overlapLevel = this->M_List.get("overlap level", -1);
     M_precType     = this->M_List.get("prectype", "Amesos");
@@ -94,6 +95,7 @@ IfpackComposedPrec::createIfpackPrec(operator_type& oper,
         {
             ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
         }
+
     IFPACK_CHK_ERR(prec->SetParameters(this->M_List));
     IFPACK_CHK_ERR(prec->Initialize());
     IFPACK_CHK_ERR(prec->Compute());
@@ -105,11 +107,14 @@ IfpackComposedPrec::push_back(operator_type& oper,
                               const bool useTranspose)
 {
     M_OperVector.push_back(oper);
+    Chrono chrono;
+    prec_raw_type::prec_type prec;
 
-    ComposedPreconditioner::prec_type prec;
-
+    this->M_displayer.leaderPrint("Computing the factorization... ");
+    chrono.start();
     createIfpackPrec(oper, prec);
-
+    chrono.stop();
+    this->M_displayer.leaderPrintMax("done in ", chrono.diff());
     M_Prec->push_back(prec, useInverse, useTranspose);
 
     return EXIT_SUCCESS;
@@ -125,10 +130,13 @@ IfpackComposedPrec::replace(operator_type& oper,
     ASSERT(index <= M_OperVector.size(), "IfpackComposedPrec::replace: index too large");
 
     M_OperVector[index] = oper;
-
-    ComposedPreconditioner::prec_type prec;
-
+    Chrono chrono;
+    prec_raw_type::prec_type prec;
+    this->M_displayer.leaderPrint("Computing the factorization... ");
+    chrono.start();
     createIfpackPrec(oper, prec);
+    chrono.stop();
+    this->M_displayer.leaderPrintMax("done in ", chrono.diff());
 
     M_Prec->replace(prec, index, useInverse, useTranspose);
 

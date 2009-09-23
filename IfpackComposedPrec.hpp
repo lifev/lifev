@@ -63,7 +63,7 @@ public:
 //     typedef super::prec_raw_type                 prec_raw_type;
 //     typedef super::prec_type                     prec_type;
 
-    typedef ComposedPreconditioner                prec_raw_type;
+    typedef ComposedPreconditioner<Ifpack_Preconditioner>    prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>      prec_type;
 
     typedef super::operator_raw_type             operator_raw_type;
@@ -75,7 +75,7 @@ public:
      */
     //@{
     //! default constructor.
-    IfpackComposedPrec();
+    IfpackComposedPrec(const Epetra_Comm* comm=0);
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
@@ -129,7 +129,7 @@ public:
 private:
 
     int createIfpackPrec (operator_type& oper,
-                           ComposedPreconditioner::prec_type& prec);
+                           prec_raw_type::prec_type& prec);
 
     prec_type                  M_Prec;
     std::vector<operator_type> M_OperVector; // we need to keep track of all the operators.
