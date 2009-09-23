@@ -12,23 +12,19 @@
 #define BC_HPP
 
 #include "life/lifecore/life.hpp"
+#include "flowConditions.hpp"
 #include "ud_functions.hpp"
 #include "life/lifefem/bcHandler.hpp"
 #include "life/lifefem/bcFunction.hpp"
 
 #include "lifemc/lifesolver/Monolithic.hpp"
 #include "lifemc/lifesolver/fullMonolithic.hpp"
-#include "life/lifesolver/fixedPointBase.hpp"
-//#include "flowConxditions.hpp"
-#define OUTLET 3
 
+
+
+#define OUTLET 3
 #define INLET 2
 #define FLUIDINTERFACE 1
-#define SOLIDINTERFACE 1
-#define INOUTEDGE 20
-#define INEDGE 30
-
-
 #define OUTERWALL 10
 #define RING  2
 #define RING2 3
@@ -66,13 +62,25 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
         bcf, 3);
-        //BCh_he->addBC("Edges", INOUTEDGE, Essential, Full,
-        //bcf, 3);
     }
 
     return BCh_he;
 }
 
+
+FSIOperator::fluid_bchandler_type BCh_monolithicFlux()
+{
+  FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
+
+
+  //     BCFunctionBase flow_3 (FluxFunction);
+
+     //uncomment  to use fluxes
+//      BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);//to kill
+//      BCh_fluid->addBC("InFlow" , OUTLET,  Flux, Normal, flow_3);
+
+  return BCh_fluid;
+}
 
 FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper)
 {
@@ -96,6 +104,19 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper)
     return BCh_fluid;
 }
 
+FSIOperator::solid_bchandler_type BCh_monolithicRobin(FSIOperator &_oper)
+{
+
+    FSIOperator::solid_bchandler_type BCh_solid( new FSIOperator::solid_bchandler_raw_type );
+    BCFunctionBase hyd(fZero);
+    BCFunctionBase young (E);
+
+    //robin condition on the outer wall
+    _oper.setMixteOuterWall(hyd, young);
+    //    BCh_solid->addBC("OuterWall", OUTERWALL, Mixte, Normal, _oper.bcfMixteOuterWall());
+
+    return BCh_solid;
+}
 
 FSIOperator::solid_bchandler_type BCh_monolithicSolid(FSIOperator &_oper)
 {
