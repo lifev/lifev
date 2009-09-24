@@ -22,8 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = aortaFlux.dat aortaPressure.dat poiseuilleFlux.dat\
-					debug_test.dat test_Flux1.dat test_Flux2.dat
+dist_pkgdata_DATA = aortaPhysicalFlux.dat aortaPhysicalPressure.dat test_dynamicPoiseuilleVelocityPressure.dat\
+					test_Flux1.dat test_Flux2.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

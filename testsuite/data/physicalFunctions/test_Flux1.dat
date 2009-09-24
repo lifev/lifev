@@ -1,11 +1,22 @@
-# -*- getpot -*- (GetPot mode activation for emacs)
-# -------------------------------------------------
-#                  TEST FLUX N.1
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
 #
-# author: 	Cristiano Malossi
-# email:	<cristiano.malossi@epfl.ch>
-# data:		2009-07-14
-# -------------------------------------------------
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-07-14
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### TEST FLUX N1 ##################################################################################
+###################################################################################################
+# The data represent this situation:
+# if (t < 0.01) return -1000.*t;
+# if (t <= 0.02) return -10.;
+# if (t <= 0.03) return 1000.*t - 30.;
+# else return 0.;
+###################################################################################################
 
 function	= 'a*t+b'
 #function	= '(0,0,a*t+b)'
@@ -22,9 +33,3 @@ data		=  '0.000000000		-1000	0
 				0.030000000		1000	-30
 				0.030000001		0		0
 				1.000000000		0		0'
-
-# The data represent this situation:
-# if (t < 0.01) return -1000.*t;
-# if (t <= 0.02) return -10.;
-# if (t <= 0.03) return 1000.*t - 30.;
-# else return 0.;

@@ -1,17 +1,22 @@
-# -*- getpot -*- (GetPot mode activation for emacs)
-# -------------------------------------------------
-#           AORTA PHYSICAL PRESSURE
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
 #
-# author: 	Cristiano Malossi
-# email:	<cristiano.malossi@epfl.ch>
-# data:		2009-07-14
-# -------------------------------------------------
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-07-14
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### AORTA PHYSICAL PRESSURE #######################################################################
+###################################################################################################
 
 function	= 'p'
 #function	= '(0,0,p)'
 
 variables	=   't			p'
-scale		= 	'1			1'
+scale		= 	'1			-1'
 
 # Items must be sorted by the first column value!
 data		=  '0.0000000000000000	110170

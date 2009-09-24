@@ -1,22 +1,29 @@
-# -*- getpot -*- (GetPot mode activation for emacs)
-# -------------------------------------------------
-#                POISEUILLE FLUX
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
 #
-# author: 	Cristiano Malossi
-# email:	<cristiano.malossi@epfl.ch>
-# data:		2009-07-14
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
 #
-# description: Poiseuille Flux (viscosity = 0.03)
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-07-14
+#  License Terms: GNU GPL
 #
-# 0.00 <= t <= 0.25 --> V =  sin(2*pi*(2*t))
-# 0.25 <= t <= 0.75 --> V =  q*3*0.03*(1/4-(x^2+y^2))
-# 0.75 <= t <= 1.00 --> V = -sin(2*pi*(2*t))
-# -------------------------------------------------
+###################################################################################################
+### TEST DYNAMIC POISEUILLE VELOCITY: cylinder with Z axial velocity and R=0.5 ####################
+###################################################################################################
+# 0.00 <= t <= 0.25 --> a =  sin(2*pi*t)
+# 0.25 <= t <= 0.75 --> a =  1
+# 0.75 <= t <= 1.00 --> a = -sin(2*pi*t)
+###################################################################################################
 
-function	= 'q*3*0.03*(1/4-(x^2+y^2))'
-#function	= '(0,0,q)'
+#functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                # Inlet  Velocity
+functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'               # Inlet  Velocity TEMPORARY FIX
+functionB	= '-a*5'                                             # Inlet  Static Pressure 
+functionC	= '0'                                                # Outlet Static Pressure
+#functionB	= '-a*5-0.5*f_density*( a*(1/4)/(8*f_viscosity) )^2' # Inlet  Static + Dynamic Pressure
+#functionC	= '-0.5*f_density*( a*(1/4)/(8*f_viscosity) )^2'     # Outlet Static + Dynamic Pressure
 
-variables	= 't			q'
+variables	= 't			a'
 scale		= '1			1'
 
 # Items must be sorted by the first column value!
