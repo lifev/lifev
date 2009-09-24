@@ -26,7 +26,15 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcsolver.la
 
-liblifemcsolver_la_SOURCES   = Monolithic.cpp fullMonolithic.cpp
+liblifemcsolver_la_SOURCES   = Monolithic.cpp \
+                               fullMonolithic.cpp \
+                               MS_Algorithm.cpp \
+                               MS_PhysicalData.cpp \
+                               MS_PhysicalModel.cpp \
+                               MS_Model_Fluid3D.cpp \
+                               MS_PhysicalCoupling.cpp \
+                               MS_Coupling_BoundaryCondition.cpp \
+                               MS_Coupling_FluxPressure.cpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 
