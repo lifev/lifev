@@ -110,6 +110,6 @@ int main()
     setBPointsMarker(aMesh, ofile,cerr, true);
     cerr<<endl;
     vector<Real> disp(3*aMesh.numPoints());
-    aMesh.moveMesh(disp);
+    //aMesh.moveMesh(disp,3); // TO MAKE IT WORKING disp SHOULD BE AN EPETRA VECTOR!
 }
 
