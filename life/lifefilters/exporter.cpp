@@ -1,8 +1,8 @@
 #include <life/lifefilters/exporter.hpp>
 namespace LifeV
 {
-ExporterData::ExporterData(const  ExporterData::Type type, const std::string prefix, const vector_ptrtype& vr, UInt start, UInt dim, UInt steady):
-    M_prefix(prefix),
+ExporterData::ExporterData(const  ExporterData::Type type, const std::string variableName, const vector_ptrtype& vr, UInt start, UInt dim, UInt steady):
+    M_variableName(variableName),
     M_vr(vr),
     M_dim(dim),
     M_start( start ),
@@ -10,9 +10,9 @@ ExporterData::ExporterData(const  ExporterData::Type type, const std::string pre
     M_steady(steady)
 {};
 
-std::string ExporterData::prefix() const
+std::string ExporterData::variableName() const
 {
-    return M_prefix;
+    return M_variableName;
 }
 
 Real ExporterData::operator()(const UInt i) const

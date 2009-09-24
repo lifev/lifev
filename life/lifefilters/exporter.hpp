@@ -65,9 +65,9 @@ public:
 
     enum Type{Scalar,Vector};
 
-    ExporterData(const Type type, const std::string prefix, vector_ptrtype const& vec, UInt start, UInt size, UInt steady);
+    ExporterData(const Type type, const std::string variableName, vector_ptrtype const& vec, UInt start, UInt size, UInt steady);
 
-    std::string prefix() const;
+    std::string variableName() const;
     Real operator()(const UInt i) const;
     Real& operator()(const UInt i);
     UInt dim() const;
@@ -84,7 +84,7 @@ public:
     UInt typeDim() const;
 
 private:
-    std::string M_prefix;
+    std::string M_variableName;
     const vector_ptrtype M_vr;
     UInt M_dim;
     UInt M_start;
@@ -148,7 +148,7 @@ public:
 
        \param dim the number of Dof for that variable
     */
-    void addVariable(const ExporterData::Type type, const std::string prefix, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
+    void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
 
 
     /**
@@ -285,7 +285,7 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
     if (M_count % M_save == 0)
         {
-            index << std::setw(3) << ( M_count / M_save );
+            index << std::setw(5) << ( M_count / M_save );
 
             M_postfix = "." + index.str();
 
@@ -298,9 +298,9 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
 
 template<typename Mesh>
-void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string prefix, vector_ptrtype const& vr, UInt start, UInt dim, UInt steady)
+void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& vr, UInt start, UInt dim, UInt steady)
 {
-    M_listData.push_back( ExporterData(type,prefix,vr,start, dim, steady) );
+    M_listData.push_back( ExporterData(type,variableName,vr,start, dim, steady) );
 }
 
 

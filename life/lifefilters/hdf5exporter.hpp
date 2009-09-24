@@ -280,7 +280,7 @@ void Hdf5exporter<Mesh>::M_wr_scalar(const ExporterData& dvar)
     vector_type subVar(subMap);
     subVar.subset(*dvar.getPtr(),start);
 
-    std::string varname (dvar.prefix() + this->M_postfix); // see also in M_wr_attributes
+    std::string varname (this->M_prefix+"_"+dvar.variableName()+ this->M_postfix); // see also in M_wr_attributes
     bool writeTranspose (true);
     M_HDF5->Write(varname, subVar.getEpetraVector(), writeTranspose );
 }
@@ -320,7 +320,7 @@ void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 
     }
 
-    std::string varname (dvar.prefix() + this->M_postfix); // see also in M_wr_attributes
+    std::string varname (this->M_prefix+"_"+dvar.variableName() + this->M_postfix); // see also in M_wr_attributes
     M_HDF5->Write(varname, varT.getEpetraVector());
 
 
@@ -334,7 +334,7 @@ void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
         vector_type subVar(subMap);
         subVar.subset(*dvar.getPtr(), start+i*dim);
 
-        std::string varname (dvar.prefix() + coord[i] + this->M_postfix); // see also in M_wr_attributes
+        std::string varname (this->M_prefix+"_"+dvar.variableName() + coord[i] + this->M_postfix); // see also in M_wr_attributes
         M_HDF5->Write(varname, subVar.getEpetraVector());
     }
 
@@ -371,7 +371,7 @@ void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 
 
     bool writeTranspose (true);
-    std::string varname (dvar.prefix() + this->M_postfix); // see also in M_wr_attributes
+    std::string varname (this->M_prefix+"_"+dvar.variableName() + this->M_postfix); // see also in M_wr_attributes
     M_HDF5->Write(varname, multiVector, writeTranspose);
 
 
@@ -670,7 +670,7 @@ template
                 "\n      <Attribute\n" <<
                 "         Type=\"" << i->typeName() << "\"\n" <<
                 "         Center=\"Node\"\n" <<
-                "         Name=\"" << i->prefix()  <<"\">\n";
+                "         Name=\"" << this->M_prefix+"_"+i->variableName()<<"\">\n";
 
             switch( i->type() )
                 {
@@ -698,7 +698,7 @@ template
                 "                           Dimensions=\"" << this->M_mesh->numGlobalVertices()  << " " << dvar.typeDim() << "\"\n" <<
                 "                           DataType=\"Float\"\n" <<
                 "                           Precision=\"8\">\n" <<
-                "               &DataFile;:/" << dvar.prefix() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+                "               &DataFile;:/" << this->M_prefix+"_"+dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
                 "           </DataStructure>\n";
 
 }
@@ -722,7 +722,7 @@ template
                 "                           Dimensions=\"" << this->M_mesh->numGlobalVertices() << " 1\"\n" <<
                 "                           DataType=\"Float\"\n" <<
                 "                           Precision=\"8\">\n" <<
-                "               &DataFile;:/" << dvar.prefix() << coord[i] << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+                "               &DataFile;:/" << this->M_prefix+"_"+dvar.variableName()<< coord[i] << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
                 "           </DataStructure>\n";
                 }
 

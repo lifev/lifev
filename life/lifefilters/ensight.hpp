@@ -183,7 +183,7 @@ void Ensight<Mesh>::postProcess(const Real& time)
 
     this->getPostfix();
 
-    if ( this->M_postfix != "***" )
+    if ( this->M_postfix != "*****" )
         {
             if (!this->M_procId) std::cout << "  x-  Ensight post-processing ...        " << std::flush;
             Chrono chrono;
@@ -229,9 +229,9 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
 	std::ofstream sclf;
 
 	if (dvar.steady() )
-		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".scl").c_str() );
+		sclf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_me+".scl").c_str() );
 	else
-		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_postfix+this->M_me+".scl").c_str() );
+		sclf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl").c_str() );
 
     UInt count=0;
 
@@ -266,9 +266,9 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
 	std::ofstream vctf;
 
 	if (dvar.steady() )
-		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".vct").c_str() );
+		vctf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_me+".vct").c_str() );
 	else
-		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_postfix+this->M_me+".vct").c_str() );
+		vctf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct").c_str() );
 
     UInt count=0;
 
@@ -399,7 +399,7 @@ template <typename Mesh> void Ensight<Mesh>::M_case_mesh_section(std::ofstream& 
 {
     casef << "GEOMETRY\n";
     if ( this->M_multimesh )
-      casef << "model: 1 "+this->M_prefix+".***"<< this->M_me << ".geo change_coords_only\n";
+      casef << "model: 1 "+this->M_prefix+".*****"<< this->M_me << ".geo change_coords_only\n";
     else
         casef << "model: 1 "+this->M_prefix+this->M_me+".geo\n";
 }
@@ -443,8 +443,8 @@ template <typename Mesh> void Ensight<Mesh>::M_case_variable_section(std::ofstre
     		if (i-> steady() )
     			str = "";
     		else
-    			str = ".***";
-            aux = i->prefix()+" "+i->prefix();
+    			str = ".*****";
+            aux = i->variableName()+" "+super::M_prefix+"_"+i->variableName();
             switch( i->type() )
                 {
                 case ExporterData::Scalar:
@@ -486,7 +486,7 @@ void Ensight<Mesh>::import(const Real& time)
 
     this->getPostfix();
 
-    assert( this->M_postfix != "***" );
+    assert( this->M_postfix != "*****" );
 
     if (!this->M_procId) std::cout << "  x-  Ensight importing ..."<< std::endl;
 
@@ -523,7 +523,7 @@ template <typename Mesh>
 void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
 {
 
-    std::string filename( this->M_import_dir+dvar.prefix()+this->M_postfix+this->M_me+".scl" );
+    std::string filename( this->M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl" );
     std::ifstream sclf( filename.c_str() );
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
@@ -569,7 +569,7 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
 template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dvar)
 {
 
-    std::string filename( this->M_import_dir+dvar.prefix()+this->M_postfix+this->M_me+".vct" );
+    std::string filename( this->M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct" );
     std::ifstream vctf( filename.c_str() );
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
