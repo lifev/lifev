@@ -284,7 +284,7 @@ computeDeltaLambda( const vector_type &_lambda,
 }
 
 
-/*! one parameter version of the generalized aitken method.*/
+/*! one parameter version of the generalized aitken method. cf page 85 S. Deparis, PhD thesis */
 template <class VectorType, class DataType>
 typename generalizedAitken<VectorType, DataType>::vector_type generalizedAitken<VectorType, DataType>::
 computeDeltaLambda( const vector_type &_lambda,
