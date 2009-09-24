@@ -86,5 +86,16 @@ void parseList( const std::string& slist, std::list<T>& list )
 
 }
 
+// Convert a number ( Int, bool, Real, ... ) to a std::string
+template <typename number>
+inline std::string
+number2string( const number& n )
+{
+	std::stringstream out;
+	out << n;
+
+	return out.str();
+}
+
 }
 #endif
