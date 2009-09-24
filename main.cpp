@@ -45,6 +45,7 @@
 
 #include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
+#include <life/lifecore/util_string.hpp>
 #include <life/lifecore/chrono.hpp>
 
 #include <lifemc/lifecore/SpiritParser.hpp>
@@ -102,83 +103,104 @@ main( int argc, char** argv )
 	// Initialization of the parser
 	SpiritParser parser;
 
+	std::cout << "READY TO TEST WITH 10+ EXPRESSIONS:" << std::endl << std::endl;
+
 	// TEST 0:
-	expression = "-sqrt(4)";
+	expression = "-sqrt(4)+1*2"; // = 0
 	parser.setString(expression);
 	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
-	if (result != -2)
+	std::cout << "TEST  0:  " << expression << " = " << result << std::endl;
+	if (result != 0)
 		return( EXIT_FAILURE );
-
 
 
 	// TEST 1:
 	expression = "(1+1)"; // = 2
 	parser.setString(expression);
 	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
+	std::cout << "TEST  1:  " << expression << " = " << result << std::endl;
 	if (result != 2)
 		return( EXIT_FAILURE );
 
 
 
 	// TEST 2:
-	expression = "(0.8 > 0.9)"; // = 0
+	expression = "1-2-3+4*5-6-7+8*9+1"; // = 76
 	parser.setString(expression);
 	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
-	if (result != 0)
+	std::cout << "TEST  2:  " << expression << " = " << result << std::endl;
+	if (result != 76)
 		return( EXIT_FAILURE );
 
 
 
 	// TEST 3:
-	expression = "(0.8 < 0.9)"; // = 1
+	expression = "-(1+1)+(250+250+(-2))"; // = 496
 	parser.setString(expression);
 	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
-	if (result != 1)
+	std::cout << "TEST  3:  " << expression << " = " << result << std::endl;
+	if (result != 496)
 		return( EXIT_FAILURE );
 
 
 
 	// TEST 4:
-	expression = "sin(3/4*pi) * sin(3/4*pi) + cos(3/4*pi)^2"; // = 1
+	expression = "(0.8 > 0.9)"; // = 0
 	parser.setString(expression);
 	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
-	if (result != 1)
+	std::cout << "TEST  4:  " << expression << " = " << result << std::endl;
+	if (result != 0)
 		return( EXIT_FAILURE );
 
 
 
 	// TEST 5:
-	expression = "144^0.5 * sqrt(144)"; // = 144
+	expression = "(0.8 < 0.9)"; // = 1
 	parser.setString(expression);
 	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
-	if (result != 144)
+	std::cout << "TEST  5:  " << expression << " = " << result << std::endl;
+	if (result != 1)
 		return( EXIT_FAILURE );
 
 
 
 	// TEST 6:
-	expression = "c=2; (0., c, c*c, c*c*c)"; // (0, 2, 4, 8)
+	expression = "sin(3/4*pi) * sin(3/4*pi) + cos(3/4*pi)^2"; // = 1
 	parser.setString(expression);
-	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ", " << parser.evaluate(4) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 2 || parser.evaluate(3) != 4 || parser.evaluate(4) != 8 )
+	result = parser.evaluate();
+	std::cout << "TEST  6:  " << expression << " = " << result << std::endl;
+	if (result != 1)
 		return( EXIT_FAILURE );
 
 
 
 	// TEST 7:
+	expression = "144^0.5 * sqrt(144)"; // = 144
+	parser.setString(expression);
+	result = parser.evaluate();
+	std::cout << "TEST  7:  " << expression << " = " << result << std::endl;
+	if (result != 144)
+		return( EXIT_FAILURE );
+
+
+
+	// TEST 8:
+	expression = "c=2; (0., c, c*c, c*c*c)"; // (0, 2, 4, 8)
+	parser.setString(expression);
+	std::cout << "TEST  8:  " << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ", " << parser.evaluate(4) << ")" << std::endl;
+	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 2 || parser.evaluate(3) != 4 || parser.evaluate(4) != 8 )
+		return( EXIT_FAILURE );
+
+
+
+	// TEST 9:
 	expression = "(0, 0, -x^2+y^2)))";
 	parser.setString(expression);
 	parser.setVariable("x", 1);
 	parser.setVariable("y", 2); // (0, 0, -5)
-	std::cout << "x = " << 1 << ", y = " << 2 << " ==> ";
+	std::cout << "TEST  9a: " << "x = " << 1 << ", y = " << 2 << " ==> ";
 	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != -5 )
+	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != 3 )
 		return( EXIT_FAILURE );
 
 
@@ -186,12 +208,12 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	parser.setVariable("x", 4);
 	parser.setVariable("y", 5); // (0, 0, -41)
-	std::cout << "x = " << 4 << ", y = " << 5 << " ==> ";
+	std::cout << "TEST  9b: " << "x = " << 4 << ", y = " << 5 << " ==> ";
 	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != -41 )
+	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != 9 )
 		return( EXIT_FAILURE );
 
-
+	std::cout << std::endl << "TEST ENDS SUCCESFULLY -> NOW TESTING PERFORMANCES" << std::endl;
 
 	// PERFORMANCE TEST
 	Chrono chrono;
@@ -205,7 +227,7 @@ main( int argc, char** argv )
 		parser.evaluate();
 	chrono.stop();
 
-	std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of function f=" << expression << " --> " << chrono.diff() << " s" << std::endl;
+	std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chrono.diff() << " s" << std::endl;
 
 	#ifdef HAVE_MPI
 		std::cout << std::endl << "MPI Finalization" << std::endl;
