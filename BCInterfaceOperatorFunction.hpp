@@ -31,40 +31,23 @@
 #ifndef __BCInterfaceOperatorFunction_H
 #define __BCInterfaceOperatorFunction_H 1
 
-
-
-
-
-// ===================================================
-//! Include
-// ===================================================
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcFunction.hpp>
 
 #include <string>
 
+#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/Oseen.hpp>
+
 #include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
 
-
-
-
-
-// ===================================================
-//! Namespaces & Enums
-// ===================================================
 namespace LifeV {
 
 
-
-
-
+//! BCInterfaceOperatorFunction - LifeV bcFunction wrapper for BCInterface (with operators)
 /*!
- * \class BCInterfaceOperatorFunction
- * \brief LifeV bcFunction wrapper for BCInterface (with operators).
- *
  *  @author Cristiano Malossi
- *  @see
  *
  *  This class is an interface between BCInterface, SpiritParser and a general
  *  LifeV operator (such as Oseen or FSIOperator). It allows to construct LifeV
@@ -73,7 +56,7 @@ namespace LifeV {
  *
  *  The class can be used in two ways:
  *
- *  1) hereditating it with and implementing createAccessList(), addOperatorVariables();
+ *  1) hereditating it and implementing the template specialization of createAccessList() and UpdateOperatorVariables();
  *  2) manually setting the variables by using the setVariable() function.
  *
  *	<b>AVAILABLE OPERATORS</b>
@@ -81,25 +64,23 @@ namespace LifeV {
  *	Available operators are:
  *
  *	f_area
+ *	f_density
  *	f_flux
  *	f_pressure
+ *	f_viscosity
  *	s_density
  *	s_poisson
  *	s_thickness
  *	s_young
- *
  */
 template <class Operator>
 class BCInterfaceOperatorFunction : public virtual BCInterfaceFunction<Operator>
-//     :
-//     public LifeV::Application
 {
 public:
 
 	typedef BCInterfaceFunction<Operator>			super;
 
-	/** @name Constructors & Destructor
-     */
+	//! @name Constructors & Destructor
     //@{
 
     //! Constructor
@@ -107,13 +88,13 @@ public:
 
 	//! Constructor
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
 	BCInterfaceOperatorFunction( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function			- BCInterfaceOperatorFunction
+	 * \param function - BCInterfaceOperatorFunction
 	 */
 	BCInterfaceOperatorFunction( const BCInterfaceOperatorFunction& function );
 
@@ -123,46 +104,46 @@ public:
     //@}
 
 
-	/** @name Methods
-     */
+
+	//! @name Methods
     //@{
 
 	//! Operator =
 	/*!
-	 * \param function			- BCInterfaceOperatorFunction
+	 * \param function - BCInterfaceOperatorFunction
 	 */
 	virtual BCInterfaceOperatorFunction& operator=( const BCInterfaceOperatorFunction& function );
 
 	//! Set data
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-	virtual void setData( const BCInterfaceData<Operator>& data );
+	virtual void SetData( const BCInterfaceData<Operator>& data );
 
 	//! Compare function
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-	virtual bool compare( const BCInterfaceData<Operator>& data );
+	virtual bool Compare( const BCInterfaceData<Operator>& data );
 
 	//! Set variable function
 	/*!
-	 * \param name				- name of the variable
-	 * \param value				- value of the variable
+	 * \param name - name of the variable
+	 * \param value - value of the variable
 	 */
-	inline void setVariable( const std::string& name, const Real& value );
+	inline void SetVariable( const std::string& name, const Real& value );
+
+	//! Update operator variables
+	inline void UpdateOperatorVariables( void ) {}
 
 	//@}
 
 protected:
 
-	/** @name Protected functions
-	*/
+	//! @name Protected functions
 	//@{
 
-	virtual inline void createAccessList( void );
-
-	virtual inline void addOperatorVariables( const Real& /*t*/ ) {}
+	inline void CreateAccessList( void );
 
 	//@}
 
@@ -171,7 +152,9 @@ protected:
 	{
 		f_area,
 		f_flux,
+		f_density,
 		f_pressure,
+		f_viscosity,
 		s_density,
 		s_poisson,
 		s_thickness,
@@ -182,9 +165,18 @@ protected:
 	BCFlag												M_flag;
 	std::set<operatorList>								M_list;
 	std::map<std::string, operatorList>					M_mapList;
-	Real												M_oldTime;
+
+private:
+
+	inline void CreateFluidMap( void );
+	inline void CreateSolidMap( void );
+	inline void CreateList    ( void );
+
+    inline void SwitchErrorMessage( const std::string& operatorType );
+
 };
 
+//! Factory create function
 template <typename Operator>
 inline BCInterfaceFunction<Operator>* createOperatorFunction()
 {
@@ -202,8 +194,7 @@ BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( ) :
 	M_operator						( ),
 	M_flag							( ),
 	M_list							( ),
-	M_mapList						( ),
-	M_oldTime						( -1.0 ) // Negative time
+	M_mapList						( )
 {
 
 #ifdef DEBUG
@@ -218,18 +209,15 @@ BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( const BCInte
 	M_operator						( ),
 	M_flag							( ),
 	M_list							( ),
-	M_mapList						( ),
-	M_oldTime						( -1.0 ) // Negative time
+	M_mapList						( )
 {
 
 #ifdef DEBUG
 	Debug( 5023 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( data )" << "\n";
 #endif
 
-	this->setData( data );
+	this->SetData( data );
 }
-
-
 
 template <class Operator>
 BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( const BCInterfaceOperatorFunction& function ) :
@@ -237,12 +225,9 @@ BCInterfaceOperatorFunction<Operator>::BCInterfaceOperatorFunction( const BCInte
 	M_operator						( function.M_operator ),
 	M_flag							( function.M_flag ),
 	M_list							( function.M_list ),
-	M_mapList						( function.M_mapList ),
-	M_oldTime						( function.M_oldTime )
+	M_mapList						( function.M_mapList )
 {
 }
-
-
 
 
 
@@ -261,71 +246,291 @@ BCInterfaceOperatorFunction<Operator>::operator=( const BCInterfaceOperatorFunct
     	M_flag			= function.M_flag;
     	M_list			= function.M_list;
     	M_mapList		= function.M_mapList;
-    	M_oldTime		= function.M_oldTime;
     }
 
 	return *this;
 }
 
-
-
 template <class Operator>
 void
-BCInterfaceOperatorFunction<Operator>::setData( const BCInterfaceData<Operator>& data )
+BCInterfaceOperatorFunction<Operator>::SetData( const BCInterfaceData<Operator>& data )
 {
 
 #ifdef DEBUG
 	Debug( 5023 ) << "BCInterfaceOperatorFunction::setData" << "\n";
 #endif
 
-	M_operator	= data.get_operator();
-	M_flag		= data.get_flag();
+	M_operator	= data.GetOperator();
+	M_flag		= data.GetFlag();
 
-	super::setData( data );
+	super::SetData( data );
 
-	this->createAccessList();
+	CreateAccessList();
 }
-
-
 
 template <class Operator>
 bool
-BCInterfaceOperatorFunction<Operator>::compare( const BCInterfaceData<Operator>& data )
+BCInterfaceOperatorFunction<Operator>::Compare( const BCInterfaceData<Operator>& data )
 {
-	return	super::M_baseString.compare( data.get_baseString() ) == 0	&&
-			super::M_comV == data.get_comV() && M_flag == data.get_flag();
+	return	super::M_baseString.compare( data.GetBaseString() ) == 0	&&
+			super::M_comV == data.GetComV() && M_flag == data.GetFlag();
 }
-
-
 
 template <class Operator>
 inline void
-BCInterfaceOperatorFunction<Operator>::setVariable( const std::string& name, const Real& value )
+BCInterfaceOperatorFunction<Operator>::SetVariable( const std::string& name, const Real& value )
 {
 	super::M_parser->setVariable( name, value );
 }
 
+template <>
+inline void
+BCInterfaceOperatorFunction<FSIOperator>::UpdateOperatorVariables( void)
+{
 
+#ifdef DEBUG
+	Debug( 5023 ) << "BCInterfaceOperatorFunction<FSIOperator>::UpdateOperatorVariables  " << "\n";
+#endif
+
+	// Create/Update variables for FSI problem
+	for ( std::set<operatorList>::iterator j = M_list.begin() ; j != M_list.end() ; ++j )
+		switch ( *j )
+		{
+			// f_ -> FLUID
+			case f_area :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().area( M_flag )  << "\n";
+#endif
+				SetVariable( "f_area", M_operator->fluid().area( M_flag ) );
+
+				break;
+
+			case f_density :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                f_density(): " << M_operator->fluid().density()  << "\n";
+#endif
+				SetVariable( "f_density", M_operator->fluid().density() );
+
+				break;
+
+			case f_flux :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().flux( M_flag )  << "\n";
+#endif
+
+				SetVariable( "f_flux", M_operator->fluid().flux( M_flag ) );
+
+				break;
+
+			case f_pressure :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().pressure( M_flag )  << "\n";
+#endif
+
+				SetVariable( "f_pressure", M_operator->fluid().pressure( M_flag ) );
+
+				break;
+
+			case f_viscosity :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                              f_viscosity(): " << M_operator->fluid().viscosity()  << "\n";
+#endif
+				SetVariable( "f_viscosity", M_operator->fluid().viscosity() );
+
+				break;
+
+
+			// s_ -> SOLID
+			case s_density :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho()  << "\n";
+#endif
+
+				SetVariable( "s_density", M_operator->solid().rho() );
+
+				break;
+
+			case s_poisson :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson()  << "\n";
+#endif
+
+				SetVariable( "s_poisson", M_operator->solid().poisson() );
+
+				break;
+
+			case s_thickness :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness()  << "\n";
+#endif
+
+				SetVariable( "s_thickness", M_operator->solid().thickness() );
+
+				break;
+
+			case s_young :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young()  << "\n";
+#endif
+
+				SetVariable( "s_young", M_operator->solid().young() );
+
+				break;
+
+			default :
+				SwitchErrorMessage( "FSI" );
+		}
+}
+
+template <>
+inline void
+BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables( void )
+{
+
+#ifdef DEBUG
+	Debug( 5023 ) << "BCInterfaceOperatorFunction<Oseen>::UpdateOperatorVariables  " << "\n";
+#endif
+
+	// Create/Update variables for FSI problem
+	for ( std::set<operatorList>::iterator j = M_list.begin() ; j != M_list.end() ; ++j )
+		switch ( *j )
+		{
+			// f_ -> FLUID
+			case f_area :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag )  << "\n";
+#endif
+				SetVariable( "f_area", M_operator->area( M_flag ) );
+
+				break;
+
+			case f_density :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                f_density(): " << M_operator->density()  << "\n";
+#endif
+				SetVariable( "f_density", M_operator->density() );
+
+				break;
+
+			case f_flux :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag )  << "\n";
+#endif
+
+				SetVariable( "f_flux", M_operator->flux( M_flag ) );
+
+				break;
+
+			case f_pressure :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag )  << "\n";
+#endif
+
+				SetVariable( "f_pressure", M_operator->pressure( M_flag ) );
+
+				break;
+
+			case f_viscosity :
+
+#ifdef DEBUG
+				Debug( 5023 ) << "                                              f_viscosity(): " << M_operator->viscosity()  << "\n";
+#endif
+				SetVariable( "f_viscosity", M_operator->viscosity() );
+
+				break;
+
+			default :
+
+				SwitchErrorMessage( "OSEEN" );
+		}
+}
 
 
 
 // ===================================================
 //! Protected functions
 // ===================================================
-template <class Operator>
+template <>
 inline void
-BCInterfaceOperatorFunction<Operator>::createAccessList( void )
+BCInterfaceOperatorFunction<FSIOperator>::CreateAccessList( void )
 {
 
 #ifdef DEBUG
-	Debug( 5023 ) << "BCInterfaceOperatorFunction::createAccessList" << "\n";
+	Debug( 5023 ) << "BCInterfaceOperatorFunction<FSIOperator>::createAccessList" << "\n";
 #endif
 
-	//Create list
+	CreateFluidMap();
+	CreateSolidMap();
+	CreateList();
+}
+
+template <>
+inline void
+BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAccessList( void )
+{
+
+#ifdef DEBUG
+	Debug( 5023 ) << "BCInterfaceOperatorFunction<Oseen>::createAccessList" << "\n";
+#endif
+
+	CreateFluidMap();
+	CreateList();
+}
+
+
+
+// ===================================================
+//! Private functions
+// ===================================================
+template <class Operator>
+inline void
+BCInterfaceOperatorFunction<Operator>::CreateFluidMap( void )
+{
+	M_mapList["f_area"]		= f_area;
+	M_mapList["f_density"]	= f_density;
+	M_mapList["f_flux"]		= f_flux;
+	M_mapList["f_pressure"]	= f_pressure;
+	M_mapList["f_viscosity"]= f_viscosity;
+}
+
+template <class Operator>
+inline void
+BCInterfaceOperatorFunction<Operator>::CreateSolidMap( void )
+{
+	M_mapList["s_density"]	= s_density;
+	M_mapList["s_poisson"]	= s_poisson;
+	M_mapList["s_thickness"]= s_thickness;
+	M_mapList["s_young"]	= s_young;
+}
+
+template <class Operator>
+inline void
+BCInterfaceOperatorFunction<Operator>::CreateList( void )
+{
 	M_list.clear();
 	for ( typename std::map<std::string, operatorList>::iterator j = M_mapList.begin() ; j != M_mapList.end() ; ++j )
 		if ( boost::find_first( super::M_baseString, j->first ) )
 			M_list.insert( j->second );
+}
+
+template <class Operator>
+inline void
+BCInterfaceOperatorFunction<Operator>::SwitchErrorMessage( const std::string& operatorType )
+{
+	std::cout	<< "ERROR: Invalid variable type for " << operatorType << "OperatorFunction" << std::endl;
 }
 
 } // Namespace LifeV

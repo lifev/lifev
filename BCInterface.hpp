@@ -31,13 +31,6 @@
 #ifndef __BCInterface_H
 #define __BCInterface_H 1
 
-
-
-
-
-// ===================================================
-//! Include
-// ===================================================
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcHandler.hpp>
@@ -50,34 +43,14 @@
 #include <lifemc/lifefem/BCInterfaceFunctionFile.hpp>
 #include <lifemc/lifefem/BCInterfaceOperatorFunction.hpp>
 #include <lifemc/lifefem/BCInterfaceOperatorFunctionFile.hpp>
-#include <lifemc/lifefem/BCInterfaceFSIFunction.hpp>
-#include <lifemc/lifefem/BCInterfaceFSIFunctionFile.hpp>
 #include <lifemc/lifefem/BCInterfaceFSI.hpp>
 
-
-
-
-
-// ===================================================
-//! Namespaces & Static initializations
-// ===================================================
 namespace LifeV {
-
-
-
-
-
-/*!
- * \class BCInterface
- * \brief LifeV Interface to load Boundary Conditions completely
- *        from a GetPot file
- *
+//! BCInterface - LifeV Interface to load Boundary Conditions completely from a GetPot file
+/*
  *  @author Cristiano Malossi
- *  @see
  *
  *  This class allows to impose boundary conditions completely from a file.
- *
- *
  *
  *  <b>EXAMPLE - DATA FILE</b>
  *
@@ -118,7 +91,7 @@ namespace LifeV {
  *  - OSEENfunctionFile
  *  - FSI
  *
- *  To see some example look at test_cylinder and test_fsi.
+ *  To see some example look at test_fsi.
  *
  *  <b>EXAMPLE - HOW TO USE</b>
  *
@@ -144,31 +117,27 @@ namespace LifeV {
  *  You can add manually more conditions by using addBC() after the call to buildHandler() function.
  *  In this case you have to manually set the TOTAL number of boundary conditions
  *  by using setHandlerParameters() function BEFORE building the handler.
- *
  */
 template <class Operator>
 class BCInterface
-//     :
-//     public LifeV::Application
 {
 public:
 
 	typedef singleton< factory< BCInterfaceFunction<Operator>, std::string > >	BCInterfaceFunctionFactory;
 
-    /** @name Constructors & Destructor
-     */
+	//! @name Constructors & Destructor
     //@{
 
     //! Constructor
     /*!
-     * \param dataFile		- GetPot data file
-     * \param dataSection 	- Subsection inside [boundary_conditions]
+     * \param dataFile - GetPot data file
+     * \param dataSection - Subsection inside [boundary_conditions]
      */
 	BCInterface( const GetPot& dataFile, const std::string& dataSection );
 
 	//! Copy constructor
 	/*!
-	 * \param interface		- BCInterface
+	 * \param interface	- BCInterface
 	 */
 	BCInterface( const BCInterface& interface );
 
@@ -179,58 +148,74 @@ public:
 
 
 
-    /** @name Get functions
-     */
+    //! @name Get functions
     //@{
 
-	const BCHandler& 						Handler() 		const { return *M_handler; }
-	const boost::shared_ptr<BCHandler>& 	Handler_ptr() 	const { return  M_handler; } //Remove & ??
+    //! Get the BCHandler
+	const BCHandler& 						Handler() 		const	{ return *M_handler; }
+
+	//! Get the shared_ptr to the BCHandler
+	const boost::shared_ptr<BCHandler>& 	Handler_ptr() 	const	{ return  M_handler; } //Remove & ??
+
+	//! Get the data container
+	      BCInterfaceData<Operator>& 		GetDataContainer()		{ return  M_data; }
 
     //@}
 
 
-
-    /** @name Methods
-     */
+	//! @name Methods
     //@{
 
 	//! Operator =
 	/*!
-	 * \param interface		- BCInterface
+	 * \param interface - BCInterface
 	 */
 	BCInterface& operator=( const BCInterface& interface );
 
 	//! Set an operator
     /*!
-     * \param Oper			- operator
+     * \param Oper - operator
      */
-	void setOperator( const boost::shared_ptr<Operator>& Oper ) { M_data.set_operator( Oper ); }
+	void SetOperator( const boost::shared_ptr<Operator>& Oper ) { M_data.SetOperator( Oper ); }
+
+	//! Update the variables inside the operator
+	void UpdateOperatorVariables( void );
 
 	//! Set manually Handler parameters: you need it only if you are adding manually some parameters by calling addBC
     /*!
-     * \param bcNumber		- total number of the boundary conditions (files + added manually)
-     * \param hint			- hint
+     * \param bcNumber - total number of the boundary conditions (files + added manually)
+     * \param hint - hint
      */
-	void setHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint = BCHandler::HINT_BC_NONE );
+	void SetHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint = BCHandler::HINT_BC_NONE );
 
-	//! Build the bcHandler
-	void buildHandler( void );
+	//! Build the bcHandler with the data file provided with the constructor
+	void BuildHandler( void );
+
+	//! Read a boundary condition from a different file and add it to the data container
+    /*!
+     * \param name - name of the boundary condition
+     * \param dataSection - section in the data file
+     * \param dataFile - external data file
+     */
+	void ReadExternalBC( const BCName& name, const std::string& dataSection, const GetPot& dataFile );
+
+	//! Insert the external boundary condition in the BChandler
+	void InsertExternalBC( void );
 
     //@}
 
 
 
-	/** @name External interface for BCHandler functions
-	 */
+	//! @name External interface for BCHandler functions
 	//@{
 
-	//! Add a Boundary Condition
+	//! Add a Boundary Condition using the standard interface of the BCHandler
     /*!
-     * \param name			- name of the condition
-     * \param flag			- list of flags
-     * \param type			- type of the condition
-     * \param mode			- mode of the condition
-     * \param base			- base of the condition
+     * \param name - name of the condition
+     * \param flag - list of flags
+     * \param type - type of the condition
+     * \param mode - mode of the condition
+     * \param base - base of the condition
      */
 	template <class BCBase>
 	void addBC( const BCName& name,
@@ -239,14 +224,14 @@ public:
 				const BCMode& mode,
 					  BCBase& base );
 
-	//! Add a Boundary Condition
+	//! Add a Boundary Condition with component using the standard interface of the BCHandler
     /*!
-     * \param name			- name of the condition
-     * \param flag			- list of flags
-     * \param type			- type of the condition
-     * \param mode			- mode of the condition
-     * \param base			- base of the condition
-     * \param comp			- component of the condition
+     * \param name - name of the condition
+     * \param flag - list of flags
+     * \param type - type of the condition
+     * \param mode - mode of the condition
+     * \param base - base of the condition
+     * \param comp - component of the condition
      */
 	template <class BCBase, class BCComp>
 	void addBC( const BCName& name,
@@ -260,41 +245,26 @@ public:
 
 private:
 
-    /** @name Private functions
-     */
+	//! @name Private Methods
     //@{
 
+	inline void SetList( const char* conditions );
+
+    inline void BuildBase( void );
+
     template <class BCInterfaceBase>
-    inline bool newBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector );
+    inline bool NewBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector );
 
 	template <class BCInterfaceBase>
-	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector );
+	inline void AddBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector );
 
 	template <class BCInterfaceBase>
-	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const std::string& Oper );
+	inline void AddBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const std::string& Oper );
 
 	template <class BCBase>
-	void addBCManager( BCBase& base );
-
-	inline void setList( const char* conditions );
-
-    inline void autosetHandlerParameters( void );
-
-    inline void readFlag( const char* flag );
-
-    inline void readType( const char* type );
-
-    inline void readMode( const char* mode );
-
-    inline void readComV( const char* component );
-
-    inline void readBase( const std::string& base );
-
-    inline bool isBase( const char* base );
+	inline void AddBCManager( BCBase& base );
 
     //@}
-
-	enum BCBaseList{ function, functionFile, OSEENfunction, OSEENfunctionFile, FSIfunction, FSIfunctionFile, FSI };
 
 	// GetPot data file
 	GetPot 												M_dataFile;
@@ -302,23 +272,14 @@ private:
 
 	std::vector<BCName>									M_list;
 	UInt												M_listSize;
-	bool												M_autoSetParameters;
 	ID													M_bcNumber;
 
 	// Handler and parameters
 	BCHandler::BCHints 									M_hint;
 	boost::shared_ptr<BCHandler> 						M_handler;
 
-	// Maps
-	std::map<std::string, BCType> 						M_mapType;
-	std::map<std::string, BCMode> 						M_mapMode;
-	std::map<std::string, BCBaseList> 					M_mapBase;
-
 	// Data
 	BCInterfaceData<Operator>							M_data;
-
-	// Base
-	std::pair<std::string, BCBaseList>					M_base;
 
 	// Functions
 	static std::map<std::string,size_type>										M_mapFunction;
@@ -358,54 +319,24 @@ BCInterface<Operator>::BCInterface( const GetPot& dataFile, const std::string& d
 	M_dataSection					( dataSection + "/boundary_conditions/" ),
 	M_list							( ),
 	M_listSize						( 0 ),
-	M_autoSetParameters				( true ),
 	M_bcNumber						( 0 ),
-	M_hint							( BCHandler::HINT_BC_ONLY_ESSENTIAL ),
+	M_hint							( BCHandler::HINT_BC_NONE ),
 	M_handler						( ),
-	M_mapType						( ),
-	M_mapMode						( ),
-	M_mapBase						( ),
-	M_data							( ),
-	M_base							( )
-
+	M_data							( )
 {
 
 #ifdef DEBUG
 	    Debug( 5020 ) << "BCInterface::BCInterface------------------------------" << "\n";
 #endif
 
-	//Set mapType
-	M_mapType["Essential"] 			= Essential;
-	M_mapType["Natural"] 			= Natural;
-	M_mapType["Mixte"] 				= Mixte;
-	M_mapType["Flux"] 				= Flux;
-
-	//Set mapMode
-	M_mapMode["Scalar"] 			= Scalar;
-	M_mapMode["Full"] 				= Full;
-	M_mapMode["Component"] 			= Component;
-	M_mapMode["Normal"] 			= Normal;
-	M_mapMode["Tangential"] 		= Tangential;
-
-	//Set mapBase
-	M_mapBase["function"] 			= function;
-	M_mapBase["functionFile"] 		= functionFile;
-	M_mapBase["OSEENfunction"]		= OSEENfunction;
-	M_mapBase["OSEENfunctionFile"]	= OSEENfunctionFile;
-	M_mapBase["FSIfunction"]		= FSIfunction;
-	M_mapBase["FSIfunctionFile"]	= FSIfunctionFile;
-	M_mapBase["FSI"]				= FSI;
-
 	//Set other parameters
-	setList( (M_dataSection + "list").c_str() );
+	SetList( (M_dataSection + "list").c_str() );
 
 	//Factory registration
-	BCInterfaceFunctionFactory::instance().registerProduct( "function", 			&createFunction<Operator> );
-	BCInterfaceFunctionFactory::instance().registerProduct( "functionFile", 		&createFunctionFile<Operator> );
-	BCInterfaceFunctionFactory::instance().registerProduct( "OSEENfunction", 		&createOperatorFunction<Operator> );
-	BCInterfaceFunctionFactory::instance().registerProduct( "OSEENfunctionFile",	&createOperatorFunctionFile<Operator> );
-	BCInterfaceFunctionFactory::instance().registerProduct( "FSIfunction", 			&createOperatorFunction<Operator> );
-	BCInterfaceFunctionFactory::instance().registerProduct( "FSIfunctionFile", 		&createOperatorFunctionFile<Operator> );
+	BCInterfaceFunctionFactory::instance().registerProduct( "function", 		&createFunction<Operator> );
+	BCInterfaceFunctionFactory::instance().registerProduct( "functionFile", 	&createFunctionFile<Operator> );
+	BCInterfaceFunctionFactory::instance().registerProduct( "OPERfunction", 	&createOperatorFunction<Operator> );
+	BCInterfaceFunctionFactory::instance().registerProduct( "OPERfunctionFile",	&createOperatorFunctionFile<Operator> );
 }
 
 template <class Operator>
@@ -414,19 +345,12 @@ BCInterface<Operator>::BCInterface( const BCInterface& interface ) :
 	M_dataSection					( interface.M_dataSection ),
 	M_list							( interface.M_list ),
 	M_listSize						( interface.M_listSize ),
-	M_autoSetParameters				( interface.M_autoSetParameters ),
 	M_bcNumber						( interface.M_bcNumber ),
 	M_hint							( interface.M_hint ),
 	M_handler						( interface.M_handler ),
-	M_mapType						( interface.M_mapType ),
-	M_mapMode						( interface.M_mapMode ),
-	M_mapBase						( interface.M_mapBase ),
-	M_data							( interface.M_data ),
-	M_base							( interface.M_base )
+	M_data							( interface.M_data )
 {
 }
-
-
 
 
 
@@ -443,25 +367,18 @@ BCInterface<Operator>::operator=( const BCInterface& interface )
     	M_dataSection					= interface.M_dataSection;
     	M_list							= interface.M_list;
     	M_listSize						= interface.M_listSize;
-    	M_autoSetParameters				= interface.M_autoSetParameters;
     	M_bcNumber						= interface.M_bcNumber;
     	M_hint							= interface.M_hint;
     	M_handler						= interface.M_handler;
-    	M_mapType						= interface.M_mapType;
-    	M_mapMode						= interface.M_mapMode;
-    	M_mapBase						= interface.M_mapBase;
     	M_data							= interface.M_data;
-    	M_base							= interface.M_base;
     }
 
 	return *this;
 }
 
-
-
 template <class Operator>
 void
-BCInterface<Operator>::setHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint )
+BCInterface<Operator>::SetHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint )
 {
 	M_bcNumber 	= bcNumber;
 	M_hint 		= hint;
@@ -471,157 +388,68 @@ BCInterface<Operator>::setHandlerParameters( const ID& bcNumber, const BCHandler
     Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n";
 #endif
 
-	M_autoSetParameters = false;
 }
-
-
 
 template <class Operator>
 void
-BCInterface<Operator>::buildHandler( void )
+BCInterface<Operator>::BuildHandler( void )
 {
 
 #ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::buildHandler         M_autoSetParameters: " << M_autoSetParameters << "\n";
+	Debug( 5020 ) << "BCInterface::buildHandler\n";
 #endif
-
-	if ( M_autoSetParameters )
-		autosetHandlerParameters();
 
 	M_handler.reset( new BCHandler ( M_bcNumber, M_hint ) );
 
 	for ( UInt i(0) ; i < M_listSize ; ++i )
 	{
-		M_data.set_name( M_list[i] );
+		M_data.ReadBC( M_list[i], M_dataSection, M_dataFile );
 
-		readFlag( (M_dataSection + M_data.get_name() + "/flag").c_str() );
-		readType( (M_dataSection + M_data.get_name() + "/type").c_str() );
-		readMode( (M_dataSection + M_data.get_name() + "/mode").c_str() );
-		readComV( (M_dataSection + M_data.get_name() + "/component").c_str() );
-		readBase(  M_dataSection + M_data.get_name() + "/" );
-
-		switch ( M_base.second )
-		{
-			case function :
-			case functionFile :
-			case OSEENfunction :
-			case OSEENfunctionFile :
-			case FSIfunction :
-			case FSIfunctionFile :
-
-				if ( newBase( M_mapFunction, M_vectorFunction ) )
-					addBase( M_vectorFunction, M_base.first );
-
-				addBCManager( M_vectorFunction[M_mapFunction[M_data.get_baseString()]]->getBase() );
-
-				break;
-
-			case FSI :
-
-				if ( newBase( M_mapFSI, M_vectorFSI ) )
-					addBase( M_vectorFSI );
-
-				addBCManager( M_vectorFSI[M_mapFSI[M_data.get_baseString()]]->getBase() );
-
-				break;
-
-		}
+		BuildBase();
 	}
 }
 
-
-
-template <class Operator> template <class BCInterfaceBase>
-inline bool
-BCInterface<Operator>::newBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector )
-{
-	//Check if the baseString has been already used
-	for ( std::map<std::string, size_type>::iterator j = map.begin() ; j != map.end() ; ++j )
-		if( vector[j->second]->compare( M_data ) )
-		{
-
-#ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::newBase                                   NO" << "\n";
-#endif
-
-			return false;
-		}
-
-	//Add baseString to the map
-	size_type size = map.size();
-	map[M_data.get_baseString()] = size;
-
-#ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::newBase                                   YES" << "\n";
-#endif
-
-	return true;
-}
-
-
-template <class Operator> template <class BCInterfaceBase>
-inline void
-BCInterface<Operator>::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector )
-{
-	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_data ) );
-	baseVector.push_back( Function );
-}
-
-
-template <class Operator> template <class BCInterfaceBase>
-inline void
-BCInterface<Operator>::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const std::string& Oper )
-{
-	boost::shared_ptr<BCInterfaceBase> Function( BCInterfaceFunctionFactory::instance().createObject( Oper ) );
-
-	Function->setData( M_data );
-
-	baseVector.push_back( Function );
-}
-
-
-
-template <class Operator> template <class BCBase>
+template <class Operator>
 void
-BCInterface<Operator>::addBCManager( BCBase& base )
+BCInterface<Operator>::ReadExternalBC( const BCName& name, const std::string& dataSection, const GetPot& dataFile )
 {
-	switch ( M_data.get_mode() )
-	{
-		case Scalar :
-		case Normal :
-		case Tangential :
 
 #ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::addBCManager                              Scalar, Normal, Tangential" << "\n\n";
+	Debug( 5020 ) << "BCInterface::readExternalBC\n";
 #endif
 
-			M_handler->addBC( M_data.get_name(), M_data.get_flag(), M_data.get_type(), M_data.get_mode(), base );
-
-			break;
-
-		case Full :
-
-#ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::addBCManager                              Full" << "\n\n";
-#endif
-
-			M_handler->addBC( M_data.get_name(), M_data.get_flag(), M_data.get_type(), M_data.get_mode(), base, M_data.get_comN() );
-
-			break;
-
-		case Component :
-
-#ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::addBCManager                              Component" << "\n\n";
-#endif
-
-			M_handler->addBC( M_data.get_name(), M_data.get_flag(), M_data.get_type(), M_data.get_mode(), base, M_data.get_comV() );
-
-			break;
-	}
+	M_data.ReadBC( name, dataSection, dataFile );
 }
 
+template <class Operator>
+void
+BCInterface<Operator>::InsertExternalBC( void )
+{
 
+#ifdef DEBUG
+	Debug( 5020 ) << "BCInterface::insertExternalBC\n";
+#endif
+
+	BuildBase();
+}
+
+template <class Operator>
+void
+BCInterface<Operator>::UpdateOperatorVariables( void )
+{
+
+#ifdef DEBUG
+	Debug( 5020 ) << "BCInterface::UpdateOperatorVariables\n";
+#endif
+
+	for ( UInt i(0) ; i < M_vectorFunction.size() ; ++i )
+	{
+		BCInterfaceOperatorFunction<Operator> *Oper = dynamic_cast<BCInterfaceOperatorFunction<Operator> *> (&(*M_vectorFunction[i]));
+
+		if ( Oper != 0 )
+			Oper->UpdateOperatorVariables();
+	}
+}
 
 template <class Operator> template <class BCBase>
 void
@@ -660,136 +488,146 @@ BCInterface<Operator>::addBC( 	const BCName& name,
 
 
 
-
-
 // ===================================================
-//! Private functions
+//! Private Methods
 // ===================================================
 template <class Operator>
 inline void
-BCInterface<Operator>::setList( const char* conditions )
+BCInterface<Operator>::SetList( const char* conditions )
 {
     M_listSize = M_dataFile.vector_variable_size( conditions );
 
     M_list.reserve( M_listSize );
     for ( UInt i(0) ; i < M_listSize ; ++i )
     	M_list.push_back(M_dataFile(conditions, " ", i));
+
+    M_bcNumber = M_listSize;
 }
-
-
 
 template <class Operator>
 inline void
-BCInterface<Operator>::autosetHandlerParameters( void )
+BCInterface<Operator>::BuildBase( void )
 {
-	for ( UInt i(0) ; i < M_listSize ; ++i )
+
+#ifdef DEBUG
+	Debug( 5020 ) << "BCInterface::BuildBase\n";
+#endif
+
+	switch ( M_data.GetBase().second )
 	{
-		readType( (M_dataSection + M_list[i] + "/type").c_str() );
-		if ( M_data.get_type() != Essential )
-			M_hint = BCHandler::HINT_BC_NONE;
+		case function :
+		case functionFile :
+		case OPERfunction :
+		case OPERfunctionFile :
 
-		M_bcNumber += M_dataFile.vector_variable_size((M_dataSection + M_list[i] + "/flag").c_str());
-	}
+			if ( NewBase( M_mapFunction, M_vectorFunction ) )
+				AddBase( M_vectorFunction, M_data.GetBase().first );
 
-#ifdef DEBUG
-    Debug( 5020 ) << "BCInterface::autosetHandlerParameters      M_bcNumber: " << M_bcNumber << "\n";
-    Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n\n";
-#endif
-
-}
-
-
-
-template <class Operator>
-inline void
-BCInterface<Operator>::readFlag( const char* flag )
-{
-	M_data.set_flag( M_dataFile(flag, 0) );
-
-#ifdef DEBUG
-    Debug( 5020 ) << "BCInterface::readFlag                            flag: " << static_cast<Real>(M_data.get_flag()) << "\n";
-#endif
-}
-
-
-
-template <class Operator>
-inline void
-BCInterface<Operator>::readType( const char* type )
-{
-	M_data.set_type( M_mapType[M_dataFile(type, "Essential")] );
-
-#ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::readType                            type: " << M_data.get_type() << " (" << M_dataFile(type, "Essential") << ")\n";
-#endif
-}
-
-
-
-template <class Operator>
-inline void
-BCInterface<Operator>::readMode( const char* mode )
-{
-	M_data.set_mode( M_mapMode[M_dataFile(mode, "Full")] );
-
-#ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::readMode                            mode: " << M_data.get_mode() << " (" << M_dataFile(mode, "Full") << ")\n";
-#endif
-}
-
-
-
-template <class Operator>
-inline void
-BCInterface<Operator>::readComV( const char* component )
-{
-    UInt componentSize = M_dataFile.vector_variable_size(component);
-
-    M_data.reset_comV( componentSize );
-
-    for (UInt j(0) ; j < componentSize ; ++j)
-    	M_data.set_comV( M_dataFile(component, 0, j) );
-
-#ifdef DEBUG
-    std::stringstream output;
-    output << "BCInterface::readComV                            comV: ";
-    for (UInt i(0) ; i < static_cast<UInt>(M_data.get_comV().size()) ; ++i )
-    	output << M_data.get_comV()[i] << " ";
-    Debug( 5020 ) << output.str() << "\n";
-#endif
-
-}
-
-
-
-template <class Operator>
-inline void
-BCInterface<Operator>::readBase( const std::string& base )
-{
-	for ( typename std::map<std::string, BCBaseList>::iterator j = M_mapBase.begin() ; j != M_mapBase.end() ; ++j )
-		if ( isBase( (base + j->first).c_str() ) )
-		{
-			M_base.first  = j->first;
-			M_base.second = M_mapBase[j->first];
-
-#ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::readBase                            base: " << M_base.second << " (" << j->first << ")\n";
-			Debug( 5020 ) << "                                           baseString: " << M_data.get_baseString() << "\n";
-#endif
+			AddBCManager( M_vectorFunction[M_mapFunction[M_data.GetBaseString()]]->GetBase() );
 
 			break;
-		}
+
+		case FSI :
+
+			if ( NewBase( M_mapFSI, M_vectorFSI ) )
+				AddBase( M_vectorFSI );
+
+			AddBCManager( M_vectorFSI[M_mapFSI[M_data.GetBaseString()]]->GetBase() );
+
+			break;
+	}
 }
 
 
 
-template <class Operator>
+template <class Operator> template <class BCInterfaceBase>
 inline bool
-BCInterface<Operator>::isBase( const char* base )
+BCInterface<Operator>::NewBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector )
 {
-	M_data.set_baseString( M_dataFile( base, " " ) );
+	//Check if the baseString has been already used
+	for ( std::map<std::string, size_type>::iterator j = map.begin() ; j != map.end() ; ++j )
+		if( vector[j->second]->Compare( M_data ) )
+		{
 
-	return M_dataFile.checkVariable( base );
+#ifdef DEBUG
+			Debug( 5020 ) << "BCInterface::NewBase                                   NO" << "\n";
+#endif
+
+			return false;
+		}
+
+	//Add baseString to the map
+	size_type size = map.size();
+	map[M_data.GetBaseString()] = size;
+
+#ifdef DEBUG
+	Debug( 5020 ) << "BCInterface::NewBase                                   YES" << "\n";
+#endif
+
+	return true;
+}
+
+
+template <class Operator> template <class BCInterfaceBase>
+inline void
+BCInterface<Operator>::AddBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector )
+{
+	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_data ) );
+	baseVector.push_back( Function );
+}
+
+
+template <class Operator> template <class BCInterfaceBase>
+inline void
+BCInterface<Operator>::AddBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const std::string& Oper )
+{
+	boost::shared_ptr<BCInterfaceBase> Function( BCInterfaceFunctionFactory::instance().createObject( Oper ) );
+
+	Function->SetData( M_data );
+
+	baseVector.push_back( Function );
+}
+
+
+
+template <class Operator> template <class BCBase>
+inline void
+BCInterface<Operator>::AddBCManager( BCBase& base )
+{
+	switch ( M_data.GetMode() )
+	{
+		case Scalar :
+		case Normal :
+		case Tangential :
+
+#ifdef DEBUG
+			Debug( 5020 ) << "BCInterface::AddBCManager                              Scalar, Normal, Tangential" << "\n\n";
+#endif
+
+			M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base );
+
+			break;
+
+		case Full :
+
+#ifdef DEBUG
+			Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
+#endif
+
+			M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
+
+			break;
+
+		case Component :
+
+#ifdef DEBUG
+			Debug( 5020 ) << "BCInterface::AddBCManager                              Component" << "\n\n";
+#endif
+
+			M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComV() );
+
+			break;
+	}
 }
 
 } // Namespace LifeV

@@ -31,13 +31,6 @@
 #ifndef __BCInterfaceFunctionFile_H
 #define __BCInterfaceFunctionFile_H 1
 
-
-
-
-
-// ===================================================
-//! Include
-// ===================================================
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 
@@ -45,25 +38,12 @@
 
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
 
-
-
-
-
-// ===================================================
-//! Namespaces & Enums
-// ===================================================
 namespace LifeV {
 
 
-
-
-
+//! BCInterfaceFunctionFile - LifeV bcFunction wrapper for BCInterface
 /*!
- * \class BCInterfaceFunctionFile
- * \brief LifeV bcFunction wrapper for BCInterface
- *
  *  @author Cristiano Malossi
- *  @see
  *
  *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
  *  functions type for boundary conditions, using a GetPot file containing a function string and a
@@ -102,19 +82,15 @@ namespace LifeV {
  *  				0.333333333		2.00
  *  				0.666666666		3.00
  *  				1.000000000		4.00'
- *
  */
 template <typename Operator>
 class BCInterfaceFunctionFile : public virtual BCInterfaceFunction<Operator>
-//     :
-//     public LifeV::Application
 {
 public:
 
 	typedef BCInterfaceFunction<Operator>				super;
 
-	/** @name Constructors & Destructor
-     */
+	//! @name Constructors & Destructor
     //@{
 
 	//! Empty Constructor
@@ -122,13 +98,13 @@ public:
 
     //! Constructor
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
 	BCInterfaceFunctionFile( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function			- BCInterfaceFunctionFile
+	 * \param function - BCInterfaceFunctionFile
 	 */
 	BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function );
 
@@ -139,27 +115,26 @@ public:
 
 
 
-    /** @name Methods
-     */
+	//! @name Methods
     //@{
 
     //! Operator =
     /*!
-     * \param function			- BCInterfaceFunctionFile
+     * \param function - BCInterfaceFunctionFile
      */
     virtual BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
 
     //! Set data
     /*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-    virtual void setData( const BCInterfaceData<Operator>& data );
+    virtual void SetData( const BCInterfaceData<Operator>& data );
 
 	//! Compare function
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-    virtual bool compare( const BCInterfaceData<Operator>& data );
+    virtual bool Compare( const BCInterfaceData<Operator>& data );
 
     //@}
 
@@ -174,15 +149,14 @@ private:
 	std::map< std::string, std::vector<Real> >				M_data;
 	std::vector<Real>::iterator								M_dataIterator;
 
-	/** @name Private functions
-	 */
+	//! @name Private functions
 	//@{
 
     //! loadData
-    inline void loadData( const GetPot& dataFile );
+    inline void LoadData( BCInterfaceData<Operator> data );
 
 	//! Linear interpolation (extrapolation) between two values of the data.
-	inline void dataInterpolation( void );
+	inline void DataInterpolation( void );
 
     //@}
 };
@@ -231,7 +205,7 @@ BCInterfaceFunctionFile<Operator>::BCInterfaceFunctionFile( const BCInterfaceDat
 	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
 #endif
 
-	this->setData( data );
+	this->SetData( data );
 }
 
 
@@ -275,35 +249,25 @@ BCInterfaceFunctionFile<Operator>::operator=( const BCInterfaceFunctionFile& fun
 
 template <typename Operator>
 void
-BCInterfaceFunctionFile<Operator>::setData( const BCInterfaceData<Operator>& data )
+BCInterfaceFunctionFile<Operator>::SetData( const BCInterfaceData<Operator>& data )
 {
-	M_fileName = data.get_baseString();	//The base string contains the file name
-
-	//Load data from file
-	GetPot dataFile( M_fileName );
-	loadData( dataFile );
+	M_fileName = data.GetBaseString();	//The base string contains the file name
 
 #ifdef DEBUG
 	Debug( 5022 ) << "BCInterfaceFunctionFile::setData             fileName: " << M_fileName  << "\n";
-	Debug( 5022 ) << "                                             function: " << data.get_baseString()  << "\n";
 #endif
 
-	//Create a new data container with the correct base string
-	BCInterfaceData<Operator> newData = data;
-	newData.set_baseString( dataFile( "function", "Undefined" ) ); // Now it contains the real base string
-	super::setData( newData );
+	LoadData( data );
 }
 
 
 
 template <typename Operator>
 bool
-BCInterfaceFunctionFile<Operator>::compare( const BCInterfaceData<Operator>& data )
+BCInterfaceFunctionFile<Operator>::Compare( const BCInterfaceData<Operator>& data )
 {
-	return M_fileName.compare( data.get_baseString() ) == 0 && super::M_comV == data.get_comV();
+	return M_fileName.compare( data.GetBaseString() ) == 0 && super::M_comV == data.GetComV();
 }
-
-
 
 
 
@@ -312,8 +276,13 @@ BCInterfaceFunctionFile<Operator>::compare( const BCInterfaceData<Operator>& dat
 // ===================================================
 template <typename Operator>
 inline void
-BCInterfaceFunctionFile<Operator>::loadData( const GetPot& dataFile )
+BCInterfaceFunctionFile<Operator>::LoadData( BCInterfaceData<Operator> data )
 {
+	std::vector<std::string> stringsVector;
+	boost::split( stringsVector, M_fileName, boost::is_any_of("[") );
+
+	//Load data from file
+	GetPot dataFile( stringsVector[0] );
 
 	//Set variables
 	UInt variablesNumber = dataFile.vector_variable_size( "variables" );
@@ -375,6 +344,24 @@ BCInterfaceFunctionFile<Operator>::loadData( const GetPot& dataFile )
 
 	//Initialize iterator
 	M_dataIterator = M_data[M_variables[0]].begin();
+
+
+
+	//Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunction
+	if ( stringsVector.size() < 2 )
+		data.SetBaseString( dataFile( "function", "Undefined" ) );
+	else
+	{
+		boost::replace_all( stringsVector[1], "]",  "" );
+		data.SetBaseString( dataFile( ("function"+stringsVector[1]).c_str(), "Undefined" ) );
+	}
+
+	// Now data contains the real base string
+	super::SetData( data );
+
+#ifdef DEBUG
+	Debug( 5022 ) << "                                             function: " << data.GetBaseString()  << "\n";
+#endif
 }
 
 
@@ -382,7 +369,7 @@ BCInterfaceFunctionFile<Operator>::loadData( const GetPot& dataFile )
 
 template <typename Operator>
 inline void
-BCInterfaceFunctionFile<Operator>::dataInterpolation( void )
+BCInterfaceFunctionFile<Operator>::DataInterpolation( void )
 {
 	//Get variable
 	Real X = super::M_parser->getVariable( M_variables[0] );

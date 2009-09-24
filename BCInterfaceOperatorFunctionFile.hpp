@@ -31,58 +31,33 @@
 #ifndef __BCInterfaceOperatorFunctionFile_H
 #define __BCInterfaceOperatorFunctionFile_H 1
 
-
-
-
-
-// ===================================================
-//! Include
-// ===================================================
 #include <life/lifecore/life.hpp>
 
 #include <lifemc/lifefem/BCInterfaceFunctionFile.hpp>
 #include <lifemc/lifefem/BCInterfaceOperatorFunction.hpp>
 
-
-
-
-
-// ===================================================
-//! Namespaces & Enums
-// ===================================================
 namespace LifeV {
 
-
-
-
-
+//! BCInterfaceOperatorFunctionFile - LifeV bcFunction wrapper for BCInterface (with Operators)
 /*!
- * \class BCInterfaceOperatorFunctionFile
- * \brief LifeV bcFunction wrapper for BCInterface (with Operators).
- *
  *  @author Cristiano Malossi
- *  @see
  *
  *  This class is an interface between BCInterface, SpiritParser and and a general
  *  LifeV operator (such as Oseen or FSIOperator). It allows to construct LifeV
  *  functions type for boundary conditions, using a GetPot file containing a function string and a
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *  The function string can contain Operator parameters.
- *
  */
 template <class Operator>
 class BCInterfaceOperatorFunctionFile : public virtual BCInterfaceFunctionFile<Operator>,
 										public virtual BCInterfaceOperatorFunction<Operator>
-//     :
-//     public LifeV::Application
 {
 public:
 
 	typedef BCInterfaceFunctionFile<Operator>		super1;
 	typedef BCInterfaceOperatorFunction<Operator>	super2;
 
-	/** @name Constructors & Destructor
-     */
+	//! @name Constructors & Destructor
     //@{
 
     //! Constructor
@@ -107,27 +82,26 @@ public:
 
 
 
-    /** @name Methods
-     */
+	//! @name Methods
     //@{
 
     //! Operator =
     /*!
-     * \param function			- BCInterfaceOperatorFunctionFile
+     * \param function - BCInterfaceOperatorFunctionFile
      */
     virtual BCInterfaceOperatorFunctionFile& operator=( const BCInterfaceOperatorFunctionFile& function );
 
     //! Set data
     /*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-    virtual void setData( const BCInterfaceData<Operator>& data );
+    virtual void SetData( const BCInterfaceData<Operator>& data );
 
 	//! Compare function
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-    virtual bool compare( const BCInterfaceData<Operator>& data );
+    virtual bool Compare( const BCInterfaceData<Operator>& data );
 
     //@}
 
@@ -171,7 +145,7 @@ BCInterfaceOperatorFunctionFile<Operator>::BCInterfaceOperatorFunctionFile( cons
 	Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::BCInterfaceOperatorFunctionFile( data )" << "\n";
 #endif
 
-	this->setData( data );
+	this->SetData( data );
 }
 
 
@@ -208,24 +182,28 @@ BCInterfaceOperatorFunctionFile<Operator>::operator=( const BCInterfaceOperatorF
 
 template <class Operator>
 void
-BCInterfaceOperatorFunctionFile<Operator>::setData( const BCInterfaceData<Operator>& data )
+BCInterfaceOperatorFunctionFile<Operator>::SetData( const BCInterfaceData<Operator>& data )
 {
 
 #ifdef DEBUG
 	Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::setData" << "\n";
 #endif
+	super1::SetData( data );
 
-	super1::setData( data );
-	super2::setData( data );
+	//super2::SetData( data ); Cannot call directly, because it call again BCInterfaceFunction::setup( data )
+	super2::M_operator	= data.GetOperator();
+	super2::M_flag		= data.GetFlag();
+
+	super2::CreateAccessList();
 }
 
 
 
 template <class Operator>
 bool
-BCInterfaceOperatorFunctionFile<Operator>::compare( const BCInterfaceData<Operator>& data )
+BCInterfaceOperatorFunctionFile<Operator>::Compare( const BCInterfaceData<Operator>& data )
 {
-	return super1::M_fileName.compare( data.get_baseString() ) == 0 && super1::M_comV == data.get_comV() && super2::M_flag == data.get_flag();
+	return super1::M_fileName.compare( data.GetBaseString() ) == 0 && super1::M_comV == data.GetComV() && super2::M_flag == data.GetFlag();
 }
 
 } // Namespace LifeV

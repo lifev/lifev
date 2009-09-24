@@ -31,13 +31,6 @@
 #ifndef __BCInterfaceFunction_H
 #define __BCInterfaceFunction_H 1
 
-
-
-
-
-// ===================================================
-//! Include
-// ===================================================
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcFunction.hpp>
 
@@ -46,30 +39,14 @@
 #include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifecore/SpiritParser.hpp>
 
-
-
-
-
-// ===================================================
-//! Namespaces & Enums
-// ===================================================
 namespace LifeV {
 
-
-
-
-
+//! BCInterfaceFunction - LifeV bcFunction wrapper for BCInterface
 /*!
- * \class BCInterfaceFunction
- * \brief LifeV bcFunction wrapper for BCInterface.
- *
  *  @author Cristiano Malossi
- *  @see
  *
  *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
  *  functions type for boundary conditions, using a functions string loaded from a GetPot file.
- *
- *
  *
  *  <b>DETAILS:</b>
  *
@@ -105,8 +82,6 @@ namespace LifeV {
  */
 template <typename Operator>
 class BCInterfaceFunction
-//     :
-//     public LifeV::Application
 {
 public:
 
@@ -116,8 +91,7 @@ public:
 									Real const& z,
 									ID 	 const& id	)> 	function_type;
 
-	/** @name Constructors & Destructor
-     */
+	//! @name Constructors & Destructor
     //@{
 
 	//! Empty Constructor
@@ -125,13 +99,13 @@ public:
 
 	//! Constructor
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
 	BCInterfaceFunction( const BCInterfaceData<Operator>& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function			- BCInterfaceFunction
+	 * \param function - BCInterfaceFunction
 	 */
 	BCInterfaceFunction( const BCInterfaceFunction& function );
 
@@ -142,37 +116,36 @@ public:
 
 
 
-    /** @name Methods
-     */
+    //! @name Methods
     //@{
 
     //! Operator =
     /*!
-     * \param function			- BCInterfaceFunction
+     * \param function - BCInterfaceFunction
      */
     virtual BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
 
     //! Set data
     /*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-    virtual void setData( const BCInterfaceData<Operator>& data );
+    virtual void SetData( const BCInterfaceData<Operator>& data );
 
 	//! Compare function
 	/*!
-	 * \param data				- BC data loaded from GetPot file
+	 * \param data - BC data loaded from GetPot file
 	 */
-    virtual bool compare( const BCInterfaceData<Operator>& data );
+    virtual bool Compare( const BCInterfaceData<Operator>& data );
 
     //@}
 
 
 
-    /** @name Get functions
-     */
+    //! @name Get functions
     //@{
 
-	BCFunctionBase& getBase() { return M_base; }
+	//! Get the base of the boundary condition
+	BCFunctionBase& GetBase() { return M_base; }
 
     //@}
 
@@ -182,15 +155,11 @@ protected:
 	BCComV												M_comV;
 	boost::shared_ptr<SpiritParser>						M_parser;
 
-	/** @name Protected functions
-	 */
+	//! @name Protected functions
 	//@{
 
 	//! dataInterpolation
-	virtual inline void dataInterpolation( void ) {}
-
-	//! addFSIVariables
-	virtual inline void addOperatorVariables( const Real& /*t*/ ) {}
+	virtual inline void DataInterpolation( void ) {}
 
     //@}
 
@@ -199,12 +168,11 @@ private:
 	BCFunctionBase 										M_base;
 	std::map<ID, ID>									M_mapID;
 
-	/** @name Private functions
-	 */
+	//! @name Private functions
 	//@{
 
     //! SetFunction
-    inline void setFunction( void );
+    inline void SetFunction( void );
 
     //! Function
     Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ );
@@ -258,7 +226,7 @@ BCInterfaceFunction<Operator>::BCInterfaceFunction( const BCInterfaceData<Operat
 	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
 #endif
 
-	this->setData( data );
+	this->SetData( data );
 }
 
 
@@ -300,33 +268,33 @@ BCInterfaceFunction<Operator>::operator=( const BCInterfaceFunction& function )
 
 template <typename Operator>
 void
-BCInterfaceFunction<Operator>::setData( const BCInterfaceData<Operator>& data )
+BCInterfaceFunction<Operator>::SetData( const BCInterfaceData<Operator>& data )
 {
 
 #ifdef DEBUG
 	Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
-	M_comV			= data.get_comV();
-	M_baseString	= data.get_baseString();
+	M_comV			= data.GetComV();
+	M_baseString	= data.GetBaseString();
 
 	//boost::shared_ptr<SpiritParser> emptyParser( );
 	//if ( M_parser == emptyParser )
 	if ( M_parser )
 		M_parser->setString( M_baseString );
 	else
-		M_parser.reset( new SpiritParser( M_baseString ) ); // INVERTITI
+		M_parser.reset( new SpiritParser( M_baseString ) );
 
-	setFunction();
+	SetFunction();
 }
 
 
 
 template <typename Operator>
 bool
-BCInterfaceFunction<Operator>::compare( const BCInterfaceData<Operator>& data )
+BCInterfaceFunction<Operator>::Compare( const BCInterfaceData<Operator>& data )
 {
-	return M_baseString.compare( data.get_baseString() ) == 0 && M_comV == data.get_comV();
+	return M_baseString.compare( data.GetBaseString() ) == 0 && M_comV == data.GetComV();
 }
 
 
@@ -338,7 +306,7 @@ BCInterfaceFunction<Operator>::compare( const BCInterfaceData<Operator>& data )
 // ===================================================
 template <typename Operator>
 inline void
-BCInterfaceFunction<Operator>::setFunction( void )
+BCInterfaceFunction<Operator>::SetFunction( void )
 {
 	/*
 	 * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
@@ -380,14 +348,6 @@ template <typename Operator>
 Real
 BCInterfaceFunction<Operator>::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ )
 {
-	M_parser->setVariable( "t", t );
-	M_parser->setVariable( "x", x );
-	M_parser->setVariable( "y", y );
-	M_parser->setVariable( "z", z );
-
-	this->dataInterpolation();
-
-	this->addOperatorVariables( t );
 
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
@@ -395,6 +355,17 @@ BCInterfaceFunction<Operator>::Function( const Real& t, const Real& x, const Rea
 	Debug( 5021 ) << "                                                           y: " << y  << "\n";
 	Debug( 5021 ) << "                                                           z: " << z  << "\n";
 	Debug( 5021 ) << "                                                           t: " << t  << "\n";
+#endif
+
+	M_parser->setVariable( "t", t );
+	M_parser->setVariable( "x", x );
+	M_parser->setVariable( "y", y );
+	M_parser->setVariable( "z", z );
+
+	this->DataInterpolation();
+
+#ifdef DEBUG
+	Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 )  << "\n";
 #endif
 
 	return M_parser->evaluate( 1 );
@@ -406,22 +377,24 @@ template <typename Operator>
 Real
 BCInterfaceFunction<Operator>::FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
 {
-	M_parser->setVariable( "t", t );
-	M_parser->setVariable( "x", x );
-	M_parser->setVariable( "y", y );
-	M_parser->setVariable( "z", z );
-
-	this->dataInterpolation();
-
-	this->addOperatorVariables( t );
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::FunctionID: " << "\n";
+	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
 	Debug( 5021 ) << "                                                           x: " << x  << "\n";
 	Debug( 5021 ) << "                                                           y: " << y  << "\n";
 	Debug( 5021 ) << "                                                           z: " << z  << "\n";
 	Debug( 5021 ) << "                                                           t: " << t  << "\n";
 	Debug( 5021 ) << "                                                          id: " << id  << "\n";
+#endif
+
+	M_parser->setVariable( "t", t );
+	M_parser->setVariable( "x", x );
+	M_parser->setVariable( "y", y );
+	M_parser->setVariable( "z", z );
+
+	this->DataInterpolation();
+
+#ifdef DEBUG
 	Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] )  << "\n";
 #endif
 

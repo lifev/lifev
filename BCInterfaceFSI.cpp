@@ -42,7 +42,7 @@ BCInterfaceFSI<FSIOperator>::BCInterfaceFSI( ) :
 {
 
 #ifdef DEBUG
-	Debug( 5029 ) << "BCInterfaceFSI::BCInterfaceFSI( void )" << "\n";
+	Debug( 5025 ) << "BCInterfaceFSI::BCInterfaceFSI( void )" << "\n";
 #endif
 
 }
@@ -56,10 +56,10 @@ BCInterfaceFSI<FSIOperator>::BCInterfaceFSI( const BCInterfaceData<FSIOperator>&
 {
 
 #ifdef DEBUG
-	Debug( 5029 ) << "BCInterfaceFSI::BCInterfaceFSI( data )" << "\n";
+	Debug( 5025 ) << "BCInterfaceFSI::BCInterfaceFSI( data )" << "\n";
 #endif
 
-	this->setData( data );
+	this->SetData( data );
 }
 
 
@@ -98,25 +98,25 @@ BCInterfaceFSI<FSIOperator>::operator=( const BCInterfaceFSI& fsi )
 
 
 void
-BCInterfaceFSI<FSIOperator>::setData( const BCInterfaceData<FSIOperator>& data )
+BCInterfaceFSI<FSIOperator>::SetData( const BCInterfaceData<FSIOperator>& data )
 {
 
 #ifdef DEBUG
-	Debug( 5029 ) << "BCInterfaceFSIFunctionFile::setData" << "\n";
+	Debug( 5025 ) << "BCInterfaceFSIFunctionFile::setData" << "\n";
 #endif
 
-	M_operator		= data.get_operator();
-	M_baseString	= data.get_baseString();
+	M_operator		= data.GetOperator();
+	M_baseString	= data.GetBaseString();
 
-	this->checkMethod();
+	this->CheckMethod();
 }
 
 
 
 bool
-BCInterfaceFSI<FSIOperator>::compare( const BCInterfaceData<FSIOperator>& data )
+BCInterfaceFSI<FSIOperator>::Compare( const BCInterfaceData<FSIOperator>& data )
 {
-	return	M_baseString.compare( data.get_baseString() ) == 0; //&& add compare for Operator!
+	return	M_baseString.compare( data.GetBaseString() ) == 0; //&& add compare for Operator!
 }
 
 
@@ -127,7 +127,7 @@ BCInterfaceFSI<FSIOperator>::compare( const BCInterfaceData<FSIOperator>& data )
 //! Private functions
 // ===================================================
 inline void
-BCInterfaceFSI<FSIOperator>::checkMethod( void )
+BCInterfaceFSI<FSIOperator>::CheckMethod( void )
 {
 	//Set mapMethod
 	M_mapMethod["exactJacobian"]	= EXACTJACOBIAN;
@@ -140,40 +140,40 @@ BCInterfaceFSI<FSIOperator>::checkMethod( void )
 			case EXACTJACOBIAN :
 
 #ifdef DEBUG
-				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            exactJacobian" << "\n";
+				Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
-				checkFunction<exactJacobian>();
+				CheckFunction<exactJacobian>();
 
 				break;
 
 			case FIXEDPOINT :
 
 #ifdef DEBUG
-				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            fixedPoint" << "\n";
+				Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
-				checkFunction<fixedPoint>();
+				CheckFunction<fixedPoint>();
 
 				break;
 
 			case MONOLITHIC :
 
 #ifdef DEBUG
-				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            monolithic" << "\n";
+				Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            monolithic" << "\n";
 #endif
 
-				//checkFunction<monolithic>();
+				//CheckFunction<monolithic>();
 
 				break;
 
 			case STEKLOVPOINCARE :
 
 #ifdef DEBUG
-				Debug( 5029 ) << "BCInterfaceFSI::checkMethod                            steklovPoincare" << "\n";
+				Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
-				//checkFunction<steklovPoincare>();
+				//CheckFunction<steklovPoincare>();
 
 				break;
 	}
