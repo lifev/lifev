@@ -43,6 +43,10 @@
 
 #include <life/lifemesh/basisElSh.hpp>
 
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
 #ifdef HAVE_MPI
 //headers useful only for reordering:
 #include "mpi.h"
@@ -176,18 +180,31 @@ namespace LifeV
 
 
 
-        //! \name Mesh movement utilities
+        /** @name Mesh transformation
+         */
+        //@{
 
-        /*! \author Miguel Fenrandez:11/2002
-          Utilities to implement mesh movement
-        */
-
+    	//! Utilities to implement mesh movement \author Miguel Fenrandez:11/2002
         /*! Move the mesh according to a given displacement stored in disp.
-          Disp is a 3*numpoints() vectore whcih stores the x-displacement first, then the y-displacements etc.
+          Disp is a 3*numpoints() vector which stores the x-displacement first, then the y-displacements etc.
           The VECTOR object must have a size() and a standard [] addressing operator.
-        */
+         */
         template <typename VECTOR>
         void moveMesh( const VECTOR & disp, int dim );
+
+    	//! Transform the mesh using boost::numeric::ublas; \author Cristiano Malossi:14/09/2009
+        /*! Scale, rotate and translate the mesh (operations performed in this order!).
+         *  NOTES:
+         *    -  Rotation follows Paraview conventions: first rotate around z-axis,
+         *       then around y-axis and finally around x-axis;
+         *    -  All the vectors must allow the command: operator[];
+         * \param scale        - vector of three components for (x,y,z) scaling of the mesh
+         * \param rotate       - vector of three components (radiants) for rotating the mesh
+         * \param translate    - vector of three components for (x,y,z) translation the mesh
+         */
+        template <typename VECTOR>
+        void transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate );
+
         //@}
 
         UInt numLocalVertices() const; //!< Number of local faces for each 3Delement
@@ -796,6 +813,56 @@ namespace LifeV
             }
         }
     }
+
+    template <typename GEOSHAPE, typename MC>
+    template <typename VECTOR>
+    void RegionMesh3D<GEOSHAPE, MC>::transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate )
+	{
+    	//Create the 3 planar rotation matrix and the scale matrix
+    	boost::numeric::ublas::matrix<Real> R(3,3), R1(3,3), R2(3,3), R3(3,3), S(3,3);
+
+    	R1(0,0) =  1.;             R1(0,1) =  0.;             R1(0,2) =  0.;
+    	R1(1,0) =  0.;             R1(1,1) =  cos(rotate[0]); R1(1,2) = -sin(rotate[0]);
+    	R1(2,0) =  0.;             R1(2,1) =  sin(rotate[0]); R1(2,2) =  cos(rotate[0]);
+
+    	R2(0,0) =  cos(rotate[1]); R2(0,1) =  0.;             R2(0,2) =  sin(rotate[1]);
+    	R2(1,0) =  0.;             R2(1,1) =  1.;             R2(1,2) = 0.;
+    	R2(2,0) = -sin(rotate[1]); R2(2,1) =  0.;             R2(2,2) =  cos(rotate[1]);
+
+    	R3(0,0) =  cos(rotate[2]); R3(0,1) = -sin(rotate[2]); R3(0,2) = 0.;
+    	R3(1,0) =  sin(rotate[2]); R3(1,1) =  cos(rotate[2]); R3(1,2) = 0.;
+    	R3(2,0) =  0;              R3(2,1) =  0.;             R3(2,2) = 1.;
+
+    	 S(0,0) = scale[0];         S(0,1) = 0.;               S(0,2) = 0.;
+    	 S(1,0) = 0.;               S(1,1) = scale[1];         S(1,2) = 0.;
+    	 S(2,0) = 0.;               S(2,1) = 0.;               S(2,2) = scale[2];
+
+    	//The total rotation is: R = R1*R2*R3 (as in Paraview we rotate first around z, then around y, and finally around x).
+    	//We also post-multiply by S to apply the scale before the rotation.
+    	R = prod( R3, S );
+    	R = prod( R2, R );
+    	R = prod( R1, R );
+
+    	//Create the 3D translate vector
+    	boost::numeric::ublas::vector<Real> P(3), T(3);
+    	T(0) = translate[0]; T(1) = translate[1];  T(2) = translate[2];
+
+    	//Apply the transformation
+		for ( UInt i(0); i < pointList.size(); ++i )
+		{
+			//P = pointList[ i ].coordinate(); // Try to avoid double copy if possible
+
+			P( 0 ) = pointList[ i ].coordinate( 1 );
+			P( 1 ) = pointList[ i ].coordinate( 2 );
+			P( 2 ) = pointList[ i ].coordinate( 3 );
+
+			P = T + prod( R, P );
+
+			pointList[ i ].coordinate( 1 ) = P( 0 );
+			pointList[ i ].coordinate( 2 ) = P( 1 );
+			pointList[ i ].coordinate( 3 ) = P( 2 );
+		}
+	}
 
     template <typename GEOSHAPE, typename MC>
     UInt

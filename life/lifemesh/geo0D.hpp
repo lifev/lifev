@@ -111,18 +111,26 @@ public:
 
         }
 
+    //!Another way to access coordinate data and modify them!
+    boost::array<Real,nDimensions>& coordinate ( void )
+	{
+		return _coor;
+	}
+
     //!Another way to access coordinate data
     Real coordinate ( ID const i ) const
-        {
-            ASSERT_BD( i > 0 && i <= NDIM ) ;
-            return _coor[ i -1 ]; // indexing from 1
-        }
+	{
+		ASSERT_BD( i > 0 && i <= NDIM ) ;
+		return _coor[ i -1 ]; // indexing from 1
+	}
+
     //!Another way to modify coordinate data
     Real & coordinate ( ID const i )
-        {
-            ASSERT_BD( i > 0 && i <= NDIM ) ;
-            return _coor[ i -1 ];
-        }
+	{
+		ASSERT_BD( i > 0 && i <= NDIM ) ;
+		return _coor[ i -1 ];
+	}
+
     //! Useful for debugging
     std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
