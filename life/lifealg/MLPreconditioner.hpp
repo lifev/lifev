@@ -133,7 +133,10 @@ createMLList( const GetPot&              dataFile,
 
 
 inline EpetraPreconditioner* createML(){return new MLPreconditioner(); }
-
+namespace
+{
+	static bool registerML = PRECFactory::instance().registerProduct( "ML", &createML );
+}
 
 
 } // namespace LifeV

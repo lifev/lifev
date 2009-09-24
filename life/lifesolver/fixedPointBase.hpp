@@ -102,6 +102,10 @@ private:
 
 
 inline FSIOperator* createFP(){ return new fixedPoint();}
+namespace
+{
+	static bool registerFP = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+}
 
 }
 

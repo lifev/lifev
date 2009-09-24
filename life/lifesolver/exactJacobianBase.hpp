@@ -233,6 +233,11 @@ Real fzeroEJ(const Real& t,
 
 inline FSIOperator* createEJ(){ return new exactJacobian(); }
 
+namespace
+{
+	static bool registerEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+}
+
 }
 
 #endif

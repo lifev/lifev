@@ -144,11 +144,11 @@ createIfpackList( const GetPot&              dataFile,
                   const std::string&         section,
                   Teuchos::ParameterList&    list);
 
-
-//IfpackPreconditioner::regIfpack = PRECFactory::instance().registerProduct( "Ifpack", &IfpackPreconditioner::createIfpack );
-
 inline EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
-
+namespace
+{
+	static bool registerIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+}
 
 // } // namespace Epetra
 } // namespace LifeV

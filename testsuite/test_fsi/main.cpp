@@ -26,16 +26,15 @@
 #include <cassert>
 #include <iomanip>
 
-#include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifealg/MLPreconditioner.hpp>
-
+//#include <life/lifealg/IfpackPreconditioner.hpp>
+//#include <life/lifealg/MLPreconditioner.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/chrono.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
-#include "life/lifesolver/exactJacobianBase.hpp"
-#include "life/lifesolver/fixedPointBase.hpp"
+//#include "life/lifesolver/exactJacobianBase.hpp"
+//#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
@@ -49,7 +48,7 @@
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
-
+/*
 namespace LifeV
 {
 namespace
@@ -60,6 +59,7 @@ namespace
 	static bool regEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 }
+*/
 using namespace LifeV;
 
 
@@ -277,26 +277,6 @@ public:
 
     	Real flux;
     	int _i = 1;
-
-    	//Real time=M_Tstart;
-
-		//if ( M_fsi->isFluid() )
-    	//{
-			//if (isFluidLeader) ofile << time << " ";
-			//flux = M_fsi->FSIOper()->fluid().flux(2);
-			//if (isFluidLeader) ofile << flux << " ";
-			//flux = M_fsi->FSIOper()->fluid().flux(3);
-			//if (isFluidLeader) ofile << flux << " ";
-			//flux = M_fsi->FSIOper()->fluid().pressure(2);
-			//if (isFluidLeader) ofile << flux << " ";
-			//flux = M_fsi->FSIOper()->fluid().pressure(3);
-			//if (isFluidLeader) ofile << flux << " " << std::endl;
-
-			//*M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
-			//*M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-
-			//M_ensightFluid->postProcess( time );
-		//}
 
     	for ( Real time = M_Tstart + dt; time <= T; time += dt, ++_i )
     	{
