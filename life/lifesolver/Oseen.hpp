@@ -231,6 +231,10 @@ public:
     // compute average pressure on a boundary face with given flag
     Real pressure(const EntityFlag& flag);
 
+    // return the density and the viscosity of the fluid
+    Real density()   const { return M_data.density(); }
+    Real viscosity() const { return M_data.viscosity(); }
+
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
 
