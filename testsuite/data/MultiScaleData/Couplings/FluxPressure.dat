@@ -1,0 +1,16 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-09-01
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: FluxPressure ########################################################################
+###################################################################################################
+
+[multiscale]
+couplingName	= FluxPressure

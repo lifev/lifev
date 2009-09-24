@@ -1,0 +1,27 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-09-01
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Cylinder Poiseuille Velocity Dynamic ############################
+###################################################################################################
+
+[multiscale]
+couplingName	= BoundaryCondition_CylinderPoiseuilleVelocityDynamic
+
+[boundary_conditions]
+list = 'ZPoiseuilleDynamic'
+
+	[./ZPoiseuilleDynamic]
+	type				= Essential
+	mode				= Component
+	component			= 3
+	OPERfunctionFile	= physicalFunctions/test_dynamicPoiseuilleVelocityPressure.dat[A]
+
+	[../]

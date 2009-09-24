@@ -1,0 +1,151 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-09-01
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: Fluid3D - Cylinder #####################################################################
+###################################################################################################
+
+[multiscale]
+modelName		= Fluid3D_Cylinder
+couplingFlags	= '2 3'
+
+
+
+[exporter]
+start			= 0             # start index for filenames
+save			= 1             # how many time steps per posptrocessing
+multimesh		= false         # true if the mesh has to be saved at each post-processing step
+
+
+
+[problem]
+semiImplicit	= false
+
+
+
+[fluid]
+useShapeDerivatives = false
+#diagonalBlockPrec	= false
+
+	[./physics] (SHOULD BE DEFINEED HERE ONLY FOR SPECIFIC CASE)
+	#density         = 1.0          # density   [kg/m^3] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
+	#viscosity       = 0.03			# viscosity [kg/m/s] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
+
+	[../time_discretization]
+	#timestep 		= 0.0001	# [s] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
+	BDF_order		= 1			# [s]
+
+	[../space_discretization]
+	mesh_dir		= ./Mesh/
+	mesh_file		= tube20.mesh
+	mesh_type		= .mesh
+	verbose			= 0             # verbose during mesh-reading
+	
+	vel_order		= P1Bubble			# P1, P1Bubble, P2
+	press_order		= P1		    # P1, P2
+	div_beta_u_v	= 1             # 1=on, 0=off
+	diagonalize		= 0             # weight, 0=off
+	#stabilization	= 'none'        # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
+
+	[../ipstab]
+	gammaBeta       = 0.125
+	gammaDiv        = 0.125
+	gammaPress      = 0.03125
+	reuse           = true
+
+	#[../valuespersection]
+	#computeMeanValuesPerSection	= 0
+	#nb_z_section					= 2
+	#tol_section					= 2e-2
+	#x_section_frontier				= .0
+	#z_section_init					= -1.0
+	#z_section_final				= .0
+	#nb_polygon_edges				= 10
+
+	[../solver]						# Solver Parameters
+	solver          = gmres
+	scaling         = none
+	output          = all # none
+	conv            = rhs
+	max_iter        = 100
+	kspace          = 100
+	tol             = 1.e-10
+	
+	[../prec]
+	prectype                = Ifpack
+	reuse                   = false
+	displayList             = true
+		
+        [./ifpack]
+		overlap				= 3 #ok
+		prectype			= Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+			[./relaxation]
+			type                   = Jacobi
+			sweeps                 = 1
+			damping_factor         = 1.
+			min_diagonal_value     = 0
+			zero_starting_solution = true
+			
+			[../partitioner]
+			type					= metis
+           	overlap					= 2
+           	local_parts				= 1
+           	root_node				= 0
+           	use_symmetric_graph		= true
+
+          	[../amesos]
+           	solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+           	
+          	[../fact]
+          	level-of-fill		= 4
+          	ilut_level-of-fill	= 4
+          	absolute_threshold	= 0
+          	relative_threshold	= 1
+          	relax_value			= 0
+           	drop_tolerance		= 1.e-5
+
+           	[../schwarz]
+           	combine_mode		= 0 # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+           	compute_condest		= true
+           	reordering_type		= none       #none, metis, rcm
+           	filter_singletons	= true
+
+			[../]
+
+		[../]
+	
+	[../boundary_conditions]
+	list = 'Wall InletRing OutletRing'
+
+		[./Wall]
+		type       = Essential
+		flag       = 1
+		mode       = Full
+		component  = 3
+		function   = 0
+
+		[../InletRing]
+		type       = Essential
+		flag       = 20
+		mode       = Full
+		component  = 3
+		function   = 0
+		
+		[../OutletRing]
+		type       = Essential
+		flag       = 30
+		mode       = Full
+		component  = 3
+		function   = 0
+
+		[../]
+		
+	[../]
