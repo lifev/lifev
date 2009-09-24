@@ -264,26 +264,23 @@ bool BCHandler::bdUpdateDone() const
 bool BCHandler::hasOnlyEssential() const
 {
     if ( empty() )
+    	return M_hint == HINT_BC_ONLY_ESSENTIAL;
+    else if ( M_hint == HINT_BC_ONLY_ESSENTIAL )
     {
-        return M_hint == HINT_BC_ONLY_ESSENTIAL;
-    }
-    else
-    {
-        bool storedOnlyEssential = ( M_hint == HINT_BC_ONLY_ESSENTIAL );
-        bool listOnlyEssential = listHasOnlyEssential();
-
-        if ( listOnlyEssential != storedOnlyEssential )
+        if ( listHasOnlyEssential() != true )
         {
             std::ostringstream __ex;
             __ex << "BCHandler::hasOnlyEssential(): state is not consistent:"
-                 << "\nhint from constructor says    " << storedOnlyEssential
-                 << "\nadded boundary conditions say " << listOnlyEssential;
+                 << "\nhint from constructor says:    yes"
+                 << "\nadded boundary conditions say: no";
             std::cerr << std::endl << "Throwing exception:\n"
                       << __ex.str() << std::endl;
             throw std::logic_error( __ex.str() );
         }
-        return storedOnlyEssential;
+        return true;
     }
+
+    return listHasOnlyEssential();
 }
 
 
