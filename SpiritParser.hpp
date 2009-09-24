@@ -33,14 +33,8 @@
 #ifndef __SpiritParser_H
 #define __SpiritParser_H 1
 
-
-
-
-
-// ===================================================
-//! Include
-// ===================================================
 #include <life/lifecore/life.hpp>
+#include <life/lifearray/tab.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit.hpp>
@@ -48,22 +42,11 @@
 
 #include <iomanip>
 
-
-
-
-
-// ===================================================
-//! Namespaces & Enums
-// ===================================================
 namespace LifeV {
 
 typedef std::map<std::string, Real>		variables_type;
 typedef std::vector<Real>				results_type;
 typedef std::vector<std::string>        string_type;
-
-
-
-
 
 /*!
  * \class SpiritCalculator
@@ -163,15 +146,14 @@ public:
     {
     public:
 
-        definition(SpiritCalculator const& self)
+        definition( const SpiritCalculator& self )
         {
             using namespace boost::spirit;
             using namespace phoenix;
 
             statement = ( assignment
                         | command
-                        | expression_vector
-                        | signed_expression[bind(&SpiritCalculator::setResult)(self, arg1)]
+                        | operation
                         ) >> (end_p | ';');
 
             assignment = identifier[assignment.name = arg1] >> '=' >> expression[assignment.value = arg1]
@@ -179,63 +161,68 @@ public:
 
             command = as_lower_d["showme"][bind(&SpiritCalculator::showMeVariables)(self)];
 
-            expression_vector = '(' >> ( signed_expression[bind(&SpiritCalculator::setResult)(self, arg1)]
-                                         >> *(',' >> signed_expression[bind(&SpiritCalculator::setResult)(self, arg1)])
+            operation = ( expression[bind(&SpiritCalculator::setResult)(self, arg1)]
+                        | expression_vector
+                        );
+
+            expression_vector = '(' >> ( expression[bind(&SpiritCalculator::setResult)(self, arg1)]
+                                         >> *(',' >> expression[bind(&SpiritCalculator::setResult)(self, arg1)])
                                        ) >> ')';
 
-            signed_expression = ( '-' >> ( expression[signed_expression.value=-arg1] )
-                                |        ( expression[signed_expression.value=arg1] )
-                                );
+            expression = term[expression.value = arg1] >> *( lowOperations[expression.value = arg1] );
 
-            expression = term[expression.value = arg1] >> *( ('+' >> term[expression.value += arg1])
-                                                           | ('-' >> term[expression.value -= arg1])
-                                                           );
+            term = subterm[term.value = arg1] >> *( midOperations[term.value = arg1] );
 
-            term = factor[term.value = arg1]
-                 >> *( ('*' >> factor[term.value *= arg1])
-                     | ('/' >> factor[term.value /= arg1])
-                     | ('^' >> factor[term.value = bind(&SpiritCalculator::pow)(self, term.value, arg1)])
-                     | ('>' >> factor[term.value = bind(&SpiritCalculator::more)(self, term.value, arg1)])
-                     | ('<' >> factor[term.value = bind(&SpiritCalculator::less)(self, term.value, arg1)])
+            subterm = factor[subterm.value = arg1] >> *( topOperations[subterm.value = arg1] );
+
+            lowOperations = ('+' >> term[lowOperations.value += arg1])
+                          | ('-' >> term[lowOperations.value -= arg1]);
+
+            midOperations = ('*' >> subterm[midOperations.value *= arg1])
+                          | ('/' >> subterm[midOperations.value /= arg1]);
+
+            topOperations =  ('^' >> factor[topOperations.value = bind(&SpiritCalculator::pow)(self, topOperations.value, arg1)])
+                           | ('>' >> factor[topOperations.value = bind(&SpiritCalculator::more)(self, topOperations.value, arg1)])
+                           | ('<' >> factor[topOperations.value = bind(&SpiritCalculator::less)(self, topOperations.value, arg1)]);
+
+            factor = ( literal[factor.value = arg1]
+                     | function[factor.value = arg1]
+                     | identifier[factor.value = bind(&SpiritCalculator::lookup)(self, arg1)]
+                     | group[factor.value = arg1]
                      );
-
-            factor = literal[factor.value = arg1]
-                   | group[factor.value = arg1]
-                   | function[factor.value = arg1]
-                   | identifier[factor.value = bind(&SpiritCalculator::lookup)(self, arg1)];
 
             literal = longest_d[ int_p[literal.value = arg1] | real_p[literal.value = arg1] ];
 
-            group = '(' >> expression[group.value = arg1] >> ')';
-
-            function = ('Q' >> group[function.value = bind(&SpiritCalculator::sqrt)(self, arg1)])
-                     | ('E' >> group[function.value = bind(&SpiritCalculator::exp)(self, arg1)])
-                     | ('L' >> group[function.value = bind(&SpiritCalculator::log)(self, arg1)])
-                     | ('M' >> group[function.value = bind(&SpiritCalculator::log10)(self, arg1)])
-                     | ("S" >> group[function.value = bind(&SpiritCalculator::sin)(self, arg1)])
-                     | ('C' >> group[function.value = bind(&SpiritCalculator::cos)(self, arg1)])
-                     | ('T' >> group[function.value = bind(&SpiritCalculator::tan)(self, arg1)]);
-
+            function = ( ("S" >> group[function.value = bind(&SpiritCalculator::sin)(self, arg1)])
+                       | ('C' >> group[function.value = bind(&SpiritCalculator::cos)(self, arg1)])
+                       | ('T' >> group[function.value = bind(&SpiritCalculator::tan)(self, arg1)])
+                       | ('Q' >> group[function.value = bind(&SpiritCalculator::sqrt)(self, arg1)])
+                       | ('E' >> group[function.value = bind(&SpiritCalculator::exp)(self, arg1)])
+                       | ('L' >> group[function.value = bind(&SpiritCalculator::log)(self, arg1)])
+                       | ('M' >> group[function.value = bind(&SpiritCalculator::log10)(self, arg1)])
+                       );
             identifier = lexeme_d[ ( alpha_p | '_') >> *( alnum_p | '_') ]
-                                 [identifier.name = construct_<std::string>(arg1, arg2)];
+                                             [identifier.name = construct_<std::string>(arg1, arg2)];
+
+            group = '(' >> expression[group.value = arg1] >> ')';
     	}
 
         boost::spirit::rule<ScannerT> const&
         start() const { return statement; }
 
-        boost::spirit::rule<ScannerT> 								 command, statement, expression_vector;
+        boost::spirit::rule<ScannerT> 								 statement, command, operation, expression_vector;
         boost::spirit::rule<ScannerT, assignment_closure::context_t> assignment;
         boost::spirit::rule<ScannerT,	  string_closure::context_t> identifier;
-        boost::spirit::rule<ScannerT,	   value_closure::context_t> signed_expression, expression, term, factor, function, literal, group;
+        boost::spirit::rule<ScannerT,	   value_closure::context_t> expression, topOperations, midOperations, lowOperations, term, subterm, factor, function, literal, group;
     };
 
     // Member functions that are called in semantic actions.
-    void define(const std::string& name, const Real value) const
+    inline void define(const std::string& name, const Real& value) const
     {
     	M_variables[name] = value;
     }
 
-    void showMeVariables() const
+    inline void showMeVariables() const
     {
     	variables_type::const_iterator it;
 
@@ -246,7 +233,7 @@ public:
     	std::cout << std::endl;
     }
 
-    Real lookup(const std::string& name) const
+    inline Real lookup(const std::string& name) const
     {
     	if (M_variables.find(name) == M_variables.end())
     	{
@@ -257,57 +244,57 @@ public:
     		return M_variables.find(name)->second;
     }
 
-    Real pow( const Real a, const Real b ) const
+    inline Real pow( const Real& a, const Real& b ) const
     {
 		return std::pow(a,b);
     }
 
-    Real more( const Real a, const Real b ) const
+    inline Real more( const Real& a, const Real& b ) const
     {
 		return a > b;
     }
 
-    Real less( const Real a, const Real b ) const
+    inline Real less( const Real& a, const Real& b ) const
     {
 		return a < b;
     }
 
-    Real sqrt( const Real a ) const
+    inline Real sqrt( const Real& a ) const
     {
     	return std::sqrt(a);
     }
 
-    Real exp( const Real a ) const
+    inline Real exp( const Real& a ) const
     {
     	return std::exp(a);
     }
 
-    Real log( const Real a ) const
+    inline Real log( const Real& a ) const
     {
     	return std::log(a);
     }
 
-    Real log10( const Real a ) const
+    inline Real log10( const Real& a ) const
     {
     	return std::log10(a);
     }
 
-    Real sin( const Real a ) const
+    inline Real sin( const Real& a ) const
     {
     	return std::sin(a);
     }
 
-    Real cos( const Real a ) const
+    inline Real cos( const Real& a ) const
     {
     	return std::cos(a);
     }
 
-    Real tan( const Real a ) const
+    inline Real tan( const Real& a ) const
     {
     	return std::tan(a);
     }
 
-    void setResult( const Real result) const
+    inline void setResult( const Real& result) const
     {
     	M_results[M_nResults] = result;
     	M_nResults++;
@@ -338,10 +325,6 @@ class SpiritParser
 {
 public:
 
-	// ===================================================
-	//! Public functions
-	// ===================================================
-
     /** @name Constructors & Destructor
      */
     //@{
@@ -366,12 +349,6 @@ public:
      */
 	SpiritParser( const SpiritParser& parser );
 
-	//! Operator =
-	/*!
-	 * \param Parser			- SpiritParser
-     */
-	SpiritParser& operator=( const SpiritParser& parser );
-
     //! Destructor
     ~SpiritParser()
     {
@@ -385,6 +362,13 @@ public:
      */
 
     //@{
+
+	//! Operator =
+	/*!
+	 * \param Parser			- SpiritParser
+     */
+	SpiritParser& operator=( const SpiritParser& parser );
+
     /*! Set string function
      *
      * \param string			- Expression to evaluate
@@ -411,7 +395,7 @@ public:
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
-     * \param substring			- Stringa da cercare
+     * \param substring			- string to find
      */
 	UInt countSubstring( const std::string& substring );
 
@@ -421,22 +405,12 @@ public:
 
 private:
 
-	// ===================================================
-	//! Private variables
-	// ===================================================
-
 	string_type											M_strings;
 	variables_type										M_variables;
 	results_type										M_results;
 	UInt												M_nResults;
 	SpiritCalculator									M_calculator;
 	bool												M_applyRules;
-
-
-
-	// ===================================================
-	//! Private functions
-	// ===================================================
 
     /** @name Private functions
      */

@@ -76,8 +76,6 @@ SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) 
 	setString( string );
 }
 
-
-
 SpiritParser::SpiritParser( const SpiritParser& parser ) :
 	M_strings 					( parser.M_strings ),
 	M_variables					( parser.M_variables ),
@@ -90,6 +88,9 @@ SpiritParser::SpiritParser( const SpiritParser& parser ) :
 
 
 
+// ===================================================
+//! Methods
+// ===================================================
 SpiritParser&
 SpiritParser::operator=( const SpiritParser& parser )
 {
@@ -106,13 +107,6 @@ SpiritParser::operator=( const SpiritParser& parser )
 	return *this;
 }
 
-
-
-
-
-// ===================================================
-//! Methods
-// ===================================================
 void
 SpiritParser::setString( const std::string& string, const std::string& stringSeparator )
 {
@@ -133,8 +127,6 @@ SpiritParser::setString( const std::string& string, const std::string& stringSep
 	setupResults();
 }
 
-
-
 void
 SpiritParser::setVariable( const std::string& name, const Real& value )
 {
@@ -145,8 +137,6 @@ SpiritParser::setVariable( const std::string& name, const Real& value )
 	M_variables[name] = value;
 }
 
-
-
 const Real&
 SpiritParser::getVariable( const std::string& name )
 {
@@ -156,8 +146,6 @@ SpiritParser::getVariable( const std::string& name )
 
 	return M_variables[name];
 }
-
-
 
 const Real&
 SpiritParser::evaluate( const UInt& ID )
@@ -173,8 +161,6 @@ SpiritParser::evaluate( const UInt& ID )
 
 	return M_results[ID - 1];
 }
-
-
 
 UInt
 SpiritParser::countSubstring( const std::string& substring )
@@ -198,17 +184,16 @@ SpiritParser::countSubstring( const std::string& substring )
 
 
 
-
-
 // ===================================================
 //! Private functions
 // ===================================================
 inline void
 SpiritParser::setDefaultVariables( void )
 {
-	setVariable( "pi", 3.141592653589793 );
-	setVariable( "e" , 2.718281828459046 );
+	setVariable( "pi", Pi );
+	//setVariable( "pi", 3.141592653589793 );
 	//setVariable( "pi", 3.1415926535897932384626433832795 ); //Better only with long double!
+	setVariable( "e" , 2.718281828459046 );
 }
 
 
@@ -231,8 +216,6 @@ SpiritParser::setupResults( void )
 	//M_results.reserve( tempVectorString.size() );
 }
 
-
-
 inline void
 SpiritParser::ruleTheString( std::string& string )
 {
@@ -243,6 +226,13 @@ SpiritParser::ruleTheString( std::string& string )
 
 	// Remove spaces from the string
 	boost::replace_all( string, " ",  "" );
+
+	// Solve the problem of signed expressions
+	boost::replace_all( string, "(-",  "(-1*" );
+	boost::replace_all( string, ",-",  ",-1*" );
+	boost::replace_all( string, "=-",  "=-1*" );
+	if ( string[0] == '-' )
+		string.insert(1,"1*");
 
 	// Convert the string to lower case
 	boost::to_lower( string );
@@ -255,6 +245,9 @@ SpiritParser::ruleTheString( std::string& string )
 	boost::replace_all( string, "sin",   "S" );
 	boost::replace_all( string, "cos",   "C" );
 	boost::replace_all( string, "tan",   "T" );
+
+	//Apply exceptions for the parser
+	boost::replace_all( string, "visCity",   "viscosity" );
 
 #ifdef DEBUG
 	Debug( 5030 ) << "                         (after) - string: " << string 	<< "\n";
