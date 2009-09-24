@@ -1,0 +1,29 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-09-24
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MULTISCALE INSTRUCTIONS #######################################################################
+###################################################################################################
+
+Inside the test multiscale folder (mathcard-cvs/testsuite/test_MultiScale) there isn't any data file,
+in fact all the data are placed into "mathcard-cvs/data/MultiScaleData".
+
+To run a simulation type:
+
+make check
+make link
+
+./test_MS -f MultiScaleData/MultiScale_*.dat
+
+where you have to replace * with the name of the problem (for example "3Dserial3" for three tube
+connected in serial).
+
+After ./test_MS you can specify the following option:
+-f (--file):   to specify the file
+-s (--showme): to turn on verbose mode (available parameters: 0, 1)
