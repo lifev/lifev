@@ -437,6 +437,8 @@ Cylinder::run()
     bcH.addBC( "RingIn",   RINGIN,  Essential,   Full,      uZero, 3 );
     bcH.addBC( "RingOut",  RINGOUT, Essential,   Full,      uZero, 3 );
 #endif
+    bcH.showMe();
+    exit(2);
 
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
 

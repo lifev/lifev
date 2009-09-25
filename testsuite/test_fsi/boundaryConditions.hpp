@@ -100,17 +100,19 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
 
     BCFunctionBase bcf           (fZero);
     BCFunctionBase in_flow       (u2);
-    BCFunctionBase in_flow_flux  (PhysFlux);
+    //    BCFunctionBase in_flow_flux  (PhysFlux);
     BCFunctionBase out_flow      (fZero);
 
-
+    /*  
 #ifdef FLUX
     BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
 #else
     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
 #endif
+    */
 
-    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
+    BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
+    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, bcf, 3);
     BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
     BCh_fluid->addBC("EdgesOut", 30, Essential, Full, bcf,  3);
 
