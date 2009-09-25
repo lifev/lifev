@@ -68,9 +68,9 @@
 namespace LifeV
 {
 /** Boundary condition basic types
-    Essential, Natural or Mixte
+    Essential, Natural, Mixte, Flux, Resistance,
 */
-  enum BCType{Essential, Natural, Mixte, Flux};
+  enum BCType{Essential, Natural, Mixte, Flux, Resistance};
 //    ,UDepEssential,UDepNatural,UDepMixte};
 
 /** Type for boundary conditions application modes
@@ -315,6 +315,15 @@ public:
     */
     bool finalised() const;
 
+
+    /**
+       Returns wether the list of vertex is finalised and the vector of IdGlobal's is
+       then accessible.
+    */
+
+    bool finalisedIdGlobal() const;
+
+
     //! Overloading function operator by calling the _M_bcf() user specified function
     /*!
       \param t time
@@ -383,6 +392,9 @@ public:
      //! Returns the value of the mixte coefficient (in BC Vector)
     Real mixteCoef() const;
 
+    //! Returns the value of the mixte coefficient (in BC Vector)
+    Real resistanceCoef() const;
+
     //! Returns the value of the beta coefficient (in BC Vector)
     Real betaCoef() const;
 
@@ -405,9 +417,18 @@ public:
     //! Add a new indentifier in the list
     void addIdentifier( IdentifierBase* );
 
+   //! Add a new indentifier in the list of IdGlobal
+   void addIdentifierIdGlobal( IdentifierBase* );
+
     //! Returns the liste size
     UInt list_size() const;
+ 
+   //! Returns the liste size of IdGlobal 
+   UInt list_size_IdGlobal() const;
 
+   //! Returns element of list_IdGlobal
+   int IdGlobal( int id) const;
+   
     //! Set the offset
     void setOffset(int offset) {_M_offset = offset;}
 
@@ -466,19 +487,33 @@ private:
     //! to which the BC applies
     std::set<boost::shared_ptr<IdentifierBase>, identifierComp> list0;
 
+    //! set of pointers to identifiers allowing the user to get hold the DOF
+    //! to which the BC applies
+    std::set<boost::shared_ptr<IdentifierBase>, identifierComp> listIdGlobal;
+
+    //! the list of IdGlobal 
+    std::vector<int> _M_IdGlobal;
+
     //! container for id's when the list is finalised
     std::vector<boost::shared_ptr<IdentifierBase> > _M_idList;
 
+    //! container for id's when the list is finalised
+    std::vector<boost::shared_ptr<IdentifierBase> > _M_IdGlobalList;
+
     //! true, when idlist updated
     bool _M_finalised;
+
+    //! true, when IdGloballist updated
+    bool _M_finalisedIdGlobal;
 
     //! BC offset
     int _M_offset;
 
     //! Transfert between list and vector containers
     void finalise();
-
-
+  
+    //! Transfert between list and vector containers
+    void  finaliseIdGlobal();
 };
 
 

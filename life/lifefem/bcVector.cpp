@@ -40,6 +40,7 @@ namespace LifeV
 BCVectorBase::BCVectorBase()
     :
    _M_mixteCoef( 0.0 ),
+   _M_resistanceCoef( 0.0 ),
    _M_betaCoef(1.0),
    _M_gammaCoef(1.0),
    _M_ismixteVec( false ),
@@ -55,6 +56,7 @@ BCVectorBase::BCVectorBase( const EpetraVector& vec, const UInt nbTotalDof, UInt
     _M_vec       ( &vec ),
     _M_nbTotalDof( nbTotalDof ),
     _M_mixteCoef ( 0.0 ),
+    _M_resistanceCoef( 0.0 ),
     _M_betaCoef(1.0),
     _M_gammaCoef(1.0),
     _M_ismixteVec( false ),
@@ -73,6 +75,7 @@ BCVectorBase::operator=( BCVectorBase const& __bcv )
     _M_vec        = __bcv._M_vec;
     _M_nbTotalDof = __bcv._M_nbTotalDof;
     _M_mixteCoef  = __bcv._M_mixteCoef;
+    _M_resistanceCoef  = __bcv._M_resistanceCoef;
     _M_betaCoef   = __bcv._M_betaCoef;
     _M_gammaCoef  = __bcv._M_gammaCoef;
     _M_type       = __bcv._M_type;
@@ -205,6 +208,7 @@ void BCVectorInterface::setup( const EpetraVector& vec, UInt nbTotalDof, dof_int
     _M_vec        = &vec;
     _M_nbTotalDof = nbTotalDof;
     _M_mixteCoef  = 0.0;
+    _M_resistanceCoef  = 0.0;
     _M_betaCoef   = 1.0;
     _M_gammaCoef  = 1.0;
     _M_type       = type;

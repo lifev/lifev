@@ -576,16 +576,27 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 //                                                             std::cout << "adding flux identifier " << gDof << std::endl;
 //                                                             where->addIdentifier( new IdentifierNatural( gDof ) );
                                                         }
-                                                    break;
-                                                default:
-                                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
-                                                }
-                                        }
+                                                  break;
+						case Resistance:
+						
+						  if ( where->dataVector() )
+		     				  
+						  where->addIdentifierIdGlobal( new IdentifierNatural( gDof ) );
+						
+						  else
+						    { // With user defined functions
+						      // feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+						      //where->addIdentifierIdGlobal( new IdentifierEssential( gDof, x, y, z ) );
+						    }
+                                                    break;	                                                
+						default:
+					            ERROR_MSG( "This boundary condition type is not yet implemented" );
+						}
+					}
                                 }
                         }
                 }
-
-
+    
 
             // ===================================================
             // Edge based Dof
@@ -669,17 +680,25 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                                         }
                                                     break;
                                                 case Flux:
-
-                                                    break;
+						  break;
+						case Resistance:
+						  // Which kind of data ?
+						  if ( where->dataVector() )
+						    { // With data vector
+						      where->addIdentifier( new IdentifierNatural( gDof ) );
+						      
+						      where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
+						    }
+						  break;
                                                 default:
-                                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
+						  ERROR_MSG( "This boundary condition type is not yet implemented" );
                                                 }
                                         }
                                 }
                         }
                 }
-
-
+	    
+	    
 #ifndef TWODIM
             // ===================================================
             // Face based Dof
@@ -798,33 +817,48 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 //                             std::cout << std::endl;
                             where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                             break;
-                        default:
-                            ERROR_MSG( "This boundary condition type is not yet implemented" );
+			
+			case Resistance:
+                          if ( where->dataVector()  ) 
+			  {
+				 
+			   for ( ID l = 1; l <= nDofPerFace; ++l )
+			     {
+			       lDof = nDofBElE + nDofBElV + l; // local Dof
+			       gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+			       where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
+			       bdltg( lDof ) = gDof; // local to global on this face
+			     }
+			   where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+			  }
+			  break;
+			default:
+			  ERROR_MSG( "This boundary condition type is not yet implemented" );
                         }
                 }
-
+	    
 #endif
         }
-
+    
     std::set<EntityFlag> notFoundMarkersNew;
-
+    
     for( std::set<EntityFlag>::iterator it = notFoundMarkersCurrent.begin(); it != notFoundMarkersCurrent.end(); ++it )
         {
-            if ( M_notFoundMarkers.find( *it ) == M_notFoundMarkers.end() )
-                {
-                    notFoundMarkersNew.insert( *it );
-                }
+	  if ( M_notFoundMarkers.find( *it ) == M_notFoundMarkers.end() )
+	    {
+	      notFoundMarkersNew.insert( *it );
+	    }
         }
-
-
+    
+    
     if( notFoundMarkersNew.size() > 0 )
-        {
-            std::cerr <<
-                "WARNING -- BCHandler::bdUpdate()\n" <<
-                "  boundary degrees of freedom with the following markers\n" <<
-                "  have no boundary condition set: ";
-            for( std::set<EntityFlag>::iterator it = notFoundMarkersNew.begin();
-                 it != notFoundMarkersNew.end(); ++it )
+      {
+	std::cerr <<
+	  "WARNING -- BCHandler::bdUpdate()\n" <<
+	  "  boundary degrees of freedom with the following markers\n" <<
+	  "  have no boundary condition set: ";
+	for( std::set<EntityFlag>::iterator it = notFoundMarkersNew.begin();
+	     it != notFoundMarkersNew.end(); ++it )
                 {
                     std::cerr << *it << " ";
                 }
@@ -840,6 +874,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     for ( Iterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
         {
             it->finalise();
+	    it->finaliseIdGlobal();
         }
 
     M_bdUpdateDone = true;

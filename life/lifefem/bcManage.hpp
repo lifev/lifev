@@ -203,6 +203,9 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
                 case Flux:
                     bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+BCh[i].offset());
                     break;
+		case Resistance: // Resistance boundary conditions (Resistance)
+                    bcResistanceManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
                 }
@@ -223,6 +226,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
                 case Natural:  // Natural boundary conditions (Neumann)
                 case Mixte:  // Mixte boundary conditions (Robin)
                 case Flux:
+		case Resistance:
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -2086,5 +2090,96 @@ void bcFluxManage( MatrixType&     A,
                 }
         }
 }
+
+
+template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
+void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
+{
+ 
+  // Number of local Dof in this face
+  UInt nDofF = bdfem.nbNode;
+  
+  // Number of total scalar Dof
+  UInt totalDof = dof.numTotalDof();
+  
+  // Number of components involved in this boundary condition
+  UInt nComp = BCb.numberOfComponents();
+  
+  DataType sum;
+  
+  const IdentifierNatural* pId;
+  ID ibF, idDof, jdDof, kdDof;
+  
+  if ( BCb.dataVector() )
+    {
+      //auxiliary vector 
+      VectorType vv(b.getMap(), Repeated);
+      
+      DataType  mbcb;
+      
+      // Loop on BC identifiers
+      for ( ID i = 1; i <= BCb.list_size(); ++i )
+	{
+	  // Pointer to the i-th identifier in the list
+	  pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+	  
+	  // Number of the current boundary face
+	  ibF = pId->id();
+	 
+	  bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) ); 
+	  
+	  // Loop on total Dof per Face
+	  for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+	    {  
+	      // Loop on components involved in this boundary condition
+	      for ( ID j = 1; j <= nComp; ++j )
+		{
+		  idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+		  
+		  // Loop on quadrature points
+		  for ( int l = 0; l < bdfem.nbQuadPt; ++l )
+		    {
+		      vv[idDof] += bdfem.phi( int( idofF-1 ), l ) *  bdfem.normal( int( j-1 ), l ) * bdfem.weightMeas( l );
+
+		      mbcb=0;
+
+		      // data on quadrature point
+		      for( ID n = 1; n <= nDofF; ++n)
+			{
+			  kdDof=pId->bdLocalToGlobal( n ); 
+			  mbcb += BCb( kdDof, BCb.component( j ) )* bdfem.phi( int( n - 1 ), l ) ;
+			}
+
+	  	        b[ idDof ] +=  mbcb* bdfem.phi( int( idofF - 1 ), l ) *  bdfem.normal( int( j-1 ), l ) * // BASEINDEX + 1
+			           bdfem.weightMeas( l );  
+	  	     
+		    }
+		}
+	    }
+	}
+
+      for ( UInt jj = 1; jj <= BCb.list_size_IdGlobal() ; jj++ )
+	{
+	  for ( UInt  j= 1; j <= nComp; ++j)
+	    {
+	      jdDof = BCb.IdGlobal( jj )  + ( BCb.component( j ) - 1 ) * totalDof + offset; 
+	      
+	      for (UInt kk = 1; kk <= BCb.list_size_IdGlobal() ; kk++) 
+		{
+		  for ( UInt k = 1; k <= nComp; ++k)
+		    { 
+		      kdDof = BCb.IdGlobal( kk )  + ( BCb.component( k ) - 1 ) * totalDof + offset;
+		      A.set_mat_inc( jdDof - 1,  kdDof - 1, BCb.resistanceCoef() * vv[jdDof] * vv[kdDof] );
+		    }
+		}
+	    }
+	}
+
+    }
+    else
+    ERROR_MSG( "This BC type is not yet implemented" );
+
+}
+
 }
 #endif

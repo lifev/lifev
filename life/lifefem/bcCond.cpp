@@ -462,6 +462,14 @@ bool BCBase::finalised() const
     return _M_finalised;
 }
 
+//! Returns wether the list is finalised and the vector of IdGlobal's is then accessible
+bool BCBase::finalisedIdGlobal() const
+{
+  return _M_finalisedIdGlobal;
+} 
+
+
+
 //! Overloading function operator by calling the (*_M_bcf)() user specified function
 Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
                            const Real& z, const ID& i ) const
@@ -554,6 +562,21 @@ bool  BCBase::ismixteVec()  const
         return 0.;
     }
 }
+
+//! Returns the value of the resistance coefficient (in BC Vector)
+Real BCBase::resistanceCoef() const
+{
+    if ( _M_dataVector )
+        return ( *_M_bcv ).resistanceCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::resistanceCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+
 
 //! Return true if beta coefficient  is bcVector, false otherside
 bool BCBase::isbetaVec()   const
@@ -692,6 +715,24 @@ BCBase::addIdentifier( IdentifierBase* iden )
 }
 
 
+//! Add a new identifier to the preliminary list of IdGlobal
+void
+BCBase::addIdentifierIdGlobal( IdentifierBase* iden )
+{
+  UInt temp = listIdGlobal.size();
+  listIdGlobal.insert( boost::shared_ptr<IdentifierBase>( iden ) );
+  
+  if( temp==0 )
+    {
+      _M_IdGlobal.push_back(0);
+      _M_IdGlobal.push_back((iden ) -> id());
+      temp ++ ;
+    }
+    if( temp != listIdGlobal.size()){
+      _M_IdGlobal.push_back((iden ) -> id());
+    }       
+}
+
 //! Transfer between the list and vector containers of ID's
 void
 BCBase::finalise()
@@ -706,6 +747,23 @@ BCBase::finalise()
     _M_finalised = true;
 }
 
+//! Transfer between the list and vector containers of IdGlobal
+void
+BCBase::finaliseIdGlobal()
+{
+    if ( ! listIdGlobal.empty() )
+    {
+        _M_IdGlobalList.clear();
+        _M_IdGlobalList.reserve( listIdGlobal.size() );
+        std::copy( listIdGlobal.begin(), listIdGlobal.end(), std::inserter( _M_IdGlobalList, _M_IdGlobalList.end() ) );
+        listIdGlobal.clear();
+    }
+
+    _M_finalisedIdGlobal = true;
+    _M_IdGlobal.size(); 
+         
+} 
+
 
 //! Returns the liste size
 UInt
@@ -713,6 +771,22 @@ BCBase::list_size() const
 {
     return _M_idList.size();
 }
+
+//! Returns the list size of IdGlobal
+UInt
+BCBase::list_size_IdGlobal() const
+{
+    return _M_IdGlobalList.size();
+}
+
+
+// return IdGlobal element 
+int 
+BCBase::IdGlobal( int id) const
+{
+  return _M_IdGlobal[id];
+}
+
 
 //! Output
 std::ostream&
@@ -730,6 +804,11 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
     out << std::endl;
     out << "Offset               : " << _M_offset << std::endl;
     out << "Number of stored ID's: " << _M_idList.size() << std::endl;
+
+    if( _M_type== Resistance)
+      {
+	out << "Number of stored IdGlobal's: " << _M_IdGlobalList.size() << std::endl;
+      }
 
     if ( verbose && _M_finalised )
     {

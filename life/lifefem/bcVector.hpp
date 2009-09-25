@@ -141,6 +141,13 @@ public:
         {
             return _M_mixteCoef;
         }
+
+    //! Return the value of the Mixte coefficient
+    Real resistanceCoef() const
+        {
+            return _M_resistanceCoef;
+        }
+
     //! Return the value of the beta coefficient
     Real betaCoef() const
         {
@@ -183,6 +190,12 @@ public:
     void setMixteCoef( const Real& coef )
         {
             _M_mixteCoef = coef;
+        }
+
+    //! set the Resistance coefficient
+    void setResistanceCoef( const Real& coef )
+        {
+            _M_resistanceCoef = coef;
         }
 
     //! set the Mixte coefficient data vector
@@ -248,6 +261,12 @@ protected:
     /*! For the moment, it is the same for all the entries of the data vector.
      */
     Real _M_mixteCoef;
+
+     //! Coefficient for mixte boundary conditions (Resistance)
+    /*! For the moment, it is the same for all the entries of the data vector.
+     */
+    Real _M_resistanceCoef;
+
 
     //! Coefficient for mixte boundary conditions (Robin)
     /*! For the moment, it is the same for all the entries of the data vector.
