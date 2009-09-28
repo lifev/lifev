@@ -241,7 +241,7 @@ FSISolver::setDataFromGetPot( const GetPot& dataFile )
     M_oper->setDataFromGetPot( dataFile );
 
 #ifdef DEBUG
-    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
+    Debug( 6220 ) << "FSISolver::preconditioner: " << dataFile( "problem/precond", DIRICHLET_NEUMANN ) << "\n";
 #endif
     M_oper->setPreconditioner( static_cast<Preconditioner> ( dataFile( "problem/precond", DIRICHLET_NEUMANN ) ) );
 
