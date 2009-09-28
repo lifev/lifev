@@ -79,7 +79,7 @@ public:
             //            bool reg = FSIFactory::instance().registerProduct( "monolithic", &createM );
 
 #ifdef DEBUG
-			Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+			Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
 #endif
 			M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
 
