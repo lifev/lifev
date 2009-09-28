@@ -248,7 +248,7 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
         {
     	    // int id = this->M_mesh->pointList( i ).id();
             int id = this->M_LtGNodesMap[i];
-            sclf << setw(12) << dvar(start+id) ;
+            sclf << setw(12) << float(dvar(start+id)) ;
             ++count;
             if ( count == 6 )
                 {
@@ -288,7 +288,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
             {
                 // int id = this->M_mesh->pointList( i ).id();
                 int id = this->M_LtGNodesMap[i];
-                vctf << setw(12) << dvar(start+j*dim+id) ;
+                vctf << setw(12) << float(dvar(start+j*dim+id)) ;
                 ++count;
                 if ( count == 6 )
                     {
@@ -320,7 +320,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
         {
             geof << setw(8) << i ;
             for(UInt icoor=0; icoor<nDimensions; icoor++)
-            	geof << setw(12) << this->M_mesh->pointList(i).coor()[icoor];
+            	geof << setw(12) << float(this->M_mesh->pointList(i).coor()[icoor]);
             geof << "\n";
         }
 
