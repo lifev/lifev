@@ -103,9 +103,14 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
     BCFunctionBase in_flow_flux  (PhysFlux);
     BCFunctionBase out_flow      (fZero);
 
-    
+
+#ifdef FLUX
+    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
+#else
     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
-    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, bcf, 3);
+#endif
+
+    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
     BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
     BCh_fluid->addBC("EdgesOut", 30, Essential, Full, bcf,  3);
 
@@ -175,10 +180,6 @@ FSIOperator::fluid_bchandler_type BCh_fluidLin(FSIOperator &_oper)
 
 #ifdef FLUX
     BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
-    int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
-        _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
-
-    BCh_fluidLin->setOffset("InFlow", numTotalDofs);
 #else
     //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
 #endif
