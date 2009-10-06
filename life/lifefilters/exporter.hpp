@@ -291,7 +291,7 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
         }
     else
-        M_postfix = "***";
+        M_postfix = "*****";
 
     ++M_count;
 }
