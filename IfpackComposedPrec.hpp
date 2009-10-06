@@ -147,8 +147,6 @@ private:
 
     std::string            M_precType;
 
-    boost::shared_ptr<EigenSolver> M_eig;
-
 };
 
 inline EpetraPreconditioner* createIfpackComposed(){ return new IfpackComposedPrec(); }
