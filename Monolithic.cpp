@@ -18,6 +18,9 @@
 */
 
 #include <lifemc/lifesolver/Monolithic.hpp>
+
+#include <lifemc/lifealg/eigenSolver.hpp>
+
 #include "EpetraExt_MatrixMatrix.h"
 
 namespace LifeV
@@ -1023,13 +1026,13 @@ updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
     *rhsFluidCoupling += *M_solid->rhsWithoutBC();
 }
 
-void
-Monolithic::setupBDF( vector_type const& u0)
-{
-    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
-    std::cout<<"initial condition : "<<u0.NormInf()<<std::endl;
-    M_bdf->initialize_unk(u0);
-}
+// void
+// Monolithic::setupBDF( vector_type const& u0)
+// {
+//     M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
+//     std::cout<<"initial condition : "<<u0.NormInf()<<std::endl;
+//     M_bdf->initialize_unk(u0);
+// }
 
 void
 Monolithic::setupSystem( )
@@ -1135,6 +1138,46 @@ void Monolithic::initialize( const vector_type& u0, const vector_type& p0, const
     //  M_bdf->initialize_unk(*M_un);
 }
 
+void Monolithic::computeMaxSingularValue()
+{
+     typedef Epetra_Operator                                                operator_type;
+
+     M_PAAP.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
+
+     boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
+
+     M_monolithicMatrix->getEpetraMatrix().OptimizeStorage();
+     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(M_monolithicMatrix->getEpetraMatrix()));
+
+     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/));
+     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr),  true);
+     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr), true, true);
+     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr), false, true);
+
+     std::vector<LifeV::Real> real;
+     std::vector<LifeV::Real> imaginary;
+
+     boost::shared_ptr<EigenSolver> eig;
+
+     UInt nev = M_dataFile("eigensolver/nevec", 10);//number of eigenvectors
+     if(nev)
+         {
+             eig.reset(new EigenSolver(M_PAAP, M_PAAP->OperatorDomainMap(), nev));
+             eig->setDataFromGetPot(M_dataFile, "eigensolver/");
+             eig->solve();
+             eig->eigenvalues(real, imaginary);
+         }
+     else
+         {
+             throw UNDEF_EIGENSOLVER_EXCEPTION();
+         }
+     for (int i=0; i<real.size(); ++i)
+         {
+             displayer().leaderPrint("\n real part ", real[i]);
+             displayer().leaderPrint("\n imaginary part ", imaginary[i]);
+         }
+
+}
 namespace
 {
 FSIOperator* createM(){ return new Monolithic(); }

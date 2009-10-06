@@ -184,7 +184,6 @@ public:
     const UInt dimInterface() const {return nDimensions*M_interface ;}
     vector_ptrtype const& un(){return M_un;}
 
-
     void setupSystem( );
     void setUp( const GetPot& dataFile );
 
@@ -212,19 +211,22 @@ public:
        \small initialize the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
      */
-  void initialize( vector_ptrtype u0)
-  {M_un=u0;}
+    void initialize( vector_ptrtype u0)
+    {M_un=u0;}
 
+    prec_raw_type & getPrec(){return *M_precPtr;}
+
+void computeMaxSingularValue();
 
 protected:
 
-  void setupBDF( vector_type const& u0);
+    //  void setupBDF( vector_type const& u0);
 
-template <typename SolverType, typename PrecOperator>
+template <typename SolverType, typename PrecOperatorPtr>
 /**
 \small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
  */
-void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperator prec, SolverType linearSolver);
+void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
 
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix
@@ -331,11 +333,9 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperator prec, S
 
    void setRobinBC             (fluid_bchandler_type bc_solid);
 
-virtual  const vector_type& meshDisp()const{return this->M_meshMotion->disp();}
-//virtual  const vector_type&  veloFluidMesh() const;
-//virtual vector_type& veloFluidMesh();
-
-protected:
+    virtual  const vector_type& meshDisp()const{return this->M_meshMotion->disp();}
+    //virtual  const vector_type&  veloFluidMesh() const;
+    //virtual vector_type& veloFluidMesh();
 
     //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
   void solidInit(std::string const& dOrder);
@@ -365,7 +365,9 @@ protected:
 
 private:
 
-  void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0);
+    boost::shared_ptr<ComposedPreconditioner<Epetra_Operator> > M_PAAP;
+
+    void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0);
 
     int                                               M_updateEvery;
     boost::shared_ptr<vector_type>                    M_numerationInterface;
@@ -402,9 +404,9 @@ private:
 };
 
 
-template <typename SolverType, typename PrecOperator>
+template <typename SolverType, typename PrecOperatorPtr>
 void Monolithic::
-iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperator prec, SolverType linearSolver)
+iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
 {
   M_solid->getDisplayer().leaderPrint("    preconditioner type : ", M_DDBlockPrec );
     Chrono chrono;
@@ -429,5 +431,8 @@ iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperator prec, Solver
 
     M_solid->getDisplayer().leaderPrint("   system solved.\n ");
 }
+
+
+
 }
 #endif
