@@ -77,6 +77,8 @@ public:
     //! default constructor.
     IfpackComposedPrec(const Epetra_Comm* comm=0);
 
+    IfpackComposedPrec( IfpackComposedPrec& P );
+
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
     //    IfpackComposedPrec(operator_type& A);
@@ -102,6 +104,8 @@ public:
 
     super::prec_raw_type*  getPrec();
 
+    prec_type  getPrecByRef();
+
     std::string            precType(){return M_precType;}
 
     int                    buildPreconditioner(operator_type& A);
@@ -126,6 +130,13 @@ public:
     bool                   set() const {return M_Prec;}
 
 
+
+    const Epetra_Comm& Comm(){return getPrec()->Comm(); }
+
+    const Epetra_Map& OperatorDomainMap() { return  M_Prec->OperatorDomainMap(); }
+    const Epetra_Map& OperatorRangeMap() { return  M_Prec->OperatorRangeMap(); }
+    std::vector<operator_type>& getOperVector(){return M_OperVector;}
+
 private:
 
     int createIfpackPrec (operator_type& oper,
@@ -136,8 +147,9 @@ private:
 
     std::string            M_precType;
 
-};
+    boost::shared_ptr<EigenSolver> M_eig;
 
+};
 
 inline EpetraPreconditioner* createIfpackComposed(){ return new IfpackComposedPrec(); }
 
