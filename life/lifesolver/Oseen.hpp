@@ -538,7 +538,6 @@ Oseen( const data_type&          dataType,
     M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
-    this->M_comm=&comm;
 }
 
 template<typename Mesh, typename SolverType>
