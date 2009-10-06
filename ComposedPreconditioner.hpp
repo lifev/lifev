@@ -36,6 +36,7 @@
 #include <Epetra_Operator.h>
 
 #include <life/lifecore/life.hpp>
+#include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/displayer.hpp>
 
@@ -65,15 +66,17 @@ public:
        The constructor builds an empty chain of composed preconditioner.
        The resulting preconditioner shall be equal to the identity.
     */
-    ComposedPreconditioner(const Epetra_Comm* comm=0 );
+      ComposedPreconditioner(const Epetra_Comm* comm=0 );
+
+      ComposedPreconditioner( ComposedPreconditioner<Operator>& P);
 
     ~ComposedPreconditioner( );
 
     //! we expecte an external matrix shared pointer, we will not destroy the matrix!
     //! remember: P = M_P(0) * ... * M_P(Qp-1)
   int push_back(prec_type  P,
-                  const bool useInverse=false,
-                  const bool useTranspose=false);
+                const bool useInverse=false,
+                const bool useTranspose=false);
 
   int push_back(prec_raw_type*  P,
                   const bool useInverse=false,
@@ -118,15 +121,32 @@ public:
     const Epetra_Map & OperatorRangeMap() const;
     //@}
 
-    void reset();
+      std::vector<prec_type>& getP(){return M_P;}
+
+      //bool getInverse(){return M_allInverse;}
+
+      bool getAllTranspose(){return M_allTranspose;}
+
+      std::vector<bool>  getTranspose(){return M_Transpose;}
+
+      std::vector<bool> getInverse(){return M_Inverse;}
+
+      int getNumber(){return M_Setted;}
+
+      double getMeanIter(){return M_meanIter;}
+
+      int getNumCalled(){return M_numCalled;}
+
+      void reset();
 
 
 protected:
 
-    // P = M_P(0) * ... * M_P(n-1)
-    mutable std::vector<prec_type> M_P;
-    std::vector<bool> M_Inverse;
-    std::vector<bool> M_Transpose;
+      // P = M_P(0) * ... * M_P(n-1)
+      mutable std::vector<prec_type> M_P;
+      std::vector<bool> M_Inverse;
+      std::vector<bool> M_Transpose;
+      bool M_allTranspose;
 
     mutable int M_Setted;
 
@@ -134,11 +154,12 @@ protected:
     mutable int M_numCalled;
 
 
-    int Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+      int Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
-    int Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+      int Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
-  Displayer M_displayer;
+      Displayer M_displayer;
+
 };
 
   template <typename Operator>
@@ -152,6 +173,24 @@ ComposedPreconditioner<Operator>::ComposedPreconditioner(const Epetra_Comm* comm
   M_numCalled(0),
   M_displayer(comm)
 {
+}
+
+  template <typename Operator>
+ComposedPreconditioner<Operator>::ComposedPreconditioner( ComposedPreconditioner<Operator>& P)
+  :
+    M_P(),
+    M_Inverse(P.getInverse()),
+    M_Transpose(P.getTranspose()),
+    M_allTranspose(P.getAllTranspose()),
+    M_Setted(P.getNumber()),
+    M_meanIter(P.getMeanIter()),
+    M_numCalled(P.getNumCalled()),
+    M_displayer(&P.getP()[0]->Comm())
+{
+    for(int i=0; i<M_Setted; ++i)
+        {
+            M_P.push_back(P.getP()[i]);
+        }
 }
 
   template <typename Operator>
@@ -193,7 +232,7 @@ push_back( prec_type P,
     M_Inverse.  push_back(useInverse);
     M_Transpose.push_back(useTranspose);
 
-    if (useInverse && useTranspose) assert(false); // I am not sure I have coded this in the right way
+    //    if (useInverse && useTranspose) assert(false); // I am not sure I have coded this in the right way
 
     M_Setted++;
 
@@ -259,12 +298,14 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 
   for (int q(M_Setted-1); q>=0 ; q--) {
     if (M_Inverse[q]) {
+
         useTranspose = M_P[q]->UseTranspose (); // storing original status
         assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
         M_P[q]->ApplyInverse(Z,Y);
         M_P[q]->SetUseTranspose(useTranspose); // put back to original status
     } else {
         useTranspose = M_P[q]->UseTranspose (); // storing original status
+        assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
         M_P[q]->Apply(Z,Y);
         M_P[q]->SetUseTranspose(useTranspose); // put back to original status
     }
@@ -290,6 +331,7 @@ Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
   for (int q(0); q<M_Setted ; q++, Z = Y) {
     if (M_Inverse[q]) {
         useTranspose = M_P[q]->UseTranspose (); // storing original status
+        assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
         M_P[q]->Apply(Z,Y);//y+=Pi*z
         M_P[q]->SetUseTranspose(useTranspose); // put back to original status
     } else {
@@ -348,10 +390,27 @@ OperatorRangeMap() const
 }
 
   template <typename Operator>
-int ComposedPreconditioner<Operator>::SetUseTranspose(bool /*UseTranspose*/)
+int ComposedPreconditioner<Operator>::SetUseTranspose(bool useTranspose)
 {
-  assert(false);
-  return(EXIT_FAILURE);
+    if(useTranspose!=UseTranspose())
+        {
+            M_allTranspose=useTranspose;
+            int size=M_P.size()-1;
+            if(size)
+            for(int i=0; i<size/2; ++i)
+                {
+                    prec_type swp;
+                    swp=M_P[i];
+                    M_P[i]=M_P[size-i];
+                    M_P[size-i]=swp;
+                    M_P[i]->SetUseTranspose(!M_P[i]->UseTranspose());
+                    assert(M_P[size-i]->SetUseTranspose(!M_P[size-i]->UseTranspose())!=-1);
+                }
+            else
+                assert(M_P[0]->SetUseTranspose(!M_P[0]->UseTranspose())!=-1);
+            M_P[(int)(size/2)]->SetUseTranspose(!M_P[(int)(size/2)]->UseTranspose());
+        }
+    return 0;
 }
 
   template <typename Operator>
@@ -364,7 +423,7 @@ double ComposedPreconditioner<Operator>::NormInf()  const
   template <typename Operator>
 bool ComposedPreconditioner<Operator>::UseTranspose()  const
 {
-  return(false);
+    return(M_allTranspose);
 }
 
   template <typename Operator>
@@ -389,8 +448,6 @@ double ComposedPreconditioner<Operator>::Condest()  const
       M_P[q].reset();
     }
   }
-
-
 
 } // namespace LifeV
 #endif
