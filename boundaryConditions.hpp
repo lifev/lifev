@@ -25,6 +25,7 @@
 #define OUTLET 3
 #define INLET 2
 #define FLUIDINTERFACE 1
+#define SOLIDINTERFACE 1
 #define OUTERWALL 10
 #define RING  2
 #define RING2 3
@@ -56,13 +57,13 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
         Debug(10000) << "EJ harmonic extension\n";
         Monolithic *EJOper = dynamic_cast<Monolithic *>(&_oper);
         EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
-        BCh_he->addBC("Interface", OUTERWALL, Essential, Full,
+        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
         *EJOper->bcvStructureDispToHarmonicExtension(), 3);
     }
    else if (_oper.method() == "fullMonolithic")
     {
 
-        BCh_he->addBC("Interface", OUTERWALL, Essential, Full,
+        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
         bcf, 3);
     }
 
@@ -114,7 +115,7 @@ FSIOperator::solid_bchandler_type BCh_monolithicRobin(FSIOperator &_oper)
     BCFunctionBase young (E);
 
     //robin condition on the outer wall
-    _oper.setMixteOuterWall(hyd, young);
+    //_oper.setMixteOuterWall(hyd, young);
     //    BCh_solid->addBC("OuterWall", OUTERWALL, Mixte, Normal, _oper.bcfMixteOuterWall());
 
     return BCh_solid;
