@@ -76,6 +76,8 @@ public:
     //! default constructor.
     EpetraPreconditioner(const Epetra_Comm* comm=0);
 
+    EpetraPreconditioner(EpetraPreconditioner& P, const Epetra_Comm* comm=0);
+
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
 //     EpetraPreconditioner(operator_type& A);
@@ -110,7 +112,8 @@ public:
 
     void                    setList(Teuchos::ParameterList list);
     const Teuchos::ParameterList& getList() const;
-
+    const int getOverlapLevel() const;
+    const operator_type& getOper() const;
 
 protected:
 

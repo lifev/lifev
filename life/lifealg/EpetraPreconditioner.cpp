@@ -43,6 +43,15 @@ EpetraPreconditioner::EpetraPreconditioner(const Epetra_Comm* comm):
 {
 }
 
+EpetraPreconditioner::EpetraPreconditioner(  EpetraPreconditioner& P, const Epetra_Comm* comm):
+    M_displayer(comm),
+    M_overlapLevel(P.getOverlapLevel()),
+    M_Oper(P.getOper()),
+    M_List(P.getList())
+{
+}
+
+
 EpetraPreconditioner::~EpetraPreconditioner()
 {
 }
@@ -59,6 +68,16 @@ EpetraPreconditioner::getList() const
     return M_List;
 }
 
+const int
+EpetraPreconditioner::getOverlapLevel() const
+{
+    return M_overlapLevel;
+}
+
+const EpetraPreconditioner::operator_type& EpetraPreconditioner::getOper() const
+{
+    return M_Oper;
+}
 
 // EpetraPreconditioner::EpetraPreconditioner(operator_type& oper):
 //         M_Oper(oper)
