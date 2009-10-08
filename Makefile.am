@@ -28,6 +28,9 @@ lib_LTLIBRARIES	= liblifemcsolver.la
 
 liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                fullMonolithic.cpp \
+				dataOneDModel.cpp \
+				vectorFunction1D.cpp \
+				oneDNonLinModelParam.cpp \
                                MS_Algorithm.cpp \
                                MS_PhysicalData.cpp \
                                MS_PhysicalModel.cpp \

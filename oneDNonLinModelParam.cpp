@@ -25,7 +25,7 @@
   \brief File containing a class for the parameter
 
 */
-#include <life/lifesolver/oneDNonLinModelParam.hpp>
+#include <lifemc/lifesolver/oneDNonLinModelParam.hpp>
 
 #include <cmath>
 
