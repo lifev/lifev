@@ -176,6 +176,8 @@ public:
 
     EpetraVector& operator*=(data_type t);
 
+  EpetraVector& operator*=(EpetraVector& _vector); 
+
     EpetraVector& operator=(data_type t);
 
     data_type operator*(EpetraVector const& a) const;
@@ -236,8 +238,7 @@ private:
 
 EpetraVector operator * (EpetraVector::data_type t, const EpetraVector& _vector);
 
-
-} // end namespace LifeV
+}
 
 //@@
 //#undef OFFSET

@@ -126,7 +126,7 @@ EpetraVector::EpetraVector( const EpetraVector& _vector, const int reduceToProc)
     M_epetraMap   (),
     M_maptype     (Unique)
 {
-    assert(false); // Need to code M_eptraMap initialization first. Then remove assert.
+     assert(false); // Need to code M_eptraMap initialization first. Then remove assert.
     operator = (_vector);
 }
 
@@ -348,6 +348,7 @@ void EpetraVector::spy( std::string const &filename ) const
 
     EpetraVector redVec(*this, 0); // reduced vector (all at proc 0)
 
+
     int  me    = redVec.M_epetraVector.Comm().MyPID();
 
     if (me) return; // do not need other CPUs now
@@ -545,7 +546,7 @@ subset(const EpetraVector& _vector,
 {
   (*this) *= 0;
    const int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
-   const UInt    numMyEntries= map.getMap(M_maptype)->NumMyElements();
+   const UInt    numMyEntries = map.getMap(M_maptype)->NumMyElements();
 
     // eg:  p = (u,p) or u = (u,p)
     for (UInt i = 0; i < numMyEntries; ++i)
@@ -593,6 +594,48 @@ operator *= (data_type t)
     M_epetraVector.Scale(t);
     return *this;
 }
+
+EpetraVector& EpetraVector::
+operator *= (EpetraVector& _vector )                       
+{
+  int numMyEntries;
+  const int*  gids;  
+
+  if (M_maptype == Unique)
+    {
+      numMyEntries = this->M_epetraVector.MyLength();
+      gids  = this->BlockMap().MyGlobalElements();
+  
+      if (!this->BlockMap().SameAs(_vector.BlockMap()))
+	{     
+     
+	  EpetraVector vCopy(_vector, M_maptype, Insert);
+	  _vector = vCopy;    
+	} 
+    }
+
+  if (M_maptype == Repeated)
+    {
+      numMyEntries = _vector.M_epetraVector.MyLength();
+      gids   = _vector.BlockMap().MyGlobalElements();
+  
+      if (!this->BlockMap().SameAs(_vector.BlockMap()))
+	{     
+	  EpetraVector vCopy(_vector, M_maptype, Zero);
+	  _vector = vCopy;    
+	} 
+    }
+
+
+    for (int i = 0; i < numMyEntries; ++i)
+	{
+	  (*this)[gids[i]] *= _vector(gids[i]);
+	}
+   
+  
+  return *this;
+}
+
 
 EpetraVector& EpetraVector::
 operator = (data_type t)
