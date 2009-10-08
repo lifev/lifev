@@ -38,3 +38,11 @@ verbose = 1
 show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 postprocess_timestep = 0.01
 showCFL = 0
+
+[solver]
+[./amesos]
+solvertype      = Umfpack
+redistribute    = true
+print_status    = false
+print_timing    = false
+

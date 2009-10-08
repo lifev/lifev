@@ -29,8 +29,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifesolver/dataOneDModel.hpp>
-#include <life/lifesolver/oneDModelSolver.hpp>
+#include <lifemc/lifesolver/dataOneDModel.hpp>
+#include <lifemc/lifesolver/oneDModelSolver.hpp>
 #include "interface2Vessels.hpp"
 #include <life/lifecore/GetPot.hpp>
 #include <sstream>
