@@ -383,7 +383,7 @@ protected:
 
     //! boolean that indicates if the matrix is updated for the current iteration
 
-    bool                           M_updated;
+    //bool                           M_updated;
 
     //! boolean that indicates if the precond has to be recomputed
 
@@ -402,7 +402,7 @@ protected:
     //    int                           M_monolithic;
     bool                          M_isDiagonalBlockPrec;
 
-private:
+  //private:
 
     //! Elementary matrices and vectors
     ElemMat                        M_elmatStiff;      // velocity Stokes
@@ -462,7 +462,7 @@ Oseen( const data_type&          dataType,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
-    M_updated                ( false ),
+    //    M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( false ),
@@ -520,7 +520,7 @@ Oseen( const data_type&          dataType,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
-    M_updated                ( false ),
+    //    M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( false ),
@@ -576,7 +576,7 @@ Oseen( const data_type&          dataType,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
-    M_updated                ( false ),
+    //    M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( false ),
@@ -708,6 +708,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
         stiff( M_data.viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
         //stiff_div( 0.5*M_uFESpace.fe().diameter(), M_elmatStiff, M_uFESpace.fe() );
         chronoStiff.stop();
+
 
         // mass
         if ( !M_steady )
@@ -942,7 +943,7 @@ updateSystem(double       alpha,
     M_Displayer.leaderPrintMax("done in ", chrono.diff());
 
 
-    M_updated = false;
+    //    M_updated = false;
 
 //
 
@@ -1016,7 +1017,7 @@ updateSystem(double       alpha,
             // ALE term: - rho div w u v
             mass_divw( -M_data.density(), M_wLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
 
-            // ALE stab implicit: 0.5 rho div w u v
+            // ALE stab implicit: 0.5 rho div u w v
             mass_divw( 0.5*M_data.density(), M_uLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
 
 
