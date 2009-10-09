@@ -323,6 +323,67 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 }
 
+//
+// coeff[q]*Mass
+//
+void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
+           int iblock, int jblock, int nb )
+/*
+  Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
+*/
+{
+    ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the jacobian" );
+    ASSERT_PRE( nb > 1, "if nb = 1, use the other mass function" );
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    int i, ig;
+    int iloc, jloc;
+    Real s, coef_s;
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s += coef[ig] * fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
+        }
+        mat_tmp( iloc, iloc ) = s;
+    }
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            s += coef[ig]*fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
+        mat_tmp( iloc, jloc ) += s;
+        mat_tmp( jloc, iloc ) += s;
+    }
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
+    }
+}
+
 
 void ipstab_grad( const Real         coef,
                   ElemMat&           elmat,
@@ -913,8 +974,8 @@ void ipstab_bagrad( const Real         coef,
 
         for ( icoor = 0; icoor < fe3.nbCoor; ++icoor ) {
             for ( i = 0; i < fe3.nbNode; ++i ) {
-                Real betaLoc = fe3.phi( i, ig ) *
-                    beta.vec() [ icoor*fe3.nbNode + i ];
+	        Real betaLoc = fe3.phi( i, ig ) *
+		  beta.vec() [ icoor*fe3.nbNode + i ];
                 sum1 += betaLoc * normal(icoor, ig);
             }
         }
@@ -1155,6 +1216,77 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
         }
     }
 }
+
+
+void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
+            int iblock, int jblock, int nb )
+/*
+  Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
+  with coef given in a vector (one element per quadrature point)
+*/
+{
+
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness (vect) matrix needs at least the first derivatives" );
+    ASSERT_PRE( nb > 1, "if nb = 1, use the other stiff function" );
+
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
+
+    int iloc, jloc;
+    int i, icoor, ig;
+    double s, coef_s;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += coef[ig] *fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
+                    * fe.weightDet( ig );
+        }
+        mat_tmp( iloc, iloc ) += s;
+    }
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += coef[ig] * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
+                    fe.weightDet( ig );
+        }
+        mat_tmp( iloc, jloc ) += s;
+        mat_tmp( jloc, iloc ) += s;
+    }
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
+    }
+}
+
 
 // VC - December 2004
 //
@@ -1903,6 +2035,76 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
         coef_s = coef * s;
         mat_tmp( iloc, jloc ) += coef_s;
         mat_tmp( jloc, iloc ) += coef_s;
+    }
+    // copy on the components
+    for ( icomp = 0;icomp < nb;icomp++ )
+    {
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
+    }
+}
+
+
+void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
+                int iblock, int jblock, int nb )
+/*
+  modified mass matrix: ( div w u,v )
+*/
+{
+
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Mass matrix, (div w u, v) needs at least the first derivatives" );
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
+
+    int i, icomp, ig, icoor, iloc, jloc;
+    Real s, coef_s, divw[ fe.nbQuadPt ];
+
+    // divw at quadrature nodes
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        divw[ ig ] = 0.0;
+        for ( icoor = 0; icoor < fe.nbCoor; ++icoor )
+            for ( i = 0; i < fe.nbNode; ++i )
+                divw[ ig ] += fe.phiDer( i, icoor, ig ) * w_loc.vec() [ i + icoor * fe.nbNode ];
+    }
+
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s += coef[ig] * divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
+        }
+        mat_tmp( iloc, iloc ) += s;
+    }
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            s += coef[ig]* divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
+        mat_tmp( iloc, jloc ) += s;
+        mat_tmp( jloc, iloc ) += s;
     }
     // copy on the components
     for ( icomp = 0;icomp < nb;icomp++ )

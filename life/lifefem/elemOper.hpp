@@ -53,12 +53,19 @@ namespace LifeV
 	     int iblock = 0, int jblock = 0 );
   void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 	     int iblock, int jblock, int nb );
+  // Mass term with coefficients given for each quadrature point
+  void mass( const std::vector<Real>& qpt_coef, ElemMat& elmat, const CurrentFE& fe,
+	     int iblock, int jblock, int nb );
+
   void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 	      int iblock = 0, int jblock = 0 );
   void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
 	      const CurrentFE& fe, int iblock, int jblock );
   void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 	      int iblock, int jblock, int nb );
+  // Stiff term with coefficient given for each quadrature node
+  void stiff( const std::vector<Real>& qpt_coef, ElemMat& elmat, const CurrentFE& fe,
+	     int iblock, int jblock, int nb );  
   void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
 		   int iblock, int jblock, int nb );
 
@@ -341,6 +348,10 @@ void  source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc,
 
 
   void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
+		  int iblock, int jblock, int nb );
+
+  // Idem mass_divw, but with coefficient given by quadrature node
+  void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
 		  int iblock, int jblock, int nb );
 
 
