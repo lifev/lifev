@@ -124,11 +124,15 @@ public:
     double Norm1()   const;
     double Norm2()   const;
     double NormInf() const;
+    double MinValue()const;
+    double MaxValue()const;
 
     void MeanValue  (double* res) const;
     void Norm1  (double* res) const;
     void Norm2  (double* res) const;
     void NormInf(double* res) const;
+    void MinValue (double* res) const;
+    void MaxValue (double* res) const;
 
     ~EpetraVector() {};
     vector_type& getEpetraVector()             {return M_epetraVector;}

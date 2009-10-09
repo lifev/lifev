@@ -340,6 +340,34 @@ EpetraVector::NormInf(double* res) const
     M_epetraVector.NormInf(res);
 }
 
+double
+EpetraVector::MinValue() const
+{
+  double res;
+  M_epetraVector.MinValue(&res);
+  return res;
+}
+
+double
+EpetraVector::MaxValue() const
+{
+  double res;
+  M_epetraVector.MaxValue(&res);
+  return res;
+}
+
+void
+EpetraVector::MinValue(double* res) const
+{
+  M_epetraVector.MinValue(res);
+}
+
+void
+EpetraVector::MaxValue(double* res) const
+{
+  M_epetraVector.MaxValue(res);
+}
+
 
 void EpetraVector::spy( std::string const &filename ) const
 {
