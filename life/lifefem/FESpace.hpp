@@ -27,6 +27,10 @@
   \author Cristiano Malossi<cristiano.malossi@epfl.ch>
   \date 06/2009
 
+  \version 1.3 - Added interpolation features for a given solution vector
+  \author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+  \date 08/2009
+
   \brief This file contains an abstract class for NavierStokes solvers.
 
 */
@@ -255,6 +259,27 @@ public:
 
     template<typename vector_type>
     Real H1Norm( const vector_type& vec );
+  
+  
+    // Added by S. Quinodoz 21.08.2009 
+    // Interpolate the function given by a FE Vector "solutionVector" (not a real function)
+    // and a cell "elementID" in ANY given point "pt" in the space
+    //
+    // !!! Until now, only for scalar FE (not checked)
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const;
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const;
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+			       const unsigned int& component ) const;
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+				    const unsigned int& component ) const;
 
 
     BasePattern::PatternType patternType();
@@ -300,8 +325,6 @@ private:
     map_type							M_map;
 
 };
-
-
 
 //
 // IMPLEMENTATION
@@ -703,8 +726,6 @@ void
 FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, const Real t)
 {
 
-
-
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
         this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
@@ -1008,6 +1029,210 @@ FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
 }
 
 
+ 
 
-}
+//This function interpolates the value of the function given by
+// - an element
+// - the solution vector
+// in a given point P: value = \sum_{dofs} solution_i \phi_i(P)
+//
+// Another faster way would have been to use a custom quadrature
+// but the fact that the quadrature is already written inside the 
+// refEle destroys all the hope of a faster implementation (the
+// geoMap has to be redefined, and so has to be updated for the
+// mesh, the refFE has to be rebuilt,...)
+
+template<typename Mesh, typename Map>
+template<typename point_type,typename vector_type>
+Real
+FESpace<Mesh, Map>::
+FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
+{
+  // Assumptions for the types:
+  // point_type has the STL-type [] accessor and the size() method
+
+  // The vector has to be repeated
+  ASSERT( solutionVector.getMaptype() == Repeated, " Vector must be repeated ");
+
+  // Make sur everything is up to date
+  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+
+  // Map the point back to the ref FE    
+  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+  Real x(0);  Real y(0);  Real z(0);
+
+  if (pt.size()>=1)    x=pt[0];
+  if (pt.size()>=2)    y=pt[1];
+  if (pt.size()>=3)    z=pt[2];
+
+  
+  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+
+  // Store the number of local DoF
+  UInt nDof(dof().numLocalDof());
+
+  // Initialization
+  Real value(0);
+
+  // Loop over the DoFs
+  for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
+    {
+      // The global ID of the selected dof
+      // This should be changed in case of a VECTORIAL FE
+      
+      ID dofID(fe().patternFirst(iter_dof));
+      ID globalDofID( dof().localToGlobal(elementID, dofID +1) ); // iter_dof -> dofID
+
+      // Make the accumulation
+      value += solutionVector[globalDofID] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
+    };
+
+  return value;
+};
+
+
+
+// Same function as before, with the difference that
+// the solution vector is LOCAL (before it was the GLOBAL) one.
+
+template<typename Mesh, typename Map>
+template<typename point_type,typename vector_type>
+Real
+FESpace<Mesh, Map>::
+FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
+{
+  // Assumptions for the types:
+  // point_type has the STL-type [] accessor and the size() method
+  // vector_type has the STL_type [] accessor
+
+
+  // Make sur everything is up to date
+  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+
+  // Map the point back to the ref FE    
+  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+
+  Real x(0);  Real y(0);  Real z(0);
+
+  if (pt.size()>=1)    x=pt[0];
+  if (pt.size()>=2)    y=pt[1];
+  if (pt.size()>=3)    z=pt[2];
+  
+  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+     
+  // Store the number of local DoF
+  UInt nDof(dof().numLocalDof());
+
+  // Initialization
+  Real value(0);
+
+  // Loop over the DoFs
+  for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
+    {
+      // Make the accumulation
+      value += solutionVector[iter_dof-1] * M_refFE->phi(iter_dof-1, hat_x, hat_y, hat_z);
+    };
+
+  return value;
+};
+
+
+template<typename Mesh, typename Map>
+template<typename point_type,typename vector_type>
+Real
+FESpace<Mesh, Map>::
+FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+		      const unsigned int& component ) const
+{
+  // Assumptions for the types:
+  // point_type has the STL-type [] accessor and the size() method
+
+
+  // Make sur everything is up to date
+  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+
+  // Map the point back to the ref FE    
+  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+
+  Real x(0);  Real y(0);  Real z(0);
+
+  if (pt.size()>=1)    x=pt[0];
+  if (pt.size()>=2)    y=pt[1];
+  if (pt.size()>=3)    z=pt[2];
+  
+  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+  
+  // Store the number of local DoF
+  UInt nDof(dof().numLocalDof());
+
+  // Initialization
+  Real grad(0);
+
+  // Loop over the DoFs
+  for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
+    {
+      // The global ID of the selected dof
+      // This should be changed in case of a VECTORIAL FE
+      ID globalDofID( dof().localToGlobal(elementID, iter_dof) );
+
+      for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
+      {
+	grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z) 
+	                                   * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,component,iter_dim);
+      };
+    };
+
+  return grad;
+};
+
+template<typename Mesh, typename Map>
+template<typename point_type,typename vector_type>
+Real
+FESpace<Mesh, Map>::
+FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+			   const unsigned int& component ) const
+{
+  // Assumptions for the types:
+  // point_type has the STL-type [] accessor and the size() method
+  // vector_type has the STL_type [] accessor
+
+
+  // Make sur everything is up to date
+  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+
+  // Map the point back to the ref FE    
+  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+
+  Real x(0);  Real y(0);  Real z(0);
+
+  if (pt.size()>=1)    x=pt[0];
+  if (pt.size()>=2)    y=pt[1];
+  if (pt.size()>=3)    z=pt[2];
+  
+  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+     
+  // Store the number of local DoF
+  UInt nDof(dof().numLocalDof());
+
+  // Initialization
+  Real grad(0);
+
+
+  // Loop over the DoFs
+  for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
+    {
+     
+      for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
+      {
+	grad+= solutionVector[iter_dof-1] * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z) 
+	                                   * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,component,iter_dim);
+      };
+    };
+
+
+  return grad;
+};
+
+
+} // end of the namespace
 #endif
