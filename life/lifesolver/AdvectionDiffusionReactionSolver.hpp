@@ -433,7 +433,7 @@ ADRSolver( const data_type&          dataType,
     M_elmatAdv               ( M_FESpace.fe().nbNode, 1, 1 ),
     M_elmatStab              ( M_FESpace.fe().nbNode, 1, 1 ),
 //    M_elvec                  ( M_FESpace.fe().nbNode, nDimensions ),
-    M_elvec_u                ( M_FESpace.fe().nbNode, nDimensions )
+    M_elvec_u                ( M_betaFESpace.fe().nbNode, nDimensions ) //SQ: from M_FESpace to M_betaFESpace
 {
 }
 
@@ -476,7 +476,7 @@ ADRSolver( const data_type&          dataType,
     M_elmatMass              ( M_FESpace.fe().nbNode, 1, 1 ),
     M_elmatAdv               ( M_FESpace.fe().nbNode, 1, 1 ),
     M_elmatStab              ( M_FESpace.fe().nbNode, 1, 1 ),
-    M_elvec_u                ( M_FESpace.fe().nbNode, nDimensions )
+    M_elvec_u                ( M_betaFESpace.fe().nbNode, nDimensions ) //SQ: from M_FESpace to M_betaFESpace
 {
 }
 
@@ -680,6 +680,7 @@ initialize( const Function& u0 )
 {
      vector_type u(M_FESpace.map());
      M_FESpace.interpolate(u0, u, 0.0);
+     M_sol = u;
 
 }
 
@@ -777,10 +778,10 @@ updateSystem( Real       alpha,
             // M_elvec contains the velocity values in the nodes
             for ( UInt iNode = 0 ; iNode < ( UInt ) M_betaFESpace.fe().nbNode ; iNode++ )
             {
-                UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
+	         UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
                 for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
                 {
-                    UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
+		    UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
                     M_elvec_u.vec()[ iloc + iComp*M_betaFESpace.fe().nbNode ] = betaVecRep[ig]; // BASEINDEX + 1
                 }
             }
@@ -853,7 +854,7 @@ updateSystem( Real       alpha,
 
         if (M_stab == "ip")
         {
-//            leaderPrint("   adr- IP stab");
+//	      leaderPrint("   adr- IP stab");
             if ( M_resetStab )
             {
                 const UInt nDof = M_betaFESpace.dof().numTotalDof();
@@ -981,6 +982,8 @@ updateSystem( Real       alpha,
                     Real bn   = 0;
                     Real bmax = 0;
 
+		    // Old version, removed by SQ
+		    /*
                     ElemVec beta( M_betaFESpace.feBd().nbNode, nDimensions);
 
                     // first, get the local trace of the velocity into beta
@@ -994,38 +997,53 @@ updateSystem( Real       alpha,
                         {
                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
                             if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbNode + iNode ] = betaVecRep( ig + 1); // BASEINDEX + 1
+			      {
+				Real value( betaVecRep( ig + 1) );
+                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbNode + iNode ] = value; // BASEINDEX + 1
+			      };
                         }
-                    }
+		    }*/
+		    
+		    // New version, added by SQ : beta on the domain, not the boundary!
+		    // See elemOper.cpp for justification of this usage
+                    ElemVec beta( M_betaFESpace.fe().nbNode, nDimensions);
+
+                    for ( int iNode = 0; iNode < M_betaFESpace.fe().nbNode; ++iNode )
+                    {
+		        UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
+                        for ( int iCoor = 0; iCoor < fe1.nbCoor; ++iCoor )
+                        {
+                            UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) + iCoor*nDof;
+			    beta.vec()[ iloc + iCoor*M_betaFESpace.fe().nbNode ] = betaVecRep[ig]; // BASEINDEX + 1
+
+                        }
+		    }
 
                     // second, calculate its max norm
-//                     for ( int l = 0; l < int( M_betaFESpace.fe().nbCoor*M_betaFESpace.feBd().nbNode ); ++l )
-//                     {
-//                         if ( bmax < fabs( beta.vec()[ l ] ) )
-//                             bmax = fabs( beta.vec()[ l ] );
-//                     }
+                    for ( int l = 0; l < int( M_betaFESpace.fe().nbCoor*M_betaFESpace.fe().nbNode ); ++l ) // SQ: feBd->fe
+                    {
+		      if ( bmax < fabs( beta.vec()[ l ] ) )
+			bmax = fabs( beta.vec()[ l ] );
+                    }
 
-//                     UInt iFaEl = M_betaFESpace.mesh()->face( iFace ).pos_first();
-//                     for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbNode; ++iNode )
-//                     {
-//                         UInt iloc = fToP( iFaEl, iNode + 1 );
-//                         for ( int iCoor = 0; iCoor < nDimensions; ++iCoor )
-//                         {
-//                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 + iCoor*nDof;
-//                             if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-//                                 bn += normal(iNode, iCoor)*betaVecRep( ig + 1 );
+                     UInt iFaEl = M_betaFESpace.mesh()->face( iFace ).pos_first();
+                     for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbNode; ++iNode )
+                     {
+                         UInt iloc = fToP( iFaEl, iNode + 1 );
+                         for ( int iCoor = 0; iCoor < nDimensions; ++iCoor )
+                         {
+                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 + iCoor*nDof;
+                             if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
+                                 bn += normal(iNode, iCoor)*betaVecRep( ig + 1 );
+                         }
+                     }
 
-//                         }
-//                     }
-
-//                    bn = 1.;
-
-//                    Real coeffBeta = hK2*M_gammaBeta*abs(bn);
+                    Real coeffBeta = hK2*M_gammaBeta*abs(bn);
 
 
 #endif
-                    Real coeffBeta = M_gammaBeta;
-//                     std::cout << coeffBeta << std::endl;
+		    //                    Real coeffBeta = M_gammaBeta;
+		    //                     std::cout << coeffBeta << std::endl;
 
                     ipstab_bagrad( coeffBeta,
                                    M_elmatStab,
