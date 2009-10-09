@@ -175,6 +175,25 @@ public:
                   const Real & xi, const Real & eta, const Real &
                   zeta ) const;
     /*!
+      compute the coordinate (xi,eta,zeta)=inv(F)(x,y,z)
+    */
+    void coorBackMap(const Real& x, const Real& y, const Real& z,
+		     Real & xi, Real & eta, Real& zeta) const; 
+  
+    /*!
+      compute the jacobian at a given point : d x_compx / d zeta_compzeta
+    */
+    Real pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
+		  int compx, int compzeta) const;
+  
+    /*!
+      compute the inverse jacobian
+     */
+
+    Real pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
+		  int compx, int compzeta) const;
+
+    /*!
       return the barycenter of the element
      */
     void barycenter( Real& x, Real& y, Real& z );
