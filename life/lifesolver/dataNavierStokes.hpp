@@ -27,7 +27,33 @@
   \date 09/2009
   \author Cristiano Malossi<cristiano.malossi@epfl.ch>
 
+  \version 1.26
+  \date 09/2009
+  \author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
   \brief File containing a class for handling NavierStokes data with GetPot
+
+  The data is now able to store multiple fluids, but the use of the old interface (for only one fluid) is still available and fully compatible.
+
+  The old way is to declare one fluid with its density and viscosity in [fluid/physics/density] and [fluid/physics/viscosity]. The set and get functions can then be used without precising which fluid is concerned. Internally, the informations are stored inside vectors, but with only one value (the 0 value: density is stored in M_density[0]).
+
+  In the new way, one has to declare first of all in [fluid/physics/fluid_number] the number of fluids that will be used. Then every fluid is specified in a section [fluid/physics/fluid_k] where k is the number of the fluid (k from 0 to fluid_number-1, the same numeration is used internally). In this section, the density and the viscosity are declared.
+
+  Example: To declare two fluids, one should use in the data file:
+  [fluid]
+     [./physics]
+       fluid_number = 2
+       
+       [./fluid_0]
+         density = 1;
+	 viscosity = 1;
+
+       [../fluid_1]
+         density = 10;
+	 viscosity = 100;
+
+  Remark: in case both ways of declaring the fluids are used, the new one has the priority.
+  Remark: do not use "fluid_number = 1" with the old way, it will not work properly.
 
 */
 #ifndef _DATANAVIERSTOKES_H_
@@ -38,6 +64,7 @@
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifecore/dataString.hpp>
+#include <life/lifecore/util_string.hpp>
 
 #include <string>
 #include <iostream>
@@ -53,7 +80,7 @@ enum NSStabilization
 
 //! DataNavierStokes - LifeV Base class which holds usual data for the NavierStokes equations solvers
 /*
- *  @author M.A. Fernandez, Cristiano Malossi
+ *  @author M.A. Fernandez, Cristiano Malossi, Samuel Quinodoz
  *
  */
 template <typename Mesh>
@@ -104,9 +131,17 @@ public:
     //! @name Set functions
     //@{
 
-    void density               ( const Real& density )   { M_density = density; }
+  INLINE void density ( const Real& density, const UInt nfluid=0 )   
+  { 
+    ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
+    M_density[nfluid] = density;
+  };
 
-    void viscosity             ( const Real& viscosity ) { M_viscosity = viscosity; }
+  INLINE void viscosity ( const Real& viscosity, const UInt nfluid=0 ) 
+  {
+    ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
+    M_viscosity[nfluid] = viscosity;
+  };
 
     void setSemiImplicit       ( const bool SI )         {
                                                            M_semiImplicit = SI;
@@ -123,9 +158,19 @@ public:
     //! @name Get functions
     //@{
 
-    Real            density()                     const { return M_density; }
-    Real            viscosity()                   const { return M_viscosity; }
+    INLINE UInt fluid_number() const { return M_fluid_number; };
 
+    INLINE Real density(const UInt& n=0) const
+    { 
+      ASSERT(n<M_fluid_number,"Undelared fluid");
+      return M_density[n];
+    };
+    INLINE Real viscosity(const UInt& n=0) const
+    { 
+      ASSERT(n<M_fluid_number,"Undelared fluid");
+      return M_viscosity[n];
+    };
+   
     std::string     uOrder()                      const { return M_uOrder; }
     std::string     pOrder()                      const { return M_pOrder; }
 
@@ -152,8 +197,9 @@ public:
 protected:
 
     //! Physics
-    Real             M_density;   // density
-    Real             M_viscosity; // viscosity
+    UInt             M_fluid_number;
+    std::vector<Real> M_density;
+    std::vector<Real> M_viscosity;
 
     //! FE order
     std::string      M_uOrder;
@@ -222,6 +268,7 @@ template <typename Mesh>
 DataNavierStokes<Mesh>::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     DataMesh<Mesh>                     ( dataNavierStokes ),
     DataTime                           ( dataNavierStokes ),
+    M_fluid_number                     ( dataNavierStokes.M_fluid_number ),
     M_density                          ( dataNavierStokes.M_density ),
     M_viscosity                        ( dataNavierStokes.M_viscosity ),
     M_uOrder                           ( dataNavierStokes.M_uOrder ),
@@ -258,6 +305,7 @@ DataNavierStokes<Mesh>::operator=( const DataNavierStokes& dataNavierStokes )
         DataMesh<Mesh>::operator=( dataNavierStokes );
         DataTime::operator=( dataNavierStokes );
 
+	M_fluid_number                     = dataNavierStokes.M_fluid_number;
         M_density                          = dataNavierStokes.M_density;
         M_viscosity                        = dataNavierStokes.M_viscosity;
         M_uOrder                           = dataNavierStokes.M_uOrder;
@@ -291,8 +339,31 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
     M_stabilization_list.add( "none", NO_STABILIZATION, "none (default)" );
 
     // Physics
-    M_density     = dataFile( "fluid/physics/density", 1. );
-    M_viscosity   = dataFile( "fluid/physics/viscosity", 1. );
+    UInt temp = dataFile("fluid/physics/fluid_number", 0 );
+    
+    if (temp == 0) // Old fashion of declaring fluids
+      {
+	M_fluid_number = 1;
+	M_density.push_back( dataFile( "fluid/physics/density", 1. ) );
+	M_viscosity.push_back ( dataFile( "fluid/physics/viscosity", 1. ) );
+      }
+    else   // New fashion of declaring fluids
+      {
+	M_fluid_number = temp;
+	M_density = std::vector<Real>(temp,0);
+	M_viscosity = std::vector<Real>(temp,0);
+	
+	for (UInt iter_fluid(0); iter_fluid<temp; ++iter_fluid)
+	  {
+	    // build the section name
+	    std::string iter_fluid_section("fluid/physics/fluid_");
+	    iter_fluid_section += number2string(iter_fluid);
+	    
+	    // Read the quantities
+	    M_density[iter_fluid]= dataFile((iter_fluid_section+"/density").c_str() , 1.0);
+	    M_viscosity[iter_fluid]= dataFile((iter_fluid_section+"/viscosity").c_str() , 1.0);
+	  };
+      };
 
     // FE Order
     M_uOrder      = dataFile( "fluid/space_discretization/vel_order", "P1");
@@ -325,10 +396,22 @@ template <typename Mesh>
 void
 DataNavierStokes<Mesh>::showMe( std::ostream& output )
 {
+  if (M_fluid_number == 1)
+    {
     output << "\n*** Values for data [fluid/physics]\n\n";
-    output << "density     = " << M_density << std::endl;
-    output << "viscosity   = " << M_viscosity << std::endl;
-
+    output << "density     = " << M_density[0] << std::endl;
+    output << "viscosity   = " << M_viscosity[0] << std::endl;
+    }
+  else
+    {
+    output << "\n*** Values for data [fluid/physics]\n\n";
+    for (UInt iter_fluid(0); iter_fluid<M_fluid_number; ++iter_fluid)
+      {
+	output << "fluid " << iter_fluid << std::endl;
+	output << "density     = " << M_density[iter_fluid] << std::endl;
+	output << "viscosity   = " << M_viscosity[iter_fluid] << std::endl;
+      };
+    };
     output << "\n*** Values for data [fluid/miscellaneous]\n\n";
     output << "verbose     = " << M_verbose << std::endl;
     output << "initial time for writing solution  = " << M_dump_init << std::endl;
