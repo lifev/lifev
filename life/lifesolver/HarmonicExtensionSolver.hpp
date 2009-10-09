@@ -489,6 +489,20 @@ template <typename Mesh, typename SolverType>
 void
 HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_type& rhs, BCHandler& BCh)
 {
+
+  // CHANGED BY S. QUINODOZ !
+  // "if" exchanged
+  
+    if (  ! BCh.bdUpdateDone() )
+    {
+        // BC boundary information update
+        if (M_verbose) std::cout << "\n      - Updating the BC " << std::flush;
+        BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        if (M_verbose) std::cout << "\n      - Filling the matrix " ;
+        bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
+        if (M_verbose) std::cout << "\n" << std::flush;
+    }
+
     if(M_offset)//mans that this is the fullMonolithic case
         {
     	BCh.setOffset(M_offset);
@@ -501,15 +515,6 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_type& 
             bcManageVector(rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 0., 1.0);
             if (M_verbose) std::cout << "\n" << std::flush;
         }
-    if (  !BCh.bdUpdateDone() )
-    {
-        // BC boundary information update
-        if (M_verbose) std::cout << "\n      - Updating the BC " << std::flush;
-        BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
-        if (M_verbose) std::cout << "\n      - Filling the matrix " ;
-        bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
-        if (M_verbose) std::cout << "\n" << std::flush;
-    }
 }
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem
