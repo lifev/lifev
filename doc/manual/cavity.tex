@@ -77,7 +77,7 @@ L^2_0(\Omega)$ such that
 \begin{equation} \label{eqn-varia}
 \left\{
 \begin{array}{rlr}
-\displaystyle \alpha (u,v) + a(u,v) + b(v,p) & =  (g,v)
+\displaystyle a(u,v) + b(v,p) & =  (g,v)
 & \hspace{1cm} \forall t \in(0,T), \forall v \in H^1_0(\Omega) \\
 b(u,q) & = 0 & \hspace{1cm} \forall t \in (0,T), \forall q \in L^2_0(\Omega)
 \end{array}
@@ -96,7 +96,7 @@ In this directory, copy the following files :
 
 from the \verb|<lifev directory>/doc/manual/| directory. \verb!cavity.cpp! contains the
 C++ code to solve the variational problem (\ref{eqn-varia}). But before compiling it,
-let's have a look a the \ixns{Makefile}{GNU Makefile}.
+let's have a look a the makefile \ixns{Makefile}{GNU Makefile}.
 
 \begin{verbatim}
 
@@ -118,8 +118,10 @@ TRILLIBS         = -laztecoo -laztecoo -ltriutils -lml \
                    -lteuchos  -llapack -lblas
 TRILINCLUDEPATH  = -I<trilinos include directory path>
 
+# type "mpicxx -show" to get an hint of the contents of 
+# the following variables
 MPILIBPATH       = -L<mpi lib directory path>
-MPILIBS          = -lmpi_cxx -lmpi
+MPILIBS          = -lmpi_cxx -lmpi -lopen-rte
 MPIINCLUDEPATH   = -I<mpi include directory path>
 
 METISLIBPATH	 = -L<parmetis lib directory path>
@@ -127,9 +129,9 @@ METISLIBS        = -lparmetis -lmetis
 METISINCLUDEPATH = -I<parmetis include directory path>
 
 # uncomment this part for optimized compilation
-LDFLAGS         = -c -g0 -O2 -DTHREEDIM -lm
+LDFLAGS         = -g0 -O2 -DTHREEDIM -lm
 # uncomment this part for debugging
-#LDFLAGS         = -c -g2 -O0 -DTHREEDIM -lm
+#LDFLAGS         = -g2 -O0 -DTHREEDIM -lm
 
 
 all: $(OBJECTS) $(EXECUTABLE)
@@ -159,6 +161,9 @@ In order to make everything work, you need to fill the \verb|<...>| with your lo
 configuration paths. You can also change the \verb|LDFLAGS| options in order to
 compile using the debug or the optimized mode in the g++ compiler. More information
 about the using makefiles are available at \url{http://www.gnu.org/software/make/manual/make.html}.
+
+
+Now that we have the makefile, we can look at the sources, contained in the file cavity.cpp
 
 
 \begin{verbatim}
@@ -448,7 +453,8 @@ Bondary conditions \ixv{Boundary Conditions} part. Here is the prototype of the 
                 const std::vector<ID>& comp );
 \end{verbatim}
 \verb!name! is a boundary condition description string,
-\verb!flag! is the boundary condition number as defined in the mesh,
+\verb!flag! is the boundary condition number as defined in the mesh (in this example, the variables \verb+UPWALL+
+and \verb+WALL+ are defined at the beginning of the file),
 \verb!mode! is the mode, \verb!bcf! is the function holding the user-defined function involved
 in the boundary condition. \verb!type! and \verb!mode! are respectively the boundary condition type
 and mode. Please refer to the table (\ref{table-bcparam) for a description of their values.
@@ -517,7 +523,7 @@ order to have the simulation running.
 \end{verbatim}
 
 In our case, after the call to the \verb!partitionMesh! constructor, \verb!meshPart! will store
-the local partitioned mesh. Using this local mesh, we can create our Finite Element \ixt{Finite Element Space}{Finite Element} spaces.
+the local partitioned mesh. Using this local mesh, we can create our Finite Element \ixns{Finite Element Space}{Finite Element} spaces.
 In \lifev, a Finite Element Space is a class storing :
 \begin{description}
 \item a mesh,
@@ -744,7 +750,7 @@ drop\_tol & default : 0. \\
 %http://trilinos.sandia.gov/packages/aztecoo/AztecOOUserGuide.pdf} for more informations ).
 Now that the linear solver and the preconditioner are set, we can build the linear system by calling :
 \begin{verbatim}
-    // the we build the constant matrices
+    // then we build the constant matrices
     fluid.buildSystem();
 \end{verbatim}
 
@@ -755,7 +761,7 @@ The associated ``full'' map can be retrieved using the \verb|getMap| method :
 
 \begin{verbatim}
     // this is the total map ( velocity + pressure ). it will be used to create
-    // vectors to strore the solutions
+    // vectors to store the solutions
 
     EpetraMap fullMap(fluid.getMap());
 
@@ -763,7 +769,7 @@ The associated ``full'' map can be retrieved using the \verb|getMap| method :
 \end{verbatim}
 
 Using this map is mendatory when we access the solution vector after the linear system is solved.\\
-Before solving our system, let's have a look a the post-precessing class.
+Before solving our system, let's have a look at the post-precessing class.
 In \lifev, we mainly use paraview in order to postprocess our problem solutions.
 Writing a paraview solution is quite straightforward using the Ensight class :
 we call the Ensight constructor where we give the data file, the mesh and the filename of the solution file,

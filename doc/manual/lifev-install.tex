@@ -87,7 +87,7 @@ of the \ix{autotools} from the GNU project\footnote{\url{http://www.gnu.org}}.
 \item \verb!libtool 1.5!\ixns{libtool}{autotools}
 \item \verb!automake 1.7!\ixns{automake}{autotools}
 \item \verb!autoconf 2.5x x>=2!\ixns{autoconf}{autotools}
-\item \verb!g++-4.0 x>=0!\ixns{g++}{compilers}
+\item \verb!g++-4.0 !\ixns{g++}{compilers}
 \end{itemize}
 
 \lifev also depends on :
@@ -214,12 +214,12 @@ input your public key, then click on \verb!update!. The server will take up to o
 hour to update your ssh account information, then you will be able to access the
 repositories without password.\\
 
-It is now time to download and compile the code. The first step is to checkout the repository :
+It is now time to download and compile the code. The first step is to checkout the repository : your should insert
 
 \begin{verbatim}
 export CVS_RSH=ssh
 \end{verbatim}
-which should be inserted in your \verb!.profile! or shell configuration file, then
+in your \verb!.profile! or shell configuration file (which are located at the root of the user account), then type
 \begin{verbatim}
 cvs -z3 -d:ext:developername@cmcsforge.epfl.ch:/cvsroot/lifev co lifev
 \end{verbatim}
@@ -242,7 +242,7 @@ for \lifev compilation. Type:
 \begin{verbatim}
 configure --with-trilinos-lib=<your Trilinos library path>
           --with-trilinos-include=<your trilinos include path>
-          <--enable-opt or --enable-debug> --with-openmpi
+          <--enable-opt or --enable-debug> --with-mpi=/usr/lib/openmpi
           --prefix=<your lifev library install path>
 \end{verbatim}
 
@@ -273,7 +273,7 @@ Here is what you can do to compile with debugging flags:
 cd $LIFEV_HOME
 mkdir debug
 cd debug
-CXXFLAGS="-g3 -O0" ../configure
+../configure CXXFLAGS="-g2 -O0"
 make
 \end{verbatim}
 Here we have \verb+$(top_builddir) == $LIFEV_HOME/debug+.
@@ -283,7 +283,7 @@ Here is what you can do to compile with optimization flags:
 cd $LIFEV_HOME
 mkdir optimized
 cd optimized
-CXXFLAGS="-O2" ../configure
+../configure CXXFLAGS="-O2"
 make
 \end{verbatim}
 Here we have \verb+$(top_builddir) == $LIFEV_HOME/optimized+.
@@ -366,7 +366,9 @@ make test_darcy _OR_ make check
 \noindent Since most tests are using meshes that are located in
 \verb+$(top_srcdir)/testsuite/data+, it is mandatory to execute \verb+make check+ in
 \verb+$(builddir)/testsuite/data+ in order to create the proper
-symlinks to the meshes when \verb+$(top_builddir) != $(top_srcdir)+.
+symlinks to the meshes when \verb+$(top_builddir) != $(top_srcdir)+. It is also possible
+to use the command \verb+make link+ inside the repertory of a particular test in order to
+set the meshes available.
 
 %
 %%%%%%%%%%%%% Some Settings for emacs and auc-TeX
