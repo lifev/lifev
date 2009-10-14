@@ -216,7 +216,15 @@ public:
 
     prec_raw_type & getPrec(){return *M_precPtr;}
 
-void computeMaxSingularValue();
+    void computeMaxSingularValue();
+
+    vector_ptrtype computeWS();
+
+    vector_ptrtype WS( )
+    {
+        return M_wss;
+    }
+
 
 protected:
 
@@ -396,6 +404,7 @@ protected:
     matrix_ptrtype                                    M_solidBlockPrec;
     matrix_ptrtype                                    M_meshBlock;
     boost::shared_ptr<solver_type>                    M_linearSolver;
+    vector_ptrtype                                    M_wss;
 private:
     bool                                              M_diagonalScale;
     bool                                              M_reusePrec;
