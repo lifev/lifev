@@ -342,11 +342,11 @@ void  fixedPoint::solveJac(vector_type        &muk,
 
     if(this->algorithm()=="RobinNeumann")
     {
-        muk = M_aitkFS.computeDeltaLambda(this->lambdaSolidOld(), res);
+        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
     }
     else
     {
-        muk = M_aitkFS.computeDeltaLambda(this->lambdaSolidOld(), -1.*res);
+        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
     }
 }
 

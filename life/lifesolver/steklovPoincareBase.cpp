@@ -309,7 +309,7 @@ void  steklovPoincare::solveJac(vector_type        &muk,
     if (this->preconditioner() != NEWTON)
     {
         if (M_nbEval == 1) M_aitkFS.restart();
-        muk = M_aitkFS.computeDeltaLambda(M_dispStructOld, muF, muS );
+        muk = M_aitkFS.computeDeltaLambdaFSI(M_dispStructOld, muF, muS );
     }
     else
     {
