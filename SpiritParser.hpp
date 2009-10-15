@@ -1,33 +1,33 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV Applications.
+ This file is part of the LifeV Applications.
 
-  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>,
-			 Gilles Fourestey  <gilles.fourestey@epfl.ch>
-       Date: 2009-04-07
+ Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>,
+ Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ Date: 2009-04-07
 
-  Copyright (C) 2009 EPFL
+ Copyright (C) 2009 EPFL
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+ */
 /**
-   \file SpiritParser.hpp
-   \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-   \author Gilles Fourestey  <gilles.fourestey@epfl.ch>
-   \date 2009-04-07
+ \file SpiritParser.hpp
+ \author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ \author Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ \date 2009-04-07
  */
 
 #ifndef __SpiritParser_H
@@ -44,17 +44,12 @@
 
 namespace LifeV {
 
-typedef std::map<std::string, Real>		variables_type;
-typedef std::vector<Real>				results_type;
-typedef std::vector<std::string>        string_type;
-
+typedef std::map< std::string, Real > variables_type;
+typedef std::vector< Real >           results_type;
+typedef std::vector< std::string >    string_type;
+//! SpiritCalculator - A string parser calculator based on \c boost::spirit
 /*!
- * \class SpiritCalculator
- * \brief A string parser calculator based on \c boost::spirit
- *
- *  @author(s) Cristiano Malossi
- *             Gilles Fourestey
- *  @see
+ *  @author(s) Cristiano Malossi, Gilles Fourestey
  *
  *  \c SpiritCalculator is a \c boost::spirit based class to perform
  *  evaluation of \c std::string expressions.
@@ -88,60 +83,56 @@ typedef std::vector<std::string>        string_type;
  *  \TODO Avoid the use of ruleTheString (if possible)!
  *
  */
-struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
-//     :
-//     public LifeV::Application
+struct SpiritCalculator: boost::spirit::grammar< SpiritCalculator >
 {
 public:
 
-	SpiritCalculator( variables_type& variables, results_type& results, UInt& nResults ) :
-		M_variables	( variables ),
-		M_results 	( results ),
-		M_nResults 	( nResults )
-	{
-	}
-
-	SpiritCalculator( const SpiritCalculator& calculator ) :
-		M_variables ( calculator.M_variables ),
-		M_results 	( calculator.M_results ),
-		M_nResults 	( calculator.M_nResults )
-	{
-	}
-
-	SpiritCalculator& operator=( const SpiritCalculator& calculator )
-	{
-	    if ( this != &calculator )
-	    {
-	    	M_variables		= calculator.M_variables;
-	    	M_results 		= calculator.M_results;
-	    	M_nResults 		= calculator.M_nResults;
-	    }
-
-		return *this;
-	}
-
-	~SpiritCalculator()
-	{
-	}
-
-	// Closures
-    struct assignment_closure : boost::spirit::closure<assignment_closure, std::string, Real>
+    SpiritCalculator( variables_type& variables, results_type& results, UInt& nResults ) :
+        M_variables ( variables ),
+        M_results   ( results ),
+        M_nResults  ( nResults )
     {
-    	member1 name;
-    	member2 value;
+    }
+
+    SpiritCalculator( const SpiritCalculator& calculator ) :
+        M_variables ( calculator.M_variables ),
+        M_results   ( calculator.M_results ),
+        M_nResults  ( calculator.M_nResults )
+    {
+    }
+
+    SpiritCalculator& operator=( const SpiritCalculator& calculator )
+    {
+        if ( this != &calculator )
+        {
+            M_variables = calculator.M_variables;
+            M_results   = calculator.M_results;
+            M_nResults = calculator.M_nResults;
+        }
+
+        return *this;
+    }
+
+    ~SpiritCalculator() {}
+
+    // Closures
+    struct assignment_closure: boost::spirit::closure< assignment_closure, std::string, Real >
+    {
+        member1 name;
+        member2 value;
     };
 
-    struct value_closure : boost::spirit::closure<value_closure, Real>
+    struct value_closure: boost::spirit::closure< value_closure, Real >
     {
         member1 value;
     };
 
-    struct string_closure : boost::spirit::closure<string_closure, std::string>
+    struct string_closure: boost::spirit::closure< string_closure, std::string >
     {
         member1 name;
     };
 
-    template <typename ScannerT>
+    template< typename ScannerT >
     struct definition
     {
     public:
@@ -207,185 +198,174 @@ public:
             group = '(' >> expression[group.value = arg1] >> ')';
     	}
 
-        boost::spirit::rule<ScannerT> const&
-        start() const { return statement; }
+        boost::spirit::rule< ScannerT > const&
+        start() const
+        {
+            return statement;
+        }
 
-        boost::spirit::rule<ScannerT> 								 statement, command, operation, expression_vector;
-        boost::spirit::rule<ScannerT, assignment_closure::context_t> assignment;
-        boost::spirit::rule<ScannerT,	  string_closure::context_t> identifier;
-        boost::spirit::rule<ScannerT,	   value_closure::context_t> expression, topOperations, midOperations, lowOperations, term, subterm, factor, function, literal, group;
+        boost::spirit::rule< ScannerT > statement, command, operation, expression_vector;
+        boost::spirit::rule< ScannerT, assignment_closure::context_t > assignment;
+        boost::spirit::rule< ScannerT, string_closure::context_t > identifier;
+        boost::spirit::rule< ScannerT, value_closure::context_t > expression, topOperations,
+                                                                  midOperations, lowOperations,
+                                                                  term, subterm, factor, function,
+                                                                  literal, group;
     };
 
     // Member functions that are called in semantic actions.
-    inline void define(const std::string& name, const Real& value) const
+    inline void define( const std::string& name, const Real& value ) const
     {
-    	M_variables[name] = value;
+        M_variables[name] = value;
     }
 
     inline void showMeVariables() const
     {
-    	variables_type::const_iterator it;
+        variables_type::const_iterator it;
 
-    	std::cout << "SpiritParser showMe: " << std::setprecision(30) <<std::endl;
+        std::cout << "SpiritParser showMe: " << std::setprecision( 30 ) << std::endl;
 
-    	for (it = M_variables.begin(); it != M_variables.end(); ++it)
-    		std::cout << "                     " << it->first << " = " << it->second << std::endl;
-    	std::cout << std::endl;
+        for ( it = M_variables.begin(); it != M_variables.end(); ++it )
+            std::cout << "                     " << it->first << " = " << it->second << std::endl;
+        std::cout << std::endl;
     }
 
-    inline Real lookup(const std::string& name) const
+    inline Real lookup( const std::string& name ) const
     {
-    	if (M_variables.find(name) == M_variables.end())
-    	{
-    	    std::cerr << "!!! Warning: SpiritParser has undefined name " << name << " !!!" << std::endl;
-    	    return 0.0;
-    	}
-    	else
-    		return M_variables.find(name)->second;
+        if ( M_variables.find( name ) == M_variables.end() )
+        {
+            std::cerr << "!!! Warning: SpiritParser has undefined name " << name << " !!!" << std::endl;
+            return 0.0;
+        }
+        else
+            return M_variables.find( name )->second;
     }
 
     inline Real pow( const Real& a, const Real& b ) const
     {
-		return std::pow(a,b);
+        return std::pow( a, b );
     }
 
     inline Real more( const Real& a, const Real& b ) const
     {
-		return a > b;
+        return a > b;
     }
 
     inline Real less( const Real& a, const Real& b ) const
     {
-		return a < b;
+        return a < b;
     }
 
     inline Real sqrt( const Real& a ) const
     {
-    	return std::sqrt(a);
+        return std::sqrt( a );
     }
 
     inline Real exp( const Real& a ) const
     {
-    	return std::exp(a);
+        return std::exp( a );
     }
 
     inline Real log( const Real& a ) const
     {
-    	return std::log(a);
+        return std::log( a );
     }
 
     inline Real log10( const Real& a ) const
     {
-    	return std::log10(a);
+        return std::log10( a );
     }
 
     inline Real sin( const Real& a ) const
     {
-    	return std::sin(a);
+        return std::sin( a );
     }
 
     inline Real cos( const Real& a ) const
     {
-    	return std::cos(a);
+        return std::cos( a );
     }
 
     inline Real tan( const Real& a ) const
     {
-    	return std::tan(a);
+        return std::tan( a );
     }
 
-    inline void setResult( const Real& result) const
+    inline void setResult( const Real& result ) const
     {
-    	M_results[M_nResults] = result;
-    	M_nResults++;
+        M_results[M_nResults] = result;
+        M_nResults++;
     }
 
 private:
 
-	variables_type&											M_variables;
-	results_type&											M_results;
-	UInt&													M_nResults;
+    variables_type& M_variables;
+    results_type&   M_results;
+    UInt&           M_nResults;
 };
-
-
-
-
-
+//! SpiritParser - A LifeV interface for SpiritCalculator
 /*!
- * \class SpiritParser
- * \brief A LifeV interface for SpiritCalculator
- *
- *  @author(s) Cristiano Malossi
- *             Gilles Fourestey
- *  @see
+ *  @author(s) Cristiano Malossi, Gilles Fourestey
  */
 class SpiritParser
-//     :
-//     public LifeV::Application
 {
 public:
 
-    /** @name Constructors & Destructor
-     */
+    //! @name Constructors & Destructor
     //@{
 
-	//! Empty string constructor (it needs a manual call to setString)
-	/*!
-	 * \param applyRules		- use rules for notation
+    //! Empty string constructor (it needs a manual call to setString)
+    /*!
+     * \param applyRules		- use rules for notation
      */
     //! Constructor
-	SpiritParser( const bool& applyRules=true );
+    SpiritParser( const bool& applyRules = true );
 
-	//! Constructor
-	/*!
-	 * \param string			- expression to parse
-	 * \param applyRules		- use rules for notation
+    //! Constructor
+    /*!
+     * \param string			- expression to parse
+     * \param applyRules		- use rules for notation
      */
-	SpiritParser( const std::string& string, const bool& applyRules=true );
+    SpiritParser( const std::string& string, const bool& applyRules = true );
 
-	//! Copy constructor
-	/*!
-	 * \param Parser			- SpiritParser
+    //! Copy constructor
+    /*!
+     * \param Parser			- SpiritParser
      */
-	SpiritParser( const SpiritParser& parser );
+    SpiritParser( const SpiritParser& parser );
 
     //! Destructor
-    ~SpiritParser()
-    {
-    }
+    ~SpiritParser() {}
 
     //@}
 
 
-
-    /** @name Methods
-     */
-
+    //! @name Methods
     //@{
 
-	//! Operator =
-	/*!
-	 * \param Parser			- SpiritParser
+    //! Operator =
+    /*!
+     * \param Parser - SpiritParser
      */
-	SpiritParser& operator=( const SpiritParser& parser );
+    SpiritParser& operator=( const SpiritParser& parser );
 
     /*! Set string function
      *
-     * \param string			- Expression to evaluate
-     * \param stringSeparator	- Separator identifier (default -> ";")
+     * \param string - Expression to evaluate
+     * \param stringSeparator - Separator identifier (default -> ";")
      */
-    void setString( const std::string& string,  const std::string& stringSeparator = ";" );
+    void setString( const std::string& string, const std::string& stringSeparator = ";" );
 
-	/*! Set/replace a variable
+    /*! Set/replace a variable
      *
-	 * \param name				- name of the parameter
+     * \param name - name of the parameter
      * \param value - value of the parameter
      */
     void setVariable( const std::string& name, const Real& value );
 
     /*! Get variable
      *
-     * \param name				- name of the parameter
+     * \param name - name of the parameter
      */
     const Real& getVariable( const std::string& name );
 
@@ -395,35 +375,37 @@ public:
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
-     * \param substring			- string to find
+     * \param substring - string to find
      */
-	UInt countSubstring( const std::string& substring );
+    UInt countSubstring( const std::string& substring );
 
-    void showMeVariables( void ) const { M_calculator.showMeVariables(); }
+    void showMeVariables( void ) const
+    {
+        M_calculator.showMeVariables();
+    }
 
     //@}
 
 private:
 
-	string_type											M_strings;
-	variables_type										M_variables;
-	results_type										M_results;
-	UInt												M_nResults;
-	SpiritCalculator									M_calculator;
-	bool												M_applyRules;
+    string_type      M_strings;
+    variables_type   M_variables;
+    results_type     M_results;
+    UInt             M_nResults;
+    SpiritCalculator M_calculator;
+    bool             M_applyRules;
 
-    /** @name Private functions
-     */
+    //! @name Private functions
     //@{
 
-	//! Setup results
-	inline void setupResults( void );
+    //! Setup results
+    inline void setupResults( void );
 
-	//! Set default variables
-	inline void setDefaultVariables( void );
+    //! Set default variables
+    inline void setDefaultVariables( void );
 
-	//! Apply rules to the string
-	inline void ruleTheString( std::string& string );
+    //! Apply rules to the string
+    inline void ruleTheString( std::string& string );
 
     //@}
 
