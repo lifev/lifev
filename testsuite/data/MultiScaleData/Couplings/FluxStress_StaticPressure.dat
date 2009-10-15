@@ -9,19 +9,9 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Velocity Dynamic ############################
+### COUPLING: FluxStress - Static Pressure ########################################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_CylinderPoiseuilleVelocityDynamic
-
-[boundary_conditions]
-list = 'ZPoiseuilleDynamic'
-
-	[./ZPoiseuilleDynamic]
-	type				= Essential
-	mode				= Component
-	component			= 3
-	OPERfunctionFile	= physicalFunctions/test_dynamicPoiseuilleVelocityPressure.dat[A]
-
-	[../]
+couplingName = FluxStess_StaticPressure
+pressureType = Static

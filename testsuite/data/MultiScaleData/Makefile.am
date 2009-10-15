@@ -25,10 +25,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 SUBDIRS		= 	Couplings\
 				Models
 
-dist_pkgdata_DATA = MultiScale_3Dbifurcation.dat \
-					MultiScale_3Dhexagon.dat \
-					MultiScale_3Dserial2.dat \
-					MultiScale_3Dserial3.dat \
+dist_pkgdata_DATA = MultiScale.dat \
 					MultiScale_test.dat
 					
 

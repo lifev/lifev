@@ -12,12 +12,12 @@
 ### COUPLING: BoundaryCondition - Cylinder Poiseuille Velocity ####################################
 ###################################################################################################
 
-[multiscale]
+[MultiScale]
 couplingName	= BoundaryCondition_CylinderPoiseuilleVelocity
 
 [boundary_conditions]
- list = 'XY ZPoiseuille' # Stationary Poiseuille
-#list = 'XYZPoiseuille'  # Stationary Poiseuille
+#list = 'XY ZPoiseuille' # Stationary Poiseuille
+ list = 'XYZPoiseuille'  # Stationary Poiseuille
 
 	[./XY]
 	type       			= Essential

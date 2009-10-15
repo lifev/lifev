@@ -9,17 +9,27 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MULTISCALE: Main data file for the automatic check of the TESTSUITE ###########################
+### MULTISCALE: Main data file ####################################################################
 ###################################################################################################
 
 [Problem] #########################################################################################
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3.dat
 MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation_Stationary.dat
 
 [Algorithm] #######################################################################################
 ###################################################################################################
 	[./time_discretization]
 	initialtime		= 0.0           # [s]
-	endtime			= 0.001			# [s]
+	endtime			= 1.5			# [s]
 	timestep		= 0.001			# [s]
 	
 	[../Aitken_method]

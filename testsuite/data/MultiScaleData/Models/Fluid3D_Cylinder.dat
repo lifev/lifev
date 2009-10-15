@@ -12,7 +12,7 @@
 ### MODEL: Fluid3D - Cylinder #####################################################################
 ###################################################################################################
 
-[multiscale]
+[MultiScale]
 modelName		= Fluid3D_Cylinder
 couplingFlags	= '2 3'
 
@@ -35,8 +35,8 @@ useShapeDerivatives = false
 #diagonalBlockPrec	= false
 
 	[./physics] (SHOULD BE DEFINEED HERE ONLY FOR SPECIFIC CASE)
-	#density         = 1.0          # density   [kg/m^3] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
-	#viscosity       = 0.03			# viscosity [kg/m/s] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
+	#density         = 1.0      # density   [kg/m^3] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
+	#viscosity       = 0.03		# viscosity [kg/m/s] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)
 
 	[../time_discretization]
 	#timestep 		= 0.0001	# [s] (SHOULD BE PLACED HERE ONLY FOR SPECIFIC CASE)

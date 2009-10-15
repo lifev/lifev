@@ -9,8 +9,9 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: FluxPressure ########################################################################
+### COUPLING: FluxStress - Total Pressure #########################################################
 ###################################################################################################
 
-[multiscale]
-couplingName	= FluxPressure
+[MultiScale]
+couplingName = FluxStess_TotalPressure
+pressureType = Total

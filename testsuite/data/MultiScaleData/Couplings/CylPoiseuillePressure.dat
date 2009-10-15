@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Cylinder Poiseuille Pressure ####################################
 ###################################################################################################
 
-[multiscale]
+[MultiScale]
 couplingName	= BoundaryCondition_CylinderPoiseuillePressure
 
 [boundary_conditions]

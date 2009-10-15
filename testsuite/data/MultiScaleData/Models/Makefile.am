@@ -22,7 +22,19 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Fluid3D_Cylinder.dat
+dist_pkgdata_DATA = Fluid3D_Cylinder.dat \
+                    MultiScale_3Dbifurcation.dat \
+                    MultiScale_3Dbifurcation_Stationary.dat \
+                    MultiScale_3Dhexagon.dat \
+                    MultiScale_3Dhexagon_Stationary.dat \
+                    MultiScale_3Dserial1.dat \
+                    MultiScale_3Dserial1_Stationary.dat \
+                    MultiScale_3Dserial2.dat \
+                    MultiScale_3Dserial2_Stationary.dat \
+                    MultiScale_3Dserial3.dat \
+                    MultiScale_3Dserial3_Stationary.dat \
+                    MultiScale_3Dserial6.dat \
+                    MultiScale_3Dserial6_Stationary.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

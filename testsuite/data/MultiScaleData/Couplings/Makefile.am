@@ -23,11 +23,12 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = CylPoiseuillePressure.dat \
-					CylPoiseuillePressureDynamic.dat \
-					CylPoiseuilleVelocity.dat \
-					CylPoiseuilleVelocityDynamic.dat \
-					FluxPressure.dat \
-					NoStress.dat
+                    CylPoiseuillePressureDynamic.dat \
+                    CylPoiseuilleVelocity.dat \
+                    CylPoiseuilleVelocityDynamic.dat \
+                    FluxStress_StaticPressure.dat \
+                    FluxStress_TotalPressure.dat \
+                    NoStress.dat
 					
 
 check-local:
