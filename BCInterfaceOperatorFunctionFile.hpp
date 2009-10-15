@@ -1,31 +1,31 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV Applications.
+ This file is part of the LifeV Applications.
 
-  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-       Date: 2009-08-26
+ Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+ Date: 2009-08-26
 
-  Copyright (C) 2009 EPFL
+ Copyright (C) 2009 EPFL
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+ */
 /**
-   \file BCInterfaceOperatorFunctionFile.hpp
-   \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-   \date 2009-08-26
+ \file BCInterfaceOperatorFunctionFile.hpp
+ \author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ \date 2009-08-26
  */
 
 #ifndef __BCInterfaceOperatorFunctionFile_H
@@ -48,41 +48,40 @@ namespace LifeV {
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *  The function string can contain Operator parameters.
  */
-template <class Operator>
-class BCInterfaceOperatorFunctionFile : public virtual BCInterfaceFunctionFile<Operator>,
-										public virtual BCInterfaceOperatorFunction<Operator>
+template< class Operator >
+class BCInterfaceOperatorFunctionFile: public virtual BCInterfaceFunctionFile< Operator > ,
+                                       public virtual BCInterfaceOperatorFunction< Operator >
 {
 public:
 
-	typedef BCInterfaceFunctionFile<Operator>		super1;
-	typedef BCInterfaceOperatorFunction<Operator>	super2;
+    typedef BCInterfaceFunctionFile< Operator > super1;
+    typedef BCInterfaceOperatorFunction< Operator > super2;
 
-	//! @name Constructors & Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Constructor
-	BCInterfaceOperatorFunctionFile();
+    BCInterfaceOperatorFunctionFile();
 
     //! Constructor
-	/*!
-	 * \param data				- BC data loaded from GetPot file
-	 */
-	BCInterfaceOperatorFunctionFile( const BCInterfaceData<Operator>& data );
+    /*!
+     * \param data				- BC data loaded from GetPot file
+     */
+    BCInterfaceOperatorFunctionFile( const BCInterfaceData< Operator >& data );
 
-	//! Copy constructor
-	/*!
-	 * \param function			- BCInterfaceOperatorFunctionFile
-	 */
-	BCInterfaceOperatorFunctionFile( const BCInterfaceOperatorFunctionFile& function );
+    //! Copy constructor
+    /*!
+     * \param function			- BCInterfaceOperatorFunctionFile
+     */
+    BCInterfaceOperatorFunctionFile( const BCInterfaceOperatorFunctionFile& function );
 
     //! Destructor
-	virtual ~BCInterfaceOperatorFunctionFile() {}
+    virtual ~BCInterfaceOperatorFunctionFile() {}
 
     //@}
 
 
-
-	//! @name Methods
+    //! @name Methods
     //@{
 
     //! Operator =
@@ -93,117 +92,105 @@ public:
 
     //! Set data
     /*!
-	 * \param data - BC data loaded from GetPot file
-	 */
-    virtual void SetData( const BCInterfaceData<Operator>& data );
+     * \param data - BC data loaded from GetPot file
+     */
+    virtual void SetData( const BCInterfaceData< Operator >& data );
 
-	//! Compare function
-	/*!
-	 * \param data - BC data loaded from GetPot file
-	 */
-    virtual bool Compare( const BCInterfaceData<Operator>& data );
+    //! Compare function
+    /*!
+     * \param data - BC data loaded from GetPot file
+     */
+    virtual bool Compare( const BCInterfaceData< Operator >& data );
 
     //@}
 
 };
 
 //! Factory create function
-template <typename Operator>
-inline BCInterfaceFunction<Operator>* createOperatorFunctionFile()
+template< typename Operator >
+inline BCInterfaceFunction< Operator >* createOperatorFunctionFile()
 {
-	return new BCInterfaceOperatorFunctionFile<Operator>();
+    return new BCInterfaceOperatorFunctionFile< Operator > ();
 }
-
-
 
 // ===================================================
 //! Constructors
 // ===================================================
-template <class Operator>
-BCInterfaceOperatorFunctionFile<Operator>::BCInterfaceOperatorFunctionFile( ) :
-	BCInterfaceFunction<Operator>				( ),
-	BCInterfaceFunctionFile<Operator>			( ),
-	BCInterfaceOperatorFunction<Operator>		( )
+template< class Operator >
+BCInterfaceOperatorFunctionFile< Operator >::BCInterfaceOperatorFunctionFile() :
+    BCInterfaceFunction< Operator >         (),
+    BCInterfaceFunctionFile< Operator >     (),
+    BCInterfaceOperatorFunction< Operator > ()
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::BCInterfaceOperatorFunctionFile( void )" << "\n";
+    Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::BCInterfaceOperatorFunctionFile( void )" << "\n";
 #endif
 
 }
 
-
-
-template <class Operator>
-BCInterfaceOperatorFunctionFile<Operator>::BCInterfaceOperatorFunctionFile( const BCInterfaceData<Operator>& data ) :
-	BCInterfaceFunction<Operator>				( ),
-	BCInterfaceFunctionFile<Operator>			( ),
-	BCInterfaceOperatorFunction<Operator>		( )
+template< class Operator >
+BCInterfaceOperatorFunctionFile< Operator >::BCInterfaceOperatorFunctionFile( const BCInterfaceData< Operator >& data ) :
+    BCInterfaceFunction< Operator >         (),
+    BCInterfaceFunctionFile< Operator >     (),
+    BCInterfaceOperatorFunction< Operator > ()
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::BCInterfaceOperatorFunctionFile( data )" << "\n";
+    Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::BCInterfaceOperatorFunctionFile( data )" << "\n";
 #endif
 
-	this->SetData( data );
+    this->SetData( data );
 }
 
-
-
-template <class Operator>
-BCInterfaceOperatorFunctionFile<Operator>::BCInterfaceOperatorFunctionFile( const BCInterfaceOperatorFunctionFile& function ) :
-	BCInterfaceFunction<Operator>				( function ),
-	BCInterfaceFunctionFile<Operator>			( function ),
-	BCInterfaceOperatorFunction<Operator>		( function )
+template< class Operator >
+BCInterfaceOperatorFunctionFile< Operator >::BCInterfaceOperatorFunctionFile( const BCInterfaceOperatorFunctionFile& function ) :
+    BCInterfaceFunction< Operator >         ( function ),
+    BCInterfaceFunctionFile< Operator >     ( function ),
+    BCInterfaceOperatorFunction< Operator > ( function )
 {
 }
-
-
-
-
 
 // ===================================================
 //! Methods
 // ===================================================
-template <class Operator>
-BCInterfaceOperatorFunctionFile<Operator>&
-BCInterfaceOperatorFunctionFile<Operator>::operator=( const BCInterfaceOperatorFunctionFile& function )
+template< class Operator >
+BCInterfaceOperatorFunctionFile< Operator >&
+BCInterfaceOperatorFunctionFile< Operator >::operator=( const BCInterfaceOperatorFunctionFile& function )
 {
-	if ( this != &function )
-	{
-		super1::operator=( function );
-		super2::operator=( function );
-	}
+    if ( this != &function )
+    {
+        super1::operator=( function );
+        super2::operator=( function );
+    }
 
-	return *this;
+    return *this;
 }
 
-
-
-template <class Operator>
+template< class Operator >
 void
-BCInterfaceOperatorFunctionFile<Operator>::SetData( const BCInterfaceData<Operator>& data )
+BCInterfaceOperatorFunctionFile< Operator >::SetData( const BCInterfaceData< Operator >& data )
 {
 
 #ifdef DEBUG
-	Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::setData" << "\n";
+    Debug( 5024 ) << "BCInterfaceOperatorFunctionFile::setData" << "\n";
 #endif
-	super1::SetData( data );
+    super1::SetData( data );
 
-	//super2::SetData( data ); Cannot call directly, because it call again BCInterfaceFunction::setup( data )
-	super2::M_operator	= data.GetOperator();
-	super2::M_flag		= data.GetFlag();
+    //super2::SetData( data ); Cannot call directly, because it call again BCInterfaceFunction::setup( data )
+    super2::M_operator = data.GetOperator();
+    super2::M_flag     = data.GetFlag();
 
-	super2::CreateAccessList();
+    super2::CreateAccessList();
 }
 
-
-
-template <class Operator>
+template< class Operator >
 bool
-BCInterfaceOperatorFunctionFile<Operator>::Compare( const BCInterfaceData<Operator>& data )
+BCInterfaceOperatorFunctionFile< Operator >::Compare( const BCInterfaceData< Operator >& data )
 {
-	return super1::M_fileName.compare( data.GetBaseString() ) == 0 && super1::M_comV == data.GetComV() && super2::M_flag == data.GetFlag();
+    return super1::M_fileName.compare( data.GetBaseString() ) == 0 &&
+           super1::M_comV == data.GetComV() &&
+           super2::M_flag == data.GetFlag();
 }
 
 } // Namespace LifeV

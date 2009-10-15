@@ -1,31 +1,31 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV Applications.
+ This file is part of the LifeV Applications.
 
-  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-       Date: 2009-04-06
+ Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+ Date: 2009-04-06
 
-  Copyright (C) 2009 EPFL
+ Copyright (C) 2009 EPFL
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+ */
 /**
-   \file BCInterfaceFunction.hpp
-   \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-   \date 2009-04-06
+ \file BCInterfaceFunction.hpp
+ \author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ \date 2009-04-06
  */
 
 #ifndef __BCInterfaceFunction_H
@@ -80,40 +80,39 @@ namespace LifeV {
  *  The only difference is that the second kind of instruction is more efficient during execution.
  *
  */
-template <typename Operator>
+template< typename Operator >
 class BCInterfaceFunction
 {
 public:
 
-	typedef boost::function<Real ( 	Real const& t,
-									Real const& x,
-									Real const& y,
-									Real const& z,
-									ID 	 const& id	)> 	function_type;
+    typedef boost::function< Real( Real const& t,
+                                   Real const& x,
+                                   Real const& y,
+                                   Real const& z,
+                                   ID const& id ) > function_type;
 
-	//! @name Constructors & Destructor
+    //! @name Constructors & Destructor
     //@{
 
-	//! Empty Constructor
-	BCInterfaceFunction( void );
+    //! Empty Constructor
+    BCInterfaceFunction( void );
 
-	//! Constructor
-	/*!
-	 * \param data - BC data loaded from GetPot file
-	 */
-	BCInterfaceFunction( const BCInterfaceData<Operator>& data );
+    //! Constructor
+    /*!
+     * \param data - BC data loaded from GetPot file
+     */
+    BCInterfaceFunction( const BCInterfaceData< Operator >& data );
 
-	//! Copy constructor
-	/*!
-	 * \param function - BCInterfaceFunction
-	 */
-	BCInterfaceFunction( const BCInterfaceFunction& function );
+    //! Copy constructor
+    /*!
+     * \param function - BCInterfaceFunction
+     */
+    BCInterfaceFunction( const BCInterfaceFunction& function );
 
     //! Destructor
     virtual ~BCInterfaceFunction() {}
 
     //@}
-
 
 
     //! @name Methods
@@ -127,55 +126,57 @@ public:
 
     //! Set data
     /*!
-	 * \param data - BC data loaded from GetPot file
-	 */
-    virtual void SetData( const BCInterfaceData<Operator>& data );
+     * \param data - BC data loaded from GetPot file
+     */
+    virtual void SetData( const BCInterfaceData< Operator >& data );
 
-	//! Compare function
-	/*!
-	 * \param data - BC data loaded from GetPot file
-	 */
-    virtual bool Compare( const BCInterfaceData<Operator>& data );
+    //! Compare function
+    /*!
+     * \param data - BC data loaded from GetPot file
+     */
+    virtual bool Compare( const BCInterfaceData< Operator >& data );
 
     //@}
-
 
 
     //! @name Get functions
     //@{
 
-	//! Get the base of the boundary condition
-	BCFunctionBase& GetBase() { return M_base; }
+    //! Get the base of the boundary condition
+    BCFunctionBase& GetBase()
+    {
+        return M_base;
+    }
 
     //@}
 
 protected:
 
-	std::string											M_baseString;
-	BCComV												M_comV;
-	boost::shared_ptr<SpiritParser>						M_parser;
+    std::string                       M_baseString;
+    BCComV                            M_comV;
+    boost::shared_ptr< SpiritParser > M_parser;
 
-	//! @name Protected functions
-	//@{
+    //! @name Protected functions
+    //@{
 
-	//! dataInterpolation
-	virtual inline void DataInterpolation( void ) {}
+    //! dataInterpolation
+    virtual inline void DataInterpolation( void ) {}
 
     //@}
 
 private:
 
-	BCFunctionBase 										M_base;
-	std::map<ID, ID>									M_mapID;
+    BCFunctionBase                   M_base;
+    std::map< ID, ID >               M_mapID;
 
-	//! @name Private functions
-	//@{
+    //! @name Private functions
+    //@{
 
     //! SetFunction
     inline void SetFunction( void );
 
     //! Function
-    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ );
+    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
 
     //! FunctionID
     Real FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
@@ -184,221 +185,206 @@ private:
 };
 
 //! Factory create function
-template <typename Operator>
-inline BCInterfaceFunction<Operator>* createFunction()
+template< typename Operator >
+inline BCInterfaceFunction< Operator >* createFunction()
 {
-	return new BCInterfaceFunction<Operator>();
+    return new BCInterfaceFunction< Operator > ();
 }
-
-
-
-
 
 // ===================================================
 //! Constructor
 // ===================================================
-template <typename Operator>
-BCInterfaceFunction<Operator>::BCInterfaceFunction( ) :
-	M_baseString				( ),
-	M_comV						( ),
-	M_parser					( ),
-	M_base						( ),
-	M_mapID						( )
+template< typename Operator >
+BCInterfaceFunction< Operator >::BCInterfaceFunction() :
+    M_baseString(),
+    M_comV      (),
+    M_parser    (),
+    M_base      (),
+    M_mapID     ()
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( void )" << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( void )" << "\n";
 #endif
 
 }
 
-
-template <typename Operator>
-BCInterfaceFunction<Operator>::BCInterfaceFunction( const BCInterfaceData<Operator>& data ) :
-	M_baseString				( ),
-	M_comV						( ),
-	M_parser					( ),
-	M_base						( ),
-	M_mapID						( )
+template< typename Operator >
+BCInterfaceFunction< Operator >::BCInterfaceFunction( const BCInterfaceData< Operator >& data ) :
+    M_baseString(),
+    M_comV      (),
+    M_parser    (),
+    M_base      (),
+    M_mapID     ()
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
 #endif
 
-	this->SetData( data );
+    this->SetData( data );
 }
 
-
-
-template <typename Operator>
-BCInterfaceFunction<Operator>::BCInterfaceFunction( const BCInterfaceFunction& function ) :
-	M_baseString	( function.M_baseString ),
-	M_comV			( function.M_comV ),
-	M_parser		( function.M_parser ),
-	M_base			( function.M_base ),
-	M_mapID			( function.M_mapID )
+template< typename Operator >
+BCInterfaceFunction< Operator >::BCInterfaceFunction( const BCInterfaceFunction& function ) :
+    M_baseString( function.M_baseString ),
+    M_comV      ( function.M_comV ),
+    M_parser    ( function.M_parser ),
+    M_base      ( function.M_base ),
+    M_mapID     ( function.M_mapID )
 {
 }
-
-
-
-
 
 // ===================================================
 //! Methods
 // ===================================================
-template <typename Operator>
-BCInterfaceFunction<Operator>&
-BCInterfaceFunction<Operator>::operator=( const BCInterfaceFunction& function )
+template< typename Operator >
+BCInterfaceFunction< Operator >&
+BCInterfaceFunction< Operator >::operator=( const BCInterfaceFunction& function )
 {
     if ( this != &function )
     {
-    	M_baseString	= function.M_baseString;
-    	M_comV			= function.M_comV;
-    	M_parser 		= function.M_parser;
-    	M_base			= function.M_base;
-    	M_mapID			= function.M_mapID;
+        M_baseString = function.M_baseString;
+        M_comV       = function.M_comV;
+        M_parser     = function.M_parser;
+        M_base       = function.M_base;
+        M_mapID      = function.M_mapID;
     }
 
-	return *this;
+    return *this;
 }
 
-
-
-template <typename Operator>
+template< typename Operator >
 void
-BCInterfaceFunction<Operator>::SetData( const BCInterfaceData<Operator>& data )
+BCInterfaceFunction< Operator >::SetData( const BCInterfaceData< Operator >& data )
 {
 
 #ifdef DEBUG
-	Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
-	M_comV			= data.GetComV();
-	M_baseString	= data.GetBaseString();
+    M_comV = data.GetComV();
+    M_baseString = data.GetBaseString();
 
-	//boost::shared_ptr<SpiritParser> emptyParser( );
-	//if ( M_parser == emptyParser )
-	if ( M_parser )
-		M_parser->setString( M_baseString );
-	else
-		M_parser.reset( new SpiritParser( M_baseString ) );
+    //boost::shared_ptr<SpiritParser> emptyParser( );
+    //if ( M_parser == emptyParser )
+    if ( M_parser )
+        M_parser->setString( M_baseString );
+    else
+        M_parser.reset( new SpiritParser( M_baseString ) );
 
-	SetFunction();
+    SetFunction();
 }
 
-
-
-template <typename Operator>
+template< typename Operator >
 bool
-BCInterfaceFunction<Operator>::Compare( const BCInterfaceData<Operator>& data )
+BCInterfaceFunction< Operator >::Compare( const BCInterfaceData< Operator >& data )
 {
-	return M_baseString.compare( data.GetBaseString() ) == 0 && M_comV == data.GetComV();
+    return M_baseString.compare( data.GetBaseString() ) == 0 && M_comV == data.GetComV();
 }
-
-
-
-
 
 // ===================================================
 //! Private functions
 // ===================================================
-template <typename Operator>
-inline void
-BCInterfaceFunction<Operator>::SetFunction( void )
+template< typename Operator >
+inline void BCInterfaceFunction< Operator >::SetFunction( void )
 {
-	/*
-	 * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
-	 * ------------------------------------------|---------------------------------------------------
-	 *                                           |
-	 * COMPONENT     2             x*y*z         |      1             1             Function
-	 * FULL          3             x*y*z         |      1             1             Function
-	 * FULL          1             x*y*z         |      1             1             Function
-	 * FULL          3             (y*z,x*z,x*y) |      1             3             FunctionID
-	 * FULL          2             (x,y)         |      1             2             FunctionID
-	 * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
-	 */
+    /*
+     * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
+     * ------------------------------------------|---------------------------------------------------
+     *                                           |
+     * COMPONENT     2             x*y*z         |      1             1             Function
+     * FULL          3             x*y*z         |      1             1             Function
+     * FULL          1             x*y*z         |      1             1             Function
+     * FULL          3             (y*z,x*z,x*y) |      1             3             FunctionID
+     * FULL          2             (x,y)         |      1             2             FunctionID
+     * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
+     */
 
-	UInt arguments = M_parser->countSubstring( "," ) + 1;
+    UInt arguments = M_parser->countSubstring( "," ) + 1;
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::setFunction            arguments: " << arguments  << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::setFunction            arguments: " << arguments << "\n";
 #endif
 
-	if ( arguments == 1 )
-		M_base.setFunction( boost::bind(&BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5) );
-	else
-	{
-		//Create the ID map
-		if ( M_comV.size() > 1 )	// Component
-			for ( ID i(0) ; i < static_cast<ID>( M_comV.size() ) ; ++i )
-				M_mapID[ M_comV[i] ] = i+1;
-		else					// if ( M_comV.front() == arguments )  Full
-			for ( ID i(1) ; i <= M_comV.front() ; ++i )
-				M_mapID[ i ] = i;
+    if ( arguments == 1 )
+        M_base.setFunction( boost::bind( &BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5 ) );
+    else
+    {
+        //Create the ID map
+        if ( M_comV.size() > 1 ) // Component
+            for ( ID i( 0 ); i < static_cast< ID > ( M_comV.size() ); ++i )
+                M_mapID[M_comV[i]] = i + 1;
+        else
+            // if ( M_comV.front() == arguments )  Full
+            for ( ID i( 1 ); i <= M_comV.front(); ++i )
+                M_mapID[i] = i;
 
-		M_base.setFunction( boost::bind(&BCInterfaceFunction::FunctionID, this, _1, _2, _3, _4, _5) );
-	}
+        M_base.setFunction( boost::bind( &BCInterfaceFunction::FunctionID, this, _1, _2, _3, _4, _5 ) );
+    }
 }
 
-
-
-template <typename Operator>
+template< typename Operator >
 Real
-BCInterfaceFunction<Operator>::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ )
+BCInterfaceFunction< Operator >::Function( const Real& t,
+                                                const Real& x,
+                                                const Real& y,
+                                                const Real& z,
+                                                const ID& /*id*/)
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
-	Debug( 5021 ) << "                                                           x: " << x  << "\n";
-	Debug( 5021 ) << "                                                           y: " << y  << "\n";
-	Debug( 5021 ) << "                                                           z: " << z  << "\n";
-	Debug( 5021 ) << "                                                           t: " << t  << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
+    Debug( 5021 ) << "                                                           x: " << x << "\n";
+    Debug( 5021 ) << "                                                           y: " << y << "\n";
+    Debug( 5021 ) << "                                                           z: " << z << "\n";
+    Debug( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
-	M_parser->setVariable( "t", t );
-	M_parser->setVariable( "x", x );
-	M_parser->setVariable( "y", y );
-	M_parser->setVariable( "z", z );
+    M_parser->setVariable( "t", t );
+    M_parser->setVariable( "x", x );
+    M_parser->setVariable( "y", y );
+    M_parser->setVariable( "z", z );
 
-	this->DataInterpolation();
+    this->DataInterpolation();
 
 #ifdef DEBUG
-	Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 )  << "\n";
+    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 ) << "\n";
 #endif
 
-	return M_parser->evaluate( 1 );
+    return M_parser->evaluate( 1 );
 }
 
-
-
-template <typename Operator>
+template< typename Operator >
 Real
-BCInterfaceFunction<Operator>::FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+BCInterfaceFunction< Operator >::FunctionID( const Real& t,
+                                                  const Real& x,
+                                                  const Real& y,
+                                                  const Real& z,
+                                                  const ID& id )
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
-	Debug( 5021 ) << "                                                           x: " << x  << "\n";
-	Debug( 5021 ) << "                                                           y: " << y  << "\n";
-	Debug( 5021 ) << "                                                           z: " << z  << "\n";
-	Debug( 5021 ) << "                                                           t: " << t  << "\n";
-	Debug( 5021 ) << "                                                          id: " << id  << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
+    Debug( 5021 ) << "                                                           x: " << x << "\n";
+    Debug( 5021 ) << "                                                           y: " << y << "\n";
+    Debug( 5021 ) << "                                                           z: " << z << "\n";
+    Debug( 5021 ) << "                                                           t: " << t << "\n";
+    Debug( 5021 ) << "                                                          id: " << id << "\n";
 #endif
 
-	M_parser->setVariable( "t", t );
-	M_parser->setVariable( "x", x );
-	M_parser->setVariable( "y", y );
-	M_parser->setVariable( "z", z );
+    M_parser->setVariable( "t", t );
+    M_parser->setVariable( "x", x );
+    M_parser->setVariable( "y", y );
+    M_parser->setVariable( "z", z );
 
-	this->DataInterpolation();
+    this->DataInterpolation();
 
 #ifdef DEBUG
-	Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] )  << "\n";
+    Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] ) << "\n";
 #endif
 
-	return M_parser->evaluate( M_mapID[id] );
+    return M_parser->evaluate( M_mapID[id] );
 }
 
 } // Namespace LifeV
