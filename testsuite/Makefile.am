@@ -31,20 +31,18 @@ SUBDIRS		= data  \
               test_structure \
               test_ethiersteinman \
               test_masstransport \
-	      test_fsi \
+	          test_fsi \
               test_cavity \
               test_ns_flux \
-              test_monolithic \
               test_meshReorder \
-	      test_ML \
-	      test_laplacian \
+	          test_ML \
+	          test_laplacian \
               $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \
-           $(srcdir)/test_monolithic/testsuite.at \
            $(srcdir)/test_filters/testsuite.at \
            $(srcdir)/test_meshReorder/testsuite.at
 
