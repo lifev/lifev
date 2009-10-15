@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 # include <cstdio>
 # include <list>
 # include <sstream>
+# include <map>
 
 namespace LifeV
 {
@@ -86,6 +87,7 @@ void parseList( const std::string& slist, std::list<T>& list )
 
 }
 
+// @author Cristiano Malossi
 // Convert a number ( Int, bool, Real, ... ) to a std::string
 template <typename number>
 inline std::string
@@ -95,6 +97,19 @@ number2string( const number& n )
 	out << n;
 
 	return out.str();
+}
+
+// @author Cristiano Malossi
+// Convert an Enum to a std::string using a map as a library for conversion
+template < typename EnumeratorType >
+inline std::string
+Enum2String( const EnumeratorType& Enum, const std::map<std::string, EnumeratorType>& Map )
+{
+    for ( typename std::map<std::string, EnumeratorType>::const_iterator j = Map.begin() ; j != Map.end() ; ++j )
+        if ( j->second == Enum )
+            return j->first;
+
+    return "NO_TYPE_FOUND";
 }
 
 }
