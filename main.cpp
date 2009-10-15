@@ -115,11 +115,11 @@ main( int argc, char** argv )
 
 
 	// TEST 1:
-	expression = "(1+1)"; // = 2
+	expression = "(1+1)/(2+2)"; // = 0.5
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  1:  " << expression << " = " << result << std::endl;
-	if (result != 2)
+	if (result != 0.5)
 		return( EXIT_FAILURE );
 
 
