@@ -1178,6 +1178,23 @@ void Monolithic::computeMaxSingularValue()
          }
 
 }
+
+boost::shared_ptr<EpetraVector> Monolithic::computeWS()
+{
+    M_wss.reset(new vector_type(M_dFESpace->map()));//on solid
+    vector_type lambda(M_monolithicInterfaceMap);
+    lambda.subset(*M_un, M_solidAndFluidDim);
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID>::const_iterator ITrow;
+    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
+
+    for(ID dim=0; dim<nDimensions; ++dim)
+        for(ITrow=locDofMap.begin(); ITrow!=locDofMap.end(); ++ITrow)
+            {
+                (*M_wss)[ITrow->second+dim*solidDim]=lambda((*M_numerationInterface)(ITrow->second)+dim*M_interface);
+            }
+    return M_wss;
+}
 namespace
 {
 FSIOperator* createM(){ return new Monolithic(); }
