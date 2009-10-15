@@ -28,16 +28,17 @@ lib_LTLIBRARIES	= liblifemcsolver.la
 
 liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                fullMonolithic.cpp \
-				dataOneDModel.cpp \
-				vectorFunction1D.cpp \
-				oneDNonLinModelParam.cpp \
-                               MS_Algorithm.cpp \
+                               dataOneDModel.cpp \
+                               vectorFunction1D.cpp \
+                               oneDNonLinModelParam.cpp \
+                               MS_Solver.cpp \
                                MS_PhysicalData.cpp \
                                MS_PhysicalModel.cpp \
+                               MS_Model_MultiScale.cpp \
                                MS_Model_Fluid3D.cpp \
                                MS_PhysicalCoupling.cpp \
                                MS_Coupling_BoundaryCondition.cpp \
-                               MS_Coupling_FluxPressure.cpp
+                               MS_Coupling_FluxStress.cpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 
