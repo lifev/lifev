@@ -19,11 +19,10 @@ To run a simulation type:
 make check
 make link
 
-./test_MS -f MultiScaleData/MultiScale_*.dat
+./test_MS -f MultiScaleData/MultiScale*.dat
 
-where you have to replace * with the name of the problem (for example "3Dserial3" for three tube
-connected in serial).
+where the star * means that you should chose which main file do you want to load.
 
-After ./test_MS you can specify the following option:
+More generally, after ./test_MS you can specify the following option:
 -f (--file):   to specify the file
 -s (--showme): to turn on verbose mode (available parameters: 0, 1)

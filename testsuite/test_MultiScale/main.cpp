@@ -39,7 +39,7 @@
 #include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
-#include <lifemc/lifesolver/MS_Algorithm.hpp>
+#include <lifemc/lifesolver/MS_Solver.hpp>
 
 
 
@@ -100,25 +100,21 @@ main( int argc, char** argv )
 	#endif
 
 	// Setup MultiScale problem
-    MS_Algorithm MS;
+	MS_Solver MS;
 
 	//Command line parameters
 	GetPot commandLine( argc, argv );
-	std::string dataFile = commandLine.follow( "./MS.dat", 2, "-f", "--file" );
-	bool verbose  = commandLine.follow( false, 2, "-s", "--showme" );
+	std::string dataFile = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
+	bool verbose = commandLine.follow( false, 2, "-s", "--showme" );
 
-	MS.SetDataFile( dataFile );
+	MS.SetCommunicator( comm );
 
-    MS.SetCommunicator( comm );
+	MS.SetupProblem( dataFile );
 
-    MS.SetupData();
+	if ( verbose )
+		MS.ShowMe();
 
-    MS.SetupProblem();
-
-    if ( verbose )
-    	MS.ShowMe();
-
-    MS.SolveProblem();
+	MS.SolveProblem();
 
 	#ifdef HAVE_MPI
 		std::cout << "MPI Finalization" << std::endl;
