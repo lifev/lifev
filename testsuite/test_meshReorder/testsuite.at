@@ -36,22 +36,37 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 
 [space_discretization]
-mesh_dir  = ./Mesh/ # the directory where the mesh file is
-#mesh_file = 179347_cm_fluid.mesh  # mesh file
+mesh_dir  = ./ # the directory where the mesh file is
+#mesh_file = aorta_fluid_scaled.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
-#timestep = 0.00025
-timestep  = 0.001             # timestep
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 mesh_type       = .mesh
-ordering = true
+ordering        = false
+output_mesh_file = output.mesh
+
+[second_mesh]
+[./space_discretization]
+mesh_dir  = ./ # the directory where the mesh file is
+#mesh_file = aorta_solid_scaled.mesh  # mesh file
+mesh_file = vessel20.mesh  # mesh file
+vel_order       = P1            # P1, P1Bubble, P2
+press_order     = P1            # P1, P2
+mesh_type       = .mesh
+ordering = false
+
+[interface]
+create_edge = true
+edgeMarker = 50 # marker assigned to the newly created edges on the second mesh
+fluidInterfaceFlag = 1
+solidInterfaceFlag = 1
+edgeFlag           = 20 # marker of the existing edges on the first mesh
+
 ]])
 
-AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh &&
-          ln -sf ../../data/mesh/inria/vessel20.mesh &&
-          ../../test_meshReorder/test_meshReorder -c
-    #          ln -sf $top_builddir/testsuite/data/mesh/inria/tube20.mesh &&
-    #          ln -sf $top_builddir/testsuite/data/mesh/inria/vessel20.mesh &&
-    #          $top_builddir/testsuite/test_meshReorder/test_meshReorder -c
-],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
+          ln -sf ../../data/mesh/inria/vessel20.mesh;
+          ../../test_meshReorder/test_meshReorder -c],[0],[ignore],[ignore])
 AT_CLEANUP([])
+
+]])
