@@ -244,7 +244,7 @@ MS_Coupling_FluxStress::CouplingFunction( void )
     {
         case Fluid3D:
         {
-            couplingFunction[1] = -selectPressureType< MS_Model_Fluid3D > (); //Coupling through the stress
+            couplingFunction[1] = computeStress< MS_Model_Fluid3D > (); //Coupling through the stress
 
             break;
         }
@@ -260,7 +260,7 @@ MS_Coupling_FluxStress::CouplingFunction( void )
     output << "                                                       Coupling Flux     = " << couplingFunction[0] << "\n";
     output << "                                                       Coupling Stress   = " << couplingFunction[1] << "\n\n";
 
-    output << "                                                       Model | Flux            Static Pressure     Total Pressure\n";
+    output << "                                                       Model | Flux            Static Pressure     Dynamic Pressure\n";
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
     {
         output << "                                                       ";
@@ -268,7 +268,7 @@ MS_Coupling_FluxStress::CouplingFunction( void )
         {
             case Fluid3D:
             {
-                output << M_models[i]->GetID() << "       " << computeFlux< MS_Model_Fluid3D > ( i ) << "    " << computePressure< MS_Model_Fluid3D > ( i ) << "        " << computeTotalPressure< MS_Model_Fluid3D > ( i ) << "\n";
+                output << M_models[i]->GetID() << "       " << computeFlux< MS_Model_Fluid3D > ( i ) << "    " << computeStaticPressure< MS_Model_Fluid3D > ( i ) << "        " << computeDynamicPressure< MS_Model_Fluid3D > ( i ) << "\n";
 
                 break;
             }

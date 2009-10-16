@@ -30,9 +30,7 @@
 
 #ifndef __MS_Coupling_FluxStress_H
 #define __MS_Coupling_FluxStress_H 1
-
-#include <lifemc/lifefem/BCInterface.hpp>
-
+#define DEBUG 1;
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
 
@@ -127,13 +125,13 @@ private:
     inline Real computeFlux( const UInt& i );
 
     template< class model >
-    inline Real selectPressureType( const UInt& i = 0 );
+    inline Real computeStress( const UInt& i = 0 );
 
     template< class model >
-    inline Real computePressure( const UInt& i );
+    inline Real computeStaticPressure( const UInt& i );
 
     template< class model >
-    inline Real computeTotalPressure( const UInt& i );
+    inline Real computeDynamicPressure( const UInt& i );
 
     Real functionFlux  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
     Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
@@ -191,18 +189,18 @@ MS_Coupling_FluxStress::computeFlux( const UInt& i )
 
 template< class model >
 inline Real
-MS_Coupling_FluxStress::selectPressureType( const UInt& i )
+MS_Coupling_FluxStress::computeStress( const UInt& i )
 {
     switch ( M_pressureType )
     {
         case Static:
         {
-            return computePressure< model > ( i );
+            return -computeStaticPressure< model > ( i );
         }
 
         case Total:
         {
-            return computeTotalPressure< model > ( i );
+            return -computeStaticPressure< model > ( i ) + ( computeFlux< model >( i ) > 0.0 ) * computeDynamicPressure< model > ( i );
         }
 
         default:
@@ -215,7 +213,7 @@ MS_Coupling_FluxStress::selectPressureType( const UInt& i )
 
 template< class model >
 inline Real
-MS_Coupling_FluxStress::computePressure( const UInt& i )
+MS_Coupling_FluxStress::computeStaticPressure( const UInt& i )
 {
     model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
 
@@ -224,11 +222,11 @@ MS_Coupling_FluxStress::computePressure( const UInt& i )
 
 template< class model >
 inline Real
-MS_Coupling_FluxStress::computeTotalPressure( const UInt& i )
+MS_Coupling_FluxStress::computeDynamicPressure( const UInt& i )
 {
     model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
 
-    return Model->GetPressure( M_flags[i] ) + 0.5 * Model->GetDensity( M_flags[i] ) * Model->GetFlux( M_flags[i] ) * Model->GetFlux( M_flags[i] ) / ( Model->GetArea( M_flags[i] ) * Model->GetArea( M_flags[i] ) );
+    return 0.5 * Model->GetDensity( M_flags[i] ) * Model->GetFlux( M_flags[i] ) * Model->GetFlux( M_flags[i] ) / ( Model->GetArea( M_flags[i] ) * Model->GetArea( M_flags[i] ) );
 }
 
 } // Namespace LifeV
