@@ -30,7 +30,7 @@
 
 #ifndef __MS_Coupling_FluxStress_H
 #define __MS_Coupling_FluxStress_H 1
-#define DEBUG 1;
+
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
 
