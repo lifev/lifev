@@ -49,7 +49,7 @@ ordering = true
 
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh &&
           ln -sf ../../data/mesh/inria/vessel20.mesh &&
-          ../../test_monolithic/test_monolithic -c
+          ../../test_meshReorder/test_meshReorder -c
     #          ln -sf $top_builddir/testsuite/data/mesh/inria/tube20.mesh &&
     #          ln -sf $top_builddir/testsuite/data/mesh/inria/vessel20.mesh &&
     #          $top_builddir/testsuite/test_meshReorder/test_meshReorder -c
