@@ -34,7 +34,7 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
 			0		BoundaryCondition	CylPoiseuilleVelocity			0				0
-			1		FluxStress			FluxStress_StaticPressure		1,0				0,1
+			1		FluxStress			FluxStress_TotalPressure		1,0				0,1
 			2		BoundaryCondition	NoStress						1				1
 		 	'
 ###################################################################################################
