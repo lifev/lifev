@@ -48,7 +48,7 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/dataMonodomain.hpp>
+#include <lifemc/lifesolver/dataMonodomain.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include "testsuite/test_heart/stiffness_fibers.hpp"
@@ -288,7 +288,7 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
     M_rhsNoBC                ( M_localMap ),
     M_sol_u                  ( M_localMap ),
-    M_fiber_vector           ( getRepeatedEpetraMapVec() ),
+    //M_fiber_vector           ( getRepeatedEpetraMapVec() ),
     M_residual               ( M_localMap ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),

@@ -105,7 +105,6 @@ public:
 
 protected:
     std::string  M_uOrder;
-    string M_fibers_file;
     Real M_Chi;
     Real M_Cm;
     Real M_D;
