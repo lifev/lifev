@@ -351,10 +351,10 @@ namespace LifeV
 
         switch ( ElementShape::Shape )
         {
-            case ElementShape::HEXA:
+            case HEXA:
                 ofile << "Hexaedra\n";
                 break;
-            case ElementShape::TETRA:
+            case TETRA:
                 ofile << "Tetrahedra\n";
                 break;
             default:
