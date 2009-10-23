@@ -328,14 +328,14 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
 template<typename Mesh, typename SolverType>
 void
-OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& matrNoBC,
-                                                            double&       alpha,
-                                                            const vector_type& un,
-                                                            const vector_type& uk,
-                                                            const vector_type& disp,
-                                                            const vector_type& w,
-                                                            const vector_type& dw,
-                                                            const vector_type& sourceVec)
+OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& matrNoBC,  //Fluid Matrix withoud BC
+                                                            double&       alpha,          //alpha
+                                                            const vector_type& un,        //Beta
+                                                            const vector_type& uk,        //Fluid Solution
+                                                            const vector_type& disp,      //Mesh deltaX
+                                                            const vector_type& w,         //Mesh Velocity
+                                                            const vector_type& dw,        //Mesh deltaVelocity
+                                                            const vector_type& sourceVec) //RHS (usually 0 )
 {
     this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
 
