@@ -23,10 +23,7 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-  \file bidomainSolver.hpp
-  \author L. Mirabella M. Perego
-  \date 11/2007
-
+  \file NonlinearBidomain.hpp
 	\modif R. Ruiz 
         \date 11/09
 */
@@ -468,8 +465,8 @@ void NonlinearBidomain<Mesh, SolverType>::buildSystem()
         		}
         		else
         		{
-        			stiff( M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), 0, 0 );
-        			stiff( M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), 1, 1 );
+        			stiffNL( M_sol_u, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0 );
+        			stiffNL( M_sol_u, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1 );
 	        	}
 	        break;
         	case 1:
