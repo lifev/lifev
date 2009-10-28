@@ -775,53 +775,80 @@ EpetraVector::operator/=( const data_type& scalar )
 const EpetraVector
 EpetraVector::operator+( const data_type& scalar ) const
 {
-    EpetraVector comparisonVector( *this );
+    EpetraVector MyVectorCopy( *this );
 
-    comparisonVector += scalar;
+    MyVectorCopy += scalar;
 
-    return comparisonVector;
+    return MyVectorCopy;
 }
 
 // Remove a scalar quantity
 const EpetraVector
 EpetraVector::operator-( const data_type& scalar ) const
 {
-    EpetraVector comparisonVector( *this );
+    EpetraVector MyVectorCopy( *this );
 
-    comparisonVector -= scalar;
+    MyVectorCopy -= scalar;
 
-    return comparisonVector;
+    return MyVectorCopy;
 }
 
 // Multiply by a scalar quantity
 const EpetraVector
 EpetraVector::operator*( const data_type& scalar ) const
 {
-    EpetraVector comparisonVector( *this );
+    EpetraVector MyVectorCopy( *this );
 
-    comparisonVector *= scalar;
+    MyVectorCopy *= scalar;
 
-    return comparisonVector;
+    return MyVectorCopy;
 }
 
 // Divide by a scalar quantity
 const EpetraVector
 EpetraVector::operator/( const data_type& scalar ) const
 {
-    EpetraVector comparisonVector( *this );
+    EpetraVector MyVectorCopy( *this );
 
-    comparisonVector /= scalar;
+    MyVectorCopy /= scalar;
 
-    return comparisonVector;
+    return MyVectorCopy;
 }
 
-//! multiply scalar * vector.
+//! - vector.
 EpetraVector
-operator * ( EpetraVector::data_type t, const EpetraVector& vector )
+operator-( const EpetraVector& vector )
 {
-    EpetraVector result(vector);
+    EpetraVector VectorCopy( vector );
 
-    return result *= t;
+    return VectorCopy *= static_cast<EpetraVector::data_type> ( -1.0 );
+}
+
+//! scalar + vector.
+EpetraVector
+operator+( const EpetraVector::data_type& scalar, const EpetraVector& vector )
+{
+    EpetraVector VectorCopy( vector );
+
+    return VectorCopy += scalar;
+}
+
+//! scalar - vector.
+EpetraVector
+operator-( const EpetraVector::data_type& scalar, const EpetraVector& vector )
+{
+    EpetraVector VectorCopy( -vector );
+
+    return VectorCopy += scalar;
+}
+
+//! scalar * vector.
+EpetraVector
+operator*( const EpetraVector::data_type& scalar, const EpetraVector& vector )
+{
+    EpetraVector VectorCopy( vector );
+
+    return VectorCopy *= scalar;
 }
 
 // Comparison with a scalar value

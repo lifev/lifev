@@ -341,6 +341,16 @@ public:
         return *M_epetraMap;
     }
 
+    const boost::shared_ptr< EpetraMap > getMap_ptr() const
+    {
+        return M_epetraMap;
+    }
+
+    const Epetra_Map& getEpetra_Map() const
+    {
+        return *( M_epetraMap->getMap( M_maptype ) );
+    }
+
     int size() const
     {
         return M_epetraVector.GlobalLength();
@@ -384,7 +394,11 @@ private:
 
 };
 
-EpetraVector operator *( EpetraVector::data_type t, const EpetraVector& vector );
+EpetraVector operator-( const EpetraVector& vector );
+
+EpetraVector operator+( const EpetraVector::data_type& scalar, const EpetraVector& vector );
+EpetraVector operator-( const EpetraVector::data_type& scalar, const EpetraVector& vector );
+EpetraVector operator*( const EpetraVector::data_type& scalar, const EpetraVector& vector );
 
 } // end namespace LifeV
 
