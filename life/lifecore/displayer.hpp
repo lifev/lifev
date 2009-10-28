@@ -102,6 +102,9 @@ public:
       return M_verbose;
   }
 
+    //Set the communicator
+    void SetCommunicator( const Epetra_Comm& comm );
+
     /*!
       Return the communicator
     */
@@ -109,7 +112,7 @@ public:
 
 protected:
 
-  const Epetra_Comm*								M_comm;
+  const Epetra_Comm*					    M_comm;
   bool										M_verbose;
 
 };

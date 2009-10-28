@@ -52,4 +52,12 @@ Displayer::Displayer( const Displayer& displayer ):
 {
 }
 
+void
+Displayer::SetCommunicator( const Epetra_Comm& comm )
+{
+    M_comm = &comm;
+    if ( M_comm )
+        M_verbose = M_comm->MyPID()==0;
+}
+
 } // Namespace LifeV
