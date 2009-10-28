@@ -225,6 +225,9 @@ public:
     // compute flux on a boundary face with given flag and a given solution
     Real flux(const EntityFlag& flag, const vector_type& sol);
 
+    // compute average pressure on a boundary face with given flag and a given solution
+    Real pressure(const EntityFlag& flag, const vector_type& sol);
+
     // compute flux on a boundary face with given flag
     Real flux(const EntityFlag& flag);
 
@@ -1173,7 +1176,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
 
-    Int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull, M_reusePrec );
+    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull, M_reusePrec );
     //std::cout << numIter <<" iterations " << std::endl;
     if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
     {
@@ -1358,6 +1361,12 @@ Oseen<Mesh, SolverType>::flux(const EntityFlag& flag)
 {
     return flux(flag, M_sol);
 }
+//! Computes the pressure on a given part of the boundary
+template<typename Mesh, typename SolverType> Real
+Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag)
+{
+  return pressure(flag, M_sol);
+}
 
 //! Computes the flux on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
@@ -1370,12 +1379,11 @@ Oseen<Mesh, SolverType>::flux(const EntityFlag& flag, const vector_type& sol)
   return M_post_proc.flux(vel, flag);
 }
 
-
 //! Computes the pressure on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
-Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag){
-
-  vector_type velAndPressure(M_sol, Repeated);
+Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag, const vector_type& sol)
+{
+  vector_type velAndPressure(sol, Repeated);
   vector_type press(this->M_pFESpace.map(), Repeated);
   press.subset(velAndPressure, this->M_uFESpace.dim()*this->M_uFESpace.fieldDim());
 
