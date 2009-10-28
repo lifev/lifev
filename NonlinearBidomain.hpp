@@ -22,11 +22,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/**
-  \file NonlinearBidomain.hpp
-	\modif R. Ruiz 
-        \date 11/09
-*/
+
 
 #ifndef _NONLINEARBIDOMAIN_H_
 #define _NONLINEARBIDOMAIN_H_
@@ -57,7 +53,7 @@ namespace LifeV
 {
 /*!
   \class NonlinearBidomain
-
+ \brief This file contains a Oseen equation solver class
   This class implements a bidomain solver.
 */
 
@@ -137,6 +133,7 @@ public:
     void initialize( const source_type&, const source_type&  );
     void initialize( const Function&, const Function&  );
     void initialize( const vector_type&, const vector_type& );
+
 
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
@@ -433,90 +430,88 @@ void NonlinearBidomain<Mesh, SolverType>::buildSystem()
     Chrono chronoMassAssemble;
     Chrono chronoZero;
 
+    vector_type M_sol_uRep(M_sol_u, Repeated );
+
     M_comm->Barrier();
 
     chrono.start();
 
     //! Elementary computation and matrix assembling
     //! Loop on elements
-
     for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
     {
-
-
         chronoZero.start();
-
         M_elmatStiff.zero();
         M_elmatMass.zero();
-
         chronoZero.stop();
 
         chronoStiff.start();
+
         switch(M_data.heart_diff_fct() )
         {
-	case 0:   // for the moment this will be the only case 
-        		chronoDer.start();
-        		M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->volumeList( iVol ) );
-        		chronoDer.stop();
-        		if (M_data.has_fibers() )
-        		{
-			  stiffNL( M_sol_u, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0);
-			  stiffNL( M_sol_u, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1);
-        		}
-        		else
-        		{
-        			stiffNL( M_sol_u, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0 );
-        			stiffNL( M_sol_u, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1 );
-	        	}
-	        break;
-        	case 1:
-        		chronoDer.start();
-        		M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
-        		chronoDer.stop();
-        		if (M_data.has_fibers() )
-        	    {
-        	    	stiff( M_data.red_sigma_sphere,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	    	stiff( M_data.red_sigma_sphere, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
-        	    }
-        	    else
-        	    {
-        	    	stiff( M_data.red_sigma_sphere, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	        stiff( M_data.red_sigma_sphere, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
-        		}
-        	break;
-        	case 2:
-        	    chronoDer.start();
-        	    M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
-        	    chronoDer.stop();
-        	    if (M_data.has_fibers() )
-        	    {
-        	       	stiff( M_data.red_sigma_cyl,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	      	stiff( M_data.red_sigma_cyl, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
-        	    }
-        	    else
-        	    {
-        	       	stiff( M_data.red_sigma_cyl, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0 , 0);
-        	        stiff( M_data.red_sigma_cyl, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
-        	    }
-        	break;
-        	case 3:
-        	    chronoDer.start();
-        	    M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
-        	    chronoDer.stop();
-        	    if (M_data.has_fibers() )
-        	    {
-        	      	stiff( M_data.red_sigma_box, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	       	stiff( M_data.red_sigma_box, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
-        	    }
-        	    else
-        	    {
-        	       	stiff( M_data.red_sigma_box, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0 );
-        	        stiff( M_data.red_sigma_box, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1 );
-        	    }
-        	    break;
+	case 0:   // for the moment this will be the only case using stiffNL
+	  chronoDer.start();
+	  M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->volumeList( iVol ) );
+	  chronoDer.stop();
+	  if (M_data.has_fibers() )
+	    {
+	      stiffNL(M_sol_uRep, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0);
+	      stiffNL(M_sol_uRep, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1);
+	    }
+	  else
+	    {
+	      stiffNL( M_sol_uRep, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0 );
+	      stiffNL( M_sol_uRep, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1 );
+	    }
+	  break;
+	case 1:
+	  chronoDer.start();
+	  M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
+	  chronoDer.stop();
+	  if (M_data.has_fibers() )
+	    {
+	      stiff( M_data.red_sigma_sphere,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
+	      stiff( M_data.red_sigma_sphere, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+	    }
+	  else
+	    {
+	      stiff( M_data.red_sigma_sphere, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
+	      stiff( M_data.red_sigma_sphere, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+	    }
+	  break;
+	case 2:
+	  chronoDer.start();
+	  M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
+	  chronoDer.stop();
+	  if (M_data.has_fibers() )
+	    {
+	      stiff( M_data.red_sigma_cyl,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
+	      stiff( M_data.red_sigma_cyl, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+	    }
+	  else
+	    {
+	      stiff( M_data.red_sigma_cyl, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0 , 0);
+	      stiff( M_data.red_sigma_cyl, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+	    }
+	  break;
+	case 3:
+	  chronoDer.start();
+	  M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
+	  chronoDer.stop();
+	  if (M_data.has_fibers() )
+	    {
+	      stiff( M_data.red_sigma_box, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
+	      stiff( M_data.red_sigma_box, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+	    }
+	  else
+	    {
+	      stiff( M_data.red_sigma_box, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0 );
+	      stiff( M_data.red_sigma_box, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1 );
+	    }
+	  break;
         }
         chronoStiff.stop();
-
+	
         chronoMass.start();
         mass( 1., M_elmatMass, M_FESpace.fe(), 0, 0 );
         mass( -1., M_elmatMass, M_FESpace.fe(), 0, 1 );
@@ -537,7 +532,6 @@ void NonlinearBidomain<Mesh, SolverType>::buildSystem()
         }
         chronoStiffAssemble.stop();
 
-
         chronoMassAssemble.start();
         for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
         	for ( UInt jComp = 0; jComp < nbComp; jComp++ ){
@@ -552,9 +546,9 @@ void NonlinearBidomain<Mesh, SolverType>::buildSystem()
         	}
          }
          chronoMassAssemble.stop();
-
+	 //	cout << "  f-  atrix assembled ...        ";
     }
-
+	
 if (M_CalCoef)
        massCoeff = 1.0/ M_data.getTimeStep();
 else
@@ -644,6 +638,7 @@ initialize( const vector_type& ui0, const vector_type& ue0 )
    M_bdf_u.initialize_unk(M_sol_uiue);
    M_bdf_u.showMe();
 }
+
 
 
 template<typename Mesh, typename SolverType>
