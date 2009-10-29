@@ -28,7 +28,13 @@
  */
 
 //#include <life/lifecore/GetPot.hpp>
+
 #include <lifemc/lifealg/eigenSolver.hpp>
+
+// #ifndef HAVE_TRILINOS_ANASAZI
+// #warning: you should use ANASAZI
+// #else
+
 #include <string>
 #include "Teuchos_RefCountPtrDecl.hpp"
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
@@ -104,3 +110,4 @@ EigenSolver
      return MySolver->solve();
  }
 }
+//#endif

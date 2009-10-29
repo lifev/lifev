@@ -28,13 +28,19 @@
  */
 
 
-/**
-class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator: in particular in Lifev it shuld be used with the ComposedPreconditioners, that inherits direcly from the Epetra_Operator. Since the class ComposedPreconditioner is templated it can contain both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedPreconditioner.
- */
+// #ifndef HAVE_TRILINOS_ANASAZI
+// #warning: you should use ANASAZI
+// #else
+
+// #endif
+
+
+// #ifdef  HAVE_TRILINOS_ANASAZI
+
+
 #ifndef EIGENSOLVER_HPP
 #define EIGENSOLVER_HPP
 
-//#include <life/lifecore/GetPot.hpp>
 #include "Epetra_MultiVector.h"
 #include "Epetra_SerialDenseVector.h"
 #include "Epetra_Operator.h"
@@ -60,6 +66,12 @@ class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra
 
 namespace LifeV
 {
+/**
+ * class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator:
+ * in particular in Lifev it shuld be used with the ComposedPreconditioner, that inherits direcly
+ * from the Epetra_Operator. Since the class ComposedPreconditioner is templated it can contain
+ *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedPreconditioner.
+ */
 
 class UNDEF_EIGENSOLVER_EXCEPTION;
 
@@ -114,3 +126,4 @@ public:
 
 }
 #endif
+//#endif
