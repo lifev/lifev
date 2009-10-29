@@ -37,7 +37,7 @@
 #include <string>
 
 #include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenShapeDerivative.hpp>
 
 #include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
@@ -304,7 +304,7 @@ BCInterfaceOperatorFunction< FSIOperator >::UpdateOperatorVariables( void )
             case f_density:
 
 #ifdef DEBUG
-                Debug( 5023 ) << "                                                f_density(): " << M_operator->fluid().density() << "\n";
+                Debug( 5023 ) << "                                                  f_density: " << M_operator->fluid().density() << "\n";
 #endif
                 SetVariable( "f_density", M_operator->fluid().density() );
 
@@ -333,7 +333,7 @@ BCInterfaceOperatorFunction< FSIOperator >::UpdateOperatorVariables( void )
             case f_viscosity:
 
 #ifdef DEBUG
-                Debug( 5023 ) << "                                              f_viscosity(): " << M_operator->fluid().viscosity() << "\n";
+                Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
 #endif
                 SetVariable( "f_viscosity", M_operator->fluid().viscosity() );
 
@@ -394,7 +394,74 @@ BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOpera
     Debug( 5023 ) << "BCInterfaceOperatorFunction<Oseen>::UpdateOperatorVariables  " << "\n";
 #endif
 
-    // Create/Update variables for FSI problem
+    // Create/Update variables for Oseen problem
+    for ( std::set< operatorList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
+        switch ( *j )
+        {
+            // f_ -> FLUID
+            case f_area:
+
+#ifdef DEBUG
+                Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
+#endif
+                SetVariable( "f_area", M_operator->area( M_flag ) );
+
+                break;
+
+            case f_density:
+
+#ifdef DEBUG
+                Debug( 5023 ) << "                                                  f_density: " << M_operator->density() << "\n";
+#endif
+                SetVariable( "f_density", M_operator->density() );
+
+                break;
+
+            case f_flux:
+
+#ifdef DEBUG
+                Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
+#endif
+
+                SetVariable( "f_flux", M_operator->flux( M_flag ) );
+
+                break;
+
+            case f_pressure:
+
+#ifdef DEBUG
+                Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
+#endif
+
+                SetVariable( "f_pressure", M_operator->pressure( M_flag ) );
+
+                break;
+
+            case f_viscosity:
+
+#ifdef DEBUG
+                Debug( 5023 ) << "                                                f_viscosity: " << M_operator->viscosity() << "\n";
+#endif
+                SetVariable( "f_viscosity", M_operator->viscosity() );
+
+                break;
+
+            default:
+
+                SwitchErrorMessage( "OSEEN" );
+        }
+}
+
+template< >
+inline void
+BCInterfaceOperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables( void )
+{
+
+#ifdef DEBUG
+    Debug( 5023 ) << "BCInterfaceOperatorFunction<OseenShapeDerivative>::UpdateOperatorVariables  " << "\n";
+#endif
+
+    // Create/Update variables for OseenShapeDerivative problem
     for ( std::set< operatorList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
@@ -448,7 +515,7 @@ BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOpera
 
             default:
 
-                SwitchErrorMessage( "OSEEN" );
+                SwitchErrorMessage( "OSEENSHAPEDERIVATIVE" );
         }
 }
 
@@ -476,6 +543,19 @@ BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAcces
 
 #ifdef DEBUG
     Debug( 5023 ) << "BCInterfaceOperatorFunction<Oseen>::createAccessList" << "\n";
+#endif
+
+    CreateFluidMap();
+    CreateList();
+}
+
+template< >
+inline void
+BCInterfaceOperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::CreateAccessList( void )
+{
+
+#ifdef DEBUG
+    Debug( 5023 ) << "BCInterfaceOperatorFunction<OseenShapeDerivative>::createAccessList" << "\n";
 #endif
 
     CreateFluidMap();
