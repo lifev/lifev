@@ -14,4 +14,4 @@
 
 [MultiScale]
 couplingName = FluxStess_TotalPressure
-pressureType = Total
+stressType = TotalPressure

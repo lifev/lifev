@@ -21,6 +21,6 @@ list = 'PoiseuilleDynamic'
 	[./PoiseuilleDynamic]
 	type				= Natural
 	mode				= Normal
-	OPERfunctionFile	= physicalFunctions/test_dynamicPoiseuilleVelocityPressure.dat[B]
+	functionFile	    = physicalFunctions/DynamicPoiseuille.dat[C]
 
 	[../]

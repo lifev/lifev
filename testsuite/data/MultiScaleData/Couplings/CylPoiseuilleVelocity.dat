@@ -16,7 +16,7 @@
 couplingName	= BoundaryCondition_CylinderPoiseuilleVelocity
 
 [boundary_conditions]
-#list = 'XY ZPoiseuille' # Stationary Poiseuille
+#list = 'XY ZPoiseuille' # Stationary Poiseuille FIX THIS BUG!!
  list = 'XYZPoiseuille'  # Stationary Poiseuille
 
 	[./XY]

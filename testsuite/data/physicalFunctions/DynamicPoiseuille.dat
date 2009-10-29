@@ -9,7 +9,7 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### TEST DYNAMIC POISEUILLE VELOCITY: cylinder with Z axial velocity and R=0.5 ####################
+### DYNAMIC POISEUILLE: cylinder with Z axial velocity and R=0.5 ##################################
 ###################################################################################################
 # 0.00 <= t <= 0.25 --> a =  sin(2*pi*t)
 # 0.25 <= t <= 0.75 --> a =  1
@@ -17,11 +17,11 @@
 ###################################################################################################
 
 #functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                # Inlet  Velocity
-functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'               # Inlet  Velocity TEMPORARY FIX
-functionB	= '-a*5'                                             # Inlet  Static Pressure 
-functionC	= '0'                                                # Outlet Static Pressure
-#functionB	= '-a*5-0.5*f_density*( a*(1/4)/(8*f_viscosity) )^2' # Inlet  Static + Dynamic Pressure
-#functionC	= '-0.5*f_density*( a*(1/4)/(8*f_viscosity) )^2'     # Outlet Static + Dynamic Pressure
+functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'                       # Inlet  Velocity TEMPORARY FIX
+#functionB	= 'a*(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)' # Inlet  Flux
+functionB	= 'a*(pi*1)/(8*0.03)*(0.5^4)'                        # Inlet  Flux TEMPORARY FIX
+functionC	= '-a*5'                                             # Inlet  Static Pressure 
+functionD	= '0'                                                # Outlet Static Pressure
 
 variables	= 't			a'
 scale		= '1			1'

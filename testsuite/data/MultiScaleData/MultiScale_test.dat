@@ -15,17 +15,39 @@
 [Problem] #########################################################################################
 MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stationary.dat
 
-[Algorithm] #######################################################################################
+[Solver] ##########################################################################################
 ###################################################################################################
+
 	[./time_discretization]
 	initialtime		= 0.0           # [s]
-	endtime			= 0.001			# [s]
-	timestep		= 0.001			# [s]
+	endtime			= 0.01			# [s]
+	timestep		= 0.01			# [s]
 	
-	[../Aitken_method]
-	subITMax		= 500			# Maximum number for coupling subiterations
+	[../Algorithm]
+	AlgorithmType   = Newton        # Aitken - Newton
+	subITMax		= 100			# Maximum number for coupling subiterations
 	tolerance		= 1.e-6			# Tolerance on the coupling values
-	omega			= 0.005			# Aitken Omega (starting value)
+	
+		[./Aitken_method]
+		Omega			= 0.5			# omega starting value
+		fixedOmega      = false         # use fixed omega (if omega = 1 -> fixed point)
+		method          = Vectorial     # Scalar, Vectorial
+		inverseOmega    = true          # direct: minimize on omega; inverse: minimize on omega^-1
+		
+		[../Newton_method]
+		
+			[./AztecOO]
+			solver          = gmres
+			scaling         = none
+			output          = all           # none
+			conv            = AZ_noscaled   # r0, noscaled
+			kspace          = 100
+			max_iter        = 100
+			tol             = 1.e-8
+			
+			[../]
+		
+		[../]
 	
 	[../]
 ###################################################################################################

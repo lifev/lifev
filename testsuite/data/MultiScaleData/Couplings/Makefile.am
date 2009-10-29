@@ -22,10 +22,14 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = CylPoiseuillePressure.dat \
+dist_pkgdata_DATA = CylPoiseuilleFlux.dat \
+                    CylPoiseuilleFluxDynamic.dat \
+                    CylPoiseuillePressure.dat \
                     CylPoiseuillePressureDynamic.dat \
                     CylPoiseuilleVelocity.dat \
                     CylPoiseuilleVelocityDynamic.dat \
+                    Stress_StaticPressure.dat \
+                    Stress_TotalPressure.dat \
                     FluxStress_StaticPressure.dat \
                     FluxStress_TotalPressure.dat \
                     NoStress.dat

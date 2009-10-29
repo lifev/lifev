@@ -22,7 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = aortaPhysicalFlux.dat aortaPhysicalPressure.dat test_dynamicPoiseuilleVelocityPressure.dat\
+dist_pkgdata_DATA = aortaPhysicalFlux.dat aortaPhysicalPressure.dat DynamicPoiseuille.dat\
 					test_Flux1.dat test_Flux2.dat
 
 check-local:

@@ -16,12 +16,20 @@
 couplingName	= BoundaryCondition_CylinderPoiseuilleVelocityDynamic
 
 [boundary_conditions]
+#list = 'XY ZPoiseuilleDynamic' # FIX THIS BUG!!
 list = 'ZPoiseuilleDynamic'
 
-	[./ZPoiseuilleDynamic]
+	[./XY]
+	type       			= Essential
+	mode       			= Component
+	component 			= '1 2'
+	function   			= 0
+
+	[../ZPoiseuilleDynamic]
 	type				= Essential
 	mode				= Component
 	component			= 3
-	OPERfunctionFile	= physicalFunctions/test_dynamicPoiseuilleVelocityPressure.dat[A]
+	functionFile	    = physicalFunctions/DynamicPoiseuille.dat[A]
+	#OPERfunctionFile	= physicalFunctions/DynamicPoiseuille.dat[A]
 
 	[../]

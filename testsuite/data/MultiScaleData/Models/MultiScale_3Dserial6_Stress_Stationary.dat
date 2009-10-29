@@ -9,7 +9,7 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - TEST: Six 3DFluid cylinder - FluxPressure #################################
+### MODEL: MultiScale - TEST: Six 3DFluid cylinder - Stress - Stationary ##########################
 ###################################################################################################
 
 [MultiScale] ######################################################################################
@@ -37,12 +37,12 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	CylPoiseuilleFluxDynamic		0				0
-			1		FluxStress			FluxStress_StaticPressure		1,0				0,1
-			2		FluxStress			FluxStress_StaticPressure		2,1				0,1
-			3		FluxStress			FluxStress_StaticPressure		3,2				0,1
-			4		FluxStress			FluxStress_StaticPressure		4,3				0,1
-			5		FluxStress			FluxStress_StaticPressure		5,4				0,1
+			0		BoundaryCondition	CylPoiseuilleFlux				0				0
+			1		Stress				Stress_StaticPressure			1,0				0,1
+			2		Stress				Stress_StaticPressure			2,1				0,1
+			3		Stress				Stress_StaticPressure			3,2				0,1
+			4		Stress				Stress_StaticPressure			4,3				0,1
+			5		Stress				Stress_StaticPressure			5,4				0,1
 			6		BoundaryCondition	NoStress						5				1
 		 	'
 ###################################################################################################
