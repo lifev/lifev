@@ -196,11 +196,11 @@ fullMonolithic::evalResidual( vector_type&       res,
             M_meshMotion->applyBoundaryConditions(*M_rhsFull, *M_BCh_mesh);
             M_meshMotion->setMatrix(M_monolithicMatrix);
 
+	    M_BCh_flux->setOffset(M_offset-M_fluxes);
 	    if ( !M_BCh_flux->bdUpdateDone() )
 	      M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 	    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
 
-	    M_BCh_flux->setOffset(M_offset-M_fluxes);
 	    M_BCh_Robin->setOffset(M_offset);
 	    if ( !M_BCh_Robin->bdUpdateDone() )
 	      M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
@@ -486,6 +486,7 @@ void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function c
   M_meshMotion->setDisplacement(df);
   //  M_bdf->initialize_unk(*M_un);
 }
+
 
 #ifdef UNDEFINED //OBSOLETE
 int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const

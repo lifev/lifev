@@ -35,6 +35,21 @@ namespace LifeV
 {
 class Epetra_FullMonolithic;
 
+/**
+ * Class handling the nonlinear monolithic solver for FSI problems. The (exact or inexact)
+ * Newton algorithm is used to solve the nonlinearity.
+ * The block structure of the jacobian matrix is
+ *\f$\left(\begin{array}{ccc}
+ C&B&S\\
+ D&N&0\\
+ 0&E&H
+ \end{array}\right)\f$
+ * where \f$N\f$ represents the solid block, \f$C\f$ the fluid block, \f$H\f$ is the harmonic extension block,
+ * while the extra
+ * diagonal blocks represent the coupling. The implementation of the stress continuity coupling condition
+ * is obtained by means of an augmented formulation.
+ * Different possible preconditioners are implemented.
+*/
 class fullMonolithic : public Monolithic
 {
 public:
