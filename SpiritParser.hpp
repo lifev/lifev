@@ -33,20 +33,16 @@
 #ifndef __SpiritParser_H
 #define __SpiritParser_H 1
 
-#include <life/lifecore/life.hpp>
-#include <life/lifearray/tab.hpp>
-
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/phoenix/binders.hpp>
 
+#include <map>
 #include <iomanip>
+#include <string>
 
 namespace LifeV {
 
-typedef std::map< std::string, Real > variables_type;
-typedef std::vector< Real >           results_type;
-typedef std::vector< std::string >    string_type;
 //! SpiritCalculator - A string parser calculator based on \c boost::spirit
 /*!
  *  @author(s) Cristiano Malossi, Gilles Fourestey
@@ -87,7 +83,11 @@ struct SpiritCalculator: boost::spirit::grammar< SpiritCalculator >
 {
 public:
 
-    SpiritCalculator( variables_type& variables, results_type& results, UInt& nResults ) :
+    typedef std::map< std::string, double > variables_type;
+    typedef std::vector< double >           results_type;
+    typedef std::vector< std::string >      string_type;
+
+    SpiritCalculator( variables_type& variables, results_type& results, unsigned int& nResults ) :
         M_variables ( variables ),
         M_results   ( results ),
         M_nResults  ( nResults )
@@ -116,13 +116,13 @@ public:
     ~SpiritCalculator() {}
 
     // Closures
-    struct assignment_closure: boost::spirit::closure< assignment_closure, std::string, Real >
+    struct assignment_closure: boost::spirit::closure< assignment_closure, std::string, double >
     {
         member1 name;
         member2 value;
     };
 
-    struct value_closure: boost::spirit::closure< value_closure, Real >
+    struct value_closure: boost::spirit::closure< value_closure, double >
     {
         member1 value;
     };
@@ -214,7 +214,7 @@ public:
     };
 
     // Member functions that are called in semantic actions.
-    inline void define( const std::string& name, const Real& value ) const
+    inline void define( const std::string& name, const double& value ) const
     {
         M_variables[name] = value;
     }
@@ -230,7 +230,7 @@ public:
         std::cout << std::endl;
     }
 
-    inline Real lookup( const std::string& name ) const
+    inline double lookup( const std::string& name ) const
     {
         if ( M_variables.find( name ) == M_variables.end() )
         {
@@ -241,57 +241,57 @@ public:
             return M_variables.find( name )->second;
     }
 
-    inline Real pow( const Real& a, const Real& b ) const
+    inline double pow( const double& a, const double& b ) const
     {
         return std::pow( a, b );
     }
 
-    inline Real more( const Real& a, const Real& b ) const
+    inline double more( const double& a, const double& b ) const
     {
         return a > b;
     }
 
-    inline Real less( const Real& a, const Real& b ) const
+    inline double less( const double& a, const double& b ) const
     {
         return a < b;
     }
 
-    inline Real sqrt( const Real& a ) const
+    inline double sqrt( const double& a ) const
     {
         return std::sqrt( a );
     }
 
-    inline Real exp( const Real& a ) const
+    inline double exp( const double& a ) const
     {
         return std::exp( a );
     }
 
-    inline Real log( const Real& a ) const
+    inline double log( const double& a ) const
     {
         return std::log( a );
     }
 
-    inline Real log10( const Real& a ) const
+    inline double log10( const double& a ) const
     {
         return std::log10( a );
     }
 
-    inline Real sin( const Real& a ) const
+    inline double sin( const double& a ) const
     {
         return std::sin( a );
     }
 
-    inline Real cos( const Real& a ) const
+    inline double cos( const double& a ) const
     {
         return std::cos( a );
     }
 
-    inline Real tan( const Real& a ) const
+    inline double tan( const double& a ) const
     {
         return std::tan( a );
     }
 
-    inline void setResult( const Real& result ) const
+    inline void setResult( const double& result ) const
     {
         M_results[M_nResults] = result;
         M_nResults++;
@@ -301,7 +301,7 @@ private:
 
     variables_type& M_variables;
     results_type&   M_results;
-    UInt&           M_nResults;
+    unsigned int&   M_nResults;
 };
 //! SpiritParser - A LifeV interface for SpiritCalculator
 /*!
@@ -310,6 +310,10 @@ private:
 class SpiritParser
 {
 public:
+
+    typedef SpiritCalculator::variables_type    variables_type;
+    typedef SpiritCalculator::results_type      results_type;
+    typedef SpiritCalculator::string_type       string_type;
 
     //! @name Constructors & Destructor
     //@{
@@ -361,23 +365,23 @@ public:
      * \param name - name of the parameter
      * \param value - value of the parameter
      */
-    void setVariable( const std::string& name, const Real& value );
+    void setVariable( const std::string& name, const double& value );
 
     /*! Get variable
      *
      * \param name - name of the parameter
      */
-    const Real& getVariable( const std::string& name );
+    const double& getVariable( const std::string& name );
 
     /*! Evaluate the expression
      */
-    const Real& evaluate( const UInt& ID = 1 );
+    const double& evaluate( const unsigned int& ID = 1 );
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
      * \param substring - string to find
      */
-    UInt countSubstring( const std::string& substring );
+    unsigned int countSubstring( const std::string& substring );
 
     void showMeVariables( void ) const
     {
@@ -391,7 +395,7 @@ private:
     string_type      M_strings;
     variables_type   M_variables;
     results_type     M_results;
-    UInt             M_nResults;
+    unsigned int     M_nResults;
     SpiritCalculator M_calculator;
     bool             M_applyRules;
 
