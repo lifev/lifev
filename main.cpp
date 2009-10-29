@@ -30,10 +30,11 @@
 #include <boost/timer.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
+//#include <life/lifefilters/hdf5exporter.hpp>
 
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
@@ -70,6 +71,7 @@ public:
     typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
 
     typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  filter_type;
+    //typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_type>  filter_type;
     typedef boost::shared_ptr<filter_type>                 filter_ptrtype;
     typedef LifeV::singleton<LifeV::factory<LifeV::FSIOperator,  std::string> > FSIFactory;
     /*!
@@ -128,6 +130,8 @@ public:
 
                     M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), Repeated ));
                     M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), Repeated ));
+                    M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->uFESpace().map(), Repeated ));
+
                     M_ensightMesh->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                                  UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
@@ -138,6 +142,10 @@ public:
                     M_ensightMesh->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
                                                  UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
 
+                    M_ensightMesh->addVariable( ExporterData::Vector, "f-wss", M_WSS,
+                    UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+
+
 
 
                     UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
@@ -147,78 +155,27 @@ public:
                     M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
                     M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
-                    M_solidVel.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
+                    M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
                     M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                                 offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                                                 UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
                     M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                                                     UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                                                 UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                    //                    M_ensightSolid->addVariable( ExporterData::Vector, "s-ws", M_WSS,
+                    //UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+
 
             M_Tstart = 0.;
 
-
-            //		M_fsi->FSIOper()->initialize(fZero, fZero, fZero, fZero, fZero);
-		//		M_fsi->initialize(M_fsi->FSIOper()->un());
-
 		//to load using ensight
 		std::string loadInitSol(data_file("problem/initSol","-1"));
-		std::string loadInitSolPrev(data_file("problem/initSolPrev","-1"));
 
 		if(loadInitSol.compare("-1"))
 		  {
-		    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
-                    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
-
-                    boost::shared_ptr<LifeV::EpetraVector> initSolV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated, Zero));
-                    boost::shared_ptr<LifeV::EpetraVector> initSolP(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated, Zero));
-                    boost::shared_ptr<LifeV::EpetraVector> initSolS(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated, Zero));
-                    boost::shared_ptr<LifeV::EpetraVector> initSolFD(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated, Zero));
-                    boost::shared_ptr<LifeV::EpetraVector> initSolidV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated, Zero));
-                    boost::shared_ptr<LifeV::EpetraVector> initSolFDPrev(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated, Zero));
-                    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
-
-                    UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof() +M_fsi->FSIOper()->BCh_flux()->size();
-                    LifeV::ExporterData initSolFluidVel(LifeV::ExporterData::Vector, std::string("f-velocity."+loadInitSol), initSolV, UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof(), UInt(0) );
-                    LifeV::ExporterData initSolFluidPress(LifeV::ExporterData::Scalar, "f-pressure."+loadInitSol, initSolP,3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof(), M_fsi->FSIOper()->pFESpace().dof().numTotalDof(), UInt(0) );
-                    LifeV::ExporterData initSolSolidDisp(LifeV::ExporterData::Vector,"s-displacement."+loadInitSol, initSolS, offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() , UInt(0) );
-                    LifeV::ExporterData initSolSolidVel(LifeV::ExporterData::Vector,"s-velocity."+loadInitSol, initSolidV, offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() , UInt(0) );
-                    LifeV::ExporterData initSolFluidDisp(LifeV::ExporterData::Vector, "f-displacement."+loadInitSol, initSolFD, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->dimInterface(), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0));
-                    LifeV::ExporterData initSolFluidDispPrev(LifeV::ExporterData::Vector, "f-displacement."+loadInitSolPrev, initSolFDPrev, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->dimInterface(), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0));
-                    //upcast necessary
-
-                    M_ensightMesh->M_rd_ascii(initSolFluidVel);
-                    M_ensightMesh->M_rd_ascii(initSolFluidPress);
-                    M_ensightSolid->M_rd_ascii(initSolSolidDisp);
-                    M_ensightSolid->M_rd_ascii(initSolSolidVel);
-                    M_ensightMesh->M_rd_ascii(initSolFluidDisp);
-                    M_ensightMesh->M_rd_ascii(initSolFluidDispPrev);
-
-                    *UniqueV=*initSolV;
-                    *initSol=*UniqueV;
-                    *UniqueV=*initSolP;
-                    *initSol+=*UniqueV;
-                    M_fsi->FSIOper()->fluid().initialize(*initSol);
-
-                    *UniqueV=*initSolS;
-                    M_fsi->FSIOper()->solid().initialize(UniqueV);
-                    *initSol+=*UniqueV;
-                    *UniqueV=*initSolFD;
-                    M_fsi->FSIOper()->meshMotion().setDisplacement(*UniqueV);
-                    *initSol+=*UniqueV;
-
-                    *UniqueV=*initSolFDPrev;
-                    M_fsi->FSIOper()->meshMotion().setDispOld(*UniqueV);
-                    M_fsi->FSIOper()->meshMotion().updateDispDiff();
-                    *initSolSVel=*initSolidV;
-                    M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
-                    M_fsi->initialize(initSol);
-                    M_fsi->FSIOper()->initialize(initSol);
-                    //		    M_Tstart= //atoi(loadInitSol);
-                    M_Tstart= M_fsi->FSIOper()->dataFluid().getInitialTime();//data_file("problem/Tstart"   ,0.);
-                    std::cout << "Starting time = " << M_Tstart << std::endl;
-		  }
-        //	      }
-	    //M_fsi->initialize();
-        //M_fsi->initialize(M_fsi->FSIOper()->un());
+              initialize(loadInitSol, data_file);
+           }
+        else
+            {
+            }
 
 
 //             FC0=FlowConditions();
@@ -238,19 +195,6 @@ public:
 //             FC4.initParameters( *M_fsi->FSIOper(), 3, 7 );
 
             MPI_Barrier(MPI_COMM_WORLD);// to kill
-//             FlowConditions::setParamsFromGetPot( data_file );
-//             FlowConditions::initParameters( *M_fsi->FSIOper(), 2, 3 );
-
-
-                    //M_fsi->FSIOper()->fluid().initialize( FlowConditions::uinit, FlowConditions::pinit );
-
-
-//             bool loaded=loadSolution(initSol, "initSol.m"); to load a vector written in matlab convenction
-//             if(loaded)
-//                 M_fsi->initSol(initSol);
-
-//            std::cout << "in problem" << std::endl;
-//            M_fsi->FSIOper()->fluid().postProcess();
         }
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
@@ -262,14 +206,11 @@ public:
     void
     run( double dt, double T)
         {
-//            std::ofstream ofile( "fluxes.res" );
-
             boost::timer _overall_timer;
-
-            //if (M_Tstart != 0.) M_Tstart -= dt;
-
             int _i = 1;
             double time=M_Tstart + dt;
+
+            dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
 
             for (time=M_Tstart + dt; time <= T; time += dt, ++_i)
             {
@@ -282,7 +223,6 @@ public:
 
                 boost::timer _timer;
 
-                *M_velAndPressure = M_fsi->displacement();
 
 
                 *M_solidDisp = M_fsi->displacement();
@@ -291,18 +231,16 @@ public:
                 *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
                 *M_velAndPressure = M_fsi->displacement();
                 M_ensightSolid->postProcess( time );
-                //M_ensightFluid->postProcess( time );
 
 
                 M_fsi->iterate( time );
 
-//                 ofile << time << " ";
-//                 ofile << M_fsi->FSIOper()->fluid().flux(2) << " ";
-//                 ofile << M_fsi->FSIOper()->fluid().flux(3) << " ";
-//                 ofile << std::endl;
-                        *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
-                        M_ensightMesh->postProcess( time );
+                *M_WSS=*(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
+                                std::cout<<"norminf wss in the main "<<M_WSS->NormInf()<<std::endl;
+                *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+
+                M_ensightMesh->postProcess( time );
 
                         //                    }
 
@@ -318,27 +256,24 @@ public:
                     *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
                     *M_velAndPressure = M_fsi->displacement();
                     M_ensightSolid->postProcess( time );
-                    //M_ensightFluid->postProcess( time );
                     *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
                     M_ensightMesh->postProcess( time );
                 }
-            //M_fsi->displacement().spy("init_sol");
 
             std::cout << "Total computation time = "
                       << _overall_timer.elapsed() << "s" << "\n";
 
-//            ofile.close();
         }
 
 private:
 
+    void initialize(std::string& loadInitSol,  GetPot const& data_file);
+
     fsi_solver_ptr M_fsi;
     double         M_Tstart;
-//    LifeV::DataNavierStokes< LifeV::RegionMesh3D<LifeV::LinearTetra> > M_dataNS;
 
     MPI_Comm*      M_comm;
 
-    //filter_ptrtype M_ensightFluid;
     filter_ptrtype M_ensightSolid;
     filter_ptrtype M_ensightMesh;
 
@@ -346,6 +281,7 @@ private:
     vector_ptrtype M_fluidDisp;
     vector_ptrtype M_solidDisp;
     vector_ptrtype M_solidVel;
+    vector_ptrtype M_WSS;
 
 };
 
@@ -375,15 +311,9 @@ struct FSIChecker
                 fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
                 std::cout << "problem set" << std::endl;
 
-//                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
-//                 std::cout << "in operator 1" << std::endl;
-//                 fsip->fsiSolver()->FSIOper()->fluid().postProcess();
-//                 fsip->fsiSolver()->FSIOper()->solid().postProcess();
 
                 fsip->fsiSolver()->FSIOper()->setPreconditioner( prec );
 
-//                std::cout << "in operator 2" << std::endl;
-//                fsip->fsiSolver()->FSIOper()->fluid().postProcess();
                 fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
             }
             catch ( std::exception const& _ex )
@@ -428,7 +358,6 @@ int main(int argc, char** argv)
 
             //int rank;
     //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //    LifeV::S_verbose = command_line.search( 2, "-v","--verbose") && (rank==0);
     const bool check = command_line.search(2, "-c", "--check");
 
     if (check)
@@ -476,3 +405,92 @@ int main(int argc, char** argv)
 
 }
 
+void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
+{
+
+    using namespace LifeV;
+    typedef EpetraVector vector_type;
+
+    std::string loadInitSolPrev(data_file("problem/initSolPrev","-1"));
+    bool wasFullMonolithic(data_file("problem/wasFullMonolithic",true));
+
+
+    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
+                    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
+
+                    boost::shared_ptr<LifeV::EpetraVector> initSolV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+                    boost::shared_ptr<LifeV::EpetraVector> initSolP(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+                    boost::shared_ptr<LifeV::EpetraVector> initSolS(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+                    boost::shared_ptr<LifeV::EpetraVector> initSolFD;
+                    boost::shared_ptr<LifeV::EpetraVector> initSolidV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+                    boost::shared_ptr<LifeV::EpetraVector> initSolFDPrev;
+                    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
+                    boost::shared_ptr<LifeV::EpetraVector> UniqueVFD;
+
+                    boost::shared_ptr<LifeV::ExporterData> initSolFluidDisp;
+                    boost::shared_ptr<LifeV::ExporterData> initSolFluidDispPrev;
+
+                    UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof() +M_fsi->FSIOper()->BCh_flux()->size();
+                    LifeV::ExporterData initSolFluidVel(LifeV::ExporterData::Vector, std::string("f-velocity."+loadInitSol), initSolV, UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof(), UInt(0) );
+                    LifeV::ExporterData initSolFluidPress(LifeV::ExporterData::Scalar, "f-pressure."+loadInitSol, initSolP,3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof(), M_fsi->FSIOper()->pFESpace().dof().numTotalDof(), UInt(0) );
+                    LifeV::ExporterData initSolSolidDisp(LifeV::ExporterData::Vector,"s-displacement."+loadInitSol, initSolS, offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() , UInt(0) );
+                    LifeV::ExporterData initSolSolidVel(LifeV::ExporterData::Vector,"s-velocity."+loadInitSol, initSolidV, offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() , UInt(0) );
+                    if(wasFullMonolithic)
+                        {
+                            UniqueVFD.reset(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
+                            initSolFD.reset(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+                            initSolFDPrev.reset(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+                            initSolFluidDisp.reset(new LifeV::ExporterData(LifeV::ExporterData::Vector, "f-displacement."+loadInitSol, initSolFD, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->dimInterface(), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0)));
+                            initSolFluidDispPrev.reset(new LifeV::ExporterData(LifeV::ExporterData::Vector, "f-displacement."+loadInitSolPrev, initSolFDPrev, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->dimInterface(), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0)));
+                        }
+                    else
+                        {
+                            UniqueVFD.reset(new LifeV::EpetraVector(M_fsi->FSIOper()->meshMotion().getMap(), Unique));
+                            initSolFD.reset(new LifeV::EpetraVector(M_fsi->FSIOper()->meshMotion().getMap(), Repeated));
+                            initSolFDPrev.reset(new LifeV::EpetraVector(M_fsi->FSIOper()->meshMotion().getMap(), Repeated));
+                            initSolFluidDisp.reset(new LifeV::ExporterData(LifeV::ExporterData::Vector, "f-displacement."+loadInitSol, initSolFD, 0, M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0)));
+                            initSolFluidDispPrev.reset(new LifeV::ExporterData(LifeV::ExporterData::Vector, "f-displacement."+loadInitSolPrev, initSolFDPrev, 0, M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0)));
+                        }
+                    //upcast necessary
+
+                    M_Tstart= M_fsi->FSIOper()->dataFluid().getInitialTime();//data_file("problem/Tstart"   ,0.);
+                    Real dt= M_fsi->FSIOper()->dataFluid().getTimeStep();//data_file("problem/Tstart"   ,0.);
+                    std::cout << "Starting time = " << M_Tstart << std::endl;
+
+                    //M_ensightMesh->import(M_Tstart);
+                    //M_ensightSolid->import(M_Tstart);
+                    M_ensightMesh->M_rd_ascii(initSolFluidVel);
+                    M_ensightMesh->M_rd_ascii(initSolFluidPress);
+                    M_ensightSolid->M_rd_ascii(initSolSolidDisp);
+                    M_ensightSolid->M_rd_ascii(initSolSolidVel);
+                    M_ensightMesh->M_rd_ascii(*initSolFluidDisp);
+                    M_ensightMesh->M_rd_ascii(*initSolFluidDispPrev);
+
+                    std::cout<<"initial norm sd "<<initSolFD->NormInf()<<std::endl;
+                    std::cout<<"initial norm sd prev "<<initSolFDPrev->NormInf()<<std::endl;
+
+                    UniqueV.reset( new vector_type(*initSolV, Unique, Zero));
+                    *initSol=*UniqueV;
+                    UniqueV.reset( new vector_type(*initSolP, Unique, Zero));
+                    *initSol+=*UniqueV;
+                    M_fsi->FSIOper()->fluid().initialize(*initSol);
+
+                    UniqueV.reset(new vector_type(*initSolS, Unique, Zero));
+                    *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
+                    M_fsi->FSIOper()->solid().initialize(UniqueV);
+                    *initSol+=*UniqueV;
+                    UniqueVFD.reset(new vector_type(*initSolFD, Unique, Zero));
+                    M_fsi->FSIOper()->meshMotion().setDisplacement(*UniqueVFD);
+                    if(wasFullMonolithic)
+                        *initSol+=*UniqueVFD;
+
+                    UniqueVFD.reset(new vector_type(*initSolFDPrev, Unique, Zero));
+                    M_fsi->FSIOper()->meshMotion().setDispOld(*UniqueVFD);
+                    M_fsi->FSIOper()->meshMotion().updateDispDiff();
+                    initSolSVel->Export(initSolidV->getEpetraVector(), Zero);
+                    *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
+                    M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
+                    M_fsi->initialize(initSol);
+                    M_fsi->FSIOper()->initialize(initSol);
+                    //		    M_Tstart= //atoi(loadInitSol);
+}
