@@ -38,13 +38,14 @@ namespace LifeV {
 MS_Model_Fluid3D::MS_Model_Fluid3D() :
     super           (),
     M_output        (),
-    M_fluid         (),
-    M_fluidBC       (),
-    M_fluidBDF      (),
-    M_fluidData     (),
-    M_fluidMesh     (),
-    M_fluidFullMap  (),
-    M_fluidSolution (),
+    M_Fluid         (),
+    M_FluidBC       (),
+    M_FluidBDF      (),
+    M_FluidData     (),
+    M_FluidMesh     (),
+    M_FluidFullMap  (),
+    M_FluidSolution (),
+    M_LinearFluidBC (),
     M_uFESpace      (),
     M_pFESpace      (),
     M_uDOF          ( 0 ),
@@ -64,13 +65,14 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
 MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
     super           ( Fluid3D ),
     M_output        ( Fluid3D.M_output ),
-    M_fluid         ( Fluid3D.M_fluid ),
-    M_fluidBC       ( Fluid3D.M_fluidBC ),
-    M_fluidBDF      ( Fluid3D.M_fluidBDF ),
-    M_fluidData     ( Fluid3D.M_fluidData ),
-    M_fluidMesh     ( Fluid3D.M_fluidMesh ),
-    M_fluidFullMap  ( Fluid3D.M_fluidFullMap ),
-    M_fluidSolution ( Fluid3D.M_fluidSolution ),
+    M_Fluid         ( Fluid3D.M_Fluid ),
+    M_FluidBC       ( Fluid3D.M_FluidBC ),
+    M_FluidBDF      ( Fluid3D.M_FluidBDF ),
+    M_FluidData     ( Fluid3D.M_FluidData ),
+    M_FluidMesh     ( Fluid3D.M_FluidMesh ),
+    M_FluidFullMap  ( Fluid3D.M_FluidFullMap ),
+    M_FluidSolution ( Fluid3D.M_FluidSolution ),
+    M_LinearFluidBC ( Fluid3D.M_LinearFluidBC ),
     M_uFESpace      ( Fluid3D.M_uFESpace ),
     M_pFESpace      ( Fluid3D.M_pFESpace ),
     M_uDOF          ( Fluid3D.M_uDOF ),
@@ -85,28 +87,109 @@ MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
 //! Methods
 // ===================================================
 MS_Model_Fluid3D&
-MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& fluid3D )
+MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
 {
-    if ( this != &fluid3D )
+    if ( this != &Fluid3D )
     {
-        super::operator=( fluid3D );
-        M_output        = fluid3D.M_output;
-        M_fluid         = fluid3D.M_fluid;
-        M_fluidBC       = fluid3D.M_fluidBC;
-        M_fluidBDF      = fluid3D.M_fluidBDF;
-        M_fluidMesh     = fluid3D.M_fluidMesh;
-        M_fluidFullMap  = fluid3D.M_fluidFullMap;
-        M_fluidSolution = fluid3D.M_fluidSolution;
-        M_uFESpace      = fluid3D.M_uFESpace;
-        M_pFESpace      = fluid3D.M_pFESpace;
-        M_uDOF          = fluid3D.M_uDOF;
-        M_pDOF          = fluid3D.M_pDOF;
-        M_alpha         = fluid3D.M_alpha;
-        M_beta          = fluid3D.M_beta;
-        M_RHS           = fluid3D.M_RHS;
+        super::operator=( Fluid3D );
+        M_output        = Fluid3D.M_output;
+        M_Fluid         = Fluid3D.M_Fluid;
+        M_FluidBC       = Fluid3D.M_FluidBC;
+        M_FluidBDF      = Fluid3D.M_FluidBDF;
+        M_FluidMesh     = Fluid3D.M_FluidMesh;
+        M_FluidFullMap  = Fluid3D.M_FluidFullMap;
+        M_FluidSolution = Fluid3D.M_FluidSolution;
+        M_LinearFluidBC = Fluid3D.M_LinearFluidBC;
+        M_uFESpace      = Fluid3D.M_uFESpace;
+        M_pFESpace      = Fluid3D.M_pFESpace;
+        M_uDOF          = Fluid3D.M_uDOF;
+        M_pDOF          = Fluid3D.M_pDOF;
+        M_alpha         = Fluid3D.M_alpha;
+        M_beta          = Fluid3D.M_beta;
+        M_RHS           = Fluid3D.M_RHS;
     }
 
     return *this;
+}
+
+void
+MS_Model_Fluid3D::SetupLinearData( void )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearData( ) \n";
+#endif
+
+    // Boundary Conditions for the linear problem
+    M_LinearFluidBC.reset( new FluidBCType( M_dataFile, "linear_fluid" ) );
+    M_LinearFluidBC->SetOperator( M_Fluid );
+    M_LinearFluidBC->BuildHandler();
+}
+
+void
+MS_Model_Fluid3D::SetupLinearModel( void )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
+#endif
+
+    // Impose offset for Flux BC
+    imposeFluxes( M_LinearFluidBC );
+}
+
+void
+MS_Model_Fluid3D::BuildLinearSystem( void )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::BuildLinearSystem() \n";
+#endif
+
+    UpdateLinearSystem();
+}
+
+void
+MS_Model_Fluid3D::UpdateLinearSystem( void )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::UpdateLinearSystem() \n";
+#endif
+
+    //Create an empty vector
+    FluidVectorType VectorZero( *M_FluidSolution ); VectorZero = 0.0;
+
+    //updateLinearSystem
+    M_Fluid->updateLinearSystem( M_Fluid->matrNoBC(),
+                                 M_alpha,
+                                 *M_beta,
+                                 M_Fluid->solution(),
+                                 VectorZero,
+                                 VectorZero,
+                                 VectorZero,
+                                 VectorZero );
+
+    //Update Properties of BC
+    M_LinearFluidBC->UpdateOperatorVariables();
+
+    //MPI Barrier
+    M_comm->Barrier();
+}
+
+void
+MS_Model_Fluid3D::SolveLinearSystem( void )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SolveLinearSystem() \n";
+#endif
+
+    //Solve the linear problem
+    M_Fluid->iterateLin( *M_LinearFluidBC->Handler_ptr() );
+
+    //MPI Barrier
+    M_comm->Barrier();
 }
 
 // ===================================================
@@ -121,31 +204,33 @@ MS_Model_Fluid3D::SetupData( void )
 #endif
 
     //Fluid data
-    M_fluidData.reset( new fluidData_type( M_dataFile ) );
+    M_FluidData.reset( new FluidDataType( M_dataFile ) );
 
     //dataPhysics
     if ( !M_dataFile.checkVariable( "fluid/physics/density" ) )
-        M_fluidData->density( M_dataPhysics->GetFluidDensity() );
+        M_FluidData->density( M_dataPhysics->GetFluidDensity() );
     if ( !M_dataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_fluidData->viscosity( M_dataPhysics->GetFluidViscosity() );
+        M_FluidData->viscosity( M_dataPhysics->GetFluidViscosity() );
 
     //dataTime
-    M_fluidData->setInitialTime( M_dataTime->getInitialTime() );
-    M_fluidData->setEndTime( M_dataTime->getEndTime() );
+    M_FluidData->setInitialTime( M_dataTime->getInitialTime() );
+    M_FluidData->setEndTime( M_dataTime->getEndTime() );
 
-    M_fluidData->setTime( M_dataTime->getInitialTime() );
-    M_fluidData->setTimeStep( M_dataTime->getTimeStep() );
-    //M_fluidData->setTimeStep	( globalTimeStep / std::ceil( globalTimeStep / M_fluidData->getTimeStep() ) );
+    M_FluidData->setTime( M_dataTime->getInitialTime() );
+    M_FluidData->setTimeStep( M_dataTime->getTimeStep() );
+    //M_FluidData->setTimeStep	( globalTimeStep / std::ceil( globalTimeStep / M_FluidData->getTimeStep() ) );
 
     //FEspace & DOF
     setupFEspace();
     setupDOF();
 
-    //Boundary Conditions
-    M_fluidBC.reset( new fluidBC_type( M_dataFile, "fluid" ) );
-    M_fluidBC->SetOperator( M_fluid ); //MUST BE MOVED AFTER M_fluid.reset !!!
-    M_fluidBC->BuildHandler();
-    M_fluidBC->UpdateOperatorVariables(); //MUST BE MOVED INSIDE THE UPDATE !!!
+    //Boundary Conditions for the problem
+    M_FluidBC.reset( new FluidBCType( M_dataFile, "fluid" ) );
+    M_FluidBC->SetOperator( M_Fluid ); //MUST BE MOVED AFTER M_Fluid.reset !!!
+    M_FluidBC->BuildHandler();
+    M_FluidBC->UpdateOperatorVariables(); //MUST BE MOVED INSIDE THE UPDATE !!!
+
+    SetupLinearData(); //TODO MOVE THIS!
 }
 
 void
@@ -157,31 +242,33 @@ MS_Model_Fluid3D::SetupModel( void )
 #endif
 
     //Fluid
-    M_fluid.reset( new fluid_type( *M_fluidData, *M_uFESpace, *M_pFESpace, *M_comm, imposeFluxes() ) );
+    M_Fluid.reset( new FluidType( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, imposeFluxes( M_FluidBC ) ) );
 
-    M_fluid->setUp( M_dataFile ); //Remove Preconditioner and Solver if possible!
+    M_Fluid->setUp( M_dataFile ); //Remove Preconditioner and Solver if possible!
 
     //Fluid MAP
-    M_fluidFullMap.reset( new EpetraMap( M_fluid->getMap() ) );
+    M_FluidFullMap.reset( new EpetraMap( M_Fluid->getMap() ) );
 
     //BDF
-    M_fluidBDF.reset( new fluidBDF_type( M_fluidData->getBDF_order() ) );
+    M_FluidBDF.reset( new FluidBDFType( M_FluidData->getBDF_order() ) );
 
     //Problem coefficients
-    M_beta.reset( new fluidVector_type( M_fluidFullMap ) );
-    M_RHS.reset ( new fluidVector_type( M_fluidFullMap ) );
+    M_beta.reset( new FluidVectorType( M_FluidFullMap ) );
+    M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
 
     //Post-processing
-    M_output.reset( new output_type( M_dataFile, M_fluidMesh->mesh(), M_modelName + "_" + number2string( M_ID ), M_comm->MyPID() ) );
+    M_output.reset( new OutputType( M_dataFile, M_FluidMesh->mesh(), M_modelName + "_" + number2string( M_ID ), M_comm->MyPID() ) );
 
-    M_fluidSolution.reset( new fluidVector_type( M_fluidFullMap, Repeated ) );
-    //M_fluidSolution.reset( new fluidVector_type( M_fluid->solution(), Repeated ) );
+    M_FluidSolution.reset( new FluidVectorType( M_FluidFullMap, Repeated ) );
+    //M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), Repeated ) );
 
-    M_output->addVariable( ExporterData::Vector, "velocity", M_fluidSolution, UInt( 0 ), M_uDOF );
-    M_output->addVariable( ExporterData::Scalar, "pressure", M_fluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
+    M_output->addVariable( ExporterData::Vector, "velocity", M_FluidSolution, UInt( 0 ), M_uDOF );
+    M_output->addVariable( ExporterData::Scalar, "pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
 
     //MPI Barrier
     M_comm->Barrier();
+
+    SetupLinearModel(); //TODO MOVE THIS!
 }
 
 void
@@ -193,7 +280,7 @@ MS_Model_Fluid3D::BuildSystem( void )
 #endif
 
     //Build constant matrices
-    M_fluid->buildSystem();
+    M_Fluid->buildSystem();
 
     //Initialize problem coefficients
     M_alpha  = 0.0;
@@ -201,10 +288,10 @@ MS_Model_Fluid3D::BuildSystem( void )
     *M_RHS  *= 0.0;
 
     //Initialize velocity and pressure to zero
-    M_fluid->initialize( *M_fluidSolution );
+    M_Fluid->initialize( *M_FluidSolution );
 
     //Set problem coefficients
-    M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+    M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
     //MPI Barrier
     M_comm->Barrier();
@@ -219,24 +306,24 @@ MS_Model_Fluid3D::UpdateSystem( void )
 #endif
 
     //BDF
-    if ( M_fluidData->isFirstTimeStep() )
-        M_fluidBDF->bdf_u().initialize_unk( M_fluid->solution() );
+    if ( M_FluidData->isFirstTimeStep() )
+        M_FluidBDF->bdf_u().initialize_unk( M_Fluid->solution() );
     else
-        M_fluidBDF->bdf_u().shift_right( M_fluid->solution() );
+        M_FluidBDF->bdf_u().shift_right( M_Fluid->solution() );
 
     //Time
-    M_fluidData->updateTime();
+    M_FluidData->updateTime();
 
     //Problem coefficients
-    M_alpha = M_fluidBDF->bdf_u().coeff_der( 0 ) / M_fluidData->getTimeStep();
-    *M_beta = M_fluidBDF->bdf_u().extrap();
-    *M_RHS  = M_fluid->matrMass() * M_fluidBDF->bdf_u().time_der( M_fluidData->getTimeStep() );
+    M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->getTimeStep();
+    *M_beta = M_FluidBDF->bdf_u().extrap();
+    *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->getTimeStep() );
 
     //Set problem coefficients
-    M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+    M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
     //Recompute preconditioner
-    M_fluid->resetPrec( true ); // TODO: Recompute only each N time step!
+    M_Fluid->resetPrec( true ); //TODO: Recompute only each N time step!
 
     //MPI Barrier
     M_comm->Barrier();
@@ -251,7 +338,31 @@ MS_Model_Fluid3D::SolveSystem( void )
 #endif
 
     //Solve the problem
-    M_fluid->iterate( *M_fluidBC->Handler_ptr() );
+    M_Fluid->iterate( *M_FluidBC->Handler_ptr() );
+
+    UInt subITMax  = 0;   //TODO: Move this on a file!
+    Real tolerance = 1.e-6; //TODO: Move this on a file!
+    Real residual;
+    for ( UInt subIT = 0; subIT < subITMax; ++subIT )
+    {
+        residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector
+
+        if ( M_displayer->isLeader() )
+        {
+            std::cout << "  F-  Sub-iteration n.:                        " << subIT << std::endl;
+            std::cout << "  F-  Residual:                                " << residual << std::endl;
+        }
+
+        // Verify tolerance
+        if ( residual <= tolerance )
+            break;
+
+        //Picard iteration for NonLinear Navier-Stokes
+        *M_beta = M_Fluid->solution();
+        M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+
+        M_Fluid->iterate( *M_FluidBC->Handler_ptr() );
+    }
 
     //MPI Barrier
     M_comm->Barrier();
@@ -266,8 +377,8 @@ MS_Model_Fluid3D::SaveSolution( void )
 #endif
 
     //Post-processing
-    *M_fluidSolution = M_fluid->solution();
-    M_output->postProcess( M_fluidData->getTime() );
+    *M_FluidSolution = M_Fluid->solution();
+    M_output->postProcess( M_FluidData->getTime() );
 
     //MPI Barrier
     M_comm->Barrier();
@@ -280,8 +391,8 @@ MS_Model_Fluid3D::ShowMe( void )
     {
         super::ShowMe();
 
-        std::cout << "uOrder             = " << M_fluidData->uOrder() << std::endl
-                  << "pOrder             = " << M_fluidData->pOrder() << std::endl << std::endl;
+        std::cout << "uOrder             = " << M_FluidData->uOrder() << std::endl
+                  << "pOrder             = " << M_FluidData->pOrder() << std::endl << std::endl;
 
         std::cout << "uDOF               = " << 3 * M_uDOF << std::endl
                   << "pDOF               = " << M_pDOF << std::endl << std::endl << std::endl << std::endl;
@@ -303,32 +414,32 @@ MS_Model_Fluid3D::setupFEspace( void )
 #endif
 
     //Transform mesh
-    M_fluidData->mesh()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FluidData->mesh()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_fluidMesh.reset( new fluidMesh_type( *M_fluidData->mesh(), *M_comm ) );
-    M_fluidData->setMesh( M_fluidMesh->mesh() );
+    M_FluidMesh.reset( new FluidMeshType( *M_FluidData->mesh(), *M_comm ) );
+    M_FluidData->setMesh( M_FluidMesh->mesh() );
 
     //Velocity FE Space
     const RefFE* u_refFE;
     const QuadRule* u_qR;
     const QuadRule* u_bdQr;
 
-    if ( M_fluidData->uOrder().compare( "P2" ) == 0 )
+    if ( M_FluidData->uOrder().compare( "P2" ) == 0 )
     {
         u_refFE = &feTetraP2;
         u_qR = &quadRuleTetra15pt; // DoE 5
         u_bdQr = &quadRuleTria3pt; // DoE 2
     }
     else
-        if ( M_fluidData->uOrder().compare( "P1" ) == 0 )
+        if ( M_FluidData->uOrder().compare( "P1" ) == 0 )
         {
             u_refFE = &feTetraP1;
             u_qR = &quadRuleTetra4pt; // DoE 2
             u_bdQr = &quadRuleTria3pt; // DoE 2
         }
         else
-            if ( M_fluidData->uOrder().compare( "P1Bubble" ) == 0 )
+            if ( M_FluidData->uOrder().compare( "P1Bubble" ) == 0 )
             {
                 u_refFE = &feTetraP1bubble;
                 u_qR = &quadRuleTetra64pt; // DoE 2
@@ -337,7 +448,7 @@ MS_Model_Fluid3D::setupFEspace( void )
             else
             {
                 if ( M_displayer->isLeader() )
-                    std::cout << M_fluidData->uOrder() << " Velocity FE not implemented yet." << std::endl;
+                    std::cout << M_FluidData->uOrder() << " Velocity FE not implemented yet." << std::endl;
                 exit( EXIT_FAILURE );
             }
 
@@ -346,14 +457,14 @@ MS_Model_Fluid3D::setupFEspace( void )
     const QuadRule* p_qR;
     const QuadRule* p_bdQr;
 
-    if ( M_fluidData->pOrder().compare( "P2" ) == 0 )
+    if ( M_FluidData->pOrder().compare( "P2" ) == 0 )
     {
         p_refFE = &feTetraP2;
         p_qR = u_qR;
         p_bdQr = &quadRuleTria3pt; // DoE 2
     }
     else
-        if ( M_fluidData->pOrder().compare( "P1" ) == 0 )
+        if ( M_FluidData->pOrder().compare( "P1" ) == 0 )
         {
             p_refFE = &feTetraP1;
             p_qR = u_qR;
@@ -362,12 +473,12 @@ MS_Model_Fluid3D::setupFEspace( void )
         else
         {
             if ( M_displayer->isLeader() )
-                std::cout << M_fluidData->pOrder() << " pressure FE not implemented yet." << std::endl;
+                std::cout << M_FluidData->pOrder() << " pressure FE not implemented yet." << std::endl;
             exit( EXIT_FAILURE );
         }
 
-    M_uFESpace.reset( new FESpace_type( *M_fluidMesh, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
-    M_pFESpace.reset( new FESpace_type( *M_fluidMesh, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
+    M_uFESpace.reset( new FESpaceType( *M_FluidMesh, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
+    M_pFESpace.reset( new FESpaceType( *M_FluidMesh, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
 }
 
 void
@@ -386,20 +497,19 @@ MS_Model_Fluid3D::setupDOF( void )
 }
 
 UInt
-MS_Model_Fluid3D::imposeFluxes( void )
+MS_Model_Fluid3D::imposeFluxes( const boost::shared_ptr< FluidBCType >& BC )
 {
 
 #ifdef DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::imposeFluxes \n";
 #endif
 
-    std::vector< BCName > fluxVector = M_fluidBC->Handler_ptr()->getBCWithType( Flux );
-    UInt numLM = static_cast< UInt > ( fluxVector.size() );
+    std::vector< BCName > FluxVector = BC->Handler_ptr()->getBCWithType( Flux );
 
     UInt offset = M_uFESpace->map().getMap( Unique )->NumGlobalElements() + M_pFESpace->map().getMap( Unique )->NumGlobalElements();
-
+    UInt numLM = static_cast< UInt > ( FluxVector.size() );
     for ( UInt i = 0; i < numLM; ++i )
-        M_fluidBC->Handler_ptr()->setOffset( fluxVector[i], offset + i );
+        BC->Handler_ptr()->setOffset( FluxVector[i], offset + i );
 
     return numLM;
 }

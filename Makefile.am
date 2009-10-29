@@ -32,12 +32,16 @@ liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                vectorFunction1D.cpp \
                                oneDNonLinModelParam.cpp \
                                MS_Solver.cpp \
+                               MS_Algorithm.cpp \
+                               MS_Algorithm_Aitken.cpp \
+                               MS_Algorithm_Newton.cpp \
                                MS_PhysicalData.cpp \
                                MS_PhysicalModel.cpp \
                                MS_Model_MultiScale.cpp \
                                MS_Model_Fluid3D.cpp \
                                MS_PhysicalCoupling.cpp \
                                MS_Coupling_BoundaryCondition.cpp \
+                               MS_Coupling_Stress.cpp \
                                MS_Coupling_FluxStress.cpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver

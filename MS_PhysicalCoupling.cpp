@@ -40,16 +40,19 @@ UInt MS_PhysicalCoupling::M_couplingsNumber = 0;
 //! Constructors
 // ===================================================
 MS_PhysicalCoupling::MS_PhysicalCoupling() :
-    M_ID                (),
-    M_type              (),
-    M_dataFile          (),
-    M_models            (),
-    M_flags             (),
-    M_couplingName      (),
-    M_comm              (),
-    M_displayer         (),
-    M_couplingVariables (),
-    M_couplingResiduals ()
+    M_ID                     (),
+    M_type                   (),
+    M_dataFile               (),
+    M_models                 (),
+    M_flags                  (),
+    M_couplingName           (),
+    M_comm                   (),
+    M_displayer              (),
+    M_couplingIndex          (),
+    M_LocalCouplingVariables (),
+    M_LocalCouplingResiduals (),
+    M_LocalJacobianProduct   (),
+    M_LocalDeltaCouplingVariables ()
 {
 
 #ifdef DEBUG
@@ -60,16 +63,19 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
 }
 
 MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) :
-    M_ID                ( coupling.M_ID ),
-    M_type              ( coupling.M_type ),
-    M_dataFile          ( coupling.M_dataFile ),
-    M_models            ( coupling.M_models ),
-    M_flags             ( coupling.M_flags ),
-    M_couplingName      ( coupling.M_couplingName ),
-    M_comm              ( coupling.M_comm ),
-    M_displayer         ( coupling.M_displayer ),
-    M_couplingVariables ( coupling.M_couplingVariables ),
-    M_couplingResiduals ( coupling.M_couplingResiduals )
+    M_ID                     ( coupling.M_ID ),
+    M_type                   ( coupling.M_type ),
+    M_dataFile               ( coupling.M_dataFile ),
+    M_models                 ( coupling.M_models ),
+    M_flags                  ( coupling.M_flags ),
+    M_couplingName           ( coupling.M_couplingName ),
+    M_comm                   ( coupling.M_comm ),
+    M_displayer              ( coupling.M_displayer ),
+    M_couplingIndex          ( coupling.M_couplingIndex ),
+    M_LocalCouplingVariables ( coupling.M_LocalCouplingVariables ),
+    M_LocalCouplingResiduals ( coupling.M_LocalCouplingResiduals ),
+    M_LocalJacobianProduct   ( coupling.M_LocalJacobianProduct ),
+    M_LocalDeltaCouplingVariables ( coupling.M_LocalDeltaCouplingVariables )
 {
 
 #ifdef DEBUG
@@ -87,18 +93,74 @@ MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
 {
     if ( this != &coupling )
     {
-        M_ID                = coupling.M_ID;
-        M_type              = coupling.M_type;
-        M_dataFile          = coupling.M_dataFile;
-        M_models            = coupling.M_models;
-        M_flags             = coupling.M_flags;
-        M_couplingName      = coupling.M_couplingName;
-        M_comm              = coupling.M_comm;
-        M_displayer         = coupling.M_displayer;
-        M_couplingVariables = coupling.M_couplingVariables;
-        M_couplingResiduals = coupling.M_couplingResiduals;
+        M_ID                     = coupling.M_ID;
+        M_type                   = coupling.M_type;
+        M_dataFile               = coupling.M_dataFile;
+        M_models                 = coupling.M_models;
+        M_flags                  = coupling.M_flags;
+        M_couplingName           = coupling.M_couplingName;
+        M_comm                   = coupling.M_comm;
+        M_displayer              = coupling.M_displayer;
+        M_couplingIndex          = coupling.M_couplingIndex;
+        M_LocalCouplingVariables = coupling.M_LocalCouplingVariables;
+        M_LocalCouplingResiduals = coupling.M_LocalCouplingResiduals;
+        M_LocalJacobianProduct   = coupling.M_LocalJacobianProduct;
+        M_LocalDeltaCouplingVariables = coupling.M_LocalDeltaCouplingVariables;
     }
     return *this;
+}
+
+void
+MS_PhysicalCoupling::BuildCouplingVectorsMap( UInt&             couplingVariablesGlobalNumber,
+                                              std::vector<int>& MyGlobalElements )
+{
+
+#ifdef DEBUG
+    Debug( 8200 ) << "MS_PhysicalCoupling::BuildCouplingVectorsMap( couplingVariablesGlobalNumber, MyGlobalElements ) \n";
+#endif
+
+    M_couplingIndex.second = couplingVariablesGlobalNumber;
+
+    for ( UInt i = 0 ; i < M_couplingIndex.first ; ++i, ++couplingVariablesGlobalNumber )
+        MyGlobalElements.push_back( couplingVariablesGlobalNumber );
+}
+
+void
+MS_PhysicalCoupling::ImportCouplingVariables( const VectorType& CouplingVariables )
+{
+
+#ifdef DEBUG
+    Debug( 8200 ) << "MS_PhysicalCoupling::ImportCouplingVariables( CouplingVariables ) \n";
+#endif
+
+    ImportCouplingVector( CouplingVariables, *M_LocalCouplingVariables );
+}
+
+void
+MS_PhysicalCoupling::ExportCouplingVariables( VectorType& CouplingVariables )
+{
+
+#ifdef DEBUG
+    Debug( 8200 ) << "MS_PhysicalCoupling::ExportCouplingVariables( CouplingVariables ) \n";
+#endif
+
+    ExportCouplingVector( *M_LocalCouplingVariables, CouplingVariables );
+}
+
+void
+MS_PhysicalCoupling::ExportJacobianProduct( const VectorType& deltaCouplingVariables, VectorType& JacobianProduct )
+{
+
+#ifdef DEBUG
+    Debug( 8200 ) << "MS_Model_MultiScale::ExportJacobianProduct() \n";
+#endif
+
+    VectorType LocalDeltaCouplingVariables( *M_LocalCouplingVariables );
+    ImportCouplingVector( deltaCouplingVariables, LocalDeltaCouplingVariables );
+
+    this->ComputeJacobianProduct( LocalDeltaCouplingVariables );
+
+    ExportCouplingVector( *M_LocalJacobianProduct, JacobianProduct );
 }
 
 // ===================================================
@@ -159,6 +221,7 @@ MS_PhysicalCoupling::ShowMe( void )
     std::cout << std::endl << std::endl;
 }
 
+
 // ===================================================
 //! Protected Methods
 // ===================================================
@@ -167,6 +230,20 @@ MS_PhysicalCoupling::switchErrorMessage( const PhysicalModel_ptr& model )
 {
     std::cout << "ERROR: Invalid model type [" << Enum2String( model->GetType(), modelsMap )
               << "] for coupling type [" << Enum2String( M_type, couplingsMap ) << "]" << std::endl;
+}
+
+void
+MS_PhysicalCoupling::ImportCouplingVector( const VectorType& globalVector, VectorType& localVector )
+{
+    for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
+        localVector[i] = globalVector[ M_couplingIndex.second + i ];
+}
+
+void
+MS_PhysicalCoupling::ExportCouplingVector( const VectorType& localVector, VectorType& globalVector )
+{
+    for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
+        globalVector[ M_couplingIndex.second + i ] = localVector[i];
 }
 
 } // Namespace LifeV

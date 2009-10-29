@@ -32,34 +32,38 @@
 
 namespace LifeV {
 
-std::map< std::string, MS_Coupling_FluxStress::pressureTypes > MS_Coupling_FluxStress::M_mapPressure;
+std::map< std::string, MS_Coupling_FluxStress::stressTypes > MS_Coupling_FluxStress::M_mapStress;
 
 // ===================================================
 //! Constructors
 // ===================================================
 MS_Coupling_FluxStress::MS_Coupling_FluxStress() :
-    super           (),
-    M_baseFlux      (),
-    M_baseStress    (),
-    M_pressureType  ()
+    super              (),
+    M_baseFlux         (),
+    M_baseStress       (),
+    M_baseDeltaFlux    (),
+    M_baseDeltaStress  (),
+    M_stressType       ()
 {
 
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::MS_Coupling_FluxStress() \n";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::MS_Coupling_FluxStress() \n";
 #endif
 
     M_type = FluxStress;
 }
 
 MS_Coupling_FluxStress::MS_Coupling_FluxStress( const MS_Coupling_FluxStress& FluxStress ) :
-    super           ( FluxStress ),
-    M_baseFlux      ( FluxStress.M_baseFlux ),
-    M_baseStress    ( FluxStress.M_baseStress ),
-    M_pressureType  ( FluxStress.M_pressureType )
+    super              ( FluxStress ),
+    M_baseFlux         ( FluxStress.M_baseFlux ),
+    M_baseStress       ( FluxStress.M_baseStress ),
+    M_baseDeltaFlux    ( FluxStress.M_baseDeltaFlux ),
+    M_baseDeltaStress  ( FluxStress.M_baseDeltaStress ),
+    M_stressType       ( FluxStress.M_stressType )
 {
 
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::MS_Coupling_FluxStress( FluxStress ) \n";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::MS_Coupling_FluxStress( FluxStress ) \n";
 #endif
 
 }
@@ -73,9 +77,11 @@ MS_Coupling_FluxStress::operator=( const MS_Coupling_FluxStress& FluxStress )
     if ( this != &FluxStress )
     {
         super::operator=( FluxStress );
-        M_baseFlux     = FluxStress.M_baseFlux;
-        M_baseStress   = FluxStress.M_baseStress;
-        M_pressureType = FluxStress.M_pressureType;
+        M_baseFlux         = FluxStress.M_baseFlux;
+        M_baseStress       = FluxStress.M_baseStress;
+        M_baseDeltaFlux    = FluxStress.M_baseDeltaFlux;
+        M_baseDeltaStress  = FluxStress.M_baseDeltaStress;
+        M_stressType       = FluxStress.M_stressType;
     }
     return *this;
 }
@@ -88,24 +94,33 @@ MS_Coupling_FluxStress::SetupData( void )
 {
 
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::SetupData() \n";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::SetupData() \n";
 #endif
 
     //Set type of pressure coupling: Static, Total
-    M_mapPressure["Static"] = Static;
-    M_mapPressure["Total"]  = Total;
-    M_pressureType = M_mapPressure[M_dataFile( "MultiScale/pressureType", "Static" )];
+    M_mapStress["StaticPressure"] = StaticPressure;
+    M_mapStress["TotalPressure"]  = TotalPressure;
+    M_stressType = M_mapStress[M_dataFile( "MultiScale/pressureType", "StaticPressure" )];
 
-    //Create coupling Vectors & Functions
-    int MyGlobalIElements[2]; MyGlobalIElements[0] = 0; MyGlobalIElements[1] = 1;
-    EpetraMap map( 2, 2, &MyGlobalIElements[0], 0, *M_comm );
+    //Set number of coupling variables
+    M_couplingIndex.first  = 2;
 
-    M_couplingVariables.reset( new EpetraVector( map, Unique ) );
-    M_couplingResiduals.reset( new EpetraVector( map, Unique ) );
+    int MyGlobalElements[M_couplingIndex.first];
+    for ( int i(0) ; i < static_cast< int > ( M_couplingIndex.first ) ; ++i )
+        MyGlobalElements[i] = i;
+    EpetraMap map( M_couplingIndex.first, M_couplingIndex.first, &MyGlobalElements[0], 0, *M_comm );
+
+    M_LocalCouplingVariables.reset( new EpetraVector( map, Unique ) );
+    M_LocalCouplingResiduals.reset( new EpetraVector( map, Unique ) );
+    M_LocalDeltaCouplingVariables.reset( new EpetraVector( map, Unique ) );
+    M_LocalJacobianProduct.reset( new EpetraVector( map, Unique ) );
 
     //Set Functions
     M_baseFlux.setFunction  ( boost::bind( &MS_Coupling_FluxStress::functionFlux,   this, _1, _2, _3, _4, _5 ) );
     M_baseStress.setFunction( boost::bind( &MS_Coupling_FluxStress::functionStress, this, _1, _2, _3, _4, _5 ) );
+
+    M_baseDeltaFlux.setFunction  ( boost::bind( &MS_Coupling_FluxStress::functionDeltaFlux,   this, _1, _2, _3, _4, _5 ) );
+    M_baseDeltaStress.setFunction( boost::bind( &MS_Coupling_FluxStress::functionDeltaStress, this, _1, _2, _3, _4, _5 ) );
 
     //MPI Barrier
     M_comm->Barrier();
@@ -116,7 +131,7 @@ MS_Coupling_FluxStress::SetupCoupling( void )
 {
 
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::SetupCoupling() \n";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::SetupCoupling() \n";
 #endif
 
     // Impose flux
@@ -125,6 +140,7 @@ MS_Coupling_FluxStress::SetupCoupling( void )
         case Fluid3D:
 
             imposeFlux< MS_Model_Fluid3D > ();
+            imposeDeltaFlux< MS_Model_Fluid3D > ();
 
             break;
 
@@ -141,6 +157,7 @@ MS_Coupling_FluxStress::SetupCoupling( void )
             case Fluid3D:
 
                 imposeStress< MS_Model_Fluid3D > ( i );
+                imposeDeltaStress< MS_Model_Fluid3D > ( i );
 
                 break;
 
@@ -155,38 +172,87 @@ MS_Coupling_FluxStress::SetupCoupling( void )
 }
 
 void
-MS_Coupling_FluxStress::SetupImplicitCoupling( ContainerOfVectors< EpetraVector >& couplingVariables,
-                                               ContainerOfVectors< EpetraVector >& couplingResiduals )
+MS_Coupling_FluxStress::InitializeCouplingVariables( void )
 {
 
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::SetupImplicitCoupling( couplingVariables, couplingResiduals ) \n";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::InitializeCouplingVariables() \n";
 #endif
 
-    couplingVariables.push_back( M_couplingVariables );
-    couplingResiduals.push_back( M_couplingResiduals );
+    *M_LocalCouplingVariables = CouplingFunction();
+    *M_LocalDeltaCouplingVariables = 0.;
+
+#ifdef DEBUG
+    PrintQuantities();
+#endif
 }
 
 void
-MS_Coupling_FluxStress::UpdateCouplingVariables( void )
+MS_Coupling_FluxStress::ExportCouplingResiduals( VectorType& CouplingResiduals )
 {
-
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::UpdateCouplingVariables() ";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::ExportCouplingResiduals() \n";
 #endif
 
-    *M_couplingVariables = CouplingFunction();
+    *M_LocalCouplingResiduals  = CouplingFunction();
+    *M_LocalCouplingResiduals -= *M_LocalCouplingVariables;
+
+    ExportCouplingVector( *M_LocalCouplingResiduals, CouplingResiduals );
+
+#ifdef DEBUG
+    PrintQuantities();
+#endif
 }
 
 void
-MS_Coupling_FluxStress::UpdateCouplingResiduals( void )
+MS_Coupling_FluxStress::ComputeJacobianProduct( const VectorType& deltaCouplingVariables )
 {
+
 #ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_FluxStress::UpdateCouplingResidual()  ";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::ComputeJacobianProduct() \n";
 #endif
 
-    *M_couplingResiduals  = CouplingFunction();
-    *M_couplingResiduals -= *M_couplingVariables;
+    // Impose delta stress and compute delta flux
+    ( *M_LocalDeltaCouplingVariables )[1] = deltaCouplingVariables[1];
+    ( *M_LocalJacobianProduct )[0] = 0.;
+    for ( UInt i( 1 ); i < modelsNumber(); ++i )
+        switch ( M_models[i]->GetType() )
+        {
+            case Fluid3D:
+            {
+                ( *M_LocalJacobianProduct )[0] -= computeDeltaFlux< MS_Model_Fluid3D > ( i );
+
+                break;
+            }
+
+            default:
+
+                if ( M_displayer->isLeader() )
+                    switchErrorMessage( M_models[i] );
+        }
+    // Restore delta stress = 0
+    ( *M_LocalDeltaCouplingVariables )[1] = 0;
+
+    // Impose delta flux and compute delta stress
+    ( *M_LocalDeltaCouplingVariables )[0] = deltaCouplingVariables[0];
+    switch ( M_models[0]->GetType() )
+    {
+        case Fluid3D:
+        {
+            ( *M_LocalJacobianProduct )[1] = computeDeltaStress< MS_Model_Fluid3D > (); //Coupling through the stress
+
+            break;
+        }
+
+        default:
+
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[0] );
+    }
+    // Restore delta flux = 0
+    ( *M_LocalDeltaCouplingVariables )[0] = 0;
+
+    *M_LocalJacobianProduct -= deltaCouplingVariables;
 }
 
 void
@@ -196,9 +262,9 @@ MS_Coupling_FluxStress::ShowMe( void )
     {
         super::ShowMe();
 
-        std::cout << "Pressure Type       = " << Enum2String( M_pressureType, M_mapPressure ) << std::endl;
-        std::cout << "Coupling Flux       = " << ( *M_couplingVariables )[0] << std::endl
-                  << "Coupling Stress     = " << ( *M_couplingVariables )[1] << std::endl << std::endl;
+        std::cout << "Pressure Type       = " << Enum2String( M_stressType, M_mapStress ) << std::endl;
+        std::cout << "Coupling Flux       = " << ( *M_LocalCouplingVariables )[0] << std::endl
+                  << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[1] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
     }
 
@@ -214,13 +280,10 @@ MS_Coupling_FluxStress::CouplingFunction( void )
 {
 
 #ifdef DEBUG
-    std::stringstream output;
-    output << std::scientific << std::setprecision( 6 );
-    output << "MS_Coupling_FluxStress::CouplingFunction() \n";
+    Debug( 8230 ) << "MS_Coupling_FluxStress::CouplingFunction() \n";
 #endif
 
-    EpetraVector couplingFunction = *M_couplingVariables;
-    couplingFunction = 0.;
+    EpetraVector couplingFunction ( *M_LocalCouplingVariables ); couplingFunction = 0;
 
     // Compute the Flux
     for ( UInt i( 1 ); i < modelsNumber(); ++i )
@@ -255,10 +318,43 @@ MS_Coupling_FluxStress::CouplingFunction( void )
                 switchErrorMessage( M_models[0] );
     }
 
-#ifdef DEBUG
+    return couplingFunction;
+}
+
+Real
+MS_Coupling_FluxStress::functionFlux( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+{
+    return ( *M_LocalCouplingVariables )[0];
+}
+
+Real
+MS_Coupling_FluxStress::functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+{
+    return ( *M_LocalCouplingVariables )[1];
+}
+
+Real
+MS_Coupling_FluxStress::functionDeltaFlux( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+{
+    return ( *M_LocalDeltaCouplingVariables )[0];
+}
+
+Real
+MS_Coupling_FluxStress::functionDeltaStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+{
+    return ( *M_LocalDeltaCouplingVariables )[1];
+}
+
+void
+MS_Coupling_FluxStress::PrintQuantities( void )
+{
+    std::stringstream output;
+    output << std::scientific << std::setprecision( 6 );
+    output << "MS_Coupling_FluxStress::PrintQuantities() \n";
+
     output << "                                                       Coupling ID       = " << M_ID << "\n";
-    output << "                                                       Coupling Flux     = " << couplingFunction[0] << "\n";
-    output << "                                                       Coupling Stress   = " << couplingFunction[1] << "\n\n";
+    output << "                                                       Coupling Flux     = " << ( *M_LocalCouplingVariables )[0] << "\n";
+    output << "                                                       Coupling Stress   = " << ( *M_LocalCouplingVariables )[1] << "\n";
 
     output << "                                                       Model | Flux            Static Pressure     Dynamic Pressure\n";
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
@@ -279,22 +375,7 @@ MS_Coupling_FluxStress::CouplingFunction( void )
                     switchErrorMessage( M_models[i] );
         }
     }
-    Debug( 8220 ) << output.str() << "\n";
-#endif
-
-    return couplingFunction;
-}
-
-Real
-MS_Coupling_FluxStress::functionFlux( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
-{
-    return ( *M_couplingVariables )[0];
-}
-
-Real
-MS_Coupling_FluxStress::functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
-{
-    return ( *M_couplingVariables )[1];
+    Debug( 8230 ) << output.str() << "\n";
 }
 
 } // Namespace LifeV

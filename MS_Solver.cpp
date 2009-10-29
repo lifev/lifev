@@ -36,48 +36,46 @@ namespace LifeV {
 //! Constructors
 // ===================================================
 MS_Solver::MS_Solver() :
-    M_multiscale        (),
+    M_multiscale        ( new MS_Model_MultiScale() ),
+    M_algorithm         (),
     M_dataPhysics       ( new MS_PhysicalData() ),
     M_dataTime          (),
     M_comm              (),
     M_displayer         (),
-    M_chrono            (),
-    M_couplingVariables (),
-    M_couplingResiduals (),
-    M_generalizedAitken (),
-    M_subITMax          (),
-    M_tolerance         ()
+    M_chrono            ()
 {
 
 #ifdef DEBUG
     Debug( 8000 ) << "MS_Solver::MS_Solver() \n";
 #endif
 
-    //Models & Couplings mapCreation
+    //Models & Couplings & Algorithms map creation
     modelsMap["MultiScale"]           = MultiScale;
     modelsMap["Fluid3D"]              = Fluid3D;
     couplingsMap["BoundaryCondition"] = BoundaryCondition;
+    couplingsMap["Stress"]            = Stress;
     couplingsMap["FluxStress"]        = FluxStress;
+    algorithmMap["Aitken"]            = Aitken;
+    algorithmMap["Newton"]            = Newton;
 
     //Models & Couplings Factory registration
     FactoryModels::instance().registerProduct   ( MultiScale,        &createMultiScale );
     FactoryModels::instance().registerProduct   ( Fluid3D,           &createFluid3D );
+    FactoryCouplings::instance().registerProduct( Stress,            &createStress );
     FactoryCouplings::instance().registerProduct( FluxStress,        &createFluxStress );
     FactoryCouplings::instance().registerProduct( BoundaryCondition, &createBoundaryCondition );
+    FactoryAlgorithms::instance().registerProduct( Aitken,           &createAitken );
+    FactoryAlgorithms::instance().registerProduct( Newton,           &createNewton );
 }
 
 MS_Solver::MS_Solver( const MS_Solver& solver ) :
     M_multiscale        ( solver.M_multiscale ),
+    M_algorithm         ( solver.M_algorithm ),
     M_dataPhysics       ( solver.M_dataPhysics ),
     M_dataTime          ( solver.M_dataTime ),
     M_comm              ( solver.M_comm ),
     M_displayer         ( solver.M_displayer ),
-    M_chrono            ( solver.M_chrono ),
-    M_couplingVariables ( solver.M_couplingVariables ),
-    M_couplingResiduals ( solver.M_couplingResiduals ),
-    M_generalizedAitken ( solver.M_generalizedAitken ),
-    M_subITMax          ( solver.M_subITMax ),
-    M_tolerance         ( solver.M_tolerance )
+    M_chrono            ( solver.M_chrono )
 {
 
 #ifdef DEBUG
@@ -100,16 +98,12 @@ MS_Solver::operator=( const MS_Solver& solver )
     if ( this != &solver )
     {
         M_multiscale        = solver.M_multiscale;
+        M_algorithm         = solver.M_algorithm;
         M_dataPhysics       = solver.M_dataPhysics;
         M_dataTime          = solver.M_dataTime;
         M_comm              = solver.M_comm;
         M_displayer         = solver.M_displayer;
         M_chrono            = solver.M_chrono;
-        M_couplingVariables = solver.M_couplingVariables;
-        M_couplingResiduals = solver.M_couplingResiduals;
-        M_generalizedAitken = solver.M_generalizedAitken;
-        M_subITMax          = solver.M_subITMax;
-        M_tolerance         = solver.M_tolerance;
     }
 
     return *this;
@@ -124,7 +118,7 @@ MS_Solver::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
 #endif
 
     M_comm = comm;
-    M_multiscale.SetCommunicator( M_comm );
+    M_multiscale->SetCommunicator( M_comm );
     M_displayer.reset( new Displayer( M_comm.get() ) );
 }
 
@@ -139,24 +133,22 @@ MS_Solver::SetupProblem( const std::string& dataFile )
     GetPot DataFile( dataFile );
 
     // Main MultiScale problem
-    M_multiscale.SetDataFile( DataFile( "Problem/MS_problem", "./MultiScaleData/Models/Model.dat" ) );
+    M_multiscale->SetDataFile( DataFile( "Problem/MS_problem", "./MultiScaleData/Models/Model.dat" ) );
 
     // Time & Physics containers
-    M_dataTime.reset( new DataTime( DataFile, "Algorithm/time_discretization" ) ); //Add here Aitken??
+    M_dataTime.reset( new DataTime( DataFile, "Solver/time_discretization" ) );
     M_dataPhysics->ReadData( DataFile );
 
-    // Sub-Iterations parameters
-    M_generalizedAitken.setDefault( DataFile( "Algorithm/Aitken_method/omega", 1.e-3 ) );
-    M_subITMax  = DataFile( "Algorithm/Aitken_method/subITMax", 100 );
-    M_tolerance = DataFile( "Algorithm/Aitken_method/tolerance", 1.e-10 );
-
     // Setup MultiScale problem
-    M_multiscale.SetData( M_dataPhysics, M_dataTime );
-    M_multiscale.SetupData();
-    M_multiscale.SetupModel();
+    M_multiscale->SetData( M_dataPhysics, M_dataTime );
+    M_multiscale->SetupData();
+    M_multiscale->SetupModel();
 
-    // Build coupling variables and residuals vectors
-    M_multiscale.SetupImplicitCoupling( M_couplingVariables, M_couplingResiduals );
+    // Algorithm parameters
+    M_algorithm = Algorthm_ptrType( FactoryAlgorithms::instance().createObject( algorithmMap[ DataFile( "Solver/Algorithm/AlgorithmType", "Aitken" ) ] ) );
+    M_algorithm->SetCommunicator( M_comm );
+    M_algorithm->SetMultiScaleProblem( M_multiscale );
+    M_algorithm->SetupData( DataFile );
 }
 
 void
@@ -166,8 +158,6 @@ MS_Solver::SolveProblem( void )
 #ifdef DEBUG
     Debug( 8000 ) << "MS_Solver::SolveProblem() \n";
 #endif
-
-    Real residual;
 
     for ( ; M_dataTime->canAdvance(); M_dataTime->updateTime() )
     {
@@ -183,54 +173,21 @@ MS_Solver::SolveProblem( void )
 
         // Build or Update System
         if ( M_dataTime->isFirstTimeStep() )
-            M_multiscale.BuildSystem();
+            M_multiscale->BuildSystem();
         else
-            M_multiscale.UpdateSystem();
+            M_multiscale->UpdateSystem();
 
         // SolveSystem
-        M_multiscale.SolveSystem();
+        M_multiscale->SolveSystem();
 
-        // Temporary Computation of a Block Vector
-        //VectorType blocksVector( M_couplingVariables ); blocksVector = 0.0;
-        //for ( UInt i = 1 ; i < blocksVector.size() ; i = i+2)
-        //    blocksVector[i] = 1.0;
-        //std::cout << "blocksVector: " << std::endl;
-        //blocksVector.ShowMe();
-
-        // Sub-Iterations with Aitken method
-        M_generalizedAitken.restart( true );
-        for ( UInt subIT = 0; subIT < M_subITMax; ++subIT )
-        {
-            residual = M_couplingResiduals.WeightNorm2();
-
-            if ( M_displayer->isLeader() )
-            {
-                std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
-                std::cout << " MS-  Residual:                                " << residual << std::endl;
-            }
-
-            // To be moved in a post-processing class
-            std::cout << " MS-  CouplingVariables:\n" << std::endl;
-            M_couplingVariables.ShowMe();
-            std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-            M_couplingResiduals.ShowMe();
-
-            // Verify tolerance
-            if ( residual <= M_tolerance )
-                break;
-
-            // Update Coupling Variables
-            //M_generalizedAitken.restart(); // To have fixed omega (if omega = 1, Fixed Point)
-            //M_couplingVariables += M_generalizedAitken.computeDeltaLambdaScalar( M_couplingVariables, M_couplingResiduals, true );
-            M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVector( M_couplingVariables, M_couplingResiduals, true, true );
-            //M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVectorBlock( M_couplingVariables, M_couplingResiduals, blocksVector, 2, true );
-
-            // SolveSystem
-            M_multiscale.SolveSystem();
-        }
+        // Algorithm - SubIterate
+        M_algorithm->SubIterate();
 
         // SaveSolution
-        M_multiscale.SaveSolution();
+        M_multiscale->SaveSolution();
+
+        if ( M_algorithm->GetSubiterationsMaximumNumber() == 0 ) // If we use an explicit coupling algorithm
+            M_multiscale->InitializeCouplingVariables();         // we need to manually update the coupling variables
 
         M_chrono.stop();
 
@@ -251,15 +208,13 @@ MS_Solver::ShowMe( void )
                   << "End time           = " << M_dataTime->getEndTime() << std::endl
                   << "TimeStep           = " << M_dataTime->getTimeStep() << std::endl << std::endl;
         std::cout << std::endl << std::endl;
-
-        std::cout << "Max Sub-iterations = " << M_subITMax << std::endl
-                  << "Tolerance          = " << M_tolerance << std::endl << std::endl;
-        std::cout << std::endl << std::endl;
-
-        M_multiscale.ShowMe();
-
-        std::cout << "=============================================================" << std::endl << std::endl;
     }
+
+    M_multiscale->ShowMe();
+    M_algorithm->ShowMe();
+
+    if ( M_displayer->isLeader() )
+        std::cout << "=============================================================" << std::endl << std::endl;
 }
 
 } // Namespace LifeV

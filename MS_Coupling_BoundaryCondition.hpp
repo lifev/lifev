@@ -45,7 +45,7 @@ namespace LifeV {
  *
  *  @author Cristiano Malossi
  */
-class MS_Coupling_BoundaryCondition: public MS_PhysicalCoupling
+class MS_Coupling_BoundaryCondition: public virtual MS_PhysicalCoupling
 {
 public:
 
@@ -90,15 +90,17 @@ public:
     //! Setup the coupling
     void SetupCoupling( void );
 
-    //! Setup parameters for the implicit coupling (DO NOTHING)
-    void SetupImplicitCoupling( ContainerOfVectors< EpetraVector >& /*couplingVariables*/,
-                                ContainerOfVectors< EpetraVector >& /*couplingResiduals*/) {}
+    //! Initialize the values of the coupling variables (DO NOTHING)
+    void InitializeCouplingVariables( void ) {}
 
-    //! Update the values of the coupling variables (DO NOTHING)
-    void UpdateCouplingVariables( void ) {}
+    //! Export the values of the coupling residuals (DO NOTHING)
+    void ExportCouplingResiduals( VectorType& /*CouplingResiduals*/ ) {}
 
-    //! Update the values of the coupling residual (DO NOTHING)
-    void UpdateCouplingResiduals( void ) {}
+    //! Compute Jacobian product: J(X) * X (DO NOTHING)
+    /*!
+     * \param deltaCouplingVariables - variation of the coupling variables
+     */
+    void ComputeJacobianProduct( const VectorType& /*deltaCouplingVariables*/ ) {}
 
     //! Display some information about the coupling
     void ShowMe( void );
@@ -117,6 +119,13 @@ private:
      */
     template< class model >
     inline void ApplyBoundaryConditions( const PhysicalModel_ptr& physicalModel );
+
+    //! Apply the boundary condition to linear version of the specific model
+    /*!
+     * \param physicalModel - shared_ptr to the specific model
+     */
+    template< class model >
+    inline void ApplyLinearBoundaryConditions( const PhysicalModel_ptr& physicalModel );
 
     //@}
 
@@ -142,12 +151,35 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions( const PhysicalModel_ptr&
 
     for ( UInt i( 0 ); i < M_listSize; ++i )
     {
-        Model->GetBCInterface().ReadExternalBC( M_list[i], "boundary_conditions/", M_dataFile );
+        Model->GetBC().ReadExternalBC( M_list[i], "boundary_conditions/", M_dataFile );
 
-        Model->GetBCInterface().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[i] );
-        Model->GetBCInterface().GetDataContainer().SetFlag( M_flags[i] );
+        Model->GetBC().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[i] );
+        Model->GetBC().GetDataContainer().SetFlag( M_flags[i] );
 
-        Model->GetBCInterface().InsertExternalBC();
+        Model->GetBC().InsertExternalBC();
+    }
+
+    //MPI Barrier
+    M_comm->Barrier();
+}
+
+template< class model >
+inline void
+MS_Coupling_BoundaryCondition::ApplyLinearBoundaryConditions( const PhysicalModel_ptr& physicalModel )
+{
+    model *Model = dynamic_cast< model * > ( &( *physicalModel ) );
+
+    for ( UInt i( 0 ); i < M_listSize; ++i )
+    {
+        Model->GetLinearBC().ReadExternalBC( M_list[i], "boundary_conditions/", M_dataFile );
+
+        Model->GetLinearBC().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[i] );
+        Model->GetLinearBC().GetDataContainer().SetFlag( M_flags[i] );
+
+        Model->GetLinearBC().GetDataContainer().SetBase( make_pair( "function", function ) );
+        Model->GetLinearBC().GetDataContainer().SetBaseString( "0" );
+
+        Model->GetLinearBC().InsertExternalBC();
     }
 
     //MPI Barrier
