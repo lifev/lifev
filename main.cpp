@@ -97,6 +97,7 @@ main( int argc, char** argv )
 
 	std::string expression;
 	Real result;
+	Real tolerance = 1e-15;
 
 	std::cout << std::setprecision(30) << std::endl;
 
@@ -110,16 +111,16 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  0:  " << expression << " = " << result << std::endl;
-	if (result != 0)
+	if ( std::fabs(result - 0) > tolerance )
 		return( EXIT_FAILURE );
 
 
 	// TEST 1:
-	expression = "(1+1)/(2+2)"; // = 0.5
+	expression = "showme; (1+1)/(2+2)"; // = 0.5
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  1:  " << expression << " = " << result << std::endl;
-	if (result != 0.5)
+	if ( std::abs(result - 0.5) > tolerance )
 		return( EXIT_FAILURE );
 
 
@@ -129,7 +130,7 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  2:  " << expression << " = " << result << std::endl;
-	if (result != 76)
+	if (std::abs(result - 76) > tolerance)
 		return( EXIT_FAILURE );
 
 
@@ -139,7 +140,7 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  3:  " << expression << " = " << result << std::endl;
-	if (result != 496)
+	if (std::abs(result - 496) > tolerance)
 		return( EXIT_FAILURE );
 
 
@@ -149,7 +150,7 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  4:  " << expression << " = " << result << std::endl;
-	if (result != 0)
+	if (std::abs(result - 0) > tolerance)
 		return( EXIT_FAILURE );
 
 
@@ -159,7 +160,7 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  5:  " << expression << " = " << result << std::endl;
-	if (result != 1)
+	if (std::abs(result - 1) > tolerance)
 		return( EXIT_FAILURE );
 
 
@@ -169,7 +170,7 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  6:  " << expression << " = " << result << std::endl;
-	if (result != 1)
+	if (std::abs(result - 1) > tolerance)
 		return( EXIT_FAILURE );
 
 
@@ -179,7 +180,7 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << "TEST  7:  " << expression << " = " << result << std::endl;
-	if (result != 144)
+	if (std::abs(result - 144) > tolerance)
 		return( EXIT_FAILURE );
 
 
@@ -188,7 +189,7 @@ main( int argc, char** argv )
 	expression = "c=2; (0., c, c*c, c*c*c)"; // (0, 2, 4, 8)
 	parser.setString(expression);
 	std::cout << "TEST  8:  " << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ", " << parser.evaluate(4) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 2 || parser.evaluate(3) != 4 || parser.evaluate(4) != 8 )
+	if ( std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 2 ) > tolerance || std::abs( parser.evaluate(3) - 4 ) > tolerance || std::abs( parser.evaluate(4) - 8 ) > tolerance )
 		return( EXIT_FAILURE );
 
 
@@ -200,7 +201,7 @@ main( int argc, char** argv )
 	parser.setVariable("y", 2); // (0, 0, -5)
 	std::cout << "TEST  9a: " << "x = " << 1 << ", y = " << 2 << " ==> ";
 	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != 3 )
+	if ( std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 0 ) > tolerance || std::abs( parser.evaluate(3) - 3 ) > tolerance )
 		return( EXIT_FAILURE );
 
 
@@ -210,7 +211,7 @@ main( int argc, char** argv )
 	parser.setVariable("y", 5); // (0, 0, -41)
 	std::cout << "TEST  9b: " << "x = " << 4 << ", y = " << 5 << " ==> ";
 	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != 9 )
+	if ( std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 0 ) > tolerance || std::abs( parser.evaluate(3) - 9 ) > tolerance )
 		return( EXIT_FAILURE );
 
 	std::cout << std::endl << "TEST ENDS SUCCESFULLY -> NOW TESTING PERFORMANCES" << std::endl;
