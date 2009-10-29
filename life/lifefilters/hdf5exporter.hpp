@@ -118,6 +118,8 @@ public:
         ASSERT(false,"Hdf5exporter::import not yet coded");
     }
 
+    void M_rd_ascii(const ExporterData& /*null*/){assert(false);}
+
 private:
 
     //! write empty xdmf file
