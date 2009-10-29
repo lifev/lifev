@@ -109,10 +109,9 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&    vector,
 // Copies vector to a vector which resides only on the processor "reduceToProc"
 EpetraVector::EpetraVector( const EpetraVector& vector, const int reduceToProc):
     M_epetraVector(vector.M_epetraMap->getRootMap(reduceToProc)),
-    M_epetraMap   (),
+    M_epetraMap   (new EpetraMap(vector.M_epetraMap->getRootMap(reduceToProc))),
     M_maptype     (Unique)
 {
-     assert(false); // Need to code M_eptraMap initialization first. Then remove assert.
     operator = (vector);
 }
 
