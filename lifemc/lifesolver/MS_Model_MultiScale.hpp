@@ -47,6 +47,7 @@
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Coupling_BoundaryCondition.hpp>
+#include <lifemc/lifesolver/MS_Coupling_Stress.hpp>
 #include <lifemc/lifesolver/MS_Coupling_FluxStress.hpp>
 
 #include <boost/array.hpp>
@@ -61,7 +62,7 @@ namespace LifeV {
  *
  *  @author Cristiano Malossi
  */
-class MS_Model_MultiScale: public MS_PhysicalModel
+class MS_Model_MultiScale: public virtual MS_PhysicalModel
 {
 public:
 
@@ -100,6 +101,41 @@ public:
      */
     MS_Model_MultiScale& operator=( const MS_Model_MultiScale& multiscale );
 
+    //! Build the global map for the coupling vectors
+    /*!
+     * \param couplingVariablesGlobalNumber - Global number of coupling variables
+     * \param MyGlobalElements - Epetra_Map MyGlobalElements
+     */
+    void BuildCouplingVectorsMap( UInt&             couplingVariablesGlobalNumber,
+                                  std::vector<int>& MyGlobalElements );
+
+    //! Setup parameters for the implicit coupling
+    void InitializeCouplingVariables( void );
+
+    //! Import the values of the coupling variables
+    void ImportCouplingVariables( const VectorType& CouplingVariables );
+
+    //! Export the values of the coupling variables
+    void ExportCouplingVariables( VectorType& CouplingVariables );
+
+    //! Export the values of the coupling residuals
+    void ExportCouplingResiduals( VectorType& CouplingResiduals );
+
+    //! Export the values of the Jacobian product
+    /*!
+     * \param deltaCouplingVariables - variation of the coupling variables
+     */
+    void ExportJacobianProduct( const VectorType& deltaCouplingVariables, VectorType& JacobianProduct );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the number of the coupling variables
+    UInt GetCouplingVariablesNumber( void );
+
     //@}
 
 
@@ -111,10 +147,6 @@ public:
 
     //! Setup the model
     void SetupModel( void );
-
-    //! Setup parameters for the implicit coupling
-    void SetupImplicitCoupling( ContainerOfVectors< EpetraVector >& couplingVariables,
-                                ContainerOfVectors< EpetraVector >& couplingResiduals );
 
     //! Build the system matrix and vectors
     void BuildSystem( void );

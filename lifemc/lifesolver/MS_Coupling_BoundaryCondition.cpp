@@ -93,6 +93,16 @@ MS_Coupling_BoundaryCondition::SetupData( void )
     for ( UInt i( 0 ); i < M_listSize; ++i )
         M_list.push_back( M_dataFile( "boundary_conditions/list", " ", i ) );
 
+    //Set number of coupling variables
+    M_couplingIndex.first  = 0;
+
+    int MyGlobalElements[M_couplingIndex.first];
+    EpetraMap map( -1, M_couplingIndex.first, &MyGlobalElements[0], 0, *M_comm );
+
+    M_LocalCouplingVariables.reset( new EpetraVector( map, Unique ) );
+    M_LocalCouplingResiduals.reset( new EpetraVector( map, Unique ) );
+    M_LocalJacobianProduct.reset( new EpetraVector( map, Unique ) );
+
     //MPI Barrier
     M_comm->Barrier();
 }
@@ -111,6 +121,7 @@ MS_Coupling_BoundaryCondition::SetupCoupling( void )
             case Fluid3D:
 
                 ApplyBoundaryConditions< MS_Model_Fluid3D > ( M_models[i] );
+                ApplyLinearBoundaryConditions< MS_Model_Fluid3D > ( M_models[i] );
 
                 break;
 

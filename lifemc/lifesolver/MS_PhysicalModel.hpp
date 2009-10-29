@@ -51,7 +51,6 @@
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <lifemc/lifearray/ContainerOfVectors.hpp>
 #include <lifemc/lifesolver/MS_PhysicalData.hpp>
 
 namespace LifeV {
@@ -80,7 +79,10 @@ class MS_PhysicalModel
 {
 public:
 
-    typedef EntityFlag BCFlag;
+    typedef EpetraVector                       VectorType;
+    typedef boost::shared_ptr<VectorType>      Vector_ptrType;
+
+    typedef EntityFlag                         BCFlag;
 
     //! @name Constructors & Destructor
     //@{
@@ -200,17 +202,10 @@ public:
     //@{
 
     //! Setup the data of the model
-    /*!
-     * \param PhysicalData - Data container for physical quantities
-     */
     virtual void SetupData( void ) = 0;
 
     //! Setup the model
     virtual void SetupModel( void ) = 0;
-
-    //! Setup parameters for the implicit coupling
-    virtual void SetupImplicitCoupling( ContainerOfVectors< EpetraVector >& /*couplingVariables*/,
-                                        ContainerOfVectors< EpetraVector >& /*couplingResiduals*/) = 0;
 
     //! Build the system matrix and vectors
     virtual void BuildSystem( void ) = 0;

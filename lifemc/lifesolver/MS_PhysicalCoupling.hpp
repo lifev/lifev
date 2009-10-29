@@ -48,6 +48,7 @@ namespace LifeV {
 enum couplingsTypes
 {
     BoundaryCondition,
+    Stress,
     FluxStress
 };
 
@@ -65,6 +66,9 @@ extern std::map< std::string, couplingsTypes > couplingsMap;
 class MS_PhysicalCoupling
 {
 public:
+
+    typedef MS_PhysicalModel::VectorType          VectorType;
+    typedef MS_PhysicalModel::Vector_ptrType      Vector_ptrType;
 
     typedef boost::shared_ptr< MS_PhysicalModel > PhysicalModel_ptr;
     typedef EntityFlag                            BCFlag;
@@ -95,6 +99,26 @@ public:
      * \param coupling - MS_PhysicalCoupling
      */
     MS_PhysicalCoupling& operator=( const MS_PhysicalCoupling& coupling );
+
+    //! Build the global map for the coupling vectors
+    /*!
+     * \param couplingVariablesGlobalNumber - Global number of coupling variables
+     * \param MyGlobalElements - Epetra_Map MyGlobalElements
+     */
+    void BuildCouplingVectorsMap( UInt&             couplingVariablesGlobalNumber,
+                                  std::vector<int>& MyGlobalElements );
+
+    //! Import the values of the coupling variables
+    void ImportCouplingVariables( const VectorType& CouplingVariables );
+
+    //! Export the values of the coupling variables
+    void ExportCouplingVariables( VectorType& CouplingVariables );
+
+    //! Export the values of the Jacobian product
+    /*!
+     * \param deltaCouplingVariables - variation of the coupling variables
+     */
+    void ExportJacobianProduct( const VectorType& deltaCouplingVariables, VectorType& JacobianProduct );
 
     //@}
 
@@ -174,6 +198,12 @@ public:
         return M_couplingName;
     }
 
+    //! Get the number of the coupling variables
+    const UInt& GetCouplingVariablesNumber() const
+    {
+        return M_couplingIndex.first;
+    }
+
     //@}
 
 
@@ -186,14 +216,17 @@ public:
     //! Setup the coupling
     virtual void SetupCoupling( void ) = 0;
 
-    //! Setup parameters for the implicit coupling
-    virtual void SetupImplicitCoupling( ContainerOfVectors< EpetraVector >& /*couplingVariables*/, ContainerOfVectors< EpetraVector >& /*couplingResiduals*/) = 0;
+    //! Initialize the values of the coupling variables
+    virtual void InitializeCouplingVariables( void ) = 0;
 
-    //! Update the values of the coupling variables
-    virtual void UpdateCouplingVariables( void ) = 0;
+    //! Export the values of the coupling residuals
+    virtual void ExportCouplingResiduals( VectorType& CouplingResiduals ) = 0;
 
-    //! Update the values of the coupling residual: R = C - F(C)
-    virtual void UpdateCouplingResiduals( void ) = 0;
+    //! Compute Jacobian product: J(X) * X
+    /*!
+     * \param deltaCouplingVariables - variation of the coupling variables
+     */
+    virtual void ComputeJacobianProduct( const VectorType& deltaCouplingVariables ) = 0;
 
     //! Display some information about the coupling
     virtual void ShowMe( void );
@@ -211,6 +244,20 @@ protected:
         return static_cast< UInt > ( M_models.size() );
     }
 
+    //! Import the content of the Global Vector in the Local vector
+    /*!
+     * \param globalVector - the global vector
+     * \param localVector - the local vector
+     */
+    void ImportCouplingVector( const VectorType& globalVector, VectorType& localVector );
+
+    //! Export the content of the Local Vector in the Global vector
+    /*!
+     * \param localVector - the local vector
+     * \param globalVector - the global vector
+     */
+    void ExportCouplingVector( const VectorType& localVector, VectorType& globalVector );
+
     //! Display and error message for the specific model
     /*!
      * \param model - shared_ptr to the specific model
@@ -219,21 +266,25 @@ protected:
 
     //@}
 
-    static UInt                       M_couplingsNumber;
+    static UInt                         M_couplingsNumber;
 
-    UInt                              M_ID;
-    couplingsTypes                    M_type;
+    UInt                                M_ID;
+    couplingsTypes                      M_type;
 
-    GetPot                            M_dataFile;
-    std::vector< PhysicalModel_ptr >  M_models;
-    std::vector< BCFlag >             M_flags;
-    std::string                       M_couplingName;
+    GetPot                              M_dataFile;
+    std::vector< PhysicalModel_ptr >    M_models;
+    std::vector< BCFlag >               M_flags;
+    std::string                         M_couplingName;
 
-    boost::shared_ptr< Epetra_Comm >  M_comm;
-    boost::shared_ptr< Displayer >    M_displayer;
+    boost::shared_ptr< Epetra_Comm >    M_comm;
+    boost::shared_ptr< Displayer >      M_displayer;
 
-    boost::shared_ptr< EpetraVector > M_couplingVariables;
-    boost::shared_ptr< EpetraVector > M_couplingResiduals;
+    std::pair< UInt, UInt >             M_couplingIndex;
+
+    Vector_ptrType                      M_LocalCouplingVariables;
+    Vector_ptrType                      M_LocalCouplingResiduals;
+    Vector_ptrType                      M_LocalJacobianProduct;
+    Vector_ptrType                      M_LocalDeltaCouplingVariables;
 };
 
 } // Namespace LifeV

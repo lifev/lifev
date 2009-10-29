@@ -39,10 +39,12 @@
 #endif
 
 #include <life/lifecore/life.hpp>
-#include <life/lifealg/generalizedAitken.hpp>
+
+#include <lifemc/lifesolver/MS_Algorithm.hpp>
+#include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
+#include <lifemc/lifesolver/MS_Algorithm_Newton.hpp>
 
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
-#include <lifemc/lifearray/ContainerOfVectors.hpp>
 
 #include <boost/array.hpp>
 #include <boost/algorithm/string.hpp>
@@ -60,10 +62,14 @@ class MS_Solver
 {
 public:
 
-    typedef singleton< factory< MS_PhysicalModel, modelsTypes > >       FactoryModels;
-    typedef singleton< factory< MS_PhysicalCoupling, couplingsTypes > > FactoryCouplings;
+    typedef singleton< factory< MS_Algorithm, algorithmsTypes > >       FactoryAlgorithms;
+    typedef MS_Model_MultiScale::FactoryModels                          FactoryModels;
+    typedef MS_Model_MultiScale::FactoryCouplings                       FactoryCouplings;
 
-    typedef ContainerOfVectors< EpetraVector > VectorType;
+    typedef boost::shared_ptr< MS_Algorithm >                           Algorthm_ptrType;
+
+    typedef MS_PhysicalModel::VectorType                                VectorType;
+    typedef MS_PhysicalModel::Vector_ptrType                            Vector_ptrType;
 
     //! @name Constructors, Destructor
     //@{
@@ -121,33 +127,25 @@ private:
     //@}
 
     // The main multiscale model
-    MS_Model_MultiScale                  M_multiscale;
+    boost::shared_ptr< MS_Model_MultiScale > M_multiscale;
+
+    // Algorithm for subiterations
+    Algorthm_ptrType                         M_algorithm;
 
     // PhysicalData container
-    boost::shared_ptr< MS_PhysicalData > M_dataPhysics;
+    boost::shared_ptr< MS_PhysicalData >     M_dataPhysics;
 
     // DataTime container
-    boost::shared_ptr< DataTime >        M_dataTime;
+    boost::shared_ptr< DataTime >            M_dataTime;
 
     // Communicator
-    boost::shared_ptr< Epetra_Comm >     M_comm;
+    boost::shared_ptr< Epetra_Comm >         M_comm;
 
     // Displayer tool for MPI processes
-    boost::shared_ptr< Displayer >       M_displayer;
+    boost::shared_ptr< Displayer >           M_displayer;
 
     // Chrono performances
-    Chrono                               M_chrono;
-
-    // Container of coupling variables
-    VectorType                           M_couplingVariables;
-
-    // Container of coupling residuals
-    VectorType                           M_couplingResiduals;
-
-    // Aitken Method
-    generalizedAitken< VectorType >      M_generalizedAitken;
-    UInt                                 M_subITMax;
-    Real                                 M_tolerance;
+    Chrono                                   M_chrono;
 };
 
 } // Namespace LifeV
