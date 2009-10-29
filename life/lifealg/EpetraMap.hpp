@@ -123,9 +123,8 @@ public:
     /*!
      * \param map: underlying Epetra_Map
      */
-private:
     EpetraMap(const map_type map);
-public:
+
     ~EpetraMap() {}
 
     //@}
