@@ -29,58 +29,58 @@
    \date 2004-08-29
 */
 
-#include <life/lifecore/debug.hpp>
-
-#include <life/lifecore/GetPot.hpp>
-
 #include <life/lifealg/SolverTrilinos.hpp>
-#include "Epetra_Comm.h"
 
-#include <iomanip>
+namespace LifeV {
 
-namespace LifeV
-{
-// namespace Epetra
-// {
-
-
-SolverTrilinos::SolverTrilinos(Epetra_Comm& comm)
-    :
-    M_prec  (),
-    M_solver(),
+// ===================================================
+//! Constructors
+// ===================================================
+SolverTrilinos::SolverTrilinos() :
+    M_prec                 (),
+    M_solver               (),
     M_TrilinosParameterList(),
-    M_Displayer(&comm),
-    M_maxIter(0),
-    M_tol(0.),
-    M_maxIterSolver(0),
-    M_maxIterForReuse(0)
-{
-}
-SolverTrilinos::SolverTrilinos()
-    :
-    M_prec  (),
-    M_solver(),
-    M_TrilinosParameterList(),
-    M_Displayer(),
-    M_maxIter(0),
-    M_tol(0.),
-    M_maxIterSolver(0),
-    M_maxIterForReuse(0)
+    M_Displayer            (),
+    M_maxIter              ( 0 ),
+    M_tol                  ( 0. ),
+    M_maxIterSolver        ( 0 ),
+    M_maxIterForReuse      ( 0 )
 {
 }
 
+SolverTrilinos::SolverTrilinos( const Epetra_Comm& comm ) :
+    M_prec                 (),
+    M_solver               (),
+    M_TrilinosParameterList(),
+    M_Displayer            ( &comm ),
+    M_maxIter              ( 0 ),
+    M_tol                  ( 0. ),
+    M_maxIterSolver        ( 0 ),
+    M_maxIterForReuse      ( 0 )
+{
+}
 
+// ===================================================
+//! Get Methods
+// ===================================================
 int
 SolverTrilinos::NumIters()
 {
     return M_solver.NumIters();
 }
 
-
 double
 SolverTrilinos::TrueResidual()
 {
     return M_solver.TrueResidual();
+}
+
+// ===================================================
+//! Set Methods
+// ===================================================
+void SolverTrilinos::SetCommunicator( const Epetra_Comm& comm )
+{
+    M_Displayer.SetCommunicator( comm );
 }
 
 void SolverTrilinos::setMatrix( matrix_type& m)
@@ -90,7 +90,7 @@ void SolverTrilinos::setMatrix( matrix_type& m)
 
 void SolverTrilinos::setOperator( Epetra_Operator& op)
 {
-    M_solver.SetUserOperator(&op);
+    M_solver.SetUserOperator( &op );
 }
 
 //! set Epetra_Operator preconditioner
@@ -99,12 +99,15 @@ void SolverTrilinos::setPreconditioner( prec_type _prec )
     M_prec = _prec;
 }
 
+void SolverTrilinos::setPrec( prec_raw_type* prec )
+{
+    M_prec.reset( prec );
+}
 
 void SolverTrilinos::SetParameters(bool cerr_warning_if_unused)
 {
     M_solver.SetParameters(M_TrilinosParameterList,cerr_warning_if_unused);
 }
-
 
 void SolverTrilinos::useGMRES(const int restart)
 {
@@ -112,13 +115,11 @@ void SolverTrilinos::useGMRES(const int restart)
     //M_TrilinosParameterList.set("solver", "AZ_gmres_condnum");
     M_TrilinosParameterList.set("kspace", restart);
 }
-
 void SolverTrilinos::useCG()
 {
     M_TrilinosParameterList.set("solver", "AZ_cg");
     //M_TrilinosParameterList.set("solver", "AZ_cg_condnum");
 }
-
 
 void SolverTrilinos::useBICGSTAB()
 {
@@ -309,11 +310,10 @@ void  SolverTrilinos::SetVerbose(const VerboseLevel verb)
 int
 SolverTrilinos::solve( vector_type& x, vector_type& b )
 {
+    M_solver.SetLHS( &x.getEpetraVector() );
+    M_solver.SetRHS( &b.getEpetraVector() );
 
-    M_solver.SetLHS(&x.getEpetraVector());
-    M_solver.SetRHS(&b.getEpetraVector());
-
-    SetParameters(true);
+    SetParameters( true );
 
 //    M_TrilinosParameterList.set("kspace", 100);
 //    M_TrilinosParameterList.TrilinosParameterListShowMe();
@@ -321,21 +321,21 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
     int    maxiter(M_maxIter);
     double mytol  (M_tol);
     int status;
-     if ( precSet() )
-//         {
+    if ( precSet() )
+//    {
         M_solver.SetPrecOperator(M_prec->getPrec());
 
-     status = M_solver.Iterate(maxiter, mytol);
-     //        }
-//     else
-//         {
-//              status = M_solver.AdaptiveIterate(maxiter, 3, mytol);
-//         }
-    /* if status:
-       0  AZ_normal
-       1  AZ_maxits
-       if < 0 see AztecOO.cpp
-    */
+        status = M_solver.Iterate(maxiter, mytol);
+//    }
+//    else
+//    {
+//        status = M_solver.AdaptiveIterate(maxiter, 3, mytol);
+//    }
+      /* if status:
+         0  AZ_normal
+         1  AZ_maxits
+         if < 0 see AztecOO.cpp
+      */
 
 #ifdef DEBUG
 
@@ -453,9 +453,6 @@ void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& secti
     ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
     M_prec->setDataFromGetPot( dataFile, section );
 }
-
- void SolverTrilinos::setPrec(prec_raw_type* prec)
- {M_prec.reset(prec);}
 
 } // namespace LifeV
 
