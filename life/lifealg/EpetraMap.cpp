@@ -13,14 +13,17 @@
 
 namespace LifeV
 {
+
+// ===================================================
+//! Constructors
+// ===================================================
+
 EpetraMap::EpetraMap():
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
     M_importer()
 {}
-
-
 
 EpetraMap::EpetraMap(int                NumGlobalElements,
                      int                NumMyElements,
@@ -107,6 +110,16 @@ EpetraMap::EpetraMap(const int          size,
 
 
 }
+
+EpetraMap::EpetraMap( const map_type map ):
+    M_repeatedEpetra_Map(new map_type(map)),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
+{
+    uniqueMap();
+}
+
 
 
 
@@ -331,41 +344,6 @@ EpetraMap::uniqueMap()
     M_exporter.reset();
     M_importer.reset();
     return;
-
-
-  int MyPID    ( getRepeatedMap()->Comm().MyPID() );
-  int NumIDs   ( getRepeatedMap()->NumMyElements() );
-  int indexBase( getRepeatedMap()->MinAllGID() );
-
-  Epetra_IntSerialDenseVector GIDList  (NumIDs);
-  getRepeatedMap()->MyGlobalElements(GIDList.Values());
-
-  Epetra_IntSerialDenseVector PIDList  (NumIDs);
-  Epetra_IntSerialDenseVector LIDList  (NumIDs);
-
-  getRepeatedMap()->RemoteIDList(NumIDs, GIDList.Values(), PIDList.Values(), LIDList.Values());
-
-// now use LIDList has a helping pointer
-
-  int MyUniqueElements(0);
-
-  for (int i(0); i< NumIDs; i++)
-    if (PIDList[i] == MyPID)
-      LIDList[MyUniqueElements++] = GIDList[i];
-
-  LIDList.Resize(MyUniqueElements);
-
-  bubbleSort(LIDList);
-
-  M_uniqueEpetraMap.reset( new Epetra_Map(-1,
-                                          LIDList.Length(),
-                                          LIDList.Values(),
-                                          indexBase,
-                                          getRepeatedMap()->Comm()) );
-  M_exporter.reset();
-  M_importer.reset();
-
-
 }
 
 

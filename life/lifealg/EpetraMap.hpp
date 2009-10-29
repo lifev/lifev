@@ -69,6 +69,10 @@ public:
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
     //@}
 
+    //! @name Constructors
+    //@{
+
+    //! Default Constructor
     EpetraMap();
     // epetra map constructor. To define a linear map, set MyGlobalElements = 0
     EpetraMap(int                NumGlobalElements,
@@ -115,7 +119,16 @@ public:
     EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
               int indexbase = -1);
 
+    //! Constructor from raw Epetra_Map
+    /*!
+     * \param map: underlying Epetra_Map
+     */
+private:
+    EpetraMap(const map_type map);
+public:
     ~EpetraMap() {}
+
+    //@}
 
     // The copy operator will copy the pointers of the maps, exporter and importer
     EpetraMap&         operator  = (const EpetraMap& _epetraMap);
