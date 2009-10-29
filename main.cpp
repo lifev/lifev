@@ -34,7 +34,7 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
-//#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
@@ -70,8 +70,8 @@ public:
     typedef LifeV::FSIOperator::vector_type        vector_type;
     typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
 
-    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  filter_type;
-    //typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_type>  filter_type;
+    //typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  filter_type;
+    typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_type>  filter_type;
     typedef boost::shared_ptr<filter_type>                 filter_ptrtype;
     typedef LifeV::singleton<LifeV::factory<LifeV::FSIOperator,  std::string> > FSIFactory;
     /*!
@@ -487,7 +487,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
                     UniqueVFD.reset(new vector_type(*initSolFDPrev, Unique, Zero));
                     M_fsi->FSIOper()->meshMotion().setDispOld(*UniqueVFD);
                     M_fsi->FSIOper()->meshMotion().updateDispDiff();
-                    initSolSVel->Export(initSolidV->getEpetraVector(), Zero);
+                    initSolSVel.reset(new vector_type(*initSolidV, Unique, Zero));
                     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
                     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
                     M_fsi->initialize(initSol);
