@@ -115,8 +115,8 @@ FSIOperator::solid_bchandler_type BCh_monolithicRobin(FSIOperator &_oper)
     BCFunctionBase young (E);
 
     //robin condition on the outer wall
-    //_oper.setMixteOuterWall(hyd, young);
-    //    BCh_solid->addBC("OuterWall", OUTERWALL, Mixte, Normal, _oper.bcfMixteOuterWall());
+    _oper.setMixteOuterWall(hyd, young);
+    BCh_solid->addBC("OuterWall", OUTERWALL, Mixte, Normal, _oper.bcfMixteOuterWall());
 
     return BCh_solid;
 }
