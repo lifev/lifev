@@ -622,10 +622,12 @@ Monolithic::evalResidual( vector_type&       res,
 
             M_rhsFull.reset(new vector_type(*M_rhs));
 
+            M_BCh_flux->setOffset(M_offset-M_fluxes);
             if ( !M_BCh_flux->bdUpdateDone() )
                 M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
             bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
 
+            M_BCh_Robin->setOffset(M_offset);
             if ( !M_BCh_Robin->bdUpdateDone() )
                 M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
             bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
@@ -1122,8 +1124,8 @@ void Monolithic::initialize( FSIOperator::fluid_type::value_type::Function const
     vector_type d(M_dFESpace->map());
     M_dFESpace->interpolate(d0, d, M_dataSolid->getTime());
 
-    vector_type w(M_dFESpace->map());
-    M_dFESpace->interpolate(w0, w, M_dataSolid->getTime());
+    //vector_type w(M_dFESpace->map());
+    //M_dFESpace->interpolate(w0, w, M_dataSolid->getTime());
 
     initialize(u, p, d);
     //fluid().initialize(u0,p0);
@@ -1138,6 +1140,7 @@ void Monolithic::initialize( const vector_type& u0, const vector_type& p0, const
     //  M_bdf->initialize_unk(*M_un);
 }
 
+#ifdef HAVE_TRILINOS_ANASAZI
 void Monolithic::computeMaxSingularValue()
 {
      typedef Epetra_Operator                                                operator_type;
@@ -1178,21 +1181,97 @@ void Monolithic::computeMaxSingularValue()
          }
 
 }
+#endif
+
+namespace
+{
+    static Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+    {return 0.;}
+    static Real fOne(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+    {return 1.;}
+}
+
+void Monolithic::enableWssComputation(EntityFlag flag)
+{
+    M_BChWSS.reset(new solid_bchandler_raw_type());
+    BCFunctionBase bcfZero(fZero);
+    BCFunctionBase bcfOne(fOne);
+    M_bcfWss.setFunctions_Mixte(bcfOne,bcfOne);
+
+    M_BChWSS->addBC("WSS", (EntityFlag) flag, Mixte, Full, M_bcfWss, 3);
+}
 
 boost::shared_ptr<EpetraVector> Monolithic::computeWS()
 {
-    M_wss.reset(new vector_type(M_dFESpace->map()));//on solid
+
+    //M_BChWSS->setOffset(M_offset);
+    M_bdMass.reset(new matrix_type(*M_monolithicMap));
+    if ( !M_BChWSS->bdUpdateDone() )
+        M_BChWSS->bdUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    bcManageMatrix(*M_bdMass, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BChWSS, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+    M_bdMass->GlobalAssemble();
+    M_bdMass->spy("bdMass");
+    M_wss.reset(new vector_type(M_uFESpace->map()/**M_monolithicMap*/));//on solid
     vector_type lambda(M_monolithicInterfaceMap);
+    matrix_ptrtype bdMatrix(new matrix_type(M_monolithicInterfaceMap));
+    std::vector<Real>  row(200);
+    std::vector<int>   indices(200);
+    int    numEntries;
     lambda.subset(*M_un, M_solidAndFluidDim);
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
+    UInt fluidDim=M_uFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
+    int col=0;
+    vector_type numerationInterfaceRep=vector_type(M_interfaceMap, Repeated);
+    numerationInterfaceRep = *M_numerationInterface;
+    int rank=M_epetraComm->NumProc();
+
+    for(ID dim=0; dim<nDimensions; ++dim)
+        for(ITrow=locDofMap.begin(); ITrow!=locDofMap.end(); ++ITrow)
+            {
+                if(M_interfaceMap.getMap(Unique)->LID(ITrow->second/* + dim*fluidDim*/) >= 0 )
+                    {
+                        M_bdMass->getEpetraMatrix().ExtractGlobalRowCopy((int)(ITrow->first+dim*fluidDim), 200, numEntries, &(row[0]), &(indices[0]));
+                                //std::vector<int> idCol;
+                        if(numEntries==0){std::cout<<"ERROR on row "<<ITrow->first+dim*fluidDim<<"that is "<<numerationInterfaceRep[ITrow->second]<<std::endl;}
+                        for (ID k=0; k<numEntries; ++k)
+                            {
+                                std::map<ID, ID>::const_iterator itInterface=locDofMap.find(indices[k]-dim*fluidDim);
+                                int itIn=indices[k]-dim*fluidDim;
+                                if((locDofMap.find(itIn))->second)
+                                    {
+                                        col=(numerationInterfaceRep)((locDofMap.find(itIn))->second)+dim*M_interface-1;
+                                        bdMatrix->set_mat_inc((numerationInterfaceRep)(ITrow->second)+dim*M_interface-1, col, row[k] );
+                                        bdMatrix->set_mat_inc(col, (numerationInterfaceRep)(ITrow->second)+dim*M_interface-1,  row[k] );
+                                    }
+                            }
+                        //bdMatrix->set_mat_inc(1, numEntries, (*M_numerationInterface)(ITrow->second)+dim*M_interface, idCol, row);
+                    }
+            }
+    bdMatrix->GlobalAssemble();
+    bdMatrix->spy("bdMatr");
+    solver_type solverMass(*M_epetraComm);
+    solverMass.setDataFromGetPot( M_dataFile, "solid/solver" );
+    solverMass.setUpPrec(M_dataFile, "solid/prec");//to avoid if we have already a prec.
+
+    boost::shared_ptr<IfpackPreconditioner> P(new IfpackPreconditioner());
+
+    vector_ptrtype sol(new vector_type(M_monolithicInterfaceMap));
+    solverMass.setMatrix(*bdMatrix);
+    int numIter = solverMass.solveSystem( lambda, *sol, bdMatrix, false);
+    std::cout<<"lambda : "<< lambda.NormInf()<<std::endl;
+    std::cout<<"sol : "<< sol->NormInf()<<std::endl;
     UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
     for(ID dim=0; dim<nDimensions; ++dim)
         for(ITrow=locDofMap.begin(); ITrow!=locDofMap.end(); ++ITrow)
             {
-                (*M_wss)[ITrow->second+dim*solidDim]=lambda((*M_numerationInterface)(ITrow->second)+dim*M_interface);
+                if(M_uFESpace->map().getMap(Unique)->LID(ITrow->first /*+ dim*solidDim*/) >= 0)
+                    {
+                        (*M_wss)[ITrow->first+dim*fluidDim]=(*sol)((*M_numerationInterface)(ITrow->second)+dim*M_interface);
+                    }
             }
+    std::cout<<"ws : "<< M_wss->NormInf()<<std::endl;
     return M_wss;
 }
 namespace

@@ -20,6 +20,11 @@
  * \file Monolithic.hpp
  * \author Paolo Crosetto
  * \date 13-09-2008
+ * Class handling the monolithic solver for FSI problems. The block structure of the matrix is
+ *$\left(\begin{array}{cc}
+ *C&B
+ *D&N
+ *\end{array}\right)$
  */
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
@@ -33,6 +38,17 @@
 
 namespace LifeV
 {
+/**
+ * Class handling the monolithic solver for FSI problems. The block structure of the matrix is
+ *\f$\left(\begin{array}{cc}
+ C&B\\
+ D&N
+ \end{array}\right)\f$
+ * where \f$N\f$ represents the solid block, \f$C\f$ the fluid block, while the extra
+ * diagonal blocks represent the coupling. The implementation of the stress continuity coupling condition
+ * is obtained by means of an augmented formulation.
+ * Different possible preconditioners are implemented.
+*/
 class Monolithic : public FSIOperator
 {
 public:
@@ -71,28 +87,29 @@ public:
        \param _muk: output, solution at the current Newton step
        \param _res: nonlinear residual
        \param _linearRelTol: not used
-       The preconditioner type is usually an algebraic additive Schwarz. The following values
+
+       \small The preconditioner type is usually an algebraic additive Schwarz. The following values
        assigned to the field DDBlockPrec in the data file correspond to different variants:
 
-       DDBlockPrec = 0 is AAS on a the system matrix. Can give problem in parallel, we suggest to use DDBlockPrec = 2 instead
-       DDBlockPrec = 2 is AAS on a the system matrix, where the system is left-premultiplied times a preconditioner
+       - DDBlockPrec = 0 is AAS on a the system matrix. Can give problem in parallel, we suggest to use DDBlockPrec = 2 instead
+       - DDBlockPrec = 2 is AAS on a the system matrix, where the system is left-premultiplied times a preconditioner
        that mix the interface boundary conditions
-       DDBlockPrec = 3 only for testing purposes
-       DDBlockPrec = 4 only for testing purposes
-       DDBlockPrec = 5 no preconditioner is set (if you use the native Aztecoo preconditioners set this option)
+       - DDBlockPrec = 3 only for testing purposes
+       - DDBlockPrec = 4 only for testing purposes
+       - DDBlockPrec = 5 no preconditioner is set (if you use the native Aztecoo preconditioners set this option)
 
        Only for the Monolithic Geometry-Convective Explicit:
-       DDBlockPrec = 1 is AAS on a Dirichlet-Neumann preconditioner
-       DDBlockPrec = 7 is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
-       DDBlockPrec = 8 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = 1 is AAS on a Dirichlet-Neumann preconditioner
+       - DDBlockPrec = 7 is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = 8 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
 
        Only for the fullMonolithic Convective Explicit:
-       DDBlockPrec = 6 is AAS on the quasi-newton matrix
-       DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy
-       DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy
-       DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy, composing
+       - DDBlockPrec = 6 is AAS on the quasi-newton matrix
+       - DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy
+       - DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy
+       - DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy, composing
        3 preconditioners
-       DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, composing
+       - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, composing
        3 preconditioners
     */
     virtual void   solveJac(vector_type&       _muk,
@@ -216,9 +233,23 @@ public:
 
     prec_raw_type & getPrec(){return *M_precPtr;}
 
+#ifdef HAVE_TRILINOS_ANASAZI
+    /**
+       \small Computes the maximum singular value of the preconditioned system \f$P^-1A\f$ where \f$P\f$ is an
+       instance of ComposedPreconditioner and \f$A\f$ is the system matrix.
+     */
     void computeMaxSingularValue();
-
+#endif
+    /**
+       \small Computes the wall shear stress. Some issues when working in parallel still has to be fixed.
+     */
     vector_ptrtype computeWS();
+
+    /**
+       \small Enables the computation of the wall shear stress on the specified boundary.
+       \param flag : flag specifying the boundary of interest.
+     */
+    void enableWssComputation(EntityFlag flag);
 
     vector_ptrtype WS( )
     {
@@ -370,6 +401,9 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec
     fluid_bchandler_type                              M_BCh_flux;
     solid_bchandler_type                              M_BCh_Robin;
     UInt                                              M_fluxes;
+    solid_bchandler_type                              M_BChWSS;
+    matrix_ptrtype                                    M_bdMass;
+    BCFunctionMixte                                   M_bcfWss;
 
 private:
 
