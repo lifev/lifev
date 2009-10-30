@@ -35,7 +35,7 @@
 // #endif
 
 
-// #ifdef  HAVE_TRILINOS_ANASAZI
+#ifdef  HAVE_TRILINOS_ANASAZI
 
 
 #ifndef EIGENSOLVER_HPP
@@ -126,4 +126,4 @@ public:
 
 }
 #endif
-//#endif
+#endif
