@@ -31,7 +31,7 @@
 
 #include <lifemc/lifealg/eigenSolver.hpp>
 
-// #ifndef HAVE_TRILINOS_ANASAZI
+ #ifndef HAVE_TRILINOS_ANASAZI
 // #warning: you should use ANASAZI
 // #else
 
@@ -110,4 +110,4 @@ EigenSolver
      return MySolver->solve();
  }
 }
-//#endif
+#endif
