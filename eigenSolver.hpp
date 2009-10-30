@@ -34,6 +34,7 @@
 
 // #endif
 
+#include <lifeconfig.h>
 
 #ifdef  HAVE_TRILINOS_ANASAZI
 

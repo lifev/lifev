@@ -27,11 +27,9 @@
    \date 2009-03-25
  */
 
-//#include <life/lifecore/GetPot.hpp>
-
 #include <lifemc/lifealg/eigenSolver.hpp>
 
- #ifndef HAVE_TRILINOS_ANASAZI
+#ifdef HAVE_TRILINOS_ANASAZI
 // #warning: you should use ANASAZI
 // #else
 
