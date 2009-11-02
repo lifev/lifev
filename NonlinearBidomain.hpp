@@ -69,7 +69,11 @@ public:
     typedef DataBidomain<Mesh> data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-                                 const Real&, const ID& );
+                               const Real&, const ID& );
+
+  //typedef boost::function<Real ( const Real&, const Real&, const Real&,
+  //                               const Real&, const ID& )> Function; 
+  
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const ID& )> source_type;
 
@@ -429,7 +433,8 @@ void NonlinearBidomain<Mesh, SolverType>::buildSystem()
     Chrono chronoStiffAssemble;
     Chrono chronoMassAssemble;
     Chrono chronoZero;
-
+    
+    // vector with repeated nodes over the processors
     vector_type M_sol_uRep(M_sol_u, Repeated );
 
     M_comm->Barrier();
@@ -546,7 +551,7 @@ void NonlinearBidomain<Mesh, SolverType>::buildSystem()
         	}
          }
          chronoMassAssemble.stop();
-	 //	cout << "  f-  atrix assembled ...        ";
+	
     }
 	
 if (M_CalCoef)
