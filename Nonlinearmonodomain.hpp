@@ -48,11 +48,12 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <lifemc/lifesolver/dataMonodomain.hpp>
+#include <life/lifesolver/dataMonodomain.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include "testsuite/test_heart/stiffness_fibers.hpp"
-
+#include "testsuite/test_elecmech/stiffness_fibers_NL.hpp"
+#include <life/lifefem/bdf_template.hpp>
+#include <fstream>
 namespace LifeV
 {
 /*!
@@ -64,8 +65,8 @@ namespace LifeV
 
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
-class Nonlinearmonodomain
+          typename SolverType = LifeV::SolverTrilinos >
+class Nonlinearmonodomain 
 {
 
 public:
@@ -138,7 +139,7 @@ public:
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
 
-    const vector_type& fiber_vector() const {return M_fiber_vector;}
+     const vector_type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local residual vector
     const vector_type& residual() const {return M_residual;}
@@ -220,7 +221,7 @@ protected:
 
     //! Local fibers vector
     //!****************************************************
-  /*  vector_type                    M_fiber_vector; */
+    vector_type                    M_fiber_vector; 
 
     //! residual
     vector_type                    M_residual;
@@ -248,6 +249,8 @@ protected:
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
 
+
+
 private:
 
     //! Elementary matrices
@@ -264,13 +267,14 @@ private:
 // IMPLEMENTATION
 // ************************************************
 
+
 //! Constructors
 template<typename Mesh, typename SolverType>
 Nonlinearmonodomain<Mesh, SolverType>::
 Nonlinearmonodomain( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& uFESpace,
-       BCHandler&                BCh_u,
-       Epetra_Comm&              comm ):
+		     FESpace<Mesh, EpetraMap>& uFESpace,
+		     BCHandler&                BCh_u,
+		     Epetra_Comm&              comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_BCh_electric           ( &BCh_u ),
@@ -278,7 +282,7 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_localMap               ( M_uFESpace.map() ),
     M_localMapVec              (M_localMap+M_localMap+M_localMap),
     M_matrMass               ( ),
@@ -288,7 +292,7 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
     M_rhsNoBC                ( M_localMap ),
     M_sol_u                  ( M_localMap ),
-    //M_fiber_vector           ( getRepeatedEpetraMapVec() ),
+    M_fiber_vector           ( M_localMapVec, Repeated ),
     M_residual               ( M_localMap ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
@@ -296,29 +300,47 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
+{ 
 
-/*{
-	if (M_data.has_fibers() )
-	    {
-	    	std::stringstream MyPID;
-	        ifstream fibers(M_data.fibers_file().c_str());
+}
 
-	        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
-	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
-	        std::vector<Real> fiber_global_vector(NumGlobalElements);
 
-	        for( UInt i=0; i< NumGlobalElements; ++i)
-	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
-	    	for(UInt j=0; j< NumMyElements; ++j)
-	    	{
-	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
-	    		}
-	    	std::cout << std::endl;
-	    	fiber_global_vector.clear();
-	    }
-};*/
+template<typename Mesh, typename SolverType>
+Nonlinearmonodomain<Mesh, SolverType>::
+Nonlinearmonodomain( const data_type&          dataType,
+		     FESpace<Mesh, EpetraMap>& uFESpace,
+		     Epetra_Comm&              comm ):
+    M_data                   ( dataType ),
+    M_uFESpace               ( uFESpace ),
+    M_setBC                  ( false ),
+    M_comm                   ( &comm ),
+    M_me                     ( M_comm->MyPID() ),
+    M_linearSolver           ( ),
+    M_prec                   ( new prec_raw_type() ),
+    M_localMap               ( M_uFESpace.map() ),
+    M_matrMass               ( ),
+    M_matrStiff	             ( ),
+    M_matrNoBC               ( ),
+    M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
+    M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
+    M_rhsNoBC                ( M_localMap ),
+    M_sol_u                  ( M_localMap ),
+    M_fiber_vector           (M_localMapVec, Repeated),
+    M_residual               ( M_localMap ),
+    M_verbose                ( M_me == 0),
+    M_updated                ( false ),
+    M_reusePrec              ( true ),
+    M_resetPrec              ( true ),
+    M_maxIterSolver          ( -1 ),
+    M_recomputeMatrix        ( false )
+{ 
+
+}
+
+
+
+
+
 
 template<typename Mesh, typename SolverType>
 Nonlinearmonodomain<Mesh, SolverType>::
@@ -338,6 +360,11 @@ void Nonlinearmonodomain<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_linearSolver.setDataFromGetPot( dataFile, "electric/solver" );
 
     M_maxIterSolver = dataFile( "electric/solver/max_iter", -1);
+
+    std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
+
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_prec.get() != 0, "Nonlinearmonodomain : Preconditioner not set");   
 
     M_prec->setDataFromGetPot( dataFile, "electric/prec" );
 }
@@ -362,6 +389,9 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
     Chrono chronoMassAssemble;
     Chrono chronoZero;
 
+    // vector with repeated nodes over the processors
+    vector_type M_sol_uRep(M_sol_u, Repeated );
+
     M_comm->Barrier();
 
     chrono.start();
@@ -385,28 +415,28 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
         chronoZero.stop();
         chronoStiff.start();
 
-        switch(M_data.heart_diff_fct() )
-        {
-	         case 0:     //  seems like the usual case
-        		M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-               		stiff( M_data.D(), M_elmatStiff,  M_uFESpace.fe(), 0, 0 );
-        	        break;
+        //switch(M_data.heart_diff_fct() )
+        //{
+	//         case 0:     //  the usual case
+	M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
+	stiffNL( M_sol_uRep, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+			//		break;
 
-	case 1: // reduced conductivity on a sphere
-        		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	        stiff( M_data.red_sigma_sphere, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-        		break;
-
-	case 2: // cylinder
-        	        M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	        stiff( M_data.red_sigma_cyl, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-        	        break;
-
-	case 3: // box
-        	        M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	        stiff( M_data.red_sigma_box, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-        	        break;
-        }
+	// case 1: // reduced conductivity on a sphere
+	//         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
+	//         	        stiff( M_data.red_sigma_sphere, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+	//         		break;
+	
+	// 	case 2: // cylinder
+	//         	        M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
+	//         	        stiff( M_data.red_sigma_cyl, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+	//         	        break;
+	
+	// 	case 3: // box
+	//         	        M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
+	//         	        stiff( M_data.red_sigma_box, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+	//         	        break;
+	//         }
         chronoStiff.stop();
 
         chronoMass.start();
@@ -716,7 +746,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_type
 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
-                 M_data.time() );
+                 M_data.getTime() );
 
    // rhs = rhsFull;
 
