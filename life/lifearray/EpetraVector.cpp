@@ -31,6 +31,7 @@
  */
 
 #include <life/lifearray/EpetraVector.hpp>
+#include <EpetraExt_MultiVectorOut.h>
 
 namespace LifeV {
 
@@ -408,14 +409,9 @@ EpetraVector::Dot( const EpetraVector& vector, data_type& scalarProduct )
 void EpetraVector::spy( std::string const &filename ) const
 {
     // Purpose: Matlab dumping and spy
-    std::string name = filename;
+    std::string nome = filename, uti = " , ";
 
-    EpetraVector redVec(*this, 0); // reduced vector (all at proc 0)
-
-
-    int  me    = redVec.M_epetraVector.Comm().MyPID();
-
-    if (me) return; // do not need other CPUs now
+     int  me    = M_epetraVector.Comm().MyPID();
 
     //
     // check on the file name
@@ -423,30 +419,9 @@ void EpetraVector::spy( std::string const &filename ) const
 
     std::ostringstream myStream;
     myStream << me;
+    nome = filename + ".m";
 
-    name = filename + ".m";
-
-    std::ofstream file_out( name.c_str() );
-    ASSERT( file_out, "Error: Output Vector (Values) file cannot be open" );
-
-
-    file_out << filename << " =  [";
-
-    int           NumEntries = redVec.M_epetraVector.GlobalLength ();
-    const double* Values     = redVec.M_epetraVector[0];
-    const int*    Index      = redVec.BlockMap().MyGlobalElements();
-
-    for (int i = 0; i < NumEntries; i++)
-    {
-        file_out.width(20);
-        file_out << Index[i] << " ";
-        file_out << Values[i];
-        file_out << "\n";
-    }
-
-
-    file_out << "];" << std::endl;
-
+    EpetraExt::MultiVectorToMatlabFile(nome.c_str(), M_epetraVector);
 }
 
 void EpetraVector::ShowMe( std::ostream& output ) const

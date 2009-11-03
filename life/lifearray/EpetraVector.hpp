@@ -169,6 +169,12 @@ public:
     void MinValue  ( double& res ) const;
     void MaxValue  ( double& res ) const;
 
+    //! spy - save the values of the matrix into a file
+    /*!
+     * \param filename - File where to save the EpetraVector
+     *
+     * To read the file in Matlab type load filename;
+     */
     void spy( std::string const &filename ) const;
 
     void ShowMe( std::ostream& output = std::cout ) const;
