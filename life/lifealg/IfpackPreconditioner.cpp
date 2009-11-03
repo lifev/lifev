@@ -64,15 +64,14 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
 int
 IfpackPreconditioner::buildPreconditioner(operator_type& oper)
 {
-    M_Oper = oper;
+    M_Oper = oper->getMatrixPtr();
 
     M_overlapLevel = this->M_List.get("overlap level", -1);
     M_precType     = this->M_List.get("prectype", "Amesos");
 
     Ifpack factory;
 
-    //    M_Prec
-    M_Prec.reset(factory.Create(M_precType, &M_Oper->getEpetraMatrix(), M_overlapLevel));
+    M_Prec.reset(factory.Create(M_precType, M_Oper.get(), M_overlapLevel));
 
     //    M_Prec.reset(new prec_type(&A.getEpetraMatrix(), OverlapLevel));
     if ( !M_Prec.get() )

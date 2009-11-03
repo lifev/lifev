@@ -113,7 +113,6 @@ public:
     void                    setList(Teuchos::ParameterList list);
     const Teuchos::ParameterList& getList() const;
     const int getOverlapLevel() const;
-    const operator_type& getOper() const;
 
 protected:
 
@@ -121,7 +120,7 @@ protected:
 
     int                     M_overlapLevel;
 
-    operator_type           M_Oper;
+    operator_raw_type::matrix_ptrtype   M_Oper;
 
     Teuchos::ParameterList  M_List;
 

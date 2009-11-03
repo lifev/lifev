@@ -85,7 +85,8 @@ void SolverTrilinos::SetCommunicator( const Epetra_Comm& comm )
 
 void SolverTrilinos::setMatrix( matrix_type& m)
 {
-    M_solver.SetUserMatrix(&m.getEpetraMatrix());
+    M_matrix = m.getMatrixPtr();
+    M_solver.SetUserMatrix(M_matrix.get());
 }
 
 void SolverTrilinos::setOperator( Epetra_Operator& op)

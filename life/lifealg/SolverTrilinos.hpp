@@ -219,17 +219,18 @@ public:
 
 private:
 
-    prec_type              M_prec;
+    matrix_type::matrix_ptrtype M_matrix;
+    prec_type                   M_prec;
 
-    AztecOO                M_solver;
+    AztecOO                     M_solver;
 
-    Teuchos::ParameterList M_TrilinosParameterList;
-    Displayer              M_Displayer;
+    Teuchos::ParameterList      M_TrilinosParameterList;
+    Displayer                   M_Displayer;
 
-    int                    M_maxIter;
-    double                 M_tol;
-    int                    M_maxIterSolver;
-    int                    M_maxIterForReuse;
+    int                         M_maxIter;
+    double                      M_tol;
+    int                         M_maxIterSolver;
+    int                         M_maxIterForReuse;
 };
 
 template<typename PrecType>

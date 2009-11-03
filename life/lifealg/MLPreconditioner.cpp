@@ -76,9 +76,9 @@ int
 MLPreconditioner::buildPreconditioner(operator_type& oper)
 {
 
-    M_Oper = oper;
+    M_Oper = oper->getMatrixPtr();
 
-    M_Prec.reset(new prec_raw_type(M_Oper->getEpetraMatrix(), this->getList(), true));
+    M_Prec.reset(new prec_raw_type(*M_Oper, this->getList(), true));
 
     if (M_analyze)
         {

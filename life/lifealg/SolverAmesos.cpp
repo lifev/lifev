@@ -58,8 +58,7 @@ namespace LifeV
 
 SolverAmesos::SolverAmesos(Epetra_Comm& comm)
     :
-        //    M_prec                 (),
-        //M_matrix               (),
+    M_matrix               (),
     M_factory              (),
     M_problem              (),
     M_TrilinosParameterList(),
@@ -97,22 +96,14 @@ SolverAmesos::TrueResidual()
 
 void SolverAmesos::setMatrix(matrix_type& m)
 {
-    //    m.getEpetraMatrix().FillComplete();
-    M_problem.SetOperator(&m.getEpetraMatrix());
+    M_matrix = m.getMatrixPtr();
+    M_problem.SetOperator(M_matrix.get());
 }
 
 void SolverAmesos::setOperator( Epetra_Operator& op)
 {
-
-    //M_factory.SetUserOperator(&op);
+    ASSERT(false,"SolverAmesos::setOperator: not coded");
 }
-
-//! set Epetra_Operator preconditioner
-// void SolverAmesos::setPreconditioner( prec_type _prec )
-// {
-//     //M_prec = _prec;
-//     return;
-// }
 
 
 void SolverAmesos::SetParameters(bool cerr_warning_if_unused)
@@ -241,8 +232,6 @@ SolverAmesos::computeResidual( vector_type& x, vector_type& b )
     vector_type Ax(x.getMap());
     vector_type res(b);
 
-    //M_matrix->getEpetraMatrix().Apply(x.getEpetraVector(),Ax.getEpetraVector());
-
     res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
 
     double residual;
@@ -294,15 +283,9 @@ int SolverAmesos::solveSystem(  vector_type&      rhsFull,
 
     Amesos_BaseSolver* Solver;
 
-
-    //std::cout << M_problem.GetOperator().FillComplete() << std::end;
-    //Epetra_LinearProblem Problem();
-    //&M_matrix->getEpetraMatrix(), &rhsFull.getEpetraVector(), &sol.getEpetraVector());
-
     M_problem.SetLHS(&sol.getEpetraVector());
     M_problem.SetRHS(&rhsFull.getEpetraVector());
 
-    //std::string SolverType = "Klu";
     Solver = M_factory.Create(M_solverType, M_problem);
 
     if (Solver == 0) {

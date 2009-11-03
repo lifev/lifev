@@ -22,9 +22,6 @@
 #include "life/lifearray/EpetraVector.hpp"
 #include "life/lifearray/EpetraMatrix.hpp"
 
-// #include "life/lifealg/EpetraPreconditioner.hpp"
-// #include "life/lifealg/IfpackPreconditioner.hpp"
-
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/displayer.hpp>
 
@@ -163,19 +160,16 @@ public:
 
 private:
 
-    //prec_type              M_prec;
-    //matrix_ptrtype         M_matrix;
+    matrix_type::matrix_ptrtype  M_matrix;
 
     Amesos                 M_factory;
 
     Epetra_LinearProblem   M_problem;
-    //Amesos                M_solver;
 
     std::string            M_solverType;
     Teuchos::ParameterList M_TrilinosParameterList;
-    //Teuchos::ParameterList M_timingsList;
 
-
+    // Teuchos::ParameterList M_timingsList;
     // timing variable
 
     double                 M_sfact_time;
@@ -208,7 +202,6 @@ private:
 
 };
 
-// } // namespace Epetra
 } // namespace LifeV
 
 #endif /* __SolverAmesos_H */
