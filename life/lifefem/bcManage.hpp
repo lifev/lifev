@@ -66,6 +66,11 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
                const DataType& t, VectorType& U )
 {
     VectorType bRepeated(b.getMap(),Repeated);
+
+    // triad is the triple (\tau_1, \tau_2, n)
+    //(cf Gwenol Grandperrin Master Thesis)
+    std::map< ID,vector< Real > > triad;
+
     bool globalassemble=false;
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
@@ -185,35 +190,61 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
 
     VectorType bRepeated(b.getMap(),Repeated);
     bool globalassemble=false;
+
+    // triad is the triple (\tau_1, \tau_2, n)
+    //(cf Gwenol Grandperrin Master Thesis)
+    std::map< ID,vector< Real > > triad;
+
+    // changingBasis is a bool to see if we need to change the local reference system
+    bool changingBasis=false;
+
+
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
+    {
+        // std::cout << i << " " << BCh[i].type() << " " << Flux << std::endl;
+	    switch ( BCh[ i ].type() )
         {
-//             std::cout << i << " " << BCh[i].type() << " " << Flux << std::endl;
-            switch ( BCh[ i ].type() )
-                {
-                case Essential:  // Essential boundary conditions (Dirichlet)
-                    globalassemble=true;
-                    break;
-                case Natural:  // Natural boundary conditions (Neumann)
-                    bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset());
-                    break;
-                case Mixte:  // Mixte boundary conditions (Robin)
-                    bcMixteManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
-                    break;
-                case Flux:
-                    bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+BCh[i].offset());
-                    break;
+		case Essential:  // Essential boundary conditions (Dirichlet)
+		    //Normal (or Tangential) essential boundary conditions
+		    if ( (BCh[ i ].mode() == Tangential) || (BCh[ i ].mode() == Normal) )
+            {
+		        bcBuildTriad(mesh, BCh[ i ],bdfem, triad,BCh.offset());
+                changingBasis=true;
+			}
+		    globalassemble=true;
+		    break;
+		case Natural:  // Natural boundary conditions (Neumann)
+		    bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset());
+		    break;
+		case Mixte:  // Mixte boundary conditions (Robin)
+		    bcMixteManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+		    break;
+        case Flux:
+            bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+BCh[i].offset());
+            break;
 		case Resistance: // Resistance boundary conditions (Resistance)
-                    bcResistanceManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
-                    break;
-                default:
-                    ERROR_MSG( "This BC type is not yet implemented" );
-                }
+            bcResistanceManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+		    break;
+		default:
+            ERROR_MSG( "This BC type is not yet implemented" );
         }
+    }
+
     bRepeated.GlobalAssemble();
     b += bRepeated;
     if(globalassemble)
         A.GlobalAssemble();
+
+    // Rotation Matrix for the local change of reference system
+    MatrixType rotMat( createRMatrix(dof, A, triad,BCh.offset()) );
+
+    //Applying the basis changement
+    if( changingBasis )
+    {
+        // MatrixType rotMat( createRMatrix(dof, A, triad,BCh.offset()) );
+        bcShiftToNormalTangentialCoordSystem(A, b, rotMat);
+	}
 
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
@@ -231,7 +262,15 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
                 }
-        }
+	}
+
+    //Return back to the initial basis
+    if ( changingBasis )
+    {
+        bcShiftToCartesianCoordSystem(A, b, rotMat);
+        //A.removeZeros();
+	}
+
 }
 
 
@@ -256,6 +295,7 @@ void bcManageMatrix( MatrixType&      A,
                 {
                 case Essential:  // Essential boundary conditions (Dirichlet)
                     globalassemble=true;
+                    break;
                 case Natural:  // Natural boundary conditions (Neumann)
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
@@ -2095,91 +2135,485 @@ void bcFluxManage( MatrixType&     A,
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
- 
-  // Number of local Dof in this face
-  UInt nDofF = bdfem.nbNode;
-  
-  // Number of total scalar Dof
-  UInt totalDof = dof.numTotalDof();
-  
-  // Number of components involved in this boundary condition
-  UInt nComp = BCb.numberOfComponents();
-  
-  DataType sum;
-  
-  const IdentifierNatural* pId;
-  ID ibF, idDof, jdDof, kdDof;
-  
-  if ( BCb.dataVector() )
+
+    // Number of local Dof in this face
+    UInt nDofF = bdfem.nbNode;
+
+    // Number of total scalar Dof
+    UInt totalDof = dof.numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = BCb.numberOfComponents();
+
+    DataType sum;
+
+    const IdentifierNatural* pId;
+    ID ibF, idDof, jdDof, kdDof;
+
+    if ( BCb.dataVector() )
     {
-      //auxiliary vector 
-      VectorType vv(b.getMap(), Repeated);
-      
-      DataType  mbcb;
-      
-      // Loop on BC identifiers
-      for ( ID i = 1; i <= BCb.list_size(); ++i )
-	{
-	  // Pointer to the i-th identifier in the list
-	  pId = static_cast< const IdentifierNatural* >( BCb( i ) );
-	  
-	  // Number of the current boundary face
-	  ibF = pId->id();
-	 
-	  bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) ); 
-	  
-	  // Loop on total Dof per Face
-	  for ( ID idofF = 1; idofF <= nDofF; ++idofF )
-	    {  
-	      // Loop on components involved in this boundary condition
-	      for ( ID j = 1; j <= nComp; ++j )
-		{
-		  idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
-		  
-		  // Loop on quadrature points
-		  for ( int l = 0; l < bdfem.nbQuadPt; ++l )
-		    {
-		      vv[idDof] += bdfem.phi( int( idofF-1 ), l ) *  bdfem.normal( int( j-1 ), l ) * bdfem.weightMeas( l );
+        //auxiliary vector
+        VectorType vv(b.getMap(), Repeated);
 
-		      mbcb=0;
+        DataType  mbcb;
 
-		      // data on quadrature point
-		      for( ID n = 1; n <= nDofF; ++n)
-			{
-			  kdDof=pId->bdLocalToGlobal( n ); 
-			  mbcb += BCb( kdDof, BCb.component( j ) )* bdfem.phi( int( n - 1 ), l ) ;
-			}
+        // Loop on BC identifiers
+        for ( ID i = 1; i <= BCb.list_size(); ++i )
+        {
+            // Pointer to the i-th identifier in the list
+            pId = static_cast< const IdentifierNatural* >( BCb( i ) );
 
-	  	        b[ idDof ] +=  mbcb* bdfem.phi( int( idofF - 1 ), l ) *  bdfem.normal( int( j-1 ), l ) * // BASEINDEX + 1
-			           bdfem.weightMeas( l );  
-	  	     
-		    }
-		}
-	    }
-	}
+            // Number of the current boundary face
+            ibF = pId->id();
 
-      for ( UInt jj = 1; jj <= BCb.list_size_IdGlobal() ; jj++ )
-	{
-	  for ( UInt  j= 1; j <= nComp; ++j)
-	    {
-	      jdDof = BCb.IdGlobal( jj )  + ( BCb.component( j ) - 1 ) * totalDof + offset; 
-	      
-	      for (UInt kk = 1; kk <= BCb.list_size_IdGlobal() ; kk++) 
-		{
-		  for ( UInt k = 1; k <= nComp; ++k)
-		    { 
-		      kdDof = BCb.IdGlobal( kk )  + ( BCb.component( k ) - 1 ) * totalDof + offset;
-		      A.set_mat_inc( jdDof - 1,  kdDof - 1, BCb.resistanceCoef() * vv[jdDof] * vv[kdDof] );
-		    }
-		}
-	    }
-	}
+            bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+
+            // Loop on total Dof per Face
+            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            {
+                // Loop on components involved in this boundary condition
+                for ( ID j = 1; j <= nComp; ++j )
+                {
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+
+                    // Loop on quadrature points
+                    for ( int l = 0; l < bdfem.nbQuadPt; ++l )
+                    {
+                        vv[idDof] += bdfem.phi( int( idofF-1 ), l ) *  bdfem.normal( int( j-1 ), l ) * bdfem.weightMeas( l );
+
+                        mbcb=0;
+
+                        // data on quadrature point
+                        for( ID n = 1; n <= nDofF; ++n)
+                        {
+                            kdDof=pId->bdLocalToGlobal( n );
+                            mbcb += BCb( kdDof, BCb.component( j ) )* bdfem.phi( int( n - 1 ), l ) ;
+                        }
+
+                        b[ idDof ] +=  mbcb* bdfem.phi( int( idofF - 1 ), l ) *  bdfem.normal( int( j-1 ), l ) * // BASEINDEX + 1
+                            bdfem.weightMeas( l );
+
+                    }
+                }
+            }
+        }
+
+        for ( UInt jj = 1; jj <= BCb.list_size_IdGlobal() ; jj++ )
+        {
+            for ( UInt  j= 1; j <= nComp; ++j)
+            {
+                jdDof = BCb.IdGlobal( jj )  + ( BCb.component( j ) - 1 ) * totalDof + offset;
+
+                for (UInt kk = 1; kk <= BCb.list_size_IdGlobal() ; kk++)
+                {
+                    for ( UInt k = 1; k <= nComp; ++k)
+                    {
+                        kdDof = BCb.IdGlobal( kk )  + ( BCb.component( k ) - 1 ) * totalDof + offset;
+                        A.set_mat_inc( jdDof - 1,  kdDof - 1, BCb.resistanceCoef() * vv[jdDof] * vv[kdDof] );
+                    }
+                }
+            }
+        }
 
     }
     else
-    ERROR_MSG( "This BC type is not yet implemented" );
+        ERROR_MSG( "This BC type is not yet implemented" );
 
 }
 
+// ===================================================
+// Defining boundary conditions on the normal and
+// the tangential directions
+// Author:	Gwenol Grandperrin
+// Date:	23.09.09
+// ===================================================
+
+template <typename MeshType>
+void bcCalculateNormals(const MeshType& mesh,CurrentBdFE& bdfem,
+						std::map< ID,vector< Real > > &triad)
+
+{
+    // Author:	Gwenol Grandperrin
+    // Date:	23.09.09
+    //
+    // This function calculate the normal vectors
+    // and store the component in the triad vector
+
+    //-----------------------------------------------------
+    // STEP 1: Calculating the normals
+    //-----------------------------------------------------
+
+    //Loop on the Faces
+    for ( UInt iFace = 1; iFace<= mesh.numBElements(); ++iFace )
+    {
+        //Update the bdfem with the face data
+        bdfem.updateMeasNormalQuadPt( mesh.bElement( iFace ) );
+        UInt nDofF = bdfem.nbNode;
+
+        //For each node on the face
+        for (UInt icheck = 1; icheck<= nDofF; ++icheck)
+        {
+            ID idf = mesh.bElement(iFace).point(icheck).id();
+            ID flag = mesh.bElement(iFace).point(icheck).marker();
+            //std::cout << "debug (id,flag) " << idf << " " << flag << std::endl;
+            if( (flag == mesh.bElement(iFace).marker()) && (triad.find(idf) != triad.end()) )
+            {
+                //bool addNormal(false);
+                //for (UInt jcheck = 1; jcheck<= nDofF; ++jcheck)
+                //{
+                //if()
+                //}
+
+                //Warning we take the normal in the first gauss point
+                //since the normal is the same over the triangle
+                Real nx(bdfem.normal(0,0));
+                Real ny(bdfem.normal(1,0));
+                Real nz(bdfem.normal(2,0));
+
+                //We get the area
+                Real area(bdfem.measure());
+
+
+                //We update the normal component of the boundary point
+                triad[idf][6] += nx * area;
+                triad[idf][7] += ny * area;
+                triad[idf][8] += nz * area;
+
+            }
+        }
+    }
+
+    //-----------------------------------------------------
+    // STEP 2: Normalizing the vectors
+    //-----------------------------------------------------
+	std::map< ID,vector< Real > >::iterator mapIt;
+	for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
+    {
+	    Real norm(0.0);
+	    norm = sqrt( (*mapIt).second[6]*(*mapIt).second[6] + (*mapIt).second[7]*(*mapIt).second[7] + (*mapIt).second[8]*(*mapIt).second[8] );
+	    (*mapIt).second[6] /= norm;
+	    (*mapIt).second[7] /= norm;
+	    (*mapIt).second[8] /= norm;
+    }
 }
+
+
+void bcCalculateTangentVectors(std::map< ID,vector< Real > > &triad)
+{
+    // Author:	Gwenol Grandperrin
+    // Date:	23.09.09
+    //
+    // This function basically calculate the tangential vectors
+    // and store the component in the triad vector
+
+    std::map< ID,vector< Real > >::iterator mapIt;
+    for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
+    {
+        //We take max{|n x i|,|n x j|,|n x k|}
+        //			=max{sqrt(ny^2+nz^2),sqrt(nx^2+nz^2),sqrt(nx^2+ny^2)}
+        //			=max{r1,r2,r3}
+        Real nx((*mapIt).second[6]);
+        Real ny((*mapIt).second[7]);
+        Real nz((*mapIt).second[8]);
+        Real nxi=sqrt(ny*ny+nz*nz);
+        Real nxj=sqrt(nx*nx+nz*nz);
+        Real nxk=sqrt(nx*nx+ny*ny);
+        if((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
+        {
+            //We create t1
+            (*mapIt).second[0] = 0;
+            (*mapIt).second[1] = nz/nxi;
+            (*mapIt).second[2] = -ny/nxi;
+
+            //We create t2
+            (*mapIt).second[3] = -nxi;
+            (*mapIt).second[4] = nx*ny/nxi;
+            (*mapIt).second[5] = nx*nz/nxi;
+        }
+        else if((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
+        {
+            //We create t1
+            (*mapIt).second[0] = -nz/nxj;
+            (*mapIt).second[1] = 0;
+            (*mapIt).second[2] = nx/nxj;
+
+            //We create t2
+            (*mapIt).second[3] = nx*ny/nxj;
+            (*mapIt).second[4] = -nxj;
+            (*mapIt).second[5] = ny*nz/nxj;
+        }
+        else //max = |n x k|
+        {
+            //We create t1
+            (*mapIt).second[0] = ny/nxk;
+            (*mapIt).second[1] = -nx/nxk;
+            (*mapIt).second[2] = 0;
+
+            //We create t2
+            (*mapIt).second[3] = nx*nz/nxk;
+            (*mapIt).second[4] = ny*nz/nxk;
+            (*mapIt).second[5] = -nxk;
+        }
+    }
+}
+
+template <typename MeshType>
+void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
+                  CurrentBdFE& bdfem, std::map< ID,vector< Real > > &triad,UInt offset=0)
+{
+    // Author:	Gwenol Grandperrin
+    // Date:	29.09.09
+    //
+    // To define the conditions for the normal and the tangential directions
+    // We will first introduce a vector< Real > which will contain the triad
+    // (t1,t2,n), which are two tangential vector and the normal at the
+    // boundary points.
+    //
+    // This function create the normal and tangential vector require
+    //
+    // The procedure will be the following
+    // 1) Create the map std::map< ID,vector< Real > > triad;
+    //    We will store the informations in the following order
+    //    (ID,[t_1x,t_1y,t_1z,t_2x,t_2y,t_2z,n_x,n_y,n_z,])
+    // 2) Update the normals
+    // 3) Update the tangential vectors
+    // 4) Exporting the results for Paraview
+
+    //std::cout << BCb.name() << "-" << BCb.flag() << std::endl;
+    //-----------------------------------------------------
+    // STEP 1: Initialization of the vectors
+    //-----------------------------------------------------
+    //Initialization of the map to store the normal vectors
+    std::map< ID,vector< Real > >::iterator mapIt;
+
+    // Loop on BC identifiers
+    for ( ID i = 1; i <= BCb.list_size(); ++i )
+    {
+        const IdentifierEssential* pId = static_cast< const IdentifierEssential* >( BCb( i ) );
+        //std::cout << "id: " << pId->id() << " x: " << pId->x() << " y: " << pId->y() << " z: " << pId->z() << std::endl;
+
+        //We add it into the map
+        vector< Real > t1t2n(12,0.0);
+        t1t2n[9]=pId->x();
+        t1t2n[10]=pId->y();
+        t1t2n[11]=pId->z();
+        triad.insert ( pair<ID,vector<Real> >(BCb(i)->id(),t1t2n) );
+    }
+
+    //-----------------------------------------------------
+    // STEP 2: Calculating the normals
+    //-----------------------------------------------------
+    bcCalculateNormals(mesh, bdfem, triad);
+
+    //-----------------------------------------------------
+    // STEP 3: Calculating the tangential vectors
+    //-----------------------------------------------------
+    bcCalculateTangentVectors(triad);
+
+    //-----------------------------------------------------
+    // STEP 4: Exporting the normals and the
+    //         tangential vectors for Paraview
+    //-----------------------------------------------------
+    std::string filename("normalAndTangentialDirections");
+    filename.append(".vtk");
+    ofstream file(filename.c_str());
+
+    //Is the file open?
+    if (file.fail())
+    {
+        cerr << "Error: The file is not opened " << std::endl;
+    }
+    else
+    {
+        //To define herein
+        unsigned int nbPoints(triad.size());
+
+        //Writing the header
+        file << "# vtk DataFile Version 2.0" << std::endl;
+        file << "Normal directions" << std::endl;
+        file << "ASCII" << std::endl;
+
+        //Writing the points
+        file << "DATASET POLYDATA" << std::endl;
+        file << "POINTS " << nbPoints << " float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[9] << "\t" << (*mapIt).second[10] << "\t" << (*mapIt).second[11] << std::endl;
+
+        //Starting the data part of the file
+        file << "POINT_DATA " << nbPoints << std::endl;
+
+        //Writing t1
+        file << "VECTORS cell_tangent_1 float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[0] << "\t" << (*mapIt).second[1] << "\t" << (*mapIt).second[2] << std::endl;
+
+        //Writing t2
+        file << "VECTORS cell_tangent_2 float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[3] << "\t" << (*mapIt).second[4] << "\t" << (*mapIt).second[5] << std::endl;
+
+        //Writing n
+        file << "VECTORS cell_normals float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[6] << "\t" << (*mapIt).second[7] << "\t" << (*mapIt).second[8] << std::endl;
+
+        //Closing the file
+        file.close();
+    }
+
+}
+
+
+/*
+  \brief This function creates the rotation matrix R which change the basis.
+  \author Gwenol Grandperrin
+  \date 16.10.09
+*/
+template <typename MatrixType>
+MatrixType createRMatrix(const Dof& dof, MatrixType& A,
+                         std::map< ID,vector< Real > > &triad,
+                         UInt offset=0)
+{
+
+    //std::cout << "Creating the R matrix... ";
+    //Initialization of the map to store the normal vectors
+    std::map< ID,vector< Real > >::iterator mapIt;
+
+    //Number of total scalar Dof
+    UInt totalDof = dof.numTotalDof();
+
+    MatrixType R(A.getMap(), A.getMeanNumEntries());
+
+    //Adding one to the diagonal
+    R.insertOneDiagonal();
+
+    int nbRows(3);
+    int nbCols(3);
+    double* values[nbCols];
+    int Indices[3];
+    for ( int n = 0; n < nbCols; ++n )
+    {
+        values[n] = new Real[nbRows];
+        for ( int m = 0; m < nbRows; ++m )
+        {
+            values[n][m] = 0.0;
+        }
+    }
+
+    std::vector<int> rows;
+    std::vector<int> cols;
+
+    for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+    {
+        //...Except for the nodes where we make the rotation
+        //Global Dof
+        //idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+        //i,j and k take values in [1,totalDof]
+        Indices[0] = (*mapIt).first + offset - 1;
+        Indices[1] = (*mapIt).first + totalDof + offset - 1;
+        Indices[2] = (*mapIt).first + 2 * totalDof + offset - 1;
+
+        cols.clear();
+        cols.push_back(Indices[0]);
+        cols.push_back(Indices[1]);
+        cols.push_back(Indices[2]);
+
+        rows.clear();
+        rows.push_back(Indices[0]);
+        rows.push_back(Indices[1]);
+        rows.push_back(Indices[2]);
+
+
+        //Line i (first tangential vector)
+        values[0][0] = (*mapIt).second[0];
+        values[0][1] = (*mapIt).second[1];
+        values[0][2] = (*mapIt).second[2];
+        R.set_mat(Indices[0],Indices[0],0.0);
+
+        //Line j (second tangential vector)
+        values[1][0] = (*mapIt).second[3];
+        values[1][1] = (*mapIt).second[4];
+        values[1][2]= (*mapIt).second[5];
+        R.set_mat(Indices[1],Indices[1],0.0);
+
+        //Line k (normal vector)
+        values[2][0] = (*mapIt).second[6];
+        values[2][1] = (*mapIt).second[7];
+        values[2][2] = (*mapIt).second[8];
+        R.set_mat(Indices[2],Indices[2],0.0);
+
+        R.set_mat_inc(nbCols, nbRows, cols, rows, values,Epetra_FECrsMatrix::ROW_MAJOR);
+
+    }
+
+
+    R.GlobalAssemble();
+    //R.removeZeros();
+
+    for ( int n = 0; n < nbRows; ++n )
+    {
+        delete values[n];
+    }
+    return R;
+}
+
+/*
+  \brief This function will change A to fit the (t1,t2,n) basis
+  \author Gwenol Grandperrin
+  \date 27.10.09
+*/
+template <typename MatrixType, typename VectorType>
+void bcShiftToNormalTangentialCoordSystem(MatrixType& A, VectorType& b, const MatrixType& R)
+{
+    //std::cout << "Shift to tangential system" << std::endl;
+
+    int errCode(0);
+
+    //std::cout << "C = R*A" << std::endl;
+    MatrixType C(A.getMap(), A.getMeanNumEntries());
+    errCode = R.Multiply(false,A,false,C);
+    //std::cout<< errCode <<std::endl;
+
+    //std::cout << "A = C*Rt" << std::endl;
+    MatrixType D(A.getMap(), A.getMeanNumEntries());
+    errCode = C.Multiply(false,R,true,D);
+    //std::cout<< errCode <<std::endl;
+    A.swapCrsMatrix(D);
+
+    //std::cout << "b = R*b" << std::endl;
+    VectorType c(b);
+    errCode = R.Multiply(false,c,b);
+    //std::cout<< errCode <<std::endl;
+}
+
+/*
+  \brief This function will change A to fit the cartesian basis
+  \author Gwenol Grandperrin
+  \date 27.10.09
+*/
+template <typename MatrixType, typename VectorType>
+void bcShiftToCartesianCoordSystem(MatrixType& A, VectorType& b, const MatrixType& R)
+{
+    //std::cout << "Shift to cartesian system" << std::endl;
+
+    int errCode(0);
+
+    //std::cout << "C = Rt*A" << std::endl;
+    MatrixType C(A.getMap(), A.getMeanNumEntries());
+    errCode = R.Multiply(true,A,false,C);
+    //std::cout<< errCode <<std::endl;
+
+    //std::cout << "A = C*R" << std::endl;
+    MatrixType D(A.getMap(), A.getMeanNumEntries());
+    errCode = C.Multiply(false,R,false,D);
+    //std::cout<< errCode <<std::endl;
+    A.swapCrsMatrix(D);
+
+    //std::cout << "b = Rt*b" << std::endl;
+    VectorType c(b);
+    errCode = R.Multiply(true,c,b);
+    //std::cout<< errCode <<std::endl;
+}
+
+} // end of namespace LifeV
 #endif

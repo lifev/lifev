@@ -89,10 +89,20 @@ BCBase::BCBase( const std::string& name,
                 _M_comp.push_back( i );
             break;
         case Normal:
-            nComp = nDimensions;
-            _M_comp.reserve( nComp );
-            for ( ID i = 1; i <= nComp; ++i )
-                _M_comp.push_back( i );
+        	// Normal Essential boundary condition (cf Gwenol Grandperrin Master Thesis)
+        	if(type == Essential)
+            {
+        		nComp = 1;
+        		_M_comp.reserve( nComp );
+        		_M_comp.push_back( nDimensions );
+            }
+        	else
+            {
+            	nComp = nDimensions;
+            	_M_comp.reserve( nComp );
+            	for ( ID i = 1; i <= nComp; ++i )
+                	_M_comp.push_back( i );
+            }
             break;
         default:
             ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -466,7 +476,7 @@ bool BCBase::finalised() const
 bool BCBase::finalisedIdGlobal() const
 {
   return _M_finalisedIdGlobal;
-} 
+}
 
 
 
@@ -721,7 +731,7 @@ BCBase::addIdentifierIdGlobal( IdentifierBase* iden )
 {
   UInt temp = listIdGlobal.size();
   listIdGlobal.insert( boost::shared_ptr<IdentifierBase>( iden ) );
-  
+
   if( temp==0 )
     {
       _M_IdGlobal.push_back(0);
@@ -730,7 +740,7 @@ BCBase::addIdentifierIdGlobal( IdentifierBase* iden )
     }
     if( temp != listIdGlobal.size()){
       _M_IdGlobal.push_back((iden ) -> id());
-    }       
+    }
 }
 
 //! Transfer between the list and vector containers of ID's
@@ -760,9 +770,9 @@ BCBase::finaliseIdGlobal()
     }
 
     _M_finalisedIdGlobal = true;
-    _M_IdGlobal.size(); 
-         
-} 
+    _M_IdGlobal.size();
+
+}
 
 
 //! Returns the liste size
@@ -780,8 +790,8 @@ BCBase::list_size_IdGlobal() const
 }
 
 
-// return IdGlobal element 
-int 
+// return IdGlobal element
+int
 BCBase::IdGlobal( int id) const
 {
   return _M_IdGlobal[id];
