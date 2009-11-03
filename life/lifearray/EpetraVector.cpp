@@ -38,39 +38,39 @@ namespace LifeV {
 //! Constructors
 // ===================================================
 EpetraVector::EpetraVector( const EpetraMap& _map, EpetraMapType maptype ):
-    M_epetraVector(*_map.getMap(maptype)),
     M_epetraMap   (new EpetraMap(_map)),
-    M_maptype     (maptype)
+    M_maptype     (maptype),
+    M_epetraVector(*M_epetraMap->getMap(M_maptype))
 {
 }
 
 EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& _map, EpetraMapType maptype ):
-    M_epetraVector(*_map->getMap(maptype)),
     M_epetraMap   (_map),
-    M_maptype     (maptype)
+    M_maptype     (maptype),
+    M_epetraVector(*M_epetraMap->getMap(M_maptype))
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector):
-    M_epetraVector(vector.M_epetraVector),
     M_epetraMap   (vector.M_epetraMap),
-    M_maptype     (vector.M_maptype)
+    M_maptype     (vector.M_maptype),
+    M_epetraVector(vector.M_epetraVector)
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype):
-    M_epetraVector(*vector.M_epetraMap->getMap(maptype)),
     M_epetraMap   (vector.M_epetraMap),
-    M_maptype     (maptype)
+    M_maptype     (maptype),
+    M_epetraVector(*M_epetraMap->getMap(M_maptype))
 {
     operator = (vector);
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype,
                             Epetra_CombineMode combineMode):
-    M_epetraVector(*vector.M_epetraMap->getMap(maptype)),
     M_epetraMap   (vector.M_epetraMap),
-    M_maptype     (maptype)
+    M_maptype     (maptype),
+    M_epetraVector(*M_epetraMap->getMap(M_maptype))
 {
 
     if (maptype == vector.M_maptype)
@@ -95,9 +95,9 @@ EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype,
 EpetraVector::EpetraVector( const Epetra_MultiVector&    vector,
                             boost::shared_ptr<EpetraMap> _map,
                             EpetraMapType                maptype ):
-    M_epetraVector( *_map->getMap(maptype)),
     M_epetraMap   ( _map),
-    M_maptype     (maptype)
+    M_maptype     (maptype),
+    M_epetraVector(*M_epetraMap->getMap(M_maptype))
 {
 
     assert(this->BlockMap().SameAs(vector.Map()) );
@@ -108,9 +108,9 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&    vector,
 
 // Copies vector to a vector which resides only on the processor "reduceToProc"
 EpetraVector::EpetraVector( const EpetraVector& vector, const int reduceToProc):
-    M_epetraVector(vector.M_epetraMap->getRootMap(reduceToProc)),
-    M_epetraMap   (new EpetraMap(vector.M_epetraMap->getRootMap(reduceToProc))),
-    M_maptype     (Unique)
+    M_epetraMap   (vector.M_epetraMap->createRootMap(reduceToProc)),
+    M_maptype     (Unique),
+    M_epetraVector(*M_epetraMap->getMap(M_maptype))
 {
     operator = (vector);
 }

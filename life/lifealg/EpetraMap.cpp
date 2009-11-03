@@ -137,10 +137,12 @@ EpetraMap::getMap( EpetraMapType maptype)   const
 }
 
 
-EpetraMap::map_type
-EpetraMap::getRootMap( int root)   const
+boost::shared_ptr<EpetraMap>
+EpetraMap::createRootMap(int const root)   const
 {
-    return Epetra_Util::Create_Root_Map(*getUniqueMap(), root);
+
+    boost::shared_ptr<EpetraMap> rootMap(new EpetraMap(Epetra_Util::Create_Root_Map(*getUniqueMap(), root) ));
+    return rootMap;
 }
 
 

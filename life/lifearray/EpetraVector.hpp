@@ -388,9 +388,9 @@ private:
      */
     EpetraVector& Export( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
-    vector_type                    M_epetraVector;
     boost::shared_ptr< EpetraMap > M_epetraMap;
     EpetraMapType                  M_maptype;
+    vector_type                    M_epetraVector;
 
 };
 

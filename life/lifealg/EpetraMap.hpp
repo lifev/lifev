@@ -119,12 +119,14 @@ public:
     EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
               int indexbase = -1);
 
-    //! Constructor from raw Epetra_Map
+    //! Constructor from raw Epetra_Map. This constructor should be used only inside this class,
+    //! therefore it is private
     /*!
      * \param map: underlying Epetra_Map
      */
+private:
     EpetraMap(const map_type map);
-
+public:
     ~EpetraMap() {}
 
     //@}
@@ -177,8 +179,14 @@ public:
                                  int   IndexBase,
                                  const Epetra_Comm &Comm)  ;
 
-    map_ptrtype const & getMap( EpetraMapType maptype)   const;
-    map_type            getRootMap( int root)   const;
+    map_ptrtype const & getMap    ( EpetraMapType maptype) const;
+
+    //! This methods create a pointer to a EpetraMap that has points only on processor root
+    /*!
+     * \param this: EpetraMap that selects the relevant points
+     * \param root: processor on which to export all the points
+     */
+    boost::shared_ptr<EpetraMap>         createRootMap( int const     root)    const;
 
     Epetra_Export const& getExporter();
     Epetra_Import const& getImporter();
