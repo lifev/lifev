@@ -1,33 +1,36 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV library
+   This file is part of the LifeV library
 
-  Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
-             Simone Deparis <simone.deparis@epfl.ch>
-       Date: 2006-10-04
+   Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
+   Simone Deparis <simone.deparis@epfl.ch>
+   Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+   Date: 2006-10-04, 2009-11-03
 
-  Copyright (C) 2006 EPFL
+   Copyright (C) 2006,2009 EPFL
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
    \file EpetraMatrix.hpp
    \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-             Simone Deparis <simone.deparis@epfl.ch>
-   \date 2004-10-26
- */
+   \author Simone Deparis <simone.deparis@epfl.ch>
+   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+   \date   2009-11-03
+
+*/
 
 #ifndef _EPETRAMATRIX_HPP_
 #define _EPETRAMATRIX_HPP_
@@ -48,51 +51,53 @@
 
 namespace LifeV
 {
-////////////////////////////////////////////////////////////////
-//
-//  Epetra Matrix format Wrapper
-//
-///////////////////////////////////////////////////////////////
 
+//! EpetraMatrix - The Epetra Matrix format Wrapper
+/*!
+ *  @author Gilles Fourestey, Simone Deparis, Gwenol Grandperrin
+ *
+ *  The EpetraMatrix class provides a general interface for the Epetra_FECrsMatrix of Trilinos.
+ *
+ *  TODO Reorder the class and to add more doxygen comments.
+ */
 template <typename DataType>
 class EpetraMatrix
 {
 public:
 
-    typedef Epetra_FECrsMatrix     matrix_type;
-    typedef EpetraVector vector_type;
-
-//    EpetraMatrix(); //!< default constructor : NULL pattern
-    //
-    // Note that the constructors MUST be based on an existing pattern
-    //
-//     EpetraMatrix( const CSRPatt &_pattern,
-//                   Epetra_Comm&   comm );
-//     EpetraMatrix( const CSRPatt&    _pattern,
-//                   const Epetra_Map& _mapRow );//,
-//                  const Epetra_Map& _mapCol );
+    typedef Epetra_FECrsMatrix             matrix_type;
+    typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
+    typedef EpetraVector                   vector_type;
 
     EpetraMatrix( const EpetraMap&    _map, int numEntries = 50 );
 
     EpetraMatrix( const EpetraMatrix& _matrix);
-//     EpetraMatrix( const EpetraMatrix<DataType> &_epetra );
+    //     EpetraMatrix( const EpetraMatrix<DataType> &_epetra );
 
-//! Copies _matrix to a matrix which resides only on the processor "reduceToProc"
+    //! Copies _matrix to a matrix which resides only on the processor "reduceToProc"
     EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc);
 
 
     ~EpetraMatrix() {};
 
-    matrix_type& getEpetraMatrix()       {return M_epetraCrs;}
-    const matrix_type& getEpetraMatrix()  const {return M_epetraCrs;}
+    // Add by Gwenol Grandperrin 23.10.2009
+    matrix_ptrtype& getMatrixPtr(){return M_epetraCrs;}
+    const matrix_ptrtype& getMatrixPtr() const {return M_epetraCrs;}
+    void openCrsMatrix();
+    void removeZeros();
+    void swapCrsMatrix(matrix_ptrtype& p);
+    void swapCrsMatrix(EpetraMatrix<DataType>& B);
+    // Add by Gwenol Grandperrin 26.10.2009
+    int Multiply(bool transposeA,
+                 const EpetraMatrix<DataType> &B, bool transposeB,
+                 EpetraMatrix<DataType> &C, bool call_FillComplete_on_result=true) const;
+    int Multiply(bool transposeA, const vector_type& x, vector_type &y) const;
 
     EpetraMatrix& operator += (const EpetraMatrix& _matrix);
 
     vector_type     operator *  (const vector_type& vec) const;
     EpetraMatrix&   operator *= (const DataType     val);
     EpetraMatrix    operator *  (const DataType     val) const;
-
-//    Epetra_FECrsMatrix const & getEpetraMatrix(){return M_epetraCrs;}
 
     //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
     void diagonalize ( std::vector<UInt> rVec, DataType const coeff, UInt offset=0 );
@@ -137,15 +142,37 @@ public:
     // Calls insertZeroDiagonal and then epetra.globalAssemble;
     int GlobalAssemble();
 
-    int MyPID() { return  M_epetraCrs.Comm().MyPID(); }
+    int MyPID() { return  M_epetraCrs->Comm().MyPID(); }
+
+    //Add by Gwenol Grandperrin 26.10.09
+    const EpetraMap& getMap() const
+    {
+        return *M_epetraMap;
+    }
+
+    //! insert ones into the diagonal to ensure the matrix' graph has a entry there
+    //! Pay intention that this will add ones to the diagonal,
+    //! so for later added values with set_mat_inc, the one
+    //! will be added
+    void insertOneDiagonal();
 
 private:
+    //Add by Gwenol Grandperrin 26.10.09
+    boost::shared_ptr< EpetraMap > M_epetraMap;
+
+    //! insert the given value into the diagonal
+    //! Pay intention that this will add values to the diagonal,
+    //! so for later added values with set_mat_inc, the one
+    //! will be added
+    void insertValueDiagonal(const DataType& value);
 
     //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
     //! This method does not remove non zero entries in the diagonal.
     void insertZeroDiagonal();
 
-    matrix_type      M_epetraCrs;
+    // Modification by Gwenol Grandperrin 23.10.2009
+    //matrix_type      M_epetraCrs;
+    matrix_ptrtype  M_epetraCrs;
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -163,18 +190,18 @@ template <typename DataType>
 EpetraMatrix<DataType>&
 EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
 {
-//    EpetraMatrix matrix(Copy, _matrix.RowMap(), _matrix.GlobalMaxNumEntries());
+    //    EpetraMatrix matrix(Copy, _matrix.RowMap(), _matrix.GlobalMaxNumEntries());
 
 #ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
-    EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1., false);
+    EpetraExt::MatrixMatrix::Add(*_matrix.getMatrixPtr(), false, 1., *this->getMatrixPtr(), 1., false);
 #elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
-    EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1.);
+    EpetraExt::MatrixMatrix::Add(*_matrix.getMatrixPtr(), false, 1., *this->getMatrixPtr(), 1.);
 #else
 #error error: do not have nor EpetraExt 6 nor 7 or 8
 #endif
 
     return *this;
-//     return matrix;
+    //     return matrix;
 }
 
 template<typename DataType>
@@ -183,7 +210,7 @@ EpetraMatrix<DataType>::operator * (const vector_type& vec) const
 {
     vector_type result(vec);
 
-    M_epetraCrs.Apply(vec.getEpetraVector(), result.getEpetraVector());
+    M_epetraCrs->Apply(vec.getEpetraVector(), result.getEpetraVector());
 
     return result;
 }
@@ -193,7 +220,7 @@ template<typename DataType>
 EpetraMatrix<DataType>&
 EpetraMatrix<DataType>::operator *= (const DataType val)
 {
-    M_epetraCrs.Scale(val);
+    M_epetraCrs->Scale(val);
     return *this;
 }
 
@@ -206,12 +233,11 @@ EpetraMatrix<DataType>::operator * (const DataType val) const
 }
 
 
-
-
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries ):
-    M_epetraCrs( Copy, *_map.getMap(Unique), numEntries, false)
-//    M_epetraCrs( Copy, *_map.getEpetra_Map(), 0, false)
+    M_epetraCrs( new matrix_type( Copy, *_map.getMap(Unique), numEntries, false)),
+    M_epetraMap   (new EpetraMap(_map)) //Add by Gwenol Grandperrin 26.10.09
+    //    M_epetraCrs( Copy, *_map.getEpetra_Map(), 0, false)
 {
 }
 
@@ -226,32 +252,33 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries ):
 // Copies _matrix to a matrix which resides only on the processor "reduceToProc"
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc):
-    M_epetraCrs( Copy, Epetra_Map( _matrix.M_epetraCrs.Map().NumGlobalElements(),
-                                   (_matrix.M_epetraCrs.Map().Comm().MyPID() == reduceToProc) * _matrix.M_epetraCrs.Map().NumGlobalElements(),
-                                   _matrix.M_epetraCrs.Map().IndexBase(),
-                                   _matrix.M_epetraCrs.Map().Comm()  ),
-                 (_matrix.M_epetraCrs.Map().Comm().MyPID() == reduceToProc) * 20)
+    M_epetraCrs(new matrix_type( Copy, Epetra_Map( _matrix.M_epetraCrs->Map().NumGlobalElements(),
+                                                   (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * _matrix.M_epetraCrs->Map().NumGlobalElements(),
+                                                   _matrix.M_epetraCrs->Map().IndexBase(),
+                                                   _matrix.M_epetraCrs->Map().Comm()  ),
+                                 (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20)),
+    M_epetraMap(_matrix.M_epetraMap) //Add by Gwenol Grandperrin 26.10.09
 {
-    int  me    = M_epetraCrs.Comm().MyPID();
+    int  me    = M_epetraCrs->Comm().MyPID();
     if (!me)
-        std::cout << "_matrix.M_epetraCrs.Map().IndexBase() = "
-                  << _matrix.M_epetraCrs.Map().IndexBase()
+        std::cout << "_matrix.M_epetraCrs->Map().IndexBase() = "
+                  << _matrix.M_epetraCrs->Map().IndexBase()
                   << std::endl
-                  << "M_epetraCrs.Map().IndexBase() = "
-                  << M_epetraCrs.Map().IndexBase()
+                  << "M_epetraCrs->Map().IndexBase() = "
+                  << M_epetraCrs->Map().IndexBase()
                   << std::endl;
-//     std::cout << "reduced Map : " << M_epetraCrs.Map()
-//               <<    endl;
+    //     std::cout << "reduced Map : " << M_epetraCrs->Map()
+    //               <<    endl;
 
-//     M_epetraCrs.Comm().Barrier();
+    //     M_epetraCrs->Comm().Barrier();
 
-//     std::cout << "original Map: " << _matrix.M_epetraCrs.Map()
-//               << std::endl;
+    //     std::cout << "original Map: " << _matrix.M_epetraCrs->Map()
+    //               << std::endl;
 
-//     M_epetraCrs.Comm().Barrier();
+    //     M_epetraCrs->Comm().Barrier();
 
-    Epetra_Export reducedExport(M_epetraCrs.Map(), _matrix.M_epetraCrs.Map());
-    M_epetraCrs.Import(_matrix.M_epetraCrs, reducedExport, Add);
+    Epetra_Export reducedExport(M_epetraCrs->Map(), _matrix.M_epetraCrs->Map());
+    M_epetraCrs->Import(*_matrix.M_epetraCrs, reducedExport, Add);
 }
 
 
@@ -260,14 +287,14 @@ template <typename DataType>
 void EpetraMatrix<DataType>::
 set_mat( UInt row, UInt col, DataType loc_val )
 {
-//     if (M_epetraCrs.RowMap()
+    //     if (M_epetraCrs->RowMap()
 
     // incrementing row and cols by one;
     int irow(row + 1);
     int icol(col + 1);
 
-//    if (M_epetraCrs.RowMap().MyGID (row))
-    M_epetraCrs.ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
+    //    if (M_epetraCrs->RowMap().MyGID (row))
+    M_epetraCrs->ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
 
 }
 
@@ -280,14 +307,14 @@ set_mat_inc( UInt row, UInt col, DataType loc_val )
     int irow(row + 1);
     int icol(col + 1);
 
-//    int  me    = M_epetraCrs.Comm().MyPID();
+    //    int  me    = M_epetraCrs->Comm().MyPID();
 
-//       std::cout << " -> ";
-//       std::cout << irow << " " << icol << " " << loc_val << std::endl;
-    int ierr = M_epetraCrs.InsertGlobalValues (1, &irow, 1, &icol, &loc_val);
+    //       std::cout << " -> ";
+    //       std::cout << irow << " " << icol << " " << loc_val << std::endl;
+    int ierr = M_epetraCrs->InsertGlobalValues (1, &irow, 1, &icol, &loc_val);
 
     if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
-//    std::cout << ierr << std::endl;
+    //    std::cout << ierr << std::endl;
 }
 
 template <typename DataType>
@@ -313,25 +340,59 @@ set_mat_inc( int const numRows, int const numCols,
         *i = *pt + 1;
 
 
-    int ierr = M_epetraCrs.InsertGlobalValues (numRows, &irow[0], numCols, &icol[0], loc_val, format);
+    int ierr = M_epetraCrs->InsertGlobalValues (numRows, &irow[0], numCols, &icol[0], loc_val, format);
 
     if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
-//    std::cout << ierr << std::endl;
+    //    std::cout << ierr << std::endl;
 }
-
 
 template <typename DataType>
 int EpetraMatrix<DataType>::GlobalAssemble()
 {
-    if ( M_epetraCrs.Filled ())
+    if ( M_epetraCrs->Filled ())
     {
-//         if (M_epetraCrs.Comm().MyPID() == 0)
-//             std::cout << "Matrix is already filled" << std::endl;
+        //         if (M_epetraCrs->Comm().MyPID() == 0)
+        //             std::cout << "Matrix is already filled" << std::endl;
         return -1;
     }
 
     insertZeroDiagonal();
-    return  M_epetraCrs.GlobalAssemble();
+    return  M_epetraCrs->GlobalAssemble();
+}
+
+//! insert the given value into the diagonal
+//! Pay intention that this will add values to the diagonal,
+//! so for later added values with set_mat_inc, the one
+//! will be added
+template <typename DataType>
+void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value)
+{
+    if ( M_epetraCrs->Filled ())
+    {
+        if (M_epetraCrs->Comm().MyPID() == 0)
+            std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
+        return;
+    }
+
+    int* p =  M_epetraCrs->RowMap().MyGlobalElements();
+    int ierr;
+
+    for (int i(0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p)
+    {
+        ierr = M_epetraCrs->InsertGlobalValues (1, p, 1, p, &value);
+
+        if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
+    }
+}
+
+//! insert ones into the diagonal to ensure the matrix' graph has a entry there
+//! Pay intention that this will add ones to the diagonal,
+//! so for later added values with set_mat_inc, the one
+//! will be added
+template <typename DataType>
+void EpetraMatrix<DataType>::insertOneDiagonal()
+{
+    insertValueDiagonal(1.0);
 }
 
 // Adds zeros into the diagonal to ensure the matrix' graph has a entry there
@@ -339,25 +400,7 @@ int EpetraMatrix<DataType>::GlobalAssemble()
 template <typename DataType>
 void EpetraMatrix<DataType>::insertZeroDiagonal()
 {
-
-    if ( M_epetraCrs.Filled ())
-    {
-        if (M_epetraCrs.Comm().MyPID() == 0)
-	    std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
-        return;
-    }
-
-    int* p =  M_epetraCrs.RowMap().MyGlobalElements();
-    int ierr;
-    DataType const zero(0);
-
-    for (int i(0); i <  M_epetraCrs.RowMap().NumMyElements(); ++i, ++p)
-    {
-        ierr = M_epetraCrs.InsertGlobalValues (1, p, 1, p, &zero);
-
-        if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
-    }
-
+    insertValueDiagonal(0.0);
 }
 
 
@@ -368,7 +411,7 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
                                            UInt offset)
 {
 
-    const Epetra_Comm&  Comm(M_epetraCrs.Comm());
+    const Epetra_Comm&  Comm(M_epetraCrs->Comm());
     int numProcs(Comm.NumProc());
     int MyPID   (Comm.MyPID()   );
     int i;
@@ -389,13 +432,13 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
         Comm.Broadcast(&sizeVec, 1, p);
 
         if ( p == MyPID )
-            {
-                Ur    =  &rVec    .front();
-            }
+        {
+            Ur    =  &rVec    .front();
+        }
         else
-            {
-                Ur    = new UInt    [sizeVec];
-            }
+        {
+            Ur    = new UInt    [sizeVec];
+        }
 
         r     = (int*) Ur;
 
@@ -405,9 +448,9 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
             diagonalize( Ur[i], coeff, offset);
 
         if ( p != MyPID )
-            {
-                delete[] Ur;
-            }
+        {
+            delete[] Ur;
+        }
 
     }
 
@@ -420,13 +463,13 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
                                           UInt offset)
 {
 
-    if ( !M_epetraCrs.Filled() )
+    if ( !M_epetraCrs->Filled() )
     { //! if not filled, I do not know how to diagonalize.
-      ERROR_MSG( "if not filled, I do not know how to diagonalize\n" );
+        ERROR_MSG( "if not filled, I do not know how to diagonalize\n" );
     }
 
-    const Epetra_Map& rowMap(M_epetraCrs.RowMap());
-    const Epetra_Map& colMap(M_epetraCrs.ColMap());
+    const Epetra_Map& rowMap(M_epetraCrs->RowMap());
+    const Epetra_Map& colMap(M_epetraCrs->ColMap());
 
 
     int myCol = colMap.LID(r + 1 + offset);
@@ -441,15 +484,15 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         int* Indices;
         // int globCol;
 
-        M_epetraCrs.ExtractMyRowView(myRow, NumEntries, Values, Indices);
+        M_epetraCrs->ExtractMyRowView(myRow, NumEntries, Values, Indices);
 
         for (int i(0); i <  NumEntries; i++)
         {
             Values[i] = 0;
         }
 
-	DataType coeff_(coeff);
-	M_epetraCrs.ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
+        DataType coeff_(coeff);
+        M_epetraCrs->ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
 
 
     }
@@ -457,12 +500,12 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 }
 
 /*! Diagonalization of rows r_0 to r_n of the system. Done by merging and distributing
-    the vector of rows w.r.t. all processors and calling diagonalize(r_i, ...)
- *  @param r vector of rows to diagonalize
- *  @param vector of coeff values to set the diagonal entry A(r,r) to
- *  @param vector of b right hand sides vectors to be corrected
- *  @param vector of datum value to set the fix the solution entry x(r) at
- */
+  the vector of rows w.r.t. all processors and calling diagonalize(r_i, ...)
+  *  @param r vector of rows to diagonalize
+  *  @param vector of coeff values to set the diagonal entry A(r,r) to
+  *  @param vector of b right hand sides vectors to be corrected
+  *  @param vector of datum value to set the fix the solution entry x(r) at
+  */
 template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
                                           DataType const coeff,
@@ -472,7 +515,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 {
 
 
-    const Epetra_Comm&  Comm(M_epetraCrs.Comm());
+    const Epetra_Comm&  Comm(M_epetraCrs->Comm());
     int numProcs(Comm.NumProc());
     int MyPID   (Comm.MyPID()   );
     int i;
@@ -498,28 +541,28 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     std::map<int, double>           localBC;
     std::map<int, double>::iterator im;
 
-    const Epetra_Map& rowMap(M_epetraCrs.RowMap());
+    const Epetra_Map& rowMap(M_epetraCrs->RowMap());
 
 
     //Comm.Barrier();
     // we want to know which IDs are our or not
 
     for (int ii = 0; ii < rVec.size(); ++ii)
+    {
+        int lID = rowMap.LID(rVec[ii] + 1);
+        if (!(lID < 0))
         {
-            int lID = rowMap.LID(rVec[ii] + 1);
-            if (!(lID < 0))
-                {
 
-                    localIDs.push_back(rVec[ii] + 1);
-                    localData.push_back(datumVec[ii]);
-                    localBC.insert(pair<int, double>(rVec[ii] + 1, datumVec[ii]));
-                }
-                    else
-                {
-                    remoteIDs.push_back(rVec[ii] + 1);
-                    remoteData.push_back(datumVec[ii]);
-                }
+            localIDs.push_back(rVec[ii] + 1);
+            localData.push_back(datumVec[ii]);
+            localBC.insert(pair<int, double>(rVec[ii] + 1, datumVec[ii]));
         }
+        else
+        {
+            remoteIDs.push_back(rVec[ii] + 1);
+            remoteData.push_back(datumVec[ii]);
+        }
+    }
 
     // now, we have to fill our localIDs with IDs from other processors
     // first, we have to build the map of all the remoteIDs and their processor owner
@@ -541,11 +584,11 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 
 
     for (int ii = 0; ii < numIDs; ++ii)
-        {
-            int pi = PIDList[ii];
-            procToID[pi].push_back(remoteIDs[ii]);
-            procToData[pi].push_back(remoteData[ii]);
-        }
+    {
+        int pi = PIDList[ii];
+        procToID[pi].push_back(remoteIDs[ii]);
+        procToData[pi].push_back(remoteData[ii]);
+    }
 
     // then, we send all the nodes where they belong
 
@@ -555,98 +598,98 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     assert(comm != 0);
 
     for (int ii = 0; ii < procToID.size(); ++ii)
+    {
+        if (ii != me)
         {
-            if (ii != me)
-                {
-                    int length;
-                    length = procToID[ii].size();
-                    //                    std::cout << me << " is sending " << *length << " to " << ii << std::endl;
-                    MPI_Send( &length, 1, MPI_INT, ii, 666, comm->Comm() );
-                    if (length > 0)
-                        {
-                            MPI_Send( &procToID[ii][0], length, MPI_INT, ii, 667, comm->Comm() );
-                            MPI_Send( &procToData[ii][0], length, MPI_INT, ii, 668, comm->Comm() );
-                            //std::cout << me << " has sent to " << ii << " : ";
+            int length;
+            length = procToID[ii].size();
+            //                    std::cout << me << " is sending " << *length << " to " << ii << std::endl;
+            MPI_Send( &length, 1, MPI_INT, ii, 666, comm->Comm() );
+            if (length > 0)
+            {
+                MPI_Send( &procToID[ii][0], length, MPI_INT, ii, 667, comm->Comm() );
+                MPI_Send( &procToData[ii][0], length, MPI_INT, ii, 668, comm->Comm() );
+                //std::cout << me << " has sent to " << ii << " : ";
 
-                            //for (int jj = 0; jj < procToData[ii].size(); ++jj)
-                                //std::cout << procToID[ii][jj] << " ";
-                            //std::cout << " end sent" << std::endl;
-                        }
-                }
-
+                //for (int jj = 0; jj < procToData[ii].size(); ++jj)
+                //std::cout << procToID[ii][jj] << " ";
+                //std::cout << " end sent" << std::endl;
+            }
         }
+
+    }
 
     for (int ii = 0; ii < procToID.size(); ++ii)
+    {
+        if (ii != me)
         {
-            if (ii != me)
+            int length;
+            MPI_Status status;
+            MPI_Recv( &length, 1, MPI_INT, ii, 666, comm->Comm(), &status );
+            //std::cout << me << " received " << *length << " from " << ii << std::endl;
+
+
+            if (length > 0)
+            {
+                int* bufferID = new int[length];
+                int* ptrID(0);//    = new int[length];
+
+                MPI_Recv( bufferID, length, MPI_INT, ii, 667, comm->Comm(), &status );
+
+                //std::cout << me << " has received ";
+                ptrID = bufferID;
+
+                //                             for (int ii = 0; ii < *length; ++ii, ++ptrID)
+                //                                 {
+                //                                     std::cout << *ptrID << " ";
+                //                                     localIDs.push_back(*ptrID);
+                //                                 }
+
+                //std::cout << me << " has received ";
+
+                //                             for (int ii = 0; ii < *length; ++ii, ++ptr)
+                //                                 {
+                //                                     //std::cout << *ptr << " ";
+                //                                     localIDs.push_back(*ptr);
+                //                                 }
+                //std::cout << std::endl;
+
+                double* bufferData = new double[length];
+                double* ptrData(0);
+
+                MPI_Recv( bufferData, length, MPI_INT, ii, 668, comm->Comm(), &status );
+
+                //                             std::cout << me << " has received ";
+                ptrData = bufferData;
+
+                for (int ii = 0; ii < length; ++ii, ++ptrID, ++ptrData)
                 {
-                    int length;
-                    MPI_Status status;
-                    MPI_Recv( &length, 1, MPI_INT, ii, 666, comm->Comm(), &status );
-                    //std::cout << me << " received " << *length << " from " << ii << std::endl;
+                    localBC.insert(pair<int, double>
+                                   (*ptrID, *ptrData));
 
-
-                    if (length > 0)
-                        {
-                            int* bufferID = new int[length];
-                            int* ptrID(0);//    = new int[length];
-
-                            MPI_Recv( bufferID, length, MPI_INT, ii, 667, comm->Comm(), &status );
-
-                            //std::cout << me << " has received ";
-                            ptrID = bufferID;
-
-//                             for (int ii = 0; ii < *length; ++ii, ++ptrID)
-//                                 {
-//                                     std::cout << *ptrID << " ";
-//                                     localIDs.push_back(*ptrID);
-//                                 }
-
-                            //std::cout << me << " has received ";
-
-//                             for (int ii = 0; ii < *length; ++ii, ++ptr)
-//                                 {
-//                                     //std::cout << *ptr << " ";
-//                                     localIDs.push_back(*ptr);
-//                                 }
-                            //std::cout << std::endl;
-
-                            double* bufferData = new double[length];
-                            double* ptrData(0);
-
-                            MPI_Recv( bufferData, length, MPI_INT, ii, 668, comm->Comm(), &status );
-
-//                             std::cout << me << " has received ";
-                            ptrData = bufferData;
-
-                            for (int ii = 0; ii < length; ++ii, ++ptrID, ++ptrData)
-                                {
-                                    localBC.insert(pair<int, double>
-                                                   (*ptrID, *ptrData));
-
-                                    //std::cout << *ptrID << " <-> " << *ptrData << std::endl;
-                                    //                                    std::cout << *ptr << " ";
-                                    //localData.push_back(*ptr);
-                                 }
-                            //std::cout << std::endl;
-
-                            delete[] bufferID;
-                            delete[] bufferData;
-
-                        }
-
+                    //std::cout << *ptrID << " <-> " << *ptrData << std::endl;
+                    //                                    std::cout << *ptr << " ";
+                    //localData.push_back(*ptr);
                 }
+                //std::cout << std::endl;
+
+                delete[] bufferID;
+                delete[] bufferData;
+
+            }
+
         }
+    }
 
     delete[] PIDList;
     delete[] LIDList;
 
     for (im = localBC.begin(); im != localBC.end(); ++im)
-        {
-            //std::cout << me << " is filling " << im->first << " with ";
-            //std::cout << im->second << std::endl;
-            diagonalize( im->first - 1, coeff, b, im->second, offset);
-        }
+    {
+        //std::cout << me << " is filling " << im->first << " with ";
+        //std::cout << im->second << std::endl;
+        diagonalize( im->first - 1, coeff, b, im->second, offset);
+    }
     //    std::cout << std::endl;
 
 
@@ -657,38 +700,38 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     // loop on all proc
     for ( int p(0); p < numProcs; p++)
     {
-	int sizeVec(rVec.size());
-	if ( sizeVec != int(datumVec.size()))
-	{ //! vectors must be of the same size
-	    ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
-	}
+        int sizeVec(rVec.size());
+        if ( sizeVec != int(datumVec.size()))
+        { //! vectors must be of the same size
+            ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+        }
 
-	Comm.Broadcast(&sizeVec, 1, p);
+        Comm.Broadcast(&sizeVec, 1, p);
 
-	if ( p == MyPID )
-	{
-	    Ur    =  &rVec    .front();
-	    datum = &datumVec.front();
-	}
-	else
-	{
-	    Ur    = new UInt    [sizeVec];
-	    datum = new DataType[sizeVec];
-	}
+        if ( p == MyPID )
+        {
+            Ur    =  &rVec    .front();
+            datum = &datumVec.front();
+        }
+        else
+        {
+            Ur    = new UInt    [sizeVec];
+            datum = new DataType[sizeVec];
+        }
 
-	r     = (int*) Ur;
+        r     = (int*) Ur;
 
-	Comm.Broadcast(r,    sizeVec, p);
-	Comm.Broadcast(datum,sizeVec, p);
+        Comm.Broadcast(r,    sizeVec, p);
+        Comm.Broadcast(datum,sizeVec, p);
 
-	for (i=0; i < sizeVec; i++)
-	  diagonalize( Ur[i], coeff, b, datum[i], offset);
+        for (i=0; i < sizeVec; i++)
+            diagonalize( Ur[i], coeff, b, datum[i], offset);
 
-	if ( p != MyPID )
-	{
-	    delete[] Ur;
-	    delete[] datum;
-	}
+        if ( p != MyPID )
+        {
+            delete[] Ur;
+            delete[] datum;
+        }
 
     }
 
@@ -710,13 +753,13 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
                                           UInt offset)
 {
 
-    if ( !M_epetraCrs.Filled() )
+    if ( !M_epetraCrs->Filled() )
     { //! if not filled, I do not know how to diagonalize.
-      ERROR_MSG( "if not filled, I do not know how to diagonalize\n" );
+        ERROR_MSG( "if not filled, I do not know how to diagonalize\n" );
     }
 
-    const Epetra_Map& rowMap(M_epetraCrs.RowMap());
-    const Epetra_Map& colMap(M_epetraCrs.ColMap());
+    const Epetra_Map& rowMap(M_epetraCrs->RowMap());
+    const Epetra_Map& colMap(M_epetraCrs->ColMap());
 
 
     int myCol = colMap.LID(r + 1 + offset);
@@ -728,8 +771,8 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         for (int i(0); i < rowMap.NumMyElements(); i++)
             // Note that if a value is not already present for the specified location in the matrix,
             // the input value will be ignored and a positive warning code will be returned.
-            M_epetraCrs.ReplaceMyValues(i,1, &zero, &myCol);
-//            b[ globCol ] -= Values[i] * datum; //@@ correct rhs : this is false, to be corrected
+            M_epetraCrs->ReplaceMyValues(i,1, &zero, &myCol);
+        //            b[ globCol ] -= Values[i] * datum; //@@ correct rhs : this is false, to be corrected
     }
 #endif
 
@@ -742,7 +785,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         double* Values;
         int* Indices;
 
-        M_epetraCrs.ExtractMyRowView(myRow, NumEntries, Values, Indices);
+        M_epetraCrs->ExtractMyRowView(myRow, NumEntries, Values, Indices);
 
         for (int i(0); i <  NumEntries; i++)
         {
@@ -751,7 +794,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 
         DataType coeff_(coeff);
 
-        M_epetraCrs.ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
+        M_epetraCrs->ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
         b[ r + 1 + offset] = coeff * datum; // correct right hand side for row r // BASEINDEX + 1
 
     }
@@ -762,11 +805,11 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 template <typename DataType>
 int EpetraMatrix<DataType>::getMeanNumEntries() const
 {
-    const int minEntries = M_epetraCrs.MaxNumEntries ()/2;
-    if ( M_epetraCrs.NumMyRows() )
+    const int minEntries = M_epetraCrs->MaxNumEntries ()/2;
+    if ( M_epetraCrs->NumMyRows() )
         return minEntries;
 
-    int meanNumEntries = M_epetraCrs.NumMyNonzeros()/M_epetraCrs.NumMyRows();
+    int meanNumEntries = M_epetraCrs->NumMyNonzeros()/M_epetraCrs->NumMyRows();
     if ( meanNumEntries < minEntries || meanNumEntries > 2*minEntries )
         return minEntries;
     return meanNumEntries;
@@ -778,7 +821,7 @@ void EpetraMatrix<DataType>::spy( std::string const &filename)
     // Purpose: Matlab dumping and spy
     std::string nome = filename, uti = " , ";
 
-     int  me    = M_epetraCrs.Comm().MyPID();
+    int  me    = M_epetraCrs->Comm().MyPID();
 
     //
     // check on the file name
@@ -788,15 +831,105 @@ void EpetraMatrix<DataType>::spy( std::string const &filename)
     myStream << me;
     nome = filename + ".m";
 
-    EpetraExt::RowMatrixToMatlabFile( nome.c_str(), M_epetraCrs);
+    EpetraExt::RowMatrixToMatlabFile( nome.c_str(), *M_epetraCrs);
 
 }
 
+//Method to open again a matrix
+template <typename DataType>
+void EpetraMatrix<DataType>::openCrsMatrix()
+{
+    if(M_epetraCrs->Filled())
+    {
+        int meanNumEntries = this->getMeanNumEntries();
+        matrix_ptrtype tmp(M_epetraCrs);
+        M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
+        *M_epetraCrs += *tmp;
+	}
+}
 
+
+//Method to remove all the zeros contain in the matrix
+template <typename DataType>
+void EpetraMatrix<DataType>::removeZeros()
+{
+    if(M_epetraCrs->Filled())
+    {
+        int meanNumEntries = this->getMeanNumEntries();
+        matrix_ptrtype tmp(M_epetraCrs);
+        M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
+
+        //Variables to store the informations
+        int NumEntries;
+        double* Values;
+        int* Indices;
+        int row(0);
+
+        for(int i(0);i<tmp->NumGlobalRows();++i)
+        {
+            row = tmp->LRID(i+1);
+            tmp->ExtractMyRowView(row, NumEntries, Values, Indices);
+
+            int Indices2[NumEntries];
+            double Values2[NumEntries];
+            int NumEntries2(0);
+
+            for(int j(0);j<NumEntries;++j)
+            {
+                if(Values[j] != 0.0)
+                {
+                    Indices2[NumEntries2] = tmp->GCID(Indices[j]);
+                    Values2[NumEntries2] = Values[j];
+                    NumEntries2++;
+                }
+            }
+            M_epetraCrs->InsertGlobalValues(row,NumEntries2,Values2,Indices2);
+        }
+        insertZeroDiagonal();
+        M_epetraCrs->GlobalAssemble();
+	}
+}
+
+//Swap the matrix with a new one
+
+template <typename DataType>
+void EpetraMatrix<DataType>::swapCrsMatrix(matrix_ptrtype& p)
+{
+    M_epetraCrs.swap(p);
+}
+
+
+template <typename DataType>
+void EpetraMatrix<DataType>::swapCrsMatrix(EpetraMatrix<DataType>& B)
+{
+    M_epetraCrs.swap(B.M_epetraCrs);
+}
+
+template <typename DataType>
+int EpetraMatrix<DataType>::Multiply(bool transposeA,
+                                     const EpetraMatrix<DataType> &B, bool transposeB,
+                                     EpetraMatrix<DataType> &C, bool call_FillComplete_on_result) const
+{
+    //return EpetraExt::MatrixMatrix::Multiply(*M_epetraCrs,transposeA,*B.getMatrixPtr(),transposeB,*C.getMatrixPtr(),call_FillComplete_on_result);
+    int errCode = EpetraExt::MatrixMatrix::Multiply(*M_epetraCrs,transposeA,*B.getMatrixPtr(),transposeB,*C.getMatrixPtr(),false);
+    if(call_FillComplete_on_result)
+        C.GlobalAssemble();
+
+    return errCode;
+}
+
+
+template <typename DataType>
+int EpetraMatrix<DataType>::Multiply(bool transposeA, const vector_type& x, vector_type &y) const
+{
+    return M_epetraCrs->Multiply(transposeA,x.getEpetraVector(),y.getEpetraVector());
 }
 
 
 
+
+
+}
 //@@
 //#undef OFFSET
 
