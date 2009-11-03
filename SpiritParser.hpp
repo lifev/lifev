@@ -33,6 +33,10 @@
 #ifndef __SpiritParser_H
 #define __SpiritParser_H 1
 
+// SpiritParser need optimization level at least = -O1
+//#pragma GCC optimization_level 2
+//#pragma GCC optimize ("-O2")     // Should work with GCC v. 4.4+
+
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit.hpp>
 #include <boost/spirit/phoenix/binders.hpp>
@@ -73,6 +77,8 @@ namespace LifeV {
  *  \verbatim
  *  +, -, *, /, ^, sqrt(), sin(), cos(), tan(), exp(), log(), log10(), >, <.
  *  \endverbatim
+ *
+ *  SpiritParser need optimization level at least -O1
  *
  *  \TODO Fix a problem when calling destructors - NOW FIXED USING REFERENCE INSTEAD OF SHARED_PTR;
  *  \TODO Find a better way to manage results (M_results, M_nResults, setResult(), ...)
