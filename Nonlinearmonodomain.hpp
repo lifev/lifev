@@ -302,6 +302,27 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_recomputeMatrix        ( false )
 { 
 
+ if (M_data.has_fibers() )
+	    {
+	    	std::stringstream MyPID;
+	        ifstream fibers(M_data.fibers_file().c_str());
+
+	        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
+	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
+	        std::vector<Real> fiber_global_vector(NumGlobalElements);
+
+	        for( UInt i=0; i< NumGlobalElements; ++i)
+	    		fibers>>fiber_global_vector[i];
+	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
+	    	for(UInt j=0; j< NumMyElements; ++j)
+	    	{
+	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
+	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
+	    		}
+	    	std::cout << std::endl;
+	    	fiber_global_vector.clear();
+	    }
+
 }
 
 
@@ -419,9 +440,17 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
         //{
 	//         case 0:     //  the usual case
 	M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-	stiffNL( M_sol_uRep, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-			//		break;
-
+	if (M_data.has_fibers() )
+	  {
+	    stiffNL( M_sol_uRep,  M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+	  }
+	else
+	  {
+	    stiffNL( M_sol_uRep, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+	    
+	  }
+	// for the moment we won't use reduce conductivity 
+	//		break;
 	// case 1: // reduced conductivity on a sphere
 	//         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
 	//         	        stiff( M_data.red_sigma_sphere, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
