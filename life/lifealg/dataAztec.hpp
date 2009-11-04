@@ -25,7 +25,7 @@
 #include <vector>
 
     //! Aztec include
-#include "az_aztec.h"
+#include <az_aztec.h>
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/sparseArray.hpp>

@@ -42,7 +42,7 @@
 // #include <Ifpack_Amesos.h>
 // #include <Ifpack_ILU.h>
 
-#include "ml_MultiLevelPreconditioner.h"
+#include <ml_MultiLevelPreconditioner.h>
 
 
 #include <life/lifecore/GetPot.hpp>
