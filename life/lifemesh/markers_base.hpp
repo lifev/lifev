@@ -20,6 +20,8 @@
 #define HH_MARKERSBASE_HH_
 #include <iostream>
 
+#include <life/lifecore/life.hpp>
+
 namespace LifeV
 {
 /*            ************************ MARKER BASE **************************/
@@ -67,9 +69,11 @@ class MarkerTraits_Base
 {
 public:
     //! EntityFlag is the type used to store the geometric entity flags
-    /*!  It is a signed long int so that we have a lot of room */
 
-    typedef signed long int EntityFlag;
+	/*!  It is a signed long int so that we have a lot of room */
+    // typedef signed long int EntityFlag;
+	/*!  Let's use standard LifeV types. TP 11/2009 */
+    typedef ID EntityFlag;
 
     /*! Nullflag is the value indicating a null flag, i.e a flag not yet
       set to a usable value*/
