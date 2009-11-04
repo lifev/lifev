@@ -80,17 +80,37 @@ public:
 
     ~EpetraMatrix() {};
 
-    // Add by Gwenol Grandperrin 23.10.2009
+    //! Return the shared_pointer of the Epetra_FECrsMatrix
     matrix_ptrtype& getMatrixPtr(){return M_epetraCrs;}
+    //! Return the const shared_pointer of the Epetra_FECrsMatrix
     const matrix_ptrtype& getMatrixPtr() const {return M_epetraCrs;}
+    //! If the matrix has been filled, this function will reopen the Matrix
     void openCrsMatrix();
+    //! This function removes all the zeros in the matrix and add zero on the diagonal
     void removeZeros();
+    /*! Swap the given shared pointer with the one of the matrix
+     *  @param p pointer on the matrix
+     */
     void swapCrsMatrix(matrix_ptrtype& p);
+    /*! Swap the matrix with the one given as argument
+     *  @param B matrix which is swapped
+     */
     void swapCrsMatrix(EpetraMatrix<DataType>& B);
-    // Add by Gwenol Grandperrin 26.10.2009
+    /*! Multiply the EpetraMatrix by the first given matrix and put the result in the second given matrix
+     *  @param transposeA if true, it transposes the EpetraMatrix
+     *  @param B matrix that multiply the EpetraMatrix
+     *  @param transposeB if true, it transposes the matrix B
+     *  @param C matrix to store the result
+     *  @param call_FillComplete_on_result if true, the matrix C will be filled (i.e. closed) after the multiplication
+     */
     int Multiply(bool transposeA,
                  const EpetraMatrix<DataType> &B, bool transposeB,
                  EpetraMatrix<DataType> &C, bool call_FillComplete_on_result=true) const;
+    /*! Multiply the first EpetraVector given as a parameter by the EpetraMatrix and put the result into the second given EpetraVector
+     *  @param transposeA if true, it transposes the EpetraMatrix
+     *  @param x vector that will be multiply by the EpetraMatrix
+     *  @param y vector that will store the result
+     */
     int Multiply(bool transposeA, const vector_type& x, vector_type &y) const;
 
     EpetraMatrix& operator += (const EpetraMatrix& _matrix);
@@ -137,6 +157,9 @@ public:
 
     void set_mat_inc( UInt row, UInt col, DataType loc_val );
 
+    /*! Save the matrix into a Matlab (.m) file
+     *  @param filename file where the matrix will be saved
+     */
     void spy    ( std::string const &filename );
 
     // Calls insertZeroDiagonal and then epetra.globalAssemble;
@@ -144,7 +167,7 @@ public:
 
     int MyPID() { return  M_epetraCrs->Comm().MyPID(); }
 
-    //Add by Gwenol Grandperrin 26.10.09
+    //! Return the internal EpetraMap of the EpetraMatrix
     const EpetraMap& getMap() const
     {
         return *M_epetraMap;
@@ -167,11 +190,10 @@ private:
     //! This method does not remove non zero entries in the diagonal.
     void insertZeroDiagonal();
 
-    // Modification by Gwenol Grandperrin 23.10.2009
-    //matrix_type      M_epetraCrs;
+    //!Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
 
-    //Add by Gwenol Grandperrin 26.10.09
+    //! Shared pointer on an EpetraMap
     boost::shared_ptr< EpetraMap > M_epetraMap;
 };
 
