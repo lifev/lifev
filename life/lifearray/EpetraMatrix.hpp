@@ -157,9 +157,6 @@ public:
     void insertOneDiagonal();
 
 private:
-    //Add by Gwenol Grandperrin 26.10.09
-    boost::shared_ptr< EpetraMap > M_epetraMap;
-
     //! insert the given value into the diagonal
     //! Pay intention that this will add values to the diagonal,
     //! so for later added values with set_mat_inc, the one
@@ -173,6 +170,9 @@ private:
     // Modification by Gwenol Grandperrin 23.10.2009
     //matrix_type      M_epetraCrs;
     matrix_ptrtype  M_epetraCrs;
+
+    //Add by Gwenol Grandperrin 26.10.09
+    boost::shared_ptr< EpetraMap > M_epetraMap;
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -547,7 +547,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     //Comm.Barrier();
     // we want to know which IDs are our or not
 
-    for (int ii = 0; ii < rVec.size(); ++ii)
+    for (int ii = 0; ii < (int)rVec.size(); ++ii)
     {
         int lID = rowMap.LID(rVec[ii] + 1);
         if (!(lID < 0))
@@ -597,7 +597,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 
     assert(comm != 0);
 
-    for (int ii = 0; ii < procToID.size(); ++ii)
+    for (int ii = 0; ii < (int)procToID.size(); ++ii)
     {
         if (ii != me)
         {
@@ -619,7 +619,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 
     }
 
-    for (int ii = 0; ii < procToID.size(); ++ii)
+    for (int ii = 0; ii < (int)procToID.size(); ++ii)
     {
         if (ii != me)
         {
