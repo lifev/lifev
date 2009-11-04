@@ -203,7 +203,7 @@ private:
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
-    M_epetraCrs(_matrix.M_epetraCrs)
+    M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs))
 {
 }
 
