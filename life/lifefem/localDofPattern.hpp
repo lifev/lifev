@@ -25,8 +25,8 @@
 namespace LifeV
 {
 /*! Local pattern type
-  This enum allows to distinguish the normal standard local pattern, which is a full pattern invoving all
-  defgrees of freedom to special patterns. It is stared in LocalDofPattern for later use by Dof
+  This enum allows to distinguish the normal standard local pattern, which is a full pattern involving all
+  degrees of freedom to special patterns. It is stared in LocalDofPattern for later use by Dof
 */
 enum PatternType {STANDARD_PATTERN = 1, P1ISOP2_TRIA_PATTERN = 2};
 
@@ -38,7 +38,7 @@ protected:
     int* _patternSecond; //!< column index of the non zero terms of the element matrix
     int _nbPattern; //!< Number of non-zero terms in the element matrix
     int _nbDiag; //!< Number of diagonal terms in the element matrix
-    int _nbUpper; //!< Numer of upper terms in the element matrix
+    int _nbUpper; //!< Number of upper terms in the element matrix
 public:
     LocalDofPattern( int _nbLocalDof, int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume,
                      PatternType _patternType );
