@@ -588,99 +588,142 @@ struct booleanCondition
     //int _max_int( std::ldexp(1., _exp-1) ); // taking a little less: 2^(exp-1) instead of 2^exp - 1
     int max_int (1000);
 
+    int ssize[nProc];
+    int rsize[nProc];
     // cycling on subdomains
     // TODO: Matteo please comment this part :)
+
+    MPI_Status status;
+    int size;
+
+    MPI_Status  recv_status,  send_status;
+    MPI_Request recv_request, send_request;
+
+
     for (int iproc = 0; iproc < nProc; ++iproc)
     {
         // all processes other than me are sending vertices
         // belonging to my subdomain
         if (int(M_me) != iproc)
-        {                                                  //start if
-            int size = locProc[iproc].size();
+            {                                                  //start if
+                size = locProc[iproc].size();
 
-            // tell me how many vertices belonging to me you have to send me
-            MPI_Send(&size, 1, MPI_INT, iproc, 10, MPIcomm);
+                // tell me how many vertices belonging to me you have to send me
+                MPI_Isend(&size, 1, MPI_INT, iproc, 10, MPIcomm, &send_request);
+                ssize[iproc] = size;
 
-            // workaround for huge data to be passed
-            if (size > max_int)
-            {
-                int incr = 1 ;
-                int pos = 0;
-                int size_part =size;
+                //MPI_Wait(&send_request, &send_status);
+                //            MPI_Wait(&recv_request,&recv_status);
 
-                // divide the whole data set into smaller packets
-                while (size_part > max_int )
-                {
-                    incr+=1;
-                    size_part=size/incr;
-                }
 
-                MPI_Send(&incr, 1, MPI_INT, iproc, 20, MPIcomm);
-                MPI_Send(&size_part, 1, MPI_INT, iproc, 30, MPIcomm);
-
-                for ( int kk = 0; kk < incr; ++kk)
-                {         //for
-                    MPI_Send(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm);
-                    MPI_Send(&locProc[iproc][pos], size_part, MPI_INT, iproc, 5000000+kk, MPIcomm);
-                    pos = pos + size_part;
-                }      //endfor
-
-                int resto = size%incr;
-
-                MPI_Send(&resto, 1, MPI_INT, iproc, 80, MPIcomm);
-
-                if(resto!=0)
-                {
-                    MPI_Send(&pos, 1, MPI_INT, iproc, 40, MPIcomm);
-                    MPI_Send(&locProc[iproc][pos],  resto, MPI_INT, iproc, 50, MPIcomm);
-                }
             }
-            else
-                MPI_Send(&locProc[iproc][0], size, MPI_INT, iproc, 60, MPIcomm);
-        }                    //end if
-    }                  //end for
+        else
+            {
+                for (int jproc = 0; jproc < nProc; ++jproc)
+                    {
+                        if (M_me !=jproc)
+                            {
+                                MPI_Recv(&size, 1, MPI_INT, jproc, 10, MPIcomm, &recv_status);
+                                rsize[jproc] = size;
+                            }
+                    }
+            }
+    }
 
 
     for (int iproc = 0; iproc < nProc; ++iproc)
-    {
-        if (int(M_me) != iproc)
         {
-            int        size;
-            MPI_Status status;
-            MPI_Recv(&size, 1, MPI_INT, iproc, 10, MPIcomm, &status);
 
-            std::vector<int> stack(size, 0);
-
-            if (size > max_int )
-            {
-                int size_part, pos, incr;
-
-                MPI_Recv(&incr, 1, MPI_INT, iproc, 20, MPIcomm, &status);
-                MPI_Recv(&size_part, 1, MPI_INT, iproc, 30, MPIcomm, &status);
-
-                for ( int kk = 0; kk < incr; ++kk)
+            if (M_me != iproc)
                 {
-                    MPI_Recv(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm, &status);
-                    MPI_Recv(&stack[pos], size_part , MPI_INT, iproc, 5000000+kk, MPIcomm, &status);
-                }
-                int resto=0;
-                MPI_Recv(&resto, 1, MPI_INT, iproc, 80, MPIcomm, &status);
+                    size = ssize[iproc];
+                    // workaround for huge data to be passed
+                    if (size > max_int)
+                        {
+                            int incr = 1 ;
+                            int pos = 0;
+                            int size_part =size;
 
-                if(resto!=0)
-                {
-                    MPI_Recv(&pos, 1, MPI_INT, iproc, 40, MPIcomm, &status);
-                    MPI_Recv(&stack[pos],  resto, MPI_INT, iproc, 50, MPIcomm, &status);
+                            // divide the whole data set into smaller packets
+                            while (size_part > max_int )
+                                {
+                                    incr+=1;
+                                    size_part=size/incr;
+                                }
+
+                            MPI_Send(&incr, 1, MPI_INT, iproc, 20, MPIcomm);
+                            MPI_Send(&size_part, 1, MPI_INT, iproc, 30, MPIcomm);
+
+                            for ( int kk = 0; kk < incr; ++kk)
+                                {         //for
+                                    MPI_Send(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm);
+                                    MPI_Send(&locProc[iproc][pos], size_part, MPI_INT, iproc, 5000000+kk, MPIcomm);
+                                    pos = pos + size_part;
+                                }      //endfor
+
+                            int resto = size%incr;
+
+                            MPI_Send(&resto, 1, MPI_INT, iproc, 80, MPIcomm);
+
+                            if(resto!=0)
+                                {
+                                    MPI_Send(&pos, 1, MPI_INT, iproc, 40, MPIcomm);
+                                    MPI_Send(&locProc[iproc][pos],  resto, MPI_INT, iproc, 50, MPIcomm);
+                                }
+                        }
+                    else
+                        if (size != 0)
+                            MPI_Send(&locProc[iproc][0], size, MPI_INT, iproc, 60, MPIcomm);
+
+//                 }
+//         }
+
                 }
-            }
             else
-                MPI_Recv(&stack[0], size , MPI_INT, iproc, 60, MPIcomm, &status);
+                {
+                    for (int jproc = 0; jproc < nProc; ++jproc)
+                        {
+                            if (jproc != iproc)
+                                {
+                                    size = rsize[jproc];
+                                    std::vector<int> stack(size, 0);
 
-            for (int jj = 0; jj < size; ++jj)
-            {
-                locProc[M_me].push_back(stack[jj]);
-            }
-        }
-    }
+                                    if (size > max_int )
+                                        {
+                                            int size_part, pos, incr;
+
+                                            MPI_Recv(&incr, 1, MPI_INT, jproc, 20, MPIcomm, &status);
+                                            MPI_Recv(&size_part, 1, MPI_INT, jproc, 30, MPIcomm, &status);
+
+                                            for ( int kk = 0; kk < incr; ++kk)
+                                                {
+                                                    MPI_Recv(&pos, 1, MPI_INT, jproc, 100+kk, MPIcomm, &status);
+                                                    MPI_Recv(&stack[pos], size_part , MPI_INT, jproc, 5000000+kk, MPIcomm, &status);
+                                                }
+                                            int resto=0;
+                                            MPI_Recv(&resto, 1, MPI_INT, jproc, 80, MPIcomm, &status);
+
+                                            if(resto!=0)
+                                                {
+                                                    MPI_Recv(&pos, 1, MPI_INT, jproc, 40, MPIcomm, &status);
+                                                    MPI_Recv(&stack[pos],  resto, MPI_INT, jproc, 50, MPIcomm, &status);
+                                                }
+                                        }
+                                    else
+                                        {
+                                            if (size != 0)
+                                                MPI_Recv(&stack[0], size , MPI_INT, jproc, 60, MPIcomm, &status);
+                                        }
+                                    for (int jj = 0; jj < size; ++jj)
+                                        {
+                                            locProc[M_me].push_back(stack[jj]);
+                                        }
+
+                                }
+                        }
+                }//end if
+            //M_comm->Barrier();
+        }                 //end for
 
 
     std::cout << M_me << " has " << locProc[M_me].size() << " elements." << std::endl;
