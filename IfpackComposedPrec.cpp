@@ -97,7 +97,7 @@ IfpackComposedPrec::createIfpackPrec(operator_type& oper,
     Ifpack factory;
 
 
-    prec.reset(factory.Create(M_precType, &oper->getEpetraMatrix(), M_overlapLevel));
+    prec.reset(factory.Create(M_precType, oper->getMatrixPtr().get(), M_overlapLevel));
 
     if ( !prec.get() )
         {
