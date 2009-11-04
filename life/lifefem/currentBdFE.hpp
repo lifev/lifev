@@ -22,7 +22,6 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/refFE.hpp>
-#include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/staticBdFE.hpp>
 /*!
   \file currentBdFE.h
@@ -69,7 +68,7 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( UInt i = 0;i < nbGeoNode;i++ )
+        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
         	for(UInt icoor=0; icoor<nDimensions; icoor++)
         		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
     }
@@ -91,7 +90,7 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;i < nbGeoNode;i++ )
+        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
         	for(UInt icoor=0; icoor<nDimensions; icoor++)
         		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 
@@ -143,7 +142,7 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;i < nbGeoNode;i++ )
+        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
         	for(UInt icoor=0; icoor<nDimensions; icoor++)
         		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 
@@ -168,7 +167,7 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;i < nbGeoNode;i++ )
+        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
         	for(UInt icoor=0; icoor<nDimensions; icoor++)
         		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 

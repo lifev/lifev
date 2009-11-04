@@ -500,14 +500,14 @@ private:
     //! container for id's when the list is finalised
     std::vector<boost::shared_ptr<IdentifierBase> > _M_IdGlobalList;
 
+    //! BC offset
+    int _M_offset;
+
     //! true, when idlist updated
     bool _M_finalised;
 
     //! true, when IdGloballist updated
     bool _M_finalisedIdGlobal;
-
-    //! BC offset
-    int _M_offset;
 
     //! Transfert between list and vector containers
     void finalise();

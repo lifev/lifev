@@ -303,6 +303,7 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
     {
         ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
     };
+    return 0.;
 };
 
 //========Barycenter===============================
