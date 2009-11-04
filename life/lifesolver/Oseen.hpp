@@ -707,8 +707,8 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
         // stiffness strain
         chronoStiff.start();
-        //stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_uFESpace.fe() );
-        stiff( M_data.viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
+        stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_uFESpace.fe() );
+        //stiff( M_data.viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
         //stiff_div( 0.5*M_uFESpace.fe().diameter(), M_elmatStiff, M_uFESpace.fe() );
         chronoStiff.stop();
 
@@ -755,8 +755,8 @@ void Oseen<Mesh, SolverType>::buildSystem()
             }
             else
             {
-                //for ( UInt jComp = 0; jComp < nbCompU; jComp++ )//ADDED
-                //{to use if stiff_strain(...) is called instead of stiff(...)
+                for ( UInt jComp = 0; jComp < nbCompU; jComp++ )//ADDED
+                { // to use if stiff_strain(...) is called instead of stiff(...)
                 chronoStiffAssemble.start();
                 assembleMatrix( *M_matrStokes,
                                 M_elmatStiff,
@@ -764,11 +764,11 @@ void Oseen<Mesh, SolverType>::buildSystem()
                                 M_uFESpace.fe(),
                                 M_uFESpace.dof(),
                                 M_uFESpace.dof(),
-                                iComp, iComp,
-                                iComp*velTotalDof, iComp*velTotalDof);
+                                iComp, jComp,
+                                iComp*velTotalDof, jComp*velTotalDof);
                 chronoStiffAssemble.stop();
 
-                        //             } //to use if stiff_strain(...) is called instead of stiff(...)
+            } //to use if stiff_strain(...) is called instead of stiff(...)
 
 
             if ( !M_steady )
