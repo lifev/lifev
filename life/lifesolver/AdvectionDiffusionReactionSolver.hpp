@@ -55,7 +55,7 @@
 //
 #include <boost/shared_ptr.hpp>
 
-#include "life/lifefem/FESpace.hpp"
+#include <life/lifefem/FESpace.hpp>
 
 #include <list>
 

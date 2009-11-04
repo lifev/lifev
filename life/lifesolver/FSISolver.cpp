@@ -76,8 +76,8 @@ FSISolver::FSISolver( const std::string& method ):
     bool fluid = false;
     bool solid = false;
 
-    int  fluidLeader;
-    int  solidLeader;
+    int  fluidLeader(0);
+    int  solidLeader(0);
 
     if( !M_monolithic )
 	{

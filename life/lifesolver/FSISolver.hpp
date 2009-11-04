@@ -39,11 +39,11 @@
 #include <life/lifealg/nonLinRichardson.hpp>
 #include <life/lifealg/newton.hpp>
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-	#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-	#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 namespace LifeV {
@@ -116,7 +116,7 @@ public:
     FSISolver( const std::string& method = "" );
 
     //! default/only destructor for the FSI solver
-    ~FSISolver() {}
+    virtual ~FSISolver() {}
 
     //@}
 

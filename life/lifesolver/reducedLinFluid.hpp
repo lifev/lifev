@@ -34,7 +34,7 @@
 
 
 #include <life/lifecore/life.hpp>
-#include "life/lifesolver/FSIOperator.hpp"
+#include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/NavierStokesAleSolverPC.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifefem/regionMesh3D_ALE.hpp>

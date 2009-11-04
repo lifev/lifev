@@ -44,11 +44,11 @@
 //#include <life/lifefem/refFE.hpp>
 //#include <life/lifesolver/fixedPointBase.hpp>
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-	#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-	#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 #define FLUID 1
@@ -181,7 +181,7 @@ public:
                              FSIOperator::fluid_type::value_type::Function const& p0,
                              FSIOperator::solid_type::value_type::Function const& d0,
                              FSIOperator::solid_type::value_type::Function const& w0,
-                             FSIOperator::fluid_type::value_type::Function const& df0=FSIOperator::solid_type::value_type::Function())
+                             FSIOperator::fluid_type::value_type::Function const& /*df0=FSIOperator::solid_type::value_type::Function()*/)
     {
         Debug( 6220 ) << "FSIOperator:: solid init \n";
         if (this->isSolid())
@@ -206,9 +206,9 @@ public:
 //     void solveLinearFluid();
 //     void solveLinearSolid();
 
-  virtual void setFluxBC             (fluid_bchandler_type bc_fluid){}
+  virtual void setFluxBC             (fluid_bchandler_type /*bc_fluid*/){}
 
-  virtual void setRobinBC             (fluid_bchandler_type bc_solid){}
+  virtual void setRobinBC             (fluid_bchandler_type /*bc_solid*/){}
 
     void transferFluidOnInterface( const vector_type& _vec1, vector_type& _vec2 );
 
@@ -353,7 +353,7 @@ public:
     const solid_bchandler_type& BCh_solid()                       const { return M_BCh_d; }
     const solid_bchandler_type& BCh_dz()                          const { return M_BCh_dz; }
     const solid_bchandler_type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
-    virtual const fluid_bchandler_type& BCh_flux()                      const {}
+    virtual const fluid_bchandler_type& BCh_flux()                const { }
 
 
 //     quasi_newton_type getReducedLinFluid()                              { return M_reducedLinFluid; }

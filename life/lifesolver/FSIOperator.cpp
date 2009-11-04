@@ -1672,7 +1672,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fes
 		//            std::cout << "  -> both FESpace have unknowns on their nodes" << std::endl;
 		for ( ID iVert = 1; iVert <= _fespace1.mesh()->numVertices(); ++iVert )
 		{
-			if (_fespace1.mesh()->pointList(iVert).marker() != M_fluidInterfaceFlag) continue;
+			if ((int)_fespace1.mesh()->pointList(iVert).marker() != M_fluidInterfaceFlag) continue;
 
 			ID nodeID = _fespace1.mesh()->pointList(iVert).id();
 			// Loop number of Dof per vertex
@@ -1701,7 +1701,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fes
 		// loop on boundary edges
 		for ( ID iEdge = 1; iEdge <= nBEdges1; ++iEdge )
 		{
-			if (_fespace1.mesh()->edgeList(iEdge).marker() != M_fluidInterfaceFlag) continue;
+			if ((int)_fespace1.mesh()->edgeList(iEdge).marker() != M_fluidInterfaceFlag) continue;
 
 			// edge ID
 			ID edgeID = _fespace1.mesh()->edgeList(iEdge).id();
@@ -1773,7 +1773,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fes
 		// loop on boundary edges
 		for ( ID iEdge = 1; iEdge <= nBEdges2; ++iEdge )
 		{
-			if (_fespace2.mesh()->edgeList(iEdge).marker() != M_fluidInterfaceFlag) continue;
+			if ((int)_fespace2.mesh()->edgeList(iEdge).marker() != M_fluidInterfaceFlag) continue;
 			// Now that we have an edge on the FS interface, let's get its ID
 			ID edgeID = _fespace2.mesh()->edgeList(iEdge).id();
 			// dof position of the edge since unknowns are store using [ node | edges | faces | volumes ]
