@@ -2298,64 +2298,8 @@ void bcCalculateNormals(const MeshType& mesh,CurrentBdFE& bdfem,
 }
 
 
-void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad)
-{
-    // Author:	Gwenol Grandperrin
-    // Date:	23.09.09
-    //
-    // This function basically calculate the tangential vectors
-    // and store the component in the triad vector
+void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad);
 
-    std::map< ID,std::vector< Real > >::iterator mapIt;
-    for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
-    {
-        //We take max{|n x i|,|n x j|,|n x k|}
-        //			=max{sqrt(ny^2+nz^2),sqrt(nx^2+nz^2),sqrt(nx^2+ny^2)}
-        //			=max{r1,r2,r3}
-        Real nx((*mapIt).second[6]);
-        Real ny((*mapIt).second[7]);
-        Real nz((*mapIt).second[8]);
-        Real nxi=sqrt(ny*ny+nz*nz);
-        Real nxj=sqrt(nx*nx+nz*nz);
-        Real nxk=sqrt(nx*nx+ny*ny);
-        if((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
-        {
-            //We create t1
-            (*mapIt).second[0] = 0;
-            (*mapIt).second[1] = nz/nxi;
-            (*mapIt).second[2] = -ny/nxi;
-
-            //We create t2
-            (*mapIt).second[3] = -nxi;
-            (*mapIt).second[4] = nx*ny/nxi;
-            (*mapIt).second[5] = nx*nz/nxi;
-        }
-        else if((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
-        {
-            //We create t1
-            (*mapIt).second[0] = -nz/nxj;
-            (*mapIt).second[1] = 0;
-            (*mapIt).second[2] = nx/nxj;
-
-            //We create t2
-            (*mapIt).second[3] = nx*ny/nxj;
-            (*mapIt).second[4] = -nxj;
-            (*mapIt).second[5] = ny*nz/nxj;
-        }
-        else //max = |n x k|
-        {
-            //We create t1
-            (*mapIt).second[0] = ny/nxk;
-            (*mapIt).second[1] = -nx/nxk;
-            (*mapIt).second[2] = 0;
-
-            //We create t2
-            (*mapIt).second[3] = nx*nz/nxk;
-            (*mapIt).second[4] = ny*nz/nxk;
-            (*mapIt).second[5] = -nxk;
-        }
-    }
-}
 
 template <typename MeshType>
 void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
@@ -2416,7 +2360,7 @@ void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
     //-----------------------------------------------------
     std::string filename("normalAndTangentialDirections");
     filename.append(".vtk");
-    ofstream file(filename.c_str());
+    std::ofstream file(filename.c_str());
 
     //Is the file open?
     if (file.fail())
@@ -2526,23 +2470,23 @@ MatrixType createRMatrix(const Dof& dof, MatrixType& A,
 
         //Line i (first tangential vector)
         values[0][0] = (*mapIt).second[0];
-        values[0][1] = (*mapIt).second[1];
-        values[0][2] = (*mapIt).second[2];
+        values[1][0] = (*mapIt).second[1];
+        values[2][0] = (*mapIt).second[2];
         R.set_mat(Indices[0],Indices[0],0.0);
 
         //Line j (second tangential vector)
-        values[1][0] = (*mapIt).second[3];
+        values[0][1] = (*mapIt).second[3];
         values[1][1] = (*mapIt).second[4];
-        values[1][2]= (*mapIt).second[5];
+        values[2][1]= (*mapIt).second[5];
         R.set_mat(Indices[1],Indices[1],0.0);
 
         //Line k (normal vector)
-        values[2][0] = (*mapIt).second[6];
-        values[2][1] = (*mapIt).second[7];
+        values[0][2] = (*mapIt).second[6];
+        values[1][2] = (*mapIt).second[7];
         values[2][2] = (*mapIt).second[8];
         R.set_mat(Indices[2],Indices[2],0.0);
 
-        R.set_mat_inc(nbCols, nbRows, cols, rows, values,Epetra_FECrsMatrix::ROW_MAJOR);
+        R.set_mat_inc(nbCols, nbRows, cols, rows, values);
 
     }
 
