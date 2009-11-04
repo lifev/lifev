@@ -69,7 +69,7 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 
     // triad is the triple (\tau_1, \tau_2, n)
     //(cf Gwenol Grandperrin Master Thesis)
-    std::map< ID,vector< Real > > triad;
+    std::map< ID,std::vector< Real > > triad;
 
     bool globalassemble=false;
     // Loop on boundary conditions
@@ -193,7 +193,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
 
     // triad is the triple (\tau_1, \tau_2, n)
     //(cf Gwenol Grandperrin Master Thesis)
-    std::map< ID,vector< Real > > triad;
+    std::map< ID,std::vector< Real > > triad;
 
     // changingBasis is a bool to see if we need to change the local reference system
     bool changingBasis=false;
@@ -2230,7 +2230,7 @@ void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, con
 
 template <typename MeshType>
 void bcCalculateNormals(const MeshType& mesh,CurrentBdFE& bdfem,
-						std::map< ID,vector< Real > > &triad)
+						std::map< ID,std::vector< Real > > &triad)
 
 {
     // Author:	Gwenol Grandperrin
@@ -2286,7 +2286,7 @@ void bcCalculateNormals(const MeshType& mesh,CurrentBdFE& bdfem,
     //-----------------------------------------------------
     // STEP 2: Normalizing the vectors
     //-----------------------------------------------------
-	std::map< ID,vector< Real > >::iterator mapIt;
+	std::map< ID,std::vector< Real > >::iterator mapIt;
 	for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
     {
 	    Real norm(0.0);
@@ -2298,7 +2298,7 @@ void bcCalculateNormals(const MeshType& mesh,CurrentBdFE& bdfem,
 }
 
 
-void bcCalculateTangentVectors(std::map< ID,vector< Real > > &triad)
+void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad)
 {
     // Author:	Gwenol Grandperrin
     // Date:	23.09.09
@@ -2306,7 +2306,7 @@ void bcCalculateTangentVectors(std::map< ID,vector< Real > > &triad)
     // This function basically calculate the tangential vectors
     // and store the component in the triad vector
 
-    std::map< ID,vector< Real > >::iterator mapIt;
+    std::map< ID,std::vector< Real > >::iterator mapIt;
     for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
     {
         //We take max{|n x i|,|n x j|,|n x k|}
@@ -2359,7 +2359,7 @@ void bcCalculateTangentVectors(std::map< ID,vector< Real > > &triad)
 
 template <typename MeshType>
 void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
-                  CurrentBdFE& bdfem, std::map< ID,vector< Real > > &triad,UInt offset=0)
+                  CurrentBdFE& bdfem, std::map< ID,std::vector< Real > > &triad,UInt offset=0)
 {
     // Author:	Gwenol Grandperrin
     // Date:	29.09.09
@@ -2384,7 +2384,7 @@ void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
     // STEP 1: Initialization of the vectors
     //-----------------------------------------------------
     //Initialization of the map to store the normal vectors
-    std::map< ID,vector< Real > >::iterator mapIt;
+    std::map< ID,std::vector< Real > >::iterator mapIt;
 
     // Loop on BC identifiers
     for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -2393,11 +2393,11 @@ void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
         //std::cout << "id: " << pId->id() << " x: " << pId->x() << " y: " << pId->y() << " z: " << pId->z() << std::endl;
 
         //We add it into the map
-        vector< Real > t1t2n(12,0.0);
+        std::vector< Real > t1t2n(12,0.0);
         t1t2n[9]=pId->x();
         t1t2n[10]=pId->y();
         t1t2n[11]=pId->z();
-        triad.insert ( pair<ID,vector<Real> >(BCb(i)->id(),t1t2n) );
+        triad.insert ( pair<ID,std::vector<Real> >(BCb(i)->id(),t1t2n) );
     }
 
     //-----------------------------------------------------
@@ -2471,13 +2471,13 @@ void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
 */
 template <typename MatrixType>
 MatrixType createRMatrix(const Dof& dof, MatrixType& A,
-                         std::map< ID,vector< Real > > &triad,
+                         std::map< ID,std::vector< Real > > &triad,
                          UInt offset=0)
 {
 
     //std::cout << "Creating the R matrix... ";
     //Initialization of the map to store the normal vectors
-    std::map< ID,vector< Real > >::iterator mapIt;
+    std::map< ID,std::vector< Real > >::iterator mapIt;
 
     //Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
