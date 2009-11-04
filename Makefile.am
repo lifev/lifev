@@ -27,9 +27,9 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 check_HEADERS = ud_functions.hpp boundaryConditions.hpp
 
 check_PROGRAMS = test_monolithic
-test_monolithic_SOURCES = main.cpp ud_functions.cpp  $(top_srcdir)/lifemc/lifealg/IfpackComposedPrec.cpp $(top_srcdir)/lifemc/lifealg/eigenSolver.cpp  $(top_srcdir)/lifemc/lifesolver/fullMonolithic.cpp $(top_srcdir)/lifemc/lifesolver/Monolithic.cpp
+test_monolithic_SOURCES = main.cpp ud_functions.cpp
 
-test_monolithic_LDADD = -llifesolver
+#test_monolithic_LDADD = -llifesolver ## already in Makefile.testsuite
 
 EXTRA_DIST = data testsuite.at
 
