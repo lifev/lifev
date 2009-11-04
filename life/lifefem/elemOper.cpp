@@ -337,7 +337,7 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
     Tab2d mat_tmp( fe.nbNode, fe.nbNode );
     int i, ig;
     int iloc, jloc;
-    Real s, coef_s;
+    Real s;//, coef_s;
     mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
     //
     // diagonal
@@ -1235,7 +1235,7 @@ void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
 
     int iloc, jloc;
     int i, icoor, ig;
-    double s, coef_s;
+    double s;//, coef_s;
     //
     // diagonal
     //
@@ -2069,7 +2069,7 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
     mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
 
     int i, icomp, ig, icoor, iloc, jloc;
-    Real s, coef_s, divw[ fe.nbQuadPt ];
+    Real s, divw[ fe.nbQuadPt ]; // , coef_s
 
     // divw at quadrature nodes
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -2984,7 +2984,7 @@ void source_mass11( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, con
 
 
 
-                for ( UInt kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+                for ( UInt kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
                     {
                         for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                             {
@@ -3063,7 +3063,7 @@ void source_mass11( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, con
         // loop on nodes, i.e. loop on components of this block
         for ( int i = 0;i < fe.nbNode;i++ )
         {
-        for ( UInt j = 0;j < fe.nbNode;j++ )
+        for ( int j = 0;j < fe.nbNode;j++ )
         {
 
             // loop on quadrature points
@@ -3075,7 +3075,7 @@ void source_mass11( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, con
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                     s -= convect_A[ ig ][ jcoor ][j][kcoor] * uk[ ig ][ icoor ] * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
             }
-            mat[ i , j] += coef * s;
+            mat( i , j ) += coef * s;
         }
     }
     }
@@ -3187,7 +3187,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
 
 
 
-                for ( UInt kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+                for ( UInt kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
                     {
                         s = 0;
                         for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
@@ -3271,7 +3271,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
         // loop on nodes, i.e. loop on components of this block
         for ( int i = 0;i < fe.nbNode;i++ )
         {
-        for ( UInt j = 0;j < fe.nbNode;j++ )
+        for ( int j = 0;j < fe.nbNode;j++ )
         {
 
             // loop on quadrature points
@@ -3286,7 +3286,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                     s += convect_A[ ig ][ jcoor ][j][kcoor] * guk[ ig ][ icoor ][ jcoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
             }
-            mat[ i , j] += coef * s;
+            mat( i , j ) += coef * s;
         }
     }
     }
@@ -3450,7 +3450,7 @@ void source_mass2( Real coef, const ElemVec& uk_loc,
             s = 0;
             for ( ig = 0;ig < fe.nbQuadPt;ig++ )
                 s += aux[ ig ][ icoor ][j][jcoor] * fe.phi( i, ig ) * fe.weightDet( ig );
-            mat[ i, j] += coef * s;
+            mat( i, j ) += coef * s;
         }
     }
     }
@@ -3473,7 +3473,7 @@ void source_mass22( Real coef, const ElemVec& uk_loc,
     Real s;
     Real sA;
 
-    int ig, icoor, jcoor, i;
+    int ig, icoor, jcoor; //, i;
 
 
 
@@ -3545,7 +3545,7 @@ void source_mass22( Real coef, const ElemVec& uk_loc,
                     }
             }
 
-        for ( i = 0;i < fe.nbNode;i++ )
+        for ( int i = 0;i < fe.nbNode;i++ )
         for ( int kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
         {
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
@@ -3576,14 +3576,14 @@ void source_mass22( Real coef, const ElemVec& uk_loc,
 //         }
         // loop on nodes, i.e. loop on components of this block
         for ( int j = 0;j < fe.nbNode;j++ )
-        for ( i = 0;i < fe.nbNode;i++ )
+        for ( int i = 0;i < fe.nbNode;i++ )
         {
 
             // loop on quadrature points
             s = 0;
             for ( ig = 0;ig < fe.nbQuadPt;ig++ )
                 s += aux[ ig ][ icoor ][j][jcoor] * fe.phi( i, ig ) * fe.weightDet( ig );
-            mat[ i, j] += coef * s;
+            mat( i, j ) += coef * s;
         }
     }
     }
@@ -3754,13 +3754,13 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc,
                 double l=0.;
                 double z[fe.nbCoor];
                 //                for ( int kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
-                for ( UInt kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+                for ( UInt kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
                     {
                                 //if(icoor==jcoor)
                                 z[ kcoor ] = A[ kcoor ][ kcoor ][i][kcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
                     }
 
-                for ( UInt kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+                for ( UInt kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
                     {
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                     {
@@ -3810,14 +3810,14 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc,
 
       for ( int i = 0;i < fe.nbNode;i++ )
         {
-          for ( UInt j = 0;j < fe.nbNode;j++ )
+          for ( int j = 0;j < fe.nbNode;j++ )
               {
                   // loop on quadrature points
                   s = 0;
                   for ( ig = 0;ig < fe.nbQuadPt;ig++ )
                       // \grad u^n:[2 * I\div d - (\grad d)^T] u^k \phi_i
                       s += aux[ ig ][j][jcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
-                  mat[ i, j ] += coef * s;
+                  mat( i, j ) += coef * s;
               }
         }
     }
@@ -4461,7 +4461,7 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 
     //    double A[ fe_u.nbCoor ][ fe_u.nbCoor ][fe_u.nbNode][ fe_u.nbCoor ];
 
-    Real s, l/*[fe_u.nbNode][fe_u.nbCoor]*/, sA/*[fe_u.nbNode][fe_u.nbCoor]*/, sG;
+    Real /*s,*/ l/*[fe_u.nbNode][fe_u.nbCoor]*/, sA/*[fe_u.nbNode][fe_u.nbCoor]*/, sG;
     int icoor, jcoor, ig;
 
 
@@ -4495,7 +4495,7 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
                 //for ( short k = 0;k < fe_u.nbCoor;k++ )
                     //sA[i][k] = 0.0;
             // loop  on space coordinates
-            for ( UInt kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
+            for ( UInt kcoor = 0;(int)kcoor < fe_u.nbCoor;kcoor++ )
             for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
             {
                 sG = 0.0;
@@ -4584,16 +4584,16 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
     //
     // Numerical integration
     //
-    for ( UInt kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
+    for ( UInt kcoor = 0;(int)kcoor < fe_u.nbCoor;kcoor++ )
         {
             //            for ( short l = 0;i < fe_u.nbNode;i++ )
             //for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
             double l = 0.;
 
             ElemMat::matrix_view mat = elmat.block( iblock, kcoor );
-            for ( UInt j = 0;j < fe_u.nbNode;j++ )
+            for ( int j = 0;j < fe_u.nbNode;j++ )
             for ( int i = 0;i < fe_p.nbNode;i++ )
-            mat[i,j]=0.;
+            mat(i,j)=0.;
 
             // Loop on nodes, i.e. loop on elementary vector components
             for ( int j = 0;j < fe_u.nbNode;j++ )
@@ -4661,7 +4661,7 @@ void source_presss( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
                 s += fe_p.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe_p.nbNode ];
             uk[ ig ][ icoor ] = s;
 
-            for ( UInt kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
+            for ( UInt kcoor = 0;(int)kcoor < fe_u.nbCoor;kcoor++ )
             for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
             {
                 sG = 0.0;
@@ -4750,7 +4750,7 @@ void source_presss( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
     //
     // Numerical integration
     //
-    for ( UInt kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
+    for ( UInt kcoor = 0;(int)kcoor < fe_u.nbCoor;kcoor++ )
         {
             //            for ( short l = 0;i < fe_u.nbNode;i++ )
             //for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
