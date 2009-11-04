@@ -39,11 +39,12 @@
 //#include "NavierStokesSolverBlockIP.hpp"
 
 //#include "Epetra_SerialComm.h"
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_MpiComm.h>
 #include <mpi.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>

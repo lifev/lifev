@@ -28,11 +28,11 @@
    \date 2005-04-16
  */
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -43,7 +43,7 @@
 #include <life/lifealg/MLPreconditioner.hpp>
 #include "resistance.hpp"
 
-#include "mpi.h"
+#include <mpi.h>
 
 
 LifeV::AboutData

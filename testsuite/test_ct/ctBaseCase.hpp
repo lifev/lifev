@@ -1,11 +1,12 @@
 #ifndef __CT_BASE_CASE_HH
 #define __CT_BASE_CASE_HH 1
 
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
-#include "mpi.h"
+#include <Epetra_MpiComm.h>
+#include <mpi.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 #include <ChorinTemam.hpp>
 #include <iostream>

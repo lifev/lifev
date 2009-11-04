@@ -3,7 +3,7 @@
 #endif
 
 
-#include "Epetra_config.h"
+#include <Epetra_config.h>
 
 #include <life/lifefilters/medit_wrtrs.hpp>
 
@@ -16,7 +16,7 @@
 #include <life/lifefem/FESpace.hpp>
 
 #ifdef HAVE_MPI
-#include "mpi.h"
+#include <mpi.h>
 #endif
 
 int main(int argc, char** argv)

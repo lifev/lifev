@@ -35,11 +35,11 @@
 
 // includes and whatnot
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -47,7 +47,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
 
-#include "mpi.h"
+#include <mpi.h>
 
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>

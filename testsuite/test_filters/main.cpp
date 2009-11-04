@@ -28,11 +28,11 @@
    \date 2008-08-11
  */
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -41,7 +41,7 @@
 #include <life/lifecore/application.hpp>
 
 #include "ensightToHdf5.hpp"
-#include "mpi.h"
+#include <mpi.h>
 
 
 LifeV::AboutData

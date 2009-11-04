@@ -32,11 +32,11 @@
 #error test_cylinder cannot be compiled in 2D
 #endif
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -46,8 +46,8 @@
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
-#include <cylinder.hpp>
-#include "mpi.h"
+#include "cylinder.hpp"
+#include <mpi.h>
 
 
 LifeV::AboutData

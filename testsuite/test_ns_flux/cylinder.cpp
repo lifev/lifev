@@ -28,12 +28,12 @@
    \author Simone Deparis <simone.deparis@epfl.ch>
    \date 2008-06-13
  */
-
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_MpiComm.h>
 #include <mpi.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
@@ -48,7 +48,7 @@
 
 #include <life/lifesolver/Oseen.hpp>
 
-#include <cylinder.hpp>
+#include "cylinder.hpp"
 #include <iostream>
 #include <math.h>
 

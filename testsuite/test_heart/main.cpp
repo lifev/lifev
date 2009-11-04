@@ -32,19 +32,18 @@
 #error test_heart cannot be compiled in 2D
 #endif
 
-#include "Epetra_config.h"
-
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+	#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
 #include <heart.hpp>
-#include "mpi.h"
+#include <mpi.h>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 

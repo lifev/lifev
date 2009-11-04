@@ -27,11 +27,12 @@
    \date 2008-08-08
  */
 
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_MpiComm.h>
 #include <mpi.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>

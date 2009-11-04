@@ -33,11 +33,12 @@
 
 #include <life/lifecore/application.hpp>
 
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_MpiComm.h>
 #include <mpi.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };

@@ -39,11 +39,12 @@
 //#include "NavierStokesSolverBlockIP.hpp"
 
 //#include "Epetra_SerialComm.h"
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
-#include <mpi.h>
+	#include <Epetra_MpiComm.h>
+    #include <mpi.h>
 #else
-#include "Epetra_SerialComm.h"
+	#include <Epetra_SerialComm.h>
 #endif
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
@@ -56,7 +57,7 @@
 
 #include <life/lifesolver/Oseen.hpp>
 
-#include <cylinder.hpp>
+#include "cylinder.hpp"
 #include <iostream>
 
 
