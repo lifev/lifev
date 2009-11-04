@@ -58,8 +58,8 @@ void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
                                      const std::string&     section)
 {
-    bool found;
-    M_analyze = dataFile((section + "/ML/analyze_smoother").data(), false, found);
+    bool found(false);
+    M_analyze = dataFile((section + "/ML/analyze_smoother").data(), found);
 
     createMLList(dataFile, section, M_List);
 
