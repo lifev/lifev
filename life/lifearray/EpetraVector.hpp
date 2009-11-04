@@ -47,8 +47,8 @@
 #ifndef _EPETRAVECTOR_HPP_
 #define _EPETRAVECTOR_HPP_
 
-#include "life/lifecore/life.hpp"
-#include "life/lifealg/EpetraMap.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifealg/EpetraMap.hpp>
 
 #include <Epetra_FEVector.h>
 #include <Epetra_Export.h>

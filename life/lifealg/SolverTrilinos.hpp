@@ -32,22 +32,22 @@
 #ifndef __SolverTrilinos_H
 #define __SolverTrilinos_H 1
 
-#include "Epetra_ConfigDefs.h"
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
+#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 
-#include "AztecOO_config.h"
-#include "AztecOO.h"
-#include "Teuchos_ParameterList.hpp"
+#include <AztecOO_config.h>
+#include <AztecOO.h>
+#include <Teuchos_ParameterList.hpp>
 
-#include "life/lifearray/EpetraVector.hpp"
-#include "life/lifearray/EpetraMatrix.hpp"
+#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/EpetraMatrix.hpp>
 
-#include "life/lifealg/EpetraPreconditioner.hpp"
-#include "life/lifealg/IfpackPreconditioner.hpp"
+#include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
 
 #include <life/lifecore/debug.hpp>
 #include <life/lifecore/GetPot.hpp>
