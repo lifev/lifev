@@ -14,13 +14,13 @@
 #ifndef _SolverAmesos_H
 #define _SolverAmesos_H
 
-#include "Amesos.h"
-#include "Amesos_BaseSolver.h"
+#include <Amesos.h>
+#include <Amesos_BaseSolver.h>
 
 
-#include "Teuchos_ParameterList.hpp"
-#include "life/lifearray/EpetraVector.hpp"
-#include "life/lifearray/EpetraMatrix.hpp"
+#include <Teuchos_ParameterList.hpp>
+#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/EpetraMatrix.hpp>
 
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/displayer.hpp>
@@ -129,7 +129,7 @@ public:
     // return the Aztec status
 
 
-    std::string printStatus();
+    void printStatus();
 
 //     void getStatus( double status[AZ_STATUS_SIZE])
 //     { M_solver.GetAllAztecStatus( status );}

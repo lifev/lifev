@@ -46,7 +46,7 @@
 #include <life/lifecore/GetPot.hpp>
 
 #include <life/lifealg/SolverAmesos.hpp>
-#include "Epetra_Comm.h"
+#include <Epetra_Comm.h>
 
 #include <iomanip>
 
@@ -100,7 +100,7 @@ void SolverAmesos::setMatrix(matrix_type& m)
     M_problem.SetOperator(M_matrix.get());
 }
 
-void SolverAmesos::setOperator( Epetra_Operator& op)
+void SolverAmesos::setOperator( Epetra_Operator& /*op*/)
 {
     ASSERT(false,"SolverAmesos::setOperator: not coded");
 }
@@ -243,7 +243,7 @@ SolverAmesos::computeResidual( vector_type& x, vector_type& b )
 
 
 
-std::string
+void
 SolverAmesos::printStatus()
 {
 
@@ -273,9 +273,9 @@ SolverAmesos::printStatus()
 
 int SolverAmesos::solveSystem(  vector_type&      rhsFull,
                                 vector_type&      sol,
-                                matrix_ptrtype&   basePrecMatrix,
-                                bool const        reuse,
-                                bool const        retry)
+                                matrix_ptrtype&   /*basePrecMatrix*/,
+                                bool const        /*reuse*/,
+                                bool const        /*retry*/)
 {
 
     if (M_comm.MyPID() == 0)
@@ -338,7 +338,7 @@ int SolverAmesos::solveSystem(  vector_type&      rhsFull,
     return 0;
 }
 
-void SolverAmesos::setUpPrec(const GetPot& dataFile,  const std::string& section)
+void SolverAmesos::setUpPrec(const GetPot& /*dataFile*/,  const std::string& /*section*/)
 {
     return;
 }
