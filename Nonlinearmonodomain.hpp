@@ -67,7 +67,7 @@ namespace LifeV
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class Nonlinearmonodomain 
+class Nonlinearmonodomain
 {
 
 public:
@@ -222,7 +222,7 @@ protected:
 
     //! Local fibers vector
     //!****************************************************
-    vector_type                    M_fiber_vector; 
+    vector_type                    M_fiber_vector;
 
     //! residual
     vector_type                    M_residual;
@@ -301,7 +301,7 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
-{ 
+{
 
  if (M_data.has_fibers() )
 	    {
@@ -355,7 +355,7 @@ Nonlinearmonodomain( const data_type&          dataType,
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
-{ 
+{
 
 }
 
@@ -386,7 +386,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::setUp( const GetPot& dataFile )
     std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
 
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "Nonlinearmonodomain : Preconditioner not set");   
+    ASSERT(M_prec.get() != 0, "Nonlinearmonodomain : Preconditioner not set");
 
     M_prec->setDataFromGetPot( dataFile, "electric/prec" );
 }
@@ -448,20 +448,18 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
 	else
 	  {
 	    stiffNL( M_sol_uRep, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-	    
+
 	  }
-	// for the moment we won't use reduce conductivity 
+	// for the moment we won't use reduce conductivity
 	//		break;
 	// case 1: // reduced conductivity on a sphere
 	//         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
 	//         	        stiff( M_data.red_sigma_sphere, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
 	//         		break;
-	
 	// 	case 2: // cylinder
 	//         	        M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
 	//         	        stiff( M_data.red_sigma_cyl, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
 	//         	        break;
-	
 	// 	case 3: // box
 	//         	        M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
 	//         	        stiff( M_data.red_sigma_box, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
