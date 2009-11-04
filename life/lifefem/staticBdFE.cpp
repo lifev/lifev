@@ -227,32 +227,12 @@ void StaticBdFE::_comp_meas()
 {
     ASSERT_PRE( _hasQR, "Needs a quadrature rule" )
     Real s, fctDer;
-#if defined(TWODIM)
 
     for ( int ig = 0;ig < nbQuadPt;ig++ )
     {
-        for ( int icoor = 0;icoor < 2;icoor++ )
+        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
         {
-            fctDer = 0.;
-            for ( int i = 0;i < nbGeoNode;i++ )
-                fctDer += point( i, icoor ) * dPhiGeo( i, 0, ig );
-            // local basis (non-unit tangent) at integration points:
-            tangent( 0, icoor, ig ) = fctDer;
-        }
-        s = 0.;
-        for ( int icoor = 0;icoor < 2;icoor++ )
-            s += tangent( 0, icoor, ig ) * tangent( 0, icoor, ig );
-        // metric tensor
-        metric( 0, 0, ig ) = s;
-        meas( ig ) = sqrt( metric( 0, 0, ig ) );
-        weightMeas( ig ) = meas( ig ) * qr.weight( ig );
-    }
-#elif defined(THREEDIM)
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
-    {
-        for ( int icoor = 0;icoor < 3;icoor++ )
-        {
-            for ( int k = 0;k < 2;k++ )
+            for ( int k = 0;k < (int)nDimensions-1;k++ )
             {
                 fctDer = 0.;
                 for ( int i = 0;i < nbGeoNode;i++ )
@@ -265,20 +245,29 @@ void StaticBdFE::_comp_meas()
         }
         // metric tensor
         s = 0.;
-        for ( int icoor = 0;icoor < 3;icoor++ )
+        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
             s += tangent( 0, icoor, ig ) * tangent( 0, icoor, ig );
         metric( 0, 0, ig ) = s;
+#if defined(TWODIM)
+        meas( ig ) = sqrt( metric( 0, 0, ig ) );
+        weightMeas( ig ) = meas( ig ) * qr.weight( ig );
+}
+#elif defined(THREEDIM)
         s = 0.;
-        for ( int icoor = 0;icoor < 3;icoor++ )
+        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
             s += tangent( 1, icoor, ig ) * tangent( 1, icoor, ig );
         metric( 1, 1, ig ) = s;
         s = 0.;
-        for ( int icoor = 0;icoor < 3;icoor++ )
+        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
             s += tangent( 0, icoor, ig ) * tangent( 1, icoor, ig );
         metric( 0, 1, ig ) = metric( 1, 0, ig ) = s;
         meas( ig ) = sqrt( metric( 0, 0, ig ) * metric( 1, 1, ig )
                            - metric( 0, 1, ig ) * metric( 1, 0, ig ) );
         weightMeas( ig ) = meas( ig ) * qr.weight( ig );
+        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
+            for ( int k = 0;k < (int)nDimensions-1;k++ )
+                    tangent( k, icoor, ig ) = tangent( k, icoor, ig )
+                    / sqrt( metric( k, k, ig ) );
     }
 #endif
 }
