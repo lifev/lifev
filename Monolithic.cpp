@@ -341,7 +341,7 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
                         {
                             int index=(colOffset + ITrow->second);// second is column
-                            err=matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,&index);
+                            err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,&index);
                         }
                 }
             return;
@@ -353,7 +353,7 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
                         {
                             int index2= (colOffset + ITrow->first);
-                            err=matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->second,1, entry ,&index2);
+                            err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->second,1, entry ,&index2);
                         }
                 }
             return;
@@ -366,7 +366,7 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
                         {
                             int* index(new int(colOffset + colNumeration[ITrow->second]));
-                            err= matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,index);
+                            err= matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,index);
 
                         }
                 }
@@ -380,7 +380,7 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                         {
                             int* index2(new int(colOffset + colNumeration[ITrow->second]));
-                            err=matrixPtr->getEpetraMatrix().ReplaceGlobalValues( rowOffset + ITrow->second,1, entry ,index2);
+                            err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues( rowOffset + ITrow->second,1, entry ,index2);
                         }
                     if (err != 0)
                         {
@@ -433,7 +433,7 @@ Monolithic::addDiagonalEntries(Real entry, matrix_ptrtype bigMatrix, const Epetr
                 {
                     //diagonal[Map.getMap(Repeated)->GID(i)+offset]=entry;
                     int* index(new int(offset + Map.getMap(Unique)->GID(i)));
-                    bigMatrix->getEpetraMatrix().ReplaceGlobalValues(offset + Map.getMap(Repeated)->GID(i), 1, &entry, index );
+                    bigMatrix->getMatrixPtr()->ReplaceGlobalValues(offset + Map.getMap(Repeated)->GID(i), 1, &entry, index );
                 }
         }
 }
@@ -454,7 +454,7 @@ Monolithic::addDiagonalEntries(Real entry,  matrix_ptrtype bigMatrix, std::map<I
                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                         {
                             int* index(new int(offset + (*M_numerationInterface)[ITrow->second]));
-                            int err = bigMatrix->getEpetraMatrix().ReplaceGlobalValues(offset + (*M_numerationInterface)[ITrow->second], 1, &entry, index );
+                            int err = bigMatrix->getMatrixPtr()->ReplaceGlobalValues(offset + (*M_numerationInterface)[ITrow->second], 1, &entry, index );
                             if (err != 0)
                                 {
                                     M_solid->getDisplayer().leaderPrint("error ", err);
@@ -735,12 +735,38 @@ evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res
 void Monolithic::
 evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling, matrix_ptrtype preconditioner)
 {
+
+    /* New version to multiply matrices: Paolo should test this and replace the code
+
+    matrix_ptrtype tmpMatPtr(new matrix_type(M_solid->getMap()));
+    M_monolithicMatrix->swapCrsMatrix(*tmpMatPtr);
+
+    tmpMatPtr -> GlobalAssemble();
+
+    preconditioner->Multiply( false,
+                              *tmpMatPtr,
+                              false,
+                              *M_monolithicMatrix);
+
+                              */
+
+
     M_monolithicMatrix->GlobalAssemble();
+
     matrix_ptrtype tmpMatPtr(new matrix_type(*M_monolithicMatrix));
     tmpMatPtr->GlobalAssemble();
     M_monolithicMatrix.reset(new matrix_type(M_solid->getMap()));
-    int err = EpetraExt::MatrixMatrix::Multiply( preconditioner->getEpetraMatrix(), false, tmpMatPtr->getEpetraMatrix(), false, M_monolithicMatrix->getEpetraMatrix());
+
+    int err = EpetraExt::MatrixMatrix::
+        Multiply( *preconditioner->getMatrixPtr(),
+                  false,
+                  *tmpMatPtr->getMatrixPtr(),
+                  false,
+                  *M_monolithicMatrix->getMatrixPtr()
+                  );
+
     *rhs = (*preconditioner)*(*rhs);
+
     evalResidual( bchFluid, bchSolid, sol, rhs, res, diagonalScaling);
 }
 
@@ -791,7 +817,7 @@ void  Monolithic::solveJac(vector_type         &_step,
                     *M_precMatrPtr += *M_fluidBlock;
                     *M_precMatrPtr += *M_solidBlock;
                     this->M_fluid->updateStab( *M_precMatrPtr);//applies the stabilization terms
-                    if(!M_precMatrPtr->getEpetraMatrix().Filled())
+                    if(!M_precMatrPtr->getMatrixPtr()->Filled())
                         {
                             couplingMatrix(M_precMatrPtr, 7);
                             //addDiagonalEntries(M_entry,M_precMatrPtr, M_interfaceMap, M_solidAndFluidDim);
@@ -1000,8 +1026,15 @@ applyPreconditioner( matrix_ptrtype robinCoupling, vector_ptrtype& rhs)
     matrix_type tmpMatrix(*M_monolithicMatrix);
     tmpMatrix.GlobalAssemble();
     M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
-    EpetraExt::MatrixMatrix::Multiply( robinCoupling->getEpetraMatrix(), false, tmpMatrix.getEpetraMatrix(), false, M_monolithicMatrix->getEpetraMatrix());
+
+    EpetraExt::MatrixMatrix::Multiply( *robinCoupling->getMatrixPtr(),
+                                       false,
+                                       *tmpMatrix.getMatrixPtr(),
+                                       false,
+                                       *M_monolithicMatrix->getMatrixPtr());
+
     *rhs=*robinCoupling*(*rhs);
+
 }
 
 void Monolithic::
@@ -1010,7 +1043,13 @@ applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype& prec )
     matrix_type tmpMatrix(*prec);
     tmpMatrix.GlobalAssemble();
     prec.reset(new matrix_type(*M_monolithicMap));
-    EpetraExt::MatrixMatrix::Multiply( robinCoupling->getEpetraMatrix(), false, tmpMatrix.getEpetraMatrix(), false, prec->getEpetraMatrix());
+
+    EpetraExt::MatrixMatrix::Multiply( *robinCoupling->getMatrixPtr(),
+                                       false,
+                                       *tmpMatrix.getMatrixPtr(),
+                                       false,
+                                       *prec->getMatrixPtr());
+
 }
 
 
@@ -1067,11 +1106,11 @@ void Monolithic::
 diagonalScale(vector_type& rhs, matrix_ptrtype matrFull)
 {
     Epetra_Vector diagonal(*rhs.getMap().getMap(Unique));
-    //M_matrFull->getEpetraMatrix().InvRowSums(diagonal);
-    //M_matrFull->getEpetraMatrix().InvRowMaxs(diagonal);
-    //M_matrFull->getEpetraMatrix().InvColSums(diagonal);
-    matrFull->getEpetraMatrix().InvColMaxs(diagonal);
-    matrFull->getEpetraMatrix().LeftScale(diagonal);
+    //M_matrFull->getMatrixPtr()->InvRowSums(diagonal);
+    //M_matrFull->getMatrixPtr()->InvRowMaxs(diagonal);
+    //M_matrFull->getMatrixPtr()->InvColSums(diagonal);
+    matrFull->getMatrixPtr()->InvColMaxs(diagonal);
+    matrFull->getMatrixPtr()->LeftScale(diagonal);
     rhs.getEpetraVector().Multiply(1, rhs.getEpetraVector(), diagonal,0);
 }
 
@@ -1093,9 +1132,9 @@ void
 Monolithic::setFluxBC             (fluid_bchandler_type bc_flux)
 {
     if (isFluid())
-        {
-            M_BCh_flux = bc_flux;
-        }
+    {
+        M_BCh_flux = bc_flux;
+    }
 }
 
 
@@ -1103,9 +1142,9 @@ void
 Monolithic::setRobinBC             (fluid_bchandler_type bc_Robin)
 {
     if (isFluid())
-        {
-            M_BCh_Robin = bc_Robin;
-        }
+    {
+        M_BCh_Robin = bc_Robin;
+    }
 }
 
 
@@ -1149,8 +1188,8 @@ void Monolithic::computeMaxSingularValue()
 
      boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
-     M_monolithicMatrix->getEpetraMatrix().OptimizeStorage();
-     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(M_monolithicMatrix->getEpetraMatrix()));
+     M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
+     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrixPtr()));
 
      M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/));
      M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr),  true);
@@ -1164,21 +1203,21 @@ void Monolithic::computeMaxSingularValue()
 
      UInt nev = M_dataFile("eigensolver/nevec", 10);//number of eigenvectors
      if(nev)
-         {
-             eig.reset(new EigenSolver(M_PAAP, M_PAAP->OperatorDomainMap(), nev));
-             eig->setDataFromGetPot(M_dataFile, "eigensolver/");
-             eig->solve();
-             eig->eigenvalues(real, imaginary);
-         }
+     {
+         eig.reset(new EigenSolver(M_PAAP, M_PAAP->OperatorDomainMap(), nev));
+         eig->setDataFromGetPot(M_dataFile, "eigensolver/");
+         eig->solve();
+         eig->eigenvalues(real, imaginary);
+     }
      else
-         {
-             throw UNDEF_EIGENSOLVER_EXCEPTION();
-         }
+     {
+         throw UNDEF_EIGENSOLVER_EXCEPTION();
+     }
      for (int i=0; i<real.size(); ++i)
-         {
-             displayer().leaderPrint("\n real part ", real[i]);
-             displayer().leaderPrint("\n imaginary part ", imaginary[i]);
-         }
+     {
+         displayer().leaderPrint("\n real part ", real[i]);
+         displayer().leaderPrint("\n imaginary part ", imaginary[i]);
+     }
 
 }
 #endif
@@ -1231,7 +1270,7 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
             {
                 if(M_interfaceMap.getMap(Unique)->LID(ITrow->second/* + dim*fluidDim*/) >= 0 )
                     {
-                        M_bdMass->getEpetraMatrix().ExtractGlobalRowCopy((int)(ITrow->first+dim*fluidDim), 200, numEntries, &(row[0]), &(indices[0]));
+                        M_bdMass->getMatrixPtr()->ExtractGlobalRowCopy((int)(ITrow->first+dim*fluidDim), 200, numEntries, &(row[0]), &(indices[0]));
                                 //std::vector<int> idCol;
                         if(numEntries==0){std::cout<<"ERROR on row "<<ITrow->first+dim*fluidDim<<"that is "<<numerationInterfaceRep[ITrow->second]<<std::endl;}
                         for (ID k=0; k<numEntries; ++k)
