@@ -1,12 +1,12 @@
 /* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
 
-  <short description here>
+   <short description here>
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+   Gilles Fourestey gilles.fourestey@epfl.ch
 
 */
 /** \file ud_functions.cpp
-*/
+ */
 
 #include "ud_functions.hpp"
 
@@ -21,14 +21,14 @@ Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z
 {
 
     //GetPot data_file( getpot::StringVector data_file_name );
-//    GetPot data_file(data_file_name.c_str());
+    //    GetPot data_file(data_file_name.c_str());
 
-//    Real scale_factor = data_file("fluid/miscellaneous/my_flux_physio_scale_factor", .1);
+    //    Real scale_factor = data_file("fluid/miscellaneous/my_flux_physio_scale_factor", .1);
     Real scale_factor = -50.;//data_file("fluid/miscellaneous/my_flux_physio_scale_factor", .1);
 
     Real newtime;
-//     Real intervallorampa = data_file("fluid/miscellaneous/timeramp",0.05);
-//     Real deltat = data_file("fluid/discretization/timestep",0.01);
+    //     Real intervallorampa = data_file("fluid/miscellaneous/timeramp",0.05);
+    //     Real deltat = data_file("fluid/discretization/timestep",0.01);
     Real intervallorampa = 0.05; //data_file("fluid/miscellaneous/timeramp",0.05);
     Real deltat = 0.001; //data_file("fluid/discretization/timestep",0.01);
 
@@ -58,21 +58,21 @@ Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z
     else newtime = time + deltat - intervallorampa;
 
     while (Taux < newtime)
-    {
-        Taux = Taux + Tfin;
-    }
+        {
+            Taux = Taux + Tfin;
+        }
     Tcorr = newtime - Taux + Tfin;
 
     if (Tcorr == Tfin)
-    {
-        Tcorr=0;
-    }
+        {
+            Tcorr=0;
+        }
 
     if (Tcorr <= prefirst)
-    {
-        a    = pigreco2*Tcorr/first;
-        flux = coeff01 + coeff02*cos(a);
-    }
+        {
+            a    = pigreco2*Tcorr/first;
+            flux = coeff01 + coeff02*cos(a);
+        }
 
     else if ((Tcorr>prefirst)&&(Tcorr<=first)) {
         b1=coeff01-coeff31;
@@ -99,34 +99,34 @@ Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z
         flux = coeff11+coeff12*cos(a);
     }
     else if (Tcorr>second)
-    {
-        a       =  pigreco2*(second - first)/first;
-        b1      =  coeff11 + coeff12*cos(a) - coeff21;
-        b2      =- coeff12*pigreco2*sin(a)/first;
-        a22     =  Tfin-second;
-        a12     =  a22*a22;
-        a11     =  a12*a12;
-        a21     =- 4*a12*a22;
-        a22     =- 2*a22;
-        det     =  a22*a11-a12*a21;
-        coeff22 =  (a22*b1-a12*b2)/det;
-        coeff23 =  (a11*b2-a21*b1)/det;
-        dt      =  Tcorr-Tfin;
-        flux    =  coeff22*dt*dt*dt*dt+coeff23*dt*dt+coeff21;
-    }
+        {
+            a       =  pigreco2*(second - first)/first;
+            b1      =  coeff11 + coeff12*cos(a) - coeff21;
+            b2      =- coeff12*pigreco2*sin(a)/first;
+            a22     =  Tfin-second;
+            a12     =  a22*a22;
+            a11     =  a12*a12;
+            a21     =- 4*a12*a22;
+            a22     =- 2*a22;
+            det     =  a22*a11-a12*a21;
+            coeff22 =  (a22*b1-a12*b2)/det;
+            coeff23 =  (a11*b2-a21*b1)/det;
+            dt      =  Tcorr-Tfin;
+            flux    =  coeff22*dt*dt*dt*dt+coeff23*dt*dt+coeff21;
+        }
     if (time < intervallorampa)
-    {
-        flux = ( time/intervallorampa )*scale_factor*flux;
-    }
+        {
+            flux = ( time/intervallorampa )*scale_factor*flux;
+        }
     else
         flux = scale_factor * flux;
 
     //  Real pi = 3.14159265358979;
 #ifdef AORTA       // ifdef ANEURISM100170
     if ( i == 2 )
-      return flux; // *1.42?
+        return flux; // *1.42?
     if ( i == 1 )
-      return flux; // *1.42?
+        return flux; // *1.42?
 #endif
 #ifdef ANEURISM100170       // ifdef ANEURISM100170
     if ( i == 2 )
@@ -148,12 +148,12 @@ Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z
 //     return f;
 // }
 
-  Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
-  {
+Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
     /*switch(i) {
-  case 1:
-    return 0.0;
-    break;*/
+      case 1:
+      return 0.0;
+      break;*/
     //  case 2:
     if(t<=0.00) return -110170;
     if(t<=0.01) return -109540;
@@ -237,10 +237,10 @@ Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z
     if(t<=0.79) return -110060;
     //    break;
     /*  case 3:
-    return 0.0;
-    break;}
-    return 0.;*/
-  }
+        return 0.0;
+        break;}
+        return 0.;*/
+}
 
 Real f(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
@@ -249,108 +249,115 @@ Real f(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*
 
 Real u1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-  return 0.0;
+    return 0.0;
 }
 
 Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-  return 0.0;
+    return 0.0;
 }
 
 // Initial velocity
 Real u0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-  return 0.0;
+    return 0.0;
 }
 
 Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-  return 0.0;
+    return 0.0;
 }
 
 
 Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-  return -29;//*e-1*5; // circa [(110-60)*(133.332*10)]/[10*(2.08-1.85)] (il 10 x via dei mm, il 133... x via dei mmHg)
-  // (vedi paper di Liu, Dang, etc). Nel loro grafico sono invertite x e y. 5e1 invece di e5 xche' d e'
-  // riscalato * il timestep, che e' 5e-4
+    return -29;//*e-1*5; // circa [(110-60)*(133.332*10)]/[10*(2.08-1.85)] (il 10 x via dei mm, il 133... x via dei mmHg)
+    // (vedi paper di Liu, Dang, etc). Nel loro grafico sono invertite x e y. 5e1 invece di e5 xche' d e'
+    // riscalato * il timestep, che e' 5e-4
 }
 
 
 Real hydro(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
- {
- return -1.33*1e5;
- }
+{
+    return -1.33*1e5;
+}
 
 Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  switch(i) {
-  case 1:
-    return 0.0;
-    break;
-  case 3:
-      if ( t <= 0.003 )
-          return 1.3332e5;
-//      return 0.01;
-      return 0.0;
-      break;
-  case 2:
-      return 0.0;
-//      return 1.3332e4;
-//    else
-//      return 0.0;
-    break;
-  }
-  return 0;
+    switch(i) {
+    case 1:
+        return 0.0;
+        break;
+    case 3:
+        if ( t <= 0.003 )
+            return 1.3332e5;
+        //      return 0.01;
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        //      return 1.3332e4;
+        //    else
+        //      return 0.0;
+        break;
+    }
+    return 0;
 }
 
 
 Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-  if(t<=0.003)
-    return -1.3332e4;//1.3332e5;
+    if(t<=0.003)
+        return -1.3332e4;//1.3332e5;
 }
 
 
 // Initial displacement and velocity
 Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  switch(i) {
-  case 1:
-    return 0.;
-    break;
-  case 2:
-    return 0.;
-    break;
-  case 3:
-    return 0.;
-    break;
-  default:
-    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-    break;
-  }
+    switch(i) {
+    case 1:
+        return 0.;
+        break;
+    case 2:
+        return 0.;
+        break;
+    case 3:
+        return 0.;
+        break;
+    default:
+        ERROR_MSG("This entry is not allowed: ud_functions.hpp");
+        break;
+    }
 }
 
 Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
 
-  switch(i) {
-  case 1:
-    return 0.0;
-    break;
-  case 2:
-    return 0.0;
-    break;
-  case 3:
-    return 0.0;
-    break;
-  default:
-    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-    break;
-  }
+    switch(i) {
+    case 1:
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        break;
+    case 3:
+        return 0.0;
+        break;
+    default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        break;
+    }
 }
 
-
+Real fluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    if(t<=0.003)
+        return -100.;
+    else
+        return 0.;
+}
 
 }
+
 

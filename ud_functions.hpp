@@ -17,6 +17,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+/**
+   \file main.cpp
+   \author Paolo Crosetto <paolo.crosetto@epfl.ch>
+   \date 2009-04-09
+*/
+
+/**
+
+   contains the functions to be assigned as boundary conditions, in the file boundaryConditions.hpp . The functions
+   can depend on time and space, while they can take in input an ID specifying one of the three principal axis
+   if the functions to
+   assign is vectorial and the boundary condition is of type \c Full \c.
+*/
 #ifndef UDF_HPP
 #define UDF_HPP
 
@@ -31,26 +44,27 @@ Real u1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real fZero(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial velocity
-  Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-  Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-  Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-  Real hydrostatic(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real hydrostatic(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
-  Real hydro(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-  Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real hydro(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 
 // Initial displacement and velocity
-  Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-  Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-  Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z, const ID& i);
+Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z, const ID& i);
 
-  Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
-  Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
+Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 }
 
 
