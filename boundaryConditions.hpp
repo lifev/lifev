@@ -1,12 +1,17 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
 
-  <short description here>
-
-  Gilles Fourestey gilles.fourestey@epfl.ch
-
+/**
+   \file boundaryConditions.hpp
+   \author Paolo Crosetto <paolo.crosetto@epfl.ch>
+   \date 2009-04-09
 */
-/** \file boundaryConditions.hpp
-*/
+
+/**
+
+contains the functions to be assigned as boundary conditions, in the file boundaryConditions.hpp . The functions
+can depend on time and space, while they can take in input an ID specifying one of the three principal axis
+if the functions to
+assign is vectorial and the boundary condition is of type \c Full \c.
+ */
 
 #ifndef BC_HPP
 #define BC_HPP
@@ -76,11 +81,11 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux()
   FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
 
-  //     BCFunctionBase flow_3 (FluxFunction);
+  BCFunctionBase flow_3 (fluxFunction);
 
      //uncomment  to use fluxes
-//      BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);//to kill
-//      BCh_fluid->addBC("InFlow" , OUTLET,  Flux, Normal, flow_3);
+  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+  //  BCh_fluid->addBC("InFlow" , OUTLET,  Flux, Normal, flow_3);
 
   return BCh_fluid;
 }
@@ -96,14 +101,14 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper)
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
     BCFunctionBase bcf      (fZero);
-    BCFunctionBase in_flow  (/*uInterpolated*/u2/*aortaPhisPress*/);
+    //BCFunctionBase in_flow  (/*uInterpolated*/u2/*aortaPhisPress*/);
     //    BCFunctionBase out_flow (fZero);
 
-    BCFunctionBase out_flow (bcf/*FlowConditions::outPressure0*/);
+    BCFunctionBase out_flow (FlowConditions::outPressure0);
 
 
-    BCh_fluid->addBC("InFlow" , INLET,  Natural/*Essential*/,   Full, in_flow, 3);
-    BCh_fluid->addBC("OutFlow", OUTLET,  Natural/*Essential*/,   Full, out_flow, 3);
+    //    BCh_fluid->addBC("InFlow" , INLET,  Natural/*Essential*/,   Full, in_flow, 3);
+    BCh_fluid->addBC("OutFlow", OUTLET,  Natural/*Essential*/,   Normal, out_flow);
     return BCh_fluid;
 }
 
