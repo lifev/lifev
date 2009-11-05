@@ -48,7 +48,7 @@ namespace LifeV
  * diagonal blocks represent the coupling. The implementation of the stress continuity coupling condition
  * is obtained by means of an augmented formulation.
  * Different possible preconditioners are implemented.
-*/
+ */
 class Monolithic : public FSIOperator
 {
 public:
@@ -113,8 +113,8 @@ public:
        3 preconditioners
     */
     virtual void   solveJac(vector_type&       _muk,
-                    const vector_type& _res,
-                    const Real       _linearRelTol);
+                            const vector_type& _res,
+                            const Real       _linearRelTol);
 
 
     /**
@@ -142,12 +142,12 @@ public:
 
 
     /**
-        restricts a vector with a monolithic map on another map that must
-	have a sequential numbering (not the interface map)
+       restricts a vector with a monolithic map on another map that must
+       have a sequential numbering (not the interface map)
        \param _dispFluid: vector on the fluid domain
        \param _disp: monolithic vector
     */
-  void monolithicToX(const vector_type& _disp, vector_type& _dispFluid, EpetraMap& map, UInt offset=(UInt)0);
+    void monolithicToX(const vector_type& _disp, vector_type& _dispFluid, EpetraMap& map, UInt offset=(UInt)0);
 
     /**
        iterates the mesh
@@ -156,7 +156,7 @@ public:
     void iterateMesh(const vector_type& disp);
 
     /**
-      builds the constant part of the monolithic matrix
+       builds the constant part of the monolithic matrix
     */
     void buildSystem();
 
@@ -200,6 +200,8 @@ public:
     //!get the total dimension of the FS interface
     const UInt dimInterface() const {return nDimensions*M_interface ;}
     vector_ptrtype const& un(){return M_un;}
+    bool const isFullMonolithic(){return M_fullMonolithic;}
+
 
     void setupSystem( );
     void setUp( const GetPot& dataFile );
@@ -211,23 +213,27 @@ public:
        \param Map: map specifying the location where to add diagonal entries
        \param offset: offset from which starts the insertion
        \param replace=false: flag stating wether the diagonal elements already exist or have to be inserted in the map
-   */
+    */
     void addDiagonalEntries(Real entry, matrix_ptrtype matrix, const EpetraMap& Map, UInt offset=0, bool replacs=false);
 
 
     /**
        \small initialize with functions
-     */
-  virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-			   FSIOperator::solid_type::value_type::Function const& p0,
-			   FSIOperator::solid_type::value_type::Function const& d0,
-			   FSIOperator::solid_type::value_type::Function const& w0,
-			   FSIOperator::solid_type::value_type::Function const& df0);
+    */
+    virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+                             FSIOperator::solid_type::value_type::Function const& p0,
+                             FSIOperator::solid_type::value_type::Function const& d0,
+                             FSIOperator::solid_type::value_type::Function const& w0,
+                             FSIOperator::solid_type::value_type::Function const& df0);
+
+
+    virtual void initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld);
+
 
     /**
        \small initialize the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
-     */
+    */
     void initialize( vector_ptrtype u0)
     {M_un=u0;}
 
@@ -237,18 +243,18 @@ public:
     /**
        \small Computes the maximum singular value of the preconditioned system \f$P^-1A\f$ where \f$P\f$ is an
        instance of ComposedPreconditioner and \f$A\f$ is the system matrix.
-     */
+    */
     void computeMaxSingularValue();
 #endif
     /**
        \small Computes the wall shear stress. Some issues when working in parallel still has to be fixed.
-     */
+    */
     vector_ptrtype computeWS();
 
     /**
        \small Enables the computation of the wall shear stress on the specified boundary.
        \param flag : flag specifying the boundary of interest.
-     */
+    */
     void enableWssComputation(EntityFlag flag);
 
     vector_ptrtype WS( )
@@ -261,11 +267,11 @@ protected:
 
     //  void setupBDF( vector_type const& u0);
 
-template <typename SolverType, typename PrecOperatorPtr>
-/**
-\small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
- */
-void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
+    template <typename SolverType, typename PrecOperatorPtr>
+    /**
+       \small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
+    */
+    void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
 
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix
@@ -274,13 +280,13 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec
        \param Map: standard map specifying the location where to add diagonal entries
        \param offset: offset from which starts the insertion
        \param replace=false: flag stating wether the diagonal elements already exist or have to be inserted in the map
-   */
-        void addDiagonalEntries(Real entry, matrix_ptrtype matrix, std::map<ID, ID> const& Map, UInt offset=0, bool replace=false);
+    */
+    void addDiagonalEntries(Real entry, matrix_ptrtype matrix, std::map<ID, ID> const& Map, UInt offset=0, bool replace=false);
 
     /**
-      \small builds the coupling matrix.
-      \param bigMatrix: the coupling matrix to be built
-      \param couplingSolid: if false the solid coupling part is neglected in the matrix
+       \small builds the coupling matrix.
+       \param bigMatrix: the coupling matrix to be built
+       \param couplingSolid: if false the solid coupling part is neglected in the matrix
     */
     virtual void couplingMatrix(matrix_ptrtype & bigMatrix, int couplingSolid = 31);
 
@@ -308,32 +314,32 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec
     void zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration , const std::map<ID, ID>& map, UInt rowOffset=0, UInt colOffset=0);
 
     /**\small evaluates the nonlinear residual
-     \param bcFluid: fluid BCHandler
-     \param bcSolid: solid BCHandler
-     \param sol: solution vector
-     \param rhs: right-hand side
-     \param res: the output residual
-     \param diagonalScaling: flag stating wether to perform diagonal scaling
-*/
+       \param bcFluid: fluid BCHandler
+       \param bcSolid: solid BCHandler
+       \param sol: solution vector
+       \param rhs: right-hand side
+       \param res: the output residual
+       \param diagonalScaling: flag stating wether to perform diagonal scaling
+    */
     void evalResidual(fluid_bchandler_raw_type & bcFluid, solid_bchandler_raw_type & bcSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling=false);
 
     /**\small evaluates the linear residual
-     \param sol: solution vector
-     \param rhs: right-hand side
-     \param res: the output residual
-     \param diagonalScaling: flag stating wether to perform diagonal scaling
-*/
+       \param sol: solution vector
+       \param rhs: right-hand side
+       \param res: the output residual
+       \param diagonalScaling: flag stating wether to perform diagonal scaling
+    */
     void evalResidual( const vector_type& sol, const vector_ptrtype& rhs,  vector_type& res, bool diagonalScaling=false);
 
     /**\small evaluates the nonlinear residual
-     \param bcFluid: fluid BCHandler
-     \param bcSolid: solid BCHandler
-     \param sol: solution vector
-     \param rhs: right-hand side
-     \param res: the output residual
-     \param diagonalScaling: flag stating wether to perform diagonal scaling
-     \param prec: preconditioner P, the final residual will be r=PAx-Pb
-*/
+       \param bcFluid: fluid BCHandler
+       \param bcSolid: solid BCHandler
+       \param sol: solution vector
+       \param rhs: right-hand side
+       \param res: the output residual
+       \param diagonalScaling: flag stating wether to perform diagonal scaling
+       \param prec: preconditioner P, the final residual will be r=PAx-Pb
+    */
     void evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling, matrix_ptrtype preconditioner);
 
     //!\small says if the preconditioner will be recomputed
@@ -359,29 +365,30 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec
     void updateSolidSystem(vector_ptrtype& rhsFluidCoupling);
 
     /**\small scales matrix and rhs
-    \param rhs: the output rhs
-    \param matrFull: the output matrix*/
+       \param rhs: the output rhs
+       \param matrFull: the output matrix*/
     void    diagonalScale(vector_type& rhs, matrix_ptrtype matrFull);
 
     void shiftSolution(){}
 
     void couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype& /*lambdaDot*/, bool& /*firstIter*/)
-  {    M_solid->getDisplayer().leaderPrint("norm( solution ) init = ", lambda->NormInf() );}
+    {    M_solid->getDisplayer().leaderPrint("norm( solution ) init = ", lambda->NormInf() );}
 
-   void setFluxBC             (fluid_bchandler_type bc_fluid);
+    void setFluxBC             (fluid_bchandler_type bc_fluid);
 
-   void setRobinBC             (fluid_bchandler_type bc_solid);
+    void setRobinBC             (fluid_bchandler_type bc_solid);
 
     virtual  const vector_type& meshDisp()const{return this->M_meshMotion->disp();}
     //virtual  const vector_type&  veloFluidMesh() const;
     //virtual vector_type& veloFluidMesh();
 
     //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
-  void solidInit(std::string const& dOrder);
+    void solidInit(std::string const& dOrder);
 
 	//void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
 
-  void variablesInit(std::string const& dOrder);
+    void variablesInit(std::string const& dOrder);
+
 
     const fluid_bchandler_type& BCh_flux()                      const { return M_BCh_flux; }
 
@@ -419,20 +426,20 @@ private:
     boost::shared_ptr<vector_type>                    M_rhsNew;
     bool                                              M_fullMonolithic;
 
-//! perturbation value added to a diagonal zero block in the preconditioner
+    //! perturbation value added to a diagonal zero block in the preconditioner
     Real                                              M_entry;
 protected:
     matrix_ptrtype                                    M_robinCoupling;
     //    matrix_ptrtype                                    M_robinCouplingInv;
-//! coefficient of the Robin preconditioner
+    //! coefficient of the Robin preconditioner
     Real                                              M_alphaf;
-//! coefficient of the Robin preconditioner
-  Real                                              M_alphas;
-  UInt                                              M_offset;
-  UInt                                              M_solidAndFluidDim;
-  IfpackComposedPrec::operator_type                 M_solidOper;
-  IfpackComposedPrec::operator_type                 M_fluidOper;
-  IfpackComposedPrec::operator_type                 M_meshOper;
+    //! coefficient of the Robin preconditioner
+    Real                                              M_alphas;
+    UInt                                              M_offset;
+    UInt                                              M_solidAndFluidDim;
+    IfpackComposedPrec::operator_type                 M_solidOper;
+    IfpackComposedPrec::operator_type                 M_fluidOper;
+    IfpackComposedPrec::operator_type                 M_meshOper;
     matrix_ptrtype                                    M_fluidBlock;
     matrix_ptrtype                                    M_solidBlock;
     matrix_ptrtype                                    M_solidBlockPrec;
@@ -451,7 +458,7 @@ template <typename SolverType, typename PrecOperatorPtr>
 void Monolithic::
 iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
 {
-  M_solid->getDisplayer().leaderPrint("    preconditioner type : ", M_DDBlockPrec );
+    M_solid->getDisplayer().leaderPrint("    preconditioner type : ", M_DDBlockPrec );
     Chrono chrono;
 
     M_solid->getDisplayer().leaderPrint("    Solving the system ... \n" );
@@ -463,14 +470,14 @@ iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, Sol
     int numIter = M_linearSolver->solveSystem( rhs, step, prec, (M_reusePrec)&&(!M_resetPrec));
 
     if (numIter < 0)
-    {
-        chrono.start();
+        {
+            chrono.start();
 
-        M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
+            M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
 
-        if (numIter <= -M_maxIterSolver)
-           M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed twice.\n");
-    }
+            if (numIter <= -M_maxIterSolver)
+                M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed twice.\n");
+        }
 
     M_solid->getDisplayer().leaderPrint("   system solved.\n ");
 }

@@ -115,9 +115,9 @@ void Monolithic::setupFluidSolid()
         M_epetraWorldComm->Broadcast( &numInterfaceDof[j], 1, j);
 
     for(int j=numtasks-1; j>0 ; --j)
-        {
-            numInterfaceDof[j] = numInterfaceDof[j-1];
-        }
+    {
+        numInterfaceDof[j] = numInterfaceDof[j-1];
+    }
     numInterfaceDof[0]=0;
     for(int j=1; j<numtasks ; ++j)
         numInterfaceDof[j] += numInterfaceDof[j-1];
@@ -129,33 +129,33 @@ void Monolithic::setupFluidSolid()
     UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
     for(l=0, ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
+    {
+        if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
         {
-            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
-                {
-                    (*M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
-                    //                                    (*M_numerationInterfaceInt)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(M_numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
-                    if((int)(*M_numerationInterface)(ITrow->second )!=floor(l+1+ numInterfaceDof[pid]/nDimensions+0.2 /*+ dim*localInterface*/) )
-                        std::cout<<"ERROR! the numeration of the coupling map is not correct"<<std::endl;
+            (*M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
+            //                                    (*M_numerationInterfaceInt)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(M_numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
+            if((int)(*M_numerationInterface)(ITrow->second )!=floor(l+1+ numInterfaceDof[pid]/nDimensions+0.2 /*+ dim*localInterface*/) )
+                std::cout<<"ERROR! the numeration of the coupling map is not correct"<<std::endl;
 
-                    ++l;
-                }
-
+            ++l;
         }
+
+    }
 
     std::vector<int> couplingVector;
     couplingVector.reserve((int)(M_interfaceMap.getMap(Unique)->NumMyElements()));
 
     for(int dim=0; dim<nDimensions; ++dim)
+    {
+        for( ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
         {
-            for( ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second)>=0)
-                        {
-                            couplingVector.push_back((*M_numerationInterface)(ITrow->second /*+ dim * solidDim*/)+ dim * M_interface );
-                            //couplingVector.push_back((*M_numerationInterfaceInt)[ITrow->second /*+ dim * solidDim*/]+ dim * M_interface );
-                        }
-                }
-        }// so the map for the coupling part of the matrix is just Unique
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second)>=0)
+            {
+                couplingVector.push_back((*M_numerationInterface)(ITrow->second /*+ dim * solidDim*/)+ dim * M_interface );
+                //couplingVector.push_back((*M_numerationInterfaceInt)[ITrow->second /*+ dim * solidDim*/]+ dim * M_interface );
+            }
+        }
+    }// so the map for the coupling part of the matrix is just Unique
 
     M_monolithicInterfaceMap = EpetraMap(-1, couplingVector.size(), &couplingVector[0], M_monolithicMap->getMap(Repeated)->IndexBase()/*1*/, *M_epetraWorldComm);
     *M_monolithicMap  += M_monolithicInterfaceMap;
@@ -184,41 +184,41 @@ void Monolithic::setupFluidSolid()
     M_BCh_Robin->setOffset(M_offset);
 
     if(!M_fullMonolithic)
-        {
-            M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
-                                                                    *M_epetraComm));
+    {
+        M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
+                                                                *M_epetraComm));
 
-            M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
-                                                          *M_uFESpace,
-                                                          *M_pFESpace,
-                                                          *M_epetraComm,
-                                                          *M_monolithicMap));
+        M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
+                                                      *M_uFESpace,
+                                                      *M_pFESpace,
+                                                      *M_epetraComm,
+                                                      *M_monolithicMap));
 
-            //             if (isLinearFluid())// to be implemented
-            //                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
-            //                                                                    *M_uFESpace,
-            //                                                                    *M_pFESpace,
-            //                                                                    *M_epetraComm));
+        //             if (isLinearFluid())// to be implemented
+        //                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
+        //                                                                    *M_uFESpace,
+        //                                                                    *M_pFESpace,
+        //                                                                    *M_epetraComm));
 
 
-            M_rhs.reset(new vector_type(*this->M_monolithicMap));
-            M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
-            M_un.reset (new vector_type(*this->M_monolithicMap));
-            M_beta.reset  (new vector_type(/*M_monolithicMap*/M_uFESpace->map()));
+        M_rhs.reset(new vector_type(*this->M_monolithicMap));
+        M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
+        M_un.reset (new vector_type(*this->M_monolithicMap));
+        M_beta.reset  (new vector_type(/*M_monolithicMap*/M_uFESpace->map()));
 
-            M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
-                                                          *M_dFESpace,
-                                                          *M_epetraComm,
-                                                          *M_monolithicMap,
-                                                          M_offset
-                                                          ));
+        M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
+                                                      *M_dFESpace,
+                                                      *M_epetraComm,
+                                                      *M_monolithicMap,
+                                                      M_offset
+                                                      ));
 
-            //             if (isLinearSolid())// to be implemented with the offset
-            //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
-            //                                                                    *M_dFESpace,
-            //
-            //                                                      *M_epetraComm));
-        }
+        //             if (isLinearSolid())// to be implemented with the offset
+        //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
+        //                                                                    *M_dFESpace,
+        //
+        //                                                      *M_epetraComm));
+    }
 }//end setup
 
 
@@ -252,15 +252,15 @@ Monolithic::buildSystem()
     M_couplingMatrix->GlobalAssemble();
 
     if(M_DDBlockPrec==7 || M_DDBlockPrec==8)
-        {
-            M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
-            *M_solidBlockPrec += *M_solidBlock;
-            addDiagonalEntries(1., M_solidBlockPrec, M_uFESpace->map() );
-            addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map(), M_uFESpace->dof().numTotalDof()*nDimensions );
-            addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
-            if(M_DDBlockPrec==8)
-                couplingMatrix(M_solidBlockPrec, 8);
-        }
+    {
+        M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
+        *M_solidBlockPrec += *M_solidBlock;
+        addDiagonalEntries(1., M_solidBlockPrec, M_uFESpace->map() );
+        addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map(), M_uFESpace->dof().numTotalDof()*nDimensions );
+        addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
+        if(M_DDBlockPrec==8)
+            couplingMatrix(M_solidBlockPrec, 8);
+    }
 
 }
 
@@ -273,33 +273,33 @@ Monolithic::couplingMatrix(matrix_ptrtype & bigMatrix, int coupling) // not work
     int flag(coupling);
 
     for(UInt dim = 0; dim < nDimensions; ++dim)
+    {
+        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, flag=coupling)
         {
-            for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, flag=coupling)
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            {
+                if(flag-8>=0)//right low
                 {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                        {
-                            if(flag-8>=0)//right low
-                                {
-                                    bigMatrix->set_mat_inc( M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(),(int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (1.) );//right low
-                                    flag -= 8;
-                                }
-                            if(flag-4>=0)// right up
-                                {
-                                    bigMatrix->set_mat_inc( ITrow->first-1 + dim* M_uFESpace->dof().numTotalDof(), (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (-1.) );//right up
-                                    flag -= 4;
-                                }
-                            if(flag-2>=0)//low left
-                                {
-                                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (ITrow->first)-1 + dim* M_uFESpace->dof().numTotalDof(), 1.);//low left
-                                    flag -= 2;
-                                }
-                            if(flag-1>=0)//low right
-                                bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (M_offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.*M_solid->rescaleFactor()/*/M_dataFluid->timestep()*/));//low right
-
-                            bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim , (int)(*this->M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, 0.0);
-                        }
+                    bigMatrix->set_mat_inc( M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(),(int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (1.) );//right low
+                    flag -= 8;
                 }
+                if(flag-4>=0)// right up
+                {
+                    bigMatrix->set_mat_inc( ITrow->first-1 + dim* M_uFESpace->dof().numTotalDof(), (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (-1.) );//right up
+                    flag -= 4;
+                }
+                if(flag-2>=0)//low left
+                {
+                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (ITrow->first)-1 + dim* M_uFESpace->dof().numTotalDof(), 1.);//low left
+                    flag -= 2;
+                }
+                if(flag-1>=0)//low right
+                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (M_offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.*M_solid->rescaleFactor()/*/M_dataFluid->timestep()*/));//low right
+
+                bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim , (int)(*this->M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, 0.0);
+            }
         }
+    }
 }
 
 
@@ -313,17 +313,17 @@ Monolithic::robinCoupling(matrix_ptrtype & IdentityMatrix, Real& alphaf, Real& a
     addDiagonalEntries(1., IdentityMatrix, *M_monolithicMap);
     //addDiagonalEntries(alphaf, IdentityMatrix, *M_solidInterfaceMap, M_offset, true);
     for(UInt dim = 0; dim < nDimensions; ++dim)
+    {
+        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                        {
-                            IdentityMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second ] - 1 + dim*M_interface + M_solidAndFluidDim, (M_offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), alphas);//low right
-                            IdentityMatrix->set_mat_inc( ITrow->first-1 + dim* M_uFESpace->dof().numTotalDof(), (int)(*this->M_numerationInterface)[ITrow->second ] - 1 + dim*M_interface + M_solidAndFluidDim, alphaf );//right up
-                            IdentityMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second ] - 1 + dim*M_interface + M_solidAndFluidDim, (ITrow->first)-1 + dim* M_uFESpace->dof().numTotalDof(), alphas);//low left
-                        }
-                }
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            {
+                IdentityMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second ] - 1 + dim*M_interface + M_solidAndFluidDim, (M_offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), alphas);//low right
+                IdentityMatrix->set_mat_inc( ITrow->first-1 + dim* M_uFESpace->dof().numTotalDof(), (int)(*this->M_numerationInterface)[ITrow->second ] - 1 + dim*M_interface + M_solidAndFluidDim, alphaf );//right up
+                IdentityMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second ] - 1 + dim*M_interface + M_solidAndFluidDim, (ITrow->first)-1 + dim* M_uFESpace->dof().numTotalDof(), alphas);//low left
+            }
         }
+    }
 }
 
 
@@ -334,62 +334,62 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
     std::map<ID, ID>::const_iterator ITrow;
     int err;
     if(colOffset>=M_offset && colOffset<M_solidAndFluidDim && rowOffset<M_solidAndFluidDim)
+    {
+        for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
         {
-            for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
-                {
 
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
-                        {
-                            int index=(colOffset + ITrow->second);// second is column
-                            err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,&index);
-                        }
-                }
-            return;
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
+            {
+                int index=(colOffset + ITrow->second);// second is column
+                err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,&index);
+            }
         }
+        return;
+    }
     if(rowOffset>=M_offset && rowOffset<M_solidAndFluidDim && colOffset<M_solidAndFluidDim)
+    {
+        for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
         {
-            for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
-                        {
-                            int index2= (colOffset + ITrow->first);
-                            err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->second,1, entry ,&index2);
-                        }
-                }
-            return;
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
+            {
+                int index2= (colOffset + ITrow->first);
+                err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->second,1, entry ,&index2);
+            }
         }
+        return;
+    }
 
     if(colOffset>=M_solidAndFluidDim && rowOffset < M_offset)
+    {
+        for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
         {
-            for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
-                        {
-                            int* index(new int(colOffset + colNumeration[ITrow->second]));
-                            err= matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,index);
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second) >= 0 )//to avoid repeated stuff
+            {
+                int* index(new int(colOffset + colNumeration[ITrow->second]));
+                err= matrixPtr->getMatrixPtr()->ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,index);
 
-                        }
-                }
-            return;
+            }
         }
+        return;
+    }
 
     if((colOffset>=M_solidAndFluidDim && rowOffset >= M_offset))
+    {
+        for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
         {
-            for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                        {
-                            int* index2(new int(colOffset + colNumeration[ITrow->second]));
-                            err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues( rowOffset + ITrow->second,1, entry ,index2);
-                        }
-                    if (err != 0)
-                        {
-                            M_solid->getDisplayer().leaderPrint("error ", err);
-                            M_solid->getDisplayer().leaderPrint("Go to fill your matrix!!");
-                        }
-                }
-            return;
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            {
+                int* index2(new int(colOffset + colNumeration[ITrow->second]));
+                err=matrixPtr->getMatrixPtr()->ReplaceGlobalValues( rowOffset + ITrow->second,1, entry ,index2);
+            }
+            if (err != 0)
+            {
+                M_solid->getDisplayer().leaderPrint("error ", err);
+                M_solid->getDisplayer().leaderPrint("Go to fill your matrix!!");
+            }
         }
+        return;
+    }
 
 }
 
@@ -405,17 +405,17 @@ Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working wi
     this->monolithicToInterface(lambda, *un);
 
     for(UInt dim = 0; dim < nDimensions; ++dim)
+    {
+        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                        {
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            {
 
-                            if(rhs.get() != 0)
-                                (*rhs)[  (int)(*this->M_numerationInterface)[ITrow->second ] + dim*M_interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*M_dFESpace->dof().numTotalDof() )*(M_solid->rescaleFactor());
-                        }
-                }
+                if(rhs.get() != 0)
+                    (*rhs)[  (int)(*this->M_numerationInterface)[ITrow->second ] + dim*M_interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*M_dFESpace->dof().numTotalDof() )*(M_solid->rescaleFactor());
+            }
         }
+    }
 }
 
 
@@ -424,18 +424,18 @@ Monolithic::addDiagonalEntries(Real entry, matrix_ptrtype bigMatrix, const Epetr
 {
     if(!replace)
         for(UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)//num from 1
-            {
-                bigMatrix->set_mat_inc(  offset + Map.getMap(Unique)->GID(i)-1 ,   offset + Map.getMap(Unique)->GID(i)-1, entry);
-            }
-    else
         {
-            for(UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)
-                {
-                    //diagonal[Map.getMap(Repeated)->GID(i)+offset]=entry;
-                    int* index(new int(offset + Map.getMap(Unique)->GID(i)));
-                    bigMatrix->getMatrixPtr()->ReplaceGlobalValues(offset + Map.getMap(Repeated)->GID(i), 1, &entry, index );
-                }
+            bigMatrix->set_mat_inc(  offset + Map.getMap(Unique)->GID(i)-1 ,   offset + Map.getMap(Unique)->GID(i)-1, entry);
         }
+    else
+    {
+        for(UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)
+        {
+            //diagonal[Map.getMap(Repeated)->GID(i)+offset]=entry;
+            int* index(new int(offset + Map.getMap(Unique)->GID(i)));
+            bigMatrix->getMatrixPtr()->ReplaceGlobalValues(offset + Map.getMap(Repeated)->GID(i), 1, &entry, index );
+        }
+    }
 }
 void
 Monolithic::addDiagonalEntries(Real entry,  matrix_ptrtype bigMatrix, std::map<ID, ID> const& Map, UInt offset, bool replace)
@@ -443,26 +443,26 @@ Monolithic::addDiagonalEntries(Real entry,  matrix_ptrtype bigMatrix, std::map<I
     std::map<ID, ID>::const_iterator ITrow;
     if(!replace)
         for(ITrow=Map.begin() ; ITrow != Map.end(); ++ITrow)
-            {
-                if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                    bigMatrix->set_mat_inc(  offset + (*M_numerationInterface)[ITrow->second]-1 ,   offset + (*M_numerationInterface)[ITrow->second]-1, entry);
-            }
-    else
         {
-            for(ITrow=Map.begin() ; ITrow != Map.end(); ++ITrow)
-                {
-                    if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                        {
-                            int* index(new int(offset + (*M_numerationInterface)[ITrow->second]));
-                            int err = bigMatrix->getMatrixPtr()->ReplaceGlobalValues(offset + (*M_numerationInterface)[ITrow->second], 1, &entry, index );
-                            if (err != 0)
-                                {
-                                    M_solid->getDisplayer().leaderPrint("error ", err);
-                                    M_solid->getDisplayer().leaderPrint("Go to fill your matrix!!");
-                                }
-                        }
-                }
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+                bigMatrix->set_mat_inc(  offset + (*M_numerationInterface)[ITrow->second]-1 ,   offset + (*M_numerationInterface)[ITrow->second]-1, entry);
         }
+    else
+    {
+        for(ITrow=Map.begin() ; ITrow != Map.end(); ++ITrow)
+        {
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            {
+                int* index(new int(offset + (*M_numerationInterface)[ITrow->second]));
+                int err = bigMatrix->getMatrixPtr()->ReplaceGlobalValues(offset + (*M_numerationInterface)[ITrow->second], 1, &entry, index );
+                if (err != 0)
+                {
+                    M_solid->getDisplayer().leaderPrint("error ", err);
+                    M_solid->getDisplayer().leaderPrint("Go to fill your matrix!!");
+                }
+            }
+        }
+    }
 }
 
 void
@@ -471,7 +471,6 @@ Monolithic::updateSystem(const vector_type& displacement)
 
     vector_type solution(*this->M_monolithicMap);
     monolithicToX(displacement, solution, M_uFESpace->map(), UInt(0));
-    std::cout<<"solution initial norm: "<<solution.NormInf()<<std::endl;
     this->M_bdf->shift_right(solution);
 
     M_meshMotion->updateSystem();
@@ -487,12 +486,12 @@ void
 Monolithic::monolithicToX(const vector_type& disp, vector_type& dispFluid, EpetraMap& map, UInt offset)
 {
     if(disp.getMaptype()== Repeated)
-        {
-            vector_type dispUnique(disp, Unique);
-            monolithicToX(dispUnique, dispFluid, map, offset);
-            dispFluid = dispUnique;
-            return;
-        }
+    {
+        vector_type dispUnique(disp, Unique);
+        monolithicToX(dispUnique, dispFluid, map, offset);
+        dispFluid = dispUnique;
+        return;
+    }
     dispFluid.subset(disp, map, offset, offset);
 }
 
@@ -500,18 +499,18 @@ void
 Monolithic::monolithicToInterface(vector_type& lambdaSolid, const vector_type& disp)
 {
     if (disp.getMaptype() == Repeated)
-        {
-            vector_type const  dispUnique(disp, Unique);
-            monolithicToInterface(lambdaSolid, dispUnique);
-            return;
-        }
+    {
+        vector_type const  dispUnique(disp, Unique);
+        monolithicToInterface(lambdaSolid, dispUnique);
+        return;
+    }
     if (lambdaSolid.getMaptype() == Repeated)
-        {
-            vector_type  lambdaSolidUn(lambdaSolid.getMap(), Unique);
-            monolithicToInterface( lambdaSolidUn, disp);
-            lambdaSolid = lambdaSolidUn;
-            return;
-        }
+    {
+        vector_type  lambdaSolidUn(lambdaSolid.getMap(), Unique);
+        monolithicToInterface( lambdaSolidUn, disp);
+        lambdaSolid = lambdaSolidUn;
+        return;
+    }
     /* UInt MyOffset(M_uFESpace->map().getMap(Unique)->NumMyElements()+M_pFESpace->map().getMap(Unique)->NumMyElements());
        vector_type subDisp(this->M_dFESpace->map(), Unique);
        subDisp.mySubset(disp, MyOffset);
@@ -540,115 +539,115 @@ Monolithic::evalResidual( vector_type&       res,
 
 
     if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
+    {
+        setDispSolid(disp);
+
+        vector_type lambdaFluid(this->M_interfaceMap, Unique);
+
+        monolithicToInterface(lambdaFluid, disp);
+
+        lambdaFluid *= (M_dataFluid->getTimeStep()*(M_solid->rescaleFactor()));//because of the matrix scaling
+        this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
+        M_meshMotion->iterate(*M_BCh_mesh);
+        M_meshMotion->updateDispDiff();
+
+        M_beta.reset(new vector_type(M_uFESpace->map()));
+        vector_type const meshDispDiff( M_meshMotion->dispDiff(), Repeated );
+
+        this->moveMesh(meshDispDiff);
+
+        this->interpolateVelocity(meshDispDiff, *this->M_beta);
+
+        double alpha = 1./M_dataFluid->getTimeStep();
+
+        *this->M_beta *= -alpha;
+        vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
+        fluid->subset(*M_un, 0);
+        *this->M_beta += *fluid/*M_un*/;
+
+
+        M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
+        if(M_DDBlockPrec==1)
         {
-            setDispSolid(disp);
-
-            vector_type lambdaFluid(this->M_interfaceMap, Unique);
-
-            monolithicToInterface(lambdaFluid, disp);
-
-            lambdaFluid *= (M_dataFluid->getTimeStep()*(M_solid->rescaleFactor()));//because of the matrix scaling
-            this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
-            M_meshMotion->iterate(*M_BCh_mesh);
-            M_meshMotion->updateDispDiff();
-
-            M_beta.reset(new vector_type(M_uFESpace->map()));
-            vector_type const meshDispDiff( M_meshMotion->dispDiff(), Repeated );
-
-            this->moveMesh(meshDispDiff);
-
-            this->interpolateVelocity(meshDispDiff, *this->M_beta);
-
-            double alpha = 1./M_dataFluid->getTimeStep();
-
-            *this->M_beta *= -alpha;
-            vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
-            fluid->subset(*M_un, 0);
-            *this->M_beta += *fluid/*M_un*/;
-
-
-            M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
-            if(M_DDBlockPrec==1)
-                {
-                    M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
-                    M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock );
-                    M_fluidBlock->GlobalAssemble();
-                    *M_monolithicMatrix += *M_fluidBlock;
-                }
-            else
-                if( M_DDBlockPrec==7 || M_DDBlockPrec==8 )
-                    {
-                        matrix_ptrtype newMatrix(new matrix_type(*M_monolithicMap));
-                        M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, newMatrix );
-                        newMatrix->GlobalAssemble();
-                        *M_monolithicMatrix += *newMatrix;
-
-                        M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
-                        *M_fluidBlock += *newMatrix;
-                        this->M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
-                        addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
-                        if(M_DDBlockPrec==7)
-                            couplingMatrix(M_fluidBlock, 7);
-                        else
-                            if(M_DDBlockPrec==8)
-                                couplingMatrix(M_fluidBlock, 6);
-                        bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-
-                        M_fluidBlock->GlobalAssemble();
-                        M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
-
-                    }
-                else
-                    {
-                        M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_monolithicMatrix );//here it assembles the fluid matrices
-                    }
-
-
-
-            M_fluid->updateStab( *M_monolithicMatrix);//applies the stabilization terms
-
-            updateMatrix(*M_monolithicMatrix);
-
-            //M_monolithicMatrix->GlobalAssemble();
-            if(iter==0)
-                {
-                    M_nbEval = 0; // new time step
-                    M_resetPrec=true;
-                    *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
-                    couplingRhs(this->M_rhs, M_un);
-                    this->M_solid->updateStuff();
-                    updateSolidSystem(this->M_rhs);
-                }
-
-            M_rhsFull.reset(new vector_type(*M_rhs));
-
-            M_BCh_flux->setOffset(M_offset-M_fluxes);
-            if ( !M_BCh_flux->bdUpdateDone() )
-                M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-            bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-
-            M_BCh_Robin->setOffset(M_offset);
-            if ( !M_BCh_Robin->bdUpdateDone() )
-                M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-            bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-
-            evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhsFull, res, M_diagonalScale);
-
-            if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8)
-                {
-                    if(!M_robinCoupling.get())
-                        {
-                            M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
-                            robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
-                            M_robinCoupling->GlobalAssemble();
-                        }
-                    this->applyPreconditioner(M_robinCoupling, M_rhsFull);
-                }
-
-            if(M_DDBlockPrec!=5 && M_DDBlockPrec!=7 &&M_DDBlockPrec!=8)
-                M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
-            M_nbEval++ ;
+            M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+            M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock );
+            M_fluidBlock->GlobalAssemble();
+            *M_monolithicMatrix += *M_fluidBlock;
         }
+        else
+            if( M_DDBlockPrec==7 || M_DDBlockPrec==8 )
+            {
+                matrix_ptrtype newMatrix(new matrix_type(*M_monolithicMap));
+                M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, newMatrix );
+                newMatrix->GlobalAssemble();
+                *M_monolithicMatrix += *newMatrix;
+
+                M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+                *M_fluidBlock += *newMatrix;
+                this->M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
+                addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
+                if(M_DDBlockPrec==7)
+                    couplingMatrix(M_fluidBlock, 7);
+                else
+                    if(M_DDBlockPrec==8)
+                        couplingMatrix(M_fluidBlock, 6);
+                bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+
+                M_fluidBlock->GlobalAssemble();
+                M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
+
+            }
+            else
+            {
+                M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_monolithicMatrix );//here it assembles the fluid matrices
+            }
+
+
+
+        M_fluid->updateStab( *M_monolithicMatrix);//applies the stabilization terms
+
+        updateMatrix(*M_monolithicMatrix);
+
+        //M_monolithicMatrix->GlobalAssemble();
+        if(iter==0)
+        {
+            M_nbEval = 0; // new time step
+            M_resetPrec=true;
+            *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
+            couplingRhs(this->M_rhs, M_un);
+            this->M_solid->updateStuff();
+            updateSolidSystem(this->M_rhs);
+        }
+
+        M_rhsFull.reset(new vector_type(*M_rhs));
+
+        M_BCh_flux->setOffset(M_offset-M_fluxes);
+        if ( !M_BCh_flux->bdUpdateDone() )
+            M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+        bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+
+        M_BCh_Robin->setOffset(M_offset);
+        if ( !M_BCh_Robin->bdUpdateDone() )
+            M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+        bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+
+        evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhsFull, res, M_diagonalScale);
+
+        if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8)
+        {
+            if(!M_robinCoupling.get())
+            {
+                M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+                robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                M_robinCoupling->GlobalAssemble();
+            }
+            this->applyPreconditioner(M_robinCoupling, M_rhsFull);
+        }
+
+        if(M_DDBlockPrec!=5 && M_DDBlockPrec!=7 &&M_DDBlockPrec!=8)
+            M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
+        M_nbEval++ ;
+    }
     evalResidual( disp,  M_rhsFull, res, false);
 }
 
@@ -738,17 +737,17 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
 
     /* New version to multiply matrices: Paolo should test this and replace the code
 
-    matrix_ptrtype tmpMatPtr(new matrix_type(M_solid->getMap()));
-    M_monolithicMatrix->swapCrsMatrix(*tmpMatPtr);
+       matrix_ptrtype tmpMatPtr(new matrix_type(M_solid->getMap()));
+       M_monolithicMatrix->swapCrsMatrix(*tmpMatPtr);
 
-    tmpMatPtr -> GlobalAssemble();
+       tmpMatPtr -> GlobalAssemble();
 
-    preconditioner->Multiply( false,
-                              *tmpMatPtr,
-                              false,
-                              *M_monolithicMatrix);
+       preconditioner->Multiply( false,
+       *tmpMatPtr,
+       false,
+       *M_monolithicMatrix);
 
-                              */
+       */
 
 
     M_monolithicMatrix->GlobalAssemble();
@@ -811,155 +810,155 @@ void  Monolithic::solveJac(vector_type         &_step,
 
     if( !M_reusePrec || M_resetPrec )
         switch(M_DDBlockPrec)
+        {
+        case 1:
             {
-            case 1:
+                *M_precMatrPtr += *M_fluidBlock;
+                *M_precMatrPtr += *M_solidBlock;
+                this->M_fluid->updateStab( *M_precMatrPtr);//applies the stabilization terms
+                if(!M_precMatrPtr->getMatrixPtr()->Filled())
                 {
-                    *M_precMatrPtr += *M_fluidBlock;
-                    *M_precMatrPtr += *M_solidBlock;
-                    this->M_fluid->updateStab( *M_precMatrPtr);//applies the stabilization terms
-                    if(!M_precMatrPtr->getMatrixPtr()->Filled())
-                        {
-                            couplingMatrix(M_precMatrPtr, 7);
-                            //addDiagonalEntries(M_entry,M_precMatrPtr, M_interfaceMap, M_solidAndFluidDim);
-                        }
-                    else
-                        this->M_solid->getDisplayer().leaderPrint("ERROR: probably the tolerance fixed for Newton is too low. Remember that this type of preconditioner can be used only in the geometry-explicit case \n");
-                    bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-                    bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                    couplingMatrix(M_precMatrPtr, 7);
+                    //addDiagonalEntries(M_entry,M_precMatrPtr, M_interfaceMap, M_solidAndFluidDim);
+                }
+                else
+                    this->M_solid->getDisplayer().leaderPrint("ERROR: probably the tolerance fixed for Newton is too low. Remember that this type of preconditioner can be used only in the geometry-explicit case \n");
+                bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
 
-                    M_precMatrPtr->GlobalAssemble();
-                    bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1.,
-                                    dataSolid().getTime() );
-                    bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(), 1.,
-                                    dataFluid().getTime() );
+                M_precMatrPtr->GlobalAssemble();
+                bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1.,
+                                dataSolid().getTime() );
+                bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(), 1.,
+                                dataFluid().getTime() );
 
 
-                    M_precMatrPtr->GlobalAssemble();}
-                break;
-            case 2:
-                {
-                    *M_precMatrPtr += *M_monolithicMatrix;
-                    M_precMatrPtr->GlobalAssemble();
-                }
-                break;
-            case 3:
-                {if(false && !M_robinCoupling.get())
-                        {
-                            M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
-                            robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
-                            M_robinCoupling->GlobalAssemble();
-                        }
-                    *M_precMatrPtr += *M_monolithicMatrix;
-                    M_precMatrPtr->GlobalAssemble();
-
-                    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
-                    for(short i=0; i<nDimensions; ++i)
-                        {
-                            zeroBlock(M_precMatrPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset); //(2, 4)
-                            zeroBlock(M_precMatrPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(2, 5)
-                        }
-                    M_precMatrPtr->GlobalAssemble();
-                }
-                break;
-            case 4:
-                {
-                    *M_precMatrPtr += *M_monolithicMatrix;
-                    M_precMatrPtr->GlobalAssemble();
-
-                    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
-                    for(short i=0; i<nDimensions; ++i)
-                        {
-                            zeroBlock(M_precMatrPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 5)
-                        }
-                }
-                break;
-            case 5:
-                {
-                }
-                break;
-            case 6:
-                {
-                }
-                break;
-            case 7:
-                {
-				    M_BCh_flux->setOffset(M_offset-M_fluxes);
-				    M_BCh_Robin->setOffset(M_offset);
-				    bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-				    bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-				    M_solidBlockPrec->GlobalAssemble();
-				    //M_solidBlockPrec->spy("solidBlock");
-				    M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-				    if(M_precPtr->set())
-                        {
-                            M_precPtr->replace(M_fluidOper, 1);
-                        }
-				    else
-                        {
-                            M_solidBlockPrec->GlobalAssemble();
-                            M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-
-                            M_precPtr->buildPreconditioner(M_solidOper);
-                            //M_epetraWorldComm->Barrier();
-                            M_precPtr->push_back(M_fluidOper);
-                            //*(new IfpackComposedPrec::operator_type(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock))));
-                        }
-
-                    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-                }
-                return;
-            case 8:
-                {
-                    M_BCh_flux->setOffset(M_offset-M_fluxes);
-                    M_BCh_Robin->setOffset(M_offset);
-
-                    if(M_precPtr->set())
-                        {
-                            M_precPtr->replace(M_fluidOper, 0);
-                        }
-                    else
-                        {
-
-                            bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                            bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                            M_solidBlockPrec->GlobalAssemble();
-                            M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-                            M_precPtr->buildPreconditioner(M_fluidOper);
-                            M_precPtr->push_back(M_solidOper);
-                        }
-
-                    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-                }
-                return;
-            case 9:
-                {
-                    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-                }
-                return;
-            case 10:
-                {
-                    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-                }
-                return;
-            case 11:
-                {
-                    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-                }
-                return;
-            case 12:
-                {
-                    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-                }
-                return;
-            default:
-                {
-                    for(short i=0; i<nDimensions; ++i)
-                        *M_precMatrPtr += *M_monolithicMatrix;
-                    M_precMatrPtr->GlobalAssemble();
-
-                }
-                break;
+                M_precMatrPtr->GlobalAssemble();}
+            break;
+        case 2:
+            {
+                *M_precMatrPtr += *M_monolithicMatrix;
+                M_precMatrPtr->GlobalAssemble();
             }
+            break;
+        case 3:
+            {if(false && !M_robinCoupling.get())
+                {
+                    M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+                    robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                    M_robinCoupling->GlobalAssemble();
+                }
+                *M_precMatrPtr += *M_monolithicMatrix;
+                M_precMatrPtr->GlobalAssemble();
+
+                std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+                for(short i=0; i<nDimensions; ++i)
+                {
+                    zeroBlock(M_precMatrPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset); //(2, 4)
+                    zeroBlock(M_precMatrPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(2, 5)
+                }
+                M_precMatrPtr->GlobalAssemble();
+            }
+            break;
+        case 4:
+            {
+                *M_precMatrPtr += *M_monolithicMatrix;
+                M_precMatrPtr->GlobalAssemble();
+
+                std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+                for(short i=0; i<nDimensions; ++i)
+                {
+                    zeroBlock(M_precMatrPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 5)
+                }
+            }
+            break;
+        case 5:
+            {
+            }
+            break;
+        case 6:
+            {
+            }
+            break;
+        case 7:
+            {
+                M_BCh_flux->setOffset(M_offset-M_fluxes);
+                M_BCh_Robin->setOffset(M_offset);
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                M_solidBlockPrec->GlobalAssemble();
+                //M_solidBlockPrec->spy("solidBlock");
+                M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+                if(M_precPtr->set())
+                {
+                    M_precPtr->replace(M_fluidOper, 1);
+                }
+                else
+                {
+                    M_solidBlockPrec->GlobalAssemble();
+                    M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+                    M_precPtr->buildPreconditioner(M_solidOper);
+                    //M_epetraWorldComm->Barrier();
+                    M_precPtr->push_back(M_fluidOper);
+                    //*(new IfpackComposedPrec::operator_type(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock))));
+                }
+
+                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+            }
+            return;
+        case 8:
+            {
+                M_BCh_flux->setOffset(M_offset-M_fluxes);
+                M_BCh_Robin->setOffset(M_offset);
+
+                if(M_precPtr->set())
+                {
+                    M_precPtr->replace(M_fluidOper, 0);
+                }
+                else
+                {
+
+                    bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                    bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                    M_solidBlockPrec->GlobalAssemble();
+                    M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+                    M_precPtr->buildPreconditioner(M_fluidOper);
+                    M_precPtr->push_back(M_solidOper);
+                }
+
+                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+            }
+            return;
+        case 9:
+            {
+                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+            }
+            return;
+        case 10:
+            {
+                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+            }
+            return;
+        case 11:
+            {
+                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+            }
+            return;
+        case 12:
+            {
+                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+            }
+            return;
+        default:
+            {
+                for(short i=0; i<nDimensions; ++i)
+                    *M_precMatrPtr += *M_monolithicMatrix;
+                M_precMatrPtr->GlobalAssemble();
+
+            }
+            break;
+        }
 
     // #if OBSOLETE
     //     if(!M_dataFluid->useShapeDerivatives())
@@ -1182,52 +1181,52 @@ void Monolithic::initialize( const vector_type& u0, const vector_type& p0, const
 #ifdef HAVE_TRILINOS_ANASAZI
 void Monolithic::computeMaxSingularValue()
 {
-     typedef Epetra_Operator                                                operator_type;
+    typedef Epetra_Operator                                                operator_type;
 
-     M_PAAP.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
+    M_PAAP.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
 
-     boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
+    boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
-     M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
-     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrixPtr()));
+    M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
+    boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrixPtr()));
 
-     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/));
-     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr),  true);
-     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr), true, true);
-     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr), false, true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/));
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr),  true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr), true, true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr), false, true);
 
-     std::vector<LifeV::Real> real;
-     std::vector<LifeV::Real> imaginary;
+    std::vector<LifeV::Real> real;
+    std::vector<LifeV::Real> imaginary;
 
-     boost::shared_ptr<EigenSolver> eig;
+    boost::shared_ptr<EigenSolver> eig;
 
-     UInt nev = M_dataFile("eigensolver/nevec", 10);//number of eigenvectors
-     if(nev)
-     {
-         eig.reset(new EigenSolver(M_PAAP, M_PAAP->OperatorDomainMap(), nev));
-         eig->setDataFromGetPot(M_dataFile, "eigensolver/");
-         eig->solve();
-         eig->eigenvalues(real, imaginary);
-     }
-     else
-     {
-         throw UNDEF_EIGENSOLVER_EXCEPTION();
-     }
-     for (int i=0; i<real.size(); ++i)
-     {
-         displayer().leaderPrint("\n real part ", real[i]);
-         displayer().leaderPrint("\n imaginary part ", imaginary[i]);
-     }
+    UInt nev = M_dataFile("eigensolver/nevec", 10);//number of eigenvectors
+    if(nev)
+    {
+        eig.reset(new EigenSolver(M_PAAP, M_PAAP->OperatorDomainMap(), nev));
+        eig->setDataFromGetPot(M_dataFile, "eigensolver/");
+        eig->solve();
+        eig->eigenvalues(real, imaginary);
+    }
+    else
+    {
+        throw UNDEF_EIGENSOLVER_EXCEPTION();
+    }
+    for (int i=0; i<real.size(); ++i)
+    {
+        displayer().leaderPrint("\n real part ", real[i]);
+        displayer().leaderPrint("\n imaginary part ", imaginary[i]);
+    }
 
 }
 #endif
 
 namespace
 {
-    static Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
-    {return 0.;}
-    static Real fOne(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
-    {return 1.;}
+static Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{return 0.;}
+static Real fOne(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{return 1.;}
 }
 
 void Monolithic::enableWssComputation(EntityFlag flag)
@@ -1267,26 +1266,27 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
 
     for(ID dim=0; dim<nDimensions; ++dim)
         for(ITrow=locDofMap.begin(); ITrow!=locDofMap.end(); ++ITrow)
+        {
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second/* + dim*fluidDim*/) >= 0 )
             {
-                if(M_interfaceMap.getMap(Unique)->LID(ITrow->second/* + dim*fluidDim*/) >= 0 )
+                M_bdMass->getMatrixPtr()->ExtractGlobalRowCopy((int)(ITrow->first+dim*fluidDim), 200, numEntries, &(row[0]), &(indices[0]));
+                //std::vector<int> idCol;
+                if(numEntries==0){std::cout<<"ERROR on row "<<ITrow->first+dim*fluidDim<<"that is "<<numerationInterfaceRep[ITrow->second]<<std::endl;}
+                for (ID k=0; k<numEntries; ++k)
+                {
+                    std::map<ID, ID>::const_iterator itInterface=locDofMap.find(indices[k]-dim*fluidDim);
+                    int itIn=indices[k]-dim*fluidDim;
+                    if((locDofMap.find(itIn))->second)
                     {
-                        M_bdMass->getMatrixPtr()->ExtractGlobalRowCopy((int)(ITrow->first+dim*fluidDim), 200, numEntries, &(row[0]), &(indices[0]));
-                                //std::vector<int> idCol;
-                        if(numEntries==0){std::cout<<"ERROR on row "<<ITrow->first+dim*fluidDim<<"that is "<<numerationInterfaceRep[ITrow->second]<<std::endl;}
-                        for (ID k=0; k<numEntries; ++k)
-                            {
-                                std::map<ID, ID>::const_iterator itInterface=locDofMap.find(indices[k]-dim*fluidDim);
-                                int itIn=indices[k]-dim*fluidDim;
-                                if((locDofMap.find(itIn))->second)
-                                    {
-                                        col=(numerationInterfaceRep)((locDofMap.find(itIn))->second)+dim*M_interface-1;
-                                        bdMatrix->set_mat_inc((numerationInterfaceRep)(ITrow->second)+dim*M_interface-1, col, row[k] );
-                                        bdMatrix->set_mat_inc(col, (numerationInterfaceRep)(ITrow->second)+dim*M_interface-1,  row[k] );
-                                    }
-                            }
-                        //bdMatrix->set_mat_inc(1, numEntries, (*M_numerationInterface)(ITrow->second)+dim*M_interface, idCol, row);
+                        col=(numerationInterfaceRep)((locDofMap.find(itIn))->second)+dim*M_interface-1;
+                        bdMatrix->set_mat_inc((numerationInterfaceRep)(ITrow->second)+dim*M_interface-1, col, row[k] );
+                        bdMatrix->set_mat_inc(col, (numerationInterfaceRep)(ITrow->second)+dim*M_interface-1,  row[k] );
+                        assert(row[k]!=0);
                     }
+                }
+                //bdMatrix->set_mat_inc(1, numEntries, (*M_numerationInterface)(ITrow->second)+dim*M_interface, idCol, row);
             }
+        }
     bdMatrix->GlobalAssemble();
     bdMatrix->spy("bdMatr");
     solver_type solverMass(*M_epetraComm);
@@ -1304,15 +1304,22 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
 
     for(ID dim=0; dim<nDimensions; ++dim)
         for(ITrow=locDofMap.begin(); ITrow!=locDofMap.end(); ++ITrow)
+        {
+            if(M_uFESpace->map().getMap(Unique)->LID(ITrow->first /*+ dim*solidDim*/) >= 0)
             {
-                if(M_uFESpace->map().getMap(Unique)->LID(ITrow->first /*+ dim*solidDim*/) >= 0)
-                    {
-                        (*M_wss)[ITrow->first+dim*fluidDim]=(*sol)((*M_numerationInterface)(ITrow->second)+dim*M_interface);
-                    }
+                (*M_wss)[ITrow->first+dim*fluidDim]=(*sol)((*M_numerationInterface)(ITrow->second)+dim*M_interface);
             }
+        }
     std::cout<<"ws : "<< M_wss->NormInf()<<std::endl;
     return M_wss;
 }
+
+void Monolithic::initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld)
+{
+    meshMotion().setDisplacement(*fluid_dispOld);
+}
+
+
 namespace
 {
 FSIOperator* createM(){ return new Monolithic(); }
