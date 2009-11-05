@@ -164,11 +164,12 @@ public:
     inline const std::string  operator()(const char* VarName, const char*   Default) const;
     //     -- vectors
 
-    inline bool               operator()(const char* VarName, bool          Default, bool& found) const;
-    // END   Cristiano Malossi - 05/05/2009
+	// BEGIN Gilles Fourestey - 05/11/2009
+	inline bool               operator()(const char* VarName, bool          Default, bool& found) const;
     inline int                operator()(const char* VarName, int           Default, bool& found) const;
     inline double             operator()(const char* VarName, const double& Default, bool& found) const;
     inline const std::string  operator()(const char* VarName, const char*   Default, bool& found) const;
+	// END   Gilles Fourestey - 05/11/2009
 
     // BEGIN Cristiano Malossi - 05/05/2009
     inline bool               operator()(const char* VarName, bool          Default, unsigned Idx) const;
@@ -1628,8 +1629,7 @@ GetPot::operator()(const char* VarName, const char* Default) const
     return sv->original;
 }
 
-//
-// BEGIN Cristiano Malossi - 05/05/2009
+// BEGIN Gilles Fourestey - 05/11/2009
 inline bool
 GetPot::operator()(const char* VarName, bool Default, bool& found) const
 {
@@ -1640,7 +1640,6 @@ GetPot::operator()(const char* VarName, bool Default, bool& found) const
     found = true;
     return __convert_to_type(sv->original, Default);
 }
-// END   Cristiano Malossi - 05/05/2009
 
 inline int
 GetPot::operator()(const char* VarName, int Default, bool& found) const
@@ -1675,6 +1674,7 @@ GetPot::operator()(const char* VarName, const char* Default, bool& found) const
     found = true;
     return sv->original;
 }
+// ENG Gilles Fourestey - 05/11/2009
 
 // BEGIN Cristiano Malossi - 05/05/2009
 inline bool
