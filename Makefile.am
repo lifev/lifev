@@ -53,8 +53,8 @@ changelog:
     fi
 
 apidox-all:
+	@echo "generate API documentation with doxygen"
 	make apidox
-	cd life && make apidox
 
 all-local:
 	make apidox-all
