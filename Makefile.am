@@ -24,10 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = TestFunction.hpp 
+check_HEADERS = TestFunction.hpp
 
 check_PROGRAMS = test_ContainerOfVectors
-test_ContainerOfVectors_SOURCES = main.cpp 
+test_ContainerOfVectors_SOURCES = main.cpp
 
 EXTRA_DIST = testsuite.at
 
@@ -40,3 +40,5 @@ clean_PROGRAMS:
 
 clean-results:
 	-rm *.vct *.scl *.case *.geo
+
+include $(top_srcdir)/admin/Doxyfile.am
