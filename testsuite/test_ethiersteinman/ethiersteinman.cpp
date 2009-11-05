@@ -146,7 +146,6 @@ Ethiersteinman::Ethiersteinman( int argc,
         dataFile( "fluid/physics/density", 1. );
 
 #ifdef EPETRA_MPI
-    std::cout << "mpi initialization ... " << std::endl;
 
     //    MPI_Init(&argc,&argv);
 
@@ -186,6 +185,7 @@ Ethiersteinman::run()
     std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
     std::set<UInt> neumannMarkers = parseList( neumannList );
 
+
     BCHandler::BCHints hint = neumannMarkers.size() != 0 ?
         BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
     BCHandler bcH( 0, hint );
@@ -208,7 +208,7 @@ Ethiersteinman::run()
 
 
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile, verbose );
 
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), *d->comm);
 
@@ -322,7 +322,9 @@ Ethiersteinman::run()
         beta = fluid.solution();
 
         fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2() );
+        fluid.getDisplayer().leaderPrint("\n");
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
 
 
         if (L2proj)
@@ -362,7 +364,6 @@ Ethiersteinman::run()
     fluid.resetPrec();
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
-
 
     vector_ptrtype velAndPressure;
 
@@ -423,8 +424,11 @@ Ethiersteinman::run()
 //        rhs  = bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
+        fluid.getDisplayer().leaderPrint("\n");
         fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
         fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
