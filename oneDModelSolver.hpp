@@ -129,7 +129,7 @@
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/SolverAmesos.hpp>
 
-#include <life/lifefem/assembGeneric.hpp>
+#include <life/lifefem/assemb.hpp>
 #include <life/lifecore/chrono.hpp>
 
 //#include <life/lifearray/tridiagMatrix.hpp>
@@ -828,6 +828,7 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     //! Elementary computation and matrix assembling
     //! Loop on elements
 
+
     for(UInt iedge = 1; iedge <= M_FESpace.mesh()->numEdges(); iedge++)
         {
             //! set the elementary matrices to 0.
@@ -835,17 +836,17 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
             M_elmatGrad.zero();
 
             //! update the current element
+
             M_FESpace.fe().updateFirstDerivQuadPt(M_FESpace.mesh()->edgeList(iedge));
             //std::cout << M_FESpace.fe().currentId() << std::endl;
 
             //! update the mass and grad matrices
             mass( M_coeffMass, M_elmatMass, M_FESpace.fe(),0, 0 );
             grad( 0 , - M_coeffGrad, M_elmatGrad, M_FESpace.fe(), M_FESpace.fe(), 0, 0 );
-
             //! assemble the mass and grad matrices
-            assemb_mat( M_massMatrix,       M_elmatMass, M_FESpace.fe(), M_FESpace.dof() , 0, 0 );
+            assemb_mat( M_massMatrix, M_elmatMass, M_FESpace.fe(), M_FESpace.dof() , 0, 0 );
             //assemb_mat( M_factorMassMatrix, M_elmatMass, M_FESpace.fe(), M_FESpace.dof() , 0, 0 );
-            assemb_mat( M_gradMatrix,       M_elmatGrad, M_FESpace.fe(), M_FESpace.dof() , 0, 0 );
+            assemb_mat( M_gradMatrix, M_elmatGrad, M_FESpace.fe(), M_FESpace.dof() , 0, 0 );
         } //! end loop on elements
 
                 //M_massMatrix.GlobalAssemble();
@@ -858,9 +859,9 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
 
     //_updateBCDirichletMatrix( M_massMatrix );
 
-
-    M_gradMatrix.spy("gm");
-    M_massMatrix.spy("mm");
+    M_localMap.getMap(Unique)->Print(std::cout);
+//     M_gradMatrix.spy("gm");
+//     M_massMatrix.spy("mm");
 
     //! cholesky or lapack lu factorization of the mass matrix
     //@M_tridiagSlv.Factor( M_factorMassMatrix );
@@ -2717,6 +2718,7 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
 
             //matrix_ptrtype matrFull( new matrix_type( M_localMap, M_factorMassMatrix.getMeanNumEntries()));
             matrix_ptrtype matrFull( new matrix_type( M_massMatrix ));
+            //M_massMatrix.spy("mass");
             _updateBCDirichletMatrix( *matrFull );
             chrono1.stop();
             //M_factorMassMatrix.GlobalAssemble();
@@ -2726,21 +2728,22 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
             //matrFull->spy("massmatr");
 
             chrono2.start();
+            //            matrFull->spy("matr");
             M_linearSolver.setMatrix(*matrFull);
-            std::cout << "rhs0 norm2 = " << sol0.Norm2() << std::endl;
+            //std::cout << "rhs0 norm2 = " << sol0.Norm2() << std::endl;
             M_linearSolver.solveSystem( M_rhs[0], sol0, matrFull, false );
-            std::cout << "sol0 norm2 = " << sol0.Norm2() << std::endl;
+            //std::cout << "sol0 norm2 = " << sol0.Norm2() << std::endl;
             chrono2.stop();
 
             chrono3.start();
             M_rhs[0] = sol0;
             vector_type sol1(M_rhs[1]);
 
-            std::cout << "rhs1 norm2 = " << M_rhs[1].Norm2() << std::endl;
+            //std::cout << "rhs1 norm2 = " << M_rhs[1].Norm2() << std::endl;
 //             //! solve the system: rhs2 = massFactor^{-1} * rhs2
 //            M_linearSolver.setMatrix
             M_linearSolver.solveSystem( M_rhs[1], sol1, matrFull, false );
-            std::cout << "sol1 norm2 = " << sol1.Norm2() << std::endl;
+            //std::cout << "sol1 norm2 = " << sol1.Norm2() << std::endl;
 
 
             M_rhs[1] = sol1;
@@ -2970,10 +2973,8 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
     // dump solutions on files (buffers must be active!)
     for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); iter++ )
         {
-            std::cout << "entering loop" << std::endl;
             outfile.open( (*iter).first.c_str(), std::ios::app );
             outfile << (*(*iter).second);
-            std::cout << (*(*iter).second) << std::endl;
             outfile.close();
         }
 
