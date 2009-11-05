@@ -1,31 +1,31 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV library
+   This file is part of the LifeV library
 
-  Author(s): Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-       Date: 2008-09-18
+   Author(s): Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+   Date: 2008-09-18
 
-  Copyright (C) 2008
+   Copyright (C) 2008
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
    \file fullMonolithic.hpp
    \author crosetto <Paolo Crosetto>
    \date 18/09/2008
- */
+*/
 #ifndef _FULLMONOLITHIC_HPP
 #define _FULLMONOLITHIC_HPP
 
@@ -49,7 +49,7 @@ class Epetra_FullMonolithic;
  * diagonal blocks represent the coupling. The implementation of the stress continuity coupling condition
  * is obtained by means of an augmented formulation.
  * Different possible preconditioners are implemented.
-*/
+ */
 class fullMonolithic : public Monolithic
 {
 public:
@@ -77,8 +77,8 @@ public:
     */
 
     /*    void   solveJac(vector_type&       _muk,
-                    const vector_type& _res,
-                    const double       _linearRelTol);*/
+          const vector_type& _res,
+          const double       _linearRelTol);*/
     /**
        solves the Jacobian system
        \param _muk: output, solution at the current block GS step
@@ -112,21 +112,25 @@ public:
     vector_type& meshVel();
     const vector_type& meshDisp()const
     {
-      //        if(this->M_dataFluid->useShapeDerivatives()==true)
-      return this->M_meshMotion->dispOld();
-//         else
-//             return (super::meshDisp());
+        //        if(this->M_dataFluid->useShapeDerivatives()==true)
+        std::cout<<"this->M_meshMotion->dispOld();"<<(this->M_meshMotion->dispOld().NormInf())<<std::endl;
+        return this->M_meshMotion->dispOld();
+        //         else
+        //             return (super::meshDisp());
     }
 
-  void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+    void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
                      FSIOperator::solid_type::value_type::Function const& p0,
                      FSIOperator::solid_type::value_type::Function const& d0,
-		   FSIOperator::solid_type::value_type::Function const& w0,
-		   FSIOperator::solid_type::value_type::Function const& df0 );
+                     FSIOperator::solid_type::value_type::Function const& w0,
+                     FSIOperator::solid_type::value_type::Function const& df0 );
 
-    private:
+    void initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld);
 
-  void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
+
+private:
+
+    void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
 
     boost::shared_ptr<EpetraMap>   M_mapWithoutMesh;
     vector_ptrtype                       M_uk;
@@ -155,12 +159,12 @@ public :
     virtual ~Epetra_FullMonolithic(){};
 
     int 	SetUseTranspose (bool  /*UseTranspose*/)
-        {std::cout << "********* EJ : transpose not available\n"; return -1;}
+    {std::cout << "********* EJ : transpose not available\n"; return -1;}
     int Apply (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
     int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-        {std::cout << "********* EJ : inverse not available\n"; return -1;}
+    {std::cout << "********* EJ : inverse not available\n"; return -1;}
     double 	NormInf         () const
-        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
+    {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
     const char * Label      () const {return "exactJacobian";}
     bool 	UseTranspose    () const {return false;}
     bool 	HasNormInf      () const {return false;}
@@ -198,12 +202,12 @@ public :
     virtual ~Epetra_FullMonolithic(){};
 
     int 	SetUseTranspose (bool  /*UseTranspose*/)
-        {std::cout << "********* EJ : transpose not available\n"; return -1;}
+    {std::cout << "********* EJ : transpose not available\n"; return -1;}
     int Apply (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
     int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-        {std::cout << "********* EJ : inverse not available\n"; return -1;}
+    {std::cout << "********* EJ : inverse not available\n"; return -1;}
     double 	NormInf         () const
-        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
+    {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
     const char * Label      () const {return "exactJacobian";}
     bool 	UseTranspose    () const {return false;}
     bool 	HasNormInf      () const {return false;}
