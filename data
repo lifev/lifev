@@ -5,6 +5,9 @@
 
 [problem]
 
+#initSol = 00004
+#initSolPrev = 00003
+
 method     = monolithic # monolithic, fullMonolithic
 precond    = 0 #for Steklov-Poincare:
                #     0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
@@ -96,7 +99,7 @@ reuse = true
 
 
 [interface] # mesh dependent flags for the interface.
-DDBlockPrec = 1
+DDBlockPrec = 2
 #0: monolithic D-N system,
 #1: segregated D-N , works only in the semiImplicit case
 #2: monolithic  R-N system (equivalent to 0)
