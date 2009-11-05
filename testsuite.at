@@ -94,30 +94,10 @@ pressname = press
 steady    = 0
 factor    = 1
 
-#[../solver]
-#solver          = gmres
-#scaling         = none
-#output          = all # none
-#conv            = rhs
-#max_iter        = 100
-#kspace          = 100
-#tol             = 1.e-10    # AztecOO tolerance
-
-# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
-#[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-#prectype        = Amesos # Amesos (does a local LU factorization), Amesos (not ILU)
-#reuse           = true
-#overlap         = 2
-#droptol         = 1.e-3
-#fill            = 4
-#athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
-#rthr            = 1
-#relax_value     = 1
-
 [../ipstab]
 gammaBeta  = 0.02
 gammaDiv   = 0.2
-gammaPress = 0.2
+gammaPress = 0.01
 #gammaBeta  = 0.125
 #gammaDiv   = 0.125
 #gammaPress = 0.03125
@@ -306,7 +286,7 @@ conv     = rhs;
 ]])
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh &&
           ln -sf ../../data/mesh/inria/vessel20.mesh &&
-          ../../test_monolithic/test_monolithic -c],[0],[ignore],[ignore])
+          mpirun -np 2 ../../test_monolithic/test_monolithic -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
 
