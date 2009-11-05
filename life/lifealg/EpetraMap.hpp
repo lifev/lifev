@@ -179,7 +179,7 @@ public:
                                  int   IndexBase,
                                  const Epetra_Comm &Comm)  ;
 
-    map_ptrtype const & getMap    ( EpetraMapType maptype) const;
+    map_ptrtype const & getMap  ( EpetraMapType maptype) const;
 
     //! This methods create a pointer to a EpetraMap that has points only on processor root
     /*!
