@@ -1,31 +1,32 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV library
+   This file is part of the LifeV library
 
-  Author(s): Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-       Date: 2009-06-03
+   Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
+              Simone Deparis <simone.deparis@epfl.ch>
+   Date: 2009-06-03
 
-  Copyright (C) 2009 EPFL
+   Copyright (C) 2009 EPFL
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
    \file flowConditions.hpp
    \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
    \date 2009-06-03
- */
+*/
 #ifndef __FLOWCONDITIONS_HPP
 #define __FLOWCONDITIONS_HPP
 
@@ -43,10 +44,10 @@ public:
     FlowConditions();
 
     void initParameters      ( FSIOperator&  oper,
-                                    const int&    outflowFlag);
+                               const int&    outflowFlag);
 
     void renewParameters     ( FSISolver&  oper,
-                                    const int&    outflowFlag);
+                               const int&    outflowFlag);
 
     Real fZero               (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
