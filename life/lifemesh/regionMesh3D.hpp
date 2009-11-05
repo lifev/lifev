@@ -312,7 +312,7 @@ namespace LifeV
           \pre The routine assumes that the boundary faces are properly set, if not use the
           methods in mesh_util.h.
         */
-        void updateElementFaces( bool createFaces = false, UInt estimateFaceNumber = 0 );
+        void updateElementFaces( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 );
         //! Destroys element-to-face container. Useful to save memory!
         void cleanElementFaces();
         //!local Face
@@ -341,7 +341,7 @@ namespace LifeV
           \note This method does not assume that bounrary edges are stores, since
           this condition is NOT a a paradigm for a RegionMesh3D.
         */
-        void updateElementEdges( bool createEdges = false, UInt estimateEdgeNumber = 0 );
+        void updateElementEdges( bool createEdges = false, const bool verbose = false, UInt estimateEdgeNumber = 0 );
         //! Destroys element-to-face container
         void cleanElementEdges();
         //!local Edge
@@ -2331,12 +2331,13 @@ namespace LifeV
     // Forward Declarations
     template <typename GEOSHAPE, typename MC>
     void
-    RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
+    RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
     {
         // If the counter is set we trust it! Otherwise we use Euler formula
         // this is ok for domains with at most 1 hole!
 
-        std::cout << "     Updating element edges ... " << std::flush;
+        if (verbose)
+            std::cout << "     Updating element edges ... " << std::flush;
 
         if ( ce && ee == 0 )
             ee = M_numEdges > M_numBEdges ? M_numEdges : ( GEOSHAPE::numFaces / 2 - 1 ) * numVolumes() + M_numBFaces / 2 + numVertices();
@@ -2466,11 +2467,13 @@ namespace LifeV
                     M_numGlobalEdges = n;
             }
 
-        std::cout << n << " edges ";
+        if (verbose)
+            std::cout << n << " edges ";
         ASSERT_POS( n == M_numEdges , "#Edges found is not equal to that in RegionMesh" << n << " " << M_numEdges ) ;
         setLinkSwitch( std::string( "HAS_VOLUME_TO_EDGES" ) );
 
-        std::cout << " done." << std::endl;
+        if (verbose)
+            std::cout << " done." << std::endl;
     }
 
 
@@ -2480,10 +2483,11 @@ namespace LifeV
 
     template <typename GEOSHAPE, typename MC>
     void
-    RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, UInt ef )
+    RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UInt ef )
     {
 
-        std::cout << "     Updating element faces ... " << std::flush;
+        if (verbose)
+            std::cout << "     Updating element faces ... " << std::flush;
 
         ASSERT0( ! cf || M_numBFaces > 0, std::stringstream( std::string("Boundary Faces Must have been set") +
                                                              std::string("in order to call updateElementFaces with createFaces=true") +
@@ -2522,7 +2526,9 @@ namespace LifeV
             }
             // we finish here
             setLinkSwitch( "HAS_VOLUME_TO_FACES" );
-            std::cout << " done." << std::endl;
+            if (verbose)
+                std::cout << " done." << std::endl;
+
             return ;
         }
 
@@ -2630,7 +2636,7 @@ namespace LifeV
             }
 
 
-        std::cout << n << " faces ";
+        if (verbose) std::cout << n << " faces ";
         ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
         setLinkSwitch( "HAS_VOLUME_TO_FACES" );
         if ( cf )
@@ -2638,7 +2644,8 @@ namespace LifeV
         if ( cf )
             setLinkSwitch( "FACES_HAVE_ADIACENCY" );
 
-        std::cout << " done." << std::endl;
+        if (verbose)
+            std::cout << " done." << std::endl;
     }
 
     template <typename GEOSHAPE, typename MC>

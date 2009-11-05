@@ -78,7 +78,7 @@ bool
 readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
              const std::string & filename,
              EntityFlag regionFlag,
-             bool verbose=false )
+             bool verbose = false )
 {
     unsigned done = 0;
     std::string line;
@@ -367,12 +367,11 @@ public:
 };
 template <typename GeoShape, typename MC>
 bool
-readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
-                   std::string const & filename,
-                   EntityFlag regionFlag,
-                   bool verbose=false,
-                   InternalEntitySelector iSelect=InternalEntitySelector()
-                   )
+readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
+                   std::string const&               filename,
+                   EntityFlag                       regionFlag,
+                   bool verbose                   = false,
+                   InternalEntitySelector iSelect = InternalEntitySelector())
 {
     unsigned done = 0;
     std::string line;
@@ -393,9 +392,10 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // open stream to read header
 
     std::ifstream hstream( filename.c_str() );
-    if (verbose){
-        std::cout<<"Reading form file "<<filename<< std::endl;
-    }
+    if (verbose)
+        {
+            std::cout<<"Reading form file "<<filename<< std::endl;
+        }
 
     if ( hstream.fail() )
     {
@@ -404,7 +404,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                   << std::endl;
         abort();
     }
-    std::cout << "Reading INRIA mesh file" << std::endl;
+    if (verbose) std::cout << "Reading INRIA mesh file" << filename << std::endl;
     if ( ! readINRIAMeshFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo, numStoredFaces,shape,
                                   iSelect) )
     {
@@ -503,6 +503,10 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     mesh.setMarker         ( regionFlag ); // Add Marker to list of Markers
 
+    typedef typename RegionMesh3D<GeoShape, MC>::PointType  PointType;
+    typedef typename RegionMesh3D<GeoShape, MC>::VolumeType VolumeType;
+
+
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
     typename RegionMesh3D<GeoShape, MC>::FaceType * pf = 0;
@@ -552,6 +556,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                 mesh.globalToLocalNode().insert(std::make_pair(i+1, i+1));
             }
             oStr << "Vertices Read " << std::endl;
+            oStr << "size of the node storage is " << count*sizeof(PointType)/1024./1024. << std::endl;
             done++;
             if ( count != nBVe )
                 std::cerr << "NumB points inconsistent !" << std::endl;
@@ -693,7 +698,10 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 //                mesh.globalToLocalElem().insert(std::make_pair(i+1, i+1));
                 count++;
             }
+            oStr << "size of the volume storage is "
+                 << sizeof(VolumeType)*count/1024./1024. << " Mo." << std::endl;
             oStr << count << " Volume elements Read" << std::endl;
+
             done++;
         }
         if ( line.find( "Hexahedra" ) != std::string::npos )
@@ -728,7 +736,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // Test mesh
     Switch sw;
 
-    if ( !checkMesh3D( mesh, sw, true, false, oStr, std::cerr, oStr ) )
+    if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
          abort();
     // if(!checkMesh3D(mesh, sw, true,true, oStr,oStr,oStr)) abort();//verbose version
 

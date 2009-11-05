@@ -689,6 +689,7 @@ setBPointsMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
         }
     }
     unsigned int count( 0 );
+
     if ( verbose )
     {
         clog << "**** NEW POINTS MARKERS **************" << std::endl;

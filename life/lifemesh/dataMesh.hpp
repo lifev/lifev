@@ -75,7 +75,7 @@ public:
     /*!
       \param section the section in the data file
     */
-    DataMesh( const GetPot& dfile, const std::string& section = "discretization" );
+    DataMesh( const GetPot& dfile, const std::string& section = "discretization", bool verbose = false );
 
     DataMesh( const DataMesh& dataMesh );
 
@@ -126,6 +126,7 @@ private:
     std::string 	M_mesh_file;	// mesh file
     std::string 	M_mesh_type;	// mesh type
 
+    bool            M_verbose;
 };
 
 
@@ -139,41 +140,42 @@ private:
 // Constructor
 template <typename Mesh>
 DataMesh<Mesh>::
-DataMesh( const GetPot& dfile, const std::string& section ):
+DataMesh( const GetPot& dfile, const std::string& section, bool verbose ):
     M_mesh		( new Mesh ),
     M_mesh_dir  ( dfile( ( section + "/mesh_dir"  ).data(), "./" ) ),
     M_mesh_file ( dfile( ( section + "/mesh_file" ).data(), "mesh.mesh" ) ),
     M_mesh_type ( dfile( ( section + "/mesh_type" ).data(), ".mesh" ) )
 {
-    bool verbose = dfile( ( section + "/verbose" ).data(), 0 );
+    bool verbatim = dfile( ( section + "/verbose" ).data(), 0 ) && verbose;
 
-	#ifdef TWODIM
-		if ( M_mesh_type == ".msh" )
-			readFreeFemFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
-		else
-			ERROR_MSG( "Sorry, this mesh file can not be loaded" );
+#ifdef TWODIM
+    if ( M_mesh_type == ".msh" )
+        readFreeFemFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbatim );
+    else
+        ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
-		//Update Edges
-		M_mesh->updateElementEdges(true);
+    //Update Edges
+    M_mesh->updateElementEdges(true);
+#elif defined(THREEDIM)
+    if ( M_mesh_type == ".mesh" )
+        readINRIAMeshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbatim );
+    else if ( M_mesh_type == ".m++" )
+        readMppFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbatim );
+    else if ( M_mesh_type == ".msh" )
+        readGmshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1 );
+    else if ( M_mesh_type == ".vol" )
+        readNetgenMesh( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbatim );
+    else
+        ERROR_MSG( "Sorry, this mesh file can not be loaded" );
+
+    //Update Edges & Faces
+    M_mesh->updateElementEdges( true, verbatim );
+    M_mesh->updateElementFaces( true, verbatim );
+#endif
 
 
+    if (verbose) std::cout << "\nEnd of the mesh constrution\n\n" << std::flush;
 
-	#elif defined(THREEDIM)
-		if ( M_mesh_type == ".mesh" )
-			readINRIAMeshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
-		else if ( M_mesh_type == ".m++" )
-			readMppFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
-		else if ( M_mesh_type == ".msh" )
-			readGmshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1 );
-		else if ( M_mesh_type == ".vol" )
-			readNetgenMesh( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
-		else
-			ERROR_MSG( "Sorry, this mesh file can not be loaded" );
-
-		//Update Edges & Faces
-		M_mesh->updateElementEdges( true );
-		M_mesh->updateElementFaces( true );
-	#endif
 }
 
 
