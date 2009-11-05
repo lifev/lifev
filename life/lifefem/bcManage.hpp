@@ -1257,6 +1257,9 @@ void bcNaturalManage( VectorType& b,
 //                                                         bdfem.phi( int( idofF - 1 ), iq )*
 //                                                         bdfem.weightMeas( iq )*bdfem.tangent( 0, int( j ), iq );
 //                                                     break;
+                                                default:
+                                                	ERROR_MSG( "This BC mode is not (yet) implemented" );
+
                                                 }
 //                                             bRepeated[ idDof ] += bdfem.phi( int( idofF - 1 ), iq ) * BCb( t, x, y, z, BCb.component( j ) ) *
 //                                                 bdfem.weightMeas( iq ); // BASEINDEX + 1
@@ -2082,9 +2085,9 @@ void bcFluxManage( MatrixType&     A,
     DataType sum;
 
     const IdentifierNatural* pId;
-    ID ibF, idDof, jdDof, kdDof;
+    ID ibF, idDof, jdDof/*, kdDof*/;
 
-    const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
+    // const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
     //std::cout<<"offset "<<offset<<std::endl;
     b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
@@ -2092,7 +2095,7 @@ void bcFluxManage( MatrixType&     A,
     //std::cout<<"step1"<<std::endl;
     if ( !BCb.dataVector() )
         {
-            DataType x = 0., y = 0., z = 0.;
+            // DataType x = 0., y = 0., z = 0.;
 
             for ( ID i = 1; i <= BCb.list_size(); ++i )
                 {
@@ -2105,9 +2108,9 @@ void bcFluxManage( MatrixType&     A,
 
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
                         {
-                            ID gDof = pId->bdLocalToGlobal( idofF );
+                            // ID gDof = pId->bdLocalToGlobal( idofF );
 
-                            for ( int ic = 1; ic <= nComp; ++ic)
+                            for ( int ic = 1; ic <= (int)nComp; ++ic)
                                 {
                                     idDof = pId->bdLocalToGlobal( idofF ) + (ic - 1)*totalDof;
 
@@ -2133,7 +2136,8 @@ void bcFluxManage( MatrixType&     A,
 
 
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
-void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
+void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
+		CurrentBdFE& bdfem, const DataType& /*t*/, UInt offset )
 {
 
     // Number of local Dof in this face
@@ -2145,7 +2149,7 @@ void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, con
     // Number of components involved in this boundary condition
     UInt nComp = BCb.numberOfComponents();
 
-    DataType sum;
+    // DataType sum;
 
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof, kdDof;
@@ -2303,7 +2307,8 @@ void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad);
 
 template <typename MeshType>
 void bcBuildTriad(const MeshType& mesh, const BCBase& BCb,
-                  CurrentBdFE& bdfem, std::map< ID,std::vector< Real > > &triad,UInt offset=0)
+                  CurrentBdFE& bdfem, std::map< ID,std::vector< Real > > &triad,
+                  UInt /*offset=0*/)
 {
     // Author:	Gwenol Grandperrin
     // Date:	29.09.09

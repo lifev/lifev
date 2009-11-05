@@ -672,7 +672,7 @@ FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
                                    const Real      time)
 {
     //
-    ID   nbComp   = M_fieldDim; // Number of components of the mesh velocity
+    // ID   nbComp   = M_fieldDim; // Number of components of the mesh velocity
     UInt totalDof = dof().numTotalDof();
 
     //
