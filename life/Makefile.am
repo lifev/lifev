@@ -29,9 +29,6 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 SUBDIRS		= lifecore lifearray lifemesh lifealg  lifefem  lifefilters lifesolver
 
 
-apidox:
-	@for i in $(SUBDIRS); do \
-	 (cd $$i && make apidox); \
-	done
+include $(top_srcdir)/admin/Doxyfile.am
 
 dist_pkgdata_DATA  = debug.areas
