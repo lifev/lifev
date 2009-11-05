@@ -76,17 +76,17 @@ public:
 
        \param time the solver time
     */
-    void postProcess(const Real& time) {}
+    void postProcess(const Real& /*time*/) {}
 
     /**
        Import data from previous simulations
 
        \param time the solver time
     */
-    void import(const Real& Tstart, const Real& dt) {} // dt is used to rebuild the history up to now
+    void import(const Real& /*Tstart*/, const Real& /*dt*/) {} // dt is used to rebuild the history up to now
 
     //! Read  only last timestep
-    void import(const Real& Tstart) {}
+    void import(const Real& /*Tstart*/) {}
 };
 
 //

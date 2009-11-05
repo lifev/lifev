@@ -245,7 +245,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
         {
             myisOnProc.reset(new std::vector<int>(_mesh.numVolumes()));
             bool myFaceRep;
-            bool myFace;
+            bool myFace(false);
             short count;
             for(UInt h=0; h<_mesh.numVolumes(); ++h)
                 {
@@ -272,7 +272,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
                                 myFaceRep=false;
                                 count=0;
 
-                                for(int ipoint=1; ipoint<=faceNodes; ++ipoint)//vertex-based dofs
+                                for(int ipoint=1; ipoint<=(int)faceNodes; ++ipoint)//vertex-based dofs
                                     {
                                         myFaceRep = ((interfaceMap->LID(_mesh.face(face).point(ipoint).id()/*first is fluid*/) == -1)&&(interfaceMapRep->LID(_mesh.face(face).point(ipoint).id()/*first is fluid*/) != -1));//to avoid repeated
                                         myFace = myFace ||(interfaceMap->LID(_mesh.face(face).point(ipoint).id()) != -1);
@@ -444,7 +444,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
                     if((*isOnProc)[kk+M_vertexDist[M_me]]!=-1)
                         ++mymatchesForProc[part[kk]][(*isOnProc)[kk+M_vertexDist[M_me]]];
                 }
-            for(UInt j=0; j<nprocs; ++j)
+            for(UInt j=0; (int)j<nprocs; ++j)
                 MPI_Allreduce( &mymatchesForProc[j][0], &matchesForProc[j][0], nprocs, MPI_INT, MPI_SUM, MPIcomm);
             M_comm->Barrier();
 //             for(UInt i=0; i<nprocs ; ++i)
@@ -596,8 +596,8 @@ struct booleanCondition
     MPI_Status status;
     int size;
 
-    MPI_Status  recv_status,  send_status;
-    MPI_Request recv_request, send_request;
+    MPI_Status  recv_status; //,  send_status;
+    MPI_Request /*recv_request,*/ send_request;
 
 
     for (int iproc = 0; iproc < nProc; ++iproc)
@@ -621,7 +621,7 @@ struct booleanCondition
             {
                 for (int jproc = 0; jproc < nProc; ++jproc)
                     {
-                        if (M_me !=jproc)
+                        if ((int)M_me !=jproc)
                             {
                                 MPI_Recv(&size, 1, MPI_INT, jproc, 10, MPIcomm, &recv_status);
                                 rsize[jproc] = size;
@@ -634,7 +634,7 @@ struct booleanCondition
     for (int iproc = 0; iproc < nProc; ++iproc)
         {
 
-            if (M_me != iproc)
+            if ((int)M_me != iproc)
                 {
                     size = ssize[iproc];
                     // workaround for huge data to be passed

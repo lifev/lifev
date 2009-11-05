@@ -107,13 +107,13 @@ public:
 
        \param time the solver time
     */
-    virtual void import(const Real& Tstart, const Real& dt) // dt is used to rebuild the history up to now
+    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) // dt is used to rebuild the history up to now
     {
         ASSERT(false,"Hdf5exporter::import not yet coded");
     }
 
     //! Read  only last timestep
-    void import(const Real& Tstart)
+    void import(const Real& /*Tstart*/)
     {
         ASSERT(false,"Hdf5exporter::import not yet coded");
     }
@@ -477,7 +477,7 @@ void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
 
 
     M_HDF5->Write(connectionsVarname, connections);
-    bool writeTranspose (true);
+    // bool writeTranspose (true);
     M_HDF5->Write(pointsXVarname, pointsX.getEpetraVector(), true);
     M_HDF5->Write(pointsYVarname, pointsY.getEpetraVector(), true);
     M_HDF5->Write(pointsZVarname, pointsZ.getEpetraVector(), true);
