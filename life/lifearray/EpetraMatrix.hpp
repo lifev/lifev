@@ -190,11 +190,12 @@ private:
     //! This method does not remove non zero entries in the diagonal.
     void insertZeroDiagonal();
 
+    //! Shared pointer on an EpetraMap
+    boost::shared_ptr< EpetraMap > M_epetraMap;
+
     //!Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
 
-    //! Shared pointer on an EpetraMap
-    boost::shared_ptr< EpetraMap > M_epetraMap;
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -203,10 +204,48 @@ private:
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
+    M_epetraMap(_matrix.M_epetraMap),
     M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs))
 {
 }
 
+template <typename DataType>
+EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries ):
+    M_epetraMap   ( new EpetraMap  (_map)),
+    M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries, false))
+{
+}
+
+
+// Copies _matrix to a matrix which resides only on the processor "reduceToProc"
+template <typename DataType>
+EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc):
+    M_epetraMap   (_matrix.M_epetraMap->createRootMap(reduceToProc)),
+    M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries
+                                     (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20,
+                                     false) )
+{
+    int  me    = M_epetraCrs->Comm().MyPID();
+    if (!me)
+        std::cout << "_matrix.M_epetraCrs->Map().IndexBase() = "
+                  << _matrix.M_epetraCrs->Map().IndexBase()
+                  << std::endl
+                  << "M_epetraCrs->Map().IndexBase() = "
+                  << M_epetraCrs->Map().IndexBase()
+                  << std::endl;
+    //     std::cout << "reduced Map : " << M_epetraCrs->Map()
+    //               <<    endl;
+
+    //     M_epetraCrs->Comm().Barrier();
+
+    //     std::cout << "original Map: " << _matrix.M_epetraCrs->Map()
+    //               << std::endl;
+
+    //     M_epetraCrs->Comm().Barrier();
+
+    Epetra_Export reducedExport(M_epetraCrs->Map(), _matrix.M_epetraCrs->Map());
+    M_epetraCrs->Import(*_matrix.M_epetraCrs, reducedExport, Add);
+}
 
 template <typename DataType>
 EpetraMatrix<DataType>&
@@ -253,57 +292,6 @@ EpetraMatrix<DataType>::operator * (const DataType val) const
     EpetraMatrix<DataType> matr(*this);
     return matr *= val;
 }
-
-
-template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries ):
-    M_epetraCrs( new matrix_type( Copy, *_map.getMap(Unique), numEntries, false)),
-    M_epetraMap   (new EpetraMap(_map)) //Add by Gwenol Grandperrin 26.10.09
-    //    M_epetraCrs( Copy, *_map.getEpetra_Map(), 0, false)
-{
-}
-
-// template <typename DataType>
-// EpetraMatrix<DataType>::
-// EpetraMatrix( const EpetraMatrix<DataType> &_csr ):
-//     M_epetraCrs( _csr.getEpetraMatrix() )
-// {
-// }
-
-
-// Copies _matrix to a matrix which resides only on the processor "reduceToProc"
-template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc):
-    M_epetraCrs(new matrix_type( Copy, Epetra_Map( _matrix.M_epetraCrs->Map().NumGlobalElements(),
-                                                   (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * _matrix.M_epetraCrs->Map().NumGlobalElements(),
-                                                   _matrix.M_epetraCrs->Map().IndexBase(),
-                                                   _matrix.M_epetraCrs->Map().Comm()  ),
-                                 (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20)),
-    M_epetraMap(_matrix.M_epetraMap) //Add by Gwenol Grandperrin 26.10.09
-{
-    int  me    = M_epetraCrs->Comm().MyPID();
-    if (!me)
-        std::cout << "_matrix.M_epetraCrs->Map().IndexBase() = "
-                  << _matrix.M_epetraCrs->Map().IndexBase()
-                  << std::endl
-                  << "M_epetraCrs->Map().IndexBase() = "
-                  << M_epetraCrs->Map().IndexBase()
-                  << std::endl;
-    //     std::cout << "reduced Map : " << M_epetraCrs->Map()
-    //               <<    endl;
-
-    //     M_epetraCrs->Comm().Barrier();
-
-    //     std::cout << "original Map: " << _matrix.M_epetraCrs->Map()
-    //               << std::endl;
-
-    //     M_epetraCrs->Comm().Barrier();
-
-    Epetra_Export reducedExport(M_epetraCrs->Map(), _matrix.M_epetraCrs->Map());
-    M_epetraCrs->Import(*_matrix.M_epetraCrs, reducedExport, Add);
-}
-
-
 
 template <typename DataType>
 void EpetraMatrix<DataType>::
