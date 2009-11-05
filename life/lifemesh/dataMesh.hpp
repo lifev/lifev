@@ -148,6 +148,8 @@ DataMesh( const GetPot& dfile, const std::string& section, bool verbose ):
 {
     bool verbatim = dfile( ( section + "/verbose" ).data(), 0 ) && verbose;
 
+    if (verbose) std::cout << "\nBuilding mesh ... ";
+
 #ifdef TWODIM
     if ( M_mesh_type == ".msh" )
         readFreeFemFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbatim );
@@ -174,7 +176,7 @@ DataMesh( const GetPot& dfile, const std::string& section, bool verbose ):
 #endif
 
 
-    if (verbose) std::cout << "\nEnd of the mesh constrution\n\n" << std::flush;
+    if (verbose) std::cout << "ok.\n" << std::endl;
 
 }
 

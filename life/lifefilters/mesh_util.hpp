@@ -354,7 +354,9 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     if ( !checkMarkerSet( mesh.pointList ) )
     {
-        err << "WARNING: Not all points have marker flag set" << std::endl;
+        if (verbose)
+            err << "WARNING: Not all points have marker flag set" << std::endl;
+
         sw.create( "POINTS_MARKER_UNSET", true );
     }
 
@@ -747,18 +749,22 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     if ( ! checkMarkerSet( mesh.pointList ) )
     {
-        err << "WARNING B. Points MARKER incorrectly set" << std::endl;
+        if (verbose)
+            err << "WARNING B. Points MARKER incorrectly set" << std::endl;
+
         if ( fix )
         {
             setBPointsMarker( mesh, clog, std::cerr, false );
             if ( ! checkMarkerSet( mesh.pointList ) )
             {
-                err << "Cannot Fix Points MARKER" << std::endl;
+                if (verbose)
+                    err << "Cannot Fix Points MARKER" << std::endl;
                 sw.create( "POINT_MARKER_UNSET", true );
             }
             else
             {
-                err << "FIXED" << std::endl;
+                if (verbose)
+                    err << "FIXED" << std::endl;
                 sw.create( "FIXED_POINT_MARKER", true );
             }
         }

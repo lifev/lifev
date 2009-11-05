@@ -43,7 +43,7 @@
   [fluid]
      [./physics]
        fluid_number = 2
-       
+
        [./fluid_0]
          density = 1;
 	 viscosity = 1;
@@ -94,8 +94,9 @@ public:
 
     //! Constructor
 	DataNavierStokes( 	const GetPot& dataFile,
-						const std::string& mesh_section= "fluid/space_discretization",
-						const std::string& time_section= "fluid/time_discretization" );
+                        const bool         verbose      = false,
+						const std::string& mesh_section = "fluid/space_discretization",
+						const std::string& time_section = "fluid/time_discretization");
 
 	//! Copy constructor
 	/*!
@@ -131,13 +132,13 @@ public:
     //! @name Set functions
     //@{
 
-  INLINE void density ( const Real& density, const UInt nfluid=0 )   
-  { 
+  INLINE void density ( const Real& density, const UInt nfluid=0 )
+  {
     ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
     M_density[nfluid] = density;
   };
 
-  INLINE void viscosity ( const Real& viscosity, const UInt nfluid=0 ) 
+  INLINE void viscosity ( const Real& viscosity, const UInt nfluid=0 )
   {
     ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
     M_viscosity[nfluid] = viscosity;
@@ -161,16 +162,16 @@ public:
     INLINE UInt fluid_number() const { return M_fluid_number; };
 
     INLINE Real density(const UInt& n=0) const
-    { 
+    {
       ASSERT(n<M_fluid_number,"Undelared fluid");
       return M_density[n];
     };
     INLINE Real viscosity(const UInt& n=0) const
-    { 
+    {
       ASSERT(n<M_fluid_number,"Undelared fluid");
       return M_viscosity[n];
     };
-   
+
     std::string     uOrder()                      const { return M_uOrder; }
     std::string     pOrder()                      const { return M_pOrder; }
 
@@ -237,29 +238,30 @@ private:
 // ===================================================
 template <typename Mesh>
 DataNavierStokes<Mesh>::DataNavierStokes( const GetPot&      dataFile,
+                                          const bool         verbose,
                                           const std::string& mesh_section,
-                                          const std::string& time_section ) :
-    DataMesh<Mesh>                     ( dataFile, mesh_section ),
-    DataTime                           ( dataFile, time_section ),
-	M_density                          ( ),
-	M_viscosity                        ( ),
-	M_uOrder                           ( ),
-	M_pOrder                           ( ),
-	M_verbose                          ( ),
-	M_dump_init                        ( ),
-	M_dump_period                      ( ),
-	M_factor                           ( ),
-	M_stab_method                      ( ),
-	M_semiImplicit                     ( false ),
-    M_shapeDerivatives                 ( false ),
-	M_computeMeanValuesPerSection      ( ),
-	M_NbZSections                      ( ),
-	M_ToleranceSection                 ( ),
-	M_XSectionFrontier                 ( ),
-	M_ZSectionInit                     ( ),
-	M_ZSectionFinal                    ( ),
-	M_NbPolygonEdges                   ( ),
-    M_stabilization_list               ( "fluid/space_discretization/stabilization" )
+                                          const std::string& time_section) :
+        DataMesh<Mesh>                     ( dataFile, mesh_section, verbose ),
+        DataTime                           ( dataFile, time_section ),
+        M_density                          ( ),
+        M_viscosity                        ( ),
+        M_uOrder                           ( ),
+        M_pOrder                           ( ),
+        M_verbose                          ( ),
+        M_dump_init                        ( ),
+        M_dump_period                      ( ),
+        M_factor                           ( ),
+        M_stab_method                      ( ),
+        M_semiImplicit                     ( false ),
+        M_shapeDerivatives                 ( false ),
+        M_computeMeanValuesPerSection      ( ),
+        M_NbZSections                      ( ),
+        M_ToleranceSection                 ( ),
+        M_XSectionFrontier                 ( ),
+        M_ZSectionInit                     ( ),
+        M_ZSectionFinal                    ( ),
+        M_NbPolygonEdges                   ( ),
+        M_stabilization_list               ( "fluid/space_discretization/stabilization" )
 {
     setup( dataFile );
 }
@@ -340,7 +342,7 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
 
     // Physics
     UInt temp = dataFile("fluid/physics/fluid_number", 0 );
-    
+
     if (temp == 0) // Old fashion of declaring fluids
       {
 	M_fluid_number = 1;
@@ -352,13 +354,13 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
 	M_fluid_number = temp;
 	M_density = std::vector<Real>(temp,0);
 	M_viscosity = std::vector<Real>(temp,0);
-	
+
 	for (UInt iter_fluid(0); iter_fluid<temp; ++iter_fluid)
 	  {
 	    // build the section name
 	    std::string iter_fluid_section("fluid/physics/fluid_");
 	    iter_fluid_section += number2string(iter_fluid);
-	    
+
 	    // Read the quantities
 	    M_density[iter_fluid]= dataFile((iter_fluid_section+"/density").c_str() , 1.0);
 	    M_viscosity[iter_fluid]= dataFile((iter_fluid_section+"/viscosity").c_str() , 1.0);

@@ -1475,7 +1475,9 @@ bool buildEdges( RegionMesh3D & mesh,
         mesh.setMaxNumEdges( bedges_found, false );
     if ( buildinternal )
         mesh.setMaxNumEdges( bedges_found + iedges_found, true );
-    err << "Building edges from scratch" << std::endl;
+
+    if (verbose)
+        err << "Building edges from scratch" << std::endl;
 
     EdgeType edge;
 

@@ -457,7 +457,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
             }
             else
             {
-                std::cout << "Linear Tetra Mesh" << std::endl;
+                if (verbose)
+                    std::cout << "Linear Tetra Mesh" << std::endl;
+
                 nPo = nVe;
                 nBPo = nBVe;
                 nBEd=(int( nBVe + nBFa - int(2) )>0?( nBVe + nBFa - 2 ):0);
