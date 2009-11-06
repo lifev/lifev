@@ -859,7 +859,6 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
 
     //_updateBCDirichletMatrix( M_massMatrix );
 
-    M_localMap.getMap(Unique)->Print(std::cout);
 //     M_gradMatrix.spy("gm");
 //     M_massMatrix.spy("mm");
 
