@@ -89,11 +89,14 @@ struct SpiritCalculator: boost::spirit::grammar< SpiritCalculator >
 {
 public:
 
-    typedef std::map< std::string, double > variables_type;
-    typedef std::vector< double >           results_type;
-    typedef std::vector< std::string >      string_type;
+    typedef boost::spirit::grammar< SpiritCalculator > super;
+
+    typedef std::map< std::string, double >            variables_type;
+    typedef std::vector< double >                      results_type;
+    typedef std::vector< std::string >                 string_type;
 
     SpiritCalculator( variables_type& variables, results_type& results, unsigned int& nResults ) :
+        super       (),
         M_variables ( variables ),
         M_results   ( results ),
         M_nResults  ( nResults )
@@ -101,6 +104,7 @@ public:
     }
 
     SpiritCalculator( const SpiritCalculator& calculator ) :
+        super       ( calculator ),
         M_variables ( calculator.M_variables ),
         M_results   ( calculator.M_results ),
         M_nResults  ( calculator.M_nResults )
@@ -111,9 +115,10 @@ public:
     {
         if ( this != &calculator )
         {
+            super::operator=( calculator );
             M_variables = calculator.M_variables;
             M_results   = calculator.M_results;
-            M_nResults = calculator.M_nResults;
+            M_nResults  = calculator.M_nResults;
         }
 
         return *this;
