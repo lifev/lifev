@@ -2827,12 +2827,12 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
 
 
 
-    std::cout << "chrono1 " << chrono1.diff() << std::endl;
-    std::cout << "chrono2 " << chrono2.diff() << std::endl;
-    std::cout << "chrono3 " << chrono3.diff() << std::endl;
-    std::cout << "chrono4 " << chrono4.diff() << std::endl;
-    std::cout << "chrono5 " << chrono5.diff() << std::endl;
-    std::cout << "chrono  " << chrono.diff() << " s.\n";
+    Debug( 6310 ) << "chrono1 " << chrono1.diff() << "s.\n";
+    Debug( 6310 ) << "chrono2 " << chrono2.diff() << "s.\n";
+    Debug( 6310 ) << "chrono3 " << chrono3.diff() << "s.\n";
+    Debug( 6310 ) << "chrono4 " << chrono4.diff() << "s.\n";
+    Debug( 6310 ) << "chrono5 " << chrono5.diff() << "s.\n";
+    Debug( 6310 ) << "chrono  " << chrono.diff() << " s.\n";
 
     Debug( 6310 ) << "[iterate] \tdone in " << chrono.diff() << " s.\n";
 
@@ -2947,37 +2947,44 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 
     std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator iter;
 
-    if (time_val==0.)
-        {
-            // the code is entering this for sure, as
-            // initialize invokes postProcess( 0. )
+//     if (time_val==0.)
+//         {
+//             // the code is entering this for sure, as
+//             // initialize invokes postProcess( 0. )
 
-            std::string file_output;
+//             std::string file_output;
 
-            Real deltax( M_oneDParams.Length() /
-                         static_cast<Real>(M_oneDParams.ParamSize() - 1) );
+//             Real deltax( M_oneDParams.Length() /
+//                          static_cast<Real>(M_oneDParams.ParamSize() - 1) );
 
-            file_output = "dati.m";
+//             file_output = "dati.m";
 
-            outfile.open(file_output.c_str(), std::ios::app );
-            outfile << "z" << M_data.PostFile()
-                    << " = (" << M_data.xLeft()
-                    << ":" << deltax
-                << ":" << M_data.xRight() << ");\n"
-                    << std::endl;
-            outfile.close();
+//             outfile.open(file_output.c_str(), std::ios::app );
+//             outfile << "z" << M_data.PostFile()
+//                     << " = (" << M_data.xLeft()
+//                     << ":" << deltax
+//                 << ":" << M_data.xRight() << ");\n"
+//                     << std::endl;
+//             outfile.close();
 
-        }
+//         }
 
     Debug( 6310 ) << "[postProcess] o- Dumping solutions on files (1d)!" << "\n";
     // dump solutions on files (buffers must be active!)
-    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); iter++ )
-        {
-            outfile.open( (*iter).first.c_str(), std::ios::app );
-            outfile << (*(*iter).second);
-            outfile.close();
-        }
+    int count = 0;
+    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter, ++count )
+    {
+        outfile.open( (*iter).first.c_str(), std::ios::app );
 
+        for (int ii = 0; ii < M_dimDof; ++ii)
+        {
+            outfile << M_U_thistime[count](ii + 1) << " ";
+            //outfile << (*(*iter).second).str();
+        }
+        outfile << std::endl;
+        outfile.close();
+
+    }
     resetFileBuffers();
 
 };
@@ -2987,6 +2994,7 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 template< class Params, class Flux, class Source >
 void
 OneDModelSolver<Params, Flux, Source>::resetFileBuffers( )
+
 {
     closeFileBuffers();
     openFileBuffers();
@@ -3089,7 +3097,7 @@ OneDModelSolver<Params, Flux, Source>::output_to_matlab( std::string  fname,
 
     boost::shared_ptr<std::ostringstream> buf;
 
-    std::cout << "buffer = " << fname << std::endl;
+    //std::cout << "buffer = " << fname << std::endl;
     buf = M_post_process_buffer[fname];
     //buf = &std::cout;
 //     std::ostringstream test;
