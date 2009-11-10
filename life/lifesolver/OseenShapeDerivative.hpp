@@ -574,7 +574,6 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                     M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
                                     M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
                                     M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
-                                    //M_d_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dispRep( ig );          // d local
                                     //                                    M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
                                     M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
                                 }
@@ -594,45 +593,22 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                             M_pk_loc[ iloc ] = ukRep[ ig ];  // p^k local
                         }
 
-        //
-        // Elementary vectors
-        //
-                    //commented the code to print out the elementary data. Useful for debugging.
 
-                    //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-                    source_mass11( this->M_data.density(), M_uk_loc, M_w_loc, M_elvec, *M_elmat_du, this->M_uFESpace.fe() );
-                    /*
-                    std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
-                    M_elvec_du.showMe(std::cout);
-                    */
-                    //  + \rho * ( \grad u^k dw, v  )
-                    source_mass2( -this->M_data.density(), M_uk_loc, *M_elmat_du, this->M_uFESpace.fe(), alpha );
-                    /*
-                    std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
-                    M_elvec_du.showMe(std::cout);
-                    */
-                    //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
-                    //source_mass3( 0.5*this->M_data.density(), M_u_loc, M_uk_loc, *M_elmat_du, this->M_uFESpace.fe() );
-                    /*
-                    std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
-                    M_elvec_du.showMe(std::cout);
-                    */
-                    //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-                    source_stress( 1.0, this->M_data.viscosity(), M_uk_loc, M_pk_loc,  *M_elmat_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
-                    /*
-                    std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
-                    M_elvec_du.showMe(std::cout);
-                    */
-                    // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-                    source_stress2( this->M_data.viscosity(), M_uk_loc, *M_elmat_du, this->M_uFESpace.fe() );
-                    /*
-                    std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
-                    M_elvec_du.showMe(std::cout);
-                    */
-                    //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
-                    source_press( 1.0, M_uk_loc,*M_elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    shape_terms_vel( this->M_data.density(),
+                                     this->M_data.viscosity(),
+                                     M_uk_loc,
+                                     M_w_loc,
+                                     M_elvec,
+                                     M_pk_loc,
+                                     *M_elmat_du,
+                                     this->M_uFESpace.fe(),
+                                     this->M_pFESpace.fe(),
+                                     *M_elmat_dp
+                                     );
+
+                    //                    source_press( 1.0, M_uk_loc,*M_elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
                       /*
-                    std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
+                        std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
                     M_elvec_dp.showMe(std::cout);
                     */
                     //
