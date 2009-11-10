@@ -451,8 +451,8 @@ void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& secti
 {
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack");
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
-    M_prec->setDataFromGetPot( dataFile, section );
+    ASSERT(M_prec.get() != 0, " Preconditioner not set");
+    M_prec->setDataFromGetPot(dataFile, section );
 }
 
 } // namespace LifeV

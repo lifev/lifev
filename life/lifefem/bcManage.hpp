@@ -30,19 +30,6 @@
   moment, we can impose Essential, Natural and Mixte boundary conditions,
   for Scalar or vectors problems.
 */
-/*! \note Bug report (V. Martin, 12/02/2003)
-  (tested with the mixed hybrid RT0 elements (Darcy))
-
-  The new functions bcManageMatrix and bcManageVector
-  are compiling for Essential FUNCTIONS
-  but the results are WRONG!
-
-  The new function bcManageMatrix passes for BC VECTORS
-  (result: ??)
-  The new function bcManageVector fails for BC VECTORS
-  (segmentation fault).
-
-*/
 
 #ifndef _BCMANAGE_
 #define _BCMANAGE_
@@ -55,7 +42,7 @@
 namespace LifeV
 {
 // ===================================================
-// Boundary conditions treatment
+//!@file Boundary conditions treatment
 // ===================================================
 /* bcManage for boundary conditions depending on the solution U too,
    a class PointSolution would be useful */
@@ -301,6 +288,9 @@ void bcManageMatrix( MatrixType&      A,
                 case Mixte:  // Mixte boundary conditions (Robin)
                     bcMixteManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
                     break;
+                case Flux:  // Mixte boundary conditions (Robin)
+                    bcFluxManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
                 }
@@ -321,6 +311,8 @@ void bcManageMatrix( MatrixType&      A,
                     // Do nothing
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
+                    break;
+                case Flux:  // Mixte boundary conditions (Robin)
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -2052,7 +2044,8 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
 
 
 // ===================================================
-// Flux BC
+//!@name Flux BC
+//!@{
 // ===================================================
 
 template <typename MatrixType,
@@ -2061,6 +2054,24 @@ template <typename MatrixType,
           typename DataType>
 void bcFluxManage( MatrixType&     A,
                     VectorType&    b,
+                   const MeshType& mesh,
+                   const Dof&      dof,
+                   const BCBase&   BCb,
+                   CurrentBdFE&    bdfem,
+                   const DataType& t,
+                   UInt            offset )
+
+{
+    b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
+    bcFluxManageMatrix(A, mesh, dof, BCb, bdfem, t, offset);
+}
+
+
+
+template <typename MatrixType,
+          typename MeshType,
+          typename DataType>
+void bcFluxManageMatrix( MatrixType&     A,
                    const MeshType& mesh,
                    const Dof&      dof,
                    const BCBase&   BCb,
@@ -2086,11 +2097,6 @@ void bcFluxManage( MatrixType&     A,
 
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof/*, kdDof*/;
-
-    // const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
-
-    //std::cout<<"offset "<<offset<<std::endl;
-    b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
 
     //std::cout<<"step1"<<std::endl;
     if ( !BCb.dataVector() )
@@ -2133,7 +2139,7 @@ void bcFluxManage( MatrixType&     A,
                 }
         }
 }
-
+//!@}
 
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void bcResistanceManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
