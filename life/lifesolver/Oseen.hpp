@@ -277,7 +277,7 @@ public:
     void          getFluidMatrix( matrix_type& matrFull );
     void          updateUn( )                              {*M_un = M_sol;}
     void          updateUn(const vector_type& sol )        {*M_un = sol;}// for the monolithic
-
+    void          setupPostProc(const EntityFlag& flag, const Mesh meshPart);
 protected:
 
     UInt dim_u() const           { return M_uFESpace.dim(); }
@@ -358,7 +358,7 @@ protected:
     bool                           M_steady;
 
     //! Postprocessing class
-    PostProc<Mesh>                 M_post_proc;
+    boost::shared_ptr<PostProc<Mesh> >                 M_post_proc;
 
     //! Stabilization
     bool                           M_stab;
@@ -452,9 +452,9 @@ Oseen( const data_type&          dataType,
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
     //    M_prec                   ( ),
-    M_post_proc              ( M_uFESpace.mesh(),
-                               &M_uFESpace.feBd(), &M_uFESpace.dof(),
-                               &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
+    M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
+                                                  &M_uFESpace.feBd(), &M_uFESpace.dof(),
+                                                  &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -510,9 +510,9 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
-    M_post_proc              ( M_uFESpace.mesh(),
-                               &M_uFESpace.feBd(), &M_uFESpace.dof(),
-                               &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
+    M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
+                                                  &M_uFESpace.feBd(), &M_uFESpace.dof(),
+                                                  &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -566,9 +566,9 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_post_proc              ( M_uFESpace.mesh(),
-                               &M_uFESpace.feBd(), &M_uFESpace.dof(),
-                               &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
+    M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
+                                                  &M_uFESpace.feBd(), &M_uFESpace.dof(),
+                                                  &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -1323,12 +1323,20 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
 } // applyBoundaryCondition
 
 
+
+template<typename Mesh, typename SolverType> void
+Oseen<Mesh, SolverType>::setupPostProc(const EntityFlag& flag, const Mesh meshPart)
+{
+    M_post_proc.reset(new PostProc<Mesh>(M_uFESpace.mesh(), &M_uFESpace.feBd(), &M_uFESpace.dof(), &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ));
+}
+
+
 // Returns the Post Processing structure
 template<typename Mesh, typename SolverType>
 PostProc<Mesh>&
 Oseen<Mesh, SolverType>::post_proc()
 {
-    return M_post_proc;
+    return *M_post_proc;
 }
 
 // Set up of post processing structures
@@ -1336,21 +1344,21 @@ template<typename Mesh, typename SolverType>
 void
 Oseen<Mesh, SolverType>::post_proc_set_area()
 {
-  M_post_proc.set_area();
+  M_post_proc->set_area();
 }
 
 template<typename Mesh, typename SolverType>
 void
 Oseen<Mesh, SolverType>::post_proc_set_normal()
 {
-  M_post_proc.set_normal();
+  M_post_proc->set_normal();
 }
 
 template<typename Mesh, typename SolverType>
 void
 Oseen<Mesh, SolverType>::post_proc_set_phi()
 {
-  M_post_proc.set_phi();
+    M_post_proc->set_phi();
 }
 
 
@@ -1376,7 +1384,7 @@ Oseen<Mesh, SolverType>::flux(const EntityFlag& flag, const vector_type& sol)
   vector_type vel(this->M_uFESpace.map(), Repeated);
   vel.subset(velAndPressure);
 
-  return M_post_proc.flux(vel, flag);
+  return M_post_proc->flux(vel, flag);
 }
 
 //! Computes the pressure on a given part of the boundary
@@ -1388,14 +1396,14 @@ Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag, const vector_type& sol
   press.subset(velAndPressure, this->M_uFESpace.dim()*this->M_uFESpace.fieldDim());
 
   // third argument is 1, to use the pressure finite element space (see PostProc docs)
-  return M_post_proc.average(press, flag, 1)[0];
+  return M_post_proc->average(press, flag, 1)[0];
 }
 
 //! Computes the area on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::area(const EntityFlag& flag) {
 
-  return M_post_proc.area(flag);
+  return M_post_proc->area(flag);
 }
 
 // Postprocessing
