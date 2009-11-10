@@ -285,12 +285,12 @@ FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
     if(!u0.get())
 	M_lambda.reset(new vector_type(*M_oper->couplingVariableMap())); // couplingVariableMap()
     else
-      M_lambda=u0;
+        *M_lambda=*u0;
     if(!v0.get())
       M_lambdaDot.reset(new vector_type(*M_oper->couplingVariableMap()));
     else
-      M_lambdaDot=v0;
-    M_oper->setupBDF(*M_lambda);
+        *M_lambdaDot=*v0;
+    //M_oper->setupBDF(*M_lambda);
 }
 
 void
