@@ -1314,7 +1314,7 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
     return M_wss;
 }
 
-void Monolithic::initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld)
+void Monolithic::initializeMesh(vector_ptrtype fluid_dispOld)
 {
     meshMotion().setDisplacement(*fluid_dispOld);
 }

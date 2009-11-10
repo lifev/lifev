@@ -227,7 +227,7 @@ public:
                              FSIOperator::solid_type::value_type::Function const& df0);
 
 
-    virtual void initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld);
+    virtual void initializeMesh(vector_ptrtype fluid_dispOld);
 
 
     /**

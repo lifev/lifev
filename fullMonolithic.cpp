@@ -496,7 +496,7 @@ void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function c
     //  M_bdf->initialize_unk(*M_un);
 }
 
-void fullMonolithic::initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld)
+void fullMonolithic::initializeMesh(vector_ptrtype fluid_dispOld)
 {
     meshMotion().initialize(*fluid_dispOld);
 }

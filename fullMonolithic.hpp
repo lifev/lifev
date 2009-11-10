@@ -125,7 +125,7 @@ public:
                      FSIOperator::solid_type::value_type::Function const& w0,
                      FSIOperator::solid_type::value_type::Function const& df0 );
 
-    void initializeMesh(vector_ptrtype fluid_disp, vector_ptrtype fluid_dispOld);
+    void initializeMesh(vector_ptrtype fluid_dispOld);
 
 
 private:
