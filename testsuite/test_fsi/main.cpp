@@ -325,14 +325,22 @@ public:
     		}
 
 			std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
-    	}
 
+            std::cout << "solution norm " << _i << " : "
+                      << M_fsi->displacement().Norm2() << "\n";
+
+            /////////CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+            checkResult(time);
+            ///////// END OF CHECK
+
+    	}
 		std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
 		ofile.close();
 	}
 
 private:
 
+    void checkResult(LifeV::Real& time);
 	fsi_solver_ptr M_fsi;
 	Real           M_Tstart;
 
@@ -345,6 +353,14 @@ private:
 	vector_ptrtype M_fluidDisp;
 	vector_ptrtype M_solidDisp;
 	vector_ptrtype M_solidVel;
+    struct RESULT_CHANGED_EXCEPTION
+    {
+    public:
+        RESULT_CHANGED_EXCEPTION(LifeV::Real time)
+        {
+            std::cout<<"Some modifications led to changes in the l2 norm of the solution at time"<<time<<std::endl;
+        }
+    };
 };
 
 
@@ -387,7 +403,15 @@ struct FSIChecker
 };
 
 
-
+void Problem::checkResult(LifeV::Real& time)
+{
+    LifeV::Real dispNorm=M_fsi->displacement().Norm2();
+    if(time==0.0001 && (dispNorm-4.43565e-5)/dispNorm*(dispNorm-4.43565e-5)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);  else
+    if(time==0.0002 && (dispNorm-0.000129848)/dispNorm*(dispNorm-0.000129848)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+    if(time==0.0003 && (dispNorm-0.000251846)/dispNorm*(dispNorm-0.000251846)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+    if(time==0.0004 && (dispNorm-0.000402367)/dispNorm*(dispNorm-0.000402367)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+    if(time==0.0005 && (dispNorm-0.000579832)/dispNorm*(dispNorm-0.000579832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+}
 
 
 int main( int argc, char** argv )

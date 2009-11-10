@@ -24,7 +24,7 @@
 # \file testsuite.at
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
-# 
+#
 AT_SETUP([test_fsi])
 AT_KEYWORDS([ns fluid solid fsi])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
@@ -47,10 +47,11 @@ defOmegaF  = 0.01 # matters only with  precond = 2
 # if updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
 # if updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit).
 #                        Deprecated when using exactJacobian (better to set ifSemiImplicit=1)
-updateEvery = -1
+updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
-abstol     = 0.e-5
+
+abstol     = 1.e-5
 reltol     = 1.e-5
 etamax     = 1.e-5 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
@@ -72,7 +73,7 @@ fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
 
 [exporter]
-multimesh  =    false   # actually we export also the displacement
+multimesh  = false  # actually we export also the displacement
 start      = 0
 #start      = 4
 save       = 1
@@ -88,7 +89,7 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.001
+endtime			= 0.0006
 timestep		= 0.0001
 BDF_order		= 1
 
@@ -311,7 +312,7 @@ conv     = rhs;
 ]])
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
           ln -sf ../../data/mesh/inria/vessel20.mesh;
-          mpirun -n 4  ../../test_fsi/test_fsi -c],[0],[ignore],[ignore])
+          mpirun -n 4  ../../test_fsi/test_fsi],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
 #
