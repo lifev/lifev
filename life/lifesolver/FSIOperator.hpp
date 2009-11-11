@@ -155,7 +155,7 @@ public:
 
     virtual void setupFEspace();
 
-            void setupDOF();
+    virtual void setupDOF();
 
     virtual void setupFluidSolid();
 
@@ -192,6 +192,7 @@ public:
     }
 
 
+    void createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension);
 
     void initializeFluid( const vector_type& velAndPressure,
                           const vector_type& displacement );
@@ -327,7 +328,7 @@ public:
 
             boost::shared_ptr<EpetraMap>& fluidInterfaceMap()              { return M_fluidInterfaceMap; }
             boost::shared_ptr<EpetraMap>& solidInterfaceMap()              { return M_solidInterfaceMap; }
-    virtual boost::shared_ptr<EpetraMap>& couplingVariableMap()            { return M_solidInterfaceMap; }
+    virtual boost::shared_ptr<EpetraMap>& getCouplingVariableMap()            { return M_solidInterfaceMap; }
 
     BCFunctionMixte& bcfMixteOuterWall()                                   { return M_bcfMixteOuterWall; }
 

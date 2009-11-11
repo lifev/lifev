@@ -390,13 +390,19 @@ FSIOperator::setupDOF( void )
 	M_epetraWorldComm->Barrier();
 	disp.leaderPrint(" done.\n");
 
+    createInterfaceMaps(M_dofStructureToHarmonicExtension);
+}
 
 
 
+void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension)
+{
+
+    Displayer disp(M_epetraWorldComm);
 	// now we build the sigma and lambda variables on each proc
 	disp.leaderPrint("FSIOperator: building fluid variables ... ");
 
-	std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+	std::map<ID, ID> const& locDofMap = dofStructureToHarmonicExtension->locDofMap();
 
 	std::vector<int> dofInterfaceFluid;
 	dofInterfaceFluid.reserve( M_dofHarmonicExtensionToFluid->locDofMap().size() );
@@ -450,16 +456,6 @@ FSIOperator::setupDOF( void )
 	M_epetraWorldComm->Barrier();
 	disp.leaderPrint(" done.\n");
 
-
-
-	disp.leaderPrint("FSIOperator: variables initialization ... ");
-
-	//variablesInit( refFE_struct, bdQr_struct, qR_struct);
-	variablesInit( M_dataSolid->order() );
-
-	M_epetraWorldComm->Barrier();
-	disp.leaderPrint(" done.\n");
-
 	//    M_dofStructureToHarmonicExtension->showMe(true, std::cout);
 	//    M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
 	//    M_dofStructureToReducedFluid->setup(uFESpace.refFE(), M_fluid->pressFESpace().dof(),
@@ -474,6 +470,17 @@ FSIOperator::setupDOF( void )
 	//                                              fluidMesh, 1,
 	//                                              0.0);
 	//     }
+
+
+
+	disp.leaderPrint("FSIOperator: variables initialization ... ");
+
+	//variablesInit( refFE_struct, bdQr_struct, qR_struct);
+	variablesInit( M_dataSolid->order() );
+
+	M_epetraWorldComm->Barrier();
+	disp.leaderPrint(" done.\n");
+
 }
 
 
