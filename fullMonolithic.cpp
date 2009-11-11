@@ -489,7 +489,7 @@ void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function c
     vector_type df(M_mmFESpace->map());
     M_mmFESpace->interpolate(df0, df, M_dataSolid->getTime());
 
-    M_un->add(df, M_solidAndFluidDim+dimInterface());
+    M_un->add(df, M_solidAndFluidDim+getDimInterface());
 
     std::cout<<  M_un->NormInf()<<"==>normInf di un"<<std::endl;
     M_meshMotion->setDisplacement(df);
@@ -505,14 +505,14 @@ void fullMonolithic::initializeMesh(vector_ptrtype fluid_dispOld)
 int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
 {
     //    Y=X;
-    vector_type x(X, M_FMOper->couplingVariableMap(), Unique);
-    vector_type y(*M_FMOper->couplingVariableMap(), Unique);
+    vector_type x(X, M_FMOper->getCouplingVariableMap(), Unique);
+    vector_type y(*M_FMOper->getCouplingVariableMap(), Unique);
     //    x.spy("x");
     //    Epetra_FEVector  dz(Y.Map());//Ax-b, that is Ax since b=0.
-    vector_ptrtype rhsShapeDer(new vector_type(*M_FMOper->couplingVariableMap(), Unique));
+    vector_ptrtype rhsShapeDer(new vector_type(*M_FMOper->getCouplingVariableMap(), Unique));
     vector_ptrtype meshDeltaDisp(new vector_type(M_FMOper->mmFESpace().map(), Unique));
     vector_type subX(M_FMOper->mapWithoutMesh());
-    UInt offset(M_solidAndFluidDim + M_FMOper->dimInterface());
+    UInt offset(M_solidAndFluidDim + M_FMOper->getDimInterface());
     y = (*M_FMOper->getMatrixPtr())*x;
     //    std::cout<<x.getEpetraVector().NumGlobalElements()<<std::endl;
     //BCManage for the shape derivatives part of the matrix
