@@ -116,13 +116,13 @@ public :
     //! These routines change the elastic modulus along the vessel
     /*!
        \brief Make the vessel stiffer on the left side of interval [xl, xr]
-       
+
        When x < alpha - delta/2, the Young modulus is E * factor
        When x > alpha + delta/2, the Young modulus is E
        When alpha - delta/2 < x < alpha + delta/2, the Young modulus changes
         smoothly from the larger to the smaller value, according to a
         polynomial law of order n
-       
+
        The grid size can be adapted (yesadaptive=1) in the nieghborhood of alpha,
        where the spatial derivative of the parameter will be maximum.
        However, the grid size is not allowed to be smaller than min_deltax
@@ -135,7 +135,7 @@ public :
 
     /*!
        \brief Make the vessel stiffer on the right side of interval [xl, xr]
-       
+
        \sa stiffenVesselLeft
     */
     void stiffenVesselRight( const Real& xl, const Real& xr,
@@ -209,9 +209,9 @@ protected :
     */
 
     //! P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
-    Vector _M_PressBeta0; //! homogeneous to a pressure
+    Vector _M_PressBeta0;    //! homogeneous to a pressure
     Vector _M_dPressBeta0dz; //! homogeneous to a pressure
-    Vector _M_PressBeta1; //! power coeff (>0, often=1/2)
+    Vector _M_PressBeta1;    //! power coeff (>0, often=1/2)
     Vector _M_dPressBeta1dz; //! power coeff (>0, often=1/2)
 
 
