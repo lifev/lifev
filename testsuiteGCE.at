@@ -5,7 +5,7 @@
 #  Author(s): Paolo Crosetto <crosetto@iacspc70.epfl.ch>
 #       Date: 2009-11-10
 #
-#  Copyright (C) 2009 EPFL
+#  Copyright (C) 2009 EPFL, INRIA, Politecnico di Milano
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -95,9 +95,9 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.01
+gammaBeta  = 0.5
+gammaDiv   = 0.5
+gammaPress = 0.5
 reuse = true
 
 

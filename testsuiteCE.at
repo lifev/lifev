@@ -25,7 +25,6 @@
 # \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
 # \date 2009-11-10
 #
-
 AT_SETUP([test_monolithic])
 AT_KEYWORDS([ns fluid solid fsi])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
@@ -96,9 +95,9 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.01
+gammaBeta  = 0.5
+gammaDiv   = 0.5
+gammaPress = 0.5
 reuse = true
 
 
@@ -251,6 +250,7 @@ solver   = gmres;
 poly_ord = 5;
 kspace   = 40;
 conv     = rhs;
+
 ]])
 
 
