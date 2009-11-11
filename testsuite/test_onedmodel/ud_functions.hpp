@@ -394,13 +394,28 @@ template<class FLUX, class SOURCE, class PARAM>
 class PressureRamp : public Compatibility<FLUX, SOURCE>
 {
 public:
-    PressureRamp(const RegionMesh& mesh,
-                 const FLUX& fluxFun,
-                 const SOURCE& sourceFun,
-                 const std::vector<DataOneDModel::vector_type>& U_thistime,
-                 const Real& dt, const std::string& border, const std::string & var,
-                 const PARAM& onedparam,
-                 const Real& startT = 0., const Real& duration = 0.05, const Real& endvalue = 106400 );
+    PressureRamp( const FESpace<RegionMesh, EpetraMap>&          fespace,
+                  const FLUX&                                    fluxFun,
+                  const SOURCE&                                  sourceFun,
+                  const std::vector<DataOneDModel::vector_type>& U_thistime,
+                  const Real&                                    dt,
+                  const std::string&                             border,
+                  const std::string&                             var,
+                  const PARAM&                                   onedparam,
+                  const Real&                                    startT     = .001,
+                  const Real&                                    duration   = 0.7,
+                  const Real&                                    endvalue   = 106400 );
+    // const RegionMesh& mesh,
+    //                  const FLUX& fluxFun,
+    //                  const SOURCE& sourceFun,
+    //                  const std::vector<DataOneDModel::vector_type>& U_thistime,
+    //                  const Real& dt,
+    //                  const std::string& border,
+    //                  const std::string & var,
+    //                  const PARAM& onedparam,
+    //                  const Real& startT = 0.,
+    //                  const Real& duration = 0.05,
+    //                  const Real& endvalue = 106400 );
 
     Real evaluate( const Real& time );
 
@@ -412,23 +427,28 @@ private:
     Real _M_startT;
     Real _M_duration;
     Real _M_endvalue;
+    Real _M_dt;
 };
 
 
 template<class FLUX, class SOURCE, class PARAM>
-PressureRamp<FLUX, SOURCE, PARAM>::PressureRamp (const RegionMesh& mesh,
-                                                 const FLUX& fluxFun,
-                                                 const SOURCE& sourceFun,
+PressureRamp<FLUX, SOURCE, PARAM>::PressureRamp (const FESpace<RegionMesh, EpetraMap>&          fespace,
+                                                 const FLUX&                                    fluxFun,
+                                                 const SOURCE&                                  sourceFun,
                                                  const std::vector<DataOneDModel::vector_type>& U_thistime,
-                                                 const Real& dt, const std::string& border, const std::string & var,
-                                                 const PARAM& onedparam,
-                                                 const Real& startT, const Real& duration, const Real& endvalue )
-        :
-        Compatibility<FLUX, SOURCE>( mesh, fluxFun, sourceFun, U_thistime,/* W_thistime,*/ dt, border, var),
-        _M_onedparam( onedparam ),
-        _M_startT( startT ),
-        _M_duration( duration ),
-        _M_endvalue( endvalue )
+                                                 const Real&                                    dt,
+                                                 const std::string&                             border,
+                                                 const std::string&                             var,
+                                                 const PARAM&                                   onedparam,
+                                                 const Real&                                    startT,
+                                                 const Real&                                    duration,
+                                                 const Real&                                    endvalue):
+        Compatibility<FLUX, SOURCE>(fespace, fluxFun, sourceFun, U_thistime,/* W_thistime,*/ dt, border, var),
+        _M_onedparam               (onedparam),
+        _M_startT                  (startT),
+        _M_duration                (duration),
+        _M_endvalue                (endvalue),
+        _M_dt                      (dt)
 {}
 
 
@@ -438,12 +458,130 @@ Real PressureRamp<FLUX, SOURCE, PARAM>::evaluate( const Real& time )
 {
     Real W_out, result(0.);
 
-    Real _P = ( time < (_M_startT + _M_duration) ) ?
-        ( ( time - _M_startT ) / _M_duration ) : 1;
-    _P *= _M_endvalue;
+//     Real _P = ( time < (_M_startT + _M_duration) ) ?
+//         ( ( time - _M_startT ) / _M_duration ) : 1;
+    //Real _P = _M_endvalue;
+    Real t = time;
+
+    int    numData = 80;
+    double pressure[81] =
+        {
+            110170,
+            109540,
+            108930,
+            108320,
+            107710,
+            107120,
+            106530,
+            111130,
+            115440,
+            118690,
+            121460,
+            123940,
+            126350,
+            128890,
+            131510,
+            133980,
+            136200,
+            138330,
+            140350,
+            142290,
+            144360,
+            146130,
+            147530,
+            148780,
+            149740,
+            150320,
+            150470,
+            150250,
+            149750,
+            148990,
+            148220,
+            147210,
+            145940,
+            144960,
+            143750,
+            141980,
+            139900,
+            137260,
+            133970,
+            131670,
+            131320,
+            133150,
+            132710,
+            131570,
+            130280,
+            129750,
+            129330,
+            128910,
+            128360,
+            127680,
+            127000,
+            126410,
+            125920,
+            125480,
+            125040,
+            124560,
+            124050,
+            123530,
+            123000,
+            122440,
+            121840,
+            121220,
+            120580,
+            119950,
+            119330,
+            118710,
+            118100,
+            117470,
+            116840,
+            116200,
+            115560,
+            114920,
+            114280,
+            113650,
+            113020,
+            112400,
+            111790,
+            111200,
+            110620,
+            110060,
+            110170
+        };
+
+    Real _P = 0;
+//     Real _P = ( time < (_M_startT + _M_duration) ) ?
+//         ( ( time - _M_startT ) / _M_duration ) : 1
+    if (t < 0)
+        _P = t/_M_startT*pressure[0];
+    else
+    {
+
+        double timescale = _M_duration/numData;
+
+        for (;;)
+        {
+            if (t < _M_duration) break;
+            t = t - _M_duration;
+        }
+
+        int     ipos     = t/timescale;
+        double t2        = timescale*(ipos + 1);
+
+        double a = (pressure[ipos + 1] - pressure[ipos])/timescale;
+        double b = pressure[ipos + 1] - a*t2;
+
+        _P = t*a + b;
+
+        double slope = ipos -  t;
+        std::cout << "BC: Pressure = " << _P
+                  << " period = " << _M_duration << " pos = " << ipos << std::endl;
+
+        //Real _P = 10000;
+    }
 
     Debug( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << _P << "\n";
-    Debug( 6030 ) << "[PressureRamp::evaluate] target pressure = " << _M_endvalue << "\n";
+    //    Debug( 6030 ) << "[PressureRamp::evaluate] target pressure = " << _M_endvalue << "\n";
 
     switch( this->_M_oneDBCFunctionsMapStringValues[this->_M_var] )
         {
@@ -473,15 +611,15 @@ class Resi : public Compatibility<FLUX, SOURCE>
 {
 public:
     Resi(  const Real & resistance, // const GetPot& data_file,
-                 const PARAM& onedparam,
-                 const FESpace<RegionMesh, EpetraMap>& FESpace,
-                 const FLUX& fluxFun,
-                 const SOURCE& sourceFun,
-                 const std::vector<DataOneDModel::vector_type>& U_thistime,
-                 const Real& dt,
-                 const std::string& border,
-                 const std::string & var,
-                 const bool& absorbing = false);
+           const PARAM& onedparam,
+           const FESpace<RegionMesh, EpetraMap>& FESpace,
+           const FLUX& fluxFun,
+           const SOURCE& sourceFun,
+           const std::vector<DataOneDModel::vector_type>& U_thistime,
+           const Real& dt,
+           const std::string& border,
+           const std::string & var,
+           const bool& absorbing = false);
 
     Real evaluate( const Real& time );
 
@@ -497,17 +635,16 @@ private:
 
 
 template<class FLUX, class SOURCE, class PARAM>
-Resi<FLUX, SOURCE, PARAM>::Resi(
-                                            const Real &                                   resistance,
-                                            const PARAM&                                   onedparam, // const GetPot& data_file,
-                                            const FESpace<RegionMesh, EpetraMap>&          fespace,
-                                            const FLUX&                                    fluxFun,
-                                            const SOURCE&                                  sourceFun,
-                                            const std::vector<DataOneDModel::vector_type>& U_thistime,
-                                            const Real&                                    dt,
-                                            const std::string&                             border,
-                                            const std::string&                             var,
-                                            const bool&                                    absorbing ):
+Resi<FLUX, SOURCE, PARAM>::Resi(const Real &                                   resistance,
+                                const PARAM&                                   onedparam, // const GetPot& data_file,
+                                const FESpace<RegionMesh, EpetraMap>&          fespace,
+                                const FLUX&                                    fluxFun,
+                                const SOURCE&                                  sourceFun,
+                                const std::vector<DataOneDModel::vector_type>& U_thistime,
+                                const Real&                                    dt,
+                                const std::string&                             border,
+                                const std::string&                             var,
+                                const bool&                                    absorbing ):
         Compatibility<FLUX, SOURCE>( fespace, fluxFun, sourceFun, U_thistime, /*W_thistime,*/ dt, border, var),
         _M_resistance(resistance),
         _M_onedparam( onedparam ),

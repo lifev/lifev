@@ -80,11 +80,13 @@ int main(int argc, char** argv)
   std::cout << "====== Building 1D model " << std::endl;
 
   std::cout << "    Building the mesh ... " << std::flush;
+
   DataOneDModel data  (data_file);
   Params1D      params(data_file);
   std::cout << "ok." << std::endl;
 
-  
+  std::cout << data.mesh() << std::endl;
+
   const RefFE*    refFE = &feSegP1;
   const QuadRule* qR    = &quadRuleSeg3pt;
   const QuadRule* bdQr  = &quadRuleSeg1pt;
@@ -92,13 +94,14 @@ int main(int argc, char** argv)
 
   //  boost::shared_ptr<BasicOneDMesh> mesh = &data.mesh();
 
-//   RegionMesh* pmesh = &data.mesh();
-//   boost::shared_ptr<RegionMesh> mesh(mesh);
+  //   RegionMesh* pmesh = &data.mesh();
+  //   boost::shared_ptr<RegionMesh> mesh(mesh);
 
-  std::cout << "    Building FE Space ... " << data.mesh() << std::flush;
+  std::cout << "    Building FE Space ... " << std::flush;
   FESpace<RegionMesh, EpetraMap> odFESpace(data.mesh(), *refFE, *qR, *bdQr, 1, *comm);
   std::cout << "ok." << std::endl;
 
+  //odFESpace.dof().showMe(std::cout, true);
   std::cout << "    Building Solver   ... " << std::flush;
   onedsolver_type onedm(data, params, odFESpace, *comm);
   onedm.setup(data_file);
@@ -107,7 +110,20 @@ int main(int argc, char** argv)
   //onedm.showMe( std::cout );
 
 
-  OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
+  //
+
+  //OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
+  OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
+                                  (odFESpace,
+                                   onedm.FluxFun(),
+                                   onedm.SourceFun(),
+                                   onedm.U_thistime(),
+                                   data.timestep(),
+                                   "left" /*border*/,
+                                   "W1"  /*var*/,
+                                   onedm.oneDParams()));
+
+
 
   OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
                                     ( data_file("parameters/R",0.),
@@ -120,8 +136,9 @@ int main(int argc, char** argv)
                                       "right" /*border*/,
                                       "W2"  /*var*/) );
 
-  onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
-  onedm.bcH().setBC( resistence,      "right", "first", "W2" );
+//   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+  onedm.bcH().setBC( pressure,         "left",  "first", "W1"  );
+  onedm.bcH().setBC( resistence,      "right",  "first", "W2" );
 
   // Initialization
   //
@@ -161,22 +178,30 @@ int main(int argc, char** argv)
 
     if( !( static_cast<int>( std::floor( time/dt + 0.5 ) ) %
            static_cast<int>( std::floor( postprocess_dt/dt  + 0.5 ) ) ) )
-		onedm.postProcess( time );
+		{
+            std::cout << "PostProcessing ... " << std::endl;
+            onedm.postProcess( time );
+        }
 
-    if ( data_file( "miscellaneous/show_graceplot", 0 ) )
-        onedm.gplot();
+//     if ( data_file( "miscellaneous/show_graceplot", 0 ) )
+//         onedm.gplot();
 
 
     chrono.stop();
 
-    printf("\033\n");
-    printf("\033[0GIteration %d", count);
-    printf("\033[25G, t = %f", time);
-    printf("\033[25Gs, time adv. computed in %f", chronota.diff());
-    printf("\033[60Gs, iter. computed in %f", chronoit.diff());
-    printf("\033[85Gs. total %f", chrono.diff());
-    printf("\033[100Gs.\n");
-    printf("\033\n");
+    std::cout << "Iteration " << count
+              << " t = " << time
+              << " time adv. computed in " << chronota.diff()
+              << " iter computed in " << chronoit.diff()
+              << " total " << chrono.diff() << " s." << std::endl;
+//     printf("\033\n");
+//     printf("\033[0GIteration %d", count);
+//     printf("\033[25G, t = %f", time);
+//     printf("\033[25Gs, time adv. computed in %f", chronota.diff());
+//     printf("\033[60Gs, iter. computed in %f", chronoit.diff());
+//     printf("\033[85Gs. total %f", chrono.diff());
+//     printf("\033[100Gs.\n");
+//     printf("\033\n");
 
   }
 

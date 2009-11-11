@@ -16,7 +16,7 @@ R = 2.e4            # terminal resistence
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 0.02		# endtime
+timeend	 = 0.7		# endtime
 timestep = 1e-5		# timestep
 
 [initialize]
