@@ -25,6 +25,8 @@
 # \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
 # \date 2009-11-10
 #
+AT_SETUP([test_monolithic])
+AT_KEYWORDS([ns fluid solid fsi])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for CE FSI Solver
