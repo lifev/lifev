@@ -33,37 +33,37 @@ namespace LifeV
 {
 
 BloodFlowParam::BloodFlowParam(const GetPot& dfile) :
-    _M_paramSize(dfile("discretization/nb_elem", 0 ) + 1),
-    _M_length(0.),
-    _M_xleft(dfile("discretization/x_left", 0. )),
-    _M_xright(dfile("discretization/x_right", 0. )),
-    _M_Area0(_M_paramSize),
-    _M_dArea0dz(_M_paramSize),
-    _M_PressBeta0(_M_paramSize),
-    _M_dPressBeta0dz(_M_paramSize),
-    _M_PressBeta1(_M_paramSize),
-    _M_dPressBeta1dz(_M_paramSize),
-    _M_FrictionKr(_M_paramSize)
+    _M_paramSize      (dfile("discretization/nb_elem", 0 ) + 1),
+    _M_length         (0.),
+    _M_xleft          (dfile("discretization/x_left", 0. )),
+    _M_xright         (dfile("discretization/x_right", 0. )),
+    _M_Area0          (_M_paramSize),
+    _M_dArea0dz       (_M_paramSize),
+    _M_PressBeta0     (_M_paramSize),
+    _M_dPressBeta0dz  (_M_paramSize),
+    _M_PressBeta1     (_M_paramSize),
+    _M_dPressBeta1dz  (_M_paramSize),
+    _M_FrictionKr     (_M_paramSize)
 {
     _M_length = _M_xright - _M_xleft;
 
-    Real _A0 = dfile("parameters/Area0",M_PI);
-    Real _beta0 = dfile("parameters/beta0",1.e6);
-    Real _beta1 = dfile("parameters/beta1",0.5);
-    Real _kr    = dfile("parameters/Kr",1.);
-    Real _dA0dz = 0.;
+    Real _A0       = dfile("parameters/Area0",M_PI);
+    Real _beta0    = dfile("parameters/beta0",1.e6);
+    Real _beta1    = dfile("parameters/beta1",0.5);
+    Real _kr       = dfile("parameters/Kr",1.);
+    Real _dA0dz    = 0.;
     Real _dbeta0dz = 0.;
     Real _dbeta1dz = 0.;
     //-------------------------------------------
     //! Initialisation of the parameter variables
     //-------------------------------------------
-    _M_Area0 = ScalarVector( _M_paramSize, _A0 );
-    _M_dArea0dz = ScalarVector( _M_paramSize, _dA0dz );
-    _M_PressBeta0 = ScalarVector( _M_paramSize, _beta0 );
+    _M_Area0         = ScalarVector( _M_paramSize, _A0 );
+    _M_dArea0dz      = ScalarVector( _M_paramSize, _dA0dz );
+    _M_PressBeta0    = ScalarVector( _M_paramSize, _beta0 );
     _M_dPressBeta0dz = ScalarVector( _M_paramSize, _dbeta0dz );
-    _M_PressBeta1 = ScalarVector( _M_paramSize, _beta1 );
+    _M_PressBeta1    = ScalarVector( _M_paramSize, _beta1 );
     _M_dPressBeta1dz = ScalarVector( _M_paramSize, _dbeta1dz );
-    _M_FrictionKr = ScalarVector( _M_paramSize, _kr );
+    _M_FrictionKr    = ScalarVector( _M_paramSize, _kr );
 
     _M_DensityRho = dfile("parameters/rho",1.);
     _M_DensityWall = dfile("parameters/rho_w",1.);

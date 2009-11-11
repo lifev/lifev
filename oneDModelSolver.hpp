@@ -744,6 +744,12 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
 
     M_variable_index_map.insert( make_pair("P",  nvar++ ) );
 
+
+    for ( std::map< std::string, UInt>::iterator it = M_variable_index_map.begin(); it != M_variable_index_map.end(); ++it)
+        std::cout << it->first << " " << it->second << std::endl;
+
+
+
     //! correction flux with viscoelastic term
     if( M_viscoelastic_wall )
         {
@@ -1998,10 +2004,12 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
     if( var == "physical")
         {
             //        for( UInt i=0; i<2; ++i )
-            M_U_thistime[0] = ScalarVector( M_FESpace.dim(), u10 );
-            M_U_thistime[1] = ScalarVector( M_FESpace.dim(), u20 );
+            M_U_thistime[0] = ScalarVector( M_localMap );
+            M_U_thistime[0] = u10;
+            M_U_thistime[1] = ScalarVector( M_localMap );
+            M_U_thistime[1] = u20;
 
-            for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
+            for (UInt ielem = 0; ielem <= M_FESpace.dim() ; ielem++ )
                 M_oneDParams.W_from_U( M_U_thistime[2][ielem], M_U_thistime[3][ielem],
                                        M_U_thistime[0][ielem], M_U_thistime[1][ielem],
                                        ielem );
@@ -2009,8 +2017,10 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
     else if( var == "reimann" )
         {
             //        for( UInt i=0; i<2; ++i )
-            M_U_thistime[2] = ScalarVector( M_FESpace.dim(), u10 );
-            M_U_thistime[3] = ScalarVector( M_FESpace.dim(), u20 );
+            M_U_thistime[2] = std::vector<vector_type>( M_localMap );
+            M_U_thistime[2] = u10;
+            M_U_thistime[3] = std::vector<vector_type>( M_localMap );
+            M_U_thistime[3] = u20;
 
             for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
                 M_oneDParams.U_from_W( M_U_thistime[0][ielem], M_U_thistime[1][ielem],
@@ -2024,7 +2034,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
             abort();
         }
 
-    for( UInt i=0; i<2; ++i )
+    for( UInt i = 0; i < 2; ++i )
         {
             M_U_prevtime [i] = M_U_thistime[i];
             M_U_2prevtime[i] = M_U_prevtime[i];
@@ -2944,7 +2954,8 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 
     std::ofstream outfile;
 
-    std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator iter;
+    std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator it;
+    std::map< std::string, UInt>::iterator iter;
 
 //     if (time_val==0.)
 //         {
@@ -2968,16 +2979,36 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 
 //         }
 
+    for (it = M_post_process_buffer.begin(); it != M_post_process_buffer.end(); ++it)
+        std::cout << it->first << std::endl;
+
+
     Debug( 6310 ) << "[postProcess] o- Dumping solutions on files (1d)!" << "\n";
     // dump solutions on files (buffers must be active!)
-    int count = 0;
-    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter, ++count )
-    {
-        outfile.open( (*iter).first.c_str(), std::ios::app );
 
+    //    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter, ++count)
+    int count = 0;
+    it  = M_post_process_buffer.begin();
+
+    for( iter = M_variable_index_map.begin(); iter != M_variable_index_map.end(); ++iter, ++it)
+    {
+
+
+        std::string varname  = iter->first;
+        int offset           = iter->second;
+        std::string filename = it->first;
+
+
+
+
+        std::cout << offset << " : " << varname << " " << filename << std::endl;
+
+        outfile.open( filename.c_str(), std::ios::app );
+
+        outfile << time_val << " ";
         for (int ii = 0; ii < M_dimDof; ++ii)
         {
-            outfile << M_U_thistime[count](ii + 1) << " ";
+            outfile << M_U_thistime[offset](ii + 1) << " ";
             //outfile << (*(*iter).second).str();
         }
         outfile << std::endl;
