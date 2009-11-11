@@ -226,8 +226,8 @@ public:
         M_hdf5Mesh->addVariable( ExporterData::Vector, "f-wss", M_WSS,
                                  UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
 
-        M_hdf5Solid.reset( new  hdf5filter_type ( data_file, "solid") );
-        M_hdf5Solid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
+        M_hdf5Solid.reset( new  hdf5filter_type ( data_file, M_fsi->FSIOper()->solidMesh().mesh(), "solid2", M_fsi->FSIOper()->dFESpace().map().Comm().MyPID()) );
+        //M_hdf5Solid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
         M_hdf5Solid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                   UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
         M_hdf5Solid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
@@ -482,16 +482,16 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     std::string loadInitSolPrev(data_file("problem/initSolPrev","-1"));
 
 
-    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
-    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
+    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap()));
+    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap()));
 
-    boost::shared_ptr<LifeV::EpetraVector> initSolV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
-    boost::shared_ptr<LifeV::EpetraVector> initSolP(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
-    boost::shared_ptr<LifeV::EpetraVector> initSolS(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+    boost::shared_ptr<LifeV::EpetraVector> initSolV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
+    boost::shared_ptr<LifeV::EpetraVector> initSolP(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
+    boost::shared_ptr<LifeV::EpetraVector> initSolS(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
     boost::shared_ptr<LifeV::EpetraVector> initSolFD;
-    boost::shared_ptr<LifeV::EpetraVector> initSolidV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Repeated));
+    boost::shared_ptr<LifeV::EpetraVector> initSolidV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
     boost::shared_ptr<LifeV::EpetraVector> initSolFDPrev;
-    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
+    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique));
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFD;
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFDOld;
 
@@ -545,7 +545,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     UniqueVFD.reset(new vector_type(*initSolFD, Unique, Zero));
 
     if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
-        initSol->add(*UniqueVFD, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->dimInterface());
+        initSol->add(*UniqueVFD, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->getDimInterface());
 
     UniqueVFDOld.reset(new vector_type(*initSolFDPrev, Unique, Zero));
 
