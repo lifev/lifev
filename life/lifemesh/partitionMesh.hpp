@@ -47,7 +47,7 @@ public:
     //! return a copy of vertexDist as a container
     const std::vector<int>& vertexDist() const { return M_vertexDist; };
 
-    mesh_type          mesh(){return M_mesh;}
+    const mesh_type     mesh() const {return M_mesh;}
 
 
     const std::vector<int>&       repeatedNodeVector() const {return M_repeatedNodeVector;}
