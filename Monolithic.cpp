@@ -39,12 +39,12 @@ Monolithic::Monolithic():
     M_precPtr(),
     M_DDBlockPrec(),
     M_rhsFull(),
-    //end of protected args
-    M_updateEvery(0),
-    M_numerationInterface(),
-    M_rhsNew(),
-    M_fullMonolithic(false),
-    M_entry(0.),
+    M_BCh_flux(new fluid_bchandler_raw_type),
+    M_BCh_Robin(new fluid_bchandler_raw_type),
+    M_fluxes(0),
+    M_BChWSS(),
+    M_bdMass(),
+    M_bcfWss(),
     M_robinCoupling(),
     M_alphaf(0.),
     M_alphas(0.),
@@ -52,16 +52,28 @@ Monolithic::Monolithic():
     M_solidAndFluidDim(0),
     M_solidOper(),
     M_fluidOper(),
+    M_meshOper(),
+    M_fluidBlock(),
+    M_solidBlock(),
+    M_solidBlockPrec(),
+    M_meshBlock(),
+    M_linearSolver(),
+    M_wss(),
+    //end of protected attributes
+    M_PAAP(),
+    M_numerationInterface(),
+#ifdef OBSOLETE
+    M_rhsShapeDerivatives(),
+#endif
+    M_rhsNew(),
+    M_fullMonolithic(),
+    M_entry(),
     M_diagonalScale(false),
     M_reusePrec(true),
     M_resetPrec(true),
-    M_maxIterSolver(-1),
-    M_linearSolver(),
-    M_fluxes(0)
-{
-    M_BCh_flux.reset(new fluid_bchandler_raw_type);
-    M_BCh_Robin.reset(new solid_bchandler_raw_type);
-}
+    M_maxIterSolver(-1)
+{}
+
 // Destructor
 Monolithic::~Monolithic()
 {
@@ -77,6 +89,18 @@ Monolithic::setupFEspace()
                                                          M_dataSolid->order(),
                                                          3,
                                                          *M_epetraComm));
+}
+
+void
+Monolithic::setupDOF( void )
+{
+	M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
+											    M_dFESpace->refFE(), M_dFESpace->dof() );
+	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_structureInterfaceFlag,
+											   *M_dFESpace->mesh(),  M_harmonicInterfaceFlag,
+											    M_interfaceTolerance );
+
+    createInterfaceMaps(M_dofStructureToHarmonicExtension);
 }
 
 void Monolithic::setupFluidSolid()
@@ -227,7 +251,6 @@ Monolithic::setDataFromGetPot( GetPot const& data_file )
 {
     super::setDataFromGetPot(data_file);
 
-    M_updateEvery = data_file("problem/updateEvery", 0);
     this->M_dataFluid->setSemiImplicit( data_file("problem/semiImplicit", false) );
     this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
     M_DDBlockPrec = data_file( "interface/DDBlockPrec",  0 );
@@ -1005,33 +1028,10 @@ void Monolithic::variablesInit(const std::string& dOrder)
 }
 
 
-// void Monolithic::resetHeAndFluid()
-// {
-//     M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
-//                                                *M_epetraComm));
-//     UInt numLM = dataFluid().numLM();
-
-//     std::cout << " numLM = " << numLM << std::endl;
-//     M_fluid.reset(new fluid_raw_type(dataFluid(),
-//                                      *M_uFESpace,
-//                                      *M_pFESpace,
-//                                      *M_epetraComm,
-//                                      numLM));
-// }
-
 void Monolithic::
 applyPreconditioner( matrix_ptrtype robinCoupling, vector_ptrtype& rhs)
 {
-    matrix_type tmpMatrix(*M_monolithicMatrix);
-    tmpMatrix.GlobalAssemble();
-    M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
-
-    EpetraExt::MatrixMatrix::Multiply( *robinCoupling->getMatrixPtr(),
-                                       false,
-                                       *tmpMatrix.getMatrixPtr(),
-                                       false,
-                                       *M_monolithicMatrix->getMatrixPtr());
-
+    applyPreconditioner(robinCoupling, M_monolithicMatrix);
     *rhs=*robinCoupling*(*rhs);
 
 }
@@ -1039,16 +1039,13 @@ applyPreconditioner( matrix_ptrtype robinCoupling, vector_ptrtype& rhs)
 void Monolithic::
 applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype& prec )
 {
-    matrix_type tmpMatrix(*prec);
-    tmpMatrix.GlobalAssemble();
-    prec.reset(new matrix_type(*M_monolithicMap));
-
+    matrix_type tmpMatrix(*M_monolithicMap/* *prec*/);
     EpetraExt::MatrixMatrix::Multiply( *robinCoupling->getMatrixPtr(),
                                        false,
-                                       *tmpMatrix.getMatrixPtr(),
+                                       *prec->getMatrixPtr(),
                                        false,
-                                       *prec->getMatrixPtr());
-
+                                       *tmpMatrix.getMatrixPtr());
+    prec->swapCrsMatrix(tmpMatrix);
 }
 
 
@@ -1298,8 +1295,6 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
     vector_ptrtype sol(new vector_type(M_monolithicInterfaceMap));
     solverMass.setMatrix(*bdMatrix);
     int numIter = solverMass.solveSystem( lambda, *sol, bdMatrix, false);
-    std::cout<<"lambda : "<< lambda.NormInf()<<std::endl;
-    std::cout<<"sol : "<< sol->NormInf()<<std::endl;
     UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
     for(ID dim=0; dim<nDimensions; ++dim)
@@ -1310,7 +1305,6 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
                 (*M_wss)[ITrow->first+dim*fluidDim]=(*sol)((*M_numerationInterface)(ITrow->second)+dim*M_interface);
             }
         }
-    std::cout<<"ws : "<< M_wss->NormInf()<<std::endl;
     return M_wss;
 }
 
