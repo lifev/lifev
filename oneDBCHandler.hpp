@@ -474,7 +474,7 @@ void OneDBCHandler<FLUX>::setDefaultBC( const FESpace<Mesh, EpetraMap>& fespace,
                                         const Real&                     dt )
 {
 
-    std::cout << "Set Default BC " << std::endl;
+    std::cout << "Set Default BC ... ";
     std::string border;
     std::string var;
 
@@ -530,6 +530,8 @@ void OneDBCHandler<FLUX>::setDefaultBC( const FESpace<Mesh, EpetraMap>& fespace,
             Debug( 6311 ) << "[OneDBCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
             setBC(point, "right", "second", "W1");
         }
+
+    std::cout << "ok." << std::endl;
 
 }
 

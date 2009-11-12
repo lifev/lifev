@@ -20,7 +20,8 @@
 #define _VECTORFUNCTION1D_H_
 
 #include <life/lifecore/life.hpp>
-#include "oneDNonLinModelParam.hpp"
+#include <lifemc/lifesolver/oneDNonLinModelParam.hpp>
+//#include "oneDNonLinModelParam.hpp"
 
 namespace LifeV
 {
@@ -83,6 +84,7 @@ public:
 class NonLinearFluxFun1D
 {
 
+  
 private:
     //! the parameters that are used in the function
     const OneDNonLinModelParam& _M_oneDParam;
@@ -128,6 +130,7 @@ public:
                const ID& ii, const ID& jj, const ID& kk,
                const UInt& indz = 0) const;
 
+  const OneDNonLinModelParam& oneDParam() const {return _M_oneDParam;}
 };
 
 /*!
