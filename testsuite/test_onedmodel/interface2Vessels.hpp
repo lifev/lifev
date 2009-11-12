@@ -32,6 +32,7 @@
 
 #include "lifemc/lifesolver/oneDModelSolver.hpp"
 
+
 namespace LifeV
 {
 /*!
@@ -55,6 +56,7 @@ public:
     typedef DataOneDModel                     data_type;
     typedef data_type::mesh_raw_type          Mesh;
     typedef data_type::Vec2D                  Vec2D;
+  
 
     typedef OneDModelSolver< Params, Flux, Source> solver_type;
     //    typedef OneDModelSolver<Params, Flux, Source>::Vec2D Vec2D;
@@ -88,9 +90,9 @@ private:
     //! side : tube alpha
     Vec2D                       _M_Un_alpha_bd;
     Vec2D                       _M_Un_alpha_int;
-    const Edge1D                _M_edge_alpha;
+    const Mesh::EdgeType        _M_edge_alpha;
     const UInt                  _M_dof_alpha;
-    const Flux&                  _M_fluxFun_alpha;
+    const Flux&                 _M_fluxFun_alpha;
     const Source&               _M_sourceFun_alpha;
     //! result of the computation
     Vector                      _M_bcDir_alpha;
@@ -98,7 +100,7 @@ private:
     //! side : tube beta
     Vec2D                       _M_Un_beta_bd;
     Vec2D                       _M_Un_beta_int;
-    const Edge1D                _M_edge_beta;
+    const Mesh::EdgeType        _M_edge_beta;
     const UInt                  _M_dof_beta;
     const Flux&                 _M_fluxFun_beta;
     const Source&               _M_sourceFun_beta;
@@ -131,6 +133,9 @@ Interface2Vessels( OneDModelSolver<Params, Flux, Source> const& tube_alpha,
     _M_bcDir_beta     ( 2 ),
     _M_time_step      ( tube_alpha.timestep() )
 {
+  std::cout << "edge alpha " << std::flush;
+  std::cout << tube_alpha.RightEdge().id() << " " << std::flush;
+  std::cout << _M_edge_alpha.point(1).id() << std::endl;
 }
 
 
@@ -191,6 +196,11 @@ Interface2Vessels::computeInterface2TubesValues()
     x[2] = _M_Un_beta_bd [0];  //!< A_beta
     x[3] = _M_Un_beta_bd [1]; //!< Q_beta
 
+    std::cout << "x0 = " << x[0] << std::endl;
+    std::cout << "x1 = " << x[1] << std::endl;
+    std::cout << "x2 = " << x[2] << std::endl;
+    std::cout << "x3 = " << x[3] << std::endl;
+
     //! lapack variable
     int INFO[1]  = {0};
     int NBRHS[1] = {1};           //  nb columns of the rhs := 1.
@@ -201,12 +211,12 @@ Interface2Vessels::computeInterface2TubesValues()
     for ( UInt iter = 0 ; iter < 10 ; iter ++)
     {
 
-        // std::cout << "=======\n\tNewton iter = " << iter << std::endl;
+        std::cout << "=======\n\tNewton iter = " << iter << std::endl;
 
         //! compute f(x) and its jacobian df(x)
         f_jac( x, f, jac);
 
-    //  std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
+	std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
 
         //! transpose to pass to fortran storage (lapack!)
         jac_trans = trans(jac);
@@ -301,6 +311,11 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     Real A_beta  = x[2];
     Real Q_beta  = x[3];
 
+    std::cout << "A_alpha " << A_alpha << std::endl;
+    std::cout << "Q_alpha " << Q_alpha << std::endl;
+    std::cout << "A_beta"   << A_beta << std::endl;
+    std::cout << "Q_beta "  << Q_beta << std::endl;
+
     //-------------
     //! Get the dof of the interfaces (to extract the paramaters values)
     //-------------
@@ -315,6 +330,7 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     // *******************************************************
     //! 0/ Continuity of the flux
     // *******************************************************
+    std::cout << "0" << std::endl;
     f(0) = Q_beta - Q_alpha;
     //! Jacobian
     jac( 0, 0 ) =  0.; //!< df0/dA_alpha
@@ -325,28 +341,31 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     // *******************************************************
     //! 1/ Continuity of the total pressure
     // *******************************************************
-    f(1) = (   _M_fluxFun_beta.totalPressure(  A_beta,  Q_beta,  leftDof )
-             - _M_fluxFun_alpha.totalPressure( A_alpha, Q_alpha, rightDof ) );
-
+    std::cout << "1" << std::endl;
+    f(1) = (   _M_fluxFun_beta.oneDParam().totalPressure(  A_beta,  Q_beta,  leftDof ) - 
+	       _M_fluxFun_alpha.oneDParam().totalPressure( A_alpha, Q_alpha, rightDof ) );
+    std::cout << " --- " << std::endl;
     //! Jacobian
     //!df1/dA_alpha:
-    jac( 1, 0 ) = - _M_fluxFun_alpha.totalPressureDiff(A_alpha, Q_alpha, 1, rightDof );
+    std::cout << A_alpha << " " << Q_alpha << " " << leftDof << " " << rightDof << std::endl;
+    jac( 1, 0 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 1, rightDof );
     //!df1/dQ_alpha:
-    jac( 1, 1 ) = - _M_fluxFun_alpha.totalPressureDiff(A_alpha, Q_alpha, 2, rightDof );
+    jac( 1, 1 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 2, rightDof );
     //!df1/dA_beta:
-    jac( 1, 2 ) = + _M_fluxFun_beta.totalPressureDiff( A_beta,  Q_beta,  1, leftDof );
+    jac( 1, 2 ) = + _M_fluxFun_beta.oneDParam().totalPressureDiff( A_beta,  Q_beta,  1, leftDof );
     //!df1/dQ_beta:
-    jac( 1, 3 ) = + _M_fluxFun_beta.totalPressureDiff( A_beta,  Q_beta,  2, leftDof );
-
+    jac( 1, 3 ) = + _M_fluxFun_beta.oneDParam().totalPressureDiff( A_beta,  Q_beta,  2, leftDof );
+    std::cout << jac(1,0) << " " << jac(1,1) << " " << jac(1,2) << " " << jac(1,3) << std::endl; 
     // *******************************************************
     //! 2/ ALPHA : right compatibility condition (for tube alpha)
     // *******************************************************
     //-------------------------------------
     //! Compute the eigen values and vectors
-    boundaryPoint   = _M_edge_alpha.pt2().x(); //!< point on the boundary (on the right of the edge!)
-    internalBdPoint = _M_edge_alpha.pt1().x(); //!< neighboring point (internal)
-
+    std::cout << "2" << std::endl;
+    boundaryPoint   = _M_edge_alpha.point(2).x(); //!< point on the boundary (on the right of the edge!)
+    internalBdPoint = _M_edge_alpha.point(1).x(); //!< neighboring point (internal)
     //! values of U on the boundary
+
     U_boundary   = Vec2D ( _M_Un_alpha_bd );
     //! values of U on the neighboring node of the boundary point
     U_internalBd = Vec2D ( _M_Un_alpha_int );
@@ -359,10 +378,10 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
                                                   left_eigvec2[0], left_eigvec2[1],
                                                   rightDof);
 
-    if ( verbose > 3 )
+    //if ( verbose > 3 )
         std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
-
+    
     ASSERT( eigval1 > 0. && eigval2 < 0. ,
             "The eigenvalues do not have the expected signs.");
 
@@ -404,15 +423,19 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     // *******************************************************
     //-------------------------------------
     //! Compute the eigen values and vectors
-    boundaryPoint   = _M_edge_beta.pt1().x(); //!< point on the boundary (on the left of the edge!)
-    internalBdPoint = _M_edge_beta.pt2().x(); //!< neighboring point (internal)
+
+    boundaryPoint   = _M_edge_beta.point(1).x(); //!< point on the boundary (on the left of the edge!)
+    internalBdPoint = _M_edge_beta.point(2).x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
+
     U_boundary   = Vec2D ( _M_Un_beta_bd );
     //! values of U on the neighboring node of the boundary point
+
     U_internalBd = Vec2D ( _M_Un_beta_int );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
+
     _M_fluxFun_beta.jacobian_EigenValues_Vectors(U_boundary[0], U_boundary[1],
                                                  eigval1, eigval2,
                                                  left_eigvec1[0], left_eigvec1[1],

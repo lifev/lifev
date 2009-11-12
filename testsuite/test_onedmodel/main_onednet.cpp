@@ -61,10 +61,11 @@ int main(int argc, char** argv)
     /*string data_file_name = command_line.follow("data", 2, "-f","--file");
       GetPot data_file(data_file_name);
     */
-    typedef NonLinearFluxFun1D                          Flux1D;
-    typedef NonLinearSourceFun1D                        Source1D;
-    typedef OneDNonLinModelParam                        Params1D;
-    typedef OneDModelSolver<Params1D, Flux1D, Source1D> onedsolver_type;
+    typedef NonLinearFluxFun1D                            Flux1D;
+    typedef NonLinearSourceFun1D                          Source1D;
+    typedef OneDNonLinModelParam                          Params1D;
+    typedef OneDModelSolver<Params1D, Flux1D, Source1D>   onedsolver_type;
+    typedef Interface2Vessels<Params1D, Flux1D, Source1D> interface_type;
 
     GetPot data_file_t1                   ( "datanl" );
 //     OneDNonLinModelParam onedparamNL   ( data_file );
@@ -106,9 +107,9 @@ int main(int argc, char** argv)
 
     std::cout << "-----------------------------" << std::endl;
 
-    /*
+    
 
-      Interface2Vessels interf_t1_t2( onedm_t1, onedm_t2 );
+    interface_type interf_t1_t2( onedm_t1, onedm_t2 );
 
     // Initialization
     //
@@ -163,10 +164,11 @@ int main(int argc, char** argv)
         //! compute the interface values
         interf_t1_t2.updateInterface2Vessels( onedm_t1, onedm_t2 );
 
+	std::cout << "OK" << std::endl;
         int cvg_newton  = interf_t1_t2.computeInterface2TubesValues();
         Vector bcDir_t1 = interf_t1_t2.BcDir_alpha();
         Vector bcDir_t2 = interf_t1_t2.BcDir_beta();
-
+	std::cout << "OK" << std::endl;
         std::cout << "bcDir_t1 " << bcDir_t1   << "\nbcDir_t2 " << bcDir_t2  << std::endl;
 
         //! set the interface values
@@ -188,12 +190,12 @@ int main(int argc, char** argv)
 
         if ( data_file_t1( "miscellaneous/show_graceplot", 0 ) )
         {
-            onedm_t1.postProcess();
-            onedm_t2.postProcess();
+            onedm_t1.postProcess( time );
+            onedm_t2.postProcess( time );
         }
 
     }
-    */
+    
 
 #ifdef EPETRA_MPI
     MPI_Finalize();
