@@ -57,22 +57,34 @@ BloodFlowParam::BloodFlowParam(const GetPot& dfile) :
     //-------------------------------------------
     //! Initialisation of the parameter variables
     //-------------------------------------------
-    _M_Area0         = ScalarVector( _M_paramSize, _A0 );
-    _M_dArea0dz      = ScalarVector( _M_paramSize, _dA0dz );
-    _M_PressBeta0    = ScalarVector( _M_paramSize, _beta0 );
-    _M_dPressBeta0dz = ScalarVector( _M_paramSize, _dbeta0dz );
-    _M_PressBeta1    = ScalarVector( _M_paramSize, _beta1 );
-    _M_dPressBeta1dz = ScalarVector( _M_paramSize, _dbeta1dz );
-    _M_FrictionKr    = ScalarVector( _M_paramSize, _kr );
+//     _M_Area0         = Vector( _M_paramSize, (double) _A0 );
+//     _M_dArea0dz      = Vector( _M_paramSize, _dA0dz );
+//     _M_PressBeta0    = Vector( _M_paramSize, _beta0 );
+//     _M_dPressBeta0dz = Vector( _M_paramSize, _dbeta0dz );
+//     _M_PressBeta1    = Vector( _M_paramSize, _beta1 );
+//     _M_dPressBeta1dz = Vector( _M_paramSize, _dbeta1dz );
+//     _M_FrictionKr    = Vector( _M_paramSize, _kr );
 
-    _M_DensityRho = dfile("parameters/rho",1.);
+    for (int ii = 1; ii <= _M_paramSize; ++ii)
+      {
+	_M_Area0[ii]         = _A0;
+	_M_dArea0dz[ii]      = _dA0dz;
+	_M_PressBeta0[ii]    = _beta0;
+	_M_dPressBeta0dz[ii] = _dbeta0dz;
+	_M_PressBeta1[ii]    = _beta1;
+	_M_dPressBeta1dz[ii] = _dbeta1dz;
+	_M_FrictionKr[ii]    = _kr;
+      }
+
+    _M_DensityRho  = dfile("parameters/rho",1.);
+
     _M_DensityWall = dfile("parameters/rho_w",1.);
 
-    _M_Thickness = dfile("parameters/thickness",0.);
+    _M_Thickness   = dfile("parameters/thickness",0.);
 
-    _M_Gamma = dfile("parameters/gamma",0.);
+    _M_Gamma       = dfile("parameters/gamma",0.);
 
-    _M_CoeffA = dfile("parameters/coeffA",0.);
+    _M_CoeffA      = dfile("parameters/coeffA",0.);
 
     if( dfile("parameters/use_physical_values",false) )
         {
@@ -156,20 +168,22 @@ UInt BloodFlowParam::ParamSize() const {
 //! initialisation from physical values
 void BloodFlowParam::initParam(const GetPot& dfile)
 {
-    Real Young_modulus = dfile("1d_physics/young",5.e6);
-    Real thickness  = dfile("1d_physics/thickness",0.05);
-    Real reference_radius = dfile("1d_physics/radius",1.);
-    Real viscosity = dfile("1d_physics/viscosity",0.035);  //???
-    Real ksi       = dfile("1d_physics/ksi",0.5);  //???
-    Real friction_factor = dfile("1d_physics/friction_factor",8.);  //???
-    bool thick_vessel = dfile("1d_physics/thick_vessel",0);
 
-    Real _A0( M_PI * reference_radius * reference_radius );
+
+    Real Young_modulus    = dfile("1d_physics/young"          , 5.e6);
+    Real thickness        = dfile("1d_physics/thickness"      , 0.05);
+    Real reference_radius = dfile("1d_physics/radius"         , 1.);
+    Real viscosity        = dfile("1d_physics/viscosity"      , 0.035);  //???
+    Real ksi              = dfile("1d_physics/ksi"            , 0.5);  //???
+    Real friction_factor  = dfile("1d_physics/friction_factor", 8.);  //???
+    bool thick_vessel     = dfile("1d_physics/thick_vessel"   , 0);
+
+    Real _A0( M_PI*reference_radius*reference_radius );
 
     Real _beta0, _beta1;
     if( thick_vessel ){ // see Amadori, Ferrari, Formaggia (MOX report 86)
         //! beta0
-        _beta0 = - thickness * Young_modulus * sqrt(M_PI) /
+        _beta0 = - thickness*Young_modulus*sqrt(M_PI) /
             ( sqrt(_A0) *
               ( (1 - ksi * ksi)
                 + ksi * (1 + ksi) * (thickness * sqrt(M_PI)
@@ -193,15 +207,23 @@ void BloodFlowParam::initParam(const GetPot& dfile)
     //! Initialisation of the parameter variables
     //-------------------------------------------
     //! A0
-    _M_Area0 = ScalarVector( _M_paramSize, _A0 );
+    _M_Area0      = Vector( _M_paramSize );
     //! beta0
-    _M_PressBeta0 = ScalarVector( _M_paramSize, _beta0 );
+    _M_PressBeta0 = Vector( _M_paramSize );
     //! beta1
-    _M_PressBeta1 = ScalarVector( _M_paramSize, _beta1 );
+    _M_PressBeta1 = Vector( _M_paramSize );
     //! Kr
-    _M_FrictionKr = ScalarVector( _M_paramSize, _kr );
+    _M_FrictionKr = Vector( _M_paramSize );
 
-    _M_Thickness = thickness;
+    for (int ii = 1; ii <= _M_paramSize; ++ii)
+      {
+	_M_Area0[ii]         = _A0;
+	_M_PressBeta0[ii]    = _beta0;
+	_M_PressBeta1[ii]    = _beta1;
+	_M_FrictionKr[ii]    = _kr;
+      }
+
+    _M_Thickness  = thickness;
 
 }
 
@@ -253,7 +275,7 @@ Real BloodFlowParam::
 pressureDiff(const Real& _A, const UInt& indz) const
 {
     Real AoverA0POWbeta1( std::pow( _A / _M_Area0[indz], _M_PressBeta1[indz] ) );
-
+    std::cout << indz << " -> " <<  _M_PressBeta0[indz] << " " <<  _M_PressBeta1[indz] << " " <<  AoverA0POWbeta1 << " " << _A << std::endl;
     return _M_PressBeta0[indz] * _M_PressBeta1[indz] * AoverA0POWbeta1 / _A;
 }
 
@@ -459,6 +481,7 @@ void BloodFlowParam::stiffenVesselRight( const Real& xl, const Real& xr,
                                          const Real& delta, const Real& n,
                                          const Real& min_deltax, const UInt& yesAdaptive )
 {
+  Debug( 6320 ) << "stiffenVesselright ...\n";
     /* Stiffen Left boundary with a fifth order polynomial law
 
        if (alpha-delta/2) <= x < alpha

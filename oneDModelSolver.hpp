@@ -378,6 +378,9 @@ public:
     //! Print to screen informations on the solver class
     void showMe( std::ostringstream& c, UInt verbose = false );
 
+  //! timestep getters
+  const Real timestep() const {return M_data.timestep();}
+  
 private:
 
     //! the data
@@ -642,14 +645,14 @@ OneDModelSolver( const data_type&                   dataType,
         M_rightInternalNodeId   ( M_rightNodeId - 1 ),
         //! boundary edges
         M_leftEdge              ( M_FESpace.mesh()->edgeList( 1 ) ),
-        M_rightEdge             ( M_FESpace.mesh()->edgeList( M_FESpace.dim() ) ),
+        M_rightEdge             ( M_FESpace.mesh()->edgeList( M_FESpace.dim() - 1 ) ),
         // elementary matrices
         M_elmatMass             (M_FESpace.fe().nbNode,1,1),
         M_elmatStiff            (M_FESpace.fe().nbNode,1,1),
         M_elmatGrad             (M_FESpace.fe().nbNode,1,1),
         M_elmatDiv              (M_FESpace.fe().nbNode,1,1),
         // vectorial unknowns and rhs
-        M_U_thistime            (0, vector_type(M_localMap)), // size should be at least 4
+        M_U_thistime            (5, vector_type(M_localMap)), // size should be at least 4
         M_U_prevtime            (2, vector_type(M_localMap)), // probably useless - could be components in U_thistime
         M_U_2prevtime           (2, vector_type(M_localMap)),
 //         M_U_thistime            (0 /*, vector_type(M_localMap)*/), // size should be at least 4
@@ -787,21 +790,6 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
 
     M_U_thistime.resize(nvar, vector_type(M_localMap));
 
-//     for (int ii = 0; ii < M_U_thistime.size(); ++ii)
-//         {
-//             std::cout << ii << " = ";
-//             M_U_thistime[ii].getEpetraVector().Print(std::cout);
-
-//         }
-
-    // initialize vectors
-//     std::fill( M_U_thistime.begin(),  M_U_thistime.end(),  ublas::zero_vector<double>(M_FESpace.dim()) );
-//     std::fill( M_U_prevtime.begin(),  M_U_prevtime.end(),  ublas::zero_vector<double>(M_FESpace.dim()) );
-//     std::fill( M_U_2prevtime.begin(), M_U_2prevtime.end(), ublas::zero_vector<double>(M_FESpace.dim()) );
-//     std::fill( M_rhs.begin(), M_rhs.end(), ublas::zero_vector<double>(M_FESpace.dim()) );
-    //std::fill( M_Flux.begin(),        M_Flux.end(),        ublas::zero_vector<double>(M_FESpace.dim()) );
-//     std::fill( M_Source.begin(), M_Source.end(), ublas::zero_vector<double>(M_FESpace.dim()) );
-
     // initialize matrices
     std::fill( M_diffFlux.begin(),    M_diffFlux.end(),    ublas::zero_vector<double>(M_FESpace.dim()) );
     std::fill( M_diffSrc.begin() ,    M_diffSrc.end() ,    ublas::zero_vector<double>(M_FESpace.dim()) );
@@ -863,33 +851,12 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     M_massMatrix.GlobalAssemble();
     M_gradMatrix.GlobalAssemble();
 
-    //_updateBCDirichletMatrix( M_massMatrix );
-
-//     M_gradMatrix.spy("gm");
-//     M_massMatrix.spy("mm");
-
-    //! cholesky or lapack lu factorization of the mass matrix
-    //@M_tridiagSlv.Factor( M_factorMassMatrix );
-
     M_linearSolver.setDataFromGetPot( data_file, "solver" );
 
     chrono.stop();
 
     Debug( 6310 ) << "[OneDModelSolver] \tdone in " << chrono.diff() << " s.\n";
 
-    // for debugging purposes
-    //    std::ostringstream output, dummy_sstr;
-    //    std::string dummy_file("second_derivative");
-    //    dummy_sstr << M_FESpace.mesh()->numEdges();
-    //    dummy_file += dummy_sstr.str() + ".m";
-    //    std::ostringstream outfile;
-    //
-    //    outfile.open(dummy_file.c_str(), std::ios::app);
-    //
-    //    outfile << "Qhat = [ ];\n";
-    //    outfile << "rhs = [ ];\n";
-    //
-    //    outfile.close();
 
 }
 
@@ -1246,8 +1213,13 @@ OneDModelSolver<Params, Flux, Source>::BCValuesLeft() const
 {
     Vec2D temp(2);
     //    for( UInt i=0; i<2; ++i )
+    
     temp[0] = M_U_thistime[0]( LeftNodeId() );
     temp[1] = M_U_thistime[1]( LeftNodeId() );
+
+    std::cout << "BCvaluesLeft " << std::endl;
+    std::cout << LeftNodeId() << " " << temp[0] << std::endl;
+    std::cout << LeftNodeId() << " " << temp[1] << std::endl;
     return temp;
 }
 
@@ -1385,7 +1357,7 @@ OneDModelSolver<Params, Flux, Source>::CheckCFL() const
         std::cout << "CFL = " << CFL << std::endl;
 
     /*
-      std::cout << "Old CFL = " << M_data.timestep() /
+      std::cout << "Old CFL = " << M_data.() /
       (M_FESpace.mesh()->edgeList( 1 ).pt2().x() - M_FESpace.mesh()->edgeList( 1 ).pt1().x())
       * std::max<Real>( lambda1_max , lambda2_max )
       << std::endl;
@@ -2002,29 +1974,29 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 {
 
     if( var == "physical")
-        {
-            //        for( UInt i=0; i<2; ++i )
-            M_U_thistime[0] = ScalarVector( M_localMap );
-            M_U_thistime[0] = u10;
-            M_U_thistime[1] = ScalarVector( M_localMap );
-            M_U_thistime[1] = u20;
-
-            for (UInt ielem = 0; ielem <= M_FESpace.dim() ; ielem++ )
-                M_oneDParams.W_from_U( M_U_thistime[2][ielem], M_U_thistime[3][ielem],
-                                       M_U_thistime[0][ielem], M_U_thistime[1][ielem],
-                                       ielem );
-        }
+      {
+	
+	M_U_thistime[0] = vector_type( M_localMap );
+	M_U_thistime[0] = u10;
+	M_U_thistime[1] = vector_type( M_localMap );
+	M_U_thistime[1] = u20;
+	
+	for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
+	  M_oneDParams.W_from_U( M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
+				 M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
+				 ielem );
+      }
     else if( var == "reimann" )
         {
             //        for( UInt i=0; i<2; ++i )
-            M_U_thistime[2] = std::vector<vector_type>( M_localMap );
+            M_U_thistime[2] = vector_type( M_localMap );
             M_U_thistime[2] = u10;
-            M_U_thistime[3] = std::vector<vector_type>( M_localMap );
+            M_U_thistime[3] = vector_type( M_localMap );
             M_U_thistime[3] = u20;
 
-            for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
-                M_oneDParams.U_from_W( M_U_thistime[0][ielem], M_U_thistime[1][ielem],
-                                       M_U_thistime[2][ielem], M_U_thistime[3][ielem],
+            for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
+                M_oneDParams.U_from_W( M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
+                                       M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
                                        ielem );
         }
     else
@@ -2034,6 +2006,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
             abort();
         }
 
+
     for( UInt i = 0; i < 2; ++i )
         {
             M_U_prevtime [i] = M_U_thistime[i];
@@ -2042,29 +2015,35 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
     ScalVec pressures(4*M_FESpace.dim());
 
-    for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ ) {
+    for (UInt ielem = 0; ielem < M_FESpace.dim() ; ++ielem ) 
+      {
         subrange(pressures, 4*ielem, 4+4*ielem) =
-            M_oneDParams.pressure( M_U_thistime[0][ielem],
-                                   M_U_prevtime[0][ielem], M_U_2prevtime[0][ielem],
+            M_oneDParams.pressure( M_U_thistime [0][ielem + 1],
+                                   M_U_prevtime [0][ielem + 1], 
+				   M_U_2prevtime[0][ielem + 1],
                                    M_data.timestep(), ielem,
                                    M_dP_dt_steps, M_viscoelastic_wall,
                                    M_linearize_string_model );
+	
+        M_U_thistime[4][ielem + 1] = pressures(4*ielem);
+      }
 
-        M_U_thistime[4][ielem] = pressures(4*ielem);
-    }
-
-    if(M_viscoelastic_wall) {
-        for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ ) {
-            M_U_thistime[M_variable_index_map.find("P_elast")->second][ielem]
-                                                                         = pressures(1+4*ielem);
-            M_U_thistime[M_variable_index_map.find("P_visc")->second][ielem]
-                                                                        = pressures(2+4*ielem);
-            M_U_thistime[M_variable_index_map.find("dA_dt")->second][ielem]
-                                                                       = pressures(3+4*ielem);
+    if(M_viscoelastic_wall) 
+      {
+        for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ ) 
+	  {
+	    M_U_thistime[M_variable_index_map.find("P_elast")->second][ielem + 1]
+	      = pressures(1+4*ielem);
+            M_U_thistime[M_variable_index_map.find("P_visc")->second][ielem + 1]
+	      = pressures(2+4*ielem);
+            M_U_thistime[M_variable_index_map.find("dA_dt")->second][ielem + 1]
+	      = pressures(3+4*ielem);
         }
     }
+
     //! Prepare bc Handler
-    M_bcH.setDefaultBC( M_FESpace.mesh(), M_sourceFun, M_data.timestep() );
+    M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
+
 
     //! create matlab scripts
     create_movie_file();
@@ -2073,7 +2052,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
     output2FileBuffers( 0. );
 
-    postProcess( 0. );
+    //postProcess( 0. );
 
 }
 
@@ -2082,6 +2061,7 @@ template< class Params, class Flux, class Source >
 void
 OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vector& u20)
 {
+
     M_U_thistime[0] = u10;
     M_U_thistime[1] = u20;
 
@@ -2089,13 +2069,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
         M_oneDParams.W_from_U( M_U_thistime[2][ielem], M_U_thistime[3][ielem],
                                M_U_thistime[0][ielem], M_U_thistime[1][ielem], ielem );
 
+
     for( UInt i=0; i<2; ++i )
         {
             M_U_prevtime[i] = M_U_thistime[i];
             M_U_2prevtime[i] = M_U_prevtime[i];
         }
 
-    //    Vector pressures(4 * M_FESpace.dim());
     Vector pressures(4 * M_FESpace.dim());
 
     for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ ) {
@@ -2119,17 +2099,18 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
               pressures(3+4*ielem);
         }
     }
+
     //! Prepare bc Handler
-    M_bcH.setDefaultBC( M_FESpace.mesh(), M_sourceFun, M_data.timestep() );
+    M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
 
     //! create matlab scripts
-    create_movie_file();
+    //create_movie_file();
 
-    openFileBuffers();
+    //openFileBuffers();
 
-    output2FileBuffers( 0. );
+    //output2FileBuffers( 0. );
 
-    postProcess( 0. );
+    //postProcess( 0. );
 
 }
 
@@ -2457,14 +2438,14 @@ OneDModelSolver<Params, Flux, Source>::initialize(GetPot& data_file)
     //resetFileBuffers();
 
     //! create matlab scripts
-    create_movie_file();
+    //create_movie_file();
 
     //! Prepare the buffers
-    openFileBuffers();
+    //openFileBuffers();
 
     //! Write down initial condition
-    output2FileBuffers( 0. );
-    postProcess( 0. );
+    //output2FileBuffers( 0. );
+    //postProcess( 0. );
 }
 
 
