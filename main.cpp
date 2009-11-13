@@ -265,7 +265,7 @@ public:
         int _i = 1;
         double time=M_Tstart + dt;
 
-        dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
+        //dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
 
         for (time=M_Tstart + dt; time <= T; time += dt, ++_i)
             {
@@ -293,7 +293,7 @@ public:
                 M_fsi->iterate( time );
 
 
-                *M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
+                //*M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
