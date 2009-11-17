@@ -69,7 +69,7 @@ public:
     typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
     typedef EpetraVector                   vector_type;
 
-    EpetraMatrix( const EpetraMap&    _map, int numEntries = 50 );
+    EpetraMatrix( const EpetraMap&    _map, int numEntries = 50, int indexBase = 1 );
 
     EpetraMatrix( const EpetraMatrix& _matrix);
     //     EpetraMatrix( const EpetraMatrix<DataType> &_epetra );
@@ -196,6 +196,9 @@ private:
     //!Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
 
+    //! The index base for the matrix
+    int             M_indexBase;
+
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -205,14 +208,16 @@ private:
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
     M_epetraMap(_matrix.M_epetraMap),
-    M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs))
+    M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs)),
+    M_indexBase(_matrix.M_indexBase )
 {
 }
 
 template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries ):
+EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int indexBase ):
     M_epetraMap   ( new EpetraMap  (_map)),
-    M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries, false))
+    M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries, false)),
+    M_indexBase   ( indexBase )
 {
 }
 
@@ -223,7 +228,8 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt re
     M_epetraMap   (_matrix.M_epetraMap->createRootMap(reduceToProc)),
     M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries
                                      (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20,
-                                     false) )
+                                     false) ),
+    M_indexBase   (_matrix.M_indexBase)
 {
     int  me    = M_epetraCrs->Comm().MyPID();
     if (!me)
@@ -299,9 +305,9 @@ set_mat( UInt row, UInt col, DataType loc_val )
 {
     //     if (M_epetraCrs->RowMap()
 
-    // incrementing row and cols by one;
-    int irow(row + 1);
-    int icol(col + 1);
+    // incrementing row and cols by indexBase;
+    int irow(row + M_indexBase);
+    int icol(col + M_indexBase);
 
     //    if (M_epetraCrs->RowMap().MyGID (row))
     M_epetraCrs->ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
@@ -313,9 +319,9 @@ void EpetraMatrix<DataType>::
 set_mat_inc( UInt row, UInt col, DataType loc_val )
 {
 
-    // incrementing row and cols by one;
-    int irow(row + 1);
-    int icol(col + 1);
+    // incrementing row and cols by indexBase;
+    int irow(row + M_indexBase);
+    int icol(col + M_indexBase);
 
     //    int  me    = M_epetraCrs->Comm().MyPID();
 
@@ -335,7 +341,7 @@ set_mat_inc( int const numRows, int const numCols,
              int format)
 {
 
-    // incrementing row and cols by one;
+    // incrementing row and cols by indexBase;
     std::vector<int> irow(numRows);
     std::vector<int> icol(numCols);
 
@@ -343,11 +349,11 @@ set_mat_inc( int const numRows, int const numCols,
 
     pt = row.begin();
     for (std::vector<int>::iterator i(irow.begin()); i !=  irow.end() && pt != row.end(); ++i, ++pt)
-        *i = *pt + 1;
+        *i = *pt + M_indexBase;
 
     pt = col.begin();
     for (std::vector<int>::iterator i(icol.begin()); i !=  icol.end() && pt != col.end(); ++i, ++pt)
-        *i = *pt + 1;
+        *i = *pt + M_indexBase;
 
 
     int ierr = M_epetraCrs->InsertGlobalValues (numRows, &irow[0], numCols, &icol[0], loc_val, format);
@@ -482,10 +488,10 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
     const Epetra_Map& colMap(M_epetraCrs->ColMap());
 
 
-    int myCol = colMap.LID(r + 1 + offset);
+    int myCol = colMap.LID(r + M_indexBase + offset);
 
     // row: if r is mine, zero out values
-    int myRow = rowMap.LID(r + 1 + offset);
+    int myRow = rowMap.LID(r + M_indexBase + offset);
 
     if (myRow >= 0)  // I have this row
     {
@@ -772,7 +778,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
     const Epetra_Map& colMap(M_epetraCrs->ColMap());
 
 
-    int myCol = colMap.LID(r + 1 + offset);
+    int myCol = colMap.LID(r + M_indexBase + offset);
 
 #ifdef EPETRAMATRIX_SYMMETRIC_DIAGONALIZE
     if (myCol >= 0)  // I have this column
@@ -787,7 +793,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 #endif
 
     // row: if r is mine, zero out values
-    int myRow = rowMap.LID(r + 1 + offset);
+    int myRow = rowMap.LID(r + M_indexBase + offset);
 
     if (myRow >= 0)  // I have this row
     {
@@ -805,7 +811,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         DataType coeff_(coeff);
 
         M_epetraCrs->ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
-        b[ r + 1 + offset] = coeff * datum; // correct right hand side for row r // BASEINDEX + 1
+        b[ r + M_indexBase + offset] = coeff * datum; // correct right hand side for row r // BASEINDEX + M_indexBase
 
     }
 
@@ -877,7 +883,7 @@ void EpetraMatrix<DataType>::removeZeros()
 
         for(int i(0);i<tmp->NumGlobalRows();++i)
         {
-            row = tmp->LRID(i+1);
+            row = tmp->LRID(i+M_indexBase);
             tmp->ExtractMyRowView(row, NumEntries, Values, Indices);
 
             int Indices2[NumEntries];
