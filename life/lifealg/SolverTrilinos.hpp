@@ -236,7 +236,7 @@ private:
 template<typename PrecType>
 int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
                                   vector_type&      sol,
-                                  PrecType&        prec,
+                                  PrecType&        prec, //baseMatrixForPreconditioner
                                   bool const        reuse,
                                   bool const        retry)
 
