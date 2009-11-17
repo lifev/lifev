@@ -63,10 +63,10 @@ all-local:
 	@echo "* LifeV compilation has ended."
 	@echo "*"
 	@echo "* LifeV API documentation has been generated in doc/api/"
-	@echo "* Open your browser at doc/api/index.html."
+	@echo "* Open your browser at doc/api/html/index.html."
 	@echo "*"
 	@echo "* Enjoy!"
-	@echo "*  C.P."
+	@echo "*  The LifeV Developing Team"
 	@echo "************************************************************"
 
 upload-api:
