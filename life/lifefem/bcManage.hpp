@@ -270,7 +270,7 @@ void bcManageMatrix( MatrixType&      A,
                      const BCHandler& BCh,
                      CurrentBdFE&     bdfem,
                      const DataType&  coef,
-                     const DataType&  t = 0 )
+                     const DataType&  t = 0)
 {
 
     bool globalassemble=false;
@@ -1530,7 +1530,7 @@ template <typename MatrixType, typename DataType, typename MeshType>
 void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                           const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
-
+    bool replace=A.getMatrixPtr()->Filled();
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
@@ -1588,7 +1588,10 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                         }
 
                                     // Assembling diagonal entry
-                                    A.set_mat_inc( idDof - 1, idDof - 1, sum );
+                                    if(replace)
+                                        A.set_mat( idDof - 1, idDof - 1, sum );
+                                    else
+                                        A.set_mat_inc( idDof - 1, idDof - 1, sum );
                                 }
 
                             // Upper diagonal columns of the elementary boundary mass matrix
@@ -1615,8 +1618,16 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                             jdDof = BCb( k ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                                             // Assembling upper entry.  The boundary mass matrix is symetric
-                                            A.set_mat_inc( idDof - 1, jdDof - 1, sum );
-                                            A.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                                            if(replace)
+                                            {
+                                                A.set_mat( idDof - 1, jdDof - 1, sum );
+                                                A.set_mat( jdDof - 1, idDof - 1, sum );
+                                            }
+                                            else
+                                            {
+                                                A.set_mat_inc( idDof - 1, jdDof - 1, sum );
+                                                A.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                                            }
                                         }
                                 }
                         }
@@ -1675,7 +1686,10 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                     // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
                                     // Assembling diagonal entry
-                                    A.set_mat_inc( idDof - 1, idDof - 1, sum );
+                                    if(replace)
+                                        A.set_mat_inc( idDof - 1, idDof - 1, sum );
+                                    else
+                                        A.set_mat( idDof - 1, idDof - 1, sum );
                                 }
 
                             // Upper diagonal columns of the elementary boundary mass matrix
@@ -2059,7 +2073,7 @@ void bcFluxManage( MatrixType&     A,
                    const BCBase&   BCb,
                    CurrentBdFE&    bdfem,
                    const DataType& t,
-                   UInt            offset )
+                   UInt            offset)
 
 {
     b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
@@ -2081,6 +2095,7 @@ void bcFluxManageMatrix( MatrixType&     A,
 
 {
 
+    bool replace=A.getMatrixPtr()->Filled();
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
@@ -2132,8 +2147,15 @@ void bcFluxManageMatrix( MatrixType&     A,
 
 //                                     std::cout << jdDof + 1 << " " << idDof << " " << sum
 //                                               << " " << b.checkLID(jdDof+1) << std::endl;
-                                    A.set_mat_inc( idDof - 1, jdDof    , sum );
-                                    A.set_mat_inc( jdDof    , idDof - 1, sum );
+                                    if(replace)
+                                    {
+                                        A.set_mat( idDof - 1, jdDof    , sum );
+                                        A.set_mat( jdDof    , idDof - 1, sum );
+
+                                    }else{
+                                        A.set_mat_inc( idDof - 1, jdDof    , sum );
+                                        A.set_mat_inc( jdDof    , idDof - 1, sum );
+                                    }
                                 }
                         }
                 }
