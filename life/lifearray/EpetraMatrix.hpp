@@ -310,7 +310,9 @@ set_mat( UInt row, UInt col, DataType loc_val )
     int icol(col + M_indexBase);
 
     //    if (M_epetraCrs->RowMap().MyGID (row))
-    M_epetraCrs->ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
+    int ierr=M_epetraCrs->ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
+    if(ierr!=0)
+    { std::cout << " error in matrix replacement " << ierr << std::endl;}
 
 }
 
