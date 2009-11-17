@@ -1687,9 +1687,9 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 
                                     // Assembling diagonal entry
                                     if(replace)
-                                        A.set_mat_inc( idDof - 1, idDof - 1, sum );
-                                    else
                                         A.set_mat( idDof - 1, idDof - 1, sum );
+                                    else
+                                        A.set_mat_inc( idDof - 1, idDof - 1, sum );
                                 }
 
                             // Upper diagonal columns of the elementary boundary mass matrix
@@ -1718,8 +1718,16 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                             jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                                             // Assembling upper entry.  The boundary mas matrix is symetric
+                                            if(replace)
+                                            {
+                                            A.set_mat( idDof - 1, jdDof - 1, sum );
+                                            A.set_mat( jdDof - 1, idDof - 1, sum );
+                                            }
+                                            else
+                                            {
                                             A.set_mat_inc( idDof - 1, jdDof - 1, sum );
                                             A.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                                            }
                                         }
                                 }
                         }
