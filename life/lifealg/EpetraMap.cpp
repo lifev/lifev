@@ -69,6 +69,22 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
 }
 */
 
+EpetraMap::EpetraMap( const int          NumGlobalElements,
+                      const int          IndexBase,
+                      const Epetra_Comm& Comm ) :
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
+{
+    std::vector<int> MyGlobalElements( NumGlobalElements );
+
+    for ( int i = 0; i < NumGlobalElements; ++i )
+        MyGlobalElements[i] = i + IndexBase;
+
+    M_repeatedEpetra_Map.reset( new Epetra_Map( -1, NumGlobalElements, &MyGlobalElements[0], IndexBase, Comm) );
+    M_uniqueEpetraMap.reset( new Epetra_Map( NumGlobalElements, IndexBase, Comm) );
+}
 
 EpetraMap::EpetraMap(const int          size,
                      const Epetra_Comm& Comm):

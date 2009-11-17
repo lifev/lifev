@@ -90,6 +90,14 @@ public:
               const Epetra_Comm&      Comm);
     */
 
+    //! Build a nearly equally distributed map.
+    /*!
+     *  The map is equally distributed if NumGlobalElements % Rank = 0
+     *  @param NumGlobalElements - Total number of elements inside the map
+     *  @param indexBase - Starting index base (typically 0 or 1)
+     *  @param Comm - Epetra communicator
+     */
+    EpetraMap( const int NumGlobalElements, const int IndexBase, const Epetra_Comm& Comm );
     //!
     EpetraMap(const int               size,
               const Epetra_Comm&      Comm);
