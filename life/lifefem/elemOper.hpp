@@ -80,7 +80,7 @@ namespace LifeV
   //! \f$ coef \cdot ( e(u) , e(v) )\f$
   void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe );
 
-  //! \f$ coef \cdor ( div u , div v )\f$
+  //! \f$ coef \cdot ( div u , div v )\f$
   void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe );
 
   //! \f$ coef \cdot ( [\nabla u^k]^T \nabla u : \nabla v  )\f$
