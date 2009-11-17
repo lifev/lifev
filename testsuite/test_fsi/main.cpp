@@ -329,10 +329,8 @@ public:
             std::cout << "solution norm " << _i << " : "
                       << M_fsi->displacement().Norm2() << "\n";
 
-            /////////CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            checkResult(time);
-            ///////// END OF CHECK
-
+            // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+            checkResult( time );
     	}
 		std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
 		ofile.close();
@@ -340,7 +338,7 @@ public:
 
 private:
 
-    void checkResult(LifeV::Real& time);
+    void checkResult( Real& time );
 	fsi_solver_ptr M_fsi;
 	Real           M_Tstart;
 
@@ -353,12 +351,13 @@ private:
 	vector_ptrtype M_fluidDisp;
 	vector_ptrtype M_solidDisp;
 	vector_ptrtype M_solidVel;
+    
     struct RESULT_CHANGED_EXCEPTION
     {
     public:
         RESULT_CHANGED_EXCEPTION(LifeV::Real time)
         {
-            std::cout<<"Some modifications led to changes in the l2 norm of the solution at time"<<time<<std::endl;
+            std::cout << "Some modifications led to changes in the l2 norm of the solution at time" << time << std::endl;
         }
     };
 };
