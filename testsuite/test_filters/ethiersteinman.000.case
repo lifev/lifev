@@ -3,8 +3,8 @@ type: ensight
 GEOMETRY
 model: 1 ethiersteinman.000.geo
 VARIABLE
-vector per node: 1 velocity velocity.***.000.vct
-scalar per node: 1 pressure pressure.***.000.scl
+vector per node: 1 velocity ethiersteinman_velocity.*****.000.vct
+scalar per node: 1 pressure ethiersteinman_pressure.*****.000.scl
 TIME
 time set: 1
 number of steps: 5
