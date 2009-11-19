@@ -1,42 +1,39 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-10-23
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Algorithm_Aitken.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-10-23
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Aitken Algorithm
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-10-2009
  */
 
-#ifndef __MS_Algorithm_Aitken_H
-#define __MS_Algorithm_Aitken_H 1
-
-#include "Epetra_ConfigDefs.h"
-#ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
-#else
-#include "Epetra_SerialComm.h"
-#endif
+#ifndef MS_Algorithm_Aitken_H
+#define MS_Algorithm_Aitken_H 1
 
 #include <life/lifealg/generalizedAitken.hpp>
 
@@ -46,10 +43,10 @@ namespace LifeV {
 
 //! MS_Algorithm_Aitken - The MultiScale Algorithm implementation of Aitken
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_Algorithm_Aitken is an implementation of MS_Algorithm
  *  which implements the Aitken method.
- *
- *  @author Cristiano Malossi
  */
 class MS_Algorithm_Aitken : public virtual MS_Algorithm
 {
@@ -65,7 +62,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param algorithm - MS_Algorithm_Aitken
+     * @param algorithm MS_Algorithm_Aitken
      */
     MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm );
 
@@ -80,24 +77,28 @@ public:
 
     //! Operator=
     /*!
-     * \param algorithm - MS_Algorithm_Aitken
+     * @param algorithm MS_Algorithm
+     * @return reference to a copy of the class
      */
     MS_Algorithm_Aitken& operator=( const MS_Algorithm_Aitken& algorithm );
 
     //@}
 
 
-    //! @name MultiScale PhysicalModel Virtual Functions
+    //! @name MultiScale Algorithm Virtual Methods
     //@{
 
-    //! Setup the data of the algorithm
+    //! Setup the data of the algorithm using a data file
+    /*!
+     * @param DataFile GetPot data file containing the settings
+     */
     void SetupData( const GetPot& DataFile );
 
-    //! Perform sub-iteration on the couplings
-    void SubIterate( void );
+    //! Perform sub-iteration on the coupling variables
+    void SubIterate();
 
     //! Display some information about the algorithm
-    void ShowMe( void );
+    void ShowMe();
 
     //@}
 
@@ -128,4 +129,4 @@ inline MS_Algorithm* createAitken()
 
 } // Namespace LifeV
 
-#endif /* __MS_Algorithm_Aitken_H */
+#endif /* MS_Algorithm_Aitken_H */

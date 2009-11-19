@@ -1,35 +1,39 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-08-24
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Coupling_FluxStress.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-08-24
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Coupling FluxStress
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 24-08-2009
  */
 
-#ifndef __MS_Coupling_FluxStress_H
-#define __MS_Coupling_FluxStress_H 1
+#ifndef MS_Coupling_FluxStress_H
+#define MS_Coupling_FluxStress_H 1
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
@@ -38,6 +42,8 @@ namespace LifeV {
 
 //! MS_Coupling_FluxStress - Flux-Stress coupling condition
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_Coupling_FluxStress class is an implementation of the MS_PhysicalCoupling
  *  for applying Flux-Stress coupling conditions on the models.
  *
@@ -45,8 +51,6 @@ namespace LifeV {
  *  Q_j = - \sum Q_i
  *  \sigma_i = -P_j
  *  where Q is the flux and P is the pressure (or the total pressure).
- *
- *  @author Cristiano Malossi
  */
 class MS_Coupling_FluxStress: public virtual MS_PhysicalCoupling
 {
@@ -62,7 +66,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param FluxStress - MS_Coupling_FluxStress
+     * @param FluxStress MS_Coupling_FluxStress
      */
     MS_Coupling_FluxStress( const MS_Coupling_FluxStress& FluxStress );
 
@@ -72,41 +76,67 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * \param FluxStress - MS_Coupling_FluxStress
+     * @param FluxStress MS_Coupling_FluxStress
+     * @return reference to a copy of the class
      */
     MS_Coupling_FluxStress& operator=( const MS_Coupling_FluxStress& FluxStress );
 
     //@}
 
 
-    //! @name MultiScale Physical Coupling
+    //! @name MultiScale PhysicalCoupling Implementation
     //@{
 
     //! Setup the data of the coupling
-    void SetupData( void );
+    void SetupData();
 
     //! Setup the coupling
-    void SetupCoupling( void );
+    void SetupCoupling();
 
     //! Initialize the values of the coupling variables
-    void InitializeCouplingVariables( void );
+    void InitializeCouplingVariables();
 
     //! Update the values of the coupling residuals
+    /*!
+     * @param CouplingResiduals Global vector of variables
+     */
     void ExportCouplingResiduals( VectorType& CouplingResiduals );
 
-    //! Compute Jacobian product: J(X) * X
+    //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
-     * \param deltaCouplingVariables - variation of the coupling variables
+     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @return list of models affected by the perturbation
      */
-    void ComputeJacobianProduct( const VectorType& deltaCouplingVariables );
+    ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID );
+
+    //! Insert constant coefficients into the Jacobian matrix
+    /*!
+     * @param Jacobian the Jacobian matrix
+     */
+    void InsertJacobianConstantCoefficients( MatrixType& Jacobian );
+
+    //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
+    /*!
+     * @param Jacobian the Jacobian matrix
+     * @param Column the column related to the perturbed variable
+     * @param ID the global ID of the model which is perturbed by the variable
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     */
+    void InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem );
 
     //! Display some information about the coupling
-    void ShowMe( void );
+    /*!
+     * @param output specify the output stream
+     */
+    void DisplayCouplingValues( std::ostream& output );
+
+    //! Display some information about the coupling
+    void ShowMe();
 
     //@}
 
@@ -115,65 +145,25 @@ private:
     //! @name Private Methods
     //@{
 
-    EpetraVector CouplingFunction( void );
-
-    //! Print the couplings quantities
-    void PrintQuantities( void );
-
-
+    template< class model >
+    inline void ImposeFlux( const UInt& i);
 
     template< class model >
-    inline void imposeFlux( const UInt& i = 0 );
+    inline void ImposeStress( const UInt& i );
+
+    Real FunctionFlux  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
+    Real FunctionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
 
     template< class model >
-    inline void imposeStress( const UInt& i );
+    inline void ImposeDeltaFlux( const UInt& i );
 
     template< class model >
-    inline Real computeFlux( const UInt& i );
+    inline void ImposeDeltaStress( const UInt& i );
 
-    template< class model >
-    inline Real computeStress( const UInt& i = 0 );
-
-    template< class model >
-    inline Real computeStaticPressure( const UInt& i );
-
-    template< class model >
-    inline Real computeDynamicPressure( const UInt& i );
-
-    Real functionFlux  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-
-
-
-
-    template< class model >
-    inline void imposeDeltaFlux( const UInt& i = 0 );
-
-    template< class model >
-    inline void imposeDeltaStress( const UInt& i );
-
-    template< class model >
-    inline Real computeDeltaFlux( const UInt& i );
-
-    template< class model >
-    inline Real computeDeltaStress( const UInt& i = 0 );
-
-    template< class model >
-    inline Real computeDeltaStaticPressure( const UInt& i );
-
-    template< class model >
-    inline Real computeDeltaDynamicPressure( const UInt& i );
-
-    Real functionDeltaFlux  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-    Real functionDeltaStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
+    Real FunctionDeltaFlux  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
+    Real FunctionDeltaStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
 
     //@}
-
-    enum stressTypes
-    {
-        StaticPressure,
-        TotalPressure
-    };
 
     BCFunctionBase M_baseFlux;
     BCFunctionBase M_baseStress;
@@ -181,8 +171,7 @@ private:
     BCFunctionBase M_baseDeltaFlux;
     BCFunctionBase M_baseDeltaStress;
 
-    static std::map< std::string, stressTypes > M_mapStress;
-    stressTypes                                 M_stressType;
+    stressTypes    M_stressType;
 };
 
 //! Factory create function
@@ -192,155 +181,44 @@ inline MS_PhysicalCoupling* createFluxStress()
 }
 
 // ===================================================
-//! Template implementation
+// Template implementation
 // ===================================================
 template< class model >
 inline void
-MS_Coupling_FluxStress::imposeFlux( const UInt& i )
+MS_Coupling_FluxStress::ImposeFlux( const UInt& i )
 {
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
+    model *Model = MS_DynamicCast< model >( M_models[i] );
 
     Model->GetBC().addBC( "imposeFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlux, 3 );
 }
 
 template< class model >
 inline void
-MS_Coupling_FluxStress::imposeStress( const UInt& i )
+MS_Coupling_FluxStress::ImposeStress( const UInt& i )
 {
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
+    model *Model = MS_DynamicCast< model >( M_models[i] );
 
     Model->GetBC().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress );
 }
 
 template< class model >
-inline Real
-MS_Coupling_FluxStress::computeFlux( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    return Model->GetFlux( M_flags[i] );
-}
-
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeStress( const UInt& i )
-{
-    switch ( M_stressType )
-    {
-        case StaticPressure:
-        {
-            return -computeStaticPressure< model > ( i );
-        }
-
-        case TotalPressure:
-        {
-            return -computeStaticPressure< model > ( i ) + ( computeFlux< model >( i ) > 0.0 ) * computeDynamicPressure< model > ( i );
-        }
-
-        default:
-
-            std::cout << "ERROR: Invalid pressure type [" << Enum2String( M_stressType, M_mapStress ) << "]" << std::endl;
-
-            return 0.0;
-    }
-}
-
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeStaticPressure( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    return Model->GetPressure( M_flags[i] );
-}
-
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeDynamicPressure( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    return 0.5 * Model->GetDensity( M_flags[i] ) * Model->GetFlux( M_flags[i] ) * Model->GetFlux( M_flags[i] ) / ( Model->GetArea( M_flags[i] ) * Model->GetArea( M_flags[i] ) );
-}
-
-template< class model >
 inline void
-MS_Coupling_FluxStress::imposeDeltaFlux( const UInt& i )
+MS_Coupling_FluxStress::ImposeDeltaFlux( const UInt& i )
 {
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
+    model *Model = MS_DynamicCast< model >( M_models[i] );
 
     Model->GetLinearBC().addBC( "imposeDeltaFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseDeltaFlux, 3 );
 }
 
 template< class model >
 inline void
-MS_Coupling_FluxStress::imposeDeltaStress( const UInt& i )
+MS_Coupling_FluxStress::ImposeDeltaStress( const UInt& i )
 {
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
+    model *Model = MS_DynamicCast< model >( M_models[i] );
 
     Model->GetLinearBC().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseDeltaStress );
 }
 
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeDeltaFlux( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    Model->UpdateLinearSystem();
-    Model->SolveLinearSystem();
-
-    return Model->GetLinearFlux( M_flags[i] );
-}
-
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeDeltaStress( const UInt& i )
-{
-    switch ( M_stressType )
-    {
-        case StaticPressure:
-        {
-            return -computeDeltaStaticPressure< model > ( i );
-        }
-
-        case TotalPressure:
-        {
-            return -computeDeltaStaticPressure< model > ( i ) + ( computeDeltaFlux< model >( i ) > 0.0 ) * computeDeltaDynamicPressure< model > ( i );
-        }
-
-        default:
-
-            std::cout << "ERROR: Invalid pressure type [" << Enum2String( M_stressType, M_mapStress ) << "]" << std::endl;
-
-            return 0.0;
-    }
-}
-
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeDeltaStaticPressure( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    Model->UpdateLinearSystem();
-    Model->SolveLinearSystem();
-
-    return Model->GetLinearPressure( M_flags[i] );
-}
-
-template< class model >
-inline Real
-MS_Coupling_FluxStress::computeDeltaDynamicPressure( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    Model->UpdateLinearSystem();
-    Model->SolveLinearSystem();
-
-    return Model->GetDensity( M_flags[i] ) * Model->GetLinearFlux( M_flags[i] ) * Model->GetFlux( M_flags[i] ) / ( Model->GetArea( M_flags[i] ) * Model->GetArea( M_flags[i] ) );
-}
-
 } // Namespace LifeV
 
-#endif /* __MS_Coupling_FluxStress_H */
+#endif /* MS_Coupling_FluxStress_H */

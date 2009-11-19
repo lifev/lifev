@@ -1,31 +1,35 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-09-09
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_PhysicalData.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-09-09
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Physical Data
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 09-09-2009
  */
 
 #include <lifemc/lifesolver/MS_PhysicalData.hpp>
@@ -33,7 +37,7 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructors
+// Constructors & Destructor
 // ===================================================
 MS_PhysicalData::MS_PhysicalData() :
     M_fluidDensity  (),
@@ -48,7 +52,7 @@ MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& PhysicalData ) :
 }
 
 // ===================================================
-//! Methods
+// Operators
 // ===================================================
 MS_PhysicalData&
 MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
@@ -62,6 +66,9 @@ MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
     return *this;
 }
 
+// ===================================================
+// Methods
+// ===================================================
 void
 MS_PhysicalData::ReadData( const GetPot& dataFile )
 {
@@ -70,10 +77,25 @@ MS_PhysicalData::ReadData( const GetPot& dataFile )
 }
 
 void
-MS_PhysicalData::ShowMe( void )
+MS_PhysicalData::ShowMe()
 {
     std::cout << "Fluid density     = " << M_fluidDensity << std::endl
               << "Fluid viscosity   = " << M_fluidViscosity << std::endl << std::endl;
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+const Real&
+MS_PhysicalData::GetFluidDensity() const
+{
+    return M_fluidDensity;
+}
+
+const Real&
+MS_PhysicalData::GetFluidViscosity() const
+{
+    return M_fluidViscosity;
 }
 
 } // Namespace LifeV
