@@ -1,35 +1,39 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-09-29
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file ContainerOfVectors.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-09-29
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ * @file
+ * @brief Containers Of Vectors
+ *
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ * @date 29-09-2009
  */
 
-#ifndef __ContainerOfVectors_H
-#define __ContainerOfVectors_H 1
+#ifndef ContainerOfVectors_H
+#define ContainerOfVectors_H 1
 
 #include <life/lifecore/life.hpp>
 
@@ -91,7 +95,7 @@ public:
     //! Copy constructor
     /*!
      * Makes a copy of all the objects contained in the shared_ptr(s).
-     * \param ContainerOfVectors - ContainerOfVectors
+     * @param ContainerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors( const ContainerOfVectors& containerOfVectors );
 
@@ -107,7 +111,7 @@ public:
     //! Operator=
     /*!
      * Make a true copy of all the objects contained in the shared_ptr(s)
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& operator=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
@@ -115,14 +119,14 @@ public:
     /*!
      * Set all the components of the vector equal to a scalar quantity.
      * Cannot be done for an empty vector!
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     ContainerOfVectors& operator=( const Real& scalar );
 
     //! Operator&=
     /*!
      * Make a copy of the shared_ptr(s), without duplicates the objects contained in them.
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& operator&=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
@@ -131,7 +135,7 @@ public:
      * The element access operator (by reference) has been implemented just for debugging or other special cases,
      * because it is not efficient with this type of implementation.
      *
-     * \param ID - Element ID
+     * @param ID - Element ID
      */
     Real& operator[]( const UInt& ID ) const;
 
@@ -139,171 +143,171 @@ public:
     /*!
      * Vector access operator (by shared_ptr).
      *
-     * \param ID - Vector ID
+     * @param ID - Vector ID
      */
     boost::shared_ptr< VectorType >& operator()( const UInt& ID );
 
     //! Operator+=
     /*!
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& operator+=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! Operator-=
     /*!
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& operator-=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! Operator*=
     /*!
      * Multiplication element by element of two vectors.
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& operator*=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! Operator/=
     /*!
      * Division element by element of two vectors.
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& operator/=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! Operator+
     /*!
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     const ContainerOfVectors operator+( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
 
     //! Operator-
     /*!
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     const ContainerOfVectors operator-( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
 
     //! Operator*
     /*!
      * Multiplication element by element of two vectors.
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     const ContainerOfVectors operator*( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
 
     //! Operator/
     /*!
      * Division element by element of two vectors.
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     const ContainerOfVectors operator/( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
 
     //! Operator+=
     /*!
      * Multiplication of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     ContainerOfVectors& operator+=( const Real& scalar );
 
     //! Operator-=
     /*!
      * Division of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     ContainerOfVectors& operator-=( const Real& scalar );
 
     //! Operator*=
     /*!
      * Multiplication of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     ContainerOfVectors& operator*=( const Real& scalar );
 
     //! Operator/=
     /*!
      * Division of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     ContainerOfVectors& operator/=( const Real& scalar );
 
     //! Operator*=
     /*!
      * Multiplication of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     const ContainerOfVectors operator+( const Real& scalar ) const;
 
     //! Operator/=
     /*!
      * Division of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     const ContainerOfVectors operator-( const Real& scalar ) const;
 
     //! Operator*=
     /*!
      * Multiplication of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     const ContainerOfVectors operator*( const Real& scalar ) const;
 
     //! Operator/=
     /*!
      * Division of the vector by a scalar.
-     * \param scalar - Scalar value
+     * @param scalar - Scalar value
      */
     const ContainerOfVectors operator/( const Real& scalar ) const;
 
     //! operator==
     /*!
      * Return a ContainerOfVectors containing 1 where vector elements are == scalar;
-     * \param scalar - Value for the comparison.
+     * @param scalar - Value for the comparison.
      */
     ContainerOfVectors operator==( const Real& scalar );
 
     //! operator!=
     /*!
      * Return a ContainerOfVectors containing 1 where vector elements are != scalar;
-     * \param scalar - Value for the comparison.
+     * @param scalar - Value for the comparison.
      */
     ContainerOfVectors operator!=( const Real& scalar );
 
     //! operator<
     /*!
      * Return a ContainerOfVectors containing 1 where vector elements are < scalar;
-     * \param scalar - Value for the comparison.
+     * @param scalar - Value for the comparison.
      */
     ContainerOfVectors operator<( const Real& scalar );
 
     //! operator>
     /*!
      * Return a ContainerOfVectors containing 1 where vector elements are > scalar;
-     * \param scalar - Value for the comparison.
+     * @param scalar - Value for the comparison.
      */
     ContainerOfVectors operator>( const Real& scalar );
 
     //! operator<=
     /*!
      * Return a ContainerOfVectors containing 1 where vector elements are <= scalar;
-     * \param scalar - Value for the comparison.
+     * @param scalar - Value for the comparison.
      */
     ContainerOfVectors operator<=( const Real& scalar );
 
     //! operator>=
     /*!
      * Return a ContainerOfVectors containing 1 where vector elements are >= scalar;
-     * \param scalar - Value for the comparison.
+     * @param scalar - Value for the comparison.
      */
     ContainerOfVectors operator>=( const Real& scalar );
 
     //! Logic operator&&
     /*!
      * Return a vector containing one where both the elements are different from zero;
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors operator&&( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! Logic operator||
     /*!
      * Return a vector containing one if one of the two elements is different from zero;
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors operator||( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
@@ -311,7 +315,7 @@ public:
     /*!
      * Return a vector containing one where the elements are equal to zero;
      */
-    ContainerOfVectors operator!( void );
+    ContainerOfVectors operator!();
 
     //@}
 
@@ -322,15 +326,15 @@ public:
     //! Dot - Scalar product
     /*!
      * Scalar product of the vectors
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     Real Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
 
     //! Dot - Scalar product
     /*!
      * Scalar product of the vectors
-     * \param containerOfVectors - ContainerOfVectors
-     * \param scalarProduct - result
+     * @param containerOfVectors - ContainerOfVectors
+     * @param scalarProduct - result
      */
     void Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors, Real& scalarProduct );
 
@@ -338,11 +342,11 @@ public:
     /*!
      * Replace all the elements in the containerOfVectors with their abs.
      */
-    void Abs( void );
+    void Abs();
 
     /*!
      * Compute the abs of the ContainerOfVectors and return it in a new container.
-     * \param containerOfVectors - The output containerOfVectors containing the abs of the vector.
+     * @param containerOfVectors - The output containerOfVectors containing the abs of the vector.
      */
     void Abs( ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
@@ -350,51 +354,51 @@ public:
     /*!
      * Compute the weight Norm2 of the vector
      */
-    Real WeightNorm2( void );
+    Real WeightNorm2();
 
     //! push_back
     /*!
      * Concatenate a ContainerOfVectors to another
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& push_back( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! push_back
     /*!
      * Add a vector at the end of the ContainerOfVectors
-     * \param vector_ptr - Shared pointer to a vector
+     * @param vector_ptr - Shared pointer to a vector
      */
     ContainerOfVectors& push_back( const boost::shared_ptr< VectorType >& vector_ptr );
 
     //! push_front
     /*!
      * Concatenate a ContainerOfVectors to another inserting it at the beginning
-     * \param containerOfVectors - ContainerOfVectors
+     * @param containerOfVectors - ContainerOfVectors
      */
     ContainerOfVectors& push_front( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
 
     //! push_front
     /*!
      * Add a vector at the begin of the ContainerOfVectors
-     * \param vector_ptr - Shared pointer to a vector
+     * @param vector_ptr - Shared pointer to a vector
      */
     ContainerOfVectors& push_front( const boost::shared_ptr< VectorType >& vector_ptr );
 
     //! Replace
     /*!
-     * \param vector_ptr - Shared pointer to the new vector
-     * \param ID - ID of the vector that has to be replaced
+     * @param vector_ptr - Shared pointer to the new vector
+     * @param ID - ID of the vector that has to be replaced
      */
     void Replace( const boost::shared_ptr< VectorType >& vector_ptr, const UInt& ID );
 
     //! resize
     /*!
-     * \param size - New size of the container
+     * @param size - New size of the container
      */
     void resize( const UInt& size );
 
     //! Clear
-    void clear( void );
+    void clear();
 
     //! ShowMe
     void ShowMe( std::ostream& output = std::cout ) const;
@@ -406,10 +410,10 @@ public:
     //@{
 
     //! Get the number of elements contained inside the ContainerOfVectors object
-    UInt size( void ) const;
+    UInt size() const;
 
     //! Get the number of vectors contained inside the ContainerOfVectors object
-    UInt vectorsNumber( void ) const
+    UInt vectorsNumber() const
     {
         return static_cast< UInt > ( M_container.size() );
     }
@@ -418,17 +422,11 @@ public:
 
 private:
 
-    //! @name Private Methods
-    //@{
-
-
-    //@}
-
     ContainerType M_container;
 };
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors():
@@ -454,7 +452,7 @@ ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors( const Conta
 }
 
 // ===================================================
-//! Operators
+// Operators
 // ===================================================
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
@@ -792,7 +790,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator/( const Real& scalar )
     return MyVectorCopy;
 }
 
-//! Multiplication by a scalar with the scalar on the left.
+// Multiplication by a scalar with the scalar on the left.
 template< class ScalarType, class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >
 operator*( const ScalarType& scalar,
@@ -980,7 +978,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator||( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator!( void )
+ContainerOfVectors< VectorType, ContainerType >::operator!()
 {
 
 #ifdef DEBUG
@@ -1001,7 +999,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator!( void )
 }
 
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
 template< class VectorType, class ContainerType >
 Real
@@ -1036,7 +1034,7 @@ ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< 
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Abs( void )
+ContainerOfVectors< VectorType, ContainerType >::Abs()
 {
 
 #ifdef DEBUG
@@ -1064,7 +1062,7 @@ ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< Vector
 
 template< class VectorType, class ContainerType >
 Real
-ContainerOfVectors< VectorType, ContainerType >::WeightNorm2( void )
+ContainerOfVectors< VectorType, ContainerType >::WeightNorm2()
 {
 
 #ifdef DEBUG
@@ -1167,7 +1165,7 @@ ContainerOfVectors< VectorType, ContainerType >::resize( const UInt& size )
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::clear( void )
+ContainerOfVectors< VectorType, ContainerType >::clear()
 {
 
 #ifdef DEBUG
@@ -1198,11 +1196,11 @@ ContainerOfVectors< VectorType, ContainerType >::ShowMe( std::ostream& output ) 
 }
 
 // ===================================================
-//! Get Methods
+// Get Methods
 // ===================================================
 template< class VectorType, class ContainerType >
 UInt
-ContainerOfVectors< VectorType, ContainerType >::size( void ) const
+ContainerOfVectors< VectorType, ContainerType >::size() const
 {
 
 #ifdef DEBUG
@@ -1219,4 +1217,4 @@ ContainerOfVectors< VectorType, ContainerType >::size( void ) const
 
 } // Namespace LifeV
 
-#endif /* __ContainerOfVectors_H */
+#endif /* ContainerOfVectors_H */
