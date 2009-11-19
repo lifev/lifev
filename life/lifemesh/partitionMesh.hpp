@@ -725,7 +725,7 @@ struct booleanCondition
             //M_comm->Barrier();
         }                 //end for
 
-#if DEBUG
+#ifdef DEBUG
     Debug(4000) std::cout << M_me << " has " << locProc[M_me].size() << " elements." << std::endl;
 #endif
     // ***********************
