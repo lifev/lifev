@@ -16,7 +16,7 @@
 couplingName	= BoundaryCondition_CylinderPoiseuilleVelocityDynamic
 
 [boundary_conditions]
-#list = 'XY ZPoiseuilleDynamic' # FIX THIS BUG!!
+#list = 'XY ZPoiseuilleDynamic'
 list = 'ZPoiseuilleDynamic'
 
 	[./XY]

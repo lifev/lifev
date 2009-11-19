@@ -22,7 +22,7 @@ list = 'PoiseuilleFlux'  # Stationary Poiseuille Flux
 	type				= Flux
 	mode				= Full
 	component			= 3
-	function   			= '(pi*1)/(8*0.03)*(0.5^4)' #TEMPORARY FIX
-	#OPERfunction		= '(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)'
+	function   			= '-(pi*1)/(8*0.03)*(0.5^4)' #TEMPORARY FIX
+	#OPERfunction		= '-(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)'
 	
 	[../]

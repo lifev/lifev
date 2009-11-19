@@ -28,13 +28,12 @@ dist_pkgdata_DATA = CylPoiseuilleFlux.dat \
                     CylPoiseuillePressureDynamic.dat \
                     CylPoiseuilleVelocity.dat \
                     CylPoiseuilleVelocityDynamic.dat \
-                    Stress_StaticPressure.dat \
-                    Stress_TotalPressure.dat \
                     FluxStress_StaticPressure.dat \
                     FluxStress_TotalPressure.dat \
+                    Stress_StaticPressure.dat \
+                    Stress_TotalPressure.dat \
                     NoStress.dat
 					
-
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
 	 for i in $(dist_pkgdata_DATA); do \
