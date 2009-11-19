@@ -52,8 +52,9 @@
 
 namespace LifeV
 {
-// namespace Epetra
-// {
+
+// Forward declaration
+class SolverTrilinos;
 
 class EpetraPreconditioner
 {
@@ -107,6 +108,8 @@ public:
     //! returns true if prec exists
     /*const*/
     virtual bool            set() const = 0;
+
+    virtual void            setSolver( SolverTrilinos& /*solver*/ ) {}
 
     // Teuchos list management
 

@@ -103,26 +103,18 @@ public:
     //@{
 
     //! Total number of iterations
-    int    NumIters();
+    int NumIters();
 
     //! True Residual
     double TrueResidual();
 
-    // Return if preconditioner has been setted
-    bool precSet() const
-    {
-        return ( M_prec.get() !=0 && M_prec->getPrec() != 0 );
-    }
+    prec_type& getPrec();
 
-    prec_type& getPrec()
-    {
-        return M_prec;
-    }
+    void getAztecStatus( double status[AZ_STATUS_SIZE]);
 
-    void getAztecStatus( double status[AZ_STATUS_SIZE])
-    {
-        M_solver.GetAllAztecStatus( status );
-    }
+    Teuchos::ParameterList& getParameterList();
+
+    AztecOO& getSolver();
 
     //@}
 
@@ -144,20 +136,10 @@ public:
     void setPrec( prec_raw_type* prec );
 
     void setDataFromGetPot( const GetPot& dfile, const std::string& section );
+
     void SetParameters( bool cerr_warning_if_unused = false );
 
-    void useGMRES(const int restart=300);
-    void useCG();
-    void useBICGSTAB();
-    void useJacobyPrec();
-    void useNoPrec();
-    void useDDPrec();
-    void useNeumannPrec();
-    void setReuse();
     void setTolMaxiter( const double tol, const int maxiter = -1 );
-
-    enum VerboseLevel { NONE, SUMMARY, LAST }; //! describes the verobisty level
-    void SetVerbose( const VerboseLevel verb=NONE );
 
     //@}
 
@@ -197,18 +179,15 @@ public:
                       bool const       reuse,
                       bool const       retry=true  );
 
-//     int solveSystem(  vector_type&     rhsFull,
-//                       vector_type&     sol,
-//                       matrix_ptrtype&  prec,
-//                       bool const       reuse,
-//                       bool const       retry=true);
-
     void setUpPrec(const GetPot& dataFile,  const std::string& section);
 
     void buildPreconditioner( matrix_ptrtype& prec);
 
     template<typename PrecType>
     void buildPreconditioner( PrecType& prec) { M_prec = prec; }
+
+    // Return if preconditioner has been setted
+    bool precSet() const;
 
     void precReset() { M_prec->precReset(); }
 
@@ -286,25 +265,10 @@ int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
             M_Displayer.leaderPrint(" ERROR: Iterative solver failed again.\n");
         return -numIter;
     }
-    return numIter;
 
-//     Chrono chrono;
-//     setPreconditioner(prec);
-//     chrono.start();
-//     int numIter = solve(sol, rhsFull);
-//     chrono.stop();
-//     M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
-//     return numiter;
+    return numIter;
 }
 
 } // namespace LifeV
 
 #endif /* __SolverTrilinos_H */
-
-/*
-//! set the level of recursion in the solution of a linear system
-void setRecursionLevel( int newLevel )
-{
-    M_options[ AZ_recursion_level ] = newLevel;
-}
-*/

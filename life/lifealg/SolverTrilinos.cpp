@@ -34,7 +34,7 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 SolverTrilinos::SolverTrilinos() :
     M_prec                 (),
@@ -61,7 +61,7 @@ SolverTrilinos::SolverTrilinos( const Epetra_Comm& comm ) :
 }
 
 // ===================================================
-//! Get Methods
+// Get Methods
 // ===================================================
 int
 SolverTrilinos::NumIters()
@@ -75,10 +75,35 @@ SolverTrilinos::TrueResidual()
     return M_solver.TrueResidual();
 }
 
+SolverTrilinos::prec_type&
+SolverTrilinos::getPrec()
+{
+    return M_prec;
+}
+
+Teuchos::ParameterList&
+SolverTrilinos::getParameterList()
+{
+    return M_TrilinosParameterList;
+}
+
+AztecOO&
+SolverTrilinos::getSolver()
+{
+    return M_solver;
+}
+
+void
+SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
+{
+    M_solver.GetAllAztecStatus( status );
+}
+
 // ===================================================
-//! Set Methods
+// Set Methods
 // ===================================================
-void SolverTrilinos::SetCommunicator( const Epetra_Comm& comm )
+void
+SolverTrilinos::SetCommunicator( const Epetra_Comm& comm )
 {
     M_Displayer.SetCommunicator( comm );
 }
@@ -89,244 +114,114 @@ void SolverTrilinos::setMatrix( matrix_type& m)
     M_solver.SetUserMatrix(M_matrix.get());
 }
 
-void SolverTrilinos::setOperator( Epetra_Operator& op)
+void
+SolverTrilinos::setOperator( Epetra_Operator& op)
 {
     M_solver.SetUserOperator( &op );
 }
 
-//! set Epetra_Operator preconditioner
-void SolverTrilinos::setPreconditioner( prec_type _prec )
+void
+SolverTrilinos::setPreconditioner( prec_type _prec )
 {
     M_prec = _prec;
 }
 
-void SolverTrilinos::setPrec( prec_raw_type* prec )
+void
+SolverTrilinos::setPrec( prec_raw_type* prec )
 {
     M_prec.reset( prec );
 }
 
-void SolverTrilinos::SetParameters(bool cerr_warning_if_unused)
+void
+SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& section )
+{
+    // SOLVER PARAMETERS
+
+    // Solver type
+    M_TrilinosParameterList.set("solver",  dfile( ( section + "/solver" ).data(), "gmres" ));
+
+    // Residual expression
+    M_TrilinosParameterList.set("conv",    dfile( ( section + "/conv" ).data(), "rhs" ));
+
+    // Scaling
+    M_TrilinosParameterList.set("scaling", dfile( ( section + "/scaling" ).data(), "none" ));
+
+    // Output
+    M_TrilinosParameterList.set("output",  dfile( ( section + "/output" ).data(), "all" ));
+
+    // Maximum Number of iterations
+    M_maxIter       = dfile( ( section + "/max_iter" ).data(), 200 );
+    M_maxIterSolver = dfile( ( section + "/max_iter" ).data(), -1 );
+    M_TrilinosParameterList.set("max_iter", M_maxIter);
+
+    // Tolerance
+    M_tol = dfile( ( section + "/tol" ).data(), 1.e-6 );
+    M_TrilinosParameterList.set("tol", M_tol);
+
+
+
+    // GMRES PARAMETERS
+
+    // Krylov space dimension
+    M_TrilinosParameterList.set("kspace", dfile( ( section + "/kspace" ).data(), M_maxIter ));
+
+    // Gram-Schmidt algorithm
+    M_TrilinosParameterList.set("orthog", dfile( ( section + "/orthog" ).data(), AZ_classic ));
+
+    // r-vector
+    M_TrilinosParameterList.set("aux_vec", dfile( ( section + "/aux_vec" ).data(), AZ_resid ));
+
+
+
+    // SET PARAMETERS
+    SetParameters( false );
+}
+
+void
+SolverTrilinos::SetParameters(bool cerr_warning_if_unused)
 {
     M_solver.SetParameters(M_TrilinosParameterList,cerr_warning_if_unused);
 }
 
-void SolverTrilinos::useGMRES(const int restart)
+void
+SolverTrilinos::setTolMaxiter(const double tol, const int maxiter)
 {
-    M_TrilinosParameterList.set("solver", "AZ_gmres");
-    //M_TrilinosParameterList.set("solver", "AZ_gmres_condnum");
-    M_TrilinosParameterList.set("kspace", restart);
-}
-void SolverTrilinos::useCG()
-{
-    M_TrilinosParameterList.set("solver", "AZ_cg");
-    //M_TrilinosParameterList.set("solver", "AZ_cg_condnum");
-}
+    if ( tol > 0 )
+    {
+        M_tol = tol;
+        M_TrilinosParameterList.set("tol", M_tol);
+    }
 
-void SolverTrilinos::useBICGSTAB()
-{
-    M_TrilinosParameterList.set("solver", "AZ_bicgstab");
-    //M_TrilinosParameterList.set("solver", "AZ_cg_condnum");
-}
-
-void SolverTrilinos::useJacobyPrec()
-{
-    M_TrilinosParameterList.set("precond", "Jacobi");
-}
-
-void SolverTrilinos::useNoPrec()
-{
-    M_TrilinosParameterList.set("precond", "none");
-}
-
-void SolverTrilinos::useDDPrec()
-{
-    M_TrilinosParameterList.set("precond", "dom_decomp");
-    //M_TrilinosParameterList.set("subdomain_solve", AZ_ilu );
-    //M_TrilinosParameterList.set("graph_fill", 2 );
-    M_TrilinosParameterList.set("drop", 0 );
-    M_TrilinosParameterList.set("ilut_fill", 10 );
-    M_TrilinosParameterList.set("overlap", 1 );
-    M_TrilinosParameterList.set("type_overlap", "symmetric" );
-}
-
-void SolverTrilinos::useNeumannPrec()
-{
-    M_TrilinosParameterList.set("precond", "Neumann");
-    M_TrilinosParameterList.set("poly_ord", 10 );
-}
-
-void SolverTrilinos::setReuse()
-{
-    M_TrilinosParameterList.set("pre_calc", "reuse");
-}
-
-void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& section )
-{
-    //
-    // solver
-    //
-    M_TrilinosParameterList.set("solver",
-                             dfile( ( section + "/solver" ).data(), "gmres" ));
-    //
-    // scaling
-    //
-    M_TrilinosParameterList.set("scaling",
-                             dfile( ( section + "/scaling" ).data(), "none" ));
-    //
-    // precond
-    //
-    M_TrilinosParameterList.set("precond",
-                             dfile( ( section + "/precond" ).data(), "none" ));
-    //
-    // Convergence type
-    //
-    M_TrilinosParameterList.set("conv",
-                             dfile( ( section + "/conv" ).data(), "rhs" ));
-    //
-    // output
-    //
-    M_TrilinosParameterList.set("output",
-                             dfile( ( section + "/output" ).data(), "all" ));
-
-    //
-    // other variables
-
-    M_TrilinosParameterList.set("pre_calc",
-                             dfile( ( section + "/pre_calc" ).data(), AZ_calc ));
-
-
-    M_maxIter = dfile( ( section + "/max_iter" ).data(), 200 );
-    M_TrilinosParameterList.set("max_iter", M_maxIter);
-
-    M_TrilinosParameterList.set("poly_ord",
-                             dfile( ( section + "/poly_ord" ).data(), 3 ));
-
-    M_TrilinosParameterList.set("overlap",
-                             dfile( ( section + "/overlap" ).data(), AZ_none ));
-
-    M_TrilinosParameterList.set("type_overlap",
-                             dfile( ( section + "/type_overlap" ).data(), AZ_standard ));
-
-    M_TrilinosParameterList.set("kspace",
-                             dfile( ( section + "/kspace" ).data(), M_maxIter ));
-
-    M_TrilinosParameterList.set("orthog",
-                             dfile( ( section + "/orthog" ).data(), AZ_classic ));
-
-    M_TrilinosParameterList.set("aux_vec",
-                             dfile( ( section + "/aux_vec" ).data(), AZ_resid ));
-
-    M_TrilinosParameterList.set("reorder",
-                             dfile( ( section + "/reorder" ).data(), 1 ));
-
-    M_TrilinosParameterList.set("keep_info",
-                             dfile( ( section + "/keep_info" ).data(), 0 ));
-
-    //
-    // subdomain solver
-    //
-
-    M_TrilinosParameterList.set("subdomain_solve",
-                             dfile( ( section + "/subdomain_solve" ).data(),
-                                    "ilut" ));
-
-    M_TrilinosParameterList.set("graph_fill",
-                             dfile( ( section + "/graph_fill" ).data(), 0 ));
-
-    M_TrilinosParameterList.set("init_guess",
-                             dfile( ( section + "/init_guess" ).data(), AZ_NOT_ZERO ));
-
-    M_TrilinosParameterList.set("keep_kvecs",
-                             dfile( ( section + "/keep_kvecs" ).data(), 0 ));
-
-    M_TrilinosParameterList.set("apply_kvecs",
-                             dfile( ( section + "/apply_kvecs" ).data(), AZ_FALSE ));
-
-    M_TrilinosParameterList.set("orth_kvecs",
-                             dfile( ( section + "/orth_kvecs" ).data(), AZ_FALSE ));
-
-    M_TrilinosParameterList.set("ignore_scaling",
-                             dfile( ( section + "/ignore_scaling" ).data(), AZ_FALSE ));
-
-    M_TrilinosParameterList.set("check_update_size",
-                             dfile( ( section + "/check_update_size" ).data(),
-                                    AZ_FALSE ));
-    //
-
-
-    M_tol = dfile( ( section + "/tol" ).data(), 1.0e-06 );
-    M_TrilinosParameterList.set("tol", M_tol);
-
-
-//     M_TrilinosParameterList.set("drop",
-//                              dfile( ( section + "/drop" ).data(), 0.0 ));
-
-//     M_TrilinosParameterList.set("ilut_fill",
-//                              dfile( ( section + "/ilut_fill" ).data(), 1. ));
-
-    M_TrilinosParameterList.set("omega",
-                             dfile( ( section + "/omega" ).data(), 1. ));
-
-    M_TrilinosParameterList.set("update_reduction",
-                             dfile( ( section + "/update_reduction" ).data(), 10e10 ));
-
-    M_maxIterSolver   = dfile(( section + "/max_iter").data(), -1);
-
-}
-
-
-void SolverTrilinos::setTolMaxiter(const double tol, const int maxiter)
-{
-    if (tol > 0)
-        {
-            M_tol = tol;
-            M_TrilinosParameterList.set("tol", M_tol);
-        }
-
-    if (maxiter >= 0)
-        {
-            M_maxIter = maxiter;
-            M_TrilinosParameterList.set("max_iter", M_maxIter);
-        }
-
-}
-
-void  SolverTrilinos::SetVerbose(const VerboseLevel verb)
-{
-    switch (verb) {
-    case NONE:
-        M_TrilinosParameterList.set("output", "none");
-        return;
-    case SUMMARY:
-        M_TrilinosParameterList.set("output", "summary");
-        return;
-    case LAST:
-    default:
-        M_TrilinosParameterList.set("output", "last");
-        return;
+    if ( maxiter >= 0 )
+    {
+        M_maxIter = maxiter;
+        M_TrilinosParameterList.set("max_iter", M_maxIter);
     }
 }
 
-
+// ===================================================
+// Methods
+// ===================================================
 int
 SolverTrilinos::solve( vector_type& x, vector_type& b )
 {
     M_solver.SetLHS( &x.getEpetraVector() );
     M_solver.SetRHS( &b.getEpetraVector() );
 
-    SetParameters( true );
-
-//    M_TrilinosParameterList.set("kspace", 100);
-//    M_TrilinosParameterList.TrilinosParameterListShowMe();
-
     int    maxiter(M_maxIter);
     double mytol  (M_tol);
     int status;
+
     if ( precSet() )
-//    {
         M_solver.SetPrecOperator(M_prec->getPrec());
 
-        status = M_solver.Iterate(maxiter, mytol);
+    status = M_solver.Iterate(maxiter, mytol);
+
+//    if ( precSet() )
+//    {
+//        M_solver.SetPrecOperator(M_prec->getPrec());
+
+//        status = M_solver.Iterate(maxiter, mytol);
 //    }
 //    else
 //    {
@@ -368,7 +263,6 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
      }
 
      return(M_solver.NumIters());
-
 }
 
 double
@@ -387,8 +281,6 @@ SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 
     return residual;
 }
-
-
 
 std::string
 SolverTrilinos::printStatus()
@@ -414,13 +306,19 @@ SolverTrilinos::printStatus()
     return str;
 }
 
-  void SolverTrilinos::precReset( prec_type& prec)
-  {
-    prec->precReset();
-  }
+bool
+SolverTrilinos::precSet() const
+{
+    return ( M_prec.get() !=0 && M_prec->getPrec() != 0 );
+}
 
-  void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
-  {
+void SolverTrilinos::precReset( prec_type& prec)
+{
+    prec->precReset();
+}
+
+void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
+{
     Chrono chrono;
     double condest(-1);
 
@@ -435,25 +333,16 @@ SolverTrilinos::printStatus()
 
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
     M_Displayer.leaderPrint("      Estimated condition number = " , condest );
-  }
-
-
-// int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
-//                                   vector_type&      sol,
-//                                   matrix_ptrtype&   basePrecMatrix,
-//                                   bool const        reuse,
-//                                   bool const        retry)
-// {
-
-// }
+}
 
 void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)
 {
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack");
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
+
     ASSERT(M_prec.get() != 0, " Preconditioner not set");
-    M_prec->setDataFromGetPot(dataFile, section );
+    M_prec->setSolver( *this );
+    M_prec->setDataFromGetPot( dataFile, section );
 }
 
 } // namespace LifeV
-
