@@ -725,9 +725,9 @@ struct booleanCondition
             //M_comm->Barrier();
         }                 //end for
 
-
-    std::cout << M_me << " has " << locProc[M_me].size() << " elements." << std::endl;
-
+#if DEBUG
+    Debug(4000) std::cout << M_me << " has " << locProc[M_me].size() << " elements." << std::endl;
+#endif
     // ***********************
     // local mesh construction
     // ***********************
@@ -1428,8 +1428,6 @@ struct booleanCondition
         M_repeatedFaceVector.push_back(*is);
     }
 #endif
-
-    if (!M_me) std::cout << "ok." << std::endl;
 
 }
 
