@@ -1,34 +1,37 @@
+//@HEADER
 /*
-This file is part of the LifeV library
-Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+************************************************************************
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
+//@HEADER
+
 /*!
-  \file dataTime.hpp
-
-  \version 1.0
-  \date 01/2003
-  \author M.A. Fernandez
-
-  \version 1.9
-  \date 06/2009
-  \author Cristiano Malossi<cristiano.malossi@epfl.ch>
-
-  \brief File containing a class for handling temporal discretization
-*/
+ *  @file
+ *  @brief File containing a class for handling temporal discretization
+ *
+ *  @author M.A. Fernandez
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 01-06-2009
+ */
 
 #ifndef _DATATIME_H_
 #define _DATATIME_H_
@@ -40,23 +43,31 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
 
+
+//! DataTime - Class for handling temporal discretization.
 /*!
- * \class DataTime
- * \brief Base class which holds data concerning temporal discretization
+ *  @author Cristiano Malossi
  *
- * @author M.A. Fernandez, Cristiano Malossi
- * @see
+ *  The class is a container for time information.
  */
 class DataTime
 {
 public:
 
-    /** @name Constructors, Destructor
-     */
+    //! @name Constructors & Destructor
 	//@{
 
-    DataTime( const GetPot& dfile, const std::string& section = "time_discretization" );
+    //! Constructor
+    /*!
+     * @param dataFile GetPot data file
+     * @param section the section on the data file that contains the information on the time discretization
+     */
+    DataTime( const GetPot& dataFile, const std::string& section = "time_discretization" );
 
+    //! Copy constructor
+    /*!
+     * @param dataTime - DataTime class
+     */
     DataTime( const DataTime& dataTime);
 
     //! Virtual destructor
@@ -65,61 +76,113 @@ public:
     //@}
 
 
+    //! @name Methods
+    //@{
 
-    /** @name Get Functions
+    //! Update the time by a timestep.
+    void updateTime()       { M_time += M_timeStep; }
+
+    //! Return if we can make a new timestep
+    /*!
+     * @return true if time < endTime, false viceversa
      */
-	//@{
+    bool canAdvance()       { return M_time < M_endTime; }
 
-    Real getInitialTime()	const { return M_initialTime; }
-
-    Real getEndTime()		const { return M_endTime; }
-
-    Real getTime()			const { return M_time; }
-
-    Real getTimeStep()		const { return M_timeStep; }
-
-    UInt getBDF_order()		const { return M_BDF_order; }
-
-    //@}
-
-
-
-    /** @name Set Functions
+    //! Return if it is the initial time step
+    /*!
+     * @return true if time = initial time, false viceversa
      */
-	//@{
+    bool isFirstTimeStep()  { return M_time == M_initialTime; }
 
-    void setInitialTime	( const Real& initialTime ) { M_initialTime = initialTime; }
-
-    void setEndTime		( const Real& endTime ) 	{ M_endTime = endTime; }
-
-    void setTime		( const Real& time ) 		{ M_time = time; }
-
-    void setTimeStep	( const Real& timeStep ) 	{ M_timeStep = timeStep; }
-
-    void setBDF_order	( const UInt& BDF_order ) 	{ M_BDF_order = BDF_order; }
-
-    //@}
-
-
-
-    /** @name General Functions
+    //! Return if it is the last time step
+    /*!
+     * @return true if time + timestep > endTime, false viceversa.
      */
-	//@{
+    bool isLastTimeStep()   { return M_time + M_timeStep >= M_endTime; }
 
-	//! Update the time by a timestep.
-    void updateTime()		{ M_time += M_timeStep; }
-
-    //! Return true if time < endTime, false viceversa.
-    bool canAdvance()		{ return M_time < M_endTime; }
-
-    //! Return true if time = initialTime, false viceversa.
-    bool isFirstTimeStep()	{ return M_time == M_initialTime; }
-
-    //! Return true if time + timestep > endTime, false viceversa.
-    bool isLastTimeStep()	{ return M_time + M_timeStep >= M_endTime; }
-
-    //! Display private variable values.
+    //! Display general information about the content of the class
+    /*!
+        @param output - specify the output format (std::cout by default)
+     */
     virtual void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the initial time step
+    /*!
+     * @param initialTime initial time step value
+     */
+    void setInitialTime ( const Real& initialTime ) { M_initialTime = initialTime; }
+
+    //! Set the final time step
+    /*!
+     * @param endtime final time step value
+     */
+    void setEndTime     ( const Real& endTime )     { M_endTime = endTime; }
+
+    //! Set the present time of the simulation
+    /*!
+     * @param time present time value
+     */
+    void setTime        ( const Real& time )        { M_time = time; }
+
+    //! Set the initial time step
+    /*!
+     * @param timeStep initial time step value
+     */
+    void setTimeStep    ( const Real& timeStep )    { M_timeStep = timeStep; }
+
+    //! Set the BDF odert to use
+    /*!
+     * @param order BDF order
+     */
+    void setBDF_order   ( const UInt& BDF_order )   { M_BDF_order = BDF_order; }
+
+    //@}
+
+
+    //! @name Get Methods
+	//@{
+
+    //! Get the initial time step
+    /*!
+     * @return initial time step value
+     */
+    Real getInitialTime()	 const { return M_initialTime; }
+
+    //! Get the final time step
+    /*!
+     * @return final time step value
+     */
+    Real getEndTime()		 const { return M_endTime; }
+
+    //! Get the present time
+    /*!
+     * @return time value
+     */
+    Real getTime()			 const { return M_time; }
+
+    //! Get the time step used for advancing
+    /*!
+     * @return time step value
+     */
+    Real getTimeStep()		 const { return M_timeStep; }
+
+    //! Get the number of time step performed
+    /*!
+     * @return time step performed
+     */
+    UInt getTimeStepNumber() const { return static_cast <UInt> ( ( M_timeStep-M_initialTime ) / M_timeStep ); }
+
+    //! Get the BDF order used
+    /*!
+     * @return BDF order value
+     */
+    UInt getBDF_order()		 const { return M_BDF_order; }
 
     //@}
 
