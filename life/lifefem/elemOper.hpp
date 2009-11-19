@@ -30,6 +30,7 @@
 #include <life/lifefem/currentHdivFE.hpp>
 #include <life/lifefem/refHybridFE.hpp>
 #include <life/lifefem/dof.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {
@@ -305,7 +306,12 @@ void shape_terms_vel( Real coef,
                        const CurrentFE& fe,
                        const CurrentFE& fe_p,
                       ElemMat& /*elmatP*/,
-                      int iblock=0);
+                      int iblock=0,
+                      bool fullImplicit=false,
+                      Real alpha=0.,
+                      boost::shared_ptr<ElemMat> elmat_convect=boost::shared_ptr<ElemMat>()
+                      );
+
   //
   //! \f$coef * (  (\nabla u^k):[I\nabla\cdot  d - (\nabla d)^T] , q  )\f$ for Newton FSI
   //
@@ -404,20 +410,6 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   void choldc( KNM<Real> &a, KN<Real> &p );
   void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x );
 //!@}
-
-
-#ifdef UNDEFINED
-//these methods will become useful in a future fully implicit version of Newton FSI
-void  source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc,
-                    ElemMat& elmat, const CurrentFE& fe );
-
-void source_mass2( Real coef, const ElemVec& uk_loc,
-		     ElemMat& elmat, const CurrentFE& fe , double& alpha);
-
-void source_mass22( Real coef, const ElemVec& uk_loc,
-                      ElemMat& elmat, const CurrentFE& fe , double& alpha);
-
-#endif
 
 }
 #endif

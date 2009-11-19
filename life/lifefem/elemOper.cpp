@@ -4022,7 +4022,14 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 // coef * ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  ) for Newton FSI
 //
 //source_stress2
-// + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
+// \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
+//
+//optionally (if full implicit):
+//source_mass2
+// -rho * ( \grad u^k dw, v  )
+//
+//convective term
+// rho * ( \grad u^k du, v  )
 //
 void shape_terms_vel( Real rho,
                       Real mu,
@@ -4034,7 +4041,10 @@ void shape_terms_vel( Real rho,
                       const CurrentFE& fe,
                       const CurrentFE& fe_p,
                       ElemMat& /*elmatP*/,
-                      int /*iblock*/
+                      int /*iblock*/,
+                      bool fullImplicit,
+                      Real alpha,
+                      boost::shared_ptr<ElemMat> elmat_convect
                       )
 {
     ASSERT_PRE( fe.hasFirstDeriv(),
@@ -4051,7 +4061,10 @@ void shape_terms_vel( Real rho,
     Real B[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];  // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
     Real gd[ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];                // \grad d at a quadrature point
     Real A2[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];  // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
-    //Real aux[ fe.nbQuadPt ][ fe.nbCoor ][fe.nbCoor];
+    Real aux[ fe.nbQuadPt ][ fe.nbCoor ][fe.nbNode][fe.nbCoor];
+    Real BMass[ fe.nbCoor ][ fe.nbCoor ];
+    Real auxMass[ fe.nbQuadPt ][fe.nbNode][fe.nbCoor];
+
     Real s, sB, sA, sG, pk;
 
     int icoor, jcoor, ig, kcoor, i, j;
@@ -4067,10 +4080,12 @@ void shape_terms_vel( Real rho,
             for(int q=0; q<fe.nbCoor; ++q)
             {
                 guk[ig][p][q]=0.;
-                //aux[ig][p][q]=0.;
                 sigma[p][q]=0.;
+                BMass[p][q]=0.;
                 for(int d=0; d<fe.nbNode; ++d)
                 {
+                    auxMass[ ig ][d][q]=0.;
+                    aux[ig][p][d][q]=0.;
                     convect_eta[ig][p][d][q]=0.;
                     for(int e=0; e<fe.nbCoor; ++e)
                     {
@@ -4105,7 +4120,6 @@ void shape_terms_vel( Real rho,
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
             {
                 sB = 0.0;
-                sA = 0.0;
                 sG = 0.0;
                 for ( i = 0;i < fe.nbNode;i++ )
                 {
@@ -4153,7 +4167,19 @@ void shape_terms_vel( Real rho,
                 }
             }
 
-            //!source_mass
+            //!source_mass1
+
+            s = 0;
+
+            for ( kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+            {
+                for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                    for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                        s += BMass[ icoor ][ jcoor ] * eta[ icoor ][ jcoor ][i][kcoor]; // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
+                auxMass[ ig ][i][kcoor] = s;
+            }
+
+
             for ( kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
             {
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
@@ -4205,30 +4231,26 @@ void shape_terms_vel( Real rho,
                 }
             }
 
-//             //source_press
-//              for ( int kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
-//              {
-//                  s=0;
-//                 //for ( kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
-//                 for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-//                     for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-//                     {
-//                         s += guk[ig][ icoor ][ jcoor ] * eta[ icoor ][ jcoor ][i][kcoor]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
-//                     }
-//                 aux[ ig ][i][kcoor] = s;
-//             }
+            if(fullImplicit)//source_mass2 and convective term derivative
+                for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                {
+                    //s = 0.0;
+                    for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                    {
+                        aux[ ig ][ icoor ][i][jcoor] = guk[ig][ icoor ][ jcoor ]  * fe.phi( i, ig ) /**alpha*/;
+                    }
+                }
+
         }
 
     }
 
 
 
-
-
     //
     // Numerical integration
     //
-
+    Real g=0.;
     // loop on coordinates, i.e. loop on elementary vector blocks
     for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
     {
@@ -4237,6 +4259,10 @@ void shape_terms_vel( Real rho,
 
             // the block iccor of the elementary vector
             ElemMat::matrix_view mat = elmat.block( icoor, kcoor );
+            boost::shared_ptr<ElemMat::matrix_view> mat_convect;
+
+            if(fullImplicit)
+                mat_convect.reset(new ElemMat::matrix_view(elmat_convect->block( icoor, kcoor )));
             // loop on nodes, i.e. loop on components of this block
             for ( i = 0;i < fe.nbNode;i++ )
             {
@@ -4245,414 +4271,40 @@ void shape_terms_vel( Real rho,
 
                     // loop on quadrature points
                     s = 0.;
+                    g = 0.;
+
                     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
                     {
-
                         // - convect^T [I\div d - (\grad d)^T] (u^k)^T :\grad\phi_i
                         for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                         {
-                            s -= convect_eta[ ig ][ jcoor ][j][kcoor] * uk[ ig ][ icoor ] * fe.phiDer( (int)i, (int)jcoor, (int)ig ) * fe.weightDet( ig )*rho;
+                            //source_mass1
+                            s += convect_eta[ ig ][ jcoor ][j][kcoor] * guk[ ig ][ icoor ][jcoor] * fe.phi( (int)i, (int)ig ) * fe.weightDet( ig )*rho;
+                            //source_stress
                             s += B[ ig ][ icoor ][ jcoor ][j][kcoor] * fe.phiDer( (int)i, (int)jcoor, (int)ig ) * fe.weightDet( ig );
-                            s += fe.phiDer( (int)i, (int)jcoor, (int)ig ) * A2[ ig ][ icoor ][ jcoor ][j][kcoor] * fe.weightDet( ig )*mu;
+                            //source_stress2
+                            s -= fe.phiDer( (int)i, (int)jcoor, (int)ig ) * A2[ ig ][ icoor ][ jcoor ][j][kcoor] * fe.weightDet( ig )*mu;
+                        }
+                        if(fullImplicit)
+                        {
+                            //source_mass1
+                            s += auxMass[ ig ][j][kcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
+                            //source_mass2
+                            s -= aux[ ig ][ icoor ][j][kcoor] * fe.phi( i, ig ) * fe.weightDet( ig )*rho*alpha;
+                            //convective term
+                            g += aux[ ig ][ icoor ][j][kcoor] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
                         }
                     }
                     mat( i , j ) += s;
+                    if(fullImplicit)
+                        (*mat_convect)( i , j ) += g;
                 }
             }
         }
-        //    }
-
-//     //
-//     // Numerical integration for pressure
-//     //
-
-//         ElemMat::matrix_view matP = elmatP.block( iblock, icoor );
-//         for ( int j = 0;j < fe.nbNode;j++ )
-//             for ( int i = 0;i < fe_p.nbNode;i++ )
-//                 matP(i,j)=0.;
-
-//             // Loop on nodes, i.e. loop on elementary vector components
-//             for ( int j = 0;j < fe.nbNode;j++ )
-//                 for (int i = 0;i < fe_p.nbNode;i++ )
-//                     {
-//                         s=0.;
-//                         // loop on quadrature points
-//                         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-//                             {
-//                                s += aux[ ig ][j][icoor] * fe_p.phi( i, ig ) * fe.weightDet( ig );
-//                             }
-//                         matP( i , j) += s;
-//                     }
-            }
+    }
 
 
 
 }
-
-
-
-#ifdef UNDEFINED
-
-void source_mass2( Real coef, const ElemVec& uk_loc,
-                   ElemMat& elmat, const CurrentFE& fe , double& alpha)
-{
-
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "source_mass needs at least the first derivatives" );
-
-    Real guk[ fe.nbCoor ][ fe.nbCoor ];      // \grad u^k at a quadrature point
-    //Real dw[ fe.nbCoor ][ fe.nbNode ];                  // dw at a quadrature point
-    Real aux[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbNode ][ fe.nbCoor ];    // (\grad u^k)dw at each quadrature point
-    Real s;
-
-    int ig, icoor, jcoor, i;
-
-    // loop on quadrature points
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-    {
-
-        // loop on space coordinates
-        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-        {
-
-            // each compontent (icoor) of dw at this quadrature point
-            s = 0.0;
-            //            for ( i = 0;i < fe.nbNode;i++ )
-            //                dw[ icoor ][i] = fe.phi( i, ig ) /dt/* * d_loc.vec() [ i + icoor * fe.nbNode ]*/;
-            //dw[ icoor ] = s;
-
-            // loop  on space coordinates
-            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-            {
-                s = 0.0;
-                for ( i = 0;i < fe.nbNode;i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at a quadrature point
-                guk[ icoor ][ jcoor ] = s;
-            }
-        }
-
-        // (\grad u^k)dw at each quadrature point
-        for ( i = 0;i < fe.nbNode;i++ )
-        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-        {
-            s = 0.0;
-            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                {
-                    aux[ ig ][ icoor ][i][jcoor] = guk[ icoor ][ jcoor ] * fe.phi( i, ig ) *alpha;
-                }
-        }
-    }
-
-    //
-    // Numerical integration
-    //
-
-    // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-    {
-    for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-    {
-
-        ElemMat::matrix_view mat = elmat.block( icoor , jcoor);
-
-//         for ( i = 0;i < fe.nbNode;i++ )
-//         {
-//         for ( UInt j = 0;j < fe.nbNode;j++ )
-//         {
-//             mat[i,j]=0.;
-//         }
-//         }
-        // loop on nodes, i.e. loop on components of this block
-        for ( int j = 0;j < fe.nbNode;j++ )
-        for ( i = 0;i < fe.nbNode;i++ )
-        {
-
-            // loop on quadrature points
-            s = 0;
-            for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-                s += aux[ ig ][ icoor ][j][jcoor] * fe.phi( i, ig ) * fe.weightDet( ig );
-            mat( i, j ) += coef * s;
-        }
-    }
-    }
-
-}
-
-// coef * u^k * ( \grad + I div , v  ) for Newton FSI
-
-void source_mass22( Real coef, const ElemVec& uk_loc,
-                   ElemMat& elmat, const CurrentFE& fe , double& alpha)
-{
-
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "source_mass needs at least the first derivatives" );
-
-    Real A[ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];// I\div d + \grad at a quadrature point
-    Real uk[ fe.nbCoor ][ fe.nbCoor ];      // \grad u^k at a quadrature point
-    //Real dw[ fe.nbCoor ][ fe.nbNode ];                  // dw at a quadrature point
-    Real aux[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbNode ][ fe.nbCoor ];    // (\grad u^k)dw at each quadrature point
-    Real s;
-    Real sA;
-
-    int ig, icoor, jcoor; //, i;
-
-
-
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-        {
-
-
-
-
-    ////INIT
-    for(int p=0; p<fe.nbCoor; ++p)
-        {
-        for(int q=0; q<fe.nbCoor; ++q)
-            {
-                for(int d=0; d<fe.nbNode; ++d)
-                    {
-                        for(int e=0; e<fe.nbCoor; ++e)
-                            A[p][q][d][e]=0.;
-                    }
-            }
-        }
-    ////////END INIT
-
-
-
-
-        // loop on space coordindates
-        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-        {
-
-            // each compontent of uk at each quadrature points
-            s = 0.0;
-            for ( int i = 0;i < fe.nbNode;i++ )
-                s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ];
-            uk[ ig ][ icoor ] = s;//uk_x(pt_ig), uk_y(pt_ig), uk_z(pt_ig)
-
-            // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-            {
-                sA = 0.0;
-                for ( int i = 0;i < fe.nbNode;i++ )
-                {
-                    sA = -fe.phiDer( i, icoor, ig ) /** d_loc.vec() [ i + jcoor * fe.nbNode ]*/; //  -(\grad)^T at this quadrature point
-                    A[ icoor ][ jcoor ][i][ jcoor ] = sA; // -(\grad)^T at this quadrature point
-                }
-            }
-        }
-
-
-
-
-        double z[fe.nbCoor];
-        for ( int i = 0;i < fe.nbNode;i++ )
-            {
-                //                for ( int kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
-                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                    {
-                                //if(icoor==jcoor)
-                                z[ jcoor ] = A[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
-                    }
-
-                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                    {
-                        for (int kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
-                        {
-                                //if(icoor==jcoor)
-                                A[ jcoor ][ jcoor ][i][kcoor] =- z[ kcoor ];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
-                        }
-                    }
-            }
-
-        for ( int i = 0;i < fe.nbNode;i++ )
-        for ( int kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
-        {
-            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                {
-                    for( icoor = 0;icoor < fe.nbCoor;icoor++ )
-                    aux[ ig ][ jcoor ][i][kcoor] += uk[ ig ][ icoor ] * A[ icoor][jcoor][i][kcoor] *alpha;
-                }
-        }
-        }
-    //
-    // Numerical integration
-    //
-
-    // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-    {
-    for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-    {
-
-        ElemMat::matrix_view mat = elmat.block( icoor , jcoor);
-
-//         for ( i = 0;i < fe.nbNode;i++ )
-//         {
-//         for ( UInt j = 0;j < fe.nbNode;j++ )
-//         {
-//             mat[i,j]=0.;
-//         }
-//         }
-        // loop on nodes, i.e. loop on components of this block
-        for ( int j = 0;j < fe.nbNode;j++ )
-        for ( int i = 0;i < fe.nbNode;i++ )
-        {
-
-            // loop on quadrature points
-            s = 0;
-            for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-                s += aux[ ig ][ icoor ][j][jcoor] * fe.phi( i, ig ) * fe.weightDet( ig );
-            mat( i, j ) += coef * s;
-        }
-    }
-    }
-
-}
-
-
-void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc,
-                   ElemMat& elmat, const CurrentFE& fe )
-{
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "source_mass needs at least the first derivatives" );
-
-
-    Real B[ fe.nbCoor ][ fe.nbCoor ];                 // \grad u^n at a quadrature point
-    Real A[ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real aux[ fe.nbQuadPt ][fe.nbNode][ fe.nbCoor ];                        //  \div d  \div u^n  + grad u^n:[I\div d - (\grad d)^T] at  quadrature points
-    Real uk[ fe.nbQuadPt ][ fe.nbCoor ];              // u^k quadrature points
-
-    Real s, sA, sB;
-
-    int icoor, jcoor, ig;
-    // loop on quadrature points
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-    {
-
-    ////INIT
-    for(int p=0; p<fe.nbCoor; ++p)
-        {
-        for(int q=0; q<fe.nbCoor; ++q)
-            {
-                for(int d=0; d<fe.nbNode; ++d)
-                    {
-                        for(int e=0; e<fe.nbCoor; ++e)
-                            A[p][q][d][e]=0.;
-                    }
-                B[p][q]=0.;
-            }
-        //        uk[ig][q]=0.;
-        for(int d=0; d<fe.nbNode; ++d)
-            aux[ig][d][p]=0.;
-        }
-    ////END INIT
-        // loop on space coordindates
-        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-        {
-            // each compontent of uk at each quadrature points
-            s = 0.0;
-            for ( int i = 0;i < fe.nbNode;i++ )
-                s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ];
-            uk[ ig ][ icoor ] = s;
-
-            // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-            {
-                sB = 0.0;
-                sA = 0.0;
-                for ( int i = 0;i < fe.nbNode;i++ )
-                {
-                    sB += fe.phiDer( i, jcoor, ig ) * un_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^n at this quadrature point
-                    sA = -fe.phiDer( i, icoor, ig ) /** d_loc.vec() [ i + jcoor * fe.nbNode ]*/; //  - (\grad d) ^T at this quadrature point
-                    A[ icoor ][ jcoor ][i][jcoor] = sA; // -(\grad d) ^T at this quadrature point ==> \delta_{jcoor kcoor}\partial_{icoor}
-                }
-		B[ icoor ][ jcoor ] = sB; // \grad u^n at this quadrature point
-            }
-        }
-
-        for ( int i = 0;i < fe.nbNode;i++ )
-            {
-                //                s = 0.0;
-
-
-
-                double l=0.;
-                double z[fe.nbCoor];
-                //                for ( int kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
-                for ( UInt kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
-                    {
-                                //if(icoor==jcoor)
-                                z[ kcoor ] = A[ kcoor ][ kcoor ][i][kcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
-                    }
-
-                for ( UInt kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
-                    {
-                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                    {
-                        //if(icoor==jcoor)
-                        A[ jcoor ][ jcoor ][i][kcoor] -= z[ kcoor ];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
-                    }
-
-
-
-
-                        l=0;
-                 for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                     {
-                         l += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ][i][kcoor]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
-                            //}
-                     }
-                 aux[ ig ][i][kcoor] = l;
-                 //}
-                    }
-                //std::cout<<"aux[ ig ][i][jcoor] "<<  aux[ ig ][i][jcoor] <<std::endl;
-            }
-    }
-
-    // At this point we have:
-    //    v u^k at each quadrature point: uk
-    //    v  \grad u^n:[ 2 * I\div d - (\grad d)^T]: aux
-
-
-    //
-    // Numerical integration
-    //
-
-    // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-    {
-    for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-    {
-
-      // the block iccor of the elementary vector
-      ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
-
-//       for ( i = 0;i < fe.nbNode;i++ )
-//           for ( UInt j = 0;j < fe.nbNode;j++ )
-//               mat[i,j]=0.;
-      // loop on nodes, i.e. loop on components of this block
-
-      for ( int i = 0;i < fe.nbNode;i++ )
-        {
-          for ( int j = 0;j < fe.nbNode;j++ )
-              {
-                  // loop on quadrature points
-                  s = 0;
-                  for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-                      // \grad u^n:[2 * I\div d - (\grad d)^T] u^k \phi_i
-                      s += aux[ ig ][j][jcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
-                  mat( i, j ) += coef * s;
-              }
-        }
-    }
-    }
-}
-
-
-#endif
-
 
 }
