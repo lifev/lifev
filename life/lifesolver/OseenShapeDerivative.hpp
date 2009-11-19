@@ -603,7 +603,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
                     shape_terms_vel( this->M_data.density(),
                                      this->M_data.viscosity(),
-                                     M_u_loc,
+                                     //M_u_loc,
                                      M_uk_loc,
                                      M_w_loc,
                                      M_elvec,
