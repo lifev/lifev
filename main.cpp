@@ -311,10 +311,12 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
                 ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+            try{
             if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
                 checkCEResult(time);
             else
                 checkGCEResult(time);
+            }catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
                 ///////// END OF CHECK
             }
         if(!M_fsi->FSIOper()->dataFluid().useShapeDerivatives())
@@ -395,10 +397,7 @@ struct FSIChecker
 
         try
             {
-                std::cout << "calling problem constructor ... " << std::flush;
                 fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
-                std::cout << "problem set" << std::endl;
-
 
                 fsip->fsiSolver()->FSIOper()->setPreconditioner( prec );
 
@@ -435,7 +434,6 @@ int main(int argc, char** argv)
 {
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
-    std::cout << "% using MPI" << std::endl;
 #else
     std::cout << "% using serial Version" << std::endl;
 #endif
@@ -575,13 +573,13 @@ void Problem::checkGCEResult(LifeV::Real& time)
 void Problem::checkCEResult(LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-472128)/dispNorm*(dispNorm-472128)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-913593)/dispNorm*(dispNorm-913593)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-1.28524e+06)/dispNorm*(dispNorm-1.28524e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.004 && (dispNorm-788936)/dispNorm*(dispNorm-788936)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-946694)/dispNorm*(dispNorm-946694)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-755566)/dispNorm*(dispNorm-755566)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-825823)/dispNorm*(dispNorm-825823)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-695446)/dispNorm*(dispNorm-695446)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-765094)/dispNorm*(dispNorm-765094)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if(time==0.001 && (dispNorm-472228)/dispNorm*(dispNorm-472128)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.002 && (dispNorm-988651)/dispNorm*(dispNorm-913593)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.003 && (dispNorm-1.362e+06988651)/dispNorm*(dispNorm-1.28524e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+    if(time==0.004 && (dispNorm-827665)/dispNorm*(dispNorm-788936)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.005 && (dispNorm-969285)/dispNorm*(dispNorm-946694)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.006 && (dispNorm-778815)/dispNorm*(dispNorm-755566)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.007 && (dispNorm-850312)/dispNorm*(dispNorm-825823)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.008 && (dispNorm-715958)/dispNorm*(dispNorm-695446)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.009 && (dispNorm-781881)/dispNorm*(dispNorm-765094)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
