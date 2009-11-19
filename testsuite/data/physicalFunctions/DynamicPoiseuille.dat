@@ -18,8 +18,8 @@
 
 #functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                # Inlet  Velocity
 functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'                       # Inlet  Velocity TEMPORARY FIX
-#functionB	= 'a*(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)' # Inlet  Flux
-functionB	= 'a*(pi*1)/(8*0.03)*(0.5^4)'                        # Inlet  Flux TEMPORARY FIX
+#functionB	= '-a*(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)' # Inlet  Flux
+functionB	= '-a*(pi*1)/(8*0.03)*(0.5^4)'                        # Inlet  Flux TEMPORARY FIX
 functionC	= '-a*5'                                             # Inlet  Static Pressure 
 functionD	= '0'                                                # Outlet Static Pressure
 
