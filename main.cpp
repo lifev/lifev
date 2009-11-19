@@ -1,43 +1,44 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV Applications.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
-  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-       Date: 2009-04-22
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2009 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
+************************************************************************
 */
-/**
-   \file main.cpp
-   \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-   \date 2009-04-22
+//@HEADER
+
+/*!
+ * @file
+ * @brief SpiritParser Test
+ *
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ * @date 22-04-2009
+ *
+ *  This is a test to verify that spiritParser performs correct computations.
+ *
+ *  Please note that spiritParser is not working correctly in debug mode!
  */
 
-
-
-
-
-// ===================================================
-//! Includes
-// ===================================================
-#include "Epetra_ConfigDefs.h"
-#ifdef HAVE_MPI
-	#include <mpi.h>
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+    #include <mpi.h>
 #endif
 
 #include <iomanip>
@@ -50,13 +51,6 @@
 
 #include <lifemc/lifecore/SpiritParser.hpp>
 
-
-
-
-
-// ===================================================
-//! Program information
-// ===================================================
 LifeV::AboutData
 makeAbout()
 {
@@ -71,22 +65,8 @@ makeAbout()
     return about;
 }
 
-
-
-
-
-// ===================================================
-//! Namespaces
-// ===================================================
 using namespace LifeV;
 
-
-
-
-
-// ===================================================
-//! Main
-// ===================================================
 int
 main( int argc, char** argv )
 {
