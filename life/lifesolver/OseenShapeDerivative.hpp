@@ -108,8 +108,8 @@ public:
                                 //                                const vector_type& disp,
                                 const vector_type& w,
                                 UInt offset,
-                                FESpace<Mesh, EpetraMap>& dFESpace
-                                );
+                                FESpace<Mesh, EpetraMap>& dFESpace,
+                                bool fullImplicit=false);
 
 
 private:
@@ -127,6 +127,7 @@ private:
 //    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
     ElemVec                   M_elvec_du; // Elementary right hand side for the linearized pressure
     boost::shared_ptr<ElemMat>                   M_elmat_du;
+    boost::shared_ptr<ElemMat>                   M_elmat_du_convective;
     ElemVec                   M_elvec_dp; // Elementary right hand side for the linearized pressure
     boost::shared_ptr<ElemMat>                   M_elmat_dp;    // Elementary displacement for right hand side
     ElemVec                   M_w_loc;    // Elementary mesh velocity
@@ -229,6 +230,7 @@ OseenShapeDerivative( const data_type&          dataType,
     M_linPrec        ( ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elmat_du       ( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
+    M_elmat_du_convective( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
     M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
     M_elmat_dp       ( new ElemMat(this->M_pFESpace.fe().nbNode, 1, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
 //    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
@@ -511,7 +513,8 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                                                 //const vector_type& disp,
                                                                 const vector_type& w,
                                                                 UInt offset,
-                                                                FESpace<Mesh, EpetraMap>& dFESpace
+                                                                FESpace<Mesh, EpetraMap>& mmFESpace,
+                                                                bool fullImplicit
                                                                 )
 {
     this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
@@ -557,11 +560,12 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
                     //this->M_pFESpace.fe().updateFirstDeriv( this->M_uFESpace.mesh()->volumeList( i ) ); // just to provide the id number in the assem_mat_mixed
                     //this->M_uFESpace.fe().updateFirstDeriv( this->M_uFESpace.mesh()->volumeList( i ) ); //as updateFirstDer
-                    dFESpace.fe().updateFirstDerivQuadPt( dFESpace.mesh()->volumeList( i ) );
+                    mmFESpace.fe().updateFirstDerivQuadPt( mmFESpace.mesh()->volumeList( i ) );
 
                     // initialization of elementary vectors
                     M_elmat_dp->zero();
                     M_elmat_du->zero();
+                    M_elmat_du_convective->zero();
 
                     for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
                         {
@@ -571,7 +575,10 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                 {
                                     UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
 
+                                    //                                    if(!fullImplicit)
                                     M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
+//                                     else
+//                                         M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep(ig) - wRep( ig ); // u^n - w^k local
                                     M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
                                     M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
                                     //                                    M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
@@ -596,6 +603,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
                     shape_terms_vel( this->M_data.density(),
                                      this->M_data.viscosity(),
+                                     M_u_loc,
                                      M_uk_loc,
                                      M_w_loc,
                                      M_elvec,
@@ -603,10 +611,16 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                      *M_elmat_du,
                                      this->M_uFESpace.fe(),
                                      this->M_pFESpace.fe(),
-                                     *M_elmat_dp
+                                     *M_elmat_dp,
+                                     0,
+                                     fullImplicit,
+                                     alpha,
+                                     M_elmat_du_convective
                                      );
 
-                    //                    source_press( 1.0, M_uk_loc,*M_elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    //source_mass2( this->M_data.density(), M_uk_loc, *M_elmat_du_convective, this->M_uFESpace.fe(), alpha );
+
+                    source_press( 1.0, M_uk_loc,*M_elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
                       /*
                         std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
                     M_elvec_dp.showMe(std::cout);
@@ -624,21 +638,33 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                     for(UInt icomp=0; icomp<nbCompU; ++icomp)
                         {
                             for(UInt jcomp=0; jcomp<nbCompU; ++jcomp)
+                            {
                                 assembleMatrix( M_matr,
                                                 *M_elmat_du,
                                                 this->M_uFESpace.fe(),
-                                                dFESpace.fe(),
+                                                mmFESpace.fe(),
                                                 this->M_uFESpace.dof(),
-                                                dFESpace.dof(),
+                                                mmFESpace.dof(),
                                                 icomp, jcomp,
                                                 icomp*velTotalDof, offset+jcomp*velTotalDof
                                                 );
+                                if(fullImplicit)//assembling the derivative of the convective term
+                                    assembleMatrix( M_matr,
+                                                    *M_elmat_du_convective,
+                                                    this->M_uFESpace.fe(),
+                                                    this->M_uFESpace.fe(),
+                                                    this->M_uFESpace.dof(),
+                                                    this->M_uFESpace.dof(),
+                                                    icomp, jcomp,
+                                                    icomp*velTotalDof, jcomp*velTotalDof
+                                                    );
+                            }
                             assembleMatrix( M_matr,
                                             *M_elmat_dp,
                                             this->M_pFESpace.fe(),
-                                            dFESpace.fe(),
+                                            mmFESpace.fe(),
                                             this->M_pFESpace.dof(),
-                                            dFESpace.dof(),
+                                            mmFESpace.dof(),
                                             (UInt)0, icomp,
                                             (UInt)nbCompU*velTotalDof, offset+icomp*velTotalDof
                                             );

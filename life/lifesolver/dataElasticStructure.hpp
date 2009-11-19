@@ -180,8 +180,6 @@ DataElasticStructure( const GetPot& dfile ) :
     std::list<double>::iterator yit = yList.begin();
     std::list<double>::iterator pit = pList.begin();
 
-    std::cout << std::endl;
-    std::cout << "flag         young       poisson \\\\       lambda           mu" << std::endl;
 
 
     for (fit = fList.begin(); fit != fList.end(); ++fit, ++yit, ++pit)
@@ -192,15 +190,11 @@ DataElasticStructure( const GetPot& dfile ) :
         M_young.insert(make_pair(*fit, young));
         M_poisson.insert(make_pair(*fit, poisson));
 
-        std::cout << std::setw(4) << *fit << "  " << std::setw(12) << young << "  " << std::setw(12) << poisson << " \\\\ ";
-
         double lambda = young*poisson/( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
         M_lambda.insert(make_pair(*fit, lambda));
 
         double mu = young/( 2.0 * ( 1.0 + poisson ) );
         M_mu.insert(make_pair(*fit, mu));
-
-        std::cout << std::setw(12) << lambda << " " << std::setw(12) << mu << std::endl;
 
         if (fList.size() == 1)
             {
@@ -212,7 +206,6 @@ DataElasticStructure( const GetPot& dfile ) :
             }
     }
 
-    std::cout << std::endl;
 }
 
 

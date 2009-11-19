@@ -163,7 +163,7 @@ FSIOperator::setDataFromGetPot( const GetPot& dataFile )
 void
 FSIOperator::setupFEspace()
 {
-	    if( M_epetraComm->MyPID()==0)
+    if( M_epetraComm->MyPID()==0)
         std::cout<< "FSIOperator: setting RefFE and QuadRule ... ";
 	std::string uOrder = M_dataFluid->uOrder();
 	std::string pOrder = M_dataFluid->pOrder();
@@ -181,7 +181,7 @@ FSIOperator::setupFEspace()
     const QuadRule* qR_struct(0);
     const QuadRule* bdQr_struct(0);
 
-    Displayer disp(M_epetraWorldComm);
+    Displayer disp(M_epetraComm.get());
     disp.leaderPrint("velocity order = ", uOrder, "\n");
     if ( uOrder.compare("P2") == 0 )
     {
@@ -398,7 +398,7 @@ FSIOperator::setupDOF( void )
 void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension)
 {
 
-    Displayer disp(M_epetraWorldComm);
+    Displayer disp(M_epetraWorldComm.get());
 	// now we build the sigma and lambda variables on each proc
 	disp.leaderPrint("FSIOperator: building fluid variables ... ");
 

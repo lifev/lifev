@@ -135,7 +135,6 @@ FSISolver::FSISolver( const std::string& method ):
 
     if( M_monolithic )
 	{
-		std::cout << "% using MPI or not" << std::endl;
 		fluid = true;
 		solid = true;
 		solidLeader = 0;
@@ -145,23 +144,24 @@ FSISolver::FSISolver( const std::string& method ):
 		M_epetraComm = M_epetraWorldComm;
 	}
 
-
+#ifdef DEBUG
     if ( fluid )
     {
-        std::cout << M_epetraComm->MyPID()
-                  << " ( " << rank << " ) "
-                  << " out of " << M_epetraComm->NumProc()
-                  << " ( " << numtasks << " ) "
-                  << " is fluid." << std::endl;
+        Debug(6220) << M_epetraComm->MyPID()
+                    << " ( " << rank << " ) "
+                    << " out of " << M_epetraComm->NumProc()
+                    << " ( " << numtasks << " ) "
+                    << " is fluid." << std::endl;
     }
     if ( solid )
     {
-        std::cout << M_epetraComm->MyPID()
-                  << " ( " << rank << " ) "
-                  << " out of " << M_epetraComm->NumProc()
-                  << " ( " << numtasks << " ) "
-                  << " is solid." << std::endl;
+        Debug(6220) << M_epetraComm->MyPID()
+                    << " ( " << rank << " ) "
+                    << " out of " << M_epetraComm->NumProc()
+                    << " ( " << numtasks << " ) "
+                    << " is solid." << std::endl;
     }
+#endif
 
     M_epetraWorldComm->Barrier();
 
