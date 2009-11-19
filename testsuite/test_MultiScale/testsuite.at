@@ -33,6 +33,6 @@ AT_DATA([data],[[
 AT_CHECK([ln -sf ../../data/mesh/inria/ Mesh &&
           ln -sf ../../data/physicalFunctions/ physicalFunctions &&
 		  ln -sf ../../data/MultiScaleData/ MultiScaleData &&
-		  mpirun -n 4 ../../test_MultiScale/test_MS -f MultiScaleData/MultiScale_test.dat -c],[0],[ignore],[ignore])
+		  mpirun -n 1 ../../test_MultiScale/test_MS -f MultiScaleData/MultiScale_test.dat -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
