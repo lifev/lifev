@@ -5,11 +5,11 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-08
+#           Date: 2009-09-01
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - TEST: Two 3DFluid cylinder - FluxPressure - Stationary ####################
+### MODEL: MultiScale - TEST: Two 3DFluid cylinder - FluxStress ###################################
 ###################################################################################################
 
 [MultiScale] ######################################################################################
@@ -33,7 +33,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	CylPoiseuilleFlux				0				0
+			0		BoundaryCondition	CylPoiseuilleFluxDynamic		0				0
 			1		FluxStress			FluxStress_StaticPressure		1,0				0,1
 			2		BoundaryCondition	NoStress						1				1
 		 	'
@@ -42,7 +42,7 @@ couplings = '
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '	
-			0		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		-2.5
-			1		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		2.5
+			0		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		-5.075
+			1		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		 0.075
 		 '
 ###################################################################################################

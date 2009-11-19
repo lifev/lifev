@@ -24,23 +24,27 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = Fluid3D_Cylinder.dat \
 					Fluid3D_Carotid.dat \
-                    MultiScale_3Dbifurcation.dat \
-                    MultiScale_3Dbifurcation_Stationary.dat \
+                    MultiScale_3Dbifurcation_FluxStress.dat \
+                    MultiScale_3Dbifurcation_FluxStress_Stationary.dat \
                     MultiScale_3Dbifurcation_Stress_Stationary.dat \
-                    MultiScale_3DCarotidBifurcation_Stationary.dat \
-                    MultiScale_3Dhexagon.dat \
-                    MultiScale_3Dhexagon_Stationary.dat \
+                    MultiScale_3DCarotidBifurcation_FluxStress.dat \
+                    MultiScale_3DCarotidBifurcation_FluxStress_Stationary.dat \
+                    MultiScale_3DCarotidBifurcation_Stress.dat \
+                    MultiScale_3DCarotidBifurcation_Stress_Stationary.dat \
+                    MultiScale_3Dhexagon_FluxStress_Stationary.dat \
+                    MultiScale_3Dhexagon_Stress_Stationary.dat \
+                    MultiScale_3Dhexagon_StressAndFluxStress_Stationary.dat \
                     MultiScale_3Dserial1.dat \
                     MultiScale_3Dserial1_Stationary.dat \
-                    MultiScale_3Dserial2.dat \
-                    MultiScale_3Dserial2_Stationary.dat \
+                    MultiScale_3Dserial2_FluxStress.dat \
+                    MultiScale_3Dserial2_FluxStress_Stationary.dat \
                     MultiScale_3Dserial2_Stress_Stationary.dat \
-                    MultiScale_3Dserial3.dat \
-                    MultiScale_3Dserial3_Stationary.dat \
+                    MultiScale_3Dserial3_FluxStress.dat \
+                    MultiScale_3Dserial3_FluxStress_Stationary.dat \
                     MultiScale_3Dserial3_Stress_Stationary.dat \
-                    MultiScale_3Dserial6.dat \
-                    MultiScale_3Dserial6_Stress_Stationary.dat \
-                    MultiScale_3Dserial6_Stationary.dat
+                    MultiScale_3Dserial6_FluxStress.dat \
+                    MultiScale_3Dserial6_FluxStress_Stationary.dat \
+                    MultiScale_3Dserial6_Stress_Stationary.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
