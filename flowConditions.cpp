@@ -132,7 +132,6 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
                 - M_beta*sqrt(M_area0);
             FlowConditions::outputVector[conditionNumber]=M_outP;
 
-            std::cout << "bcOnFluid = " << bcOnFluid << std::endl;
             oper->displayer().leaderPrint( " Flow rate = " , qn );
             oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
 
