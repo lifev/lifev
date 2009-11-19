@@ -1,37 +1,40 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>,
- Gilles Fourestey  <gilles.fourestey@epfl.ch>
- Date: 2009-04-07
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file SpiritParser.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \author Gilles Fourestey  <gilles.fourestey@epfl.ch>
- \date 2009-04-07
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ * @file
+ * @brief SpiritParser
+ *
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ * @author Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ * @date 07-04-2009
  */
 
-#ifndef __SpiritParser_H
-#define __SpiritParser_H 1
+#ifndef SpiritParser_H
+#define SpiritParser_H 1
 
 // SpiritParser need optimization level at least = -O1
 //#pragma GCC optimization_level 2
@@ -331,21 +334,21 @@ public:
 
     //! Empty string constructor (it needs a manual call to setString)
     /*!
-     * \param applyRules		- use rules for notation
+     * @param applyRules use rules for notation
      */
     //! Constructor
     SpiritParser( const bool& applyRules = true );
 
     //! Constructor
     /*!
-     * \param string			- expression to parse
-     * \param applyRules		- use rules for notation
+     * @param string expression to parse
+     * @param applyRules use rules for notation
      */
     SpiritParser( const std::string& string, const bool& applyRules = true );
 
     //! Copy constructor
     /*!
-     * \param Parser			- SpiritParser
+     * @param Parser SpiritParser
      */
     SpiritParser( const SpiritParser& parser );
 
@@ -355,52 +358,73 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator =
     /*!
-     * \param Parser - SpiritParser
+     * @param Parser SpiritParser
+     * @return reference to a copy of the class
      */
     SpiritParser& operator=( const SpiritParser& parser );
 
-    /*! Set string function
-     *
-     * \param string - Expression to evaluate
-     * \param stringSeparator - Separator identifier (default -> ";")
-     */
-    void setString( const std::string& string, const std::string& stringSeparator = ";" );
+    //@}
 
-    /*! Set/replace a variable
-     *
-     * \param name - name of the parameter
-     * \param value - value of the parameter
-     */
-    void setVariable( const std::string& name, const double& value );
 
-    /*! Get variable
-     *
-     * \param name - name of the parameter
-     */
-    const double& getVariable( const std::string& name );
+    //! @name Methods
+    //@{
 
     /*! Evaluate the expression
+     * @param ID expression index (starting from 1)
+     * @return computed value
      */
     const double& evaluate( const unsigned int& ID = 1 );
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
-     * \param substring - string to find
+     * @param substring string to find
+     * @return number of substring
      */
     unsigned int countSubstring( const std::string& substring );
 
-    void showMeVariables( void ) const
+    void showMeVariables() const
     {
         M_calculator.showMeVariables();
     }
 
     //@}
 
+    //! @name Set Methods
+    //@{
+
+    /*! Set string function
+     *
+     * @param string Expression to evaluate
+     * @param stringSeparator Separator identifier (default -> ";")
+     */
+    void setString( const std::string& string, const std::string& stringSeparator = ";" );
+
+    /*! Set/replace a variable
+     *
+     * @param name name of the parameter
+     * @param value value of the parameter
+     */
+    void setVariable( const std::string& name, const double& value );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    /*! Get variable
+     *
+     * @param name name of the parameter
+     * @return value of the variable
+     */
+    const double& getVariable( const std::string& name );
+
+    //@}
 private:
 
     string_type      M_strings;
@@ -414,10 +438,10 @@ private:
     //@{
 
     //! Setup results
-    inline void setupResults( void );
+    inline void setupResults();
 
     //! Set default variables
-    inline void setDefaultVariables( void );
+    inline void setDefaultVariables();
 
     //! Apply rules to the string
     inline void ruleTheString( std::string& string );
@@ -428,4 +452,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* __SpiritParser_H */
+#endif /* SpiritParser_H */

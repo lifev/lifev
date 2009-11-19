@@ -1,33 +1,36 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>,
- Gilles Fourestey  <gilles.fourestey@epfl.ch>
- Date: 2009-04-07
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file SpiritParser.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \author Gilles Fourestey  <gilles.fourestey@epfl.ch>
- \date 2009-04-07
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ * @file
+ * @brief SpiritParser
+ *
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ * @author Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ * @date 07-04-2009
  */
 
 #include <lifemc/lifecore/SpiritParser.hpp>
@@ -35,7 +38,7 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructor & Destructor
+// Constructors & Destructor
 // ===================================================
 SpiritParser::SpiritParser( const bool& applyRules ) :
     M_strings       (),
@@ -85,7 +88,7 @@ SpiritParser::SpiritParser( const SpiritParser& parser ) :
 }
 
 // ===================================================
-//! Methods
+// Operators
 // ===================================================
 SpiritParser&
 SpiritParser::operator=( const SpiritParser& parser )
@@ -103,50 +106,9 @@ SpiritParser::operator=( const SpiritParser& parser )
     return *this;
 }
 
-void
-SpiritParser::setString( const std::string& string, const std::string& stringSeparator )
-{
-/*
-#ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::setString:          strings: " << string << "\n";
-#endif
-*/
-    M_strings.clear();
-    boost::split( M_strings, string, boost::is_any_of( stringSeparator ) );
-/*
-#ifdef DEBUG
-    Debug( 5030 ) << "                               applyRules: " << M_applyRules << "\n";
-#endif
-*/
-    if ( M_applyRules )
-        for ( unsigned int i = 0; i < M_strings.size(); ++i )
-            ruleTheString( M_strings[i] );
-
-    setupResults();
-}
-
-void
-SpiritParser::setVariable( const std::string& name, const double& value )
-{
-/*
-#ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::setVariable    variables[" << name << "]: " << value << "\n";
-#endif
-*/
-    M_variables[name] = value;
-}
-
-const double&
-SpiritParser::getVariable( const std::string& name )
-{
-/*
-#ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::getVariable    variables[" << name << "]: " << M_variables[name] << "\n";
-#endif
-*/
-    return M_variables[name];
-}
-
+// ===================================================
+// Methods
+// ===================================================
 const double&
 SpiritParser::evaluate( const unsigned int& ID )
 {
@@ -183,10 +145,60 @@ SpiritParser::countSubstring( const std::string& substring )
 }
 
 // ===================================================
-//! Private functions
+// Set Methods
+// ===================================================
+void
+SpiritParser::setString( const std::string& string, const std::string& stringSeparator )
+{
+/*
+#ifdef DEBUG
+    Debug( 5030 ) << "SpiritParser::setString:          strings: " << string << "\n";
+#endif
+*/
+    M_strings.clear();
+    boost::split( M_strings, string, boost::is_any_of( stringSeparator ) );
+/*
+#ifdef DEBUG
+    Debug( 5030 ) << "                               applyRules: " << M_applyRules << "\n";
+#endif
+*/
+    if ( M_applyRules )
+        for ( unsigned int i = 0; i < M_strings.size(); ++i )
+            ruleTheString( M_strings[i] );
+
+    setupResults();
+}
+
+void
+SpiritParser::setVariable( const std::string& name, const double& value )
+{
+/*
+#ifdef DEBUG
+    Debug( 5030 ) << "SpiritParser::setVariable    variables[" << name << "]: " << value << "\n";
+#endif
+*/
+    M_variables[name] = value;
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+const double&
+SpiritParser::getVariable( const std::string& name )
+{
+/*
+#ifdef DEBUG
+    Debug( 5030 ) << "SpiritParser::getVariable    variables[" << name << "]: " << M_variables[name] << "\n";
+#endif
+*/
+    return M_variables[name];
+}
+
+// ===================================================
+// Private functions
 // ===================================================
 inline void
-SpiritParser::setDefaultVariables( void )
+SpiritParser::setDefaultVariables()
 {
     //setVariable( "pi", Pi ); //Using the tab of LifeV
     setVariable( "pi", 3.141592653589793 );
@@ -195,7 +207,7 @@ SpiritParser::setDefaultVariables( void )
 }
 
 inline void
-SpiritParser::setupResults( void )
+SpiritParser::setupResults()
 {
     M_nResults = 0;
 
