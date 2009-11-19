@@ -1,54 +1,59 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-09-09
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Physical Data
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 09-09-2009
  */
-/**
- \file MultiScale_DataModel.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-09-09
- */
 
-#ifndef __MS_PhysicalData_H
-#define __MS_PhysicalData_H 1
+#ifndef MS_PhysicalData_H
+#define MS_PhysicalData_H 1
 
-#include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
-
-#include <string>
+#include <lifemc/lifesolver/MS_Definitions.hpp>
 
 namespace LifeV {
-
-//todo Allow specific value for the models
 
 //! MS_PhysicalData - Global data container for the physical quantities of the problem
 /*!
  *  @author Cristiano Malossi
+ *
+ *  Up to now, the container contains:
+ *  <ul>
+ *      <li> Fluid density
+ *      <li> Fluid viscosity
+ *  </ul>
  */
 class MS_PhysicalData
 {
 public:
 
-    //! @name Constructors, Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Constructor
@@ -56,7 +61,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param PhysicalData - MS_PhysicalData
+     * @param PhysicalData MS_PhysicalData
      */
     MS_PhysicalData( const MS_PhysicalData& PhysicalData );
 
@@ -66,41 +71,48 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * \param PhysicalData - MS_PhysicalData
+     * @param PhysicalData MS_PhysicalData
+     * @return reference to a copy of the class
      */
     MS_PhysicalData& operator=( const MS_PhysicalData& PhysicalData );
-
-    //! Read the physical quantities from a GetPot file
-    /*!
-     * \param dataFile - GetPot file
-     */
-    void ReadData( const GetPot& dataFile );
-
-    //! Display some information about the physical quantities
-    void ShowMe( void );
 
     //@}
 
 
-    //! @name Get functions
+    //! @name Methods
+    //@{
+
+    //! Read the physical quantities from a GetPot file
+    /*!
+     * @param dataFile GetPot file
+     */
+    void ReadData( const GetPot& dataFile );
+
+    //! Display some information about the physical quantities
+    void ShowMe();
+
+    //@}
+
+
+    //! @name Get Methods
     //@{
 
     //! Get the global fluid density
-    const Real& GetFluidDensity() const
-    {
-        return M_fluidDensity;
-    }
+    /*!
+     * @return density of the fluid
+     */
+    const Real& GetFluidDensity() const;
 
     //! Get the global fluid viscosity
-    const Real& GetFluidViscosity() const
-    {
-        return M_fluidViscosity;
-    }
+    /*!
+     * @return viscosity of the fluid
+     */
+    const Real& GetFluidViscosity() const;
 
     //@}
 
@@ -113,4 +125,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* __MS_PhysicalData_H */
+#endif /* MS_PhysicalData_H */

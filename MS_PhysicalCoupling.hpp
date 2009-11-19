@@ -1,77 +1,56 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-09-02
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Physical Coupling
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 02-09-2009
  */
-/**
- \file MS_PhysicalCoupling.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-09-02
- */
 
-#ifndef __MS_PhysicalCoupling_H
-#define __MS_PhysicalCoupling_H 1
+#ifndef MS_PhysicalCoupling_H
+#define MS_PhysicalCoupling_H 1
 
-#include "Epetra_ConfigDefs.h"
-#ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
-#else
-#include "Epetra_SerialComm.h"
-#endif
-
+#include <lifemc/lifesolver/MS_Definitions.hpp>
+#include <lifemc/lifesolver/MS_PhysicalData.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
 namespace LifeV {
 
-//! @name MS_PhysicalCoupling global objects
-//@{
-
-enum couplingsTypes
-{
-    BoundaryCondition,
-    Stress,
-    FluxStress
-};
-
-extern std::map< std::string, couplingsTypes > couplingsMap;
-
-//@}
-
 //! MS_PhysicalCoupling - The MultiScale Physical Coupling
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_PhysicalCoupling class provides a general interface between the
  *  MS_Algorithm and all the coupling conditions.
- *
- *  @author Cristiano Malossi
  */
 class MS_PhysicalCoupling
 {
 public:
-
-    typedef MS_PhysicalModel::VectorType          VectorType;
-    typedef MS_PhysicalModel::Vector_ptrType      Vector_ptrType;
-
-    typedef boost::shared_ptr< MS_PhysicalModel > PhysicalModel_ptr;
-    typedef EntityFlag                            BCFlag;
 
     //! @name Constructors & Destructor
     //@{
@@ -81,7 +60,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param coupling - MS_PhysicalCoupling
+     * @param coupling MS_PhysicalCoupling
      */
     MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling );
 
@@ -91,34 +70,107 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * \param coupling - MS_PhysicalCoupling
+     * @param coupling MS_PhysicalCoupling
+     * @return reference to a copy of the class
      */
     MS_PhysicalCoupling& operator=( const MS_PhysicalCoupling& coupling );
 
+    //@}
+
+
+    //! @name MultiScale PhysicalCoupling Virtual Methods
+    //@{
+
+    //! Setup the data of the coupling
+    virtual void SetupData() = 0;
+
+    //! Setup the coupling
+    virtual void SetupCoupling() = 0;
+
+    //! Initialize the values of the coupling variables
+    virtual void InitializeCouplingVariables() = 0;
+
+    //! Export the values of the local coupling residuals into a global vector
+    /*!
+     * @param CouplingResiduals Global vector of variables
+     */
+    virtual void ExportCouplingResiduals( VectorType& CouplingResiduals ) = 0;
+
+    //! Build the list of models affected by the perturbation of a local coupling variable
+    /*!
+     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @return list of models affected by the perturbation
+     */
+    virtual ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID ) = 0;
+
+    //! Insert constant coefficients into the Jacobian matrix
+    /*!
+     * @param Jacobian the Jacobian matrix
+     */
+    virtual void InsertJacobianConstantCoefficients( MatrixType& Jacobian ) = 0;
+
+    //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
+    /*!
+     * @param Jacobian the Jacobian matrix
+     * @param Column the column related to the perturbed variable
+     * @param ID the global ID of the model which is perturbed by the variable
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     */
+    virtual void InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const UInt& Column, const UInt& ID, bool& LinearSystemSolved ) = 0;
+
+    //! Display some information about the coupling
+    /*!
+     * @param output specify the output stream
+     */
+    virtual void DisplayCouplingValues( std::ostream& output ) = 0;
+
+    //! Display some information about the coupling
+    virtual void ShowMe();
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
     //! Build the global map for the coupling vectors
     /*!
-     * \param couplingVariablesGlobalNumber - Global number of coupling variables
-     * \param MyGlobalElements - Epetra_Map MyGlobalElements
+     * @param couplingMap Global coupling map
      */
-    void BuildCouplingVectorsMap( UInt&             couplingVariablesGlobalNumber,
-                                  std::vector<int>& MyGlobalElements );
+    void CreateCouplingMap( EpetraMap& couplingMap );
 
     //! Import the values of the coupling variables
+    /*!
+     * @param CouplingVariables Global vector of coupling variables
+     */
     void ImportCouplingVariables( const VectorType& CouplingVariables );
 
     //! Export the values of the coupling variables
+    /*!
+     * @param CouplingVariables Global vector of coupling variables
+     */
     void ExportCouplingVariables( VectorType& CouplingVariables );
+
+    //! Export the Jacobian matrix
+    /*!
+     * @param Jacobian Jacobian Matrix
+     */
+    void ExportJacobian( MatrixType& Jacobian );
 
     //! Export the values of the Jacobian product
     /*!
-     * \param deltaCouplingVariables - variation of the coupling variables
+     * @param deltaCouplingVariables variation of the coupling variables
+     * @param JacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
      */
     void ExportJacobianProduct( const VectorType& deltaCouplingVariables, VectorType& JacobianProduct );
+
+    //! Save the coupling variables information on a file
+    void SaveSolution();
 
     //@}
 
@@ -128,49 +180,45 @@ public:
 
     //! Set the global ID of the coupling
     /*!
-     * \param id - Coupling ID
+     * @param id Coupling ID
      */
-    void SetID( const UInt& id )
-    {
-        M_ID = id;
-    }
+    void SetID( const UInt& id );
 
     //! Set the data file to load information of the coupling condition
     /*!
-     * \param dataFile - Name and path of data file
+     * @param dataFile Name and path of data file
      */
     void SetDataFile( const std::string& dataFile );
 
     //! Add a pointer to one of the models to couple
     /*!
-     * \param model - shared_ptr of the model
+     * @param model shared_ptr of the model
      */
-    void AddModel( const PhysicalModel_ptr& model )
-    {
-        M_models.push_back( model );
-    }
+    void AddModel( const Model_ptrType& model );
+
+    //! Set global data for physical quantities and time
+    /*!
+     * @param dataPhysics Data container for physical quantities
+     * @param dataTime Data container for time parameters
+     */
+    void SetData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics,
+                  const boost::shared_ptr< DataTime >& dataTime );
 
     //! Add a flag of one of the models to couple
     /*!
-     * \param flag - flag of the model
+     * @param flag flag of the model
      */
-    void AddFlag( const BCFlag& flag )
-    {
-        M_flags.push_back( flag );
-    }
+    void AddFlag( const BCFlag& flag );
 
     //! Add a flag of one of the models to couple
     /*!
-     * \param flagID - get from the model the flag with this flagID
+     * @param flagID get from the model the flag with this flagID
      */
-    void AddFlagID( const UInt& flagID )
-    {
-        M_flags.push_back( M_models.back()->GetFlag( flagID ) );
-    }
+    void AddFlagID( const UInt& flagID );
 
     //! Set the epetra communicator for the coupling
     /*!
-     * \param comm - Epetra communicator
+     * @param comm Epetra communicator
      */
     void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
 
@@ -181,55 +229,45 @@ public:
     //@{
 
     //! Get the global ID of the coupling
-    const UInt& GetID() const
-    {
-        return M_ID;
-    }
+    /*!
+     * @return global ID of the coupling
+     */
+    const UInt& GetID() const;
 
     //! Get the type of the coupling
-    const couplingsTypes& GetType() const
-    {
-        return M_type;
-    }
+    /*!
+     * @return type of the coupling
+     */
+    const couplingsTypes& GetType() const;
 
     //! Get the name of the coupling
-    const std::string& GetCouplingName() const
-    {
-        return M_couplingName;
-    }
+    /*!
+     * @return name of the coupling
+     */
+    const std::string& GetCouplingName() const;
+
+    //! Get the number of models connected by the coupling
+    UInt GetModelsNumber() const;
+
+    //! Get the model local ID through global ID
+    /*!
+     * @param ID global ID of the model
+     * @return local ID of the model
+     */
+    UInt GetModelLocalID( const UInt& ID ) const;
+
+    //! Get the model connected by the coupling through local ID
+    /*!
+     * @param ID local ID of the model
+     * @return Pointer to the model
+     */
+    Model_ptrType GetModel( const UInt& LocalID ) const;
 
     //! Get the number of the coupling variables
-    const UInt& GetCouplingVariablesNumber() const
-    {
-        return M_couplingIndex.first;
-    }
-
-    //@}
-
-
-    //! @name MultiScale PhysicalCoupling Virtual Functions
-    //@{
-
-    //! Setup the data of the coupling
-    virtual void SetupData( void ) = 0;
-
-    //! Setup the coupling
-    virtual void SetupCoupling( void ) = 0;
-
-    //! Initialize the values of the coupling variables
-    virtual void InitializeCouplingVariables( void ) = 0;
-
-    //! Export the values of the coupling residuals
-    virtual void ExportCouplingResiduals( VectorType& CouplingResiduals ) = 0;
-
-    //! Compute Jacobian product: J(X) * X
     /*!
-     * \param deltaCouplingVariables - variation of the coupling variables
+     * @return number of the coupling variables
      */
-    virtual void ComputeJacobianProduct( const VectorType& deltaCouplingVariables ) = 0;
-
-    //! Display some information about the coupling
-    virtual void ShowMe( void );
+    const UInt& GetCouplingVariablesNumber() const;
 
     //@}
 
@@ -238,55 +276,55 @@ protected:
     //! @name Protected Methods
     //@{
 
-    //! Get the number of models connected by the coupling
-    inline UInt modelsNumber() const
-    {
-        return static_cast< UInt > ( M_models.size() );
-    }
+    //! Create the local vectors of the coupling
+    void CreateLocalVectors();
 
     //! Import the content of the Global Vector in the Local vector
     /*!
-     * \param globalVector - the global vector
-     * \param localVector - the local vector
+     * @param globalVector the global vector
+     * @param localVector the local vector
      */
     void ImportCouplingVector( const VectorType& globalVector, VectorType& localVector );
 
     //! Export the content of the Local Vector in the Global vector
     /*!
-     * \param localVector - the local vector
-     * \param globalVector - the global vector
+     *
+     * @param localVector the local vector
+     * @param globalVector the global vector
      */
     void ExportCouplingVector( const VectorType& localVector, VectorType& globalVector );
 
     //! Display and error message for the specific model
     /*!
-     * \param model - shared_ptr to the specific model
+     * @param model shared_ptr to the specific model
      */
-    void switchErrorMessage( const PhysicalModel_ptr& model );
+    void switchErrorMessage( const Model_ptrType& model );
 
     //@}
 
-    static UInt                         M_couplingsNumber;
+    static UInt                          M_couplingsNumber;
 
-    UInt                                M_ID;
-    couplingsTypes                      M_type;
+    UInt                                 M_ID;
+    couplingsTypes                       M_type;
 
-    GetPot                              M_dataFile;
-    std::vector< PhysicalModel_ptr >    M_models;
-    std::vector< BCFlag >               M_flags;
-    std::string                         M_couplingName;
+    GetPot                               M_dataFile;
+    ModelsVector_Type                    M_models;
+    std::string                          M_couplingName;
+    std::vector< BCFlag >                M_flags;
 
-    boost::shared_ptr< Epetra_Comm >    M_comm;
-    boost::shared_ptr< Displayer >      M_displayer;
+    std::pair< UInt, UInt >              M_couplingIndex;
 
-    std::pair< UInt, UInt >             M_couplingIndex;
+    Vector_ptrType                       M_LocalCouplingVariables;
+    Vector_ptrType                       M_LocalCouplingResiduals;
+    Vector_ptrType                       M_LocalDeltaCouplingVariables;
 
-    Vector_ptrType                      M_LocalCouplingVariables;
-    Vector_ptrType                      M_LocalCouplingResiduals;
-    Vector_ptrType                      M_LocalJacobianProduct;
-    Vector_ptrType                      M_LocalDeltaCouplingVariables;
+    boost::shared_ptr< MS_PhysicalData > M_dataPhysics;
+    boost::shared_ptr< DataTime >        M_dataTime;
+
+    boost::shared_ptr< Epetra_Comm >     M_comm;
+    boost::shared_ptr< Displayer >       M_displayer;
 };
 
 } // Namespace LifeV
 
-#endif /* __MS_PhysicalCoupling_H */
+#endif /* MS_PhysicalCoupling_H */

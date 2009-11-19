@@ -1,44 +1,41 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-09-28
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Solver
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 28-09-2009
  */
-/**
- \file MS_Solver.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-09-28
- */
 
-#ifndef __MS_Solver_H
-#define __MS_Solver_H 1
+#ifndef MS_Solver_H
+#define MS_Solver_H 1
 
-#include "Epetra_ConfigDefs.h"
-#ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
-#else
-#include "Epetra_SerialComm.h"
-#endif
-
-#include <life/lifecore/life.hpp>
+#include <lifemc/lifesolver/MS_Definitions.hpp>
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 #include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
@@ -46,32 +43,20 @@
 
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
 
-#include <boost/array.hpp>
-#include <boost/algorithm/string.hpp>
-
 namespace LifeV {
 
 //! MS_Solver - The MultiScale problem solver
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_Solver class provides a series of functions to create and
  *  solve a general MultiScale problem.
- *
- *  @author Cristiano Malossi
  */
 class MS_Solver
 {
 public:
 
-    typedef singleton< factory< MS_Algorithm, algorithmsTypes > >       FactoryAlgorithms;
-    typedef MS_Model_MultiScale::FactoryModels                          FactoryModels;
-    typedef MS_Model_MultiScale::FactoryCouplings                       FactoryCouplings;
-
-    typedef boost::shared_ptr< MS_Algorithm >                           Algorthm_ptrType;
-
-    typedef MS_PhysicalModel::VectorType                                VectorType;
-    typedef MS_PhysicalModel::Vector_ptrType                            Vector_ptrType;
-
-    //! @name Constructors, Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Constructor
@@ -79,7 +64,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param algorithm - MS_Solver
+     * @param algorithm MS_Solver
      */
     MS_Solver( const MS_Solver& solver );
 
@@ -89,32 +74,42 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * \param solver - MS_Solver
+     * @param solver MS_solver
+     * @return reference to a copy of the class
      */
     MS_Solver& operator=( const MS_Solver& solver );
 
+    //@}
+
+
+    //! @name Methods
+    //@{
+
     //! Set the epetra communicator for the MultiScale problem
     /*!
-     * \param comm - Epetra communicator
+     * @param comm Epetra communicator
      */
     void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
 
     //! Setup the problem
     /*!
-     * \param dataFile - Name and path of data file
+     * @param dataFile Name and path of the data file
      */
     void SetupProblem( const std::string& dataFile );
 
     //! Run the time-loop to solve the MultiScale problem
-    void SolveProblem( void );
+    /*!
+     * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
+     */
+    bool SolveProblem();
 
     //! Display some information about the MultiScale problem (to be called after SetupProblem)
-    void ShowMe( void );
+    void ShowMe();
 
     //@}
 
@@ -130,7 +125,7 @@ private:
     boost::shared_ptr< MS_Model_MultiScale > M_multiscale;
 
     // Algorithm for subiterations
-    Algorthm_ptrType                         M_algorithm;
+    Algorithm_ptrType                        M_algorithm;
 
     // PhysicalData container
     boost::shared_ptr< MS_PhysicalData >     M_dataPhysics;
@@ -150,4 +145,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* __MS_Solver_H */
+#endif /* MS_Solver_H */

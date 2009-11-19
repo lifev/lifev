@@ -1,31 +1,35 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-10-23
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Algorithm_Aitken.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-10-23
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Aitken Algorithm
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-10-2009
  */
 
 #include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
@@ -33,7 +37,7 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructors
+// Constructors & Destructor
 // ===================================================
 MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
     super               (),
@@ -70,7 +74,7 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm )
 }
 
 // ===================================================
-//! Methods
+// Operators
 // ===================================================
 MS_Algorithm_Aitken&
 MS_Algorithm_Aitken::operator=( const MS_Algorithm_Aitken& algorithm )
@@ -87,7 +91,7 @@ MS_Algorithm_Aitken::operator=( const MS_Algorithm_Aitken& algorithm )
 }
 
 // ===================================================
-//! Virtual Methods
+// MultiScale Algorithm Virtual Methods
 // ===================================================
 void
 MS_Algorithm_Aitken::SetupData( const GetPot& DataFile )
@@ -106,19 +110,28 @@ MS_Algorithm_Aitken::SetupData( const GetPot& DataFile )
 }
 
 void
-MS_Algorithm_Aitken::SubIterate( void )
+MS_Algorithm_Aitken::SubIterate()
 {
 
 #ifdef DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::SubIterate( tolerance, subITMax ) \n";
 #endif
 
+    // Check if it is necessary to performs subiterations
+    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
+    Real residual = M_couplingResiduals->Norm2();
+
     if ( M_displayer->isLeader() )
-        std::cout << " MS-  Aitken Algorithm \n" << std::endl;
+        std::cout << " MS-  Residual:                                " << residual << std::endl;
+
+    if ( residual <= M_Tolerance )
+        return;
+
+    if ( M_displayer->isLeader() )
+        std::cout << " MS-  Aitken Algorithm" << std::endl;
 
     M_multiscale->ExportCouplingVariables( *M_couplingVariables );
 
-    Real residual = 0;
     M_generalizedAitken.restart( true );
 
     // Temporary Computation of a Block Vector - Testing purpose
@@ -128,26 +141,13 @@ MS_Algorithm_Aitken::SubIterate( void )
     //std::cout << "blocksVector: " << std::endl;
     //blocksVector.ShowMe();
 
-    for ( UInt subIT = 0; subIT < M_SubiterationsMaximumNumber; ++subIT )
+    for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
     {
-        M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-        residual = M_couplingResiduals->Norm2();
-
-        if ( M_displayer->isLeader() )
-        {
-            std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
-            std::cout << " MS-  Residual:                                " << residual << std::endl;
-        }
-
         // To be moved in a post-processing class
-        std::cout << " MS-  CouplingVariables:\n" << std::endl;
-        M_couplingVariables->ShowMe();
-        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-        M_couplingResiduals->ShowMe();
-
-        // Verify tolerance
-        if ( residual <= M_Tolerance )
-            break;
+        //std::cout << " MS-  CouplingVariables:\n" << std::endl;
+        //M_couplingVariables->ShowMe();
+        //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
+        //M_couplingResiduals->ShowMe();
 
         // Update Coupling Variables
         switch ( M_method )
@@ -171,19 +171,37 @@ MS_Algorithm_Aitken::SubIterate( void )
                 break;
         }
 
-        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-        M_couplingVariables->ShowMe();
+        //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
+        //M_couplingVariables->ShowMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->ImportCouplingVariables( *M_couplingVariables );
 
         // SolveSystem
         M_multiscale->SolveSystem();
+
+        // Check the new residual
+        M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
+        Real residual = M_couplingResiduals->Norm2();
+
+        // Display subiteration information
+        if ( M_displayer->isLeader() )
+        {
+            std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
+            std::cout << " MS-  Residual:                                " << residual << std::endl;
+        }
+
+        // Verify tolerance
+        if ( residual <= M_Tolerance )
+            return;
     }
+
+    MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( residual ) +
+                                 " (required: " + number2string( M_Tolerance ) + ")\n" );
 }
 
 void
-MS_Algorithm_Aitken::ShowMe( void )
+MS_Algorithm_Aitken::ShowMe()
 {
     if ( M_displayer->isLeader() )
     {

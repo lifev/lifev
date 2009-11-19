@@ -1,38 +1,41 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-03-12
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Model_Fluid3D.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-03-12
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Model Fluid3D
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 12-03-2009
  */
 
-#ifndef __MS_Model_Fluid3D_H
-#define __MS_Model_Fluid3D_H 1
 
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#ifndef MS_Model_Fluid3D_H
+#define MS_Model_Fluid3D_H 1
+
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -44,14 +47,16 @@
 
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
+#include <lifemc/lifealg/AztecOOPreconditioner.hpp>
+
 namespace LifeV {
 
 //! MS_Model_Fluid3D - MultiScale model for 3D Fluid simulations
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_Model_Fluid3D class is an implementation of the MS_PhysicalModel
  *  for 3D Fluid problem (in particular Oseen with Shape Derivatives).
- *
- *  @author Cristiano Malossi
  */
 class MS_Model_Fluid3D: public virtual MS_PhysicalModel
 {
@@ -80,7 +85,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param Fluid3D - MS_Model_Fluid3D
+     * @param Fluid3D MS_Model_Fluid3D
      */
     MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D );
 
@@ -90,56 +95,60 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * \param fluid3D - MS_Model_Fluid3D
+     * @param fluid3D MS_Model_Fluid3D
+     * @return reference to a copy of the class
      */
     MS_Model_Fluid3D& operator=( const MS_Model_Fluid3D& fluid3D );
-
-    //! Setup the data of the linear model
-    void SetupLinearData( void );
-
-    //! Setup the linear model
-    void SetupLinearModel( void );
-
-    //! Build the linear system matrix and vectors
-    void BuildLinearSystem( void );
-
-    //! Update the linear system matrix and vectors
-    void UpdateLinearSystem( void );
-
-    //! Solve the linear problem
-    void SolveLinearSystem( void );
 
     //@}
 
 
-    //! @name MultiScale Physical Model
+    //! @name MultiScale PhysicalModel Virtual Methods
     //@{
 
     //! Setup the data of the model
-    void SetupData( void );
+    void SetupData();
 
     //! Setup the model
-    void SetupModel( void );
+    void SetupModel();
 
     //! Build the system matrix and vectors
-    void BuildSystem( void );
+    void BuildSystem();
 
     //! Update the system matrix and vectors
-    void UpdateSystem( void );
+    void UpdateSystem();
 
     //! Solve the problem
-    void SolveSystem( void );
+    void SolveSystem();
 
     //! Save the solution
-    void SaveSolution( void );
+    void SaveSolution();
 
     //! Display some information about the model
-    void ShowMe( void );
+    void ShowMe();
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Setup the data of the linear model
+    void SetupLinearData();
+
+    //! Setup the linear model
+    void SetupLinearModel();
+
+    //! Update the linear system matrix and vectors
+    void UpdateLinearModel();
+
+    //! Solve the linear problem
+    void SolveLinearModel( bool& SolveLinearSystem );
 
     //@}
 
@@ -148,79 +157,99 @@ public:
     //@{
 
     //! Get the BCInterface container of the boundary conditions of the model
-    FluidBCType& GetBC( void )
-    {
-        return *M_FluidBC;
-    }
+    /*!
+     * @return BCInterface container
+     */
+    FluidBCType& GetBC();
 
     //! Get the BCInterface container of the boundary conditions of the linear model
-    FluidBCType& GetLinearBC( void )
-    {
-        return *M_LinearFluidBC;
-    }
-
-    //! Get the area on a specific boundary face of the model
     /*!
-     * \param flag - flag of the boundary face
+     * @return BCInterface container
      */
-    Real GetArea( const BCFlag& flag ) const
-    {
-        return M_Fluid->area( flag );
-    }
-
-    //! Get the flux on a specific boundary face of the model
-    /*!
-     * \param flag - flag of the boundary face
-     */
-    Real GetFlux( const BCFlag& flag ) const
-    {
-        return M_Fluid->flux( flag );
-    }
-
-    //! Get the flux on a specific boundary face of the linear model
-    /*!
-     * \param flag - flag of the boundary face
-     */
-    Real GetLinearFlux( const BCFlag& flag ) const
-    {
-        return M_Fluid->GetLinearFlux( flag );
-    }
-
-    //! Get the pressure on a specific boundary face of the model
-    /*!
-     * \param flag - flag of the boundary face
-     */
-    Real GetPressure( const BCFlag& flag ) const
-    {
-        return M_Fluid->pressure( flag );
-    }
-
-    //! Get the pressure on a specific boundary face of the linear model
-    /*!
-     * \param flag - flag of the boundary face
-     */
-    Real GetLinearPressure( const BCFlag& flag ) const
-    {
-        return M_Fluid->GetLinearPressure( flag );
-    }
+    FluidBCType& GetLinearBC();
 
     //! Get the density on a specific boundary face of the model
     /*!
-     * \param flag - flag of the boundary face
+     * @param flag flag of the boundary face
+     * @return density value
      */
-    Real GetDensity( const BCFlag& /*flag*/) const
-    {
-        return M_FluidData->density();
-    }
+    Real GetDensity( const BCFlag& /*flag*/) const;
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
-     * \param flag - flag of the boundary face
+     * @param flag flag of the boundary face
+     * @return viscosity value
      */
-    Real GetViscosity( const BCFlag& /*flag*/) const
-    {
-        return M_FluidData->viscosity();
-    }
+    Real GetViscosity( const BCFlag& /*flag*/) const;
+
+    //! Get the area on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return area value
+     */
+    Real GetArea( const BCFlag& Flag ) const;
+
+    //! Get the flux on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return flux value
+     */
+    Real GetFlux( const BCFlag& Flag ) const;
+
+    //! Get the integral of the pressure (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return pressure value
+     */
+    Real GetPressure( const BCFlag& Flag ) const;
+
+    //! Get the integral of the dynamic pressure (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return dynamic pressure value
+     */
+    Real GetDynamicPressure( const BCFlag& Flag ) const;
+
+    //! Get the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param StressType Type of approximation for the stress
+     * @return stress value
+     */
+    Real GetStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
+
+    //! Get the variation of the flux (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the flux
+     */
+    Real GetDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the pressure (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the pressure
+     */
+    Real GetDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the total pressure (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the dynamic pressure
+     */
+    Real GetDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param StressType Type of approximation for the stress
+     * @return variation of the stress
+     */
+    Real GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
 
     //@}
 
@@ -230,10 +259,10 @@ private:
     //@{
 
     //! Setup the FE space for pressure and velocity
-    void setupFEspace( void );
+    void setupFEspace();
 
     //! Setup the DOF of the model
-    void setupDOF( void );
+    void setupDOF();
 
     //! Compute the number fluxes applied to the model
     UInt imposeFluxes( const boost::shared_ptr< FluidBCType >& BC );
@@ -251,8 +280,12 @@ private:
     boost::shared_ptr< EpetraMap >        M_FluidFullMap;
     boost::shared_ptr< FluidVectorType >  M_FluidSolution;
 
+    // Fluid Parameters
+    UInt                                  M_TimeStepForNewPreconditioner;
+
     // Linear Fluid problem
     boost::shared_ptr< FluidBCType >      M_LinearFluidBC;
+    bool                                  M_UpdateLinearModel;
 
     // FE spaces
     boost::shared_ptr< FESpaceType >      M_uFESpace;
@@ -276,4 +309,4 @@ inline MS_PhysicalModel* createFluid3D()
 
 } // Namespace LifeV
 
-#endif /* __MS_Model_Fluid3D_H */
+#endif /* MS_Model_Fluid3D_H */

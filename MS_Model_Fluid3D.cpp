@@ -1,31 +1,35 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-03-12
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Model_Fluid3D.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-03-12
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Model Fluid3D
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 12-03-2009
  */
 
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
@@ -33,26 +37,27 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructor
+// Constructors & Destructor
 // ===================================================
 MS_Model_Fluid3D::MS_Model_Fluid3D() :
-    super           (),
-    M_output        (),
-    M_Fluid         (),
-    M_FluidBC       (),
-    M_FluidBDF      (),
-    M_FluidData     (),
-    M_FluidMesh     (),
-    M_FluidFullMap  (),
-    M_FluidSolution (),
-    M_LinearFluidBC (),
-    M_uFESpace      (),
-    M_pFESpace      (),
-    M_uDOF          ( 0 ),
-    M_pDOF          ( 0 ),
-    M_alpha         ( 0 ),
-    M_beta          (),
-    M_RHS           ()
+    super                          (),
+    M_output                       (),
+    M_Fluid                        (),
+    M_FluidBC                      (),
+    M_FluidBDF                     (),
+    M_FluidData                    (),
+    M_FluidMesh                    (),
+    M_FluidFullMap                 (),
+    M_FluidSolution                (),
+    M_LinearFluidBC                (),
+    M_UpdateLinearModel            ( true ),
+    M_uFESpace                     (),
+    M_pFESpace                     (),
+    M_uDOF                         ( 0 ),
+    M_pDOF                         ( 0 ),
+    M_alpha                        ( 0 ),
+    M_beta                         (),
+    M_RHS                          ()
 {
 
 #ifdef DEBUG
@@ -63,28 +68,29 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
 }
 
 MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
-    super           ( Fluid3D ),
-    M_output        ( Fluid3D.M_output ),
-    M_Fluid         ( Fluid3D.M_Fluid ),
-    M_FluidBC       ( Fluid3D.M_FluidBC ),
-    M_FluidBDF      ( Fluid3D.M_FluidBDF ),
-    M_FluidData     ( Fluid3D.M_FluidData ),
-    M_FluidMesh     ( Fluid3D.M_FluidMesh ),
-    M_FluidFullMap  ( Fluid3D.M_FluidFullMap ),
-    M_FluidSolution ( Fluid3D.M_FluidSolution ),
-    M_LinearFluidBC ( Fluid3D.M_LinearFluidBC ),
-    M_uFESpace      ( Fluid3D.M_uFESpace ),
-    M_pFESpace      ( Fluid3D.M_pFESpace ),
-    M_uDOF          ( Fluid3D.M_uDOF ),
-    M_pDOF          ( Fluid3D.M_pDOF ),
-    M_alpha         ( Fluid3D.M_alpha ),
-    M_beta          ( Fluid3D.M_beta ),
-    M_RHS           ( Fluid3D.M_RHS )
+    super                          ( Fluid3D ),
+    M_output                       ( Fluid3D.M_output ),
+    M_Fluid                        ( Fluid3D.M_Fluid ),
+    M_FluidBC                      ( Fluid3D.M_FluidBC ),
+    M_FluidBDF                     ( Fluid3D.M_FluidBDF ),
+    M_FluidData                    ( Fluid3D.M_FluidData ),
+    M_FluidMesh                    ( Fluid3D.M_FluidMesh ),
+    M_FluidFullMap                 ( Fluid3D.M_FluidFullMap ),
+    M_FluidSolution                ( Fluid3D.M_FluidSolution ),
+    M_LinearFluidBC                ( Fluid3D.M_LinearFluidBC ),
+    M_UpdateLinearModel            ( Fluid3D.M_UpdateLinearModel ),
+    M_uFESpace                     ( Fluid3D.M_uFESpace ),
+    M_pFESpace                     ( Fluid3D.M_pFESpace ),
+    M_uDOF                         ( Fluid3D.M_uDOF ),
+    M_pDOF                         ( Fluid3D.M_pDOF ),
+    M_alpha                        ( Fluid3D.M_alpha ),
+    M_beta                         ( Fluid3D.M_beta ),
+    M_RHS                          ( Fluid3D.M_RHS )
 {
 }
 
 // ===================================================
-//! Methods
+// Operators
 // ===================================================
 MS_Model_Fluid3D&
 MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
@@ -92,111 +98,32 @@ MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
     if ( this != &Fluid3D )
     {
         super::operator=( Fluid3D );
-        M_output        = Fluid3D.M_output;
-        M_Fluid         = Fluid3D.M_Fluid;
-        M_FluidBC       = Fluid3D.M_FluidBC;
-        M_FluidBDF      = Fluid3D.M_FluidBDF;
-        M_FluidMesh     = Fluid3D.M_FluidMesh;
-        M_FluidFullMap  = Fluid3D.M_FluidFullMap;
-        M_FluidSolution = Fluid3D.M_FluidSolution;
-        M_LinearFluidBC = Fluid3D.M_LinearFluidBC;
-        M_uFESpace      = Fluid3D.M_uFESpace;
-        M_pFESpace      = Fluid3D.M_pFESpace;
-        M_uDOF          = Fluid3D.M_uDOF;
-        M_pDOF          = Fluid3D.M_pDOF;
-        M_alpha         = Fluid3D.M_alpha;
-        M_beta          = Fluid3D.M_beta;
-        M_RHS           = Fluid3D.M_RHS;
+        M_output                       = Fluid3D.M_output;
+        M_Fluid                        = Fluid3D.M_Fluid;
+        M_FluidBC                      = Fluid3D.M_FluidBC;
+        M_FluidBDF                     = Fluid3D.M_FluidBDF;
+        M_FluidMesh                    = Fluid3D.M_FluidMesh;
+        M_FluidFullMap                 = Fluid3D.M_FluidFullMap;
+        M_FluidSolution                = Fluid3D.M_FluidSolution;
+        M_LinearFluidBC                = Fluid3D.M_LinearFluidBC;
+        M_UpdateLinearModel            = Fluid3D.M_UpdateLinearModel;
+        M_uFESpace                     = Fluid3D.M_uFESpace;
+        M_pFESpace                     = Fluid3D.M_pFESpace;
+        M_uDOF                         = Fluid3D.M_uDOF;
+        M_pDOF                         = Fluid3D.M_pDOF;
+        M_alpha                        = Fluid3D.M_alpha;
+        M_beta                         = Fluid3D.M_beta;
+        M_RHS                          = Fluid3D.M_RHS;
     }
 
     return *this;
 }
 
-void
-MS_Model_Fluid3D::SetupLinearData( void )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearData( ) \n";
-#endif
-
-    // Boundary Conditions for the linear problem
-    M_LinearFluidBC.reset( new FluidBCType( M_dataFile, "linear_fluid" ) );
-    M_LinearFluidBC->SetOperator( M_Fluid );
-    M_LinearFluidBC->BuildHandler();
-}
-
-void
-MS_Model_Fluid3D::SetupLinearModel( void )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
-#endif
-
-    // Impose offset for Flux BC
-    imposeFluxes( M_LinearFluidBC );
-}
-
-void
-MS_Model_Fluid3D::BuildLinearSystem( void )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::BuildLinearSystem() \n";
-#endif
-
-    UpdateLinearSystem();
-}
-
-void
-MS_Model_Fluid3D::UpdateLinearSystem( void )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::UpdateLinearSystem() \n";
-#endif
-
-    //Create an empty vector
-    FluidVectorType VectorZero( *M_FluidSolution ); VectorZero = 0.0;
-
-    //updateLinearSystem
-    M_Fluid->updateLinearSystem( M_Fluid->matrNoBC(),
-                                 M_alpha,
-                                 *M_beta,
-                                 M_Fluid->solution(),
-                                 VectorZero,
-                                 VectorZero,
-                                 VectorZero,
-                                 VectorZero );
-
-    //Update Properties of BC
-    M_LinearFluidBC->UpdateOperatorVariables();
-
-    //MPI Barrier
-    M_comm->Barrier();
-}
-
-void
-MS_Model_Fluid3D::SolveLinearSystem( void )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SolveLinearSystem() \n";
-#endif
-
-    //Solve the linear problem
-    M_Fluid->iterateLin( *M_LinearFluidBC->Handler_ptr() );
-
-    //MPI Barrier
-    M_comm->Barrier();
-}
-
 // ===================================================
-//! MultiScale Physical Model
+// MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetupData( void )
+MS_Model_Fluid3D::SetupData()
 {
 
 #ifdef DEBUG
@@ -226,15 +153,16 @@ MS_Model_Fluid3D::SetupData( void )
 
     //Boundary Conditions for the problem
     M_FluidBC.reset( new FluidBCType( M_dataFile, "fluid" ) );
-    M_FluidBC->SetOperator( M_Fluid ); //MUST BE MOVED AFTER M_Fluid.reset !!!
+    M_FluidBC->SetOperator( M_Fluid );    //MUST BE MOVED AFTER M_Fluid.reset !!!
     M_FluidBC->BuildHandler();
     M_FluidBC->UpdateOperatorVariables(); //MUST BE MOVED INSIDE THE UPDATE !!!
 
-    SetupLinearData(); //TODO MOVE THIS!
+    //Setup linear problem
+    SetupLinearData();
 }
 
 void
-MS_Model_Fluid3D::SetupModel( void )
+MS_Model_Fluid3D::SetupModel()
 {
 
 #ifdef DEBUG
@@ -243,8 +171,10 @@ MS_Model_Fluid3D::SetupModel( void )
 
     //Fluid
     M_Fluid.reset( new FluidType( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, imposeFluxes( M_FluidBC ) ) );
-
     M_Fluid->setUp( M_dataFile ); //Remove Preconditioner and Solver if possible!
+
+    //Setup linear model
+    SetupLinearModel();
 
     //Fluid MAP
     M_FluidFullMap.reset( new EpetraMap( M_Fluid->getMap() ) );
@@ -267,12 +197,10 @@ MS_Model_Fluid3D::SetupModel( void )
 
     //MPI Barrier
     M_comm->Barrier();
-
-    SetupLinearModel(); //TODO MOVE THIS!
 }
 
 void
-MS_Model_Fluid3D::BuildSystem( void )
+MS_Model_Fluid3D::BuildSystem()
 {
 
 #ifdef DEBUG
@@ -298,7 +226,7 @@ MS_Model_Fluid3D::BuildSystem( void )
 }
 
 void
-MS_Model_Fluid3D::UpdateSystem( void )
+MS_Model_Fluid3D::UpdateSystem()
 {
 
 #ifdef DEBUG
@@ -319,18 +247,22 @@ MS_Model_Fluid3D::UpdateSystem( void )
     *M_beta = M_FluidBDF->bdf_u().extrap();
     *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->getTimeStep() );
 
+    //Linear system need to be updated!
+    M_UpdateLinearModel = true;
+
     //Set problem coefficients
     M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
     //Recompute preconditioner
-    M_Fluid->resetPrec( true ); //TODO: Recompute only each N time step!
+    if ( M_FluidData->getTimeStepNumber() % 1 == 0 )
+        M_Fluid->resetPrec( true );
 
     //MPI Barrier
     M_comm->Barrier();
 }
 
 void
-MS_Model_Fluid3D::SolveSystem( void )
+MS_Model_Fluid3D::SolveSystem()
 {
 
 #ifdef DEBUG
@@ -361,6 +293,9 @@ MS_Model_Fluid3D::SolveSystem( void )
         *M_beta = M_Fluid->solution();
         M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
+        //Linear model need to be updated!
+        M_UpdateLinearModel = true;
+
         M_Fluid->iterate( *M_FluidBC->Handler_ptr() );
     }
 
@@ -369,7 +304,7 @@ MS_Model_Fluid3D::SolveSystem( void )
 }
 
 void
-MS_Model_Fluid3D::SaveSolution( void )
+MS_Model_Fluid3D::SaveSolution()
 {
 
 #ifdef DEBUG
@@ -385,17 +320,17 @@ MS_Model_Fluid3D::SaveSolution( void )
 }
 
 void
-MS_Model_Fluid3D::ShowMe( void )
+MS_Model_Fluid3D::ShowMe()
 {
     if ( M_displayer->isLeader() )
     {
         super::ShowMe();
 
-        std::cout << "uOrder             = " << M_FluidData->uOrder() << std::endl
-                  << "pOrder             = " << M_FluidData->pOrder() << std::endl << std::endl;
+        std::cout << "uOrder              = " << M_FluidData->uOrder() << std::endl
+                  << "pOrder              = " << M_FluidData->pOrder() << std::endl << std::endl;
 
-        std::cout << "uDOF               = " << 3 * M_uDOF << std::endl
-                  << "pDOF               = " << M_pDOF << std::endl << std::endl << std::endl << std::endl;
+        std::cout << "uDOF                = " << 3 * M_uDOF << std::endl
+                  << "pDOF                = " << M_pDOF << std::endl << std::endl << std::endl << std::endl;
     }
 
     //MPI Barrier
@@ -403,10 +338,216 @@ MS_Model_Fluid3D::ShowMe( void )
 }
 
 // ===================================================
-//! Private Methods
+// Methods
 // ===================================================
 void
-MS_Model_Fluid3D::setupFEspace( void )
+MS_Model_Fluid3D::SetupLinearData()
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearData( ) \n";
+#endif
+
+    // Boundary Conditions for the linear problem
+    M_LinearFluidBC.reset( new FluidBCType( M_dataFile, "linear_fluid" ) );
+    M_LinearFluidBC->SetOperator( M_Fluid );
+    M_LinearFluidBC->BuildHandler();
+}
+
+void
+MS_Model_Fluid3D::SetupLinearModel()
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
+#endif
+
+    // Impose offset for Flux BC
+    imposeFluxes( M_LinearFluidBC );
+}
+
+void
+MS_Model_Fluid3D::UpdateLinearModel()
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::UpdateLinearModel() \n";
+#endif
+
+    //Create an empty vector
+    FluidVectorType VectorZero( *M_FluidSolution ); VectorZero = 0.0;
+
+    //UpdateLinearModel
+    M_Fluid->updateLinearSystem( M_Fluid->matrNoBC(),
+                                 M_alpha,
+                                 *M_beta,
+                                 M_Fluid->solution(),
+                                 VectorZero,
+                                 VectorZero,
+                                 VectorZero,
+                                 VectorZero );
+
+    //Update Properties of BC
+    M_LinearFluidBC->UpdateOperatorVariables();
+
+    //Linear System Updated
+    M_UpdateLinearModel = false;
+
+    //MPI Barrier
+    M_comm->Barrier();
+}
+
+void
+MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SolveLinearModel() \n";
+#endif
+
+    if ( !SolveLinearSystem )
+        return;
+
+    if ( M_UpdateLinearModel )
+        UpdateLinearModel();
+
+    //Solve the linear problem
+    M_Fluid->iterateLin( *M_LinearFluidBC->Handler_ptr() );
+
+    //This flag avoid recomputation of the same system
+    SolveLinearSystem = false;
+
+    //MPI Barrier
+    M_comm->Barrier();
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+MS_Model_Fluid3D::FluidBCType&
+MS_Model_Fluid3D::GetBC()
+{
+    return *M_FluidBC;
+}
+
+MS_Model_Fluid3D::FluidBCType&
+MS_Model_Fluid3D::GetLinearBC()
+{
+    return *M_LinearFluidBC;
+}
+
+Real
+MS_Model_Fluid3D::GetDensity( const BCFlag& /*flag*/) const
+{
+    return M_FluidData->density();
+}
+
+Real
+MS_Model_Fluid3D::GetViscosity( const BCFlag& /*flag*/) const
+{
+    return M_FluidData->viscosity();
+}
+
+Real
+MS_Model_Fluid3D::GetArea( const BCFlag& Flag ) const
+{
+    return M_Fluid->area( Flag );
+}
+
+Real
+MS_Model_Fluid3D::GetFlux( const BCFlag& Flag ) const
+{
+    return M_Fluid->flux( Flag );
+}
+
+Real
+MS_Model_Fluid3D::GetPressure( const BCFlag& Flag ) const
+{
+    return M_Fluid->pressure( Flag );
+}
+
+Real
+MS_Model_Fluid3D::GetDynamicPressure( const BCFlag& Flag ) const
+{
+    return 0.5 * GetDensity( Flag ) * ( GetFlux( Flag ) * GetFlux( Flag ) )
+                                    / ( GetArea( Flag ) * GetArea( Flag ) );
+}
+
+Real
+MS_Model_Fluid3D::GetStress( const BCFlag& Flag, const stressTypes& StressType ) const
+{
+    switch ( StressType )
+    {
+        case StaticPressure:
+        {
+            return -GetPressure( Flag );
+        }
+
+        case TotalPressure:
+        {
+            return -GetPressure( Flag ) + GetDynamicPressure( Flag ) * ( ( GetFlux( Flag ) > 0.0 ) ? 1 : -1 );
+        }
+
+        default:
+
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+
+            return 0.0;
+    }
+}
+
+Real
+MS_Model_Fluid3D::GetDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    SolveLinearModel( SolveLinearSystem );
+
+    return M_Fluid->GetLinearFlux( Flag );
+}
+
+Real
+MS_Model_Fluid3D::GetDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    SolveLinearModel( SolveLinearSystem );
+
+    return M_Fluid->GetLinearPressure( Flag );
+}
+
+Real
+MS_Model_Fluid3D::GetDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    SolveLinearModel( SolveLinearSystem );
+
+    return GetDensity( Flag ) * M_Fluid->GetLinearFlux( Flag ) * GetFlux( Flag ) / ( GetArea( Flag ) * GetArea( Flag ) );
+}
+
+Real
+MS_Model_Fluid3D::GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
+{
+    switch ( StressType )
+    {
+        case StaticPressure:
+        {
+            return -GetDeltaPressure( Flag, SolveLinearSystem );
+        }
+
+        case TotalPressure:
+        {
+            return -GetDeltaPressure( Flag, SolveLinearSystem ) + GetDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+        }
+
+        default:
+
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+
+            return 0.0;
+    }
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+void
+MS_Model_Fluid3D::setupFEspace()
 {
 
 #ifdef DEBUG
@@ -482,7 +623,7 @@ MS_Model_Fluid3D::setupFEspace( void )
 }
 
 void
-MS_Model_Fluid3D::setupDOF( void )
+MS_Model_Fluid3D::setupDOF()
 {
 
 #ifdef DEBUG

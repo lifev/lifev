@@ -1,35 +1,39 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-10-20
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Coupling_Stress.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-10-20
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Coupling Stress
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 20-10-2009
  */
 
-#ifndef __MS_Coupling_Stress_H
-#define __MS_Coupling_Stress_H 1
+#ifndef MS_Coupling_Stress_H
+#define MS_Coupling_Stress_H 1
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
@@ -38,10 +42,10 @@ namespace LifeV {
 
 //! MS_Coupling_Stress - Stress coupling condition
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_Coupling_Stress class is an implementation of the MS_PhysicalCoupling
  *  for applying Stress coupling conditions on the models.
- *
- *  @author Cristiano Malossi
  */
 class MS_Coupling_Stress: public virtual MS_PhysicalCoupling
 {
@@ -57,7 +61,7 @@ public:
 
     //! Copy constructor
     /*!
-     * \param Stress - MS_Coupling_Stress
+     * @param Stress MS_Coupling_Stress
      */
     MS_Coupling_Stress( const MS_Coupling_Stress& Stress );
 
@@ -67,41 +71,64 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * \param Stress - MS_Coupling_Stress
+     * @param Stress MS_Coupling_Stress
+     * @return reference to a copy of the class
      */
     MS_Coupling_Stress& operator=( const MS_Coupling_Stress& Stress );
 
     //@}
 
 
-    //! @name MultiScale Physical Coupling
+    //! @name MultiScale PhysicalCoupling Implementation
     //@{
 
     //! Setup the data of the coupling
-    void SetupData( void );
+    void SetupData();
 
     //! Setup the coupling
-    void SetupCoupling( void );
+    void SetupCoupling();
 
     //! Initialize the values of the coupling variables
-    void InitializeCouplingVariables( void );
+    void InitializeCouplingVariables();
 
     //! Update the values of the coupling residuals
     void ExportCouplingResiduals( VectorType& CouplingResiduals );
 
-    //! Compute Jacobian product: J(X) * X
+    //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
-     * \param deltaCouplingVariables - variation of the coupling variables
+     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @return list of models affected by the perturbation
      */
-    void ComputeJacobianProduct( const VectorType& deltaCouplingVariables );
+    ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID );
+
+    //! Insert constant coefficients into the Jacobian matrix
+    /*!
+     * @param Jacobian the Jacobian matrix
+     */
+    void InsertJacobianConstantCoefficients( MatrixType& Jacobian );
+
+    //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
+    /*!
+     * @param Jacobian the Jacobian matrix
+     * @param Column the column related to the perturbed variable
+     * @param ID the global ID of the model which is perturbed by the variable
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     */
+    void InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem );
 
     //! Display some information about the coupling
-    void ShowMe( void );
+    /*!
+     * @param output specify the output stream
+     */
+    void DisplayCouplingValues( std::ostream& output );
+
+    //! Display some information about the coupling
+    void ShowMe();
 
     //@}
 
@@ -110,54 +137,22 @@ private:
     //! @name Private Methods
     //@{
 
-    EpetraVector CouplingFunction( void );
+    template< class model >
+    inline void ImposeStress( const UInt& i );
 
-    //! Print the couplings quantities
-    void PrintQuantities( void );
-
-
+    Real FunctionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
 
     template< class model >
-    inline void imposeStress( const UInt& i );
+    inline void ImposeDeltaStress( const UInt& i );
 
-    template< class model >
-    inline Real computeFlux( const UInt& i );
-
-    template< class model >
-    inline Real computeStress( const UInt& i = 0 );
-
-    template< class model >
-    inline Real computeStaticPressure( const UInt& i );
-
-    template< class model >
-    inline Real computeDynamicPressure( const UInt& i );
-
-    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-
-
-
-    template< class model >
-    inline void imposeDeltaStress( const UInt& i );
-
-    template< class model >
-    inline Real computeDeltaFlux( const UInt& i );
-
-    Real functionDeltaStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
+    Real FunctionDeltaStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
 
     //@}
 
-    enum stressTypes
-    {
-        StaticPressure,
-        TotalPressure
-    };
-
     BCFunctionBase M_baseStress;
-
     BCFunctionBase M_baseDeltaStress;
 
-    static std::map< std::string, stressTypes > M_mapStress;
-    stressTypes                                 M_stressType;
+    stressTypes    M_stressType;
 };
 
 //! Factory create function
@@ -167,89 +162,28 @@ inline MS_PhysicalCoupling* createStress()
 }
 
 // ===================================================
-//! Template implementation
+// Template implementation
 // ===================================================
 template< class model >
 inline void
-MS_Coupling_Stress::imposeStress( const UInt& i )
+MS_Coupling_Stress::ImposeStress( const UInt& i )
 {
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
+    model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetBC().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress );
-}
-
-template< class model >
-inline Real
-MS_Coupling_Stress::computeFlux( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    return Model->GetFlux( M_flags[i] );
-}
-
-template< class model >
-inline Real
-MS_Coupling_Stress::computeStress( const UInt& i )
-{
-    switch ( M_stressType )
-    {
-        case StaticPressure:
-        {
-            return -computeStaticPressure< model > ( i );
-        }
-
-        case TotalPressure:
-        {
-            return -computeStaticPressure< model > ( i ) + ( computeFlux< model >( i ) > 0.0 ) * computeDynamicPressure< model > ( i );
-        }
-
-        default:
-
-            std::cout << "ERROR: Invalid pressure type [" << Enum2String( M_stressType, M_mapStress ) << "]" << std::endl;
-
-            return 0.0;
-    }
-}
-
-template< class model >
-inline Real
-MS_Coupling_Stress::computeStaticPressure( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    return Model->GetPressure( M_flags[i] );
-}
-
-template< class model >
-inline Real
-MS_Coupling_Stress::computeDynamicPressure( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    return 0.5 * Model->GetDensity( M_flags[i] ) * Model->GetFlux( M_flags[i] ) * Model->GetFlux( M_flags[i] ) / ( Model->GetArea( M_flags[i] ) * Model->GetArea( M_flags[i] ) );
+    Model->GetBC().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
+                          M_flags[i], Natural, Normal, M_baseStress );
 }
 
 template< class model >
 inline void
-MS_Coupling_Stress::imposeDeltaStress( const UInt& i )
+MS_Coupling_Stress::ImposeDeltaStress( const UInt& i )
 {
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
+    model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetLinearBC().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseDeltaStress );
-}
-
-template< class model >
-inline Real
-MS_Coupling_Stress::computeDeltaFlux( const UInt& i )
-{
-    model *Model = dynamic_cast< model * > ( &( *M_models[i] ) );
-
-    Model->UpdateLinearSystem();
-    Model->SolveLinearSystem();
-
-    return Model->GetLinearFlux( M_flags[i] );
+    Model->GetLinearBC().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
+                                M_flags[i], Natural, Normal, M_baseDeltaStress );
 }
 
 } // Namespace LifeV
 
-#endif /* __MS_Coupling_Stress_H */
+#endif /* MS_Coupling_Stress_H */

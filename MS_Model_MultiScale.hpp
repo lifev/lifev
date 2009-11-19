@@ -1,47 +1,40 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-03-12
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Model MultiScale
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 12-03-2009
  */
-/**
- \file MS_Model_MultiScale.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-03-12
- */
 
-#ifndef __MS_Model_MultiScale_H
-#define __MS_Model_MultiScale_H 1
+#ifndef MS_Model_MultiScale_H
+#define MS_Model_MultiScale_H 1
 
-#include "Epetra_ConfigDefs.h"
-#ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
-#else
-#include "Epetra_SerialComm.h"
-#endif
-
-#include <life/lifecore/life.hpp>
-#include <life/lifearray/tab.hpp>
-
-#include <lifemc/lifesolver/MS_PhysicalData.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
 
@@ -50,17 +43,14 @@
 #include <lifemc/lifesolver/MS_Coupling_Stress.hpp>
 #include <lifemc/lifesolver/MS_Coupling_FluxStress.hpp>
 
-#include <boost/array.hpp>
-#include <boost/algorithm/string.hpp>
-
 namespace LifeV {
 
 //! MS_Model_MultiScale - MultiScale model
 /*!
+ *  @author Cristiano Malossi
+ *
  *  The MS_Model_MultiScale class is an implementation of the MS_PhysicalModel
  *  for a general multiscale problem.
- *
- *  @author Cristiano Malossi
  */
 class MS_Model_MultiScale: public virtual MS_PhysicalModel
 {
@@ -68,13 +58,7 @@ public:
 
     typedef MS_PhysicalModel                                            super;
 
-    typedef singleton< factory< MS_PhysicalModel, modelsTypes > >       FactoryModels;
-    typedef singleton< factory< MS_PhysicalCoupling, couplingsTypes > > FactoryCouplings;
-
-    typedef boost::shared_ptr< MS_PhysicalModel >                       PhysicalModel_ptr;
-    typedef boost::shared_ptr< MS_PhysicalCoupling >                    PhysicalCoupling_ptr;
-
-    //! @name Constructors, Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Constructor
@@ -82,12 +66,52 @@ public:
 
     //! Copy constructor
     /*!
-     * \param multiscale - MS_Model_MultiScale
+     * @param multiscale MS_Model_MultiScale
      */
     MS_Model_MultiScale( const MS_Model_MultiScale& multiscale );
 
     //! Destructor
     ~MS_Model_MultiScale() {}
+
+    //@}class
+
+
+    //! @name Operators
+    //@{
+
+    //! Operator=
+    /*!
+     * @param multiscale MS_Model_MultiScale
+     * @return reference to a copy of the class
+     */
+    MS_Model_MultiScale& operator=( const MS_Model_MultiScale& multiscale );
+
+    //@}
+
+
+    //! @name MultiScale PhysicalModel Virtual Methods
+    //@{
+
+    //! Load data and create the models and the couplings
+    void SetupData();
+
+    //! Setup the model
+    void SetupModel();
+
+    //! Build the system matrix and vectors
+    void BuildSystem();
+
+    //! Update the system matrix and vectors
+    void UpdateSystem();
+
+    //! Solve the problem
+    void SolveSystem();
+
+    //! Save the solution
+    void SaveSolution();
+
+    //! Display some information about the multiscale problem (call after SetupProblem)
+    void ShowMe();
 
     //@}
 
@@ -95,22 +119,14 @@ public:
     //! @name Methods
     //@{
 
-    //! Operator=
-    /*!
-     * \param multiscale - MS_Model_MultiScale
-     */
-    MS_Model_MultiScale& operator=( const MS_Model_MultiScale& multiscale );
-
     //! Build the global map for the coupling vectors
     /*!
-     * \param couplingVariablesGlobalNumber - Global number of coupling variables
-     * \param MyGlobalElements - Epetra_Map MyGlobalElements
+     * @param couplingMap Global coupling map
      */
-    void BuildCouplingVectorsMap( UInt&             couplingVariablesGlobalNumber,
-                                  std::vector<int>& MyGlobalElements );
+    void CreateCouplingMap( EpetraMap& couplingMap );
 
     //! Setup parameters for the implicit coupling
-    void InitializeCouplingVariables( void );
+    void InitializeCouplingVariables();
 
     //! Import the values of the coupling variables
     void ImportCouplingVariables( const VectorType& CouplingVariables );
@@ -121,11 +137,11 @@ public:
     //! Export the values of the coupling residuals
     void ExportCouplingResiduals( VectorType& CouplingResiduals );
 
-    //! Export the values of the Jacobian product
+    //! Export the Jacobian matrix
     /*!
-     * \param deltaCouplingVariables - variation of the coupling variables
+     * @param Jacobian Jacobian Matrix
      */
-    void ExportJacobianProduct( const VectorType& deltaCouplingVariables, VectorType& JacobianProduct );
+    void ExportJacobian( MatrixType& Jacobian );
 
     //@}
 
@@ -134,34 +150,10 @@ public:
     //@{
 
     //! Get the number of the coupling variables
-    UInt GetCouplingVariablesNumber( void );
-
-    //@}
-
-
-    //! @name MultiScale Physical Model
-    //@{
-
-    //! Load data and create the models and the couplings
-    void SetupData( void );
-
-    //! Setup the model
-    void SetupModel( void );
-
-    //! Build the system matrix and vectors
-    void BuildSystem( void );
-
-    //! Update the system matrix and vectors
-    void UpdateSystem( void );
-
-    //! Solve the problem
-    void SolveSystem( void );
-
-    //! Save the solution
-    void SaveSolution( void );
-
-    //! Display some information about the multiscale problem (call after SetupProblem)
-    void ShowMe( void );
+    /*!
+     * @return number of the coupling variables
+     */
+    UInt GetCouplingVariablesNumber();
 
     //@}
 
@@ -179,13 +171,9 @@ private:
 
     //@}
 
-    // Models & Connections
-    std::map< UInt, PhysicalModel_ptr >    M_models;
-    std::map< UInt, PhysicalCoupling_ptr > M_couplings;
-
-    // Models & Connections size
-    UInt                                   M_modelsNumber;
-    UInt                                   M_couplingsNumber;
+    // Models & Couplings
+    ModelsVector_Type        M_modelsList;
+    CouplingsVector_Type     M_couplingsList;
 };
 
 //! Factory create function
@@ -196,4 +184,4 @@ inline MS_PhysicalModel* createMultiScale()
 
 } // Namespace LifeV
 
-#endif /* __MS_Model_MultiScale_H */
+#endif /* MS_Model_MultiScale_H */

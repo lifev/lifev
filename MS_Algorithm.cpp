@@ -1,31 +1,35 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-10-23
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_Algorithm.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-10-23
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Algorithm
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-10-2009
  */
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
@@ -35,7 +39,7 @@ namespace LifeV {
 std::map< std::string, algorithmsTypes > algorithmMap;
 
 // ===================================================
-//! Constructors
+// Constructors & Destructor
 // ===================================================
 MS_Algorithm::MS_Algorithm() :
     M_type                       (),
@@ -72,7 +76,7 @@ MS_Algorithm::MS_Algorithm( const MS_Algorithm& algorithm ) :
 }
 
 // ===================================================
-//! Methods
+// Operators
 // ===================================================
 MS_Algorithm&
 MS_Algorithm::operator=( const MS_Algorithm& algorithm )
@@ -91,6 +95,35 @@ MS_Algorithm::operator=( const MS_Algorithm& algorithm )
     return *this;
 }
 
+// ===================================================
+// MultiScale Algorithm Virtual Methods
+// ===================================================
+void
+MS_Algorithm::SetupData( const GetPot& DataFile )
+{
+
+#ifdef DEBUG
+    Debug( 8010 ) << "MS_Algorithm::SetupData( DataFile ) \n";
+#endif
+
+    M_SubiterationsMaximumNumber = DataFile( "Solver/Algorithm/subITMax", 100 );
+    M_Tolerance                  = DataFile( "Solver/Algorithm/tolerance", 1.e-10 );
+}
+
+void
+MS_Algorithm::ShowMe()
+{
+    std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
+
+    std::cout << "Algorithm type      = " << Enum2String( M_type, algorithmMap ) << std::endl
+              << "Max Sub-iterations  = " << M_SubiterationsMaximumNumber << std::endl
+              << "Tolerance           = " << M_Tolerance << std::endl << std::endl;
+    std::cout << std::endl << std::endl;
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
 void
 MS_Algorithm::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
 {
@@ -114,39 +147,57 @@ MS_Algorithm::SetMultiScaleProblem( const boost::shared_ptr< MS_Model_MultiScale
     M_multiscale = multiscale;
 
     // Build coupling variables and residuals vectors
-    std::vector<int> MyGlobalElements; //MyGlobalElements.resize( M_multiscale.GetCouplingVariablesNumber() );
-    UInt couplingVariablesGlobalNumber = 0;
-    M_multiscale->BuildCouplingVectorsMap( couplingVariablesGlobalNumber, MyGlobalElements );
+    std::vector<int> MyGlobalElements;
+    EpetraMap couplingMap( -1, static_cast<int> ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
+    M_multiscale->CreateCouplingMap( couplingMap );
 
-    EpetraMap map( static_cast<int> ( MyGlobalElements.size() ), static_cast<int> ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
-    M_couplingVariables.reset( new EpetraVector( map, Unique ) );
-    M_couplingResiduals.reset( new EpetraVector( map, Unique ) );
+    M_couplingVariables.reset( new EpetraVector( couplingMap, Unique ) );
+    M_couplingResiduals.reset( new EpetraVector( couplingMap, Unique ) );
 }
 
 // ===================================================
-//! Virtual Methods
+// Get Methods
 // ===================================================
-void
-MS_Algorithm::SetupData( const GetPot& DataFile )
+const algorithmsTypes&
+MS_Algorithm::GetType() const
 {
-
-#ifdef DEBUG
-    Debug( 8010 ) << "MS_Algorithm::SetupData( DataFile ) \n";
-#endif
-
-    M_SubiterationsMaximumNumber = DataFile( "Solver/Algorithm/subITMax", 100 );
-    M_Tolerance                  = DataFile( "Solver/Algorithm/tolerance", 1.e-10 );
+    return M_type;
 }
 
-void
-MS_Algorithm::ShowMe( void )
+const boost::shared_ptr< MS_Model_MultiScale >
+MS_Algorithm::GetMultiScaleProblem() const
 {
-    std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
+    return M_multiscale;
+}
 
-    std::cout << "Algorithm type      = " << Enum2String( M_type, algorithmMap ) << std::endl
-              << "Max Sub-iterations = " << M_SubiterationsMaximumNumber << std::endl
-              << "Tolerance          = " << M_Tolerance << std::endl << std::endl;
-    std::cout << std::endl << std::endl;
+const Vector_ptrType
+MS_Algorithm::GetCouplingVariables() const
+{
+    return M_couplingVariables;
+}
+
+const Vector_ptrType
+MS_Algorithm::GetCouplingResiduals() const
+{
+    return M_couplingResiduals;
+}
+
+const boost::shared_ptr< Epetra_Comm >
+MS_Algorithm::GetCommunicator() const
+{
+    return M_comm;
+}
+
+const UInt&
+MS_Algorithm::GetSubiterationsMaximumNumber() const
+{
+    return M_SubiterationsMaximumNumber;
+}
+
+const Real&
+MS_Algorithm::GetTolerance() const
+{
+    return M_Tolerance;
 }
 
 } // Namespace LifeV

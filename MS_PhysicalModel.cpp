@@ -1,31 +1,35 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-09-03
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file MS_PhysicalModel.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-09-03
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Physical Model
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 12-03-2009
  */
 
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
@@ -37,12 +41,13 @@ std::map< std::string, modelsTypes > modelsMap;
 UInt MS_PhysicalModel::M_modelsNumber = 0;
 
 // ===================================================
-//! Constructors
+// Constructors & Destructor
 // ===================================================
 MS_PhysicalModel::MS_PhysicalModel() :
     M_ID                (),
     M_type              (),
     M_dataFile          (),
+    M_couplings         (),
     M_modelName         (),
     M_flags             (),
     M_geometryScale     (),
@@ -73,6 +78,7 @@ MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
     M_ID                ( model.M_ID ),
     M_type              ( model.M_type ),
     M_dataFile          ( model.M_dataFile ),
+    M_couplings         ( model.M_couplings ),
     M_modelName         ( model.M_modelName ),
     M_flags             ( model.M_flags ),
     M_geometryScale     ( model.M_geometryScale ),
@@ -92,7 +98,7 @@ MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
 }
 
 // ===================================================
-//! Methods
+// Operators
 // ===================================================
 MS_PhysicalModel&
 MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
@@ -102,6 +108,7 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
         M_ID                = model.M_ID;
         M_type              = model.M_type;
         M_dataFile          = model.M_dataFile;
+        M_couplings         = model.M_couplings;
         M_modelName         = model.M_modelName;
         M_flags             = model.M_flags;
         M_geometryScale     = model.M_geometryScale;
@@ -116,8 +123,48 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
 }
 
 // ===================================================
-//! Set Methods
+// MultiScale PhysicalModel Virtual Methods
 // ===================================================
+void
+MS_PhysicalModel::ShowMe()
+{
+    std::cout << "Model id            = " << M_ID << std::endl
+              << "Model name          = " << M_modelName << std::endl
+              << "Model type          = " << Enum2String( M_type, modelsMap ) << std::endl;
+
+    std::cout << "Couplings number    = " << GetCouplingsNumber() << std::endl;
+    std::cout << "Couplings type(s)   = ";
+    for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
+        std::cout << Enum2String( M_couplings[i]->GetType(), couplingsMap ) << " ";
+    std::cout << std::endl;
+    std::cout << "Flags list          = ";
+    for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
+        std::cout << M_flags[i] << " ";
+    std::cout << std::endl << std::endl;
+
+    std::cout << "Geometry scale      = ";
+    for ( UInt i( 0 ); i < nDimensions; ++i )
+        std::cout << M_geometryScale[i] << " ";
+    std::cout << std::endl;
+    std::cout << "Geometry rotate     = ";
+    for ( UInt i( 0 ); i < nDimensions; ++i )
+        std::cout << M_geometryRotate[i] << " ";
+    std::cout << std::endl;
+    std::cout << "Geometry translate  = ";
+    for ( UInt i( 0 ); i < nDimensions; ++i )
+        std::cout << M_geometryTranslate[i] << " ";
+    std::cout << std::endl << std::endl;
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MS_PhysicalModel::SetID( const UInt& id )
+{
+    M_ID = id;
+}
+
 void
 MS_PhysicalModel::SetDataFile( const std::string& dataFile )
 {
@@ -136,6 +183,12 @@ MS_PhysicalModel::SetDataFile( const std::string& dataFile )
     M_flags.reserve( componentSize );
     for ( UInt j( 0 ); j < componentSize; ++j )
         M_flags.push_back( M_dataFile( "MultiScale/couplingFlags", 0, j ) );
+}
+
+void
+MS_PhysicalModel::AddCoupling( const Coupling_ptrType& coupling )
+{
+    M_couplings.push_back( coupling );
 }
 
 void
@@ -177,32 +230,58 @@ MS_PhysicalModel::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm 
 }
 
 // ===================================================
-//! Virtual Functions
+// Get Methods
 // ===================================================
-void
-MS_PhysicalModel::ShowMe( void )
+const UInt&
+MS_PhysicalModel::GetID() const
 {
-    std::cout << "Model id           = " << M_ID << std::endl
-              << "Model name         = " << M_modelName << std::endl
-              << "Model type         = " << Enum2String( M_type, modelsMap ) << std::endl;
+    return M_ID;
+}
 
-    std::cout << "Flags list         = ";
-    for ( UInt i( 0 ); i < flagsNumber(); ++i )
-        std::cout << M_flags[i] << " ";
-    std::cout << std::endl << std::endl;
+const modelsTypes&
+MS_PhysicalModel::GetType() const
+{
+    return M_type;
+}
 
-    std::cout << "Geometry scale     = ";
-    for ( UInt i( 0 ); i < nDimensions; ++i )
-        std::cout << M_geometryScale[i] << " ";
-    std::cout << std::endl;
-    std::cout << "Geometry rotate    = ";
-    for ( UInt i( 0 ); i < nDimensions; ++i )
-        std::cout << M_geometryRotate[i] << " ";
-    std::cout << std::endl;
-    std::cout << "Geometry translate = ";
-    for ( UInt i( 0 ); i < nDimensions; ++i )
-        std::cout << M_geometryTranslate[i] << " ";
-    std::cout << std::endl << std::endl;
+const BCFlag&
+MS_PhysicalModel::GetFlag( const UInt& id ) const
+{
+    return M_flags[id];
+}
+
+const std::vector< BCFlag >&
+MS_PhysicalModel::GetFlags() const
+{
+    return M_flags;
+}
+
+const std::string&
+MS_PhysicalModel::GetModelName() const
+{
+    return M_modelName;
+}
+
+UInt
+MS_PhysicalModel::GetCouplingsNumber() const
+{
+    return static_cast< UInt > ( M_couplings.size() );
+}
+
+UInt
+MS_PhysicalModel::GetCouplingLocalID( const UInt& ID ) const
+{
+    for ( UInt localID( 0 ); localID < GetCouplingsNumber(); ++localID )
+        if ( M_couplings[localID]->GetID() == ID )
+            return localID;
+
+    return -1;
+}
+
+Coupling_ptrType
+MS_PhysicalModel::GetCoupling( const UInt& LocalID ) const
+{
+    return M_couplings[LocalID];
 }
 
 } // Namespace LifeV
