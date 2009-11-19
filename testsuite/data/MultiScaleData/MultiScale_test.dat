@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stationary.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress_Stationary.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -25,7 +25,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stationary.dat
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
-	subITMax		= 100			# Maximum number for coupling subiterations
+	subITMax		= 1  			# Maximum number for coupling subiterations
 	tolerance		= 1.e-6			# Tolerance on the coupling values
 	
 		[./Aitken_method]

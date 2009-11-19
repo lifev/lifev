@@ -13,23 +13,27 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stationary.dat
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stress_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation_Stress_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_FluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_FluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_Stress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_FluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stress_Stationary.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress_Stationary.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -41,7 +45,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress_Stationary.d
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
-	subITMax		= 100			# Maximum number for coupling subiterations
+	subITMax		= 100	        # Maximum number for coupling subiterations
 	tolerance		= 1.e-6			# Tolerance on the coupling values
 	
 		[./Aitken_method]
@@ -61,10 +65,61 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress_Stationary.d
 			max_iter        = 100
 			tol             = 1.e-8
 			
-			[../]
-		
-		[../]
+			
+			[../Preconditioner]
+			prectype                = Ifpack #Ifpack
+			reuse                   = false
+			displayList             = false
 	
+				[./AztecOO]
+				precond				= 'dom_decomp'
+				prec_calc			= calc
+				reorder             = 1
+				keep_info           = 0
+				overlap             = 0
+				subdomain_solve     = ilut
+				ilut_fill           = 6
+				drop                = 1.e-6
+				
+				[../ifpack]
+				overlap				= 3 #ok
+				prectype			= Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+					[./relaxation]
+					type                   = Jacobi
+					sweeps                 = 1
+					damping_factor         = 1.
+					min_diagonal_value     = 0
+					zero_starting_solution = true
+			
+					[../partitioner]
+					type					= metis
+           			overlap					= 2
+           			local_parts				= 1
+           			root_node				= 0
+     		      	use_symmetric_graph		= true
+
+      		    	[../amesos]
+      		     	solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+     			      	
+          			[../fact]
+        		  	level-of-fill		= 4
+        		  	ilut_level-of-fill	= 4
+       			   	absolute_threshold	= 0
+       			   	relative_threshold	= 1
+       			   	relax_value			= 0
+       		    	drop_tolerance		= 1.e-5
+
+         		  	[../schwarz]
+       		    	combine_mode		= 0 # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+        		   	compute_condest		= true
+        		   	reordering_type		= none       #none, metis, rcm
+        		   	filter_singletons	= true
+	
+					[../]
+				[../]
+			[../]
+		[../]
 	[../]
 ###################################################################################################
 
