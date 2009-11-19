@@ -1,50 +1,49 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-08-24
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief BCInterface_Function
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 24-08-2009
  */
-/**
- \file BCInterfaceOperatorFunction.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-08-24
- */
 
-#ifndef __BCInterfaceOperatorFunction_H
-#define __BCInterfaceOperatorFunction_H 1
-
-#include <life/lifecore/life.hpp>
-#include <life/lifefem/bcFunction.hpp>
-
-#include <string>
+#ifndef BCInterface_OperatorFunction_H
+#define BCInterface_OperatorFunction_H 1
 
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
-#include <lifemc/lifefem/BCInterfaceData.hpp>
-#include <lifemc/lifefem/BCInterfaceFunction.hpp>
+#include <lifemc/lifefem/BCInterface_Data.hpp>
+#include <lifemc/lifefem/BCInterface_Function.hpp>
 
 namespace LifeV {
 
-//! BCInterfaceOperatorFunction - LifeV bcFunction wrapper for BCInterface (with operators)
+//! BCInterface_OperatorFunction - LifeV bcFunction wrapper for BCInterface (with operators)
 /*!
  *  @author Cristiano Malossi
  *
@@ -73,32 +72,32 @@ namespace LifeV {
  *	s_young
  */
 template< class Operator >
-class BCInterfaceOperatorFunction: public virtual BCInterfaceFunction< Operator >
+class BCInterface_OperatorFunction: public virtual BCInterface_Function< Operator >
 {
 public:
 
-    typedef BCInterfaceFunction< Operator > super;
+    typedef BCInterface_Function< Operator > super;
 
     //! @name Constructors & Destructor
     //@{
 
     //! Constructor
-    BCInterfaceOperatorFunction();
+    BCInterface_OperatorFunction();
 
     //! Constructor
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    BCInterfaceOperatorFunction( const BCInterfaceData< Operator >& data );
+    BCInterface_OperatorFunction( const BCInterface_Data< Operator >& data );
 
     //! Copy constructor
     /*!
-     * \param function - BCInterfaceOperatorFunction
+     * @param function BCInterface_OperatorFunction
      */
-    BCInterfaceOperatorFunction( const BCInterfaceOperatorFunction& function );
+    BCInterface_OperatorFunction( const BCInterface_OperatorFunction& function );
 
     //! Destructor
-    virtual ~BCInterfaceOperatorFunction() {}
+    virtual ~BCInterface_OperatorFunction() {}
 
     //@}
 
@@ -108,31 +107,33 @@ public:
 
     //! Operator =
     /*!
-     * \param function - BCInterfaceOperatorFunction
+     * @param function BCInterface_OperatorFunction
+     * @return reference to a copy of the class
      */
-    virtual BCInterfaceOperatorFunction& operator=( const BCInterfaceOperatorFunction& function );
+    virtual BCInterface_OperatorFunction& operator=( const BCInterface_OperatorFunction& function );
 
     //! Set data
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterfaceData< Operator >& data );
+    virtual void SetData( const BCInterface_Data< Operator >& data );
 
     //! Compare function
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
+     * @return true if the functions are equal, false if they aren't
      */
-    virtual bool Compare( const BCInterfaceData< Operator >& data );
+    virtual bool Compare( const BCInterface_Data< Operator >& data );
 
     //! Set variable function
     /*!
-     * \param name - name of the variable
-     * \param value - value of the variable
+     * @param name name of the variable
+     * @param value value of the variable
      */
     inline void SetVariable( const std::string& name, const Real& value );
 
     //! Update operator variables
-    inline void UpdateOperatorVariables( void ) {}
+    inline void UpdateOperatorVariables() {}
 
     //@}
 
@@ -141,7 +142,7 @@ protected:
     //! @name Protected functions
     //@{
 
-    inline void CreateAccessList( void );
+    inline void CreateAccessList();
 
     //@}
 
@@ -166,9 +167,9 @@ protected:
 
 private:
 
-    inline void CreateFluidMap( void );
-    inline void CreateSolidMap( void );
-    inline void CreateList( void );
+    inline void CreateFluidMap();
+    inline void CreateSolidMap();
+    inline void CreateList();
 
     inline void SwitchErrorMessage( const std::string& operatorType );
 
@@ -176,62 +177,62 @@ private:
 
 //! Factory create function
 template< typename Operator >
-inline BCInterfaceFunction< Operator >* createOperatorFunction()
+inline BCInterface_Function< Operator >* createOperatorFunction()
 {
-    return new BCInterfaceOperatorFunction< Operator > ();
+    return new BCInterface_OperatorFunction< Operator > ();
 }
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 template< class Operator >
-BCInterfaceOperatorFunction< Operator >::BCInterfaceOperatorFunction() :
-    BCInterfaceFunction< Operator > (),
-    M_operator                      (),
-    M_flag                          (),
-    M_list                          (),
-    M_mapList                       ()
+BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction() :
+    BCInterface_Function< Operator > (),
+    M_operator                       (),
+    M_flag                           (),
+    M_list                           (),
+    M_mapList                        ()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( void )" << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction::BCInterface_OperatorFunction()" << "\n";
 #endif
 
 }
 
 template< class Operator >
-BCInterfaceOperatorFunction< Operator >::BCInterfaceOperatorFunction( const BCInterfaceData<
+BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const BCInterface_Data<
         Operator >& data ) :
-    BCInterfaceFunction< Operator > (),
-    M_operator                      (),
-    M_flag                          (),
-    M_list                          (),
-    M_mapList                       ()
+    BCInterface_Function< Operator > (),
+    M_operator                       (),
+    M_flag                           (),
+    M_list                           (),
+    M_mapList                        ()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction::BCInterfaceOperatorFunction( data )" << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction::BCInterface_OperatorFunction( data )" << "\n";
 #endif
 
     this->SetData( data );
 }
 
 template< class Operator >
-BCInterfaceOperatorFunction< Operator >::BCInterfaceOperatorFunction( const BCInterfaceOperatorFunction& function ) :
-    BCInterfaceFunction< Operator > ( function ),
-    M_operator                      ( function.M_operator ),
-    M_flag                          ( function.M_flag ),
-    M_list                          ( function.M_list ),
-    M_mapList                       ( function.M_mapList )
+BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const BCInterface_OperatorFunction& function ) :
+    BCInterface_Function< Operator > ( function ),
+    M_operator                       ( function.M_operator ),
+    M_flag                           ( function.M_flag ),
+    M_list                           ( function.M_list ),
+    M_mapList                        ( function.M_mapList )
 {
 }
 
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
 template< class Operator >
-BCInterfaceOperatorFunction< Operator >&
-BCInterfaceOperatorFunction< Operator >::operator=( const BCInterfaceOperatorFunction& function )
+BCInterface_OperatorFunction< Operator >&
+BCInterface_OperatorFunction< Operator >::operator=( const BCInterface_OperatorFunction& function )
 {
     if ( this != &function )
     {
@@ -248,11 +249,11 @@ BCInterfaceOperatorFunction< Operator >::operator=( const BCInterfaceOperatorFun
 
 template< class Operator >
 void
-BCInterfaceOperatorFunction< Operator >::SetData( const BCInterfaceData< Operator >& data )
+BCInterface_OperatorFunction< Operator >::SetData( const BCInterface_Data< Operator >& data )
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction::setData" << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction::setData" << "\n";
 #endif
 
     M_operator = data.GetOperator();
@@ -265,7 +266,7 @@ BCInterfaceOperatorFunction< Operator >::SetData( const BCInterfaceData< Operato
 
 template< class Operator >
 bool
-BCInterfaceOperatorFunction< Operator >::Compare( const BCInterfaceData< Operator >& data )
+BCInterface_OperatorFunction< Operator >::Compare( const BCInterface_Data< Operator >& data )
 {
     return super::M_baseString.compare( data.GetBaseString() ) == 0 && super::M_comV
             == data.GetComV() && M_flag == data.GetFlag();
@@ -273,18 +274,18 @@ BCInterfaceOperatorFunction< Operator >::Compare( const BCInterfaceData< Operato
 
 template< class Operator >
 inline void
-BCInterfaceOperatorFunction< Operator >::SetVariable( const std::string& name, const Real& value )
+BCInterface_OperatorFunction< Operator >::SetVariable( const std::string& name, const Real& value )
 {
     super::M_parser->setVariable( name, value );
 }
 
 template< >
 inline void
-BCInterfaceOperatorFunction< FSIOperator >::UpdateOperatorVariables( void )
+BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction<FSIOperator>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction<FSIOperator>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for FSI problem
@@ -387,11 +388,11 @@ BCInterfaceOperatorFunction< FSIOperator >::UpdateOperatorVariables( void )
 
 template< >
 inline void
-BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables( void )
+BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction<Oseen>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction<Oseen>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for Oseen problem
@@ -454,11 +455,11 @@ BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOpera
 
 template< >
 inline void
-BCInterfaceOperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables( void )
+BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction<OseenShapeDerivative>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction<OseenShapeDerivative>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for OseenShapeDerivative problem
@@ -520,15 +521,15 @@ BCInterfaceOperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > >
 }
 
 // ===================================================
-//! Protected functions
+// Protected functions
 // ===================================================
 template< >
 inline void
-BCInterfaceOperatorFunction< FSIOperator >::CreateAccessList( void )
+BCInterface_OperatorFunction< FSIOperator >::CreateAccessList()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction<FSIOperator>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction<FSIOperator>::createAccessList" << "\n";
 #endif
 
     CreateFluidMap();
@@ -538,11 +539,11 @@ BCInterfaceOperatorFunction< FSIOperator >::CreateAccessList( void )
 
 template< >
 inline void
-BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAccessList( void )
+BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAccessList()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction<Oseen>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction<Oseen>::createAccessList" << "\n";
 #endif
 
     CreateFluidMap();
@@ -551,11 +552,11 @@ BCInterfaceOperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAcces
 
 template< >
 inline void
-BCInterfaceOperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::CreateAccessList( void )
+BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::CreateAccessList()
 {
 
 #ifdef DEBUG
-    Debug( 5023 ) << "BCInterfaceOperatorFunction<OseenShapeDerivative>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface_OperatorFunction<OseenShapeDerivative>::createAccessList" << "\n";
 #endif
 
     CreateFluidMap();
@@ -563,11 +564,11 @@ BCInterfaceOperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > >
 }
 
 // ===================================================
-//! Private functions
+// Private functions
 // ===================================================
 template< class Operator >
 inline void
-BCInterfaceOperatorFunction< Operator >::CreateFluidMap( void )
+BCInterface_OperatorFunction< Operator >::CreateFluidMap()
 {
     M_mapList["f_area"]      = f_area;
     M_mapList["f_density"]   = f_density;
@@ -578,7 +579,7 @@ BCInterfaceOperatorFunction< Operator >::CreateFluidMap( void )
 
 template< class Operator >
 inline void
-BCInterfaceOperatorFunction< Operator >::CreateSolidMap( void )
+BCInterface_OperatorFunction< Operator >::CreateSolidMap()
 {
     M_mapList["s_density"]   = s_density;
     M_mapList["s_poisson"]   = s_poisson;
@@ -588,7 +589,7 @@ BCInterfaceOperatorFunction< Operator >::CreateSolidMap( void )
 
 template< class Operator >
 inline void
-BCInterfaceOperatorFunction< Operator >::CreateList( void )
+BCInterface_OperatorFunction< Operator >::CreateList()
 {
     M_list.clear();
     for ( typename std::map< std::string, operatorList >::iterator j = M_mapList.begin(); j != M_mapList.end(); ++j )
@@ -598,11 +599,11 @@ BCInterfaceOperatorFunction< Operator >::CreateList( void )
 
 template< class Operator >
 inline void
-BCInterfaceOperatorFunction< Operator >::SwitchErrorMessage( const std::string& operatorType )
+BCInterface_OperatorFunction< Operator >::SwitchErrorMessage( const std::string& operatorType )
 {
     std::cout << "ERROR: Invalid variable type for " << operatorType << "OperatorFunction" << std::endl;
 }
 
 } // Namespace LifeV
 
-#endif /* __BCInterfaceOperatorFunction_H */
+#endif /* BCInterface_OperatorFunction_H */

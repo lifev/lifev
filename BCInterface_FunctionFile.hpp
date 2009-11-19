@@ -1,46 +1,44 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-07-09
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief BCInterface_Function
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 09-07-2009
  */
-/**
- \file BCInterfaceFunctionFile.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-07-09
- */
+#ifndef BCInterface_FunctionFile_H
+#define BCInterface_FunctionFile_H 1
 
-#ifndef __BCInterfaceFunctionFile_H
-#define __BCInterfaceFunctionFile_H 1
-
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/life.hpp>
-
-#include <sstream>
-
-#include <lifemc/lifefem/BCInterfaceFunction.hpp>
+#include <lifemc/lifefem/BCInterface_Function.hpp>
 
 namespace LifeV {
 
-//! BCInterfaceFunctionFile - LifeV bcFunction wrapper for BCInterface
+//! BCInterface_FunctionFile - LifeV bcFunction wrapper for BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -83,32 +81,32 @@ namespace LifeV {
  *  				1.000000000		4.00'
  */
 template< typename Operator >
-class BCInterfaceFunctionFile: public virtual BCInterfaceFunction< Operator >
+class BCInterface_FunctionFile: public virtual BCInterface_Function< Operator >
 {
 public:
 
-    typedef BCInterfaceFunction< Operator > super;
+    typedef BCInterface_Function< Operator > super;
 
     //! @name Constructors & Destructor
     //@{
 
     //! Empty Constructor
-    BCInterfaceFunctionFile( void );
+    BCInterface_FunctionFile();
 
     //! Constructor
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    BCInterfaceFunctionFile( const BCInterfaceData< Operator >& data );
+    BCInterface_FunctionFile( const BCInterface_Data< Operator >& data );
 
     //! Copy constructor
     /*!
-     * \param function - BCInterfaceFunctionFile
+     * @param function BCInterface_FunctionFile
      */
-    BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function );
+    BCInterface_FunctionFile( const BCInterface_FunctionFile& function );
 
     //! Destructor
-    virtual ~BCInterfaceFunctionFile() {}
+    virtual ~BCInterface_FunctionFile() {}
 
     //@}
 
@@ -118,21 +116,23 @@ public:
 
     //! Operator =
     /*!
-     * \param function - BCInterfaceFunctionFile
+     * @param function BCInterface_FunctionFile
+     * @return reference to a copy of the class
      */
-    virtual BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
+    virtual BCInterface_FunctionFile& operator=( const BCInterface_FunctionFile& function );
 
     //! Set data
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterfaceData< Operator >& data );
+    virtual void SetData( const BCInterface_Data< Operator >& data );
 
     //! Compare function
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
+     * @return true if the functions are equal, false if they aren't
      */
-    virtual bool Compare( const BCInterfaceData< Operator >& data );
+    virtual bool Compare( const BCInterface_Data< Operator >& data );
 
     //@}
 
@@ -151,74 +151,74 @@ private:
     //@{
 
     //! loadData
-    inline void LoadData( BCInterfaceData< Operator > data );
+    inline void LoadData( BCInterface_Data< Operator > data );
 
     //! Linear interpolation (extrapolation) between two values of the data.
-    inline void DataInterpolation( void );
+    inline void DataInterpolation();
 
     //@}
 };
 
 //! Factory create function
 template< typename Operator >
-inline BCInterfaceFunction< Operator >* createFunctionFile()
+inline BCInterface_Function< Operator >* createFunctionFile()
 {
-    return new BCInterfaceFunctionFile< Operator > ();
+    return new BCInterface_FunctionFile< Operator > ();
 }
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 template< typename Operator >
-BCInterfaceFunctionFile< Operator >::BCInterfaceFunctionFile() :
-    BCInterfaceFunction< Operator > (),
-    M_fileName                      (),
-    M_variables                     (),
-    M_scale                         (),
-    M_data                          (),
-    M_dataIterator                  ()
+BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile() :
+    BCInterface_Function< Operator > (),
+    M_fileName                       (),
+    M_variables                      (),
+    M_scale                          (),
+    M_data                           (),
+    M_dataIterator                   ()
 {
 
 #ifdef DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( void )" << "\n";
+    Debug( 5022 ) << "BCInterface_FunctionFile::BCInterface_FunctionFile()" << "\n";
 #endif
 
 }
 
 template< typename Operator >
-BCInterfaceFunctionFile< Operator >::BCInterfaceFunctionFile( const BCInterfaceData< Operator >& data ) :
-    BCInterfaceFunction< Operator > (),
-    M_fileName                      (),
-    M_variables                     (),
-    M_scale                         (),
-    M_data                          (),
-    M_dataIterator                  ()
+BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterface_Data< Operator >& data ) :
+    BCInterface_Function< Operator > (),
+    M_fileName                       (),
+    M_variables                      (),
+    M_scale                          (),
+    M_data                           (),
+    M_dataIterator                   ()
 {
 
 #ifdef DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
+    Debug( 5022 ) << "BCInterface_FunctionFile::BCInterface_FunctionFile( data )" << "\n";
 #endif
 
     this->SetData( data );
 }
 
 template< typename Operator >
-BCInterfaceFunctionFile< Operator >::BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function ) :
-    BCInterfaceFunction< Operator > ( function ),
-    M_fileName                      ( function.M_fileName ),
-    M_variables                     ( function.M_variables ),
-    M_scale                         ( function.M_scale ),
-    M_data                          ( function.M_data ),
-    M_dataIterator                  ( function.M_dataIterator )
+BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterface_FunctionFile& function ) :
+    BCInterface_Function< Operator > ( function ),
+    M_fileName                       ( function.M_fileName ),
+    M_variables                      ( function.M_variables ),
+    M_scale                          ( function.M_scale ),
+    M_data                           ( function.M_data ),
+    M_dataIterator                   ( function.M_dataIterator )
 {
 }
 
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
 template< typename Operator >
-BCInterfaceFunctionFile< Operator >&
-BCInterfaceFunctionFile< Operator >::operator=( const BCInterfaceFunctionFile& function )
+BCInterface_FunctionFile< Operator >&
+BCInterface_FunctionFile< Operator >::operator=( const BCInterface_FunctionFile& function )
 {
     if ( this != &function )
     {
@@ -235,12 +235,12 @@ BCInterfaceFunctionFile< Operator >::operator=( const BCInterfaceFunctionFile& f
 
 template< typename Operator >
 void
-BCInterfaceFunctionFile< Operator >::SetData( const BCInterfaceData< Operator >& data )
+BCInterface_FunctionFile< Operator >::SetData( const BCInterface_Data< Operator >& data )
 {
     M_fileName = data.GetBaseString(); //The base string contains the file name
 
 #ifdef DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::setData             fileName: " << M_fileName << "\n";
+    Debug( 5022 ) << "BCInterface_FunctionFile::setData             fileName: " << M_fileName << "\n";
 #endif
 
     LoadData( data );
@@ -248,17 +248,17 @@ BCInterfaceFunctionFile< Operator >::SetData( const BCInterfaceData< Operator >&
 
 template< typename Operator >
 bool
-BCInterfaceFunctionFile< Operator >::Compare( const BCInterfaceData< Operator >& data )
+BCInterface_FunctionFile< Operator >::Compare( const BCInterface_Data< Operator >& data )
 {
     return M_fileName.compare( data.GetBaseString() ) == 0 && super::M_comV == data.GetComV();
 }
 
 // ===================================================
-//! Private functions
+// Private functions
 // ===================================================
 template< typename Operator >
 inline void
-BCInterfaceFunctionFile< Operator >::LoadData( BCInterfaceData< Operator > data )
+BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > data )
 {
     std::vector< std::string > stringsVector;
     boost::split( stringsVector, M_fileName, boost::is_any_of( "[" ) );
@@ -283,7 +283,7 @@ BCInterfaceFunctionFile< Operator >::LoadData( BCInterfaceData< Operator > data 
 
 #ifdef DEBUG
     std::stringstream output;
-    output << "BCInterfaceFunctionFile::loadData           variables: ";
+    output << "BCInterface_FunctionFile::loadData           variables: ";
     for ( UInt j(0); j < variablesNumber; ++j )
     output << M_variables[j] << "  ";
 
@@ -324,7 +324,7 @@ BCInterfaceFunctionFile< Operator >::LoadData( BCInterfaceData< Operator > data 
     //Initialize iterator
     M_dataIterator = M_data[M_variables[0]].begin();
 
-    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunction
+    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterface_Function
     if ( stringsVector.size() < 2 )
         data.SetBaseString( dataFile( "function", "Undefined" ) );
     else
@@ -343,7 +343,7 @@ BCInterfaceFunctionFile< Operator >::LoadData( BCInterfaceData< Operator > data 
 
 template< typename Operator >
 inline void
-BCInterfaceFunctionFile< Operator >::DataInterpolation( void )
+BCInterface_FunctionFile< Operator >::DataInterpolation()
 {
     //Get variable
     Real X = super::M_parser->getVariable( M_variables[0] );
@@ -401,4 +401,4 @@ BCInterfaceFunctionFile< Operator >::DataInterpolation( void )
 
 } // Namespace LifeV
 
-#endif /* __BCInterfaceFunctionFile_H */
+#endif /* BCInterface_FunctionFile_H */

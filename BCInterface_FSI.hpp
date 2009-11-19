@@ -1,66 +1,66 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-04-23
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file BCInterfaceFSI.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-04-23
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief BCInterface_FSI
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-04-2009
  */
 
-#ifndef __BCInterfaceFSI_H
-#define __BCInterfaceFSI_H 1
+#ifndef BCInterface_FSI_H
+#define BCInterface_FSI_H 1
 
-#include <life/lifecore/life.hpp>
-#include <life/lifefem/bcVector.hpp>
+#include <lifemc/lifefem/BCInterface_Definitions.hpp>
+#include <lifemc/lifefem/BCInterface_Data.hpp>
 
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
 //#include <life/lifesolver/steklovPoincareBase.hpp>
 
-#include <string>
-
-#include <lifemc/lifefem/BCInterfaceData.hpp>
-
 namespace LifeV {
 
-//! BCInterfaceFSI - Fake class for non-FSI problems.
+//! BCInterface_FSI Fake class for non-FSI problems.
 /*!
  *  @author Cristiano Malossi
  */
 template< class Operator >
-class BCInterfaceFSI
+class BCInterface_FSI
 {
 public:
 
     //! @name Constructors & Destructor
     //@{
 
-    BCInterfaceFSI() {}
-    BCInterfaceFSI( const BCInterfaceData< Operator >& /*data*/) {}
-    BCInterfaceFSI( const BCInterfaceFSI& /*fsi*/) {}
+    BCInterface_FSI() {}
+    BCInterface_FSI( const BCInterface_Data< Operator >& /*data*/) {}
+    BCInterface_FSI( const BCInterface_FSI& /*fsi*/) {}
 
-    ~BCInterfaceFSI() {}
+    ~BCInterface_FSI() {}
 
     //@}
 
@@ -68,10 +68,10 @@ public:
     //! @name Methods
     //@{
 
-    BCInterfaceFSI& operator=( const BCInterfaceFSI& /*fsi*/) {}
-    void SetData( const BCInterfaceData< Operator >& /*data*/) {}
+    BCInterface_FSI& operator=( const BCInterface_FSI& /*fsi*/) {}
+    void SetData( const BCInterface_Data< Operator >& /*data*/) {}
 
-    bool Compare( const BCInterfaceData< Operator >& /*data*/)
+    bool Compare( const BCInterface_Data< Operator >& /*data*/)
     {
         return true;
     }
@@ -94,7 +94,7 @@ private:
     boost::shared_ptr< BCVectorInterface > M_base;
 };
 
-//! BCInterfaceFSI - specialized template implementation for FSI problems.
+//! BCInterface_FSI - specialized template implementation for FSI problems.
 /*!
  *  @author Cristiano Malossi
  *
@@ -130,7 +130,7 @@ private:
  *	To get the base for the boundary condition call the getBase function.
  */
 template< >
-class BCInterfaceFSI< FSIOperator >
+class BCInterface_FSI< FSIOperator >
 //     :
 //     public LifeV::Application
 {
@@ -140,22 +140,22 @@ public:
     //@{
 
     //! Constructor
-    BCInterfaceFSI();
+    BCInterface_FSI();
 
     //! Constructor
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    BCInterfaceFSI( const BCInterfaceData< FSIOperator >& data );
+    BCInterface_FSI( const BCInterface_Data< FSIOperator >& data );
 
     //! Copy constructor
     /*!
-     * \param fsiOperator - BCInterfaceFSI
+     * @param fsiOperator BCInterface_FSI
      */
-    BCInterfaceFSI( const BCInterfaceFSI& fsi );
+    BCInterface_FSI( const BCInterface_FSI& fsi );
 
     //! Destructor
-    ~BCInterfaceFSI() {}
+    ~BCInterface_FSI() {}
 
     //@}
 
@@ -165,21 +165,23 @@ public:
 
     //! Operator =
     /*!
-     * \param fsiOperator - BCInterfaceFSI
+     * @param fsiOperator BCInterface_FSI
+     * @return reference to a copy of the class
      */
-    BCInterfaceFSI& operator=( const BCInterfaceFSI& fsi );
+    BCInterface_FSI& operator=( const BCInterface_FSI& fsi );
 
     //! Set data
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    void SetData( const BCInterfaceData< FSIOperator >& data );
+    void SetData( const BCInterface_Data< FSIOperator >& data );
 
     //! Compare function
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
+     * @return true if the functions are equal, false if they aren't
      */
-    bool Compare( const BCInterfaceData< FSIOperator >& data );
+    bool Compare( const BCInterface_Data< FSIOperator >& data );
 
     //@}
 
@@ -200,10 +202,10 @@ private:
     //! @name Private functions
     //@{
 
-    inline void CheckMethod( void );
+    inline void CheckMethod();
 
     template< class method >
-    inline void CheckFunction( void );
+    inline void CheckFunction();
 
     //@}
 
@@ -236,10 +238,10 @@ private:
 };
 
 // ===================================================
-//! Private functions
+// Private functions
 // ===================================================
 template< class method >
-inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
+inline void BCInterface_FSI< FSIOperator >::CheckFunction()
 {
     method *operMethod = dynamic_cast< method * > ( &*M_operator );
 
@@ -261,7 +263,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case DerFluidLoadToFluid:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
             break;
@@ -269,7 +271,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case DerFluidLoadToStructure:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
             if ( !M_operator->isSolid() )
                 return;
@@ -283,7 +285,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case DerHarmonicExtensionVelToFluid:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
             if ( !M_operator->isFluid() )
@@ -298,7 +300,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case DerStructureDispToSolid:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          DerStructureDispToSolid" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
             break;
@@ -306,7 +308,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case FluidInterfaceDisp:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          FluidInterfaceDisp" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
             //operMethod->FluidInterfaceDisp( (LifeV::Vector&) M_operator->lambdaFluidRepeated() );
@@ -318,7 +320,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case FluidLoadToStructure:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          FluidLoadToStructure" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
             if ( !M_operator->isSolid() )
@@ -333,7 +335,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case HarmonicExtensionVelToFluid:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
             if ( !M_operator->isFluid() )
@@ -348,7 +350,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case SolidLoadToStructure:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          SolidLoadToStructure" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
             if ( !M_operator->isFluid() )
                 return;
@@ -362,7 +364,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case StructureDispToHarmonicExtension:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
             if ( !M_operator->isFluid() )
@@ -377,7 +379,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case StructureDispToSolid:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          StructureDispToSolid" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
             break;
@@ -385,7 +387,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
         case StructureToFluid:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkFunction                          StructureToFluid" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
             if ( !M_operator->isFluid() )
@@ -402,4 +404,4 @@ inline void BCInterfaceFSI< FSIOperator >::CheckFunction( void )
 
 } // Namespace LifeV
 
-#endif /* __BCInterfaceFSI_H */
+#endif /* BCInterface_FSI_H */

@@ -1,41 +1,45 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-04-23
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file BCInterfaceFSI.cpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-04-23
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief BCInterface_FSI
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-04-2009
  */
 
-#include <lifemc/lifefem/BCInterfaceFSI.hpp>
+#include <lifemc/lifefem/BCInterface_FSI.hpp>
 
 namespace LifeV {
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
-BCInterfaceFSI< FSIOperator >::BCInterfaceFSI() :
+BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
     M_operator      (),
     M_baseString    (),
     M_base          (),
@@ -44,12 +48,12 @@ BCInterfaceFSI< FSIOperator >::BCInterfaceFSI() :
 {
 
 #ifdef DEBUG
-    Debug( 5025 ) << "BCInterfaceFSI::BCInterfaceFSI( void )" << "\n";
+    Debug( 5025 ) << "BCInterface_FSI::BCInterface_FSI()" << "\n";
 #endif
 
 }
 
-BCInterfaceFSI< FSIOperator >::BCInterfaceFSI( const BCInterfaceData< FSIOperator >& data ) :
+BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_Data< FSIOperator >& data ) :
     M_operator      (),
     M_baseString    (),
     M_base          (),
@@ -58,13 +62,13 @@ BCInterfaceFSI< FSIOperator >::BCInterfaceFSI( const BCInterfaceData< FSIOperato
 {
 
 #ifdef DEBUG
-    Debug( 5025 ) << "BCInterfaceFSI::BCInterfaceFSI( data )" << "\n";
+    Debug( 5025 ) << "BCInterface_FSI::BCInterface_FSI( data )" << "\n";
 #endif
 
     this->SetData( data );
 }
 
-BCInterfaceFSI< FSIOperator >::BCInterfaceFSI( const BCInterfaceFSI& fsi ) :
+BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_FSI& fsi ) :
     M_operator    ( fsi.M_operator ),
     M_baseString  ( fsi.M_baseString ),
     M_base        ( fsi.M_base ),
@@ -74,10 +78,10 @@ BCInterfaceFSI< FSIOperator >::BCInterfaceFSI( const BCInterfaceFSI& fsi ) :
 }
 
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
-BCInterfaceFSI< FSIOperator >&
-BCInterfaceFSI< FSIOperator >::operator=( const BCInterfaceFSI& fsi )
+BCInterface_FSI< FSIOperator >&
+BCInterface_FSI< FSIOperator >::operator=( const BCInterface_FSI& fsi )
 {
     if ( this != &fsi )
     {
@@ -91,11 +95,11 @@ BCInterfaceFSI< FSIOperator >::operator=( const BCInterfaceFSI& fsi )
     return *this;
 }
 
-void BCInterfaceFSI< FSIOperator >::SetData( const BCInterfaceData< FSIOperator >& data )
+void BCInterface_FSI< FSIOperator >::SetData( const BCInterface_Data< FSIOperator >& data )
 {
 
 #ifdef DEBUG
-    Debug( 5025 ) << "BCInterfaceFSIFunctionFile::setData" << "\n";
+    Debug( 5025 ) << "BCInterface_FSIFunctionFile::setData" << "\n";
 #endif
 
     M_operator   = data.GetOperator();
@@ -104,15 +108,15 @@ void BCInterfaceFSI< FSIOperator >::SetData( const BCInterfaceData< FSIOperator 
     this->CheckMethod();
 }
 
-bool BCInterfaceFSI< FSIOperator >::Compare( const BCInterfaceData< FSIOperator >& data )
+bool BCInterface_FSI< FSIOperator >::Compare( const BCInterface_Data< FSIOperator >& data )
 {
     return M_baseString.compare( data.GetBaseString() ) == 0; //&& add compare for Operator!
 }
 
 // ===================================================
-//! Private functions
+// Private functions
 // ===================================================
-inline void BCInterfaceFSI< FSIOperator >::CheckMethod( void )
+inline void BCInterface_FSI< FSIOperator >::CheckMethod()
 {
     //Set mapMethod
     M_mapMethod["exactJacobian"]   = EXACTJACOBIAN;
@@ -125,7 +129,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckMethod( void )
         case EXACTJACOBIAN:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            exactJacobian" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
             CheckFunction< exactJacobian > ();
@@ -135,7 +139,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckMethod( void )
         case FIXEDPOINT:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            fixedPoint" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
             CheckFunction< fixedPoint > ();
@@ -145,7 +149,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckMethod( void )
         case MONOLITHIC:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            monolithic" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithic" << "\n";
 #endif
 
             //CheckFunction<monolithic>();
@@ -155,7 +159,7 @@ inline void BCInterfaceFSI< FSIOperator >::CheckMethod( void )
         case STEKLOVPOINCARE:
 
 #ifdef DEBUG
-            Debug( 5025 ) << "BCInterfaceFSI::checkMethod                            steklovPoincare" << "\n";
+            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
             //CheckFunction<steklovPoincare>();

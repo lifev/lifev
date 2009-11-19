@@ -1,47 +1,48 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
- Date: 2009-04-06
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief BCInterface_Function
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 06-04-2009
  */
-/**
- \file BCInterfaceFunction.hpp
- \author Cristiano Malossi <cristiano.malossi@epfl.ch>
- \date 2009-04-06
- */
 
-#ifndef __BCInterfaceFunction_H
-#define __BCInterfaceFunction_H 1
+#ifndef BCInterface_Function_H
+#define BCInterface_Function_H 1
 
-#include <life/lifecore/life.hpp>
-#include <life/lifefem/bcFunction.hpp>
+#include <lifemc/lifefem/BCInterface_Definitions.hpp>
+#include <lifemc/lifefem/BCInterface_Data.hpp>
 
-#include <string>
-
-#include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifecore/SpiritParser.hpp>
 
 namespace LifeV {
 
-//! BCInterfaceFunction - LifeV bcFunction wrapper for BCInterface
+//! BCInterface_Function - LifeV bcFunction wrapper for BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -81,7 +82,7 @@ namespace LifeV {
  *
  */
 template< typename Operator >
-class BCInterfaceFunction
+class BCInterface_Function
 {
 public:
 
@@ -95,22 +96,22 @@ public:
     //@{
 
     //! Empty Constructor
-    BCInterfaceFunction( void );
+    BCInterface_Function();
 
     //! Constructor
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    BCInterfaceFunction( const BCInterfaceData< Operator >& data );
+    BCInterface_Function( const BCInterface_Data< Operator >& data );
 
     //! Copy constructor
     /*!
-     * \param function - BCInterfaceFunction
+     * @param function BCInterface_Function
      */
-    BCInterfaceFunction( const BCInterfaceFunction& function );
+    BCInterface_Function( const BCInterface_Function& function );
 
     //! Destructor
-    virtual ~BCInterfaceFunction() {}
+    virtual ~BCInterface_Function() {}
 
     //@}
 
@@ -120,21 +121,23 @@ public:
 
     //! Operator =
     /*!
-     * \param function - BCInterfaceFunction
+     * @param function BCInterface_Function
+     * @return reference to a copy of the class
      */
-    virtual BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
+    virtual BCInterface_Function& operator=( const BCInterface_Function& function );
 
     //! Set data
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterfaceData< Operator >& data );
+    virtual void SetData( const BCInterface_Data< Operator >& data );
 
     //! Compare function
     /*!
-     * \param data - BC data loaded from GetPot file
+     * @param data BC data loaded from GetPot file
+     * @return true if the functions are equal, false if they aren't
      */
-    virtual bool Compare( const BCInterfaceData< Operator >& data );
+    virtual bool Compare( const BCInterface_Data< Operator >& data );
 
     //@}
 
@@ -160,7 +163,7 @@ protected:
     //@{
 
     //! dataInterpolation
-    virtual inline void DataInterpolation( void ) {}
+    virtual inline void DataInterpolation() {}
 
     //@}
 
@@ -173,7 +176,7 @@ private:
     //@{
 
     //! SetFunction
-    inline void SetFunction( void );
+    inline void SetFunction();
 
     //! Function
     Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
@@ -186,16 +189,16 @@ private:
 
 //! Factory create function
 template< typename Operator >
-inline BCInterfaceFunction< Operator >* createFunction()
+inline BCInterface_Function< Operator >* createFunction()
 {
-    return new BCInterfaceFunction< Operator > ();
+    return new BCInterface_Function< Operator > ();
 }
 
 // ===================================================
-//! Constructor
+// Constructor
 // ===================================================
 template< typename Operator >
-BCInterfaceFunction< Operator >::BCInterfaceFunction() :
+BCInterface_Function< Operator >::BCInterface_Function() :
     M_baseString(),
     M_comV      (),
     M_parser    (),
@@ -204,13 +207,13 @@ BCInterfaceFunction< Operator >::BCInterfaceFunction() :
 {
 
 #ifdef DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( void )" << "\n";
+    Debug( 5021 ) << "BCInterface_Function::BCInterface_Function()" << "\n";
 #endif
 
 }
 
 template< typename Operator >
-BCInterfaceFunction< Operator >::BCInterfaceFunction( const BCInterfaceData< Operator >& data ) :
+BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Data< Operator >& data ) :
     M_baseString(),
     M_comV      (),
     M_parser    (),
@@ -219,14 +222,14 @@ BCInterfaceFunction< Operator >::BCInterfaceFunction( const BCInterfaceData< Ope
 {
 
 #ifdef DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
+    Debug( 5021 ) << "BCInterface_Function::BCInterface_Function( data )" << "\n";
 #endif
 
     this->SetData( data );
 }
 
 template< typename Operator >
-BCInterfaceFunction< Operator >::BCInterfaceFunction( const BCInterfaceFunction& function ) :
+BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Function& function ) :
     M_baseString( function.M_baseString ),
     M_comV      ( function.M_comV ),
     M_parser    ( function.M_parser ),
@@ -236,11 +239,11 @@ BCInterfaceFunction< Operator >::BCInterfaceFunction( const BCInterfaceFunction&
 }
 
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
 template< typename Operator >
-BCInterfaceFunction< Operator >&
-BCInterfaceFunction< Operator >::operator=( const BCInterfaceFunction& function )
+BCInterface_Function< Operator >&
+BCInterface_Function< Operator >::operator=( const BCInterface_Function& function )
 {
     if ( this != &function )
     {
@@ -256,11 +259,11 @@ BCInterfaceFunction< Operator >::operator=( const BCInterfaceFunction& function 
 
 template< typename Operator >
 void
-BCInterfaceFunction< Operator >::SetData( const BCInterfaceData< Operator >& data )
+BCInterface_Function< Operator >::SetData( const BCInterface_Data< Operator >& data )
 {
 
 #ifdef DEBUG
-    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    Debug( 5022 ) << "BCInterface_Function::setData" << "\n";
 #endif
 
     M_comV = data.GetComV();
@@ -278,16 +281,16 @@ BCInterfaceFunction< Operator >::SetData( const BCInterfaceData< Operator >& dat
 
 template< typename Operator >
 bool
-BCInterfaceFunction< Operator >::Compare( const BCInterfaceData< Operator >& data )
+BCInterface_Function< Operator >::Compare( const BCInterface_Data< Operator >& data )
 {
     return M_baseString.compare( data.GetBaseString() ) == 0 && M_comV == data.GetComV();
 }
 
 // ===================================================
-//! Private functions
+// Private functions
 // ===================================================
 template< typename Operator >
-inline void BCInterfaceFunction< Operator >::SetFunction( void )
+inline void BCInterface_Function< Operator >::SetFunction()
 {
     /*
      * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
@@ -304,11 +307,11 @@ inline void BCInterfaceFunction< Operator >::SetFunction( void )
     UInt arguments = M_parser->countSubstring( "," ) + 1;
 
 #ifdef DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::setFunction            arguments: " << arguments << "\n";
+    Debug( 5021 ) << "BCInterface_Function::setFunction            arguments: " << arguments << "\n";
 #endif
 
     if ( arguments == 1 )
-        M_base.setFunction( boost::bind( &BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5 ) );
+        M_base.setFunction( boost::bind( &BCInterface_Function::Function, this, _1, _2, _3, _4, _5 ) );
     else
     {
         //Create the ID map
@@ -320,13 +323,13 @@ inline void BCInterfaceFunction< Operator >::SetFunction( void )
             for ( ID i( 1 ); i <= M_comV.front(); ++i )
                 M_mapID[i] = i;
 
-        M_base.setFunction( boost::bind( &BCInterfaceFunction::FunctionID, this, _1, _2, _3, _4, _5 ) );
+        M_base.setFunction( boost::bind( &BCInterface_Function::FunctionID, this, _1, _2, _3, _4, _5 ) );
     }
 }
 
 template< typename Operator >
 Real
-BCInterfaceFunction< Operator >::Function( const Real& t,
+BCInterface_Function< Operator >::Function( const Real& t,
                                                 const Real& x,
                                                 const Real& y,
                                                 const Real& z,
@@ -334,7 +337,7 @@ BCInterfaceFunction< Operator >::Function( const Real& t,
 {
 
 #ifdef DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterface_Function::Function: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
     Debug( 5021 ) << "                                                           z: " << z << "\n";
@@ -357,7 +360,7 @@ BCInterfaceFunction< Operator >::Function( const Real& t,
 
 template< typename Operator >
 Real
-BCInterfaceFunction< Operator >::FunctionID( const Real& t,
+BCInterface_Function< Operator >::FunctionID( const Real& t,
                                                   const Real& x,
                                                   const Real& y,
                                                   const Real& z,
@@ -365,7 +368,7 @@ BCInterfaceFunction< Operator >::FunctionID( const Real& t,
 {
 
 #ifdef DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterface_Function::Function: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
     Debug( 5021 ) << "                                                           z: " << z << "\n";
@@ -389,4 +392,4 @@ BCInterfaceFunction< Operator >::FunctionID( const Real& t,
 
 } // Namespace LifeV
 
-#endif /* __BCInterfaceFunction_H */
+#endif /* BCInterface_Function_H */
