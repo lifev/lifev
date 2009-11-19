@@ -184,7 +184,7 @@ void Monolithic::setupFluidSolid()
     M_monolithicInterfaceMap = EpetraMap(-1, couplingVector.size(), &couplingVector[0], M_monolithicMap->getMap(Repeated)->IndexBase()/*1*/, *M_epetraWorldComm);
     *M_monolithicMap  += M_monolithicInterfaceMap;
 
-    std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
+    //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
     //            std::cout<<"map My elements : "<<M_monolithicMap.getMap(Unique)->NumMyElements()<<std::endl;
 
     //            std::cout<<"newmap global elements : "<<newMap.getMap(Unique)->NumGlobalElements()<<std::endl;
@@ -276,10 +276,13 @@ Monolithic::buildSystem()
 
     if(M_DDBlockPrec==7 || M_DDBlockPrec==8)
     {
+        EpetraMap pressureMap(M_pFESpace->map());
+        if(M_fluxes)
+            pressureMap+=M_fluxes;
         M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solidBlock;
         addDiagonalEntries(1., M_solidBlockPrec, M_uFESpace->map() );
-        addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map(), M_uFESpace->dof().numTotalDof()*nDimensions );
+        addDiagonalEntries(1., M_solidBlockPrec, pressureMap, M_uFESpace->dof().numTotalDof()*nDimensions );
         addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
         if(M_DDBlockPrec==8)
             couplingMatrix(M_solidBlockPrec, 8);
@@ -720,27 +723,49 @@ void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDi
 }
 #endif
 
-void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol)
+void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool fullImplicit)
 {
     double alpha = 1./M_dataFluid->getTimeStep();
     vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
     vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
     vector_type uk(M_uFESpace->map()+M_pFESpace->map());
-    vector_type meshVel(M_meshMotion->dispDiff(), Repeated);
+
+    //vector_type meshVel(M_meshMotion->dispDiff(), Repeated);
+    vector_ptrtype meshVel;//(M_mmFESpace->map(), Repeated);
+    meshVel.reset(new vector_type(M_mmFESpace->map()));
+
+    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
+    if(fullImplicit)
+    {
+        vector_type meshDispOld(M_mmFESpace->map());
+        meshVel->subset(sol, offset); //if the conv. term is to be condidered implicitly
+        meshDispOld.subset(*M_un, offset);
+        *meshVel -= meshDispOld;
+    }
+    else
+    {
+        meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
+        *meshVel -= M_meshMotion->dispOld();
+    }
+    *meshVel *= alpha;
+    vector_ptrtype meshVelRep(new vector_type(M_mmFESpace->map(), Repeated));
+    *meshVelRep = *meshVel;
+
     un.subset(*this->M_un, 0);
     uk.subset(sol, 0);
     vector_type dvfm(M_uFESpace->map(), Repeated);
     vector_type vfm(M_uFESpace->map(), Repeated);
-    vector_type vmdisp(M_uFESpace->map(), Repeated);
-    this->transferMeshMotionOnFluid(meshVel, vfm);
+    //vector_type vmdisp(M_uFESpace->map(), Repeated);
+    this->transferMeshMotionOnFluid(*meshVelRep, vfm);
 
     M_fluid->updateShapeDerivatives(*sdMatrix,
                                     alpha,
                                     un,//un
                                     uk,//uk
-                                    vfm, //(xk-xn)/dt //Repeated
+                                    vfm, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
                                     M_solidAndFluidDim+M_interface*nDimensions,
-                                    *M_mmFESpace
+                                    *M_mmFESpace,
+                                    fullImplicit
                                     );
 }
 
@@ -907,7 +932,7 @@ void  Monolithic::solveJac(vector_type         &_step,
             {
                 M_BCh_flux->setOffset(M_offset-M_fluxes);
                 M_BCh_Robin->setOffset(M_offset);
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime());
                 bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
                 M_solidBlockPrec->GlobalAssemble();
                 //M_solidBlockPrec->spy("solidBlock");
@@ -1245,7 +1270,6 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
         M_BChWSS->bdUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
     bcManageMatrix(*M_bdMass, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BChWSS, M_uFESpace->feBd(), 1., dataSolid().getTime() );
     M_bdMass->GlobalAssemble();
-    M_bdMass->spy("bdMass");
     M_wss.reset(new vector_type(M_uFESpace->map()/**M_monolithicMap*/));//on solid
     vector_type lambda(M_monolithicInterfaceMap);
     matrix_ptrtype bdMatrix(new matrix_type(M_monolithicInterfaceMap));
@@ -1285,7 +1309,6 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
             }
         }
     bdMatrix->GlobalAssemble();
-    bdMatrix->spy("bdMatr");
     solver_type solverMass(*M_epetraComm);
     solverMass.setDataFromGetPot( M_dataFile, "solid/solver" );
     solverMass.setUpPrec(M_dataFile, "solid/prec");//to avoid if we have already a prec.

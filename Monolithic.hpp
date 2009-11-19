@@ -154,11 +154,11 @@ public:
        \param rhsShapeDerivatives: output. Shape derivative terms.
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
-    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol);
+    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit);
     //! getters
 
     void setupSystem( );
-    void setUp( const GetPot& dataFile );
+    virtual void setUp( const GetPot& dataFile );
 
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix

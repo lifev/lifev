@@ -127,6 +127,7 @@ public:
 
     void initializeMesh(vector_ptrtype fluid_dispOld);
 
+    void setUp( const GetPot& dataFile );
 
 private:
 
@@ -135,6 +136,7 @@ private:
     boost::shared_ptr<EpetraMap>   M_mapWithoutMesh;
     vector_ptrtype                       M_uk;
     vector_ptrtype                       M_meshVel;
+    bool                                 M_fullImplicit;
     //    static bool              reg;
 };
 
