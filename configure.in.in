@@ -92,6 +92,9 @@ AC_CHECK_LAPACK
 dnl AC_CHECK_UMFPACK
 dnl AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
+dnl y12m
+AC_CHECK_Y12M
+
 dnl hdf5
 AC_CHECK_HDF5
 
