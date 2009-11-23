@@ -132,9 +132,9 @@ MS_Algorithm_Newton::SubIterate()
             M_Jacobian.reset( new MatrixType( M_couplingVariables->getMap(), 50, 0 ) );
             M_multiscale->ExportJacobian( *M_Jacobian );
             M_Jacobian->GlobalAssemble();
-            M_Jacobian->spy( "Jacobian" );
-
             M_solver.setMatrix( *M_Jacobian );
+
+            //M_Jacobian->spy( "Jacobian" );
         }
 
         // To be moved in a post-processing class

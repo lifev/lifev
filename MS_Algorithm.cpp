@@ -147,9 +147,11 @@ MS_Algorithm::SetMultiScaleProblem( const boost::shared_ptr< MS_Model_MultiScale
     M_multiscale = multiscale;
 
     // Build coupling variables and residuals vectors
-    std::vector<int> MyGlobalElements;
+    std::vector<int> MyGlobalElements(0);
     EpetraMap couplingMap( -1, static_cast<int> ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
     M_multiscale->CreateCouplingMap( couplingMap );
+
+    std::cout << *couplingMap.getMap( Unique );
 
     M_couplingVariables.reset( new EpetraVector( couplingMap, Unique ) );
     M_couplingResiduals.reset( new EpetraVector( couplingMap, Unique ) );

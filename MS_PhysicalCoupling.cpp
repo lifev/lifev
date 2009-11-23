@@ -282,7 +282,7 @@ MS_PhysicalCoupling::AddModel( const Model_ptrType& model )
 
 void
 MS_PhysicalCoupling::SetData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics,
-                           const boost::shared_ptr< DataTime >& dataTime )
+                              const boost::shared_ptr< DataTime >& dataTime )
 {
 
 #ifdef DEBUG
@@ -372,12 +372,13 @@ MS_PhysicalCoupling::GetCouplingVariablesNumber() const
 void
 MS_PhysicalCoupling::CreateLocalVectors()
 {
-    // Build a repeated map for the couplings
+    // Build a repeated list of GlobalElements
     std::vector<int> MyGlobalElements( M_couplingIndex.first );
     for ( UInt i = 0 ; i < static_cast< UInt > ( MyGlobalElements.size() ) ; ++i )
         MyGlobalElements[i] = i;
 
-    EpetraMap map( static_cast< int > ( MyGlobalElements.size() ), static_cast< int > ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
+    // Build a repeated map for the couplings
+    EpetraMap map( -1, static_cast< int > ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
 
     // Create local repeated vectors
     M_LocalCouplingVariables.reset     ( new EpetraVector( map, Repeated ) );
@@ -388,15 +389,24 @@ MS_PhysicalCoupling::CreateLocalVectors()
 void
 MS_PhysicalCoupling::ImportCouplingVector( const VectorType& globalVector, VectorType& localVector )
 {
+    Real value(0);
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
-        localVector[i] = globalVector[ M_couplingIndex.second + i ];
+    {
+        if ( M_comm->MyPID() == 0 )
+            value = globalVector[ M_couplingIndex.second + i ];
+
+        M_comm->Broadcast( &value, 1, 0 );
+
+        localVector[i] = value;
+    }
 }
 
 void
 MS_PhysicalCoupling::ExportCouplingVector( const VectorType& localVector, VectorType& globalVector )
 {
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
-        globalVector[ M_couplingIndex.second + i ] = localVector[i];
+        if ( M_comm->MyPID() == 0 )
+            globalVector[ M_couplingIndex.second + i ] = localVector[i];
 }
 
 void
