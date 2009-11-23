@@ -21,6 +21,6 @@ list = 'PoiseuilleDynamic'
 	[./PoiseuilleDynamic]
 	type				= Natural
 	mode				= Normal
-	functionFile	    = physicalFunctions/DynamicPoiseuille.dat[C]
+	functionFile	    = physicalFunctions/DynamicPoiseuille.dat[E]
 
 	[../]

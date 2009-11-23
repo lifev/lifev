@@ -83,7 +83,7 @@ useShapeDerivatives = false
     conv            = rhs
     max_iter        = 100
     kspace          = 100
-    tol             = 1.e-10
+    tol             = 1.e-13
     
     [../prec]
     #prectype                = AztecOO 

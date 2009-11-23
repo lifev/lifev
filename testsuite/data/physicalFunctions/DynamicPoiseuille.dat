@@ -16,12 +16,13 @@
 # 0.75 <= t <= 1.00 --> a = -sin(2*pi*t)
 ###################################################################################################
 
-#functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                # Inlet  Velocity
-functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'                       # Inlet  Velocity TEMPORARY FIX
+#functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                 # Inlet  Velocity
+functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'                        # Inlet  Velocity TEMPORARY FIX
 #functionB	= '-a*(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)' # Inlet  Flux
 functionB	= '-a*(pi*1)/(8*0.03)*(0.5^4)'                        # Inlet  Flux TEMPORARY FIX
-functionC	= '-a*5'                                             # Inlet  Static Pressure 
-functionD	= '0'                                                # Outlet Static Pressure
+functionC	= '-a'                                                # Inlet  Static Pressure 
+functionD	= '0'                                                 # Outlet Static Pressure
+functionE	= '-a*53200'                                          # Inlet Physiological Pressure 
 
 variables	= 't			a'
 scale		= '1			1'

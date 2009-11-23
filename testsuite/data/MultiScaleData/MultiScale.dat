@@ -18,7 +18,7 @@
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dbifurcation_Stress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_FluxStress_Stationary.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_Stress_Stationary.dat
@@ -31,7 +31,7 @@
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stress_Stationary.dat
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress_Stationary.dat
 
@@ -40,12 +40,12 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 
 	[./time_discretization]
 	initialtime		= 0.0           # [s]
-	endtime			= 1.2			# [s]
-	timestep		= 0.01			# [s]
+	endtime			= 1.0			# [s]
+	timestep		= 0.001     	# [s]
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
-	subITMax		= 100	        # Maximum number for coupling subiterations
+	subITMax		= 2  	        # Maximum number for coupling subiterations
 	tolerance		= 1.e-6			# Tolerance on the coupling values
 	
 		[./Aitken_method]
@@ -63,7 +63,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 			conv            = AZ_noscaled   # r0, noscaled
 			kspace          = 100
 			max_iter        = 100
-			tol             = 1.e-8
+			tol             = 1.e-16
 			
 			
 			[../Preconditioner]
@@ -126,5 +126,5 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 [Physics] #########################################################################################
 ###################################################################################################
 fluidDensity	= 1.0           # density   [kg/m^3]
-fluidViscosity	= 0.03			# viscosity [kg/m/s]
+fluidViscosity	= 0.035			# viscosity [kg/m/s]
 ###################################################################################################
