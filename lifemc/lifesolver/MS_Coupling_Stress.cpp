@@ -257,11 +257,12 @@ MS_Coupling_Stress::InsertJacobianConstantCoefficients( MatrixType& Jacobian )
     UInt Row    = M_couplingIndex.second;
     UInt Column = M_couplingIndex.second;
 
-    for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
-    {
-        Jacobian.set_mat_inc( Row,     Column + i,  1 );
-        Jacobian.set_mat_inc( Row + i, Column + i, -1 );
-    }
+    if ( M_comm->MyPID() == 0 )
+        for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
+        {
+            Jacobian.set_mat_inc( Row,     Column + i,  1 );
+            Jacobian.set_mat_inc( Row + i, Column + i, -1 );
+        }
 }
 
 void
@@ -293,7 +294,8 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const
 
     // Add coefficient to the matrix
     Row = M_couplingIndex.second + ModelLocalID;
-    Jacobian.set_mat_inc( Row, Column, Coefficient );
+    if ( M_comm->MyPID() == 0 )
+        Jacobian.set_mat_inc( Row, Column, Coefficient );
 
 #ifdef DEBUG
     Debug( 8220 ) << "J(" << Row << "," << Column << ") = " << Coefficient  << "\n";

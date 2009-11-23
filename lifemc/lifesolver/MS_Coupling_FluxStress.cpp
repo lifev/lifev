@@ -293,8 +293,11 @@ MS_Coupling_FluxStress::InsertJacobianConstantCoefficients( MatrixType& Jacobian
 
     UInt Row = M_couplingIndex.second;
 
-    Jacobian.set_mat_inc( Row,     Row,     -1 );
-    Jacobian.set_mat_inc( Row + 1, Row + 1, -1 );
+    if ( M_comm->MyPID() == 0 )
+    {
+        Jacobian.set_mat_inc( Row,     Row,     -1 );
+        Jacobian.set_mat_inc( Row + 1, Row + 1, -1 );
+    }
 }
 
 void
@@ -335,7 +338,8 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, c
         Row = M_couplingIndex.second;
 
     // Add coefficient to the matrix
-    Jacobian.set_mat_inc( Row, Column, Coefficient );
+    if ( M_comm->MyPID() == 0 )
+        Jacobian.set_mat_inc( Row, Column, Coefficient );
 
 #ifdef DEBUG
     Debug( 8230 ) << "J(" << Row << "," << Column << ") = " << Coefficient  << "\n";
