@@ -26,7 +26,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
 	subITMax		= 1  			# Maximum number for coupling subiterations
-	tolerance		= 1.e-16		# Tolerance on the coupling values
+	tolerance		= 1.e-6		# Tolerance on the coupling values
 	
 		[./Aitken_method]
 		Omega			= 0.5			# omega starting value
@@ -43,7 +43,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress
 			conv            = AZ_noscaled   # r0, noscaled
 			kspace          = 100
 			max_iter        = 100
-			tol             = 1.e-8
+			tol             = 1.e-16
 			
 			[../]
 		
