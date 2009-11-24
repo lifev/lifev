@@ -135,6 +135,13 @@ public:
     void initProcId       ( int const procId );
 
     void setNodesMap       ( std::vector<int> LtGNodesMap );
+
+    //! Set the output folder for postprocessing
+    /*!
+     * @param outputDirectory output folder
+     */
+    void setOutputDirectory( const std::string& outputDirectory );
+
     void initNodesMap       ();
 
     /**
@@ -262,6 +269,12 @@ template<typename Mesh>
 void Exporter<Mesh>::setNodesMap( std::vector<int> LtGNodesMap )
 {
     M_LtGNodesMap = LtGNodesMap;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setOutputDirectory( const std::string& outputDirectory )
+{
+    M_post_dir = outputDirectory;
 }
 
 template<typename Mesh>
