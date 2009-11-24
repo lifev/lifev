@@ -98,9 +98,10 @@ public:
 
     //! Setup the problem
     /*!
-     * @param dataFile Name and path of the data file
+     * @param dataFile name and path of the data file
+     * @param problemName the name of the problem (useful for saving data in a specific folder)
      */
-    void SetupProblem( const std::string& dataFile );
+    void SetupProblem( const std::string& dataFile, const std::string& problemName );
 
     //! Run the time-loop to solve the MultiScale problem
     /*!

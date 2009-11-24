@@ -37,6 +37,7 @@
 namespace LifeV {
 
 bool MS_ExitFlag = EXIT_SUCCESS;
+std::string MS_ProblemName = "";
 
 // ===================================================
 // Constructors
@@ -132,12 +133,22 @@ MS_Solver::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
 }
 
 void
-MS_Solver::SetupProblem( const std::string& dataFile )
+MS_Solver::SetupProblem( const std::string& dataFile, const std::string& problemName )
 {
 
 #ifdef DEBUG
-    Debug( 8000 ) << "MS_Solver::SetupData( dataFile ) \n";
+    Debug( 8000 ) << "MS_Solver::SetupData( dataFile, problemName ) \n";
 #endif
+
+    // Define the global name of the problem: if it is a folder create it
+    MS_ProblemName = problemName;
+    if ( MS_ProblemName.find("/") != std::string::npos )
+    {
+        if ( M_comm->MyPID() == 0 )
+            mkdir( MS_ProblemName.c_str(), 0777 );
+    }
+    else
+        MS_ProblemName += "_";
 
     GetPot DataFile( dataFile );
 

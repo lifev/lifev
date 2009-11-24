@@ -227,7 +227,7 @@ MS_PhysicalCoupling::SaveSolution()
 
     if ( M_comm->MyPID() == 0 )
     {
-        std::string filename = "Coupling_" + number2string( M_ID ) + ".mfile";
+        std::string filename = MS_ProblemName + "Coupling_" + number2string( M_ID ) + ".mfile";
 
         if ( M_dataTime->isFirstTimeStep() )
         {
