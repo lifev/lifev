@@ -62,9 +62,9 @@ useShapeDerivatives = false
     #stabilization   = 'none'          # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
 
     [../ipstab]
-    gammaBeta       = 0.125
-    gammaDiv        = 0.125
-    gammaPress      = 0.03125
+    gammaBeta       = 0.5
+    gammaDiv        = 0.5
+    gammaPress      = 0.5
     reuse           = true
 
     #[../valuespersection]
@@ -82,26 +82,27 @@ useShapeDerivatives = false
     output          = all # all none
     conv            = rhs
     max_iter        = 500
-    kspace          = 100
+    kspace          = 500
     tol             = 1.e-13
     
     [../prec]
-    #prectype                = AztecOO 
-    prectype                = Ifpack 
+    prectype                = AztecOO 
+    #prectype                = Ifpack 
     reuse                   = true    #reuse the preconditioner on following-subiterations
     displayList             = false
         
-        
         [./AztecOO]
         precond             = 'dom_decomp'
+        prec_calc           = calc
         reorder             = 0
-        overlap             = 0
-        subdomain_solve     = ilut
-        ilut_fill           = 4
+        keep_info           = 1
+        overlap             = 1
+        subdomain_solve     = ILUT
+        ilut_fill           = 10
         drop                = 1.e-6
         
         [../ifpack]
-        overlap             = 3
+        overlap             = 2
         prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
 
             [./relaxation]
@@ -122,12 +123,12 @@ useShapeDerivatives = false
             solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
                
             [../fact]
-            level-of-fill          = 4
-            ilut_level-of-fill     = 4
+            level-of-fill          = 10
+            ilut_level-of-fill     = 10
             absolute_threshold     = 0
             relative_threshold     = 1
             relax_value            = 0
-            drop_tolerance         = 1.e-5
+            drop_tolerance         = 1.e-10
 
             [../schwarz]
             combine_mode           = 0             # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax

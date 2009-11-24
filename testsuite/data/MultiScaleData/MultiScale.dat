@@ -63,7 +63,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.d
 			conv            = AZ_noscaled   # r0, noscaled
 			kspace          = 100
 			max_iter        = 100
-			tol             = 1.e-15
+			tol             = 1.e-14
 			
 			
 			[../Preconditioner]

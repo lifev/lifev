@@ -126,7 +126,7 @@ main( int argc, char** argv )
     GetPot commandLine( argc, argv );
     std::string dataFile    = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
     bool verbose            = commandLine.follow( false, 2, "-s", "--showme" );
-    std::string problemName = commandLine.follow( "", 2, "-n", "--name" );
+    std::string problemName = commandLine.follow( "MultiScale", 2, "-n", "--name" );
 
     MS.SetCommunicator( comm );
 
