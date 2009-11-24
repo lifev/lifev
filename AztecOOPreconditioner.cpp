@@ -71,14 +71,14 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
 
     // SUBDOMAIN SOLVER
-
+    
     M_solver->getParameterList().set("subdomain_solve", dataFile( ( section + "/AztecOO/subdomain_solve" ).data(), "ILUT" ));
 
-    M_solver->getParameterList().set("drop", dataFile( ( section + "/AztecOO/drop" ).data(), 1.e-6 ));
+    M_solver->getParameterList().set("drop", dataFile( ( section + "/AztecOO/drop" ).data(), 1.e-5 ));
 
     //M_solver->getParameterList().set("graph_fill", dataFile( ( section + "/AztecOO/graph_fill" ).data(), 6. ));
 
-    M_solver->getParameterList().set("ilut_fill", dataFile( ( section + "/AztecOO/ilut_fill" ).data(), 6. ));
+    M_solver->getParameterList().set("ilut_fill", dataFile( ( section + "/AztecOO/ilut_fill" ).data(), 4. ));
 
     //M_solver->getParameterList().set("init_guess", dataFile( ( section + "/AztecOO/init_guess" ).data(), AZ_NOT_ZERO ));
 
@@ -113,6 +113,9 @@ AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 
     M_solver->getSolver().SetPrecMatrix( Operator->getMatrixPtr().get() );
 
+    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
+    M_solver->getSolver().SetAztecOption( AZ_keep_info, 1 );
+
     Real estimateConditionNumber;
     M_solver->getSolver().ConstructPreconditioner( estimateConditionNumber );
 
@@ -136,6 +139,17 @@ AztecOOPreconditioner::getPrec()
 void
 AztecOOPreconditioner::precReset()
 {
+    M_solver->getSolver().SetAztecOption( AZ_keep_info, 0 );
+    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
+
+    // Perform one "fake" iteration to delete the preconditioner
+    int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
+    M_solver->getSolver().SetAztecOption( AZ_output, AZ_none );
+    M_solver->getSolver().GetRHS()->PutScalar( 1.0 );
+    M_solver->getSolver().GetLHS()->PutScalar( 0.0 );
+    M_solver->getSolver().Iterate( 0, 1.e14 );
+    M_solver->getSolver().SetAztecOption( AZ_output, AZoutputOption );
+
     M_solver->getSolver().DestroyPreconditioner();
 
     M_preconditionerCreated = false;
