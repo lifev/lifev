@@ -156,12 +156,12 @@ public:
         M_rhsNoBC.GlobalAssemble();
     }
 
-    virtual void updateSystem(double       alpha,
-                              vector_type& betaVec,
+    virtual void updateSystem(const double       alpha,
+                              const vector_type& betaVec,
                               const vector_type& sourceVec
                               );
-    virtual void updateSystem(double       alpha,
-                              vector_type& betaVec,
+    virtual void updateSystem(const double       alpha,
+                              const vector_type& betaVec,
                               const vector_type& sourceVec,
                               matrix_ptrtype matrix
                               );
@@ -902,8 +902,8 @@ initialize( const vector_type& velAndPressure)
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::
-updateSystem(double       alpha,
-             vector_type& betaVec,
+updateSystem(const double       alpha,
+             const vector_type& betaVec,
              const vector_type& sourceVec
              )
 {
@@ -919,8 +919,8 @@ updateSystem(double       alpha,
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::
-updateSystem(double       alpha,
-             vector_type& betaVec,
+updateSystem(const double       alpha,
+             const vector_type& betaVec,
              const vector_type& sourceVec,
              matrix_ptrtype matrNoBC)
 {
@@ -1369,6 +1369,8 @@ Oseen<Mesh, SolverType>::flux(const EntityFlag& flag)
 {
     return flux(flag, M_sol);
 }
+
+
 //! Computes the pressure on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag)
