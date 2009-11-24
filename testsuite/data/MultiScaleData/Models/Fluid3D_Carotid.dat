@@ -40,8 +40,8 @@ useShapeDerivatives = false
 #diagonalBlockPrec   = false
 
     [./physics] # Defined here only if different from the one in the main file.
-    #density         = 1.0             # density   [kg/m^3]
-    #viscosity       = 0.03            # viscosity [kg/m/s]
+    #density         = 1.0             # density   [g/cm^3]
+    #viscosity       = 0.035           # viscosity [g/cm/s]
 
     [../time_discretization]
     #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
@@ -81,7 +81,7 @@ useShapeDerivatives = false
     scaling         = none
     output          = all # all none
     conv            = rhs
-    max_iter        = 100
+    max_iter        = 500
     kspace          = 100
     tol             = 1.e-13
     

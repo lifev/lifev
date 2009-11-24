@@ -26,6 +26,8 @@ function	= '(0,0,q)'
 variables	=   't				q'
 scale		= 	'1				1'
 
+loop        = false
+
 # Items must be sorted by the first column value!
 data		=  '0.000000000		13332
 				0.003000000		13332

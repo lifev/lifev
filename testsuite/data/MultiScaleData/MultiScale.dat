@@ -40,7 +40,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.d
 
 	[./time_discretization]
 	initialtime		= 0.0           # [s]
-	endtime			= 1.0			# [s]
+	endtime			= 4.0			# [s]
 	timestep		= 0.001     	# [s]
 	
 	[../Algorithm]
@@ -63,7 +63,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.d
 			conv            = AZ_noscaled   # r0, noscaled
 			kspace          = 100
 			max_iter        = 100
-			tol             = 1.e-16
+			tol             = 1.e-15
 			
 			
 			[../Preconditioner]
@@ -125,6 +125,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.d
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0           # density   [kg/m^3]
-fluidViscosity	= 0.035			# viscosity [kg/m/s]
+fluidDensity	= 1.0           # density   [g/cm^3]
+fluidViscosity	= 0.035			# viscosity [g/cm/s]
 ###################################################################################################

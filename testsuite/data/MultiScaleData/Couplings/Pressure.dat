@@ -9,16 +9,16 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Pressure ####################################
+### COUPLING: BoundaryCondition - Pressure ########################################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_CylinderPoiseuillePressure
+couplingName	= BoundaryCondition_Pressure
 
 [boundary_conditions]
-list = 'Poiseuille'
+list = 'Pressure'
 
-	[./Poiseuille]
+	[./Pressure]
 	type				= Natural
 	mode				= Normal
 	function			= '-10'

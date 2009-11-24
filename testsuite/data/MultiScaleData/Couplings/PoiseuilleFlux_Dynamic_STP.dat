@@ -5,22 +5,25 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2009-10-28
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Pressure Dynamic ############################
+### COUPLING: BoundaryCondition - Poiseuille Flux Dynamic #########################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_CylinderPoiseuillePressureDynamic
+couplingName	= BoundaryCondition_PoiseuilleFluxDynamic
 
 [boundary_conditions]
-list = 'PoiseuilleDynamic'
+list = 'PoiseuilleFluxDynamic'
 
-	[./PoiseuilleDynamic]
-	type				= Natural
-	mode				= Normal
-	functionFile	    = physicalFunctions/DynamicPoiseuille.dat[E]
+	[./PoiseuilleFluxDynamic]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	functionFile		= physicalFunctions/SmoothTrapezoidalProfile.dat[B]
+	#OPERfunctionFile	= physicalFunctions/SmoothTrapezoidalProfile.dat[B]
 
 	[../]
+	

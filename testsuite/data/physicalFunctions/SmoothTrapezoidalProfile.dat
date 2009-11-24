@@ -9,23 +9,24 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### DYNAMIC POISEUILLE: cylinder with Z axial velocity and R=0.5 ##################################
+### TRAPEZOIDAL PROFILE ###########################################################################
 ###################################################################################################
 # 0.00 <= t <= 0.25 --> a =  sin(2*pi*t)
 # 0.25 <= t <= 0.75 --> a =  1
 # 0.75 <= t <= 1.00 --> a = -sin(2*pi*t)
 ###################################################################################################
 
-#functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                 # Inlet  Velocity
-functionA	= 'a*(1/4-(x^2+y^2))/(4*0.03)'                        # Inlet  Velocity TEMPORARY FIX
-#functionB	= '-a*(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)' # Inlet  Flux
-functionB	= '-a*(pi*1)/(8*0.03)*(0.5^4)'                        # Inlet  Flux TEMPORARY FIX
-functionC	= '-a'                                                # Inlet  Static Pressure 
-functionD	= '0'                                                 # Outlet Static Pressure
-functionE	= '-a*53200'                                          # Inlet Physiological Pressure 
+#functionA	= 'a*(1/4-(x^2+y^2))/(4*f_viscosity)'                 # Poiseuille Velocity
+functionA	= 'a*(1/4-(x^2+y^2))/(4*0.035)'                       # Poiseuille Velocity TEMPORARY FIX
+#functionB	= '-a*(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)' # Poiseuille Flux
+functionB	= '-a*(pi*1)/(8*0.035)*(0.5^4)'                       # Poiseuille Flux TEMPORARY FIX
+functionC	= '-a'                                                # Pressure 
+functionD	= '-a*53200'                                          # Physiological Pressure 
 
 variables	= 't			a'
 scale		= '1			1'
+
+loop        = false # remove last line from data if true!
 
 # Items must be sorted by the first column value!
 data		= '0                   0.000000000000001

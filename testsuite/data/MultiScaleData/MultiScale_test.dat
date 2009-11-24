@@ -43,7 +43,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress
 			conv            = AZ_noscaled   # r0, noscaled
 			kspace          = 100
 			max_iter        = 100
-			tol             = 1.e-16
+			tol             = 1.e-15
 			
 			[../]
 		
@@ -54,6 +54,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0           # density   [kg/m^3]
-fluidViscosity	= 0.03			# viscosity [kg/m/s]
+fluidDensity	= 1.0           # density   [g/cm^3]
+fluidViscosity	= 0.035			# viscosity [g/cm/s]
 ###################################################################################################

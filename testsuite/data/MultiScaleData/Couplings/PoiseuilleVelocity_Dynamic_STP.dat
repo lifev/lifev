@@ -5,24 +5,31 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-28
+#           Date: 2009-09-01
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux ########################################
+### COUPLING: BoundaryCondition - Poiseuille Velocity Dynamic #####################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_CylinderPoiseuilleFlux
+couplingName	= BoundaryCondition_PoiseuilleVelocityDynamic
 
 [boundary_conditions]
-list = 'PoiseuilleFlux'  # Stationary Poiseuille Flux
-	
-	[./PoiseuilleFlux]
-	type				= Flux
-	mode				= Full
+#list = 'XY ZPoiseuilleDynamic'
+list = 'ZPoiseuilleDynamic'
+
+	[./XY]
+	type       			= Essential
+	mode       			= Component
+	component 			= '1 2'
+	function   			= 0
+
+	[../ZPoiseuilleDynamic]
+	type				= Essential
+	mode				= Component
 	component			= 3
-	function   			= '-(pi*1)/(8*0.03)*(0.5^4)' #TEMPORARY FIX
-	#OPERfunction		= '-(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)'
-	
+	functionFile	    = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+	#OPERfunctionFile	= physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+
 	[../]

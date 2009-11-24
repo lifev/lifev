@@ -5,25 +5,25 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-28
+#           Date: 2009-11-24
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux Dynamic ################################
+### COUPLING: BoundaryCondition - Carotid bifurcation Flux ########################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_CylinderPoiseuilleFluxDynamic
+couplingName	= BoundaryCondition_CarotidBifurcationFlux
 
 [boundary_conditions]
-list = 'PoiseuilleFluxDynamic'
+list = 'CarotidBifurcationFlux'
 
-	[./PoiseuilleFluxDynamic]
+	[./CarotidBifurcationFlux]
 	type				= Flux
 	mode				= Full
 	component			= 3
-	functionFile		= physicalFunctions/DynamicPoiseuille.dat[B]
-	#OPERfunctionFile	= physicalFunctions/DynamicPoiseuille.dat[B]
+	functionFile		= physicalFunctions/CarotidBifurcationPhysicalFlux.dat[A] #Physiological
+	#functionFile		= physicalFunctions/CarotidBifurcationPhysicalFlux.dat[B] #Approximate
 
 	[../]
 	

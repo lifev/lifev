@@ -24,6 +24,8 @@ function	= 'a*t+b'
 variables	=   't				a		b'
 scale		= 	'1				1		1'
 
+loop        = false
+
 # Items must be sorted by the first column value!
 data		=  '0.000000000		-1000	0
 				0.009999999		-1000	0

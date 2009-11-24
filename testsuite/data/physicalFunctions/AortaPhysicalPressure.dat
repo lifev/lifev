@@ -18,6 +18,8 @@ function	= 'p'
 variables	=   't			p'
 scale		= 	'1			-1'
 
+loop        = false
+
 # Items must be sorted by the first column value!
 data		=  '0.0000000000000000	110170
 				0.0126582278481013	109540

@@ -1,0 +1,28 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-10-28
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux ########################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_PoiseuilleFlux
+
+[boundary_conditions]
+list = 'PoiseuilleFlux'  # Poiseuille Flux
+	
+	[./PoiseuilleFlux]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	function   			= '-(pi*1)/(8*0.035)*(0.5^4)'                       #TEMPORARY FIX
+	#OPERfunction		= '-(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)'
+	
+	[../]
