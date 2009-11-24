@@ -187,7 +187,7 @@ MS_Model_Fluid3D::SetupModel()
     M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
 
     //Post-processing
-    M_output.reset( new OutputType( M_dataFile, M_FluidMesh->mesh(), M_modelName + "_" + number2string( M_ID ), M_comm->MyPID() ) );
+    M_output.reset( new OutputType( M_dataFile, M_FluidMesh->mesh(), MS_ProblemName + "Model_" + number2string( M_ID ), M_comm->MyPID() ) );
 
     M_FluidSolution.reset( new FluidVectorType( M_FluidFullMap, Repeated ) );
     //M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), Repeated ) );

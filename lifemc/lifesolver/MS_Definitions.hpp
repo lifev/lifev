@@ -68,6 +68,8 @@
 // STL classes
 #include <string>
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace LifeV {
 
@@ -116,6 +118,9 @@ enum errorsTypes
 
 // Exit Flag
 extern bool MS_ExitFlag;
+
+// Name of the problem
+extern std::string MS_ProblemName;
 
 // Map objects
 extern std::map< std::string, algorithmsTypes > algorithmMap;
