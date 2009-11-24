@@ -54,7 +54,7 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
     M_solver->getParameterList().set("pre_calc", dataFile( ( section + "/AztecOO/pre_calc" ).data(), "calc" ));
 
     // Reordering
-    M_solver->getParameterList().set("reorder", dataFile( ( section + "/AztecOO/reorder" ).data(), 1 ));
+    M_solver->getParameterList().set("reorder", dataFile( ( section + "/AztecOO/reorder" ).data(), 0 ));
 
     // Keep the information
     M_solver->getParameterList().set("keep_info", dataFile( ( section + "/AztecOO/keep_info" ).data(), 1 ));
@@ -74,7 +74,7 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
     M_solver->getParameterList().set("subdomain_solve", dataFile( ( section + "/AztecOO/subdomain_solve" ).data(), "ILUT" ));
 
-    M_solver->getParameterList().set("drop", dataFile( ( section + "/AztecOO/drop" ).data(), 1.e-10 ));
+    M_solver->getParameterList().set("drop", dataFile( ( section + "/AztecOO/drop" ).data(), 1.e-6 ));
 
     //M_solver->getParameterList().set("graph_fill", dataFile( ( section + "/AztecOO/graph_fill" ).data(), 6. ));
 
