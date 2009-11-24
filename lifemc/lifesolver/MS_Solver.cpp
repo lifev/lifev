@@ -142,14 +142,13 @@ MS_Solver::SetupProblem( const std::string& dataFile, const std::string& problem
 
     // Define the global name of the problem: if it is a folder create it
     MS_ProblemName = problemName;
-    if ( MS_ProblemName.find("/") != std::string::npos )
+    if ( MS_ProblemName.compare("./") )
     {
+        MS_ProblemName += "/";
+
         if ( M_comm->MyPID() == 0 )
             mkdir( MS_ProblemName.c_str(), 0777 );
     }
-    else
-        MS_ProblemName += "_";
-
     GetPot DataFile( dataFile );
 
     // Main MultiScale problem
