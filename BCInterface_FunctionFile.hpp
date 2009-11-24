@@ -65,6 +65,9 @@ namespace LifeV {
  *	scale:     Contains n optional coefficients (Default = 1), which multiply each column
  *	           in the data table.
  *
+ *  loop:      Useful for time dependent value: at the end of the list, restart using the first value
+ *             instead of extrapolating.
+ *
  *	NOTE:
  *	During the execution, if the value of the variable (usually the time) is not present in the 'data' table,
  *	the class linearly interpolates the value between the two closest one. Moreover, if the value of the variable is higher
@@ -144,6 +147,7 @@ private:
 
     std::vector< std::string >                   M_variables;
     std::vector< Real >                          M_scale;
+    bool                                         M_loop;
     std::map< std::string, std::vector< Real > > M_data;
     std::vector< Real >::iterator                M_dataIterator;
 
@@ -175,6 +179,7 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile() :
     M_fileName                       (),
     M_variables                      (),
     M_scale                          (),
+    M_loop                           (),
     M_data                           (),
     M_dataIterator                   ()
 {
@@ -191,6 +196,7 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterfac
     M_fileName                       (),
     M_variables                      (),
     M_scale                          (),
+    M_loop                           (),
     M_data                           (),
     M_dataIterator                   ()
 {
@@ -208,6 +214,7 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterfac
     M_fileName                       ( function.M_fileName ),
     M_variables                      ( function.M_variables ),
     M_scale                          ( function.M_scale ),
+    M_loop                           ( function.M_loop ),
     M_data                           ( function.M_data ),
     M_dataIterator                   ( function.M_dataIterator )
 {
@@ -226,6 +233,7 @@ BCInterface_FunctionFile< Operator >::operator=( const BCInterface_FunctionFile&
         M_fileName     = function.M_fileName;
         M_variables    = function.M_variables;
         M_scale        = function.M_scale;
+        M_loop         = function.M_loop;
         M_data         = function.M_data;
         M_dataIterator = function.M_dataIterator;
     }
@@ -285,14 +293,17 @@ BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > dat
     std::stringstream output;
     output << "BCInterface_FunctionFile::loadData           variables: ";
     for ( UInt j(0); j < variablesNumber; ++j )
-    output << M_variables[j] << "  ";
+        output << M_variables[j] << "  ";
 
     output << "\n                                                           scale: ";
     for ( UInt j(0); j < variablesNumber; ++j )
-    output << M_scale[j] << "  ";
+        output << M_scale[j] << "  ";
 
     Debug( 5022 ) << output.str() << "\n";
 #endif
+
+    //Load loop flag
+    M_loop = dataFile( "loop", false );
 
     //Load data
     UInt dataLines = dataFile.vector_variable_size( "data" ) / variablesNumber;
@@ -308,14 +319,15 @@ BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > dat
 
 #ifdef DEBUG
     output.str("");
+    output << "                                                 loop: " << M_loop << "\n";
     output << "                                                 data:";
     for ( UInt i(0); i < dataLines; ++i )
     {
         if (i > 0)
-        output << "                                                                 ";
+            output << "                                                                 ";
 
         for ( UInt j(0); j < variablesNumber; ++j )
-        output << " " << M_data[ M_variables[j] ][i];
+            output << " " << M_data[ M_variables[j] ][i];
         output << "\n";
     }
     Debug( 5022 ) << output.str();
@@ -347,6 +359,10 @@ BCInterface_FunctionFile< Operator >::DataInterpolation()
 {
     //Get variable
     Real X = super::M_parser->getVariable( M_variables[0] );
+
+    //If it is a loop scale the variable: X = X - (ceil( X / Xmax ) -1) * Xmax
+    if ( M_loop )
+        X -= ( std::ceil( X / M_data[M_variables[0]].back() ) - 1 ) * M_data[M_variables[0]].back();
 
 #ifdef DEBUG
     Debug( 5022 ) << "                                                    variable: " << X << "\n";
@@ -383,7 +399,7 @@ BCInterface_FunctionFile< Operator >::DataInterpolation()
 
     //Linear interpolation (extrapolation if X > xB)
     Real xA, xB, A, B;
-    for ( UInt j( 1 ),position = static_cast< UInt > ( M_dataIterator - M_data[M_variables[0]].begin() );
+    for ( UInt j( 1 ), position = static_cast< UInt > ( M_dataIterator - M_data[M_variables[0]].begin() ) ;
           j < static_cast< UInt > ( M_variables.size() ); ++j )
     {
         xA = M_data[M_variables[0]][position];
