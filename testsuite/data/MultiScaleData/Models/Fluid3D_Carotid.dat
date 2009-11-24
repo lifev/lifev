@@ -86,8 +86,8 @@ useShapeDerivatives = false
     tol             = 1.e-12
     
     [../prec]
-    prectype                = AztecOO 
-    #prectype                = Ifpack 
+    #prectype                = AztecOO 
+    prectype                = Ifpack 
     reuse                   = true    #reuse the preconditioner on following-subiterations
     displayList             = false
         
