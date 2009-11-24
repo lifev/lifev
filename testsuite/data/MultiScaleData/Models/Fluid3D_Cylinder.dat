@@ -98,8 +98,8 @@ useShapeDerivatives = false
         keep_info           = 1
         overlap             = 1
         subdomain_solve     = ILUT
-        ilut_fill           = 10
-        drop                = 1.e-6
+        ilut_fill           = 4
+        drop                = 1.e-5
         
         [../ifpack]
         overlap             = 2
@@ -124,7 +124,7 @@ useShapeDerivatives = false
                
             [../fact]
             level-of-fill          = 4
-            ilut_level-of-fill     = 4
+            ilut_level-of-fill     = 10
             absolute_threshold     = 0
             relative_threshold     = 1
             relax_value            = 0

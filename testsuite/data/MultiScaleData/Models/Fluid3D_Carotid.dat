@@ -83,7 +83,7 @@ useShapeDerivatives = false
     conv            = rhs
     max_iter        = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-12
     
     [../prec]
     prectype                = AztecOO 
@@ -98,8 +98,8 @@ useShapeDerivatives = false
         keep_info           = 1
         overlap             = 1
         subdomain_solve     = ILUT
-        ilut_fill           = 10
-        drop                = 1.e-6
+        ilut_fill           = 4
+        drop                = 1.e-5
         
         [../ifpack]
         overlap             = 2
@@ -123,7 +123,7 @@ useShapeDerivatives = false
             solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
                
             [../fact]
-            level-of-fill          = 10
+            level-of-fill          = 4
             ilut_level-of-fill     = 10
             absolute_threshold     = 0
             relative_threshold     = 1
