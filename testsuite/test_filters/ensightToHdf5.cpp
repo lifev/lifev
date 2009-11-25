@@ -172,28 +172,30 @@ EnsightToHdf5::run()
 
 
     // hdf5 exporter, still under development
-    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "renamed", d->comm->MyPID()) );
+    // exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "renamed", d->comm->MyPID()) );
+    importer.reset( new Ensight<RegionMesh3D<LinearTetra> >      ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+    //importer.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> >      ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
 
-    vector_ptrtype velAndPressureUnique ( new vector_type(fluid.solution(), Unique ) );
+    vector_ptrtype velAndPressureExport ( new vector_type(fluid.solution(), exporter->mapType() ) );
+    vector_ptrtype velAndPressureImport ( new vector_type(fluid.solution(), importer->mapType() ) );
 
-    importer.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-    vector_ptrtype velAndPressureRepeated ( new vector_type(fluid.solution(), Repeated ) );
+    if ( exporter->mapType() == Unique )
+        velAndPressureExport->setCombineMode(Zero);
 
-
-    importer->addVariable( ExporterData::Vector, "velocity", velAndPressureRepeated,
+    importer->addVariable( ExporterData::Vector, "velocity", velAndPressureImport,
                            UInt(0), uFESpace.dof().numTotalDof() );
-
-    importer->addVariable( ExporterData::Scalar, "pressure", velAndPressureRepeated,
+    importer->addVariable( ExporterData::Scalar, "pressure", velAndPressureImport,
                            UInt(3*uFESpace.dof().numTotalDof()),
                            UInt(pFESpace.dof().numTotalDof()) );
     importer->import( t0 );
 
-    *velAndPressureUnique = *velAndPressureRepeated;
+    *velAndPressureExport = *velAndPressureImport;
 
-    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressureUnique,
+    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressureExport,
                            UInt(0), uFESpace.dof().numTotalDof() );
 
-    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressureUnique,
+    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressureExport,
                            UInt(3*uFESpace.dof().numTotalDof()),
                            UInt(pFESpace.dof().numTotalDof()) );
     exporter->postProcess( t0 );
@@ -210,7 +212,7 @@ EnsightToHdf5::run()
         chrono.stop();
         importer->import( time );
 
-        *velAndPressureUnique = *velAndPressureRepeated;
+        *velAndPressureExport = *velAndPressureImport;
 
         exporter->postProcess( time );
 

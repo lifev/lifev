@@ -76,6 +76,9 @@ public:
 
     void setMeshProcId( mesh_ptrtype mesh, int const procId );
 
+    //! returns the type of the map to use for the EpetraVector
+    EpetraMapType mapType() const;
+
     /**
        Post-porcess the variables added to the list
 
@@ -98,7 +101,7 @@ private:
 
     void M_wr_case(const Real& time);
     void M_wr_ascii_geo( const std::string geo_file );
-    //void M_getPostfix();
+
     void M_wr_ascii(const ExporterData& dvar);
     void M_wr_ascii_scalar(const ExporterData& dvar);
     void M_wr_ascii_vector(const ExporterData& dvar);
@@ -175,13 +178,18 @@ void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
 
 
 }
+template<typename Mesh>
+EpetraMapType Ensight<Mesh>::mapType() const
+{
+    return Repeated;
+}
 
 template<typename Mesh>
 void Ensight<Mesh>::postProcess(const Real& time)
 {
     typedef std::list< ExporterData >::iterator Iterator;
 
-    this->getPostfix();
+    this->computePostfix();
 
     if ( this->M_postfix != "*****" )
         {
@@ -272,7 +280,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
 
     UInt count=0;
 
-    UInt dim   = dvar.dim();
+    UInt dim   = dvar.size();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
     UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
@@ -484,7 +492,7 @@ void Ensight<Mesh>::import(const Real& time)
 
     typedef std::list< ExporterData >::iterator Iterator;
 
-    this->getPostfix();
+    this->computePostfix();
 
     assert( this->M_postfix != "*****" );
 
@@ -532,7 +540,7 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
 
     // UInt count=0;
 
-//    UInt dim = dvar.dim();
+//    UInt dim = dvar.size();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
     UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
@@ -578,7 +586,7 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dva
 
 //    UInt count=0;
 
-    UInt dim   = dvar.dim();
+    UInt dim   = dvar.size();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
     UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());

@@ -36,6 +36,6 @@ link:
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 	test -a ethiersteinman.000.case || cp -p $(srcdir)/*.case .
 	test -a ethiersteinman.000.geo  || cp -p $(srcdir)/*.geo  .
-	test -a pressure.000.000.scl    || cp -p $(srcdir)/*.scl  .
-	test -a velocity.000.000.vct    || cp -p $(srcdir)/*.vct  .
+	test -a pressure.00000.000.scl    || cp -p $(srcdir)/*.scl  .
+	test -a velocity.00000.000.vct    || cp -p $(srcdir)/*.vct  .
 

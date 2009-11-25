@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
    This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+   Copyright (C) 2008 EPFL
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -17,22 +17,24 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-/*!
-  \file hdf5exporter.hpp
-  \author S. Deparis
-  \date 11/2007
-  \version 1.0
+//@HEADER
 
-  \brief This file provides an interface for post-processing with hdf5
+/*!
+  @file hdf5exporter.hpp
+  @brief This file provides the class  Hdf5exporter for post-processing with hdf5
+
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @date 11-11-2008
 
   Usage: two steps
-  - first: add the variables using addVariable
-  - second: call postProcess( time );
-*/
+  <ol>
+    <li> first: add the variables using addVariable
+    <li> second: call postProcess( time );
+  </ol>
+ */
 
 #ifndef _HDF5EXPORTER_H_
 #define _HDF5EXPORTER_H_
-
 
 #include <lifeconfig.h>
 #ifndef HAVE_HDF5
@@ -53,10 +55,11 @@
 namespace LifeV
 {
 
-/**
- * \class Hdf5exporter
- * \brief Hdf5exporter data exporter
- */
+//! Hdf5 data exporter, implementation of Exporter
+/*!
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @date 11-11-2008
+*/
 template<typename Mesh>
 class Hdf5exporter : public Exporter<Mesh> {
 
@@ -70,35 +73,39 @@ class Hdf5exporter : public Exporter<Mesh> {
 
 public:
 
-    /**
-       Constructor for Hdf5exporter
+    //! @name Constructor & Destructor
+    //@{
 
-       \param dfile the GetPot data file where you must provide and [hdf5exporter] section with:
-       "start" (start index for filenames 0 for 000, 1 for 001 etc.),
-       "save" (how many time steps per posptrocessing)
-       "multimesh" (=true if the mesh has to be saved at each post-processing step)
-
+    //! Constructor for Hdf5exporter
+    /*!
+        \param dfile the GetPot data file where you must provide an [exporter] section with:
+          "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
+          "save"      (how many time steps per postprocessing)
+          "multimesh" ( = true if the mesh has to be saved at each post-processing step)
        \param mesh the mesh
-
        \param the prefix for the case file (ex. "test" for test.case)
-
        \param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
     Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId);
 
+    //! Constructor for Hdf5exporter without prefix and procID
+    /*!
+        \param dfile the GetPot data file where you must provide an [exporter] section with:
+          "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
+          "save"      (how many time steps per postprocessing)
+          "multimesh" ( = true if the mesh has to be saved at each post-processing step)
+       \param mesh the mesh
+    */
     Hdf5exporter(const GetPot& dfile, const std::string prefix);
 
+    //@}
 
-    /**
-       setters
-    */
+    //! @name Methods
+    //@{
 
-    void setMeshProcId( mesh_ptrtype mesh, int const procId );
-
-    /**
-       Post-porcess the variables added to the list
-
-       \param time the solver time
+    //! Post-process the variables added to the list
+    /*!
+        \param time the solver time
     */
     void postProcess(const Real& time);
 
@@ -107,20 +114,37 @@ public:
 
        \param time the solver time
     */
-    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) // dt is used to rebuild the history up to now
-    {
-        ASSERT(false,"Hdf5exporter::import not yet coded");
-    }
+    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/); // dt is used to rebuild the history up to now
 
-    //! Read  only last timestep
-    void import(const Real& /*Tstart*/)
-    {
-        ASSERT(false,"Hdf5exporter::import not yet coded");
-    }
+    //! Import data from previous simulations
+    /*!
+       \param time the solver time
+    */
+    void import(const Real& /*Tstart*/);
 
-    void M_rd_ascii(const ExporterData& /*null*/){assert(false);}
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    void setMeshProcId( mesh_ptrtype mesh, int const procId );
+
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! returns the type of the map to use for the EpetraVector
+    EpetraMapType mapType() const;
+
+    //@}
+
 
 private:
+
+    //! @name Private Methods
+    //@{
 
     //! write empty xdmf file
     void M_wr_initXdmf();
@@ -143,6 +167,13 @@ private:
     void M_wr_vector(const ExporterData& dvar);
 
     void M_wr_geo();
+
+    void M_rd_var   ( ExporterData& dvar);
+    void M_rd_scalar( ExporterData& dvar);
+    void M_rd_vector( ExporterData& dvar);
+
+
+    //@}
 
     hdf5_ptrtype M_HDF5;
     std::ofstream M_xdmf;
@@ -203,11 +234,17 @@ void Hdf5exporter<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
 }
 
 template<typename Mesh>
+EpetraMapType Hdf5exporter<Mesh>::mapType() const
+{
+    return Unique;
+}
+
+template<typename Mesh>
 void Hdf5exporter<Mesh>::postProcess(const Real& time)
 {
     if ( M_HDF5.get() == 0)
         {
-            M_HDF5.reset(new hdf5_type(this->M_listData.begin()->getPtr()->Comm()));
+            M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
             M_HDF5->Create(this->M_prefix+".h5");
 
             // write empty xdmf file
@@ -222,7 +259,7 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
     typedef std::list< ExporterData >::const_iterator Iterator;
 
 
-    this->getPostfix();
+    this->computePostfix();
 
     if ( this->M_postfix != "***" )
         {
@@ -275,12 +312,12 @@ void Hdf5exporter<Mesh>::M_wr_scalar(const ExporterData& dvar)
     M_HDF5->Write("RHS", RHS);
     */
 
-    UInt dim   = dvar.dim();
+    UInt dim   = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.getPtr()->BlockMap(), start, dim);
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
     vector_type subVar(subMap);
-    subVar.subset(*dvar.getPtr(),start);
+    subVar.subset(*dvar.storedArray(),start);
 
     std::string varname (this->M_prefix+"_"+dvar.variableName()+ this->M_postfix); // see also in M_wr_attributes
     bool writeTranspose (true);
@@ -291,65 +328,17 @@ template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 {
 
-
-    /*
-    UInt dim   = dvar.dim();
-    UInt start = dvar.start();
-
-    EpetraMap subMapDist(dvar.getPtr()->BlockMap(), start, nDimensions*dim);
-
-    // Unfortunately, we need row-oriented write-out in hdf5/xmf (at least for now in paraview)
-    // EpetraExt::DistArray< double > distVar(*subMapDist.getMap(Unique), nDimensions);
-    EpetraVector varT(subMapDist);
-
-    double* rowMajor;
-    int     lda (nDimensions);
-    int*    rowGID = varT.BlockMap().MyGlobalElements ();
-
-    for (int i(0); i<nDimensions; ++i)
-    {
-        rowMajor = varT.getEpetraVector().Values() + i;
-
-        EpetraMap subMap(dvar.getPtr()->BlockMap(), start+i*dim, dim);
-
-        vector_type subVar(subMap);
-        subVar.subset(*dvar.getPtr(), start+i*dim);
-
-        double* colMajor (subVar.getEpetraVector().Values());
-
-        for (int j(0); j < varT.getEpetraVector().MyLength () / 3  ; ++j, ++colMajor, rowMajor += lda)
-            *rowMajor = *colMajor;
-
-    }
-
-    std::string varname (this->M_prefix+"_"+dvar.variableName() + this->M_postfix); // see also in M_wr_attributes
-    M_HDF5->Write(varname, varT.getEpetraVector());
-
-
-    UInt dim   = dvar.dim();
-    UInt start = dvar.start();
-
-    string coord[3]={"X","Y","Z"}; // see also wr_vector_datastructure
-    for (int i(0); i<nDimensions; ++i)
-    {
-        EpetraMap subMap(dvar.getPtr()->BlockMap(), start+i*dim, dim);
-        vector_type subVar(subMap);
-        subVar.subset(*dvar.getPtr(), start+i*dim);
-
-        std::string varname (this->M_prefix+"_"+dvar.variableName() + coord[i] + this->M_postfix); // see also in M_wr_attributes
-        M_HDF5->Write(varname, subVar.getEpetraVector());
-    }
-
-
-    */
-
-    UInt dim   = dvar.dim();
+    UInt dim   = dvar.size();
     UInt start = dvar.start();
 
     using namespace boost;
 
-    shared_array<double*>                   ArrayOfPointers(new double*[nDimensions]);
+    // solution array has to be reordered and stored in a Multivector.
+    // Using auxiliary arrays:
+    //shared_array<double*>                   ArrayOfPointers(new double*[nDimensions]);
+    double **                                 ArrayOfPointers(new double*[nDimensions]);
     shared_array< shared_ptr<vector_type> > ArrayOfVectors (new shared_ptr<vector_type>[nDimensions]);
+
     int MyLDA;
 
 
@@ -361,20 +350,22 @@ void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        EpetraMap subMap(dvar.getPtr()->BlockMap(), start+d*dim, dim);
+        EpetraMap subMap(dvar.storedArray()->BlockMap(), start+d*dim, dim);
         ArrayOfVectors[d].reset(new  vector_type(subMap));
-        ArrayOfVectors[d]->subset(*dvar.getPtr(),start+d*dim);
+        ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*dim);
 
         ArrayOfVectors[d]->getEpetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
     }
 
-    EpetraMap subMap(dvar.getPtr()->BlockMap(), start, dim);
-    Epetra_MultiVector multiVector(View, *subMap.getMap(Unique), &ArrayOfPointers[0], nDimensions);
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    Epetra_MultiVector multiVector(View, *subMap.getMap(Unique), ArrayOfPointers, nDimensions);
 
 
     bool writeTranspose (true);
     std::string varname (this->M_prefix+"_"+dvar.variableName() + this->M_postfix); // see also in M_wr_attributes
     M_HDF5->Write(varname, multiVector, writeTranspose);
+
+    delete[] ArrayOfPointers;
 
 
 }
@@ -402,7 +393,7 @@ void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
     */
 
     // I need a map, I suppose var[0] has one:
-    //     dvar.getPtr()->BlockMap()
+    //     dvar.storedArray()->BlockMap()
     // but this map probably includes more dimensions or P2 elements ...
     // ok: I assume that anyway it starts with the P1 elements of the first dimensions,
     //  I will discart the following entries.
@@ -413,7 +404,7 @@ void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
     // linear map for volumes. we Will have to insert via local ids.
     Epetra_Map connectionsMap( this->M_nbLocalDof * this->M_mesh->numGlobalVolumes(),
                 this->M_nbLocalDof * this->M_mesh->numVolumes(),
-                0, this->M_listData.begin()->getPtr()->Comm());
+                0, this->M_listData.begin()->storedArray()->Comm());
 
     Epetra_IntVector connections(connectionsMap);
 
@@ -430,15 +421,15 @@ void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
         }
 
 
-    this->M_listData.begin()->getPtr()->Comm().Barrier();
+    this->M_listData.begin()->storedArray()->Comm().Barrier();
 
     // this offset is needed by hdf5 since it starts numbering from 0
-    //int const hdf5Offset(this->M_listData.begin()->getPtr()->BlockMap().IndexBase());
+    //int const hdf5Offset(this->M_listData.begin()->storedArray()->BlockMap().IndexBase());
     int const hdf5Offset(0);
 
     // Points
-    EpetraMap subMap(this->M_listData.begin()->getPtr()->BlockMap(), hdf5Offset, this->M_mesh->numGlobalVertices(),
-                     this->M_listData.begin()->getPtr()->BlockMap().IndexBase() - hdf5Offset );
+    EpetraMap subMap(this->M_listData.begin()->storedArray()->BlockMap(), hdf5Offset, this->M_mesh->numGlobalVertices(),
+                     this->M_listData.begin()->storedArray()->BlockMap().IndexBase() - hdf5Offset );
 
     EpetraVector pointsX(subMap);
     EpetraVector pointsY(subMap);
@@ -475,6 +466,7 @@ void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
             pointsZVarname      += this->M_postfix; // see also in M_wr_geometry
         }
 
+    std::cout << pointsX.getEpetraVector() << pointsX.getEpetraVector().Values()<< std::endl;
 
     M_HDF5->Write(connectionsVarname, connections);
     // bool writeTranspose (true);
@@ -733,6 +725,130 @@ template
 
 
 }
+
+
+template<typename Mesh>
+void Hdf5exporter<Mesh>::import(const Real& Tstart, const Real& dt)
+{
+    // dt is used to rebuild the history up to now
+    Real time(Tstart - this->M_count*dt);
+
+    for ( UInt count(0); count < this->M_count; ++count)
+    {
+        this->M_timeSteps.push_back(time);
+        ++this->M_steps;
+        time += dt;
+    }
+
+    time += dt;
+
+    import(time);
+
+}
+
+template<typename Mesh>
+void Hdf5exporter<Mesh>::import(const Real& time)
+{
+    if ( M_HDF5.get() == 0)
+    {
+        M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
+        M_HDF5->Open(this->M_prefix+".h5"); //!! Simone
+    }
+
+
+    this->M_timeSteps.push_back(time);
+    ++this->M_steps;
+
+    typedef std::list< ExporterData >::iterator Iterator;
+
+    this->computePostfix();
+
+    assert( this->M_postfix != "*****" );
+
+    if (!this->M_procId) std::cout << "  x-  HDF5 importing ..."<< std::endl;
+
+    Chrono chrono;
+    chrono.start();
+    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+        {
+            M_rd_var(*i); ///!!! Simone
+        }
+    chrono.stop();
+    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+
+}
+
+template <typename Mesh>
+void Hdf5exporter<Mesh>::M_rd_var(ExporterData& dvar)
+{
+
+    switch( dvar.type() )
+        {
+        case ExporterData::Scalar:
+            M_rd_scalar(dvar);
+            break;
+        case ExporterData::Vector:
+            M_rd_vector(dvar);
+            break;
+        }
+
+}
+
+
+
+template <typename Mesh>
+void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
+{
+
+    UInt dim   = dvar.size();
+    UInt start = dvar.start();
+
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    Epetra_MultiVector* subVar(0);
+
+    std::string varname (this->M_prefix+"_"+dvar.variableName()+ this->M_postfix); // see also in M_wr_attributes
+    bool readTranspose (true);
+    M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
+
+    dvar.storedArray()->subset(*subVar, subMap, 0, start );
+
+    delete subVar;
+
+}
+
+template <typename Mesh>
+void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
+{
+
+    UInt dim   = dvar.size();
+    UInt start = dvar.start();
+
+    using namespace boost;
+
+    // solution array has first to be read has Multivector.
+
+    // first read the multivector:
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    Epetra_MultiVector* subVar(0);
+
+    bool readTranspose (true);
+    std::string varname (this->M_prefix+"_"+dvar.variableName() + this->M_postfix); // see also in M_wr_attributes
+
+    M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
+
+    std::cout << "subVar = "<< *subVar << std::endl;
+
+    // then put back value in our EpetraVector
+
+    for (UInt d ( 0 ); d < nDimensions; ++d)
+    {
+        dvar.storedArray()->subset(*subVar, subMap,  0, start+d*dim, d );
+    }
+
+    delete subVar;
+
+}
+
 
 
 }

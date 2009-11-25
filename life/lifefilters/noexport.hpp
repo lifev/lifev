@@ -70,6 +70,8 @@ public:
 
     NoExport(const GetPot& dfile, const std::string prefix);
 
+    //! returns the type of the map to use for the EpetraVector
+    EpetraMapType mapType() const;
 
     /**
        Post-porcess the variables added to the list
@@ -77,6 +79,7 @@ public:
        \param time the solver time
     */
     void postProcess(const Real& /*time*/) {}
+
 
     /**
        Import data from previous simulations
@@ -105,6 +108,12 @@ template<typename Mesh>
 NoExport<Mesh>::NoExport(const GetPot& dfile, const std::string prefix):
     super(dfile,prefix)
 {
+}
+
+template<typename Mesh>
+EpetraMapType NoExport<Mesh>::mapType() const
+{
+    return Unique;
 }
 
 

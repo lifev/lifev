@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
    This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+   Copyright (C) 2008 EPFL
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -17,18 +17,23 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-/*!
-  \file exporter.hpp
-  \author S. Deparis
-  \date 11/2008
-  \version 1.0
+//@HEADER
 
-  \brief This file provides an interface for post-processing
+/*!
+  @file exporter.hpp
+  @brief This file provides an interface for post-processing
+
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @date 11-11-2008
 
   Usage: two steps
-  - first: add the variables using addVariable
-  - second: call postProcess( time );
-*/
+  <ol>
+    <li> first: add the variables using addVariable
+    <li> second: call postProcess( time );
+  </ol>
+ */
+
+
 #ifndef _EXPORTER_H_
 #define _EXPORTER_H_
 
@@ -49,90 +54,221 @@
 
 #include <boost/shared_ptr.hpp>
 
-
 namespace LifeV
 {
 
-//typedef boost::numeric::ublas::vector_range< Vector >  VectorRange;
-//typedef EpetraVector VectorRange;
-//typedef double* VectorRange;
+//! ExporterData - Holds the datastructure of the an array to import/export
+/*!
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @date 11-11-2008
 
-class ExporterData {
-
+  This class holds the datastructure of one datum
+  to help the importer/exporter
+  like:   variable name, shared pointer to data, size, and few others.
+ */
+class ExporterData
+{
 public:
-    typedef EpetraVector vector_rawtype;
+
+    //! @name Public Types
+    //@{
+
+    typedef EpetraVector                      vector_rawtype;
     typedef boost::shared_ptr<vector_rawtype> vector_ptrtype;
 
-    enum Type{Scalar,Vector};
+    //! Type of data stored.
+    enum Type
+    {
+        Scalar, /*!< Scalar stands for scalarfield */
+        Vector  /*!< Vector stands for vectorfield */
+    };
 
+    //@}
+
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Constructor with all the data to be stored
+    /*!
+        Constructor with all the data to be stored
+        @param type         - scalar or vector field
+        @param variableName - name assigned to this variable in output file
+        @param vec          - shared pointer to array
+        @param start        - address of first datum in the array to be stored.
+                              Useful in case you want to define a subrange of the vector *vec
+        @param size         - size of the array to store (not yet multiplied by the dimension of the vector)
+        @param steady       - if  file name for postprocessing has to include time dependency
+    */
     ExporterData(const Type type, const std::string variableName, vector_ptrtype const& vec, UInt start, UInt size, UInt steady);
 
-    std::string variableName() const;
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! Accessor to component (const)
+    /*!
+        @param i which component to access
+    */
     Real operator()(const UInt i) const;
+
+    //! Accessor to component (reference)
+    /*!
+        @param i which component to access
+    */
     Real& operator()(const UInt i);
-    UInt dim() const;
-    //! Useful in case you want to define a subrange of vector *vec
-    UInt start() const { return M_start; }
-    Type type() const;
-    const vector_ptrtype getPtr() const { return M_vr; }
-    UInt steady() const {return M_steady; }
+
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    //! file name for postprocessing has to include time dependency
     void set_steady(UInt i) {M_steady = i;}
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! name assigned to this variable in output file
+    const std::string&  variableName() const;
+
+    //! size of the stored array. was: dim()
+    const UInt& size() const;
+
+    //! address of first datum in the array
+    const UInt& start() const { return M_start; }
+
+    //! scalar or vector field
+    const Type& type() const;
+
+    //! shared pointer to array
+    const vector_ptrtype storedArray() const { return M_vr; }
+
+    //! returns 0 if file name for postprocessing has to include time dependency
+    UInt steady() const {return M_steady; }
 
     //! returns Scalar or Vector strings
     std::string typeName() const;
+
     //! returns 1 (if Scalar) or 3 (if Vector)
     UInt typeDim() const;
 
+    //@}
+
+
 private:
+
+    //! @name Private Methods
+    //@{
+
+    //! dim has been replaced by size() and will be removed
+    const UInt dim() const { assert(false); }
+
+    //! shared pointer to array, replaced by storedArray() and will be removed
+    const vector_ptrtype getPtr() const { assert(false); return M_vr; }
+
+    //@}
+
+    //! name assigned to this variable in output file
     std::string M_variableName;
+
+    //! pointer to storedArray
     const vector_ptrtype M_vr;
-    UInt M_dim;
+
+    //! address of first datum in the array
+    UInt M_size;
+
+    //! address of first datum in the array
     UInt M_start;
+
+    //! scalar or vector field
     Type M_type;
+
+    //! equal to 0 if file name for postprocessing has to include time dependency
     UInt M_steady;
 
 };
 
-/**
- * \class Exporter
- * \brief generic data exporter
+
+//! Exporter - Pure virtual class that describes a generic exporter
+/*!
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @date 11-11-2008
+
+  This class is pure virtual and describes a generic exporter that can
+  also do import
  */
 template<typename Mesh>
 class Exporter {
 
 public:
-    typedef boost::shared_ptr<Mesh> mesh_ptrtype;
+
+    typedef boost::shared_ptr<Mesh>      mesh_ptrtype;
     typedef ExporterData::vector_rawtype vector_rawtype;
     typedef ExporterData::vector_ptrtype vector_ptrtype;
 
-    /**
-       Constructor for Exporter
+    //! @name Constructor & Destructor
+    //@{
 
-       \param dfile the GetPot data file where you must provide an [ensight] section with:
-       "start" (start index for filenames 0 for 000, 1 for 001 etc.),
-       "save" (how many time steps per postprocessing)
-       "multimesh" (=true if the mesh has to be saved at each post-processing step)
-
+    //! Constructor for Exporter
+    /*!
+        \param dfile the GetPot data file where you must provide an [exporter] section with:
+          "start"     (start index for filenames 0 for 000, 1 for 001 etc.),
+          "save"      (how many time steps per postprocessing)
+          "multimesh" ( = true if the mesh has to be saved at each post-processing step)
        \param mesh the mesh
-
        \param the prefix for the case file (ex. "test" for test.case)
-
        \param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
     Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId );
 
+    //! Constructor for Exporter without prefix and procID
+    /*!
+        In this case prefix and procID should be set separately
+        \param dfile the GetPot data file where you must provide an [exporter] section with:
+          "start"     (start index for filenames 0 for 000, 1 for 001 etc.),
+          "save"      (how many time steps per postprocessing)
+          "multimesh" ( = true if the mesh has to be saved at each post-processing step)
+       \param the prefix for the case file (ex. "test" for test.case)
+    */
     Exporter(const GetPot& dfile, const std::string prefix);
 
+    //! Destructor
     virtual ~Exporter() {};
+    //@}
 
-    /**
-       setters
+    //! @name Methods
+    //@{
+
+    //! Adds a new variable to be post-processed
+    /*!
+        \param type the type fo the variable Ensight::Scalar or Ensight::Vector
+        \param prefix the prefix of the files storing the variable (ex: "velocity" for velocity.***)
+        \param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
+        \param size the number of Dof for that variable
     */
+    void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
+    //! Post-process the variables added to the list
+    /*!
+        \param time the solver time
+    */
+    virtual void postProcess(const Real& time) = 0;
 
-    virtual void setMeshProcId( mesh_ptrtype mesh, int const procId );
+    //! Import data from previous simulations
+    /*!
+       \param time the solver time
+    */
+    virtual void import(const Real& Tstart, const Real& dt) = 0; // dt is used to rebuild the history up to now
+
+    //! Read  only last timestep
+    virtual void import(const Real& Tstart) = 0;
+
+protected:
+
     void initMeshProcId       ( mesh_ptrtype mesh, int const procId );
-
-    void initProcId       ( int const procId );
 
     void setNodesMap       ( std::vector<int> LtGNodesMap );
 
@@ -142,43 +278,34 @@ public:
      */
     void setOutputDirectory( const std::string& outputDirectory );
 
+    //! compute postfix
+    void computePostfix();
+
+    //@}
+
+public:
+
+    //! @name Set Methods
+    //@{
+
+    virtual void setMeshProcId( mesh_ptrtype mesh, int const procId );
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! returns the type of the map to use for the EpetraVector
+    virtual EpetraMapType mapType() const = 0;
+
+    //@}
+
+private:
+    void initProcId       ( int const procId );
+
     void initNodesMap       ();
 
-    /**
-       Adds a new variable to be post-processed
-
-       \param type the type fo the variable Ensight::Scalar or Ensight::Vector
-
-       \param prefix the prefix of the files storing the variable (ex: "velocity" for velocity.***)
-
-       \param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
-
-       \param dim the number of Dof for that variable
-    */
-    void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
-
-
-    /**
-       Post-porcess the variables added to the list
-
-       \param time the solver time
-    */
-    virtual void postProcess(const Real& time) = 0;
-
-    /**
-       Import data from previous simulations
-
-       \param time the solver time
-    */
-    virtual void import(const Real& Tstart, const Real& dt) = 0; // dt is used to rebuild the history up to now
-
-    //! Read  only last timestep
-    virtual void import(const Real& Tstart) = 0;
-
-
 protected:
-
-    void getPostfix();
 
     mesh_ptrtype M_mesh;
     std::string M_prefix;
@@ -290,7 +417,7 @@ void Exporter<Mesh>::initNodesMap()
 
 }
 
-template <typename Mesh> void Exporter<Mesh>::getPostfix()
+template <typename Mesh> void Exporter<Mesh>::computePostfix()
 {
 
     std::ostringstream index;
@@ -311,9 +438,9 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
 
 template<typename Mesh>
-void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& vr, UInt start, UInt dim, UInt steady)
+void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& vr, UInt start, UInt size, UInt steady)
 {
-    M_listData.push_back( ExporterData(type,variableName,vr,start, dim, steady) );
+    M_listData.push_back( ExporterData(type,variableName,vr,start, size, steady) );
 }
 
 
