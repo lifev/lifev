@@ -22,7 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Pressure.dat \
+dist_pkgdata_DATA = SinusoidalFlux.dat \
+                    Pressure.dat \
                     Pressure_Dynamic_STP.dat \
                     PoiseuilleFlux.dat \
                     PoiseuilleFlux_Dynamic_STP.dat \
