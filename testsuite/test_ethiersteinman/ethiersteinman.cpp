@@ -373,12 +373,10 @@ Ethiersteinman::run()
     if (exporterType.compare("hdf5") == 0)
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-        velAndPressure.reset( new vector_type(fluid.solution(), Unique ) );
     }
     else
 #endif
     {
-        velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
         if (exporterType.compare("none") == 0)
         {
             exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
@@ -386,6 +384,8 @@ Ethiersteinman::run()
             exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
         }
     }
+
+    velAndPressure.reset( new vector_type(fluid.solution(), exporter->mapType() ) );
 
     exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
