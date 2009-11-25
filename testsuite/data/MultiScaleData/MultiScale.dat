@@ -37,6 +37,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.d
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress_Stationary.dat
 
 [Solver] ##########################################################################################
