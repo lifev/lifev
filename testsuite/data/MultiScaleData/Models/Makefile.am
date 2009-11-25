@@ -46,6 +46,8 @@ dist_pkgdata_DATA = Fluid3D_Cylinder.dat \
                     MultiScale_3Dserial3_FluxStress.dat \
                     MultiScale_3Dserial3_FluxStress_Stationary.dat \
                     MultiScale_3Dserial3_Stress_Stationary.dat \
+                    MultiScale_3Dserial5_FluxStress.dat \
+                    MultiScale_3Dserial5_Stress.dat \
                     MultiScale_3Dserial6_FluxStress.dat \
                     MultiScale_3Dserial6_FluxStress_Stationary.dat \
                     MultiScale_3Dserial6_Stress.dat \
