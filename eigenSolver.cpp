@@ -66,9 +66,10 @@ EigenSolver::setDataFromGetPot(GetPot const& data , const std::string& section)
     if (verbose) {
         verbosity += Anasazi::FinalSummary + Anasazi::TimingDetails;
     }
-    if (debug) {
+#ifdef DEBUG
+    if (debug)
         verbosity += Anasazi::Debug;
-    }
+#endif
   //
   // Create parameter list to pass into solver manager
   //
