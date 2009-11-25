@@ -726,7 +726,7 @@ struct booleanCondition
         }                 //end for
 
 #ifdef DEBUG
-    Debug(4000) std::cout << M_me << " has " << locProc[M_me].size() << " elements." << std::endl;
+    Debug(4000) << M_me << " has " << locProc[M_me].size() << " elements.\n";
 #endif
     // ***********************
     // local mesh construction

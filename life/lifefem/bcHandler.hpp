@@ -864,7 +864,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 {
                     Debug(5010) << *it << " ";
                 }
-            Debug(5010) << std::endl;
+            Debug(5010) << "\n";
 #endif
         }
 
