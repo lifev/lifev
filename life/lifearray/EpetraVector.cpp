@@ -41,28 +41,32 @@ namespace LifeV {
 EpetraVector::EpetraVector( const EpetraMap& _map, EpetraMapType maptype ):
     M_epetraMap   (new EpetraMap(_map)),
     M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype))
+    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
+    M_combineMode (Add)
 {
 }
 
 EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& _map, EpetraMapType maptype ):
     M_epetraMap   (_map),
     M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype))
+    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
+    M_combineMode (Add)
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector):
     M_epetraMap   (vector.M_epetraMap),
     M_maptype     (vector.M_maptype),
-    M_epetraVector(vector.M_epetraVector)
+    M_epetraVector(vector.M_epetraVector),
+    M_combineMode (vector.M_combineMode)
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype):
     M_epetraMap   (vector.M_epetraMap),
     M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype))
+    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
+    M_combineMode (Add)
 {
     operator = (vector);
 }
@@ -71,7 +75,8 @@ EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype,
                             Epetra_CombineMode combineMode):
     M_epetraMap   (vector.M_epetraMap),
     M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype))
+    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
+    M_combineMode (Add)
 {
 
     if (maptype == vector.M_maptype)
@@ -98,7 +103,8 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&    vector,
                             EpetraMapType                maptype ):
     M_epetraMap   ( _map),
     M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype))
+    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
+    M_combineMode (Add)
 {
 
     assert(this->BlockMap().SameAs(vector.Map()) );
@@ -111,7 +117,8 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&    vector,
 EpetraVector::EpetraVector( const EpetraVector& vector, const int reduceToProc):
     M_epetraMap   (vector.M_epetraMap->createRootMap(reduceToProc)),
     M_maptype     (Unique),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype))
+    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
+    M_combineMode (Add)
 {
     operator = (vector);
 }
@@ -245,27 +252,40 @@ EpetraVector& EpetraVector::
 subset(const EpetraVector& vector,
        const int           offset )
 {
-    (*this) *= 0;
-
-    this->subset(vector, getMap(), offset, 0);
-      return *this;
+    return this->subset(vector, getMap(), offset, 0);
 }
 
 EpetraVector& EpetraVector::
 subset(const EpetraVector& vector,
        const EpetraMap&    map,
-       const UInt           offset1,
-       const UInt           offset2)
+       const UInt          offset1,
+       const UInt          offset2)
 {
-  (*this) *= 0;
-   const int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
-   const UInt    numMyEntries = map.getMap(M_maptype)->NumMyElements();
+
+    return subset(vector.M_epetraVector, map, offset1, offset2);
+}
+
+EpetraVector& EpetraVector::
+subset(const Epetra_MultiVector& vector,
+       const EpetraMap&    map,
+       const UInt          offset1,
+       const UInt          offset2,
+       const UInt          column)
+{
+    const int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
+    const UInt    numMyEntries = map.getMap(M_maptype)->NumMyElements();
+
+    int lid1 ;
+    int lid2 ;
 
     // eg:  p = (u,p) or u = (u,p)
     for (UInt i = 0; i < numMyEntries; ++i)
         {
+            lid1 = vector.Map().LID(gids[i]+offset1);
+            lid2 = BlockMap().LID(gids[i]+offset2);
+            ASSERT( lid2 >= 0 & lid1 >= 0, "EpetraVector::subset ERROR : !! lid < 0\n" );
             //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
-            (*this)[gids[i]+offset2] += vector(gids[i]+offset1);
+            M_epetraVector[0][lid2] = vector[column][lid1];
         }
 
     return *this;
@@ -411,7 +431,14 @@ void EpetraVector::spy( std::string const &filename ) const
     // Purpose: Matlab dumping and spy
     std::string nome = filename, uti = " , ";
 
-     int  me    = M_epetraVector.Comm().MyPID();
+    int  me    = M_epetraVector.Comm().MyPID();
+
+    if (M_maptype == Repeated)
+    {
+        EpetraVector unique(*this, Unique, Zero);
+        unique.spy(filename);
+        return;
+    }
 
     //
     // check on the file name
@@ -509,10 +536,10 @@ EpetraVector::operator=( const EpetraVector& vector )
 
         switch (M_maptype) {
         case Unique:
-            M_epetraVector.Export(vector.M_epetraVector, M_epetraMap->getImporter(), Add);
+            M_epetraVector.Export(vector.M_epetraVector, M_epetraMap->getImporter(), M_combineMode);
             return *this;
         case Repeated:
-             M_epetraVector.Import(vector.M_epetraVector, M_epetraMap->getExporter(), Add);
+             M_epetraVector.Import(vector.M_epetraVector, M_epetraMap->getExporter(), M_combineMode);
             return *this;
         }
     }
@@ -520,9 +547,9 @@ EpetraVector::operator=( const EpetraVector& vector )
     case Repeated:
         //
         if (M_maptype != Repeated)
-            return Export(vector.M_epetraVector, Add);
+            return Export(vector.M_epetraVector, M_combineMode);
     case Unique:
-            return Import(vector.M_epetraVector, Add);
+            return Import(vector.M_epetraVector, M_combineMode);
     }
 
     // if we get here, it means that we have two different repeated maps.
@@ -532,8 +559,8 @@ EpetraVector::operator=( const EpetraVector& vector )
               << std::endl;
 
     EpetraVector vectorUnique(*M_epetraMap, Unique);
-    vectorUnique.Export(vector.M_epetraVector, Add);
-    M_epetraVector.Import(vectorUnique.M_epetraVector, M_epetraMap->getExporter(), Add);
+    vectorUnique.Export(vector.M_epetraVector, M_combineMode);
+    M_epetraVector.Import(vectorUnique.M_epetraVector, M_epetraMap->getExporter(), M_combineMode);
 
     return *this;
 }
@@ -549,9 +576,9 @@ EpetraVector::operator=( const Epetra_MultiVector& vector )
     // We hope we are guessing right
     switch (M_maptype) {
     case Unique:
-        return Export(*feVec, Add);
+        return Export(*feVec, M_combineMode);
     case Repeated:
-        return Import(*feVec, Add);
+        return Import(*feVec, M_combineMode);
     }
 
     return *this;
@@ -949,6 +976,22 @@ EpetraVector::operator!( void )
             comparisonVector.M_epetraVector[i][j] = !M_epetraVector[i][j];
 
     return comparisonVector;
+}
+
+
+// ===================================================
+//! Set Methods
+// ===================================================
+void
+EpetraVector::setCombineMode( Epetra_CombineMode combineMode )
+{
+    M_combineMode = combineMode;
+}
+
+void
+EpetraVector::setDefaultCombineMode( )
+{
+    setCombineMode(Add);
 }
 
 

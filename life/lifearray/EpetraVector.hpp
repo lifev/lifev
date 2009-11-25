@@ -145,10 +145,36 @@ public:
      */
     EpetraVector& subset( const EpetraVector& vector, const int offset = 0 );
 
+    //! set this to a subset of  vector with an offset.
+    /*!
+        similar to subset( const EpetraVector& , const int ), but with
+        additional parameters:
+        @param vector  vector from which to copy data
+        @param map     map from which to select indeces to copy
+        @param offset1 offset to apply to input vector
+        @param offset2 offset to apply to this vector
+    */
     EpetraVector& subset( const EpetraVector& vector,
                           const EpetraMap& map,
                           const UInt offset1,
                           const UInt offset2 );
+
+    //! set this to a subset of  vector with an offset.
+    /*!
+        similar to subset( const EpetraVector& , const int ), but with
+        additional parameters:
+        @param vector  Epetra_MultiVector, instead of EpetraVector, from which to copy data
+        @param map     map from which to select indeces to copy
+        @param offset1 offset to apply to input vector
+        @param offset2 offset to apply to this vector
+        @param column  column of the multivector from which to extract the data
+    */
+    EpetraVector& subset(const Epetra_MultiVector& vector,
+                         const EpetraMap&    map,
+                         const UInt          offset1,
+                         const UInt          offset2,
+                         const UInt          column = 0);
+
 
     double Norm1   () const;
     double Norm2   () const;
@@ -315,6 +341,27 @@ public:
     //@}
 
 
+    //! @name Set Methods
+    //@{
+
+    //! Sets the combine mode for the import/export operations.
+    /*!
+        Most of the LifeV library is structured to use combine mode
+        equal to Add. In some cases (cf test_filters) it is necessary
+        to discard the data coming from other processors.
+        @param combineMode combien mode to use for this vector from now on
+     */
+    void setCombineMode( Epetra_CombineMode combineMode );
+
+    //! Sets the combine mode for the import/export operations to default.
+    /*!
+        Most of the LifeV library is structured to use combine mode
+        equal to Add.
+     */
+    void setDefaultCombineMode( );
+
+    //@}
+
     //! @name Get Methods
     //@{
 
@@ -397,6 +444,8 @@ private:
     boost::shared_ptr< EpetraMap > M_epetraMap;
     EpetraMapType                  M_maptype;
     vector_type                    M_epetraVector;
+
+    Epetra_CombineMode             M_combineMode;
 
 };
 
