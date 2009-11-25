@@ -26,7 +26,9 @@ SUBDIRS		= 	Couplings\
 				Models
 
 dist_pkgdata_DATA = MultiScale.dat \
-					MultiScale_test.dat
+					MultiScale_test.dat \
+					Run3Dserial6_FluxStress.dat \
+					Run3Dserial6_Stress.dat
 					
 
 check-local:
