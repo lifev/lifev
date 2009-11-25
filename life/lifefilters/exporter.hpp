@@ -266,17 +266,18 @@ public:
     //! Read  only last timestep
     virtual void import(const Real& Tstart) = 0;
 
-protected:
-
-    void initMeshProcId       ( mesh_ptrtype mesh, int const procId );
-
-    void setNodesMap       ( std::vector<int> LtGNodesMap );
-
     //! Set the output folder for postprocessing
     /*!
      * @param outputDirectory output folder
      */
     void setOutputDirectory( const std::string& outputDirectory );
+
+    void initMeshProcId       ( mesh_ptrtype mesh, int const procId );
+
+
+protected:
+
+    void setNodesMap       ( std::vector<int> LtGNodesMap );
 
     //! compute postfix
     void computePostfix();
