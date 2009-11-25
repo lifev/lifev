@@ -3,15 +3,15 @@
 using namespace LifeV;
 
 
-HeartFunctors::HeartFunctors( GetPot& dataFile ):	
+HeartFunctors::HeartFunctors( GetPot& dataFile ):
 	_dataFile(dataFile),
     stim_source (dataFile("electric/physics/stim_source",1)),
     stim_period_1 (dataFile("electric/physics/stim_period_1",200.)),
-    stim_period_2 (dataFile("electric/physics/stim_period_2",200.)),	
-    stim_period_3 (dataFile("electric/physics/stim_period_3",200.)),	
-    stim_period_4 (dataFile("electric/physics/stim_period_4",200.)),	
-    stim_period_5 (dataFile("electric/physics/stim_period_5",200.)),	
-    stim_period_6 (dataFile("electric/physics/stim_period_6",200.)),	
+    stim_period_2 (dataFile("electric/physics/stim_period_2",200.)),
+    stim_period_3 (dataFile("electric/physics/stim_period_3",200.)),
+    stim_period_4 (dataFile("electric/physics/stim_period_4",200.)),
+    stim_period_5 (dataFile("electric/physics/stim_period_5",200.)),
+    stim_period_6 (dataFile("electric/physics/stim_period_6",200.)),
     stim_start_1 (dataFile("electric/physics/stim_start_1",0.)),
     stim_stop_1 (dataFile("electric/physics/stim_stop_1",0.)),
     stim_value_1 (dataFile("electric/physics/stim_value_1",0.)),
