@@ -21,7 +21,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 	[./time_discretization]
 	initialtime		= 0.0           # [s]
 	endtime			= 36.8514713339174    # [s]
-	timestep		= 0.0368514713339173  # [s]
+	timestep		= 0.0359877649745286  # [s]
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
