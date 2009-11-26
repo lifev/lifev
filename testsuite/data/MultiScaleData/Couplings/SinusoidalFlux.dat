@@ -23,6 +23,6 @@ list = 'SinusoidalFlux'  # Sinusoidal Flux
 	mode				= Full
 	component			= 3
 	#function   			= 'C=1; -sin(2*pi*t/C)'
-	function   			= 'C=1.233700550136170 ; -sin(2*pi*t/C)' # Womersley = 10, Reynolds = 100
+	function   			= 'c=9.21286783347932; -sin(2*pi*t/c)' # Womersley = 10
 	
 	[../]
