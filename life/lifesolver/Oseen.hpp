@@ -1058,7 +1058,7 @@ updateSystem(const double       alpha,
 
         if ( M_stab && (!M_reuseStab || (M_matrStab.get() == 0) ) )
         {
-            M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...    ");
+            M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...     ");
             chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVecRep, false );
@@ -1072,7 +1072,7 @@ updateSystem(const double       alpha,
         {
             if (M_stab)
                 {
-                    M_Displayer.leaderPrint("  f-  Updating the Stabilization terms ...    ");
+                    M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...     ");
                     chrono.start();
 
                     if ( !M_reuseStab || (M_matrStab.get() == 0) )
