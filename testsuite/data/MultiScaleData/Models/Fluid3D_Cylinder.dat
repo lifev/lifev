@@ -25,11 +25,6 @@ multimesh        = false         # true if the mesh has to be saved at each post
 
 
 
-[problem]
-semiImplicit    = false
-
-
-
 [fluid]
 useShapeDerivatives = false
 #diagonalBlockPrec   = false
@@ -52,19 +47,19 @@ useShapeDerivatives = false
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
     
-    #vel_order       = P1               # P1, P1Bubble, P2
-    vel_order       = P1Bubble         # P1, P1Bubble, P2
+    vel_order       = P1               # P1, P1Bubble, P2
+    #vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
-    div_beta_u_v    = 1                # 1=on, 0=off
+    div_beta_u_v    = true                # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
-    #stabilization   = 'none'          # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
+    stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
 
     [../ipstab]
-    gammaBeta       = 0.5
-    gammaDiv        = 0.5
-    gammaPress      = 0.5
-    reuse           = true
+    gammaBeta       = 0.25
+    gammaDiv        = 0.25
+    gammaPress      = 0.025
+    reuse           = false
 
     #[../valuespersection]
     #computeMeanValuesPerSection    = 0
