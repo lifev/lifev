@@ -1025,12 +1025,9 @@ updateSystem(const double       alpha,
 
 
             // Stabilising term: div u^n u v
-            /*
             if ( M_divBetaUv )
-            {
                 mass_divw( 0.5*M_data.density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
-            }
-            */
+
             // loop on components
             for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
             {
