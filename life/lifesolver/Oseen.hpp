@@ -756,7 +756,8 @@ void Oseen<Mesh, SolverType>::buildSystem()
             else
             {
                 for ( UInt jComp = 0; jComp < nbCompU; jComp++ )//ADDED
-                { // to use if stiff_strain(...) is called instead of stiff(...)
+                { // to use if stiff_strain(...) is called instead of stiff(...):
+                  // if you want to use stiff() comment the for loop and substitute jcomp=icomp.
                 chronoStiffAssemble.start();
                 assembleMatrix( *M_matrStokes,
                                 M_elmatStiff,
@@ -768,7 +769,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
                                 iComp*velTotalDof, jComp*velTotalDof);
                 chronoStiffAssemble.stop();
 
-            } //to use if stiff_strain(...) is called instead of stiff(...)
+                }
 
 
             if ( !M_steady )
@@ -1166,6 +1167,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     chrono.start();
     applyBoundaryConditions( *matrFull, rhsFull, bch);
 
+    matrFull->GlobalAssemble();
     chrono.stop();
 
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
