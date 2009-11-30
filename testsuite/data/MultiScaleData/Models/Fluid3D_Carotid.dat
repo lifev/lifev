@@ -53,18 +53,18 @@ useShapeDerivatives = false
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
     
-    vel_order       = P1               # P1, P1Bubble, P2
-    #vel_order       = P1Bubble         # P1, P1Bubble, P2
+    #vel_order       = P1               # P1, P1Bubble, P2
+    vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
-    div_beta_u_v    = true                # 1=on, 0=off
+    div_beta_u_v    = false                # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
 
     [../ipstab]
-    gammaBeta       = 0.25
-    gammaDiv        = 0.25
-    gammaPress      = 0.025
+    gammaBeta       = 0.02
+    gammaDiv        = 0.2
+    gammaPress      = 0.2
     reuse           = false
 
     #[../valuespersection]
