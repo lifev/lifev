@@ -27,7 +27,7 @@ multimesh        = false         # true if the mesh has to be saved at each post
 
 [fluid]
 useShapeDerivatives = false
-#diagonalBlockPrec   = false
+diagonalBlockPrec   = false
 
     [./physics] # Defined here only if different from the one in the main file.
     #density         = 1.0             # density   [g/cm^3]
@@ -51,6 +51,7 @@ useShapeDerivatives = false
     vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
+    stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
     div_beta_u_v    = false                # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
@@ -59,6 +60,7 @@ useShapeDerivatives = false
     gammaBeta       = 0.02
     gammaDiv        = 0.2
     gammaPress      = 0.2
+    max_iter_reuse  = 100
     reuse           = false
 
     #[../valuespersection]
@@ -76,6 +78,7 @@ useShapeDerivatives = false
     output          = all # all none
     conv            = rhs
     max_iter        = 500
+    max_iter_reuse  = 500
     kspace          = 500
     tol             = 1.e-12
     
