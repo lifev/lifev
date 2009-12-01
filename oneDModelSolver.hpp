@@ -380,7 +380,7 @@ public:
 
   //! timestep getters
   const Real timestep() const {return M_data.timestep();}
-  
+
 private:
 
     //! the data
@@ -1213,7 +1213,7 @@ OneDModelSolver<Params, Flux, Source>::BCValuesLeft() const
 {
     Vec2D temp(2);
     //    for( UInt i=0; i<2; ++i )
-    
+
     temp[0] = M_U_thistime[0]( LeftNodeId() );
     temp[1] = M_U_thistime[1]( LeftNodeId() );
 
@@ -1975,12 +1975,12 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
     if( var == "physical")
       {
-	
+
 	M_U_thistime[0] = vector_type( M_localMap );
 	M_U_thistime[0] = u10;
 	M_U_thistime[1] = vector_type( M_localMap );
 	M_U_thistime[1] = u20;
-	
+
 	for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
 	  M_oneDParams.W_from_U( M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
 				 M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
@@ -2015,22 +2015,22 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
     ScalVec pressures(4*M_FESpace.dim());
 
-    for (UInt ielem = 0; ielem < M_FESpace.dim() ; ++ielem ) 
+    for (UInt ielem = 0; ielem < M_FESpace.dim() ; ++ielem )
       {
         subrange(pressures, 4*ielem, 4+4*ielem) =
             M_oneDParams.pressure( M_U_thistime [0][ielem + 1],
-                                   M_U_prevtime [0][ielem + 1], 
+                                   M_U_prevtime [0][ielem + 1],
 				   M_U_2prevtime[0][ielem + 1],
                                    M_data.timestep(), ielem,
                                    M_dP_dt_steps, M_viscoelastic_wall,
                                    M_linearize_string_model );
-	
+
         M_U_thistime[4][ielem + 1] = pressures(4*ielem);
       }
 
-    if(M_viscoelastic_wall) 
+    if(M_viscoelastic_wall)
       {
-        for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ ) 
+        for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
 	  {
 	    M_U_thistime[M_variable_index_map.find("P_elast")->second][ielem + 1]
 	      = pressures(1+4*ielem);
@@ -2721,7 +2721,8 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
             //            matrFull->spy("matr");
             M_linearSolver.setMatrix(*matrFull);
             //std::cout << "rhs0 norm2 = " << sol0.Norm2() << std::endl;
-            M_linearSolver.solveSystem( M_rhs[0], sol0, matrFull, false );
+            M_linearSolver.setReusePreconditioner(false);
+            M_linearSolver.solveSystem( M_rhs[0], sol0, matrFull );
             //std::cout << "sol0 norm2 = " << sol0.Norm2() << std::endl;
             chrono2.stop();
 
@@ -2732,7 +2733,8 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
             //std::cout << "rhs1 norm2 = " << M_rhs[1].Norm2() << std::endl;
 //             //! solve the system: rhs2 = massFactor^{-1} * rhs2
 //            M_linearSolver.setMatrix
-            M_linearSolver.solveSystem( M_rhs[1], sol1, matrFull, false );
+            M_linearSolver.setReusePreconditioner(false);
+            M_linearSolver.solveSystem( M_rhs[1], sol1, matrFull );
             //std::cout << "sol1 norm2 = " << sol1.Norm2() << std::endl;
 
 
