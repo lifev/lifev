@@ -259,9 +259,9 @@ public:
 
     template<typename vector_type>
     Real H1Norm( const vector_type& vec );
-  
-  
-    // Added by S. Quinodoz 21.08.2009 
+
+
+    // Added by S. Quinodoz 21.08.2009
     // Interpolate the function given by a FE Vector "solutionVector" (not a real function)
     // and a cell "elementID" in ANY given point "pt" in the space
     //
@@ -1029,7 +1029,7 @@ FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
 }
 
 
- 
+
 
 //This function interpolates the value of the function given by
 // - an element
@@ -1037,7 +1037,7 @@ FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
 // in a given point P: value = \sum_{dofs} solution_i \phi_i(P)
 //
 // Another faster way would have been to use a custom quadrature
-// but the fact that the quadrature is already written inside the 
+// but the fact that the quadrature is already written inside the
 // refEle destroys all the hope of a faster implementation (the
 // geoMap has to be redefined, and so has to be updated for the
 // mesh, the refFE has to be rebuilt,...)
@@ -1057,7 +1057,7 @@ FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const
   // Make sur everything is up to date
   M_fe->updateFirstDeriv( M_mesh->element( elementID ));
 
-  // Map the point back to the ref FE    
+  // Map the point back to the ref FE
   Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
   Real x(0);  Real y(0);  Real z(0);
 
@@ -1065,7 +1065,7 @@ FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const
   if (pt.size()>=2)    y=pt[1];
   if (pt.size()>=3)    z=pt[2];
 
-  
+
   M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
 
   // Store the number of local DoF
@@ -1079,7 +1079,7 @@ FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const
     {
       // The global ID of the selected dof
       // This should be changed in case of a VECTORIAL FE
-      
+
       ID dofID(fe().patternFirst(iter_dof));
       ID globalDofID( dof().localToGlobal(elementID, dofID +1) ); // iter_dof -> dofID
 
@@ -1109,7 +1109,7 @@ FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, 
   // Make sur everything is up to date
   M_fe->updateFirstDeriv( M_mesh->element( elementID ));
 
-  // Map the point back to the ref FE    
+  // Map the point back to the ref FE
   Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
 
   Real x(0);  Real y(0);  Real z(0);
@@ -1117,9 +1117,9 @@ FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, 
   if (pt.size()>=1)    x=pt[0];
   if (pt.size()>=2)    y=pt[1];
   if (pt.size()>=3)    z=pt[2];
-  
+
   M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-     
+
   // Store the number of local DoF
   UInt nDof(dof().numLocalDof());
 
@@ -1151,7 +1151,7 @@ FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
   // Make sur everything is up to date
   M_fe->updateFirstDeriv( M_mesh->element( elementID ));
 
-  // Map the point back to the ref FE    
+  // Map the point back to the ref FE
   Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
 
   Real x(0);  Real y(0);  Real z(0);
@@ -1159,9 +1159,9 @@ FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
   if (pt.size()>=1)    x=pt[0];
   if (pt.size()>=2)    y=pt[1];
   if (pt.size()>=3)    z=pt[2];
-  
+
   M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-  
+
   // Store the number of local DoF
   UInt nDof(dof().numLocalDof());
 
@@ -1177,7 +1177,7 @@ FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
 
       for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
       {
-	grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z) 
+	grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z)
 	                                   * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,component,iter_dim);
       };
     };
@@ -1200,7 +1200,7 @@ FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVecto
   // Make sur everything is up to date
   M_fe->updateFirstDeriv( M_mesh->element( elementID ));
 
-  // Map the point back to the ref FE    
+  // Map the point back to the ref FE
   Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
 
   Real x(0);  Real y(0);  Real z(0);
@@ -1208,9 +1208,9 @@ FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVecto
   if (pt.size()>=1)    x=pt[0];
   if (pt.size()>=2)    y=pt[1];
   if (pt.size()>=3)    z=pt[2];
-  
+
   M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-     
+
   // Store the number of local DoF
   UInt nDof(dof().numLocalDof());
 
@@ -1221,10 +1221,10 @@ FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVecto
   // Loop over the DoFs
   for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
     {
-     
+
       for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
       {
-	grad+= solutionVector[iter_dof-1] * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z) 
+          grad+= solutionVector[iter_dof-1] * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z)
 	                                   * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,component,iter_dim);
       };
     };
