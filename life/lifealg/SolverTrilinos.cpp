@@ -156,7 +156,7 @@ SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& secti
 
     // Maximum Number of iterations
     M_maxIter         = dfile( ( section + "/max_iter"      ).data(), 200 );
-    M_maxIterForReuse = dfile( ( section + "/max_iter_reuse").data(), M_maxIter*8/10);
+    M_maxIterForReuse = dfile( ( section + "/max_iter_reuse").data(), static_cast<int> ( M_maxIter*8./10.) );
     M_reusePreconditioner = dfile( (section + "/reuse").data(), M_reusePreconditioner);
 
     M_TrilinosParameterList.set("max_iter", M_maxIter);
