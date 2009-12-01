@@ -56,9 +56,10 @@ public:
 
     typedef FSIOperator                            super;
     typedef FSIOperator::fluid_type::value_type::matrix_type   matrix_type;
-    typedef IfpackComposedPrec                                 prec_raw_type;
+    //typedef IfpackComposedPrec                               prec_raw_type;
+    typedef EpetraPreconditioner                               prec_raw_type;
     typedef boost::shared_ptr<matrix_type>                     matrix_ptrtype;
-    typedef boost::shared_ptr<prec_raw_type>                       prec_type;
+    typedef boost::shared_ptr<prec_raw_type>                   prec_type;
     typedef SolverTrilinos                                     solver_type;
 
 
@@ -302,7 +303,7 @@ protected:
     /**
        \small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
     */
-    void iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
+    void iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
     //!@}
 
     /**
@@ -489,7 +490,7 @@ private:
 
 template <typename SolverType, typename PrecOperatorPtr>
 void Monolithic::
-iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
+iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
 {
     M_solid->getDisplayer().leaderPrint("    preconditioner type : ", M_DDBlockPrec );
     Chrono chrono;
@@ -500,7 +501,9 @@ iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, Sol
 
     M_linearSolver->setMatrix(*M_monolithicMatrix);
 
-    int numIter = M_linearSolver->solveSystem( rhs, step, prec, (M_reusePrec)&&(!M_resetPrec));
+
+    M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
+    int numIter = M_linearSolver->solveSystem( rhs, step, prec );
 
     if (numIter < 0)
         {
@@ -509,7 +512,7 @@ iterateMonolithic(vector_type& rhs, vector_type& step, PrecOperatorPtr prec, Sol
             M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
 
             if (numIter <= -M_maxIterSolver)
-                M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed twice.\n");
+                M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
         }
 
     M_solid->getDisplayer().leaderPrint("   system solved.\n ");

@@ -21,7 +21,9 @@
 
 #include <lifemc/lifealg/eigenSolver.hpp>
 
-#include "EpetraExt_MatrixMatrix.h"
+#include <EpetraExt_MatrixMatrix.h>
+
+#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {
@@ -856,63 +858,67 @@ void  Monolithic::solveJac(vector_type         &_step,
 
     M_solid->getDisplayer().leaderPrint("Solving Jacobian system... \n" );
 
+    boost::shared_ptr<IfpackComposedPrec>  ifpackCompPrec;
+
+
     if( !M_reusePrec || M_resetPrec )
+    {
         switch(M_DDBlockPrec)
         {
         case 1:
+            *M_precMatrPtr += *M_fluidBlock;
+            *M_precMatrPtr += *M_solidBlock;
+            this->M_fluid->updateStab( *M_precMatrPtr);//applies the stabilization terms
+            if(!M_precMatrPtr->getMatrixPtr()->Filled())
             {
-                *M_precMatrPtr += *M_fluidBlock;
-                *M_precMatrPtr += *M_solidBlock;
-                this->M_fluid->updateStab( *M_precMatrPtr);//applies the stabilization terms
-                if(!M_precMatrPtr->getMatrixPtr()->Filled())
-                {
-                    couplingMatrix(M_precMatrPtr, 7);
-                    //addDiagonalEntries(M_entry,M_precMatrPtr, M_interfaceMap, M_solidAndFluidDim);
-                }
-                else
-                    this->M_solid->getDisplayer().leaderPrint("ERROR: probably the tolerance fixed for Newton is too low. Remember that this type of preconditioner can be used only in the geometry-explicit case \n");
-                bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-                bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-
-                M_precMatrPtr->GlobalAssemble();
-                bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1.,
-                                dataSolid().getTime() );
-                bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(), 1.,
-                                dataFluid().getTime() );
-
-
-                M_precMatrPtr->GlobalAssemble();}
-            break;
-        case 2:
-            {
-                *M_precMatrPtr += *M_monolithicMatrix;
-                M_precMatrPtr->GlobalAssemble();
+                couplingMatrix(M_precMatrPtr, 7);
+                //addDiagonalEntries(M_entry,M_precMatrPtr, M_interfaceMap, M_solidAndFluidDim);
             }
-            break;
-        case 3:
-            {if(false && !M_robinCoupling.get())
-                {
-                    M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
-                    robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
-                    M_robinCoupling->GlobalAssemble();
-                }
-                *M_precMatrPtr += *M_monolithicMatrix;
-                M_precMatrPtr->GlobalAssemble();
+            else
+                this->M_solid->getDisplayer().leaderPrint("ERROR: probably the tolerance fixed for Newton is too low. Remember that this type of preconditioner can be used only in the geometry-explicit case \n");
+            bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
 
+            M_precMatrPtr->GlobalAssemble();
+            bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1.,
+                            dataSolid().getTime() );
+            bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(), 1.,
+                            dataFluid().getTime() );
+
+            M_precMatrPtr->GlobalAssemble();
+            break;
+
+        case 2:
+            *M_precMatrPtr += *M_monolithicMatrix;
+            M_precMatrPtr->GlobalAssemble();
+            break;
+
+        case 3:
+            if(false && !M_robinCoupling.get())
+            {
+                M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+                robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                M_robinCoupling->GlobalAssemble();
+            }
+            *M_precMatrPtr += *M_monolithicMatrix;
+            M_precMatrPtr->GlobalAssemble();
+
+            {
                 std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
                 for(short i=0; i<nDimensions; ++i)
                 {
                     zeroBlock(M_precMatrPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset); //(2, 4)
                     zeroBlock(M_precMatrPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(2, 5)
                 }
-                M_precMatrPtr->GlobalAssemble();
             }
-            break;
-        case 4:
-            {
-                *M_precMatrPtr += *M_monolithicMatrix;
-                M_precMatrPtr->GlobalAssemble();
 
+            break;
+
+        case 4:
+            *M_precMatrPtr += *M_monolithicMatrix;
+            M_precMatrPtr->GlobalAssemble();
+
+            {
                 std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
                 for(short i=0; i<nDimensions; ++i)
                 {
@@ -920,84 +926,68 @@ void  Monolithic::solveJac(vector_type         &_step,
                 }
             }
             break;
+
         case 5:
-            {
-            }
-            break;
         case 6:
-            {
-            }
             break;
+
         case 7:
+
+            ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
+
+            M_BCh_flux->setOffset(M_offset-M_fluxes);
+            M_BCh_Robin->setOffset(M_offset);
+
+            if(ifpackCompPrec->set())
             {
-                M_BCh_flux->setOffset(M_offset-M_fluxes);
-                M_BCh_Robin->setOffset(M_offset);
+                ifpackCompPrec->replace(M_fluidOper, 1);
+            }
+            else
+            {
                 bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime());
                 bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
                 M_solidBlockPrec->GlobalAssemble();
-                //M_solidBlockPrec->spy("solidBlock");
+
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-                if(M_precPtr->set())
-                {
-                    M_precPtr->replace(M_fluidOper, 1);
-                }
-                else
-                {
-                    M_solidBlockPrec->GlobalAssemble();
-                    M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
 
-                    M_precPtr->buildPreconditioner(M_solidOper);
-                    //M_epetraWorldComm->Barrier();
-                    M_precPtr->push_back(M_fluidOper);
-                    //*(new IfpackComposedPrec::operator_type(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock))));
-                }
-
-                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+                ifpackCompPrec->buildPreconditioner(M_solidOper);
+                ifpackCompPrec->push_back(M_fluidOper);
             }
-            return;
+
+            //
+            break;
+
         case 8:
+
+            ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
+
+            M_BCh_flux->setOffset(M_offset-M_fluxes);
+            M_BCh_Robin->setOffset(M_offset);
+
+
+            if(ifpackCompPrec->set())
             {
-                M_BCh_flux->setOffset(M_offset-M_fluxes);
-                M_BCh_Robin->setOffset(M_offset);
-
-                if(M_precPtr->set())
-                {
-                    M_precPtr->replace(M_fluidOper, 0);
-                }
-                else
-                {
-
-                    bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                    bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                    M_solidBlockPrec->GlobalAssemble();
-                    M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-                    M_precPtr->buildPreconditioner(M_fluidOper);
-                    M_precPtr->push_back(M_solidOper);
-                }
-
-                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
+                ifpackCompPrec->replace(M_fluidOper, 0);
             }
-            return;
+            else
+            {
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                M_solidBlockPrec->GlobalAssemble();
+
+                M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+                ifpackCompPrec->buildPreconditioner(M_fluidOper);
+                ifpackCompPrec->push_back(M_solidOper);
+            }
+
+            break;
+
         case 9:
-            {
-                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-            }
-            return;
         case 10:
-            {
-                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-            }
-            return;
         case 11:
-            {
-                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-            }
-            return;
         case 12:
-            {
-                this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precPtr, M_linearSolver);
-            }
-            return;
+            break;
         default:
             {
                 for(short i=0; i<nDimensions; ++i)
@@ -1007,13 +997,39 @@ void  Monolithic::solveJac(vector_type         &_step,
             }
             break;
         }
+    }
+
 
     // #if OBSOLETE
     //     if(!M_dataFluid->useShapeDerivatives())
     // #endif
 
     //M_precMatrPtr->spy("p");
-    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_precMatrPtr, M_linearSolver);
+
+    switch(M_DDBlockPrec)
+    {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+        this->iterateMonolithic(_res, _step, M_precMatrPtr, M_linearSolver);
+        break;
+
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+        this->iterateMonolithic(_res, _step, M_precPtr,     M_linearSolver);
+        break;
+
+    default:
+        this->iterateMonolithic(_res, _step, M_precMatrPtr, M_linearSolver);
+        break;
+    }
 
     this->M_solid->getDisplayer().leaderPrint("done.\n");
 }
@@ -1115,7 +1131,9 @@ Monolithic::setUp( const GetPot& dataFile )
 
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setUpPrec(dataFile, "solid/prec");//to avoid if we have already a prec.
-    M_precPtr.reset(new prec_raw_type(M_epetraComm.get()));
+
+    // We should use a factory here, like reset( PRECFactory::instance().createObject( precType ) );
+    M_precPtr.reset(new IfpackComposedPrec(M_epetraComm.get()));
     M_precPtr->setDataFromGetPot(dataFile, "solid/prec");//to avoid if we build the prec from a matrix.
 
     M_reusePrec     = dataFile( "solid/prec/reuse", true);
@@ -1317,7 +1335,8 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
 
     vector_ptrtype sol(new vector_type(M_monolithicInterfaceMap));
     solverMass.setMatrix(*bdMatrix);
-    int numIter = solverMass.solveSystem( lambda, *sol, bdMatrix, false);
+    solverMass.setReusePreconditioner(false);
+    int numIter = solverMass.solveSystem( lambda, *sol, bdMatrix);
     UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
     for(ID dim=0; dim<nDimensions; ++dim)
