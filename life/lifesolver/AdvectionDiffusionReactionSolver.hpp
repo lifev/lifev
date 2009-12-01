@@ -210,11 +210,7 @@ public:
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
 
-    void resetPrec() {M_resetPrec = true; M_resetStab = true;}
-    // as for now resetting stabilization matrix at the same time as the preconditioner
-    // void resetStab() {M_resetStab = true;}
-
-    //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
     EpetraMap const& getMap() const { return M_localMap; }
 
@@ -246,13 +242,6 @@ public:
 protected:
 
     UInt dim() const           { return M_FESpace.dim(); }
-
-
-    void solveSystem            (  matrix_ptrtype matrFull,
-                                   vector_type&   rhsFull,
-                                   vector_type&    sol,
-                                   SolverType&     linearSolver,
-                                   prec_type&      prec );
 
     void applyBoundaryConditions(  matrix_type&        matrix,
                                    vector_type&        rhs,
@@ -330,8 +319,6 @@ protected:
     //! Stabilization
     std::string                    M_stab;
     Real                           M_gammaBeta;
-    bool                           M_resetStab;
-    bool                           M_reuseStab;
 
 //     details::
 //    IPStabilization<Mesh, Dof>     M_ipStab;
@@ -356,8 +343,6 @@ protected:
     //! boolean that indicates if le precond has to be recomputed
 
     bool                           M_reusePrec;
-    int                            M_maxIterForReuse;
-    bool                           M_resetPrec;
 
     //! interger storing the max number of solver iteration with prec recomputing
 
@@ -412,8 +397,6 @@ ADRSolver( const data_type&          dataType,
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
     M_prec                   ( ),
-    M_resetStab              ( true ),
-    M_reuseStab              ( true ),
 //     M_ipStab                 ( M_FESpace.mesh(),
 //                                M_FESpace.dof(), M_FESpace.refFE(),
 //                                M_FESpace.feBd(), M_FESpace.qr(),
@@ -424,8 +407,6 @@ ADRSolver( const data_type&          dataType,
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_FESpace.fe().nbNode, 1, 1 ),
@@ -461,15 +442,11 @@ ADRSolver( const data_type&          dataType,
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
     M_prec                   ( ),
-    M_resetStab              ( true ),
-    M_reuseStab              ( true ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_FESpace.fe().nbNode, 1, 1 ),
@@ -527,7 +504,6 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_steady      = dataFile( "adr/miscellaneous/steady",        0  );
     M_stab        = dataFile( "adr/stab/type",                   "ip");
     M_gammaBeta   = dataFile( "adr/stab/gammaBeta",              0. );
-    M_reuseStab   = dataFile( "adr/stab/reuse",                  true);
     M_diagonalize = dataFile( "adr/space_discretization/diagonalize",  0. );
 
 
@@ -535,7 +511,6 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     M_maxIterSolver   = dataFile( "adr/solver/max_iter", -1);
     M_reusePrec       = dataFile( "adr/prec/reuse", true);
-    M_maxIterForReuse = dataFile( "adr/prec/max_iter_reuse", M_maxIterSolver*8/10);
 
     std::string precType = dataFile( "adr/prec/prectype", "Ifpack");
 
@@ -855,7 +830,7 @@ updateSystem( Real       alpha,
         if (M_stab == "ip")
         {
 //	      leaderPrint("   adr- IP stab");
-            if ( M_resetStab )
+//            if ( M_resetStab )
             {
                 const UInt nDof = M_betaFESpace.dof().numTotalDof();
 
@@ -1003,7 +978,7 @@ updateSystem( Real       alpha,
 			      };
                         }
 		    }*/
-		    
+
 		    // New version, added by SQ : beta on the domain, not the boundary!
 		    // See elemOper.cpp for justification of this usage
                     ElemVec beta( M_betaFESpace.fe().nbNode, nDimensions);
@@ -1062,7 +1037,6 @@ updateSystem( Real       alpha,
                                     M_FESpace.dof(),
                                     0, 0, 0, 0 );
 
-                    M_resetStab = true;
                 }
             }
         }
@@ -1145,9 +1119,12 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_comm->Barrier();
 
     leaderPrintMax("done in " , chrono.diff());
-    // solving the system
 
-    solveSystem( matrFull, rhsFull, M_sol, M_linearSolver, M_prec);
+    // solving the system
+    M_linearSolver.setMatrix(*matrFull);
+
+    M_linearSolver.setReusePreconditioner( M_reusePrec );
+    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
 
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
@@ -1156,92 +1133,6 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 
 
-template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull,
-                                           vector_type&    sol,
-                                           SolverType&     linearSolver,
-                                           prec_type&      prec)
-{
-    Chrono chrono;
-
-    leaderPrint("  adr-  Setting up the solver ...                ");
-
-    chrono.start();
-    linearSolver.setMatrix(*matrFull);
-    chrono.stop();
-
-    leaderPrintMax("done in " , chrono.diff());
-
-    // overlapping schwarz preconditioner
-
-    if ( !M_reusePrec || M_resetPrec || !prec->set() )
-    {
-        chrono.start();
-
-        leaderPrint("  adr-  Computing the precond ...                ");
-
-        prec->buildPreconditioner(matrFull);
-
-        Real condest = prec->Condest();
-
-        linearSolver.setPreconditioner(prec);
-
-        chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
-	leaderPrint("  adr-       Estimated condition number = " , condest );
-
-    }
-    else
-    {
-        leaderPrint("  adr-  Reusing  precond ...                \n");
-    }
-
-
-    chrono.start();
-
-    leaderPrint("  adr-  Solving system ...                       ");
-
-    int numIter = linearSolver.solve(sol, rhsFull);
-
-    if (numIter > M_maxIterSolver)
-    {
-        chrono.start();
-
-	leaderPrint("  adr- Iterative solver failed, numiter = " , numIter);
-        leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-	leaderPrint("     recomputing the precond ...            ");
-
-        prec->buildPreconditioner(matrFull);
-
-        Real condest = prec->Condest();
-
-        linearSolver.setPreconditioner(prec);
-
-        chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
-        leaderPrint("  adr-       Estimated condition number = " , condest );
-
-        numIter = linearSolver.solve(sol, rhsFull);
-
-        if (numIter > M_maxIterSolver && M_verbose)
-            std::cout << "  adr- ERROR: Iterative solver failed again.\n" <<  std::flush;
-
-    }
-
-    M_resetPrec = (numIter > M_maxIterForReuse);
-
-    leaderPrintMax( "done in " , chrono.diff() );
-
-    std::string statusMessage;
-
-    statusMessage = linearSolver.printStatus();
-
-    leaderPrint("  adr-  " + statusMessage);
-
-    M_comm->Barrier();
-
-}
 
 
 template<typename Mesh, typename SolverType>
