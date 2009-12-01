@@ -727,7 +727,8 @@ iterate( bchandler_raw_type& bch )
 
     // solving the system
     M_linearSolver->setMatrix(*matrFull);
-    int numIter = M_linearSolver->solveSystem( rhsFull, M_disp, matrFull, M_reusePrec);
+    M_linearSolver->setReusePreconditioner( M_reusePrec );
+    int numIter = M_linearSolver->solveSystem( rhsFull, M_disp, matrFull);
 
     numIter = abs(numIter);
 
@@ -792,7 +793,8 @@ iterateLin( bchandler_raw_type& bch )
         M_resetPrec = false;
     }
     M_linearSolver->setMatrix(*matrFull);
-    int numIter = M_linearSolver->solveSystem(/*matrFull,*/  rhsFull, M_disp, matrFull, ( M_reusePrec && !M_resetPrec ));
+    M_linearSolver->setReusePreconditioner( ( M_reusePrec && !M_resetPrec ) );
+    int numIter = M_linearSolver->solveSystem(  rhsFull, M_disp, matrFull );
 
 
     M_Displayer.leaderPrintMax("dz norm     = " , M_disp.NormInf() );

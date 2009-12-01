@@ -241,19 +241,10 @@ public:
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
 
-//     // Precond reset
-//     void resetPrec() {M_resetPrec = true; M_resetStab = true;}
-    void reusePrec()
-    {
-        M_resetPrec = !M_reusePrec;
-    }
-
     void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
+
     // as for now resetting stabilization matrix at the same time as the preconditioner
-
     void resetStab() { M_matrStab.reset(); }
-
-    //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
     EpetraMap   const& getMap()       const { return M_localMap; }
 
@@ -282,14 +273,6 @@ protected:
 
     UInt dim_u() const           { return M_uFESpace.dim(); }
     UInt dim_p() const           { return M_pFESpace.dim(); }
-
-
-//     void solveSystem            (  matrix_ptrtype matrFull,
-//                                    vector_type&   rhsFull,
-//                                    vector_type&    sol,
-//                                    SolverType&     linearSolver,
-//                                    prec_type&      prec ,
-//                                    bool reuse=true);
 
     void applyBoundaryConditions(  matrix_type&        matrix,
                                    vector_type&        rhs,
@@ -353,8 +336,6 @@ protected:
 
     SolverType                     M_linearSolver;
 
-    //    boost::shared_ptr<EpetraPreconditioner> M_prec;
-
     bool                           M_steady;
 
     //! Postprocessing class
@@ -391,8 +372,7 @@ protected:
     //! boolean that indicates if the precond has to be recomputed
 
     bool                           M_reusePrec;
-    int                            M_maxIterForReuse;
-    bool                           M_resetPrec;
+    int                            M_iterReuseStab;
 
     //! integer storing the max number of solver iteration with prec recomputing
 
@@ -451,7 +431,6 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
-    //    M_prec                   ( ),
     M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
@@ -467,9 +446,7 @@ Oseen( const data_type&          dataType,
     M_count                  ( 0 ),
     //    M_updated                ( false ),
     M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( false ),
-    M_maxIterSolver          ( -1 ),
+    M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -483,7 +460,6 @@ Oseen( const data_type&          dataType,
     M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
-    //    M_prec = prec_ptr( PRECFactory::instance().createObject
 }
 
 template<typename Mesh, typename SolverType>
@@ -525,9 +501,7 @@ Oseen( const data_type&          dataType,
     M_count                  ( 0 ),
     //    M_updated                ( false ),
     M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( false ),
-    M_maxIterSolver          ( -1 ),
+    M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -581,9 +555,7 @@ Oseen( const data_type&          dataType,
     M_count                  ( 0 ),
     //    M_updated                ( false ),
     M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( false ),
-    M_maxIterSolver          ( -1 ),
+    M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -612,11 +584,17 @@ Oseen<Mesh, SolverType>::
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
+
+    M_linearSolver.setUpPrec(dataFile, "fluid/prec");
+
     M_steady      = dataFile( "fluid/miscellaneous/steady",        0  );
+
     M_gammaBeta   = dataFile( "fluid/ipstab/gammaBeta",            0. );
     M_gammaDiv    = dataFile( "fluid/ipstab/gammaDiv",             0. );
     M_gammaPress  = dataFile( "fluid/ipstab/gammaPress",           0. );
     M_reuseStab   = dataFile( "fluid/ipstab/reuse",               true);
+    M_iterReuseStab = dataFile( "fluid/ipstab/max_iter_reuse", M_linearSolver.MaxIter() * 8./10.);
+
     M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v",false);
     M_diagonalize = dataFile( "fluid/space_discretization/diagonalize",  1. );
     M_isDiagonalBlockPrec = dataFile( "fluid/diagonalBlockPrec",  false );
@@ -629,18 +607,8 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_ipStab.setGammaDiv  (M_gammaDiv);
     M_ipStab.setGammaPress(M_gammaPress);
 
-    M_maxIterSolver   = dataFile( "fluid/solver/max_iter", -1);
     M_reusePrec       = dataFile( "fluid/prec/reuse", true);
-    M_maxIterForReuse = dataFile( "fluid/prec/max_iter_reuse", M_maxIterSolver*8/10);
 
-    //    std::string precType = dataFile( "fluid/prec/prectype", "Ifpack");
-
-    M_linearSolver.setUpPrec(dataFile, "fluid/prec");
-    //    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    //ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
-
-
-    //M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
 }
 
 
@@ -1175,17 +1143,12 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
 
-    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull, M_reusePrec );
-    //std::cout << numIter <<" iterations " << std::endl;
-    if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
-    {
-        resetStab();
-        numIter = - numIter;
-    }
+    M_linearSolver.setReusePreconditioner( M_reusePrec );
+    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
 
-    if( numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
+    // if the preconditioner has been reset, the stab terms are to be updated
+    if( numIter < 0 || numIter > M_iterReuseStab )
     {
-        resetPrec();
         resetStab();
     }
 

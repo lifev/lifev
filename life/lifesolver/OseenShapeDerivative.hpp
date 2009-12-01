@@ -274,7 +274,8 @@ void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
     //    M_linearLinSolver.setAztecooPreconditioner( dataFile, "lin_fluid/solver" );
 
     super::setUp( dataFile );
-    //M_reusePrecLin = dataFile( "lin_fluid/prec/reuse", true);
+
+    M_reusePrecLin = dataFile( "lin_fluid/prec/reuse", true);
 
     //std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack");
 
@@ -289,8 +290,7 @@ template<typename Mesh, typename SolverType>
 void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch )
 {
     Chrono chrono;
-    if(M_reusePrecLin)
-        this->resetPrec(false); // I'd like to reuse the preconditioner already built, at least in the semi-implicit case
+
     // matrix and vector assembling communication
     this->M_Displayer.leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
 
@@ -330,7 +330,8 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms).
     this->M_linearSolver.setMatrix(*matrFull);
-    this->M_linearSolver.solveSystem( rhsFull, M_linSol, matrFull, (M_reusePrecLin && !this->M_resetPrec));
+    this->M_linearSolver.setReusePreconditioner( M_reusePrecLin );
+    this->M_linearSolver.solveSystem( rhsFull, M_linSol, matrFull );
 
 
     this->M_residual  = M_rhsLinNoBC;
