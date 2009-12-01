@@ -251,6 +251,10 @@ void fullMonolithic::solveJac(vector_type       &_muk,
                               const Real       _linearRelTol)
 {
     vector_ptrtype rhs(new vector_type(_res));
+
+    boost::shared_ptr<IfpackComposedPrec>  ifpackCompPrec;
+
+
     if(M_dataFluid->useShapeDerivatives())
     {
         if(M_DDBlockPrec==6)
@@ -311,10 +315,11 @@ void fullMonolithic::solveJac(vector_type       &_muk,
             M_fluidBlock->GlobalAssemble();
             M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
 
+            ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
 
-            if(M_precPtr->set())
+            if(ifpackCompPrec->set())
             {
-                M_precPtr->replace(M_fluidOper, 0);
+                ifpackCompPrec->replace(M_fluidOper, 0);
             }
             else
             {
@@ -325,7 +330,7 @@ void fullMonolithic::solveJac(vector_type       &_muk,
                 M_solidBlockPrec->GlobalAssemble();
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
 
-                M_precPtr->push_back(M_solidOper);
+                ifpackCompPrec->push_back(M_solidOper);
             }
         }
         break;
@@ -353,10 +358,11 @@ void fullMonolithic::solveJac(vector_type       &_muk,
             M_fluidBlock->GlobalAssemble();
             M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
 
+            ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
 
-            if(M_precPtr->set())
+            if(ifpackCompPrec->set())
             {
-                M_precPtr->replace(M_fluidOper, 1);
+                ifpackCompPrec->replace(M_fluidOper, 1);
             }
             else
             {
@@ -367,8 +373,8 @@ void fullMonolithic::solveJac(vector_type       &_muk,
 
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
 
-                M_precPtr->buildPreconditioner(M_solidOper);
-                M_precPtr->push_back(M_fluidOper);
+                ifpackCompPrec->buildPreconditioner(M_solidOper);
+                ifpackCompPrec->push_back(M_fluidOper);
             }
         }
 	    break;
@@ -394,9 +400,11 @@ void fullMonolithic::solveJac(vector_type       &_muk,
 
             M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
 
-            if(M_precPtr->set())
+            ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
+
+            if(ifpackCompPrec->set())
             {
-                M_precPtr->replace(M_fluidOper, 2);
+                ifpackCompPrec->replace(M_fluidOper, 2);
             }
             else
             {
@@ -424,9 +432,9 @@ void fullMonolithic::solveJac(vector_type       &_muk,
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
 
 
-                M_precPtr->buildPreconditioner(M_solidOper);
-                M_precPtr->push_back(M_meshOper);
-                M_precPtr->push_back(M_fluidOper);
+                ifpackCompPrec->buildPreconditioner(M_solidOper);
+                ifpackCompPrec->push_back(M_meshOper);
+                ifpackCompPrec->push_back(M_fluidOper);
             }
         }
         break;
@@ -448,9 +456,11 @@ void fullMonolithic::solveJac(vector_type       &_muk,
             //M_fluidBlock->spy("fb");
             M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
 
-            if(M_precPtr->set())
+            ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
+
+            if(ifpackCompPrec->set())
             {
-                M_precPtr->replace(M_fluidOper, 2);
+                ifpackCompPrec->replace(M_fluidOper, 2);
             }
             else
             {
@@ -478,9 +488,9 @@ void fullMonolithic::solveJac(vector_type       &_muk,
 
                 M_meshOper.reset(new IfpackComposedPrec::operator_raw_type(*M_meshBlock));
 
-                M_precPtr->buildPreconditioner(M_meshOper);
-                M_precPtr->push_back(M_solidOper);
-                M_precPtr->push_back(M_fluidOper);
+                ifpackCompPrec->buildPreconditioner(M_meshOper);
+                ifpackCompPrec->push_back(M_solidOper);
+                ifpackCompPrec->push_back(M_fluidOper);
             }
         }
         break;
