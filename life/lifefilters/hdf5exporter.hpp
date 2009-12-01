@@ -63,6 +63,8 @@ namespace LifeV
 template<typename Mesh>
 class Hdf5exporter : public Exporter<Mesh> {
 
+public:
+
     typedef Exporter<Mesh> super;
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_rawtype vector_type;
@@ -71,7 +73,6 @@ class Hdf5exporter : public Exporter<Mesh> {
     typedef EpetraExt::HDF5         hdf5_type;
     typedef boost::shared_ptr<hdf5_type> hdf5_ptrtype;
 
-public:
 
     //! @name Constructor & Destructor
     //@{
@@ -261,7 +262,7 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
 
     this->computePostfix();
 
-    if ( this->M_postfix != "***" )
+    if ( this->M_postfix != "*****" )
         {
             if (!this->M_procId) std::cout << "  x-  Hdf5exporter post-processing..."<< std::endl;
             Chrono chrono;
@@ -458,15 +459,15 @@ void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
     std::string pointsYVarname("PointsY");
     std::string pointsZVarname("PointsZ");
     std::string connectionsVarname("Connections");
+
     if (this->M_multimesh)
         {
-            connectionsVarname += this->M_postfix; // see also in M_wr_topology
+            connectionsVarname  += this->M_postfix; // see also in M_wr_topology
             pointsXVarname      += this->M_postfix; // see also in M_wr_geometry
             pointsYVarname      += this->M_postfix; // see also in M_wr_geometry
             pointsZVarname      += this->M_postfix; // see also in M_wr_geometry
         }
 
-    std::cout << pointsX.getEpetraVector() << pointsX.getEpetraVector().Values()<< std::endl;
 
     M_HDF5->Write(connectionsVarname, connections);
     // bool writeTranspose (true);
@@ -836,7 +837,6 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
 
     M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
 
-    std::cout << "subVar = "<< *subVar << std::endl;
 
     // then put back value in our EpetraVector
 
