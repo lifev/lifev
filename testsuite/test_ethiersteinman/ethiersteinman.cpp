@@ -151,7 +151,7 @@ Ethiersteinman::Ethiersteinman( int argc,
 
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
-    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     d->comm = new Epetra_SerialComm();
 #endif
@@ -372,7 +372,9 @@ Ethiersteinman::run()
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
+        exporter->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
     }
     else
 #endif
@@ -394,6 +396,9 @@ Ethiersteinman::run()
                          UInt(3*uFESpace.dof().numTotalDof()),
                          UInt(pFESpace.dof().numTotalDof()) );
     exporter->postProcess( 0 );
+
+    std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
+    std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
 
     // Temporal loop
 
