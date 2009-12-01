@@ -122,7 +122,7 @@ public:
 
     double computeResidual( vector_type& __X, vector_type& __B );
 
-    bool precSet() const {return true;}
+    bool isPrecSet() const {return true;}
     void precReset() { return; }
 
 
@@ -154,7 +154,6 @@ public:
                       bool const       retry=true);
 
     void setUpPrec    (const GetPot& dataFile,  const std::string& section);
-//     void setPrec      (prec_raw_type* prec);
 
     //prec_type& getPrec(){return 0;}
 
