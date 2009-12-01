@@ -103,7 +103,10 @@ public:
     //@{
 
     //! Total number of iterations
-    int NumIters();
+    int NumIters() const;
+
+    //! Maximum Total number of iterations
+    int MaxIter() const;
 
     //! True Residual
     double TrueResidual();
@@ -131,15 +134,16 @@ public:
     void setOperator(Epetra_Operator& op);
 
     //! set Epetra_Operator preconditioner
-    void setPreconditioner( prec_type _prec );
-
-    void setPrec( prec_raw_type* prec );
+    void setPreconditioner( prec_type& _prec );
 
     void setDataFromGetPot( const GetPot& dfile, const std::string& section );
 
     void SetParameters( bool cerr_warning_if_unused = false );
 
     void setTolMaxiter( const double tol, const int maxiter = -1 );
+
+    //! if set to true,  do not recompute the preconditioner
+    void setReusePreconditioner( const bool reuse );
 
     //@}
 
@@ -152,49 +156,58 @@ public:
      *  return the number of iterations, M_maxIter+1 if solve failed.
      * \param algorithm - MS_Algorithm
      */
-    int solve( vector_type& x, vector_type& b );
+    int solve( vector_type& x, const vector_type& b );
 
     double computeResidual( vector_type& __X, vector_type& __B );
 
     // return the Aztec status
     std::string printStatus();
 
-    //@}
-
-    /** Solves the system and returns the number of iterations.
-        @param  matrFull,
-        @param  rhsFull,
-        @param  sol,
-        @param  prec,
-        @param  reuse,
-        @param  retry = true
+    //! Solves the system and returns the number of iterations.
+    /*! The Matrix has already been passed by the method
+        setMatrix or setOperator
+        The preconditioner is build starting from the matrix baseMatrixForPreconditioner
+        by the preconditioner object passed in by the method setPreconditioner
+        @param  rhsFull   right hand side
+        @param  sol       solution
+        @param  baseMatrixForPreconditioner base matrix for the preconditioner construction
+        @param  retry     if solver fails, recompute the preconditioner and try again
 
         returns number of iterations. If negative, the solver did not converge,
-        the preconditionar has been recomputed, and a second solution is tried
+        the preconditioner has been recomputed, and a second solution is tried
     */
-    template<typename PrecType>
-    int solveSystem(  vector_type&     rhsFull,
-                      vector_type&     sol,
-                      PrecType&        prec,
-                      bool const       reuse,
-                      bool const       retry=true  );
+    int solveSystem(  const vector_type& rhsFull,
+                      vector_type&       sol,
+                      matrix_ptrtype&    baseMatrixForPreconditioner );
+
+    //! Solves the system and returns the number of iterations.
+    /*! The Matrix has already been passed by the method
+        setMatrix or setOperator
+        @param  rhsFull   right hand side
+        @param  sol       solution
+        @param  prec      preconditioner to use
+    */
+    int solveSystem(  const vector_type& rhsFull,
+                      vector_type&       sol,
+                      prec_type&         prec );
 
     void setUpPrec(const GetPot& dataFile,  const std::string& section);
 
-    void buildPreconditioner( matrix_ptrtype& prec);
+    //! builds the preconditioner starting from the matrix baseMatrixForPreconditioner
+    /*! The preconditioner is build starting from the matrix baseMatrixForPreconditioner
+        by the preconditioner object passed in by the method setPreconditioner
+        @param  baseMatrixForPreconditioner base matrix for the preconditioner construction
+    */
+    void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner);
 
-    template<typename PrecType>
-    void buildPreconditioner( PrecType& prec) { M_prec = prec; }
+
+    //@}
+
 
     // Return if preconditioner has been setted
-    bool precSet() const;
+    bool isPrecSet() const;
 
     void precReset() { M_prec->precReset(); }
-
-    void precReset(prec_type& prec);
-
-    template<typename PrecType>
-    void precReset(PrecType& prec) {}
 
 private:
 
@@ -206,68 +219,12 @@ private:
     Teuchos::ParameterList      M_TrilinosParameterList;
     Displayer                   M_Displayer;
 
-    int                         M_maxIter;
     double                      M_tol;
-    int                         M_maxIterSolver;
+    int                         M_maxIter;
     int                         M_maxIterForReuse;
+    bool                        M_reusePreconditioner;
 };
 
-template<typename PrecType>
-int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
-                                  vector_type&      sol,
-                                  PrecType&        prec, //baseMatrixForPreconditioner
-                                  bool const        reuse,
-                                  bool const        retry)
-
-{
-    M_Displayer.leaderPrint("      Setting up the solver ...                \n");
-
-    if ( !M_prec->set() || !reuse  )
-    {
-        buildPreconditioner(prec);
-        setPreconditioner(M_prec);
-    }
-    else
-    {
-        M_Displayer.leaderPrint("      Reusing  precond ...                 \n");
-    }
-
-    M_Displayer.leaderPrint("      Solving system ...                   \n");
-
-    Chrono chrono;
-    chrono.start();
-    int numIter = solve( sol, rhsFull );
-    chrono.stop();
-    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
-
-    // If we do not want to retry, return now.
-    // otherwise rebuild the preconditioner and solve again:
-    if ( numIter >= M_maxIterSolver && retry )
-    {
-        chrono.start();
-
-        M_Displayer.leaderPrint("     Iterative solver failed, numiter = " , numIter);
-        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-        M_Displayer.leaderPrint("     retrying:          ");
-
-        if (prec.get())
-        {
-            precReset(M_prec);
-            buildPreconditioner(prec);
-            setPreconditioner(M_prec);
-        }
-        chrono.stop();
-        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-        // Solving again, but only once (retry = false)
-        numIter = solveSystem( rhsFull, sol, prec, reuse, false );
-
-        if (numIter >= M_maxIterSolver)
-            M_Displayer.leaderPrint(" ERROR: Iterative solver failed again.\n");
-        return -numIter;
-    }
-
-    return numIter;
-}
 
 } // namespace LifeV
 
