@@ -356,6 +356,8 @@ protected:
 
     bool                           M_divBetaUv;
 
+    bool                           M_stiffStrain;
+
     //
     double                         M_diagonalize;
 
@@ -443,10 +445,13 @@ Oseen( const data_type&          dataType,
                                0., 0., 0.,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
+    M_divBetaUv              ( false ),
+    M_stiffStrain            ( false ),
+    M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
     M_reusePrec              ( true ),
-    M_iterReuseStab        ( -1 ),
+    M_iterReuseStab          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -498,6 +503,9 @@ Oseen( const data_type&          dataType,
                                0., 0., 0.,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
+    M_divBetaUv              ( false ),
+    M_stiffStrain            ( false ),
+    M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
     M_reusePrec              ( true ),
@@ -552,6 +560,9 @@ Oseen( const data_type&          dataType,
                                0., 0., 0.,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
+    M_divBetaUv              ( false ),
+    M_stiffStrain            ( false ),
+    M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
     M_reusePrec              ( true ),
@@ -587,15 +598,16 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     M_linearSolver.setUpPrec(dataFile, "fluid/prec");
 
-    M_steady      = dataFile( "fluid/miscellaneous/steady",        0  );
+    M_steady        = dataFile( "fluid/miscellaneous/steady",        0  );
 
-    M_gammaBeta   = dataFile( "fluid/ipstab/gammaBeta",            0. );
-    M_gammaDiv    = dataFile( "fluid/ipstab/gammaDiv",             0. );
-    M_gammaPress  = dataFile( "fluid/ipstab/gammaPress",           0. );
-    M_reuseStab   = dataFile( "fluid/ipstab/reuse",               true);
-    M_iterReuseStab = dataFile( "fluid/ipstab/max_iter_reuse", M_linearSolver.MaxIter() * 8./10.);
+    M_gammaBeta     = dataFile( "fluid/ipstab/gammaBeta",            0. );
+    M_gammaDiv      = dataFile( "fluid/ipstab/gammaDiv",             0. );
+    M_gammaPress    = dataFile( "fluid/ipstab/gammaPress",           0. );
+    M_reuseStab     = dataFile( "fluid/ipstab/reuse",               true);
+    M_iterReuseStab = dataFile( "fluid/ipstab/max_iter_reuse", static_cast<int> ( M_linearSolver.MaxIter() * 8./10. ) );
 
-    M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v",false);
+    M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v",false); // Energetic stabilization term
+    M_stiffStrain = dataFile( "fluid/space_discretization/stiff_strain",false); // Enable grad( u )^T in stress tensor
     M_diagonalize = dataFile( "fluid/space_discretization/diagonalize",  1. );
     M_isDiagonalBlockPrec = dataFile( "fluid/diagonalBlockPrec",  false );
 
@@ -672,14 +684,14 @@ void Oseen<Mesh, SolverType>::buildSystem()
         M_elmatGrad.zero();
         chronoZero.stop();
 
-
-        // stiffness strain
+        // stiffness
         chronoStiff.start();
-        stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_uFESpace.fe() );
-        //stiff( M_data.viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
+        if ( M_stiffStrain )
+            stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_uFESpace.fe() );
+        else
+            stiff( M_data.viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
         //stiff_div( 0.5*M_uFESpace.fe().diameter(), M_elmatStiff, M_uFESpace.fe() );
         chronoStiff.stop();
-
 
         // mass
         if ( !M_steady )
@@ -691,12 +703,10 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
         for ( UInt iComp = 0; iComp < nbCompU; iComp++ )
         {
-//             for ( UInt jComp = 0; jComp < nbCompU; jComp++ )
-//             {
-                // stiffness
-            if(M_isDiagonalBlockPrec == true)
+            // stiffness
+            chronoStiffAssemble.start();
+            if ( M_isDiagonalBlockPrec == true )
             {
-                chronoStiffAssemble.start();
                 assembleMatrix( *M_blockPrec,
                                 M_elmatStiff,
                                 M_uFESpace.fe(),
@@ -705,54 +715,51 @@ void Oseen<Mesh, SolverType>::buildSystem()
                                 M_uFESpace.dof(),
                                 iComp, iComp,
                                 iComp*velTotalDof, iComp*velTotalDof);
-                chronoStiffAssemble.stop();
-
-                if ( !M_steady )
-                    {
-                        chronoMassAssemble.start();
-                        assembleMatrix( *M_matrMass,
-                                        M_elmatMass,
-                                        M_uFESpace.fe(),
-                                        M_uFESpace.fe(),
-                                        M_uFESpace.dof(),
-                                        M_uFESpace.dof(),
-                                        iComp, iComp,
-                                        iComp*velTotalDof, iComp*velTotalDof);
-                        chronoMassAssemble.stop();
-                    }
             }
             else
             {
-                for ( UInt jComp = 0; jComp < nbCompU; jComp++ )//ADDED
-                { // to use if stiff_strain(...) is called instead of stiff(...):
-                  // if you want to use stiff() comment the for loop and substitute jcomp=icomp.
-                chronoStiffAssemble.start();
-                assembleMatrix( *M_matrStokes,
-                                M_elmatStiff,
-                                M_uFESpace.fe(),
-                                M_uFESpace.fe(),
-                                M_uFESpace.dof(),
-                                M_uFESpace.dof(),
-                                iComp, jComp,
-                                iComp*velTotalDof, jComp*velTotalDof);
-                chronoStiffAssemble.stop();
-
-                }
-
-
-            if ( !M_steady )
+                if ( M_stiffStrain ) // sigma = 0.5 * mu (grad( u ) + grad ( u )^T)
                 {
-                    chronoMassAssemble.start();
-                    assembleMatrix( *M_matrMass,
-                                    M_elmatMass,
+                    for ( UInt jComp = 0; jComp < nbCompU; jComp++ )
+                    {
+                        assembleMatrix( *M_matrStokes,
+                                        M_elmatStiff,
+                                        M_uFESpace.fe(),
+                                        M_uFESpace.fe(),
+                                        M_uFESpace.dof(),
+                                        M_uFESpace.dof(),
+                                        iComp, jComp,
+                                        iComp*velTotalDof, jComp*velTotalDof);
+
+                    }
+                }
+                else // sigma = mu grad( u )
+                {
+                    assembleMatrix( *M_matrStokes,
+                                    M_elmatStiff,
                                     M_uFESpace.fe(),
                                     M_uFESpace.fe(),
                                     M_uFESpace.dof(),
                                     M_uFESpace.dof(),
                                     iComp, iComp,
-                                iComp*velTotalDof, iComp*velTotalDof);
-                    chronoMassAssemble.stop();
+                                    iComp*velTotalDof, iComp*velTotalDof);
                 }
+            }
+            chronoStiffAssemble.stop();
+
+            // mass
+            if ( !M_steady )
+            {
+                chronoMassAssemble.start();
+                assembleMatrix( *M_matrMass,
+                                M_elmatMass,
+                                M_uFESpace.fe(),
+                                M_uFESpace.fe(),
+                                M_uFESpace.dof(),
+                                M_uFESpace.dof(),
+                                iComp, iComp,
+                                iComp*velTotalDof, iComp*velTotalDof);
+                chronoMassAssemble.stop();
             }
 
             // div
