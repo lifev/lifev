@@ -343,7 +343,6 @@ void  exactJacobian::solveJac(vector_type         &_muk,
                               const vector_type   &_res,
                               const Real         _linearRelTol)
 {
-    if (this->isFluid()) M_fluid->reusePrec();
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
     if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
