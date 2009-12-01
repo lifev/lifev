@@ -171,7 +171,6 @@ public:
         @param  rhsFull   right hand side
         @param  sol       solution
         @param  baseMatrixForPreconditioner base matrix for the preconditioner construction
-        @param  retry     if solver fails, recompute the preconditioner and try again
 
         returns number of iterations. If negative, the solver did not converge,
         the preconditioner has been recomputed, and a second solution is tried

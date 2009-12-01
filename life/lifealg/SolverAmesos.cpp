@@ -204,9 +204,7 @@ SolverAmesos::printStatus()
 
 int SolverAmesos::solveSystem(  vector_type&      rhsFull,
                                 vector_type&      sol,
-                                matrix_ptrtype&   /*basePrecMatrix*/,
-                                bool const        /*reuse*/,
-                                bool const        /*retry*/)
+                                matrix_ptrtype&   /*basePrecMatrix*/)
 {
 
     if (M_comm.MyPID() == 0)
@@ -273,17 +271,12 @@ void SolverAmesos::setUpPrec(const GetPot& /*dataFile*/,  const std::string& /*s
 {
     return;
 }
-//     //     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack");
 
-//     //     M_prec.reset( PRECFactory::instance().createObject( precType ) );
-//     //     ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
-//     //     M_prec->setDataFromGetPot( dataFile, section );
-// }
 
-// void SolverAmesos::setPrec(prec_raw_type* prec)
-// {
-//     return;
-// }
+void SolverAmesos::setReusePreconditioner(const bool& /*reuse*/)
+{
+     return;
+}
 
 } // namespace LifeV
 

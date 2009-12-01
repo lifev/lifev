@@ -49,7 +49,8 @@ public:
     typedef EpetraVector                     vector_type;
 
     typedef void                             prec_raw_type;
-    typedef void                             prec_type;
+    //typedef EpetraPreconditioner             prec_raw_type;
+    typedef boost::shared_ptr<prec_raw_type> prec_type;
     typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
     typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
 
@@ -88,8 +89,7 @@ public:
 
     void setOperator(Epetra_Operator& op);
 
-    //! set Epetra_Operator preconditioner
-    //void setPreconditioner( prec_type _prec );
+    void setReusePreconditioner( const bool& /*reuse*/ );
 
     void setDataFromGetPot( const GetPot& dfile, const std::string& section );
     void SetParameters(bool cerr_warning_if_unused = false);
@@ -140,18 +140,13 @@ public:
         @param  matrFull,
         @param  rhsFull,
         @param  sol,
-        @param  prec,
-        @param  reuse,
-        @param  retry = true
-
+        @param  prec
         returns number of iterations. If negative, the solver did not converge,
         the preconditionar has been recomputed, and a second solution is tried
     */
     int solveSystem(  vector_type&     rhsFull,
                       vector_type&     sol,
-                      matrix_ptrtype&  prec,
-                      bool const       reuse,
-                      bool const       retry=true);
+                      matrix_ptrtype&  /* unused */);
 
     void setUpPrec    (const GetPot& dataFile,  const std::string& section);
 
