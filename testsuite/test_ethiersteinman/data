@@ -108,6 +108,7 @@ save       = 1
     output          = all # none
     conv            = rhs
     max_iter        = 100
+    max_iter_reuse  = 100
     kspace          = 100
     tol             = 1.e-10    # AztecOO tolerance
 
@@ -115,6 +116,7 @@ save       = 1
     gammaBeta  = 0.02
     gammaDiv   = 0.2
     gammaPress = 0.2
+    max_iter_reuse  = 60
 
     [../problem]
     a = 1.57
