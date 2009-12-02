@@ -29,13 +29,4 @@ check_HEADERS = ensightToHdf5.hpp
 check_PROGRAMS = test_filters
 test_filters_SOURCES = main.cpp ensightToHdf5.cpp
 
-EXTRA_DIST = data testsuite.at # pressure.000.000.scl etc
-
-link:
-	test -a data || ln -s $(srcdir)/data
-	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
-	test -a ethiersteinman.000.case || cp -p $(srcdir)/*.case .
-	test -a ethiersteinman.000.geo  || cp -p $(srcdir)/*.geo  .
-	test -a pressure.00000.000.scl    || cp -p $(srcdir)/*.scl  .
-	test -a velocity.00000.000.vct    || cp -p $(srcdir)/*.vct  .
-
+EXTRA_DIST = data testsuite.at  *.case *.geo *.scl *.vct

@@ -51,7 +51,7 @@ timestep		= 0.01
 BDF_order		= 1
 
 [../space_discretization]
-mesh_dir        = ./Mesh/   # the directory where the mesh file is
+mesh_dir        = ./   # the directory where the mesh file is
 mesh_file       = cube4x4.mesh          # mesh file
 
 verbose         = 0
@@ -65,8 +65,8 @@ press_order       = P1
 verbose         = 1
 steady          = 0
 ]])
-AT_CHECK([ cp -p $(srcdir)/*.case  $(srcdir)/*.geo  $(srcdir)/*.scl $(srcdir)/*.vct  . &&
-	   ln -sf ../../data/mesh/inria/cube4x4.mesh &&
+AT_CHECK([ ln -sf ../../test_filters/*{.case,.geo,.scl,.vct}  . &&
+	       ln -sf ../../data/mesh/inria/cube4x4.mesh &&
            mpirun -np 4 ../../test_filters/test_filters -c],[0],[ignore],[ignore])
 AT_CLEANUP([ethiersteinman.xmf ethiersteinman.h5])
 
