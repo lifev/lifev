@@ -187,16 +187,23 @@ MS_Model_Fluid3D::SetupModel()
     M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
 
     //Post-processing
-    //M_output.reset( new OutputType( M_dataFile, M_FluidMesh->mesh(), MS_ProblemName + "Model_" + number2string( M_ID ), M_comm->MyPID() ) );
     M_output.reset( new OutputType( M_dataFile, "Model_" + number2string( M_ID ) ) );
     M_output->setOutputDirectory( MS_ProblemName );
     M_output->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
 
-    M_FluidSolution.reset( new FluidVectorType( M_FluidFullMap, Repeated ) );
+    //M_FluidSolution.reset( new FluidVectorType( M_FluidFullMap, Repeated ) );
     //M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), Repeated ) );
 
-    M_output->addVariable( ExporterData::Vector, "velocity", M_FluidSolution, UInt( 0 ), M_uDOF );
+    M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), M_output->mapType() ) );
+    //if ( M_output->mapType() == Unique )
+    //    M_FluidSolution->setCombineMode( Zero );
+
+    M_output->addVariable( ExporterData::Vector, "velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
+#ifdef HAVE_HDF5
+    M_output->addVariable( ExporterData::Scalar, "pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
+#else
     M_output->addVariable( ExporterData::Scalar, "pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
+#endif
 
     //MPI Barrier
     M_comm->Barrier();
@@ -257,8 +264,7 @@ MS_Model_Fluid3D::UpdateSystem()
     M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
     //Recompute preconditioner
-    if ( M_FluidData->getTimeStepNumber() % 1 == 0 )
-        M_Fluid->resetPrec( true );
+    M_Fluid->resetPrec( true );
 
     //MPI Barrier
     M_comm->Barrier();

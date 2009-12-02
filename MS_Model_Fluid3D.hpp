@@ -36,18 +36,22 @@
 #ifndef MS_Model_Fluid3D_H
 #define MS_Model_Fluid3D_H 1
 
+// Mathcard includes
+#include <lifemc/lifealg/AztecOOPreconditioner.hpp>
+#include <lifemc/lifefem/BCInterface.hpp>
+#include <lifemc/lifesolver/MS_PhysicalModel.hpp>
+
+// LifeV includes
+#include <life/lifefilters/ensight.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
+#ifdef HAVE_HDF5
+    #include <life/lifefilters/hdf5exporter.hpp>
+#endif
 #include <life/lifesolver/OseenShapeDerivative.hpp>
-
-#include <lifemc/lifefem/BCInterface.hpp>
-
-#include <lifemc/lifesolver/MS_PhysicalModel.hpp>
-
-#include <lifemc/lifealg/AztecOOPreconditioner.hpp>
 
 namespace LifeV {
 
@@ -65,8 +69,13 @@ public:
     typedef MS_PhysicalModel                  super;
 
     typedef RegionMesh3D< LinearTetra >       MeshType;
-    typedef Ensight< MeshType >               OutputType;
     typedef OseenShapeDerivative< MeshType >  FluidType;
+
+#ifdef HAVE_HDF5
+    typedef Hdf5exporter< MeshType >          OutputType;
+#else
+    typedef Ensight< MeshType >               OutputType;
+#endif
 
     typedef FluidType::vector_type            FluidVectorType;
 
@@ -279,9 +288,6 @@ private:
     boost::shared_ptr< FluidMeshType >    M_FluidMesh;
     boost::shared_ptr< EpetraMap >        M_FluidFullMap;
     boost::shared_ptr< FluidVectorType >  M_FluidSolution;
-
-    // Fluid Parameters
-    UInt                                  M_TimeStepForNewPreconditioner;
 
     // Linear Fluid problem
     boost::shared_ptr< FluidBCType >      M_LinearFluidBC;
