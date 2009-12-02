@@ -159,7 +159,6 @@ EnsightToHdf5::run()
     if (verbose) std::cout << "ok." << std::endl;
 
     fluid.setUp(dataFile);
-    fluid.buildSystem();
 
     // Initialization
 
@@ -171,11 +170,34 @@ EnsightToHdf5::run()
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > importer;
 
 
-    // hdf5 exporter, still under development
-    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "renamed", d->comm->MyPID()) );
-    // exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "renamed", d->comm->MyPID()) );
-    importer.reset( new Ensight<RegionMesh3D<LinearTetra> >      ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-    //importer.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> >      ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+
+    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+    std::string const exporterName =  dataFile( "exporter/filename", "ensight");
+
+    std::string const importerType =  dataFile( "importer/type", "ensight");
+    std::string const importerName =  dataFile( "importer/filename", "ensight");
+
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
+    else
+#endif
+        exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
+
+    exporter->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+
+#ifdef HAVE_HDF5
+    if (importerType.compare("hdf5") == 0)
+        importer.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
+    else
+#endif
+        importer.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
+
+
+    importer->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
+    importer->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+
 
     vector_ptrtype velAndPressureExport ( new vector_type(fluid.solution(), exporter->mapType() ) );
     vector_ptrtype velAndPressureImport ( new vector_type(fluid.solution(), importer->mapType() ) );
