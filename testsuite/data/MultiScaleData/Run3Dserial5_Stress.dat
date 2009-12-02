@@ -20,8 +20,8 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial5_Stress.dat
 
 	[./time_discretization]
 	initialtime		= 0.0                 # [s]
-	endtime			= 36.8514713339174    # [s]
-	timestep		= 0.0359877649745286  # [s]
+	endtime			= 4.2925208983925     # [s]
+	timestep		= 0.00419191493983642 # [s]
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
@@ -106,5 +106,5 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial5_Stress.dat
 [Physics] #########################################################################################
 ###################################################################################################
 fluidDensity	= 1.0           # density   [g/cm^3]
-fluidViscosity	= 0.00170500256292255 # viscosity [g/cm/s]
+fluidViscosity	= 0.00148309067632946 # viscosity [g/cm/s]
 ###################################################################################################
