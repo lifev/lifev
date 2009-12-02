@@ -699,13 +699,26 @@ template
 template
 <typename Mesh> void Hdf5exporter<Mesh>::M_wr_scalar_datastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
 {
+    // First: hyperslab definition, then description of the data
     xdmf <<
-                "           <DataStructure  Format=\"HDF\"\n" <<
-                "                           Dimensions=\"" << this->M_mesh->numGlobalVertices()  << " " << dvar.typeDim() << "\"\n" <<
-                "                           DataType=\"Float\"\n" <<
-                "                           Precision=\"8\">\n" <<
-                "               &DataFile;:/" << this->M_prefix+"_"+dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
-                "           </DataStructure>\n";
+
+        "         <DataStructure ItemType=\"HyperSlab\"\n" <<
+        "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << " " << dvar.typeDim() << "\"\n" <<
+        "                        Type=\"HyperSlab\">\n" <<
+        "           <DataStructure  Dimensions=\"3 2\"\n" <<
+        "                           Format=\"XML\">\n" <<
+        "               0    0\n" <<
+        "               1    1\n" <<
+        "               " << this->M_mesh->numGlobalVertices() << " " << dvar.typeDim() << "\n" <<
+        "           </DataStructure>\n" <<
+
+        "           <DataStructure  Format=\"HDF\"\n" <<
+        "                           Dimensions=\"" << dvar.size()  << " " << dvar.typeDim() << "\"\n" <<
+        "                           DataType=\"Float\"\n" <<
+        "                           Precision=\"8\">\n" <<
+        "               &DataFile;:/" << this->M_prefix+"_"+dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+        "           </DataStructure>\n" <<
+        "         </DataStructure>\n";
 
 }
 
