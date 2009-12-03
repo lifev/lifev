@@ -52,6 +52,7 @@
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
     #include <Epetra_MpiComm.h>
+    #include <mpi.h>
 #else
     #include <Epetra_SerialComm.h>
 #endif
@@ -95,7 +96,7 @@ enum modelsTypes
 enum couplingsTypes
 {
     BoundaryCondition, /*!< Boundary condition */
-    Stress,            /*!< All stess coupling condition */
+    Stress,            /*!< All stress coupling condition */
     FluxStress         /*!< Flux/stress coupling condition */
 };
 
@@ -104,7 +105,7 @@ enum couplingsTypes
 enum stressTypes
 {
     StaticPressure,    /*!< Use static pressure */
-    TotalPressure      /*!< Use tolal pressure (static + dynamic) */
+    TotalPressure      /*!< Use total pressure (static + dynamic) */
 
 };
 

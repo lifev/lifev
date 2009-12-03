@@ -187,7 +187,11 @@ MS_Model_Fluid3D::SetupModel()
     M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
 
     //Post-processing
-    M_output.reset( new OutputType( M_dataFile, "Model_" + number2string( M_ID ) ) );
+#ifdef HAVE_HDF5
+    M_output.reset( new Hdf5exporter< MeshType > ( M_dataFile, "Model_" + number2string( M_ID ) ) );
+#else
+    M_output.reset( new Ensight< MeshType > ( M_dataFile, "Model_" + number2string( M_ID ) ) );
+#endif
     M_output->setOutputDirectory( MS_ProblemName );
     M_output->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
 

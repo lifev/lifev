@@ -71,11 +71,11 @@ public:
     typedef RegionMesh3D< LinearTetra >       MeshType;
     typedef OseenShapeDerivative< MeshType >  FluidType;
 
-#ifdef HAVE_HDF5
-    typedef Hdf5exporter< MeshType >          OutputType;
-#else
-    typedef Ensight< MeshType >               OutputType;
-#endif
+//#ifdef HAVE_HDF5
+  //  typedef Hdf5exporter< MeshType >          OutputType;
+//#else
+    typedef Exporter< MeshType >               OutputType;
+//#endif
 
     typedef FluidType::vector_type            FluidVectorType;
 
