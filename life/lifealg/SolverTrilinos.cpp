@@ -314,7 +314,7 @@ void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
 
     chrono.start();
 
-    M_Displayer.leaderPrint("      Computing the precond ...                \n");
+    M_Displayer.leaderPrint("      Computing the precond ...                ");
 
     M_prec->buildPreconditioner(prec);
 
@@ -351,7 +351,7 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
     if (baseMatrixForPreconditioner.get() == 0)
         M_Displayer.leaderPrint("      Warning: baseMatrixForPreconditioner is empty     \n");
 
-    if ( !M_prec->set() || !M_reusePreconditioner  )
+    if ( !isPrecSet() || !M_reusePreconditioner  )
     {
         buildPreconditioner(baseMatrixForPreconditioner);
         // do not retry if I am recomputing the preconditioner
