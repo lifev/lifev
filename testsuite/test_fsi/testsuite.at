@@ -51,11 +51,12 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 
-abstol     = 1.e-5
+abstol     = 0.
 reltol     = 1.e-5
-etamax     = 1.e-5 # tolerance of the interface problem (GMRES),
+etamax     = 1.e-8 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
                     # else (e.g.)            etamax = 1.e-3
+                    #IMPORTANT: etamax < abstol + reltol*res
 semiImplicit = false # (only valid for method = exactJacobian or monolithic).
 maxSubIter = 100
 #monolithic = 0
@@ -89,13 +90,13 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.0006
-timestep		= 0.0001
+endtime			= 0.006
+timestep		= 0.001
 BDF_order		= 1
 
 # end of fluid preconditioner parameters
 [../ipstab]
-gammaBeta  = 0.02
+gammaBeta  = 1
 gammaDiv   = 0.2
 gammaPress = 0.2
 reuse      = true
@@ -106,7 +107,7 @@ mesh_dir  = ./ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
 
-vel_order		= P1Bubble		# P1, P1Bubble, P2
+vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
 
 [../miscellaneous]
@@ -229,7 +230,7 @@ density         = 1.2					# density
 thickness		= 0.1
 
 [../time_discretization]
-timestep		= 0.0001
+timestep		= 0.001
 
 [../space_discretization]
 mesh_dir  = ./  # the directory where the mesh file is

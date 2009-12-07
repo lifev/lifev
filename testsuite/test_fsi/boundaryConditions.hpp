@@ -22,7 +22,7 @@
 #include "life/lifesolver/fixedPointBase.hpp"
 
 
-#define FLUX
+//#define FLUX
 
 namespace LifeV
 {
