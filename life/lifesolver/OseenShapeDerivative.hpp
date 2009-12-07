@@ -95,7 +95,7 @@ public:
                              const vector_type& dw,
                              const vector_type& sourceVec);
     //getter
-    vector_type rhsLinNoBC() {return M_rhsLinNoBC;}
+    vector_type& rhsLinNoBC() {return M_rhsLinNoBC;}
 
     Real GetLinearFlux    ( const EntityFlag& flag );
     Real GetLinearPressure( const EntityFlag& flag );
@@ -105,13 +105,15 @@ public:
                                 double&       alpha,
                                 const vector_type& un,
                                 const vector_type& uk,
-                                //                                const vector_type& disp,
+                                //const vector_type& disp,
                                 const vector_type& w,
                                 UInt offset,
                                 FESpace<Mesh, EpetraMap>& dFESpace,
-                                bool fullImplicit=false);
+                                bool wImplicit=true,
+                                bool convectiveTermDerivative=false);
 
-
+    void updateRhsLinNoBC( const vector_type& rhs){M_rhsLinNoBC=rhs;}
+    bool const stab(){return this->M_stab;}
 private:
 
 
@@ -126,10 +128,10 @@ private:
 
 //    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
     ElemVec                   M_elvec_du; // Elementary right hand side for the linearized pressure
-    boost::shared_ptr<ElemMat>                   M_elmat_du;
-    boost::shared_ptr<ElemMat>                   M_elmat_du_convective;
+    //    boost::shared_ptr<ElemMat>                   M_elmat_du;
+    //    boost::shared_ptr<ElemMat>                   M_elmat_du_convective;
     ElemVec                   M_elvec_dp; // Elementary right hand side for the linearized pressure
-    boost::shared_ptr<ElemMat>                   M_elmat_dp;    // Elementary displacement for right hand side
+    //    boost::shared_ptr<ElemMat>                   M_elmat_dp;    // Elementary displacement for right hand side
     ElemVec                   M_w_loc;    // Elementary mesh velocity
     ElemVec                   M_uk_loc;   // Elementary velocity
     ElemVec                   M_pk_loc;   // Elementary pressure
@@ -229,10 +231,7 @@ OseenShapeDerivative( const data_type&          dataType,
     M_linearLinSolver( ),
     M_linPrec        ( ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_elmat_du       ( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
-    M_elmat_du_convective( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
     M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
-    M_elmat_dp       ( new ElemMat(this->M_pFESpace.fe().nbNode, 1, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
 //    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
     M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
@@ -515,7 +514,8 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                                                 const vector_type& w,
                                                                 UInt offset,
                                                                 FESpace<Mesh, EpetraMap>& mmFESpace,
-                                                                bool fullImplicit
+                                                                bool wImplicit,
+                                                                bool convectiveTermDerivative
                                                                 )
 {
     this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
@@ -548,7 +548,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 //     std::cout << dwRep.NormInf() << std::endl;
 //     std::cout << dispRep.NormInf() << std::endl;
 
-            vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
+//            vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
 
             for ( UInt i = 1; i <= this->M_uFESpace.mesh()->numVolumes(); i++ )
                 {
@@ -564,9 +564,21 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                     mmFESpace.fe().updateFirstDerivQuadPt( mmFESpace.mesh()->volumeList( i ) );
 
                     // initialization of elementary vectors
-                    M_elmat_dp->zero();
-                    M_elmat_du->zero();
-                    M_elmat_du_convective->zero();
+                    boost::shared_ptr<ElemMat> elmat_dp       ( new ElemMat(this->M_pFESpace.fe().nbNode, 1, 0, mmFESpace.fe().nbNode, 0, nDimensions ));
+                    boost::shared_ptr<ElemMat> elmat_du       ( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, this->M_uFESpace.fe().nbNode, 0, nDimensions ));
+                    boost::shared_ptr<ElemMat> elmat_du_convective;
+
+                    if(convectiveTermDerivative)
+                    {
+                        elmat_du_convective.reset( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions ));
+                        elmat_du_convective->zero();
+                    }
+
+
+
+                    elmat_dp->zero();
+                    elmat_du->zero();
+
 
                     for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
                         {
@@ -576,13 +588,14 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                 {
                                     UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
 
-                                    //                                    if(!fullImplicit)
+                                    //                                    if(!wImplicit)
                                     M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
 //                                     else
 //                                         M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep(ig) - wRep( ig ); // u^n - w^k local
                                     M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
                                     M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
-                                    //                                    M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
+                                    //M_d_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dispRep( ig );            // dw local
+                                    //M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
                                     M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
                                 }
                        }
@@ -602,26 +615,31 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                         }
 
 
-                    shape_terms_vel( this->M_data.density(),
-                                     this->M_data.viscosity(),
-                                     //M_u_loc,
-                                     M_uk_loc,
-                                     M_w_loc,
-                                     M_elvec,
-                                     M_pk_loc,
-                                     *M_elmat_du,
-                                     this->M_uFESpace.fe(),
-                                     this->M_pFESpace.fe(),
-                                     *M_elmat_dp,
-                                     0,
-                                     fullImplicit,
-                                     alpha,
-                                     M_elmat_du_convective
-                                     );
+                    shape_terms(
+                                //M_d_loc,
+                                this->M_data.density(),
+                                this->M_data.viscosity(),
+                                M_u_loc,
+                                M_uk_loc,
+                                M_w_loc,
+                                M_elvec,
+                                M_pk_loc,
+                                *elmat_du,
+                                this->M_uFESpace.fe(),
+                                this->M_pFESpace.fe(),
+                                (ID) mmFESpace.fe().nbNode,
+                                *elmat_dp,
+                                0,
+                                wImplicit,
+                                alpha//,
+                                //elmat_du_convective
+                                );
+
+                    //elmat_du->showMe(std::cout);
 
                     //source_mass2( this->M_data.density(), M_uk_loc, *M_elmat_du_convective, this->M_uFESpace.fe(), alpha );
 
-                    source_press( 1.0, M_uk_loc,*M_elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    source_press( 1.0, M_uk_loc,*elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe(), (ID) mmFESpace.fe().nbNode);
                       /*
                         std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
                     M_elvec_dp.showMe(std::cout);
@@ -641,7 +659,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                             for(UInt jcomp=0; jcomp<nbCompU; ++jcomp)
                             {
                                 assembleMatrix( M_matr,
-                                                *M_elmat_du,
+                                                *elmat_du,
                                                 this->M_uFESpace.fe(),
                                                 mmFESpace.fe(),
                                                 this->M_uFESpace.dof(),
@@ -649,9 +667,9 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                                 icomp, jcomp,
                                                 icomp*velTotalDof, offset+jcomp*velTotalDof
                                                 );
-                                if(fullImplicit)//assembling the derivative of the convective term
+                                if(wImplicit && elmat_du_convective.get())//assembling the derivative of the convective term
                                     assembleMatrix( M_matr,
-                                                    *M_elmat_du_convective,
+                                                    *elmat_du_convective,
                                                     this->M_uFESpace.fe(),
                                                     this->M_uFESpace.fe(),
                                                     this->M_uFESpace.dof(),
@@ -661,7 +679,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                                     );
                             }
                             assembleMatrix( M_matr,
-                                            *M_elmat_dp,
+                                            *elmat_dp,
                                             this->M_pFESpace.fe(),
                                             mmFESpace.fe(),
                                             this->M_pFESpace.dof(),

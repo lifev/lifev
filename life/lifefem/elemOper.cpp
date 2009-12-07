@@ -3116,7 +3116,9 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
         for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
         {
             for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            {
                 sigma[ icoor ][ jcoor ] = mu * ( guk[ icoor ][ jcoor ] + guk[ jcoor ][ icoor ] );
+            }
             sigma[ icoor ][ icoor ] -= pk;
         }
 
@@ -3273,7 +3275,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 {
 
     ASSERT_PRE( fe_u.hasFirstDeriv(),
-                "source_stress needs at least the velocity shape functions first derivatives" );
+                " needs at least the velocity shape functions first derivatives" );
     Real A[ fe_u.nbCoor ][ fe_u.nbCoor ];     //  I\div d - (\grad d)^T at a quadrature point
     Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];   // \grad u^k at a quadrature point
     Real aux[ fe_u.nbQuadPt ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
@@ -3348,7 +3350,7 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
 {
 
   ASSERT_PRE( fe.hasFirstDeriv(),
-	      "source_stress needs at least the velocity shape functions first derivatives" );
+	      "needs at least the velocity shape functions first derivatives" );
 
   Real A[ fe.nbCoor ][ fe.nbCoor ];     //  I\div d - (\grad d)^T - \grad d at a quadrature point
   Real B[ fe.nbCoor ][ fe.nbCoor ];     // - \grad d
@@ -3845,13 +3847,15 @@ void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x )
     }
 }
 
-
+//
+// coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
+//
 void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
-                   const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock )
+                   const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim , int iblock )
 {
 
     ASSERT_PRE( fe_u.hasFirstDeriv(),
-                "source_stress needs at least the velocity shape functions first derivatives" );
+                " needs at least the velocity shape functions first derivatives" );
     Real A[ fe_u.nbCoor ][ fe_u.nbCoor ][fe_u.nbNode][ fe_u.nbCoor ];     //  I\div d - (\grad d)^T at a quadrature point
     Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];   // \grad u^k at a quadrature point
     Real aux[ fe_u.nbQuadPt ][fe_u.nbNode][ fe_u.nbCoor ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
@@ -3988,12 +3992,12 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
             double l = 0.;
 
             ElemMat::matrix_view mat = elmat.block( iblock, kcoor );
-            for ( int j = 0;j < fe_u.nbNode;j++ )
+            for ( int j = 0;j < mmDim;j++ )
             for ( int i = 0;i < fe_p.nbNode;i++ )
             mat(i,j)=0.;
 
             // Loop on nodes, i.e. loop on elementary vector components
-            for ( int j = 0;j < fe_u.nbNode;j++ )
+            for ( int j = 0;j < mmDim;j++ )
                 for (int i = 0;i < fe_p.nbNode;i++ )
                     {
                         l=0.;
@@ -4024,6 +4028,9 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 //source_stress2
 // \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
 //
+//source_mass3
+// 0.5 * ( \grad u^n :[2 I \div d - (\grad d)^T]  u^k , v  ) for Newton FSI
+//
 //optionally (if full implicit):
 //source_mass2
 // -rho * ( \grad u^k dw, v  )
@@ -4031,8 +4038,11 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 //convective term
 // rho * ( \grad u^k du, v  )
 //
-void shape_terms_vel( Real rho,
+void shape_terms(
+                     //const ElemVec& d_loc,
+                     Real rho,
                       Real mu,
+                      const ElemVec& un_loc,
                       const ElemVec& uk_loc,
                       const ElemVec& wk_loc,
                       const ElemVec& convect_loc,
@@ -4040,9 +4050,10 @@ void shape_terms_vel( Real rho,
                       ElemMat& elmat,
                       const CurrentFE& fe,
                       const CurrentFE& fe_p,
+                      ID mmDim,
                       ElemMat& /*elmatP*/,
                       int /*iblock*/,
-                      bool fullImplicit,
+                      bool wImplicit,
                       Real alpha,
                       boost::shared_ptr<ElemMat> elmat_convect
                       )
@@ -4053,8 +4064,11 @@ void shape_terms_vel( Real rho,
 
     //Real BGrConv[ fe.nbCoor ][ fe.nbCoor ]/*[fe.nbNode]*/;                 // \grad (convect) at a quadrature point
     Real eta[ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
+    Real etaMass3[ fe.nbCoor ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
     Real uk[ fe.nbQuadPt ][ fe.nbCoor ];              // u^k quadrature points
     Real guk[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ];  // \grad u^k at quadrature points
+    Real duk[ fe.nbQuadPt ];  // \div u^k at quadrature points
+    Real gun[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ];  // \grad u^k at quadrature points
     Real convect[ fe.nbCoor ];                      // convect at quadrature points
     Real convect_eta[ fe.nbQuadPt ][ fe.nbCoor ][fe.nbNode][ fe.nbCoor ];       // (convect)^T [I\div d - (\grad d)^T] at quadrature points
     Real sigma[ fe.nbCoor ][ fe.nbCoor ];             // [-p^k I + 2*mu e(u^k)] a quadrature point
@@ -4064,10 +4078,12 @@ void shape_terms_vel( Real rho,
     Real aux[ fe.nbQuadPt ][ fe.nbCoor ][fe.nbNode][fe.nbCoor];
     Real BMass[ fe.nbCoor ][ fe.nbCoor ];
     Real auxMass[ fe.nbQuadPt ][fe.nbNode][fe.nbCoor];
+    Real auxMass3[ fe.nbQuadPt ][fe.nbNode][fe.nbCoor];
 
-    Real s, sB, sA, sG, pk;
+    Real s,  sA, sB, sGk, sGn, pk;
 
     int icoor, jcoor, ig, kcoor, i, j;
+
     // loop on quadrature points
 
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -4080,17 +4096,20 @@ void shape_terms_vel( Real rho,
             for(int q=0; q<fe.nbCoor; ++q)
             {
                 guk[ig][p][q]=0.;
+                gun[ig][p][q]=0.;
                 sigma[p][q]=0.;
                 BMass[p][q]=0.;
                 for(int d=0; d<fe.nbNode; ++d)
                 {
                     auxMass[ ig ][d][q]=0.;
+                    auxMass3[ ig ][d][q]=0.;
                     aux[ig][p][d][q]=0.;
                     convect_eta[ig][p][d][q]=0.;
                     for(int e=0; e<fe.nbCoor; ++e)
                     {
                         gd[p][q][d][e]=0.;
                         eta[p][q][d][e]=0.;
+                        etaMass3[p][q][d][e]=0.;
                         A2[ig][p][q][d][e]=0.;
                         B[ig][p][q][d][e]=0.;
                     }
@@ -4120,17 +4139,22 @@ void shape_terms_vel( Real rho,
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
             {
                 sB = 0.0;
-                sG = 0.0;
+                sGk = 0.0;
+                sGn = 0.0;
                 for ( i = 0;i < fe.nbNode;i++ )
                 {
-                    gd[ icoor ][ jcoor ][i][jcoor] = fe.phiDer( (int)i, (int)jcoor, (int)ig );
+                    gd[ icoor ][ jcoor ][i][jcoor] = fe.phiDer( (int)i, (int)jcoor, (int)ig )/** d_loc.vec() [ i + jcoor * fe.nbNode ]*/;
 
-                    sG += fe.phiDer( (int)i, (int)jcoor, (int)ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at each quadrature point
+                    sGk += fe.phiDer( (int)i, (int)jcoor, (int)ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at each quadrature point
+                    sGn += fe.phiDer( (int)i, (int)jcoor, (int)ig ) * un_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at each quadrature point
                     sB -= fe.phiDer( (int)i, (int)jcoor, (int)ig ) * wk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad (- w^k) at this quadrature point
                     sA = -fe.phiDer( (int)i, (int)icoor, (int)ig ) /** d_loc.vec() [ i + jcoor * fe.nbNode ]*/; //  - (\grad d) ^T at this quadrature point
                     eta[ icoor ][ jcoor ][i][ jcoor ] = sA; // -(\grad d) ^T at this quadrature point
+                    etaMass3[ icoor ][ jcoor ][i][ jcoor ] = sA; // -(\grad d) ^T at this quadrature point
                 }
-                guk[ ig ][ icoor ][ jcoor ] = sG; // \grad u^k at each quadrature point
+                guk[ ig ][ icoor ][ jcoor ] = sGk; // \grad u^k at each quadrature point
+                gun[ ig ][ icoor ][ jcoor ] = sGn; // \grad u^n at each quadrature point
+                BMass[ icoor ][ jcoor ] = sB;
             }
         }
 
@@ -4143,45 +4167,40 @@ void shape_terms_vel( Real rho,
         for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
         {
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
                 sigma[ icoor ][ jcoor ] = mu * ( guk[ig][ icoor ][ jcoor ] + guk[ig][ jcoor ][ icoor ] );
+            }
             sigma[ icoor ][ icoor ] -= pk;
         }
 
         //!building the tensor \f$\eta = [I\nabla\cdot d - (\nabla d)^T]\f$
-        Real z[fe.nbCoor];
         for ( i = 0;i < fe.nbNode;i++ )
         {
-            //                for ( int kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+
+            Real z[fe.nbCoor];
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
             {
                 //if(icoor==jcoor)
-                z[ jcoor ] = eta[ jcoor ][ jcoor ][i][jcoor];  //! -\delta_{jcoor, kcoor} \partial_{icoor} + \delta_{jcoor ,icoor}\partial_{kcoor}
+                z[ jcoor ] = eta[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
             }
-
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
             {
-                for (kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
+                for ( kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
                 {
-                    //if(icoor==jcoor)
-                    eta[ jcoor ][ jcoor ][i][kcoor] -= z[ kcoor ];  //! -\delta_{jcoor, kcoor} \partial_{icoor} + \delta_{jcoor, icoor}\partial_{kcoor}
+                    eta[ jcoor ][ jcoor ][i][kcoor] -= z[kcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
                 }
             }
 
             //!source_mass1
 
-            s = 0;
-
             for ( kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
             {
+                s = 0;
                 for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                     for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                         s += BMass[ icoor ][ jcoor ] * eta[ icoor ][ jcoor ][i][kcoor]; // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
                 auxMass[ ig ][i][kcoor] = s;
-            }
 
-
-            for ( kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
-            {
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                 {
                     s = 0.;
@@ -4192,14 +4211,6 @@ void shape_terms_vel( Real rho,
                     convect_eta[ ig ][ jcoor ][i][kcoor] = s;
                 }
             }
-
-            //! At this point we have:
-            //!    \f$ v  \nabla u^k \f at each quadrature point
-            //!    \f$ v  [I\nabla\cdot d - (\nabla d)^T] \f$ at each quadrature point: convect_A
-            //!    \f$ v  \nabla (-w^k):[I\nabla\cdot d - (\nabla d)^T]\f$
-
-
-
             //! source_stress
 
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
@@ -4215,6 +4226,8 @@ void shape_terms_vel( Real rho,
                     }
                 }
             }
+
+
             //! source_stress2
             for ( kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
             {
@@ -4231,7 +4244,8 @@ void shape_terms_vel( Real rho,
                 }
             }
 
-            if(fullImplicit)//source_mass2 and convective term derivative
+            if(wImplicit)//source_mass2 and convective term derivative
+            {
                 for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 {
                     //s = 0.0;
@@ -4239,8 +4253,44 @@ void shape_terms_vel( Real rho,
                     {
                         aux[ ig ][ icoor ][i][jcoor] = guk[ig][ icoor ][ jcoor ]  * fe.phi( i, ig ) /**alpha*/;
                     }
+
+                }
+                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                {
+                    duk[ig] += guk[ig][ jcoor ][ jcoor ];  //div uk
+                }
+            }
+
+
+            //source_mass3
+            // coef * ( \grad u^n :[2 I \div d - (\grad d)^T]  u^k , v  ) for Newton FSI
+            //
+            //
+
+            //!building the tensor \f$\eta = [I\nabla\cdot d - (\nabla d)^T]\f$
+            //                for ( int kcoor = 0;kcoor < fe.nbCoor;kcoor++ )
+
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                {
+                    for (kcoor = 0;(int)kcoor < fe.nbCoor;kcoor++ )
+                    {
+                        //if(icoor==jcoor)
+                        etaMass3[ icoor ][ jcoor ][i][kcoor] -= 2*z[kcoor];  //! -2*\delta_{jcoor, kcoor} \partial_{icoor} + \delta_{jcoor, icoor}\partial_{kcoor}
+                    }
                 }
 
+            for(kcoor =0; kcoor<fe.nbCoor; ++kcoor)
+            {
+                s = 0;
+                for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                    for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                        s += gun[ig][ icoor ][ jcoor ] * etaMass3/**/[ icoor ][ jcoor ][i][kcoor]; // \grad u^n:[/*2*/ * I\div d - (\grad d)^T] at each quadrature point
+                auxMass3[ ig ][i][kcoor] = s;
+                //if fullImplicit un=uk
+            }
+
+            ///////////////////////////////////////////////////////////////////////
         }
 
     }
@@ -4261,8 +4311,10 @@ void shape_terms_vel( Real rho,
             ElemMat::matrix_view mat = elmat.block( icoor, kcoor );
             boost::shared_ptr<ElemMat::matrix_view> mat_convect;
 
-            if(fullImplicit)
+            if(elmat_convect.get())
+            {
                 mat_convect.reset(new ElemMat::matrix_view(elmat_convect->block( icoor, kcoor )));
+            }
             // loop on nodes, i.e. loop on components of this block
             for ( i = 0;i < fe.nbNode;i++ )
             {
@@ -4284,19 +4336,25 @@ void shape_terms_vel( Real rho,
                             s += B[ ig ][ icoor ][ jcoor ][j][kcoor] * fe.phiDer( (int)i, (int)jcoor, (int)ig ) * fe.weightDet( ig );
                             //source_stress2
                             s -= fe.phiDer( (int)i, (int)jcoor, (int)ig ) * A2[ ig ][ icoor ][ jcoor ][j][kcoor] * fe.weightDet( ig )*mu;
+
+
                         }
-                        if(fullImplicit)
+                        //source_mass1
+                        s += auxMass[ ig ][j][kcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
+
+                        //source_mass3
+                        s += 0.5*auxMass3[ ig ][j][kcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
+
+                        if(wImplicit)
                         {
-                            //source_mass1
-                            s += auxMass[ ig ][j][kcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
-                            //source_mass2
+                            //source_mass2{
                             s -= aux[ ig ][ icoor ][j][kcoor] * fe.phi( i, ig ) * fe.weightDet( ig )*rho*alpha;
                             //convective term
                             g += aux[ ig ][ icoor ][j][kcoor] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
                         }
                     }
                     mat( i , j ) += s;
-                    if(fullImplicit)
+                    if(wImplicit && mat_convect.get())
                         (*mat_convect)( i , j ) += g;
                 }
             }

@@ -294,29 +294,34 @@ void ipstab_bagrad( const Real           coef,
  *instead of it's multiplication times a vector. However the computation of these terms need to be done once per Newton
  *iterations, instead of once per Jacobian-vector multiplication.
 
- *Note that the term \c source_mass2\c is not considered here because the fluid domain velocity \f w\f is trated explicitly
+ *Note that the term \c source_mass2\c is not considered if the fluid domain velocity \f w\f is trated explicitly.
+ *This method is currently tested only for the P1-P1 stabilized space discretization.
  */
-void shape_terms_vel( Real coef,
-                       Real mu,
-                       const ElemVec& uk_loc,
-                       const ElemVec& wk_loc,
-                       const ElemVec& convect_loc,
-                       const ElemVec& pk_loc,
-                       ElemMat& elmat,
-                       const CurrentFE& fe,
-                       const CurrentFE& fe_p,
-                      ElemMat& /*elmatP*/,
-                      int iblock=0,
-                      bool fullImplicit=false,
-                      Real alpha=0.,
-                      boost::shared_ptr<ElemMat> elmat_convect=boost::shared_ptr<ElemMat>()
-                      );
+void shape_terms(
+                 //const ElemVec& d_loc,
+                 Real coef,
+                 Real mu,
+                 const ElemVec& un_loc,
+                 const ElemVec& uk_loc,
+                 const ElemVec& wk_loc,
+                 const ElemVec& convect_loc,
+                 const ElemVec& pk_loc,
+                 ElemMat& elmat,
+                 const CurrentFE& fe,
+                 const CurrentFE& fe_p,
+                 ID mmDim,
+                 ElemMat& /*elmatP*/,
+                 int iblock=0,
+                 bool wImplicit=false,
+                 Real alpha=0.,
+                 boost::shared_ptr<ElemMat> elmat_convect=boost::shared_ptr<ElemMat>()
+                 );
 
   //
   //! \f$coef * (  (\nabla u^k):[I\nabla\cdot  d - (\nabla d)^T] , q  )\f$ for Newton FSI
   //
 void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
-                   const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock=0 );
+                   const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim, int iblock=0 );
 
 
 
