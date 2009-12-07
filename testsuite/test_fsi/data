@@ -93,7 +93,8 @@ scaling         = none
 output          = all  #none
 conv            = rhs
 max_iter        = 100
-max_iter_reuse  = 100
+reuse           = true
+max_iter_reuse  = 101
 kspace          = 100
 tol             = 1.e-10    # AztecOO tolerance
 
@@ -139,54 +140,54 @@ filter_singletons      = false
 
 [lin_fluid]
 
-[./solver]
-solver          = gmres
-scaling         = none
-output          = all  #none
-conv            = rhs
-max_iter        = 100
-kspace          = 100
-tol             = 1.e-5    # AztecOO tolerance
+  [./solver]
+  solver          = gmres
+  scaling         = none
+  output          = all  #none
+  conv            = rhs
+  max_iter        = 100
+  kspace          = 100
+  tol             = 1.e-5    # AztecOO tolerance
 
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack
-reuse           = true
-displayList     = false
+  [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+  prectype        = Ifpack
+  reuse           = true
+  displayList     = false
 
-[./ifpack]
-prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
-overlap         = 2
+    [./ifpack]
+    prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+    overlap         = 2
 
-[./relaxation]
-type                   = "Jacobi"
-damping_factor         = 1.
-sweeps                 = 1
-min_diagonal_value     = 0
-zero_starting_solution = true
+      [./relaxation]
+      type                   = "Jacobi"
+      damping_factor         = 1.
+      sweeps                 = 1
+      min_diagonal_value     = 0
+      zero_starting_solution = true
 
-[../partitioner]
-type                   = metis
-#overlap                = 0
-local_parts            = 1
-root_node              = 0
-use_symmetric_graph    = true
+      [../partitioner]
+      type                   = metis
+      #overlap                = 0
+      local_parts            = 1
+      root_node              = 0
+      use_symmetric_graph    = true
 
-[../amesos]
-solvertype             = Amesos_KLU
+      [../amesos]
+      solvertype             = Amesos_Umfpack
 
-[../fact]
-drop_tolerance         = 1.e-5
-level-of-fill          = 1
-ilut_level-of-fill     = 1
-absolute_threshold     = 0.
-relative_threshold     = 0.
-relax_value            = 0.
+      [../fact]
+      drop_tolerance         = 1.e-5
+      level-of-fill          = 1
+      ilut_level-of-fill     = 1
+      absolute_threshold     = 0.
+      relative_threshold     = 0.
+      relax_value            = 0.
 
-[../schwarz]
-combine_mode           = true
-reordering_type        = none
-filter_singletons      = false
-# end of fluid preconditioner parameters
+      [../schwarz]
+      combine_mode           = true
+      reordering_type        = none
+      filter_singletons      = false
+      # end of fluid preconditioner parameters
 
 [solid]
 
@@ -247,31 +248,34 @@ solvertype      = Amesos_Umfpack
 
 [mesh_motion]
 
-[./solver]
-output          = all
-max_iter        = 300
-poly_ord        = 5
-kspace          = 40
-precond         = dom_decomp
-drop            = 1.00e-4
-ilut_fill       = 4
-tol             = 1.e-10
-keep_info       = 1
+  [./solver]
+  solver          = cg
+  scaling         = none
+  output          = all  #none
+  conv            = rhs
+  max_iter        = 100
+  reuse           = true
+  max_iter_reuse  = 101
+  kspace          = 100
+  tol             = 1.e-5    # AztecOO tolerance
 
-# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack
-reuse           = true
+  [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+  prectype        = Ifpack
+  reuse           = true
+  displayList     = false
 
-[./ifpack]
-prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
-droptol         = 1.e-5
-fill            = 4
-relax_value     = 1
-overlap         = 1
+    [./ifpack]
+    prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+    droptol         = 1.e-5
+    fill            = 4
+    relax_value     = 1
+    overlap         = 1
 
-[./amesos]
-solvertype      = Amesos_Umfpack
+    [../partitioner]
+    overlap = 1
+
+    [../amesos]
+    solvertype      = Amesos_Umfpack
 
 [jacobian]
 

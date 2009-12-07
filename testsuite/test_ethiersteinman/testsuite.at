@@ -69,31 +69,51 @@ initialization  = interp                # initialize using proj: L2 projection
 verbose         = 1
 steady          = 0
 
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype                = Ifpack # Ifpack or ML
+displayList             = false
+
+        # ifpack
+        [./ifpack]
+        overlap		= 2
+
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+
 [../solver]
 solver          = gmres
 scaling         = none
 output          = all # none
-conv            = r0
+conv            = rhs
 max_iter        = 100
+reuse           = true
+max_iter_reuse  = 80
 kspace          = 100
 tol             = 1.00e-10
 
 
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack   # Amesos (does a local LU factorization), ILUT (not ILU)
-reuse           = true
-overlap         = 2
-droptol         = 1.e-10 # ??
-fill            = 4
-athr            = 1e-3 # ~h^2. for h=0.25: athr~1e-3
-rthr            = 1
-relax_value     = 1
 
 
 [../ipstab]
 gammaBeta  = 0.02
 gammaDiv   = 0.2
 gammaPress = 0.2
+max_iter_reuse  = 60
 
 [../problem]
 a = 1.57
