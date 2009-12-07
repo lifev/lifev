@@ -43,7 +43,6 @@ save       = 1
 
 	[../prec]
 	prectype                = Ifpack # Ifpack or ML
-	reuse                   = false
 	displayList             = true
 
 		[./ML]
@@ -108,7 +107,8 @@ save       = 1
     output          = all # none
     conv            = rhs
     max_iter        = 100
-    max_iter_reuse  = 100
+    reuse           = true
+    max_iter_reuse  = 80
     kspace          = 100
     tol             = 1.e-10    # AztecOO tolerance
 
