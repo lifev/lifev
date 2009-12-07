@@ -132,6 +132,9 @@ public:
     //! get the final time
     Real timeEnd() const { return M_oper->dataFluid().getEndTime(); }
 
+    //! get the initial time
+    Real timeInitial() const { return M_oper->dataFluid().getInitialTime(); }
+
     //! get the FSI operator
     oper_fsi_ptr_mpi const& FSIOper() const { return M_oper; }
     //oper_fsi_ptr_mpi FSIOper() const { return M_oper; }
