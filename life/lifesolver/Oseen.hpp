@@ -343,7 +343,6 @@ protected:
 
     //! Stabilization
     bool                           M_stab;
-    bool                           M_resetStab;
     bool                           M_reuseStab;
 
     details::
@@ -373,7 +372,6 @@ protected:
 
     //! boolean that indicates if the precond has to be recomputed
 
-    bool                           M_reusePrec;
     int                            M_iterReuseStab;
 
     //! integer storing the max number of solver iteration with prec recomputing
@@ -437,7 +435,6 @@ Oseen( const data_type&          dataType,
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
-    M_resetStab              ( true ),
     M_reuseStab              ( true ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
@@ -450,7 +447,6 @@ Oseen( const data_type&          dataType,
     M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
-    M_reusePrec              ( true ),
     M_iterReuseStab          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -495,7 +491,6 @@ Oseen( const data_type&          dataType,
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
-    M_resetStab              ( true ),
     M_reuseStab              ( true ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
@@ -508,7 +503,6 @@ Oseen( const data_type&          dataType,
     M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
-    M_reusePrec              ( true ),
     M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -552,7 +546,6 @@ Oseen( const data_type&          dataType,
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
-    M_resetStab              ( true ),
     M_reuseStab              ( true ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
@@ -565,7 +558,6 @@ Oseen( const data_type&          dataType,
     M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
-    M_reusePrec              ( true ),
     M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -597,6 +589,7 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
 
     M_linearSolver.setUpPrec(dataFile, "fluid/prec");
+    M_linearSolver.setDataFromGetPot( dataFile, "fluid/solver" );
 
     M_steady        = dataFile( "fluid/miscellaneous/steady",        0  );
 
@@ -611,15 +604,12 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_diagonalize = dataFile( "fluid/space_discretization/diagonalize",  1. );
     M_isDiagonalBlockPrec = dataFile( "fluid/diagonalBlockPrec",  false );
 
-    M_linearSolver.setDataFromGetPot( dataFile, "fluid/solver" );
 
     //    M_linearSolver.setAztecooPreconditioner( dataFile, "fluid/solver" );
 
     M_ipStab.setGammaBeta (M_gammaBeta);
     M_ipStab.setGammaDiv  (M_gammaDiv);
     M_ipStab.setGammaPress(M_gammaPress);
-
-    M_reusePrec       = dataFile( "fluid/prec/reuse", true);
 
 }
 
@@ -1150,10 +1140,9 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
 
-    M_linearSolver.setReusePreconditioner( M_reusePrec );
     int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
 
-    // if the preconditioner has been reset, the stab terms are to be updated
+    // if the preconditioner has been rese the stab terms are to be updated
     if( numIter < 0 || numIter > M_iterReuseStab )
     {
         resetStab();

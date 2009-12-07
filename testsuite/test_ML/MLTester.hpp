@@ -345,7 +345,6 @@ testML( bchandler_raw_type& bch )
                             this->M_sol.getEpetraVector().Scale(0.);
 
                             this->M_linearSolver.setMatrix(*matrFull);
-                            this->M_linearSolver.setReusePreconditioner( this->M_reusePrec );
                             this->M_linearSolver.solveSystem( rhsFull, this->M_sol, matrFull );
 
 

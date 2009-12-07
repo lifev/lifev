@@ -164,7 +164,7 @@ public:
         return comm().MyPID() == 0;
     }
 
-    void resetPrec() {M_resetPrec = true;}
+    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
     void rescaleMatrix(Real& dt){*M_matrHE *= dt;}
     void setMatrix(matrix_ptrtype matr){*matr += *M_matrHE;}
@@ -187,6 +187,7 @@ private:
     matrix_ptrtype                 M_matrHE;
 
     Epetra_Comm*                   M_comm;
+    Displayer                      M_Displayer;
     int                            M_me;
     bool                           M_verbose;
 
@@ -212,13 +213,6 @@ private:
 
     solver_type                    M_linearSolver;
 
-    prec_type                      M_prec;
-
-    //! boolean that indicates if le precond has to be recomputed
-    bool                           M_reusePrec;
-    int                            M_maxIterForReuse;
-    bool                           M_resetPrec;
-
     //! BC holding the imposed boundary displacement
     //BCHandler*                     M_BCh;
     //bool                           M_setBC;
@@ -231,47 +225,6 @@ private:
 };
 
 
-//! Constructor for an harmonics extensions
-/*!
-  \param mesh the mesh of the reference domain to be moved
-  \param diffusion the "viscosity" in the laplacian operator
-  \param Qr the quadrature rule for volumic elementary computations
-  \param bdQr the quadrature rule for surface elementary computations
-  \param bch the list of boundary conditions involved in the harmonic extension
-
-  \note The BCHandler objet (bch) holds the displacement imposed on moving boundary
-  in the mesh trhough a BCVetor_Interface objet.
-
-*/
-/*template <typename Mesh, typename SolverType>
-HarmonicExtensionSolver<Mesh, SolverType>::
-HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                         BCHandler&                bcHandler,
-                         Epetra_Comm&              comm ):
-    M_FESpace               ( mmFESpace ),
-    M_localMap              ( M_FESpace.map() ),
-    M_matrHE                ( ),
-    M_comm                  ( &comm ),
-    M_me                    ( M_comm->MyPID() ),
-    M_verbose               ( M_me == 0 ),
-    M_disp                  ( M_localMap ),
-    M_dispOld               ( M_localMap ),
-    M_dispDiff              ( M_localMap ),
-    M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_f                     ( M_localMap ),
-    M_linearSolver          ( comm ),
-    M_prec                  ( ),
-    M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
-    //M_BCh                   ( &bcHandler ),
-    M_diffusion             ( 1. ),
-    M_offset                (0)
-
-{
-}*/
-
-
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
@@ -280,6 +233,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_localMap              ( M_FESpace.map() ),
     M_matrHE                ( new matrix_type (M_localMap ) ),
     M_comm                  ( &comm ),
+    M_Displayer              ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -288,10 +242,6 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_dispDiff              ( M_localMap ),
     M_f                     ( M_localMap ),
     M_linearSolver          ( comm ),
-    M_prec                  (  ),
-    M_reusePrec             ( true ),
-    M_maxIterForReuse       ( -1 ),
-    M_resetPrec             ( true ),
     M_diffusion             ( 1. ),
     M_offset                (0)
 {
@@ -307,6 +257,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_localMap              ( localMap),
     M_matrHE                ( new matrix_type (M_localMap ) ),
     M_comm                  ( &comm ),
+    M_Displayer              ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -314,11 +265,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_dispOld               ( M_disp.getMap() ),
     M_dispDiff              ( M_disp.getMap() ),
     M_f                     ( M_disp.getMap() ),
-    M_linearSolver          ( ),
-    M_prec                   ( ),
-    M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
+    M_linearSolver          ( comm ),
     M_diffusion             ( 1. ),
     M_offset                (offset)
 {
@@ -329,27 +276,14 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
 template <typename Mesh, typename SolverType>
 void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
-
     M_linearSolver.setDataFromGetPot( dataFile, "mesh_motion/solver" );
-    //    M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
+    M_linearSolver.setUpPrec(dataFile, "mesh_motion/prec");
+
     M_diffusion = dataFile("mesh_motion/diffusion",1.0);
-
-    int maxIterSolver   = dataFile( "mesh_motion/solver/max_iter", -1);
-    M_reusePrec       = dataFile( "mesh_motion/prec/reuse", true);
-    M_maxIterForReuse = dataFile( "mesh_motion/solver/max_iter_reuse", maxIterSolver*8/10);
-
-    std::string precType = dataFile( "mesh_motion/prec/prectype", "Ifpack");
-
-    M_prec               = prec_type( PRECFactory::instance().createObject( precType ) );
-
-    ASSERT(M_prec.get() != 0, "HE : Preconditioner not set");
-
-
-    M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
 
     computeMatrix( );
     M_linearSolver.setMatrix( *M_matrHE );
-}
+} // end setUp
 
 
 template <typename Mesh, typename SolverType>
@@ -414,43 +348,17 @@ HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
 void
 HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
 {
-    if (M_verbose)
-        std::cout << "  HE- Updating boundary conditions : " << std::flush;
+
+    Chrono chrono;
+
+    // matrix and vector assembling communication
+    M_Displayer.leaderPrint(" HE-  Updating the boundary conditions ...     ");
+
+    chrono.start();
 
     // Initializations
     M_f    *= 0.;
     applyBoundaryConditions(M_f, BCh);
-
-    Chrono chrono;
-
-
-    if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
-    {
-        chrono.start();
-
-        if (M_verbose)
-            std::cout << "  HE-  Computing the precond ...                "  <<  std::flush;
-
-        M_prec->buildPreconditioner(M_matrHE);
-
-        double condest = M_prec->Condest();
-
-        M_linearSolver.setPreconditioner(M_prec);
-
-        chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "  HE-       Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
-
-
-    }
-    else
-    {
-        if (M_verbose)
-            std::cout << "  HE-  Reusing  precond ...                \n" <<  std::flush;
-    }
 
 
     // Real f_norm_inf(M_f.NormInf());
@@ -458,25 +366,16 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
     if (M_verbose)
         std::cout << "  HE- Solving the system ... \n" << std::flush;
 
-    int numIter =  M_linearSolver.solve( M_disp, M_f );
-
-    M_resetPrec = (numIter > M_maxIterForReuse);
-
-
-    chrono.stop();
-    if (M_verbose)
-    {
-        std::cout << "HE- system solved in " << chrono.diff()
-                  << " s. ( " << numIter << "  iterations. ) \n"
-                  << std::flush;
-    }
+    // solving the system. Note: setMatrix(M_matrHE) done in setUp()
+    int numIter = M_linearSolver.solveSystem( M_f, M_disp, M_matrHE );
 
     //    M_dispDiff =  M_disp ;
     //    M_dispDiff -= M_dispOld;
 
 
 }
-    template <typename Mesh, typename SolverType>
+
+template <typename Mesh, typename SolverType>
 void
 HarmonicExtensionSolver<Mesh, SolverType>::updateDispDiff()
 {

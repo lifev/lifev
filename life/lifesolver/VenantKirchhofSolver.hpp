@@ -168,7 +168,9 @@ public:
     //!setters
     void setBC(BCHandler& BCd)   {M_BCh = &BCd;}
     void setSourceTerm( source_type const& __s ) { M_source = __s; }
-    void resetPrec() {M_resetPrec = true;}
+
+    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
+
     void setDisp(const vector_type& disp){M_disp = disp;} // used for monolithic
     //! recur setter
     void setRecur(UInt recur) {_recur = recur;}
@@ -314,13 +316,7 @@ private:
 
     //! data for solving tangent problem with aztec
     boost::shared_ptr<solver_type>                    M_linearSolver;
-    //    prec_type                      M_prec;
 
-    bool                           M_reusePrec;
-    int                            M_maxIterForReuse;
-    bool                           M_resetPrec;
-
-    int                            M_maxIterSolver;
 
     int                            M_count;
 
@@ -363,7 +359,6 @@ VenantKirchhofSolver( const data_type&          data,
     M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_linearSolver               ( new SolverType( comm ) ),
-    //    M_prec                       ( ),//new prec_raw_type() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
     M_linearStiff                ( new matrix_type(M_localMap) ),
@@ -387,10 +382,6 @@ VenantKirchhofSolver( const data_type&          data,
     M_szz                        ( new vector_type(M_localMap) ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
-    M_reusePrec                  ( true ),
-    M_maxIterForReuse            ( -1 ),
-    M_resetPrec                  ( true ),
-    M_maxIterSolver              ( -1 ),
     M_count                      ( 0 ),
     M_offset                     (offset),
     M_rescaleFactor            (1.),
@@ -435,11 +426,6 @@ VenantKirchhofSolver( const data_type& data,
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
     M_linearSolver               ( new SolverType( comm ) ),
-    //M_prec                       ( ),//new prec_raw_type() ),
-    M_reusePrec                  ( true ),
-    M_maxIterForReuse            ( -1 ),
-    M_resetPrec                  ( true ),
-    M_maxIterSolver              ( -1 ),
     M_count                      ( 0 ),
     M_offset                     ( 0 ),
     M_rescaleFactor            (1.),
@@ -464,7 +450,6 @@ VenantKirchhofSolver( const data_type& data,
     M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_linearSolver               ( ),
-    //M_prec                      ( ),//new prec_raw_type() ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -482,9 +467,6 @@ VenantKirchhofSolver( const data_type& data,
     M_szz                        (/*M_localMap*/),//useless
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
-    M_reusePrec                  ( true ),//useless
-    M_resetPrec                  ( true ),//useless
-    M_maxIterSolver              ( -1 ),//useless
     M_count                      ( 0 ),//useless
     M_massStiff                  ( /*new matrix_type(monolithicMap) */),//constructed outside
     M_localMap                   ( monolithicMap ),
@@ -509,22 +491,12 @@ setUp( const GetPot& dataFile )
     M_Displayer.leaderPrint("\n S-  Displacement unknowns: ",  M_FESpace.dof().numTotalDof() );
     M_Displayer.leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
 
-    M_monolithic = dataFile("problem/monolithic"   , false );
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
-//    M_linearSolver.setMatrix( M_jacobian );
-
-    M_reusePrec     = dataFile( "solid/prec/reuse", true);
-    M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
-    M_maxIterForReuse = dataFile( "solid/solver/max_iter_reuse", M_maxIterSolver*8/10);
-
     M_linearSolver->setUpPrec(dataFile, "solid/prec");
 
-    //    std::string precType = dataFile( "solid/prec/prectype", "Ifpack");
-//     M_prec.reset( PRECFactory::instance().createObject( precType ) );
-//     ASSERT(M_prec.get() != 0, "VenantKirchhof : Preconditioner not set");
-//     //    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
+    M_monolithic = dataFile("problem/monolithic"   , false );
 
-//     M_prec->setDataFromGetPot( dataFile, "solid/prec" );
+
 }
 
 
@@ -719,23 +691,11 @@ iterate( bchandler_raw_type& bch )
 
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-    if (M_resetPrec)
-    {
-        M_linearSolver->precReset();
-        M_resetPrec = false;
-    }
 
     // solving the system
     M_linearSolver->setMatrix(*matrFull);
-    M_linearSolver->setReusePreconditioner( M_reusePrec );
+
     int numIter = M_linearSolver->solveSystem( rhsFull, M_disp, matrFull);
-
-    numIter = abs(numIter);
-
-    if(numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
-    {
-        resetPrec();
-    }
 
     M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
@@ -787,27 +747,13 @@ iterateLin( bchandler_raw_type& bch )
 
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-    if (M_resetPrec)
-    {
-        M_linearSolver->precReset();
-        M_resetPrec = false;
-    }
     M_linearSolver->setMatrix(*matrFull);
-    M_linearSolver->setReusePreconditioner( ( M_reusePrec && !M_resetPrec ) );
     int numIter = M_linearSolver->solveSystem(  rhsFull, M_disp, matrFull );
 
 
     M_Displayer.leaderPrintMax("dz norm     = " , M_disp.NormInf() );
 
     numIter = abs(numIter);
-
-    if (numIter < 0)
-    {
-        resetPrec();
-    }
-
-        if (numIter <= -M_maxIterSolver)
-            M_Displayer.leaderPrint( "  s- ERROR: Iterative solver failed twice.\n" );
 
     *M_residual_d =  *M_massStiff*(M_disp);
 //    M_residual_d -= M_rhsNoBC;
@@ -919,10 +865,6 @@ updateJacobian( vector_type & sol, int iter )
         }
     }
     */
-//     if (iter == 1)
-//     {
-//         M_jacobian.spy("Jacobian");
-//     }
 
     chrono.stop();
     M_Displayer.leaderPrintMax("   ... done in ", chrono.diff() );
