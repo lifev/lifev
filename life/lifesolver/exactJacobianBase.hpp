@@ -47,6 +47,8 @@ public:
     typedef super::fluid_bchandler_type  bchandler_type;
 
     typedef fluid_raw_type::vector_type  vector_type;
+    typedef fluid_raw_type::matrix_type      matrix_type;
+    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
 
     // default constructor
     exactJacobian();
@@ -167,6 +169,9 @@ private:
     boost::shared_ptr<Epetra_ExactJacobian> M_epetraOper;
 
     int M_nbEvalAux;
+
+    matrix_ptrtype M_matrSD;
+    bool M_recomputeSD;
 
 }; // end class exactJacobian
 

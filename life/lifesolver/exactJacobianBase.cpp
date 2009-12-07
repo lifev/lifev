@@ -38,7 +38,8 @@ Real fzeroEJ(const Real& /*t*/,
 exactJacobian::exactJacobian():
     super       (),
     M_updateEvery(0),
-    M_nbEvalAux(0)
+    M_nbEvalAux(0),
+    M_matrSD()
 //    M_epetraOper(this)
 {
 
@@ -196,10 +197,11 @@ void exactJacobian::eval(const vector_type& _disp,
 
                 *M_beta *= 0.;
 
-                vector_type const meshDispDiff( M_meshMotion->dispDiff(), Repeated );
+                vector_type meshDisp( M_meshMotion->disp(), Repeated );
 
-                this->moveMesh(meshDispDiff);
+                this->moveMesh(meshDisp);
 
+                vector_type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
                 this->interpolateVelocity(meshDispDiff, *M_beta);
 
                 *M_beta *= -1./M_dataFluid->getTimeStep();
@@ -356,6 +358,7 @@ void  exactJacobian::solveJac(vector_type         &_muk,
     M_linearSolver.setOperator(*M_epetraOper);
 
     this->displayer().leaderPrint( "Solving Jacobian system... " );
+    M_recomputeSD=true;
     M_linearSolver.solve(_muk, res);
 
     this->displayer().leaderPrint( "done.\n" );
@@ -364,9 +367,9 @@ void  exactJacobian::solveJac(vector_type         &_muk,
 
 void  exactJacobian::solveLinearFluid()
 {
-
-    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
-
+    //vector_type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
+    vector_type dispFluidDomain( M_fluid->matrNoBC().getMap(), Unique, Zero);
+    dispFluidDomain.setCombineMode(Zero);
     vector_type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
     if(false && this->M_dataFluid->isSemiImplicit()==true)// not working in parallel
@@ -388,23 +391,65 @@ void  exactJacobian::solveLinearFluid()
             this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                             dispFluidMesh);
         }
-
+    //dispFluidDomainRep = dispFluidMesh;//import
+    dispFluidDomain=dispFluidMesh;//import
     this->derVeloFluidMesh() = dispFluidMesh;
-
     this->derVeloFluidMesh() *= 1./(M_dataFluid->getTimeStep());
-
     this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
-
     *M_rhsNew *= 0.;
 
-    this->M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
-                                       alpha,
-                                       *M_un,
-                                       M_fluid->solution(),
-                                       dispFluidMesh,
-                                       this->veloFluidMesh(),
-                                       this->derVeloFluidMesh(),
-                                       *M_rhsNew );
+    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
+
+    if(!this->M_fluid->stab())//if using P1Bubble
+    {
+
+        this->M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
+                                           alpha,
+                                           *M_un,
+                                           M_fluid->solution(),
+                                           dispFluidMesh,
+                                           this->veloFluidMesh(),
+                                           this->derVeloFluidMesh(),
+                                           *M_rhsNew );
+
+    }
+    else
+     {
+        if(M_recomputeSD)
+        {
+            M_recomputeSD=false;
+            M_matrSD.reset(new matrix_type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
+            this->M_fluid->updateShapeDerivatives(
+                                                  *M_matrSD,
+                                                  alpha,
+                                                  *M_un,
+                                                  M_fluid->solution(),
+                                                  //dispFluidMesh,
+                                                  this->veloFluidMesh(),
+                                                  (UInt)0,
+                                                  *M_mmFESpace,
+                                                  true,
+                                                  false
+                                                  //this->derVeloFluidMesh(),
+                                                  //*M_rhsNew
+                                                  );
+            M_matrSD->GlobalAssemble();
+            *M_matrSD*=-1;
+            //M_matrSD->spy("matrsd");
+        }
+        *M_rhsNew=(*M_matrSD)*dispFluidDomain;
+        M_fluid->updateRhsLinNoBC(*M_rhsNew);
+    }
+
+//    //DEBUG:
+//     vector_type rhs_debug(M_fluid->matrNoBC().getMap());
+//     rhs_debug=*M_matrSD*dispFluidDomain;
+//     std::cout<<"normInf1 "<<rhs_debug.NormInf()<<std::endl;
+//     //    std::cout<<"normInf2 "<<M_rhsLin->NormInf()<<std::endl;
+//     std::cout<<"normInf displ "<<dispFluidMesh.NormInf()<<std::endl;
+//     std::cout<<"normInf solution "<<M_fluid->solution().NormInf()<<std::endl;
+//     std::cout<<"normInf sould be 0 "<<rhs_debug.NormInf()<<std::endl;
+//     //END DEBUG
 
     this->M_fluid->iterateLin( *this->M_BCh_du );
 }
