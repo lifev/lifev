@@ -73,7 +73,7 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
-
+#include <life/lifefilters/noexport.hpp>
 #ifdef HAVE_HDF5
 #include <life/lifefilters/hdf5exporter.hpp>
 #endif
@@ -114,8 +114,11 @@ public:
     typedef LifeV::FSIOperator::vector_type        vector_type;
     typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
 
-    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  filter_type;
-    typedef boost::shared_ptr<filter_type>                 filter_ptrtype;
+
+    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filter_ptrtype;
+
+    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  ensightfilter_type;
+    typedef boost::shared_ptr<ensightfilter_type>                 ensightfilter_ptrtype;
 #ifdef HAVE_HDF5
     typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_type>  hdf5filter_type;
     typedef boost::shared_ptr<hdf5filter_type>                  hdf5filter_ptrtype;
@@ -169,75 +172,65 @@ public:
         Debug( 10000 ) << "BC set\n";
 #endif
 
+        std::string const exporterType =  data_file( "exporter/type", "ensight");
 
 
-        M_ensightMesh.reset( new  filter_type( data_file, "fluid") );
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+    {
+        M_exporterFluid.reset( new  hdf5filter_type( data_file, "fluid") );
+        M_exporterSolid.reset( new  hdf5filter_type ( data_file,"solid"));// M_fsi->FSIOper()->solidMesh().mesh(), "solid", M_fsi->FSIOper()->dFESpace().map().Comm().MyPID()) );
 
-        M_ensightMesh->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
-        M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), Repeated ));
-        M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), Repeated ));
-        M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->uFESpace().map(), Repeated ));
+    }
+    else
+#endif
+    {
+        if (exporterType.compare("none") == 0)
+        {
+            M_exporterFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
+            M_exporterSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
+        } else {
+            M_exporterFluid.reset( new  ensightfilter_type( data_file, "fluid") );
+            M_exporterSolid.reset( new  ensightfilter_type ( data_file, "solid") );
+        }
+    }
 
-        M_ensightMesh->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-                                    UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
+        M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
+        M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
+        M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->uFESpace().map(), M_exporterFluid->mapType() ));
 
-        M_ensightMesh->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-                                    UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
-                                    UInt(M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+        M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
+        M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
-        M_ensightMesh->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
-                                    UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+        M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
+                                 UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
-        M_ensightMesh->addVariable( ExporterData::Vector, "f-wss", M_WSS,
-                                    UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+        M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
+                                 UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
+                                 UInt(M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+
+        M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
+                                 UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+
+        M_exporterFluid->addVariable( ExporterData::Vector, "f-wss", M_WSS,
+                                 UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
 
 
 
         UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
 
-        M_ensightSolid.reset( new  filter_type ( data_file, "solid") );
-
-        M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
-
         M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
         M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
-        M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                     UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-        M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                     UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
-
-
-#ifdef HAVE_HDF5
-        M_hdf5Mesh.reset( new  hdf5filter_type( data_file, "fluid") );
-
-        M_hdf5Mesh->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
-
-        M_hdf5Mesh->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-                                 UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
-
-        M_hdf5Mesh->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-                                 UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
-                                 UInt(M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
-
-        M_hdf5Mesh->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
-                                 UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
-
-        M_hdf5Mesh->addVariable( ExporterData::Vector, "f-wss", M_WSS,
-                                 UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
-
-        M_hdf5Solid.reset( new  hdf5filter_type ( data_file, M_fsi->FSIOper()->solidMesh().mesh(), "solid2", M_fsi->FSIOper()->dFESpace().map().Comm().MyPID()) );
-        //M_hdf5Solid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
-        M_hdf5Solid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
+        M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                   UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-        M_hdf5Solid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
+        M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                   UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-#endif
 
 
         M_Tstart = 0.;
 
-		//to load using ensight
+		//to load using ensight/hdf5
 		std::string loadInitSol(data_file("problem/initSol","-1"));
 
 		if(loadInitSol.compare("-1"))
@@ -247,7 +240,6 @@ public:
         else
             {
             }
-
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
     }
@@ -285,10 +277,7 @@ public:
                 *M_solidVel = M_fsi->FSIOper()->solid().vel();
                 *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
                 *M_velAndPressure = M_fsi->displacement();
-                M_ensightSolid->postProcess( time );
-#ifdef HAVE_HDF5
-                M_hdf5Solid->postProcess( time );
-#endif
+                M_exporterSolid->postProcess( time );
 
                 M_fsi->iterate( time );
 
@@ -297,10 +286,7 @@ public:
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
-                M_ensightMesh->postProcess( time );
-#ifdef HAVE_HDF5
-                M_hdf5Mesh->postProcess( time );
-#endif
+                M_exporterFluid->postProcess( time );
 
                 //                    }
 
@@ -327,13 +313,9 @@ public:
                 *M_solidVel = M_fsi->FSIOper()->solid().vel();
                 *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
                 *M_velAndPressure = M_fsi->displacement();
-                M_ensightSolid->postProcess( time );
+                M_exporterSolid->postProcess( time );
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-                M_ensightMesh->postProcess( time );
-#ifdef HAVE_HDF5
-                M_hdf5Solid->postProcess( time );
-                M_hdf5Mesh->postProcess( time );
-#endif
+                M_exporterFluid->postProcess( time );
             }
 
         std::cout << "Total computation time = "
@@ -353,12 +335,8 @@ private:
 
     MPI_Comm*      M_comm;
 
-    filter_ptrtype M_ensightSolid;
-    filter_ptrtype M_ensightMesh;
-#ifdef HAVE_HDF5
-    hdf5filter_ptrtype M_hdf5Solid;
-    hdf5filter_ptrtype M_hdf5Mesh;
-#endif
+    filter_ptrtype M_exporterSolid;
+    filter_ptrtype M_exporterFluid;
     vector_ptrtype M_velAndPressure;
     vector_ptrtype M_fluidDisp;
     vector_ptrtype M_solidDisp;
@@ -482,104 +460,75 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 
     boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap()));
     boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap()));
-
-    boost::shared_ptr<LifeV::EpetraVector> initSolV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
-    boost::shared_ptr<LifeV::EpetraVector> initSolP(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
-    boost::shared_ptr<LifeV::EpetraVector> initSolS(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
-    boost::shared_ptr<LifeV::EpetraVector> initSolFD;
-    boost::shared_ptr<LifeV::EpetraVector> initSolidV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Repeated));
-    boost::shared_ptr<LifeV::EpetraVector> initSolFDPrev;
     boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique));
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFD;
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFDOld;
 
-    boost::shared_ptr<LifeV::ExporterData> initSolFluidDisp;
-    boost::shared_ptr<LifeV::ExporterData> initSolFluidDispPrev;
 
-    UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof() +M_fsi->FSIOper()->BCh_flux()->size();
-    LifeV::ExporterData initSolFluidVel(LifeV::ExporterData::Vector, std::string("f-velocity."+loadInitSol), initSolV, UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof(), UInt(0) );
-    LifeV::ExporterData initSolFluidPress(LifeV::ExporterData::Scalar, "f-pressure."+loadInitSol, initSolP,3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof(), M_fsi->FSIOper()->pFESpace().dof().numTotalDof(), UInt(0) );
-    LifeV::ExporterData initSolSolidDisp(LifeV::ExporterData::Vector,"s-displacement."+loadInitSol, initSolS, offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() , UInt(0) );
-    LifeV::ExporterData initSolSolidVel(LifeV::ExporterData::Vector,"s-velocity."+loadInitSol, initSolidV, offset, M_fsi->FSIOper()->dFESpace().dof().numTotalDof() , UInt(0) );
-
-    initSolFD.reset(new LifeV::EpetraVector(M_fsi->FSIOper()->mmFESpace().map(), Repeated));
-    initSolFDPrev.reset(new LifeV::EpetraVector(M_fsi->FSIOper()->mmFESpace().map(), Repeated));
-    initSolFluidDisp.reset(new LifeV::ExporterData(LifeV::ExporterData::Vector, "f-displacement."+loadInitSol, initSolFD, 0, M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0)));
-    initSolFluidDispPrev.reset(new LifeV::ExporterData(LifeV::ExporterData::Vector, "f-displacement."+loadInitSolPrev, initSolFDPrev, 0, M_fsi->FSIOper()->mmFESpace().dof().numTotalDof(), UInt(0)));
+         UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof() +M_fsi->FSIOper()->BCh_flux()->size();
     //                        }
     //upcast necessary
 
-    M_Tstart= M_fsi->FSIOper()->dataFluid().getInitialTime();//data_file("problem/Tstart"   ,0.);
+    Real init= data_file("problem/Tstart"   ,0.);
     Real dt= M_fsi->FSIOper()->dataFluid().getTimeStep();//data_file("problem/Tstart"   ,0.);
-    M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);
+    M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,init);
 
-    //M_ensightMesh->import(M_Tstart);
-    //M_ensightSolid->import(M_Tstart);
-    M_ensightMesh->M_rd_ascii(initSolFluidVel);
-    M_ensightMesh->M_rd_ascii(initSolFluidPress);
-    M_ensightSolid->M_rd_ascii(initSolSolidDisp);
-    M_ensightSolid->M_rd_ascii(initSolSolidVel);
-    M_ensightMesh->M_rd_ascii(*initSolFluidDisp);
-    M_ensightMesh->M_rd_ascii(*initSolFluidDispPrev);
+    M_exporterFluid->import(init-dt, dt);
+    M_exporterSolid->import(init-dt, dt);
 
-    //                     M_hdf5Mesh->M_rd_ascii(initSolFluidVel);
-    //                     M_hdf5Mesh->M_rd_ascii(initSolFluidPress);
-    //                     M_hdf5Solid->M_rd_ascii(initSolSolidDisp);
-    //                     M_hdf5Solid->M_rd_ascii(initSolSolidVel);
-    //                     M_hdf5Mesh->M_rd_ascii(*initSolFluidDisp);
-    //                     M_hdf5Mesh->M_rd_ascii(*initSolFluidDispPrev);
+    UniqueVFDOld.reset(new vector_type(*M_fluidDisp, Unique, Zero));
+    dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
+
+    M_exporterFluid->import(init);
+    M_exporterSolid->import(init);
 
 
-    UniqueV.reset( new vector_type(*initSolV, Unique, Zero));
+    UniqueV.reset( new vector_type(*M_velAndPressure, Unique, Zero));
     *initSol=*UniqueV;
-    UniqueV.reset( new vector_type(*initSolP, Unique, Zero));
-    *initSol+=*UniqueV;
     M_fsi->FSIOper()->fluid().initialize(*initSol);
 
-    UniqueV.reset(new vector_type(*initSolS, Unique, Zero));
+    UniqueV.reset(new vector_type(*M_solidDisp, Unique, Zero));
     *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
-    UniqueVFD.reset(new vector_type(*initSolFD, Unique, Zero));
+    UniqueVFD.reset(new vector_type(*M_fluidDisp, Unique, Zero));
 
     if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
-        initSol->add(*UniqueVFD, offset + 3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof() + (dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get()))->getDimInterface());
+        *initSol+=*UniqueVFD;
 
-    UniqueVFDOld.reset(new vector_type(*initSolFDPrev, Unique, Zero));
-
-    dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
-
-    initSolSVel.reset(new vector_type(*initSolidV, Unique, Zero));
+    initSolSVel.reset(new vector_type(*M_solidVel, Unique, Zero));
     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
+
+
 }
 
 void Problem::checkGCEResult(LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-504035)/dispNorm*(dispNorm-504035)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-914879)/dispNorm*(dispNorm-914879)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-1.26589e+06)/dispNorm*(dispNorm-1.26589e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.004 && (dispNorm-777523)/dispNorm*(dispNorm-777523)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-938905)/dispNorm*(dispNorm-938905)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-753279)/dispNorm*(dispNorm-753279)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-835605)/dispNorm*(dispNorm-835605)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-717966)/dispNorm*(dispNorm-717966)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-779217)/dispNorm*(dispNorm-779217)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if(time==0.001 && (dispNorm-684898)/dispNorm*(dispNorm-504035)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.002 && (dispNorm-850537)/dispNorm*(dispNorm-914879)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.003 && (dispNorm-1.10523e+06)/dispNorm*(dispNorm-1.26589e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.004 && (dispNorm-807697)/dispNorm*(dispNorm-777523)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.005 && (dispNorm-869367)/dispNorm*(dispNorm-938905)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.006 && (dispNorm-794390)/dispNorm*(dispNorm-753279)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.007 && (dispNorm-794135)/dispNorm*(dispNorm-835605)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.008 && (dispNorm-752333)/dispNorm*(dispNorm-717966)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.009 && (dispNorm-762949)/dispNorm*(dispNorm-779217)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 
 void Problem::checkCEResult(LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-472228)/dispNorm*(dispNorm-472128)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-988651)/dispNorm*(dispNorm-913593)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-1.362e+06988651)/dispNorm*(dispNorm-1.28524e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.004 && (dispNorm-827665)/dispNorm*(dispNorm-788936)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-969285)/dispNorm*(dispNorm-946694)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-778815)/dispNorm*(dispNorm-755566)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-850312)/dispNorm*(dispNorm-825823)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-715958)/dispNorm*(dispNorm-695446)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-781881)/dispNorm*(dispNorm-765094)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-472128)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.002 && (dispNorm-787299)/dispNorm*(dispNorm-913593)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.003 && (dispNorm-773835)/dispNorm*(dispNorm-1.28524e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+    if(time==0.004 && (dispNorm-654622)/dispNorm*(dispNorm-788936)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.005 && (dispNorm-543915)/dispNorm*(dispNorm-946694)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.006 && (dispNorm-517692)/dispNorm*(dispNorm-755566)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.007 && (dispNorm-497380)/dispNorm*(dispNorm-825823)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.008 && (dispNorm-486165)/dispNorm*(dispNorm-695446)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.009 && (dispNorm-478644)/dispNorm*(dispNorm-765094)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }

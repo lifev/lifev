@@ -55,9 +55,7 @@ linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 abstol     =  1.e-5 # tolerance in nonLinearRichardson
 reltol     =  1.e-5 # tolerance in nonLinearRichardson
-etamax     = 1.e-5 # relarive tolerance of the nterface problem (solveJac) (GMRES),
-                    # if semiImplicit, set   etamax = 1.e-10,
-                    # else (e.g.)            etamax = 1.e-3
+
 restart    = 0
 maxSubIter = 20
 
@@ -67,9 +65,12 @@ semiImplicit = true # (only valid for method = monolithic or monolithic).
 multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
+type       = hdf5
 
 [fluid]
-useShapeDerivatives = false
+useShapeDerivatives           = false
+domainVelImplicit             = false
+convectiveTermDer             = false
 
 [./physics]
 density   = 1.0               # density
@@ -95,14 +96,14 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
-gammaBeta  = 0.5
-gammaDiv   = 0.5
-gammaPress = 0.5
+gammaBeta  = 1
+gammaDiv   = 0.2
+gammaPress = 0.05
 reuse = true
 
 
 [interface] # mesh dependent flags for the interface.
-DDBlockPrec = 2
+DDBlockPrec = 7
 #0: monolithic D-N system,
 #1: segregated D-N , works only in the semiImplicit case
 #2: monolithic  R-N system (equivalent to 0)
