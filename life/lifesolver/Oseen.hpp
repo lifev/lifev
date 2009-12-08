@@ -244,7 +244,7 @@ public:
     void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
     // as for now resetting stabilization matrix at the same time as the preconditioner
-    void resetStab() { M_matrStab.reset(); }
+    void resetStab() { M_resetStab = true; }
 
     EpetraMap   const& getMap()       const { return M_localMap; }
 
@@ -344,6 +344,8 @@ protected:
     //! Stabilization
     bool                           M_stab;
     bool                           M_reuseStab;
+    bool                           M_resetStab;
+    int                            M_iterReuseStab;
 
     details::
     IPStabilization<Mesh, Dof>     M_ipStab;
@@ -361,24 +363,6 @@ protected:
     double                         M_diagonalize;
 
     UInt                           M_count;
-
-    //! boolean that indicates if output is sent to cout
-
-    //bool                           M_verbose;
-
-    //! boolean that indicates if the matrix is updated for the current iteration
-
-    //bool                           M_updated;
-
-    //! boolean that indicates if the precond has to be recomputed
-
-    int                            M_iterReuseStab;
-
-    //! integer storing the max number of solver iteration with prec recomputing
-
-    int                            M_maxIterSolver;
-
-    //!
 
     bool                           M_recomputeMatrix;
 
@@ -436,6 +420,8 @@ Oseen( const data_type&          dataType,
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
     M_reuseStab              ( true ),
+    M_resetStab              ( false ),
+    M_iterReuseStab          ( -1 ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
@@ -447,7 +433,6 @@ Oseen( const data_type&          dataType,
     M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
-    M_iterReuseStab          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -492,6 +477,8 @@ Oseen( const data_type&          dataType,
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
     M_reuseStab              ( true ),
+    M_resetStab              ( false ),
+    M_iterReuseStab          ( -1 ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
@@ -503,7 +490,6 @@ Oseen( const data_type&          dataType,
     M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
-    M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -547,6 +533,8 @@ Oseen( const data_type&          dataType,
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
     M_reuseStab              ( true ),
+    M_resetStab              ( false ),
+    M_iterReuseStab          ( -1 ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
@@ -558,7 +546,6 @@ Oseen( const data_type&          dataType,
     M_diagonalize            ( false ),
     M_count                  ( 0 ),
     //    M_updated                ( false ),
-    M_iterReuseStab        ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -1019,13 +1006,14 @@ updateSystem(const double       alpha,
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
-        if ( M_stab && (!M_reuseStab || (M_matrStab.get() == 0) ) )
+        if ( M_stab && (M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) ) )
         {
             M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...     ");
             chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVecRep, false );
             M_matrStab->GlobalAssemble();
+            M_resetStab = false;
             chrono.stop();
             M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
         }
@@ -1038,11 +1026,13 @@ updateSystem(const double       alpha,
                     M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...     ");
                     chrono.start();
 
-                    if ( !M_reuseStab || (M_matrStab.get() == 0) )
+                    if ( M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) )
                         {
                             M_matrStab.reset  ( new matrix_type(M_localMap) );
                             M_ipStab.apply( *M_matrStab, betaVec, false );
                             M_matrStab->GlobalAssemble();
+                            M_resetStab = false;
+
                         }
                     else
                         {
@@ -1084,9 +1074,9 @@ void Oseen<Mesh, SolverType>::updateStab( matrix_type& matrFull )
 {
 
     if (M_stab)
-        {
+    {
         matrFull += *M_matrStab;
-        }
+    }
 
 }
 
