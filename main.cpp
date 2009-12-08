@@ -197,7 +197,6 @@ public:
 
         M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
         M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
-        M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->uFESpace().map(), M_exporterFluid->mapType() ));
 
         M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
         M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
@@ -212,20 +211,20 @@ public:
         M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
                                  UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
 
-        M_exporterFluid->addVariable( ExporterData::Vector, "f-wss", M_WSS,
-                                 UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
-
 
 
         UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
 
         M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
         M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
+        M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                   UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
         M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                   UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+        M_exporterSolid->addVariable( ExporterData::Vector, "s-wss", M_WSS,
+                                 UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
 
         M_Tstart = 0.;
@@ -257,7 +256,7 @@ public:
         int _i = 1;
         double time=M_Tstart + dt;
 
-        //dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
+        dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
 
         for (time=M_Tstart + dt; time <= T; time += dt, ++_i)
             {
@@ -282,7 +281,7 @@ public:
                 M_fsi->iterate( time );
 
 
-                //*M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
+                *M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
@@ -297,12 +296,12 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
                 ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            try{
+            //try{
             if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
                 checkCEResult(time);
             else
                 checkGCEResult(time);
-            }catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
+            //}catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
                 ///////// END OF CHECK
             }
         if(!M_fsi->FSIOper()->dataFluid().useShapeDerivatives())
