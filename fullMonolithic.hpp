@@ -129,6 +129,7 @@ public:
 
     void setUp( const GetPot& dataFile );
 
+    void setupBlockPrec(vector_type& rhs);
 private:
 
     void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);

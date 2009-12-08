@@ -295,7 +295,7 @@ public:
 
     virtual void initializeMesh(vector_ptrtype fluid_dispOld);
     //!@}
-
+    virtual void  setupBlockPrec(vector_type& rhs);
 protected:
 
     //!@name Protected methods
@@ -380,7 +380,7 @@ protected:
     //!\small says if the preconditioner will be recomputed
     bool recomputePrec(){return(!M_reusePrec || M_resetPrec);}
     //!\small left-multiply both the monolithic matrix and the rhs times a preconditioner matrix
-    void applyPreconditioner(matrix_ptrtype robinCoupling, vector_ptrtype& rhs);
+    void applyPreconditioner(matrix_ptrtype robinCoupling, vector_type& rhs);
     //!\small left-multiply the monolithic matrix, the rhs and the preconditioner times a preconditioner matrix
     void applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype& prec );
     //void setAztecooPreconditioner(const GetPot& dataFile, const std::string& section){M_linearSolver->setAztecooPreconditioner( dataFile, section);}

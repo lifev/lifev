@@ -229,14 +229,11 @@ fullMonolithic::evalResidual( vector_type&       res,
     super::evalResidual( disp, M_rhsFull, res, false );
 }
 
-void fullMonolithic::solveJac(vector_type       &_muk,
-                              const vector_type &_res,
-                              const Real       _linearRelTol)
+
+void fullMonolithic::setupBlockPrec(vector_type& rhs)
 {
-    vector_ptrtype rhs(new vector_type(_res));
 
     boost::shared_ptr<IfpackComposedPrec>  ifpackCompPrec;
-
 
     if(M_dataFluid->useShapeDerivatives())
     {
@@ -489,8 +486,14 @@ void fullMonolithic::solveJac(vector_type       &_muk,
         {}
         break;
     }
+}
+
+void fullMonolithic::solveJac(vector_type       &_muk,
+                              const vector_type &_res,
+                              const Real       _linearRelTol)
+{
     super::setMatrix(*M_monolithicMatrix);
-    super::solveJac(_muk, *rhs, _linearRelTol);
+    super::solveJac(_muk, _res, _linearRelTol);
 }
 
 void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function const& u0,

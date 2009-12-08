@@ -24,6 +24,7 @@
 #include <EpetraExt_MatrixMatrix.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 namespace LifeV
 {
@@ -672,7 +673,7 @@ Monolithic::evalResidual( vector_type&       res,
                 robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
                 M_robinCoupling->GlobalAssemble();
             }
-            this->applyPreconditioner(M_robinCoupling, M_rhsFull);
+            this->applyPreconditioner(M_robinCoupling, *M_rhsFull);
         }
 
         if(M_DDBlockPrec!=5 && M_DDBlockPrec!=7 &&M_DDBlockPrec!=8)
@@ -858,16 +859,8 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
     evalResidual(sol,rhs, res, diagonalScaling);
 }
 
-
-void  Monolithic::solveJac(vector_type         &_step,
-                           const vector_type   &_res,
-                           const Real         /*_linearRelTol*/)
+void  Monolithic::setupBlockPrec(vector_type& rhs)
 {
-
-    M_solid->getDisplayer().leaderPrint("solveJac: NormInf res ", _res.NormInf());
-
-    M_solid->getDisplayer().leaderPrint("Solving Jacobian system... \n" );
-
     boost::shared_ptr<IfpackComposedPrec>  ifpackCompPrec;
 
 
@@ -1016,13 +1009,23 @@ void  Monolithic::solveJac(vector_type         &_step,
             break;
         }
     }
+}
 
-
+void  Monolithic::solveJac(vector_type         &_step,
+                           const vector_type   &_res,
+                           const Real         /*_linearRelTol*/)
+{
+    setupBlockPrec(*const_cast<vector_type*>(&_res));
     // #if OBSOLETE
     //     if(!M_dataFluid->useShapeDerivatives())
     // #endif
 
     //M_precMatrPtr->spy("p");
+
+
+    M_solid->getDisplayer().leaderPrint("solveJac: NormInf res ", _res.NormInf());
+
+    M_solid->getDisplayer().leaderPrint("Solving Jacobian system... \n" );
 
     switch(M_DDBlockPrec)
     {
@@ -1088,10 +1091,10 @@ void Monolithic::variablesInit(const std::string& dOrder)
 
 
 void Monolithic::
-applyPreconditioner( matrix_ptrtype robinCoupling, vector_ptrtype& rhs)
+applyPreconditioner( matrix_ptrtype robinCoupling, vector_type& rhs)
 {
     applyPreconditioner(robinCoupling, M_monolithicMatrix);
-    *rhs=*robinCoupling*(*rhs);
+    rhs=*robinCoupling*(rhs);
 
 }
 
