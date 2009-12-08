@@ -1,14 +1,11 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for Fluid Structure Solver
+#      Data file for CE FSI Solver
 #-------------------------------------------------
 
 [problem]
 
-#initSol = 00004
-#initSolPrev = 00003
-
-method     = fullMonolithic # monolithic, fullMonolithic
+method     = monolithic # monolithic, fullMonolithic
 precond    = 0 #for Steklov-Poincare:
                #     0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
                #for Monolithic:
@@ -29,22 +26,22 @@ linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 abstol     =  1.e-5 # tolerance in nonLinearRichardson
 reltol     =  1.e-5 # tolerance in nonLinearRichardson
-etamax     = 1.e-5 # relarive tolerance of the nterface problem (solveJac) (GMRES),
-                    # if semiImplicit, set   etamax = 1.e-10,
-                    # else (e.g.)            etamax = 1.e-3
+
 restart    = 0
 maxSubIter = 20
 
-semiImplicit = false # (only valid for method = monolithic or monolithic).
+semiImplicit = true # (only valid for method = monolithic or monolithic).
 
 [exporter]
 multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
+type       = hdf5
 
 [fluid]
-useShapeDerivatives = true
-fullImplicit        = true
+useShapeDerivatives           = false
+domainVelImplicit             = false
+convectiveTermDer             = false
 
 [./physics]
 density   = 1.0               # density
@@ -70,14 +67,14 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
-gammaBeta  = 0.5
-gammaDiv   = 0.5
-gammaPress = 0.5
+gammaBeta  = 1
+gammaDiv   = 0.2
+gammaPress = 0.05
 reuse = true
 
 
 [interface] # mesh dependent flags for the interface.
-DDBlockPrec = 2
+DDBlockPrec = 7
 #0: monolithic D-N system,
 #1: segregated D-N , works only in the semiImplicit case
 #2: monolithic  R-N system (equivalent to 0)
@@ -105,12 +102,7 @@ timestep		= 0.001
 
 [../space_discretization]
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
-#mesh_file = 179347_cm_solid.mesh  # mesh file
-#mesh_file = vessel20_ord.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
-#mesh_file = test_tubes/solid_0_001_ord_properUnit.mesh  # mesh file
-#mesh_file = vessel_curve20.mesh  # mesh file
-#mesh_file = solid02.mesh  # mesh file
 order     = P1
 
 
@@ -187,27 +179,6 @@ displayList		= false
 
 [./smoother]
 type = IFPACK
-
-# [../ifpack]
-# prectype        = Amesos
-
-# [./fact]
-# # #level-of-fill                 = 10
-# ilut_level-of-fill            = 5
-# drop_tolerance                = 1.e-10
-# relax_value                   = 0
-
-# [../amesos]
-# solvertype = Amesos_Umfpack
-
-# [../partitioner]
-#  #overlap =
-
-# [../schwarz]
-# reordering_type = none #metis, rcm, none
-# filter_singletons = true
-
-# [../]
 
 [../] # end if ML
 
