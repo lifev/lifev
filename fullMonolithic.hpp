@@ -136,7 +136,8 @@ private:
     boost::shared_ptr<EpetraMap>   M_mapWithoutMesh;
     vector_ptrtype                       M_uk;
     vector_ptrtype                       M_meshVel;
-    bool                                 M_fullImplicit;
+    bool                                 M_domainVelImplicit;
+    bool                                 M_convectiveTermDer;
     //    static bool              reg;
 };
 

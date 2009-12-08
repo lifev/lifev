@@ -49,6 +49,9 @@ namespace LifeV
  * is obtained by means of an augmented formulation.
  * Different possible preconditioners are implemented.
  */
+
+class WRONG_PREC_EXCEPTION;
+
 class Monolithic : public FSIOperator
 {
 public:
@@ -155,7 +158,7 @@ public:
        \param rhsShapeDerivatives: output. Shape derivative terms.
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
-    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit);
+    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
     //! getters
 
     void setupSystem( );
@@ -518,6 +521,11 @@ iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr pre
     M_solid->getDisplayer().leaderPrint("   system solved.\n ");
 }
 
+class WRONG_PREC_EXCEPTION{
+public:
+    WRONG_PREC_EXCEPTION(){}
+    virtual ~WRONG_PREC_EXCEPTION(){}
+};
 
 
 }

@@ -580,18 +580,19 @@ Monolithic::evalResidual( vector_type&       res,
         M_meshMotion->updateDispDiff();
 
         M_beta.reset(new vector_type(M_uFESpace->map()));
-        vector_type const meshDispDiff( M_meshMotion->dispDiff(), Repeated );
+        vector_type meshDispDiff( M_meshMotion->disp(), Repeated );
 
-        this->moveMesh(meshDispDiff);
+        this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
 
+        meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
         this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-        double alpha = 1./M_dataFluid->getTimeStep();
+        double alpha = 1./M_dataFluid->getTimeStep();//mesh velocity w
 
         *this->M_beta *= -alpha;
         vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
         fluid->subset(*M_un, 0);
-        *this->M_beta += *fluid/*M_un*/;
+        *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
 
 
         M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
@@ -619,8 +620,10 @@ Monolithic::evalResidual( vector_type&       res,
                 else
                     if(M_DDBlockPrec==8)
                         couplingMatrix(M_fluidBlock, 6);
-                bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
 
+                if ( !M_BCh_flux->bdUpdateDone() )
+                    M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+                bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
                 M_fluidBlock->GlobalAssemble();
                 M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
 
@@ -725,7 +728,7 @@ void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDi
 }
 #endif
 
-void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool fullImplicit)
+void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
     double alpha = 1./M_dataFluid->getTimeStep();
     vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
@@ -737,7 +740,7 @@ void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& so
     meshVel.reset(new vector_type(M_mmFESpace->map()));
 
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-    if(fullImplicit)
+    if(domainVelImplicit)
     {
         vector_type meshDispOld(M_mmFESpace->map());
         meshVel->subset(sol, offset); //if the conv. term is to be condidered implicitly
@@ -749,11 +752,17 @@ void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& so
         meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
         *meshVel -= M_meshMotion->dispOld();
     }
+
+    if(convectiveTermDer)
+        un.subset(sol, 0);
+    else
+        un.subset(*this->M_un, 0);
+
+
     *meshVel *= alpha;
     vector_ptrtype meshVelRep(new vector_type(M_mmFESpace->map(), Repeated));
     *meshVelRep = *meshVel;
 
-    un.subset(*this->M_un, 0);
     uk.subset(sol, 0);
     vector_type dvfm(M_uFESpace->map(), Repeated);
     vector_type vfm(M_uFESpace->map(), Repeated);
@@ -762,12 +771,13 @@ void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& so
 
     M_fluid->updateShapeDerivatives(*sdMatrix,
                                     alpha,
-                                    un,//un
+                                    un,//un if !domainVelImplicit, otherwise uk
                                     uk,//uk
                                     vfm, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
                                     M_solidAndFluidDim+M_interface*nDimensions,
-                                    *M_mmFESpace,
-                                    fullImplicit
+                                    *M_uFESpace,
+                                    domainVelImplicit,
+                                    convectiveTermDer
                                     );
 }
 
@@ -928,9 +938,14 @@ void  Monolithic::solveJac(vector_type         &_step,
             break;
 
         case 5:
-        case 6:
             break;
-
+        case 6:
+            {
+            displayer().leaderPrint("Preconditioner type not yet implemented," );
+            displayer().leaderPrint("change the entry DDBlockPrec in the data file");
+            throw WRONG_PREC_EXCEPTION();
+            break;
+            }
         case 7:
 
             ifpackCompPrec =  boost::dynamic_pointer_cast< IfpackComposedPrec, prec_raw_type > (M_precPtr);
@@ -987,6 +1002,9 @@ void  Monolithic::solveJac(vector_type         &_step,
         case 10:
         case 11:
         case 12:
+            displayer().leaderPrint("Preconditioner type not yet implemented," );
+            displayer().leaderPrint("change the entry DDBlockPrec in the data file");
+            throw WRONG_PREC_EXCEPTION();
             break;
         default:
             {
