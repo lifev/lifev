@@ -215,8 +215,8 @@ public:
 
         UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
 
-        M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
-        M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
+        M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
+        M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
         M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
