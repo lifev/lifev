@@ -167,12 +167,15 @@ Ethiersteinman::Ethiersteinman( int argc,
 void
 Ethiersteinman::run()
 {
+    Chrono chrono;
+
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name.c_str() );
 
     bool verbose = (d->comm->MyPID() == 0);
 
+    chrono.start();
 
 
     // Problem definition
@@ -257,6 +260,9 @@ Ethiersteinman::run()
 
     fluid.setUp(dataFile);
     fluid.buildSystem();
+
+    if (verbose) 
+	std::cout << d->comm->MyPID() << " Init time (partial) " << chrono.diff() << " s." << std::endl;
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -359,6 +365,9 @@ Ethiersteinman::run()
 
     }
 
+    chrono.stop();
+    if (verbose) 
+	std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
     // end initialization step
 
     fluid.resetPrec();
@@ -402,9 +411,10 @@ Ethiersteinman::run()
 
     // Temporal loop
 
-    Chrono chrono;
     int iter = 1;
 
+    Chrono chronoGlobal;
+    chronoGlobal.start();
 
     for ( ; time <= tFinal + dt/2.; time += dt, iter++)
     {
@@ -473,6 +483,9 @@ Ethiersteinman::run()
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
     }
+
+    chronoGlobal.stop();
+    if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
 }
 
