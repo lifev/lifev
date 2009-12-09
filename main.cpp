@@ -213,18 +213,19 @@ public:
 
 
 
-        UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
+        M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+        M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
-        M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-        M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-        M_WSS.reset           ( new vector_type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+        M_WSS.reset      ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                  UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-        M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                  UInt(offset), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+         M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
+                                       UInt(0),
+                                       M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+
         M_exporterSolid->addVariable( ExporterData::Vector, "s-wss", M_WSS,
-                                 UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
 
         M_Tstart = 0.;
@@ -255,6 +256,7 @@ public:
         boost::timer _overall_timer;
         int _i = 1;
         double time=M_Tstart + dt;
+        LifeV::UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
 
         dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
 
@@ -271,17 +273,18 @@ public:
 
 
 
-                *M_solidDisp = M_fsi->displacement();
+                M_solidDisp->subset(M_fsi->displacement(), offset);
                 *M_solidDisp *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
-                *M_solidVel = M_fsi->FSIOper()->solid().vel();
+                M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
                 *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
+
                 *M_velAndPressure = M_fsi->displacement();
+                *M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
+
                 M_exporterSolid->postProcess( time );
 
                 M_fsi->iterate( time );
 
-
-                *M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
@@ -307,10 +310,12 @@ public:
         if(!M_fsi->FSIOper()->dataFluid().useShapeDerivatives())
             {
                 M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
-                *M_solidDisp = M_fsi->displacement();
+
+                M_solidDisp->subset(M_fsi->displacement(), offset);
                 *M_solidDisp *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
-                *M_solidVel = M_fsi->FSIOper()->solid().vel();
+                M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
                 *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
+
                 *M_velAndPressure = M_fsi->displacement();
                 M_exporterSolid->postProcess( time );
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
