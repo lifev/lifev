@@ -179,16 +179,26 @@ public:
     //! will be added
     void insertOneDiagonal();
 
-private:
-    //! insert the given value into the diagonal
-    //! Pay intention that this will add values to the diagonal,
-    //! so for later added values with set_mat_inc, the one
-    //! will be added
-    void insertValueDiagonal(const DataType& value);
-
     //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
     //! This method does not remove non zero entries in the diagonal.
-    void insertZeroDiagonal();
+    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
+	If from > to, process all diagonal entries entries
+	If from = to, do nothing
+	This methods works only if matrix is not closed.
+    */
+    void insertZeroDiagonal(UInt from = -1, UInt to = -2);
+
+private:
+    //! insert the given value into the diagonal
+    /*! Pay intention that this will add values to the diagonal,
+        so for later added values with set_mat_inc, the one
+	will be added
+	Inserts Value on the local diagonal for diagonal elements >= from and < to;
+	If from > to, process all diagonal entries entries
+	If from = to, do nothing
+	This methods works only if matrix is not closed.
+    */
+    void insertValueDiagonal(const DataType& value, UInt from = -1, UInt to = -2);
 
     //! Shared pointer on an EpetraMap
     boost::shared_ptr< EpetraMap > M_epetraMap;
@@ -380,10 +390,10 @@ int EpetraMatrix<DataType>::GlobalAssemble()
 
 //! insert the given value into the diagonal
 //! Pay intention that this will add values to the diagonal,
-//! so for later added values with set_mat_inc, the one
+//! so for later added values with set_mat_inc, the value
 //! will be added
 template <typename DataType>
-void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value)
+void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, UInt from, UInt to)
 {
     if ( M_epetraCrs->Filled ())
     {
@@ -392,11 +402,21 @@ void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value)
         return;
     }
 
+    if (to == from) return;
+
+    if (to < from) // do all entries
+    {
+	from = M_epetraCrs->RowMap().MinMyGID ();
+	to = M_epetraCrs->RowMap().MaxMyGID () + 1;
+    }
+
     int* p =  M_epetraCrs->RowMap().MyGlobalElements();
     int ierr;
 
     for (int i(0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p)
     {
+	if (*p < from || *p >= to) continue;
+
         ierr = M_epetraCrs->InsertGlobalValues (1, p, 1, p, &value);
 
         if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
@@ -416,9 +436,9 @@ void EpetraMatrix<DataType>::insertOneDiagonal()
 // Adds zeros into the diagonal to ensure the matrix' graph has a entry there
 // This method does not remove non zero entries in the diagonal.
 template <typename DataType>
-void EpetraMatrix<DataType>::insertZeroDiagonal()
+void EpetraMatrix<DataType>::insertZeroDiagonal( UInt from, UInt to)
 {
-    insertValueDiagonal(0.0);
+    insertValueDiagonal(0.0, from, to);
 }
 
 
