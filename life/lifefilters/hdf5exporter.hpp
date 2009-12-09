@@ -42,7 +42,6 @@
 #else
 
 #include <life/lifefilters/exporter.hpp>
-#include <hdf5.h>
 #include <EpetraExt_HDF5.h>
 #include <Epetra_MultiVector.h>
 #include <boost/shared_array.hpp>
