@@ -22,7 +22,7 @@
 
 #AM_CXXFLAGS		= -DTEST_ALL -gstabs -DTHREEDIM
 AM_CXXFLAGS		= -DTHREEDIM 
-LDADD			= $(life_libs)
+LDADD			= $(life_libs) $(boost_libs)
 
 INCLUDES		= $(all_includes)
 
