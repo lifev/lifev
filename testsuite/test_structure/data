@@ -5,53 +5,75 @@
 
 
 [exporter]
+type       = hdf5 # ensight # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
 
 [solid]
 
-[./physics]
-density   = 1.2               # density
-young     = 3.0E6
-poisson   = 0.3
+  [./physics]
+  density   = 1.2               # density
+  young     = 3.0E6
+  poisson   = 0.3
 
-[../time_discretization]
-initialtime		= 0.
-endtime			= 0.02
-timestep		= 0.001
+  [../time_discretization]
+  initialtime = 0.
+  endtime     = 0.02
+  timestep    = 0.001
 
-[../space_discretization]
-mesh_dir  = Mesh/     # the directory where the mesh file is
-mesh_file = vessel2x4x20.mesh # mesh file
-#mesh_file = hexa2x2.mesh # mesh file
-order     = P1
-
-
-[../miscellaneous]
-factor    = 1
-verbose   = 1
+  [../space_discretization]
+  mesh_dir  = Mesh/     # the directory where the mesh file is
+  mesh_file = vessel2x4x20.mesh # mesh file
+  #mesh_file = hexa2x2.mesh # mesh file
+  order     = P1
 
 
-[../newton]
-maxiter = 1
-reltol  = 1.e-8
+  [../miscellaneous]
+  factor    = 1
+  verbose   = 1
 
 
-[../solver]
-output          = none
-max_iter        = 100
-poly_ord        = 5
-drop            = 1.00e-4
-ilut_fill       = 4
-tol             = 1.e-12
+  [../newton]
+  maxiter = 1
+  reltol  = 1.e-8
 
-[../precond]
 
-precond         = Amesos
+  [../solver]
+  solver          = gmres
+  scaling         = none
+  output          = all # none
+  conv            = rhs
+  max_iter        = 100
+  reuse           = true
+  max_iter_reuse  = 80
+  kspace          = 100
+  tol             = 1.e-10    # AztecOO tolerance
 
-reuse           = true
-overlap         = 10
-droptol         = 1.e-5
-fill 		= 2
+  [../prec]
+  prectype                = Ifpack # Ifpack or ML
+  displayList             = true
+
+    # ifpack
+    [./ifpack]
+    overlap  = 2
+
+      [./fact]
+      ilut_level-of-fill            = 1
+      drop_tolerance                = 1.e-5
+      relax_value                   = 0
+
+      [../amesos]
+      solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+      [../partitioner]
+      overlap = 2
+
+      [../schwarz]
+      reordering_type = none #metis, rcm, none
+      filter_singletons = true
+
+      [../]
+   [../]
+
 

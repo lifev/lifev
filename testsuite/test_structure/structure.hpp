@@ -135,7 +135,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> d;
+    boost::shared_ptr<Private> parameters;
 };
 
 #endif /* __Structure_H */

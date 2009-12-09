@@ -44,6 +44,8 @@
 #include <life/lifefilters/medit_wrtrs.hpp>
 
 #include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/noexport.hpp>
 
 
 #include "structure.hpp"
@@ -74,10 +76,8 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
                 break;
         }
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -97,6 +97,8 @@ Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
     break;
   }
+  return 0.0;
+
 }
 
 
@@ -113,77 +115,15 @@ Real zero_scalar( const Real& /* t */,
 struct Structure::Private
 {
     Private() :
-        //check(false),
-        nu(1),
-        //rho(1),
-        H(1), D(1)
-        //H(20), D(1)
-        //H(0.41), D(0.1)
+        rho(1), poisson(1), young(1)
         {}
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
-    //double h;
-    //double T0;
-    //double T;
-    //double dt;
-    //TimeScheme time_order;
-    double Re;
-    //bool check;
+    double rho, poisson, young;
 
-    //std::string exporter_str;
     std::string data_file_name;
 
-    double nu;  /**< viscosity (in m^2/s) */
-    //const double rho; /**< density is constant (in kg/m^3) */
-    double H;   /**< height and width of the domain (in m) */
-    double D;   /**< diameter of the cylinder (in m) */
-    bool centered; /**< true if the cylinder is at the origin */
-
     Epetra_Comm*     comm;
-    /**
-     * get the characteristic velocity
-     *
-     * @return the characteristic velocity
-     */
-    double Ubar() const { return nu*Re/D; }
 
-    /**
-     * get the magnitude of the profile velocity
-     *
-     *
-     * @return the magnitude of the profile velocity
-     */
-    double Um_3d() const { return 9*Ubar()/4; }
-
-    double Um_2d() const { return 3*Ubar()/2; }
-
-    /**
-     * u3d 3D velocity profile.
-     *
-     * Define the velocity profile at the inlet for the 3D cylinder
-     */
-    Real d3d( const Real& /* t */,
-              const Real& /* x */,
-              const Real& y,
-              const Real& z,
-              const ID&   id ) const
-        {
-            if ( id == 1 ) {
-                if ( centered ) {
-                    return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / pow(H,4);
-                } else {
-                    return 16 * Um_3d() * y * z * (H-y) * (H-z) / pow(H,4);
-                }
-            } else {
-                return 0;
-            }
-        }
-
-    fct_type getD_3d()
-        {
-            fct_type f;
-            f = boost::bind(&Structure::Private::d3d, this, _1, _2, _3, _4, _5);
-            return f;
-        }
 
 };
 
@@ -192,29 +132,25 @@ Structure::Structure( int                                   argc,
                       Epetra_Comm &                         structComm,
                       LifeV::AboutData const&               ad,
                       LifeV::po::options_description const& od ):
-    d( new Private )
+    parameters( new Private() )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
-    d->data_file_name = data_file_name;
+    parameters->data_file_name = data_file_name;
 
-    d->Re = dataFile( "fluid/problem/Re", 1. );
-    d->nu = dataFile( "fluid/physics/viscosity", 1. ) /
-        dataFile( "fluid/physics/density", 1. );
-    d->H  = dataFile( "fluid/problem/H", 1. );
-    d->D  = dataFile( "fluid/problem/D", 1. );
-    d->centered = (bool)dataFile( "fluid/problem/centered", 0 );
+    parameters->rho = dataFile( "solid/physics/density", 1. );
+    parameters->young = dataFile( "solid/physics/young", 1. );
+    parameters->poisson  = dataFile( "solid/physics/poisson", 1. );
 
-    std::cout << "Re = " << d->Re << std::endl
-              << "nu = " << d->nu << std::endl
-              << "H  = " << d->H  << std::endl
-              << "D  = " << d->D  << std::endl;
+    std::cout << "density = " << parameters->rho << std::endl
+              << "young   = " << parameters->young << std::endl
+              << "poisson = " << parameters->poisson << std::endl;
 
-    d->comm = &structComm;
-    int ntasks = d->comm->NumProc();
+    parameters->comm = &structComm;
+    int ntasks = parameters->comm->NumProc();
 
-    if (!d->comm->MyPID()) std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    if (!parameters->comm->MyPID()) std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
 
 }
 
@@ -231,7 +167,7 @@ Structure::run3d()
     typedef VenantKirchhofSolver< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
-    bool verbose = (d->comm->MyPID() == 0);
+    bool verbose = (parameters->comm->MyPID() == 0);
     // Number of boundary conditions for the velocity and mesh motion
     //
     BCHandler BCh(2);
@@ -240,12 +176,12 @@ Structure::run3d()
     // dataElasticStructure
     //
 
-    GetPot dataFile( d->data_file_name.c_str() );
+    GetPot dataFile( parameters->data_file_name.c_str() );
 
     DataElasticStructure< RegionMesh3D<LinearTetra > >    dataStructure( dataFile );
 
     partitionMesh< RegionMesh3D<LinearTetra> >            meshPart( *dataStructure.mesh(),
-                                                                    *d->comm );
+                                                                    *parameters->comm );
 
 //    meshPart.rebuildMesh();
 
@@ -255,10 +191,10 @@ Structure::run3d()
     dataStructure.setMesh(meshPart.mesh());
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,*d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,*parameters->comm);
     if (verbose) std::cout << std::endl;
 
-    EpetraMap structMap(dFESpace.refFE(), meshPart, *d->comm);
+    EpetraMap structMap(dFESpace.refFE(), meshPart, *parameters->comm);
 
     EpetraMap fullMap;
 
@@ -269,7 +205,7 @@ Structure::run3d()
 
     VenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid( dataStructure,
                                                              dFESpace,
-                                                             *d->comm);
+                                                             *parameters->comm);
     solid.setUp(dataFile);
     solid.buildSystem();
     //
@@ -299,21 +235,41 @@ Structure::run3d()
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose ) std::cout << "ok." << std::endl;
-    //if (d->comm->NumProc() == 1 )  solid.postProcess();
+    //if (parameters->comm->NumProc() == 1 )  solid.postProcess();
 
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "structure", d->comm->MyPID());
+    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
-    vector_ptrtype solidDisp ( new vector_type(solid.disp(), Repeated ) );
-    vector_ptrtype solidVel  ( new vector_type(solid.vel(),  Repeated ) );
+    std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
-    ensight.addVariable( ExporterData::Vector, "displacement", solidDisp,
-                         UInt(0), dFESpace.dof().numTotalDof() );
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+    {
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "structure" ) );
+        exporter->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId( meshPart.mesh(), parameters->comm->MyPID() );
+    }
+    else
+#endif
+    {
+        if (exporterType.compare("none") == 0)
+        {
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "structure", parameters->comm->MyPID()) );
+        } else {
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "structure", parameters->comm->MyPID()) );
+        }
+    }
 
-    ensight.addVariable( ExporterData::Vector, "velocity", solidVel,
-                         UInt(0), dFESpace.dof().numTotalDof() );
+    vector_ptrtype solidDisp ( new vector_type(solid.disp(), exporter->mapType() ) );
+    vector_ptrtype solidVel  ( new vector_type(solid.vel(),  exporter->mapType() ) );
 
-    ensight.postProcess( 0 );
+    exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
+                           UInt(0), dFESpace.dof().numTotalDof() );
+
+    exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
+                           UInt(0), dFESpace.dof().numTotalDof() );
+
+    exporter->postProcess( 0 );
 
 
     //
@@ -333,11 +289,11 @@ Structure::run3d()
         //solid.updateSystem(dZero);    // Computes the rigth hand side
         solid.updateSystem();    // Computes the rigth hand side
         solid.iterate( BCh );                  // Computes the matrices and solves the system
-        //if (d->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
+        //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
         *solidDisp = solid.disp();
         *solidVel  = solid.vel();
-        ensight.postProcess( time );
+        exporter->postProcess( time );
 
 
     }
