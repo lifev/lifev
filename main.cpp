@@ -572,8 +572,6 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
-
-
 }
 
 void Problem::checkGCEResult(LifeV::Real& time)
