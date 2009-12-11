@@ -181,7 +181,6 @@ filter_singletons      = false
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack
-  reuse           = true
   displayList     = false
 
     [./ifpack]
@@ -263,7 +262,6 @@ tol             = 1.e-10
 
 [../prec]
 prectype        = Ifpack
-reuse           = true
 overlap         = 2
 
 [./ifpack]
@@ -291,7 +289,6 @@ solvertype      = Amesos_Umfpack
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack
-  reuse           = true
   displayList     = false
 
     [./ifpack]
@@ -315,9 +312,9 @@ kspace   = 40;
 conv     = rhs;
 
 ]])
-AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
-          ln -sf ../../data/mesh/inria/vessel20.mesh;
-          mpirun -n 4  ../../test_fsi/test_fsi],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh &&
+          ln -sf ../../data/mesh/inria/vessel20.mesh &&
+          mpirun -n 4 ../../test_fsi/test_fsi],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
 #

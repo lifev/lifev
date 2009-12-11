@@ -102,7 +102,6 @@ tol             = 1.e-10    # AztecOO tolerance
 
 [../prec]
 prectype        = Ifpack
-reuse           = true
 displayList     = true
 
 [./ifpack]
@@ -153,7 +152,6 @@ filter_singletons      = false
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack
-  reuse           = true
   displayList     = false
 
     [./ifpack]
@@ -235,7 +233,6 @@ tol             = 1.e-10
 
 [../prec]
 prectype        = Ifpack
-reuse           = true
 overlap         = 2
 
 [./ifpack]
@@ -263,7 +260,6 @@ solvertype      = Amesos_Umfpack
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack
-  reuse           = true
   displayList     = false
 
     [./ifpack]
