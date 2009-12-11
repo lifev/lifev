@@ -71,11 +71,11 @@ public:
     typedef RegionMesh3D< LinearTetra >       MeshType;
     typedef OseenShapeDerivative< MeshType >  FluidType;
 
-//#ifdef HAVE_HDF5
-  //  typedef Hdf5exporter< MeshType >          OutputType;
-//#else
-    typedef Exporter< MeshType >               OutputType;
-//#endif
+#ifdef HAVE_HDF5
+    typedef Hdf5exporter< MeshType >          OutputType;
+#else
+    typedef Ensight< MeshType >               OutputType;
+#endif
 
     typedef FluidType::vector_type            FluidVectorType;
 
@@ -99,7 +99,7 @@ public:
     MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D );
 
     //! Destructor
-    ~MS_Model_Fluid3D() {}
+    ~MS_Model_Fluid3D();
 
     //@}
 
