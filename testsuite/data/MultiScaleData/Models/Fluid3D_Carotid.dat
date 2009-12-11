@@ -84,6 +84,7 @@ diagonalBlockPrec   = false
     output          = all # all none
     conv            = rhs
     max_iter        = 500
+    reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
     tol             = 1.e-12
@@ -91,7 +92,6 @@ diagonalBlockPrec   = false
     [../prec]
     #prectype                = AztecOO 
     prectype                = Ifpack 
-    reuse                   = true    #reuse the preconditioner on following-subiterations
     displayList             = false
         
         [./AztecOO]
