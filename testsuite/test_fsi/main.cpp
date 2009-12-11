@@ -330,7 +330,7 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //checkResult( time );
+            checkResult( time );
     	}
 		std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
 		ofile.close();
