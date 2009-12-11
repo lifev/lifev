@@ -251,6 +251,7 @@ public:
         \param size the number of Dof for that variable
     */
     void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
+
     //! Post-process the variables added to the list
     /*!
         \param time the solver time
