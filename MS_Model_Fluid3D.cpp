@@ -89,6 +89,13 @@ MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
 {
 }
 
+MS_Model_Fluid3D::~MS_Model_Fluid3D()
+{
+#ifdef HAVE_HDF5
+    //M_output->CloseFile();
+#endif
+}
+
 // ===================================================
 // Operators
 // ===================================================
@@ -187,11 +194,7 @@ MS_Model_Fluid3D::SetupModel()
     M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
 
     //Post-processing
-#ifdef HAVE_HDF5
-    M_output.reset( new Hdf5exporter< MeshType > ( M_dataFile, "Model_" + number2string( M_ID ) ) );
-#else
-    M_output.reset( new Ensight< MeshType > ( M_dataFile, "Model_" + number2string( M_ID ) ) );
-#endif
+    M_output.reset( new OutputType ( M_dataFile, "Model_" + number2string( M_ID ) ) );
     M_output->setOutputDirectory( MS_ProblemName );
     M_output->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
 
@@ -210,7 +213,7 @@ MS_Model_Fluid3D::SetupModel()
 #endif
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 void
@@ -236,7 +239,7 @@ MS_Model_Fluid3D::BuildSystem()
     M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 void
@@ -271,7 +274,7 @@ MS_Model_Fluid3D::UpdateSystem()
     M_Fluid->resetPrec( true );
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 void
@@ -313,7 +316,7 @@ MS_Model_Fluid3D::SolveSystem()
     }
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 void
@@ -329,7 +332,7 @@ MS_Model_Fluid3D::SaveSolution()
     M_output->postProcess( M_FluidData->getTime() );
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 void
@@ -347,7 +350,7 @@ MS_Model_Fluid3D::ShowMe()
     }
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 // ===================================================
@@ -407,7 +410,7 @@ MS_Model_Fluid3D::UpdateLinearModel()
     M_UpdateLinearModel = false;
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 void
@@ -431,7 +434,7 @@ MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
     SolveLinearSystem = false;
 
     //MPI Barrier
-    M_comm->Barrier();
+    //M_comm->Barrier();
 }
 
 // ===================================================
