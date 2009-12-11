@@ -26,7 +26,7 @@ dist_pkgdata_DATA = SinusoidalFlux.dat \
 					SinusoidalPressure.dat \
 					WomersleySinusoidalFlux.dat \
 					WomersleySinusoidalPressure.dat \
-					UnitaryFlow.dat \
+					UnitaryFlux.dat \
                     UnitaryPressure.dat \
                     Pressure.dat \
                     Pressure_Dynamic_STP.dat \
