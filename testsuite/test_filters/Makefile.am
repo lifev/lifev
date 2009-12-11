@@ -29,4 +29,7 @@ check_HEADERS = ensightToHdf5.hpp
 check_PROGRAMS = test_filters
 test_filters_SOURCES = main.cpp ensightToHdf5.cpp
 
+link:
+	test -a Mesh              || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
+
 EXTRA_DIST = data testsuite.at  *.case *.geo *.scl *.vct
