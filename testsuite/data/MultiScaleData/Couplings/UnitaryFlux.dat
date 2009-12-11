@@ -5,23 +5,23 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-11-25
+#           Date: 2009-10-28
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Sinusoidal Flux #################################################
+### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux ########################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_SinusoidalFlux
+couplingName	= BoundaryCondition_UnitaryFlux
 
 [boundary_conditions]
-list = 'SinusoidalFlux'  # Sinusoidal Flux
+list = 'UnitaryFlux'  # Unitary Flux
 	
-	[./SinusoidalFlux]
+	[./UnitaryFluxx]
 	type				= Flux
 	mode				= Full
 	component			= 3
-	function		    = 'p=1; -sin(2*pi*t/p)'
+	function   			= '-1' 
 	
 	[../]

@@ -13,15 +13,14 @@
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_SinusoidalFlux
+couplingName	= BoundaryCondition_WomersleySinusoidalFlux
 
 [boundary_conditions]
-list = 'SinusoidalFlux'  # Sinusoidal Flux
+list = 'WomersleySinusoidalFlux'  # Womersley Sinusoidal Flux
 	
-	[./SinusoidalFlux]
+	[./WomersleySinusoidalFlux]
 	type				= Flux
 	mode				= Full
 	component			= 3
-	function		    = 'p=1; -sin(2*pi*t/p)'
-	
+	function		    = 'p=1.07313022459812; -0.116481669334104*sin(2*pi*t/p)' # Womersley = 10, Reynolds = 100
 	[../]
