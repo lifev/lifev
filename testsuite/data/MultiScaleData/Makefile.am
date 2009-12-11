@@ -31,7 +31,9 @@ dist_pkgdata_DATA = MultiScale.dat \
 					Run3Dserial5_FluxStress.dat \
 					Run3Dserial5_Stress.dat \
 					Run3Dserial6_FluxStress.dat \
-					Run3Dserial6_Stress.dat
+					Run3Dserial6_Stress.dat \
+					Run3Dhexagon_FluxStress_Stationary.dat \
+					Run3Dhexagon_Stress_Stationary.dat
 					
 
 check-local:
