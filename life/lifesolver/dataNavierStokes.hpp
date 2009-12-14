@@ -380,7 +380,7 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
     M_stab_method  = NSStabilization ( M_stabilization_list.value( dataFile( "fluid/space_discretization/stabilization", "none") ) );
 
     // Semi-implicit and shape derivatives
-    M_semiImplicit     = dataFile( "problem/semiImplicit", false ) ;
+    M_semiImplicit     = dataFile( "fluid/semiImplicit", false ) ;
     M_shapeDerivatives = dataFile( "fluid/useShapeDerivatives", false ) ;
     setSemiImplicit( M_semiImplicit );
 
