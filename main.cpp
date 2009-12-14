@@ -198,7 +198,7 @@ public:
     }
 
         M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
-        M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
+        M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluid->mapType() ));
 
         M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
         M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
@@ -230,7 +230,7 @@ public:
                                       UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
 
-        M_Tstart = 0.;
+        M_Tstart = data_file("fluid/time_discretization/initialtime"   ,0.);
 
 		//to load using ensight/hdf5
 		std::string loadInitSol(data_file("problem/initSol","-1"));
@@ -238,9 +238,6 @@ public:
 		if(loadInitSol.compare("-1"))
             {
                 initialize(loadInitSol, data_file);
-            }
-        else
-            {
             }
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
@@ -253,11 +250,11 @@ public:
       This routine runs the temporal loop
     */
     void
-    run( double dt, double T)
+    run( LifeV::Real dt, LifeV::Real T)
     {
         boost::timer _overall_timer;
         int _i = 1;
-        double time=M_Tstart + dt;
+        LifeV::Real time=M_Tstart + dt;
         LifeV::UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
 
         dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
@@ -266,7 +263,7 @@ public:
         M_exporterFluid->postProcess( 0 );//ugly way to avoid that hdf5 starts with a deformed mesh
 #endif
 
-        for (time=M_Tstart + dt; time <= T; time += dt, ++_i)
+        for ( ; time <= T; time += dt, ++_i)
             {
                 FC0.renewParameters( *M_fsi, 3 );
                 //                 FC0.renewParameters( *M_fsi, 6 );
@@ -562,8 +559,8 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
     {
         UniqueVFD.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, dynamic_cast<LifeV::fullMonolithic*>(M_fsi->FSIOper().get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
         *initSol+=*UniqueVFD;
-        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, offset+3*M_fsi->FSIOper()->dFESpace().dof().numTotalDof()+dynamic_cast<LifeV::fullMonolithic*>(M_fsi->FSIOper().get())->getDimInterface());
     }
 
 
