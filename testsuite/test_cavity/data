@@ -40,7 +40,14 @@ conv            = r0
 max_iter        = 100
 kspace          = 100
 tol             = 1.e-5
-
+	
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+#gammaBeta  = 0.125
+#gammaDiv   = 0.125
+#gammaPress = 0.03125
 
 #
 # fluid preconditioner parameters
@@ -94,14 +101,6 @@ filter_singletons      = false
 #
 # end of fluid preconditioner parameters
 #
-
-[../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.2
-#gammaBeta  = 0.125
-#gammaDiv   = 0.125
-#gammaPress = 0.03125
 
 [../problem]
 
