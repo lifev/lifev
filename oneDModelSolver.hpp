@@ -378,8 +378,14 @@ public:
     //! Print to screen informations on the solver class
     void showMe( std::ostringstream& c, UInt verbose = false );
 
-  //! timestep getters
-  const Real timestep() const {return M_data.timestep();}
+    //! timestep getters
+    const Real timestep() const {return M_data.timestep();}
+
+    //! left external point position
+    const Real xLeft()    const {return M_data.xLeft();}
+
+    //! left external point position
+    const Real xRight()   const {return M_data.xRight();}
 
 private:
 
@@ -634,7 +640,7 @@ OneDModelSolver( const data_type&                   dataType,
         M_data                  (dataType),
         M_oneDParams            (parameters),
         M_FESpace               (FESpace),
-        M_dimDof                ( FESpace.dim() ),
+        M_dimDof                (FESpace.dim()),
         M_localMap              (FESpace.map()),
         M_fluxFun               (M_oneDParams),
         M_sourceFun             (M_oneDParams),
@@ -698,9 +704,6 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     M_dP_dt_steps            = data_file("miscellaneous/pressure_derivative_steps",      2);
 
 
-    //std::cout << "M_Dp" << M_dP_dt_steps << std::endl;
-
-
         // These maps allow a more readable definition of the variables
     // the model is describing
 
@@ -746,10 +749,6 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     M_variable_index_map.insert( make_pair("W2", nvar++ ) );
 
     M_variable_index_map.insert( make_pair("P",  nvar++ ) );
-
-
-    for ( std::map< std::string, UInt>::iterator it = M_variable_index_map.begin(); it != M_variable_index_map.end(); ++it)
-        std::cout << it->first << " " << it->second << std::endl;
 
 
 
@@ -832,7 +831,6 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
             //! update the current element
 
             M_FESpace.fe().updateFirstDerivQuadPt(M_FESpace.mesh()->edgeList(iedge));
-            //std::cout << M_FESpace.fe().currentId() << std::endl;
 
             //! update the mass and grad matrices
             mass( M_coeffMass, M_elmatMass, M_FESpace.fe(),0, 0 );
@@ -896,7 +894,6 @@ OneDModelSolver<Params, Flux, Source>::_updateElemMatrices()
 
     //! update the mass matrix
     mass( M_coeffMass, M_elmatMass, M_FESpace.fe(),0, 0 );
-    //  std::cout << "Elem Mass matrix :" << std::endl;
     //  M_elmatMass.showMe( std::cout );
 
     //! update the stiffness matrix
@@ -1049,7 +1046,6 @@ _updateBCDirichletMatrix( matrix_type& mat )
     UInt firstDof = M_leftNodeId;
     UInt lastDof  = M_rightNodeId;
 
-    //std::cout << "first dof = " << M_leftNodeId << std::endl;
     //! unsymmetric treatment (LU must be used!)
     //! modify the first row
 
@@ -1217,9 +1213,6 @@ OneDModelSolver<Params, Flux, Source>::BCValuesLeft() const
     temp[0] = M_U_thistime[0]( LeftNodeId() );
     temp[1] = M_U_thistime[1]( LeftNodeId() );
 
-    std::cout << "BCvaluesLeft " << std::endl;
-    std::cout << LeftNodeId() << " " << temp[0] << std::endl;
-    std::cout << LeftNodeId() << " " << temp[1] << std::endl;
     return temp;
 }
 
@@ -1304,10 +1297,13 @@ template< class Params, class Flux, class Source >
 void
 OneDModelSolver<Params, Flux, Source>::CheckCFL() const
 {
+
+    Debug(6310) << "checking the CFL ... ";
     Real CFL = 0.;
 
     //! length of the first edge (arbitrary as they are all supposed equal).
     Real deltaX;
+
     Real deltaX_min = M_FESpace.mesh()->edgeList( 1 ).point(2).x() - M_FESpace.mesh()->edgeList( 1 ).point(1).x();
 
     Real Ainode, Qinode;
@@ -1318,33 +1314,23 @@ OneDModelSolver<Params, Flux, Source>::CheckCFL() const
     Real eigval1, eigval2;
     Real tmp11, tmp12, tmp21, tmp22;
 
-    for ( UInt inode=0; inode < M_FESpace.dim() ; inode++ )
+    for ( UInt inode = 1; inode <= M_FESpace.dim() ; inode++ )
         {
-
-            Ainode = M_U_thistime[0]( inode + 1 );
-            Qinode = M_U_thistime[1]( inode + 1 );
-
-//             std::cout << "inode  = " << inode << " ------------" << std::endl;
-//             std::cout << "Ainode " << Ainode << std::endl;
-//             std::cout << "Qinode " << Qinode << std::endl;
+            Ainode = M_U_thistime[0]( inode );
+            Qinode = M_U_thistime[1]( inode );
 
             //! compute the eigenvalues at node
             M_fluxFun.jacobian_EigenValues_Vectors( Ainode, Qinode,
                                                     eigval1, eigval2,
                                                     tmp11, tmp12,
                                                     tmp21, tmp22,
-                                                    inode );
-
-
-
-//             std::cout << "e1 " << eigval1 << std::endl;
-//             std::cout << "e2 " << eigval2 << std::endl;
+                                                    inode);
 
             lambda1_max = std::max<Real>( std::fabs(eigval1), lambda1_max );
             lambda2_max = std::max<Real>( std::fabs(eigval2), lambda2_max );
         }
 
-    for ( UInt inode=1; inode < M_FESpace.dim() ; inode++ )
+    for ( UInt inode = 1; inode < M_FESpace.dim() ; inode++ )
         {
             deltaX     = M_FESpace.mesh()->edgeList( inode ).point(2).x() - M_FESpace.mesh()->edgeList( inode ).point(1).x();
             deltaX_min = std::min<Real>( std::fabs(deltaX), deltaX_min );
@@ -1368,6 +1354,8 @@ OneDModelSolver<Params, Flux, Source>::CheckCFL() const
         std::cout << "\n[CheckCFL] CFL not respected in " << M_data.PostFile()
                   << ": CFL = " << CFL << std::endl;
     ASSERT( CFL < 0.5774 , "CFL not respected" );
+
+    Debug(6310) << "ok.";
 }
 
 
@@ -1574,7 +1562,6 @@ OneDModelSolver<Params, Flux, Source>::_correct_flux_inertial( const vector_type
 
         //! update the current element
         M_FESpace.fe().updateFirstDerivQuadPt(M_FESpace.mesh()->edgeList(iedge));
-        //std::cout << M_FESpace.fe().currentId() << std::endl;
 
         mass (   _coeffMass,  _elmatMassLHS,  M_FESpace.fe(), 0, 0 );
         stiff(   _coeffStiff, _elmatStiffLHS, M_FESpace.fe(), 0, 0 );
@@ -1975,16 +1962,21 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
     if( var == "physical")
       {
+          Debug( 6310 ) << "[initialize] 0- Imposing real values ... ";
 
-	M_U_thistime[0] = vector_type( M_localMap );
-	M_U_thistime[0] = u10;
-	M_U_thistime[1] = vector_type( M_localMap );
-	M_U_thistime[1] = u20;
+          M_U_thistime[0] = vector_type( M_localMap );
+          M_U_thistime[0] = u10;
+          M_U_thistime[1] = vector_type( M_localMap );
+          M_U_thistime[1] = u20;
 
-	for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
-	  M_oneDParams.W_from_U( M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
-				 M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
-				 ielem );
+          for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
+          {
+              M_oneDParams.W_from_U( M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
+                                     M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
+                                     ielem );
+          }
+
+          Debug( 6310 ) << "ok\n";
       }
     else if( var == "reimann" )
         {
@@ -1997,12 +1989,11 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
             for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
                 M_oneDParams.U_from_W( M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
                                        M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
-                                       ielem );
+                                       ielem + 1 ); // WARNING the +1 is not debugged yet (GF 12/2009)
         }
     else
         {
-            std::cout << "[initialize] trying to initialize " << var << " variables!"
-            << std::endl;
+            std::cout << "[initialize] trying to initialize " << var << " variables!" << std::endl;
             abort();
         }
 
@@ -2017,15 +2008,16 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
     for (UInt ielem = 0; ielem < M_FESpace.dim() ; ++ielem )
       {
-        subrange(pressures, 4*ielem, 4+4*ielem) =
-            M_oneDParams.pressure( M_U_thistime [0][ielem + 1],
-                                   M_U_prevtime [0][ielem + 1],
-				   M_U_2prevtime[0][ielem + 1],
-                                   M_data.timestep(), ielem,
-                                   M_dP_dt_steps, M_viscoelastic_wall,
-                                   M_linearize_string_model );
-
-        M_U_thistime[4][ielem + 1] = pressures(4*ielem);
+          subrange(pressures, 4*ielem, 4+4*ielem) =
+              M_oneDParams.pressure( M_U_thistime [0][ielem + 1],
+                                     M_U_prevtime [0][ielem + 1],
+                                     M_U_2prevtime[0][ielem + 1],
+                                     M_data.timestep(),
+                                     ielem,
+                                     M_dP_dt_steps,
+                                     M_viscoelastic_wall,
+                                     M_linearize_string_model );
+          M_U_thistime[4][ielem + 1] = pressures(4*ielem);
       }
 
     if(M_viscoelastic_wall)
@@ -2601,8 +2593,10 @@ OneDModelSolver<Params, Flux, Source>::timeAdvance( const Real& time_val )
     //! 3/ take into account the BOUNDARY CONDITIONS
     //!---------------------------------------------------
     //! compute the values for the boundary conditions
+    Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
     _computeBC( time_val );
     //! take into account the bc
+    Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
     _updateBCDirichletVector();
 
     Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
@@ -2720,7 +2714,6 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
             chrono2.start();
             //            matrFull->spy("matr");
             M_linearSolver.setMatrix(*matrFull);
-            //std::cout << "rhs0 norm2 = " << sol0.Norm2() << std::endl;
             M_linearSolver.setReusePreconditioner(false);
             M_linearSolver.solveSystem( M_rhs[0], sol0, matrFull );
             //std::cout << "sol0 norm2 = " << sol0.Norm2() << std::endl;
@@ -2829,9 +2822,9 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
     Debug( 6310 ) << "[iterate] \tdone in " << chrono.diff() << " s.\n";
 
 
-    output2FileBuffers( time_val );
+    //output2FileBuffers( time_val );
 
-    postProcess( time_val );
+    //    postProcess( time_val );
 }
 
 
@@ -2962,8 +2955,8 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 
 //         }
 
-    for (it = M_post_process_buffer.begin(); it != M_post_process_buffer.end(); ++it)
-        std::cout << it->first << std::endl;
+//     for (it = M_post_process_buffer.begin(); it != M_post_process_buffer.end(); ++it)
+//         std::cout << it->first << std::endl;
 
 
     Debug( 6310 ) << "[postProcess] o- Dumping solutions on files (1d)!" << "\n";
@@ -2978,17 +2971,14 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 
 
         std::string varname  = iter->first;
+
         int offset           = iter->second;
+
         std::string filename = it->first;
-
-
-
-
-        std::cout << offset << " : " << varname << " " << filename << std::endl;
 
         outfile.open( filename.c_str(), std::ios::app );
 
-        outfile << time_val << " ";
+
         for (int ii = 0; ii < M_dimDof; ++ii)
         {
             outfile << M_U_thistime[offset](ii + 1) << " ";
