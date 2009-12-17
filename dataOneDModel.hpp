@@ -81,7 +81,7 @@ public:
     typedef boost::shared_ptr<matrix_type>       matrix_ptrtype;
 
 //     //! Constructors
-    DataOneDModel(const GetPot& dfile);
+  DataOneDModel(const GetPot& dfile, const std::string section = "");
 //     //DataOneDModel(const DataOneDModel& dataOneDModel);
 
     //    DataOneDModel(const DataOneDModel& dataOneDModel);
