@@ -36,13 +36,13 @@ DataOneDModel::DataOneDModel(const GetPot& dfile):
         _M_time_beg           (dfile("time/timebeg",0.0)),
         _M_time_end           (dfile("time/timeend",1.0)),
         _M_time_step          (dfile("time/timestep",0.1)),
-    //! Discretization
+        //! Discretization
         _M_mesh_file          (dfile("discretization/mesh_file","mesh.mesh")),
         _M_mesh_dir           (dfile("discretization/mesh_dir","./")),
         _M_x_left             (dfile("discretization/x_left",0.)),
         _M_x_right            (dfile("discretization/x_right",1.)),
         _M_nb_elem            (dfile("discretization/nb_elem",10)),
-//! Miscellaneous
+        //! Miscellaneous
         _M_post_dir           (dfile("miscellaneous/post_dir","./")),
         _M_post_file          (dfile("miscellaneous/post_file","sol")),
         _M_verbose            (dfile("miscellaneous/verbose",1)),
@@ -57,48 +57,8 @@ DataOneDModel::DataOneDModel(const GetPot& dfile):
     _M_mesh.reset(new DataOneDModel::mesh_raw_type);
 
     _M_mesh->setUp( _M_x_left, _M_x_right, _M_nb_elem );
-//                     dfile("problem/alpha",50),
-//                     dfile("problem/delta",10),
-//                     dfile("problem/order",5),
-//                     dfile("problem/minDeltaX",1.));
     std::cout << "    ok." << std::endl;
-    //! Time
-//     _M_time_beg  = dfile("time/timebeg",0.0);
-//     _M_time_end  = dfile("time/timeend",1.0);
-//     _M_time_step = dfile("time/timestep",0.1);
-//     //! Discretization
-//     _M_mesh_file = dfile("discretization/mesh_file","mesh.mesh");
-//     _M_mesh_dir  = dfile("discretization/mesh_dir","./");
-//     _M_x_left    = dfile("discretization/x_left",0.);
-//     _M_x_right   = dfile("discretization/x_right",1.);
-//     _M_nb_elem   = dfile("discretization/nb_elem",10);
-//     //! Miscellaneous
-//     _M_post_dir  = dfile("miscellaneous/post_dir","./");
-//     _M_post_file = dfile("miscellaneous/post_file","sol");
-//     _M_verbose   = dfile("miscellaneous/verbose",1);
-//     _M_postProcessTimeStep = dfile("miscellaneous/postprocess_timestep",0.01);
 }
-
-
-// DataOneDModel::DataOneDModel(const DataOneDModel& dataOneDModel):
-//     //! Time
-//         _M_time_beg            = dataOneDModel._M_time_beg,
-//         _M_time_end            = dataOneDModel._time_end,
-//         _M_time_step           = dataOneDModel._M_time_step,
-//         //! Discretization
-//         _M_mesh_file           = dataOneDModel._M_mesh_file,
-//         _M_mesh_dir            = dataOneDModel._M_mesh_dir,
-//         _M_x_left              = dataOneDModel._M_x_left,
-//         _M_x_right             = dataOneDModel._M_x_right,
-//         _M_nb_elem             = dataOneDModel._M_nb_elem,
-//     //! Miscellaneous
-//         _M_post_dir            = dataOneDModel._M_post_dir,
-//         _M_post_file           = dataOneDModel._M_post_file,
-//         _M_verbose             = dataOneDModel._M_verbose,
-//         _M_postProcessTimeStep = dataOneDModel._M_postProcessTimeStep
-// }
-// {
-
 
 
 Real const& DataOneDModel::timestep() const
