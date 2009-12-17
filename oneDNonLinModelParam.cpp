@@ -32,25 +32,25 @@
 namespace LifeV
 {
 
-BloodFlowParam::BloodFlowParam(const GetPot& dfile) :
-    _M_paramSize      (dfile("discretization/nb_elem", 0 ) + 1),
-    _M_length         (0.),
-    _M_xleft          (dfile("discretization/x_left", 0. )),
-    _M_xright         (dfile("discretization/x_right", 0. )),
-    _M_Area0          (_M_paramSize),
-    _M_dArea0dz       (_M_paramSize),
-    _M_PressBeta0     (_M_paramSize),
-    _M_dPressBeta0dz  (_M_paramSize),
-    _M_PressBeta1     (_M_paramSize),
-    _M_dPressBeta1dz  (_M_paramSize),
-    _M_FrictionKr     (_M_paramSize)
+BloodFlowParam::BloodFlowParam(const GetPot& dfile, std::string section) :
+        _M_paramSize      (dfile((section + "/discretization/nb_elem").data(), 0 ) + 1),
+        _M_length         (0.),
+        _M_xleft          (dfile((section + "sectiondiscretization/x_left").data(), 0. )),
+        _M_xright         (dfile((section + "discretization/x_right").data(), 0. )),
+        _M_Area0          (_M_paramSize),
+        _M_dArea0dz       (_M_paramSize),
+        _M_PressBeta0     (_M_paramSize),
+        _M_dPressBeta0dz  (_M_paramSize),
+        _M_PressBeta1     (_M_paramSize),
+        _M_dPressBeta1dz  (_M_paramSize),
+        _M_FrictionKr     (_M_paramSize)
 {
     _M_length = _M_xright - _M_xleft;
 
-    Real _A0       = dfile("parameters/Area0",M_PI);
-    Real _beta0    = dfile("parameters/beta0",1.e6);
-    Real _beta1    = dfile("parameters/beta1",0.5);
-    Real _kr       = dfile("parameters/Kr",1.);
+    Real _A0       = dfile((section + "parameters/Area0").data(), M_PI);
+    Real _beta0    = dfile((section + "parameters/beta0").data(), 1.e6);
+    Real _beta1    = dfile((section + "parameters/beta1").data(), 0.5);
+    Real _kr       = dfile((section + "parameters/Kr").data(),    1.);
     Real _dA0dz    = 0.;
     Real _dbeta0dz = 0.;
     Real _dbeta1dz = 0.;
@@ -65,15 +65,15 @@ BloodFlowParam::BloodFlowParam(const GetPot& dfile) :
 //     _M_dPressBeta1dz = Vector( _M_paramSize, _dbeta1dz );
 //     _M_FrictionKr    = Vector( _M_paramSize, _kr );
 
-    for (int ii = 1; ii <= _M_paramSize; ++ii)
+    for (int ii = 0; ii < _M_paramSize; ++ii)
       {
-	_M_Area0[ii]         = _A0;
-	_M_dArea0dz[ii]      = _dA0dz;
-	_M_PressBeta0[ii]    = _beta0;
-	_M_dPressBeta0dz[ii] = _dbeta0dz;
-	_M_PressBeta1[ii]    = _beta1;
-	_M_dPressBeta1dz[ii] = _dbeta1dz;
-	_M_FrictionKr[ii]    = _kr;
+          _M_Area0[ii]         = _A0;
+          _M_dArea0dz[ii]      = _dA0dz;
+          _M_PressBeta0[ii]    = _beta0;
+          _M_dPressBeta0dz[ii] = _dbeta0dz;
+          _M_PressBeta1[ii]    = _beta1;
+          _M_dPressBeta1dz[ii] = _dbeta1dz;
+          _M_FrictionKr[ii]    = _kr;
       }
 
     _M_DensityRho  = dfile("parameters/rho",1.);
@@ -215,12 +215,12 @@ void BloodFlowParam::initParam(const GetPot& dfile)
     //! Kr
     _M_FrictionKr = Vector( _M_paramSize );
 
-    for (int ii = 1; ii <= _M_paramSize; ++ii)
+    for (int ii = 0; ii < _M_paramSize; ++ii)
       {
-	_M_Area0[ii]         = _A0;
-	_M_PressBeta0[ii]    = _beta0;
-	_M_PressBeta1[ii]    = _beta1;
-	_M_FrictionKr[ii]    = _kr;
+          _M_Area0[ii]         = _A0;
+          _M_PressBeta0[ii]    = _beta0;
+          _M_PressBeta1[ii]    = _beta1;
+          _M_FrictionKr[ii]    = _kr;
       }
 
     _M_Thickness  = thickness;
@@ -241,15 +241,21 @@ pressure(const Real& _A,
          const bool& linearized ) const
 {
     Vector _a(2), _b(2), _c(2), area(2), result(4);
-    _a(0) = 1.; _b(0) = -1.; _c(0) = 0.;
-    _a(1) = 3./2.; _b(1) = -2.; _c(1) = 1./2.;
+
+    _a(0) =  1.;
+    _b(0) = -1.;
+    _c(0) =  0.;
+
+    _a(1) =  3./2.;
+    _b(1) = -2.;
+    _c(1) =  1./2.;
 
     area(0) = _A;
     area(1) = _M_Area0[indz];
 
     Real _pi( 4*std::atan(1) );
 
-    result(3) = ( _a(steps-1) * _A + _b(steps-1) * _A_n + _c(steps-1) * _A_nm1 ) / dt; //> dA/dt
+    result(3) = ( _a(steps) * _A + _b(steps) * _A_n + _c(steps) * _A_nm1 ) / dt; //> dA/dt
 
     result(2) = _M_Gamma * result(3) / ( 2*sqrt(_pi*area(linearized)) );               //> visc_component
 
@@ -265,7 +271,7 @@ Real BloodFlowParam::
 pressure(const Real& _A, const UInt& indz) const
 {
     return ( _M_PressBeta0[indz]
-             * ( std::pow( _A / _M_Area0[indz], _M_PressBeta1[indz] ) - 1 ) );
+             * ( std::pow( _A/_M_Area0[indz], _M_PressBeta1[indz] ) - 1 ) );
 }
 
 /*! Derivative of pressure as a function of A
@@ -275,7 +281,8 @@ Real BloodFlowParam::
 pressureDiff(const Real& _A, const UInt& indz) const
 {
     Real AoverA0POWbeta1( std::pow( _A / _M_Area0[indz], _M_PressBeta1[indz] ) );
-    std::cout << indz << " -> " <<  _M_PressBeta0[indz] << " " <<  _M_PressBeta1[indz] << " " <<  AoverA0POWbeta1 << " " << _A << std::endl;
+
+    //std::cout << indz << " -> " <<  _M_PressBeta0[indz] << " " <<  _M_PressBeta1[indz] << " " <<  AoverA0POWbeta1 << " " << _A << std::endl;
     return _M_PressBeta0[indz] * _M_PressBeta1[indz] * AoverA0POWbeta1 / _A;
 }
 
@@ -692,12 +699,12 @@ OneDNonLinModelParam::W_from_U( Real& _W1, Real& _W2,
 {
     Real QoverA  = _U2 / _U1;
 
-    Real AoverA0  = _U1 / _M_Area0[indz - 1];
+    Real AoverA0  = _U1 / _M_Area0[indz];
 
-    Real celerity( Celerity0(indz - 1) * std::sqrt( std::pow( AoverA0, _M_PressBeta1[indz - 1] ) ) );
+    Real celerity( Celerity0(indz) * std::sqrt( std::pow( AoverA0, _M_PressBeta1[indz] ) ) );
 
-    Real add( std::sqrt( M_ROBERTSON_CORRECTION ) * ( celerity - Celerity0(indz - 1) )
-              * 2 / _M_PressBeta1[indz - 1] );
+    Real add( std::sqrt( M_ROBERTSON_CORRECTION ) * ( celerity - Celerity0(indz) )
+              * 2 / _M_PressBeta1[indz] );
 
     _W1 = QoverA + add;
 
