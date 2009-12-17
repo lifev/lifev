@@ -27,7 +27,7 @@
    \date 2009-05-07
  */
 
-#include "IfpackComposedPrec.hpp"
+#include <lifemc/lifealg/IfpackComposedPrec.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 
 

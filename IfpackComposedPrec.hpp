@@ -75,7 +75,7 @@ public:
      */
     //@{
     //! default constructor.
-    IfpackComposedPrec(const Epetra_Comm* comm=0);
+    IfpackComposedPrec(const Epetra_Comm* comm = 0);
 
     IfpackComposedPrec( IfpackComposedPrec& P );
 
