@@ -122,20 +122,20 @@ jacobian_EigenValues_Vectors(const Real& _A, const Real& _Q,
 
     Real celeralpha;
 
-    Area0 = _M_oneDParam.Area0(indz);
-    alphaCor = M_ROBERTSON_CORRECTION * _M_oneDParam.AlphaCor(indz);
-    beta0 = _M_oneDParam.Beta0(indz);
-    beta1 = _M_oneDParam.Beta1(indz);
-    rho   = _M_oneDParam.DensityRho();
+    Area0           = _M_oneDParam.Area0(indz - 1);
+    alphaCor        = M_ROBERTSON_CORRECTION * _M_oneDParam.AlphaCor(indz - 1);
+    beta0           = _M_oneDParam.Beta0(indz - 1);
+    beta1           = _M_oneDParam.Beta1(indz - 1);
+    rho             = _M_oneDParam.DensityRho();
 
-    AoverA0 = _A / Area0;
+    AoverA0         = _A / Area0;
     AoverA0POWbeta1 = std::pow( AoverA0, beta1 );
 
-    QoverA  = _Q / _A;
+    QoverA          = _Q / _A;
 
-    celeralpha = alphaCor * ( alphaCor - 1) * QoverA * QoverA;
-    celeralpha += M_ROBERTSON_CORRECTION * beta0 * beta1 / rho * AoverA0POWbeta1;
-    celeralpha = std::sqrt( celeralpha );
+    celeralpha      = alphaCor * ( alphaCor - 1) * QoverA * QoverA;
+    celeralpha     += M_ROBERTSON_CORRECTION * beta0 * beta1 / rho * AoverA0POWbeta1;
+    celeralpha      = std::sqrt( celeralpha );
 
     /*
       std::cout << "\nArea in compute eigenvalues/vectors " << _A
@@ -437,22 +437,18 @@ QuasiLinearSource(const Real& _A, const Real& _Q,
         Kr    = _M_oneDParam.FrictionKr(indz);
         rho   = _M_oneDParam.DensityRho();
 
-        AoverA0 = _A / Area0;
+        AoverA0               = _A/Area0;
         AoverA0POWbeta1timesA = std::pow( AoverA0, beta1 ) * _A;
 
-        tmp = beta0 / rho * AoverA0POWbeta1timesA;
+        tmp  = beta0 / rho * AoverA0POWbeta1timesA;
         //! friction term
-        Sql2 = Kr * _Q /_A;
-
+        Sql2 = Kr * _Q/_A;
         //! term with the derivative of A0 with respect to z
         Sql2 += - tmp * beta1 / Area0 * dArea0dz;
-
         //! term with the derivative of beta0 with respect to z
         Sql2 += 1 / rho * ( AoverA0POWbeta1timesA  -  _A ) * dbeta0dz;
-
         //! term with the derivative of beta1 with respect to z
         Sql2 += tmp * std::log( AoverA0 ) * dbeta1dz;
-
         //! term with the derivative of alpha with respect to z
         Sql2 += _Q * _Q / _A * dalphadz;
 

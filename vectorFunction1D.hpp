@@ -84,7 +84,7 @@ public:
 class NonLinearFluxFun1D
 {
 
-  
+
 private:
     //! the parameters that are used in the function
     const OneDNonLinModelParam& _M_oneDParam;
