@@ -65,7 +65,7 @@ class BloodFlowParam
 public :
 
     //! constructor
-    BloodFlowParam(const GetPot& dfile );
+    BloodFlowParam(const GetPot& dfile, std::string section = "" );
 
     //! return the values
     Real Area0(const UInt& ii) const;
