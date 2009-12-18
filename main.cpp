@@ -28,11 +28,11 @@
  * @file
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
- *  -# solution with exact Newton (useShapeDerivatives = true)
- *  -# solution with quasi Newton (useShapeDerivatives = false)
+ *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - Monolithic (GCE):
- *  -# solution extrapolating the fluid domain
+ *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - boundary conditions:
  *  -# Neumann
@@ -94,10 +94,7 @@
 #include "flowConditions.hpp"
 
 
-// namespace flowCond
-// {
-//  LifeV::FlowConditions FC0;
-// }
+// LifeV::FlowConditions FC0;
 // LifeV::FlowConditions FC1;
 // LifeV::FlowConditions FC2;
 // LifeV::FlowConditions FC3;
@@ -113,7 +110,6 @@ public:
 
     typedef LifeV::FSIOperator::vector_type        vector_type;
     typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
-
 
     typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filter_ptrtype;
 
@@ -144,23 +140,23 @@ public:
             }
 
 #ifdef DEBUG
-        Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+			Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
 #endif
-        M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
+			M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
 
-        MPI_Barrier( MPI_COMM_WORLD );
+			MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
-        Debug( 10000 ) << "Setting up data from GetPot \n";
+			Debug( 10000 ) << "Setting up data from GetPot \n";
 #endif
-        M_fsi->setDataFromGetPot( data_file );
+			M_fsi->setDataFromGetPot( data_file );
 
-        MPI_Barrier( MPI_COMM_WORLD );
+			MPI_Barrier( MPI_COMM_WORLD );
 
-        MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Barrier(MPI_COMM_WORLD);
 
 #ifdef DEBUG
-        Debug( 10000 ) << "Setting up the BC \n";
+            Debug( 10000 ) << "Setting up the BC \n";
 #endif
 	    M_fsi->setFluxBC(BCh_monolithicFlux());
 	    M_fsi->setup(/*data_file*/);
@@ -175,7 +171,6 @@ public:
         std::string const exporterType =  data_file( "exporter/type", "ensight");
         std::string const fluidName    =  data_file( "exporter/fluid/filename", "fluid");
         std::string const solidName    =  data_file( "exporter/solid/filename", "solid");
-
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
@@ -196,16 +191,13 @@ public:
             M_exporterSolid.reset( new  ensightfilter_type ( data_file, solidName) );
         }
     }
-
         M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
         M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluid->mapType() ));
 
         M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
         M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
-
         M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                  UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
-
         M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
                                  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
                                  UInt(M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
@@ -219,7 +211,6 @@ public:
         M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
         M_WSS.reset      ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                       UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
          M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
@@ -257,8 +248,7 @@ public:
         LifeV::Real time=M_Tstart + dt;
         LifeV::UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
 
-        dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
-
+	    dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
 #ifdef HAVE_HDF5
         M_exporterFluid->postProcess( 0 );//ugly way to avoid that hdf5 starts with a deformed mesh
 #endif
@@ -288,6 +278,7 @@ public:
 
                 M_fsi->iterate( time );
 
+                dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->computeMaxSingularValue();
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 

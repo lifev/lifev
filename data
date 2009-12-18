@@ -28,13 +28,11 @@ defOmegaF  = 0.01 # matters only with  precond = 2
 updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
-abstol     =  1.e-5 # tolerance in nonLinearRichardson
-reltol     =  1.e-5 # tolerance in nonLinearRichardson
+abstol     =  0. # tolerance in nonLinearRichardson
+reltol     =  1.e-3 # tolerance in nonLinearRichardson
 
 restart    = 0
 maxSubIter = 20
-
-semiImplicit = true # (only valid for method = monolithic or monolithic).
 
 [exporter]
 multimesh  = false   # actually we export also the displacement
@@ -57,8 +55,9 @@ filename   = solidExp
 
 [fluid]
 useShapeDerivatives           = false
-domainVelImplicit             = false
-convectiveTermDer             = false
+domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 
 [./physics]
 density   = 1.0               # density
@@ -232,10 +231,19 @@ relax_value                   = 0
 [../amesos]
 solvertype = Amesos_Umfpack
 
-
 [jacobian]
 
 solver   = gmres;
 poly_ord = 5;
 kspace   = 40;
 conv     = rhs;
+
+[eigensolver]
+
+nevec = 10
+block_size = 1;
+max_blocks = 1000;
+max_restarts = 1000;
+tol = 1e-5;
+which = ML
+neval = 5
