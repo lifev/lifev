@@ -32,11 +32,11 @@
 namespace LifeV
 {
 
-BloodFlowParam::BloodFlowParam(const GetPot& dfile, std::string section) :
+BloodFlowParam::BloodFlowParam(const GetPot& dfile, const std::string& section) :
         _M_paramSize      (dfile((section + "/discretization/nb_elem").data(), 0 ) + 1),
         _M_length         (0.),
-        _M_xleft          (dfile((section + "sectiondiscretization/x_left").data(), 0. )),
-        _M_xright         (dfile((section + "discretization/x_right").data(), 0. )),
+        _M_xleft          (dfile((section + "/discretization/x_left").data(), 0. )),
+        _M_xright         (dfile((section + "/discretization/x_right").data(), 0. )),
         _M_Area0          (_M_paramSize),
         _M_dArea0dz       (_M_paramSize),
         _M_PressBeta0     (_M_paramSize),
@@ -47,6 +47,7 @@ BloodFlowParam::BloodFlowParam(const GetPot& dfile, std::string section) :
 {
     _M_length = _M_xright - _M_xleft;
 
+
     Real _A0       = dfile((section + "parameters/Area0").data(), M_PI);
     Real _beta0    = dfile((section + "parameters/beta0").data(), 1.e6);
     Real _beta1    = dfile((section + "parameters/beta1").data(), 0.5);
@@ -54,6 +55,9 @@ BloodFlowParam::BloodFlowParam(const GetPot& dfile, std::string section) :
     Real _dA0dz    = 0.;
     Real _dbeta0dz = 0.;
     Real _dbeta1dz = 0.;
+
+
+    std::cout << "NB ELEM = " << _M_paramSize << std::endl;
     //-------------------------------------------
     //! Initialisation of the parameter variables
     //-------------------------------------------
@@ -634,7 +638,7 @@ void BloodFlowParam::stiffenVesselRight( const Real& xl, const Real& xr,
 }
 
 
-void BloodFlowParam::showMeData(std::ostream& c) const
+void BloodFlowParam::showMe(std::ostream& c) const
 {
     //! parameters
     c << "\t[parameters]\n";
@@ -660,10 +664,10 @@ void BloodFlowParam::showMeData(std::ostream& c) const
 //+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-OneDNonLinModelParam::OneDNonLinModelParam(const GetPot& dfile) :
-    BloodFlowParam( dfile ),
-    _M_AlphaCoriolis(this->_M_paramSize),
-    _M_dAlphaCoriolisdz(this->_M_paramSize)
+OneDNonLinModelParam::OneDNonLinModelParam(const GetPot& dfile, const std::string& section ) :
+        BloodFlowParam     ( dfile, section ),
+        _M_AlphaCoriolis   (this->_M_paramSize),
+        _M_dAlphaCoriolisdz(this->_M_paramSize)
 {
     Real _alpha = dfile("parameters/alphaCor",1./M_ROBERTSON_CORRECTION);
     Real _dalphadz = 0.;
@@ -876,10 +880,10 @@ W_from_Q(const Real& _Q, const Real& _W_n, const Real& _W, const ID& ii, const U
 }
 
 
-void OneDNonLinModelParam::showMeData(std::ostream& c) const
+void OneDNonLinModelParam::showMe(std::ostream& c) const
 {
     //! parameters
-    BloodFlowParam::showMeData(c);
+    BloodFlowParam::showMe(c);
     c << "alphaCor = " << _M_AlphaCoriolis << "\n";
     c << "dalphaCordz = " << _M_dAlphaCoriolisdz << "\n";
 }
@@ -991,7 +995,7 @@ Real LinearSimpleParam::Source22(const UInt& ii) const {
     return _M_Source22[ii];
 }
 
-void LinearSimpleParam::showMeData(std::ostream& c) const
+void LinearSimpleParam::showMe(std::ostream& c) const
 {
     //! parameters
     c << "\t[parameters]\n";
@@ -1182,10 +1186,10 @@ W_from_Q(const Real& _Q, const Real& /*_W_n*/, const Real& _W, const ID& ii, con
 
 //! output
 void LinearizedParam::
-showMeData(std::ostream& c) const
+showMe(std::ostream& c) const
 {
-    LinearSimpleParam::showMeData(c);
-    BloodFlowParam::showMeData(c);
+    LinearSimpleParam::showMe(c);
+    BloodFlowParam::showMe(c);
 }
 
 }

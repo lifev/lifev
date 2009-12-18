@@ -111,10 +111,14 @@ Real NonLinearFluxFun1D::diff(const Real& _A, const Real& _Q,
 
 //! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj :
 void NonLinearFluxFun1D::
-jacobian_EigenValues_Vectors(const Real& _A, const Real& _Q,
-                             Real& eig1, Real& eig2,
-                             Real& lefteigvec11, Real& lefteigvec12,
-                             Real& lefteigvec21, Real& lefteigvec22,
+jacobian_EigenValues_Vectors(const Real& _A,
+                             const Real& _Q,
+                             Real&       eig1,
+                             Real&       eig2,
+                             Real&       lefteigvec11,
+                             Real&       lefteigvec12,
+                             Real&       lefteigvec21,
+                             Real&       lefteigvec22,
                              const UInt& indz ) const
 {
     Real Area0, alphaCor, beta0, beta1, rho;
@@ -156,7 +160,6 @@ jacobian_EigenValues_Vectors(const Real& _A, const Real& _Q,
     //! eigen values
     eig1 =   celeralpha + alphaCor * QoverA;
     eig2 = - celeralpha + alphaCor * QoverA;
-
     //! eigen vectors
     lefteigvec11 = - eig2 / _A;
     lefteigvec12 = 1. / _A;

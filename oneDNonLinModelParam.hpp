@@ -65,7 +65,7 @@ class BloodFlowParam
 public :
 
     //! constructor
-    BloodFlowParam(const GetPot& dfile, std::string section = "" );
+    BloodFlowParam(const GetPot& dfile, const std::string& section = "" );
 
     //! return the values
     Real Area0(const UInt& ii) const;
@@ -144,7 +144,7 @@ public :
                              const Real& min_deltax=1, const UInt& yesAdaptive=0  );
 
     //! output
-    virtual void showMeData(std::ostream& c) const;
+    virtual void showMe(std::ostream& c = std::cout) const;
 
     //! destructor
     virtual ~BloodFlowParam(){}
@@ -262,7 +262,7 @@ class OneDNonLinModelParam :
 public :
 
     //! constructor
-    OneDNonLinModelParam(const GetPot& dfile );
+    OneDNonLinModelParam(const GetPot& dfile, const std::string& section = "" );
 
     //! return the values
     Real AlphaCor(const UInt& ii) const;
@@ -295,7 +295,7 @@ public :
                          const UInt& indz = 0) const;
 
     //! output
-    void showMeData(std::ostream& c) const;
+    void showMe(std::ostream& c = std::cout) const;
 
 private :
 
@@ -354,7 +354,7 @@ public:
     Real Source22(const UInt& ii) const;
 
     //! output
-    virtual void showMeData(std::ostream& c) const;
+    virtual void showMe(std::ostream& c = std::cout) const;
 
     //! destructor
     virtual ~LinearSimpleParam(){}
@@ -451,7 +451,7 @@ public:
     Real W_from_Q(const Real& _Q, const Real& _W_n, const Real& _W, const ID& ii, const UInt& indz) const;
 
     //! output
-    void showMeData(std::ostream& /*c*/) const;
+    void showMe(std::ostream& c = std::cout) const;
 
 };
 
