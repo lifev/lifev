@@ -95,7 +95,9 @@ public:
 
     //! Read  only last timestep
     void import(const Real& Tstart);
-    void M_rd_ascii       ( ExporterData& dvar );
+
+    void rd_var(ExporterData& dvar)
+    {super::rd_var(dvar);}
 
 private:
 
@@ -109,8 +111,8 @@ private:
     void M_case_variable_section(std::ofstream& casef);
     void M_case_time_section(std::ofstream& casef, const Real& time);
 
-    void M_rd_ascii_scalar( ExporterData& dvar );
-    void M_rd_ascii_vector( ExporterData& dvar );
+    void M_rd_scalar( ExporterData& dvar );
+    void M_rd_vector( ExporterData& dvar );
 
 
 
@@ -502,7 +504,7 @@ void Ensight<Mesh>::import(const Real& time)
     chrono.start();
     for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
         {
-            M_rd_ascii(*i);
+            this->rd_var(*i);
         }
     chrono.stop();
     if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
@@ -510,25 +512,7 @@ void Ensight<Mesh>::import(const Real& time)
 }
 
 template <typename Mesh>
-void Ensight<Mesh>::M_rd_ascii( ExporterData& dvar )
-{
-
-    switch( dvar.type() )
-        {
-        case ExporterData::Scalar:
-            M_rd_ascii_scalar(dvar);
-            break;
-        case ExporterData::Vector:
-            M_rd_ascii_vector(dvar);
-            break;
-        }
-
-}
-
-
-
-template <typename Mesh>
-void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
+void Ensight<Mesh>::M_rd_scalar( ExporterData& dvar )
 {
 
     std::string filename( this->M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl" );
@@ -574,7 +558,7 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
     ASSERT(!sclf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dvar)
+template <typename Mesh> void Ensight<Mesh>::M_rd_vector(ExporterData& dvar)
 {
 
     std::string filename( this->M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct" );

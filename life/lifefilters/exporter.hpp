@@ -267,6 +267,8 @@ public:
     //! Read  only last timestep
     virtual void import(const Real& Tstart) = 0;
 
+    virtual void rd_var(ExporterData& dvar);
+
     //! Set the output folder for postprocessing
     /*!
      * @param outputDirectory output folder
@@ -282,6 +284,9 @@ protected:
 
     //! compute postfix
     void computePostfix();
+
+    virtual void M_rd_scalar( ExporterData& dvar )=0;
+    virtual void M_rd_vector( ExporterData& dvar )=0;
 
     //@}
 
@@ -443,6 +448,21 @@ template<typename Mesh>
 void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& vr, UInt start, UInt size, UInt steady)
 {
     M_listData.push_back( ExporterData(type,variableName,vr,start, size, steady) );
+}
+
+template <typename Mesh>
+void Exporter<Mesh>::rd_var(ExporterData& dvar)
+{
+
+    switch( dvar.type() )
+        {
+        case ExporterData::Scalar:
+            M_rd_scalar(dvar);
+            break;
+        case ExporterData::Vector:
+            M_rd_vector(dvar);
+            break;
+        }
 }
 
 

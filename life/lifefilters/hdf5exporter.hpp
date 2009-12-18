@@ -146,6 +146,8 @@ public:
     //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
 
+    void rd_var   ( ExporterData& dvar);
+
     //@}
 
 
@@ -176,7 +178,6 @@ private:
 
     void M_wr_geo();
 
-    void M_rd_var   ( ExporterData& dvar);
     void M_rd_scalar( ExporterData& dvar);
     void M_rd_vector( ExporterData& dvar);
 
@@ -795,7 +796,7 @@ void Hdf5exporter<Mesh>::import(const Real& time)
     chrono.start();
     for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
         {
-            M_rd_var(*i); ///!!! Simone
+            this->rd_var(*i); ///!!! Simone
         }
     chrono.stop();
     if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
@@ -803,19 +804,14 @@ void Hdf5exporter<Mesh>::import(const Real& time)
 }
 
 template <typename Mesh>
-void Hdf5exporter<Mesh>::M_rd_var(ExporterData& dvar)
+void Hdf5exporter<Mesh>::rd_var(ExporterData& dvar)
 {
-
-    switch( dvar.type() )
-        {
-        case ExporterData::Scalar:
-            M_rd_scalar(dvar);
-            break;
-        case ExporterData::Vector:
-            M_rd_vector(dvar);
-            break;
-        }
-
+    if ( M_HDF5.get() == 0)
+    {
+        M_HDF5.reset(new hdf5_type(dvar.storedArray()->BlockMap().Comm()));
+        M_HDF5->Open(this->M_post_dir+this->M_prefix+".h5"); //!! Simone
+    }
+    super::rd_var(dvar);
 }
 
 
@@ -830,7 +826,11 @@ void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
     EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
     Epetra_MultiVector* subVar(0);
 
-    std::string varname (dvar.variableName()+ this->M_postfix); // see also in M_wr_attributes
+    std::string varname (dvar.variableName()); // see also in M_wr_attributes
+    if(this->M_postfix!="")
+    {
+        varname += this->M_postfix;
+    }
     bool readTranspose (true);
     M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
 
@@ -856,7 +856,11 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
     Epetra_MultiVector* subVar(0);
 
     bool readTranspose (true);
-    std::string varname (dvar.variableName() + this->M_postfix); // see also in M_wr_attributes
+    std::string varname (dvar.variableName()); // see also in M_wr_attributes
+    if(this->M_postfix!="")
+    {
+        varname += this->M_postfix;
+    }
 
     M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
 
