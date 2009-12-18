@@ -255,7 +255,6 @@ Monolithic::setDataFromGetPot( GetPot const& data_file )
 {
     super::setDataFromGetPot(data_file);
 
-    this->M_dataFluid->setSemiImplicit( data_file("problem/semiImplicit", false) );
     this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
     M_DDBlockPrec = data_file( "interface/DDBlockPrec",  0 );
     M_fullMonolithic  = !(M_method.compare("fullMonolithic"));
@@ -593,7 +592,7 @@ Monolithic::evalResidual( vector_type&       res,
 
         *this->M_beta *= -alpha;
         vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
-        fluid->subset(*M_un, 0);
+        fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
 
 
@@ -625,7 +624,7 @@ Monolithic::evalResidual( vector_type&       res,
 
                 if ( !M_BCh_flux->bdUpdateDone() )
                     M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-                bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataFluid().getTime() );
                 M_fluidBlock->GlobalAssemble();
                 M_fluidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_fluidBlock));
 
@@ -657,12 +656,12 @@ Monolithic::evalResidual( vector_type&       res,
         M_BCh_flux->setOffset(M_offset-M_fluxes);
         if ( !M_BCh_flux->bdUpdateDone() )
             M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+        bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataFluid().getTime() );
 
         M_BCh_Robin->setOffset(M_offset);
         if ( !M_BCh_Robin->bdUpdateDone() )
             M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-        bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+        bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().getTime() );
 
         evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhsFull, res, M_diagonalScale);
 
@@ -842,7 +841,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
         bchSolid.bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
 
     bcManage( *M_monolithicMatrix, rhsFullSolid, *M_dFESpace->mesh(), M_dFESpace->dof(), bchSolid, M_dFESpace->feBd(), 1.,
-              dataSolid().getTime() );
+              dataFluid().getTime() );
 
     // matrix is GlobalAssembled by  bcManage
 
@@ -851,7 +850,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
 
     vector_type rhsFull(rhsFullSolid);
     bcManage( *M_monolithicMatrix, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
-              dataSolid().getTime() );
+              dataFluid().getTime() );
 
     M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
 
@@ -880,12 +879,12 @@ void  Monolithic::setupBlockPrec(vector_type& rhs)
             }
             else
                 this->M_solid->getDisplayer().leaderPrint("ERROR: probably the tolerance fixed for Newton is too low. Remember that this type of preconditioner can be used only in the geometry-explicit case \n");
-            bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-            bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_flux, M_uFESpace->feBd(), 1., dataFluid().getTime() );
+            bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().getTime() );
 
             M_precMatrPtr->GlobalAssemble();
             bcManageMatrix( *M_precMatrPtr, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1.,
-                            dataSolid().getTime() );
+                            dataFluid().getTime() );
             bcManageMatrix( *M_precMatrPtr, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(), 1.,
                             dataFluid().getTime() );
 
@@ -953,8 +952,8 @@ void  Monolithic::setupBlockPrec(vector_type& rhs)
             }
             else
             {
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime());
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().getTime());
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataFluid().getTime() );
                 M_solidBlockPrec->GlobalAssemble();
 
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
@@ -980,8 +979,8 @@ void  Monolithic::setupBlockPrec(vector_type& rhs)
             }
             else
             {
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataFluid().getTime() );
                 M_solidBlockPrec->GlobalAssemble();
 
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
@@ -1249,13 +1248,13 @@ void Monolithic::computeMaxSingularValue()
 
     boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
-    M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
+    //M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrixPtr()));
 
-    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/));
-    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr),  true);
-    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr), true, true);
-    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr), false, true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr));
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/),  true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/), true, true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr), false, true);
 
     std::vector<LifeV::Real> real;
     std::vector<LifeV::Real> imaginary;
@@ -1307,7 +1306,7 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
     M_bdMass.reset(new matrix_type(M_interfaceMap));
     if ( !M_BChWSS->bdUpdateDone() )
         M_BChWSS->bdUpdate(*M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-    bcManageMatrix(*M_bdMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWSS, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+    bcManageMatrix(*M_bdMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWSS, M_dFESpace->feBd(), 1., dataFluid().getTime() );
     M_bdMass->GlobalAssemble();
 
     vector_type lambda(M_monolithicInterfaceMap);

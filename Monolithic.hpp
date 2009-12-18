@@ -260,10 +260,10 @@ public:
 
        Only for the Monolithic Geometry-Convective Explicit:
        - DDBlockPrec = 1 is AAS on a Dirichlet-Neumann preconditioner
-       - DDBlockPrec = 7 is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
-       - DDBlockPrec = 8 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = 7 is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy (buggy when a flux is imposed)
+       - DDBlockPrec = 8 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy (buggy when a flux is imposed)
 
-       Only for the fullMonolithic Convective Explicit:
+       Only for the fullMonolithic Convective Explicit (buggy when a flux is imposed):
        - DDBlockPrec = 6 is AAS on the quasi-newton matrix
        - DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy
        - DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy
