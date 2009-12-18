@@ -278,7 +278,7 @@ public:
     void initialize(const Real& u20);
 
     //! Initialize with non constant (step) data
-    void initialize(GetPot& data_file);
+    void initialize(const GetPot& data_file);
 
     //! Save and recover solution at current time step
     void savesol();
@@ -376,7 +376,7 @@ public:
     void create_movie_file();
 
     //! Print to screen informations on the solver class
-    void showMe( std::ostringstream& c, UInt verbose = false );
+    void showMe( std::ostringstream& c = std::cout, UInt verbose = false );
 
     //! timestep getters
     const Real timestep() const {return M_data.timestep();}
@@ -701,7 +701,7 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     M_linearize_equations    = data_file("miscellaneous/linearize_equations",            0);
     M_longitudinal_wall      = data_file("miscellaneous/longitudinal_wall",              0);
     M_flux_second_der        = data_file("miscellaneous/compute_flux_second_derivative", 0);
-    M_dP_dt_steps            = data_file("miscellaneous/pressure_derivative_steps",      2);
+    M_dP_dt_steps            = data_file("miscellaneous/pressure_derivative_steps",      1);
 
 
         // These maps allow a more readable definition of the variables
@@ -1298,7 +1298,8 @@ void
 OneDModelSolver<Params, Flux, Source>::CheckCFL() const
 {
 
-    Debug(6310) << "checking the CFL ... ";
+    Debug(6310) << "[CheckCFL] checking the CFL ... ";
+
     Real CFL = 0.;
 
     //! length of the first edge (arbitrary as they are all supposed equal).
@@ -1328,6 +1329,7 @@ OneDModelSolver<Params, Flux, Source>::CheckCFL() const
 
             lambda1_max = std::max<Real>( std::fabs(eigval1), lambda1_max );
             lambda2_max = std::max<Real>( std::fabs(eigval2), lambda2_max );
+
         }
 
     for ( UInt inode = 1; inode < M_FESpace.dim() ; inode++ )
@@ -1339,9 +1341,7 @@ OneDModelSolver<Params, Flux, Source>::CheckCFL() const
 
     CFL = M_data.timestep() / deltaX_min * std::max<Real>( lambda1_max , lambda2_max );
 
-    if ( M_CFL )
-        std::cout << "CFL = " << CFL << std::endl;
-
+    //if ( M_CFL )
     /*
       std::cout << "Old CFL = " << M_data.() /
       (M_FESpace.mesh()->edgeList( 1 ).pt2().x() - M_FESpace.mesh()->edgeList( 1 ).pt1().x())
@@ -1353,9 +1353,10 @@ OneDModelSolver<Params, Flux, Source>::CheckCFL() const
     if( CFL > 0.5774 )
         std::cout << "\n[CheckCFL] CFL not respected in " << M_data.PostFile()
                   << ": CFL = " << CFL << std::endl;
-    ASSERT( CFL < 0.5774 , "CFL not respected" );
 
-    Debug(6310) << "ok.";
+    //ASSERT( CFL < 0.5774 , "CFL not respected" );
+
+    Debug(6310) << "[CheckCFL] ok.";
 }
 
 
@@ -2217,7 +2218,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u20)
 */
 template< class Params, class Flux, class Source >
 void
-OneDModelSolver<Params, Flux, Source>::initialize(GetPot& data_file)
+OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
 {
     // the discontinuity is comprised between firstnode and lastnode
     UInt firstnode( data_file("initialize/firstnode",1) );

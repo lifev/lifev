@@ -32,27 +32,26 @@ namespace LifeV
 {
 
 //! constructor using a data file.
-  DataOneDModel::DataOneDModel(const GetPot& dfile, const std::string section):
-    _M_time_beg           (dfile((section + "time/timebeg").data(),0.0)),
-    _M_time_end           (dfile((section + "time/timeend").data(),1.0)),
-    _M_time_step          (dfile((section + "time/timestep").data(),0.1)),
+  DataOneDModel::DataOneDModel(const GetPot& dfile, const std::string& section):
+    _M_time_beg           (dfile((section + "/time/timebeg").data()                      ,0.0)),
+    _M_time_end           (dfile((section + "/time/timeend").data()                      ,1.0)),
+    _M_time_step          (dfile((section + "/time/timestep").data()                     ,0.1)),
         //! Discretization
-    _M_mesh_file          (dfile((section + "discretization/mesh_file").data(),"mesh.mesh")),
-    _M_mesh_dir           (dfile((section + "discretization/mesh_dir").data(),"./")),
-    _M_x_left             (dfile((section + "discretization/x_left").data(),0.)),
-    _M_x_right            (dfile((section + "discretization/x_right").data(),1.)),
-    _M_nb_elem            (dfile((section + "discretization/nb_elem").data(),10)),
+    _M_mesh_file          (dfile((section + "/discretization/mesh_file").data()          ,"mesh.mesh")),
+    _M_mesh_dir           (dfile((section + "/discretization/mesh_dir").data()           ,"./")),
+    _M_x_left             (dfile((section + "/discretization/x_left").data()             ,0.)),
+    _M_x_right            (dfile((section + "/discretization/x_right").data()            ,1.)),
+    _M_nb_elem            (dfile((section + "/discretization/nb_elem").data()            ,10)),
         //! Miscellaneous
-    _M_post_dir           (dfile((section + "miscellaneous/post_dir").data(),"./")),
-    _M_post_file          (dfile((section + "miscellaneous/post_file").data(),"sol")),
-    _M_verbose            (dfile((section + "miscellaneous/verbose").data(),1)),
-    _M_postProcessTimeStep(dfile((section + "miscellaneous/postprocess_timestep").data(),0.01)),
-    _M_adaptiveMesh       (dfile((section + "problem/adaptiveMesh").data(), 0)),
-        _M_mesh               ( )
+    _M_post_dir           (dfile((section + "/miscellaneous/post_dir").data()            ,"./")),
+    _M_post_file          (dfile((section + "/miscellaneous/post_file").data()           ,"sol")),
+    _M_verbose            (dfile((section + "/miscellaneous/verbose").data()             ,1)),
+    _M_postProcessTimeStep(dfile((section + "/miscellaneous/postprocess_timestep").data(),0.01)),
+    _M_adaptiveMesh       (dfile((section + "/problem/adaptiveMesh").data()              , 0)),
+    _M_mesh               ( )
 {
 
-
-    std::cout << "    Mesh setup ... " << std::endl;
+    std::cout << "    1d- Mesh setup ... " << std::endl;
 
     _M_mesh.reset(new DataOneDModel::mesh_raw_type);
 
