@@ -90,6 +90,11 @@ public:
 
     //! Read  only last timestep
     void import(const Real& /*Tstart*/) {}
+
+private:
+    virtual void M_rd_scalar( ExporterData& dvar ){}
+    virtual void M_rd_vector( ExporterData& dvar ){}
+
 };
 
 //
