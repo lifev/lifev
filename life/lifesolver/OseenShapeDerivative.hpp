@@ -529,7 +529,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
     if(this->M_data.useShapeDerivatives())
         {
 
-            this->M_Displayer.leaderPrint("  f-  updating SD matrix... ");
+            this->M_Displayer.leaderPrint("  f-  updating shape derivative blocks... ");
 
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM

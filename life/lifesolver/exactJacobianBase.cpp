@@ -39,7 +39,7 @@ exactJacobian::exactJacobian():
     super       (),
     M_updateEvery(0),
     M_nbEvalAux(0),
-    M_matrSD()
+    M_matrShapeDer()
 //    M_epetraOper(this)
 {
 
@@ -358,7 +358,7 @@ void  exactJacobian::solveJac(vector_type         &_muk,
     M_linearSolver.setOperator(*M_epetraOper);
 
     this->displayer().leaderPrint( "Solving Jacobian system... " );
-    M_recomputeSD=true;
+    M_recomputeShapeDer=true;
     M_linearSolver.solve(_muk, res);
 
     this->displayer().leaderPrint( "done.\n" );
@@ -415,12 +415,12 @@ void  exactJacobian::solveLinearFluid()
     }
     else
      {
-        if(M_recomputeSD)
+        if(M_recomputeShapeDer)
         {
-            M_recomputeSD=false;
-            M_matrSD.reset(new matrix_type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
+            M_recomputeShapeDer=false;
+            M_matrShapeDer.reset(new matrix_type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
             this->M_fluid->updateShapeDerivatives(
-                                                  *M_matrSD,
+                                                  *M_matrShapeDer,
                                                   alpha,
                                                   *M_un,
                                                   M_fluid->solution(),
@@ -433,17 +433,17 @@ void  exactJacobian::solveLinearFluid()
                                                   //this->derVeloFluidMesh(),
                                                   //*M_rhsNew
                                                   );
-            M_matrSD->GlobalAssemble();
-            *M_matrSD*=-1;
-            //M_matrSD->spy("matrsd");
+            M_matrShapeDer->GlobalAssemble();
+            *M_matrShapeDer*=-1;
+            //M_matrShapeDer->spy("matrsd");
         }
-        *M_rhsNew=(*M_matrSD)*dispFluidDomain;
+        *M_rhsNew=(*M_matrShapeDer)*dispFluidDomain;
         M_fluid->updateRhsLinNoBC(*M_rhsNew);
     }
 
 //    //DEBUG:
 //     vector_type rhs_debug(M_fluid->matrNoBC().getMap());
-//     rhs_debug=*M_matrSD*dispFluidDomain;
+//     rhs_debug=*M_matrShapeDer*dispFluidDomain;
 //     std::cout<<"normInf1 "<<rhs_debug.NormInf()<<std::endl;
 //     //    std::cout<<"normInf2 "<<M_rhsLin->NormInf()<<std::endl;
 //     std::cout<<"normInf displ "<<dispFluidMesh.NormInf()<<std::endl;

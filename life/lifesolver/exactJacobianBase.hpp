@@ -170,8 +170,8 @@ private:
 
     int M_nbEvalAux;
 
-    matrix_ptrtype M_matrSD;
-    bool M_recomputeSD;
+    matrix_ptrtype M_matrShapeDer;
+    bool M_recomputeShapeDer;
 
 }; // end class exactJacobian
 
