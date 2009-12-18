@@ -143,7 +143,7 @@ public:
      a) if vector has a unique map: then this should also (otherwise run time error)
      b) if vector has a repeated map: then this should also. (otherwise wrong)
      */
-    EpetraVector& subset( const EpetraVector& vector, const int offset = 0 );
+    EpetraVector& subset( const EpetraVector& vector, const UInt offset = 0 );
 
     //! set this to a subset of  vector with an offset.
     /*!

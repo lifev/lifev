@@ -250,9 +250,9 @@ add(const EpetraVector& vector,
 
 EpetraVector& EpetraVector::
 subset(const EpetraVector& vector,
-       const int           offset )
+       const UInt           offset )
 {
-    return this->subset(vector, getMap(), offset, 0);
+    return this->subset(vector, getMap(), offset, (const UInt)0);
 }
 
 EpetraVector& EpetraVector::
@@ -261,7 +261,10 @@ subset(const EpetraVector& vector,
        const UInt          offset1,
        const UInt          offset2)
 {
-
+    if (M_maptype==Repeated && vector.getMaptype()==Unique )
+    {
+        return subset(EpetraVector(vector, Repeated), map, offset1, offset2);
+    }
     return subset(vector.M_epetraVector, map, offset1, offset2);
 }
 
