@@ -246,8 +246,6 @@ Structure::run3d()
     if (exporterType.compare("hdf5") == 0)
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "structure" ) );
-        exporter->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), parameters->comm->MyPID() );
     }
     else
 #endif
@@ -255,10 +253,15 @@ Structure::run3d()
         if (exporterType.compare("none") == 0)
         {
             exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "structure", parameters->comm->MyPID()) );
-        } else {
+        }
+        else
+        {
             exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "structure", parameters->comm->MyPID()) );
         }
     }
+
+    exporter->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setMeshProcId( meshPart.mesh(), parameters->comm->MyPID() );
 
     vector_ptrtype solidDisp ( new vector_type(solid.disp(), exporter->mapType() ) );
     vector_ptrtype solidVel  ( new vector_type(solid.vel(),  exporter->mapType() ) );
