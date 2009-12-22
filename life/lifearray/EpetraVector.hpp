@@ -86,6 +86,7 @@ public:
     EpetraVector( const EpetraVector& vector, EpetraMapType maptype );
 
     //! Constructor - Using Vector (without using map)
+    /*! combineMode is only used during the copy, and not in subsequent calls. */
     EpetraVector( const EpetraVector& vector,
                   EpetraMapType maptype,
                   Epetra_CombineMode combineMode );
