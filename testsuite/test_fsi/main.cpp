@@ -203,10 +203,11 @@ public:
 
     		M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
-    		M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), Repeated ));
-    		M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), Repeated ));
+    		M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(),      M_ensightFluid->mapType() ));
+    		M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_ensightFluid->mapType() ));
+
     		M_ensightFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-										UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
+                                         UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
     		M_ensightFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
 										UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
@@ -221,8 +222,8 @@ public:
 
     		M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
-    		M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
-    		M_solidVel.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
+    		M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_ensightSolid->mapType() ));
+    		M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_ensightSolid->mapType() ));
     		M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
 										UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
     		M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
@@ -357,7 +358,7 @@ private:
     public:
         RESULT_CHANGED_EXCEPTION(LifeV::Real time)
         {
-            std::cout << "Some modifications led to changes in the l2 norm of the solution at time" << time << std::endl;
+            std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
         }
     };
 };
