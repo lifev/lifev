@@ -75,7 +75,8 @@ Monolithic::Monolithic():
     M_diagonalScale(false),
     M_reusePrec(true),
     M_resetPrec(true),
-    M_maxIterSolver(-1)
+    M_maxIterSolver(-1),
+    M_restarts(false)
 {}
 
 // Destructor
@@ -259,9 +260,11 @@ Monolithic::setDataFromGetPot( GetPot const& data_file )
     M_DDBlockPrec = data_file( "interface/DDBlockPrec",  0 );
     M_fullMonolithic  = !(M_method.compare("fullMonolithic"));
     M_diagonalScale           = data_file( "solid/prec/diagonalScaling",  false );
-    M_entry           = data_file( "solid/prec/entry",  0. );
+    M_entry            = data_file( "solid/prec/entry",  0. );
     M_alphaf           = data_file( "interface/alphaf",  0.5 );
     M_alphas           = data_file( "interface/alphas",  0.5 );
+    M_restarts         = data_file( "exporter/start"  ,  0   );
+
 }
 
 void
@@ -647,7 +650,11 @@ Monolithic::evalResidual( vector_type&       res,
             M_resetPrec=true;
             *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
             couplingRhs(this->M_rhs, M_un);
-            this->M_solid->updateStuff();
+            if (!M_restarts)
+            {
+                this->M_solid->updateVel();
+                M_restarts = false;
+            }
             updateSolidSystem(this->M_rhs);
         }
 
@@ -1001,9 +1008,9 @@ void  Monolithic::setupBlockPrec(vector_type& rhs)
             break;
         default:
             {
-                for(short i=0; i<nDimensions; ++i)
-                    *M_precMatrPtr += *M_monolithicMatrix;
-                M_precMatrPtr->GlobalAssemble();
+                // for(short i=0; i<nDimensions; ++i)
+//                     *M_precMatrPtr += *M_monolithicMatrix;
+//                 M_precMatrPtr->GlobalAssemble();
 
             }
             break;
@@ -1240,7 +1247,7 @@ void Monolithic::initialize( const vector_type& u0, const vector_type& p0, const
 }
 
 #ifdef HAVE_TRILINOS_ANASAZI
-void Monolithic::computeMaxSingularValue()
+Real& Monolithic::computeMaxSingularValue()
 {
     typedef Epetra_Operator                                                operator_type;
 
@@ -1278,7 +1285,7 @@ void Monolithic::computeMaxSingularValue()
         displayer().leaderPrint("\n real part ", real[i]);
         displayer().leaderPrint("\n imaginary part ", imaginary[i]);
     }
-
+    return real[0];
 }
 #endif
 

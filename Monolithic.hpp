@@ -189,7 +189,7 @@ public:
        \small Computes the maximum singular value of the preconditioned system \f$P^-1A\f$ where \f$P\f$ is an
        instance of ComposedPreconditioner and \f$A\f$ is the system matrix.
     */
-    void computeMaxSingularValue();
+    LifeV::Real& computeMaxSingularValue();
 #endif
     /**
        \small Computes the wall shear stress. Some issues when working in parallel still has to be fixed.
@@ -487,6 +487,7 @@ private:
     bool                                              M_reusePrec;
     bool                                              M_resetPrec;
     UInt                                              M_maxIterSolver;
+    bool                                              M_restarts;
     //!@}
 };
 
