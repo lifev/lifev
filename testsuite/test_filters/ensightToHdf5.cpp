@@ -1,40 +1,45 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV library
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
-  Author(s):  <simone.deparis@epfl.ch>
-       Date: 2008-08-08
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2008 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+************************************************************************
 */
-/**
-   \file ensightToHdf5.cpp
-   \author  <simone.deparis@epfl.ch>
-   \date 2008-08-08
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief Convert from Ensight to HDF5
+ *
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *  @date 08-08-2008
  */
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include <Epetra_MpiComm.h>
-#include <mpi.h>
+	#include <Epetra_MpiComm.h>
+	#include <mpi.h>
 #else
-#include <Epetra_SerialComm.h>
+	#include <Epetra_SerialComm.h>
 #endif
-//#include "life/lifesolver/NavierStokesSolver.hpp"
+
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
@@ -43,16 +48,13 @@
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
-
 #include <life/lifesolver/Oseen.hpp>
 
 #include <iostream>
 
 #include "ensightToHdf5.hpp"
 
-
 using namespace LifeV;
-
 
 struct EnsightToHdf5::Private
 {
@@ -62,9 +64,6 @@ struct EnsightToHdf5::Private
 
     Epetra_Comm*   comm;
 };
-
-
-
 
 EnsightToHdf5::EnsightToHdf5( int argc,
                               char** argv,
@@ -82,8 +81,7 @@ EnsightToHdf5::EnsightToHdf5( int argc,
 #ifdef EPETRA_MPI
     std::cout << "mpi initialization ... " << std::endl;
 
-    //    MPI_Init(&argc,&argv);
-
+    // MPI_Init(&argc,&argv);
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
@@ -102,48 +100,55 @@ EnsightToHdf5::run()
 {
     typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
+    
     // Reading from data file
-    //
     GetPot dataFile( d->data_file_name.c_str() );
 
     bool verbose = (d->comm->MyPID() == 0);
 
-
-    // fluid solver
-
-
-
+	// Fluid solver
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
+
+    // Scale, Rotate, Translate (if necessary)
+    boost::array< Real, nDimensions >    geometryScale;
+    boost::array< Real, nDimensions >    geometryRotate;
+    boost::array< Real, nDimensions >    geometryTranslate;
+	
+    geometryScale[0] = dataFile( "fluid/space_discretization/transform", 1., 0);
+    geometryScale[1] = dataFile( "fluid/space_discretization/transform", 1., 1);
+    geometryScale[2] = dataFile( "fluid/space_discretization/transform", 1., 2);
+
+    geometryRotate[0] = dataFile( "fluid/space_discretization/transform", 0., 3) * Pi / 180;
+    geometryRotate[1] = dataFile( "fluid/space_discretization/transform", 0., 4) * Pi / 180;
+    geometryRotate[2] = dataFile( "fluid/space_discretization/transform", 0., 5) * Pi / 180;
+
+    geometryTranslate[0] = dataFile( "fluid/space_discretization/transform", 0., 6);
+    geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
+    geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
+
+    dataNavierStokes.mesh()->transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), *d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
 
-
     dataNavierStokes.setMesh(meshPart.mesh());
 
-    if (verbose)
-        std::cout << "Building the velocity FE space ... " << std::flush;
+    if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
 
-    if (verbose)
-        std::cout << "ok." << std::endl;
+    if (verbose) std::cout << "ok." << std::endl;
 
-    if (verbose)
-        std::cout << "Building the pressure FE space ... " << std::flush;
+    if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
 
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
 
-    if (verbose)
-        std::cout << "ok." << std::endl;
-
-
+    if (verbose) std::cout << "ok." << std::endl;
 
     UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
-
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -161,15 +166,12 @@ EnsightToHdf5::run()
     fluid.setUp(dataFile);
 
     // Initialization
-
     Real dt     = dataNavierStokes.getTimeStep();
     Real t0     = dataNavierStokes.getInitialTime();
     Real tFinal = dataNavierStokes.getEndTime();
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > importer;
-
-
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
     std::string const exporterName =  dataFile( "exporter/filename", "ensight");
@@ -194,10 +196,8 @@ EnsightToHdf5::run()
 #endif
         importer.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
 
-
     importer->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
     importer->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
-
 
     vector_ptrtype velAndPressureExport ( new vector_type(fluid.solution(), exporter->mapType() ) );
     vector_ptrtype velAndPressureImport ( new vector_type(fluid.solution(), importer->mapType() ) );
@@ -222,15 +222,12 @@ EnsightToHdf5::run()
                            UInt(pFESpace.dof().numTotalDof()) );
     exporter->postProcess( t0 );
 
-
     // Temporal loop
-
     Chrono chrono;
     int iter = 1;
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
-
         chrono.stop();
         importer->import( time );
 
@@ -241,11 +238,4 @@ EnsightToHdf5::run()
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
     }
-
 }
-
-
-//////////////////////
-
-
-

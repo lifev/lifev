@@ -32,6 +32,10 @@ BDF_order		= 1
 mesh_dir        = ./Mesh/   # the directory where the mesh file is
 mesh_file       = cube4x4.mesh          # mesh file
 
+transform = '1.0 1.0 1.0 
+             0.0 0.0 0.0
+             0.0 0.0 0.0'
+
 verbose         = 0
 linearized      = 0
 diagonalize     = 1 # weight, 0=off
