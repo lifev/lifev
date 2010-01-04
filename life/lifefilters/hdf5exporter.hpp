@@ -1,46 +1,46 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2008 EPFL
+//@HEADER
+/*
+************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-
 //@HEADER
 
 /*!
-  @file hdf5exporter.hpp
+  @file
   @brief This file provides the class  Hdf5exporter for post-processing with hdf5
 
   @author Simone Deparis <simone.deparis@epfl.ch>
   @date 11-11-2008
-
-  Usage: two steps
-  <ol>
-    <li> first: add the variables using addVariable
-    <li> second: call postProcess( time );
-  </ol>
  */
 
-#ifndef _HDF5EXPORTER_H_
-#define _HDF5EXPORTER_H_
+#ifndef HDF5EXPORTER_H
+#define HDF5EXPORTER_H 1
 
 #include <lifeconfig.h>
+
 #ifndef HAVE_HDF5
 #warning warning you should reconfigure with --with-hdf5=... flag
-#else
 
+#else
 #include <life/lifefilters/exporter.hpp>
 #include <EpetraExt_HDF5.h>
 #include <Epetra_MultiVector.h>
@@ -49,15 +49,17 @@
 #include <EpetraExt_DistArray.h>
 #include <Epetra_IntVector.h>
 
-
-
-namespace LifeV
-{
+namespace LifeV {
 
 //! Hdf5 data exporter, implementation of Exporter
 /*!
   @author Simone Deparis <simone.deparis@epfl.ch>
-  @date 11-11-2008
+
+  Usage: two steps
+  <ol>
+    <li> first: add the variables using addVariable
+    <li> second: call postProcess( time );
+  </ol>
 */
 template<typename Mesh>
 class Hdf5exporter : public Exporter<Mesh> {
@@ -78,34 +80,33 @@ public:
 
     //! Constructor for Hdf5exporter
     /*!
-        \param dfile the GetPot data file where you must provide an [exporter] section with:
+       @param dfile the GetPot data file where you must provide an [exporter] section with:
           "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
           "save"      (how many time steps per postprocessing)
           "multimesh" ( = true if the mesh has to be saved at each post-processing step)
-       \param mesh the mesh
-       \param the prefix for the case file (ex. "test" for test.case)
-       \param the procId determines de CPU id. if negative, it ussemes there is only one processor
+       @param mesh the mesh
+       @param the prefix for the case file (ex. "test" for test.case)
+       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
     Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId);
 
     //! Constructor for Hdf5exporter without prefix and procID
     /*!
-        \param dfile the GetPot data file where you must provide an [exporter] section with:
+       @param dfile the GetPot data file where you must provide an [exporter] section with:
           "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
           "save"      (how many time steps per postprocessing)
           "multimesh" ( = true if the mesh has to be saved at each post-processing step)
-       \param mesh the mesh
+       @param mesh the mesh
     */
     Hdf5exporter(const GetPot& dfile, const std::string prefix);
 
     //! Destructor for Hdf5exporter
     /*!
-     *   Close the HDF5 file.
+         Close the HDF5 file.
      */
     //~Hdf5exporter() { M_HDF5->Close(); }
 
     //@}
-
 
 
     //! @name Methods
@@ -113,32 +114,38 @@ public:
 
     //! Post-process the variables added to the list
     /*!
-        \param time the solver time
+        @param time the solver time
     */
     void postProcess(const Real& time);
 
-    /**
-       Import data from previous simulations
-
-       \param time the solver time
+    //! Import data from previous simulations
+    /*!
+       @param time the solver time
     */
-    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/); // dt is used to rebuild the history up to now
+    void import(const Real& /*Tstart*/, const Real& /*dt*/); // dt is used to rebuild the history up to now
 
     //! Import data from previous simulations
     /*!
-       \param time the solver time
+       @param time the solver time
     */
     void import(const Real& /*Tstart*/);
 
+    //! Close the Hdf5 file
+    /*!
+         Close the HDF5 file.
+     */
+    void CloseFile() { M_HDF5->Close(); }
+
     //@}
+
 
     //! @name Set Methods
     //@{
 
     void setMeshProcId( mesh_ptrtype mesh, int const procId );
 
-
     //@}
+
 
     //! @name Get Methods
     //@{
@@ -149,7 +156,6 @@ public:
     void rd_var   ( ExporterData& dvar);
 
     //@}
-
 
 private:
 
@@ -876,8 +882,7 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
 
 }
 
-
-
 }
 #endif
+
 #endif
