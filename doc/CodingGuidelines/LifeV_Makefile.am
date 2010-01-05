@@ -1,0 +1,34 @@
+# -*- makefile -*-
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU GPL
+#
+###################################################################################################
+
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
+SUFFIXES                   = .cpp .hpp .idl .c .h .f .F .o .moc
+
+check_HEADERS              = *.hpp # List of hpp files
+
+check_PROGRAMS             = test_NameOfTheTest
+test_NameOfTheTest_SOURCES = main.cpp *.cpp # List of cpp files
+
+EXTRA_DIST = data.txt testsuite.at
+
+link:
+	test -a data || ln -s $(srcdir)/data.txt
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
+
+recheck: clean_PROGRAMS check
+
+clean_PROGRAMS:
+	-rm $(check_PROGRAMS)
+
+clean-results:
+	-rm *.vct *.scl *.case *.geo
