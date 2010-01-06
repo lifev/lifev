@@ -46,7 +46,7 @@
 
 namespace LifeV {
 //! BCInterface - LifeV Interface to load Boundary Conditions completely from a GetPot file
-/*
+/*!
  *  @author Cristiano Malossi
  *
  *  This class allows to impose boundary conditions completely from a file.
@@ -60,12 +60,12 @@ namespace LifeV {
  *
  *  Each condition has a similar structure; here there is an example:
  *
- *  [InFlow]
- *  type       = Essential
- *  flag       = 2
- *  mode       = Full
- *  component  = 3
- *  function   = '(0, 0, 3*0.03*(1/4-(x^2+y^2))'
+ *  [InFlow]               <br>
+ *  type       = Essential <br>
+ *  flag       = 2         <br>
+ *  mode       = Full      <br>
+ *  component  = 3         <br>
+ *  function   = '(0, 0, 3*0.03*(1/4-(x^2+y^2))' <br>
  *
  *  NOTE: All the parameters are case sensitive.
  *
@@ -84,10 +84,8 @@ namespace LifeV {
  *
  *  - function
  *  - functionFile
- *  - FSIfunction
- *  - FSIfunctionFile
- *  - OSEENfunction
- *  - OSEENfunctionFile
+ *  - OperatorFunction
+ *  - OperatorFunctionFile
  *  - FSI
  *
  *  To see some example look at test_fsi.
