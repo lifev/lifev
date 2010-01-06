@@ -59,40 +59,7 @@ complete and exaustive documentation, will help old and new developers to
 take advantage of all the available features of our library, improving
 productivity and results.
 
-\section{General style}
-This is a short list of rules regarding the style for \texttt{LifeV}
-library.  
-\begin{itemize}
-  \item To uniform the code inside the library, all developers have to
-  use the same notation and in particular the same indentation style. The style
-  used in \texttt{LifeV} is the BSD/Allman Indent style. Please see
-  \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29} 
-  for more details about this style and its inventor.
-  Moreover please note that both Eclipse and Emacs (and probably also other editors)
-  have a special utility to help follow this style.
-  \item Before committing any code, be sure that all tabs have been converted
-  into $4$ spaces, and that your editor has removed endline spaces.
-  \item In order to improve readability of the code, headers should
-  contain sections (see Section \ref{doxygen} for doxygen syntax) grouping
-  all the similar methods. Basically all the classes should contain at least
-  these sections:
-  \begin{description}
-      \item[Public Types]: containing the public enum and type definition(s).
-	  \item[Constructors \& Destructor]: containing the constructor(s), the
-      copy constructor and the destructor(s).
-      \item[Operators]: containing the operators defined in the class, such as
-      the \texttt{operator=} for making copies.
-      \item[Methods]: containing all the general methods of the class. Note that
-      a method performs operations on private variables and it is
-      not just a setter or getter function.
-      \item[Set Methods]: containing all the set methods (starting with the
-      prefix \texttt{set})
-      \item[Get Methods]: containing all the get methods.
-      % starting with the prefix \texttt{get})
-  \end{description}
-\end{itemize}
-
-\section{General nomenclature of classes and methods}
+\section{Nomenclature of classes and methods}
 This is a short list of rules for the nomenclature of files, classes and
 methods.
 \begin{itemize}
@@ -116,6 +83,13 @@ class datatime; //NO!!!
   
 class DataTime; //OK
 \end{lstlisting}
+  \item In case of composed names, each word (starting from the second one)
+  should start with capital letter.
+\begin{lstlisting}
+void matrixvectormultiplication( matrixtype& matrix ); //NO!!!
+  
+void matrixVectorMultiplication( matrix_Type& matrix ); //OK
+\end{lstlisting}
   \item All variables and methods names should clearly describe what they are
   doing.
 \begin{lstlisting}
@@ -130,13 +104,6 @@ void insertSingleElement( UInt row, UInt column, data_Type value );
 void replaceSingleElement( UInt row, UInt column, data_Type value );
   
   \end{lstlisting}
-  \item In case of composed names, each word (starting from the second one)
-  should start with capital letter.
-\begin{lstlisting}
-void matrixvectormultiplication( matrixtype& matrix ); //NO!!!
-  
-void matrixVectorMultiplication( matrix_Type& matrix ); //OK
-\end{lstlisting}
   \item Do not use abbreviations in the code! They prevent its readability.
 \begin{lstlisting}
 void elByElMul( vtype& v1, vtype& v2 ); //NOOOOO!!!
@@ -173,6 +140,7 @@ void setDataFile( const std::string& ); //NO!!!
 
 void setDataFile( const std::string& fileName ); //OK
 \end{lstlisting}
+\newpage
   \item All get functions and methods should be declared const, and should
   return a const object.
 \begin{lstlisting}
@@ -201,7 +169,7 @@ void showMe( std::ostream& output = std::cout ) const;
 \end{itemize}
 
 \newpage
-\section{LifeV conventions}
+\section{Conventions}
 This is a short list of programming and general conventions that should be used
 working with \texttt{LifeV} library.
 
@@ -254,6 +222,15 @@ working with \texttt{LifeV} library.
 
 \subsection{General conventions}
 \begin{itemize}
+  \item To uniform the code inside the library, all developers have to
+  use the same notation and in particular the same indentation style. The style
+  used in \texttt{LifeV} is the BSD/Allman Indent style. Please see
+  \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29} 
+  for more details about this style and its inventor.
+  Moreover please note that both Eclipse and Emacs (and probably also other editors)
+  have a special utility to help follow this style.
+  \item Before committing any code, be sure that all tabs have been converted
+  into $4$ spaces, and that your editor has removed endline spaces.
   \item Before committing any modification in the library, always check
   that these modifications have not broken any test present in the
   testsuite.
@@ -267,9 +244,28 @@ working with \texttt{LifeV} library.
   generally any kind of text must be in english language.
   \item Don't write comment or documentation using all caps look letters. Use
   them only for titles, or specific words.
+  \item In order to improve readability of the code, headers should
+  contain sections (see Section \ref{doxygen} for doxygen syntax) grouping
+  all the similar methods. Basically all the classes should contain at least
+  these sections:
+  \begin{description}
+      \item[Public Types]: containing the public enum and type definition(s).
+	  \item[Constructors \& Destructor]: containing the constructor(s), the
+      copy constructor and the destructor(s).
+      \item[Operators]: containing the operators defined in the class, such as
+      the \texttt{operator=} for making copies.
+      \item[Methods]: containing all the general methods of the class. Note that
+      a method performs operations on private variables and it is
+      not just a setter or getter function.
+      \item[Set Methods]: containing all the set methods (starting with the
+      prefix \texttt{set})
+      \item[Get Methods]: containing all the get methods.
+      % starting with the prefix \texttt{get})
+  \end{description}
 \end{itemize}
 
-\section{\texttt{LifeV} testsuite} \label{testsuite}
+\newpage
+\section{Testsuite development} \label{testsuite}
 All new packages and main classes should have a working test in the testsuite:
 this is mandatory to allow easy mantainance of all the classes in the
 library. Moreover, it is important to have a working test for the night
@@ -315,6 +311,7 @@ The testsuite has the purpose to test classes and packages with simple tests.
 Moreover, the tests should be no longer than $5$
 minutes, to allow a quick check of the library before committing new software.
 
+\newpage
 \section{Doxygen documentation} \label{doxygen}
 All classes should have documentation lines explaining in a concise
 but thorough way their usage. Doxygen provides an easy and general format to
@@ -362,6 +359,7 @@ properly.
   full description of the class should be given. This is a good place also to
   describe the list of parameters that are required by the class and that
   should be provided from a data file.
+  \newpage
   \item \label{point4} A detailed description of all the public methods
   contained in the class, and their input and output
   parameters. All the methods are grouped using the syntax:
