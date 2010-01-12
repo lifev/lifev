@@ -43,7 +43,7 @@ AT_INIT([lifev testsuite])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
-#m4_include([test_bdf/testsuite.at])
+m4_include([test_TemplateTest/testsuite.at])
 m4_include([test_cylinder/testsuite.at])
 m4_include([test_ethiersteinman/testsuite.at])
 m4_include([test_structure/testsuite.at])

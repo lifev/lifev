@@ -1,0 +1,24 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### TEST: TEST NAME ###############################################################################
+###################################################################################################
+
+AT_SETUP([test_TemplateTest])
+AT_KEYWORDS([])
+AT_DATA([data],[[
+
+# Place here the content of the GetPot data file for the night test.
+
+]])
+AT_CHECK([ln -sf ../../data/mesh/inria/Mesh &&
+		  mpirun -n 1 ../../test_TemplateTest/test_TemplateTest -c],[0],[ignore],[ignore])
+AT_CLEANUP([FilesCreatedByTheTest1.txt FilesCreatedByTheTest2.txt ...])
+

@@ -25,6 +25,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 DO_NOT_COMPILE=
 
 SUBDIRS		= data  \
+              test_TemplateTest \
               test_cylinder \
               test_getpot \
               test_heart \
@@ -37,10 +38,11 @@ SUBDIRS		= data  \
               test_meshReorder \
 	          test_ML \
 	          test_laplacian \
-              test_filters \
+              test_filters
               $(DO_NOT_COMPILE)
 
-TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
+TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
+           $(srcdir)/test_cylinder/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \
