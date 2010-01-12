@@ -229,7 +229,7 @@ public:
     //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
     //void updateCoupling(matrix_type couplingMatrix);// used for monolithic
     Real rescaleFactor(){return M_rescaleFactor;}
-    void updateStuff();
+    void updateVel();
     UInt const offset()const{return M_offset;}
 
 
@@ -708,7 +708,7 @@ iterate( bchandler_raw_type& bch )
 
 template <typename Mesh, typename SolverType> // for monolithic
 void VenantKirchhofSolver<Mesh, SolverType>::
-updateStuff()
+updateVel()
 {
     M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
