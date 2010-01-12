@@ -1,30 +1,26 @@
-# -*- mode: m4 -*-
+###################################################################################################
 #
-#  This file is part of the LifeV library
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2001-(>>>YEAR<<<) EPFL, Politecnico di Milano, INRIA          
 #
-#  Author(s): (>>>USER_NAME<<<) <(>>>AUTHOR<<<)>
-#       Date: (>>>ISO_DATE<<<)
+#      Author(s): (>>>USER_NAME<<<) <(>>>AUTHOR<<<)>
+#           Date: (>>>DATE<<<)
+#  License Terms: GNU GPL
 #
-#  Copyright (C) (>>>YEAR<<<) (>>>ORG<<<)
-#
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License, or (at your option) any later version.
-#
-#  This library is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#  Lesser General Public License for more details.
-#
-#  You should have received a copy of the GNU Lesser General Public
-#  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# \file (>>>FILE<<<)
-# \author (>>>USER_NAME<<<) <(>>>AUTHOR<<<)>
-# \date (>>>ISO_DATE<<<)
-# 
+###################################################################################################
+
+AT_SETUP([test_NameOfTheTest])    #Name of the test
+AT_KEYWORDS([])
+AT_DATA([data.txt],               #Data file
+[[
+
 (>>>POINT<<<)
->>>TEMPLATE-DEFINITION-SECTION<<<
-("ORG" "Your Organization: " "" "" "EPFL, INRIA, Politecnico di Milano")
+# Place here the content of the GetPot data file for the night test.
+
+]])
+AT_CHECK([ln -sf ../../data/mesh/inria/Mesh &&
+		  mpirun -n 1 ../../test_TemplateTest/test_TemplateTest -c],[0],[ignore],[ignore])
+AT_CLEANUP([FilesCreatedByTheTest1.txt 
+            FilesCreatedByTheTest2.txt 
+            ...
+          ]) # Files to be removed at the end of the test
