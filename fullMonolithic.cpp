@@ -147,7 +147,7 @@ fullMonolithic::evalResidual( vector_type&       res,
     }
     else
     {
-        this->M_solid->updateStuff();
+        this->M_solid->updateVel();
     }
     if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
     {
@@ -254,17 +254,13 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
     case 1:
         {
             M_meshMotion->setMatrix(M_precMatrPtr);
+            super::setupBlockPrec(rhs);
         }
         break;
-    case 2:
+    case 2:    case 3:    case 4:    case 5:
         {
             super::applyPreconditioner(M_robinCoupling, rhs);
-        }
-        break;
-    case 5:
-        {
-            super::applyPreconditioner(M_robinCoupling, rhs);
-            M_monolithicMatrix->GlobalAssemble();
+            super::setupBlockPrec(rhs);
         }
         break;
     case 6:
@@ -330,7 +326,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
             *M_fluidBlock+=*M_solidBlock;
             addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
             couplingMatrix(M_fluidBlock, 15);
-            //*M_fluidBlock+=*M_SDMatrix;
+            //*M_fluidBlock+=*M_matrShapeDer;
             this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
 
             M_BCh_Robin->setOffset(M_offset);
@@ -374,7 +370,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
             addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
             addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
             couplingMatrix(M_fluidBlock, 7);
-            //*M_fluidBlock+=*M_SDMatrix;
+            //*M_fluidBlock+=*M_matrShapeDer;
             this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
 
             M_BCh_flux->setOffset(M_offset-M_fluxes);
@@ -470,7 +466,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
                 M_meshBlock.reset(new matrix_type(*M_monolithicMap));
                 addDiagonalEntries(1., M_meshBlock, mapWithoutMesh(), 0);
                 M_meshMotion->setMatrix(M_meshBlock);
-                //*M_meshBlock += *M_SDMatrix;
+                //*M_meshBlock += *M_matrShapeDer;
                 this->shapeDerivatives(M_meshBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
                 M_meshBlock->GlobalAssemble();
 
