@@ -1533,7 +1533,7 @@ namespace LifeV
             ASSERT_PRE( _bPoints.size() < _bPoints.capacity(), "Boundary Point list size exceeded" <<
                         _bPoints.size() + 1 << " " << _bPoints.capacity() ) ;
             _bPoints.push_back( pp );
-            pp->boundary() = true;
+            pp->setBoundary(true);
         }
         return pointList.back();
     }

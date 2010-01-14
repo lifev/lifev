@@ -51,7 +51,7 @@ Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary )
 
 Geo0D::Geo0D( Geo0D const & G )
     :
-    MeshEntityWithBoundary( G.id(), G._boundary ),
+    MeshEntityWithBoundary( G.id(), G.boundary() ),
     _coor( G._coor )
 {
 }
@@ -62,7 +62,7 @@ Geo0D::operator=( Geo0D const & G )
     if (  this == &G )
         return *this;
     this->setId(G.id());
-    _boundary = G._boundary;
+    setBoundary(G.boundary());
     _coor = G._coor;
     return *this;
 }

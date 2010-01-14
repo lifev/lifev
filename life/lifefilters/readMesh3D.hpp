@@ -34,6 +34,8 @@
 #include <life/lifefilters/mesh_util.hpp>
 #include <life/lifefilters/selectMarker.hpp>
 
+//#include <life/lifefilters/GmshReader.hpp>
+
 namespace LifeV
 {
 /*----------------------------------------------------------------------*
@@ -775,7 +777,12 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
    @param regionFlag identifier for the region
    @param verbose whether the function shall be verbose
    @return true if everything went fine, false otherwise
+
+   /author Samuel Quinodoz 2009.10.28
+   
+   Based on the official Gmsh specification
 */
+
 template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
@@ -783,7 +790,169 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
               EntityFlag regionFlag,
               bool verbose=false )
 {
-    std::ifstream __is ( filename.c_str() );
+  std::cout << " Not finished " << std::endl;
+  /*GmshReader fileReader(filename,true,std::cout); */
+
+  /*ERROR_MSG("msh loading is currently not available!");
+
+  // Try to open the file
+  if (verbose) std::cout << " -GmshRead- Opening the file ..." <<  std::flush;
+  std::ifstream input_file (filename.c_str());
+  std::string current_string;
+
+  // Important variables
+
+  unsigned long int nNodes; 
+  std::vector<std::vector<Real> > NodesCoor;
+  std::vector<int> NodesFlag;
+
+  unsigned long int nElements;
+  
+
+  // In case we cannot open the file, abort
+  if (input_file.fail())
+    {
+      std::cerr << " Gmsh Mesh Reader : Impossible to open the file " << filename << std::endl;
+      std::cerr << " Aborting ... " << std::endl;
+      abort();
+    };
+  
+  if (verbose) std::cout << " Ok " << std::endl;
+  if (verbose) std::cout << " -GmshRead- Reading the head ..." << std::flush;
+
+  // Read the first line of the file
+  input_file >> current_string;
+  
+  if (!current_string.compare("$MeshFormat") == 0)
+    {
+      std::cerr << " Gmsh file start with the keyword $MeshFormat " << std::endl;
+      std::cerr << " Aborting ... " << std::endl;
+      abort();
+    };
+  
+  // Read the second line of the file
+  // Check the version
+  double version;
+  input_file >> version;
+  if (version != 2.0)
+    {
+      std::cerr << " Version " << version << " not supported " << std::endl;
+      std::cerr << " Aborting ... " << std::endl;
+      abort();
+    };
+  
+  // Check the format
+  double file_format;
+  input_file >> file_format;
+  if (file_format == 1)
+    {
+      std::cerr << " Binary files not supported " << std::endl;
+      std::cerr << " Aborting ... " << std::endl;
+      abort();
+    }
+  else if (file_format !=0)
+    {
+      std::cerr << " Unknown file format " << file_format << std::endl;
+      std::cerr << " Aborting ... " << std::endl;
+      abort();
+    };
+  
+  // Read the float format... useless
+  double float_lenght;
+  input_file >> float_lenght;
+  
+  // Read the third line of the file
+  input_file >> current_string;
+  // Should be the end of the MeshFormat
+  
+  if (verbose) std::cout << " Ok " << std::endl;
+  if (verbose) std::cout << " -GmshRead- Skipping the names ..." << std::flush;
+
+  // Read the fourth line ... Physical Names
+  input_file >> current_string;
+
+  // Read the number of names
+  int nPhysicalNames;
+  input_file >> nPhysicalNames;
+  
+  // Skip all the names
+  for (int i_skip(0); i_skip<nPhysicalNames; ++i_skip)
+    {
+      getline(input_file,current_string);
+    };
+  
+  // Read the line ... should be EndPhysicalNames
+  input_file >> current_string;
+
+
+
+
+
+  if (verbose) std::cout << " Ok " << std::endl;
+  if (verbose) std::cout << " -GmshRead- Reading the nodes ..." << std::endl;
+  
+  // Read the line ... should be Nodes
+  input_file >> current_string;
+  
+  // Read the number of nodes
+  input_file >> nNodes;
+  
+  if (verbose) std::cout <<  " -GmshRead-      " << nNodes << " announced " << std::endl;
+
+  // Read all the nodes
+  NodesCoor = std::vector<std::vector<Real> > (nNodes, std::vector<Real>(3,0));
+  NodesFlag = std::vector<int> (nNodes,-1); // Default is -1, to detect which have been changed
+
+  Real n_i,x_i,y_i,z_i;
+  for (int i(0); i<nNodes; ++i)
+    {
+      input_file >> n_i >> x_i >> y_i >> z_i;
+
+      // Check
+      if (input_file.bad() || input_file.eof())
+	{
+	  std::cerr << " Wrong declaration of the nodes " << std::endl;
+	  if (verbose) << std::cout << " -GmshRead-     " << i << " nodes found " << std::endl;
+	  abort();
+	};
+      
+      NodesCoor[i][0]=x_i;
+      NodesCoor[i][1]=y_i;
+      NodesCoor[i][2]=z_i;
+    };
+  
+  // Read the end line
+  input_file >> current_string;
+  
+  if (current_string.compare("$EndNodes")!=0)
+    {
+      std::cerr << " Too much nodes declared " << std::endl;
+      abort();
+    };
+  
+  if (verbose) std::cout << " -GmshRead-     " << nNodes << " found " << std::endl;
+
+
+
+
+
+
+  if (verbose) std::cout << " -GmshRead- Reading the elements " << std::endl;
+
+  
+  // This should be $Elements
+  input_file >> current_string;
+  
+
+  
+  
+
+  
+  // Now we have to read the elements
+
+  ERROR_MSG(" BOTTOM REACHED ");
+  */
+  /*std::ifstream __is ( filename.c_str() );
     Debug() << "gmsh reading: "<< filename << "\n";
 
     char __buf[256];
@@ -1019,7 +1188,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         throw std::logic_error( __ex.str() );
     }
 
-    return true;
+    return true; */
 }
 
 

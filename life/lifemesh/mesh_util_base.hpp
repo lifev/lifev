@@ -838,7 +838,7 @@ fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
     for ( UInt j = 1;j <= numitems;++j )
       bpts[mesh.bElement(k).point(j).id()-1]=true;
   for (ID  k = 1; k <= mesh.storedPoints() ;++k )
-    mesh.point(k).boundary()=bpts[k-1];
+      mesh.point(k).setBoundary(bpts[k-1]);
     bpts.clear();
     std::vector<bool> temp;
     bpts.swap(temp);
