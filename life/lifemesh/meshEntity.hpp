@@ -1,142 +1,317 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-/*! file MeshEntity.h */
+//@HEADER
+
+/*!
+    @meshEntity.hpp
+    @brief This file contains the MeshEntity and MeshEntityWithBoundary classes.
+
+    The classes included in this file are usefull to store the identifiers of
+    the different structures stored in the meshes.
+ */
+
 #ifndef _MESHENTITY_HH_
 #define _MESHENTITY_HH_
+
 #include <life/lifecore/life.hpp>
 
 namespace LifeV
 {
-//using namespace std; //Pretty useless
+//! MeshEntity - This is the base class to store the identifiers.
+/*!
+   In this class, there are two identifiers stored:
+    <ol>
+        <li> The global identifier is defined for the whole mesh.
+        <li> The local identifier is defined as the identifier for
+        a particular processor.
+    </ol>
 
-//! Base class of all Mesh Entities
-/*! It contains the Entity ID and it defined the comparison operators */
+    When running the code in serial (1 processor), the identifiers
+    are then the same.
+    
+    This class provides the method and operators to handle easily
+    the identifiers.
+
+    Note: Documentation by Samuel Quinodoz, implementation anterior
+    to the documentation, without name of author.
+ */
+
 class MeshEntity
 {
 public:
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    /*!
+       Using this constructor, both identifiers are set to 0.
+     */
     MeshEntity():
         M_id( 0 ),
         M_localId( 0 )
-        {}
-    ;
+    {};
+   
+    //! Copy Constructor
     MeshEntity(const MeshEntity& meshEntity):
         M_id     (meshEntity.M_id),
         M_localId(meshEntity.M_localId)
-        {}
-    ;
+    {};
+
+    //! Constructor with a single value for both identifiers.
+    /*!
+       @param id The value for both identifers.
+     */   
     MeshEntity( ID id ):
         M_id( id ),
         M_localId( id )
-        {}
-
+    {};
+    
+    //! Full constructor, where both identifiers are specified.
+    /*!
+       @param id The value for the global ID.
+       @param lid The value for the local ID.
+     */   
     MeshEntity( ID id, ID lid ):
         M_id( id ),
         M_localId( lid )
-        {}
-    ;
-    ID id() const
-        {
-            return M_id;
-        }
+    {};
 
-    ID localId() const
-        {
-            return M_localId;
-        }
+    //! Destructor
+    ~MeshEntity()
+    {};
 
-    void setId( ID id)
-        {
-            M_id = id;
-        }
+    //@}
 
-    void setLocalId( ID id)
-        {
-            M_localId = id;
-        }
+    
+    //! @name Methods
+    //@{
+    
+    
+    //! Display the informations stored by this class
+    void showMe( std::ostream& output = std::cout ) const
+    {
+        output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
+    };
 
+    
+    //@}
 
+    
+    //! @name Operators
+    //@{
 
-//     ID & id()
-//     {
-//         return M_id;
-//     }
-
-    bool operator==( MeshEntity & e ) const
+    //! Equivalence operator that check if BOTH identifiers are the same.
+    /*!
+      @param e The mesh entity to be compared with.
+     */
+    bool operator==(const MeshEntity & e ) const
     {
         bool res = ( ( M_id == e.id() ) && ( M_localId == e.M_localId ));
         return res;
     };
 
-
-    bool operator<=( MeshEntity & e ) const
+    //! Relation operator that perform the same comparison on the GLOBAL identifier.
+    /*!
+      @param e The mesh entity to be compared with.
+    */
+    bool operator<=(const MeshEntity & e ) const
     {
         return M_id <= e.id();
     };
-
-    bool operator>=( MeshEntity & e ) const
+   
+    //! Relation operator that perform the same comparison on the GLOBAL identifier.
+    /*!
+      @param e The mesh entity to be compared with.
+    */
+    bool operator>=(const MeshEntity & e ) const
     {
         return M_id >= e.id();
     };
 
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+    
+    //! Method to set the global identifier.
+    /*!
+      @param id The new global identifier.
+    */
+    inline void setId( ID id)
+    {
+        M_id = id;
+    };
+
+    //! Method to set the local identifier.
+    /*!
+      @param id The new local identifier.
+    */
+    inline void setLocalId( ID id)
+    {
+        M_localId = id;
+    };
+    
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Method to get the global identifier.
+    /*!
+      @return The global identifier.
+    */
+    inline const ID & id() const
+    {
+        return M_id;
+    };
+
+    //! Method to get the local identifier.
+    /*!
+      @return The local identifier.
+    */
+    inline const ID & localId() const
+    {
+        return M_localId;
+    };
+    
+    //@}
+    
 private:
     ID M_id;
-    ID M_localId;
-
+    ID M_localId;  
 };
 
 
-//! Base class with boundary
-/*! Contains info on boundary position */
+
+//! MeshEntityWithBoundary - This is a MeshEntity with an additional information on the boundary.
+/*! 
+  The additional boolean that is stored is used to know if the MeshEntity is on the boundary
+  or not. This class provides all the methods needed to handle easily this additional information.
+
+  Note: Documentation by Samuel Quinodoz, implementation anterior
+  to the documentation, without name of author.
+ */
+
 class MeshEntityWithBoundary : public MeshEntity
 {
 public:
-    MeshEntityWithBoundary() : MeshEntity(), _boundary( false )
-    {}
-    ;
+    
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty constructor
+    /*!
+      This constructor calles the empty constructor of MeshEntity and 
+      set the boundary indicator to false.
+    */
+    MeshEntityWithBoundary() : MeshEntity(), M_boundary( false )
+    {};
+   
+    //! Copy constructor
     MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
         MeshEntity( meshEntityWithBoundary ),
-        _boundary( meshEntityWithBoundary._boundary )
-    {}
-    ;
-    MeshEntityWithBoundary( ID i, bool boundary = false ) :
-        MeshEntity( i ),
-        _boundary( boundary )
-    {}
-    ;
-    //! Tells if  item is on the boundary
-    bool boundary() const
+        M_boundary( meshEntityWithBoundary.M_boundary )
+    {};
+    
+    //! Specific constructor
+    /*!
+      This is the "full" constructor for this class.
+      @param id The identifier to be set for both (global and local) identifiers. Use
+      a set method if you want different identifiers.
+      @param boundary The value of the boundary indicator.
+    */
+    MeshEntityWithBoundary( ID id, bool boundary = false ) :
+        MeshEntity( id ),
+        M_boundary( boundary )
+    {};
+
+    //! Destructor
+    ~MeshEntityWithBoundary()
+    {};
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+    
+
+    //! Display the informations stored by this class
+    void showMe( std::ostream& output = std::cout ) const
     {
-        return _boundary;
+        output << " Global ID : " << id() << " -- " << " Local ID " << localId();
+        if (M_boundary)
+        {
+            output << " -- Boundary ";
+        };
+        output << std::endl;
     };
-    //! Changes boundary indicator
-    bool & boundary()
+
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    
+    //! Set method for the boundary indicator
+    /*!
+      @param boundary The value to be set for the boundary indicator.
+    */
+    inline void setBoundary(const bool& boundary)
     {
-        return _boundary;
+        M_boundary = boundary;
     };
-protected:
-    bool _boundary;
+    
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+
+    //! Tells if it is on the boundary
+    inline const bool & boundary() const
+    {
+        return M_boundary;
+    };
+    
+
+    //@}
+
+private:
+    bool M_boundary;
 };
 
 
 //! Mesh Entity with an orientation
 /*! \note Not Used so far! */
-class OrientedMeshEntity: public MeshEntity
+/*class OrientedMeshEntity: public MeshEntity
 {
 public:
     OrientedMeshEntity() :
@@ -165,6 +340,8 @@ public:
     }
 protected:
     bool _orient;
-};
-}
+    }; */
+
+
+} // End of namespace LifeV
 #endif
