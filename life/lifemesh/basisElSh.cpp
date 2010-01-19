@@ -182,6 +182,67 @@ LinearTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing
 ///////////////////////
 
 /*
+          -- LinearTetraBubble
+
+                4
+               / .
+              /  \.3
+             /  . \\
+            / . .5 \\
+           /.       \!
+         1 ----------2
+
+
+*/
+id_type
+LinearTetraBubble::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+// eToP(i,j) = localId of jth point on ith local edge
+{
+    static const id_type _eToP[ 2 * numEdges ] =
+        {
+            1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
+        };
+    ASSERT_BD( _point > 0 && _point < 3 ) ;
+    ASSERT_BD( _localEdge > 0 && _localEdge <= numEdges ) ;
+    return _eToP[ 2 * _localEdge + _point - 3 ];
+}
+
+id_type
+LinearTetraBubble::fToP( id_type const _localFace, id_type const _point )   // indexing from 1!!!
+// fToP(i,j) = localId of jth point on ith local face
+{
+    static const id_type _fToP[ 3 * numFaces ] =
+        {
+            1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
+        }
+        ; // AV - November 2000: fixed a little bug
+    //  {1,3,2, 1,2,4, 2,3,4, 3,1,4};
+    ASSERT_BD( _point > 0 && _point < 4 ) ;
+    ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
+    return _fToP[ 3 * _localFace + _point - 4 ];
+}
+pair<id_type, bool>
+LinearTetraBubble::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
+// fToE(i,j) = localId of jth edge on ith local face
+{
+    static const id_type _fToE[ 3 * numFaces ] =
+        {
+            3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
+        };
+    static const bool _orient[ 3 * numFaces ] =
+        {
+            0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1
+        };
+
+    ASSERT_BD( _edge > 0 && _edge < 4 ) ;
+    ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
+
+    return make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
+}
+
+///////////////////////
+
+/*
           -- QuadraticTetra
 
 

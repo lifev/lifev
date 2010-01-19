@@ -180,13 +180,6 @@ public:
 
 //    Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetra_Map;}
 
-    // createMap does not call createImportExport
-    void               createMap(int   NumGlobalElements,
-                                 int   NumMyElements,
-                                 int*  MyGlobalElements,
-                                 int   IndexBase,
-                                 const Epetra_Comm &Comm)  ;
-
     map_ptrtype const & getMap  ( EpetraMapType maptype) const;
 
     //! This methods create a pointer to a EpetraMap that has points only on processor root
@@ -205,7 +198,16 @@ public:
 
 //    EpetraMap&          uniqueMap();
 
+
+
 private:
+
+    // createMap does not call createImportExport
+    void               createMap(int   NumGlobalElements,
+                                 int   NumMyElements,
+                                 int*  MyGlobalElements,
+                                 int   IndexBase,
+                                 const Epetra_Comm &Comm)  ;
 
     /*
     Epetra_Map const * getRepeatedEpetra_Map()       const

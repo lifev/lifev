@@ -42,7 +42,9 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 #include <life/lifefem/localDofPattern.hpp>
+#include <life/lifemesh/basisElSh.hpp>
 #include <algorithm>
+#include <map>
 
 namespace LifeV
 {
@@ -59,6 +61,8 @@ passing the mesh to the constructor, or calling the method Dof::update().
 
 \note The methods bulds the table for ALL degrees of freedom, i.e. it does not handle any essential
 boundary condition.
+
+Now the class include also a local-to-global table with DOF grouped by (internal) face that was implemented in the old versions into the dofByFace.hpp and dofByFace.cpp files created by D. A. Di Pietro in 2004
 */
 class Dof
 {
@@ -121,7 +125,7 @@ public:
       \param localNode the local DOF numbering (starting from 1)
       \return The numbering of the DOF
     */
-    inline ID localToGlobal( const ID ElId, const ID localNode ) const
+    inline ID localToGlobal( const ID ElId, const ID localNode) const
         {
             return _ltg( localNode, ElId );
         }
@@ -130,6 +134,12 @@ public:
     UInt numElements() const
         {
             return _nEl;
+        }
+
+    //! Number of faces in the mesh
+    UInt numFaces() const
+        {
+            return _numFaces;
         }
 
     //! Number of local vertices (in a elment)
@@ -150,10 +160,30 @@ public:
             return nlf;
         }
 
+    //Internal data
+
+    //! Number of Local DofByFace
+    UInt numLocalDofByFace() const {
+        ASSERT_PRE( (_numLocalDofByFace>0) , "This data are not available for this reference element");
+        return _numLocalDofByFace;
+    }
+
+    /*!
+      Returns the global numbering of a DOF, given an internal face and the
+      local numbering
+      \param faceId the internal face ID
+      \param localDOF the local DOF numbering (starting from 1)
+      \return The global numbering of the DOF
+    */
+    ID localToGlobalByFace(const ID& faceId, const ID& localDOF, bool& exist ) const;
+
     //! Ouput
     void showMe( std::ostream & out = std::cout, bool verbose = false ) const;
+    void showMeByFace(std::ostream& out = std::cout, bool verbose = false) const;
 
 private:
+    typedef ID ( *FTOP )( ID const localFace, ID const point );
+
     UInt _offset;
     UInt _totalDof;
     UInt _nEl;
@@ -161,6 +191,16 @@ private:
     UInt nle;
     UInt nlf;
     Container _ltg; // container is:  typedef SimpleArray<UInt> Container;
+
+    UInt _numFaces;             // number of faces in the mesh
+
+    std::vector<std::vector<ID> > _ltgByFace;
+    //Container _ltgByFace;       // connection array that maps the local dof of
+                                // the face to the global dof
+    std::map<ID,ID> _gtlByFace; // connection between global dof and local numbering
+    FTOP _fToP;                 // local array that maps the local dof of the
+                                // face to the local dof the the element
+    UInt _numLocalDofByFace;    // number of dof on a face
     UInt _ncount[ 5 ];
 };
 
@@ -180,8 +220,40 @@ Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) :
         nlv      ( 0 ),
         nle      ( 0 ),
         nlf      ( 0 ),
-        _ltg     ()
+        _ltg     (),
+        _numFaces( 0 ),
+        _ltgByFace(),
+        _gtlByFace()
 {
+    //Getting the face
+    switch( _fe.nbLocalDof )
+    {
+        case 4:
+            _fToP = LinearTetra::fToP;
+            _numLocalDofByFace = 3;
+            break;
+        case 5:
+            _fToP = LinearTetraBubble::fToP;
+            _numLocalDofByFace = 3;
+            break;
+        case 10:
+            _fToP = QuadraticTetra::fToP;
+            _numLocalDofByFace = 6;
+            break;
+        case 8:
+            _fToP = LinearHexa::fToP;
+            _numLocalDofByFace = 4;
+            break;
+        case 27:
+            _fToP = QuadraticHexa::fToP;
+            _numLocalDofByFace = 27;
+            break;
+        default:
+            std::cout << "Warning: This refFE is not available for the dof by face." << std::endl;
+            _numLocalDofByFace = 0;
+            break;
+    }
+
     for ( UInt i = 0; i < 5; ++i )
         _ncount[ i ] = 0;
     update( mesh );
@@ -330,6 +402,30 @@ void Dof::update( Mesh& M )
     if ( update_faces )
       M.cleanElementFaces();
 #endif
+
+    //UPDATE of the boundary face (add the 13th november 2009)
+    _numFaces = M.numFaces();
+
+    if(_numLocalDofByFace>0){
+        UInt lfID = 0;
+        for(UInt k = 1; k <= _nEl; k++)
+        {
+            for(UInt j = 1; j <= nlf; j++)
+            {
+                ID fID  = M.faceList( M.localFaceId( k, j ) ).id();
+                std::vector<ID> v(_numLocalDofByFace,0);
+                for(UInt i = 1; i <= _numLocalDofByFace; i++)
+                {
+                    v[i-1] = _ltg( _fToP( j, i ), k );
+                }
+                _gtlByFace[fID] = _ltgByFace.size();
+                _ltgByFace.push_back(v);
+            }
+        }
+    }
+
+
 }
+
 }
 #endif

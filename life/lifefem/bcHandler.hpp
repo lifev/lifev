@@ -376,6 +376,7 @@ private:
         }
         void setNormal() { M_normal = true; }
         void setTangential() { M_tangential = true; }
+        void setDirectional() {M_directional = true;}
         bool isEssential() const
         {
             bool result = true;
@@ -390,6 +391,7 @@ private:
         bool M_components[nDimensions];
         bool M_normal;
         bool M_tangential;
+        bool M_directional;
     };
 
     //! set of markers which are in the mesh but not in the list
@@ -422,6 +424,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
     EntityFlag marker; //will store the marker of each geometric entity
+    EntityFlag elementMarker; //will store the marker of the element
 
     typedef typename GeoShape::GeoBShape GeoBShape;
 
@@ -461,6 +464,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
             iBElEl = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
 
             feBd.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
+            elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker (added by Gwenol Grandperrin)
 
             // ===================================================
             // Vertex based Dof
@@ -612,7 +616,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             iEdEl = GeoShape::fToE( iBElEl, iLocalBElement ).first; // local edge number (in element)
 #endif
                             marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
-
+                            if(marker!= elementMarker){continue;}
                             // Finding this marker on the BC list
                             whereList.clear();
                             where = M_bcList.begin();

@@ -192,6 +192,45 @@ const bool __bcUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduc
         typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
 
 
-
-
+//
+// BCFunctionDirectional
+//
+BCFunctionDirectional::BCFunctionDirectional( const BCFunctionDirectional& bcf )
+    :
+    BCFunctionBase( bcf ),
+    _M_vectFct( bcf._M_vectFct )
+{
 }
+
+BCFunctionDirectional::BCFunctionDirectional( function_type g, function_type vectFct )
+    :
+    BCFunctionBase( g ),
+    _M_vectFct( vectFct )
+
+{
+}
+
+//! set the functions after having built it.
+void
+BCFunctionDirectional::setFunctions_Directional( function_type g, function_type vectFct )
+{
+    setFunction( g );
+    _M_vectFct = vectFct;
+}
+
+Real
+BCFunctionDirectional::vectFct( const Real& t, const Real& x, const Real& y,
+                       const Real& z, const ID& icomp ) const
+{
+    return _M_vectFct( t, x, y, z, icomp );
+}
+
+BCFunctionBase*
+createBCFunctionDirectional( BCFunctionBase const* __bc )
+{
+    return new BCFunctionDirectional( ( BCFunctionDirectional const& )*__bc );
+}
+// register BCFunctionMixte in factory for cloning
+const bool __bcdirectional = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionDirectional), &createBCFunctionDirectional );
+
+} //End of namespace LifeV

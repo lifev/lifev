@@ -35,7 +35,7 @@
   -# a type (Essential, Natural, Mixte),
 
   -# a mode of implementation (Scalar, Full, Component, Normal,
-     Tangential),
+     Tangential,Resistance,Directional),
 
   -# a functor holding the data function,
 
@@ -70,7 +70,7 @@ namespace LifeV
 /** Boundary condition basic types
     Essential, Natural, Mixte, Flux, Resistance,
 */
-  enum BCType{Essential, Natural, Mixte, Flux, Resistance};
+enum BCType{Essential, Natural, Mixte, Flux, Resistance};
 //    ,UDepEssential,UDepNatural,UDepMixte};
 
 /** Type for boundary conditions application modes
@@ -85,7 +85,7 @@ namespace LifeV
 
 -# Tangential: for vector problems dealing with tangential components
 */
-enum BCMode{Scalar, Full, Component, Normal, Tangential};
+enum BCMode{Scalar, Full, Component, Normal, Tangential,Directional};
 
 /*!
   \class BCBase
@@ -422,13 +422,13 @@ public:
 
     //! Returns the liste size
     UInt list_size() const;
- 
-   //! Returns the liste size of IdGlobal 
+
+   //! Returns the liste size of IdGlobal
    UInt list_size_IdGlobal() const;
 
    //! Returns element of list_IdGlobal
    int IdGlobal( int id) const;
-   
+
     //! Set the offset
     void setOffset(int offset) {_M_offset = offset;}
 
@@ -491,7 +491,7 @@ private:
     //! to which the BC applies
     std::set<boost::shared_ptr<IdentifierBase>, identifierComp> listIdGlobal;
 
-    //! the list of IdGlobal 
+    //! the list of IdGlobal
     std::vector<int> _M_IdGlobal;
 
     //! container for id's when the list is finalised
@@ -511,7 +511,7 @@ private:
 
     //! Transfert between list and vector containers
     void finalise();
-  
+
     //! Transfert between list and vector containers
     void  finaliseIdGlobal();
 };

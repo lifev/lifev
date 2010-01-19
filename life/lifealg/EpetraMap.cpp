@@ -35,6 +35,10 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
     M_exporter(),
     M_importer()
 {
+
+    //Sort MyGlobalElements to avoid a bug in Trilinos (9?) when multiplying two matrices (A * B^T)
+    std::sort (MyGlobalElements, MyGlobalElements + NumMyElements);
+
     createMap( NumGlobalElements,
                NumMyElements,
                MyGlobalElements,
@@ -188,7 +192,8 @@ EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const i
     const int maxMyElements = std::min(maxid, _blockMap.NumMyElements());
     MyGlobalElements.reserve(maxMyElements);
 
-
+    //Sort MyGlobalElements to avoid a bug in Trilinos (9?) when multiplying two matrices (A * B^T)
+    std::sort (MyGlobalElements.begin(), MyGlobalElements.end());
 
     // We consider that the source Map may not be ordered
     for (int i(0); i < _blockMap.NumMyElements(); ++i)

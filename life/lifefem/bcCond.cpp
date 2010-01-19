@@ -104,6 +104,11 @@ BCBase::BCBase( const std::string& name,
                 	_M_comp.push_back( i );
             }
             break;
+        case Directional:
+            nComp = 1;
+            _M_comp.reserve( nComp );
+            _M_comp.push_back( nDimensions );
+            break;
         default:
             ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
         }
@@ -215,6 +220,11 @@ BCBase::BCBase( const std::string& name,
         _M_comp.push_back( nDimensions );
 
         break;
+    case Directional:
+        nComp = 1;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( nDimensions );
+        break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
@@ -315,6 +325,11 @@ BCBase::BCBase( const std::string&  name,
                 _M_comp.push_back( i );
             break;
         case Normal:
+            nComp = 1;
+            _M_comp.reserve( nComp );
+            _M_comp.push_back( nDimensions );
+            break;
+        case Directional:
             nComp = 1;
             _M_comp.reserve( nComp );
             _M_comp.push_back( nDimensions );

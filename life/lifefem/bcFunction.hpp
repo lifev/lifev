@@ -188,8 +188,8 @@ namespace LifeV
 /* much similar to BCFunctionBase but different func prototipe
    for bc, I derive BCFunctionBaseUDepending from BCFunctionBase
    only becouse BCBase and BCHandler can work with us with little change,
-   really I don't like that class BCFunctionBase has fixed function_type 
-   prototype in the base class, but I conform 
+   really I don't like that class BCFunctionBase has fixed function_type
+   prototype in the base class, but I conform
  */
 class BCFunctionUDepBase
 {
@@ -234,7 +234,71 @@ typedef LifeV::singleton< LifeV::factoryClone< BCFunctionUDepBase > > FactoryClo
 /* now I can store this in a BCBase */
 
 
-}
+/*!
+
+ \class BCFunctionDirectional
+
+ Class (STL functor) that holds the user defined fonctions for a directional Dirichlet bc
+
+  The data funcitions given by the user must have the following declaration
+  Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
+*/
+class BCFunctionDirectional
+    :
+    public BCFunctionBase
+{
+public:
+
+    typedef BCFunctionBase::function_type function_type;
+
+    //! Default constructor
+    /*!
+      The user must supply a function by calling setFunction(..)
+    */
+    BCFunctionDirectional()
+        {}
+
+
+    //! Constructing from user defined functions
+    /*!
+      \param g user defined function
+      \param vectFct user defined function to defined the direction where the Dirichlet condition is imposed
+    */
+    BCFunctionDirectional( function_type g, function_type vectFct );
+
+    //! Constructing from a user defined functor
+    /*!
+      \param bcf user defined functor
+    */
+    BCFunctionDirectional( const BCFunctionDirectional& bcf );
+
+
+    //! Set the functions in the mixte case (beware : plural!)
+    /*!
+      \param g : the user defined function
+      \param vectFct user defined function to defined the direction where the Dirichlet condition is imposed
+    */
+    void setFunctions_Directional( function_type g, function_type vectFct );
+
+
+    //! Method to call the auxiliary user defined function
+    /*!
+      \param t time
+      \param x coordinate
+      \param y coordinate
+      \param z coordinate
+      \param i component of the vector function
+      \return i-component of the user defined fonction evaluted in (t,x,y,z)
+    */
+    Real vectFct( const Real& t, const Real& x, const Real& y,
+               const Real& z, const ID& i ) const;
+private:
+    //! user defined function
+    function_type _M_vectFct;
+};
+
+}//End of namespace LifeV
+
 #endif
 
 

@@ -167,6 +167,7 @@ class QuadraticTriangle;
 class LinearQuad;
 class QuadraticQuad;
 class LinearTetra;
+class LinearTetraBubble;
 class QuadraticTetra;
 class LinearHexa;
 class QuadraticHexa;
@@ -273,6 +274,22 @@ public:
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
+    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static id_type fToP( id_type const _localFace, id_type const _point );
+    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+};
+//! \ingroup GeoShape
+class LinearTetraBubble:
+            public Tetra
+{
+public:
+    typedef Tetra BasRefSha;
+    typedef LinearTriangle GeoBShape;
+    static const UInt numPoints = 5;
+    static const UInt nbPtsPerVertex = 1;
+    static const UInt nbPtsPerEdge = 0;
+    static const UInt nbPtsPerFace = 0;
+    static const UInt nbPtsPerVolume = 1;
     static id_type eToP( id_type const _localEdge, id_type const _point );
     static id_type fToP( id_type const _localFace, id_type const _point );
     static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );

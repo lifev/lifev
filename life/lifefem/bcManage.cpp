@@ -31,7 +31,6 @@
 
 namespace LifeV
 {
-
 void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad)
 {
     // Author:	Gwenol Grandperrin
@@ -88,6 +87,58 @@ void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad)
             (*mapIt).second[4] = ny*nz/nxk;
             (*mapIt).second[5] = -nxk;
         }
+    }
+}
+
+void bcExportTriadToParaview(std::map< ID,std::vector< Real > > &triad,std::string filename)
+{
+    //Initialization of the map to store the normal vectors
+    std::map< ID,std::vector< Real > >::iterator mapIt;
+
+    filename.append(".vtk");
+    std::ofstream file(filename.c_str());
+
+    //Is the file open?
+    if (file.fail())
+    {
+        cerr << "Error: The file is not opened " << std::endl;
+    }
+    else
+    {
+        //To define herein
+        unsigned int nbPoints(triad.size());
+
+        //Writing the header
+        file << "# vtk DataFile Version 2.0" << std::endl;
+        file << "Normal directions" << std::endl;
+        file << "ASCII" << std::endl;
+
+        //Writing the points
+        file << "DATASET POLYDATA" << std::endl;
+        file << "POINTS " << nbPoints << " float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[9] << "\t" << (*mapIt).second[10] << "\t" << (*mapIt).second[11] << std::endl;
+
+        //Starting the data part of the file
+        file << "POINT_DATA " << nbPoints << std::endl;
+
+        //Writing t1
+        file << "VECTORS cell_tangent_1 float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[0] << "\t" << (*mapIt).second[1] << "\t" << (*mapIt).second[2] << std::endl;
+
+        //Writing t2
+        file << "VECTORS cell_tangent_2 float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[3] << "\t" << (*mapIt).second[4] << "\t" << (*mapIt).second[5] << std::endl;
+
+        //Writing n
+        file << "VECTORS cell_normals float" << std::endl;
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+            file << (*mapIt).second[6] << "\t" << (*mapIt).second[7] << "\t" << (*mapIt).second[8] << std::endl;
+
+        //Closing the file
+        file.close();
     }
 }
 

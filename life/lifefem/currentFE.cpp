@@ -133,10 +133,10 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
   // M(x)-p = 0
   // with M the mapping, p the given point and x its coordinates in
   // the reference frame. However, this is more expensive and inexact.
-  
+
   // ASSERT(geoMap.name.compare("P1")==0," The 'coorBackMap' function should NOT be used in this case! ");
 
-  // In the P1 mapping case, we want to solve the problem 
+  // In the P1 mapping case, we want to solve the problem
   // P = \lamda_1 V_1 + \lambda_2 V_2 + \lambda_3 V_3
   // where V_i is the ith vertice of the cell because we have then
   // \hat{P} = \lambda_1 \hat{V}_1 + \lambda_2 \hat{V}_2 + \lambda_3 \hat{V}_3
@@ -144,7 +144,7 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
   //
   // For "simplicity", we use Cramer's formula (no need for an heavy solver)
 
-  
+
   if (nbCoor ==1)
     {
 
@@ -152,41 +152,41 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
 
       const Real a11=point(1,0)-point(0,0);
       const Real b1=x-point(0,0);
-      
+
       Real lambda=b1/a11;
-      
+
       xi  = lambda * 1; // 1= refFE.xi(1)-refFE.xi(0);
       eta = 0;
       zeta= 0;
 
     } else if ( nbCoor ==2)
     {
-   
+
       // 2D Case
-    
+
       const Real a11=point(1,0)-point(0,0);
       const Real a12=point(2,0)-point(0,0);
       const Real a21=point(1,1)-point(0,1);
       const Real a22=point(2,1)-point(0,1);
       const Real b1 =x-point(0,0);
       const Real b2 =y-point(0,1);
-      
+
       Real D= a11*a22 - a21*a12;
       Real lambda_1= b1*a22 - b2*a12;
       Real lambda_2= a11*b2 - a21*b1;
-      
+
       lambda_1/=D;
       lambda_2/=D;
-      
+
       xi  = lambda_1 * 1 + lambda_2 * 0; // 1=refFE.xi(1)  -refFE.xi(0)  ; 0=refFE.xi(2)  -refFE.xi(0);
       eta = lambda_1 * 0 + lambda_2 * 1; // 0=refFE.eta(1) -refFE.eta(0) ; 1=refFE.eta(2) -refFE.eta(0);
       zeta= 0;
-      
+
     }else if (nbCoor == 3)
     {
-      
+
       // 3D Case
-      
+
       const Real a11=point(1,0)-point(0,0);
       const Real a12=point(2,0)-point(0,0);
       const Real a13=point(3,0)-point(0,0);
@@ -199,25 +199,25 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
       const Real b1 =x-point(0,0);
       const Real b2 =y-point(0,1);
       const Real b3 =z-point(0,2);
-      
+
       const Real D= a11*a22*a33 + a31*a12*a23 + a21*a32*a13 - a11*a32*a23 - a31*a22*a13 - a21*a12*a33;
       Real lambda_1= b1*a22*a33 + b3*a12*a23 + b2*a32*a13 - b1*a32*a23 - b3*a22*a13 - b2*a12*a33;
       Real lambda_2= a11*b2*a33 + a31*b1*a23 + a21*b3*a13 - a11*b3*a23 - a31*b2*a13 - a21*b1*a33;
       Real lambda_3= a11*a22*b3 + a31*a12*b2 + a21*a32*b1 - a11*a32*b2 - a31*a22*b1 - a21*a12*b3;
-      
+
       lambda_1/=D;
       lambda_2/=D;
       lambda_3/=D;
-      
+
       xi  = lambda_1 * 1 + lambda_2 * 0 + lambda_3 * 0;
       eta = lambda_1 * 0 + lambda_2 * 1 + lambda_3 * 0;
       zeta= lambda_1 * 0 + lambda_2 * 0 + lambda_3 * 1;
 
     } else
-    {   
+    {
       ERROR_MSG("Impossible dimension to invert coordinates");
     };
-  
+
 };
 
 // Compute the Jacobian at the given point
@@ -226,7 +226,7 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
 // where x are the global coordinates
 //       zeta the reference coordinates
 
-Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z, 
+Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
 			      int comp_x, int comp_zeta) const
 {
   Real jac(0);
@@ -235,7 +235,7 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
   {
     jac += point( i, comp_x ) * geoMap.dPhi( i , comp_zeta , hat_x, hat_y, hat_z );
   };
-  
+
   return jac;
 };
 
@@ -244,11 +244,11 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
 {
   if ( nbCoor ==1 )
     {
- 
+
       return 1/ pointJacobian(hat_x,hat_y,hat_z,comp_x,comp_zeta);
     } else if (nbCoor ==2)
     {
-      
+
       Real a11= pointJacobian(hat_x,hat_y,hat_z,0,0);
       Real a12= pointJacobian(hat_x,hat_y,hat_z,0,1);
       Real a21= pointJacobian(hat_x,hat_y,hat_z,1,0);
@@ -260,7 +260,7 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
 	mysign=-1;
 
       return mysign*pointJacobian(hat_x,hat_y,hat_z,comp_zeta,comp_x)/(a11*a22-a12*a21);
-      
+
     } else if (nbCoor ==3)
     {
 
@@ -273,15 +273,15 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
       Real a31= pointJacobian(hat_x,hat_y,hat_z,2,0);
       Real a32= pointJacobian(hat_x,hat_y,hat_z,2,1);
       Real a33= pointJacobian(hat_x,hat_y,hat_z,2,2);
-      
+
       //std::cout << a11 << "  " << a12 << "  " << a13 << std::endl;
       //std::cout << a21 << "  " << a22 << "  " << a23 << std::endl;
       //std::cout << a31 << "  " << a32 << "  " << a33 << std::endl;
-      
+
       Real det= a11*a22*a33 + a12*a23*a31 + a13*a21*a32 - a11*a23*a32 - a13*a22*a31 - a12*a21*a33;
-      
+
       std::vector<std::vector< Real > > cof(3,std::vector<Real>(3,0));
-      
+
       cof[0][0]=  (a22*a33 - a23*a32);
       cof[0][1]= -(a21*a33 - a31*a23);
       cof[0][2]=  (a21*a32 - a31*a22);
@@ -296,10 +296,10 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
       //std::cout << cof[1][0] << " ; " <<  cof[1][1] << " ; " <<  cof[1][2] << std::endl;
       //std::cout << cof[2][0] << " ; " <<  cof[2][1] << " ; " <<  cof[2][2] << std::endl;
       //std::cout << det << std::endl;
-     
+
       // inverse need the TRANSPOSE!
       return cof[comp_x][comp_zeta]/det;
-    } else 
+    } else
     {
         ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
     };
@@ -377,6 +377,30 @@ Real CurrentFE::diameter() const
             {
                 s += fabs( point( i, icoor ) - point( j, icoor ) );
             }
+            if ( s > h )
+                h = s;
+        }
+    }
+    return h;
+}
+
+//----------------------------------------------------------------------
+Real CurrentFE::diameter2() const
+{
+	int i, j, icoor;
+    Real s, d, h = 0.;
+    for ( i = 0;i < nbGeoNode - 1;i++ )
+    {
+        for ( j = i + 1;j < nbGeoNode;j++ )
+        {
+            s = 0.;
+            for ( icoor = 0;icoor < (int)nDimensions; icoor++ )
+            {
+                d = ( point( i, icoor ) - point( j, icoor ) );
+                d = d*d;
+                s += d;
+            }
+            s = sqrt(s);
             if ( s > h )
                 h = s;
         }

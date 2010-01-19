@@ -454,6 +454,9 @@ bool BCHandler::listHasOnlyEssential() const
                 case Tangential:
                     status.setTangential();
                     break;
+                case Directional:
+                    status.setDirectional();
+                    break;
                 default:
                     {
                         std::ostringstream __ex;
