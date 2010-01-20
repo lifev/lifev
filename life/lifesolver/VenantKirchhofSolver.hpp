@@ -209,10 +209,8 @@ public:
     void setUp( const GetPot& dataFile );
 
     void initialize( const Function& d0, const Function& w0 );
-  void initialize( vector_ptrtype d0,  vector_ptrtype w0=vector_ptrtype());
+    void initialize( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype() );
     void initializeVel( const vector_type& w0);
-
-    void postProcess();
 
 
     //const Dof& dDof() const { return M_FESpace.dof(); }
@@ -384,7 +382,7 @@ VenantKirchhofSolver( const data_type&          data,
     M_out_res                    ( "out_res_solid" ),
     M_count                      ( 0 ),
     M_offset                     (offset),
-    M_rescaleFactor            (1.),
+    M_rescaleFactor              (1.),
     M_matrFull                   ( )
 {
     //    M_BCh->setOffset(M_offset);
@@ -428,7 +426,7 @@ VenantKirchhofSolver( const data_type& data,
     M_linearSolver               ( new SolverType( comm ) ),
     M_count                      ( 0 ),
     M_offset                     ( 0 ),
-    M_rescaleFactor            (1.),
+    M_rescaleFactor              (1.),
     M_matrFull                   ( )
 {
     //    M_BCh->setOffset(0);
@@ -489,7 +487,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::
 setUp( const GetPot& dataFile )
 {
     M_Displayer.leaderPrint("\n S-  Displacement unknowns: ",  M_FESpace.dof().numTotalDof() );
-    M_Displayer.leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
+    M_Displayer.leaderPrint("\n");
 
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setUpPrec(dataFile, "solid/prec");
@@ -515,6 +513,8 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::
 buildSystem()
 {
+    M_Displayer.leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
+
     M_massStiff.reset(new matrix_type(M_localMap));
     buildSystem(M_massStiff);
     M_massStiff->GlobalAssemble();
@@ -712,7 +712,6 @@ updateVel()
 {
     M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
-//    postProcess();
 }
 
 
@@ -1227,112 +1226,6 @@ reduceSolution( Vector& disp,
                 vel [ iDof ] = velocity    [ iDof + 1 ];
             }
     }
-}
-
-template<typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::
-VenantKirchhofSolver<Mesh, SolverType>::postProcess()
-{
-    std::ostringstream index, indexMe;
-    std::string name, me, namedef;
-
-    PhysVectUnknown<Vector> disp(dim());
-    PhysVectUnknown<Vector> vel (dim());
-
-    reduceSolution(disp, vel);
-    evalConstraintTensor();
-
-    M_count++;
-
-//    std::cout << "factor " << M_data.factor() << std::endl;
-     if ( M_comm->MyPID() == 0)
-     {
-        if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
-        {
-            std::cout << "  S-  Post-processing \n";
-            index << ( M_count / M_data.verbose() );
-
-            switch ( index.str().size() )
-            {
-                case 1:
-                    name = "00" + index.str();
-                    break;
-                case 2:
-                    name = "0" + index.str();
-                    break;
-                case 3:
-                    name = index.str();
-                    break;
-            }
-
-            indexMe << M_me;
-
-            switch ( indexMe.str().size() )
-            {
-                case 1:
-                    me = "00" + indexMe.str();
-                    break;
-                case 2:
-                    me = "0" + indexMe.str();
-                    break;
-                case 3:
-                    me = indexMe.str();
-                    break;
-            }
-
-            vector_type disp(M_disp, Repeated);
-            vector_type vel (M_vel,  Repeated);
-
-
-            namedef = "defor." + me + "." + name + ".mesh";
-
-            meditSolutionWriter( "dep_x." + me + "." + name + ".bb", *M_FESpace.mesh(), disp, M_FESpace.dof().numTotalDof()*0);
-            meditSolutionWriter( "dep_y." + me + "." + name + ".bb", *M_FESpace.mesh(), disp, M_FESpace.dof().numTotalDof()*1);
-            meditSolutionWriter( "dep_z." + me + "." + name + ".bb", *M_FESpace.mesh(), disp, M_FESpace.dof().numTotalDof()*2);
-
-//             meditSolutionWriter( "res_x." + me + "." + name + ".bb", *M_FESpace.mesh(), M_sxx, M_FESpace.dof().numTotalDof()*0);
-//             meditSolutionWriter( "res_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_syy, M_FESpace.dof().numTotalDof()*1);
-//             meditSolutionWriter( "res_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_szz, M_FESpace.dof().numTotalDof()*2);
-
-            meditSolutionWriter( "resd_x." + me + "." + name + ".bb", *M_FESpace.mesh(), *M_residual_d, M_FESpace.dof().numTotalDof()*0);
-            meditSolutionWriter( "resd_y." + me + "." + name + ".bb", *M_FESpace.mesh(), *M_residual_d, M_FESpace.dof().numTotalDof()*1);
-            meditSolutionWriter( "resd_z." + me + "." + name + ".bb", *M_FESpace.mesh(), *M_residual_d, M_FESpace.dof().numTotalDof()*2);
-
-//             wr_medit_ascii_scalar( "dep_x." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 0*dim(), M_FESpace.mesh()->numVertices() );
-//             wr_medit_ascii_scalar( "dep_y." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 1*dim(), M_FESpace.mesh()->numVertices() );
-//             wr_medit_ascii_scalar( "dep_z." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 2*dim(), M_FESpace.mesh()->numVertices() );
-
-            wr_medit_ascii2( namedef, *M_FESpace.mesh(), disp, M_data.factor() );
-            // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),M_FESpace.mesh()->numVertices(),_dim_u);
-
-            system( ( "ln -sf " + namedef + " dep_x." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " dep_y." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " dep_z." + me + "." + name + ".mesh" ).data() );
-
-//             system( ( "ln -sf " + namedef + " res_x." + me + "." + name + ".mesh" ).data() );
-//             system( ( "ln -sf " + namedef + " res_y." + me + "." + name + ".mesh" ).data() );
-//             system( ( "ln -sf " + namedef + " res_z." + me + "." + name + ".mesh" ).data() );
-
-            system( ( "ln -sf " + namedef + " resd_x." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " resd_y." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " resd_z." + me + "." + name + ".mesh" ).data() );
-
-            // system(("ln -s "+M_FESpace.mesh()_file+" veloc."+name+".mesh").data());
-
-//             wr_medit_ascii_scalar( "veld_x." + name + "." + me + ".bb", vel.getEpetraVector().Values() + 0*dim(), M_FESpace.mesh()->numVertices() );
-//             wr_medit_ascii_scalar( "veld_y." + name + "." + me + ".bb", vel.getEpetraVector().Values() + 1*dim(), M_FESpace.mesh()->numVertices() );
-//             wr_medit_ascii_scalar( "veld_z." + name + "." + me + ".bb", vel.getEpetraVector().Values() + 2*dim(), M_FESpace.mesh()->numVertices() );
-
-            // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),M_FESpace.mesh()->numVertices(),_dim_u);
-
-//             system( ( "ln -sf " + namedef + " veld_x." + name + "." + me + ".mesh" ).data() );
-//             system( ( "ln -sf " + namedef + " veld_y." + name + "." + me + ".mesh" ).data() );
-//             system( ( "ln -sf " + namedef + " veld_z." + name + "." + me + ".mesh" ).data() );
-
-            // system(("ln -s "+M_FESpace.mesh()_file+" veloc."+name+".mesh").data());
-
-        }
-     }
 }
 
 }
