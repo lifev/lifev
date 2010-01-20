@@ -89,6 +89,10 @@ private:
 #endif
 public:
     CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr );
+private:
+    CurrentFE( );
+    CurrentFE( const CurrentFE& );
+public:
     const int nbGeoNode;
     const int nbNode;
     const int nbCoor;
