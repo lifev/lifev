@@ -240,7 +240,7 @@ void exactJacobian::eval(const vector_type& _disp,
         std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
         std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
 
-        this->M_fluid->postProcess();
+        //this->M_fluid->postProcess();
     }
 
     chronoInterface.start();
@@ -288,7 +288,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     if ( false && this->isSolid() )
     {
-        this->solid().postProcess();
+        //this->solid().postProcess();
     }
 
 // possibly unsafe when using more cpus, since both has repeated maps
@@ -527,7 +527,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 
                 M_ej->transferFluidOnInterface(M_ej->fluid().residual(), sigmaFluidUnique);
 
-                M_ej->fluidPostProcess();
+                //M_ej->fluidPostProcess();
             }
 
         M_comm->Barrier();
