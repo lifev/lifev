@@ -330,8 +330,8 @@ struct Cylinder::Private
                const Real& /*z*/,
                const ID&   id ) const
         {
-            if (id == 3)
-                return 1.;
+            //            if (id == 3)
+                return 10.;
 
             return 0.;
         }
@@ -424,13 +424,14 @@ Cylinder::run()
     bcH.addBC( "Cylinder", CYLINDER, Essential, Full,      uZero, 3 );
     //    bcH.addBC( "Slipwall", SLIPWALL, Essential, Full, uZero , 3 );
 #endif
+
 #ifdef TUBE20_MESH_SETTINGS
     //BCFunctionBase unormal(  d->get_normal() );
 
     //cylinder
 
-//     bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uPois, 3 );
-    bcH.addBC( "Inlet",    INLET,    Essential,     Full,     uPois, 3 );
+    //bcH.addBC( "Inlet",    INLET,    Natural,   Full,      uIn, 3 );
+    bcH.addBC( "Inlet",    INLET,    Flux,        Full,     uOne, 3);
     bcH.addBC( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
     //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
     //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
@@ -438,6 +439,8 @@ Cylinder::run()
     bcH.addBC( "RingIn",   RINGIN,  Essential,   Full,      uZero, 3 );
     bcH.addBC( "RingOut",  RINGOUT, Essential,   Full,      uZero, 3 );
 #endif
+
+    int numLM = 1;
 
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
 
@@ -472,15 +475,19 @@ Cylinder::run()
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
+
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
+    bcH.setOffset("Inlet", totalVelDof + totalPressDof);
+
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm);
+                                              *d->comm,
+                                              numLM);
     EpetraMap fullMap(fluid.getMap());
 
 
