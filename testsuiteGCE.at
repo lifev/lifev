@@ -53,7 +53,7 @@ defOmegaF  = 0.01 # matters only with  precond = 2
 updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
-abstol     =  1.e-5 # tolerance in nonLinearRichardson
+abstol     =  0. # tolerance in nonLinearRichardson
 reltol     =  1.e-5 # tolerance in nonLinearRichardson
 
 restart    = 0
@@ -69,8 +69,9 @@ type       = hdf5
 
 [fluid]
 useShapeDerivatives           = false
-domainVelImplicit             = false
-convectiveTermDer             = false
+domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 
 [./physics]
 density   = 1.0               # density
@@ -149,9 +150,9 @@ linesearch = 0
 
 [../solver]
 output          = all # none
-max_iter        = 100
+max_iter        = 200
 poly_ord        = 5
-kspace          = 100
+kspace          = 200
 precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
@@ -251,6 +252,16 @@ solver   = gmres;
 poly_ord = 5;
 kspace   = 40;
 conv     = rhs;
+
+[eigensolver]
+
+nevec = 10
+block_size = 1;
+max_blocks = 1000;
+max_restarts = 1000;
+tol = 1e-5;
+which = ML
+neval = 5
 
 ]])
 
