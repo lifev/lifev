@@ -628,7 +628,7 @@ template
         "                        Dimensions=\""<< this->M_mesh->numGlobalVolumes() << " 4\"\n" <<
         "                        DataType=\"Int\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             &DataFile;:/Connections/Values\n" <<
+        "             " << M_outputFileName << ":/Connections/Values\n" <<
         "         </DataStructure>\n" <<
         "      </Topology>\n";
 }
@@ -652,19 +652,19 @@ template
         "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
         "                        DataType=\"Float\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             &DataFile;:/" << geoVarName << "X/Values\n" <<
+        "             " << M_outputFileName << ":/" << geoVarName << "X/Values\n" <<
         "         </DataStructure>\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
         "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
         "                        DataType=\"Float\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             &DataFile;:/" << geoVarName << "Y/Values\n" <<
+        "             " << M_outputFileName << ":/" << geoVarName << "Y/Values\n" <<
         "         </DataStructure>\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
         "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
         "                        DataType=\"Float\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             &DataFile;:/" << geoVarName << "Z/Values\n" <<
+        "             " << M_outputFileName << ":/" << geoVarName << "Z/Values\n" <<
         "         </DataStructure>\n" <<
         "      </Geometry>\n" <<
         "\n";
@@ -722,7 +722,7 @@ template
         "                           Dimensions=\"" << dvar.size()  << " " << dvar.typeDim() << "\"\n" <<
         "                           DataType=\"Float\"\n" <<
         "                           Precision=\"8\">\n" <<
-        "               &DataFile;:/" << dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+        "               " << M_outputFileName << ":/" << dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
         "           </DataStructure>\n" <<
         "         </DataStructure>\n";
 
@@ -747,7 +747,7 @@ template
                 "                           Dimensions=\"" << this->M_mesh->numGlobalVertices() << " 1\"\n" <<
                 "                           DataType=\"Float\"\n" <<
                 "                           Precision=\"8\">\n" <<
-                "               &DataFile;:/" << dvar.variableName()<< coord[i] << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+                "               " << M_outputFileName << ":/" << dvar.variableName()<< coord[i] << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
                 "           </DataStructure>\n";
                 }
 
