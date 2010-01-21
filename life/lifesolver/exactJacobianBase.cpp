@@ -169,7 +169,6 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_nbEval++ ;
 
-    // possibly unsafe when using more cpus, since both has repeated maps
     this->setLambdaFluid(_disp);
 
 
@@ -331,7 +330,8 @@ void exactJacobian::evalResidual(vector_type&       res,
     res -=  disp;
 
     this->displayer().leaderPrint( "NormInf res   " , res.NormInf(), "\n" );
-    this->displayer().leaderPrint( "NormInf res_d " , this->solid().residual().NormInf(), "\n" );
+    if (this->isSolid())
+        this->displayer().leaderPrint( "NormInf res_d " , this->solid().residual().NormInf(), "\n" );
 
 }
 
