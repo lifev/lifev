@@ -92,8 +92,8 @@ public:
       \param message1 message to print out
       \param localMax Int or Real local maximum value that we want to print
     */
-    template <typename T1, typename T2>
-    void leaderPrintMax( const T1& message1, const T2& localMax ) const;
+    template <typename T1>
+    void leaderPrintMax( const T1& message1, const Real& localMax ) const;
 
     /*!
       Return true if it is process 0 of the communicator
@@ -128,8 +128,6 @@ template <typename T1>
 void Displayer::
 leaderPrint( const T1& message1 ) const
 {
-	if ( M_comm )
-		M_comm->Barrier();
 	if ( M_verbose )
 		std::cout << message1 << std::flush;
 }
@@ -138,8 +136,6 @@ template <typename T1, typename T2>
 void Displayer::
 leaderPrint( const T1& message1, const T2& message2 ) const
 {
-	if ( M_comm )
-		M_comm->Barrier();
 	if ( M_verbose )
 		std::cout << message1 << message2 << std::flush;
 }
@@ -148,23 +144,25 @@ template <typename T1, typename T2, typename T3>
 void Displayer::
 leaderPrint( const T1& message1, const T2& message2, const T3& message3 ) const
 {
-	if ( M_comm )
-		M_comm->Barrier();
 	if ( M_verbose )
 		std::cout << message1 << message2 << message3 << std::flush;
 }
 
-template <typename T1, typename T2>
+template <typename T1>
 void Displayer::
-leaderPrintMax( const T1& message1, const T2& localMax ) const
+leaderPrintMax( const T1& message1, const Real& localMax ) const
 {
-	Real num( static_cast<Real>(localMax) );
-	Real globalMax;
-
 	if ( M_comm )
+    {
+        Real num( localMax );
+        Real globalMax;
+
 		M_comm->MaxAll( &num, &globalMax, 1 );
-	if ( M_verbose )
-		std::cout << message1 << globalMax << std::endl;
+        if ( M_verbose )
+            std::cout << message1 << globalMax << std::endl;
+    }
+    else
+        std::cout << message1 << localMax << std::endl;
 }
 
 } // Namespace LifeV
