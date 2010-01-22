@@ -194,7 +194,9 @@ private:
     std::ofstream M_xdmf;
 
     std::string const M_closingLines;
-    std::streampos M_closingLinesPosition;
+    std::streampos    M_closingLinesPosition;
+
+    std::string       M_outputFileName;
 };
 
 
@@ -207,7 +209,8 @@ Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const s
     :
     super(dfile, mesh, prefix,procId),
     M_HDF5(),
-    M_closingLines ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n")
+    M_closingLines ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+    M_outputFileName("noninitialisedFileName")
 {
     setMeshProcId(mesh,procId);
 }
@@ -216,7 +219,8 @@ template<typename Mesh>
 Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, const std::string prefix):
     super(dfile,prefix),
     M_HDF5(),
-    M_closingLines ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n")
+    M_closingLines ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+    M_outputFileName("noninitialisedFileName")
 {
 }
 
@@ -260,7 +264,9 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
     if ( M_HDF5.get() == 0)
     {
         M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
-        M_HDF5->Create(this->M_post_dir+this->M_prefix+".h5");
+        M_outputFileName=this->M_post_dir+this->M_prefix;
+        M_outputFileName+=".h5";
+        M_HDF5->Create(M_outputFileName);
 
         // write empty xdmf file
         M_wr_initXdmf();
