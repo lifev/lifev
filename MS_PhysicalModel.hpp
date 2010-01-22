@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -47,7 +47,8 @@ namespace LifeV {
  *  @author Cristiano Malossi
  *
  *  The MS_PhysicalModel class provides a general interface between the
- *  MS_Algorithm and all the other models.
+ *  MS_Algorithm and all the other models. Moreover it provides internal methods
+ *  for accessing general information and model related couplings.
  */
 class MS_PhysicalModel
 {
@@ -56,11 +57,17 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! The main constructor.
+    /*!
+     * All the derived classes has to
+     * be constructed using an empty constructor which calls (as first operation)
+     * this empty constructor.
+     */
     MS_PhysicalModel();
 
     //! Copy constructor
     /*!
+     * Should not be used in classical situations.
      * @param model MS_PhysicalModel
      */
     MS_PhysicalModel( const MS_PhysicalModel& model );
@@ -74,8 +81,9 @@ public:
     //! @name Operators
     //@{
 
-    //! Operator=
+    //! Copy operator.
     /*!
+     * Should not be used in classical situations.
      * @param model MS_PhysicalModel
      * @return reference to a copy of the class
      */
@@ -87,25 +95,56 @@ public:
     //! @name MultiScale PhysicalModel Virtual Methods
     //@{
 
-    //! Setup the data of the model
+    //! Setup the data of the model.
+    /*!
+     * In particular it does the following operations:
+     * <ol>
+     *     <li> read data from files;
+     *     <li> set global parameter for the MS simulation (viscosity, time, ...);
+     *     <li> perform preliminary operations which don't depend on the couplings.
+     * </ol>
+     */
     virtual void SetupData() = 0;
 
-    //! Setup the model
+    //! Setup the model.
+    /*!
+     * In particular it does the following operations:
+     * <ol>
+     *     <li> initialize the model object;
+     *     <li> initialize all the other private objects;
+     *     <li> perform preliminary operations which depend on the couplings.
+     * </ol>
+     */
     virtual void SetupModel() = 0;
 
-    //! Build the system matrix and vectors
+    //! Build the initial system (matrix and vectors).
+    /*!
+     * Matrix and vectors built here are for the first time step. If they are time independent could be reused later.
+     * More generally, this method initialize all the objects which are not defined at the first time step.
+     *
+     * <b>This method should be called only once at the first time step!</b>
+     */
     virtual void BuildSystem() = 0;
 
-    //! Update the system matrix and vectors
+    //! Update the system for (matrix and vectors)
+    /*!
+     * Only time dependent objects are updated here.
+     */
     virtual void UpdateSystem() = 0;
 
-    //! Solve the problem
+    //! Solve the problem.
+    /*!
+     * This method solve the problem.
+     */
     virtual void SolveSystem() = 0;
 
-    //! Save the solution
+    //! Save the solution.
+    /*!
+     * This method wrote to file the solution computed during the last call of SolveSystem.
+     */
     virtual void SaveSolution() = 0;
 
-    //! Display some information about the model
+    //! Display some information about the model.
     virtual void ShowMe();
 
     //@}
@@ -132,8 +171,9 @@ public:
      */
     void AddCoupling( const Coupling_ptrType& coupling );
 
-    //! Rescale, rotate and translate the Model in the 3D space
+    //! Scale, rotate and translate the Model in the 3D space
     /*!
+     * This method apply directly to the mesh before its partitioning.
      * @param scale Vector (Sx,Sy,Sz) of scale factors
      * @param rotate Vector (Rx,Ry,Rz) of angles for rotation (degree units)
      * @param translate Vector (Tx,Ty,Tz) of offset for position
@@ -144,6 +184,7 @@ public:
 
     //! Set global data for physical quantities and time
     /*!
+     * This method set all the data
      * @param dataPhysics Data container for physical quantities
      * @param dataTime Data container for time parameters
      */
@@ -222,25 +263,25 @@ protected:
 
     //@}
 
-    static UInt                          M_modelsNumber;
+    static UInt                          M_modelsNumber;       // Total number of models
 
-    UInt                                 M_ID;
-    modelsTypes                          M_type;
+    UInt                                 M_ID;                 // Global ID of the model
+    modelsTypes                          M_type;               // Type of the model (depends on the derived class)
 
-    GetPot                               M_dataFile;
-    CouplingsVector_Type                 M_couplings;
-    std::string                          M_modelName;
-    std::vector< BCFlag >                M_flags;
+    GetPot                               M_dataFile;           // GetPot data file
+    CouplingsVector_Type                 M_couplings;          // Container for the couplings
+    std::string                          M_modelName;          // Name of the model
+    std::vector< BCFlag >                M_flags;              // Free flags, available for the couplings
 
-    boost::array< Real, nDimensions >    M_geometryScale;
-    boost::array< Real, nDimensions >    M_geometryRotate;
-    boost::array< Real, nDimensions >    M_geometryTranslate;
+    boost::array< Real, nDimensions >    M_geometryScale;      // Global geometrical scale
+    boost::array< Real, nDimensions >    M_geometryRotate;     // Global geometrical rotation
+    boost::array< Real, nDimensions >    M_geometryTranslate;  // Global geometrical translation
 
-    boost::shared_ptr< MS_PhysicalData > M_dataPhysics;
-    boost::shared_ptr< DataTime >        M_dataTime;
+    boost::shared_ptr< MS_PhysicalData > M_dataPhysics;        // Data container for global physical quantities
+    boost::shared_ptr< DataTime >        M_dataTime;           // Data container for time quantities
 
-    boost::shared_ptr< Epetra_Comm >     M_comm;
-    boost::shared_ptr< Displayer >       M_displayer;
+    boost::shared_ptr< Epetra_Comm >     M_comm;               // Communicator
+    boost::shared_ptr< Displayer >       M_displayer;          // Displayer
 };
 
 } // Namespace LifeV
