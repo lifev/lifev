@@ -36,14 +36,6 @@ namespace LifeV
   \author J.-F. Gerbeau
   \date 04/2002
 
-  modified: the update methods to have
-            them dependent on the dimension (lifev becomes multiscale...)
-     (nbCoor = Nb Dimension = 1, 2 or 3).
-
-     I removed the Macro "#if defined(THREEDIM)" to
-     use a normal switch.
-     Question: IS IT TOO SLOW???
-
      I also factorized some code, and
      postponed the implementation of template methods
      after the class declaration.
@@ -300,10 +292,19 @@ public:
 template <class GEOELE>
 void CurrentFE::_update_point( const GEOELE& geoele )
 {
-    //! old way: it was practical, but is it still working???
-    // for(int icoor=0;icoor<nbCoor;icoor++)
-    // point(i,icoor) =  geoele.coor(i+1,icoor+1);
 
+    ASSERT( nbCoor < 4, "nbCoor must be smaller than 4");
+
+    //! Nicer way to do the same as in the switch
+    Real const * pointCoordinate;
+    for ( ID i(0); i < nbGeoNode; ++i )
+    {
+        pointCoordinate = geoele.point( i + 1  ).coor();
+        for( ID icoor(0); icoor < nbCoor; ++icoor)
+            point( i, icoor ) =  pointCoordinate[icoor];
+    }
+    return;
+    /*
     switch ( nbCoor )
     {
     case 1:    //! 1D
@@ -333,7 +334,7 @@ void CurrentFE::_update_point( const GEOELE& geoele )
 
         ERROR_MSG( err_msg.str().c_str() );
     }
-
+    */
 }
 
 //---------------------------------------

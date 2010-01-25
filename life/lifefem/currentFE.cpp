@@ -47,6 +47,9 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
         phiDer2( nbNode, nbCoor, nbCoor, nbQuadPt )
 {
     CONSTRUCTOR( "CurrentFE" );
+
+    ASSERT( nbCoor < 4, "nbCoor must be smaller than 4");
+
     for ( int ig = 0;ig < nbQuadPt;ig++ )
     {
         for ( int i = 0;i < nbNode;i++ )
