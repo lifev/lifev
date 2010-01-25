@@ -100,7 +100,7 @@ EnsightToHdf5::run()
 {
     typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
-    
+
     // Reading from data file
     GetPot dataFile( d->data_file_name.c_str() );
 
@@ -110,10 +110,10 @@ EnsightToHdf5::run()
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
 
     // Scale, Rotate, Translate (if necessary)
-    boost::array< Real, nDimensions >    geometryScale;
-    boost::array< Real, nDimensions >    geometryRotate;
-    boost::array< Real, nDimensions >    geometryTranslate;
-	
+    boost::array< Real, NDIM >    geometryScale;
+    boost::array< Real, NDIM >    geometryRotate;
+    boost::array< Real, NDIM >    geometryTranslate;
+
     geometryScale[0] = dataFile( "fluid/space_discretization/transform", 1., 0);
     geometryScale[1] = dataFile( "fluid/space_discretization/transform", 1., 1);
     geometryScale[2] = dataFile( "fluid/space_discretization/transform", 1., 2);
