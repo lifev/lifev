@@ -54,25 +54,31 @@ public:
     static const UInt numLocalVertices = GEOSHAPE::numVertices; // for comp only
     //! The ith point (starting from 1)
     /* It returns the reference to an point object (possibly derived from
-       Geo0D)*/
-    PointType & point( ID const i );
+       PointType)*/
     PointType const & point ( ID const i ) const;
     //! The ith point (starting from the end)
     /* It returns the reference to an point object (possibly derived from
-    Geo0D). It starts from the last point, yet it follows the rule: vertices
+    PointType). It starts from the last point, yet it follows the rule: vertices
     first. It may be used to access the points of a Geometry Element in a
     reverse way (i.e. with the opposite GeoElement orientation)*/
-    PointType & reversepoint( ID const i );
     PointType const & reversepoint ( ID const i ) const;
 
     //!Inserts a point.  Uses point references
-    void setPoint( ID const i, Geo0D const & p ); //put point
+    void setPoint( ID const i, PointType const & p ); //put point
     //!Inserts a point Uses point references (bounds check)
-    bool setPointBD( ID const i, Geo0D const & p ); //with forced bound check
+    bool setPointBD( ID const i, PointType const & p ); //with forced bound check
     //!Inserts a point. Uses pointers
-    void setPoint( ID const i, Geo0D const * p ); //put point
+    void setPoint( ID const i, PointType const * p ); //put point
     //!Inserts a point. Uses pointers (bounds check)
-    bool setPointBD( ID const i, Geo0D const * p ); //with forced bound check
+    bool setPointBD( ID const i, PointType const * p ); //with forced bound check
+
+    //! If marker flag of point p is unset, is stes it to that of the argument, otherwise
+    //! is sets it to  the stronger flag between the stored one
+    //! and the one provided by the argument.
+    /*! Be aware: This method is going to do a const_cast to _points to
+        change the flag.
+     */
+    EntityFlag setStrongerMarkerAtPoint( const ID& pt, EntityFlag const & p );
 
     std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
@@ -93,7 +99,7 @@ public:
     void exchangePoints( const ID otn[ GEOSHAPE::numPoints ] );
 
 private:
-    Geo0D * _points[ GEOSHAPE::numPoints ];
+    PointType const* _points[ GEOSHAPE::numPoints ];
 };
 
 
@@ -162,26 +168,10 @@ GeoND<GEOSHAPE, POINTTYPE>::operator=( GeoND<GEOSHAPE, POINTTYPE> const & G )
 
 template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
-POINTTYPE & GeoND<GEOSHAPE, POINTTYPE>::point( ID const i )
-{
-    ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    return *( static_cast<POINTTYPE *>( _points[ i - 1 ] ) ); // indexing from 1
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::point( ID const i ) const
 {
     ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) );
-    return *( static_cast<POINTTYPE *>( _points[ i - 1 ] ) );
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
-POINTTYPE & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const i )
-{
-    ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    return *( static_cast<POINTTYPE *>( _points[ reversePoint<GEOSHAPE>::operate( i ) - 1 ] ) ); // indexing from 1
+    return *( static_cast<POINTTYPE const*>( _points[ i - 1 ] ) );
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
@@ -189,21 +179,21 @@ INLINE
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const i ) const
 {
     ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) );
-    return *( static_cast<POINTTYPE *>( _points[ reversePoint<GEOSHAPE>::operate( i ) - 1 ] ) );
+    return *( static_cast<POINTTYPE const*>( _points[ reversePoint<GEOSHAPE>::operate( i ) - 1 ] ) );
 }
 
 
 template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const i, Geo0D const & p )
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const i, PointType const & p )
 {
     ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    _points[ i - 1 ] = const_cast<Geo0D *>( &p );
+    _points[ i - 1 ] = ( &p );
 }
 
 
 template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, Geo0D const & p )
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, PointType const & p )
 {
     ASSERT_BD0( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
 
@@ -212,21 +202,21 @@ bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, Geo0D const & p )
     if ( i <= 0 || i > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
         return false;
 
-    _points[ i -1 ] = const_cast<Geo0D *>( &p );
+    _points[ i -1 ] = ( &p );
     return true;
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const i, Geo0D const * p )
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const i, PointType const * p )
 {
     ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    _points[ i - 1 ] = const_cast<Geo0D *>( p );
+    _points[ i - 1 ] = ( p );
 }
 
 
 template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, Geo0D const * p )
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, PointType const * p )
 {
     ASSERT_BD0( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
 
@@ -235,8 +225,14 @@ bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, Geo0D const * p )
     if ( i <= 0 || i > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
         return false;
 
-    _points[ i -1 ] = const_cast<Geo0D *>( p );
+    _points[ i -1 ] = ( p );
     return true;
+}
+
+template <typename GEOSHAPE, typename POINTTYPE>
+EntityFlag GeoND<GEOSHAPE, POINTTYPE>::setStrongerMarkerAtPoint( const ID& i, EntityFlag const & p )
+{
+    return (const_cast<POINTTYPE *> ( _points[i -1]) ) -> setStrongerMarker(p);
 }
 
 
@@ -265,7 +261,7 @@ showMe( bool verbose, std::ostream & out ) const
 template <typename GEOSHAPE, typename POINTTYPE>
 void GeoND<GEOSHAPE, POINTTYPE>::swapPoints( const ID & pt1, const ID & pt2 )
 {
-    Geo0D * tmp( _points[ pt1 - 1 ] );
+    PointType const* tmp( _points[ pt1 - 1 ] );
     _points[ pt1 - 1 ] = _points[ pt2 - 1 ];
     _points[ pt2 - 1 ] = tmp;
 }
@@ -273,7 +269,7 @@ void GeoND<GEOSHAPE, POINTTYPE>::swapPoints( const ID & pt1, const ID & pt2 )
 template <typename GEOSHAPE, typename POINTTYPE>
 void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID otn[ GEOSHAPE::numPoints ] )
 {
-    Geo0D * tmp[ GEOSHAPE::numPoints ];
+    PointType const* tmp[ GEOSHAPE::numPoints ];
     for ( unsigned int i = 0;i < GEOSHAPE::numPoints;++i )
     {
         tmp[ i ] = _points[ i ];

@@ -26,7 +26,7 @@ AM_CPPFLAGS                 = -I$(top_srcdir)
 
 lib_LTLIBRARIES		= liblifecore.la
 
-liblifecore_la_SOURCES	=  about.cpp lifeversion.cpp\
+liblifecore_la_SOURCES	=  about.cpp life.cpp lifeversion.cpp\
 dataString.cpp debug.cpp \
 switch.cpp util_string.cpp typeInfo.cpp\
 SmartAssert.cpp displayer.cpp

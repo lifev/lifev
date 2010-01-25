@@ -61,10 +61,12 @@ public:
 
 
     //! returns a pointer to a Real[3] containing the coordinates
+    /*
     Real * coor()
         {
             return const_cast<Real*>( _coor.data() );
         };
+    */
     Real const * coor() const
         {
             return _coor.data();
@@ -112,7 +114,7 @@ public:
         }
 
     //!Another way to access coordinate data and modify them!
-    boost::array<Real,nDimensions>& coordinate ( void )
+    boost::array<Real,NDIM>& coordinate ( void )
 	{
 		return _coor;
 	}
@@ -135,7 +137,7 @@ public:
     std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
 private:
-    boost::array<Real,nDimensions> _coor;
+    boost::array<Real,NDIM> _coor;
 };
 }
 #endif

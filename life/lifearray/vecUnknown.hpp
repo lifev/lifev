@@ -151,7 +151,7 @@ class PhysVectUnknown
         public VectorType
 
 {
-    static const UInt _S_nbcomp = nDimensions;
+    static const UInt _S_nbcomp;
 public:
 
     typedef VectorType super;
@@ -401,6 +401,11 @@ public:
 
 
 };
+
+
+template <typename VectorType>
+const UInt PhysVectUnknown <VectorType>::_S_nbcomp (nDimensions);
+
 
 ///////////////////////////////////////////////////////////
 inline VectorBlock

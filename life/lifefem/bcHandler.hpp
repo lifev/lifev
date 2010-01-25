@@ -388,7 +388,7 @@ private:
             return result;
         }
     private:
-        bool M_components[nDimensions];
+        bool M_components[NDIM];
         bool M_normal;
         bool M_tangential;
         bool M_directional;

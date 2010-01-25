@@ -243,15 +243,13 @@ const BCName nullBCName; // The empty string!
 
 #define THREEDIM 1
 
-#if defined(TWODIM)
+extern const UInt nDimensions;
 
-# define NDIM 2
-const UInt nDimensions = 2;
+#if defined(TWODIM)
+#define NDIM 2
 
 #elif defined(THREEDIM)
-
 #define NDIM 3
-const UInt nDimensions = 3;
 
 #else
 #error You MUST compile with either -DTWODIM of -DTHREEDIM set, sorry.
