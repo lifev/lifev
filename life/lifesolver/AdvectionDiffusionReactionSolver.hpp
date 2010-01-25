@@ -508,6 +508,7 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
 
     M_linearSolver.setDataFromGetPot( dataFile, "adr/solver" );
+    M_linearSolver.setUpPrec( dataFile, "adr/prec" );
 
     M_maxIterSolver   = dataFile( "adr/solver/max_iter", -1);
     M_reusePrec       = dataFile( "adr/prec/reuse", true);
@@ -517,7 +518,6 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
     ASSERT(M_prec.get() != 0, "AdvectionDiffusionSolver : Preconditioner not set");
 
-    M_prec->setDataFromGetPot( dataFile, "adr/prec" );
 }
 
 template<typename Mesh, typename SolverType>
