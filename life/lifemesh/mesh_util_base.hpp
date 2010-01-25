@@ -684,7 +684,7 @@ setBPointsMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
             for ( UInt j = 1;j <= BElementShape::numPoints;++j )
             {
                 if ( !markset[ ( fp->point( j ).id() ) - 1 ] )
-                    fp->point( j ).setStrongerMarker( fp->marker() );
+                    fp->setStrongerMarkerAtPoint( j, fp->marker() );
             }
         }
     }
