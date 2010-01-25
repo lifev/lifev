@@ -33,7 +33,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <lifemc/lifesolver/oneDModelSolver.hpp>
 #include "interface2Vessels.hpp"
 #include <life/lifecore/GetPot.hpp>
+#include <lifemc/lifefem/oneDBCFunctions.hpp>
+#include "ud_functions.hpp"
+
 #include <sstream>
+
 
 using namespace LifeV;
 
@@ -67,7 +71,7 @@ int main(int argc, char** argv)
     typedef OneDModelSolver<Params1D, Flux1D, Source1D>   onedsolver_type;
     typedef Interface2Vessels<Params1D, Flux1D, Source1D> interface_type;
 
-    GetPot data_file_t1                   ( "datanl" );
+    GetPot data_file_t1                   ( "datanl1" );
 //     OneDNonLinModelParam onedparamNL   ( data_file );
 //     onedparamNL.initParam              ( data_file );
 
@@ -83,13 +87,44 @@ int main(int argc, char** argv)
 
     DataOneDModel data_t1(data_file_t1);
     Params1D params_t1(data_file_t1);
-    params_t1.showMeData(std::cout);
+    params_t1.showMe(std::cout);
 
     std::cout << "    Building FE Space ... " << std::flush;
     FESpace<RegionMesh, EpetraMap> odFESpace_t1(data_t1.mesh(), *refFE, *qR, *bdQr, 1, *comm);
     std::cout << "ok." << std::endl;
 
     onedsolver_type onedm_t1(data_t1, params_t1, odFESpace_t1, *comm );
+    onedm_t1.setup(data_file_t1);
+
+    //OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
+    OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
+                                    (odFESpace_t1,
+                                     onedm_t1.FluxFun(),
+                                     onedm_t1.SourceFun(),
+                                     onedm_t1.U_thistime(),
+                                     data_t1.timestep(),
+                                     "left" /*border*/,
+                                     "W1"  /*var*/,
+                                     onedm_t1.oneDParams()));
+
+
+
+//     OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
+//                                        ( data_file_t1("parameters/R",0.),
+//                                          onedm_t1.oneDParams(),
+//                                          odFESpace_t1,
+//                                          onedm_t1.FluxFun(),
+//                                          onedm_t1.SourceFun(),
+//                                          onedm_t1.U_thistime(),
+//                                          data_t1.timestep(),
+//                                          "right" /*border*/,
+//                                          "W2"  /*var*/) );
+
+
+    //   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+    onedm_t1.bcH().setBC( pressure,         "left",  "first", "W1"  );
+    //    onedm_t1.bcH().setBC( resistence,      "right",  "first", "W2" );
+
 
     std::cout << "-----------------------------" << std::endl;
 
@@ -97,17 +132,16 @@ int main(int argc, char** argv)
 
     DataOneDModel data_t2(data_file_t2);
     Params1D params_t2(data_file_t2);
-    params_t2.showMeData(std::cout);
+    params_t2.showMe(std::cout);
 
     std::cout << "    Building FE Space ... " << std::flush;
     FESpace<RegionMesh, EpetraMap> odFESpace_t2(data_t2.mesh(), *refFE, *qR, *bdQr, 1, *comm);
     std::cout << "ok." << std::endl;
 
     onedsolver_type onedm_t2(data_t2, params_t2, odFESpace_t2, *comm );
+    onedm_t2.setup(data_file_t2);
 
     std::cout << "-----------------------------" << std::endl;
-
-    
 
     interface_type interf_t1_t2( onedm_t1, onedm_t2 );
 
@@ -125,8 +159,13 @@ int main(int argc, char** argv)
     ASSERT_PRE( startT_t1 == startT_t2, "Same initial time required!");
     ASSERT_PRE( T_t1      == T_t2,      "Same final time required!");
 
-    ASSERT( onedm.xRight() == onedm_t2.xLeft(),
-            "Same interface point required!");
+    if (onedm_t1.xRight() != onedm_t2.xLeft())
+    {
+        std::cout << "Same interface point required! ";
+        std::cout << onedm_t1.xRight() << " " << onedm_t1.xRight() << std::endl;
+        std::cout << onedm_t2.xLeft() << " " << onedm_t2.xRight() << std::endl;
+        //        exit(-1);
+    }
 
 
     //  Real u1_0 = 0.; //! constant initial condition
@@ -144,8 +183,9 @@ int main(int argc, char** argv)
     u2_0 = 0.; //! constant initial condition
 
     std::cout << "initialize tube 2 with constant (u1_0, u2_0)" << std::endl;
-    onedm_t2.initialize(u1_0, u2_0);
 
+    onedm_t2.initialize(u1_0, u2_0);
+    //
 
     std::cout << "startT, T,  dt = " << startT_t1 << ", " <<  T_t1 << ", " << dt_t1 << std::endl;
 
@@ -164,16 +204,19 @@ int main(int argc, char** argv)
         //! compute the interface values
         interf_t1_t2.updateInterface2Vessels( onedm_t1, onedm_t2 );
 
-	std::cout << "OK" << std::endl;
+        std::cout << "OK" << std::endl;
+
         int cvg_newton  = interf_t1_t2.computeInterface2TubesValues();
+
         Vector bcDir_t1 = interf_t1_t2.BcDir_alpha();
         Vector bcDir_t2 = interf_t1_t2.BcDir_beta();
-	std::cout << "OK" << std::endl;
+
+        std::cout << "OK" << std::endl;
         std::cout << "bcDir_t1 " << bcDir_t1   << "\nbcDir_t2 " << bcDir_t2  << std::endl;
 
         //! set the interface values
         onedm_t1.setBCValuesRight  ( bcDir_t1[0], bcDir_t1[1] );
-        onedm_t2.setBCValuesLeft( bcDir_t2[0], bcDir_t2[1] );
+        onedm_t2.setBCValuesLeft   ( bcDir_t2[0], bcDir_t2[1] );
 
         ASSERT_PRE( !cvg_newton,"Newton iteration for interface values computation not achieved.");
 
@@ -195,7 +238,7 @@ int main(int argc, char** argv)
         }
 
     }
-    
+
 
 #ifdef EPETRA_MPI
     MPI_Finalize();

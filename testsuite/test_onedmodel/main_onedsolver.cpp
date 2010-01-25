@@ -98,7 +98,10 @@ int main(int argc, char** argv)
   //   boost::shared_ptr<RegionMesh> mesh(mesh);
 
   std::cout << "    Building FE Space ... " << std::flush;
+
+  std::cout << feSegP1.nbCoor << std::endl;
   FESpace<RegionMesh, EpetraMap> odFESpace(data.mesh(), *refFE, *qR, *bdQr, 1, *comm);
+  std::cout << "nbCoorFE " << odFESpace.fe().nbCoor << std::endl;
   std::cout << "ok." << std::endl;
 
   //odFESpace.dof().showMe(std::cout, true);
@@ -123,8 +126,6 @@ int main(int argc, char** argv)
                                    "W1"  /*var*/,
                                    onedm.oneDParams()));
 
-
-
   OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
                                     ( data_file("parameters/R",0.),
                                       onedm.oneDParams(),
@@ -136,7 +137,9 @@ int main(int argc, char** argv)
                                       "right" /*border*/,
                                       "W2"  /*var*/) );
 
-//   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+  //   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+
+
   onedm.bcH().setBC( pressure,         "left",  "first", "W1"  );
   onedm.bcH().setBC( resistence,      "right",  "first", "W2" );
 
@@ -166,12 +169,13 @@ int main(int argc, char** argv)
     count++;
 
     chrono.start();
+    Debug(6030) << "[main] 1d model time advance\n";
     chronota.start();
-
     onedm.timeAdvance( time );
 
     chronota.stop();
 
+    Debug(6030) << "[main] 1d model iterate\n";
     chronoit.start();
     onedm.iterate( time , count );
     chronoit.stop();

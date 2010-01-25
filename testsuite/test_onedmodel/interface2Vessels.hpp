@@ -56,7 +56,7 @@ public:
     typedef DataOneDModel                     data_type;
     typedef data_type::mesh_raw_type          Mesh;
     typedef data_type::Vec2D                  Vec2D;
-  
+
 
     typedef OneDModelSolver< Params, Flux, Source> solver_type;
     //    typedef OneDModelSolver<Params, Flux, Source>::Vec2D Vec2D;
@@ -196,10 +196,11 @@ Interface2Vessels::computeInterface2TubesValues()
     x[2] = _M_Un_beta_bd [0];  //!< A_beta
     x[3] = _M_Un_beta_bd [1]; //!< Q_beta
 
-    std::cout << "x0 = " << x[0] << std::endl;
-    std::cout << "x1 = " << x[1] << std::endl;
-    std::cout << "x2 = " << x[2] << std::endl;
-    std::cout << "x3 = " << x[3] << std::endl;
+    //@@
+    //     std::cout << "x0 = " << x[0] << std::endl;
+    //     std::cout << "x1 = " << x[1] << std::endl;
+    //     std::cout << "x2 = " << x[2] << std::endl;
+    //     std::cout << "x3 = " << x[3] << std::endl;
 
     //! lapack variable
     int INFO[1]  = {0};
@@ -210,13 +211,12 @@ Interface2Vessels::computeInterface2TubesValues()
     //! (use the newton class???)
     for ( UInt iter = 0 ; iter < 10 ; iter ++)
     {
-
-        std::cout << "=======\n\tNewton iter = " << iter << std::endl;
+        std::cout << "======= Newton iter = " << iter << std::endl;
 
         //! compute f(x) and its jacobian df(x)
         f_jac( x, f, jac);
 
-	std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
+        std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
 
         //! transpose to pass to fortran storage (lapack!)
         jac_trans = trans(jac);
@@ -311,10 +311,11 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     Real A_beta  = x[2];
     Real Q_beta  = x[3];
 
-    std::cout << "A_alpha " << A_alpha << std::endl;
-    std::cout << "Q_alpha " << Q_alpha << std::endl;
-    std::cout << "A_beta"   << A_beta << std::endl;
-    std::cout << "Q_beta "  << Q_beta << std::endl;
+    //@
+    //     std::cout << "A_alpha " << A_alpha << std::endl;
+    //     std::cout << "Q_alpha " << Q_alpha << std::endl;
+    //     std::cout << "A_beta"   << A_beta << std::endl;
+    //     std::cout << "Q_beta "  << Q_beta << std::endl;
 
     //-------------
     //! Get the dof of the interfaces (to extract the paramaters values)
@@ -330,7 +331,6 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     // *******************************************************
     //! 0/ Continuity of the flux
     // *******************************************************
-    std::cout << "0" << std::endl;
     f(0) = Q_beta - Q_alpha;
     //! Jacobian
     jac( 0, 0 ) =  0.; //!< df0/dA_alpha
@@ -341,27 +341,29 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     // *******************************************************
     //! 1/ Continuity of the total pressure
     // *******************************************************
-    std::cout << "1" << std::endl;
-    f(1) = (   _M_fluxFun_beta.oneDParam().totalPressure(  A_beta,  Q_beta,  leftDof ) - 
-	       _M_fluxFun_alpha.oneDParam().totalPressure( A_alpha, Q_alpha, rightDof ) );
-    std::cout << " --- " << std::endl;
+
+    f(1) = (   _M_fluxFun_beta.oneDParam().totalPressure(  A_beta,  Q_beta,  leftDof - 1 ) -
+               _M_fluxFun_alpha.oneDParam().totalPressure( A_alpha, Q_alpha, rightDof - 1 ) );
+
+    //@std::cout << " --- " << std::endl;
+
     //! Jacobian
     //!df1/dA_alpha:
-    std::cout << A_alpha << " " << Q_alpha << " " << leftDof << " " << rightDof << std::endl;
-    jac( 1, 0 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 1, rightDof );
+    //std::cout << "leftDof " << leftDof << " rightDof " << rightDof << std::endl;
+    jac( 1, 0 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 1, rightDof - 1 );
     //!df1/dQ_alpha:
-    jac( 1, 1 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 2, rightDof );
+    jac( 1, 1 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 2, rightDof - 1 );
     //!df1/dA_beta:
-    jac( 1, 2 ) = + _M_fluxFun_beta.oneDParam().totalPressureDiff( A_beta,  Q_beta,  1, leftDof );
+    jac( 1, 2 ) = + _M_fluxFun_beta.oneDParam().totalPressureDiff( A_beta,  Q_beta,  1, leftDof  - 1 );
     //!df1/dQ_beta:
-    jac( 1, 3 ) = + _M_fluxFun_beta.oneDParam().totalPressureDiff( A_beta,  Q_beta,  2, leftDof );
-    std::cout << jac(1,0) << " " << jac(1,1) << " " << jac(1,2) << " " << jac(1,3) << std::endl; 
+    jac( 1, 3 ) = + _M_fluxFun_beta.oneDParam().totalPressureDiff( A_beta,  Q_beta,  2, leftDof  - 1 );
+    //std::cout << jac(1,0) << " " << jac(1,1) << " " << jac(1,2) << " " << jac(1,3) << std::endl;
     // *******************************************************
     //! 2/ ALPHA : right compatibility condition (for tube alpha)
     // *******************************************************
     //-------------------------------------
     //! Compute the eigen values and vectors
-    std::cout << "2" << std::endl;
+    //std::cout << "2" << std::endl;
     boundaryPoint   = _M_edge_alpha.point(2).x(); //!< point on the boundary (on the right of the edge!)
     internalBdPoint = _M_edge_alpha.point(1).x(); //!< neighboring point (internal)
     //! values of U on the boundary
@@ -376,12 +378,12 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
                                                   eigval1, eigval2,
                                                   left_eigvec1[0], left_eigvec1[1],
                                                   left_eigvec2[0], left_eigvec2[1],
-                                                  rightDof);
+                                                  rightDof - 1);
 
     //if ( verbose > 3 )
-        std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
+    //std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
-    
+
     ASSERT( eigval1 > 0. && eigval2 < 0. ,
             "The eigenvalues do not have the expected signs.");
 
@@ -390,26 +392,53 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //-------------------------------------
     //! first characteristics
     //! interpolation of U at the foot of the 1rst characteristics
-    U_charact_pt = interpolLinear(boundaryPoint, internalBdPoint,
-                                  _M_time_step, eigval1,
-                                  U_boundary, U_internalBd);
+
+//@     std::cout << boundaryPoint << std::endl;
+//     std::cout << internalBdPoint << std::endl;
+//     std::cout << _M_time_step  << std::endl;
+//     std::cout << eigval1 << std::endl;
+
+    U_charact_pt = interpolLinear(boundaryPoint,
+                                  internalBdPoint,
+                                  _M_time_step,
+                                  eigval1,
+                                  U_boundary,
+                                  U_internalBd);
 
     //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
+    //@
+    // std::cout << "lev " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
+//     std::cout << "Ucp " << U_charact_pt[0] << " " << U_charact_pt[1] << std::endl;
+
     rhsBC1 = dot( left_eigvec1 , U_charact_pt );
+
+    //@std::cout << "rhsBC1 = " << rhsBC1 << std::endl;
 
     //! take into account the (quasi linear) source term
     //!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
     //! THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    qlSource[0]  = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                           1, rightDof);
+
+    qlSource[0] = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
+                                                           1, rightDof - 1);
     qlSource[1] = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                           2, rightDof);
+                                                           2, rightDof - 1);
 
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
+
+
+    //@std::cout << "qlSource " << qlSource[0] << " " << qlSource[1] << std::endl;
     rhsBC1 -= _M_time_step * dot( left_eigvec1 , qlSource );
 
     //! return f(2): left_eigvec1 dot (A_alpha_n+1, Q_alpha_n+1)
+    //@
+    //     std::cout << "left_eig0 = " << left_eigvec1[0] << std::endl;
+    //     std::cout << "left_eig1 = " << left_eigvec1[1] << std::endl;
+    //     std::cout << "A_alpha   = " << A_alpha << std::endl;
+    //     std::cout << "Q_alpha   = " << Q_alpha << std::endl;
+    //     std::cout << "rhsBC1    = " << rhsBC1 << std::endl;
+
     f(2) = left_eigvec1[0] * A_alpha + left_eigvec1[1] * Q_alpha - rhsBC1;
+
     //! Jacobian
     jac( 2, 0 ) =  left_eigvec1[0]; //!< df2/dA_alpha
     jac( 2, 1 ) =  left_eigvec1[1];//!< df2/dQ_alpha
@@ -435,7 +464,7 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     U_internalBd = Vec2D ( _M_Un_beta_int );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
-
+    //@std::cout << "jacobian eigenvalues ... " << std::endl;
     _M_fluxFun_beta.jacobian_EigenValues_Vectors(U_boundary[0], U_boundary[1],
                                                  eigval1, eigval2,
                                                  left_eigvec1[0], left_eigvec1[1],
@@ -466,9 +495,9 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
     //! THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
     qlSource[0]  = _M_sourceFun_beta.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                          1, leftDof);
+                                                          1, leftDof - 1);
     qlSource[1] = _M_sourceFun_beta.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                          2, leftDof);
+                                                          2, leftDof - 1);
 
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
     rhsBC2 -= _M_time_step * dot( left_eigvec2 , qlSource );
@@ -519,8 +548,20 @@ Interface2Vessels::interpolLinear(const Real& point_bound, const Real& point_int
         weight = cfl;
     }
 
-    Vec2D u_interp( ( 1 - weight ) * U_bound[0]  + weight * U_intern[0] ,
-                    ( 1 - weight ) * U_bound[1] + weight * U_intern[1] );
+//     std::cout << "--- interpolLinear" << std::endl;
+//     std::cout << U_bound[0] << std::endl;
+//     std::cout << U_bound[1] << std::endl;
+//     std::cout << U_intern[0] << std::endl;
+//     std::cout << U_intern[1] << std::endl;
+//     std::cout << ( 1 - weight )*U_bound[1] + weight*U_intern[1] << std::endl;
+//     std::cout << ( 1 - weight )*U_bound[1] + weight*U_intern[1] << std::endl;
+
+//     std::cout << "---" << std::endl;
+
+    Vec2D u_interp(2);
+    u_interp[0] = ( 1 - weight )*U_bound[0] + weight*U_intern[0];
+    u_interp[1] = ( 1 - weight )*U_bound[1] + weight*U_intern[1];
+
     return u_interp;
 
 }

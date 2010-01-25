@@ -22,7 +22,7 @@ timestep = 1e-5		# timestep
 [initialize]
 var = Q
 value = 0
-firstnode = 51
+firstnode = 1
 lastnode = 101
 multiplier = 0
 
@@ -37,7 +37,7 @@ post_file = sol                  # the file name
 verbose = 1
 show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 postprocess_timestep = 0.01
-showCFL = 0
+showCFL = 1
 
 [solver]
 [./amesos]
