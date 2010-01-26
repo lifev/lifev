@@ -22,11 +22,11 @@
 namespace LifeV
 {
 
-RefFE::RefFE( std::string _name, int _type, ReferenceShapes _shape,
+RefFE::RefFE( std::string _name, FE_TYPE _type, ReferenceShapes _shape,
               int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace,
               int _nbDofPerVolume, int _nbDof, int _nbCoor, const Fct* phi,
               const Fct* dPhi, const Fct* d2Phi, const Real* _refCoor,
-              const SetOfQuadRule& sqr, PatternType _patternType,
+              const SetOfQuadRule& sqr, DofPatternType _patternType,
               const RefFE* bdRefFE ) :
         RefEle( _name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, _refCoor, sqr ),
         LocalDofPattern( _nbDof, _nbDofPerVertex, _nbDofPerEdge, _nbDofPerFace, _nbDofPerVolume, _patternType ),

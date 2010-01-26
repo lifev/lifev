@@ -121,7 +121,7 @@ public:
     RefHdivFE( std::string _name, int _type, ReferenceShapes _shape,
                int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume,
                int _nbDof, int _nbCoor, const FCT* phi, const FCT* divPhi,
-               const Real* _refCoor, const SetOfQuadRule& sqr, PatternType _patternType );
+               const Real* _refCoor, const SetOfQuadRule& sqr, DofPatternType _patternType );
     ~RefHdivFE();
     //! return the first local coordinate of the i-th node of the reference element
     inline Real xi( int i ) const

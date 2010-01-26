@@ -123,7 +123,7 @@ public:
     RefHybridFE( const UInt& nbdfe, const StaticBdFE* bdfelist,
                  std::string _name, int _type, ReferenceShapes _shape,
                  int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume,
-                 int _nbDof, int _nbCoor, const Real* _refCoor, PatternType _patternType = STANDARD_PATTERN );
+                 int _nbDof, int _nbCoor, const Real* _refCoor, DofPatternType _patternType = STANDARD_PATTERN );
     ~RefHybridFE();
 
     //! extracting a BdFE from the face list.

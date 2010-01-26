@@ -99,7 +99,8 @@ public LocalDofPattern
     const RefFE* _boundaryFE;
 public:
     //! Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h
-    const int type;
+    //const int type;
+    const FE_TYPE type;
     //! Constructor of a reference Lagrangian finite element.
     /*!
       Constructor of a reference finite element. The arguments are:
@@ -130,7 +131,7 @@ public:
       \param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
     RefFE( std::string          _name,
-           int                  _type,
+           FE_TYPE                  _type,
            ReferenceShapes      _shape,
            int                  _nbDofPerVertex,
            int                  _nbDofPerEdge,
@@ -143,7 +144,7 @@ public:
            const Fct*           d2Phi,
            const Real*          _refCoor,
            const SetOfQuadRule& sqr,
-           PatternType          _patternType,
+           DofPatternType _patternType,
            const RefFE*         bdRefFE );
 
     ~RefFE();

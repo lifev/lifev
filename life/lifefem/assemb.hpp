@@ -1552,7 +1552,7 @@ assemb_vec( EpetraVector& V, ElemVec& elvec, const LocalDofPattern& fe, const DO
     //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;
     //  UInt eleId = feId;  //simplify.
-    for ( i = 0 ; i < fe.nbLocalDof ; i++ )
+    for ( i = 0 ; i < fe.nbLocalDof() ; i++ )
     {    //! instead of CurrentFE::nbNode
         ig = dof.localToGlobal( feId, i + 1 ) - 1 + iblock * totdof;
         //    std::cout << "i= " << i << std::endl;
@@ -1583,7 +1583,7 @@ extract_vec( EpetraVector& V, ElemVec& elvec, const LocalDofPattern& fe, const D
     int i;
     //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;
-    for ( i = 0 ; i < fe.nbLocalDof ; i++ )
+    for ( i = 0 ; i < fe.nbLocalDof() ; i++ )
     {
         ig = dof.localToGlobal( feId, i + 1 ) - 1 + iblock * totdof;
         //    std::cout << "i= " << i << std::endl;

@@ -365,9 +365,9 @@ namespace LifeV
       bDof[var] = 1;
 
       // Some useful local variables, to save some typing
-      _M_nDofpV[var] = _dof[var]->fe.nbDofPerVertex; // number of Dof per vertices
-      _M_nDofpE[var] = _dof[var]->fe.nbDofPerEdge;   // number of Dof per edges
-      _M_nDofpF[var] = _dof[var]->fe.nbDofPerFace;   // number of Dof per faces
+      _M_nDofpV[var] = _dof[var]->fe.nbDofPerVertex(); // number of Dof per vertices
+      _M_nDofpE[var] = _dof[var]->fe.nbDofPerEdge();   // number of Dof per edges
+      _M_nDofpF[var] = _dof[var]->fe.nbDofPerFace();   // number of Dof per faces
 
       _M_nDofFV[var] = _M_nDofpV[var] * _M_nFaceV; // number of vertex's Dof on a face
       _M_nDofFE[var] = _M_nDofpE[var] * _M_nFaceE; // number of edge's Dof on a face

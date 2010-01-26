@@ -1427,10 +1427,10 @@ FSIOperator::interpolateVelocity( const vector_type& _vec1, vector_type& _vec2 )
 
     typedef mesh_type::VolumeShape GeoShape; // Element shape
 
-    UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex; // number of Dof per vertex
-    UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge;   // number of Dof per edge
-    UInt nDofpF = M_uFESpace->refFE().nbDofPerFace;   // number of Dof per face
-    UInt nDofpEl = M_uFESpace->refFE().nbDofPerVolume; // number of Dof per Volume
+    UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex(); // number of Dof per vertex
+    UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge();   // number of Dof per edge
+    UInt nDofpF = M_uFESpace->refFE().nbDofPerFace();   // number of Dof per face
+    UInt nDofpEl = M_uFESpace->refFE().nbDofPerVolume(); // number of Dof per Volume
 
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
@@ -1619,13 +1619,13 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fes
     typedef mesh_type::VolumeShape GeoShape; // Element shape
 
 
-    UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex; // number of Dof per vertex
-    UInt nDofPerEdge1  = _fespace1.refFE().nbDofPerEdge;   // number of Dof per edge
+    UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of Dof per vertex
+    UInt nDofPerEdge1  = _fespace1.refFE().nbDofPerEdge();   // number of Dof per edge
     //UInt nDofPerFace1  = _fespace1.refFE().nbDofPerFace;   // number of Dof per face
     //UInt nDofPerElem1  = _fespace1.refFE().nbDofPerVolume; // number of Dof per Volume
 
-    UInt nDofPerVert2  = _fespace2.refFE().nbDofPerVertex; // number of Dof per vertex
-    UInt nDofPerEdge2  = _fespace2.refFE().nbDofPerEdge;   // number of Dof per edge
+    UInt nDofPerVert2  = _fespace2.refFE().nbDofPerVertex(); // number of Dof per vertex
+    UInt nDofPerEdge2  = _fespace2.refFE().nbDofPerEdge();   // number of Dof per edge
     //UInt nDofPerFace2  = _fespace2.refFE().nbDofPerFace;   // number of Dof per face
     //UInt nDofPerElem2  = _fespace2.refFE().nbDofPerVolume; // number of Dof per Volume
 

@@ -25,7 +25,7 @@ namespace LifeV
 RefHdivFE::RefHdivFE( std::string _name, int _type, ReferenceShapes _shape, int _nbDofPerVertex,
                       int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume,
                       int _nbDof, int _nbCoor, const FCT* fctphi, const FCT* fctdivPhi,
-                      const Real* refCoor, const SetOfQuadRule& sqr, PatternType _patternType ) :
+                      const Real* refCoor, const SetOfQuadRule& sqr, DofPatternType _patternType ) :
         LocalDofPattern( _nbDof, _nbDofPerVertex, _nbDofPerEdge, _nbDofPerFace, _nbDofPerVolume, _patternType ),
         _sqr( &sqr ), _phi( fctphi ), _divPhi( fctdivPhi ),
         _refCoor( refCoor ), _phiQuad( sqr.totalNbQuadPoint() * _nbDof * _nbCoor ),

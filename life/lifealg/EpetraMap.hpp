@@ -279,14 +279,14 @@ EpetraMap(const RefFE&               refFE,
     std::vector<int> repeatedFaceVector;
     std::vector<int> repeatedVolumeVector;
 
-    if (refFE.nbDofPerVertex)
+    if (refFE.nbDofPerVertex())
     {
         repeatedNodeVector.reserve(mesh.numPoints());
         for ( UInt ii = 1; ii <= mesh.numPoints(); ii++ )
             repeatedNodeVector.push_back(mesh.pointList( ii ).id());
     }
 
-    if (refFE.nbDofPerEdge)
+    if (refFE.nbDofPerEdge())
     {
         repeatedEdgeVector.reserve(mesh.numEdges());
 
@@ -294,7 +294,7 @@ EpetraMap(const RefFE&               refFE,
             repeatedEdgeVector.push_back(mesh.edgeList( ii ).id());
     }
 
-    if (refFE.nbDofPerFace)
+    if (refFE.nbDofPerFace())
     {
         repeatedFaceVector.reserve(mesh.numFaces());
 
@@ -302,7 +302,7 @@ EpetraMap(const RefFE&               refFE,
             repeatedFaceVector.push_back(mesh.faceList( ii ).id());
     }
 
-    if (refFE.nbDofPerVolume)
+    if (refFE.nbDofPerVolume())
     {
         repeatedVolumeVector.reserve(mesh.numVolumes());
 

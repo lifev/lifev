@@ -115,7 +115,7 @@ public:
     //! The number of local Dof (nodes) in the finite element
     inline UInt numLocalDof() const
         {
-            return fe.nbLocalDof;
+            return fe.nbLocalDof();
         }
 
     //! Return the specified entries of the localToGlobal table
@@ -226,7 +226,7 @@ Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) :
         _gtlByFace()
 {
     //Getting the face
-    switch( _fe.nbLocalDof )
+    switch( _fe.nbLocalDof() )
     {
         case 4:
             _fToP = LinearTetra::fToP;
@@ -268,10 +268,10 @@ void Dof::update( Mesh& M )
   typedef typename Mesh::ElementShape GeoShape;
 
     // Some useful local variables, to save some typing
-    UInt nldpe = fe.nbDofPerEdge;
-    UInt nldpv = fe.nbDofPerVertex;
-    UInt nldpf = fe.nbDofPerFace;
-    UInt nldpV = fe.nbDofPerVolume;
+    UInt nldpe = fe.nbDofPerEdge();
+    UInt nldpv = fe.nbDofPerVertex();
+    UInt nldpf = fe.nbDofPerFace();
+    UInt nldpV = fe.nbDofPerVolume();
 
     nlv = GeoShape::numVertices;
     nle = GeoShape::numEdges;
@@ -294,7 +294,7 @@ void Dof::update( Mesh& M )
 
     UInt nldof = nldpV + nldpe * nle + nldpv * nlv + nldpf * nlf;
 
-    ASSERT_PRE( nldof == UInt( fe.nbLocalDof ), "Something wrong in FE specification" ) ;
+    ASSERT_PRE( nldof == UInt( fe.nbLocalDof() ), "Something wrong in FE specification" ) ;
 
     _totalDof = nV * nldpV + ne * nldpe + nv * nldpv + nf * nldpf;
 

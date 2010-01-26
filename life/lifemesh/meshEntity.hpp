@@ -25,7 +25,7 @@
 //@HEADER
 
 /*!
-    @meshEntity.hpp
+    @file
     @brief This file contains the MeshEntity and MeshEntityWithBoundary classes.
 
     The classes included in this file are usefull to store the identifiers of

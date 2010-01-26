@@ -1,3 +1,4 @@
+
 /*
  This file is part of the LifeV library
  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
@@ -304,13 +305,13 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
     UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
     UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
 
-    UInt nDofpV1 = _refFE1->nbDofPerVertex; // number of Dof per vertices on mesh1
-    UInt nDofpE1 = _refFE1->nbDofPerEdge;   // number of Dof per edges on mesh1
-    UInt nDofpF1 = _refFE1->nbDofPerFace;   // number of Dof per faces on mesh1
+    UInt nDofpV1 = _refFE1->nbDofPerVertex(); // number of Dof per vertices on mesh1
+    UInt nDofpE1 = _refFE1->nbDofPerEdge();   // number of Dof per edges on mesh1
+    UInt nDofpF1 = _refFE1->nbDofPerFace();   // number of Dof per faces on mesh1
 
-    UInt nDofpV2 = _refFE2->nbDofPerVertex; // number of Dof per vertices on mesh2
-    UInt nDofpE2 = _refFE2->nbDofPerEdge;   // number of Dof per edges on mesh2
-    UInt nDofpF2 = _refFE2->nbDofPerFace;   // number of Dof per faces on mesh2
+    UInt nDofpV2 = _refFE2->nbDofPerVertex(); // number of Dof per vertices on mesh2
+    UInt nDofpE2 = _refFE2->nbDofPerEdge();   // number of Dof per edges on mesh2
+    UInt nDofpF2 = _refFE2->nbDofPerFace();   // number of Dof per faces on mesh2
 
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges

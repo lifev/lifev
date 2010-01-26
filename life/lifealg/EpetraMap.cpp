@@ -395,28 +395,28 @@ EpetraMap::setUp(const RefFE&               refFE,
 {
     int indexBase = 1;
 
-    if (refFE.nbDofPerVertex)
+    if (refFE.nbDofPerVertex())
     {
         int numNode = repeatedNodeVector.size();
         EpetraMap repeatedNodeMap(-1, numNode, &repeatedNodeVector[0], indexBase,  _comm);
         operator+=(repeatedNodeMap);
     }
 
-    if (refFE.nbDofPerEdge)
+    if (refFE.nbDofPerEdge())
     {
         int numEdge = repeatedEdgeVector.size();
         EpetraMap repeatedEdgeMap(-1, numEdge, &repeatedEdgeVector[0], indexBase,  _comm);
         operator+=(repeatedEdgeMap);
     }
 
-    if (refFE.nbDofPerFace)
+    if (refFE.nbDofPerFace())
     {
     	int numFace = repeatedFaceVector.size();
         EpetraMap repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], indexBase,  _comm);
         operator+=(repeatedFaceMap);
     }
 
-    if (refFE.nbDofPerVolume)
+    if (refFE.nbDofPerVolume())
     {
     	int numElem = repeatedVolumeVector.size();
         EpetraMap repeatedElemMap(-1, numElem, &repeatedVolumeVector[0], indexBase,  _comm);
