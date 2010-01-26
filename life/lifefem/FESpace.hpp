@@ -1,39 +1,37 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
+//@HEADER
+
 /*!
-  \file FESpace.hpp
-
-  \version 1.0
-  \author Gilles Fourestey
-  \date 06/2007
-
-  \version 1.2 - Added new constructors for "Standard FE Spaces" and some other minor changes.
-  \author Cristiano Malossi<cristiano.malossi@epfl.ch>
-  \date 06/2009
-
-  \version 1.3 - Added interpolation features for a given solution vector
-  \author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-  \date 08/2009
-
-  \brief This file contains an abstract class for NavierStokes solvers.
-
-*/
+ * @file
+ * @brief This files contains the description and the implementation of the FESpace class.
+ *
+ * @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ * @date 00-06-2007
+ *
+ */
 
 #ifndef _FESPACE_H_
 #define _FESPACE_H_
@@ -67,16 +65,6 @@ using std::pair;
 namespace LifeV
 {
 
-/*!
-  \class FESpace
-
-  Abstract class which defines the general structure of a NavierStokes solver.
-  For each new NavierStokes solver  we have to implement the corresponding
-  timeAdvance and an iterate methods
-
-*/
-
-
 inline Real
 elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
          const CurrentFE& fe, const Real t, const UInt nbcomp )
@@ -97,6 +85,13 @@ elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
 }
 
 
+//! FESpace - Short description here please!
+/*!
+ *  @author Gilles Fourestey
+ *
+ *  Here write a long and detailed description of the class.
+ *
+ */
 
 template <typename Mesh, typename Map>
 class FESpace
@@ -158,6 +153,124 @@ public:
 
     //! Do nothing destructor
     virtual ~FESpace() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! This method computes the interpolate value of a given FE function in a given point.
+    /*!
+     * The user of this function has to provide the element and the vector of the DOF values.
+     * Given these informations and a point P, the function compute the value:
+     * value = sum_{dof i} v(i) phi_i(P)
+     * 
+     * Note that the point P can be outside of the element considered (this is NOT checked).
+     *
+     * Warning: this method has been only checked in 3D.
+     *
+     *  @param elementID  The ID of the element considered. The ID is the local ID
+     * (not the global one, see in the MeshEntity class).
+     *  @param solutionVector  The vector containing the values in all nodes (not only of
+     * the considered element).
+     *  @param pt  The point where to perform the interpolation. Note that pt must allow 
+     * for STL-type accessor [] and must have the size() method (typically a std::vector<Real>).
+     *  @param component  The component for which the interpolation has to be performed
+     * (usefull only for the vectorial FE, set to 0 if the FE is scalar).
+     *  @return  The interpolated value in the point.
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, 
+                            const point_type& pt, const UInt& component = 0) const;
+
+
+    //! This method computes the interpolate value of a given FE function in a given point.
+    /*!
+     * This method is the same as FEinterpolateValue, but for the definition of the solution
+     * vector. Here, the solution is given only for the degrees of freedom of the given
+     * element. The parameter solutionVector is typically a std::vector<Real> containing
+     * the values in the dofs.
+     *
+     * It is not possible to specify the component, the user has to provide directly the
+     * values for the wanted component in the solutionVector.
+     *
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector,
+                                 const point_type& pt ) const;
+
+
+    //! This method computes the interpolated gradient of a given FE function in a given point.
+    /*!
+     * This method is the same as FEinterpolateValue, but it computes the gradient insted of
+     * the value. Therefor, the desired element of the gradient has to be expressed using the
+     * parameter gradientElement.
+     *
+     * For example, if gradientElement=i and component=j, then the results corresponds to the
+     * value of partial u_j / partial x_i.
+     *
+     * Warning: This method has not been tested deeply, buggy behaviour is possible.
+     *
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+			       const UInt& gradientElement, const UInt& component=0 ) const;
+
+    
+    //! This method computes the interpolated gradient of a given FE function in a given point.
+    /*!
+     * This method is the same as FEinterpolateGradient, but it works with local values only,
+     * just as FEinterpolateValueLocal.
+     *
+     * Warning: This method has not been tested deeply, buggy behaviour is possible.
+     *
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename point_type, typename vector_type>
+    Real FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+				    const UInt& gradientElement ) const;
+
+
+    //! This method enables to pass a solution from one FESpace to the present one.
+    /*!
+     * This method interpolates the values of a FE solution (given by the vector and the FESpace)
+     * in the dofs of the present FESpace: we note \f$ v_i \f$ the component of the vector given in
+     * argument and \f$ phi_i \f$ the basis functions of the FESpace given in argument. This defines a 
+     * function on the domain given by: \f$ f(x) = \sum_i v_i \phi_i(x) \f$.
+     * 
+     * We search then the function \f$ g(x) \f$ belonging to the present FESpace such that \f$ g(x_j) = f(x_j) \f$
+     * for all \f$ x_j \f$ dofs of the present FESpace. This function returns the vector  \f$ w_j \f$ such that
+     * \f$ g(x) = sum_j w_j psi_j(x) \f$ where \f$ psi_j \f$ are the basis functions of the present space.
+     *
+     * Warning: It is NOT true in general that \f$ w_j = f(x_j) \f$ (it is for lagrangian FEs). For 
+     * example, if we want to pass the solution from the P_1 to the P_1 with bubbles, then
+     * the value associated to the bubble function will be always 0 even if the value of f
+     * is not 0 at the location of the dof of the bubble!
+     * 
+     *  @param originalSpace  The space were the solution is defined originally.
+     *  @param originalVector  The vector of the solution in the original space.
+     *  @return The vector in the current FESpace. The vector is Unique (unless it is actually
+     * the same space so that no interpolation is performed).
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template <typename vector_type>
+    vector_type FeToFeInterpolate(const FESpace<mesh_type,map_type>& originalSpace,
+    const vector_type& originalVector) const;
+
 
     //@}
 
@@ -261,27 +374,6 @@ public:
     Real H1Norm( const vector_type& vec );
 
 
-    // Added by S. Quinodoz 21.08.2009
-    // Interpolate the function given by a FE Vector "solutionVector" (not a real function)
-    // and a cell "elementID" in ANY given point "pt" in the space
-    //
-    // !!! Until now, only for scalar FE (not checked)
-
-    template<typename point_type, typename vector_type>
-    Real FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const;
-
-    template<typename point_type, typename vector_type>
-    Real FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const;
-
-    template<typename point_type, typename vector_type>
-    Real FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
-			       const unsigned int& component ) const;
-
-    template<typename point_type, typename vector_type>
-    Real FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
-				    const unsigned int& component ) const;
-
-
     BasePattern::PatternType patternType();
 
 private:
@@ -289,8 +381,80 @@ private:
     //! copy constructor
     FESpace( const FESpace& fespace );
 
-    //! Set space
+     //! @name Private Methods
+    //@{
+    
+     //! Set space
     inline void setSpace( const std::string& space );
+ 
+
+    //! This is a specialized function called by FeToFeInterpolate method for P_2 to P_1 interpolation
+    /*!
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename vector_type>
+    vector_type P2ToP1Interpolate(const FESpace<mesh_type,map_type>& originalSpace,
+				  const vector_type& originalVector) const;
+
+
+    //! This is a specialized function called by FeToFeInterpolate method for P_1 Bubble to P_1 interpolation
+    /*!
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename vector_type>
+    vector_type P1bToP1Interpolate(const FESpace<mesh_type,map_type>& original_space,
+				  const vector_type& original_vector) const;
+    
+    //! This is a specialized function called by FeToFeInterpolate method for P_1 to P_2 interpolation
+    /*!
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename vector_type>
+    vector_type P1ToP2Interpolate(const FESpace<mesh_type,map_type>& original_space,
+				  const vector_type& original_vector) const;
+    
+
+    //! This is a specialized function called by FeToFeInterpolate method for P_1 to P_1 Bubble interpolation
+    /*!
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename vector_type>
+    vector_type P1ToP1bInterpolate(const FESpace<mesh_type,map_type>& original_space,
+				   const vector_type& original_vector) const;
+
+
+    //! This is a specialized function called by FeToFeInterpolate method for P_1 Bubble to P_2 interpolation
+    /*!
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+    
+    template<typename vector_type>
+    vector_type P1bToP2Interpolate(const FESpace<mesh_type,map_type>& original_space,
+				   const vector_type& original_vector) const;
+
+
+    //! This is a specialized function called by FESpace::FeToFeInterpolate method for P_1 Bubble to P_2 interpolation
+    /*!
+     *  @author Samuel Quinodoz
+     *  @date 13-01-2010
+     */
+
+    template<typename vector_type>
+    vector_type P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& original_space,
+				   const vector_type& original_vector) const;
+    //@}
+
+
+
 
     //! Set space Map (useful for switch syntax with strings)
     enum spaceData{P1, P1_HIGH, P1Bubble, P2, P2_HIGH};
@@ -545,10 +709,10 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
 {
     typedef typename mesh_type::ElementShape GeoShape ; // Element shape
 
-    UInt nDofpV    = refFE().nbDofPerVertex; // number of Dof per vertex
-    UInt nDofpE    = refFE().nbDofPerEdge;   // number of Dof per edge
-    UInt nDofpF    = refFE().nbDofPerFace;   // number of Dof per face
-//    UInt nDofpEl   = refFE().nbDofPerVolume; // number of Dof per Volume
+    UInt nDofpV    = refFE().nbDofPerVertex(); // number of Dof per vertex
+    UInt nDofpE    = refFE().nbDofPerEdge();   // number of Dof per edge
+    UInt nDofpF    = refFE().nbDofPerFace();   // number of Dof per face
+    UInt nDofpEl   = refFE().nbDofPerVolume(); // number of Dof per Volume
 
     UInt nElemV    = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE    = GeoShape::numEdges;    // Number of element's edges
@@ -556,7 +720,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
 
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-//    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
+    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
 
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
 
@@ -647,19 +811,19 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
         }
 //         // Element based Dof
 //         // Loop on number of Dof per Element
-//         for ( ID l = 1; l <= nDofpEl; ++l )
-//         {
-//             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
+/*         for ( ID l = 1; l <= nDofpEl; ++l )
+         {
+             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
 
-//             // Nodal coordinates
-//             fe().coorMap( x, y, z, refFE().xi( lDof - 1 ), refFE().eta( lDof - 1 ), refFE().zeta( lDof - 1 ) );
+             // Nodal coordinates
+             fe().coorMap( x, y, z, refFE().xi( lDof - 1 ), refFE().eta( lDof - 1 ), refFE().zeta( lDof - 1 ) );
 
-//             // Loop on data vector components
-//             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-//             {
-// //                vect( icmp * dim() + dof().localToGlobal( elemId, lDof ) - 0 ) = fct( time, x, y, z, icmp + 1 );
-//             }
-//         }
+             // Loop on data vector components
+             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
+             {
+                vect( icmp * dim() + dof().localToGlobal( elemId, lDof ) - 0 ) = fct( time, x, y, z, icmp + 1 );
+             }
+	     }*/
     }
 }
 
@@ -968,6 +1132,8 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
 
 // }
 
+
+// Warning! When using this function in parallel, the vector vec HAS TO BE REPEATED!
 template <typename Mesh, typename Map>
 template<typename vector_type>
 Real
@@ -1030,70 +1196,54 @@ FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
 
 
 
-
-//This function interpolates the value of the function given by
-// - an element
-// - the solution vector
-// in a given point P: value = \sum_{dofs} solution_i \phi_i(P)
-//
-// Another faster way would have been to use a custom quadrature
-// but the fact that the quadrature is already written inside the
-// refEle destroys all the hope of a faster implementation (the
-// geoMap has to be redefined, and so has to be updated for the
-// mesh, the refFE has to be rebuilt,...)
-
 template<typename Mesh, typename Map>
 template<typename point_type,typename vector_type>
 Real
 FESpace<Mesh, Map>::
-FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
+FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt, const UInt& component ) const
 {
-  // Assumptions for the types:
-  // point_type has the STL-type [] accessor and the size() method
-
-  // The vector has to be repeated
-  ASSERT( solutionVector.getMaptype() == Repeated, " Vector must be repeated ");
-
-  // Make sur everything is up to date
-  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
-
-  // Map the point back to the ref FE
-  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
-  Real x(0);  Real y(0);  Real z(0);
-
-  if (pt.size()>=1)    x=pt[0];
-  if (pt.size()>=2)    y=pt[1];
-  if (pt.size()>=3)    z=pt[2];
-
-
-  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-
-  // Store the number of local DoF
-  UInt nDof(dof().numLocalDof());
-
-  // Initialization
-  Real value(0);
-
-  // Loop over the DoFs
-  for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
+    // The vector has to be repeated, so if it is not, we make is repeated and call this function again.
+    if (solutionVector.getMaptype() != Repeated )
     {
-      // The global ID of the selected dof
-      // This should be changed in case of a VECTORIAL FE
-
-      ID dofID(fe().patternFirst(iter_dof));
-      ID globalDofID( dof().localToGlobal(elementID, dofID +1) ); // iter_dof -> dofID
-
-      // Make the accumulation
-      value += solutionVector[globalDofID] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
+        vector_type repeatedSolutionVector(solutionVector,Repeated);
+        return FEinterpolateValue(elementID, repeatedSolutionVector, pt, component);
     };
-
-  return value;
+    
+    // Make sur everything is up to date
+    M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+    
+    // Map the point back to the ref FE
+    Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+    Real x(0);  Real y(0);  Real z(0);
+    
+    if (pt.size()>=1)    x=pt[0];
+    if (pt.size()>=2)    y=pt[1];
+    if (pt.size()>=3)    z=pt[2];
+    
+    M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+    
+    // Store the number of local DoF
+    UInt nDof(dof().numLocalDof());
+    UInt totalDof(dof().numTotalDof());
+    
+    // Initialization
+    Real value(0);
+    
+    // Loop over the DoFs
+    for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
+    {
+        // The global ID of the selected dof
+        // This should be changed in case of a VECTORIAL FE
+        
+        ID globalDofID(component*totalDof + dof().localToGlobal(elementID, iter_dof +1) ); // iter_dof -> dofID
+        
+        // Make the accumulation
+        value += solutionVector[globalDofID] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
+    };
+    
+    return value;
 };
 
-
-
-// Same function as before, with the difference that
-// the solution vector is LOCAL (before it was the GLOBAL) one.
 
 template<typename Mesh, typename Map>
 template<typename point_type,typename vector_type>
@@ -1101,39 +1251,34 @@ Real
 FESpace<Mesh, Map>::
 FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
-  // Assumptions for the types:
-  // point_type has the STL-type [] accessor and the size() method
-  // vector_type has the STL_type [] accessor
-
-
-  // Make sur everything is up to date
-  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
-
-  // Map the point back to the ref FE
-  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
-
-  Real x(0);  Real y(0);  Real z(0);
-
-  if (pt.size()>=1)    x=pt[0];
-  if (pt.size()>=2)    y=pt[1];
-  if (pt.size()>=3)    z=pt[2];
-
-  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-
-  // Store the number of local DoF
-  UInt nDof(dof().numLocalDof());
-
-  // Initialization
-  Real value(0);
-
-  // Loop over the DoFs
-  for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
+    // Make sur everything is up to date
+    M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+    
+    // Map the point back to the ref FE
+    Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+    
+    Real x(0);  Real y(0);  Real z(0);
+    
+    if (pt.size()>=1)    x=pt[0];
+    if (pt.size()>=2)    y=pt[1];
+    if (pt.size()>=3)    z=pt[2];
+    
+    M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+    
+    // Store the number of local DoF
+    UInt nDof(dof().numLocalDof());
+    
+    // Initialization
+    Real value(0);
+    
+    // Loop over the DoFs
+    for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
     {
-      // Make the accumulation
-      value += solutionVector[iter_dof-1] * M_refFE->phi(iter_dof-1, hat_x, hat_y, hat_z);
+        // Make the accumulation
+        value += solutionVector[iter_dof] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
     };
-
-  return value;
+    
+    return value;
 };
 
 
@@ -1142,97 +1287,561 @@ template<typename point_type,typename vector_type>
 Real
 FESpace<Mesh, Map>::
 FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
-		      const unsigned int& component ) const
+                      const UInt& gradientElement, const UInt& component ) const
 {
-  // Assumptions for the types:
-  // point_type has the STL-type [] accessor and the size() method
-
-
-  // Make sur everything is up to date
-  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
-
-  // Map the point back to the ref FE
-  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
-
-  Real x(0);  Real y(0);  Real z(0);
-
-  if (pt.size()>=1)    x=pt[0];
-  if (pt.size()>=2)    y=pt[1];
-  if (pt.size()>=3)    z=pt[2];
-
-  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-
-  // Store the number of local DoF
-  UInt nDof(dof().numLocalDof());
-
-  // Initialization
-  Real grad(0);
-
-  // Loop over the DoFs
-  for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
+    // The vector has to be repeated, so if it is not, we make is repeated and call this function again.
+    if (solutionVector.getMaptype() != Repeated )
     {
-      // The global ID of the selected dof
-      // This should be changed in case of a VECTORIAL FE
-      ID globalDofID( dof().localToGlobal(elementID, iter_dof) );
-
-      for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
-      {
-	grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z)
-	                                   * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,component,iter_dim);
-      };
+        vector_type repeatedSolutionVector(solutionVector,Repeated);
+        return FEinterpolateGradient(elementID, repeatedSolutionVector, pt, gradientElement, component);
     };
-
-  return grad;
+    
+    
+    // Make sur everything is up to date
+    M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+    
+    // Map the point back to the ref FE
+    Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+    Real x(0);  Real y(0);  Real z(0);
+    
+    if (pt.size()>=1)    x=pt[0];
+    if (pt.size()>=2)    y=pt[1];
+    if (pt.size()>=3)    z=pt[2];
+    
+    M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+    
+    // Store the number of local DoF
+    UInt nDof(dof().numLocalDof());
+    UInt totalDof(dof().numTotalDof());
+    
+    // Initialization
+    Real grad(0);
+    
+    // Loop over the DoFs
+    for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
+    {
+        // The global ID of the selected dof
+        ID globalDofID(totalDof * component + dof().localToGlobal(elementID, iter_dof+1) );
+        
+        for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
+        {
+            grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof,iter_dim,hat_x,hat_y,hat_z)
+                * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,iter_dim);
+        };
+    };
+    
+    return grad;
 };
+
 
 template<typename Mesh, typename Map>
 template<typename point_type,typename vector_type>
 Real
 FESpace<Mesh, Map>::
 FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
-			   const unsigned int& component ) const
+			   const UInt& gradientElement ) const
 {
-  // Assumptions for the types:
-  // point_type has the STL-type [] accessor and the size() method
-  // vector_type has the STL_type [] accessor
-
-
-  // Make sur everything is up to date
-  M_fe->updateFirstDeriv( M_mesh->element( elementID ));
-
-  // Map the point back to the ref FE
-  Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
-
-  Real x(0);  Real y(0);  Real z(0);
-
-  if (pt.size()>=1)    x=pt[0];
-  if (pt.size()>=2)    y=pt[1];
-  if (pt.size()>=3)    z=pt[2];
-
-  M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-
-  // Store the number of local DoF
-  UInt nDof(dof().numLocalDof());
-
-  // Initialization
-  Real grad(0);
-
-
-  // Loop over the DoFs
-  for (UInt iter_dof(1); iter_dof<=nDof ; ++iter_dof)
+    // Make sur everything is up to date
+    M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+    
+    // Map the point back to the ref FE
+    Real hat_x(0);  Real hat_y(0);  Real hat_z(0);
+    Real x(0);  Real y(0);  Real z(0);
+    
+    if (pt.size()>=1)    x=pt[0];
+    if (pt.size()>=2)    y=pt[1];
+    if (pt.size()>=3)    z=pt[2];
+    
+    M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
+    
+    // Store the number of local DoF
+    UInt nDof(dof().numLocalDof());
+    
+    // Initialization
+    Real grad(0);
+    
+    // Loop over the DoFs
+    for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
     {
-
-      for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
-      {
-          grad+= solutionVector[iter_dof-1] * M_refFE->dPhi(iter_dof-1,iter_dim,hat_x,hat_y,hat_z)
-	                                   * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,component,iter_dim);
-      };
+        
+        for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
+        {
+            grad+= solutionVector[iter_dof] * M_refFE->dPhi(iter_dof,iter_dim,hat_x,hat_y,hat_z)
+                * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,iter_dim);
+        };
     };
-
-
-  return grad;
+    
+    return grad;
 };
 
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+  // This method just check that everything is alright and then call the
+  // appropriate method __To__Interpolate if needed.
+
+  // First, check that the interpolation is possible
+  ASSERT(fieldDim() == OriginalSpace.fieldDim(),"Incompatible field dimension for interpolation");
+  ASSERT(refFE().shape == OriginalSpace.refFE().shape , "Incompatible element shape for interpolation");
+
+  // If the spaces are the same, just return the original vector
+  if (refFE().type == OriginalSpace.refFE().type)
+  {
+    return OriginalVector;
+  };
+
+  // Then, check that the original vector is repeated.
+  // If not, make it repeated and recall this method.
+  if ( OriginalVector.getMaptype() == Unique )
+  {
+    const vector_type OriginalRepeated(OriginalVector,Repeated); 
+    return FeToFeInterpolate(OriginalSpace,OriginalRepeated);
+  };
+
+  // Distinguish the other cases
+
+  if (refFE().type == FE_P1_3D)
+  {
+    if (OriginalSpace.refFE().type == FE_P1bubble_3D)
+    {
+      return P1bToP1Interpolate(OriginalSpace,OriginalVector);
+    } 
+    else if (OriginalSpace.refFE().type == FE_P2_3D)
+    {
+      return P2ToP1Interpolate(OriginalSpace,OriginalVector);
+    }
+    else
+    {
+      ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
+    };
+  }
+  else if (refFE().type == FE_P1bubble_3D)
+  {
+    if (OriginalSpace.refFE().type == FE_P1_3D)
+    {
+      return P1ToP1bInterpolate(OriginalSpace,OriginalVector);
+    } 
+    else if (OriginalSpace.refFE().type == FE_P2_3D)
+    {
+      return P2ToP1bInterpolate(OriginalSpace,OriginalVector);
+    }
+    else
+    {
+      ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
+    };
+  }
+  else if (refFE().type == FE_P2_3D)
+  {
+    if (OriginalSpace.refFE().type == FE_P1bubble_3D)
+    {
+      return P1bToP2Interpolate(OriginalSpace,OriginalVector);
+    } 
+    else if (OriginalSpace.refFE().type == FE_P1_3D)
+    {
+      return P1ToP2Interpolate(OriginalSpace,OriginalVector);
+    }
+    else
+    {
+      ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
+    };
+  }
+  else
+  {
+    ERROR_MSG(" The interpolation with this space has not been yet implemented. Please, add it!");
+  };
+
+
+};
+
+
+// This method returns a vector with Unique map.
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+P2ToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+  // Create a zero vector.
+  vector_type Interpolated(map(),Repeated);
+  Interpolated *= 0.0;
+ 
+  // Some constants (avoid recomputing them each time used)
+  UInt FieldDim(fieldDim());
+  
+  UInt numVolumes(mesh()->numVolumes());
+  
+  UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
+  UInt totalDofsPresent(dof().numTotalDof());
+
+  // Loop over the elements to get the values
+  for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+  {
+    UInt elemId (mesh()->volume(iElem).localId());
+   
+    // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+    // are the first ones of the P2 dofs. We have 4 P1 dofs to report per
+    // field dimension.
+    
+    for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
+    {
+      for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
+      {
+	ID globalDofID_original(iComponent*totalDofsOriginal + OriginalSpace.dof().localToGlobal(elemId, iP1dof +1));
+	ID globalDofID_present(iComponent*totalDofsPresent + dof().localToGlobal(elemId, iP1dof +1) );
+
+	Real value =  OriginalVector[globalDofID_original];
+	Interpolated[globalDofID_present]= value;
+      };
+    };
+  };
+
+  // Here we do need to use the combine mode "Insert": the default combine mode
+  // is "Add" and then, as we pass several times on the same DoF, the values would be added, what would
+  // be wrong. Instead, we keep only one value (which anyway should be always the same for continuous
+  // finite element).
+  vector_type return_vector(Interpolated,Unique,Insert);
+  return return_vector;
+
+};
+
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+P1bToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+// Create a zero vector.
+  vector_type Interpolated(map(),Repeated);
+  Interpolated *= 0.0;
+ 
+  // Some constants (avoid recomputing them each time used)
+  UInt FieldDim(fieldDim());
+  
+  UInt numVolumes(mesh()->numVolumes());
+  
+  UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
+  UInt totalDofsPresent(dof().numTotalDof());
+
+  // Loop over the elements to get the values
+  for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+  {
+    UInt elemId (mesh()->volume(iElem).localId());
+   
+    // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+    // are the first ones of the P1Bubble dofs. We have 4 P1 dofs to report per
+    // field dimension.
+    
+    for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
+    {
+      for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
+      {
+	ID globalDofID_original(iComponent*totalDofsOriginal + OriginalSpace.dof().localToGlobal(elemId, iP1dof +1));
+	ID globalDofID_present(iComponent*totalDofsPresent + dof().localToGlobal(elemId, iP1dof +1) );
+
+	Real value =  OriginalVector[globalDofID_original];
+	Interpolated[globalDofID_present]= value;
+      };
+    };
+  };
+
+  // Here we do need to use the combine mode "Insert": the default combine mode
+  // is "Add" and then, as we pass several times on the same DoF, the values would be added, what would
+  // be wrong. Instead, we keep only one value (which anyway should be always the same for continuous
+  // finite element).
+  vector_type return_vector(Interpolated,Unique,Insert);
+  return return_vector;
+
+};
+
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+P1ToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+ // Create a zero vector.
+  vector_type Interpolated(map(),Repeated);
+  Interpolated *= 0.0;
+ 
+  // Some constants (avoid recomputing them each time used)
+  UInt FieldDim(fieldDim());
+  
+  UInt numVolumes(mesh()->numVolumes());
+  
+  UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
+  UInt totalDofsPresent(dof().numTotalDof());
+
+  // A vector to store the values to set in the dofs
+  std::vector<Real> DofValues(10,0.0);
+
+  // Loop over the elements to get the values
+  for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+  {
+    UInt elemId (mesh()->volume(iElem).localId());
+   
+    // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+    // are the first ones of the P2 dofs. We have then to recompute the values
+    // in the "face" dofs of the P2 element.
+    
+    for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
+    {
+      // Get the values in the vertices
+      for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
+      {
+	ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+
+	DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
+      };
+      
+      // Compute the values in the faces (!this vector starts from 0, not from 1 as the dofs numeration)
+      DofValues[4] = 0.5*(DofValues[0]+DofValues[1]);
+      DofValues[5] = 0.5*(DofValues[1]+DofValues[2]);
+      DofValues[6] = 0.5*(DofValues[0]+DofValues[2]);
+      DofValues[7] = 0.5*(DofValues[0]+DofValues[3]);
+      DofValues[8] = 0.5*(DofValues[1]+DofValues[3]);
+      DofValues[9] = 0.5*(DofValues[2]+DofValues[3]);
+
+      // Now set them
+      for (UInt iP2dof(0); iP2dof<10; ++iP2dof)
+      {
+	ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP2dof +1));
+
+	Interpolated[globalDofID_present] = DofValues[iP2dof];
+      };
+     
+    };
+  };
+
+  // Here we do need to use the combine mode "Insert": the default combine mode
+  // is "Add" and then, as we pass several times on the same DoF, the values would be added, what would
+  // be wrong. Instead, we keep only one value (which anyway should be always the same for continuous
+  // finite element).
+  vector_type return_vector(Interpolated,Unique,Insert);
+  return return_vector;
+
+};
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+P1ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+ // Create a zero vector.
+  vector_type Interpolated(map(),Repeated);
+  Interpolated *= 0.0;
+ 
+  // Some constants (avoid recomputing them each time used)
+  UInt FieldDim(fieldDim());
+  
+  UInt numVolumes(mesh()->numVolumes());
+  
+  UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
+  UInt totalDofsPresent(dof().numTotalDof());
+
+  // A vector to store the values to set in the dofs
+  std::vector<Real> DofValues(5,0.0);
+
+  // Loop over the elements to get the values
+  for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+  {
+    UInt elemId (mesh()->volume(iElem).localId());
+   
+    // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+    // are the first ones of the P1Bubble dofs. The value of the Bubble is
+    // zero when interpolating a P1 functions.
+    
+    for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
+    {
+      // Get the values in the vertices
+      for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
+      {
+	ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+
+	DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
+      };
+      
+      // This is the value for the bubble function.
+      DofValues[4] = 0.0;
+      
+      // Now set them
+      for (UInt iP1bdof(0); iP1bdof<5; ++iP1bdof)
+      {
+	ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP1bdof +1));
+
+	Interpolated[globalDofID_present] = DofValues[iP1bdof];
+      };
+     
+    };
+  };
+
+  // Here we do need to use the combine mode "Insert": the default combine mode
+  // is "Add" and then, as we pass several times on the same DoF, the values would be added, what would
+  // be wrong. Instead, we keep only one value (which anyway should be always the same for continuous
+  // finite element).
+  vector_type return_vector(Interpolated,Unique,Insert);
+  return return_vector;
+
+};
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+P1bToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+  // Create a zero vector.
+  vector_type Interpolated(map(),Repeated);
+  Interpolated *= 0.0;
+ 
+  // Some constants (avoid recomputing them each time used)
+  UInt FieldDim(fieldDim());
+  
+  UInt numVolumes(mesh()->numVolumes());
+  
+  UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
+  UInt totalDofsPresent(dof().numTotalDof());
+
+  // A vector to store the values to set in the dofs
+  std::vector<Real> DofValues(10,0.0);
+
+  // Loop over the elements to get the values
+  for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+  {
+    UInt elemId (mesh()->volume(iElem).localId());
+   
+    // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+    // are the first ones of the P2 dofs. We have then to recompute the values
+    // in the "face" dofs of the P2 element. Moreover, the bubble is zero on the
+    // faces of the element. It gives then no contribution.
+    
+    for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
+    {
+      // Get the values in the vertices
+      for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
+      {
+	ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+
+	DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
+      };
+      
+      // Compute the values in the faces (!this vector starts from 0, not from 1 as the dofs numeration)
+      DofValues[4] = 0.5*(DofValues[0]+DofValues[1]);
+      DofValues[5] = 0.5*(DofValues[1]+DofValues[2]);
+      DofValues[6] = 0.5*(DofValues[0]+DofValues[2]);
+      DofValues[7] = 0.5*(DofValues[0]+DofValues[3]);
+      DofValues[8] = 0.5*(DofValues[1]+DofValues[3]);
+      DofValues[9] = 0.5*(DofValues[2]+DofValues[3]);
+
+      // Now set them
+      for (UInt iP2dof(0); iP2dof<10; ++iP2dof)
+      {
+	ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP2dof +1));
+
+	Interpolated[globalDofID_present] = DofValues[iP2dof];
+      };
+     
+    };
+  };
+
+  // Here we do need to use the combine mode "Insert": the default combine mode
+  // is "Add" and then, as we pass several times on the same DoF, the values would be added, what would
+  // be wrong. Instead, we keep only one value (which anyway should be always the same for continuous
+  // finite element).
+  vector_type return_vector(Interpolated,Unique,Insert);
+  return return_vector;
+
+};
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+		  const vector_type& OriginalVector) const
+{
+  // Create a zero vector.
+  vector_type Interpolated(map(),Repeated);
+  Interpolated *= 0.0;
+ 
+  // Some constants (avoid recomputing them each time used)
+  UInt FieldDim(fieldDim());
+  
+  UInt numVolumes(mesh()->numVolumes());
+  
+  UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
+  UInt totalDofsPresent(dof().numTotalDof());
+
+  // A vector to store the values to set in the dofs
+  std::vector<Real> DofValues(5,0.0);
+
+  // Loop over the elements to get the values
+  for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+  {
+    UInt elemId (mesh()->volume(iElem).localId());
+   
+    // This is a tricky case. The problem is that the P2 functions
+    // have an influence on the gravity center. Moreover, the P1Bubble
+    // FE is NOT a Lagrangian FE, so we need to make a combinaison of
+    // the values in the different points. But first of all, we extract
+    // the P1 values in the vertices.
+    
+    for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
+    {
+      // Get the values in the vertices
+      for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
+      {
+	ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+
+	DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
+      };
+      
+      // Here we have to compute the value of the interpolated function
+      // in the gravity center of the cell.
+      std::vector<Real> gravityCenter(3,0);
+      for (UInt iterVertices(0); iterVertices<4; ++iterVertices)
+      {
+          gravityCenter[0] += mesh()->volume(iElem).point(iterVertices+1).coordinate(0+1)/4.0;
+          gravityCenter[1] += mesh()->volume(iElem).point(iterVertices+1).coordinate(1+1)/4.0;
+          gravityCenter[2] += mesh()->volume(iElem).point(iterVertices+1).coordinate(2+1)/4.0;
+      };
+
+      Real gravityCenterValue(0);
+      gravityCenterValue = FEinterpolateValue(elemId,OriginalVector,gravityCenter,iComponent);
+      
+      // Here we do the combinaison because it is not Lagrangian.
+      DofValues[4] = 256*(gravityCenterValue - (DofValues[0]+DofValues[1]+DofValues[2]+DofValues[3])/4.0);
+     
+      // Now set them
+      for (UInt iP1bdof(0); iP1bdof<5; ++iP1bdof)
+      {
+	ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP1bdof +1));
+
+        Interpolated[globalDofID_present] = DofValues[iP1bdof];
+      };
+     
+    };
+  };
+
+  // Here we do need to use the combine mode "Insert": the default combine mode
+  // is "Add" and then, as we pass several times on the same DoF, the values would be added, what would
+  // be wrong. Instead, we keep only one value (which anyway should be always the same for continuous
+  // finite element).
+  vector_type return_vector(Interpolated,Unique,Insert);
+  return return_vector;
+};
 
 } // end of the namespace
 #endif
