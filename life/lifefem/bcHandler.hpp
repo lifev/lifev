@@ -37,6 +37,58 @@
 
 namespace LifeV
 {
+
+/*! \page bc_page Boundary Conditions
+  
+  \section bc_identifier Conventions
+  
+  Here we explain what is the convention for the boundary conditions is LifeV.
+
+  The main issue is to understand what is the flag that are attributed to the degrees of freedom not located on a vertex. In that case, the flag of the smallest entity including the degree of freedom is used.
+
+  This means that:
+  <ol>
+  <li> A degree of freedom based on a vertex will use the flag of that vertex.
+  <li> A degree of freedom based on an edge (but not on a vertex) will use the flag of that edge.
+  <li> A degree of freedom based on a face (but not on a vertex or an edge) will use the flag of that face.
+  <li> ...
+  </ol>
+  
+  The user of the library has then the responsability to define the good flags for each mesh entity. There is no priority for any of the boundary conditions. This is an important issue has it can create buggy behaviours that are difficult to trace back. We provide here an example.
+
+  Suppose that we want to keep a fluid inside a cube.
+
+  \image html cube.png "The domain"
+  
+  Then, no penetration boundary conditions have to be imposed on all the sides, otherwise the fluid will escape from the container. No penetration boundary conditions are different depending on the face/edge/vertex that we are considering, as shown on the next picture (for a corner of the cube).
+
+   \image html bc_cube_types.png "Boundary conditions to be imposed"
+
+   To impose these conditions, we might have defined in the mesh file flags for all the vertices. Here, we might have defined them as in the next figure.
+
+   \image html bc_cube_flags_I_P1.png "A choice for the flags"
+
+   However, if P2 finite elements are used, the degrees of freedom in the middle of each edge are concerned by the boundary conditions. By default, when the mesh is built, the flag attributed to the edge is the minimum of the flags of the vertices defining it. The flag of the edge is then used as the flag of the P2 degree of freedom, as shown in the next picture.
+
+   \image html bc_cube_flags_I_P2.png "The resulting flags for the P2 degrees of freedom"
+
+   We can see that this will result in a wrong behaviour, as the boundary conditions of the edges are spread on the faces of the cube, what is not what we wanted. If we are aware of the default behaviour, we can reorder the flags to get boundary conditions that are closer to what we wanted, as shown in the next two figures.
+
+   \image html bc_cube_flags_II_P1.png "A better choice for the flags ..."
+
+   \image html bc_cube_flags_II_P2.png "... and the resulting flags for the P2 degrees of freedom"
+ 
+   However, we see on the last picture that there are still two degrees of freedom with the wrong boundary conditions, near the corner. On the front face, we would like the upper "3" to be "1" as the boundary condition for the face should apply. The library cannot guess that it has to take the flag "1"! This is why in this situation, the user has to provide a flag for this edge in the mesh file.
+
+   \image html bc_cube_flags_III_P2.png "The correct flag repartition"
+
+   <b>Remark</b>: The mesh shown in the previous examples should be avoided, not only because it makes "complicated" boundary conditions for the P2 elements, but also because the tetrahedron in the corner is "locked" if the P1 elements are choosen.
+  
+  
+ */
+
+
+
 /**
    \class BCHandler
 
@@ -417,9 +469,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 	typedef typename Mesh::ElementShape GeoShape;
 
     // Some useful local variables, to save some typing
-    UInt nDofPerVert = dof.fe.nbDofPerVertex; // number of Dof per vertices
-    UInt nDofPerEdge = dof.fe.nbDofPerEdge;   // number of Dof per edges
-    UInt nDofPerFace = dof.fe.nbDofPerFace;   // number of Dof per faces
+        UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
+        UInt nDofPerEdge = dof.fe.nbDofPerEdge();   // number of Dof per edges
+        UInt nDofPerFace = dof.fe.nbDofPerFace();   // number of Dof per faces
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
@@ -616,7 +668,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             iEdEl = GeoShape::fToE( iBElEl, iLocalBElement ).first; // local edge number (in element)
 #endif
                             marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
-                            if(marker!= elementMarker){continue;}
+                            //if(marker!= elementMarker){continue;}
                             // Finding this marker on the BC list
                             whereList.clear();
                             where = M_bcList.begin();
