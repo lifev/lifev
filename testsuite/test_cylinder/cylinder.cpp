@@ -53,6 +53,9 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
+#ifdef HAVE_HDF5
+#include <life/lifefilters/hdf5exporter.hpp>
+#endif
 #include <life/lifefilters/ensight.hpp>
 
 #include <life/lifesolver/Oseen.hpp>
@@ -545,10 +548,13 @@ Cylinder::run()
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
-
+#ifdef HAVE_HDF5
+    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+#else
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+#endif
 
+    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), ensight.mapType() ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
