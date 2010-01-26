@@ -75,24 +75,32 @@ fullMonolithic::setupFluidSolid()
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
     M_un.reset (new vector_type(*this->M_monolithicMap));
-    M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
-                                                            *M_epetraComm,
-                                                            *M_monolithicMap,
-                                                            offset));
-    M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
-                                                  *M_uFESpace,
-                                                  *M_pFESpace,
-                                                  *M_mmFESpace,
-                                                  *M_epetraComm,
-                                                  *M_monolithicMap));
-    M_solid.reset(new solid_raw_type(dataSolid(),
-                                     *M_dFESpace,
-                                     *M_epetraComm,
-                                     *M_monolithicMap,
-                                     M_offset
-                                     ));
+    M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
+                                               *M_epetraComm,
+                                               *M_monolithicMap,
+                                               offset));
+    M_fluid.reset     (new fluid_raw_type(dataFluid(),
+                                          *M_uFESpace,
+                                          *M_pFESpace,
+                                          *M_mmFESpace,
+                                          *M_epetraComm,
+                                          *M_monolithicMap));
+    M_solid.reset     (new solid_raw_type(dataSolid(),
+                                          *M_dFESpace,
+                                          *M_epetraComm,
+                                          *M_monolithicMap,
+                                          M_offset
+                                          ));
 
 }
+
+
+void
+fullMonolithic::setDataFromGetPot( GetPot const& data_file )
+{
+    this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
+}
+
 
 void
 fullMonolithic::updateSystem(const vector_type& solution)
@@ -149,83 +157,80 @@ fullMonolithic::evalResidual( vector_type&       res,
     {
         this->M_solid->updateVel();
     }
-    if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
+    M_uk.reset(new vector_type(disp));
+    this->M_beta.reset(new vector_type(M_uFESpace->map()));
+    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
+
+    vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
+    vector_ptrtype meshDispOld(new vector_type(M_mmFESpace->map()));
+
+    meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
+    meshDispOld->subset(*M_un, offset);
+    //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
+    //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
+    M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
+    double alpha = 1/M_dataFluid->getTimeStep();
+    vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
+    this->moveMesh(mmRep);// re-initialize the mesh points
+    *meshDispDiff -= *meshDispOld;//relative displacement
+    if(!M_domainVelImplicit)
     {
-        M_uk.reset(new vector_type(disp));
-        this->M_beta.reset(new vector_type(M_uFESpace->map()));
-        UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-
-        vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
-        vector_ptrtype meshDispOld(new vector_type(M_mmFESpace->map()));
-
-        meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
-        meshDispOld->subset(*M_un, offset);
-        //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
-        //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-        M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
-        double alpha = 1/M_dataFluid->getTimeStep();
-        vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
-        this->moveMesh(mmRep);// re-initialize the mesh points
-        *meshDispDiff -= *meshDispOld;//relative displacement
-        if(!M_domainVelImplicit)
-        {
-            meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
-            //        std::cout<<"meshDispDiff1.5 "<<meshDispDiff->NormInf()<<std::endl;
-            *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
-        }
-        *meshDispDiff *= -alpha;// -w, mesh velocity
-        mmRep = *meshDispDiff;
-
-        this->interpolateVelocity(mmRep, *this->M_beta);
-        //            *this->M_beta *= -alpha; //HE solution scaled!
-        vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
-        if(!M_convectiveTermDer)
-            fluid->subset(*M_un/**M_unOld*/, 0);
-        else
-            fluid->subset(disp, 0);
-        *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
-        //          if(firstIter)
-        M_fluid->recomputeMatrix(true);
-        M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
-        if(iter==0)
-        {
-            *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->getTimeStep() );// fluid time discr.
-            super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
-            super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
-        }
-        M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
-        M_fluid->getFluidMatrix( *M_monolithicMatrix);// adds the fluid part
-        M_fluid->updateStab( *M_monolithicMatrix);//adds the stabilization terms
-        this->updateMatrix(*M_monolithicMatrix);// adds the solid and the coupling parts
-        this->M_rhsFull.reset(new vector_type(*this->M_rhs));//this will be the rhs with the BCs (the one who changes at each nonlinear iteration)
-        M_meshMotion->applyBoundaryConditions(*M_rhsFull, *M_BCh_mesh);
-        M_meshMotion->setMatrix(M_monolithicMatrix);// adds the mesh part
-
-
-	    M_BCh_flux->setOffset(M_offset-M_fluxes);
-	    if ( !M_BCh_flux->bdUpdateDone() )
-            M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-	    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-
-	    M_BCh_Robin->setOffset(M_offset);
-	    if ( !M_BCh_Robin->bdUpdateDone() )
-            M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-	    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-
-        super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
-        if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8 && M_DDBlockPrec<11)
-        {
-            if(!M_robinCoupling.get())
-            {
-                M_robinCoupling.reset( new matrix_type(*M_monolithicMap));//this matrix is a preconditioner that mixes the coupling conditions at the interface
-                super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
-                M_robinCoupling->GlobalAssemble();
-            }
-        }
-
-        if(M_DDBlockPrec!=5 && M_DDBlockPrec<9)
-            M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
+        meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
+        //        std::cout<<"meshDispDiff1.5 "<<meshDispDiff->NormInf()<<std::endl;
+        *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
     }
+    *meshDispDiff *= -alpha;// -w, mesh velocity
+    mmRep = *meshDispDiff;
+
+    this->interpolateVelocity(mmRep, *this->M_beta);
+    //            *this->M_beta *= -alpha; //HE solution scaled!
+    vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
+    if(!M_convectiveTermDer)
+        fluid->subset(*M_un/**M_unOld*/, 0);
+    else
+        fluid->subset(disp, 0);
+    *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
+    //          if(firstIter)
+    M_fluid->recomputeMatrix(true);
+    M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
+    if(iter==0)
+    {
+        *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->getTimeStep() );// fluid time discr.
+        super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
+        super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
+    }
+    M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
+    M_fluid->getFluidMatrix( *M_monolithicMatrix);// adds the fluid part
+    M_fluid->updateStab( *M_monolithicMatrix);//adds the stabilization terms
+    this->updateMatrix(*M_monolithicMatrix);// adds the solid and the coupling parts
+    this->M_rhsFull.reset(new vector_type(*this->M_rhs));//this will be the rhs with the BCs (the one who changes at each nonlinear iteration)
+    M_meshMotion->applyBoundaryConditions(*M_rhsFull, *M_BCh_mesh);
+    M_meshMotion->setMatrix(M_monolithicMatrix);// adds the mesh part
+
+
+    M_BCh_flux->setOffset(M_offset-M_fluxes);
+    if ( !M_BCh_flux->bdUpdateDone() )
+        M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+
+    M_BCh_Robin->setOffset(M_offset);
+    if ( !M_BCh_Robin->bdUpdateDone() )
+        M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+
+    super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
+    if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8 && M_DDBlockPrec<11)
+    {
+        if(!M_robinCoupling.get())
+        {
+            M_robinCoupling.reset( new matrix_type(*M_monolithicMap));//this matrix is a preconditioner that mixes the coupling conditions at the interface
+            super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+            M_robinCoupling->GlobalAssemble();
+        }
+    }
+
+    if(M_DDBlockPrec!=5 && M_DDBlockPrec<9)
+        M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
     super::evalResidual( disp, M_rhsFull, res, false );
 }
 
@@ -243,7 +248,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
         }
         matrix_ptrtype monolithicMatrix(new matrix_type(*M_monolithicMap));
         *monolithicMatrix+=*M_monolithicMatrix;
-        this->shapeDerivatives(monolithicMatrix,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
+        shapeDerivatives(monolithicMatrix,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
         monolithicMatrix->GlobalAssemble();
         M_monolithicMatrix=monolithicMatrix;
 
@@ -327,7 +332,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
             addDiagonalEntries(1., M_fluidBlock, M_mmFESpace->map(), mapWithoutMesh().getMap(Unique)->NumGlobalElements());
             couplingMatrix(M_fluidBlock, 15);
             //*M_fluidBlock+=*M_matrShapeDer;
-            this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
+            shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
 
             M_BCh_Robin->setOffset(M_offset);
             bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
@@ -371,7 +376,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
             addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
             couplingMatrix(M_fluidBlock, 7);
             //*M_fluidBlock+=*M_matrShapeDer;
-            this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
+            shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
 
             M_BCh_flux->setOffset(M_offset-M_fluxes);
             if ( !M_BCh_flux->bdUpdateDone() )
@@ -467,7 +472,7 @@ void fullMonolithic::setupBlockPrec(vector_type& rhs)
                 addDiagonalEntries(1., M_meshBlock, mapWithoutMesh(), 0);
                 M_meshMotion->setMatrix(M_meshBlock);
                 //*M_meshBlock += *M_matrShapeDer;
-                this->shapeDerivatives(M_meshBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
+                shapeDerivatives(M_meshBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
                 M_meshBlock->GlobalAssemble();
 
                 M_meshOper.reset(new IfpackComposedPrec::operator_raw_type(*M_meshBlock));
@@ -492,6 +497,8 @@ void fullMonolithic::solveJac(vector_type       &_muk,
     super::solveJac(_muk, _res, _linearRelTol);
 }
 
+
+
 void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function const& u0,
                                  FSIOperator::solid_type::value_type::Function const& p0,
                                  FSIOperator::solid_type::value_type::Function const& d0,
@@ -514,41 +521,61 @@ void fullMonolithic::initializeMesh(vector_ptrtype fluid_dispOld)
     meshMotion().initialize(*fluid_dispOld);
 }
 
-#ifdef UNDEFINED //OBSOLETE
-int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
+
+void fullMonolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
-    //    Y=X;
-    vector_type x(X, M_FMOper->getCouplingVariableMap(), Unique);
-    vector_type y(*M_FMOper->getCouplingVariableMap(), Unique);
-    //    x.spy("x");
-    //    Epetra_FEVector  dz(Y.Map());//Ax-b, that is Ax since b=0.
-    vector_ptrtype rhsShapeDer(new vector_type(*M_FMOper->getCouplingVariableMap(), Unique));
-    vector_ptrtype meshDeltaDisp(new vector_type(M_FMOper->mmFESpace().map(), Unique));
-    vector_type subX(M_FMOper->mapWithoutMesh());
-    UInt offset(M_solidAndFluidDim + M_FMOper->getDimInterface());
-    y = (*M_FMOper->getMatrixPtr())*x;
-    //    std::cout<<x.getEpetraVector().NumGlobalElements()<<std::endl;
-    //BCManage for the shape derivatives part of the matrix
-    //    vector_ptrtype p;
-    //    M_FMOper->fluid().diagonalizeVec(x , M_FMOper->BCh_solid()/*, p*/);
-    //End of BCManage
-    meshDeltaDisp->subset(x, offset);
-    //    *meshDeltaDisp += M_FMOper->meshMotion().disp();
-    //  subX.subset(*M_FMOper->uk(), 0);
-    //M_FMOper->shapeDerivatives(rhsShapeDer , meshDeltaDisp,*M_FMOper->uk() /*subX*/);
-    *rhsShapeDer *= -1.;//e-1;
-    //rhsShapeDer->spy("solBefore");
-    //BCManage for the shape derivatives part of the matrix
-    //M_FMOper->fluid().bcManageVec(*rhsShapeDer, M_FMOper->BCh_sd());
-    //End of BCManage
-    //rhsShapeDer->spy("solAfter");
-    y += *rhsShapeDer;
-    Y=y.getEpetraVector();
-    //    Y=X;
-    //    Y.Update(1., X, 1.);
-    return 0;
+    double alpha = 1./M_dataFluid->getTimeStep();
+    vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
+    vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
+    vector_type uk(M_uFESpace->map()+M_pFESpace->map());
+
+    //vector_type meshVel(M_meshMotion->dispDiff(), Repeated);
+    vector_ptrtype meshVel;//(M_mmFESpace->map(), Repeated);
+    meshVel.reset(new vector_type(M_mmFESpace->map()));
+
+    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
+    if(domainVelImplicit)
+    {
+        vector_type meshDispOld(M_mmFESpace->map());
+        meshVel->subset(sol, offset); //if the conv. term is to be condidered implicitly
+        meshDispOld.subset(*M_un, offset);
+        *meshVel -= meshDispOld;
+    }
+    else
+    {
+        meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
+        *meshVel -= M_meshMotion->dispOld();
+    }
+
+    if(convectiveTermDer)
+        un.subset(sol, 0);
+    else
+        un.subset(*this->M_un, 0);
+
+
+    *meshVel *= alpha;
+    vector_ptrtype meshVelRep(new vector_type(M_mmFESpace->map(), Repeated));
+    *meshVelRep = *meshVel;
+
+    uk.subset(sol, 0);
+    vector_type dvfm(M_uFESpace->map(), Repeated);
+    vector_type vfm(M_uFESpace->map(), Repeated);
+    //vector_type vmdisp(M_uFESpace->map(), Repeated);
+    this->transferMeshMotionOnFluid(*meshVelRep, vfm);
+
+    M_fluid->updateShapeDerivatives(*sdMatrix,
+                                    alpha,
+                                    un,//un if !domainVelImplicit, otherwise uk
+                                    uk,//uk
+                                    vfm, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
+                                    M_solidAndFluidDim+M_interface*nDimensions,
+                                    *M_uFESpace,
+                                    domainVelImplicit,
+                                    convectiveTermDer
+                                    );
 }
-#endif
+
+
 /*typedef Monolithic::vector_type vector_type;
   vector_type&
   fullMonolithic::meshVel()

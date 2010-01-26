@@ -63,171 +63,114 @@ public:
     virtual ~fullMonolithic(){}
     ///destructor
 
-    void couplingMatrix(matrix_ptrtype & bigMatrix, int solidCoupling=31);
-    void couplingRhs(vector_ptrtype rhs);
+    /**
+       constructs the matrix handling the coupling and sums it to matrix
+       \param matrix: output matrix
+       \param coupling:   flag handling the coupling of the different blocks. Chosing properly it's value, ranging from 0 to 31, one can decide which couplings to keep and which to neglect (it works like the chmod command in bash)
+    */
 
-    void   evalResidual(vector_type&        res,
-                        const vector_type& _sol,
-                        const UInt          _iter);
+    void                        setUp( const GetPot& dataFile );
+
+    /**
+       creates FEspace
+    */
+    void                       setupFEspace();
+
+
+    void                       setupFluidSolid();
+
+
+    void                       setDataFromGetPot( GetPot const& data_file );
+
+    /**
+       updates the meshmotion, advances of a time step
+       \param displacement: solution
+    */
+    void                        updateSystem(const vector_type& displacement);
+
+    void                      couplingMatrix(matrix_ptrtype & matrix,
+                                             int coupling=31);
+    /**
+       applies the velocity continuity coupling to the right hand side of the equation
+    */
+    //void                      couplingRhs(vector_ptrtype rhs);
+
+    void                        buildSystem ();
+
     /**
        evaluates the residual b-Ax
        \param res: output
        \param _sol: fluid domain displacement solution
        \param iter: current nonLinRichardson (block Gauss Seidel for the tangent system) iteration
     */
+    void                      evalResidual(vector_type&        res,
+                                           const vector_type& _sol,
+                                           const UInt          _iter);
 
-    /*    void   solveJac(vector_type&       _muk,
-          const vector_type& _res,
-          const double       _linearRelTol);*/
+    void                        setupBlockPrec(vector_type& rhs);
+
+
+    //    void updateSystem(const vector_type& _sol);
+
+
+    const EpetraMap&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
+    //    vector_type& solution(){return *M_un;}
+
+
     /**
        solves the Jacobian system
        \param _muk: output, solution at the current block GS step
        \param _res: linear residual
        \param _linearRelTol: not used
     */
-    //    void   updateSystem(const vector_type&       solution);
+    void                        solveJac(vector_type       &_muk,
+                                         const vector_type &_res,
+                                         const Real       _linearRelTol);
 
-    /**
-       create FEspace
-    */
-    void setupFEspace();
+    //! @getters
+    //!{
+    const matrix_ptrtype        getMatrixPtr() const {return this->M_monolithicMatrix;}
 
-    void setupFluidSolid();
-    //    void updateSystem(const vector_type& _sol);
+    const vector_ptrtype        uk()      const {return M_uk;}
 
-    /**
-       updates the meshmotion, advances of a time step
-       \param _sol: solution
-    */
-    void buildSystem ();
-    EpetraMap& mapWithoutMesh(){return *M_mapWithoutMesh;}
-    //    vector_type& solution(){return *M_un;}
-    void updateSystem(const vector_type& displacement);
+    //const vector_type&          meshVel() const;
 
-    void solveJac(vector_type       &_muk,
-                  const vector_type &_res,
-                  const Real       _linearRelTol);
-    matrix_ptrtype getMatrixPtr(){return this->M_monolithicMatrix;}
-    vector_ptrtype uk(){return M_uk;}
-    vector_type& meshVel();
-    const vector_type& meshDisp()const
+    const vector_type&          meshDisp()const
     {
-        //        if(this->M_dataFluid->useShapeDerivatives()==true)
-        std::cout<<"this->M_meshMotion->dispOld();"<<(this->M_meshMotion->dispOld().NormInf())<<std::endl;
         return this->M_meshMotion->dispOld();
-        //         else
-        //             return (super::meshDisp());
     }
+    //}
 
-    void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                     FSIOperator::solid_type::value_type::Function const& p0,
-                     FSIOperator::solid_type::value_type::Function const& d0,
-                     FSIOperator::solid_type::value_type::Function const& w0,
-                     FSIOperator::solid_type::value_type::Function const& df0 );
 
-    void initializeMesh(vector_ptrtype fluid_dispOld);
 
-    void setUp( const GetPot& dataFile );
+    void                        initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+                                            FSIOperator::solid_type::value_type::Function const& p0,
+                                            FSIOperator::solid_type::value_type::Function const& d0,
+                                            FSIOperator::solid_type::value_type::Function const& w0,
+                                            FSIOperator::solid_type::value_type::Function const& df0 );
 
-    void setupBlockPrec(vector_type& rhs);
+    void                        initializeMesh(vector_ptrtype fluid_dispOld);
+
+
 private:
 
-    void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
+    void                        initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
 
-    boost::shared_ptr<EpetraMap>   M_mapWithoutMesh;
+    /**
+       calculates the terms due to the shape derivatives on the rhs of the monolithic system rhsShapeDerivatives
+       given the mesh increment deltaDisp.
+       \param rhsShapeDerivatives: output. Shape derivative terms.
+       \param meshDeltaDisp: input. Mesh displacement increment.
+    */
+    void                        shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
+
+
+    boost::shared_ptr<EpetraMap>         M_mapWithoutMesh;
     vector_ptrtype                       M_uk;
     vector_ptrtype                       M_meshVel;
     bool                                 M_domainVelImplicit;
     bool                                 M_convectiveTermDer;
-    //    static bool              reg;
 };
 
-
-#ifdef UNDEFINED
-
-class Epetra_FullMonolithic : public Epetra_Operator
-{
-public :
-
-    typedef Monolithic::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
-
-    Epetra_FullMonolithic(fullMonolithic& MOperator/*, Epetra_Map& Mappa*/):
-        M_FMOper               (&MOperator),
-        M_operatorDomainMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Unique)),
-        M_operatorRangeMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Unique)),
-        M_comm             (&M_FMOper->worldComm())
-    {
-
-    };
-    virtual ~Epetra_FullMonolithic(){};
-
-    int 	SetUseTranspose (bool  /*UseTranspose*/)
-    {std::cout << "********* EJ : transpose not available\n"; return -1;}
-    int Apply (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
-    int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-    {std::cout << "********* EJ : inverse not available\n"; return -1;}
-    double 	NormInf         () const
-    {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
-    const char * Label      () const {return "exactJacobian";}
-    bool 	UseTranspose    () const {return false;}
-    bool 	HasNormInf      () const {return false;}
-    const Epetra_Comm&  Comm () const { return *M_comm; }
-    const Epetra_Map & 	OperatorDomainMap () const {return M_operatorDomainMap;}
-    const Epetra_Map & 	OperatorRangeMap  () const {return M_operatorRangeMap;}
-
-    void setOperator( fullMonolithic* fm) {M_FMOper = fm;}
-
-private:
-
-    fullMonolithic* M_FMOper;
-    const Epetra_Map M_operatorDomainMap;
-    const Epetra_Map M_operatorRangeMap;
-    Epetra_Comm* M_comm;
-};
-
-class Epetra_FullMonolithic : public Epetra_Operator
-{
-public :
-
-    typedef Monolithic::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
-
-    Epetra_FullMonolithic(Monolithic* MOperator):
-        M_FMOper               (MOperator),
-        //        M_operatorDomainMap(*M_FMOper->solidInterfaceMap()->getMap(Repeated)),
-        //        M_operatorRangeMap(*M_FMOper->solidInterfaceMap()->getMap(Repeated)),
-        M_comm             (&M_FMOper->worldComm())
-    {
-        std::cout << "M_FMOper->solidInterfaceMap() = " << M_FMOper->solidInterfaceMap() << std::endl;
-        std::cout << "M_FMOper->solidInterfaceMap()->getMap(Repeated) = " << M_FMOper->solidInterfaceMap()->getMap(Repeated) << std::endl;
-
-    };
-    virtual ~Epetra_FullMonolithic(){};
-
-    int 	SetUseTranspose (bool  /*UseTranspose*/)
-    {std::cout << "********* EJ : transpose not available\n"; return -1;}
-    int Apply (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
-    int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-    {std::cout << "********* EJ : inverse not available\n"; return -1;}
-    double 	NormInf         () const
-    {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
-    const char * Label      () const {return "exactJacobian";}
-    bool 	UseTranspose    () const {return false;}
-    bool 	HasNormInf      () const {return false;}
-    const Epetra_Comm&  Comm () const { return *M_comm; }
-    //const Epetra_Map & 	OperatorDomainMap () const {/*return M_operatorDomainMap;*/}
-    //const Epetra_Map & 	OperatorRangeMap  () const {/*return M_operatorRangeMap;*/}
-
-    void setOperator( Monolithic* fm) {M_FMOper = fm;}
-
-private:
-
-    //    const Epetra_Map M_operatorDomainMap;
-    //    const Epetra_Map M_operatorRangeMap;
-    Monolithic* M_FMOper;
-    Epetra_Comm* M_comm;
-};
-#endif
 }
 #endif

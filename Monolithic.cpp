@@ -256,7 +256,6 @@ Monolithic::setDataFromGetPot( GetPot const& data_file )
 {
     super::setDataFromGetPot(data_file);
 
-    this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
     M_DDBlockPrec = data_file( "interface/DDBlockPrec",  0 );
     M_fullMonolithic  = !(M_method.compare("fullMonolithic"));
     M_diagonalScale           = data_file( "solid/prec/diagonalScaling",  false );
@@ -690,104 +689,6 @@ Monolithic::evalResidual( vector_type&       res,
     evalResidual( disp,  M_rhsFull, res, false);
 }
 
-#if OBSOLETE
-void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDisp, const vector_type& sol)
-{
-    double alpha = 1./M_dataFluid->getTimeStep();
-    vector_type derVeloFluidMsh(*meshDeltaDisp, Repeated);
-    derVeloFluidMsh *= alpha;
-    vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
-    vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
-    vector_type uk(M_uFESpace->map()+M_pFESpace->map());
-    vector_type meshVel(M_meshMotion->dispDiff(), Repeated);
-    un.subset(*this->M_un, 0);
-    uk.subset(sol, 0);
-    //    if(!M_rhsNew.get())
-    //    M_rhsNew.reset(new vector_type(M_uFESpace->map()+M_pFESpace->map()));//useless
-    vector_type dvfm(M_uFESpace->map()/*+M_pFESpace->map()*/, Repeated);
-    vector_type vfm(M_uFESpace->map()/*+M_pFESpace->map()*/, Repeated);
-    vector_type vmdisp(M_uFESpace->map()/*+M_pFESpace->map()*/, Repeated);
-    this->transferMeshMotionOnFluid(derVeloFluidMsh, dvfm);
-    this->transferMeshMotionOnFluid(*meshDeltaDisp, vmdisp);
-    this->transferMeshMotionOnFluid(meshVel, vfm);
-
-    //    rhs->spy("rhsSd");
-    //    meshDeltaDisp->spy("deltaDispSd");
-    //    sol.spy("solSd");
-    //    un.spy("unSd");
-    //    uk.spy("ukSd");
-    //    vmdisp.spy("deltax");
-    //    vfm.spy("velFluidMesh");
-    //    dvfm.spy("derVelFluidMesh");
-
-    M_fluid->updateLinearSystem(*M_monolithicMatrix,
-                                alpha,
-                                un,//un
-                                uk,//uk
-                                vmdisp,//unknown x.
-                                vfm, //(xk-xn)/dt //Repeated
-                                dvfm, // (x)/dt //Repeated
-                                *rhsNew// useless
-                                );
-    //    M_rhsShapeDerivatives.reset(new vector_type(*this->M_rhs)) ;
-    *rhs = M_fluid->rhsLinNoBC();// Import
-    //    rhs->spy("rhsShape");
-    //    std::cout<<"rhs lin no bc : "<<M_fluid->rhsLinNoBC().NormInf()<<std::endl;
-}
-#endif
-
-void Monolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
-{
-    double alpha = 1./M_dataFluid->getTimeStep();
-    vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
-    vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
-    vector_type uk(M_uFESpace->map()+M_pFESpace->map());
-
-    //vector_type meshVel(M_meshMotion->dispDiff(), Repeated);
-    vector_ptrtype meshVel;//(M_mmFESpace->map(), Repeated);
-    meshVel.reset(new vector_type(M_mmFESpace->map()));
-
-    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-    if(domainVelImplicit)
-    {
-        vector_type meshDispOld(M_mmFESpace->map());
-        meshVel->subset(sol, offset); //if the conv. term is to be condidered implicitly
-        meshDispOld.subset(*M_un, offset);
-        *meshVel -= meshDispOld;
-    }
-    else
-    {
-        meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
-        *meshVel -= M_meshMotion->dispOld();
-    }
-
-    if(convectiveTermDer)
-        un.subset(sol, 0);
-    else
-        un.subset(*this->M_un, 0);
-
-
-    *meshVel *= alpha;
-    vector_ptrtype meshVelRep(new vector_type(M_mmFESpace->map(), Repeated));
-    *meshVelRep = *meshVel;
-
-    uk.subset(sol, 0);
-    vector_type dvfm(M_uFESpace->map(), Repeated);
-    vector_type vfm(M_uFESpace->map(), Repeated);
-    //vector_type vmdisp(M_uFESpace->map(), Repeated);
-    this->transferMeshMotionOnFluid(*meshVelRep, vfm);
-
-    M_fluid->updateShapeDerivatives(*sdMatrix,
-                                    alpha,
-                                    un,//un if !domainVelImplicit, otherwise uk
-                                    uk,//uk
-                                    vfm, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
-                                    M_solidAndFluidDim+M_interface*nDimensions,
-                                    *M_uFESpace,
-                                    domainVelImplicit,
-                                    convectiveTermDer
-                                    );
-}
 
 void Monolithic::
 evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
@@ -1302,22 +1203,34 @@ void Monolithic::enableWssComputation(EntityFlag flag)
     M_BChWSS.reset(new solid_bchandler_raw_type());
     BCFunctionBase bcfZero(fZero);
     BCFunctionBase bcfOne(fOne);
-    M_bcfWss.setFunctions_Mixte(bcfOne,bcfOne);
+    M_bcfWss.setFunctions_Mixte(bcfZero,bcfOne);
 
-    M_BChWSS->addBC("WSS", (EntityFlag) flag, Mixte, Full, M_bcfWss, 3);
+    M_BChWSS->addBC ("WS" , (EntityFlag) flag, Mixte    , Full  , M_bcfWss, 3);//to compute the mass matrix on the interface
+    M_BChWSS->addBC("WSS", (EntityFlag) flag, Essential, Normal, bcfZero);    //to project the WSS on the tangent plane
+
 }
 
 boost::shared_ptr<EpetraVector> Monolithic::computeWS()
 {
     //M_BChWSS->setOffset(M_offset);
     M_bdMass.reset(new matrix_type(M_interfaceMap));
+    vector_ptrtype lambda(new vector_type(M_monolithicInterfaceMap));
+    lambda->subset(*M_un, M_solidAndFluidDim);
+
+    vector_ptrtype lambdaOnInterface;
+    EpetraExt::MultiVector_Reindex reindexMVToInterface(*M_interfaceMap.getMap(Unique));
+    boost::shared_ptr<EpetraMap> newMap(new EpetraMap( M_interfaceMap ));
+    lambdaOnInterface.reset(new vector_type(reindexMVToInterface(lambda->getEpetraVector()), newMap, Unique));
+
     if ( !M_BChWSS->bdUpdateDone() )
         M_BChWSS->bdUpdate(*M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-    bcManageMatrix(*M_bdMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWSS, M_dFESpace->feBd(), 1., dataFluid().getTime() );
+    bcManage(*M_bdMass, *lambdaOnInterface, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWSS, M_dFESpace->feBd(), 1., dataFluid().getTime() );
     M_bdMass->GlobalAssemble();
 
-    vector_type lambda(M_monolithicInterfaceMap);
-    lambda.subset(*M_un, M_solidAndFluidDim);
+    EpetraExt::MultiVector_Reindex reindexMVFromInterface(*M_monolithicInterfaceMap.getMap(Unique));
+    newMap.reset(new EpetraMap( M_monolithicInterfaceMap ));
+    lambda.reset(new vector_type(reindexMVFromInterface(lambdaOnInterface->getEpetraVector()), newMap, Unique));
+
 
     solver_type solverMass(*M_epetraComm);
     solverMass.setDataFromGetPot( M_dataFile, "solid/solver" );
@@ -1328,11 +1241,10 @@ boost::shared_ptr<EpetraVector> Monolithic::computeWS()
     vector_ptrtype sol(new vector_type(M_monolithicInterfaceMap));
     solverMass.setMatrix(*M_bdMass);
     solverMass.setReusePreconditioner(false);
-    int numIter = solverMass.solveSystem( lambda, *sol, M_bdMass);
+    int numIter = solverMass.solveSystem( *lambda, *sol, M_bdMass);
 
-    EpetraExt::MultiVector_Reindex reindexMV(*M_interfaceMap.getMap(Unique));
-    boost::shared_ptr<EpetraMap> newMap(new EpetraMap( M_interfaceMap ));
-    M_wss.reset(new vector_type(reindexMV(sol->getEpetraVector()), newMap, Unique));
+    newMap.reset(new EpetraMap( M_interfaceMap ));
+    M_wss.reset(new vector_type(reindexMVToInterface(sol->getEpetraVector()), newMap, Unique));
     return M_wss;
 }
 

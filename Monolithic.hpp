@@ -48,6 +48,8 @@ namespace LifeV
  * diagonal blocks represent the coupling. The implementation of the stress continuity coupling condition
  * is obtained by means of an augmented formulation.
  * Different possible preconditioners are implemented.
+ * The flag semiImplicit in the data file is used to distinguish between the GCE and CE (with quasi Newton) time discretizations.
+ * Exact Newton method and fullImplicit time discretization are implemented in the fullMonolithic class.
  */
 
 class WRONG_PREC_EXCEPTION;
@@ -104,9 +106,6 @@ public:
 
 
 
-    /** sets the parameters from the data file*/
-    void setDataFromGetPot( GetPot const& data );
-
 
 
     /**
@@ -142,27 +141,9 @@ public:
     void buildSystem();
 
 
-#if OBSOLETE
-    /**
-       calculates the terms due to the shape derivatives on the rhs of the monolithic system rhsShapeDerivatives
-       given the mesh increment deltaDisp.
-       \param rhsShapeDerivatives: output. Shape derivative terms.
-       \param meshDeltaDisp: input. Mesh displacement increment.
-    */
-    void shapeDerivatives(vector_ptrtype rhsShapeDerivatives, vector_ptrtype meshDeltaDisp, const vector_type& sol);
-#endif
-
-    /**
-       calculates the terms due to the shape derivatives on the rhs of the monolithic system rhsShapeDerivatives
-       given the mesh increment deltaDisp.
-       \param rhsShapeDerivatives: output. Shape derivative terms.
-       \param meshDeltaDisp: input. Mesh displacement increment.
-    */
-    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
     //! getters
 
     void setupSystem( );
-    virtual void setUp( const GetPot& dataFile );
 
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix
@@ -231,12 +212,19 @@ public:
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     bool const isFullMonolithic(){return M_fullMonolithic;}
 
-    /** returns the monolithic map*/
-    virtual    boost::shared_ptr<EpetraMap>& getCouplingVariableMap(){return M_monolithicMap;}
-
     //!@}
     //!@name Virtual methods
     //!@{
+
+
+    /** sets the parameters from the data file*/
+    virtual void setDataFromGetPot( GetPot const& data );
+
+    virtual void setUp( const GetPot& dataFile );
+
+    /** returns the monolithic map*/
+    virtual    boost::shared_ptr<EpetraMap>& getCouplingVariableMap(){return M_monolithicMap;}
+
     /**
        assigns each mesh partition to the corresponding processor, builds the monolithic map
     */
