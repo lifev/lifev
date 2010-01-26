@@ -399,7 +399,7 @@ MS_Model_MultiScale::loadGeometry()
 {
     UInt id;
 
-    boost::array< Real, nDimensions > geometryScale, geometryRotate, geometryTranslate;
+    boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
     UInt columnNumber = 10.0;
     UInt linesNumber = M_dataFile.vector_variable_size( "Problem/offset" ) / columnNumber;

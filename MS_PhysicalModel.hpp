@@ -178,9 +178,9 @@ public:
      * @param rotate Vector (Rx,Ry,Rz) of angles for rotation (degree units)
      * @param translate Vector (Tx,Ty,Tz) of offset for position
      */
-    void SetGeometry( const boost::array< Real, nDimensions >& scale,
-                      const boost::array< Real, nDimensions >& rotate,
-                      const boost::array< Real, nDimensions >& translate );
+    void SetGeometry( const boost::array< Real, NDIM >& scale,
+                      const boost::array< Real, NDIM >& rotate,
+                      const boost::array< Real, NDIM >& translate );
 
     //! Set global data for physical quantities and time
     /*!
@@ -273,9 +273,9 @@ protected:
     std::string                          M_modelName;          // Name of the model
     std::vector< BCFlag >                M_flags;              // Free flags, available for the couplings
 
-    boost::array< Real, nDimensions >    M_geometryScale;      // Global geometrical scale
-    boost::array< Real, nDimensions >    M_geometryRotate;     // Global geometrical rotation
-    boost::array< Real, nDimensions >    M_geometryTranslate;  // Global geometrical translation
+    boost::array< Real, NDIM >           M_geometryScale;      // Global geometrical scale
+    boost::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation
+    boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
     boost::shared_ptr< MS_PhysicalData > M_dataPhysics;        // Data container for global physical quantities
     boost::shared_ptr< DataTime >        M_dataTime;           // Data container for time quantities
