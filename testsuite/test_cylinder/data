@@ -8,69 +8,164 @@ multimesh  = false
 start      = 0
 save       = 1
 
-
 [fluid]
 
-[./problem]
-# for  cyl3D.2.2.00.mesh
-Re              = 1
-D               = 1.
-H               = 2.
-centered        = 1
-initial_sol     = stokes          # stokes, none
+    [./problem]
+    # for  cyl3D.2.2.00.mesh
+    Re              = 1
+    D               = 1.
+    H               = 2.
+    centered        = 1
+    initial_sol     = stokes          # stokes, none
 
 
-[../physics]
-density         = 1.0          # density
-viscosity       = 0.03         # viscosity
+	[../physics]
+	density         = 1.0           # density   [kg/m^3]
+	viscosity       = 0.03			# viscosity [kg/m/s]
 
-[../time_discretization]
-initialtime		= 0.
-endtime			= .2
-timestep		= 0.0001
-BDF_order		= 1
+	[../time_discretization]
+	initialtime		= 0.
+	endtime			= 0.2
+	timestep		= 0.0001
+	BDF_order		= 1
 
-[../space_discretization]
-mesh_dir        = ./Mesh/
-mesh_file       = tube20.mesh          # "big file"
-#mesh_file       = tube-test.mesh          # "big file"
-#mesh_file       = tube-r5.mesh          # "big file"
-#mesh_file       = cyl3D-1.mesh          # "big file"
-#mesh_file       = cyl3D.2.2.00.mesh
-#mesh_file       = cyl2D.mesh             # "reasonable file"
-mesh_type       = .mesh
+	[../space_discretization]
+	mesh_dir        = ./Mesh/
+	mesh_file       = tube20.mesh
+	mesh_type       = .mesh
 
-verbose         = 0                     # verbose during mesh-reading
-linearized      = 0
-diagonalize     = 0 # weight, 0=off
-div_beta_u_v    = 0 # 1=on, 0=off
-vel_order       = P1Bubble	# P1, P1Bubble, P2
-press_order     = P1		# P1, P2
+	verbose         = 0             # verbose during mesh-reading
+    linearized      = 0
+    diagonalize     = 0 # weight, 0=off
+	div_beta_u_v    = 0             # 1=on, 0=off
+	vel_order       = P1Bubble	     	# P1, P1Bubble, P2
+	press_order     = P1		    # P1, P2
 
-[../solver]
-solver          = gmres
-scaling         = none
-output          = all # none
-conv            = rhs
-max_iter        = 100
-kspace          = 100
-tol             = 1.e-10    # AztecOO tolerance
+    [../miscellaneous]
+    verbose         = 1
+    steady          = 0
+
+	[../prec]
+	prectype                = Ifpack # Ifpack or ML
+	displayList             = true
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = pre
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 200
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+        # ifpack
+        [../ifpack]
+        overlap		= 2
+
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+
+    [../solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 100
+    reuse           = true
+    max_iter_reuse  = 80
+    kspace          = 100
+    tol             = 1.e-10    # AztecOO tolerance
+
+	[../ipstab]
+	gammaBeta       = 0.125
+	gammaDiv        = 0.125
+	gammaPress      = 0.03125
+	reuse           = true
+    max_iter_reuse  = 20
 
 
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
-reuse           = true
-overlap         = 2
-#droptol         = 1.e-5 ??
-fill            = 4
-relax_value     = 1
+	[../boundary_conditions]
+	list = 'Inlet Outlet Wall Ring' # use apex to create the list; use spaces to separe members
+	#list = 'InletXY InletZ Outlet Wall Ring' # use apex to create the list; use spaces to separe members
 
-[../ipstab]
-#gammaBeta  = 0.02
-#gammaDiv   = 0.02
-#gammaPress = 0.02
-gammaBeta  = 0.125
-gammaDiv   = 0.125
-gammaPress = 0.03125
-reuse      = true
+		[./Inlet]
+		type       = Essential
+		flag       = 2
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 3*0.03*(1/4-(x^2+y^2)))' # Poiseuille - viscosity = 0.03
 
+		[../InletXY]
+		type       = Essential
+		flag       = 2
+		mode       = Component
+		component  = '1 2' # use apex to create the list; use spaces to separe members
+		function   = '(0., 0., 0.)'
+
+		[../InletZ]
+		type       = Essential
+		flag       = 2
+		mode       = Component
+		component  = 3
+		function   = '(0., 0., 3*0.03*(1/4-(x^2+y^2)))' # Poiseuille - viscosity = 0.03
+
+		[../Outlet]
+		type       = Natural
+		flag       = 3
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 0.)'
+
+		[../Wall]
+		type       = Essential
+		flag       = 1
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 0.)'
+
+		[../Ring]
+		type       = Essential
+		flag       = 20
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 0.)'
