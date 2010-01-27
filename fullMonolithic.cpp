@@ -98,6 +98,7 @@ fullMonolithic::setupFluidSolid()
 void
 fullMonolithic::setDataFromGetPot( GetPot const& data_file )
 {
+    super::setDataFromGetPot(data_file);
     this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
 }
 
