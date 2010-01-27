@@ -395,7 +395,7 @@ void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 }
 
 template <typename Mesh>
-void Hdf5exporter<Mesh>::Hdf5exporter<Mesh>::M_wr_geo()
+void Hdf5exporter<Mesh>::M_wr_geo()
 {
 
 
