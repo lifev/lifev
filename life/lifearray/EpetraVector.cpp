@@ -248,11 +248,11 @@ add(const EpetraVector& vector,
     return *this;
 }
 
-EpetraVector& EpetraVector::
-subset(const EpetraVector& vector,
-       const UInt           offset )
+EpetraVector&
+EpetraVector::subset(const EpetraVector& vector,
+                     const UInt          offset )
 {
-    return this->subset(vector, getMap(), offset, (const UInt)0);
+    return this->subset( vector, getMap(), offset, static_cast<UInt> (0) );
 }
 
 EpetraVector& EpetraVector::
