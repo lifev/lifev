@@ -38,7 +38,7 @@
 #include <lifemc/lifefem/BCInterface_Definitions.hpp>
 #include <lifemc/lifefem/BCInterface_Data.hpp>
 
-#include <lifemc/lifecore/SpiritParser.hpp>
+#include <lifemc/lifecore/Parser.hpp>
 
 namespace LifeV {
 
@@ -157,7 +157,7 @@ protected:
 
     std::string                       M_baseString;
     BCComV                            M_comV;
-    boost::shared_ptr< SpiritParser > M_parser;
+    boost::shared_ptr< Parser >       M_parser;
 
     //! @name Protected functions
     //@{
@@ -274,7 +274,7 @@ BCInterface_Function< Operator >::SetData( const BCInterface_Data< Operator >& d
     if ( M_parser )
         M_parser->setString( M_baseString );
     else
-        M_parser.reset( new SpiritParser( M_baseString ) );
+        M_parser.reset( new Parser( M_baseString ) );
 
     SetFunction();
 }
