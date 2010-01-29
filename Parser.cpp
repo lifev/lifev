@@ -26,21 +26,21 @@
 
 /*!
  * @file
- * @brief SpiritParser
+ * @brief Parser
  *
  * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  * @author Gilles Fourestey  <gilles.fourestey@epfl.ch>
  * @date 07-04-2009
  */
 
-#include <lifemc/lifecore/SpiritParser.hpp>
+#include <lifemc/lifecore/Parser.hpp>
 
 namespace LifeV {
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-SpiritParser::SpiritParser( const bool& applyRules ) :
+Parser::Parser( const bool& applyRules ) :
     M_strings       (),
     M_variables     (),
     M_results       (),
@@ -48,16 +48,16 @@ SpiritParser::SpiritParser( const bool& applyRules ) :
     M_calculator    ( M_variables, M_results, M_nResults ),
     M_applyRules    ( applyRules )
 {
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::SpiritParser"<< "\n";
+    Debug( 5030 ) << "Parser::Parser"<< "\n";
 #endif
-*/
+
     // Set default variables
     setDefaultVariables();
 }
 
-SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) :
+Parser::Parser( const std::string& string, const bool& applyRules ) :
     M_strings       (),
     M_variables     (),
     M_results       (),
@@ -65,11 +65,11 @@ SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) 
     M_calculator    ( M_variables, M_results,M_nResults ),
     M_applyRules    ( applyRules )
 {
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::SpiritParser"<< "\n";
+    Debug( 5030 ) << "Parser::Parser"<< "\n";
 #endif
-*/
+
     // Set default variables
     setDefaultVariables();
 
@@ -77,7 +77,7 @@ SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) 
     setString( string );
 }
 
-SpiritParser::SpiritParser( const SpiritParser& parser ) :
+Parser::Parser( const Parser& parser ) :
     M_strings       ( parser.M_strings ),
     M_variables     ( parser.M_variables ),
     M_results       ( parser.M_results ),
@@ -90,8 +90,8 @@ SpiritParser::SpiritParser( const SpiritParser& parser ) :
 // ===================================================
 // Operators
 // ===================================================
-SpiritParser&
-SpiritParser::operator=( const SpiritParser& parser )
+Parser&
+Parser::operator=( const Parser& parser )
 {
     if ( this != &parser )
     {
@@ -109,25 +109,25 @@ SpiritParser::operator=( const SpiritParser& parser )
 // ===================================================
 // Methods
 // ===================================================
-const double&
-SpiritParser::evaluate( const unsigned int& ID )
+const Real&
+Parser::evaluate( const UInt& ID )
 {
-    for ( unsigned int i = 0; i < M_strings.size(); ++i )
-        boost::spirit::parse( M_strings[i].begin(), M_strings[i].end(), M_calculator, boost::spirit::space_p );
-/*
+    for ( UInt i = 0; i < M_strings.size(); ++i )
+        spirit::parse( M_strings[i].begin(), M_strings[i].end(), M_calculator, spirit::space_p );
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::evaluate          results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
+    Debug( 5030 ) << "Parser::evaluate          results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
 #endif
-*/
+
     M_nResults = 0; //Reset for next evaluation
 
     return M_results[ID - 1];
 }
 
-unsigned int
-SpiritParser::countSubstring( const std::string& substring )
+UInt
+Parser::countSubstring( const std::string& substring )
 {
-    unsigned int count( 0 );
+    UInt count( 0 );
     std::string::size_type position( 0 );
 
     for ( ;; )
@@ -148,49 +148,49 @@ SpiritParser::countSubstring( const std::string& substring )
 // Set Methods
 // ===================================================
 void
-SpiritParser::setString( const std::string& string, const std::string& stringSeparator )
+Parser::setString( const std::string& string, const std::string& stringSeparator )
 {
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::setString:          strings: " << string << "\n";
+    Debug( 5030 ) << "Parser::setString:          strings: " << string << "\n";
 #endif
-*/
+
     M_strings.clear();
     boost::split( M_strings, string, boost::is_any_of( stringSeparator ) );
-/*
+
 #ifdef DEBUG
     Debug( 5030 ) << "                               applyRules: " << M_applyRules << "\n";
 #endif
-*/
+
     if ( M_applyRules )
-        for ( unsigned int i = 0; i < M_strings.size(); ++i )
+        for ( UInt i = 0; i < M_strings.size(); ++i )
             ruleTheString( M_strings[i] );
 
     setupResults();
 }
 
 void
-SpiritParser::setVariable( const std::string& name, const double& value )
+Parser::setVariable( const std::string& name, const Real& value )
 {
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::setVariable    variables[" << name << "]: " << value << "\n";
+    Debug( 5030 ) << "Parser::setVariable    variables[" << name << "]: " << value << "\n";
 #endif
-*/
+
     M_variables[name] = value;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
-const double&
-SpiritParser::getVariable( const std::string& name )
+const Real&
+Parser::getVariable( const std::string& name )
 {
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::getVariable    variables[" << name << "]: " << M_variables[name] << "\n";
+    Debug( 5030 ) << "Parser::getVariable    variables[" << name << "]: " << M_variables[name] << "\n";
 #endif
-*/
+
     return M_variables[name];
 }
 
@@ -198,41 +198,41 @@ SpiritParser::getVariable( const std::string& name )
 // Private functions
 // ===================================================
 inline void
-SpiritParser::setDefaultVariables()
+Parser::setDefaultVariables()
 {
     //setVariable( "pi", Pi ); //Using the tab of LifeV
     setVariable( "pi", 3.141592653589793 );
-    //setVariable( "pi", 3.1415926535897932384626433832795 ); //Better only with long double!
+    //setVariable( "pi", 3.1415926535897932384626433832795 ); //Better only with long Real!
     setVariable( "e", 2.718281828459046 );
 }
 
 inline void
-SpiritParser::setupResults()
+Parser::setupResults()
 {
     M_nResults = 0;
 
     //Reserve the space for results
     M_results.clear();
     M_results.reserve( countSubstring( "," ) + 1 );
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::setupResults      dimension: " << countSubstring( "," ) + 1 << "\n";
+    Debug( 5030 ) << "Parser::setupResults      dimension: " << countSubstring( "," ) + 1 << "\n";
 #endif
-*/
+
     //std::vector<std::string> tempVectorString;
     //boost::split( tempVectorString, M_strings.back(), boost::is_any_of(stringSeparator) );
     //M_results.reserve( tempVectorString.size() );
 }
 
 inline void
-SpiritParser::ruleTheString( std::string& string )
+Parser::ruleTheString( std::string& string )
 {
-/*
+
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::ruleTheString" << "\n";
+    Debug( 5030 ) << "Parser::ruleTheString" << "\n";
     Debug( 5030 ) << "                        (before) - string: " << string << "\n";
 #endif
-*/
+
     // Remove spaces from the string
     boost::replace_all( string, " ", "" );
 
@@ -257,11 +257,11 @@ SpiritParser::ruleTheString( std::string& string )
 
     //Apply exceptions for the parser
     boost::replace_all( string, "visCity", "viscosity" );
-/*
+
 #ifdef DEBUG
     Debug( 5030 ) << "                         (after) - string: " << string << "\n";
 #endif
-*/
+
 }
 
 } // Namespace LifeV

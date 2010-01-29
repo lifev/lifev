@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -26,27 +26,17 @@
 
 /*!
  * @file
- * @brief SpiritParser
+ * @brief Parser_SpiritClassic
  *
  * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  * @author Gilles Fourestey  <gilles.fourestey@epfl.ch>
  * @date 07-04-2009
  */
 
-#ifndef SpiritParser_H
-#define SpiritParser_H 1
+#ifndef Parser_SpiritClassic_H
+#define Parser_SpiritClassic_H 1
 
-// SpiritParser need optimization level at least = -O1
-//#pragma GCC optimization_level 2
-//#pragma GCC optimize ("-O2")     // Should work with GCC v. 4.4+
-
-#include <boost/algorithm/string.hpp>
-#include <boost/spirit.hpp>
-#include <boost/spirit/phoenix/binders.hpp>
-
-#include <map>
-#include <iomanip>
-#include <string>
+#include <lifemc/lifecore/Parser_Definitions.hpp>
 
 namespace LifeV {
 
@@ -69,48 +59,46 @@ namespace LifeV {
  *	w(t)   = b*t;
  *
  *	with "a" and "b" constants such that a=5.12345, b=9.999999.
- *	You can use this syntax to implement it inside the spiritParser:
+ *	You can use this syntax to implement it inside the Parser_SpiritClassic:
  *
  *	string = "a=5.12345 ; b=9.999999 ; (a*b*x, a/b*sqrt(x^2 + y^2), b*t)"
  *
  *	where semicolons (";") separate constants and commas (",") separate output functions.
  *
  *	NOTE:
- *  Currently SpiritParser works with the following operators:
+ *  Currently Parser_SpiritClassic works with the following operators:
  *  \verbatim
  *  +, -, *, /, ^, sqrt(), sin(), cos(), tan(), exp(), log(), log10(), >, <.
  *  \endverbatim
  *
- *  SpiritParser need optimization level at least -O1
+ *  Parser_SpiritClassic need optimization level at least -O1
  *
  *  \TODO Fix a problem when calling destructors - NOW FIXED USING REFERENCE INSTEAD OF SHARED_PTR;
  *  \TODO Find a better way to manage results (M_results, M_nResults, setResult(), ...)
  *  \TODO Avoid the use of ruleTheString (if possible)!
  *
  */
-struct SpiritCalculator: boost::spirit::grammar< SpiritCalculator >
+
+class SpiritCalculator : public spirit::grammar< SpiritCalculator >
 {
 public:
 
-    typedef boost::spirit::grammar< SpiritCalculator > super;
+    //! @name Constructors & Destructor
+    //@{
 
-    typedef std::map< std::string, double >            variables_type;
-    typedef std::vector< double >                      results_type;
-    typedef std::vector< std::string >                 string_type;
-
-    SpiritCalculator( variables_type& variables, results_type& results, unsigned int& nResults ) :
-        super       (),
-        M_variables ( variables ),
-        M_results   ( results ),
-        M_nResults  ( nResults )
+    SpiritCalculator( Variables_Type& variables, Results_Type& results, UInt& nResults ) :
+        spirit::grammar< SpiritCalculator > (),
+        M_variables                         ( variables ),
+        M_results                           ( results ),
+        M_nResults                          ( nResults )
     {
     }
 
     SpiritCalculator( const SpiritCalculator& calculator ) :
-        super       ( calculator ),
-        M_variables ( calculator.M_variables ),
-        M_results   ( calculator.M_results ),
-        M_nResults  ( calculator.M_nResults )
+        spirit::grammar< SpiritCalculator > ( calculator ),
+        M_variables                         ( calculator.M_variables ),
+        M_results                           ( calculator.M_results ),
+        M_nResults                          ( calculator.M_nResults )
     {
     }
 
@@ -118,7 +106,7 @@ public:
     {
         if ( this != &calculator )
         {
-            super::operator=( calculator );
+            spirit::grammar< SpiritCalculator >::operator=( calculator );
             M_variables = calculator.M_variables;
             M_results   = calculator.M_results;
             M_nResults  = calculator.M_nResults;
@@ -129,19 +117,21 @@ public:
 
     ~SpiritCalculator() {}
 
+    //@}
+
     // Closures
-    struct assignment_closure: boost::spirit::closure< assignment_closure, std::string, double >
+    struct assignment_closure: spirit::closure< assignment_closure, std::string, Real >
     {
         member1 name;
         member2 value;
     };
 
-    struct value_closure: boost::spirit::closure< value_closure, double >
+    struct value_closure: spirit::closure< value_closure, Real >
     {
         member1 value;
     };
 
-    struct string_closure: boost::spirit::closure< string_closure, std::string >
+    struct string_closure: spirit::closure< string_closure, std::string >
     {
         member1 name;
     };
@@ -153,7 +143,7 @@ public:
 
         definition( const SpiritCalculator& self )
         {
-            using namespace boost::spirit;
+            using namespace boost::spirit::classic;
             using namespace phoenix;
 
             statement = ( assignment
@@ -212,244 +202,118 @@ public:
             group = '(' >> expression[group.value = arg1] >> ')';
     	}
 
-        boost::spirit::rule< ScannerT > const&
+        //boost::spirit::rule< ScannerT > const&
+        spirit::rule< ScannerT > const&
         start() const
         {
             return statement;
         }
 
-        boost::spirit::rule< ScannerT > statement, command, operation, expression_vector;
-        boost::spirit::rule< ScannerT, assignment_closure::context_t > assignment;
-        boost::spirit::rule< ScannerT, string_closure::context_t > identifier;
-        boost::spirit::rule< ScannerT, value_closure::context_t > expression, topOperations,
-                                                                  midOperations, lowOperations,
-                                                                  term, subterm, factor, function,
-                                                                  literal, group;
+        spirit::rule< ScannerT > statement, command, operation, expression_vector;
+        spirit::rule< ScannerT, assignment_closure::context_t > assignment;
+        spirit::rule< ScannerT, string_closure::context_t > identifier;
+        spirit::rule< ScannerT, value_closure::context_t > expression, topOperations,
+                                                           midOperations, lowOperations,
+                                                           term, subterm, factor, function,
+                                                           literal, group;
     };
 
+    //! @name Methods
+    //@{
+
     // Member functions that are called in semantic actions.
-    inline void define( const std::string& name, const double& value ) const
+    inline void define( const std::string& name, const Real& value ) const
     {
         M_variables[name] = value;
     }
 
     inline void showMeVariables() const
     {
-        variables_type::const_iterator it;
+        Variables_Type::const_iterator it;
 
-        std::cout << "SpiritParser showMe: " << std::setprecision( 30 ) << std::endl;
+        std::cout << "Parser_SpiritClassic showMe: " << std::setprecision( 30 ) << std::endl;
 
         for ( it = M_variables.begin(); it != M_variables.end(); ++it )
             std::cout << "                     " << it->first << " = " << it->second << std::endl;
         std::cout << std::endl;
     }
 
-    inline double lookup( const std::string& name ) const
+    inline Real lookup( const std::string& name ) const
     {
         if ( M_variables.find( name ) == M_variables.end() )
         {
-            std::cerr << "!!! Warning: SpiritParser has undefined name " << name << " !!!" << std::endl;
+            std::cerr << "!!! Warning: Parser_SpiritClassic has undefined name " << name << " !!!" << std::endl;
             return 0.0;
         }
         else
             return M_variables.find( name )->second;
     }
 
-    inline double pow( const double& a, const double& b ) const
+    inline Real pow( const Real& a, const Real& b ) const
     {
         return std::pow( a, b );
     }
 
-    inline double more( const double& a, const double& b ) const
+    inline Real more( const Real& a, const Real& b ) const
     {
         return a > b;
     }
 
-    inline double less( const double& a, const double& b ) const
+    inline Real less( const Real& a, const Real& b ) const
     {
         return a < b;
     }
 
-    inline double sqrt( const double& a ) const
+    inline Real sqrt( const Real& a ) const
     {
         return std::sqrt( a );
     }
 
-    inline double exp( const double& a ) const
+    inline Real exp( const Real& a ) const
     {
         return std::exp( a );
     }
 
-    inline double log( const double& a ) const
+    inline Real log( const Real& a ) const
     {
         return std::log( a );
     }
 
-    inline double log10( const double& a ) const
+    inline Real log10( const Real& a ) const
     {
         return std::log10( a );
     }
 
-    inline double sin( const double& a ) const
+    inline Real sin( const Real& a ) const
     {
         return std::sin( a );
     }
 
-    inline double cos( const double& a ) const
+    inline Real cos( const Real& a ) const
     {
         return std::cos( a );
     }
 
-    inline double tan( const double& a ) const
+    inline Real tan( const Real& a ) const
     {
         return std::tan( a );
     }
 
-    inline void setResult( const double& result ) const
+    inline void setResult( const Real& result ) const
     {
         M_results[M_nResults] = result;
         M_nResults++;
     }
 
+    //@}
+
 private:
 
-    variables_type& M_variables;
-    results_type&   M_results;
-    unsigned int&   M_nResults;
-};
-//! SpiritParser - A LifeV interface for SpiritCalculator
-/*!
- *  @author(s) Cristiano Malossi, Gilles Fourestey
- */
-class SpiritParser
-{
-public:
-
-    typedef SpiritCalculator::variables_type    variables_type;
-    typedef SpiritCalculator::results_type      results_type;
-    typedef SpiritCalculator::string_type       string_type;
-
-    //! @name Constructors & Destructor
-    //@{
-
-    //! Empty string constructor (it needs a manual call to setString)
-    /*!
-     * @param applyRules use rules for notation
-     */
-    //! Constructor
-    SpiritParser( const bool& applyRules = true );
-
-    //! Constructor
-    /*!
-     * @param string expression to parse
-     * @param applyRules use rules for notation
-     */
-    SpiritParser( const std::string& string, const bool& applyRules = true );
-
-    //! Copy constructor
-    /*!
-     * @param Parser SpiritParser
-     */
-    SpiritParser( const SpiritParser& parser );
-
-    //! Destructor
-    ~SpiritParser() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator =
-    /*!
-     * @param Parser SpiritParser
-     * @return reference to a copy of the class
-     */
-    SpiritParser& operator=( const SpiritParser& parser );
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-    /*! Evaluate the expression
-     * @param ID expression index (starting from 1)
-     * @return computed value
-     */
-    const double& evaluate( const unsigned int& ID = 1 );
-
-    /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
-     *
-     * @param substring string to find
-     * @return number of substring
-     */
-    unsigned int countSubstring( const std::string& substring );
-
-    void showMeVariables() const
-    {
-        M_calculator.showMeVariables();
-    }
-
-    //@}
-
-    //! @name Set Methods
-    //@{
-
-    /*! Set string function
-     *
-     * @param string Expression to evaluate
-     * @param stringSeparator Separator identifier (default -> ";")
-     */
-    void setString( const std::string& string, const std::string& stringSeparator = ";" );
-
-    /*! Set/replace a variable
-     *
-     * @param name name of the parameter
-     * @param value value of the parameter
-     */
-    void setVariable( const std::string& name, const double& value );
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    /*! Get variable
-     *
-     * @param name name of the parameter
-     * @return value of the variable
-     */
-    const double& getVariable( const std::string& name );
-
-    //@}
-private:
-
-    string_type      M_strings;
-    variables_type   M_variables;
-    results_type     M_results;
-    unsigned int     M_nResults;
-    SpiritCalculator M_calculator;
-    bool             M_applyRules;
-
-    //! @name Private functions
-    //@{
-
-    //! Setup results
-    inline void setupResults();
-
-    //! Set default variables
-    inline void setDefaultVariables();
-
-    //! Apply rules to the string
-    inline void ruleTheString( std::string& string );
-
-    //@}
-
+    Variables_Type& M_variables;
+    Results_Type&   M_results;
+    UInt&           M_nResults;
 };
 
 } // Namespace LifeV
 
-#endif /* SpiritParser_H */
+#endif /* Parser_SpiritClassic_H */
