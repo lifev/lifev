@@ -49,7 +49,7 @@
 #include <life/lifecore/util_string.hpp>
 #include <life/lifecore/chrono.hpp>
 
-#include <lifemc/lifecore/SpiritParser.hpp>
+#include <lifemc/lifecore/Parser.hpp>
 
 LifeV::AboutData
 makeAbout()
@@ -82,7 +82,7 @@ main( int argc, char** argv )
 	std::cout << std::setprecision(30) << std::endl;
 
 	// Initialization of the parser
-	SpiritParser parser;
+	Parser parser;
 
 	std::cout << "READY TO TEST WITH 10+ EXPRESSIONS:" << std::endl << std::endl;
 
