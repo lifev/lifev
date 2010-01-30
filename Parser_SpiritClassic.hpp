@@ -143,63 +143,60 @@ public:
 
         definition( const SpiritCalculator& self )
         {
-            using namespace boost::spirit::classic;
-            using namespace phoenix;
-
             statement = ( assignment
                         | command
                         | operation
-                        ) >> (end_p | ';');
+                        ) >> (spirit::end_p | ';');
 
-            assignment = identifier[assignment.name = arg1] >> '=' >> expression[assignment.value = arg1]
-                       [ bind(&SpiritCalculator::define)(self, assignment.name, assignment.value) ];
+            assignment = identifier[assignment.name = phoenix::arg1] >> '=' >> expression[assignment.value = phoenix::arg1]
+                       [ phoenix::bind(&SpiritCalculator::define)(self, assignment.name, assignment.value) ];
 
-            command = as_lower_d["showme"][bind(&SpiritCalculator::showMeVariables)(self)];
+            command = spirit::as_lower_d["showme"][phoenix::bind(&SpiritCalculator::showMeVariables)(self)];
 
-            operation = ( expression[bind(&SpiritCalculator::setResult)(self, arg1)]
+            operation = ( expression[phoenix::bind(&SpiritCalculator::setResult)(self, phoenix::arg1)]
                         | expression_vector
                         );
 
-            expression_vector = '(' >> ( expression[bind(&SpiritCalculator::setResult)(self, arg1)]
-                                         >> *(',' >> expression[bind(&SpiritCalculator::setResult)(self, arg1)])
+            expression_vector = '(' >> ( expression[phoenix::bind(&SpiritCalculator::setResult)(self, phoenix::arg1)]
+                                         >> *(',' >> expression[phoenix::bind(&SpiritCalculator::setResult)(self, phoenix::arg1)])
                                        ) >> ')';
 
-            expression = term[expression.value = arg1] >> *( lowOperations[expression.value = arg1] );
+            expression = term[expression.value = phoenix::arg1] >> *( lowOperations[expression.value = phoenix::arg1] );
 
-            term = subterm[term.value = arg1] >> *( midOperations[term.value = arg1] );
+            term = subterm[term.value = phoenix::arg1] >> *( midOperations[term.value = phoenix::arg1] );
 
-            subterm = factor[subterm.value = arg1] >> *( topOperations[subterm.value = arg1] );
+            subterm = factor[subterm.value = phoenix::arg1] >> *( topOperations[subterm.value = phoenix::arg1] );
 
-            lowOperations = ('+' >> term[lowOperations.value += arg1])
-                          | ('-' >> term[lowOperations.value -= arg1]);
+            lowOperations = ('+' >> term[lowOperations.value += phoenix::arg1])
+                          | ('-' >> term[lowOperations.value -= phoenix::arg1]);
 
-            midOperations = ('*' >> subterm[midOperations.value *= arg1])
-                          | ('/' >> subterm[midOperations.value /= arg1]);
+            midOperations = ('*' >> subterm[midOperations.value *= phoenix::arg1])
+                          | ('/' >> subterm[midOperations.value /= phoenix::arg1]);
 
-            topOperations =  ('^' >> factor[topOperations.value = bind(&SpiritCalculator::pow)(self, topOperations.value, arg1)])
-                           | ('>' >> factor[topOperations.value = bind(&SpiritCalculator::more)(self, topOperations.value, arg1)])
-                           | ('<' >> factor[topOperations.value = bind(&SpiritCalculator::less)(self, topOperations.value, arg1)]);
+            topOperations =  ('^' >> factor[topOperations.value = phoenix::bind(&SpiritCalculator::pow)(self, topOperations.value, phoenix::arg1)])
+                           | ('>' >> factor[topOperations.value = phoenix::bind(&SpiritCalculator::more)(self, topOperations.value, phoenix::arg1)])
+                           | ('<' >> factor[topOperations.value = phoenix::bind(&SpiritCalculator::less)(self, topOperations.value, phoenix::arg1)]);
 
-            factor = ( literal[factor.value = arg1]
-                     | function[factor.value = arg1]
-                     | identifier[factor.value = bind(&SpiritCalculator::lookup)(self, arg1)]
-                     | group[factor.value = arg1]
+            factor = ( literal[factor.value = phoenix::arg1]
+                     | function[factor.value = phoenix::arg1]
+                     | identifier[factor.value = phoenix::bind(&SpiritCalculator::lookup)(self, phoenix::arg1)]
+                     | group[factor.value = phoenix::arg1]
                      );
 
-            literal = longest_d[ int_p[literal.value = arg1] | real_p[literal.value = arg1] ];
+            literal = spirit::longest_d[ spirit::int_p[literal.value = phoenix::arg1] | spirit::real_p[literal.value = phoenix::arg1] ];
 
-            function = ( ("S" >> group[function.value = bind(&SpiritCalculator::sin)(self, arg1)])
-                       | ('C' >> group[function.value = bind(&SpiritCalculator::cos)(self, arg1)])
-                       | ('T' >> group[function.value = bind(&SpiritCalculator::tan)(self, arg1)])
-                       | ('Q' >> group[function.value = bind(&SpiritCalculator::sqrt)(self, arg1)])
-                       | ('E' >> group[function.value = bind(&SpiritCalculator::exp)(self, arg1)])
-                       | ('L' >> group[function.value = bind(&SpiritCalculator::log)(self, arg1)])
-                       | ('M' >> group[function.value = bind(&SpiritCalculator::log10)(self, arg1)])
+            function = ( ("S" >> group[function.value = phoenix::bind(&SpiritCalculator::sin)(self, phoenix::arg1)])
+                       | ('C' >> group[function.value = phoenix::bind(&SpiritCalculator::cos)(self, phoenix::arg1)])
+                       | ('T' >> group[function.value = phoenix::bind(&SpiritCalculator::tan)(self, phoenix::arg1)])
+                       | ('Q' >> group[function.value = phoenix::bind(&SpiritCalculator::sqrt)(self, phoenix::arg1)])
+                       | ('E' >> group[function.value = phoenix::bind(&SpiritCalculator::exp)(self, phoenix::arg1)])
+                       | ('L' >> group[function.value = phoenix::bind(&SpiritCalculator::log)(self, phoenix::arg1)])
+                       | ('M' >> group[function.value = phoenix::bind(&SpiritCalculator::log10)(self, phoenix::arg1)])
                        );
-            identifier = lexeme_d[ ( alpha_p | '_') >> *( alnum_p | '_') ]
-                                             [identifier.name = construct_<std::string>(arg1, arg2)];
+            identifier = spirit::lexeme_d[ ( spirit::alpha_p | '_') >> *( spirit::alnum_p | '_') ]
+                                             [identifier.name = phoenix::construct_<std::string>(phoenix::arg1, phoenix::arg2)];
 
-            group = '(' >> expression[group.value = arg1] >> ')';
+            group = '(' >> expression[group.value = phoenix::arg1] >> ')';
     	}
 
         //boost::spirit::rule< ScannerT > const&
