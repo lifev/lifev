@@ -195,7 +195,6 @@ private:
 
     std::string const M_closingLines;
     std::streampos    M_closingLinesPosition;
-
     std::string       M_outputFileName;
 };
 
@@ -264,9 +263,8 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
     if ( M_HDF5.get() == 0)
     {
         M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
-        M_outputFileName=this->M_post_dir+this->M_prefix;
-        M_outputFileName+=".h5";
-        M_HDF5->Create(M_outputFileName);
+        M_outputFileName=this->M_prefix+".h5";
+        M_HDF5->Create(this->M_post_dir+M_outputFileName);
 
         // write empty xdmf file
         M_wr_initXdmf();
