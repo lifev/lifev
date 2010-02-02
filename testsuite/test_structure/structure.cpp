@@ -53,6 +53,7 @@
 
 using namespace LifeV;
 
+Real pi = 3.14159265358979;
 
 
 Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -61,11 +62,11 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     {
         switch(i) {
             case 1:
-                return -z*(z - 5.)*x/50.;
+	      //return -z*(z - 5.)*x/50.;
                 return 0;
                 break;
             case 2:
-                return -z*(z - 5.)*y/50.;
+	      //return -z*(z - 5.)*y/50.;
                 return 0;
                 break;
             case 3:
@@ -101,7 +102,47 @@ Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 
 }
 
+Real f1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
 
+  switch(i) {
+  case 1:
+    return 1e3*y;
+    break;
+  case 2:
+    return 0.0;
+    break;
+  case 3:
+    return 0.0;
+    break;
+  default:
+    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+    break;
+  }
+  return 0.0;
+
+}
+
+Real f2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+  switch(i) {
+  case 1:
+    return 0.0;
+    break;
+  case 2:
+    return -1e3*x;
+    break;
+  case 3:
+    return 0.0;
+    break;
+  default:
+    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+    break;
+  }
+  return 0.0;
+
+}
 
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
@@ -213,8 +254,44 @@ Structure::run3d()
     //
     BCFunctionBase fixed(dZero);
 
-    BCh.addBC("Base2 ", 2 , Essential, Full, fixed, 3);
+    Real onda_value = 0.0; 
+    vector_type press_lagr(solid.getMap(),Repeated);
+    press_lagr.getEpetraVector().PutScalar(onda_value);
+    BCVector onda(press_lagr, solid.dFESpace().dof().numTotalDof(), 1 );
+
+    std::cout << "NUMERO GDL BCVECTOR = " << solid.dFESpace().dof().numTotalDof() << std::endl;
+
+    std::vector<ID> compxy(2);
+    compxy[0] = 1;
+    compxy[1] = 2;
+    std::vector<ID> compx(1);
+    compx[0] = 1;
+    std::vector<ID> compy(1);
+    compy[0] = 2;
+    std::vector<ID> compz(1);
+    compz[0] = 3;
+ 
+    vector_type vect0(solid.getMap(),Repeated);
+    vect0.getEpetraVector().PutScalar(0.0);
+    BCVector bcvect0(vect0, solid.dFESpace().dof().numTotalDof(), 1 );
+
+    BCFunctionBase fun1(f1);
+    BCFunctionBase fun2(f2);
+
+
+    BCh.addBC("Base1 ", 1 , Natural, Full, onda, 3);
+    //BCh.addBC("Base2 ", 2 , Essential, Full, fixed, 3);
+    BCh.addBC("Base2 ", 2 , Essential, Component, fixed, compz);
+    //BCh.addBC("Base2 ", 2 , Natural, Component, bcvect0, compxy);
+    BCh.addBC("Base2 ", 2 , Natural, Component, fun1, compx);
+    BCh.addBC("Base2 ", 2 , Natural, Component, fun2, compy);
     BCh.addBC("Base3 ", 3 , Essential, Full, fixed, 3);
+    //BCh.addBC("Base3 ", 3 , Essential, Component, fixed, compz);
+    //BCh.addBC("Base3 ", 3 , Natural, Component, bcvect0, compxy);
+   
+    
+
+ 
     //
     // Temporal data and initial conditions
     //
@@ -281,7 +358,13 @@ Structure::run3d()
 
     for (Real time = dt; time <= T; time += dt)
     {
-        dataStructure.setTime(time);
+
+      onda_value = -10000.0 * sin(20*pi*time);
+      press_lagr.getEpetraVector().PutScalar(onda_value);
+    
+      std::cout << "VALORE ONDA = " << onda_value << std::endl;
+  
+      dataStructure.setTime(time);
 
         if (verbose)
             {
