@@ -24,10 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = cylinder.hpp
+check_HEADERS = cylinder_1flux.hpp
 
-check_PROGRAMS = test_cylinder
-test_cylinder_SOURCES = main.cpp cylinder.cpp
+check_PROGRAMS = test_cylinder_1flux
+test_cylinder_1flux_SOURCES = main.cpp cylinder_1flux.cpp
 
 EXTRA_DIST = data testsuite.at
 
