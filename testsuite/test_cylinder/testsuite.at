@@ -25,8 +25,8 @@
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
 #
-AT_SETUP([test_cylinder_1flux])
-AT_KEYWORDS([test_cylinder_1flux fluid])
+AT_SETUP([test_cylinder])
+AT_KEYWORDS([test_cylinder fluid])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #----------------------------------------------------------------
 #      Data file for cylinder test with Navier-Stokes IP Solver
@@ -41,28 +41,24 @@ save       = 1
 
 	[./physics]
 	density         = 1.0           # density   [kg/m^3]
-	viscosity       = 0.035			# viscosity [kg/m/s]
+	viscosity       = 0.03			# viscosity [kg/m/s]
 
 	[../time_discretization]
 	initialtime		= 0.
-	endtime			= 0.80
-	timestep		= 0.01
+	endtime			= 0.001
+	timestep		= 0.0001
 	BDF_order		= 1
 
 	[../space_discretization]
 	mesh_dir        = ./
-	mesh_file       = cyltetra.mesh
+	mesh_file       = tube20.mesh
 	mesh_type       = .mesh
 
 	verbose         = 0             # verbose during mesh-reading
-<<<<<<< testsuite.at
-	vel_order       = P2	     	# P1, P1Bubble, P2
-=======
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
 	div_beta_u_v    = 1             # 1=on, 0=off
 	vel_order       = P2	     	# P1, P1Bubble, P2
->>>>>>> 1.10
 	press_order     = P1		    # P1, P2
 
     [../miscellaneous]
@@ -148,8 +144,6 @@ save       = 1
     max_iter_reuse  = 20
 
 
-<<<<<<< testsuite.at
-=======
 	[../boundary_conditions]
 	list = 'Inlet Outlet Wall Ring' # use apex to create the list; use spaces to separe members
 	#list = 'InletXY InletZ Outlet Wall Ring' # use apex to create the list; use spaces to separe members
@@ -195,11 +189,10 @@ save       = 1
 		mode       = Full
 		component  = 3
 		function   = '(0., 0., 0.)'
->>>>>>> 1.10
 ]])
 
 
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
-          mpirun -np 2 ../../test_cylinder_1flux/test_cylinder_1flux -c],[0],[ignore],[ignore])
+          mpirun -np 2 ../../test_cylinder/test_cylinder -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 

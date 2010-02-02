@@ -29,7 +29,7 @@
  */
 
 #ifdef TWODIM
-#error test_cylinder_1flux cannot be compiled in 2D
+#error test_cylinder cannot be compiled in 2D
 #endif
 
 #include <Epetra_ConfigDefs.h>
@@ -46,7 +46,7 @@
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
-#include "cylinder_1flux.hpp"
+#include "cylinder.hpp"
 #include <mpi.h>
 
 
