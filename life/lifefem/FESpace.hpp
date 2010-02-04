@@ -45,8 +45,8 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifearray/pattern.hpp>
-#include <life/lifearray/SimpleVect.hpp>
+//#include <life/lifearray/pattern.hpp>
+//#include <life/lifearray/SimpleVect.hpp>
 
 #include <life/lifecore/life.hpp>
 
@@ -54,8 +54,8 @@
 #include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/currentBdFE.hpp>
 #include <life/lifefem/dof.hpp>
-#include <life/lifefem/geoMap.hpp>
-#include <life/lifefem/refFE.hpp>
+//#include <life/lifefem/geoMap.hpp>
+//#include <life/lifefem/refFE.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 
 #include <life/lifemesh/partitionMesh.hpp>
@@ -373,8 +373,6 @@ public:
     template<typename vector_type>
     Real H1Norm( const vector_type& vec );
 
-
-    BasePattern::PatternType patternType();
 
 private:
 
