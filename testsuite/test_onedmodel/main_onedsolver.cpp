@@ -81,8 +81,10 @@ int main(int argc, char** argv)
 
   std::cout << "    Building the mesh ... " << std::flush;
 
-  DataOneDModel data  (data_file);
-  Params1D      params(data_file);
+  const std::string section = "onedmodel";
+
+  DataOneDModel data  (data_file, section);
+  Params1D      params(data_file, section);
   std::cout << "ok." << std::endl;
 
   std::cout << data.mesh() << std::endl;
@@ -99,7 +101,7 @@ int main(int argc, char** argv)
 
   std::cout << "    Building FE Space ... " << std::flush;
 
-  std::cout << feSegP1.nbCoor << std::endl;
+  //std::cout << feSegP1.nbCoor << std::endl;
   FESpace<RegionMesh, EpetraMap> odFESpace(data.mesh(), *refFE, *qR, *bdQr, 1, *comm);
   std::cout << "nbCoorFE " << odFESpace.fe().nbCoor << std::endl;
   std::cout << "ok." << std::endl;
@@ -107,24 +109,26 @@ int main(int argc, char** argv)
   //odFESpace.dof().showMe(std::cout, true);
   std::cout << "    Building Solver   ... " << std::flush;
   onedsolver_type onedm(data, params, odFESpace, *comm);
-  onedm.setup(data_file);
+
+
+  onedm.setup(data_file, section);
   std::cout << "ok." << std::endl;
 
-  //onedm.showMe( std::cout );
+  onedm.showMe(std::cout);
 
 
   //
 
   //OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
-  OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
-                                  (odFESpace,
-                                   onedm.FluxFun(),
-                                   onedm.SourceFun(),
-                                   onedm.U_thistime(),
-                                   data.timestep(),
-                                   "left" /*border*/,
-                                   "W1"  /*var*/,
-                                   onedm.oneDParams()));
+//   OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
+//                                   (odFESpace,
+//                                    onedm.FluxFun(),
+//                                    onedm.SourceFun(),
+//                                    onedm.U_thistime(),
+//                                    data.timestep(),
+//                                    "left" /*border*/,
+//                                    "W1"  /*var*/,
+//                                    onedm.oneDParams()));
 
   OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
                                     ( data_file("parameters/R",0.),
@@ -135,12 +139,14 @@ int main(int argc, char** argv)
                                       onedm.U_thistime(),
                                       data.timestep(),
                                       "right" /*border*/,
-                                      "W2"  /*var*/) );
+                                      "W2"  /*var*/, true));
 
   //   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
 
+  OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
+  onedm.bcH().setBC( sinusoidal_flux, "left", "first", "Q" );
 
-  onedm.bcH().setBC( pressure,         "left",  "first", "W1"  );
+  //onedm.bcH().setBC( pressure,         "left",  "first", "W1"  );
   onedm.bcH().setBC( resistence,      "right",  "first", "W2" );
 
   // Initialization
@@ -148,14 +154,24 @@ int main(int argc, char** argv)
   Real dt             = data.timestep();
   Real startT         = data.inittime();
   Real T              = data.endtime();
-  Real postprocess_dt = data_file("miscellaneous/postprocess_timestep",0.01);
+  UInt postprocess_it = data_file("miscellaneous/postprocess_timestep", 10);
 
-  Debug(6030) << "[main] startT T dt postprocess_dt "
+  Debug(6030) << "[main] startT T dt postprocess_it "
               << startT << " " <<  T << " " << dt
-              << " " << postprocess_dt << "\n";
+              << " " << postprocess_it << "\n";
 
-  onedm.initialize(data_file);
 
+  onedm.initialize(data_file, section);
+//   Real u1_0 = 3.14; //! constant initial condition
+//   Real u2_0 = 0.;    //! constant initial condition
+
+//   //     if (fsi->isSolid())
+//   //     {
+//   //        std::cout << "     1d- initialize tube with constant A_0 = " << u1_0 << " and Q_0 = " << u2_0 << std::endl;
+//   onedm.initialize(u1_0, u2_0);
+//   std::cout << "    1d- initialize tube with constant A_0 = " << onedm.BCValuesLeft()[0]
+//             << " and Q_0 = " << onedm.BCValuesLeft()[1] << std::endl;
+//   //     }
   // Temporal loop
   printf("\nTemporal loop:\n");
 
@@ -165,7 +181,12 @@ int main(int argc, char** argv)
   Chrono chrono;
 
   int count = 0;
-  for (Real time=startT+dt ; time <= T; time+=dt) {
+
+  for (Real time=startT + dt ; time <= T; time+=dt)
+  {
+      std::cout << std::endl;
+      std::cout << "--------- Iteration " << count << " time = " << time << std::endl;
+
     count++;
 
     chrono.start();
@@ -180,10 +201,12 @@ int main(int argc, char** argv)
     onedm.iterate( time , count );
     chronoit.stop();
 
-    if( !( static_cast<int>( std::floor( time/dt + 0.5 ) ) %
-           static_cast<int>( std::floor( postprocess_dt/dt  + 0.5 ) ) ) )
+    //    std::cout <<
+    if( !( static_cast<int>( std::floor( count%postprocess_it))))
+//     if( !( static_cast<int>( std::floor( time/dt + 0.5 ) ) %
+//            static_cast<int>( std::floor( postprocess_dt/dt  + 0.5 ) ) ) )
 		{
-            std::cout << "PostProcessing ... " << std::endl;
+            std::cout << "PostProcessing at time ... " << time << std::endl;
             onedm.postProcess( time );
         }
 
@@ -193,9 +216,7 @@ int main(int argc, char** argv)
 
     chrono.stop();
 
-    std::cout << "Iteration " << count
-              << " t = " << time
-              << " time adv. computed in " << chronota.diff()
+    std::cout << " time adv. computed in " << chronota.diff()
               << " iter computed in " << chronoit.diff()
               << " total " << chrono.diff() << " s." << std::endl;
 //     printf("\033\n");

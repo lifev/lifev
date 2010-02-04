@@ -59,7 +59,7 @@ public:
     */
     Sin(const Real mean   = 0,
         const Real scale  = 10,
-        const Real period = 1.,
+        const Real period = .01,
         const Real phase  = 0. ) :
             _M_mean(mean), _M_scale(scale), _M_period(period), _M_phase(phase) {}
 
@@ -77,8 +77,17 @@ public:
         //         std::cout << "phase  " << _M_phase << std::endl;
 
 
-        //         std::cout << "BC imposed at time  " << time << " = " << _M_mean + _M_scale*std::sin(_M_phase + 2*M_PI*time/_M_period);
-        return _M_mean + _M_scale*std::sin(_M_phase + 2*M_PI*time/_M_period);
+        if (time < _M_period)
+            {
+                std::cout << "Flux BC = " << _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period) << std::endl;
+                return _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period);
+            }
+        else
+            {
+                return 0.;
+            }
+//         std::cout << "BC imposed at time  " << time << " = " << _M_mean + _M_scale*std::sin(_M_phase + 2*M_PI*time/_M_period) << std::endl;
+//         return _M_mean + _M_scale*std::sin(_M_phase + 2*M_PI*time/_M_period);
     };
 
     ~Sin() {}

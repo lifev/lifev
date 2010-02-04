@@ -3,7 +3,9 @@
 #   Data file for One D Model (Non Linear)
 #-------------------------------------------------
 
-[parameters]
+[onedmodel]
+
+[./parameters]
 use_physical_values = 0
 Area0 = 1
 # alphaCor	= 1 	# coriolis coeff
@@ -14,35 +16,38 @@ Kr	= 2.419026343 	# friction parameter (source term)
 # Kr	= 0.		# friction parameter (source term)
 R = 2.e4            # terminal resistence
 
-[time]
+[../time]
 timebeg	 = 0.0		# inittime
-timeend	 = 0.7		# endtime
+timeend	 = 1.0		# endtime
 timestep = 1e-5		# timestep
 
-[initialize]
+[../initialize]
 var = Q
 value = 0
-firstnode = 1
+firstnode = 51
 lastnode = 101
-multiplier = 0
+multiplier = 1
 
-[discretization]
+[../discretization]
 x_left	= 0.
 x_right	= 10.
 nb_elem	= 100	#   number of elements
 
-[miscellaneous]
+[../miscellaneous]
 post_dir = ./                    # the directory for postprocessing files
 post_file = sol                  # the file name
 verbose = 1
 show_graceplot = 0                # 0: no grace plot, 1: show grace plots
-postprocess_timestep = 0.01
+postprocess_timestep = 100
 showCFL = 1
 
-[solver]
-[./amesos]
-solvertype      = Umfpack
-redistribute    = true
-print_status    = false
-print_timing    = false
+
+[../solver]
+                [./amesos]
+                solvertype      = Umfpack
+                redistribute    = true
+                print_status    = false
+                print_timing    = false
+
+
 
