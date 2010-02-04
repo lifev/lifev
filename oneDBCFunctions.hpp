@@ -310,7 +310,7 @@ Compatibility<FLUX, SOURCE>::computeEigenValuesVectors()
                                                    _M_eigval1, _M_eigval2,
                                                    _M_left_eigvec1[0], _M_left_eigvec1[1],
                                                    _M_left_eigvec2[0], _M_left_eigvec2[1],
-                                                   this->_M_boundaryDof - 1 );
+                                                   this->_M_boundaryDof );
 }
 
 
@@ -375,11 +375,19 @@ Compatibility<FLUX, SOURCE>::extrapolate_W( OneDBCStringValue const& _W )
             W_out = extrapolate_L_dot_U(_M_eigval1, _M_left_eigvec1)
                 - dot( _M_left_eigvec1, this->_M_U_boundary ) + this->_M_W_boundary[0];
 
+//             std::cout << extrapolate_L_dot_U(_M_eigval1, _M_left_eigvec1) << " "
+//                       << _M_left_eigvec1[0] << " " << _M_left_eigvec1[1] << " "
+//                       << this->_M_U_boundary[0]  << " " << this->_M_U_boundary[1]  << " "
+//                       << this->_M_W_boundary[1] << std::endl;
             break;
         case OneDBCW2:
             W_out = extrapolate_L_dot_U(_M_eigval2, _M_left_eigvec2)
                 - dot( _M_left_eigvec2, this->_M_U_boundary ) + this->_M_W_boundary[1];
 
+//             std::cout << extrapolate_L_dot_U(_M_eigval2, _M_left_eigvec2) << " "
+//                       << _M_left_eigvec2[0] << " " << _M_left_eigvec2[1] << " "
+//                       << this->_M_U_boundary[0]  << " " << this->_M_U_boundary[1]  << " "
+//                       << this->_M_W_boundary[1] << std::endl;
             break;
         default:
             std::cout << "\n[Compatibility::extrapolate_W] incorrect variable identifier: " << _W << std::endl;
