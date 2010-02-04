@@ -230,7 +230,7 @@ public:
     ~OneDModelSolver(){}
 
     //! set up
-    void setup(const GetPot& datafile);
+    void setup(const GetPot& datafile, const std::string& section = "");
 
     //! return the solution at current time step (Area)
     const vector_type& U1_thistime()       const { return M_U_thistime[0]; }
@@ -278,7 +278,7 @@ public:
     void initialize(const Real& u20);
 
     //! Initialize with non constant (step) data
-    void initialize(const GetPot& data_file);
+    void initialize(const GetPot& data_file, const std::string section = "");
 
     //! Save and recover solution at current time step
     void savesol();
@@ -376,7 +376,7 @@ public:
     void create_movie_file();
 
     //! Print to screen informations on the solver class
-    void showMe( std::ostringstream& c = std::cout, UInt verbose = false );
+    void showMe( std::ostream& c = std::cout, UInt verbose = false );
 
     //! timestep getters
     const Real timestep() const {return M_data.timestep();}
@@ -691,17 +691,17 @@ OneDModelSolver( const data_type&                   dataType,
 
 /*! Set up */
 template< class Params, class Flux, class Source >
-void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
+void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file, const std::string& section)
 {
-    M_CFL                    = data_file("miscellaneous/showCFL",                        0);
-    M_UW                     = data_file("miscellaneous/alternate_solver",               0);
-    M_inertial_wall          = data_file("miscellaneous/inertial_wall",                  0);
-    M_viscoelastic_wall      = data_file("miscellaneous/viscoelastic_wall",              0);
-    M_linearize_string_model = data_file("miscellaneous/linearize_string_model",         1);
-    M_linearize_equations    = data_file("miscellaneous/linearize_equations",            0);
-    M_longitudinal_wall      = data_file("miscellaneous/longitudinal_wall",              0);
-    M_flux_second_der        = data_file("miscellaneous/compute_flux_second_derivative", 0);
-    M_dP_dt_steps            = data_file("miscellaneous/pressure_derivative_steps",      1);
+    M_CFL                    = data_file((section + "miscellaneous/showCFL").data(),                        0);
+    M_UW                     = data_file((section + "miscellaneous/alternate_solver").data(),               0);
+    M_inertial_wall          = data_file((section + "miscellaneous/inertial_wall").data(),                  0);
+    M_viscoelastic_wall      = data_file((section + "miscellaneous/viscoelastic_wall").data(),              0);
+    M_linearize_string_model = data_file((section + "miscellaneous/linearize_string_model").data(),         1);
+    M_linearize_equations    = data_file((section + "miscellaneous/linearize_equations").data(),            0);
+    M_longitudinal_wall      = data_file((section + "miscellaneous/longitudinal_wall").data(),              0);
+    M_flux_second_der        = data_file((section + "miscellaneous/compute_flux_second_derivative").data(), 0);
+    M_dP_dt_steps            = data_file((section + "miscellaneous/pressure_derivative_steps").data(),      1);
 
 
         // These maps allow a more readable definition of the variables
@@ -787,7 +787,12 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     //    M_variable_filter_map.insert( make_pair(".mtv",
     //  &LifeV::OneDModelSolver<Params, Flux, Source>::output_to_plotmtv) );
 
+
     M_U_thistime.resize(nvar, vector_type(M_localMap));
+
+    for (UInt ii = 0; ii < nvar; ++ii)
+        M_U_thistime[ii] *= 0.;
+
 
     // initialize matrices
     std::fill( M_diffFlux.begin(),    M_diffFlux.end(),    ublas::zero_vector<double>(M_FESpace.dim()) );
@@ -849,7 +854,8 @@ void OneDModelSolver<Params, Flux, Source>::setup(const GetPot& data_file)
     M_massMatrix.GlobalAssemble();
     M_gradMatrix.GlobalAssemble();
 
-    M_linearSolver.setDataFromGetPot( data_file, "solver" );
+    M_linearSolver.setUpPrec( data_file, section + "/prec");
+    M_linearSolver.setDataFromGetPot( data_file, section + "/solver" );
 
     chrono.stop();
 
@@ -1961,14 +1967,23 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
                                                   const std::string& var )
 {
 
+    Debug( 6310 ) << "[OneDModelSolver::initialize] 0- Initialize: var " << var << "\n";
+
     if( var == "physical")
       {
-          Debug( 6310 ) << "[initialize] 0- Imposing real values ... ";
+          Debug( 6310 ) << "[OneDModelSolver::initialize] 0- Imposing real values ... ";
 
           M_U_thistime[0] = vector_type( M_localMap );
-          M_U_thistime[0] = u10;
+          M_U_thistime[0][LeftNodeId()] = u10;
+
+
           M_U_thistime[1] = vector_type( M_localMap );
-          M_U_thistime[1] = u20;
+          M_U_thistime[1][LeftNodeId()] = u20;
+
+//           std::cout << "LeftNodeId() " << LeftNodeId() << std::endl;
+
+//           std::cout << "A0 = " << M_U_thistime[0][1] << " " << BCValuesLeft()[0] << std::endl;
+//           std::cout << "Q0 = " << M_U_thistime[0][2] << " " << BCValuesLeft()[1] << std::endl;
 
           for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
           {
@@ -1977,7 +1992,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
                                      ielem );
           }
 
-          Debug( 6310 ) << "ok\n";
+          Debug( 6310 ) << "[OneDModelSolver::initialize] O- ok\n";
       }
     else if( var == "reimann" )
         {
@@ -2218,19 +2233,20 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u20)
 */
 template< class Params, class Flux, class Source >
 void
-OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
+OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file, const std::string section)
 {
     // the discontinuity is comprised between firstnode and lastnode
-    UInt firstnode( data_file("initialize/firstnode",1) );
-    UInt lastnode( data_file("initialize/lastnode",2) );
+    UInt firstnode( data_file((section+"/initialize/firstnode").data(),1) );
+    UInt lastnode( data_file((section+"/initialize/lastnode").data(),2) );
 
     ASSERT_PRE( (firstnode <= lastnode) && (lastnode <= M_FESpace.dim()),
                 "[initialize] outside tube boundaries" );
 
     // read initialization type from data file (see OneDModelSolver::initialize)
-    std::string init_var( data_file("initialize/var","P") );
-    Real multiplier( data_file("initialize/multiplier",1.) );
+    std::string init_var( data_file((section+"/initialize/var").data(),"P") );
+    Real multiplier( data_file((section+"/initialize/multiplier").data(),1.) );
 
+    std::cout << "init_var = " << init_var << std::endl;
     // tell me what I am doing
     Debug( 6310 ) << "[initialize] 0- Initializing with values:\n";
     Debug( 6310 ) << "[initialize]\t\tinitialize var = " << init_var << "\n";
@@ -2238,7 +2254,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
     Debug( 6310 ) << "[initialize]\t\tlastnode       = " << lastnode << "\n";
     Debug( 6310 ) << "[initialize]\t\tmultiplier     = " << multiplier << "\n";
 
-    Real value1, value2, width( data_file("initialize/width",5.) );
+    Real value1, value2, width( data_file((section+"/initialize/width").data(),5.) );
 
     Vector exponent(M_FESpace.dim());
 
@@ -2259,13 +2275,16 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
             }
         }
 
+
     switch( M_oneDstring2initializeVarMap[init_var] )
         {
             // case 1, 2: initialize physical variables to desired value
         case OneDInitPressure:
-            std::cout << "OneDInitPressure" << std::endl;
+            //std::cout << "OneDInitPressure" << std::endl;
             // this is a pressure value! has to be converted in area value
-            value1 = data_file("initialize/rest_value",0.);
+            Debug( 6310 ) << "[initialize] 0- OneDInitPressure\n";
+
+            value1 = data_file((section+"/initialize/rest_value").data(),0.);
             // HYPOTHESIS: when initializing pressure, flux is imposed constant = 0
             value2 = 0;
 
@@ -2277,7 +2296,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
 
             Debug( 6310 ) << "[initialize] Q done\n";
 
-            for (UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+            for (UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
                 {
                     // reusing value2 as help variable
                     value2 = value1*( 1 + multiplier*std::exp( exponent[inode - 1] ) );
@@ -2286,15 +2305,16 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
                     Debug( 6310 ) << "[initialize] A(" << inode <<") done\n";
                     M_oneDParams.W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
                                            M_U_thistime[0][inode], M_U_thistime[1][inode],
-                                           inode );
+                                           inode - 1);
                     Debug( 6310 ) << "[initialize] W_i(" << inode <<") done\n";
                 }
             break;
 
         case OneDInitArea:
+            Debug( 6310 ) << "[initialize] 0- OneDInitArea\n";
 
-            std::cout << "OneDInitArea" << std::endl;
-            value1 = data_file("initialize/value", 0.);
+            //std::cout << "OneDInitArea" << std::endl;
+            value1 = data_file((section+"initialize/value").data(), 0.);
             value2 = 0;
 
             //ScalarVector( M_U_thistime[1].size(), value2 );
@@ -2309,31 +2329,32 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
 
                     M_oneDParams.W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
                                            M_U_thistime[0][inode], M_U_thistime[1][inode],
-                                           inode );
+                                           inode - 1 );
                 }
             break;
 
         case OneDInitFlux:
             // HYPOTHESIS: when initializing flux, area is equal to Area0
+            Debug( 6310 ) << "[initialize] 0- OneDInitFlux\n";
 
 
-            std::cout << "OneDInitFlux" << std::endl;
             value1 = M_oneDParams.Area0(0); // this if Area0 is constant
-            value2 = data_file("initialize/value",0.);
+            value2 = data_file((section+"/initialize/value").data(), 0.);
 
-            for (UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+            for (UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
                 {
                     M_U_thistime[0][inode] = M_oneDParams.Area0(inode - 1);
                     M_U_thistime[1][inode] = value2*( 1 + multiplier*std::exp( exponent[inode - 1] ) );
 
                     M_oneDParams.W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
                                            M_U_thistime[0][inode], M_U_thistime[1][inode],
-                                           inode );
+                                           inode - 1 );
                 }
             break;
 
         case OneDInitReimann1:
-            value1 = data_file("initialize/value",0.);
+            Debug( 6310 ) << "[initialize] 0- OneDInitReimann1\n";
+            value1 = data_file((section+"initialize/value").data(), 0.);
             value2 = -value1;
             std::cout << "[initialize] WARNING! Initializing W2 = - W1"
                       << " (assuming Q = 0)" << std::endl;
@@ -2348,12 +2369,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
                                            M_U_thistime[1][inode],
                                            M_U_thistime[2][inode],
                                            M_U_thistime[3][inode],
-                                           inode );
+                                           inode - 1);
                 }
 
             break;
 
         case OneDInitReimann2:
+            Debug( 6310 ) << "[initialize] 0- OneDInitReimann2\n";
             value1 = data_file("initialize/value",0.);
             value2 = - value1;
             std::cout << "[initialize] WARNING! Initializing W1 = - W2"
@@ -2379,6 +2401,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
             ERROR_MSG("No such initializing option.");
 
         }
+
 
     Debug( 6310 ) << "[initialize]\t\tvalue1         = " << value1 << "\n";
     Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * multiplier << "\n";
@@ -2434,11 +2457,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file)
     //create_movie_file();
 
     //! Prepare the buffers
-    //openFileBuffers();
+    openFileBuffers();
 
     //! Write down initial condition
     //output2FileBuffers( 0. );
     //postProcess( 0. );
+
+
 }
 
 
@@ -2476,7 +2501,7 @@ OneDModelSolver<Params, Flux, Source>::loadsol()
     for (UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
         M_oneDParams.W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
                                M_U_thistime[0][inode], M_U_thistime[1][inode],
-                               inode );
+                               inode - 1 );
 
 }
 
@@ -2595,6 +2620,12 @@ OneDModelSolver<Params, Flux, Source>::timeAdvance( const Real& time_val )
     //!---------------------------------------------------
     //! compute the values for the boundary conditions
     Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
+
+//     std::cout <<  M_U_thistime[0](101) << std::endl;
+//     std::cout <<  M_U_thistime[1](101) << std::endl;
+//     std::cout <<  M_U_thistime[2](101) << std::endl;
+//     std::cout <<  M_U_thistime[3](101) << std::endl;
+
     _computeBC( time_val );
     //! take into account the bc
     Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
@@ -2652,7 +2683,7 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
                                    M_rhs[0][0], M_rhs[1][0], 0 );
             M_oneDParams.W_from_U( W1_UW(M_FESpace.dim()-1), W2_UW(M_FESpace.dim()-1),
                                    M_rhs[0][M_FESpace.dim()-1], M_rhs[1][M_FESpace.dim()-1],
-                                   M_FESpace.dim()-1 );
+                                   M_FESpace.dim() - 1 );
 
             for ( UInt ii=1; ii < (M_FESpace.dim()-1) ; ii++ ) {
                 //! compute the eigenvalues at node
@@ -2775,10 +2806,11 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
             chrono4.stop();
             chrono5.start();
             Vector pressures(4 * M_FESpace.dim());
-            for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ ) {
+            for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
+            {
                 M_oneDParams.W_from_U( M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
                                        M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
-                                       ielem + 1);
+                                       ielem);
                 //        for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ ) {
                 subrange(pressures, 4*ielem, 4 + 4*ielem) =
                     M_oneDParams.pressure( M_U_thistime [0][ielem + 1],
@@ -2789,9 +2821,7 @@ OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int
                                            M_linearize_string_model );
 
                 M_U_thistime[4][ielem + 1] = pressures(4*ielem);
-                //        std::cout << 4*ielem << "\t";
             }
-            //      std::cout << std::endl;
 
             if(M_viscoelastic_wall)
                 {
@@ -2967,6 +2997,7 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
     int count = 0;
     it  = M_post_process_buffer.begin();
 
+
     for( iter = M_variable_index_map.begin(); iter != M_variable_index_map.end(); ++iter, ++it)
     {
 
@@ -2978,7 +3009,7 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
         std::string filename = it->first;
 
         outfile.open( filename.c_str(), std::ios::app );
-
+        //outfile << "# time = " << time_val << std::endl;
 
         for (int ii = 0; ii < M_dimDof; ++ii)
         {
@@ -3174,14 +3205,14 @@ OneDModelSolver<Params, Flux, Source>::create_movie_file()
 //! Print to screen information on the Solver class
 template< class Params, class Flux, class Source >
 void
-OneDModelSolver<Params, Flux, Source>::showMe(std::ostringstream& c, UInt verbose)
+OneDModelSolver<Params, Flux, Source>::showMe(std::ostream& c, UInt verbose)
 {
     c << "\n--- One Dimensional Model Data\n";
     //this->showMe(c);
 //     c << "\n--- One Dimensional Model Handler\n";
 //     this->showMeHandler(c, verbose);
 //     c << "\n--- One Dimensional Model Parameters\n";
-    this->oneDParams().showMeData(c);
+    this->oneDParams().showMe(c);
     c << "--- End of One Dimensional Model\n";
 }
 

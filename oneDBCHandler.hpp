@@ -250,34 +250,59 @@ void OneDBC<FLUX>::compute_resBC(const Real& time_val)
 {
     Vec2D rhsBC(2);
 
+
     //! Eigen values of the jacobian diffFlux (= dF/dU = H)
     Real  eigval1, eigval2;
     //! Left eigen vectors for the eigen values eigval1 and eigval2
-    Vec2D left_eigvec1(2), left_eigvec2(2),
-        left_eigvec_first(2), left_eigvec_second(2);
+    Vec2D left_eigvec1(2), left_eigvec2(2);
+    Vec2D left_eigvec_first(2), left_eigvec_second(2);
+
+    left_eigvec1[0] = 0.;
+    left_eigvec1[1] = 0.;
+
+    left_eigvec2[0] = 0.;
+    left_eigvec2[1] = 0.;
 
     Vec2D U_boundary(2), W_boundary(2);
 
-    for( UInt i=0; i < 2; ++i )
+    //    std::cout << "M_boundaryDof " << _M_boundaryDof << std::endl;
+    for( UInt i = 0; i < 2; ++i )
         {
             U_boundary[i] = _M_U_thistime[i    ](_M_boundaryDof);
-            W_boundary[i] = _M_U_thistime[2 + i](_M_boundaryDof);
+            W_boundary[i] = _M_U_thistime[2 + i](_M_boundaryDof) ;
+            //std::cout << "bdof " << _M_boundaryDof << " : " << _M_U_thistime[2 + i](_M_boundaryDof) << std::endl;
         }
 
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary[0], U_boundary[1],
+//     std::cout << "B dof " << _M_boundaryDof << std::endl;
+
+//     std::cout << U_boundary[0] << std::endl;
+//     std::cout << U_boundary[1] << std::endl;
+
+//     std::cout << left_eigvec1[0] << std::endl;
+//     std::cout << left_eigvec1[1] << std::endl;
+
+//     std::cout << left_eigvec2[0] << std::endl;
+//     std::cout << left_eigvec2[1] << std::endl;
+
+//     rhsBC[0]=_M_rhs_at_line["first"]->evaluate(time_val);
+//     rhsBC[1]=_M_rhs_at_line["second"]->evaluate(time_val);
+
+    Real Aboundary = U_boundary[0];
+    Real Qboundary = U_boundary[1];
+
+    _M_fluxFun.jacobian_EigenValues_Vectors(Aboundary, Qboundary,
                                             eigval1, eigval2,
                                             left_eigvec1[0], left_eigvec1[1],
                                             left_eigvec2[0], left_eigvec2[1],
-                                            _M_boundaryDof - 1);
+                                            _M_boundaryDof);
 
     Debug(6311) << "[OneDBC::compute_resBC_line] 1\n";
 
-    rhsBC[0] = _M_rhs_at_line["first" ]->evaluate(time_val);
-    rhsBC[1] = _M_rhs_at_line["second"]->evaluate(time_val);
+    rhsBC[0]=_M_rhs_at_line["first"]->evaluate(time_val);
+    rhsBC[1]=_M_rhs_at_line["second"]->evaluate(time_val);
 
-
-    Debug(6311) << "rhsBC[0] = " << rhsBC[0] << "\n";;
-    Debug(6311) << "rhsBC[1] = " << rhsBC[1] << "\n";;
+    Debug(6311) << "[OneDBC::compute_resBC_line] rhsBC[0] = " << rhsBC[0] << "\n";;
+    Debug(6311) << "[OneDBC::compute_resBC_line] rhsBC[1] = " << rhsBC[1] << "\n";;
 
     // this is not general
     // PRECONDITION (typical situation):
@@ -287,6 +312,7 @@ void OneDBC<FLUX>::compute_resBC(const Real& time_val)
     //   on second line, right boundary, I impose W1
     // the code does not check for coherence (you cannot impose
     // the same variable on both lines!)
+
     Debug(6311) << "[OneDBC::compute_resBC_line] 2\n";
     _M_oneDBCMapStringValues[ _M_variable_at_line["first"] ] == OneDBCW1 ? //"W1"
         left_eigvec_first = left_eigvec1 :
@@ -376,6 +402,9 @@ template< class FLUX >
 void OneDBC<FLUX>::applyBC(const Real& time_val,
                            Vec2D& BC_dir)
 {
+
+
+    //std::cout << "BC_dir = " << BC_dir[0] << " " << BC_dir[1] << std::endl;
     ASSERT_PRE( BC_dir.size() == 2,
                 "applyBC works only for 2D vectors");
 
@@ -474,7 +503,7 @@ void OneDBCHandler<FLUX>::setDefaultBC( const FESpace<Mesh, EpetraMap>& fespace,
                                         const Real&                     dt )
 {
 
-    std::cout << "Set Default BC ... ";
+    Debug( 6311 ) << "[OneDBCHandler::OneDBCHandler] Set Default BC ... \n";
     std::string border;
     std::string var;
 
@@ -531,7 +560,7 @@ void OneDBCHandler<FLUX>::setDefaultBC( const FESpace<Mesh, EpetraMap>& fespace,
             setBC(point, "right", "second", "W1");
         }
 
-    std::cout << "ok." << std::endl;
+    //std::cout << "ok." << std::endl;
 
 }
 

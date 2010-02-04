@@ -48,10 +48,10 @@ BloodFlowParam::BloodFlowParam(const GetPot& dfile, const std::string& section) 
     _M_length = _M_xright - _M_xleft;
 
 
-    Real _A0       = dfile((section + "parameters/Area0").data(), M_PI);
-    Real _beta0    = dfile((section + "parameters/beta0").data(), 1.e6);
-    Real _beta1    = dfile((section + "parameters/beta1").data(), 0.5);
-    Real _kr       = dfile((section + "parameters/Kr").data(),    1.);
+    Real _A0       = dfile((section + "/parameters/Area0").data(), M_PI);
+    Real _beta0    = dfile((section + "/parameters/beta0").data(), 1.e6);
+    Real _beta1    = dfile((section + "/parameters/beta1").data(), 0.5);
+    Real _kr       = dfile((section + "/parameters/Kr").data(),    1.);
     Real _dA0dz    = 0.;
     Real _dbeta0dz = 0.;
     Real _dbeta1dz = 0.;

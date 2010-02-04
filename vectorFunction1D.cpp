@@ -121,6 +121,8 @@ jacobian_EigenValues_Vectors(const Real& _A,
                              Real&       lefteigvec22,
                              const UInt& indz ) const
 {
+    Debug(6312) << "[NonLinearFluxFun1D]::jabocian_EigenValues_Vectors\n";
+
     Real Area0, alphaCor, beta0, beta1, rho;
     Real AoverA0, AoverA0POWbeta1, QoverA;
 
@@ -165,7 +167,6 @@ jacobian_EigenValues_Vectors(const Real& _A,
     lefteigvec12 = 1. / _A;
     lefteigvec21 = - eig1 / _A;
     lefteigvec22 = 1. / _A;
-
 }
 
 
