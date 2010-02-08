@@ -202,8 +202,8 @@ MS_Model_Fluid3D::SetupModel()
     //M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), Repeated ) );
 
     M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), M_output->mapType() ) );
-    //if ( M_output->mapType() == Unique )
-    //    M_FluidSolution->setCombineMode( Zero );
+    if ( M_output->mapType() == Unique )
+        M_FluidSolution->setCombineMode( Zero );
 
     M_output->addVariable( ExporterData::Vector, "velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
 #ifdef HAVE_HDF5
@@ -229,10 +229,10 @@ MS_Model_Fluid3D::BuildSystem()
 
     //Initialize problem coefficients
     M_alpha  = 0.0;
-    *M_beta *= 0.0;
+    *M_beta *= M_Fluid->solution();
     *M_RHS  *= 0.0;
 
-    //Initialize velocity and pressure to zero
+    //Initialize velocity and pressure
     M_Fluid->initialize( *M_FluidSolution );
 
     //Set problem coefficients

@@ -47,9 +47,11 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
-#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/exporter.hpp>
 #ifdef HAVE_HDF5
     #include <life/lifefilters/hdf5exporter.hpp>
+#else
+    #include <life/lifefilters/ensight.hpp>
 #endif
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
@@ -120,25 +122,25 @@ public:
     //! @name MultiScale PhysicalModel Virtual Methods
     //@{
 
-    //! Setup the data of the model
+    //! Setup the data of the model.
     void SetupData();
 
-    //! Setup the model
+    //! Setup the model.
     void SetupModel();
 
-    //! Build the system matrix and vectors
+    //! Build the initial system (matrix and vectors).
     void BuildSystem();
 
-    //! Update the system matrix and vectors
+    //! Update the system for (matrix and vectors).
     void UpdateSystem();
 
-    //! Solve the problem
+    //! Solve the problem.
     void SolveSystem();
 
     //! Save the solution
     void SaveSolution();
 
-    //! Display some information about the model
+    //! Display some information about the model.
     void ShowMe();
 
     //@}
