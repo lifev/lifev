@@ -269,8 +269,6 @@ BCInterface_Function< Operator >::SetData( const BCInterface_Data< Operator >& d
     M_comV = data.GetComV();
     M_baseString = data.GetBaseString();
 
-    //boost::shared_ptr<SpiritParser> emptyParser( );
-    //if ( M_parser == emptyParser )
     if ( M_parser )
         M_parser->setString( M_baseString );
     else
@@ -330,10 +328,10 @@ inline void BCInterface_Function< Operator >::SetFunction()
 template< typename Operator >
 Real
 BCInterface_Function< Operator >::Function( const Real& t,
-                                                const Real& x,
-                                                const Real& y,
-                                                const Real& z,
-                                                const ID& /*id*/)
+                                            const Real& x,
+                                            const Real& y,
+                                            const Real& z,
+                                            const ID& /*id*/)
 {
 
 #ifdef DEBUG
@@ -361,10 +359,10 @@ BCInterface_Function< Operator >::Function( const Real& t,
 template< typename Operator >
 Real
 BCInterface_Function< Operator >::FunctionID( const Real& t,
-                                                  const Real& x,
-                                                  const Real& y,
-                                                  const Real& z,
-                                                  const ID& id )
+                                              const Real& x,
+                                              const Real& y,
+                                              const Real& z,
+                                              const ID& id )
 {
 
 #ifdef DEBUG
