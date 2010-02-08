@@ -305,6 +305,10 @@ public:
     //! get the value at neighboring node (right)
     Vec2D BCValuesInternalRight() const;
 
+    //! return the selection solution (P, A, Q, W1, W2)
+    Real value(std::string var, UInt pos) const;
+
+
     //! set the Dirichlet boundary conditions (left)
     void setBCValuesLeft( const Real& bcL1, const Real& bcL2 );
 
@@ -1199,6 +1203,31 @@ OneDModelSolver<Params, Flux, Source>::RightNodeId() const
 }
 
 
+//
+
+template< class Params, class Flux, class Source >
+Real
+OneDModelSolver<Params, Flux, Source>::value(std::string var, UInt pos) const
+{
+    //    M_variable_index_iter iter;
+
+    std::map< std::string, UInt>::const_iterator it = M_variable_index_map.find(var);
+
+    UInt offset = it->second;
+    return M_U_thistime[offset](pos);
+
+
+//     for( iter = M_variable_index_map.begin(); iter != M_variable_index_map.end(); ++iter)
+//     {
+//         if (iter->first == var)
+//         {
+//         }
+//     }
+
+//     return -1;
+}
+
+
 //! get the right internal node (neighboring node)
 template< class Params, class Flux, class Source >
 UInt
@@ -1221,6 +1250,11 @@ OneDModelSolver<Params, Flux, Source>::BCValuesLeft() const
 
     return temp;
 }
+
+
+
+
+
 
 
 //! get the value at neighboring node (left)
@@ -1967,18 +2001,21 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
                                                   const std::string& var )
 {
 
-    Debug( 6310 ) << "[OneDModelSolver::initialize] 0- Initialize: var " << var << "\n";
+    Debug( 6310 ) << "[OneDModelSolver::initialize] O- Initialize: var " << var << "\n";
 
     if( var == "physical")
       {
-          Debug( 6310 ) << "[OneDModelSolver::initialize] 0- Imposing real values ... ";
+          //
+          Debug( 6310 ) << "[OneDModelSolver::initialize] O- Imposing real values ... \n";
+          Debug( 6310 ) << "[OneDModelSolver::initialize] O- A0 = " << u10 << "\n";
+          Debug( 6310 ) << "[OneDModelSolver::initialize] O- Q0 = " << u20 << "\n";
 
           M_U_thistime[0] = vector_type( M_localMap );
-          M_U_thistime[0][LeftNodeId()] = u10;
+          //M_U_thistime[0][LeftNodeId()] = u10;
 
 
           M_U_thistime[1] = vector_type( M_localMap );
-          M_U_thistime[1][LeftNodeId()] = u20;
+          //M_U_thistime[1][LeftNodeId()] = u20;
 
 //           std::cout << "LeftNodeId() " << LeftNodeId() << std::endl;
 
@@ -1987,6 +2024,10 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
 
           for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
           {
+              M_U_thistime[0][ielem + 1] = u10;
+              M_U_thistime[1][ielem + 1] = u20;
+
+              //              std::cout << ielem << " " << M_U_thistime[0][ielem + 1] << std::endl;
               M_oneDParams.W_from_U( M_U_thistime[2][ielem + 1], M_U_thistime[3][ielem + 1],
                                      M_U_thistime[0][ielem + 1], M_U_thistime[1][ielem + 1],
                                      ielem );
@@ -2074,9 +2115,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
     M_U_thistime[1] = u20;
 
     for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
+    {
+//         M_U_thistime[0][ielem] = u10;
+//         M_U_thistime[1][ielem] = u20;
+
         M_oneDParams.W_from_U( M_U_thistime[2][ielem], M_U_thistime[3][ielem],
                                M_U_thistime[0][ielem], M_U_thistime[1][ielem], ielem );
-
+    }
 
     for( UInt i=0; i<2; ++i )
         {
@@ -2118,7 +2163,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
 
     //output2FileBuffers( 0. );
 
-    //postProcess( 0. );
+    postProcess( 0. );
 
 }
 
@@ -2213,7 +2258,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u20)
 
     output2FileBuffers( 0. );
 
-    postProcess( 0. );
+    //postProcess( 0. );
 
 }
 
@@ -2314,11 +2359,11 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file, const
             Debug( 6310 ) << "[initialize] 0- OneDInitArea\n";
 
             //std::cout << "OneDInitArea" << std::endl;
-            value1 = data_file((section+"initialize/value").data(), 0.);
+            value1 = data_file((section+"/initialize/value").data(), 0.);
             value2 = 0;
 
             //ScalarVector( M_U_thistime[1].size(), value2 );
-            M_U_thistime[1] = vector_type(M_localMap);
+            //M_U_thistime[0] = vector_type(M_localMap);
             M_U_thistime[1] = value2;
 
 
@@ -2461,7 +2506,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file, const
 
     //! Write down initial condition
     //output2FileBuffers( 0. );
-    //postProcess( 0. );
+    postProcess( 0. );
 
 
 }
@@ -2990,7 +3035,7 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
 //         std::cout << it->first << std::endl;
 
 
-    Debug( 6310 ) << "[postProcess] o- Dumping solutions on files (1d)!" << "\n";
+    Debug( 6310 ) << "[postProcess] o- Dumping solutions on files (1d)!" << "/n";
     // dump solutions on files (buffers must be active!)
 
     //    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter, ++count)
@@ -3007,6 +3052,7 @@ OneDModelSolver<Params, Flux, Source>::postProcess( const Real& time_val )
         int offset           = iter->second;
 
         std::string filename = it->first;
+        Debug( 6310 ) << "Writing file " << filename << " with var " << offset << "/n";
 
         outfile.open( filename.c_str(), std::ios::app );
         //outfile << "# time = " << time_val << std::endl;
