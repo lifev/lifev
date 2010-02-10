@@ -68,7 +68,7 @@ EpetraPreconditioner::getList() const
     return M_List;
 }
 
-const int
+const int&
 EpetraPreconditioner::getOverlapLevel() const
 {
     return M_overlapLevel;

@@ -99,7 +99,11 @@ public:
 
     virtual prec_raw_type*  getPrec() = 0;
 
-    //std::string            precType() { return M_precType; }
+    //! Return the type name of the preconditioner.
+    /*!
+     *  @return type of the preconditioner
+     */
+    virtual std::string     precType() = 0;
 
     virtual int             buildPreconditioner(operator_type& A) = 0;
 
@@ -115,7 +119,7 @@ public:
 
     void                    setList(Teuchos::ParameterList list);
     const Teuchos::ParameterList& getList() const;
-    const int getOverlapLevel() const;
+    const int& getOverlapLevel() const;
 
 protected:
 
