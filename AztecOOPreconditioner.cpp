@@ -54,7 +54,7 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
     M_solver->getParameterList().set("pre_calc", dataFile( ( section + "/AztecOO/pre_calc" ).data(), "calc" ));
 
     // Reordering
-    M_solver->getParameterList().set("reorder", dataFile( ( section + "/AztecOO/reorder" ).data(), 0 ));
+    M_solver->getParameterList().set("reorder", dataFile( ( section + "/AztecOO/reorder" ).data(), 1 ));
 
     // Keep the information
     M_solver->getParameterList().set("keep_info", dataFile( ( section + "/AztecOO/keep_info" ).data(), 1 ));
@@ -121,7 +121,7 @@ AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 
     M_preconditionerCreated = true;
 
-    return EXIT_SUCCESS;
+    return ( EXIT_SUCCESS );
 }
 
 Real
@@ -133,6 +133,9 @@ AztecOOPreconditioner::Condest()
 EpetraPreconditioner::prec_raw_type*
 AztecOOPreconditioner::getPrec()
 {
+    if ( M_preconditionerCreated )
+        return M_solver->getSolver().GetPrecMatrix();
+
     return 0;
 }
 
