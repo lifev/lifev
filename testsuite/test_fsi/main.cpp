@@ -38,8 +38,10 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 
 #include <Epetra_ConfigDefs.h>
+
 #ifdef EPETRA_MPI
 	#include <Epetra_MpiComm.h>
 #else
@@ -48,6 +50,7 @@
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
+
 /*
 namespace LifeV
 {
@@ -73,7 +76,7 @@ public:
     bc_adaptor( FSIOperator& Operator ):
             M_oper   ( Operator )
     {
-    	Real area0	= 0.78540;
+    	Real area0	= 0.7854;
     	//Real area0	= M_oper.fluid().area(3);
         Real area	= area0;
 
@@ -143,7 +146,8 @@ public:
     typedef FSIOperator::vector_type                        vector_type;
     typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
 
-    typedef Ensight<FSIOperator::mesh_type>                 filter_type;
+    //typedef Ensight<FSIOperator::mesh_type>                 filter_type;
+    typedef Hdf5exporter<FSIOperator::mesh_type>                 filter_type;
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
     /*!
@@ -156,23 +160,17 @@ public:
     */
     Problem( const GetPot& dataFile, std::string method = "" )
     {
-#ifdef DEBUG
     	Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
-#endif
     	M_fsi = fsi_solver_ptr( new FSISolver( method ) );
 
     	MPI_Barrier( MPI_COMM_WORLD );
 
-#ifdef DEBUG
 		Debug( 10000 ) << "Setting up data from GetPot \n";
-#endif
     	M_fsi->setDataFromGetPot( dataFile );
 
     	MPI_Barrier( MPI_COMM_WORLD );
 
-#ifdef DEBUG
     	Debug( 10000 ) << "Setting up the BC \n";
-#endif
     	//M_fsi->setSourceTerms( fZero, fZero );
 		M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
 		M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension(*M_fsi->FSIOper()));
@@ -185,18 +183,14 @@ public:
 
     	MPI_Barrier( MPI_COMM_WORLD );
 
-#ifdef DEBUG
 		Debug( 10000 ) << "Setting up the problem \n";
-#endif
     	M_fsi->setup( );
 
     	//M_fsi->resetFSISolvers();
 
     	MPI_Barrier( MPI_COMM_WORLD );
 
-#ifdef DEBUG
 		Debug( 10000 ) << "Setting up Ensight \n";
-#endif
     	if ( M_fsi->isFluid() )
     	{
     		M_ensightFluid.reset( new  filter_type( dataFile, "fixedPtFluid") );
@@ -288,6 +282,7 @@ public:
 				BCFunctionBase outFlow;
 				outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
 				M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
+                std::cout << "   F- pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
 			}
 
     		M_fsi->iterate( time );
