@@ -13,15 +13,15 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
 	[./time_discretization]
-	initialtime		= 0.0                 # [s]
-	endtime			= 4.2925208983925     # [s]
-	timestep		= 0.00419191493983642 # [s]
+	initialtime		= 0.0   # [s]
+	endtime			= 4.0   # [s]
+	timestep		= 0.001 # [s]
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
@@ -106,5 +106,5 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
 [Physics] #########################################################################################
 ###################################################################################################
 fluidDensity	= 1.0           # density   [g/cm^3]
-fluidViscosity	= 0.00148309067632946 # viscosity [g/cm/s]
+fluidViscosity	= 0.035         # viscosity [g/cm/s]
 ###################################################################################################

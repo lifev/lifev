@@ -41,14 +41,14 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 			scaling         = none
 			output          = all           # none
 			conv            = AZ_noscaled   # r0, noscaled
-			kspace          = 100
 			max_iter        = 100
+			reuse           = false
+            max_iter_reuse  = 100
+            kspace          = 100
 			tol             = 1.e-14
-			
 			
 			[../Preconditioner]
 			prectype                = Ifpack #Ifpack
-			reuse                   = false
 			displayList             = false
 	
 				[./AztecOO]
@@ -57,10 +57,10 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 				reorder             = 1
 				keep_info           = 0
 				overlap             = 0
-				subdomain_solve     = ilut
-				ilut_fill           = 6
-				drop                = 1.e-6
-				
+				subdomain_solve     = ILUT
+				ilut_fill           = 4
+				drop                = 1.e-5
+								
 				[../ifpack]
 				overlap				= 3 #ok
 				prectype			= Amesos # Amesos (does a local LU factorization), ILUT (not ILU)

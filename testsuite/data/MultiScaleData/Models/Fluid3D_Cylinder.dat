@@ -92,7 +92,7 @@ diagonalBlockPrec   = false
         [./AztecOO]
         precond             = 'dom_decomp'
         prec_calc           = calc
-        reorder             = 0
+        reorder             = 1
         keep_info           = 1
         overlap             = 1
         subdomain_solve     = ILUT
