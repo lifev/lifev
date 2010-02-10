@@ -222,11 +222,10 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
     double mytol  (M_tol);
     int status;
 
-    if ( isPrecSet() )
+    if ( isPrecSet() && M_prec->precType().compare("AztecOO") )
         M_solver.SetPrecOperator(M_prec->getPrec());
 
     status = M_solver.Iterate(maxiter, mytol);
-
 
 #ifdef DEBUG
 
