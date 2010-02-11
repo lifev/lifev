@@ -100,13 +100,17 @@ IfpackComposedPrec::createIfpackPrec(operator_type& oper,
     prec.reset(factory.Create(M_precType, oper->getMatrixPtr().get(), M_overlapLevel));
 
     if ( !prec.get() )
-        {
-            ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-        }
+    {
+        ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+    }
 
     IFPACK_CHK_ERR(prec->SetParameters(this->M_List));
     IFPACK_CHK_ERR(prec->Initialize());
     IFPACK_CHK_ERR(prec->Compute());
+
+    this->M_preconditionerCreated = true;
+
+    return ( EXIT_SUCCESS );
 }
 
 int
@@ -134,7 +138,6 @@ IfpackComposedPrec::replace(operator_type& oper,
                             const bool useInverse,
                             const bool useTranspose)
 {
-
     ASSERT(index <= M_OperVector.size(), "IfpackComposedPrec::replace: index too large");
 
     M_OperVector[index] = oper;
@@ -175,7 +178,8 @@ IfpackComposedPrec::precReset()
 {
     M_Oper.reset();
     M_Prec.reset();
-}
 
+    this->M_preconditionerCreated = false;
+}
 
 } // namespace LifeV

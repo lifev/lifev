@@ -38,15 +38,24 @@ namespace LifeV {
 
 AztecOOPreconditioner::AztecOOPreconditioner():
         super                   ( ),
-        M_solver                ( ),
-        M_preconditionerCreated ( false )
+        M_solver                ( )
 {
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::AztecOOPreconditioner() \n";
+#endif
+
 }
 
 void
 AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                           const std::string& section )
 {
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::setDataFromGetPot(dataFile, section) \n";
+#endif
+
     // Preconditioner
     M_solver->getParameterList().set("precond", dataFile( ( section + "/AztecOO/precond" ).data(), "dom_decomp" ));
 
@@ -108,7 +117,12 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 int
 AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 {
-    if ( M_preconditionerCreated )
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::buildPreconditioner( Operator ) \n";
+#endif
+
+    if ( this->M_preconditionerCreated )
         precReset();
 
     M_solver->getSolver().SetPrecMatrix( Operator->getMatrixPtr().get() );
@@ -119,7 +133,7 @@ AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
     Real estimateConditionNumber;
     M_solver->getSolver().ConstructPreconditioner( estimateConditionNumber );
 
-    M_preconditionerCreated = true;
+    this->M_preconditionerCreated = true;
 
     return ( EXIT_SUCCESS );
 }
@@ -127,13 +141,23 @@ AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 Real
 AztecOOPreconditioner::Condest()
 {
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::Condest() \n";
+#endif
+
     return M_solver->getSolver().Condest();
 }
 
 EpetraPreconditioner::prec_raw_type*
 AztecOOPreconditioner::getPrec()
 {
-    if ( M_preconditionerCreated )
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::getPrec() \n";
+#endif
+
+    if ( this->M_preconditionerCreated )
         return M_solver->getSolver().GetPrecMatrix();
 
     return 0;
@@ -142,6 +166,11 @@ AztecOOPreconditioner::getPrec()
 void
 AztecOOPreconditioner::precReset()
 {
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::precReset() \n";
+#endif
+
     M_solver->getSolver().SetAztecOption( AZ_keep_info, 0 );
     M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
 
@@ -155,7 +184,7 @@ AztecOOPreconditioner::precReset()
 
     M_solver->getSolver().DestroyPreconditioner();
 
-    M_preconditionerCreated = false;
+    this->M_preconditionerCreated = false;
 }
 
 } // namespace LifeV

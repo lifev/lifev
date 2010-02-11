@@ -31,7 +31,6 @@
 #ifndef _IFPACKCOMPOSEDPREC_HPP_
 #define _IFPACKCOMPOSEDPREC_HPP_
 
-
 #include <boost/shared_ptr.hpp>
 
 #include <Ifpack_config.h>
@@ -96,10 +95,6 @@ public:
     void                   setDataFromGetPot ( const GetPot&      dataFile,
 					       const std::string& section );
 
-//     void                   createList( const GetPot&              dataFile,
-// 				       const std::string&         section,
-// 				       Teuchos::ParameterList&    list);
-
     double                 Condest ();
 
     super::prec_raw_type*  getPrec();
@@ -152,4 +147,5 @@ private:
 inline EpetraPreconditioner* createIfpackComposed(){ return new IfpackComposedPrec(); }
 
 } // namespace LifeV
+
 #endif

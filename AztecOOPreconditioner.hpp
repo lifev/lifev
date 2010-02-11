@@ -141,7 +141,6 @@ public:
 private:
 
     Solver_Type*           M_solver;
-    bool                   M_preconditionerCreated;
 };
 
 inline EpetraPreconditioner* createAztecOOPreconditioner()
