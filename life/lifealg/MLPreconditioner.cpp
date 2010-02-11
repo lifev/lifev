@@ -28,11 +28,8 @@
  */
 
 #include "MLPreconditioner.hpp"
-//#ifdef HAVE_TRILINOS_ML
 
-
-namespace LifeV
-{
+namespace LifeV {
 
 MLPreconditioner::MLPreconditioner():
         super(),
@@ -43,16 +40,6 @@ MLPreconditioner::MLPreconditioner():
 
 MLPreconditioner::~MLPreconditioner()
 {}
-
-// MLPreconditioner::MLPreconditioner(operator_type& oper):
-//   M_Prec(),
-//   M_Oper()
-// {
-//     buildPreconditioner(oper);
-// }
-
-
-
 
 void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
@@ -67,10 +54,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
 
     Teuchos::ParameterList& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
     createIfpackList(dataFile, section, SmootherIFSubList);
-
-
 }
-
 
 int
 MLPreconditioner::buildPreconditioner(operator_type& oper)
@@ -81,27 +65,27 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
     M_Prec.reset(new prec_raw_type(*M_Oper, this->getList(), true));
 
     if (M_analyze)
-        {
-            ML_Epetra::MultiLevelPreconditioner* prec;
-            prec = dynamic_cast<ML_Epetra::MultiLevelPreconditioner*> (M_Prec.get());
-            int NumPreCycles = 5;
-            int NumPostCycles = 1;
-            int NumMLCycles = 10;
-            prec->AnalyzeHierarchy(true, NumPreCycles, NumPostCycles, NumMLCycles);
+    {
+        ML_Epetra::MultiLevelPreconditioner* prec;
+        prec = dynamic_cast<ML_Epetra::MultiLevelPreconditioner*> (M_Prec.get());
+        int NumPreCycles = 5;
+        int NumPostCycles = 1;
+        int NumMLCycles = 10;
+        prec->AnalyzeHierarchy(true, NumPreCycles, NumPostCycles, NumMLCycles);
 
-            //prec->TestSmoothers();
-        }
+        //prec->TestSmoothers();
+    }
 
-
-    //    ML_CHK_ERR(M_Prec->SetParameters(M_List));
-
+//     ML_CHK_ERR(M_Prec->SetParameters(M_List));
 //     M_Prec->Initialize();
 //     M_Prec->Compute();
 
-    return EXIT_SUCCESS;
+    this->M_preconditionerCreated = true;
+
+    return ( EXIT_SUCCESS );
 }
 
-double
+Real
 MLPreconditioner::Condest()
 {
     return 0.;
@@ -118,22 +102,15 @@ MLPreconditioner::precReset()
 {
     M_Oper.reset();
     M_Prec.reset();
+
+    this->M_preconditionerCreated = false;
 }
-
-
-
-
-
 
 void
 createMLList( const GetPot&              dataFile,
               const std::string&         section,
               Teuchos::ParameterList&    list)
 {
-
-
-
-
     list.setName("ML paramters list");
 
     std::string defList      = dataFile((section + "/ML/default_parameter_list").data(), "SA");
@@ -298,7 +275,6 @@ createMLList( const GetPot&              dataFile,
 
 
     // Load-balancing Options
-
     int RepartitionEnable              = dataFile((section + "/ML/repartition/enable").data(), 0, found);
     if (found) list.set("repartition: enable",             RepartitionEnable);
 
@@ -323,13 +299,11 @@ createMLList( const GetPot&              dataFile,
 
 
     if (MLPrintParameterList)
-        {
-            std::cout << "  Parameters List: " << std::endl;
-            list.print(std::cout);
-            std::cout << std::endl;
-        }
+    {
+        std::cout << "  Parameters List: " << std::endl;
+        list.print(std::cout);
+        std::cout << std::endl;
+    }
 }
 
-
 } // namespace LifeV
-//#endif //#ifdef HAVE_TRILINOS_ML

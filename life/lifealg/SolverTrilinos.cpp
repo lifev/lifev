@@ -303,7 +303,7 @@ SolverTrilinos::printStatus()
 bool
 SolverTrilinos::isPrecSet() const
 {
-    return ( M_prec.get() !=0 && M_prec->getPrec() != 0 );
+    return ( M_prec.get() !=0 && M_prec->preconditionerCreated() );
 }
 
 void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)

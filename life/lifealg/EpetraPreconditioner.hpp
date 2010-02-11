@@ -79,12 +79,7 @@ public:
 
     EpetraPreconditioner(EpetraPreconditioner& P, const Epetra_Comm* comm=0);
 
-    //! constructor from matrix A.
-    //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-//     EpetraPreconditioner(operator_type& A);
-
     //! default virtual destructor
-
     virtual ~EpetraPreconditioner();
 
     //@}
@@ -116,35 +111,28 @@ public:
     virtual void            setSolver( SolverTrilinos& /*solver*/ ) {}
 
     // Teuchos list management
-
     void                    setList(Teuchos::ParameterList list);
     const Teuchos::ParameterList& getList() const;
     const int& getOverlapLevel() const;
 
+    //! Return if the preconditioner has been created
+    /*!
+     *  @return true if the preconditioner has been created.
+     */
+    bool preconditionerCreated();
+
 protected:
 
-    Displayer               M_displayer;
-
-    int                     M_overlapLevel;
-
+    Displayer                           M_displayer;
+    int                                 M_overlapLevel;
     operator_raw_type::matrix_ptrtype   M_Oper;
-
-    Teuchos::ParameterList  M_List;
-
-
-private:
-
-
+    Teuchos::ParameterList              M_List;
+    bool                                M_preconditionerCreated;
 
 };
 
-
-
-// } // namespace Epetra
-
-//typedef boost::shared_ptr<EpetraPreconditioner>                 prec_ptr;
 typedef singleton<factory<EpetraPreconditioner,  std::string> > PRECFactory;
 
-
 } // namespace LifeV
+
 #endif

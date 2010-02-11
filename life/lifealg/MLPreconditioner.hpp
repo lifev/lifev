@@ -31,8 +31,6 @@
 #ifndef _MLPRECONDITIONER_HPP_
 #define _MLPRECONDITIONER_HPP_
 
-//#ifdef HAVE_TRILINOS_ML
-
 #include <boost/shared_ptr.hpp>
 
 // #include <Ifpack_config.h>
@@ -44,15 +42,12 @@
 
 #include <ml_MultiLevelPreconditioner.h>
 
-
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 
-
-namespace LifeV
-{
+namespace LifeV{
 
 class MLPreconditioner:
         public EpetraPreconditioner
@@ -141,5 +136,4 @@ namespace
 
 } // namespace LifeV
 
-//#endif // HAVE_TRILINOS_ML
 #endif

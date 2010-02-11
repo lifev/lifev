@@ -29,11 +29,7 @@
 
 #include "IfpackPreconditioner.hpp"
 
-
-
-namespace LifeV
-{
-
+namespace LifeV {
 
 IfpackPreconditioner::IfpackPreconditioner():
         super (),
@@ -44,13 +40,10 @@ IfpackPreconditioner::IfpackPreconditioner():
 IfpackPreconditioner::~IfpackPreconditioner()
 {}
 
-
-
 void
 IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
                                          const std::string& section )
 {
-
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
@@ -58,7 +51,6 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
 
     M_overlapLevel = this->M_List.get("overlap level", -1);
     M_precType     = this->M_List.get("prectype", "Amesos");
-
 }
 
 int
@@ -75,22 +67,24 @@ IfpackPreconditioner::buildPreconditioner(operator_type& oper)
 
     //    M_Prec.reset(new prec_type(&A.getEpetraMatrix(), OverlapLevel));
     if ( !M_Prec.get() )
-        { //! if not filled, I do not know how to diagonalize.
-            ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-        }
+    { //! if not filled, I do not know how to diagonalize.
+        ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+    }
+
     IFPACK_CHK_ERR(M_Prec->SetParameters(this->M_List));
     IFPACK_CHK_ERR(M_Prec->Initialize());
     IFPACK_CHK_ERR(M_Prec->Compute());
-    return EXIT_SUCCESS;
+
+    this->M_preconditionerCreated = true;
+
+    return ( EXIT_SUCCESS );
 }
 
-
-double
+Real
 IfpackPreconditioner::Condest()
 {
     return M_Prec->Condest();
 }
-
 
 EpetraPreconditioner::prec_raw_type*
 IfpackPreconditioner::getPrec()
@@ -103,9 +97,9 @@ IfpackPreconditioner::precReset()
 {
     M_Oper.reset();
     M_Prec.reset();
+
+    this->M_preconditionerCreated = false;
 }
-
-
 
 void
 createIfpackList( const GetPot&              dataFile,
@@ -122,8 +116,6 @@ createIfpackList( const GetPot&              dataFile,
     list.set("overlap level", overlapLevel);
 
     bool displayList = dataFile((section + "/displayList").data(),     false);
-    //    std::cout << section + "/displayList " << displayList <<std::endl;
-
 
     std::string relaxationType              = dataFile((section + "/ifpack/relaxation/type").data(), "Jacobi");
     int         relaxationSweeps            = dataFile((section + "/ifpack/relaxation/sweeps").data(), 1);
@@ -137,7 +129,6 @@ createIfpackList( const GetPot&              dataFile,
     list.set("relaxation: min diagonal value",      relaxationMinDiagValue);
     list.set("relaxation: zero starting solution",  relaxationZeroStartSolution);
 
-
     std::string partitionerType             = dataFile((section + "/ifpack/partitioner/type").data(), "metis");
     int         partitionerOverlap          = dataFile((section + "/ifpack/partitioner/overlap").data(), 0);
     int         partitionerLocalParts       = dataFile((section + "/ifpack/partitioner/local_parts").data(), 1);
@@ -150,7 +141,6 @@ createIfpackList( const GetPot&              dataFile,
     list.set("partitioner: root node",           partitionerRootNode);
     list.set("partitioner: use symmetric graph", partitionerUseSymmGraph);
 
-
     std::string amesosSolverType            = dataFile((section + "/ifpack/amesos/solvertype").data(), "Amesos_KLU");
 
     list.set("amesos: solver type", amesosSolverType);
@@ -161,7 +151,6 @@ createIfpackList( const GetPot&              dataFile,
     double rthr            = dataFile((section + "/ifpack/fact/relative_threshold").data(), 1.);
     double relaxValue      = dataFile((section + "/ifpack/fact/relax_value").data(),        0.);
     double dropTolerance   = dataFile((section + "/ifpack/fact/drop_tolerance").data(),     1e-5);
-
 
     list.set("fact: drop tolerance",     dropTolerance);
     list.set("fact: level-of-fill",      levelOfFill);
@@ -194,7 +183,6 @@ createIfpackList( const GetPot&              dataFile,
              schwarzCombineMode = Zero;
          }
 
-
     bool schwarzComputeCondest          = dataFile((section + "/ifpack/schwarz/compute_condest").data(),   true);
     std::string schwarzReorderingType   = dataFile((section + "/ifpack/schwarz/reordering_type").data(),      "none");
     bool schwarzFilterSingletons        = dataFile((section + "/ifpack/schwarz/filter_singletons").data(), true);
@@ -206,28 +194,5 @@ createIfpackList( const GetPot&              dataFile,
 
     if (displayList) list.print(std::cout);
 }
-
-
-
-
-
-
-
-
-
-// void
-// IfpackPreconditioner::createList( const GetPot& /*dataFile*/ )
-// {
-// }
-
-
-// namespace
-// {
-// EpetraPreconditioner* createIfpack(){ std::cout << "*******************"<< std::endl;return new IfpackPreconditioner(); }
-// static bool reg = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack )
-//                    && (std::cout << "*************** SIMONE" << std::endl) ) ;
-// }
-
-//} // namespace Epetra
 
 } // namespace LifeV

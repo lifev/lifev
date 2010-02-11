@@ -29,17 +29,14 @@
 
 #include "EpetraPreconditioner.hpp"
 
-
-namespace LifeV
-{
-// namespace Epetra
-// {
+namespace LifeV {
 
 EpetraPreconditioner::EpetraPreconditioner(const Epetra_Comm* comm):
   M_displayer(comm),
   M_overlapLevel(0),
   M_Oper(),
-  M_List()
+  M_List(),
+  M_preconditionerCreated( false )
 {
 }
 
@@ -47,10 +44,10 @@ EpetraPreconditioner::EpetraPreconditioner(  EpetraPreconditioner& P, const Epet
     M_displayer(comm),
     M_overlapLevel(P.getOverlapLevel()),
     M_Oper(P.M_Oper),
-    M_List(P.getList())
+    M_List(P.getList()),
+    M_preconditionerCreated( P.M_preconditionerCreated )
 {
 }
-
 
 EpetraPreconditioner::~EpetraPreconditioner()
 {
@@ -74,5 +71,10 @@ EpetraPreconditioner::getOverlapLevel() const
     return M_overlapLevel;
 }
 
-// } // namespace Epetra
+bool
+EpetraPreconditioner::preconditionerCreated()
+{
+    return M_preconditionerCreated;
+}
+
 } // namespace LifeV
