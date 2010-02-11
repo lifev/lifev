@@ -205,11 +205,11 @@ MS_Model_Fluid3D::SetupModel()
     if ( M_output->mapType() == Unique )
         M_FluidSolution->setCombineMode( Zero );
 
-    M_output->addVariable( ExporterData::Vector, "velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
+    M_output->addVariable( ExporterData::Vector, "Velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
 #ifdef HAVE_HDF5
-    M_output->addVariable( ExporterData::Scalar, "pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
+    M_output->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
 #else
-    M_output->addVariable( ExporterData::Scalar, "pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
+    M_output->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
 #endif
 
     //MPI Barrier
