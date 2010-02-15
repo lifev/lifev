@@ -1251,6 +1251,10 @@ void bcNaturalManage( VectorType& b,
                                                     bRepeated[ idDof ] += bdfem.phi( int( idofF - 1 ), iq ) * BCb( t, x, y, z, BCb.component( j ) ) *
                                                         bdfem.weightMeas( iq ); // BASEINDEX + 1
                                                     break;
+						case Component:
+                                                    bRepeated[ idDof ] += bdfem.phi( int( idofF - 1 ), iq ) * BCb( t, x, y, z, BCb.component( j ) ) *
+                                                        bdfem.weightMeas( iq ); // BASEINDEX + 1
+                                                    break;
                                                 case Normal:
                                                     //                                                    std::cout << bdfem.normal(int(j), iq) << " ";
                                                     bRepeated[ idDof ] += BCb( t, x, y, z, BCb.component( j ) )*
