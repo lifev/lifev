@@ -38,7 +38,11 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
+
+#ifdef HAVE_HDF5
 #include <life/lifefilters/hdf5exporter.hpp>
+#endif
+
 
 #include <Epetra_ConfigDefs.h>
 
@@ -147,7 +151,12 @@ public:
     typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
 
     //typedef Ensight<FSIOperator::mesh_type>                 filter_type;
+#ifdef HAVE_HDF5
     typedef Hdf5exporter<FSIOperator::mesh_type>                 filter_type;
+#else
+    typedef Ensight<FSIOperator::mesh_type>                 filter_type;
+#endif
+
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
     /*!
