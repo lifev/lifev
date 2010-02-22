@@ -286,7 +286,7 @@ void bcManageMatrix( MatrixType&      A,
                     bcMixteManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
                     break;
                 case Flux:  // Mixte boundary conditions (Robin)
-                    bcFluxManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    bcFluxManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t, BCh.offset()+BCh[i].offset());
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
