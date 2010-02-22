@@ -207,6 +207,18 @@ namespace LifeV
 
         //@}
 
+        //! Get the maximum H over all the edges of the mesh; @author Cristiano Malossi: 22/02/2010
+        /*!
+         * \return maximum H
+         */
+        Real maxH() const;
+
+        //! Get the mean H over all the edges of the mesh; @author Cristiano Malossi: 22/02/2010
+        /*!
+         * \return maximum H
+         */
+        Real meanH() const;
+
         UInt numLocalVertices() const; //!< Number of local faces for each 3Delement
         UInt numLocalFaces() const; //!< Number of local faces for each 3Delement
         UInt numLocalEdges() const;  //!< Number of local edges for each 3DElement
@@ -863,6 +875,50 @@ namespace LifeV
 			pointList[ i ].coordinate( 3 ) = P( 2 );
 		}
 	}
+
+    template <typename GEOSHAPE, typename MC>
+    Real RegionMesh3D<GEOSHAPE, MC>::maxH() const
+    {
+        Real MaxH(0);
+        Real deltaX(0), deltaY(0), deltaZ(0);
+
+        for ( UInt i(0); i < static_cast<UInt> ( edgeList.size() ); ++i )
+        {
+            deltaX = ( edgeList[ i ].point( 2 ) ).x() - ( edgeList[ i ].point( 1 ) ).x();
+            deltaY = ( edgeList[ i ].point( 2 ) ).y() - ( edgeList[ i ].point( 1 ) ).y();
+            deltaZ = ( edgeList[ i ].point( 2 ) ).z() - ( edgeList[ i ].point( 1 ) ).z();
+
+            deltaX *= deltaX;
+            deltaY *= deltaY;
+            deltaZ *= deltaZ;
+
+            MaxH = std::max( MaxH, deltaX+deltaY+deltaZ );
+        }
+
+        return std::sqrt( MaxH );
+    }
+
+    template <typename GEOSHAPE, typename MC>
+    Real RegionMesh3D<GEOSHAPE, MC>::meanH() const
+    {
+        Real MeanH = 0;
+        Real deltaX(0), deltaY(0), deltaZ(0);
+
+        for ( UInt i(0); i < static_cast<UInt> ( edgeList.size() ); ++i )
+        {
+            deltaX = ( edgeList[ i ].point( 2 ) ).x() - ( edgeList[ i ].point( 1 ) ).x();
+            deltaY = ( edgeList[ i ].point( 2 ) ).y() - ( edgeList[ i ].point( 1 ) ).y();
+            deltaZ = ( edgeList[ i ].point( 2 ) ).z() - ( edgeList[ i ].point( 1 ) ).z();
+
+            deltaX *= deltaX;
+            deltaY *= deltaY;
+            deltaZ *= deltaZ;
+
+            MeanH += deltaX+deltaY+deltaZ;
+        }
+
+        return std::sqrt( MeanH / static_cast<Real> ( edgeList.size() ) );
+    }
 
     template <typename GEOSHAPE, typename MC>
     UInt
