@@ -346,7 +346,10 @@ MS_Model_Fluid3D::ShowMe()
                   << "pOrder              = " << M_FluidData->pOrder() << std::endl << std::endl;
 
         std::cout << "uDOF                = " << 3 * M_uDOF << std::endl
-                  << "pDOF                = " << M_pDOF << std::endl << std::endl << std::endl << std::endl;
+                  << "pDOF                = " << M_pDOF << std::endl << std::endl;
+
+        std::cout << "maxH                = " << M_FluidData->mesh()->maxH() << std::endl
+                  << "meanH               = " << M_FluidData->mesh()->meanH() << std::endl << std::endl << std::endl << std::endl;
     }
 
     //MPI Barrier
