@@ -372,6 +372,9 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //! values of U on the neighboring node of the boundary point
     U_internalBd = Vec2D ( _M_Un_alpha_int );
 
+    std::cout << "b. eigvec1 = " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
+    std::cout << "b. eigvec2 = " << left_eigvec2[0] << " " << left_eigvec2[1] << std::endl;
+
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
     _M_fluxFun_alpha.jacobian_EigenValues_Vectors(U_boundary[0],
                                                   U_boundary[1],
@@ -380,6 +383,8 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
                                                   left_eigvec2[0], left_eigvec2[1],
                                                   rightDof - 1);
 
+    std::cout << "a. eigvec1 = " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
+    std::cout << "a. eigvec2 = " << left_eigvec2[0] << " " << left_eigvec2[1] << std::endl;
     //if ( verbose > 3 )
     //std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
@@ -438,6 +443,7 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //     std::cout << "rhsBC1    = " << rhsBC1 << std::endl;
 
     f(2) = left_eigvec1[0] * A_alpha + left_eigvec1[1] * Q_alpha - rhsBC1;
+    std::cout << "f(2) = " << left_eigvec1[0] << " " <<  A_alpha << " " << left_eigvec1[1] << " " <<  Q_alpha << " " <<  rhsBC1 << std::endl;
 
     //! Jacobian
     jac( 2, 0 ) =  left_eigvec1[0]; //!< df2/dA_alpha

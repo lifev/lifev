@@ -24,7 +24,7 @@ timestep = 1e-5		# timestep
 [../initialize]
 var = Q
 value = 0
-firstnode = 51
+firstnode = 1
 lastnode = 101
 multiplier = 1
 
