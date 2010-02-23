@@ -186,7 +186,7 @@ public:
 	If from = to, do nothing
 	This methods works only if matrix is not closed.
     */
-    void insertZeroDiagonal(UInt from = -1, UInt to = -2);
+    void insertZeroDiagonal(int from = -1, int to = -2);
 
 private:
     //! insert the given value into the diagonal
@@ -198,7 +198,7 @@ private:
 	If from = to, do nothing
 	This methods works only if matrix is not closed.
     */
-    void insertValueDiagonal(const DataType& value, UInt from = -1, UInt to = -2);
+    void insertValueDiagonal(const DataType& value, int from = -1, int to = -2);
 
     //! Shared pointer on an EpetraMap
     boost::shared_ptr< EpetraMap > M_epetraMap;
@@ -393,7 +393,7 @@ int EpetraMatrix<DataType>::GlobalAssemble()
 //! so for later added values with set_mat_inc, the value
 //! will be added
 template <typename DataType>
-void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, UInt from, UInt to)
+void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, int from, int to)
 {
     if ( M_epetraCrs->Filled ())
     {
@@ -406,8 +406,8 @@ void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, UInt fro
 
     if (to < from) // do all entries
     {
-	from = M_epetraCrs->RowMap().MinMyGID ();
-	to = M_epetraCrs->RowMap().MaxMyGID () + 1;
+        from = M_epetraCrs->RowMap().MinMyGID ();
+        to = M_epetraCrs->RowMap().MaxMyGID () + 1;
     }
 
     int* p =  M_epetraCrs->RowMap().MyGlobalElements();
@@ -415,7 +415,7 @@ void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, UInt fro
 
     for (int i(0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p)
     {
-	if (*p < from || *p >= to) continue;
+        if (*p < from || *p >= to) continue;
 
         ierr = M_epetraCrs->InsertGlobalValues (1, p, 1, p, &value);
 
@@ -436,7 +436,7 @@ void EpetraMatrix<DataType>::insertOneDiagonal()
 // Adds zeros into the diagonal to ensure the matrix' graph has a entry there
 // This method does not remove non zero entries in the diagonal.
 template <typename DataType>
-void EpetraMatrix<DataType>::insertZeroDiagonal( UInt from, UInt to)
+void EpetraMatrix<DataType>::insertZeroDiagonal( int from, int to)
 {
     insertValueDiagonal(0.0, from, to);
 }
