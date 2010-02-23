@@ -83,10 +83,12 @@ int main(int argc, char** argv)
     const QuadRule* qR    = &quadRuleSeg3pt;
     const QuadRule* bdQr  = &quadRuleSeg1pt;
 
+    const std::string section = "onedmodel";
+
     std::cout << "======\n\tNon Linear model tube 1" << std::endl;
 
-    DataOneDModel data_t1(data_file_t1);
-    Params1D params_t1(data_file_t1);
+    DataOneDModel data_t1(data_file_t1, section);
+    Params1D params_t1(data_file_t1, section);
     params_t1.showMe(std::cout);
 
     std::cout << "    Building FE Space ... " << std::flush;
@@ -94,7 +96,7 @@ int main(int argc, char** argv)
     std::cout << "ok." << std::endl;
 
     onedsolver_type onedm_t1(data_t1, params_t1, odFESpace_t1, *comm );
-    onedm_t1.setup(data_file_t1);
+    onedm_t1.setup(data_file_t1, section);
 
     //OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
     OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
@@ -121,7 +123,7 @@ int main(int argc, char** argv)
 //                                          "W2"  /*var*/) );
 
 
-    //   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+
     onedm_t1.bcH().setBC( pressure,         "left",  "first", "W1"  );
     //    onedm_t1.bcH().setBC( resistence,      "right",  "first", "W2" );
 
@@ -130,8 +132,8 @@ int main(int argc, char** argv)
 
     std::cout << "======\n\tNon Linear model tube 2" << std::endl;
 
-    DataOneDModel data_t2(data_file_t2);
-    Params1D params_t2(data_file_t2);
+    DataOneDModel data_t2(data_file_t2, section);
+    Params1D params_t2(data_file_t2   , section);
     params_t2.showMe(std::cout);
 
     std::cout << "    Building FE Space ... " << std::flush;
@@ -139,7 +141,10 @@ int main(int argc, char** argv)
     std::cout << "ok." << std::endl;
 
     onedsolver_type onedm_t2(data_t2, params_t2, odFESpace_t2, *comm );
-    onedm_t2.setup(data_file_t2);
+    onedm_t2.setup(data_file_t2, section);
+
+    OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
+    onedm_t2.bcH().setBC( sinusoidal_flux, "right",  "first", "Q"  );
 
     std::cout << "-----------------------------" << std::endl;
 
@@ -177,7 +182,7 @@ int main(int argc, char** argv)
 
     std::cout << "initialize tube 1 with constant (u1_0, u2_0)" << std::endl;
     onedm_t1.initialize(u1_0, u2_0);
-
+    onedm_t1.setBCRight_internalnode();
     //! tube 2
     u1_0 = params_t2.Area0(0); //! constant initial condition
     u2_0 = 0.; //! constant initial condition
@@ -185,7 +190,9 @@ int main(int argc, char** argv)
     std::cout << "initialize tube 2 with constant (u1_0, u2_0)" << std::endl;
 
     onedm_t2.initialize(u1_0, u2_0);
-    //
+    onedm_t2.setBCLeft_internalnode();
+
+//
 
     std::cout << "startT, T,  dt = " << startT_t1 << ", " <<  T_t1 << ", " << dt_t1 << std::endl;
 
@@ -208,15 +215,23 @@ int main(int argc, char** argv)
 
         int cvg_newton  = interf_t1_t2.computeInterface2TubesValues();
 
+	if (cvg_newton < 0)
+	  {
+	    std::cout << "Convergence failed !" << std::endl;
+	    exit(-1);
+	  }
+
         Vector bcDir_t1 = interf_t1_t2.BcDir_alpha();
         Vector bcDir_t2 = interf_t1_t2.BcDir_beta();
 
-        std::cout << "OK" << std::endl;
-        std::cout << "bcDir_t1 " << bcDir_t1   << "\nbcDir_t2 " << bcDir_t2  << std::endl;
+        std::cout << "A_t1 " << bcDir_t1[0]   << " A_t2 " << bcDir_t2[0]  << std::endl;
+        std::cout << "P_t1 " << bcDir_t1[1]   << " P_t2 " << bcDir_t2[1]  << std::endl;
 
         //! set the interface values
-        onedm_t1.setBCValuesRight  ( bcDir_t1[0], bcDir_t1[1] );
-        onedm_t2.setBCValuesLeft   ( bcDir_t2[0], bcDir_t2[1] );
+         onedm_t1.setBCValuesRight  ( bcDir_t1[0], bcDir_t1[1] );
+         onedm_t2.setBCValuesLeft   ( bcDir_t2[0], bcDir_t2[1] );
+//         onedm_t1.setBCValuesRight  ( 0, 0);
+//         onedm_t2.setBCValuesLeft   ( 0, 0);
 
         ASSERT_PRE( !cvg_newton,"Newton iteration for interface values computation not achieved.");
 
@@ -231,11 +246,11 @@ int main(int argc, char** argv)
         chrono.stop();
         std::cout << "Iteration " <<  count  << " computed in " << chrono.diff() << " s.\n" << std::endl;
 
-        if ( data_file_t1( "miscellaneous/show_graceplot", 0 ) )
-        {
+//         if ( data_file_t1( "miscellaneous/show_graceplot", 0 ) )
+//         {
             onedm_t1.postProcess( time );
             onedm_t2.postProcess( time );
-        }
+//         }
 
     }
 

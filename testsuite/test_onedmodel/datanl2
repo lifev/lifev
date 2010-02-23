@@ -4,7 +4,6 @@
 #-------------------------------------------------
 
 [onedmodel]
-
 [./parameters]
 use_physical_values = 0
 Area0 = 1
@@ -18,36 +17,33 @@ R = 2.e4            # terminal resistence
 
 [../time]
 timebeg	 = 0.0		# inittime
-timeend	 = 1.0		# endtime
+timeend	 = 0.7		# endtime
 timestep = 1e-5		# timestep
 
 [../initialize]
 var = Q
-value = 0
-firstnode = 1
-lastnode = 101
-multiplier = 1
+value = 20
+firstnode = 2
+lastnode = 11
+multiplier = 0
 
 [../discretization]
 x_left	= 0.
 x_right	= 10.
-nb_elem	= 100	#   number of elements
+nb_elem	= 10	#   number of elements
 
 [../miscellaneous]
 post_dir = ./                    # the directory for postprocessing files
-post_file = sol                  # the file name
+post_file = sol2                  # the file name
 verbose = 1
 show_graceplot = 0                # 0: no grace plot, 1: show grace plots
-postprocess_timestep = 100
-showCFL = 1
-
+postprocess_timestep = 0.01
+showCFL = 0
 
 [../solver]
-                [./amesos]
-                solvertype      = Klu
-                redistribute    = true
-                print_status    = false
-                print_timing    = false
-
-
+[./amesos]
+solvertype      = Klu
+redistribute    = true
+print_status    = false
+print_timing    = false
 

@@ -133,9 +133,9 @@ Interface2Vessels( OneDModelSolver<Params, Flux, Source> const& tube_alpha,
     _M_bcDir_beta     ( 2 ),
     _M_time_step      ( tube_alpha.timestep() )
 {
-  std::cout << "edge alpha " << std::flush;
-  std::cout << tube_alpha.RightEdge().id() << " " << std::flush;
-  std::cout << _M_edge_alpha.point(1).id() << std::endl;
+  //  std::cout << "A0 = " << _M_sourceFun_alpha.
+
+
 }
 
 
@@ -209,14 +209,17 @@ Interface2Vessels::computeInterface2TubesValues()
 
     //! newton raphson iteration
     //! (use the newton class???)
-    for ( UInt iter = 0 ; iter < 10 ; iter ++)
+    UInt iter;
+    bool converge = false;
+
+    for ( iter = 0 ; iter < 10 ; iter ++)
     {
         std::cout << "======= Newton iter = " << iter << std::endl;
 
         //! compute f(x) and its jacobian df(x)
-        f_jac( x, f, jac);
+        f_jac(x, f, jac);
 
-        std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
+	std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
 
         //! transpose to pass to fortran storage (lapack!)
         jac_trans = trans(jac);
@@ -226,7 +229,16 @@ Interface2Vessels::computeInterface2TubesValues()
         ASSERT_PRE(!INFO[0],"Lapack LU resolution of y = df(x)^{-1} f(x) is not achieved.");
         x += - f;
 
-        // std::cout << "---After lapack inversion:\nx : " << x << "\ndf(x)^{-1}f(x) : " << f << std::endl;
+        std::cout << "---After lapack inversion:\nx : " << x << "\ndf(x)^{-1}f(x) : " << f << std::endl;
+
+	double norm = std::fabs(std::fabs(x[0] - x[2]) - std::fabs(x[1] - x[3]));
+	
+	if (norm < 1e-10) 
+	  {
+	    converge = true;
+	    break;
+	  }
+			
 
     /* //Write a correct test here!
         //! convergence if Q_alpha == Q_beta
@@ -242,17 +254,18 @@ Interface2Vessels::computeInterface2TubesValues()
     */
     }
     //! dummy convergence test ( if Q_alpha == Q_beta )
-    if ( std::fabs( x[1] - x[3] ) < 1e-12 ) {
+    if ( std::fabs( x[1] - x[3] ) < 1e-12 ) 
+      {
         _M_bcDir_alpha( 0 ) = x[0];
         _M_bcDir_alpha( 1 ) = x[1];
         _M_bcDir_beta ( 0 ) = x[2];
         _M_bcDir_beta ( 1 ) = x[3];
-
-      // std::cout << "\n\tNewton finished\n========" << std::endl;
-      return 0;
-    }
+	
+	// std::cout << "\n\tNewton finished\n========" << std::endl;
+	return iter;
+      }
     //! no convergence
-    return 1;
+    return -1;
 }
 
 /*!
@@ -349,7 +362,7 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
 
     //! Jacobian
     //!df1/dA_alpha:
-    //std::cout << "leftDof " << leftDof << " rightDof " << rightDof << std::endl;
+
     jac( 1, 0 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 1, rightDof - 1 );
     //!df1/dQ_alpha:
     jac( 1, 1 ) = - _M_fluxFun_alpha.oneDParam().totalPressureDiff(A_alpha, Q_alpha, 2, rightDof - 1 );
@@ -372,8 +385,8 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //! values of U on the neighboring node of the boundary point
     U_internalBd = Vec2D ( _M_Un_alpha_int );
 
-    std::cout << "b. eigvec1 = " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
-    std::cout << "b. eigvec2 = " << left_eigvec2[0] << " " << left_eigvec2[1] << std::endl;
+//@     std::cout << "b. eigvec1 = " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
+//@     std::cout << "b. eigvec2 = " << left_eigvec2[0] << " " << left_eigvec2[1] << std::endl;
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
     _M_fluxFun_alpha.jacobian_EigenValues_Vectors(U_boundary[0],
@@ -383,8 +396,8 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
                                                   left_eigvec2[0], left_eigvec2[1],
                                                   rightDof - 1);
 
-    std::cout << "a. eigvec1 = " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
-    std::cout << "a. eigvec2 = " << left_eigvec2[0] << " " << left_eigvec2[1] << std::endl;
+//@     std::cout << "a. eigvec1 = " << left_eigvec1[0] << " " << left_eigvec1[1] << std::endl;
+//@     std::cout << "a. eigvec2 = " << left_eigvec2[0] << " " << left_eigvec2[1] << std::endl;
     //if ( verbose > 3 )
     //std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
@@ -423,6 +436,9 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
     //! THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
 
+    //@
+
+   
     qlSource[0] = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
                                                            1, rightDof - 1);
     qlSource[1] = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
@@ -431,19 +447,27 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
 
 
-    //@std::cout << "qlSource " << qlSource[0] << " " << qlSource[1] << std::endl;
-    rhsBC1 -= _M_time_step * dot( left_eigvec1 , qlSource );
+    //std::cout << "qlSource " << qlSource[0] << " " << qlSource[1] << std::endl;
 
+    rhsBC1 -= _M_time_step*dot( left_eigvec1 , qlSource );
+    
     //! return f(2): left_eigvec1 dot (A_alpha_n+1, Q_alpha_n+1)
     //@
     //     std::cout << "left_eig0 = " << left_eigvec1[0] << std::endl;
     //     std::cout << "left_eig1 = " << left_eigvec1[1] << std::endl;
     //     std::cout << "A_alpha   = " << A_alpha << std::endl;
     //     std::cout << "Q_alpha   = " << Q_alpha << std::endl;
-    //     std::cout << "rhsBC1    = " << rhsBC1 << std::endl;
+//     std::cout << "rhsBC1    = " << rhsBC1 << " " << _M_time_step << " " 
+// 	      << qlSource[0] << " "
+// 	      << qlSource[1] << " " << std::endl;
 
     f(2) = left_eigvec1[0] * A_alpha + left_eigvec1[1] * Q_alpha - rhsBC1;
-    std::cout << "f(2) = " << left_eigvec1[0] << " " <<  A_alpha << " " << left_eigvec1[1] << " " <<  Q_alpha << " " <<  rhsBC1 << std::endl;
+//     std::cout << "f(2) = " 
+// 	      << left_eigvec1[0] << " " 
+// 	      <<  A_alpha << " " 
+// 	      << left_eigvec1[1] << " " 
+// 	      <<  Q_alpha << " " 
+// 	      <<  rhsBC1 << std::endl;
 
     //! Jacobian
     jac( 2, 0 ) =  left_eigvec1[0]; //!< df2/dA_alpha
