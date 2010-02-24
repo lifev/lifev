@@ -37,9 +37,12 @@ dist_pkgdata_DATA = SinusoidalFlux.dat \
                     CarotidBifurcationFlux_Dynamic.dat \
                     FluxStress_StaticPressure.dat \
                     FluxStress_TotalPressure.dat \
+                    FluxStress_LagrangeMultiplier.dat \
                     Stress_StaticPressure.dat \
                     Stress_TotalPressure.dat \
-                    NoStress.dat
+                    Stress_LagrangeMultiplier.dat \
+                    NoStress.dat \
+                    XY_ZeroTangentialVelocity.dat
 					
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

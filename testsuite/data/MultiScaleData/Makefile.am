@@ -25,15 +25,21 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 SUBDIRS		= 	Couplings\
 				Models
 
-dist_pkgdata_DATA = MultiScale.dat \
-					MultiScale_test.dat \
+dist_pkgdata_DATA = MultiScale_test.dat \
+					MultiScale.dat \
+					Run3DCarotidBifurcation_FluxStress.dat \
+					Run3DCarotidBifurcation_Stress.dat \
+					Run3Dhexagon_FluxStress_Stationary.dat \
+					Run3Dhexagon_Stress_Stationary.dat
+					Run3Dserial1_Stationary.dat \
 					Run3Dserial1.dat \
+					Run3Dserial2_FluxStress_Stationary.dat \
 					Run3Dserial5_FluxStress.dat \
 					Run3Dserial5_Stress.dat \
 					Run3Dserial6_FluxStress.dat \
 					Run3Dserial6_Stress.dat \
-					Run3Dhexagon_FluxStress_Stationary.dat \
-					Run3Dhexagon_Stress_Stationary.dat
+					Run3DSyntheticCarotidBifurcation_FluxStress.dat \
+					Run3DSyntheticCarotidBifurcation_Stress.dat
 					
 
 check-local:

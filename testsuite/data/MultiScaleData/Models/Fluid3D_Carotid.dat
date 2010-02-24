@@ -90,8 +90,8 @@ diagonalBlockPrec   = false
     tol             = 1.e-12
     
     [../prec]
-    #prectype                = AztecOO 
-    prectype                = Ifpack 
+    prectype                = AztecOO 
+    #prectype                = Ifpack 
     displayList             = false
         
         [./AztecOO]

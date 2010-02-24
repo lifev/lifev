@@ -37,10 +37,10 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
 			0		BoundaryCondition	WomersleySinusoidalFlux			0				0
-			1		FluxStress			FluxStress_StaticPressure		1,0				0,1
-			2		FluxStress			FluxStress_StaticPressure		2,1				0,1
-			3		FluxStress			FluxStress_StaticPressure		3,2				0,1
-			4		FluxStress			FluxStress_StaticPressure		4,3				0,1
+			1		FluxStress			FluxStress_LagrangeMultiplier	1,0				0,1
+			2		FluxStress			FluxStress_LagrangeMultiplier	2,1				0,1
+			3		FluxStress			FluxStress_LagrangeMultiplier	3,2				0,1
+			4		FluxStress			FluxStress_LagrangeMultiplier	4,3				0,1
 			5		BoundaryCondition	NoStress						4				1
 		 	'
 ###################################################################################################

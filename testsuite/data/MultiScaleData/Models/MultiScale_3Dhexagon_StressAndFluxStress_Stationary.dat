@@ -39,10 +39,10 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
 			0		BoundaryCondition	UnitaryFlux						0				0
-			1		Stress				Stress_StaticPressure			1,0,3,4			0,1,0,0
-			2		FluxStress			FluxStress_StaticPressure		2,1,5,6			0,1,0,0
-			3		Stress				Stress_StaticPressure			3,6				1,1
-			4		FluxStress			FluxStress_StaticPressure		4,5				1,1
+			1		Stress				Stress_LagrangeMultiplier		1,0,3,4			0,1,0,0
+			2		FluxStress			FluxStress_LagrangeMultiplier	2,1,5,6			0,1,0,0
+			3		Stress				Stress_LagrangeMultiplier		3,6				1,1
+			4		FluxStress			FluxStress_LagrangeMultiplier	4,5				1,1
 			5		BoundaryCondition	NoStress						2				1
 		 	'
 ###################################################################################################

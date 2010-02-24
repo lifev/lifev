@@ -84,10 +84,9 @@ diagonalBlockPrec   = false
     tol             = 1.e-12
     
     [../prec]
-    #prectype                = AztecOO 
-    prectype                = Ifpack 
+    prectype                = AztecOO 
+    #prectype                = Ifpack 
     displayList             = false
-        
         
         [./AztecOO]
         precond             = 'dom_decomp'
@@ -140,6 +139,7 @@ diagonalBlockPrec   = false
     
     [../boundary_conditions]
     list = 'Wall InletRing OutletRing'
+    #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
 
         [./Wall]
         type       = Essential
@@ -161,7 +161,21 @@ diagonalBlockPrec   = false
         mode       = Full
         component  = 3
         function   = 0
+        
+        [../Inlet_NoVelocityOnXY]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '1 2'
+        function   = 0
 
+        [../Outlet_NoVelocityOnXY]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '1 2'
+        function   = 0
+        
         [../]
         
     [../]
@@ -170,6 +184,7 @@ diagonalBlockPrec   = false
 
     [./boundary_conditions]
     list = 'Wall InletRing OutletRing'
+    #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
 
         [./Wall]
         type       = Essential
@@ -190,6 +205,20 @@ diagonalBlockPrec   = false
         flag       = 30
         mode       = Full
         component  = 3
+        function   = 0
+        
+        [../Inlet_NoVelocityOnXY]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '1 2'
+        function   = 0
+
+        [../Outlet_NoVelocityOnXY]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '1 2'
         function   = 0
 
         [../]

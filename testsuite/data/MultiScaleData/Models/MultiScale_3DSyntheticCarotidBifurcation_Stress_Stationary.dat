@@ -38,11 +38,11 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
 			0		BoundaryCondition	PoiseuilleFlux					0				0
-			1		Stress				Stress_StaticPressure			1,0				0,1
-			2		Stress				Stress_StaticPressure			2,4				0,1
-			3		Stress				Stress_StaticPressure			3,5				0,1
+			1		Stress				Stress_LagrangeMultiplier		1,0				0,1
+			2		Stress				Stress_LagrangeMultiplier		2,4				0,1
+			3		Stress				Stress_LagrangeMultiplier		3,5				0,1
 			4		BoundaryCondition	NoStress						2,3				1,1
-			5		Stress				Stress_StaticPressure			4,1,5			0,1,0
+			5		Stress				Stress_LagrangeMultiplier		4,1,5			0,1,0
 		 	'
 ###################################################################################################
 
