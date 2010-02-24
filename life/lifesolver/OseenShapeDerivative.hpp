@@ -100,6 +100,20 @@ public:
     Real GetLinearFlux    ( const EntityFlag& flag );
     Real GetLinearPressure( const EntityFlag& flag );
 
+    //! Get the lagrange multiplier related to a flux imposed on a given part of the boundary.
+    /*!
+     * @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     * @param BC BChandler containing the boundary conditions of the problem.
+     * @return Lagrange multiplier
+     */
+    Real LinearLagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC );
+
+    //! Get the solution of the Shape Derivative problem.
+    /*!
+     * @return vector containing the solution of the Shape Derivative problem.
+     */
+    const vector_type& LinearSolution() const { return M_linSol; }
+
     void updateShapeDerivatives(
                                 matrix_type& matrNoBC,
                                 double&       alpha,
@@ -113,7 +127,7 @@ public:
                                 bool convectiveTermDerivative=false);
 
     void updateRhsLinNoBC( const vector_type& rhs){M_rhsLinNoBC=rhs;}
-    bool const stab(){return this->M_stab;}
+    bool stab()         { return this->M_stab; }
 private:
 
 
@@ -254,16 +268,25 @@ OseenShapeDerivative<Mesh, SolverType>::
 
 }
 
-template<typename Mesh, typename SolverType> Real
+template<typename Mesh, typename SolverType>
+Real
 OseenShapeDerivative<Mesh, SolverType>::GetLinearFlux( const EntityFlag& flag )
 {
     return flux( flag, M_linSol );
 }
 
-template<typename Mesh, typename SolverType> Real
+template<typename Mesh, typename SolverType>
+Real
 OseenShapeDerivative<Mesh, SolverType>::GetLinearPressure( const EntityFlag& flag )
 {
     return pressure( flag, M_linSol );
+}
+
+template<typename Mesh, typename SolverType>
+Real
+OseenShapeDerivative<Mesh, SolverType>::LinearLagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC )
+{
+  return LagrangeMultiplier( Flag, BC, M_linSol );
 }
 
 template<typename Mesh, typename SolverType>
@@ -477,7 +500,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
                       M_elvec_du.showMe(std::cout);
                       std::cout << "fin   ====================" << std::endl;
                     */
-                    // assembling presssure right hand side
+                    // assembling pressure right hand side
                     assembleVector( rhsLinNoBC, M_elvec_dp, this->M_pFESpace.fe(), this->M_pFESpace.dof(), 0, nbCompU*this->dim_u() );
 
                     // loop on velocity components
@@ -522,7 +545,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
     Chrono chrono;
 
-    int nbCompU = nDimensions;
+    UInt nbCompU = nDimensions;
 
     //    M_rhsLinNoBC = sourceVec;//which is usually zero
 
@@ -584,7 +607,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                         {
                             UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
 
-                            for ( int ic = 0; ic < nbCompU; ++ic )
+                            for ( UInt ic = 0; ic < nbCompU; ++ic )
                                 {
                                     UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
 
@@ -694,9 +717,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
     chrono.stop();
     this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 }
-//#endif
 
 }
-
 
 #endif

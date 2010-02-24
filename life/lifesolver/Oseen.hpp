@@ -228,11 +228,28 @@ public:
     // compute average pressure on a boundary face with given flag and a given solution
     Real pressure(const EntityFlag& flag, const vector_type& sol);
 
+    //! Get the lagrange multiplier related to a flux imposed on a given part of the boundary.
+    /*!
+     * @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     * @param BC BChandler containing the boundary conditions of the problem.
+     * @return Lagrange multiplier
+     */
+    Real LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC );
+
     // compute flux on a boundary face with given flag
     Real flux(const EntityFlag& flag);
 
     // compute average pressure on a boundary face with given flag
     Real pressure(const EntityFlag& flag);
+
+    //! Get the lagrange multiplier related to a flux imposed on a given part of the boundary.
+    /*!
+     * @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     * @param BC BChandler containing the boundary conditions of the problem.
+     * @param Solution vector containing the solution of the problem (and also the Lagrange multipliers at the end).
+     * @return Lagrange multiplier
+     */
+    Real LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC, const vector_type& Solution );
 
     // return the density and the viscosity of the fluid
     Real density()   const { return M_data.density(); }
@@ -1318,12 +1335,17 @@ Oseen<Mesh, SolverType>::flux(const EntityFlag& flag)
     return flux(flag, M_sol);
 }
 
-
 //! Computes the pressure on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag)
 {
   return pressure(flag, M_sol);
+}
+
+template<typename Mesh, typename SolverType> Real
+Oseen<Mesh, SolverType>::LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC )
+{
+  return LagrangeMultiplier( Flag, BC, M_sol );
 }
 
 //! Computes the flux on a given part of the boundary
@@ -1347,6 +1369,23 @@ Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag, const vector_type& sol
 
   // third argument is 1, to use the pressure finite element space (see PostProc docs)
   return M_post_proc->average(press, flag, 1)[0];
+}
+
+template<typename Mesh, typename SolverType> Real
+Oseen<Mesh, SolverType>::LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC, const vector_type& Solution )
+{
+    // Create a list of Flux BCName
+    std::vector< BCName > FluxBCVector = BC.getBCWithType( Flux );
+    BCName FluxBCName = BC.GetBCWithFlag( Flag ).name();
+
+    // Find the index associated to the correct Lagrange multiplier
+    for ( UInt lmIndex(0); lmIndex < static_cast <UInt> ( FluxBCVector.size() ); ++lmIndex )
+        if ( FluxBCName.compare( FluxBCVector[lmIndex] ) == 0 )
+            return Solution[3 * M_uFESpace.dof().numTotalDof() + M_pFESpace.dof().numTotalDof() + 1 + lmIndex];
+
+    // If lmIndex has not been found a warning message is printed
+    std::cout << "!!! Warning - Lagrange multiplier for Flux BC not found!" << std::endl;
+    return 0;
 }
 
 //! Computes the area on a given part of the boundary
