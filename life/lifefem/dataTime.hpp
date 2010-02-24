@@ -176,7 +176,7 @@ public:
     /*!
      * @return time step performed
      */
-    UInt getTimeStepNumber() const { return static_cast <UInt> ( ( M_timeStep-M_initialTime ) / M_timeStep ); }
+    UInt getTimeStepNumber() const { return static_cast <UInt> ( ( M_time-M_initialTime ) / M_timeStep ); }
 
     //! Get the BDF order used
     /*!
