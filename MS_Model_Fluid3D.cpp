@@ -55,6 +55,7 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_pFESpace                     (),
     M_uDOF                         ( 0 ),
     M_pDOF                         ( 0 ),
+    M_lmDOF                        ( 0 ),
     M_alpha                        ( 0 ),
     M_beta                         (),
     M_RHS                          ()
@@ -83,6 +84,7 @@ MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
     M_pFESpace                     ( Fluid3D.M_pFESpace ),
     M_uDOF                         ( Fluid3D.M_uDOF ),
     M_pDOF                         ( Fluid3D.M_pDOF ),
+    M_lmDOF                        ( Fluid3D.M_lmDOF ),
     M_alpha                        ( Fluid3D.M_alpha ),
     M_beta                         ( Fluid3D.M_beta ),
     M_RHS                          ( Fluid3D.M_RHS )
@@ -118,6 +120,7 @@ MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
         M_pFESpace                     = Fluid3D.M_pFESpace;
         M_uDOF                         = Fluid3D.M_uDOF;
         M_pDOF                         = Fluid3D.M_pDOF;
+        M_lmDOF                        = Fluid3D.M_lmDOF;
         M_alpha                        = Fluid3D.M_alpha;
         M_beta                         = Fluid3D.M_beta;
         M_RHS                          = Fluid3D.M_RHS;
@@ -154,9 +157,8 @@ MS_Model_Fluid3D::SetupData()
     M_FluidData->setTimeStep( M_dataTime->getTimeStep() );
     //M_FluidData->setTimeStep	( globalTimeStep / std::ceil( globalTimeStep / M_FluidData->getTimeStep() ) );
 
-    //FEspace & DOF
+    //FEspace
     setupFEspace();
-    setupDOF();
 
     //Boundary Conditions for the problem
     M_FluidBC.reset( new FluidBCType( M_dataFile, "fluid" ) );
@@ -176,12 +178,15 @@ MS_Model_Fluid3D::SetupModel()
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupProblem() \n";
 #endif
 
-    //Fluid
-    M_Fluid.reset( new FluidType( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, imposeFluxes( M_FluidBC ) ) );
-    M_Fluid->setUp( M_dataFile ); //Remove Preconditioner and Solver if possible!
+    //DOF
+    setupDOF();
 
-    //Setup linear model
-    SetupLinearModel();
+    //Add flow rate offset to BC
+    setupBCOffset( M_FluidBC );
+
+    //Fluid
+    M_Fluid.reset( new FluidType( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, M_lmDOF ) );
+    M_Fluid->setUp( M_dataFile ); //Remove Preconditioner and Solver if possible!
 
     //Fluid MAP
     M_FluidFullMap.reset( new EpetraMap( M_Fluid->getMap() ) );
@@ -211,6 +216,9 @@ MS_Model_Fluid3D::SetupModel()
 #else
     M_output->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
 #endif
+
+    //Setup linear model
+    SetupLinearModel();
 
     //MPI Barrier
     //M_comm->Barrier();
@@ -250,14 +258,14 @@ MS_Model_Fluid3D::UpdateSystem()
     Debug( 8120 ) << "MS_Model_Fluid3D::UpdateSystem() \n";
 #endif
 
+    //Time
+    M_FluidData->updateTime();
+
     //BDF
-    if ( M_FluidData->isFirstTimeStep() )
+    if ( M_FluidData->getTimeStepNumber() )
         M_FluidBDF->bdf_u().initialize_unk( M_Fluid->solution() );
     else
         M_FluidBDF->bdf_u().shift_right( M_Fluid->solution() );
-
-    //Time
-    M_FluidData->updateTime();
 
     //Problem coefficients
     M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->getTimeStep();
@@ -346,7 +354,8 @@ MS_Model_Fluid3D::ShowMe()
                   << "pOrder              = " << M_FluidData->pOrder() << std::endl << std::endl;
 
         std::cout << "uDOF                = " << 3 * M_uDOF << std::endl
-                  << "pDOF                = " << M_pDOF << std::endl << std::endl;
+                  << "pDOF                = " << M_pDOF << std::endl
+                  << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
         std::cout << "maxH                = " << M_FluidData->mesh()->maxH() << std::endl
                   << "meanH               = " << M_FluidData->mesh()->meanH() << std::endl << std::endl << std::endl << std::endl;
@@ -381,8 +390,7 @@ MS_Model_Fluid3D::SetupLinearModel()
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
 #endif
 
-    // Impose offset for Flux BC
-    imposeFluxes( M_LinearFluidBC );
+    setupBCOffset( M_LinearFluidBC );
 }
 
 void
@@ -493,6 +501,12 @@ MS_Model_Fluid3D::GetDynamicPressure( const BCFlag& Flag ) const
 }
 
 Real
+MS_Model_Fluid3D::GetLagrangeMultiplier( const BCFlag& Flag ) const
+{
+    return M_Fluid->LagrangeMultiplier(Flag, *M_FluidBC->Handler_ptr() );
+}
+
+Real
 MS_Model_Fluid3D::GetStress( const BCFlag& Flag, const stressTypes& StressType ) const
 {
     switch ( StressType )
@@ -505,6 +519,11 @@ MS_Model_Fluid3D::GetStress( const BCFlag& Flag, const stressTypes& StressType )
         case TotalPressure:
         {
             return -GetPressure( Flag ) + GetDynamicPressure( Flag ) * ( ( GetFlux( Flag ) > 0.0 ) ? 1 : -1 );
+        }
+
+        case LagrangeMultiplier:
+        {
+            return -GetLagrangeMultiplier( Flag );
         }
 
         default:
@@ -540,6 +559,14 @@ MS_Model_Fluid3D::GetDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinear
 }
 
 Real
+MS_Model_Fluid3D::GetDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    SolveLinearModel( SolveLinearSystem );
+
+    return M_Fluid->LinearLagrangeMultiplier(Flag, *M_LinearFluidBC->Handler_ptr() );
+}
+
+Real
 MS_Model_Fluid3D::GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
 {
     switch ( StressType )
@@ -554,6 +581,11 @@ MS_Model_Fluid3D::GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, c
             return -GetDeltaPressure( Flag, SolveLinearSystem ) + GetDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
         }
 
+        case LagrangeMultiplier:
+        {
+            return -GetDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
+        }
+        
         default:
 
             std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
@@ -650,28 +682,27 @@ MS_Model_Fluid3D::setupDOF()
 #endif
 
     //DOF
-    M_uDOF = M_uFESpace->dof().numTotalDof();
-    M_pDOF = M_pFESpace->dof().numTotalDof();
+    M_uDOF  = M_uFESpace->dof().numTotalDof();
+    M_pDOF  = M_pFESpace->dof().numTotalDof();
+    M_lmDOF = M_FluidBC->Handler_ptr()->getNumberBCWithType( Flux );
+
     //M_uDOF = M_uFESpace->map().getMap(Unique)->NumGlobalElements();
     //M_pDOF = M_pFESpace->map().getMap(Unique)->NumGlobalElements();
 }
 
-UInt
-MS_Model_Fluid3D::imposeFluxes( const boost::shared_ptr< FluidBCType >& BC )
+void
+MS_Model_Fluid3D::setupBCOffset( const boost::shared_ptr< FluidBCType >& BC )
 {
 
 #ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::imposeFluxes \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::setupBCOffset( BC ) \n";
 #endif
 
-    std::vector< BCName > FluxVector = BC->Handler_ptr()->getBCWithType( Flux );
-
     UInt offset = M_uFESpace->map().getMap( Unique )->NumGlobalElements() + M_pFESpace->map().getMap( Unique )->NumGlobalElements();
-    UInt numLM = static_cast< UInt > ( FluxVector.size() );
-    for ( UInt i = 0; i < numLM; ++i )
-        BC->Handler_ptr()->setOffset( FluxVector[i], offset + i );
 
-    return numLM;
+    std::vector< BCName > FluxVector = BC->Handler_ptr()->getBCWithType( Flux );
+    for ( UInt i = 0; i < M_lmDOF; ++i )
+        BC->Handler_ptr()->setOffset( FluxVector[i], offset + i );
 }
 
 } // Namespace LifeV

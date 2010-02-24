@@ -54,9 +54,10 @@ MS_Coupling_FluxStress::MS_Coupling_FluxStress() :
 
     M_type = FluxStress;
 
-    //Set type of stress coupling: StaticPressure, TotalPressure
-    stressMap["StaticPressure"] = StaticPressure;
-    stressMap["TotalPressure"]  = TotalPressure;
+    //Set type of stress coupling: StaticPressure, TotalPressure, LagrangeMultiplier
+    stressMap["StaticPressure"]     = StaticPressure;
+    stressMap["TotalPressure"]      = TotalPressure;
+    stressMap["LagrangeMultiplier"] = LagrangeMultiplier;
 }
 
 MS_Coupling_FluxStress::MS_Coupling_FluxStress( const MS_Coupling_FluxStress& FluxStress ) :
@@ -116,8 +117,8 @@ MS_Coupling_FluxStress::SetupData()
     M_baseDeltaFlux.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaFlux,   this, _1, _2, _3, _4, _5 ) );
     M_baseDeltaStress.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaStress, this, _1, _2, _3, _4, _5 ) );
 
-    //Set type of pressure coupling
-    M_stressType = stressMap[M_dataFile( "MultiScale/pressureType", "StaticPressure" )];
+    //Set type of stress coupling
+    M_stressType = stressMap[M_dataFile( "MultiScale/stressType", "StaticPressure" )];
 
     //MPI Barrier
     M_comm->Barrier();
@@ -147,7 +148,7 @@ MS_Coupling_FluxStress::SetupCoupling()
                 switchErrorMessage( M_models[0] );
     }
 
-    // Impose pressure
+    // Impose stress
     for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
@@ -387,7 +388,7 @@ MS_Coupling_FluxStress::ShowMe()
     {
         super::ShowMe();
 
-        std::cout << "Pressure Type       = " << Enum2String( M_stressType, stressMap ) << std::endl;
+        std::cout << "Stress Type         = " << Enum2String( M_stressType, stressMap ) << std::endl;
         std::cout << "Coupling Flux       = " << ( *M_LocalCouplingVariables )[0] << std::endl
                   << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[1] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
