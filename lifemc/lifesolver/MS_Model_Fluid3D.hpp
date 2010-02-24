@@ -221,6 +221,13 @@ public:
      */
     Real GetDynamicPressure( const BCFlag& Flag ) const;
 
+    //! Get the value of the Lagrange multiplier associated to a specific boundary face
+    /*!
+     * @param Flag flag of the boundary face
+     * @return Lagrange multiplier value
+     */
+    Real GetLagrangeMultiplier( const BCFlag& Flag ) const;
+
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
@@ -253,6 +260,14 @@ public:
      */
     Real GetDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
 
+    //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
+    /*!
+     * @param Flag flag of the boundary face
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return Lagrange multiplier value
+     */
+    Real GetDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem );
+
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
@@ -275,8 +290,8 @@ private:
     //! Setup the DOF of the model
     void setupDOF();
 
-    //! Compute the number fluxes applied to the model
-    UInt imposeFluxes( const boost::shared_ptr< FluidBCType >& BC );
+    //! Setup the offset for fluxes boundary conditions
+    void setupBCOffset( const boost::shared_ptr< FluidBCType >& BC );
 
     //@}
 
@@ -300,8 +315,9 @@ private:
     boost::shared_ptr< FESpaceType >      M_pFESpace;
 
     // Degrees of freedom of the problem
-    UInt                                  M_uDOF;
-    UInt                                  M_pDOF;
+    UInt                                  M_uDOF;  // Velocity degrees of freedom (one component)
+    UInt                                  M_pDOF;  // Pressure degrees of freedom
+    UInt                                  M_lmDOF; // Lagrange Multipliers degrees of freedom
 
     // Problem coefficients
     Real                                  M_alpha;

@@ -105,8 +105,8 @@ enum couplingsTypes
 enum stressTypes
 {
     StaticPressure,    /*!< Use static pressure */
-    TotalPressure      /*!< Use total pressure (static + dynamic) */
-
+    TotalPressure,     /*!< Use total pressure (static + dynamic) */
+    LagrangeMultiplier /*!< Use the Lagrange multiplier */
 };
 
 enum errorsTypes
