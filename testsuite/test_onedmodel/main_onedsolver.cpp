@@ -40,9 +40,17 @@
 using namespace LifeV;
 
 
+bool checkValue(const double val, const double test, const double tol = 1.e-5, const bool verbose = true)
+{
+    double norm = abs(val - test);
+    std::cout << "value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
+
+    return (norm < tol);
+}
+
+
 int main(int argc, char** argv)
 {
-
 
 
 #ifdef EPETRA_MPI
@@ -71,6 +79,10 @@ int main(int argc, char** argv)
   // ***** Reading from data file
   // *********************************
   GetPot command_line(argc,argv);
+
+    // checking if we are checking for the nightly build
+    const bool check = command_line.search(2, "-c", "--check");
+
   string data_file_name = command_line.follow("data", 2, "-f","--file");
   GetPot data_file(data_file_name);
 
@@ -230,6 +242,18 @@ int main(int argc, char** argv)
 
   }
 
+
+//    std::cout << onedm.U1_thistime()[rightnodeid - 0] << std::endl;
+//    std::cout << onedm.U2_thistime()[rightnodeid - 0] << std::endl;
+//    std::cout << onedm.W1_thistime()[rightnodeid - 0] << std::endl;
+//    std::cout << onedm.W2_thistime()[rightnodeid - 0] << std::endl;
+
+//    std::cout << onedm.U1_thistime()[rightnodeid - 1] << std::endl;
+//    std::cout << onedm.U2_thistime()[rightnodeid - 1] << std::endl;
+//    std::cout << onedm.W1_thistime()[rightnodeid - 1] << std::endl;
+//    std::cout << onedm.W2_thistime()[rightnodeid - 1] << std::endl;
+
+
   printf("\nSimulation ended successfully.\n");
 
 #ifdef EPETRA_MPI
@@ -237,7 +261,44 @@ int main(int argc, char** argv)
 #endif
 
 
-  return 0;
+  if (check)
+  {
+      bool ok = true;
+      int rightnodeid = onedm.RightNodeId();
+
+
+      ok = ok && checkValue( 0.999998  , onedm.U1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00138076, onedm.U2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00276153, onedm.W1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.00000000, onedm.W2_thistime()[rightnodeid - 0]);
+
+      ok = ok && checkValue( 0.999999  , onedm.U1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00040393, onedm.U2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00080833, onedm.W1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.00000045, onedm.W2_thistime()[rightnodeid - 1]);
+
+      if (ok)
+      {
+          std::cout << "Test succesful" << std::endl;
+          return 0;
+      }
+      else
+      {
+          std::cout << "Test unseccesful" << std::endl;
+          return -1;
+      }
+//       bool = bool &&  onedm.U2_thistime()[rightnodeid - 0] << std::endl;
+//       std::cout << onedm.W1_thistime()[rightnodeid - 0] << std::endl;
+//       std::cout << onedm.W2_thistime()[rightnodeid - 0] << std::endl;
+
+//       std::cout << onedm.U1_thistime()[rightnodeid - 1] << std::endl;
+//       std::cout << onedm.U2_thistime()[rightnodeid - 1] << std::endl;
+//       std::cout << onedm.W1_thistime()[rightnodeid - 1] << std::endl;
+//       std::cout << onedm.W2_thistime()[rightnodeid - 1] << std::endl;
+
+  }
+  else
+      return 0;
 
 
 
