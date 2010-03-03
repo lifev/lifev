@@ -145,8 +145,8 @@
 #include <boost/function.hpp>
 
 #include <lifemc/lifesolver/oneDNonLinModelParam.hpp>
-#include <lifemc/lifesolver/oneDBCHandler.hpp>
 #include <lifemc/lifesolver/dataOneDModel.hpp>
+#include <lifemc/lifesolver/oneDBCHandler.hpp>
 
 namespace ublas = boost::numeric::ublas;
 
@@ -189,9 +189,9 @@ public:
     typedef data_type::mesh_raw_type          Mesh;
 
     typedef data_type::Vec2D                  Vec2D;
-//     typedef data_type::ScalVec                ScalVec;
-//     typedef data_type::ScalVec_vector         ScalVec_vector;
-//     typedef data_type::ScalVec_vector_range   ScalVec_vector_range;
+    typedef data_type::ScalVec                ScalVec;
+    typedef data_type::ScalVec_vector         ScalVec_vector;
+    typedef data_type::ScalVec_vector_range   ScalVec_vector_range;
 
 //     typedef ublas::bounded_array<Real, 2>        Vec2D;
 //     //typedef ublas::vector<Real>                  Vec2D;
@@ -223,7 +223,9 @@ public:
     */
 
     OneDModelSolver( const data_type&                   dataType,
-                     const Params&                      parameters,
+                     Params&                      parameters,
+                     Flux&                        flux,
+                     Source&                      source,
                      FESpace<Mesh, EpetraMap>&          FESpace,
                      Epetra_Comm&                       comm); //,
 
@@ -251,7 +253,7 @@ public:
     const Params& oneDParams()         const { return M_oneDParams; }
 
     //! return the BC handler
-    OneDBCHandler<Flux>& bcH() { return M_bcH;}
+    //OneDBCHandler<Flux>& bcH() { return M_bcH;}
 
     //! Sets initial condition for the unknowns
     /*!
@@ -288,7 +290,7 @@ public:
     void timeAdvance( const Real& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
-    void iterate( const Real& time , const int& count);
+    void iterate( OneDBCHandler<Flux>& bcH, const Real& time , const int& count);
 
     //! Save results on file
     void postProcess( const Real& time );
@@ -315,11 +317,11 @@ public:
     //! set the Dirichlet boundary conditions (right)
     void setBCValuesRight( const Real& bcR1, const Real& bcR2 );
 
-    //! set left bctype to internal node
-    void setBCLeft_internalnode();
+//     //! set left bctype to internal node
+//     void setBCLeft_internalnode();
 
-    //! set right bctype to internal node
-    void setBCRight_internalnode();
+//     //! set right bctype to internal node
+//     void setBCRight_internalnode();
 
     //! get the flux function
     Flux const& FluxFun() const;
@@ -397,7 +399,13 @@ private:
     const data_type&                   M_data;
 
     //! the parameters
-    Params                             M_oneDParams;
+    Params&                            M_oneDParams;
+
+    //! the flux function
+    Flux&                              M_fluxFun;
+
+    //! the source function
+    Source&                            M_sourceFun ;
 
     //! The FESpace
     FESpace<Mesh, EpetraMap>&          M_FESpace;
@@ -408,12 +416,7 @@ private:
     // const LinearSimpleParam& M_oneDParam;
     EpetraMap                          M_localMap;
 
-    //! the flux function
-    Flux                               M_fluxFun;
-
-    //! the source function
-    Source                             M_sourceFun ;
-
+    //
     const UInt                         M_leftNodeId;
     const UInt                         M_leftInternalNodeId;
     const UInt                         M_rightNodeId;
@@ -545,7 +548,7 @@ private:
       at time n+1.)
       Used as Compatibility condition.
     */
-    void _computeBC( const Real& time_val );
+    //void _computeBC( const Real& time_val );
 
     //! Axpy product for 2D vectors (pairs)
     //! Axpy(alpha, x, beta, y) -> y = a*A*x + beta*y
@@ -580,7 +583,7 @@ private:
     std::map<std::string, long>  M_post_process_buffer_offset;
 
     //! Class to manage boundary conditions
-    OneDBCHandler<Flux>          M_bcH;
+    //OneDBCHandler<Flux>          M_bcH;
 
     //! Trick to use strings in C++ "switch" construct
     std::map<std::string, OneDInitializeVar> M_oneDstring2initializeVarMap;
@@ -636,18 +639,20 @@ private:
 template< class Params, class Flux, class Source >
 OneDModelSolver<Params, Flux, Source>::
 OneDModelSolver( const data_type&                   dataType,
-                 const Params&                      parameters,
+                 Params&                      parameters,
+                 Flux&                        flux,
+                 Source&                      source,
                  FESpace<Mesh, EpetraMap>&          FESpace,
                  Epetra_Comm&                       comm):
 //,OneDModelSolver(const GetPot& data_file):
         //        OneDModelHandler        (data_file),
         M_data                  (dataType),
         M_oneDParams            (parameters),
+        M_fluxFun               (flux),
+        M_sourceFun             (source),
         M_FESpace               (FESpace),
         M_dimDof                (FESpace.dim()),
         M_localMap              (FESpace.map()),
-        M_fluxFun               (M_oneDParams),
-        M_sourceFun             (M_oneDParams),
         //! id of left and right bc nodes
         M_leftNodeId            ( 1 ),
         M_leftInternalNodeId    ( M_leftNodeId  + 1 ),
@@ -665,10 +670,6 @@ OneDModelSolver( const data_type&                   dataType,
         M_U_thistime            (5, vector_type(M_localMap)), // size should be at least 4
         M_U_prevtime            (2, vector_type(M_localMap)), // probably useless - could be components in U_thistime
         M_U_2prevtime           (2, vector_type(M_localMap)),
-//         M_U_thistime            (0 /*, vector_type(M_localMap)*/), // size should be at least 4
-//         M_U_prevtime            (2 /*, vector_type(M_localMap)*/), // probably useless - could be components in U_thistime
-//         M_U_2prevtime           (2 /*, vector_type(M_localMap)*/),
-        //
         M_rhs                   (2, vector_type(M_localMap)),
         // vectors and matrices of the non-linear function
         M_Flux                  (2, vector_type(M_localMap)),
@@ -685,9 +686,9 @@ OneDModelSolver( const data_type&                   dataType,
         // The linear solver
         M_linearSolver          ( comm ),
         // Handle boundary conditions
-        M_bcH                   (M_U_thistime, /*M_postproc_variable,*/
-                                 M_fluxFun,
-                                 M_dimDof),
+//         M_bcH                   (M_U_thistime, /*M_postproc_variable,*/
+//                                  M_fluxFun,
+//                                  M_dimDof),
         M_bcDirLeft             (2),
         M_bcDirRight            (2)
 {
@@ -1132,12 +1133,12 @@ _updateBCDirichletVector()
 
 
 //! compute the M_bcDirLeft and M_bcDirRight and set them to the new values
-template< class Params, class Flux, class Source >
-void
-OneDModelSolver<Params, Flux, Source>::_computeBC( const Real& time_val )
-{
-    M_bcH.applyBC(time_val, M_bcDirLeft, M_bcDirRight );
-}
+// template< class Params, class Flux, class Source >
+// void
+// OneDModelSolver<Params, Flux, Source>::_computeBC( const Real& time_val )
+// {
+//     M_bcH.applyBC(time_val, M_bcDirLeft, M_bcDirRight );
+// }
 
 
 //! get the flux function
@@ -1316,20 +1317,20 @@ OneDModelSolver<Params, Flux, Source>::setBCValuesLeft( const Real& bcL1, const 
 }
 
 
-template< class Params, class Flux, class Source >
-void
-OneDModelSolver<Params, Flux, Source>::setBCLeft_internalnode()
-{
-    M_bcH.setBCLeft_internalnode();
-}
+// template< class Params, class Flux, class Source >
+// void
+// OneDModelSolver<Params, Flux, Source>::setBCLeft_internalnode()
+// {
+//     M_bcH.setBCLeft_internalnode();
+// }
 
 
-template< class Params, class Flux, class Source >
-void
-OneDModelSolver<Params, Flux, Source>::setBCRight_internalnode()
-{
-    M_bcH.setBCRight_internalnode();
-}
+// template< class Params, class Flux, class Source >
+// void
+// OneDModelSolver<Params, Flux, Source>::setBCRight_internalnode()
+// {
+//     M_bcH.setBCRight_internalnode();
+// }
 
 
 //! simple cfl computation (correct for constant mesh)
@@ -2091,7 +2092,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
     }
 
     //! Prepare bc Handler
-    M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
+    //M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
 
 
     //! create matlab scripts
@@ -2154,7 +2155,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
     }
 
     //! Prepare bc Handler
-    M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
+    //M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
 
     //! create matlab scripts
     //create_movie_file();
@@ -2163,7 +2164,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
 
     //output2FileBuffers( 0. );
 
-    postProcess( 0. );
+    //postProcess( 0. );
 
 }
 
@@ -2198,7 +2199,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const std::string & vname)
 
     output2FileBuffers( 0. );
 
-    postProcess( 0. );
+    //postProcess( 0. );
 
 }
 
@@ -2249,7 +2250,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u20)
         }
 
     //! Prepare bc Handler
-    M_bcH.setDefaultBC( M_FESpace.mesh(), M_sourceFun, M_data.timestep() );
+    //M_bcH.setDefaultBC( M_FESpace.mesh(), M_sourceFun, M_data.timestep() );
 
     //! create matlab scripts
     create_movie_file();
@@ -2492,7 +2493,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file, const
 
 
     //! Prepare bc Handler
-    M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
+    //M_bcH.setDefaultBC( M_FESpace, M_sourceFun, M_data.timestep() );
 
     //! resetting the file buffers
 
@@ -2506,7 +2507,7 @@ OneDModelSolver<Params, Flux, Source>::initialize(const GetPot& data_file, const
 
     //! Write down initial condition
     //output2FileBuffers( 0. );
-    postProcess( 0. );
+    //postProcess( 0. );
 
 
 }
@@ -2664,20 +2665,20 @@ OneDModelSolver<Params, Flux, Source>::timeAdvance( const Real& time_val )
     //! 3/ take into account the BOUNDARY CONDITIONS
     //!---------------------------------------------------
     //! compute the values for the boundary conditions
-    Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
+//     Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
 
-//     std::cout <<  M_U_thistime[0](101) << std::endl;
-//     std::cout <<  M_U_thistime[1](101) << std::endl;
-//     std::cout <<  M_U_thistime[2](101) << std::endl;
-//     std::cout <<  M_U_thistime[3](101) << std::endl;
+// //     std::cout <<  M_U_thistime[0](101) << std::endl;
+// //     std::cout <<  M_U_thistime[1](101) << std::endl;
+// //     std::cout <<  M_U_thistime[2](101) << std::endl;
+// //     std::cout <<  M_U_thistime[3](101) << std::endl;
 
-    _computeBC( time_val );
-    //! take into account the bc
-    Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
-    _updateBCDirichletVector();
+//     _computeBC( time_val );
+//     //! take into account the bc
+//     Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
+//     _updateBCDirichletVector();
 
-    Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
-    Debug( 6310 ) << "[timeAdvance] \trhs1 norm2 = " << M_rhs[1].Norm2() << "\n";
+//     Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
+//     Debug( 6310 ) << "[timeAdvance] \trhs1 norm2 = " << M_rhs[1].Norm2() << "\n";
 
     // *******************************************************
     chronoall.stop();
@@ -2690,8 +2691,31 @@ OneDModelSolver<Params, Flux, Source>::timeAdvance( const Real& time_val )
 
 template< class Params, class Flux, class Source >
 void
-OneDModelSolver<Params, Flux, Source>::iterate( const Real& time_val , const int& count)
+OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const Real& time_val , const int& count)
 {
+
+    //!---------------------------------------------------
+    //! 3/ take into account the BOUNDARY CONDITIONS
+    //!---------------------------------------------------
+    //! compute the values for the boundary conditions
+    Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
+
+    //     std::cout <<  M_U_thistime[0](101) << std::endl;
+    //     std::cout <<  M_U_thistime[1](101) << std::endl;
+    //     std::cout <<  M_U_thistime[2](101) << std::endl;
+    //     std::cout <<  M_U_thistime[3](101) << std::endl;
+
+    bcH.applyBC(time_val, M_bcDirLeft, M_bcDirRight );
+
+    //_computeBC( bcH, time_val );
+    //! take into account the bc
+    Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
+    _updateBCDirichletVector();
+
+    Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
+    Debug( 6310 ) << "[timeAdvance] \trhs1 norm2 = " << M_rhs[1].Norm2() << "\n";
+
+
     Debug( 6310 ) << "[iterate] o-  Solving the system... t = " << time_val
                   << ", iter = " << count  << "... \n";
     Chrono chrono;
