@@ -102,13 +102,34 @@ public:
     Real xRight() const;
     Real nbElem() const;
 
-    const std::string PostFile     () const {return _M_post_file;}
-    const std::string PostDirectory() const {return _M_post_dir;}
+    const std::string PostFile     ()         const {return M_post_file;}
+    const std::string PostDirectory()         const {return M_post_dir;}
 
-    const int verbose()               const {return _M_verbose;}
+    const int         verbose()               const {return M_verbose;}
 
-    mesh_type mesh() {return _M_mesh;}
-    //BasicOneDMesh& mesh() {return _M_mesh;}
+    const Real        CFL()                   const {return M_CFL;}
+    const bool        UW()                    const {return M_UW;}
+    const bool        inertialWall()          const {return M_inertial_wall;}
+    const bool        viscolasticWall()       const {return M_viscoelastic_wall;}
+    const bool        linearizeStringModel()  const {return M_linearize_string_model;}
+    const bool        linearizeEquations()    const {return M_linearize_equations;}
+    const bool        longitudinalWall()      const {return M_longitudinal_wall;}
+
+    const bool        fluxSecondDer()         const {return M_flux_second_der;}
+
+    const int         DPdtSteps()             const {return M_dP_dt_steps;}
+
+    const std::string initVar()               const {return M_initVar;}
+    const int         firstNode()             const {return M_firstNode;}
+    const int         lastNode()              const {return M_lastNode;}
+    const Real        restValue()             const {return M_restValue;}
+    const Real        initValue()             const {return M_initValue;}
+    const Real        multiplier()            const {return M_multiplier;}
+    const Real        width()                 const {return M_width;}
+
+
+    mesh_type mesh() {return M_mesh;}
+    //BasicOneDMesh& mesh() {return M_mesh;}
     //! Output
     void showMe(std::ostream& c=std::cout) const;
 
@@ -117,34 +138,56 @@ protected:
     //
     //! Time
     //
-    Real            _M_time_beg;  //! starting time
-    Real            _M_time_end; //! finishing time
-    Real            _M_time_step; //! time step
+    Real            M_time_beg;  //! starting time
+    Real            M_time_end; //! finishing time
+    Real            M_time_step; //! time step
     //
     //! Discretization
     //
-    std::string     _M_mesh_file;
-    std::string     _M_mesh_dir;
-    Real            _M_x_left;  //! left coordinate
-    Real            _M_x_right; //! right coordinate
-    UInt            _M_nb_elem;    //! number of elements
+    std::string     M_mesh_file;
+    std::string     M_mesh_dir;
+    Real            M_x_left;  //! left coordinate
+    Real            M_x_right; //! right coordinate
+
+    UInt            M_nb_elem;    //! number of elements
     //
     //! Miscellaneous
     //
-    std::string     _M_post_dir; //! full directory name (including path)
-    std::string     _M_post_file; //! output file name
-    int             _M_verbose;
+    std::string     M_post_dir; //! full directory name (including path)
+    std::string     M_post_file; //! output file name
+    int             M_verbose;
+    //
+    Real            M_CFL;
+    bool            M_UW;
+    //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
+    bool            M_inertial_wall;
+    bool            M_viscoelastic_wall;
+    bool            M_linearize_string_model;
+    bool            M_linearize_equations;
+    bool            M_longitudinal_wall;
+
+    //! boolean: compute second spatial derivative of flux?
+    bool            M_flux_second_der;
+    //! approximation of pressure temporal derivative: how many time steps?
+    int             M_dP_dt_steps;
+    //! initialize
+    std::string     M_initVar;
+    int             M_firstNode;
+    int             M_lastNode;
+    Real            M_restValue;
+    Real            M_initValue;
+    Real            M_multiplier;
+    Real            M_width;
     /*!
-      Write down results to file each _M_postProcessTimeStep seconds
+      Write down results to file each M_postProcessTimeStep seconds
     */
-    Real            _M_postProcessTimeStep;
+    Real            M_postProcessTimeStep;
     /*!
       Mesh
      */
-    const UInt      _M_adaptiveMesh;
-    //BasicOneDMesh   _M_mesh;
-    mesh_type       _M_mesh;
-
+    const UInt      M_adaptiveMesh;
+    //BasicOneDMesh   M_mesh;
+    mesh_type       M_mesh;
 
 };
 

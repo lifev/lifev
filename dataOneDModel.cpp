@@ -33,70 +33,86 @@ namespace LifeV
 
 //! constructor using a data file.
   DataOneDModel::DataOneDModel(const GetPot& dfile, const std::string& section):
-    _M_time_beg           (dfile((section + "/time/timebeg").data()                      ,0.0)),
-    _M_time_end           (dfile((section + "/time/timeend").data()                      ,1.0)),
-    _M_time_step          (dfile((section + "/time/timestep").data()                     ,0.1)),
+    M_time_beg               (dfile((section + "/time/timebeg").data()                      ,0.0)),
+    M_time_end               (dfile((section + "/time/timeend").data()                      ,1.0)),
+    M_time_step              (dfile((section + "/time/timestep").data()                     ,0.1)),
         //! Discretization
-    _M_mesh_file          (dfile((section + "/discretization/mesh_file").data()          ,"mesh.mesh")),
-    _M_mesh_dir           (dfile((section + "/discretization/mesh_dir").data()           ,"./")),
-    _M_x_left             (dfile((section + "/discretization/x_left").data()             ,0.)),
-    _M_x_right            (dfile((section + "/discretization/x_right").data()            ,1.)),
-    _M_nb_elem            (dfile((section + "/discretization/nb_elem").data()            ,10)),
+    M_mesh_file              (dfile((section + "/discretization/mesh_file").data()          ,"mesh.mesh")),
+    M_mesh_dir               (dfile((section + "/discretization/mesh_dir").data()           ,"./")),
+    M_x_left                 (dfile((section + "/discretization/x_left").data()             ,0.)),
+    M_x_right                (dfile((section + "/discretization/x_right").data()            ,1.)),
+    M_nb_elem                (dfile((section + "/discretization/nb_elem").data()            ,10)),
         //! Miscellaneous
-    _M_post_dir           (dfile((section + "/miscellaneous/post_dir").data()            ,"./")),
-    _M_post_file          (dfile((section + "/miscellaneous/post_file").data()           ,"sol")),
-    _M_verbose            (dfile((section + "/miscellaneous/verbose").data()             ,1)),
-    _M_postProcessTimeStep(dfile((section + "/miscellaneous/postprocess_timestep").data(),0.01)),
-    _M_adaptiveMesh       (dfile((section + "/problem/adaptiveMesh").data()              , 0)),
-    _M_mesh               ( )
+    M_post_dir               (dfile((section + "/miscellaneous/post_dir").data()            ,"./")),
+    M_post_file              (dfile((section + "/miscellaneous/post_file").data()           ,"sol")),
+    M_verbose                (dfile((section + "/miscellaneous/verbose").data()             ,1)),
+    M_postProcessTimeStep    (dfile((section + "/miscellaneous/postprocess_timestep").data(),0.01)),
+    M_adaptiveMesh           (dfile((section + "/problem/adaptiveMesh").data()              , 0)),
+    M_CFL                    (dfile((section + "miscellaneous/showCFL").data(),                        0)),
+    M_UW                     (dfile((section + "miscellaneous/alternate_solver").data(),               0)),
+    M_inertial_wall          (dfile((section + "miscellaneous/inertial_wall").data(),                  0)),
+    M_viscoelastic_wall      (dfile((section + "miscellaneous/viscoelastic_wall").data(),              0)),
+    M_linearize_string_model (dfile((section + "miscellaneous/linearize_string_model").data(),         1)),
+    M_linearize_equations    (dfile((section + "miscellaneous/linearize_equations").data(),            0)),
+    M_longitudinal_wall      (dfile((section + "miscellaneous/longitudinal_wall").data(),              0)),
+    M_flux_second_der        (dfile((section + "miscellaneous/compute_flux_second_derivative").data(), 0)),
+    M_dP_dt_steps            (dfile((section + "miscellaneous/pressure_derivative_steps").data(),      1)),
+    M_firstNode              (dfile((section + "/initialize/firstnode").data(),                        1)),
+    M_lastNode               (dfile((section + "/initialize/lastnode").data(),                         2)),
+    M_initVar                (dfile((section + "/initialize/var").data(),                            "P")),
+    M_initValue              (dfile((section + "/initialize/init_value").data(),                      0.)),
+    M_restValue              (dfile((section + "/initialize/rest_value").data(),                      0.)),
+    M_multiplier             (dfile((section + "/initialize/multiplier").data(),                      1.)),
+    M_width                  (dfile((section + "/initialize/width").data(),                           5.)),
+    M_mesh                   ( )
 {
 
     std::cout << "    1d- Mesh setup ... " << std::endl;
 
-    _M_mesh.reset(new DataOneDModel::mesh_raw_type);
+    M_mesh.reset(new DataOneDModel::mesh_raw_type);
 
-    _M_mesh->setUp( _M_x_left, _M_x_right, _M_nb_elem );
+    M_mesh->setUp( M_x_left, M_x_right, M_nb_elem );
     std::cout << "    ok." << std::endl;
 }
 
 
 Real const& DataOneDModel::timestep() const
 {
-    return _M_time_step;
+    return M_time_step;
 }
 Real const& DataOneDModel::inittime() const
 {
-    return _M_time_beg;
+    return M_time_beg;
 }
 Real const& DataOneDModel::endtime() const
 {
-    return _M_time_end;
+    return M_time_end;
 }
 
 void DataOneDModel::settimestep( const Real& dt )
 {
-    _M_time_step = dt;
+    M_time_step = dt;
 }
 void DataOneDModel::setinittime( const Real& t0 )
 {
-    _M_time_beg = t0;
+    M_time_beg = t0;
 }
 void DataOneDModel::setendtime( const Real& T )
 {
-    _M_time_end = T;
+    M_time_end = T;
 }
 
 Real DataOneDModel::xLeft() const
 {
-    return _M_x_left;
+    return M_x_left;
 }
 Real DataOneDModel::xRight() const
 {
-    return _M_x_right;
+    return M_x_right;
 }
 Real DataOneDModel::nbElem() const
 {
-    return _M_nb_elem;
+    return M_nb_elem;
 }
 
 
@@ -104,23 +120,23 @@ void DataOneDModel::showMe(std::ostream& c) const
 {
     //! Time
     c << "\n*** Values for data [time]\n";
-    c << "time_beg = " << _M_time_beg << "\n";
-    c << "time_end = " << _M_time_end << "\n";
-    c << "time_step = " << _M_time_step << "\n";
+    c << "time_beg = " << M_time_beg << "\n";
+    c << "time_end = " << M_time_end << "\n";
+    c << "time_step = " << M_time_step << "\n";
 
     //! Discretization
     c << "\n*** Values for data [discretization]\n";
-    c << "mesh_file = " << _M_mesh_file << "\n";
-    c << "mesh_dir  = " << _M_mesh_dir << "\n";
-    c << "x_left = " << _M_x_left << "\n";
-    c << "x_right = " << _M_x_right << "\n";
-    c << "nb_elem = " << _M_nb_elem << "\n";
+    c << "mesh_file = " << M_mesh_file << "\n";
+    c << "mesh_dir  = " << M_mesh_dir << "\n";
+    c << "x_left = " << M_x_left << "\n";
+    c << "x_right = " << M_x_right << "\n";
+    c << "nb_elem = " << M_nb_elem << "\n";
 
     //! Miscellaneous
     c << "\n*** Values for data [miscellaneous]\n\n";
-    c << "post_dir         = " << _M_post_dir << "\n";
-    c << "post_file        = " << _M_post_file << "\n";
-    c << "verbose          = " << _M_verbose << std::endl;
+    c << "post_dir         = " << M_post_dir << "\n";
+    c << "post_file        = " << M_post_file << "\n";
+    c << "verbose          = " << M_verbose << std::endl;
 }
 
 
