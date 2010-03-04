@@ -33,6 +33,10 @@
 //#include <lifemc/lifesolver/dataOneDModel.hpp>
 #include <lifemc/lifesolver/oneDModelSolver.hpp>
 #include <lifemc/lifefem/oneDBCFunctions.hpp>
+#include <lifemc/lifesolver/oneDBCHandler.hpp>
+
+#include <life/lifealg/SolverAmesos.hpp>
+
 #include "ud_functions.hpp"
 
 #include <sstream>
@@ -91,15 +95,25 @@ int main(int argc, char** argv)
   // *********************************
   std::cout << "====== Building 1D model " << std::endl;
 
-  std::cout << "    Building the mesh ... " << std::flush;
-
   const std::string section = "onedmodel";
 
+  std::cout << "    1d- Building the data ... " << std::flush;
   DataOneDModel data  (data_file, section);
-  Params1D      params(data_file, section);
-  std::cout << "ok." << std::endl;
+  std::cout << &data.mesh()<< std::endl;
+  std::cout << "ok" << std::endl;
 
-  std::cout << data.mesh() << std::endl;
+  std::cout << "    1d- Building the params ... " << std::flush;
+  Params1D      params(data_file, section);
+  std::cout << "ok" << std::endl;
+
+  std::cout << "    1d- Building the flux function ... " << std::flush;
+  Flux1D        flux(params);
+  std::cout << "ok" << std::endl;
+
+
+  std::cout << "    1d- Building the source function ... " << std::flush;
+  Source1D      source(params);
+  std::cout << "ok" << std::endl;
 
   const RefFE*    refFE = &feSegP1;
   const QuadRule* qR    = &quadRuleSeg3pt;
@@ -111,26 +125,36 @@ int main(int argc, char** argv)
   //   RegionMesh* pmesh = &data.mesh();
   //   boost::shared_ptr<RegionMesh> mesh(mesh);
 
-  std::cout << "    Building FE Space ... " << std::flush;
+  std::cout << "    1d- Building FE Space ... " << std::flush;
 
   //std::cout << feSegP1.nbCoor << std::endl;
+  std::cout << &data.mesh()<< std::endl;
   FESpace<RegionMesh, EpetraMap> odFESpace(data.mesh(), *refFE, *qR, *bdQr, 1, *comm);
-  std::cout << "nbCoorFE " << odFESpace.fe().nbCoor << std::endl;
+
+  //std::cout << "nbCoorFE " << odFESpace.fe().nbCoor << std::endl;
   std::cout << "ok." << std::endl;
 
   //odFESpace.dof().showMe(std::cout, true);
-  std::cout << "    Building Solver   ... " << std::flush;
-  onedsolver_type onedm(data, params, odFESpace, *comm);
+  std::cout << "    1d- Building Solver   ... " << std::flush;
+
+  //  Params1D params;
+
+  onedsolver_type onedm(data, params, flux, source, odFESpace, *comm);
 
 
-  onedm.setup(data_file, section);
+  onedm.setup();//data_file, section);
   std::cout << "ok." << std::endl;
 
   onedm.showMe(std::cout);
 
 
+  //SolverAmesos linearSolver(0);
+
+  //linearSolver.setUpPrec        (data_file, section + "/prec");
+  //linearSolver.setDataFromGetPot(data_file, section + "/solver");
   //
 
+  onedm.setUpLinearSolver(data_file, section);
   //OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
 //   OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
 //                                   (odFESpace,
@@ -156,10 +180,18 @@ int main(int argc, char** argv)
   //   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
 
   OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
-  onedm.bcH().setBC( sinusoidal_flux, "left", "first", "Q" );
+
+  OneDBCHandler<Flux1D> bcH(onedm.U_thistime(), flux, odFESpace.dim());
+  //bcH.setDefaultBC(
+
+
+  bcH.setBC( sinusoidal_flux, "left", "first", "Q" );
 
   //onedm.bcH().setBC( pressure,         "left",  "first", "W1"  );
-  onedm.bcH().setBC( resistence,      "right",  "first", "W2" );
+  bcH.setBC( resistence,      "right",  "first", "W2" );
+
+  bcH.setDefaultBC(odFESpace, source, data.timestep());
+
 
   // Initialization
   //
@@ -173,7 +205,7 @@ int main(int argc, char** argv)
               << " " << postprocess_it << "\n";
 
 
-  onedm.initialize(data_file, section);
+  onedm.initialize();
 //   Real u1_0 = 3.14; //! constant initial condition
 //   Real u2_0 = 0.;    //! constant initial condition
 
@@ -210,7 +242,7 @@ int main(int argc, char** argv)
 
     Debug(6030) << "[main] 1d model iterate\n";
     chronoit.start();
-    onedm.iterate( time , count );
+    onedm.iterate( bcH, time , count );
     chronoit.stop();
 
     //    std::cout <<
