@@ -86,17 +86,18 @@ public:
 
     //    DataOneDModel(const DataOneDModel& dataOneDModel);
 
+    void timeAdvance(){M_time += M_time_step;}
 
     // return the different time data
     Real const& timestep() const;
     Real const& inittime() const;
     Real const& endtime()  const;
-
+    Real const& time()     const;
     // set the different time data
     void settimestep( const Real& dt );
     void setinittime( const Real& t0 );
-    void setendtime( const Real& T );
-
+    void setendtime ( const Real& T );
+    void settime    ( const Real& time);
     // return the two extremal points
     Real xLeft() const;
     Real xRight() const;
@@ -141,6 +142,7 @@ protected:
     Real            M_time_beg;  //! starting time
     Real            M_time_end; //! finishing time
     Real            M_time_step; //! time step
+    Real            M_time;
     //
     //! Discretization
     //
