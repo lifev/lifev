@@ -36,7 +36,8 @@ namespace LifeV
     M_time_beg               (dfile((section + "/time/timebeg").data()                      ,0.0)),
     M_time_end               (dfile((section + "/time/timeend").data()                      ,1.0)),
     M_time_step              (dfile((section + "/time/timestep").data()                     ,0.1)),
-        //! Discretization
+    M_time                   (M_time_beg),
+    //! Discretization
     M_mesh_file              (dfile((section + "/discretization/mesh_file").data()          ,"mesh.mesh")),
     M_mesh_dir               (dfile((section + "/discretization/mesh_dir").data()           ,"./")),
     M_x_left                 (dfile((section + "/discretization/x_left").data()             ,0.)),
@@ -87,6 +88,10 @@ Real const& DataOneDModel::inittime() const
 Real const& DataOneDModel::endtime() const
 {
     return M_time_end;
+}
+Real const& DataOneDModel::time() const
+{
+    return M_time;
 }
 
 void DataOneDModel::settimestep( const Real& dt )
