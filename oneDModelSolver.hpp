@@ -288,10 +288,10 @@ public:
 
     //! setting the linear solver
 
-//     void setLinearSolver(solver_type linearSolver)
-//     {
-//         M_linearSolver.reset(&linearSolver);
-//     }
+    void setLinearSolver(boost::shared_ptr<solver_type>& linearSolver)
+    {
+        M_linearSolver = linearSolver;
+    }
 
 
 //! Save and recover solution at current time step
@@ -513,8 +513,8 @@ private:
     std::vector<matrix_ptrtype >       M_divMatrixDiffSrc;
 
     //! The linear solver
-    //    boost::shared_ptr<solver_type>     M_linearSolver;
-    solver_type                        M_linearSolver;
+    boost::shared_ptr<solver_type>     M_linearSolver;
+    //solver_type                        M_linearSolver;
 
     //! Update the coefficients
     //! (from the flux, source functions and their derivatives)
@@ -609,20 +609,20 @@ private:
     //bool                         M_CFL;
 
     //! boolean: use alternate solver (UpWind)?
-    bool                         M_UW;
+    //bool                         M_UW;
 
     //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
-    bool                         M_inertial_wall;
-    bool                         M_viscoelastic_wall;
-    bool                         M_linearize_string_model;
-    bool                         M_linearize_equations;
-    bool                         M_longitudinal_wall;
+//     bool                         M_inertial_wall;
+//     bool                         M_data.viscoelasticWall();
+//     bool                         M_data.linearizeStringModel();
+//     bool                         M_data.linearizeEquations();
+//     bool                         M_longitudinal_wall;
 
-    //! boolean: compute second spatial derivative of flux?
-    bool                         M_flux_second_der;
+//     //! boolean: compute second spatial derivative of flux?
+//     bool                         M_data.fluxSecondDer();
 
-    //! approximation of pressure temporal derivative: how many time steps?
-    int                          M_dP_dt_steps;
+//     //! approximation of pressure temporal derivative: how many time steps?
+//     int                          M_data.DPdtSteps();
 
     //! plotting using graceplot
 
@@ -697,7 +697,8 @@ OneDModelSolver( const data_type&             dataType,
         // matrices used to build the rhs
         M_gradMatrix            (M_localMap),
         // The linear solver
-        M_linearSolver          (comm),
+        //M_linearSolver          (comm),
+        M_linearSolver          (),
         // Handle boundary conditions
 //         M_bcH                   (M_U_thistime, /*M_postproc_variable,*/
 //                                  M_fluxFun,
@@ -714,12 +715,12 @@ void OneDModelSolver<Params, Flux, Source>::setup()
 //     M_CFL                    = data_file((section + "miscellaneous/showCFL").data(),                        0);
 //     M_UW                     = data_file((section + "miscellaneous/alternate_solver").data(),               0);
 //     M_inertial_wall          = data_file((section + "miscellaneous/inertial_wall").data(),                  0);
-//     M_viscoelastic_wall      = data_file((section + "miscellaneous/viscoelastic_wall").data(),              0);
-//     M_linearize_string_model = data_file((section + "miscellaneous/linearize_string_model").data(),         1);
-//     M_linearize_equations    = data_file((section + "miscellaneous/linearize_equations").data(),            0);
+//     M_data.viscoelasticWall()      = data_file((section + "miscellaneous/viscoelastic_wall").data(),              0);
+//     M_data.linearizeStringModel() = data_file((section + "miscellaneous/linearize_string_model").data(),         1);
+//     M_data.linearizeEquations()    = data_file((section + "miscellaneous/linearize_equations").data(),            0);
 //     M_longitudinal_wall      = data_file((section + "miscellaneous/longitudinal_wall").data(),              0);
 //     M_flux_second_der        = data_file((section + "miscellaneous/compute_flux_second_derivative").data(), 0);
-//     M_dP_dt_steps            = data_file((section + "miscellaneous/pressure_derivative_steps").data(),      1);
+//     M_data.DPdtSteps()            = data_file((section + "miscellaneous/pressure_derivative_steps").data(),      1);
 
 
         // These maps allow a more readable definition of the variables
@@ -747,7 +748,7 @@ void OneDModelSolver<Params, Flux, Source>::setup()
     Debug( 6310 ) << "[OneDModelSolver] O-  Nb of unknowns: " << M_FESpace.dim()     << "\n";
     Debug( 6310 ) << "[OneDModelSolver] O-  Computing the constant matrices... \n";
     Debug( 6310 ) << "[OneDModelSolver] O-  Adopting a"
-                  << std::string( M_viscoelastic_wall ? " viscoelastic " : "n elastic " )
+                  << std::string( M_data.viscoelasticWall() ? " viscoelastic " : "n elastic " )
                   << "model for vessel wall... \n";
 
     Chrono chrono;
@@ -771,7 +772,7 @@ void OneDModelSolver<Params, Flux, Source>::setup()
 
 
     //! correction flux with viscoelastic term
-    if( M_viscoelastic_wall )
+    if( M_data.viscoelasticWall() )
         {
             // correction on the flux due to the viscoelastic term
             M_variable_index_map.insert( make_pair("Q_visc",  nvar++ ) );
@@ -784,15 +785,15 @@ void OneDModelSolver<Params, Flux, Source>::setup()
         }
 
     //! flux second derivative
-    if( M_flux_second_der )
+    if( M_data.fluxSecondDer() )
         M_variable_index_map.insert( make_pair("d2Q_dx2", nvar++ ) );
 
     //! correction flux with inertial term
-    if( M_inertial_wall )
+    if( M_data.inertialWall() )
         M_variable_index_map.insert( make_pair("Q_inert", nvar++ ) );
 
     //! correction flux with longitudinal term
-    if( M_longitudinal_wall )
+    if( M_data.longitudinalWall() )
         M_variable_index_map.insert( make_pair("Q_long", nvar++ ) );
 
     //! activate the export filters
@@ -872,8 +873,8 @@ void OneDModelSolver<Params, Flux, Source>::setup()
     M_massMatrix.GlobalAssemble();
     M_gradMatrix.GlobalAssemble();
 
-//     M_linearSolver->setUpPrec        ( data_file, section + "/prec");
-//     M_linearSolver->setDataFromGetPot( data_file, section + "/solver" );
+//     M_linearSolver.setUpPrec        ( data_file, section + "/prec");
+//     M_linearSolver.setDataFromGetPot( data_file, section + "/solver" );
 
     chrono.stop();
 
@@ -885,8 +886,8 @@ template< class Params, class Flux, class Source >
 void
 OneDModelSolver<Params, Flux, Source>::setUpLinearSolver(const GetPot& data_file, const std::string section)
 {
-    M_linearSolver.setUpPrec        ( data_file, section + "/prec");
-    M_linearSolver.setDataFromGetPot( data_file, section + "/solver" );
+//     M_linearSolver.setUpPrec        ( data_file, section + "/prec");
+//     M_linearSolver.setDataFromGetPot( data_file, section + "/solver" );
 }
 
 
@@ -1667,8 +1668,8 @@ OneDModelSolver<Params, Flux, Source>::_correct_flux_inertial( const vector_type
 
     vector_type _sol(_rhs);
 
-    M_linearSolver.setMatrix(_matrixLHS);
-    //@int numIter = M_linearSolver.solveSystem( _rhs, _sol, _matrixLHS, true);
+    M_linearSolver->setMatrix(_matrixLHS);
+    //@int numIter = M_linearSolver->solveSystem( _rhs, _sol, _matrixLHS, true);
 
     //std::cout <<" iterations number :  " << numIter << std::endl;
 
@@ -1810,14 +1811,14 @@ OneDModelSolver<Params, Flux, Source>::_correct_flux_viscoelastic( const vector_
         _coeffMass *= 0.5;
         _coeffMass = 1./std::sqrt(_coeffMass);
 
-        if(M_linearize_string_model) {
+        if(M_data.linearizeStringModel()) {
             // this is to recover the linearized version (_coeffMass = 1/A)
             _coeffMass *= _coeffMass;
 
             meanA0  = M_oneDParams.Area0( iedge - 1 ) + M_oneDParams.Area0( iedge );
             meanA0 *= 0.5;
 
-            if(M_linearize_equations) {
+            if(M_data.linearizeEquations()) {
                 // when using linearized equations, A \simeq A0
                 _coeffMass = 1./ meanA0;
             }
@@ -1873,8 +1874,8 @@ OneDModelSolver<Params, Flux, Source>::_correct_flux_viscoelastic( const vector_
 
     vector_type _sol(_rhs);
 
-    M_linearSolver.setMatrix(_matrixLHS);
-    //int numIter = M_linearSolver.solveSystem( _rhs, _sol, _matrixLHS, true);
+    M_linearSolver->setMatrix(_matrixLHS);
+    //int numIter = M_linearSolver->solveSystem( _rhs, _sol, _matrixLHS, true);
 
     return _sol;
 }
@@ -2089,13 +2090,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u10, const Real& u
                                      M_U_2prevtime[0][ielem + 1],
                                      M_data.timestep(),
                                      ielem,
-                                     M_dP_dt_steps,
-                                     M_viscoelastic_wall,
-                                     M_linearize_string_model );
+                                     M_data.DPdtSteps(),
+                                     M_data.viscoelasticWall(),
+                                     M_data.linearizeStringModel() );
           M_U_thistime[4][ielem + 1] = pressures(4*ielem);
       }
 
-    if(M_viscoelastic_wall)
+    if(M_data.viscoelasticWall())
       {
         for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
 	  {
@@ -2154,13 +2155,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Vector& u10, const Vecto
             M_oneDParams.pressure( M_U_thistime[0][ielem],
                                    M_U_prevtime[0][ielem], M_U_2prevtime[0][ielem],
                                    M_data.timestep(), ielem,
-                                   M_dP_dt_steps, M_viscoelastic_wall,
-                                   M_linearize_string_model );
+                                   M_data.DPdtSteps(), M_data.viscoelasticWall(),
+                                   M_data.linearizeStringModel() );
 
         M_U_thistime[4][ielem] = pressures(4*ielem);
     }
 
-    if(M_viscoelastic_wall) {
+    if(M_data.viscoelasticWall()) {
         for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ ) {
             M_U_thistime[M_variable_index_map.find("P_elast")->second][ielem] =
               pressures(1+4*ielem);
@@ -2247,13 +2248,13 @@ OneDModelSolver<Params, Flux, Source>::initialize(const Real& u20)
                 M_oneDParams.pressure( M_U_thistime[0][ielem],
                                        M_U_prevtime[0][ielem], M_U_2prevtime[0][ielem],
                                        M_data.timestep(), ielem,
-                                       M_dP_dt_steps, M_viscoelastic_wall,
-                                       M_linearize_string_model );
+                                       M_data.DPdtSteps(), M_data.viscoelasticWall(),
+                                       M_data.linearizeStringModel() );
 
             M_U_thistime[4][ielem] = pressures(4*ielem);
         }
 
-    if(M_viscoelastic_wall)
+    if(M_data.viscoelasticWall())
         {
             for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
                 {
@@ -2488,15 +2489,15 @@ OneDModelSolver<Params, Flux, Source>::initialize()
                                        M_U_2prevtime[0][ielem + 1],
                                        M_data.timestep(),
                                        ielem,
-                                       M_dP_dt_steps,
-                                       M_viscoelastic_wall,
-                                       M_linearize_string_model );
+                                       M_data.DPdtSteps(),
+                                       M_data.viscoelasticWall(),
+                                       M_data.linearizeStringModel() );
 
             M_U_thistime[4][ielem + 1] = pressures(4*ielem);
         }
 
 
-    if(M_viscoelastic_wall)
+    if(M_data.viscoelasticWall())
         {
             for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
                 {
@@ -2745,7 +2746,7 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
     Chrono chrono5;
 
 
-    if( M_UW )
+    if( M_data.UW() )
         {
             Real Ainode, Qinode;
 
@@ -2832,9 +2833,9 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
 
             chrono2.start();
             //            matrFull->spy("matr");
-            M_linearSolver.setMatrix(*matrFull);
-            M_linearSolver.setReusePreconditioner(false);
-            M_linearSolver.solveSystem( M_rhs[0], sol0, matrFull );
+            M_linearSolver->setMatrix(*matrFull);
+            M_linearSolver->setReusePreconditioner(false);
+            M_linearSolver->solveSystem( M_rhs[0], sol0, matrFull );
             //std::cout << "sol0 norm2 = " << sol0.Norm2() << std::endl;
             chrono2.stop();
 
@@ -2844,9 +2845,9 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
 
             //std::cout << "rhs1 norm2 = " << M_rhs[1].Norm2() << std::endl;
 //             //! solve the system: rhs2 = massFactor^{-1} * rhs2
-//            M_linearSolver.setMatrix
-            M_linearSolver.setReusePreconditioner(false);
-            M_linearSolver.solveSystem( M_rhs[1], sol1, matrFull );
+//            M_linearSolver->setMatrix
+            M_linearSolver->setReusePreconditioner(false);
+            M_linearSolver->solveSystem( M_rhs[1], sol1, matrFull );
             //std::cout << "sol1 norm2 = " << sol1.Norm2() << std::endl;
 
 
@@ -2855,25 +2856,25 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
             chrono3.stop();
             //! correct flux with inertial term
             chrono4.start();
-            if( M_inertial_wall )
+            if( M_data.inertialWall() )
                 {
                     M_U_thistime[M_variable_index_map.find("Q_inert")->second] =
                         _correct_flux_inertial( M_rhs[1] );
                     M_rhs[1] += M_U_thistime[M_variable_index_map.find("Q_inert")->second];
                 }
             //! correct flux with viscoelastic term
-            if( M_viscoelastic_wall )
+            if( M_data.viscoelasticWall() )
                 {
                     M_U_thistime[M_variable_index_map.find("Q_visc")->second] =
                         _correct_flux_viscoelastic( M_rhs[1] );
                     M_rhs[1] += M_U_thistime[M_variable_index_map.find("Q_visc")->second];
                 }
             //! compute L2 projection of d2Q_dx2
-            //    if( M_flux_second_der )
+            //    if( M_data.fluxSecondDer() )
             //      M_d2_U2_dx2 = _compute_d2Q_dx2( M_rhs[1] );
 
             //! correct flux with longitudinal term
-            if( M_longitudinal_wall )
+            if( M_data.longitudinalWall() )
                 {
 //                     M_U_thistime[M_variable_index_map.find("Q_long")->second] =
 //                         _correct_flux_longitudinal(  );
@@ -2881,6 +2882,8 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
                 }
 
             //! store solution at previous timesteps & update the solution for the next time step
+            std::cout << "0" << std::endl;
+
             for( UInt i=0; i<2; ++i )
                 {
                     M_U_2prevtime[i] = M_U_prevtime[i];
@@ -2892,6 +2895,7 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
 
             chrono4.stop();
             chrono5.start();
+            std::cout << "1" << std::endl;
             Vector pressures(4 * M_FESpace.dim());
             for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
             {
@@ -2904,13 +2908,13 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
                                            M_U_prevtime [0][ielem + 1],
                                            M_U_2prevtime[0][ielem + 1],
                                            M_data.timestep(), ielem,
-                                           M_dP_dt_steps, M_viscoelastic_wall,
-                                           M_linearize_string_model );
+                                           M_data.DPdtSteps(), M_data.viscoelasticWall(),
+                                           M_data.linearizeStringModel() );
 
                 M_U_thistime[4][ielem + 1] = pressures(4*ielem);
             }
-
-            if(M_viscoelastic_wall)
+            std::cout << "2" << std::endl;
+            if(M_data.viscoelasticWall())
                 {
                     for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
                         {
