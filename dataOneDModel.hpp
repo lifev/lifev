@@ -110,7 +110,7 @@ public:
     const Real        CFL()                   const {return M_CFL;}
     const bool        UW()                    const {return M_UW;}
     const bool        inertialWall()          const {return M_inertial_wall;}
-    const bool        viscolasticWall()       const {return M_viscoelastic_wall;}
+    const bool        viscoelasticWall()      const {return M_viscoelastic_wall;}
     const bool        linearizeStringModel()  const {return M_linearize_string_model;}
     const bool        linearizeEquations()    const {return M_linearize_equations;}
     const bool        longitudinalWall()      const {return M_longitudinal_wall;}
