@@ -37,6 +37,8 @@
 
 #include <life/lifealg/SolverAmesos.hpp>
 
+#include <lifemc/lifesolver/MS_Model_1D.hpp>
+
 #include "ud_functions.hpp"
 
 #include <sstream>
@@ -62,12 +64,14 @@ int main(int argc, char** argv)
 
     MPI_Init(&argc,&argv);
 
-    Epetra_Comm* comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    boost::shared_ptr<Epetra_MpiComm> comm;
+    comm.reset(new Epetra_MpiComm( MPI_COMM_WORLD ));
     int ntasks;
 //    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
     std::cout << "ok" << std::endl;
 #else
-    Epetra_Comm* comm = new Epetra_SerialComm();
+    boost::shared_ptr<Epetra_SerialComm> comm;
+    comm.reset(new Epetra_SerialComm());
 #endif;
 
 
@@ -99,7 +103,6 @@ int main(int argc, char** argv)
 
   std::cout << "    1d- Building the data ... " << std::flush;
   DataOneDModel data  (data_file, section);
-  std::cout << &data.mesh()<< std::endl;
   std::cout << "ok" << std::endl;
 
   std::cout << "    1d- Building the params ... " << std::flush;
@@ -115,83 +118,30 @@ int main(int argc, char** argv)
   Source1D      source(params);
   std::cout << "ok" << std::endl;
 
-  const RefFE*    refFE = &feSegP1;
-  const QuadRule* qR    = &quadRuleSeg3pt;
-  const QuadRule* bdQr  = &quadRuleSeg1pt;
 
+  MS_Model_1D od;
+  od.SetCommunicator(comm);
+  od.SetupData(data_file, section);
+  od.SetupModel();
 
-  //  boost::shared_ptr<BasicOneDMesh> mesh = &data.mesh();
-
-  //   RegionMesh* pmesh = &data.mesh();
-  //   boost::shared_ptr<RegionMesh> mesh(mesh);
-
-  std::cout << "    1d- Building FE Space ... " << std::flush;
-
-  //std::cout << feSegP1.nbCoor << std::endl;
-  std::cout << &data.mesh()<< std::endl;
-  FESpace<RegionMesh, EpetraMap> odFESpace(data.mesh(), *refFE, *qR, *bdQr, 1, *comm);
-
-  //std::cout << "nbCoorFE " << odFESpace.fe().nbCoor << std::endl;
-  std::cout << "ok." << std::endl;
-
-  //odFESpace.dof().showMe(std::cout, true);
-  std::cout << "    1d- Building Solver   ... " << std::flush;
-
-  //  Params1D params;
-
-  onedsolver_type onedm(data, params, flux, source, odFESpace, *comm);
-
-
-  onedm.setup();//data_file, section);
-  std::cout << "ok." << std::endl;
-
-  onedm.showMe(std::cout);
-
-
-  //SolverAmesos linearSolver(0);
-
-  //linearSolver.setUpPrec        (data_file, section + "/prec");
-  //linearSolver.setDataFromGetPot(data_file, section + "/solver");
   //
-
-  onedm.setUpLinearSolver(data_file, section);
-  //OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
-//   OneDBCFunctionPointer pressure( new PressureRamp<Flux1D, Source1D, OneDNonLinModelParam>
-//                                   (odFESpace,
-//                                    onedm.FluxFun(),
-//                                    onedm.SourceFun(),
-//                                    onedm.U_thistime(),
-//                                    data.timestep(),
-//                                    "left" /*border*/,
-//                                    "W1"  /*var*/,
-//                                    onedm.oneDParams()));
 
   OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
                                     ( data_file("parameters/R",0.),
-                                      onedm.oneDParams(),
-                                      odFESpace,
-                                      onedm.FluxFun(),
-                                      onedm.SourceFun(),
-                                      onedm.U_thistime(),
+                                      params,
+                                      od.GetFESpace(),
+                                      flux,
+                                      source,
+                                      od.GetSolver().U_thistime(),
                                       data.timestep(),
                                       "right" /*border*/,
                                       "W2"  /*var*/, true));
 
-  //   onedm.bcH().setBC( sinusoidal_flux, "left",  "first", "Q"  );
-
   OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
 
-  OneDBCHandler<Flux1D> bcH(onedm.U_thistime(), flux, odFESpace.dim());
-  //bcH.setDefaultBC(
-
-
-  bcH.setBC( sinusoidal_flux, "left", "first", "Q" );
-
-  //onedm.bcH().setBC( pressure,         "left",  "first", "W1"  );
-  bcH.setBC( resistence,      "right",  "first", "W2" );
-
-  bcH.setDefaultBC(odFESpace, source, data.timestep());
-
+  od.GetBC().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+  od.GetBC().setBC( resistence,      "right", "first", "W2" );
+  od.GetBC().setDefaultBC(od.GetFESpace(), source, data.timestep());
 
   // Initialization
   //
@@ -205,17 +155,9 @@ int main(int argc, char** argv)
               << " " << postprocess_it << "\n";
 
 
-  onedm.initialize();
-//   Real u1_0 = 3.14; //! constant initial condition
-//   Real u2_0 = 0.;    //! constant initial condition
+  //onedm.initialize();
+  od.BuildSystem();
 
-//   //     if (fsi->isSolid())
-//   //     {
-//   //        std::cout << "     1d- initialize tube with constant A_0 = " << u1_0 << " and Q_0 = " << u2_0 << std::endl;
-//   onedm.initialize(u1_0, u2_0);
-//   std::cout << "    1d- initialize tube with constant A_0 = " << onedm.BCValuesLeft()[0]
-//             << " and Q_0 = " << onedm.BCValuesLeft()[1] << std::endl;
-//   //     }
   // Temporal loop
   printf("\nTemporal loop:\n");
 
@@ -236,26 +178,23 @@ int main(int argc, char** argv)
     chrono.start();
     Debug(6030) << "[main] 1d model time advance\n";
     chronota.start();
-    onedm.timeAdvance( time );
-
+    od.UpdateSystem();
     chronota.stop();
+
+
 
     Debug(6030) << "[main] 1d model iterate\n";
     chronoit.start();
-    onedm.iterate( bcH, time , count );
+    od.SolveSystem();
     chronoit.stop();
 
-    //    std::cout <<
+    int leftnodeid = od.GetSolver().LeftNodeId();
+
     if( !( static_cast<int>( std::floor( count%postprocess_it))))
-//     if( !( static_cast<int>( std::floor( time/dt + 0.5 ) ) %
-//            static_cast<int>( std::floor( postprocess_dt/dt  + 0.5 ) ) ) )
 		{
             std::cout << "PostProcessing at time ... " << time << std::endl;
-            onedm.postProcess( time );
+            //onedm.postProcess( time );
         }
-
-//     if ( data_file( "miscellaneous/show_graceplot", 0 ) )
-//         onedm.gplot();
 
 
     chrono.stop();
@@ -263,27 +202,7 @@ int main(int argc, char** argv)
     std::cout << " time adv. computed in " << chronota.diff()
               << " iter computed in " << chronoit.diff()
               << " total " << chrono.diff() << " s." << std::endl;
-//     printf("\033\n");
-//     printf("\033[0GIteration %d", count);
-//     printf("\033[25G, t = %f", time);
-//     printf("\033[25Gs, time adv. computed in %f", chronota.diff());
-//     printf("\033[60Gs, iter. computed in %f", chronoit.diff());
-//     printf("\033[85Gs. total %f", chrono.diff());
-//     printf("\033[100Gs.\n");
-//     printf("\033\n");
-
   }
-
-
-//    std::cout << onedm.U1_thistime()[rightnodeid - 0] << std::endl;
-//    std::cout << onedm.U2_thistime()[rightnodeid - 0] << std::endl;
-//    std::cout << onedm.W1_thistime()[rightnodeid - 0] << std::endl;
-//    std::cout << onedm.W2_thistime()[rightnodeid - 0] << std::endl;
-
-//    std::cout << onedm.U1_thistime()[rightnodeid - 1] << std::endl;
-//    std::cout << onedm.U2_thistime()[rightnodeid - 1] << std::endl;
-//    std::cout << onedm.W1_thistime()[rightnodeid - 1] << std::endl;
-//    std::cout << onedm.W2_thistime()[rightnodeid - 1] << std::endl;
 
 
   printf("\nSimulation ended successfully.\n");
@@ -296,18 +215,18 @@ int main(int argc, char** argv)
   if (check)
   {
       bool ok = true;
-      int rightnodeid = onedm.RightNodeId();
+      int rightnodeid = od.GetSolver().RightNodeId();
 
 
-      ok = ok && checkValue( 0.999998  , onedm.U1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00138076, onedm.U2_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00276153, onedm.W1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue( 0.00000000, onedm.W2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.999998  , od.GetSolver().U1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00138076, od.GetSolver().U2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00276153, od.GetSolver().W1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.00000000, od.GetSolver().W2_thistime()[rightnodeid - 0]);
 
-      ok = ok && checkValue( 0.999999  , onedm.U1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00040393, onedm.U2_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00080833, onedm.W1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue( 0.00000045, onedm.W2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.999999  , od.GetSolver().U1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00040393, od.GetSolver().U2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00080833, od.GetSolver().W1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.00000045, od.GetSolver().W2_thistime()[rightnodeid - 1]);
 
       if (ok)
       {

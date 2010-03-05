@@ -79,7 +79,7 @@ public:
 
         if (time < _M_period)
             {
-                std::cout << "Flux BC = " << _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period) << std::endl;
+                std::cout << time << " Flux BC = " << _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period) << std::endl;
                 return _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period);
             }
         else
