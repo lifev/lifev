@@ -77,6 +77,8 @@ public:
     void bcShiftToNormalTangentialCoordSystem(MatrixType& A, VectorType& b);
     template <typename VectorType>
     void bcShiftToCartesianCoordSystem(MatrixType& A, VectorType& b);
+    template <typename VectorType>
+    void computeIntegratedNormals(const Dof& dof,CurrentBdFE& bdfem, VectorType& normals,  const MeshType& mesh);
 
 private:
     bool          M_dataBuilt;      // true if some normal has been set
@@ -523,90 +525,9 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateNormals(const Dof& dof,Cur
     //-----------------------------------------------------
 
     M_normal = new EpetraVector(*M_idMap,Repeated);
-    (*M_normal)*=0;
+    //(*M_normal)*=0;
+    computeIntegratedNormals(dof, bdfem, *M_normal, *M_mesh);
 
-    //Loop on the Faces
-    for ( UInt iFace = 1; iFace<= M_mesh->numBElements(); ++iFace )
-    {
-        //Update the bdfem with the face data
-        bdfem.updateMeasNormalQuadPt( M_mesh->bElement( iFace ) );
-        ID idFace = M_mesh->bElement( iFace ).id();
-        UInt nDofF = bdfem.nbNode;
-
-        //For each node on the face
-        for (UInt icheck = 1; icheck<= nDofF; ++icheck)
-        {
-            bool idFaceExist(false); //Is the face in the array?
-            ID idf = dof.localToGlobalByFace(idFace,icheck,idFaceExist);
-            //std::cout << "idf = " << idf << std::endl;
-
-            //If the face exists and the point is on this processor
-            if(idFaceExist && (M_flags.find(idf) != M_flags.end()))
-            {
-                ID flag = M_flags[idf];
-
-                //std::cout << "Flag: " << flag << std::endl;
-
-                //if the normal is not already calculated
-                //and the marker correspond to the flag of the point
-                if((flag == M_mesh->bElement(iFace).marker())||(flag == 0))
-                {
-                    //Warning we take the normal in the first gauss point
-                    //since the normal is the same over the triangle
-                    Real nx(bdfem.normal(0,0));
-                    Real ny(bdfem.normal(1,0));
-                    Real nz(bdfem.normal(2,0));
-
-                    //We get the area
-                    Real area(bdfem.measure());
-
-                    //We update the normal component of the boundary point
-                    (*M_normal)[idf] += nx * area;
-                    (*M_normal)[idf+M_numDof] += ny * area;
-                    (*M_normal)[idf+2*M_numDof] += nz * area;
-                }
-            }
-        }
-    }
-
-    //-----------------------------------------------------
-    // STEP 2: Gathering the data from others processors
-    //-----------------------------------------------------
-
-    EpetraVector* tmp = new EpetraVector(*M_normal,Unique);
-    delete M_normal;
-    M_normal = tmp;
-
-    //-----------------------------------------------------
-    // STEP 3: Normalizing the vectors
-    //-----------------------------------------------------
-
-    //We obtain the ID of the element
-    int NumMyElements = M_idMap->getMap(Unique)->NumMyElements();
-    int MyGlobalElements[NumMyElements];
-    M_idMap->getMap(Unique)->MyGlobalElements(MyGlobalElements);
-
-    //We normalize the normal
-    Real norm;
-    UInt id;
-
-	for ( UInt i(0);i<NumMyElements;++i )
-    {
-        id = MyGlobalElements[i];
-
-        //The id must be smaller than M_numDof
-        //(the larger values are the y and z components)
-        if(id<=M_numDof)
-        {
-            Real nx( (*M_normal)[id] );
-            Real ny( (*M_normal)[id+M_numDof] );
-            Real nz( (*M_normal)[id+2*M_numDof] );
-            norm = sqrt( nx*nx + ny*ny + nz*nz );
-            (*M_normal)[id]            /= norm;
-            (*M_normal)[id+M_numDof]   /= norm;
-            (*M_normal)[id+2*M_numDof] /= norm;
-        }
-    }
 
     //-----------------------------------------------------
     // STEP 4: Cleaning the memory
@@ -828,6 +749,107 @@ void BCNormalManager<MeshType,MatrixType>::bcShiftToCartesianCoordSystem(MatrixT
         VectorType c(b);
         errCode = M_rotMat->Multiply(true,c,b);
         //std::cout<< errCode <<std::endl;
+    }
+}
+
+
+//! This method computes the normals to a surface
+/*!
+    @param Dof the dof containing the local-to-global map and the number of dofs of the volume whose boundary
+    is the surface of interest.
+    @param bdfem the finite element of the boundary
+    @param normals the templated output vector
+    @param mesh the templated mesh
+ */
+template<typename MeshType, typename MatrixType> template< typename VectorType>
+void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& dof,CurrentBdFE& bdfem, VectorType& normals,  const MeshType& mesh)
+{
+
+    //-----------------------------------------------------
+    // STEP 1: Calculating the normals
+    //-----------------------------------------------------
+
+
+    VectorType repNormals(normals.getMap(), Repeated);
+    //Loop on the Faces
+    for ( UInt iFace = 1; iFace<= mesh.numBElements(); ++iFace )
+    {
+        //Update the bdfem with the face data
+        bdfem.updateMeasNormalQuadPt( mesh.bElement( iFace ) );
+        ID idFace = mesh.bElement( iFace ).id();
+        UInt nDofF = bdfem.nbNode;
+
+        //For each node on the face
+        for (UInt icheck = 1; icheck<= nDofF; ++icheck)
+        {
+            bool idFaceExist(false); //Is the face in the array?
+            ID idf = dof.localToGlobalByFace(idFace,icheck,idFaceExist);
+            //std::cout << "idf = " << idf << std::endl;
+
+            //If the face exists and the point is on this processor
+            if(idFaceExist && (M_flags.find(idf) != M_flags.end()))
+            {
+                ID flag = M_flags[idf];
+
+                //std::cout << "Flag: " << flag << std::endl;
+
+                //if the normal is not already calculated
+                //and the marker correspond to the flag of the point
+                if((flag == mesh.bElement(iFace).marker())||(flag == 0))
+                {
+                    //Warning we take the normal in the first gauss point
+                    //since the normal is the same over the triangle
+                    Real nx(bdfem.normal(0,0));
+                    Real ny(bdfem.normal(1,0));
+                    Real nz(bdfem.normal(2,0));
+
+                    //We get the area
+                    Real area(bdfem.measure());
+
+                    //We update the normal component of the boundary point
+                    (repNormals)[idf] += nx * area;
+                    (repNormals)[idf+dof.numTotalDof()] += ny * area;
+                    (repNormals)[idf+2*dof.numTotalDof()] += nz * area;
+                }
+            }
+        }
+    }
+
+    //-----------------------------------------------------
+    // STEP 2: Gathering the data from others processors
+    //-----------------------------------------------------
+
+    normals = VectorType(repNormals,Unique);
+
+    //-----------------------------------------------------
+    // STEP 3: Normalizing the vectors
+    //-----------------------------------------------------
+
+    //We obtain the ID of the element
+    int NumMyElements = normals.getMap().getMap(Unique)->NumMyElements();
+    int MyGlobalElements[NumMyElements];
+    normals.getMap().getMap(Unique)->MyGlobalElements(MyGlobalElements);
+
+    //We normalize the normal
+    Real norm;
+    UInt id;
+
+	for ( UInt i(0); i<NumMyElements; ++i )
+    {
+        id = MyGlobalElements[i];
+
+        //The id must be smaller than M_numDof
+        //(the larger values are the y and z components)
+        if(id <= dof.numTotalDof())
+        {
+            Real nx( (normals)[id] );
+            Real ny( (normals)[id+dof.numTotalDof()] );
+            Real nz( (normals)[id+2*dof.numTotalDof()] );
+            norm = sqrt( nx*nx + ny*ny + nz*nz );
+            (normals)[id]            /= norm;
+            (normals)[id+dof.numTotalDof()]   /= norm;
+            (normals)[id+2*dof.numTotalDof()] /= norm;
+        }
     }
 }
 
