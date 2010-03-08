@@ -101,24 +101,6 @@ int main(int argc, char** argv)
 
   const std::string section = "onedmodel";
 
-  std::cout << "    1d- Building the data ... " << std::flush;
-  DataOneDModel data  (data_file, section);
-  std::cout << "ok" << std::endl;
-
-  std::cout << "    1d- Building the params ... " << std::flush;
-  Params1D      params(data_file, section);
-  std::cout << "ok" << std::endl;
-
-  std::cout << "    1d- Building the flux function ... " << std::flush;
-  Flux1D        flux(params);
-  std::cout << "ok" << std::endl;
-
-
-  std::cout << "    1d- Building the source function ... " << std::flush;
-  Source1D      source(params);
-  std::cout << "ok" << std::endl;
-
-
   MS_Model_1D od;
   od.SetCommunicator(comm);
   od.SetupData(data_file, section);
@@ -128,12 +110,12 @@ int main(int argc, char** argv)
 
   OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
                                     ( data_file("parameters/R",0.),
-                                      params,
+                                      od.GetSolver().oneDParams(),
                                       od.GetFESpace(),
-                                      flux,
-                                      source,
+                                      od.GetSolver().FluxFun(),
+                                      od.GetSolver().SourceFun(),
                                       od.GetSolver().U_thistime(),
-                                      data.timestep(),
+                                      od.GetSolver().timestep(),
                                       "right" /*border*/,
                                       "W2"  /*var*/, true));
 
@@ -141,13 +123,13 @@ int main(int argc, char** argv)
 
   od.GetBC().setBC( sinusoidal_flux, "left",  "first", "Q"  );
   od.GetBC().setBC( resistence,      "right", "first", "W2" );
-  od.GetBC().setDefaultBC(od.GetFESpace(), source, data.timestep());
+  od.GetBC().setDefaultBC(od.GetFESpace(), od.GetSolver().SourceFun(), od.GetSolver().timestep());
 
   // Initialization
   //
-  Real dt             = data.timestep();
-  Real startT         = data.inittime();
-  Real T              = data.endtime();
+  Real dt             = od.GetSolver().timestep();
+  Real startT         = od.GetSolver().inittime();
+  Real T              = od.GetSolver().endtime();
   UInt postprocess_it = data_file("miscellaneous/postprocess_timestep", 10);
 
   Debug(6030) << "[main] startT T dt postprocess_it "
@@ -238,15 +220,6 @@ int main(int argc, char** argv)
           std::cout << "Test unseccesful" << std::endl;
           return -1;
       }
-//       bool = bool &&  onedm.U2_thistime()[rightnodeid - 0] << std::endl;
-//       std::cout << onedm.W1_thistime()[rightnodeid - 0] << std::endl;
-//       std::cout << onedm.W2_thistime()[rightnodeid - 0] << std::endl;
-
-//       std::cout << onedm.U1_thistime()[rightnodeid - 1] << std::endl;
-//       std::cout << onedm.U2_thistime()[rightnodeid - 1] << std::endl;
-//       std::cout << onedm.W1_thistime()[rightnodeid - 1] << std::endl;
-//       std::cout << onedm.W2_thistime()[rightnodeid - 1] << std::endl;
-
   }
   else
       return 0;
