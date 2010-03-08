@@ -39,6 +39,7 @@ liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                MS_PhysicalModel.cpp \
                                MS_Model_MultiScale.cpp \
                                MS_Model_Fluid3D.cpp \
+                               MS_Model_1D.cpp \
                                MS_PhysicalCoupling.cpp \
                                MS_Coupling_BoundaryCondition.cpp \
                                MS_Coupling_Stress.cpp \
