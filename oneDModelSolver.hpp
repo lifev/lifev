@@ -2882,7 +2882,6 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
                 }
 
             //! store solution at previous timesteps & update the solution for the next time step
-            std::cout << "0" << std::endl;
 
             for( UInt i=0; i<2; ++i )
                 {
@@ -2895,7 +2894,6 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
 
             chrono4.stop();
             chrono5.start();
-            std::cout << "1" << std::endl;
             Vector pressures(4 * M_FESpace.dim());
             for (UInt ielem = 0; ielem < M_FESpace.dim() ; ielem++ )
             {
@@ -2913,7 +2911,7 @@ OneDModelSolver<Params, Flux, Source>::iterate( OneDBCHandler<Flux>& bcH, const 
 
                 M_U_thistime[4][ielem + 1] = pressures(4*ielem);
             }
-            std::cout << "2" << std::endl;
+
             if(M_data.viscoelasticWall())
                 {
                     for (UInt ielem=0; ielem <= M_FESpace.dim() ; ielem++ )
