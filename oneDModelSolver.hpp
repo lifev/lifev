@@ -398,6 +398,8 @@ public:
 
     //! timestep getters
     const Real timestep() const {return M_data.timestep();}
+    const Real inittime() const {return M_data.inittime();}
+    const Real endtime () const {return M_data.endtime();}
 
     //! left external point position
     const Real xLeft()    const {return M_data.xLeft();}
