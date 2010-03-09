@@ -1,15 +1,14 @@
 # -*- readme-debian -*-
 
-LifeV  1.0.0:
+LifeV  1.1.0:
 =============
 
 New Features
 ------------
 
-This distribution 1.0.x is the first public distribution
+Distribution 1.2.x will the first public distribution
 of the lifev-parallel.
-The serial version is continuing on a separate cvs module pobably
-with the name lifev-serial.
+The serial version is continuing on a separate cvs module, lifev-serial.
 
 
 Obsolete (Branch Obsolete)
