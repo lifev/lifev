@@ -133,8 +133,6 @@
 #include <life/lifecore/chrono.hpp>
 
 //#include <life/lifearray/tridiagMatrix.hpp>
-#include <life/lifealg/triDiagCholesky.hpp>
-#include <life/lifealg/triDiagLU.hpp>
 
 
 #include <lifemc/lifesolver/vectorFunction1D.hpp>
@@ -1681,6 +1679,7 @@ OneDModelSolver<Params, Flux, Source>::_correct_flux_inertial( const vector_type
 /*
   L2 Projection of the second derivative of Q over P1 space
 */
+/*
 template< class Params, class Flux, class Source >
 ScalVec
 OneDModelSolver<Params, Flux, Source>::_compute_d2Q_dx2( const ScalVec& flux )
@@ -1764,6 +1763,7 @@ OneDModelSolver<Params, Flux, Source>::_compute_d2Q_dx2( const ScalVec& flux )
 
     return _rhs;
 }
+*/
 
 
 /*

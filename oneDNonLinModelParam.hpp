@@ -31,7 +31,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <life/lifemesh/basicOneDMesh.hpp>
+//#include <life/lifemesh/basicOneDMesh.hpp>
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
