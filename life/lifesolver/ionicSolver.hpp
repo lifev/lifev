@@ -39,8 +39,6 @@
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/values.hpp>
-#include <life/lifearray/pattern.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
@@ -216,7 +214,7 @@ public:
 
     //! Solves the ionic model
     void ionModelSolve( const vector_type& u, const Real timestep );
-    
+
     //! Computes the term -1/ \Cm u^n (G (1-u^n/vp) (1-u^n/v_th) + eta_1 v^{n+1}) for the PDE righthand side
     void computeIion( Real Cm, ElemVec& elvec, ElemVec& elvec_u, FESpace<Mesh, EpetraMap>& uFESpace );
 
@@ -228,12 +226,12 @@ public:
 //    void initialize( const vector_type& );
 
     void setHeteroTauClose(fct_TauClose);
- 
+
     Real fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const;
 
 protected:
 
-    //! Global solution _w 
+    //! Global solution _w
     vector_type                    	M_sol_w;
     vector_type				M_wVecRep;
     ElemVec 				M_elvec;
@@ -262,7 +260,7 @@ Mitchell_Schaeffer( const data_type&          dataType,
 	   order_bdf ( IonicSolver<Mesh, SolverType>::M_data.order_bdf ),
 	   bdf_w( order_bdf )
 {
-	setHeteroTauClose(this->M_data.M_ShdPtr->get_heterotauclose());	
+	setHeteroTauClose(this->M_data.M_ShdPtr->get_heterotauclose());
 }
 
 
@@ -289,8 +287,8 @@ void Mitchell_Schaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
 		for ( UInt iNode = 0 ; iNode < ( UInt ) IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
-			M_elvec.vec()[ iNode ] = M_wVecRep[ig]; 
-		} 
+			M_elvec.vec()[ iNode ] = M_wVecRep[ig];
+		}
 }
 
 template<typename Mesh, typename SolverType>
@@ -310,16 +308,16 @@ template<typename Mesh, typename SolverType>
 void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
 {
         // Solving :
-	////           ((v_max-v_min)^{-2}  - w )/tau_open  if u < vcrit 
-	// dw/dt ={         
-	//            -w/tau_close   if u > vcrit  
-	//	
+	////           ((v_max-v_min)^{-2}  - w )/tau_open  if u < vcrit
+	// dw/dt ={
+	//            -w/tau_close   if u > vcrit
+	//
 	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/this->M_data.tau_open );
 	Real aux = 1.0/((this->M_data.v_max - this->M_data.v_min)*(this->M_data.v_max- this->M_data.v_min)* this->M_data.tau_open);
 	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/this->M_data.tau_close);
 	vector_type M_time_der=bdf_w.time_der(timestep);
-	
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);	
+
+	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);
 	Real x, y, z;
 	EntityFlag ref;
 	UInt ID;
@@ -338,7 +336,7 @@ void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, 
 			else
 				M_sol_w[ig] = aux2 *  M_time_der[ig];
 	}
-	bdf_w.shift_right(M_sol_w);	
+	bdf_w.shift_right(M_sol_w);
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);
 }

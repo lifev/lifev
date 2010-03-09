@@ -27,8 +27,6 @@
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/currentBdFE.hpp>
-#include <life/lifefem/currentHdivFE.hpp>
-#include <life/lifefem/refHybridFE.hpp>
 #include <life/lifefem/dof.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -335,27 +333,6 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemVec& elvec,
 		      const CurrentFE& fe, int iblock=0 );
 //@}
-  //----------------------------------------------------------------------
-  //
-  //!@name  Operators for H(div) finite elements
-  //!@{
-  //
-  //----------------------------------------------------------------------
-  //!Transpose of Elementary divergence matrix
-  void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
-		  const CurrentFE& fe_p, int iblock, int jblock );
-
-  //!Elementary divergence matrix
-  void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
-		 const CurrentFE& fe_p, int iblock, int jblock );
-
-  //!Elementary tp v dot n matrix
-  void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe, const RefHybridFE& vdotnfe, int iblock, int jblock );
-
-  //!Elementary tp^2  matrix
-  void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock, int jblock );
-
-//!@}
 //!@name Mass matrix
 //!@{
   //-------------Mass matrix---------------------------------------
@@ -363,9 +340,6 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
     Weighted Mass matrix with a permeability tensor which is a constant scalar matrix
     (i.e. \f$K^{-1} = coef \cdot Id\f$, coef being the inverse of the permeability).
   */
-  void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe,
-		  int iblock = 0, int jblock = 0 );
-
 
   void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
 		  int iblock, int jblock, int nb );
@@ -378,31 +352,6 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const CurrentFE& fe );
 
 
-
-  //-------------Mass matrix---------------------------------------
-  /*!
-    Weighted Mass matrix with permeability matrix which is a constant
-    per element symmetric positive definite matrix (non diagonal a
-    priori) and ALREADY INVERTED (with Lapack LU or Choleski for
-    instance).
-  */
-  void mass_Hdiv( Matrix const& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
-		  int iblock = 0, int jblock = 0 );
-
-
-  /*!
-    Weighted Mass matrix with a permeability that is a scalar function.
-    The inverse function of the permeability should be provided.
-  */
-  void mass_Hdiv( Real ( *Invperm ) ( const Real&, const Real&, const Real& ),
-		  ElemMat& elmat, const CurrentHdivFE& fe, int iblock, int jblock );
-
-  /*!
-    Weighted Mass matrix with a permeability which is a constant scalar
-    (i.e. K^{-1} = coef, coef is the inverse of the permeability).
-  */
-  void mass_Mixed_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& fe,
-			const CurrentHdivFE& hdivfe, int iblock, int jblock );
 
 //!@}
 

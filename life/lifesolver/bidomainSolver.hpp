@@ -38,8 +38,6 @@
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/values.hpp>
-#include <life/lifearray/pattern.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
@@ -56,7 +54,7 @@
 #include <life/lifefem/FESpace.hpp>
 #include <testsuite/test_heart/stiffness_fibers.hpp>
 #include <life/lifefem/bdf_template.hpp>
-#include <fstream> 
+#include <fstream>
 namespace LifeV
 {
 /*!
@@ -182,7 +180,7 @@ public:
             return *M_matrMass;
         }
 
-    BdfT<vector_type>& bdf_u() {return M_bdf_u;} 
+    BdfT<vector_type>& bdf_u() {return M_bdf_u;}
 
 protected:
 
@@ -563,11 +561,11 @@ if (M_CalCoef)
        massCoeff = 1.0/ M_data.getTimeStep();
 else
        massCoeff = M_data.Chi() * M_data.Cm() * M_bdf_u.coeff_der(0) / M_data.getTimeStep();
-	
+
 	M_comm->Barrier();
 
 	chrono.stop();
-    
+
 	if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
 
 	if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
@@ -609,10 +607,10 @@ initialize( const source_type& ui0, const source_type& ue0 )
 
      vector_type ui(M_uFESpace.map());
      vector_type ue(M_uFESpace.map());
-    
+
      M_uFESpace.interpolate(ui0, ui, 0.);
      M_uFESpace.interpolate(ue0, ue, 0.);
-    
+
      initialize(ui, ue);
 }
 
@@ -852,12 +850,12 @@ for ( int i = 0 ; i < rhsFull.getEpetraVector().MyLength() ; i++ )
 	}
     M_bdf_u.shift_right(M_sol_uiue);
     M_sol_uiue_extrap = M_bdf_u.extrap();
-    M_bdf_u.showMe(); 
+    M_bdf_u.showMe();
     for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
         {
         UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
         M_sol_u_extrap[ig] = M_sol_uiue_extrap[ig] - M_sol_uiue_extrap[ig+dim_u()]; // BASEINDEX + 1
-        } 
+        }
 
 }
 

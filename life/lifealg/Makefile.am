@@ -22,18 +22,11 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-if HAVE_PETSC
-PETSC_SRCS=SolverPETSC.cpp
-endif
-if HAVE_UMFPACK
-UMFPACK_SRCS=SolverUMFPACK.cpp
-endif
-
 lib_LTLIBRARIES	= liblifealg.la
 
-liblifealg_la_SOURCES	= EpetraPreconditioner.cpp MLPreconditioner.cpp IfpackPreconditioner.cpp SolverAmesos.cpp SolverTrilinos.cpp SolverAztec.cpp dataAztec.cpp dataNewton.cpp EpetraMap.cpp $(PETSC_SRCS) $(UMFPACK_SRCS)
+liblifealg_la_SOURCES	= EpetraPreconditioner.cpp MLPreconditioner.cpp IfpackPreconditioner.cpp SolverAmesos.cpp SolverTrilinos.cpp dataNewton.cpp EpetraMap.cpp
 
-liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(umfpack_libs) $(aztec_libs)
+liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(aztec_libs)
 include $(top_srcdir)/admin/Doxyfile.am
 
 

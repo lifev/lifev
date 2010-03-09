@@ -34,11 +34,9 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/dof.hpp>
-#include <life/lifearray/pattern.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/refFE.hpp>
-#include <life/lifefem/values.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/FESpace.hpp>

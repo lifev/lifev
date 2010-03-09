@@ -40,8 +40,6 @@
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/values.hpp>
-#include <life/lifearray/pattern.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/algebraic_facto.hpp>

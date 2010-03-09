@@ -22,7 +22,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 lib_LTLIBRARIES		= liblifemesh.la
 liblifemesh_la_SOURCES	= bareItems.cpp basisElSh.cpp geo0D.cpp identifier.cpp \
-markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp subDomainNeighbors.cpp
+markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp
 
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la
 
