@@ -173,11 +173,11 @@ EnsightToHdf5::run()
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > importer;
 
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
-    std::string const exporterName =  dataFile( "exporter/filename", "ensight");
+    std::string const exporterType =  dataFile( "exporter/type", "hdf5");
+    std::string const exporterName =  dataFile( "exporter/filename", "ethiersteinman");
 
     std::string const importerType =  dataFile( "importer/type", "ensight");
-    std::string const importerName =  dataFile( "importer/filename", "ensight");
+    std::string const importerName =  dataFile( "importer/filename", "ethiersteinman");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
