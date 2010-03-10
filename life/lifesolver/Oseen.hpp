@@ -1370,16 +1370,21 @@ Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag, const vector_type& sol
 }
 
 template<typename Mesh, typename SolverType> Real
-Oseen<Mesh, SolverType>::LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC, const vector_type& Solution )
+Oseen<Mesh, SolverType>::LagrangeMultiplier( const EntityFlag&         Flag,
+                                                   bchandler_raw_type& BC,
+                                             const vector_type&        Solution )
 {
     // Create a list of Flux BCName
     std::vector< BCName > FluxBCVector = BC.getBCWithType( Flux );
     BCName FluxBCName = BC.GetBCWithFlag( Flag ).name();
 
+    // Create a Repeated vector for looking to the lambda
+    vector_type VelocityPressureLambda(Solution, Repeated);
+
     // Find the index associated to the correct Lagrange multiplier
     for ( UInt lmIndex(0); lmIndex < static_cast <UInt> ( FluxBCVector.size() ); ++lmIndex )
         if ( FluxBCName.compare( FluxBCVector[lmIndex] ) == 0 )
-            return Solution[3 * M_uFESpace.dof().numTotalDof() + M_pFESpace.dof().numTotalDof() + 1 + lmIndex];
+            return VelocityPressureLambda[3 * M_uFESpace.dof().numTotalDof() + M_pFESpace.dof().numTotalDof() + 1 + lmIndex];
 
     // If lmIndex has not been found a warning message is printed
     std::cout << "!!! Warning - Lagrange multiplier for Flux BC not found!" << std::endl;
