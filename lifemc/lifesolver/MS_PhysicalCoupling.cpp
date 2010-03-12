@@ -245,6 +245,12 @@ MS_PhysicalCoupling::SaveSolution()
         output.close();
 }
 
+void
+MS_PhysicalCoupling::ClearModelsList()
+{
+    M_models.clear();
+}
+
 // ===================================================
 // Set Methods
 // ===================================================

@@ -71,9 +71,9 @@ public:
     MS_Model_MultiScale( const MS_Model_MultiScale& multiscale );
 
     //! Destructor
-    ~MS_Model_MultiScale() {}
+    ~MS_Model_MultiScale();
 
-    //@}class
+    //@}
 
 
     //! @name Operators
@@ -139,7 +139,7 @@ public:
 
     //! Export the Jacobian matrix
     /*!
-     * @param Jacobian Jacobian Matrix
+     * @param Jacobian Matrix
      */
     void ExportJacobian( MatrixType& Jacobian );
 

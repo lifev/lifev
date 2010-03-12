@@ -64,6 +64,21 @@ MS_Model_MultiScale::MS_Model_MultiScale( const MS_Model_MultiScale& multiscale 
 
 }
 
+MS_Model_MultiScale::~MS_Model_MultiScale()
+{
+
+    #ifdef DEBUG
+        Debug( 8110 ) << "MS_Model_MultiScale::~MS_Model_MultiScale( ) \n";
+    #endif
+
+        // Disconnect models and couplings to allow their destruction
+        for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
+            ( *i )->ClearCouplingsList();
+
+        for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
+            ( *i )->ClearModelsList();
+}
+
 // ===================================================
 // Operators
 // ===================================================
