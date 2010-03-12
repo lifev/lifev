@@ -172,6 +172,13 @@ public:
     //! Save the coupling variables information on a file
     void SaveSolution();
 
+    //! Clear the list of pointers to the models.
+    /*!
+     *  This method has to be called before the automatic destructor, in order
+     *  to disconnect the coupling classes from the model classes.
+     */
+    void ClearModelsList();
+
     //@}
 
 

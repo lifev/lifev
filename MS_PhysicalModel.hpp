@@ -150,6 +150,19 @@ public:
     //@}
 
 
+    //! @name Methods
+    //@{
+
+    //! Clear the list of pointers to the couplings.
+    /*!
+     *  This method has to be called before the automatic destructor, in order
+     *  to disconnect the coupling classes from the model classes.
+     */
+    void ClearCouplingsList();
+
+    //@}
+
+
     //! @name Set Methods
     //@{
 
