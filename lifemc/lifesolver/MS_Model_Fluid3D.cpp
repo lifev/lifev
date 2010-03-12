@@ -91,13 +91,6 @@ MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
 {
 }
 
-MS_Model_Fluid3D::~MS_Model_Fluid3D()
-{
-#ifdef HAVE_HDF5
-    //M_output->CloseFile();
-#endif
-}
-
 // ===================================================
 // Operators
 // ===================================================
@@ -338,6 +331,11 @@ MS_Model_Fluid3D::SaveSolution()
     //Post-processing
     *M_FluidSolution = M_Fluid->solution();
     M_output->postProcess( M_FluidData->getTime() );
+
+#ifdef HAVE_HDF5
+    if ( M_dataTime->isLastTimeStep() )
+        M_output->CloseFile();
+#endif
 
     //MPI Barrier
     //M_comm->Barrier();

@@ -101,7 +101,7 @@ public:
     MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D );
 
     //! Destructor
-    ~MS_Model_Fluid3D();
+    ~MS_Model_Fluid3D() {}
 
     //@}
 
