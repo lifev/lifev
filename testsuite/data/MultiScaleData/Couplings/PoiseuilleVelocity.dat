@@ -37,8 +37,8 @@ list = 'XYZPoiseuille'  # Poiseuille
 	type      			= Essential
 	mode     			= Full
 	component  			= 3
-	function   			= '(0., 0., (1/4-(x^2+y^2))/(4*0.035))' #TEMPORARY FIX
-	#OPERfunction   	= '(0., 0., (1/4-(x^2+y^2))/(4*f_viscosity))'
-	#OPERfunction   	= '(0., 0., (f_area/pi-(x^2+y^2))/(4*f_viscosity))' # More general
+	function   			= '[0., 0., (1/4-(x^2+y^2))/(4*0.035)]' #TEMPORARY FIX
+	#OPERfunction   	= '[0., 0., (1/4-(x^2+y^2))/(4*f_viscosity)]'
+	#OPERfunction   	= '[0., 0., (f_area/pi-(x^2+y^2))/(4*f_viscosity)]' # More general
 	
 	[../]
