@@ -276,7 +276,7 @@ template< class Operator >
 inline void
 BCInterface_OperatorFunction< Operator >::SetVariable( const std::string& name, const Real& value )
 {
-    super::M_parser->setVariable( name, value );
+    super::M_parser->SetVariable( name, value );
 }
 
 template< >

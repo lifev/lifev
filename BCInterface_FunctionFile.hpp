@@ -358,7 +358,7 @@ inline void
 BCInterface_FunctionFile< Operator >::DataInterpolation()
 {
     //Get variable
-    Real X = super::M_parser->getVariable( M_variables[0] );
+    Real X = super::M_parser->GetVariable( M_variables[0] );
 
     //If it is a loop scale the variable: X = X - (ceil( X / Xmax ) -1) * Xmax
     if ( M_loop )
@@ -407,7 +407,7 @@ BCInterface_FunctionFile< Operator >::DataInterpolation()
         A  = M_data[M_variables[j]][position];
         B  = M_data[M_variables[j]][position + 1];
 
-        super::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
+        super::M_parser->SetVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
 #ifdef DEBUG
         Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";

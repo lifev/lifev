@@ -270,7 +270,7 @@ BCInterface_Function< Operator >::SetData( const BCInterface_Data< Operator >& d
     M_baseString = data.GetBaseString();
 
     if ( M_parser )
-        M_parser->setString( M_baseString );
+        M_parser->SetString( M_baseString );
     else
         M_parser.reset( new Parser( M_baseString ) );
 
@@ -302,7 +302,7 @@ inline void BCInterface_Function< Operator >::SetFunction()
      * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
      */
 
-    UInt arguments = M_parser->countSubstring( "," ) + 1;
+    UInt arguments = M_parser->CountSubstring( "," ) + 1;
 
 #ifdef DEBUG
     Debug( 5021 ) << "BCInterface_Function::setFunction            arguments: " << arguments << "\n";
@@ -342,18 +342,18 @@ BCInterface_Function< Operator >::Function( const Real& t,
     Debug( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
-    M_parser->setVariable( "t", t );
-    M_parser->setVariable( "x", x );
-    M_parser->setVariable( "y", y );
-    M_parser->setVariable( "z", z );
+    M_parser->SetVariable( "t", t );
+    M_parser->SetVariable( "x", x );
+    M_parser->SetVariable( "y", y );
+    M_parser->SetVariable( "z", z );
 
     this->DataInterpolation();
 
 #ifdef DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 ) << "\n";
+    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->Evaluate( 1 ) << "\n";
 #endif
 
-    return M_parser->evaluate( 1 );
+    return M_parser->Evaluate( 1 );
 }
 
 template< typename Operator >
@@ -374,18 +374,18 @@ BCInterface_Function< Operator >::FunctionID( const Real& t,
     Debug( 5021 ) << "                                                          id: " << id << "\n";
 #endif
 
-    M_parser->setVariable( "t", t );
-    M_parser->setVariable( "x", x );
-    M_parser->setVariable( "y", y );
-    M_parser->setVariable( "z", z );
+    M_parser->SetVariable( "t", t );
+    M_parser->SetVariable( "x", x );
+    M_parser->SetVariable( "y", y );
+    M_parser->SetVariable( "z", z );
 
     this->DataInterpolation();
 
 #ifdef DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] ) << "\n";
+    Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->Evaluate( M_mapID[id] ) << "\n";
 #endif
 
-    return M_parser->evaluate( M_mapID[id] );
+    return M_parser->Evaluate( M_mapID[id] );
 }
 
 } // Namespace LifeV
