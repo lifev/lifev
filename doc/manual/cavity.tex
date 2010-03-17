@@ -345,7 +345,7 @@ informations on the console ( 0 in our case ).
     // By default, it's data.
 
     GetPot command_line(argc, argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
+    const std::string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
 \end{verbatim}

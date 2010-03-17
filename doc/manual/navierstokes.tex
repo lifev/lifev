@@ -100,7 +100,7 @@ to store a history of previous solution in order to be able to compute the discr
 This can be done by using the following object :
 \begin{verbatim}
     // bdf initialization with the stokes problem solution
-    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 \end{verbatim}
 The Backward Differentiation Formula templated class \verb!BdfTNS! \ixn{Backward Differentiation Formula} will store the previous solution $u^n$, $u^{n-1}$ ... so that
 they will always be accessible when we need them. All we have to do is to construct this class
@@ -115,9 +115,9 @@ We are now ready to enter the time loop :
 
 \begin{verbatim}
 
-    Real dt     = dataNavierStokes.timestep();
-    Real t0     = dataNavierStokes.inittime();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime ();
 
     int iter = 1;
 
