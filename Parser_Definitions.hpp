@@ -39,6 +39,7 @@
 #include <map>
 #include <iomanip>
 #include <string>
+#include <algorithm>
 
 // LifeV config
 #include <lifeconfig.h>
@@ -46,25 +47,27 @@
 
 // BOOST Classes
 #include <boost/algorithm/string.hpp>
-#ifdef HAVE_BOOST_SPIRIT_CLASSIC
-    #ifdef HAVE_BOOST_SPIRIT_CLASSIC_TEMP
-        #include <boost/spirit/include/classic.hpp>
-        #include <boost/spirit/include/phoenix1_binders.hpp>
+#include <boost/shared_ptr.hpp>
 
-        namespace spirit = boost::spirit::classic;
-    #else
-        #include <boost/spirit.hpp>
-        #include <boost/spirit/phoenix/binders.hpp>
+#ifdef HAVE_BOOST_SPIRIT_QI
+    // BOOST Spirit Classes
+    #include <boost/spirit/include/qi.hpp>
+    #include <boost/spirit/include/phoenix_bind.hpp>
+    #include <boost/spirit/include/phoenix_operator.hpp>
 
-        namespace spirit = boost::spirit;
-    #endif
-#endif
+    // BOOST Spirit Namespaces
+    namespace spirit  = boost::spirit;
+    namespace qi      = spirit::qi;
+    namespace ascii   = spirit::ascii;
+    namespace phoenix = boost::phoenix;
+#endif /* HAVE_BOOST_SPIRIT_QI */
 
 namespace LifeV {
 
-typedef std::map< std::string, Real >            Variables_Type;
-typedef std::vector< Real >                      Results_Type;
 typedef std::vector< std::string >               Strings_Type;
+typedef std::string::const_iterator              String_Iterator;
+
+typedef std::vector< Real >                      Results_Type;
 
 } // Namespace LifeV
 

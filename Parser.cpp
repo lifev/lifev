@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -33,57 +33,47 @@
  * @date 07-04-2009
  */
 
-#include <lifemc/lifecore/Parser.hpp>
+#include "Parser.hpp"
 
 namespace LifeV {
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-Parser::Parser( const bool& applyRules ) :
+Parser::Parser() :
     M_strings       (),
-    M_variables     (),
     M_results       (),
-    M_nResults      ( 0 ),
-    M_calculator    ( M_variables, M_results, M_nResults ),
-    M_applyRules    ( applyRules )
+    M_calculator    (),
+    M_evaluate      ( true )
 {
 
 #ifdef DEBUG
     Debug( 5030 ) << "Parser::Parser"<< "\n";
 #endif
 
-    // Set default variables
-    setDefaultVariables();
+    M_calculator.SetDefaultVariables();
 }
 
-Parser::Parser( const std::string& string, const bool& applyRules ) :
+Parser::Parser( const std::string& String ) :
     M_strings       (),
-    M_variables     (),
     M_results       (),
-    M_nResults      ( 0 ),
-    M_calculator    ( M_variables, M_results,M_nResults ),
-    M_applyRules    ( applyRules )
+    M_calculator    (),
+    M_evaluate      ( true )
 {
 
 #ifdef DEBUG
-    Debug( 5030 ) << "Parser::Parser"<< "\n";
+    Debug( 5030 ) << "Parser::Parser( string, applyRules )"<< "\n";
 #endif
 
-    // Set default variables
-    setDefaultVariables();
-
-    // Set the string (it is not necessary to empty M_results)
-    setString( string );
+    M_calculator.SetDefaultVariables();
+    SetString( String );
 }
 
 Parser::Parser( const Parser& parser ) :
     M_strings       ( parser.M_strings ),
-    M_variables     ( parser.M_variables ),
     M_results       ( parser.M_results ),
-    M_nResults      ( parser.M_nResults ),
     M_calculator    ( parser.M_calculator ),
-    M_applyRules    ( parser.M_applyRules )
+    M_evaluate      ( parser.M_evaluate )
 {
 }
 
@@ -91,16 +81,14 @@ Parser::Parser( const Parser& parser ) :
 // Operators
 // ===================================================
 Parser&
-Parser::operator=( const Parser& parser )
+Parser::operator=( const Parser& Parser )
 {
-    if ( this != &parser )
+    if ( this != &Parser )
     {
-        M_strings    = parser.M_strings;
-        M_variables  = parser.M_variables;
-        M_results    = parser.M_results;
-        M_nResults   = parser.M_nResults;
-        M_calculator = parser.M_calculator;
-        M_applyRules = parser.M_applyRules;
+        M_strings    = Parser.M_strings;
+        M_results    = Parser.M_results;
+        //M_calculator = Parser.M_calculator; //NOT WORKING!!!
+        M_evaluate   = Parser.M_evaluate;
     }
 
     return *this;
@@ -110,45 +98,70 @@ Parser::operator=( const Parser& parser )
 // Methods
 // ===================================================
 const Real&
-Parser::evaluate( const UInt& ID )
+Parser::Evaluate( const UInt& ID )
 {
-    for ( UInt i = 0; i < M_strings.size(); ++i )
-        spirit::parse( M_strings[i].begin(), M_strings[i].end(), M_calculator, spirit::space_p );
+    if ( M_evaluate )
+    {
+        M_results.clear();
+        String_Iterator start, end;
+
+        for ( UInt i = 0; i < M_strings.size(); ++i )
+        {
+            start = M_strings[i].begin();
+            end   = M_strings[i].end();
+#ifdef HAVE_BOOST_SPIRIT_QI
+            qi::phrase_parse( start, end, M_calculator, ascii::space, M_results);
+#else
+            std::cout << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
+            // This generate an error ---------
+            int *a = new int(0); int *b; b = a;
+            delete a; delete b;
+            // --------------------------------
+#endif
+        }
+
+        M_evaluate = false;
+    }
 
 #ifdef DEBUG
     Debug( 5030 ) << "Parser::evaluate          results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
 #endif
 
-    M_nResults = 0; //Reset for next evaluation
-
     return M_results[ID - 1];
 }
 
 UInt
-Parser::countSubstring( const std::string& substring )
+Parser::CountSubstring( const std::string& Substring )
 {
     UInt count( 0 );
     std::string::size_type position( 0 );
 
     for ( ;; )
     {
-        position = M_strings.back().find( substring, position );
+        position = M_strings.back().find( Substring, position );
 
         if ( position == std::string::npos )
             break;
 
         ++count;
-        position += substring.length(); // start next search after this substring
+        position += Substring.length(); // start next search after this substring
     }
 
     return count;
+}
+
+void
+Parser::ClearVariables()
+{
+    M_calculator.ClearVariables();
+    M_evaluate = true;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-Parser::setString( const std::string& string, const std::string& stringSeparator )
+Parser::SetString( const std::string& String, const std::string& StringSeparator )
 {
 
 #ifdef DEBUG
@@ -156,112 +169,44 @@ Parser::setString( const std::string& string, const std::string& stringSeparator
 #endif
 
     M_strings.clear();
-    boost::split( M_strings, string, boost::is_any_of( stringSeparator ) );
+    boost::split( M_strings, String, boost::is_any_of( StringSeparator ) );
 
-#ifdef DEBUG
-    Debug( 5030 ) << "                               applyRules: " << M_applyRules << "\n";
-#endif
+    //Remove white space to speed up the parser
+    for ( UInt i = 0; i < M_strings.size(); ++i )
+        boost::replace_all( M_strings[i], " ", "" );
 
-    if ( M_applyRules )
-        for ( UInt i = 0; i < M_strings.size(); ++i )
-            ruleTheString( M_strings[i] );
+    //Reserve the space for results
+    M_results.clear();
+    M_results.reserve( CountSubstring( "," ) + 1 );
 
-    setupResults();
+    M_evaluate = true;
 }
 
 void
-Parser::setVariable( const std::string& name, const Real& value )
+Parser::SetVariable( const std::string& Name, const Real& Value )
 {
 
 #ifdef DEBUG
-    Debug( 5030 ) << "Parser::setVariable    variables[" << name << "]: " << value << "\n";
+    Debug( 5030 ) << "Parser_Utility::SetVariable    variables[" << Name << "]: " << Value << "\n";
 #endif
 
-    M_variables[name] = value;
+    M_calculator.SetVariable( Name, Value);
+
+    M_evaluate = true;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 const Real&
-Parser::getVariable( const std::string& name )
+Parser::GetVariable( const std::string& Name )
 {
 
 #ifdef DEBUG
-    Debug( 5030 ) << "Parser::getVariable    variables[" << name << "]: " << M_variables[name] << "\n";
+    Debug( 5030 ) << "Parser_Utility::GetVariable    variables[" << Name << "]: " << M_calculator.GetVariable( Name ) << "\n";
 #endif
 
-    return M_variables[name];
-}
-
-// ===================================================
-// Private functions
-// ===================================================
-inline void
-Parser::setDefaultVariables()
-{
-    //setVariable( "pi", Pi ); //Using the tab of LifeV
-    setVariable( "pi", 3.141592653589793 );
-    //setVariable( "pi", 3.1415926535897932384626433832795 ); //Better only with long Real!
-    setVariable( "e", 2.718281828459046 );
-}
-
-inline void
-Parser::setupResults()
-{
-    M_nResults = 0;
-
-    //Reserve the space for results
-    M_results.clear();
-    M_results.reserve( countSubstring( "," ) + 1 );
-
-#ifdef DEBUG
-    Debug( 5030 ) << "Parser::setupResults      dimension: " << countSubstring( "," ) + 1 << "\n";
-#endif
-
-    //std::vector<std::string> tempVectorString;
-    //boost::split( tempVectorString, M_strings.back(), boost::is_any_of(stringSeparator) );
-    //M_results.reserve( tempVectorString.size() );
-}
-
-inline void
-Parser::ruleTheString( std::string& string )
-{
-
-#ifdef DEBUG
-    Debug( 5030 ) << "Parser::ruleTheString" << "\n";
-    Debug( 5030 ) << "                        (before) - string: " << string << "\n";
-#endif
-
-    // Remove spaces from the string
-    boost::replace_all( string, " ", "" );
-
-    // Solve the problem of signed expressions
-    boost::replace_all( string, "(-", "(-1*" );
-    boost::replace_all( string, ",-", ",-1*" );
-    boost::replace_all( string, "=-", "=-1*" );
-    if ( string[0] == '-' )
-        string.insert( 1, "1*" );
-
-    // Convert the string to lower case
-    boost::to_lower( string );
-
-    // Apply the rules for the parser
-    boost::replace_all( string, "sqrt", "Q" );
-    boost::replace_all( string, "exp", "E" );
-    boost::replace_all( string, "log", "L" );
-    boost::replace_all( string, "log10", "M" );
-    boost::replace_all( string, "sin", "S" );
-    boost::replace_all( string, "cos", "C" );
-    boost::replace_all( string, "tan", "T" );
-
-    //Apply exceptions for the parser
-    boost::replace_all( string, "visCity", "viscosity" );
-
-#ifdef DEBUG
-    Debug( 5030 ) << "                         (after) - string: " << string << "\n";
-#endif
-
+    return M_calculator.GetVariable( Name );
 }
 
 } // Namespace LifeV

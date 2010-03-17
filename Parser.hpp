@@ -37,11 +37,7 @@
 #define Parser_H 1
 
 #include <lifemc/lifecore/Parser_Definitions.hpp>
-#ifdef HAVE_BOOST_SPIRIT_CLASSIC
-    #include <lifemc/lifecore/Parser_SpiritClassic.hpp>
-#elif  HAVE_BOOST_SPIRIT_QI
-    //#include <lifemc/lifecore/Parser_SpiritQI.hpp>
-#endif
+#include <lifemc/lifecore/Parser_SpiritGrammar.hpp>
 
 namespace LifeV {
 
@@ -53,28 +49,25 @@ class Parser
 {
 public:
 
+    typedef Parser_SpiritGrammar<String_Iterator>        Calculator_Type;
+
     //! @name Constructors & Destructor
     //@{
 
-    //! Empty string constructor (it needs a manual call to setString)
-    /*!
-     * @param applyRules use rules for notation
-     */
-    //! Constructor
-    Parser( const bool& applyRules = true );
+    //! Empty constructor (it needs a manual call to setString)
+    Parser();
 
     //! Constructor
     /*!
-     * @param string expression to parse
-     * @param applyRules use rules for notation
+     * @param String expression to parse
      */
-    Parser( const std::string& string, const bool& applyRules = true );
+    Parser( const std::string& String );
 
     //! Copy constructor
     /*!
      * @param Parser Parser
      */
-    Parser( const Parser& parser );
+    Parser( const Parser& Parser );
 
     //! Destructor
     ~Parser() {}
@@ -90,7 +83,7 @@ public:
      * @param Parser Parser
      * @return reference to a copy of the class
      */
-    Parser& operator=( const Parser& parser );
+    Parser& operator=( const Parser& Parser );
 
     //@}
 
@@ -102,19 +95,17 @@ public:
      * @param ID expression index (starting from 1)
      * @return computed value
      */
-    const Real& evaluate( const UInt& ID = 1 );
+    const Real& Evaluate( const UInt& ID = 1 );
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
-     * @param substring string to find
+     * @param Substring string to find
      * @return number of substring
      */
-    UInt countSubstring( const std::string& substring );
+    UInt CountSubstring( const std::string& Substring );
 
-    void showMeVariables() const
-    {
-        M_calculator.showMeVariables();
-    }
+    //! Clear all the variables.
+    void ClearVariables();
 
     //@}
 
@@ -123,17 +114,17 @@ public:
 
     /*! Set string function
      *
-     * @param string Expression to evaluate
-     * @param stringSeparator Separator identifier (default -> ";")
+     * @param String Expression to evaluate
+     * @param StringSeparator Separator identifier (default -> ";")
      */
-    void setString( const std::string& string, const std::string& stringSeparator = ";" );
+    void SetString( const std::string& String, const std::string& StringSeparator = ";" );
 
     /*! Set/replace a variable
      *
-     * @param name name of the parameter
-     * @param value value of the parameter
+     * @param Name name of the parameter
+     * @param Value value of the parameter
      */
-    void setVariable( const std::string& name, const Real& value );
+    void SetVariable( const std::string& Name, const Real& Value );
 
     //@}
 
@@ -143,34 +134,20 @@ public:
 
     /*! Get variable
      *
-     * @param name name of the parameter
+     * @param Name name of the parameter
      * @return value of the variable
      */
-    const Real& getVariable( const std::string& name );
+    const Real& GetVariable( const std::string& Name );
 
     //@}
 private:
 
-    Strings_Type     M_strings;
-    Variables_Type   M_variables;
-    Results_Type     M_results;
-    UInt             M_nResults;
-    SpiritCalculator M_calculator;
-    bool             M_applyRules;
+    Strings_Type        M_strings;
+    Results_Type        M_results;
 
-    //! @name Private functions
-    //@{
+    Calculator_Type     M_calculator;
 
-    //! Setup results
-    inline void setupResults();
-
-    //! Set default variables
-    inline void setDefaultVariables();
-
-    //! Apply rules to the string
-    inline void ruleTheString( std::string& string );
-
-    //@}
+    bool                M_evaluate;
 
 };
 
