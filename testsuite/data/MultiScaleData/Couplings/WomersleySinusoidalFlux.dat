@@ -22,5 +22,6 @@ list = 'WomersleySinusoidalFlux'  # Womersley Sinusoidal Flux
 	type				= Flux
 	mode				= Full
 	component			= 3
-	function		    = 'p=1.07313022459812; -0.116481669334104*sin(2*pi*t/p)' # Womersley = 10, Reynolds = 100
+	function		    = 'T=13.4026108412793; -sin(2*pi*t/T)' 
+	                    # Wo = 2.5, Re = 600 (with rho = 1, mu = 0.00188259560676, D = 1)
 	[../]

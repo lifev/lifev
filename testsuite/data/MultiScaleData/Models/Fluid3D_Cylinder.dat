@@ -35,7 +35,7 @@ diagonalBlockPrec   = false
 
     [../time_discretization]
     #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
-    BDF_order       = 1               # [s]
+    BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
@@ -55,7 +55,10 @@ diagonalBlockPrec   = false
     div_beta_u_v    = false                # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
-
+    
+    [../miscellaneous]
+    Stokes          = false            # Solve a Stokes problem
+    
     [../ipstab]
     gammaBeta       = 0.02
     gammaDiv        = 0.2

@@ -19,9 +19,9 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial5_FluxStress.dat
 ###################################################################################################
 
 	[./time_discretization]
-	initialtime		= 0.0                 # [s]
-	endtime			= 4.2925208983925     # [s]
-	timestep		= 0.00419191493983642 # [s]
+	initialtime		= 0.0                # [s]
+	endtime			= 53.610443365117    # [s]
+	timestep		= 0.052353948598747  # [s]
 	
 	[../Algorithm]
 	AlgorithmType   = Newton        # Aitken - Newton
@@ -105,6 +105,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial5_FluxStress.dat
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0                 # density   [g/cm^3]
-fluidViscosity	= 0.00148309067632946 # viscosity [g/cm/s]
+fluidDensity	= 0.895347939450773   # density   [g/cm^3]
+fluidViscosity	= 0.00189998733800979 # viscosity [g/cm/s]
 ###################################################################################################

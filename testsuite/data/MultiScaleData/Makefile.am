@@ -34,6 +34,7 @@ dist_pkgdata_DATA = MultiScale_test.dat \
 					Run3Dserial1_Stationary.dat \
 					Run3Dserial1.dat \
 					Run3Dserial2_FluxStress_Stationary.dat \
+					Run3Dserial2_Stress.dat \
 					Run3Dserial5_FluxStress.dat \
 					Run3Dserial5_Stress.dat \
 					Run3Dserial6_FluxStress.dat \
