@@ -285,13 +285,13 @@ private:
     //@{
 
     //! Setup the FE space for pressure and velocity
-    void setupFEspace();
+    void SetupFEspace();
 
     //! Setup the DOF of the model
-    void setupDOF();
+    void SetupDOF();
 
     //! Setup the offset for fluxes boundary conditions
-    void setupBCOffset( const boost::shared_ptr< FluidBCType >& BC );
+    void SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC );
 
     //@}
 
