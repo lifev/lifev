@@ -132,17 +132,19 @@ public:
     //! @name Set functions
     //@{
 
-  INLINE void density ( const Real& density, const UInt nfluid=0 )
-  {
-    ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
-    M_density[nfluid] = density;
-  };
+    inline void density ( const Real& density, const UInt nfluid=0 )
+    {
+        ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
+        M_density[nfluid] = density;
+    }
 
-  INLINE void viscosity ( const Real& viscosity, const UInt nfluid=0 )
-  {
-    ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
-    M_viscosity[nfluid] = viscosity;
-  };
+    inline void viscosity ( const Real& viscosity, const UInt nfluid=0 )
+    {
+        ASSERT(nfluid< M_fluid_number,"Undeclared fluid");
+        M_viscosity[nfluid] = viscosity;
+    }
+
+    void setStokes             ( const bool Stokes )     { M_Stokes = Stokes; }
 
     void setSemiImplicit       ( const bool SI )         {
                                                            M_semiImplicit = SI;
@@ -159,18 +161,19 @@ public:
     //! @name Get functions
     //@{
 
-    INLINE UInt fluid_number() const { return M_fluid_number; };
+    inline UInt fluid_number() const { return M_fluid_number; };
 
-    INLINE Real density(const UInt& n=0) const
+    inline Real density(const UInt& n=0) const
     {
-      ASSERT(n<M_fluid_number,"Undelared fluid");
-      return M_density[n];
-    };
-    INLINE Real viscosity(const UInt& n=0) const
+        ASSERT(n<M_fluid_number,"Undelared fluid");
+        return M_density[n];
+    }
+
+    inline Real viscosity(const UInt& n=0) const
     {
-      ASSERT(n<M_fluid_number,"Undelared fluid");
-      return M_viscosity[n];
-    };
+        ASSERT(n<M_fluid_number,"Undelared fluid");
+        return M_viscosity[n];
+    }
 
     std::string     uOrder()                      const { return M_uOrder; }
     std::string     pOrder()                      const { return M_pOrder; }
@@ -182,6 +185,7 @@ public:
 
     NSStabilization stabilization()               const { return M_stab_method; }
 
+    inline bool     Stokes()                      const { return M_Stokes; }
     bool            isSemiImplicit()              const { return M_semiImplicit; }
     bool            useShapeDerivatives()         const { return M_shapeDerivatives; }
 
@@ -211,7 +215,8 @@ protected:
     Real             M_dump_init;   // time for starting the dumping of the results (Alex December 2003)
     UInt             M_dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
     Real             M_factor;      // amplification factor for moving domains
-
+    bool             M_Stokes;      // true: Stokes problem; false: Navier-Stokes problem
+    
     //! Discretization
     NSStabilization  M_stab_method;
 
@@ -251,6 +256,7 @@ DataNavierStokes<Mesh>::DataNavierStokes( const GetPot&      dataFile,
         M_dump_init                        ( ),
         M_dump_period                      ( ),
         M_factor                           ( ),
+        M_Stokes                           ( false ),
         M_stab_method                      ( ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
@@ -279,6 +285,7 @@ DataNavierStokes<Mesh>::DataNavierStokes( const DataNavierStokes& dataNavierStok
     M_dump_init                        ( dataNavierStokes.M_dump_init ),
     M_dump_period                      ( dataNavierStokes.M_dump_period ),
     M_factor                           ( dataNavierStokes.M_factor ),
+    M_Stokes                           ( dataNavierStokes.M_Stokes ),
     M_stab_method                      ( dataNavierStokes.M_stab_method ),
     M_semiImplicit                     ( false ),
     M_shapeDerivatives                 ( false ),
@@ -307,7 +314,7 @@ DataNavierStokes<Mesh>::operator=( const DataNavierStokes& dataNavierStokes )
         DataMesh<Mesh>::operator=( dataNavierStokes );
         DataTime::operator=( dataNavierStokes );
 
-	M_fluid_number                     = dataNavierStokes.M_fluid_number;
+        M_fluid_number                     = dataNavierStokes.M_fluid_number;
         M_density                          = dataNavierStokes.M_density;
         M_viscosity                        = dataNavierStokes.M_viscosity;
         M_uOrder                           = dataNavierStokes.M_uOrder;
@@ -316,6 +323,7 @@ DataNavierStokes<Mesh>::operator=( const DataNavierStokes& dataNavierStokes )
         M_dump_init                        = dataNavierStokes.M_dump_init;
         M_dump_period                      = dataNavierStokes.M_dump_period;
         M_factor                           = dataNavierStokes.M_factor;
+        M_Stokes                           = dataNavierStokes.M_Stokes;
         M_stab_method                      = dataNavierStokes.M_stab_method;
         M_semiImplicit                     = dataNavierStokes.M_semiImplicit;
         M_shapeDerivatives                 = dataNavierStokes.M_shapeDerivatives;
@@ -344,38 +352,39 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
     UInt temp = dataFile("fluid/physics/fluid_number", 0 );
 
     if (temp == 0) // Old fashion of declaring fluids
-      {
-	M_fluid_number = 1;
-	M_density.push_back( dataFile( "fluid/physics/density", 1. ) );
-	M_viscosity.push_back ( dataFile( "fluid/physics/viscosity", 1. ) );
-      }
+    {
+        M_fluid_number = 1;
+        M_density.push_back( dataFile( "fluid/physics/density", 1. ) );
+        M_viscosity.push_back ( dataFile( "fluid/physics/viscosity", 1. ) );
+    }
     else   // New fashion of declaring fluids
-      {
-	M_fluid_number = temp;
-	M_density = std::vector<Real>(temp,0);
-	M_viscosity = std::vector<Real>(temp,0);
+    {
+        M_fluid_number = temp;
+        M_density = std::vector<Real>(temp,0);
+        M_viscosity = std::vector<Real>(temp,0);
 
-	for (UInt iter_fluid(0); iter_fluid<temp; ++iter_fluid)
-	  {
-	    // build the section name
-	    std::string iter_fluid_section("fluid/physics/fluid_");
-	    iter_fluid_section += number2string(iter_fluid);
+        for (UInt iter_fluid(0); iter_fluid<temp; ++iter_fluid)
+        {
+            // build the section name
+            std::string iter_fluid_section("fluid/physics/fluid_");
+            iter_fluid_section += number2string(iter_fluid);
 
-	    // Read the quantities
-	    M_density[iter_fluid]= dataFile((iter_fluid_section+"/density").c_str() , 1.0);
-	    M_viscosity[iter_fluid]= dataFile((iter_fluid_section+"/viscosity").c_str() , 1.0);
-	  };
-      };
+            // Read the quantities
+            M_density[iter_fluid]= dataFile((iter_fluid_section+"/density").c_str() , 1.0);
+            M_viscosity[iter_fluid]= dataFile((iter_fluid_section+"/viscosity").c_str() , 1.0);
+        }
+    }
 
     // FE Order
-    M_uOrder      = dataFile( "fluid/space_discretization/vel_order", "P1");
-    M_pOrder      = dataFile( "fluid/space_discretization/press_order", "P1");
+    M_uOrder       = dataFile( "fluid/space_discretization/vel_order", "P1");
+    M_pOrder       = dataFile( "fluid/space_discretization/press_order", "P1");
 
     // Miscellaneous
     M_verbose      = dataFile( "fluid/miscellaneous/verbose", 1 );
     M_dump_init    = dataFile( "fluid/miscellaneous/dump_init", getInitialTime() );
     M_dump_period  = dataFile( "fluid/miscellaneous/dump_period", 1 );
     M_factor       = dataFile( "fluid/miscellaneous/factor", 0. );
+    M_Stokes       = dataFile( "fluid/miscellaneous/Stokes", false );
 
     M_stab_method  = NSStabilization ( M_stabilization_list.value( dataFile( "fluid/space_discretization/stabilization", "none") ) );
 
@@ -398,28 +407,28 @@ template <typename Mesh>
 void
 DataNavierStokes<Mesh>::showMe( std::ostream& output )
 {
-  if (M_fluid_number == 1)
+    if (M_fluid_number == 1)
     {
-    output << "\n*** Values for data [fluid/physics]\n\n";
-    output << "density     = " << M_density[0] << std::endl;
-    output << "viscosity   = " << M_viscosity[0] << std::endl;
+        output << "\n*** Values for data [fluid/physics]\n\n";
+        output << "density     = " << M_density[0] << std::endl;
+        output << "viscosity   = " << M_viscosity[0] << std::endl;
     }
-  else
+    else
     {
-    output << "\n*** Values for data [fluid/physics]\n\n";
-    for (UInt iter_fluid(0); iter_fluid<M_fluid_number; ++iter_fluid)
-      {
-	output << "fluid " << iter_fluid << std::endl;
-	output << "density     = " << M_density[iter_fluid] << std::endl;
-	output << "viscosity   = " << M_viscosity[iter_fluid] << std::endl;
-      };
-    };
+        output << "\n*** Values for data [fluid/physics]\n\n";
+        for (UInt iter_fluid(0); iter_fluid<M_fluid_number; ++iter_fluid)
+        {
+            output << "fluid " << iter_fluid << std::endl;
+            output << "density     = " << M_density[iter_fluid] << std::endl;
+            output << "viscosity   = " << M_viscosity[iter_fluid] << std::endl;
+        }
+    }
     output << "\n*** Values for data [fluid/miscellaneous]\n\n";
     output << "verbose     = " << M_verbose << std::endl;
     output << "initial time for writing solution  = " << M_dump_init << std::endl;
     output << "number of time steps between two consecutive dumps of the solution = " << M_dump_period << std::endl;
     output << "amplification factor = " << M_factor << std::endl;
-
+    output << "Stokes simulation    = " << M_Stokes << std::endl;
 
     output << "\n*** Values for data [fluid/space_discretization]\n\n";
     DataMesh<Mesh>::showMe( output );
