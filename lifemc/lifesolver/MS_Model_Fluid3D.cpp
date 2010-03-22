@@ -151,7 +151,7 @@ MS_Model_Fluid3D::SetupData()
     //M_FluidData->setTimeStep	( globalTimeStep / std::ceil( globalTimeStep / M_FluidData->getTimeStep() ) );
 
     //FEspace
-    setupFEspace();
+    SetupFEspace();
 
     //Boundary Conditions for the problem
     M_FluidBC.reset( new FluidBCType( M_dataFile, "fluid" ) );
@@ -172,10 +172,10 @@ MS_Model_Fluid3D::SetupModel()
 #endif
 
     //DOF
-    setupDOF();
+    SetupDOF();
 
     //Add flow rate offset to BC
-    setupBCOffset( M_FluidBC );
+    SetupBCOffset( M_FluidBC );
 
     //Fluid
     M_Fluid.reset( new FluidType( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, M_lmDOF ) );
@@ -228,13 +228,26 @@ MS_Model_Fluid3D::BuildSystem()
     //Build constant matrices
     M_Fluid->buildSystem();
 
-    //Initialize problem coefficients
-    M_alpha  = 0.0;
-    *M_beta *= M_Fluid->solution();
-    *M_RHS  *= 0.0;
-
     //Initialize velocity and pressure
+    *M_FluidSolution = 0.0;
     M_Fluid->initialize( *M_FluidSolution );
+
+    //Initialize BDF
+    M_FluidBDF->bdf_u().initialize_unk( M_Fluid->solution() );
+
+    //Define problem coefficients
+    if ( M_FluidData->Stokes() )
+    {
+        M_alpha  = 0.0;
+        *M_beta  = M_Fluid->solution();
+        *M_RHS  *= 0.0;
+    }
+    else
+    {
+        M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->getTimeStep();
+        *M_beta = M_FluidBDF->bdf_u().extrap();
+        *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->getTimeStep() );
+    }
 
     //Set problem coefficients
     M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
@@ -254,22 +267,19 @@ MS_Model_Fluid3D::UpdateSystem()
     //Time
     M_FluidData->updateTime();
 
-    //BDF
-    if ( M_FluidData->getTimeStepNumber() )
-        M_FluidBDF->bdf_u().initialize_unk( M_Fluid->solution() );
-    else
-        M_FluidBDF->bdf_u().shift_right( M_Fluid->solution() );
+    //Update BDF
+    M_FluidBDF->bdf_u().shift_right( M_Fluid->solution() );
 
-    //Problem coefficients
+    //Update problem coefficients
     M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->getTimeStep();
     *M_beta = M_FluidBDF->bdf_u().extrap();
     *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->getTimeStep() );
 
-    //Linear system need to be updated!
-    M_UpdateLinearModel = true;
-
     //Set problem coefficients
     M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+
+    //Linear system need to be updated
+    M_UpdateLinearModel = true;
 
     //Recompute preconditioner
     M_Fluid->resetPrec( true );
@@ -388,7 +398,7 @@ MS_Model_Fluid3D::SetupLinearModel()
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
 #endif
 
-    setupBCOffset( M_LinearFluidBC );
+    SetupBCOffset( M_LinearFluidBC );
 }
 
 void
@@ -596,11 +606,11 @@ MS_Model_Fluid3D::GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, c
 // Private Methods
 // ===================================================
 void
-MS_Model_Fluid3D::setupFEspace()
+MS_Model_Fluid3D::SetupFEspace()
 {
 
 #ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::setupFEspace() \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupFEspace() \n";
 #endif
 
     //Transform mesh
@@ -672,11 +682,11 @@ MS_Model_Fluid3D::setupFEspace()
 }
 
 void
-MS_Model_Fluid3D::setupDOF()
+MS_Model_Fluid3D::SetupDOF()
 {
 
 #ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::setupDOF \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupDOF \n";
 #endif
 
     //DOF
@@ -689,11 +699,11 @@ MS_Model_Fluid3D::setupDOF()
 }
 
 void
-MS_Model_Fluid3D::setupBCOffset( const boost::shared_ptr< FluidBCType >& BC )
+MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC )
 {
 
 #ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::setupBCOffset( BC ) \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupBCOffset( BC ) \n";
 #endif
 
     UInt offset = M_uFESpace->map().getMap( Unique )->NumGlobalElements() + M_pFESpace->map().getMap( Unique )->NumGlobalElements();
