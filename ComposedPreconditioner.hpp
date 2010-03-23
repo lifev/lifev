@@ -27,6 +27,16 @@
    \date 2009-03-25
  */
 
+/**
+ * \file ComposedPreconditioner.hpp
+ * \author Simone Deparis, Paolo Crosetto
+ * \date 2009-03-25
+ * Class handling a preconditioner defined as a composition of operators. The class is templated
+ * so that the operators that define the preconditioner can be general
+ * (matrices, other preconditioners, other composed preconditioners, etc.).
+ * It is similar to the thyra package in Trilinos although it doesn't depend on it.
+ *\end{array}\right)$
+ */
 
 #ifndef COMPOSEDPRECONDITIONER_HPP
 #define COMPOSEDPRECONDITIONER_HPP
@@ -39,8 +49,6 @@
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/displayer.hpp>
-
-#include <Ifpack_Preconditioner.h>
 
 namespace LifeV
 {
@@ -68,22 +76,50 @@ public:
     */
       ComposedPreconditioner(const Epetra_Comm* comm=0 );
 
+    /**
+       Copy constructor: it doesn't make a real copy of the operators, it just copy the list of shared pointer
+       (note that the implementation is mandatory in order to avoid a bit-copy of the shared_ptr vector)
+    */
       ComposedPreconditioner( ComposedPreconditioner<Operator>& P);
 
-    ~ComposedPreconditioner( );
+      ~ComposedPreconditioner( );
 
-    //! we expecte an external matrix shared pointer, we will not destroy the matrix!
-    //! remember: P = M_P(0) * ... * M_P(Qp-1)
-  int push_back(prec_type  P,
-                const bool useInverse=false,
-                const bool useTranspose=false);
+      /**
+         Method to add an operator at the end of the operators list.
+         we expect an external Operator shared pointer, we will not destroy the matrix!
+         remember: P = M_P(0) * ... * M_P(Qp-1)
+         \param P: the operator
+         \param useTranspose: flag specifying if we want to applly the transposed operator
+         \param summed: flag specifying if we want the operator to be summed. Note that the operator would be "out
+         of the vector", summed in a second step after all the multiplications.
+       */
+      int push_back(prec_type  P,
+                    const bool useInverse=false,
+                    const bool useTranspose=false,
+                    const bool summed=false);
+
+      /**
+         Method to add an operator at the end of the operators list.
+         Deprecated. The input parameter P is a standard pointer.
+         \param P: the operator
+         \param useTranspose: flag specifying if we want to applly the transposed operator
+         \param summed: flag specifying if we want the operator to be summed. Note that the operator would be "out
+         of the vector", summed in a second step after all the multiplications.
+       */
 
   int push_back(prec_raw_type*  P,
                   const bool useInverse=false,
-                  const bool useTranspose=false);
+                const bool useTranspose=false,
+                const bool summed=false);
 
     //! we expecte an external matrix shared pointer, we will not destroy the matrix!
     //! remember: P = M_P(0) * ... * M_P(Qp-1)
+      /**
+         Method to replace an operator in a specified position of the operators vector.
+         \param P: input operator
+         \param index: position (starting from 0)
+         \param useInverse: flag specifying if the operator is already inverted (if AllpyInverse() is implemented)
+       */
     int replace(prec_type&  P,
                 UInt const& index,
                 const bool useInverse=false,
@@ -92,6 +128,9 @@ public:
     /** @name Epetra_Operator Implementation
      */
     //@{
+      /**
+         Method to set the flag M_useTranspose, which specifies if the composed preconditioner is to be transposed.
+       */
     int SetUseTranspose(bool UseTranspose);
 
     int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
@@ -99,7 +138,7 @@ public:
     // Simone:here use the ApplyInverse from the local preconditioners.
     int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
-    /* Returns the quantity \f$ \| A \|_\infty\f$ such that
+      /** Returns the quantity \f$ \| A \|_\infty\f$ such that
        \f[\| A \|_\infty = \max_{1\lei\lem} \sum_{j=1}^n |a_{ij}| \f].
 
        \warning This method must not be called unless HasNormInf() returns true.
@@ -110,9 +149,9 @@ public:
 
     const char * Label() const;
 
-    bool UseTranspose() const;
+    const bool UseTranspose() const;
 
-    bool HasNormInf() const;
+    const bool HasNormInf() const;
 
     const Epetra_Comm & Comm() const;
 
@@ -121,21 +160,23 @@ public:
     const Epetra_Map & OperatorRangeMap() const;
     //@}
 
-      std::vector<prec_type>& getP(){return M_P;}
+      const std::vector<prec_type>& getP() const {return M_P;}
 
       //bool getInverse(){return M_allInverse;}
 
-      bool getAllTranspose(){return M_allTranspose;}
+      const bool getAllTranspose() const {return M_allTranspose;}
 
-      std::vector<bool>  getTranspose(){return M_Transpose;}
+      const std::vector<bool>  getTranspose() const {return M_Transpose;}
 
-      std::vector<bool> getInverse(){return M_Inverse;}
+      const std::vector<bool>  getSummed() const {return M_Summed;}
 
-      int getNumber(){return M_Setted;}
+      const std::vector<bool> getInverse() const {return M_Inverse;}
 
-      double getMeanIter(){return M_meanIter;}
+      const int getNumber() const {return M_Setted;}
 
-      int getNumCalled(){return M_numCalled;}
+      const double getMeanIter() const {return M_meanIter;}
+
+      const int getNumCalled() const {return M_numCalled;}
 
       void reset();
 
@@ -146,6 +187,7 @@ protected:
       mutable std::vector<prec_type> M_P;
       std::vector<bool> M_Inverse;
       std::vector<bool> M_Transpose;
+      std::vector<ID> M_Summed;
       bool M_allTranspose;
 
     mutable int M_Setted;
@@ -168,6 +210,7 @@ ComposedPreconditioner<Operator>::ComposedPreconditioner(const Epetra_Comm* comm
   M_P(),
   M_Inverse(),
   M_Transpose(),
+  M_Summed(),
   M_Setted(0),
   M_meanIter(0),
   M_numCalled(0),
@@ -181,6 +224,7 @@ ComposedPreconditioner<Operator>::ComposedPreconditioner( ComposedPreconditioner
     M_P(),
     M_Inverse(P.getInverse()),
     M_Transpose(P.getTranspose()),
+    M_Summed(P.getSummed()),
     M_allTranspose(P.getAllTranspose()),
     M_Setted(P.getNumber()),
     M_meanIter(P.getMeanIter()),
@@ -203,10 +247,11 @@ ComposedPreconditioner<Operator>::~ComposedPreconditioner()
 int ComposedPreconditioner<Operator>::
 push_back( prec_raw_type* P,
            const bool useInverse,
-           const bool useTranspose)
+           const bool useTranspose,
+           const bool summed)
 {
   prec_type prec(P);
-  push_back(P, useInverse, useTranspose);
+  push_back(P, useInverse, useTranspose, summed);
 }
 
 
@@ -215,7 +260,8 @@ push_back( prec_raw_type* P,
 int ComposedPreconditioner<Operator>::
 push_back( prec_type P,
            const bool useInverse,
-           const bool useTranspose)
+           const bool useTranspose,
+           const bool summed)
 {
     if (P.get() ==  0)   return(M_Setted);
 
@@ -231,6 +277,8 @@ push_back( prec_type P,
     M_P.        push_back(P);
     M_Inverse.  push_back(useInverse);
     M_Transpose.push_back(useTranspose);
+    if(summed)
+        M_Summed.push_back(M_Setted);
 
     //    if (useInverse && useTranspose) assert(false); // I am not sure I have coded this in the right way
 
@@ -296,23 +344,40 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 
   // P = M_P(0) * ... * M_P(Qp-1)
 
-  for (int q(M_Setted-1); q>=0 ; q--) {
-    if (M_Inverse[q]) {
-
-        useTranspose = M_P[q]->UseTranspose (); // storing original status
-        assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
-        M_P[q]->ApplyInverse(Z,Y);
-        M_P[q]->SetUseTranspose(useTranspose); // put back to original status
-    } else {
-        useTranspose = M_P[q]->UseTranspose (); // storing original status
-        assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
-        M_P[q]->Apply(Z,Y);
-        M_P[q]->SetUseTranspose(useTranspose); // put back to original status
-    }
-
-    Z = Y;
+  ID k=0;
+  for (int q(M_Setted-1); q>=0 ; q--)
+  {
+      if(M_Summed.size() && q==M_Summed[k])
+      {
+          ++k;
+      }
+      else
+      {
+          if (M_Inverse[q]) {
+              useTranspose = M_P[q]->UseTranspose (); // storing original status
+              assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
+              M_P[q]->ApplyInverse(Z,Y);
+              M_P[q]->SetUseTranspose(useTranspose); // put back to original status
+          } else {
+              useTranspose = M_P[q]->UseTranspose (); // storing original status
+              assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
+              M_P[q]->Apply(Z,Y);
+              M_P[q]->SetUseTranspose(useTranspose); // put back to original status
+          }
+          Z = Y;
+      }
   }
 
+  for(UInt k=0; k<M_Summed.size(); ++k)
+  {
+      if(M_Inverse[M_Summed[k]])
+          M_P[M_Summed[k]]->ApplyInverse(X,Y);
+      else
+          M_P[M_Summed[k]]->Apply(X,Y);
+      Z.Update(1., Y, 1.);
+  }
+
+  Y=Z;
   return(EXIT_SUCCESS);
 
 }
@@ -327,21 +392,41 @@ Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 
   bool useTranspose;
   Epetra_MultiVector Z(X);
+  ID k=0;
 
-  for (int q(0); q<M_Setted ; q++, Z = Y) {
-    if (M_Inverse[q]) {
-        useTranspose = M_P[q]->UseTranspose (); // storing original status
-        assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
-        M_P[q]->Apply(Z,Y);//y+=Pi*z
-        M_P[q]->SetUseTranspose(useTranspose); // put back to original status
-    } else {
-        useTranspose = M_P[q]->UseTranspose (); // storing original status
-        assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
-        M_P[q]->ApplyInverse(Z,Y);//y+=Pi^(-1)*z
-        M_P[q]->SetUseTranspose(useTranspose); // put back to original status
-    }
+  for (int q(0); q<M_Setted ; q++, Z = Y)
+  {
+      if(M_Summed.size() && q==M_Summed[k])
+      {
+          ++k;
+      }
+      else
+      {
+          if (M_Inverse[q]) {
+              useTranspose = M_P[q]->UseTranspose (); // storing original status
+              assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
+              M_P[q]->Apply(Z,Y);//y+=Pi*z
+              M_P[q]->SetUseTranspose(useTranspose); // put back to original status
+          } else {
+              useTranspose = M_P[q]->UseTranspose (); // storing original status
+              assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
+              M_P[q]->ApplyInverse(Z,Y);//y+=Pi^(-1)*z
+              M_P[q]->SetUseTranspose(useTranspose); // put back to original status
+          }
+          Z=Y;
+      }
   }
 
+  for(UInt k=0; k<M_Summed.size(); ++k)
+  {
+      if(M_Inverse[M_Summed[k]])
+          M_P[M_Summed[k]]->Apply(X,Y);
+      else
+          M_P[M_Summed[k]]->ApplyInverse(X,Y);
+      Z.Update(1., Y, 1.);
+  }
+
+  Y=Z;
   return(EXIT_SUCCESS);
 
 }
@@ -355,7 +440,7 @@ Label() const
 }
 
   template <typename Operator>
-bool ComposedPreconditioner<Operator>::
+const bool ComposedPreconditioner<Operator>::
 HasNormInf() const
 {
   return(false);
@@ -421,7 +506,7 @@ double ComposedPreconditioner<Operator>::NormInf()  const
 }
 
   template <typename Operator>
-bool ComposedPreconditioner<Operator>::UseTranspose()  const
+const bool ComposedPreconditioner<Operator>::UseTranspose()  const
 {
     return(M_allTranspose);
 }
