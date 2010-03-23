@@ -99,7 +99,7 @@ public:
 
     super::prec_raw_type*  getPrec();
 
-    prec_type  getPrecByRef();
+    boost::shared_ptr<Epetra_Operator>  getPrecPtr(){return M_Prec;}
 
     std::string            precType(){return M_precType;}
 

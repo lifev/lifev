@@ -46,11 +46,11 @@ IfpackComposedPrec::IfpackComposedPrec(const Epetra_Comm* comm):
 
 IfpackComposedPrec::IfpackComposedPrec(IfpackComposedPrec& P):
     super(P, &P.getPrec()->Comm()),
-    M_Prec(new prec_raw_type(*P.getPrecByRef())),
+    M_Prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
     M_OperVector(P.getOperVector()),
     M_precType(P.precType())
 {
-    //    *M_Prec=*P.getPrecByRef();
+    //    *M_Prec=*P.getPrecPrec();
 }
 IfpackComposedPrec::~IfpackComposedPrec()
 {}
@@ -160,12 +160,6 @@ IfpackComposedPrec::Condest()
 {
     return M_Prec->Condest();
 }
-
-IfpackComposedPrec::prec_type IfpackComposedPrec::getPrecByRef()
-{
-    return M_Prec;
-}
-
 
 EpetraPreconditioner::prec_raw_type*
 IfpackComposedPrec::getPrec()
