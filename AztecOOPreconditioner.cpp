@@ -177,12 +177,12 @@ AztecOOPreconditioner::precReset()
     // Perform one "fake" iteration to delete the preconditioner
     int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
     M_solver->getSolver().SetAztecOption( AZ_output, AZ_none );
-    M_solver->getSolver().GetRHS()->PutScalar( 1.0 );
-    M_solver->getSolver().GetLHS()->PutScalar( 0.0 );
+    //M_solver->getSolver().GetRHS()->PutScalar( 1.0 );
+    //M_solver->getSolver().GetLHS()->PutScalar( 0.0 );
     M_solver->getSolver().Iterate( 0, 1.e14 );
     M_solver->getSolver().SetAztecOption( AZ_output, AZoutputOption );
 
-    M_solver->getSolver().DestroyPreconditioner();
+    //M_solver->getSolver().DestroyPreconditioner();
 
     this->M_preconditionerCreated = false;
 }
