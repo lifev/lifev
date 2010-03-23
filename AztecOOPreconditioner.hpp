@@ -130,6 +130,12 @@ public:
      */
     super::prec_raw_type* getPrec();
 
+    //! Return the shared pointer to the preconditioner
+    /*!
+     *  @Deprecated
+     */
+    super::prec_type  getPrecPtr();
+
     //! Return the name of the preconditioner
     /*!
      *  @return "AztecOO"

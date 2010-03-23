@@ -80,7 +80,7 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
 
     // SUBDOMAIN SOLVER
-    
+
     M_solver->getParameterList().set("subdomain_solve", dataFile( ( section + "/AztecOO/subdomain_solve" ).data(), "ILUT" ));
 
     M_solver->getParameterList().set("drop", dataFile( ( section + "/AztecOO/drop" ).data(), 1.e-5 ));
@@ -161,6 +161,23 @@ AztecOOPreconditioner::getPrec()
         return M_solver->getSolver().GetPrecMatrix();
 
     return 0;
+}
+
+EpetraPreconditioner::prec_type
+AztecOOPreconditioner::getPrecPtr()
+{
+
+#ifdef DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::getPrec() \n";
+#endif
+
+    boost::shared_ptr<Epetra_RowMatrix> prec;
+    if ( this->M_preconditionerCreated )
+    {
+        prec.reset(M_solver->getSolver().GetPrecMatrix());
+        return  prec;
+    }
+    return EpetraPreconditioner::prec_type();
 }
 
 void
