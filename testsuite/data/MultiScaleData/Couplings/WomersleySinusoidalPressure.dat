@@ -21,6 +21,7 @@ list = 'WomersleySinusoidalPressure'  # Womersley Sinusoidal Pressure
 	[./WomersleySinusoidalPressure]
 	type			= Natural
 	mode			= Normal
-	function		= 'p=1.07313022459812; -sin(2*pi*t/p)' # Womersley = 10, Reynolds = 100
+	function		= 'T=13.4026108412793; -sin(2*pi*t/T)' 
+	                # Wo = 2.5, Re = 600 (with rho = 0.895347939450773, mu = 0.00189998733800979, D = 1)
 	
 	[../]

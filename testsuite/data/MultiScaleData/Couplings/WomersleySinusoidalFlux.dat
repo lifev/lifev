@@ -19,9 +19,9 @@ couplingName	= BoundaryCondition_WomersleySinusoidalFlux
 list = 'WomersleySinusoidalFlux'  # Womersley Sinusoidal Flux
 	
 	[./WomersleySinusoidalFlux]
-	type				= Flux
-	mode				= Full
-	component			= 3
-	function		    = 'T=13.4026108412793; -sin(2*pi*t/T)' 
-	                    # Wo = 2.5, Re = 600 (with rho = 1, mu = 0.00188259560676, D = 1)
+	type			= Flux
+	mode			= Full
+	component		= 3
+	function		= 'T=13.4026108412793; -sin(2*pi*t/T)' 
+	                # Wo = 2.5, Re = 600 (with rho = 0.895347939450773, mu = 0.00189998733800979, D = 1)
 	[../]
