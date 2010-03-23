@@ -86,6 +86,7 @@ public:
 
     typedef EpetraPreconditioner             prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
+    typedef boost::shared_ptr<Epetra_Operator> comp_prec_type;
     typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
     typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
 
@@ -111,6 +112,7 @@ public:
     //! True Residual
     double TrueResidual();
 
+    /** Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
     prec_type& getPrec();
 
     void getAztecStatus( double status[AZ_STATUS_SIZE]);
@@ -125,16 +127,20 @@ public:
     //! @name Set Method
     //@{
 
-    //! Set communicator for Displayer (for empty constructor)
+    //! Method to set communicator for Displayer (for empty constructor)
     void SetCommunicator( const Epetra_Comm& comm);
 
-    //! set matrix from EpetraMatrix
+    //! Method to set matrix from EpetraMatrix
     void setMatrix(matrix_type& m);
 
+    /** Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system*/
     void setOperator(Epetra_Operator& op);
 
-    //! set Epetra_Operator preconditioner
+    //! Method to set an EpetraPreconditioner preconditioner
     void setPreconditioner( prec_type& _prec );
+
+    /** Method to set a general Epetra_Operator as preconditioner*/
+    void setPreconditioner( comp_prec_type& _prec );
 
     void setDataFromGetPot( const GetPot& dfile, const std::string& section );
 
@@ -184,11 +190,13 @@ public:
         setMatrix or setOperator
         @param  rhsFull   right hand side
         @param  sol       solution
-        @param  prec      preconditioner to use
+        @param  prec      preconditioner to use (templated parameter, can derive from
+EpetraPreconditioner class or from Epetra_Operator)
     */
+    template <typename PrecPtrOperator>
     int solveSystem(  const vector_type& rhsFull,
                       vector_type&       sol,
-                      prec_type&         prec );
+                      PrecPtrOperator         prec );
 
     void setUpPrec(const GetPot& dataFile,  const std::string& section);
 
@@ -223,6 +231,28 @@ private:
     int                         M_maxIterForReuse;
     bool                        M_reusePreconditioner;
 };
+
+template <typename PrecPtrOperator>
+int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
+                                 vector_type&        sol,
+                                 PrecPtrOperator          prec )
+
+{
+    M_Displayer.leaderPrint("      Solving system ...                   \n");
+
+    setPreconditioner(prec);
+
+    Chrono chrono;
+    chrono.start();
+    int numIter = solve( sol, rhsFull );
+    chrono.stop();
+    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
+
+    if (numIter >= M_maxIter)
+        numIter = -numIter;
+
+    return numIter;
+}
 
 
 } // namespace LifeV

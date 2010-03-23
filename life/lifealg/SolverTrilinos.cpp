@@ -134,6 +134,12 @@ SolverTrilinos::setPreconditioner( prec_type& _prec )
 }
 
 void
+SolverTrilinos::setPreconditioner( comp_prec_type& _prec )
+{
+     M_solver.SetPrecOperator(_prec.get());
+}
+
+void
 SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& section )
 {
     // SOLVER PARAMETERS
@@ -386,27 +392,6 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
 
     if ( abs(numIter) > M_maxIterForReuse)
         precReset();
-
-    return numIter;
-}
-
-int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
-                                 vector_type&        sol,
-                                 prec_type&          prec )
-
-{
-    M_Displayer.leaderPrint("      Solving system ...                   \n");
-
-    setPreconditioner(prec);
-
-    Chrono chrono;
-    chrono.start();
-    int numIter = solve( sol, rhsFull );
-    chrono.stop();
-    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
-
-    if (numIter >= M_maxIter)
-        numIter = -numIter;
 
     return numIter;
 }
