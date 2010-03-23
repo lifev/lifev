@@ -96,6 +96,8 @@ public:
 
     super::prec_raw_type*   getPrec();
 
+    super::prec_type   getPrecPtr(){return M_Prec;}
+
     std::string             precType(){return M_precType;}
 
     int                     buildPreconditioner(operator_type& A);

@@ -77,6 +77,7 @@ public:
     //! default constructor.
     EpetraPreconditioner(const Epetra_Comm* comm=0);
 
+    /** Copy constructor*/
     EpetraPreconditioner(EpetraPreconditioner& P, const Epetra_Comm* comm=0);
 
     //! default virtual destructor
@@ -92,7 +93,13 @@ public:
 
     virtual double          Condest() = 0;
 
+    /** Get a standard pointer to the preconditioner. In most of the cases is more safe to use getPrecPtr(), which
+     returns a boost::shared_ptr*/
     virtual prec_raw_type*  getPrec() = 0;
+
+    /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
+     it must derive from the Epetra_Operator object*/
+    virtual prec_type  getPrecPtr()=0;
 
     //! Return the type name of the preconditioner.
     /*!
