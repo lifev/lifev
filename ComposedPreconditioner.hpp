@@ -149,9 +149,9 @@ public:
 
     const char * Label() const;
 
-    const bool UseTranspose() const;
+    bool UseTranspose() const;
 
-    const bool HasNormInf() const;
+    bool HasNormInf() const;
 
     const Epetra_Comm & Comm() const;
 
@@ -168,7 +168,7 @@ public:
 
       const std::vector<bool>  getTranspose() const {return M_Transpose;}
 
-      const std::vector<bool>  getSummed() const {return M_Summed;}
+      const std::vector<ID>  getSummed() const {return M_Summed;}
 
       const std::vector<bool> getInverse() const {return M_Inverse;}
 
@@ -440,7 +440,7 @@ Label() const
 }
 
   template <typename Operator>
-const bool ComposedPreconditioner<Operator>::
+bool ComposedPreconditioner<Operator>::
 HasNormInf() const
 {
   return(false);
@@ -506,7 +506,7 @@ double ComposedPreconditioner<Operator>::NormInf()  const
 }
 
   template <typename Operator>
-const bool ComposedPreconditioner<Operator>::UseTranspose()  const
+bool ComposedPreconditioner<Operator>::UseTranspose()  const
 {
     return(M_allTranspose);
 }
