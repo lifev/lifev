@@ -108,7 +108,7 @@ public:
       \param bcHandler boundary conditions for the velocity
     */
     ADRSolver( const data_type&          dataType,
-               FESpace<Mesh, EpetraMap>& FESpace,
+               FESpace<Mesh, EpetraMap>& adrFESpace,
                FESpace<Mesh, EpetraMap>& betaFESpace,
                BCHandler&                bcHandler,
                Epetra_Comm&              comm );
@@ -120,7 +120,7 @@ public:
       \param pressure FE space
     */
     ADRSolver( const data_type&      dataType,
-               FESpace<Mesh, EpetraMap>& FESpace,
+               FESpace<Mesh, EpetraMap>& adrFESpace,
                FESpace<Mesh, EpetraMap>& betaFESpace,
                Epetra_Comm&              comm );
 
@@ -373,12 +373,12 @@ private:
 template<typename Mesh, typename SolverType>
 ADRSolver<Mesh, SolverType>::
 ADRSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& FESpace,
+           FESpace<Mesh, EpetraMap>& adrFESpace,
            FESpace<Mesh, EpetraMap>& betaFESpace,
            BCHandler&                BCh,
            Epetra_Comm&              comm ):
     M_data                   ( dataType ),
-    M_FESpace                ( FESpace ),
+    M_FESpace                ( adrFESpace ),
     M_betaFESpace            ( betaFESpace ),
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
@@ -421,11 +421,11 @@ ADRSolver( const data_type&          dataType,
 template<typename Mesh, typename SolverType>
 ADRSolver<Mesh, SolverType>::
 ADRSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& FESpace,
+           FESpace<Mesh, EpetraMap>& adrFESpace,
            FESpace<Mesh, EpetraMap>& betaFESpace,
            Epetra_Comm&              comm ):
     M_data                   ( dataType ),
-    M_FESpace                ( FESpace ),
+    M_FESpace                ( adrFESpace ),
     M_betaFESpace            ( betaFESpace ),
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),

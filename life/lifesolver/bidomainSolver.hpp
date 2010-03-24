@@ -100,7 +100,7 @@ public:
       \param Epetra communicator
     */
     BidomainSolver( const data_type&          dataType,
-    	   FESpace<Mesh, EpetraMap>& FESpace,
+    	   FESpace<Mesh, EpetraMap>& pFESpace,
            FESpace<Mesh, EpetraMap>& uFESpace,
            BCHandler&                bcHandler,
            Epetra_Comm&              comm );
@@ -111,7 +111,7 @@ public:
       \param Epetra communicator
     */
     BidomainSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& FESpace,
+           FESpace<Mesh, EpetraMap>& pFESpace,
            FESpace<Mesh, EpetraMap>& uFESpace,
            Epetra_Comm&              comm );
 
@@ -197,7 +197,7 @@ protected:
     const data_type&               M_data;
 
     //! u FE space
-    FESpace<Mesh, EpetraMap>&      M_FESpace;
+    FESpace<Mesh, EpetraMap>&      M_pFESpace;
     FESpace<Mesh, EpetraMap>&      M_uFESpace;
 
     //! MPI communicator
@@ -283,12 +283,12 @@ private:
 template<typename Mesh, typename SolverType>
 BidomainSolver<Mesh, SolverType>::
 BidomainSolver( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& FESpace,
+       FESpace<Mesh, EpetraMap>& pFESpace,
        FESpace<Mesh, EpetraMap>& uFESpace,
        BCHandler&                BCh_u,
        Epetra_Comm&              comm ):
     M_data                   ( dataType ),
-    M_FESpace               ( FESpace ),
+    M_pFESpace               ( pFESpace ),
     M_uFESpace               ( uFESpace ),
     M_BCh_electric           ( &BCh_u ),
     M_setBC                  ( true ),
@@ -296,14 +296,14 @@ BidomainSolver( const data_type&          dataType,
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver           ( ),
     M_prec                   ( ),
-    M_localMap               ( M_FESpace.map()),
-    M_localMap_u             ( M_uFESpace.map()),
+    M_localMap               ( pFESpace.map()),
+    M_localMap_u             ( uFESpace.map()),
     M_localMapVec            (M_localMap_u+M_localMap_u+M_localMap_u),
     M_matrMass               ( ),
     M_matrStiff	             ( ),
     M_matrNoBC               ( ),
-    M_elmatStiff             ( M_FESpace.fe().nbNode, 2, 2 ),
-    M_elmatMass              ( M_FESpace.fe().nbNode, 2, 2 ),
+    M_elmatStiff             ( M_pFESpace.fe().nbNode, 2, 2 ),
+    M_elmatMass              ( M_pFESpace.fe().nbNode, 2, 2 ),
     M_rhsNoBC                ( M_localMap ),
     M_sol_uiue               ( M_localMap ),
     M_sol_uiue_extrap        ( M_localMap ),
@@ -353,24 +353,24 @@ BidomainSolver( const data_type&          dataType,
 template<typename Mesh, typename SolverType>
 BidomainSolver<Mesh, SolverType>::
 BidomainSolver( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& FESpace,
+       FESpace<Mesh, EpetraMap>& pFESpace,
        FESpace<Mesh, EpetraMap>& uFESpace,
        Epetra_Comm&              comm ):
     M_data               	( dataType ),
-    M_FESpace              ( FESpace ),
+    M_pFESpace              ( pFESpace ),
     M_uFESpace              ( uFESpace ),
     M_setBC                 ( false ),
     M_comm                  ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_linearSolver          ( ),
     M_prec                  ( new prec_raw_type() ),
-    M_localMap              ( M_FESpace.map()),
+    M_localMap              ( M_pFESpace.map()),
     M_localMap_u            ( M_uFESpace.map() ),
     M_matrMass              ( ),
     M_matrStiff             ( ),
     M_matrNoBC              ( ),
-    M_elmatStiff            ( M_FESpace.fe().nbNode, 2, 2 ),
-    M_elmatMass             ( M_FESpace.fe().nbNode, 2, 2 ),
+    M_elmatStiff            ( M_pFESpace.fe().nbNode, 2, 2 ),
+    M_elmatMass             ( M_pFESpace.fe().nbNode, 2, 2 ),
     M_rhsNoBC               ( M_localMap ),
     M_residual              ( M_localMap ),
     M_sol_uiue              ( M_localMap ),
@@ -442,7 +442,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
     //! Elementary computation and matrix assembling
     //! Loop on elements
 
-    for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_pFESpace.mesh()->numVolumes(); iVol++ )
     {
 
 
@@ -458,82 +458,82 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
         {
         	case 0:
         		chronoDer.start();
-        		M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->volumeList( iVol ) );
+        		M_pFESpace.fe().updateFirstDeriv( M_pFESpace.mesh()->volumeList( iVol ) );
         		chronoDer.stop();
         		if (M_data.has_fibers() )
         		{
-				stiff( M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0);
-        			stiff( M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1);
+				stiff( M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0);
+        			stiff( M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1);
         		}
         		else
         		{
-        			stiff( M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), 0, 0 );
-        			stiff( M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), 1, 1 );
+        			stiff( M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), 0, 0 );
+        			stiff( M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), 1, 1 );
 	        	}
 	        break;
         	case 1:
         		chronoDer.start();
-        		M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
+        		M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
         		chronoDer.stop();
         		if (M_data.has_fibers() )
         	    {
-        	    	stiff( M_data.red_sigma_sphere,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	    	stiff( M_data.red_sigma_sphere, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+        	    	stiff( M_data.red_sigma_sphere,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+        	    	stiff( M_data.red_sigma_sphere, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
         	    }
         	    else
         	    {
-        	    	stiff( M_data.red_sigma_sphere, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	        stiff( M_data.red_sigma_sphere, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+        	    	stiff( M_data.red_sigma_sphere, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+        	        stiff( M_data.red_sigma_sphere, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
         		}
         	break;
         	case 2:
         	    chronoDer.start();
-        	    M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
+        	    M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
         	    chronoDer.stop();
         	    if (M_data.has_fibers() )
         	    {
-        	       	stiff( M_data.red_sigma_cyl,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	      	stiff( M_data.red_sigma_cyl, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+        	       	stiff( M_data.red_sigma_cyl,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+        	      	stiff( M_data.red_sigma_cyl, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
         	    }
         	    else
         	    {
-        	       	stiff( M_data.red_sigma_cyl, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0 , 0);
-        	        stiff( M_data.red_sigma_cyl, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+        	       	stiff( M_data.red_sigma_cyl, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0 , 0);
+        	        stiff( M_data.red_sigma_cyl, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
         	    }
         	break;
         	case 3:
         	    chronoDer.start();
-        	    M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( iVol ) );
+        	    M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
         	    chronoDer.stop();
         	    if (M_data.has_fibers() )
         	    {
-        	      	stiff( M_data.red_sigma_box, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0);
-        	       	stiff( M_data.red_sigma_box, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1);
+        	      	stiff( M_data.red_sigma_box, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+        	       	stiff( M_data.red_sigma_box, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
         	    }
         	    else
         	    {
-        	       	stiff( M_data.red_sigma_box, M_data.D_i(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 0, 0, 0 );
-        	        stiff( M_data.red_sigma_box, M_data.D_e(), M_elmatStiff,  M_FESpace.fe(), M_FESpace.dof(), 1, 1, 1 );
+        	       	stiff( M_data.red_sigma_box, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0 );
+        	        stiff( M_data.red_sigma_box, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1 );
         	    }
         	    break;
         }
         chronoStiff.stop();
 
         chronoMass.start();
-        mass( 1., M_elmatMass, M_FESpace.fe(), 0, 0 );
-        mass( -1., M_elmatMass, M_FESpace.fe(), 0, 1 );
-        mass( -1., M_elmatMass, M_FESpace.fe(), 1, 0 );
-        mass( 1., M_elmatMass, M_FESpace.fe(), 1, 1 );
+        mass( 1., M_elmatMass, M_pFESpace.fe(), 0, 0 );
+        mass( -1., M_elmatMass, M_pFESpace.fe(), 0, 1 );
+        mass( -1., M_elmatMass, M_pFESpace.fe(), 1, 0 );
+        mass( 1., M_elmatMass, M_pFESpace.fe(), 1, 1 );
         chronoMass.stop();
 
         chronoStiffAssemble.start();
         for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
         	assembleMatrix( *M_matrStiff,
         	                        M_elmatStiff,
-        	                        M_FESpace.fe(),
-        	                        M_FESpace.fe(),
-        	                        M_FESpace.dof(),
-        	                        M_FESpace.dof(),
+        	                        M_pFESpace.fe(),
+        	                        M_pFESpace.fe(),
+        	                        M_pFESpace.dof(),
+        	                        M_pFESpace.dof(),
         	                        iComp, iComp,
         	                        iComp*dim_u(), iComp*dim_u());
         }
@@ -545,10 +545,10 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
         	for ( UInt jComp = 0; jComp < nbComp; jComp++ ){
         		assembleMatrix( *M_matrMass,
         		                        M_elmatMass,
-        		                        M_FESpace.fe(),
-        		                        M_FESpace.fe(),
-        		                        M_FESpace.dof(),
-        		                        M_FESpace.dof(),
+        		                        M_pFESpace.fe(),
+        		                        M_pFESpace.fe(),
+        		                        M_pFESpace.dof(),
+        		                        M_pFESpace.dof(),
         		                        iComp, jComp,
         		                        iComp*dim_u(), jComp*dim_u());
         	}
@@ -870,7 +870,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
     // BC manage for the PDE
     if ( !BCh.bdUpdateDone() )
     {
-        BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        BCh.bdUpdate( *M_pFESpace.mesh(), M_pFESpace.feBd(), M_pFESpace.dof() );
     }
 
     vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
@@ -878,7 +878,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
 
 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManage( matrix, rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
+    bcManage( matrix, rhs, *M_pFESpace.mesh(), M_pFESpace.dof(), BCh, M_pFESpace.feBd(), 1.,
               M_data.getTime() );
 
     rhs = rhsFull;

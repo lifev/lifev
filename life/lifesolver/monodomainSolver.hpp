@@ -62,7 +62,7 @@ namespace LifeV
 
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class MonodomainSolver
 {
 
