@@ -84,21 +84,21 @@ public:
 
     //! Return if we can make a new timestep
     /*!
-     * @return true if time < endTime, false viceversa
+     * @return true if time <= endTime, false viceversa
      */
-    bool canAdvance()       { return M_time < M_endTime; }
+    bool canAdvance()       { return round( M_time ) <= round( M_endTime ); }
 
     //! Return if it is the initial time step
     /*!
      * @return true if time = initial time, false viceversa
      */
-    bool isFirstTimeStep()  { return M_time == M_initialTime; }
+    bool isFirstTimeStep()  { return round( M_time ) == round( M_initialTime ); }
 
     //! Return if it is the last time step
     /*!
      * @return true if time + timestep > endTime, false viceversa.
      */
-    bool isLastTimeStep()   { return M_time + M_timeStep >= M_endTime; }
+    bool isLastTimeStep()   { return round( M_time + M_timeStep ) > round( M_endTime ); }
 
     //! Display general information about the content of the class
     /*!
@@ -176,7 +176,7 @@ public:
     /*!
      * @return time step performed
      */
-    UInt getTimeStepNumber() const { return static_cast <UInt> ( ( M_time-M_initialTime ) / M_timeStep ); }
+    UInt getTimeStepNumber() const { return static_cast <UInt> ( round( round( M_time-M_initialTime ) / round( M_timeStep ) ) ); }
 
     //! Get the BDF order used
     /*!
@@ -187,6 +187,8 @@ public:
     //@}
 
 private:
+
+    Real round( const Real n, const UInt decimal=10 ) const;
 
 	Real					M_initialTime;	// initial time
     Real					M_endTime;		// end time

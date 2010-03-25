@@ -61,13 +61,23 @@ DataTime::DataTime( const DataTime& dataTime )
 // ===================================================
 // Methods
 // ===================================================
-void DataTime::showMe( std::ostream& output ) const
+void
+DataTime::showMe( std::ostream& output ) const
 {
 	output << "Initial time = " << M_initialTime	<< std::endl;
 	output << "End time     = " << M_endTime		<< std::endl;
 	output << "Time         = " << M_time			<< std::endl;
 	output << "TimeStep     = " << M_timeStep		<< std::endl;
 	output << "BDF order    = " << M_BDF_order  	<< std::endl;
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+Real
+DataTime::round( const Real n, const UInt decimal ) const
+{
+    return std::floor( n * std::pow(10.0, decimal) + 0.5 ) / std::pow(10.0, decimal);
 }
 
 }
