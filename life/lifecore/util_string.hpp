@@ -29,8 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 # include <sstream>
 # include <map>
 
-namespace LifeV
-{
+namespace LifeV {
 /*! \file util_string.h
 \brief Special structures for handling mesh faces and sides
 \version 0.0 Experimental   5/2/00. Luca Formaggia
@@ -84,7 +83,20 @@ void parseList( const std::string& slist, std::list<T>& list )
 
         stringList = stringList.substr( commaPos + 1 );
     }
+}
 
+// @author Cristiano Malossi
+// Convert a std::string to a number ( Int, bool, Real, ... )
+inline double
+string2number( const std::string& s )
+{
+    std::stringstream out;
+    out << s;
+
+    double n;
+    out >> n;
+
+    return n;
 }
 
 // @author Cristiano Malossi
