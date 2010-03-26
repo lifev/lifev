@@ -18,89 +18,93 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3DCarotidBifurcation_Stress.d
 [Solver] ##########################################################################################
 ###################################################################################################
 
-	[./time_discretization]
+    [./Restart]
+    Restart                    = false
+    RestartFromStepNumber      = 0
+    
+    [../time_discretization]
 	initialtime		= 0.0   # [s]
 	endtime			= 4.0   # [s]
 	timestep		= 0.001 # [s]
 	
-	[../Algorithm]
-	AlgorithmType   = Newton        # Aitken - Newton
-	subITMax		= 2  	        # Maximum number for coupling subiterations
-	tolerance		= 1.e-6			# Tolerance on the coupling values
-	
-		[./Aitken_method]
-		Omega			= 0.5			# omega starting value
-		fixedOmega      = false         # use fixed omega (if omega = 1 -> fixed point)
-		method          = Vectorial     # Scalar, Vectorial
-		inverseOmega    = true          # direct: minimize on omega; inverse: minimize on omega^-1
-		
-		[../Newton_method]
-		
-			[./AztecOO]
-			solver          = gmres
-			scaling         = none
-			output          = all           # none
-			conv            = AZ_noscaled   # r0, noscaled
-			max_iter        = 100
-			reuse           = false
-            max_iter_reuse  = 100
-            kspace          = 100
-			tol             = 1.e-14
-			
-			[../Preconditioner]
-			prectype                = Ifpack #Ifpack
-			displayList             = false
-	
-				[./AztecOO]
-				precond				= 'dom_decomp'
-				prec_calc			= calc
-				reorder             = 1
-				keep_info           = 0
-				overlap             = 0
-				subdomain_solve     = ILUT
-				ilut_fill           = 4
-				drop                = 1.e-5
-				
-				[../ifpack]
-				overlap				= 3 #ok
-				prectype			= Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+    [../Algorithm]
+    AlgorithmType              = Newton        # Aitken - Newton
+    subITMax                   = 2              # Maximum number for coupling subiterations
+    tolerance                  = 1.e-6            # Tolerance on the coupling values
+    
+        [./Aitken_method]
+        Omega                      = 0.5           # omega starting value
+        fixedOmega                 = false         # use fixed omega (if omega = 1 -> fixed point)
+        method                     = Vectorial     # Scalar, Vectorial
+        inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1
+        
+        [../Newton_method]
+        
+            [./AztecOO]
+            solver                     = gmres
+            scaling                    = none
+            output                     = all           # none
+            conv                       = AZ_noscaled   # r0, noscaled
+            max_iter                   = 100
+            reuse                      = false
+            max_iter_reuse             = 100
+            kspace                     = 100
+            tol                        = 1.e-14
+            
+            [../Preconditioner]
+            prectype                   = Ifpack #Ifpack
+            displayList                = false
+    
+                [./AztecOO]
+                precond                    = 'dom_decomp'
+                prec_calc                  = calc
+                reorder                    = 1
+                keep_info                  = 0
+                overlap                    = 0
+                subdomain_solve            = ILUT
+                ilut_fill                  = 4
+                drop                       = 1.e-5
+                
+                [../ifpack]
+                overlap                    = 3 #ok
+                prectype                   = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
 
-					[./relaxation]
-					type                   = Jacobi
-					sweeps                 = 1
-					damping_factor         = 1.
-					min_diagonal_value     = 0
-					zero_starting_solution = true
-			
-					[../partitioner]
-					type					= metis
-           			overlap					= 2
-           			local_parts				= 1
-           			root_node				= 0
-     		      	use_symmetric_graph		= true
+                    [./relaxation]
+                    type                   = Jacobi
+                    sweeps                 = 1
+                    damping_factor         = 1.
+                    min_diagonal_value     = 0
+                    zero_starting_solution = true
+            
+                    [../partitioner]
+                    type                   = metis
+                    overlap                = 2
+                    local_parts            = 1
+                    root_node              = 0
+                    use_symmetric_graph    = true
 
-      		    	[../amesos]
-      		     	solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-     			      	
-          			[../fact]
-        		  	level-of-fill		= 4
-        		  	ilut_level-of-fill	= 4
-       			   	absolute_threshold	= 0
-       			   	relative_threshold	= 1
-       			   	relax_value			= 0
-       		    	drop_tolerance		= 1.e-5
+                    [../amesos]
+                    solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+                           
+                    [../fact]
+                    level-of-fill          = 4
+                    ilut_level-of-fill     = 4
+                    absolute_threshold     = 0
+                    relative_threshold     = 1
+                    relax_value            = 0
+                    drop_tolerance         = 1.e-5
 
-         		  	[../schwarz]
-       		    	combine_mode		= 0 # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
-        		   	compute_condest		= true
-        		   	reordering_type		= none       #none, metis, rcm
-        		   	filter_singletons	= true
-	
-					[../]
-				[../]
-			[../]
-		[../]
-	[../]
+                    [../schwarz]
+                    combine_mode           = 0 # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+                    compute_condest        = true
+                    reordering_type        = none       #none, metis, rcm
+                    filter_singletons      = true
+    
+                    [../]
+                [../]
+            [../]
+        [../]
+    [../]
 ###################################################################################################
 
 [Physics] #########################################################################################
