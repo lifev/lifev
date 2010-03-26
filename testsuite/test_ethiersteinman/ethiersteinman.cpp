@@ -382,7 +382,7 @@ Ethiersteinman::run()
     if (exporterType.compare("hdf5") == 0)
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
-        exporter->setOutputDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
     }
     else
