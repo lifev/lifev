@@ -95,7 +95,6 @@ main( int argc, char** argv )
 
 	//MPI Preprocessing
 #ifdef EPETRA_MPI
-
 	    int nprocs;
         int rank;
 
@@ -110,31 +109,41 @@ main( int argc, char** argv )
         comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 
         comm->Barrier();
-
 #else
-
         std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
         comm.reset( new Epetra_SerialComm() );
-
 #endif
 
     // Setup MultiScale problem
     bool exitFlag = EXIT_SUCCESS;
     MS_Solver MS;
 
-    //Command line parameters
+    // Set the communicator
+    MS.SetCommunicator( comm );
+
+    // Command line parameters
     GetPot commandLine( argc, argv );
     std::string dataFile    = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
     bool verbose            = commandLine.follow( false, 2, "-s", "--showme" );
-    std::string problemName = commandLine.follow( "MultiScale", 2, "-n", "--name" );
+    std::string problemFolder = commandLine.follow( "MultiScale", 2, "-n", "--name" );
 
-    MS.SetCommunicator( comm );
+    // Create the problem folder
+    if ( problemFolder.compare("./") )
+    {
+        problemFolder += "/";
 
-    MS.SetupProblem( dataFile, problemName );
+        if ( comm->MyPID() == 0 )
+            mkdir( problemFolder.c_str(), 0777 );
+    }
 
+    // Setup the problem
+    MS.SetupProblem( dataFile, problemFolder );
+
+    // Display problem information
     if ( verbose )
         MS.ShowMe();
 
+    // Solve the problem
     exitFlag = MS.SolveProblem();
 
 #ifdef HAVE_MPI

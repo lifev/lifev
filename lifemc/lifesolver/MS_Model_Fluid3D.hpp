@@ -74,9 +74,9 @@ public:
     typedef OseenShapeDerivative< MeshType >  FluidType;
 
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< MeshType >          OutputType;
+    typedef Hdf5exporter< MeshType >          IOFileType;
 #else
-    typedef Ensight< MeshType >               OutputType;
+    typedef Ensight< MeshType >               IOFileType;
 #endif
 
     typedef FluidType::vector_type            FluidVectorType;
@@ -293,9 +293,12 @@ private:
     //! Setup the offset for fluxes boundary conditions
     void SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC );
 
+    //! Setup the solution.
+    void SetupSolution();
+
     //@}
 
-    boost::shared_ptr< OutputType >       M_output;
+    boost::shared_ptr< IOFileType >       M_output;
 
     // Fluid problem
     boost::shared_ptr< FluidType >        M_Fluid;
