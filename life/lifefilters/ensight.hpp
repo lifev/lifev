@@ -65,16 +65,14 @@ public:
 
        \param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId );
+    Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId );
 
-    Ensight(const GetPot& dfile, const std::string prefix);
+    Ensight(const GetPot& dfile, const std::string& prefix);
 
 
     /**
        setters
     */
-
-    void setMeshProcId( mesh_ptrtype mesh, int const procId );
 
     //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
@@ -85,6 +83,12 @@ public:
        \param time the solver time
     */
     void postProcess(const Real& time);
+
+    //! Import data from previous simulations at a certain time
+    /*!
+       @param Time the time of the data to be imported
+     */
+    UInt importFromTime( const Real& /*Time*/ ) { assert(false); } //Not yet implemented for Ensight
 
     /**
        Import data from previous simulations
@@ -101,6 +105,7 @@ public:
 
 private:
 
+    void defineShape();
     void M_wr_case(const Real& time);
     void M_wr_ascii_geo( const std::string geo_file );
 
@@ -114,8 +119,15 @@ private:
     void M_rd_scalar( ExporterData& dvar );
     void M_rd_vector( ExporterData& dvar );
 
+    void initProcId();
+    void setNodesMap( std::vector<int> LtGNodesMap );
+    void initNodesMap();
 
 
+    std::string M_import_dir;
+    UInt M_steps;
+    std::vector<int> M_LtGNodesMap;
+    std::string M_me;
 };
 
 
@@ -123,25 +135,33 @@ private:
 // Implementation
 //
 template<typename Mesh>
-Ensight<Mesh>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix,
-                       int const procId)
+Ensight<Mesh>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+                       const int& procId)
     :
-    super(dfile, mesh, prefix,procId)
+    super(dfile, prefix),
+    M_import_dir(dfile("exporter/import_dir", "./")),
+    M_steps(0),
+    M_LtGNodesMap(),
+    M_me()
 {
-    setMeshProcId(mesh,procId);
+    this->setMeshProcId(mesh,procId);
 }
 
 template<typename Mesh>
-Ensight<Mesh>::Ensight(const GetPot& dfile, const std::string prefix):
-    super(dfile,prefix)
+Ensight<Mesh>::Ensight(const GetPot& dfile, const std::string& prefix):
+    super(dfile,prefix),
+    M_import_dir(dfile("exporter/import_dir", "./")),
+    M_steps(0),
+    M_LtGNodesMap(),
+    M_me()
 {
 }
 
 template<typename Mesh>
-void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
+void Ensight<Mesh>::defineShape()
 {
-
-    initMeshProcId( mesh, procId );
+    initNodesMap();
+    initProcId();
 
     typedef typename Mesh::ElementShape ElementShape;
 
@@ -177,8 +197,6 @@ void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
 
     if (!this->M_multimesh)
       M_wr_ascii_geo( this->M_post_dir+this->M_prefix+this->M_me+".geo" );
-
-
 }
 template<typename Mesh>
 EpetraMapType Ensight<Mesh>::mapType() const
@@ -515,7 +533,7 @@ template <typename Mesh>
 void Ensight<Mesh>::M_rd_scalar( ExporterData& dvar )
 {
 
-    std::string filename( this->M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl" );
+    std::string filename( M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl" );
     std::ifstream sclf( filename.c_str() );
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
@@ -561,7 +579,7 @@ void Ensight<Mesh>::M_rd_scalar( ExporterData& dvar )
 template <typename Mesh> void Ensight<Mesh>::M_rd_vector(ExporterData& dvar)
 {
 
-    std::string filename( this->M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct" );
+    std::string filename( M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct" );
     std::ifstream vctf( filename.c_str() );
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
@@ -603,9 +621,37 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_vector(ExporterData& dvar)
     ASSERT(!vctf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
 }
 
-
-
+template<typename Mesh>
+void Ensight<Mesh>::initProcId()
+{
+    std::ostringstream index;
+    index.fill( '0' );
+    if (this->M_procId >=0)
+        {
+            index << std::setw(1) << "." ;
+            index << std::setw(3) << this->M_procId;
+        }
+    M_me = index.str();
 }
 
+template<typename Mesh>
+void Ensight<Mesh>::setNodesMap( std::vector<int> LtGNodesMap )
+{
+    M_LtGNodesMap = LtGNodesMap;
+}
+
+template<typename Mesh>
+void Ensight<Mesh>::initNodesMap()
+{
+    UInt nVert = this->M_mesh->numVertices();
+    M_LtGNodesMap.resize(nVert);
+    for (UInt i=0; i<nVert; ++i)
+    {
+        int id = this->M_mesh->pointList( i+1 ).id();
+        M_LtGNodesMap[i] = id;
+    }
+}
+
+}
 
 #endif

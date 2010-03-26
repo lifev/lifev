@@ -1,48 +1,46 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV library
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
-  Author(s): simone <simone@mac-simao.local>
-       Date: 2008-12-27
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2008 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+************************************************************************
 */
-/**
-   \file noexport.hpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \date 2008-12-27
-  \brief This file provides an interface as a fake post-processing.
+//@HEADER
 
+/*!
+    @file exporter.hpp
+    @brief This file provides an interface for post-processing
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @date 2008-12-27
+
+    This file provides an interface as a fake post-processing.
  */
-
 
 #ifndef _NOEXPORT_H_
 #define _NOEXPORT_H_
 
 #include <life/lifefilters/exporter.hpp>
 
+namespace LifeV {
 
-namespace LifeV
-{
-
-/**
- * \class Ensight
- * \brief Ensight data exporter
- */
 template<typename Mesh>
 class NoExport : public Exporter<Mesh> {
 
@@ -52,65 +50,33 @@ public:
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;
 
-    /**
-       Constructor for NoExport
+    NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId );
+    NoExport(const GetPot& dfile, const std::string& prefix);
 
-       \param dfile the GetPot data file where you must provide and [ensight] section with:
-       "start" (start index for filenames 0 for 000, 1 for 001 etc.),
-       "save" (how many time steps per posptrocessing)
-       "multimesh" (=true if the mesh has to be saved at each post-processing step)
-
-       \param mesh the mesh
-
-       \param the prefix for the case file (ex. "test" for test.case)
-
-       \param the procId determines de CPU id. if negative, it ussemes there is only one processor
-    */
-    NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId );
-
-    NoExport(const GetPot& dfile, const std::string prefix);
-
-    //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
-
-    /**
-       Post-porcess the variables added to the list
-
-       \param time the solver time
-    */
     void postProcess(const Real& /*time*/) {}
-
-
-    /**
-       Import data from previous simulations
-
-       \param time the solver time
-    */
+    UInt importFromTime( const Real& /*Time*/ ) {}
     void import(const Real& /*Tstart*/, const Real& /*dt*/) {} // dt is used to rebuild the history up to now
-
-    //! Read  only last timestep
     void import(const Real& /*Tstart*/) {}
+    void defineShape() {}
 
 private:
-    virtual void M_rd_scalar( ExporterData& dvar ){}
-    virtual void M_rd_vector( ExporterData& dvar ){}
+    virtual void M_rd_scalar( ExporterData& /*dvar*/ ) {}
+    virtual void M_rd_vector( ExporterData& /*dvar*/ ) {}
 
 };
 
-//
-// Implementation
-//
 template<typename Mesh>
-NoExport<Mesh>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix,
-                       int const procId)
+NoExport<Mesh>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+                       const int& procId)
     :
-    super(dfile, mesh, prefix,procId)
+    super(dfile,prefix)
 {
     setMeshProcId(mesh,procId);
 }
 
 template<typename Mesh>
-NoExport<Mesh>::NoExport(const GetPot& dfile, const std::string prefix):
+NoExport<Mesh>::NoExport(const GetPot& dfile, const std::string& prefix):
     super(dfile,prefix)
 {
 }
@@ -120,7 +86,6 @@ EpetraMapType NoExport<Mesh>::mapType() const
 {
     return Unique;
 }
-
 
 }
 

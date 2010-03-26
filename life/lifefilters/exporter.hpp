@@ -1,36 +1,41 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2008 EPFL
+//@HEADER
+/*
+************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-
 //@HEADER
 
 /*!
-  @file exporter.hpp
-  @brief This file provides an interface for post-processing
+    @file exporter.hpp
+    @brief This file provides an interface for post-processing
 
-  @author Simone Deparis <simone.deparis@epfl.ch>
-  @date 11-11-2008
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @date 11-11-2008
 
-  Usage: two steps
-  <ol>
-    <li> first: add the variables using addVariable
-    <li> second: call postProcess( time );
-  </ol>
+    Usage: two steps
+    <ol>
+        <li> first: add the variables using addVariable
+        <li> second: call postProcess( time );
+    </ol>
  */
 
 
@@ -59,12 +64,12 @@ namespace LifeV
 
 //! ExporterData - Holds the datastructure of the an array to import/export
 /*!
-  @author Simone Deparis <simone.deparis@epfl.ch>
-  @date 11-11-2008
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @date 11-11-2008
 
-  This class holds the datastructure of one datum
-  to help the importer/exporter
-  like:   variable name, shared pointer to data, size, and few others.
+    This class holds the datastructure of one datum
+    to help the importer/exporter
+    like:   variable name, shared pointer to data, size, and few others.
  */
 class ExporterData
 {
@@ -104,6 +109,7 @@ public:
 
     //@}
 
+
     //! @name Operators
     //@{
 
@@ -128,6 +134,7 @@ public:
     void set_steady(UInt i) {M_steady = i;}
 
     //@}
+
 
     //! @name Get Methods
     //@{
@@ -164,9 +171,6 @@ private:
     //! @name Private Methods
     //@{
 
-    //! dim has been replaced by size() and will be removed
-    const UInt dim() const { assert(false); }
-
     //! shared pointer to array, replaced by storedArray() and will be removed
     const vector_ptrtype getPtr() const { assert(false); return M_vr; }
 
@@ -189,17 +193,16 @@ private:
 
     //! equal to 0 if file name for postprocessing has to include time dependency
     UInt M_steady;
-
 };
 
 
 //! Exporter - Pure virtual class that describes a generic exporter
 /*!
-  @author Simone Deparis <simone.deparis@epfl.ch>
-  @date 11-11-2008
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @date 11-11-2008
 
-  This class is pure virtual and describes a generic exporter that can
-  also do import
+    This class is pure virtual and describes a generic exporter that can
+    also do import
  */
 template<typename Mesh>
 class Exporter {
@@ -213,239 +216,148 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    //! Constructor for Exporter
-    /*!
-        \param dfile the GetPot data file where you must provide an [exporter] section with:
-          "start"     (start index for filenames 0 for 000, 1 for 001 etc.),
-          "save"      (how many time steps per postprocessing)
-          "multimesh" ( = true if the mesh has to be saved at each post-processing step)
-       \param mesh the mesh
-       \param the prefix for the case file (ex. "test" for test.case)
-       \param the procId determines de CPU id. if negative, it ussemes there is only one processor
-    */
-    Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId );
-
     //! Constructor for Exporter without prefix and procID
     /*!
         In this case prefix and procID should be set separately
-        \param dfile the GetPot data file where you must provide an [exporter] section with:
+        @param dfile the GetPot data file where you must provide an [exporter] section with:
           "start"     (start index for filenames 0 for 000, 1 for 001 etc.),
           "save"      (how many time steps per postprocessing)
           "multimesh" ( = true if the mesh has to be saved at each post-processing step)
-       \param the prefix for the case file (ex. "test" for test.case)
+       @param the prefix for the case file (ex. "test" for test.case)
     */
-    Exporter(const GetPot& dfile, const std::string prefix);
+    Exporter(const GetPot& dfile, const std::string& prefix);
 
     //! Destructor
     virtual ~Exporter() {};
     //@}
+
 
     //! @name Methods
     //@{
 
     //! Adds a new variable to be post-processed
     /*!
-        \param type the type fo the variable Ensight::Scalar or Ensight::Vector
-        \param prefix the prefix of the files storing the variable (ex: "velocity" for velocity.***)
-        \param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
-        \param size the number of Dof for that variable
+        @param type the type fo the variable Ensight::Scalar or Ensight::Vector
+        @param prefix the prefix of the files storing the variable (ex: "velocity" for velocity.***)
+        @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
+        @param size the number of Dof for that variable
     */
-    void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
+    void addVariable(const ExporterData::Type type, const std::string variableName, const vector_ptrtype& map, UInt start, UInt size, UInt steady =0 );
 
     //! Post-process the variables added to the list
     /*!
-        \param time the solver time
+        @param time the solver time
     */
     virtual void postProcess(const Real& time) = 0;
 
+    //! Import data from previous simulations at a certain time
+    /*!
+       @param Time the time of the data to be imported
+     */
+    virtual UInt importFromTime( const Real& Time ) = 0;
+
     //! Import data from previous simulations
     /*!
-       \param time the solver time
+       @param time the solver time
+       @param dt time step used to rebuild the history up to now
     */
-    virtual void import(const Real& Tstart, const Real& dt) = 0; // dt is used to rebuild the history up to now
+    virtual void import(const Real& Tstart, const Real& dt) = 0;
 
     //! Read  only last timestep
     virtual void import(const Real& Tstart) = 0;
 
     virtual void rd_var(ExporterData& dvar);
 
-    //! Set the output folder for postprocessing
-    /*!
-     * @param outputDirectory output folder
-     */
-    void setOutputDirectory( const std::string& outputDirectory );
-
-    void initMeshProcId       ( mesh_ptrtype mesh, int const procId );
-
-
 protected:
-
-    void setNodesMap       ( std::vector<int> LtGNodesMap );
 
     //! compute postfix
     void computePostfix();
 
-    virtual void M_rd_scalar( ExporterData& dvar )=0;
-    virtual void M_rd_vector( ExporterData& dvar )=0;
+    virtual void M_rd_scalar( ExporterData& dvar ) = 0;
+    virtual void M_rd_vector( ExporterData& dvar ) = 0;
+
+    virtual void defineShape() = 0;
 
     //@}
 
-public:
 
     //! @name Set Methods
     //@{
 
-    virtual void setMeshProcId( mesh_ptrtype mesh, int const procId );
+public:
+
+
+    //! Set the folder for pre/postprocessing
+    /*!
+     * @param Directory output folder
+     */
+    void setStartIndex( const UInt& StartIndex );
+
+    //! Set the folder for pre/postprocessing
+    /*!
+     * @param Directory output folder
+     */
+    void setDirectory( const std::string& Directory );
+
+    void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
 
     //@}
 
+
     //! @name Get Methods
     //@{
+
+    const UInt& getStartIndex( void );
 
     //! returns the type of the map to use for the EpetraVector
     virtual EpetraMapType mapType() const = 0;
 
     //@}
 
-private:
-    void initProcId       ( int const procId );
-
-    void initNodesMap       ();
-
 protected:
 
-    mesh_ptrtype M_mesh;
-    std::string M_prefix;
-    std::string M_post_dir;
-    std::string M_import_dir;
-    UInt M_count;
-    UInt M_save;
-    bool M_multimesh;
-    UInt M_steps;
-    std::list<Real> M_timeSteps;
-    std::string M_FEstr;
-    std::string M_bdFEstr;
-    UInt M_nbLocalDof;
-    UInt M_nbLocalBdDof;
-    std::string M_postfix;
-    std::list<ExporterData> M_listData;
+    std::string                 M_prefix;
+    std::string                 M_post_dir;
+    UInt                        M_count;
+    UInt                        M_save;
+    bool                        M_multimesh;
+    mesh_ptrtype                M_mesh;
+    int                         M_procId;
+    std::string                 M_postfix;
 
-    int M_procId;
-    std::string M_me;
+    std::string                 M_FEstr;
+    std::string                 M_bdFEstr;
+    UInt                        M_nbLocalDof;
+    UInt                        M_nbLocalBdDof;
 
-    std::vector<int> M_LtGNodesMap;
+    std::list<ExporterData>     M_listData;
+    std::list<Real>             M_timeSteps;
 };
 
 
-//
-// Implementation
-//
+
+// ===================================================
+// Constructors
+// ===================================================
 template<typename Mesh>
-Exporter<Mesh>::Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix,
-						 int const procId)
-    :
-    M_prefix(prefix),
-    M_post_dir(dfile("exporter/post_dir", "./")),
-    M_import_dir(dfile("exporter/import_dir", "./")),
-    M_count(dfile("exporter/start",0)),
-    M_save(dfile("exporter/save",1)),
-    M_multimesh(dfile("exporter/multimesh",true)),
-    M_steps(0)
-{
-    setMeshProcId(mesh,procId);
-}
+Exporter<Mesh>::Exporter( const GetPot& dfile, const std::string& prefix ):
+    M_prefix        (prefix),
+    M_post_dir      (dfile("exporter/post_dir", "./")),
+    M_count         (dfile("exporter/start",0)),
+    M_save          (dfile("exporter/save",1)),
+    M_multimesh     (dfile("exporter/multimesh",true))
+{}
 
+// ===================================================
+// Methods
+// ===================================================
 template<typename Mesh>
-Exporter<Mesh>::Exporter(const GetPot& dfile, const std::string prefix):
-    M_prefix(prefix),
-    M_post_dir(dfile("exporter/post_dir", "./")),
-    M_import_dir(dfile("exporter/import_dir", "./")),
-    M_count(dfile("exporter/start",0)),
-    M_save(dfile("exporter/save",1)),
-    M_multimesh(dfile("exporter/multimesh",true)),
-    M_steps(0)
-{
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
-{
-    initMeshProcId(mesh,procId);
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::initMeshProcId( mesh_ptrtype mesh , int const procId )
-{
-    M_mesh = mesh;
-
-    initProcId(procId);
-
-    initNodesMap();
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::initProcId( int const procId )
-{
-    M_procId = procId;
-
-    std::ostringstream index;
-    index.fill( '0' );
-    if (M_procId >=0)
-        {
-            index << std::setw(1) << "." ;
-            index << std::setw(3) << M_procId;
-        }
-    M_me = index.str();
-
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setNodesMap( std::vector<int> LtGNodesMap )
-{
-    M_LtGNodesMap = LtGNodesMap;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setOutputDirectory( const std::string& outputDirectory )
-{
-    M_post_dir = outputDirectory;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::initNodesMap()
-{
-    UInt nVert = M_mesh->numVertices();
-    M_LtGNodesMap.resize(nVert);
-    for (UInt i=0; i<nVert; ++i)
-        {
-            int id = this->M_mesh->pointList( i+1 ).id();
-            M_LtGNodesMap[i] = id;
-        }
-
-}
-
-template <typename Mesh> void Exporter<Mesh>::computePostfix()
-{
-
-    std::ostringstream index;
-    index.fill( '0' );
-
-    if (M_count % M_save == 0)
-        {
-            index << std::setw(5) << ( M_count / M_save );
-
-            M_postfix = "." + index.str();
-
-        }
-    else
-        M_postfix = "*****";
-
-    ++M_count;
-}
-
-
-template<typename Mesh>
-void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype const& vr, UInt start, UInt size, UInt steady)
+void Exporter<Mesh>::addVariable(const ExporterData::Type type,
+                                 const std::string variableName,
+                                 const vector_ptrtype& vr,
+                                 UInt start,
+                                 UInt size,
+                                 UInt steady)
 {
     M_listData.push_back( ExporterData(type,variableName,vr,start, size, steady) );
 }
@@ -453,20 +365,68 @@ void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::strin
 template <typename Mesh>
 void Exporter<Mesh>::rd_var(ExporterData& dvar)
 {
-
     switch( dvar.type() )
-        {
-        case ExporterData::Scalar:
-            M_rd_scalar(dvar);
-            break;
-        case ExporterData::Vector:
-            M_rd_vector(dvar);
-            break;
-        }
+    {
+    case ExporterData::Scalar:
+        M_rd_scalar(dvar);
+        break;
+    case ExporterData::Vector:
+        M_rd_vector(dvar);
+        break;
+    }
 }
 
+template <typename Mesh>
+void Exporter<Mesh>::computePostfix()
+{
+    std::ostringstream index;
+    index.fill( '0' );
 
+    if (M_count % M_save == 0)
+    {
+        index << std::setw(5) << ( M_count / M_save );
+
+        M_postfix = "." + index.str();
+    }
+    else
+        M_postfix = "*****";
+
+    ++M_count;
 }
 
+// ===================================================
+// Set Methods
+// ===================================================
+template<typename Mesh>
+void Exporter<Mesh>::setStartIndex( const UInt& StartIndex )
+{
+    M_count = StartIndex;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setDirectory( const std::string& Directory )
+{
+    M_post_dir = Directory;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setMeshProcId( const mesh_ptrtype mesh , const int& procId )
+{
+    M_mesh   = mesh;
+    M_procId = procId;
+
+    this->defineShape();
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+template<typename Mesh>
+const UInt& Exporter<Mesh>::getStartIndex( void )
+{
+    return M_count;
+}
+
+}
 
 #endif
