@@ -120,8 +120,11 @@ enum errorsTypes
 // Exit Flag
 extern bool MS_ExitFlag;
 
-// Name of the problem
-extern std::string MS_ProblemName;
+// Folder of the problem
+extern std::string MS_ProblemFolder;
+
+// Step of the problem ( > 0 when performing a restart )
+extern UInt MS_ProblemStep;
 
 // Map objects
 extern std::map< std::string, algorithmsTypes > algorithmMap;

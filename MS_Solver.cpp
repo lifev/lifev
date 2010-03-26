@@ -37,7 +37,8 @@
 namespace LifeV {
 
 bool MS_ExitFlag = EXIT_SUCCESS;
-std::string MS_ProblemName = "";
+std::string MS_ProblemFolder = "";
+UInt MS_ProblemStep = 0;
 
 // ===================================================
 // Constructors
@@ -133,23 +134,22 @@ MS_Solver::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
 }
 
 void
-MS_Solver::SetupProblem( const std::string& dataFile, const std::string& problemName )
+MS_Solver::SetupProblem( const std::string& dataFile, const std::string& problemFolder )
 {
 
 #ifdef DEBUG
-    Debug( 8000 ) << "MS_Solver::SetupData( dataFile, problemName ) \n";
+    Debug( 8000 ) << "MS_Solver::SetupData( dataFile, problemFolder ) \n";
 #endif
 
-    // Define the global name of the problem: if it is a folder create it
-    MS_ProblemName = problemName;
-    if ( MS_ProblemName.compare("./") )
-    {
-        MS_ProblemName += "/";
-
-        if ( M_comm->MyPID() == 0 )
-            mkdir( MS_ProblemName.c_str(), 0777 );
-    }
+    // Load data file
     GetPot DataFile( dataFile );
+
+    // Define the folder containing the problem
+    MS_ProblemFolder = problemFolder;
+
+    // Define the step of the problem
+    if ( DataFile( "Solver/Restart/Restart", false ) )
+        MS_ProblemStep = DataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Main MultiScale problem
     M_multiscale->SetDataFile( DataFile( "Problem/MS_problem", "./MultiScaleData/Models/Model.dat" ) );
@@ -178,6 +178,13 @@ MS_Solver::SolveProblem()
     Debug( 8000 ) << "MS_Solver::SolveProblem() \n";
 #endif
 
+    // Move to the "true" first time step when restarting a simulation
+    if ( MS_ProblemStep > 0 )
+    {
+        M_dataTime->updateTime();
+        M_dataTime->setInitialTime( M_dataTime->getTime() );
+    }
+
     for ( ; M_dataTime->canAdvance(); M_dataTime->updateTime() )
     {
         M_chrono.start();
@@ -186,7 +193,8 @@ MS_Solver::SolveProblem()
         {
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
-            std::cout << "            MULTISCALE SIMULATION TIME: " << M_dataTime->getTime() << " s" << std::endl;
+            std::cout << "                    MULTISCALE SIMULATION" << std::endl;
+            std::cout << "             time = " << M_dataTime->getTime() << " s; time step number = " << M_dataTime->getTimeStepNumber() << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 
@@ -224,6 +232,9 @@ MS_Solver::ShowMe()
     {
         std::cout << std::endl << std::endl
                   << "=============== MultiScale Solver Information ===============" << std::endl << std::endl;
+
+        std::cout << "Problem folder      = " << MS_ProblemFolder << std::endl
+                  << "Problem step        = " << MS_ProblemStep << std::endl << std::endl;
 
         std::cout << "Initial time        = " << M_dataTime->getInitialTime() << std::endl
                   << "End time            = " << M_dataTime->getEndTime() << std::endl

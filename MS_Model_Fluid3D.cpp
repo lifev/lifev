@@ -192,8 +192,8 @@ MS_Model_Fluid3D::SetupModel()
     M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
 
     //Post-processing
-    M_output.reset( new OutputType ( M_dataFile, "Model_" + number2string( M_ID ) ) );
-    M_output->setOutputDirectory( MS_ProblemName );
+    M_output.reset( new IOFileType ( M_dataFile, "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) ) );
+    M_output->setDirectory( MS_ProblemFolder );
     M_output->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
 
     //M_FluidSolution.reset( new FluidVectorType( M_FluidFullMap, Repeated ) );
@@ -213,6 +213,9 @@ MS_Model_Fluid3D::SetupModel()
     //Setup linear model
     SetupLinearModel();
 
+    //Setup solution
+    SetupSolution();
+
     //MPI Barrier
     //M_comm->Barrier();
 }
@@ -227,10 +230,6 @@ MS_Model_Fluid3D::BuildSystem()
 
     //Build constant matrices
     M_Fluid->buildSystem();
-
-    //Initialize velocity and pressure
-    *M_FluidSolution = 0.0;
-    M_Fluid->initialize( *M_FluidSolution );
 
     //Initialize BDF
     M_FluidBDF->bdf_u().initialize_unk( M_Fluid->solution() );
@@ -711,6 +710,43 @@ MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC )
     std::vector< BCName > FluxVector = BC->Handler_ptr()->getBCWithType( Flux );
     for ( UInt i = 0; i < M_lmDOF; ++i )
         BC->Handler_ptr()->setOffset( FluxVector[i], offset + i );
+}
+
+void
+MS_Model_Fluid3D::SetupSolution()
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupSolution() \n";
+#endif
+
+    if ( MS_ProblemStep > 0 )
+    {
+        IOFileType input( M_dataFile, "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+        input.setDirectory( MS_ProblemFolder );
+        input.setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
+
+        input.addVariable( ExporterData::Vector, "Velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
+        #ifdef HAVE_HDF5
+            input.addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
+        #else
+            input.addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
+        #endif
+
+        // Import
+        M_output->setStartIndex( input.importFromTime( M_FluidData->getInitialTime() ) + 1 );
+
+        // Move to the "true" first time step when restarting a simulation
+        M_FluidData->updateTime();
+        M_FluidData->setInitialTime( M_dataTime->getTime() );
+    }
+    else
+        *M_FluidSolution = 0.0;
+
+    M_Fluid->initialize( *M_FluidSolution );
+
+    //MPI Barrier
+    //M_comm->Barrier();
 }
 
 } // Namespace LifeV
