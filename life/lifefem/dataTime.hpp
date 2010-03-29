@@ -188,7 +188,7 @@ public:
 
 private:
 
-    Real round( const Real n, const UInt decimal=10 ) const;
+    Real round( const Real n, const Int decimal=10 ) const;
 
 	Real					M_initialTime;	// initial time
     Real					M_endTime;		// end time

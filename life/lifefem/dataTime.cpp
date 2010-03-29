@@ -75,9 +75,9 @@ DataTime::showMe( std::ostream& output ) const
 // Private Methods
 // ===================================================
 Real
-DataTime::round( const Real n, const UInt decimal ) const
+DataTime::round( const Real n, const Int decimal ) const
 {
-    return std::floor( n * std::pow(10.0, decimal) + 0.5 ) / std::pow(10.0, decimal);
+    return std::floor( n * std::pow(static_cast<Real>(10), decimal) + 0.5 )  / std::pow(static_cast<Real>(10), decimal);
 }
 
 }
