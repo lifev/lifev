@@ -69,8 +69,6 @@
 // STL classes
 #include <string>
 #include <fstream>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 namespace LifeV {
 

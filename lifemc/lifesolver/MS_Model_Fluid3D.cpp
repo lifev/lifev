@@ -45,7 +45,7 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_Fluid                        (),
     M_FluidBC                      (),
     M_FluidBDF                     (),
-    M_FluidData                    (),
+    M_FluidData                    ( new FluidDataType() ),
     M_FluidMesh                    (),
     M_FluidFullMap                 (),
     M_FluidSolution                (),
@@ -134,21 +134,14 @@ MS_Model_Fluid3D::SetupData()
 #endif
 
     //Fluid data
-    M_FluidData.reset( new FluidDataType( M_dataFile ) );
+    M_FluidData->setDataTime( M_dataTime );
+    M_FluidData->setup( M_dataFile );
 
     //dataPhysics
     if ( !M_dataFile.checkVariable( "fluid/physics/density" ) )
         M_FluidData->density( M_dataPhysics->GetFluidDensity() );
     if ( !M_dataFile.checkVariable( "fluid/physics/viscosity" ) )
         M_FluidData->viscosity( M_dataPhysics->GetFluidViscosity() );
-
-    //dataTime
-    M_FluidData->setInitialTime( M_dataTime->getInitialTime() );
-    M_FluidData->setEndTime( M_dataTime->getEndTime() );
-
-    M_FluidData->setTime( M_dataTime->getInitialTime() );
-    M_FluidData->setTimeStep( M_dataTime->getTimeStep() );
-    //M_FluidData->setTimeStep	( globalTimeStep / std::ceil( globalTimeStep / M_FluidData->getTimeStep() ) );
 
     //FEspace
     SetupFEspace();
@@ -185,7 +178,7 @@ MS_Model_Fluid3D::SetupModel()
     M_FluidFullMap.reset( new EpetraMap( M_Fluid->getMap() ) );
 
     //BDF
-    M_FluidBDF.reset( new FluidBDFType( M_FluidData->getBDF_order() ) );
+    M_FluidBDF.reset( new FluidBDFType( M_FluidData->dataTime()->getBDF_order() ) );
 
     //Problem coefficients
     M_beta.reset( new FluidVectorType( M_FluidFullMap ) );
@@ -243,9 +236,9 @@ MS_Model_Fluid3D::BuildSystem()
     }
     else
     {
-        M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->getTimeStep();
+        M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->dataTime()->getTimeStep();
         *M_beta = M_FluidBDF->bdf_u().extrap();
-        *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->getTimeStep() );
+        *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->dataTime()->getTimeStep() );
     }
 
     //Set problem coefficients
@@ -263,16 +256,13 @@ MS_Model_Fluid3D::UpdateSystem()
     Debug( 8120 ) << "MS_Model_Fluid3D::UpdateSystem() \n";
 #endif
 
-    //Time
-    M_FluidData->updateTime();
-
     //Update BDF
     M_FluidBDF->bdf_u().shift_right( M_Fluid->solution() );
 
     //Update problem coefficients
-    M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->getTimeStep();
+    M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->dataTime()->getTimeStep();
     *M_beta = M_FluidBDF->bdf_u().extrap();
-    *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->getTimeStep() );
+    *M_RHS  = M_Fluid->matrMass() * M_FluidBDF->bdf_u().time_der( M_FluidData->dataTime()->getTimeStep() );
 
     //Set problem coefficients
     M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
@@ -339,7 +329,7 @@ MS_Model_Fluid3D::SaveSolution()
 
     //Post-processing
     *M_FluidSolution = M_Fluid->solution();
-    M_output->postProcess( M_FluidData->getTime() );
+    M_output->postProcess( M_FluidData->dataTime()->getTime() );
 
 #ifdef HAVE_HDF5
     if ( M_dataTime->isLastTimeStep() )
@@ -364,8 +354,8 @@ MS_Model_Fluid3D::ShowMe()
                   << "pDOF                = " << M_pDOF << std::endl
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
-        std::cout << "maxH                = " << M_FluidData->mesh()->maxH() << std::endl
-                  << "meanH               = " << M_FluidData->mesh()->meanH() << std::endl << std::endl << std::endl << std::endl;
+        std::cout << "maxH                = " << M_FluidData->dataMesh()->mesh()->maxH() << std::endl
+                  << "meanH               = " << M_FluidData->dataMesh()->mesh()->meanH() << std::endl << std::endl << std::endl << std::endl;
     }
 
     //MPI Barrier
@@ -613,11 +603,11 @@ MS_Model_Fluid3D::SetupFEspace()
 #endif
 
     //Transform mesh
-    M_FluidData->mesh()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FluidData->dataMesh()->mesh()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_FluidMesh.reset( new FluidMeshType( *M_FluidData->mesh(), *M_comm ) );
-    M_FluidData->setMesh( M_FluidMesh->mesh() );
+    M_FluidMesh.reset( new FluidMeshType( *M_FluidData->dataMesh()->mesh(), *M_comm ) );
+    M_FluidData->dataMesh()->setMesh( M_FluidMesh->mesh() );
 
     //Velocity FE Space
     const RefFE* u_refFE;
@@ -734,11 +724,7 @@ MS_Model_Fluid3D::SetupSolution()
         #endif
 
         // Import
-        M_output->setStartIndex( input.importFromTime( M_FluidData->getInitialTime() ) + 1 );
-
-        // Move to the "true" first time step when restarting a simulation
-        M_FluidData->updateTime();
-        M_FluidData->setInitialTime( M_dataTime->getTime() );
+        M_output->setStartIndex( input.importFromTime( M_FluidData->dataTime()->getInitialTime() ) + 1 );
     }
     else
         *M_FluidSolution = 0.0;
