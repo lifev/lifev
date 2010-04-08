@@ -246,7 +246,7 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
 
     if ( this->M_postfix != "*****" )
     {
-        if (!this->M_procId) std::cout << "  x-  Hdf5exporter post-processing ..."<< std::flush;
+        if (!this->M_procId) std::cout << "  x-  HDF5 post-processing ...        "<< std::flush;
         Chrono chrono;
         chrono.start();
         for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
@@ -309,7 +309,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
             if ( std::abs( SelectedTimeAndPostfix.first - Time ) >= std::abs( (*i).first - Time ) )
                 SelectedTimeAndPostfix = *i;
 
-        std::cout << "  x-  HDF5 import from time " << SelectedTimeAndPostfix.first << " iteration " << SelectedTimeAndPostfix.second << std::endl;
+        //std::cout << "  x-  HDF5 import from time " << SelectedTimeAndPostfix.first << " iteration " << SelectedTimeAndPostfix.second << std::endl;
     }
 
     this->M_listData.begin()->storedArray()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
@@ -318,7 +318,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
 
     // Importing
     if ( !this->M_procId )
-        std::cout << "  x-  HDF5 importing ..."<< std::flush;
+        std::cout << "  x-  HDF5 importing ...                       "<< std::flush;
 
     Chrono chrono;
     chrono.start();
@@ -327,7 +327,8 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
 
     chrono.stop();
     if ( !this->M_procId )
-        std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+        std::cout << "done in " << chrono.diff() << " s. (Time " << SelectedTimeAndPostfix.first
+                                                 <<", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
 
     return static_cast <UInt> ( SelectedTimeAndPostfix.second );
 }
