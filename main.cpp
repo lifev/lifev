@@ -522,7 +522,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     //upcast necessary
 
     Real init= data_file("problem/Tstart"   ,0.);
-    Real dt= M_fsi->FSIOper()->dataFluid().getTimeStep();//data_file("problem/Tstart"   ,0.);
+    Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,init);
 
     M_importerFluid->import(init-dt, dt);
