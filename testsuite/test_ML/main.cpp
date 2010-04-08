@@ -164,7 +164,8 @@ main( int argc, char** argv )
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    dataNavierStokes.setup( dataFile );
 
     // Now for the boundary conditions :
     // BCHandler is the class that stores the boundary conditions. Here we will
@@ -190,7 +191,7 @@ main( int argc, char** argv )
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
@@ -273,18 +274,18 @@ main( int argc, char** argv )
     // Initialization
 
 
-    Real dt     = dataNavierStokes.getTimeStep();
-    Real t0     = dataNavierStokes.getInitialTime();
-    Real tFinal = dataNavierStokes.getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
+    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
+    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.setTime(t0);
+    dataNavierStokes.dataTime()->setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
     // (velocity + pressure)

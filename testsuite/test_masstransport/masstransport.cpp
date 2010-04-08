@@ -288,17 +288,18 @@ MassTransport::run()
     bcH.addBC( "wall",     WALL,     Essential,   Full,      uZero, 3 );
     bcH.addBC( "spliwall", SLIPWALL, Essential,   Full,      uZero, 3 );
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    dataNavierStokes.setup( dataFile );
 
     dataNavierStokes.viscosity( d->nu/dataFile( "fluid/physics/density", 1. ));
 
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
 
-    dataNavierStokes.setMesh(meshPart.mesh());
+    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
@@ -411,21 +412,21 @@ MassTransport::run()
     if (verbose) std::cout << "\n*********************** solutions initialization \n\n" << std::flush;
 
 
-    Real dt     = dataNavierStokes.getTimeStep();
-    Real t0     = dataNavierStokes.getInitialTime();
-    Real tFinal = dataNavierStokes.getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
+    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
+    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
 
     // initialization with stokes solution
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the fluid initial solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.setTime(t0);
+    dataNavierStokes.dataTime()->setTime(t0);
 
     vector_type betaFluid( uFESpace.map() );
     vector_type rhsFluid ( fullFluidMap );
@@ -528,23 +529,23 @@ MassTransport::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
-        dataNavierStokes.setTime(time);
+        dataNavierStokes.dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << "\n\n*********************** Temporal loop : " << std::flush;
-            std::cout << "we are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
+            std::cout << "we are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        double alphaNS = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.getTimeStep();
+        double alphaNS = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
 
 //         betaFluid = bdf.bdf_u().extrap();
 
         betaFluid.subset(bdf.bdf_u().extrap());
-        rhsFluid  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
+        rhsFluid  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
 
 
 //         std::cout << "alphaNS " << alphaNS << std::endl;
@@ -565,11 +566,11 @@ MassTransport::run()
 //        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
 
 
-        double alphaADR = 1./dataNavierStokes.getTimeStep();
+        double alphaADR = 1./dataNavierStokes.dataTime()->getTimeStep();
 
 //        adrFESpace.interpolateBC(bcADR, rhsADR, 0.);
         rhsADR  = adr.matrMass()*adr.solution();
-        rhsADR *= 1./dataNavierStokes.getTimeStep();
+        rhsADR *= 1./dataNavierStokes.dataTime()->getTimeStep();
 
 //        betaFluid *= 0.;
         adr.updateSystem( alphaADR, betaFluid, rhsADR );

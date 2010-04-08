@@ -84,9 +84,10 @@ CT::run()
     const QuadRule* qR_press;
     const QuadRule* bdQr_press;
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.mesh(), *M_comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.dataMesh()->mesh(), *M_comm);
 
     // fill in the space and time discretization orders
 
@@ -99,7 +100,7 @@ CT::run()
     if (verbose) std::cout << "  t-  Pressure time discretization order : "
 		<< pBdfOrder << std::endl;
 
-    dataNavierStokes.setMesh(meshPart.mesh());
+    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
     std::string uOrder = dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -159,9 +160,9 @@ CT::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     // Initialization
-    Real dt     = dataNavierStokes.getTimeStep();
-    Real t0     = dataNavierStokes.getInitialTime();
-    Real tFinal = dataNavierStokes.getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
+    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
 
 
     // initialization with stokes solution
@@ -169,7 +170,7 @@ CT::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "  tt- Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.setTime(t0);
+    dataNavierStokes.dataTime()->setTime(t0);
 
     vector_type init_u ( fullMap_u );
     vector_type init_p ( fullMap_p );
@@ -202,12 +203,12 @@ CT::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
-        dataNavierStokes.setTime(time);
+        dataNavierStokes.dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "l-  We are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
+            std::cout << "l-  We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 

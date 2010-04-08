@@ -287,13 +287,15 @@ Cylinder::run()
 
 
     // fluid solver
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), *d->comm);
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    dataNavierStokes.setup( dataFile );
+    
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
+    if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
 
-    dataNavierStokes.setMesh(meshPart.mesh());
+    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
@@ -382,21 +384,21 @@ Cylinder::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes.getTimeStep();
-    Real t0     = dataNavierStokes.getInitialTime();
-    Real tFinal = dataNavierStokes.getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
+    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
+    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
 
     // initialization with stokes solution
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.setTime(t0);
+    dataNavierStokes.dataTime()->setTime(t0);
 
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
@@ -448,22 +450,22 @@ Cylinder::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
-        dataNavierStokes.setTime(time);
+        dataNavierStokes.dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        Real alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.getTimeStep();
+        Real alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
 
         beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
