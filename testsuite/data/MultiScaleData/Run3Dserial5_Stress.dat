@@ -19,21 +19,13 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial5_Stress.dat
 ###################################################################################################
 
     [./Restart]
-    Restart                    = true
+    Restart                    = false
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    #initialtime                = 0.0                # [s]
-    #endtime                    = 53.610443365117    # [s]
-    #timestep                   = 0.052353948598747  # [s]
-	
-    initialtime                = 0.20                # [s]
-    endtime                    = 0.40  # [s]
-    timestep                   = 0.05  # [s]
-    
-    #initialtime                = 0.0                # [s]
-    #endtime                    = 3.350652710319812    # [s]
-    #timestep                   = 0.052353948598747  # [s]
+    initialtime                = 0.0                # [s]
+    endtime                    = 53.610443365117    # [s]
+    timestep                   = 0.052353948598747  # [s]
 	
     [../Algorithm]
     AlgorithmType              = Newton        # Aitken - Newton

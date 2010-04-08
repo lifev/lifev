@@ -24,7 +24,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_FluxStress_Stationa
     
     [../time_discretization]
 	initialtime		= 0.0           # [s]
-	endtime			= 0.1			# [s]
+	endtime			= 0.0			# [s]
 	timestep		= 0.1          	# [s]
 	
     [../Algorithm]
