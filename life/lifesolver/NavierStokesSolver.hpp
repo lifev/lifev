@@ -337,7 +337,7 @@ NavierStokesSolver( const data_type&     dataType,
     M_dataType               ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
-    M_bdf                    ( M_dataType.order_bdf() ),
+    M_bdf                    ( M_dataType.dataTime()->order_bdf() ),
     M_BCh_fluid              ( &BCh_u ),
     M_comm                   ( &comm ),
     M_me                     ( comm.MyPID() ),
@@ -357,7 +357,7 @@ NavierStokesSolver( const data_type&     dataType,
     M_rhsFull                ( localMap ),
     M_sol                    ( localMap ),
     M_stab                   ( false ),
-    M_ipStab                 ( M_dataType.mesh(),
+    M_ipStab                 ( M_dataType.dataMesh()->mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
                                0., 0., 0.,
@@ -441,7 +441,7 @@ void NavierStokesSolver<Mesh, SolverType>::buildSystem()
     // Number of velocity components
     UInt nbCompU = this->u().nbcomp();
 
-    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.getTimeStep();
+    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.dataTime()->getTimeStep();
     // Elementary computation and matrix assembling
     // Loop on elements
 
@@ -451,12 +451,12 @@ void NavierStokesSolver<Mesh, SolverType>::buildSystem()
 
     chrono.start();
 
-    for ( UInt iVol = 1; iVol <= M_dataType.mesh().numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_dataType.dataMesh()->mesh().numVolumes(); iVol++ )
     {
         chronoDer.start();
-        M_pFESpace.fe().update( M_dataType.mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
-//        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
-        M_uFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) );
+        M_pFESpace.fe().update( M_dataType.dataMesh()->mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
+//        M_pFESpace.fe().updateFirstDeriv( M_dataType.dataMesh()->mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
+        M_uFESpace.fe().updateFirstDeriv( M_dataType.dataMesh()->mesh().volumeList( iVol ) );
 
         M_elmatStiff.zero();
         M_elmatBdfMass.zero();
@@ -603,7 +603,7 @@ updateSystem()
 
     chrono.start();
 
-    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.getTimeStep();
+    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.dataTime()->getTimeStep();
 
     M_matrFull  = new matrix_type(M_localMap);
 
@@ -644,11 +644,11 @@ updateSystem()
     }
 
 
-    for ( UInt iVol = 1; iVol<= M_dataType.mesh().numVolumes(); ++iVol )
+    for ( UInt iVol = 1; iVol<= M_dataType.dataMesh()->mesh().numVolumes(); ++iVol )
     {
 
-        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
-        M_uFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) ); //as updateFirstDer
+        M_pFESpace.fe().updateFirstDeriv( M_dataType.dataMesh()->mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
+        M_uFESpace.fe().updateFirstDeriv( M_dataType.dataMesh()->mesh().volumeList( iVol ) ); //as updateFirstDer
 
         M_elmatStiff.zero();
 
@@ -730,15 +730,15 @@ timeAdvance( source_type const& source, Real const& time )
     M_rhsNoBC *= 0.;
 
     // loop on volumes: assembling source term
-    for ( UInt iVol = 1; iVol<= M_dataType.mesh().numVolumes(); ++iVol )
+    for ( UInt iVol = 1; iVol<= M_dataType.dataMesh()->mesh().numVolumes(); ++iVol )
     {
         M_elvec.zero();
-        M_uFESpace.fe().updateJacQuadPt( M_dataType.mesh().volumeList( iVol ) );
+        M_uFESpace.fe().updateJacQuadPt( M_dataType.dataMesh()->mesh().volumeList( iVol ) );
 
         for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
         {
             // compute local vector
-            compute_vec( source, M_elvec, M_uFESpace.fe(), M_dataType.getTime(), iComp );
+            compute_vec( source, M_elvec, M_uFESpace.fe(), M_dataType.dataTime()->getTime(), iComp );
 
             // assemble local vector into global one
             assembleVector( M_rhsNoBC, M_elvec,
@@ -749,7 +749,7 @@ timeAdvance( source_type const& source, Real const& time )
 
     if ( !M_steady )
     {
-         M_rhsNoBC += *M_matrMass * M_bdf.bdf_u().time_der( M_dataType.getTimeStep() );
+         M_rhsNoBC += *M_matrMass * M_bdf.bdf_u().time_der( M_dataType.dataTime()->getTimeStep() );
     }
 
     chrono.stop();
@@ -835,7 +835,7 @@ void NavierStokesSolver<Mesh, SolverType>::initialize( const Function& x0,
     ID nbComp = this->u().nbcomp(); // Number of components of the velocity
 
     M_bdf.bdf_u().initialize_unk( x0,
-                                  M_dataType.mesh(),
+                                  M_dataType.dataMesh()->mesh(),
                                   this->refFEu(),
                                   M_uFESpace.fe(),
                                   M_uFESpace.dof(),
@@ -1018,9 +1018,9 @@ void NavierStokesSolver<Mesh, SolverType>::removeMean( vector_type& x, UInt comp
     Real sum1 = 0.;
     Real sum0 = 0.;
 
-    for ( UInt iVol = 1; iVol <= M_dataType.mesh().numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_dataType.dataMesh()->mesh().numVolumes(); iVol++ )
     {
-        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) );
+        M_pFESpace.fe().updateFirstDeriv( M_dataType.dataMesh()->mesh().volumeList( iVol ) );
         sum1 += elem_integral( x, M_pFESpace.fe(), M_pFESpace.dof(), comp );
         sum0 += M_pFESpace.fe().measure();
     }
@@ -1041,10 +1041,10 @@ void NavierStokesSolver<Mesh, SolverType>::applyBoundaryConditions(matrix_type &
 
     // BC manage for the velocity
     if ( !this->bcHandler().bdUpdateDone() )
-        this->bcHandler().bdUpdate( M_dataType.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+        this->bcHandler().bdUpdate( M_dataType.dataMesh()->mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
 
-    bcManage( _csr, M_rhsFull, M_dataType.mesh(), M_uFESpace.dof(), this->bcHandler(), M_uFESpace.feBd(), 1.,
-               M_dataType.getTime() );
+    bcManage( _csr, M_rhsFull, M_dataType.dataMesh()->mesh(), M_uFESpace.dof(), this->bcHandler(), M_uFESpace.feBd(), 1.,
+               M_dataType.dataTime()->getTime() );
 
     if ( this->bcHandler().hasOnlyEssential() && M_diagonalize )
     {
@@ -1078,18 +1078,18 @@ NavierStokesSolver<Mesh, SolverType>::postProcess()
         wr_medit_ascii_scalar( "press." + name + ".bb", this->p().giveVec(),
                                this->p().size() );
         wr_medit_ascii_scalar( "vel_x." + name + ".bb", this->u().giveVec(),
-                               M_dataType.mesh().numGlobalVertices() );
+                               M_dataType.dataMesh()->mesh().numGlobalVertices() );
         wr_medit_ascii_scalar( "vel_y." + name + ".bb", this->u().giveVec() + this->dim_u(),
-                               M_dataType.mesh().numGlobalVertices() );
+                               M_dataType.dataMesh()->mesh().numGlobalVertices() );
         wr_medit_ascii_scalar( "vel_z." + name + ".bb", this->u().giveVec()+2*this->dim_u(),
-                               M_dataType.mesh().numGlobalVertices() );
-        system( ( "ln -s -f " + M_dataType.meshDir() + M_dataType.meshFile() +
+                               M_dataType.dataMesh()->mesh().numGlobalVertices() );
+        system( ( "ln -s -f " + M_dataType.dataMesh()->meshDir() + M_dataType.dataMesh()->meshFile() +
                   " press." + name + ".mesh" ).data() );
-        system( ( "ln -s -f " + M_dataType.meshDir() + M_dataType.meshFile() +
+        system( ( "ln -s -f " + M_dataType.dataMesh()->meshDir() + M_dataType.dataMesh()->meshFile() +
                   " vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s -f " + M_dataType.meshDir() + M_dataType.meshFile() +
+        system( ( "ln -s -f " + M_dataType.dataMesh()->meshDir() + M_dataType.dataMesh()->meshFile() +
                   " vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s -f " + M_dataType.meshDir() + M_dataType.meshFile() +
+        system( ( "ln -s -f " + M_dataType.dataMesh()->meshDir() + M_dataType.dataMesh()->meshFile() +
                   " vel_z." + name + ".mesh" ).data() );
     }
 

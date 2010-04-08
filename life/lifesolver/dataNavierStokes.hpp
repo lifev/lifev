@@ -84,19 +84,24 @@ enum NSStabilization
  *
  */
 template <typename Mesh>
-class DataNavierStokes : public DataMesh<Mesh>,
-                         public DataTime
+class DataNavierStokes
 {
 public:
 
 	//! @name Constructors & Destructor
 	//@{
 
+    typedef DataTime                                                  Time_Type;
+    typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
+
+    typedef DataMesh<Mesh>                                            Mesh_Type;
+    typedef boost::shared_ptr< Mesh_Type >                            Mesh_ptrType;
+
+    //! Empty Constructor
+    DataNavierStokes();
+
     //! Constructor
-	DataNavierStokes( 	const GetPot& dataFile,
-                        const bool         verbose      = false,
-						const std::string& mesh_section = "fluid/space_discretization",
-						const std::string& time_section = "fluid/time_discretization");
+	DataNavierStokes( const GetPot& dataFile,  const Time_ptrType DataTime, const Mesh_ptrType DataMesh );
 
 	//! Copy constructor
 	/*!
@@ -129,8 +134,20 @@ public:
 
 
 
-    //! @name Set functions
+    //! @name Set methods
     //@{
+
+    //! Set data time container
+    /*!
+     * @param DataTime shared_ptr to dataTime container
+     */
+    inline void setDataTime( const Time_ptrType DataTime ) { M_Time = DataTime; }
+
+    //! Set mesh container
+    /*!
+     * @param DataMesh shared_ptr to dataMesh container
+     */
+    inline void setDataMesh( const Mesh_ptrType DataMesh ) { M_Mesh = DataMesh; }
 
     inline void density ( const Real& density, const UInt nfluid=0 )
     {
@@ -158,8 +175,20 @@ public:
 
 
 
-    //! @name Get functions
+    //! @name Get methods
     //@{
+
+    //! Get data time container
+    /*!
+     * @return shared_ptr to dataTime container
+     */
+    inline Time_ptrType dataTime( void ) const { return M_Time; }
+
+    //! Get mesh container
+    /*!
+     * @return shared_ptr to dataMesh container
+     */
+    inline Mesh_ptrType dataMesh( void ) const { return M_Mesh; }
 
     inline UInt fluid_number() const { return M_fluid_number; };
 
@@ -201,8 +230,12 @@ public:
 
 protected:
 
+    //! Data containers for time and mesh
+    Time_ptrType      M_Time;
+    Mesh_ptrType      M_Mesh;
+
     //! Physics
-    UInt             M_fluid_number;
+    UInt              M_fluid_number;
     std::vector<Real> M_density;
     std::vector<Real> M_viscosity;
 
@@ -239,15 +272,41 @@ private:
 
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 template <typename Mesh>
-DataNavierStokes<Mesh>::DataNavierStokes( const GetPot&      dataFile,
-                                          const bool         verbose,
-                                          const std::string& mesh_section,
-                                          const std::string& time_section) :
-        DataMesh<Mesh>                     ( dataFile, mesh_section, verbose ),
-        DataTime                           ( dataFile, time_section ),
+DataNavierStokes<Mesh>::DataNavierStokes( ) :
+        M_Time                             ( ),
+        M_Mesh                             ( ),
+        M_density                          ( ),
+        M_viscosity                        ( ),
+        M_uOrder                           ( ),
+        M_pOrder                           ( ),
+        M_verbose                          ( ),
+        M_dump_init                        ( ),
+        M_dump_period                      ( ),
+        M_factor                           ( ),
+        M_Stokes                           ( false ),
+        M_stab_method                      ( ),
+        M_semiImplicit                     ( false ),
+        M_shapeDerivatives                 ( false ),
+        M_computeMeanValuesPerSection      ( ),
+        M_NbZSections                      ( ),
+        M_ToleranceSection                 ( ),
+        M_XSectionFrontier                 ( ),
+        M_ZSectionInit                     ( ),
+        M_ZSectionFinal                    ( ),
+        M_NbPolygonEdges                   ( ),
+        M_stabilization_list               ( "fluid/space_discretization/stabilization" )
+{
+}
+
+template <typename Mesh>
+DataNavierStokes<Mesh>::DataNavierStokes( const GetPot& dataFile,
+                                          const Time_ptrType DataTime,
+                                          const Mesh_ptrType DataMesh ) :
+        M_Time                             ( DataTime ),
+        M_Mesh                             ( DataMesh ),
         M_density                          ( ),
         M_viscosity                        ( ),
         M_uOrder                           ( ),
@@ -274,8 +333,8 @@ DataNavierStokes<Mesh>::DataNavierStokes( const GetPot&      dataFile,
 
 template <typename Mesh>
 DataNavierStokes<Mesh>::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
-    DataMesh<Mesh>                     ( dataNavierStokes ),
-    DataTime                           ( dataNavierStokes ),
+    M_Time                             ( dataNavierStokes.M_Time ),
+    M_Mesh                             ( dataNavierStokes.M_Mesh ),
     M_fluid_number                     ( dataNavierStokes.M_fluid_number ),
     M_density                          ( dataNavierStokes.M_density ),
     M_viscosity                        ( dataNavierStokes.M_viscosity ),
@@ -303,7 +362,7 @@ DataNavierStokes<Mesh>::DataNavierStokes( const DataNavierStokes& dataNavierStok
 
 
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
 template <typename Mesh>
 DataNavierStokes<Mesh>&
@@ -311,9 +370,8 @@ DataNavierStokes<Mesh>::operator=( const DataNavierStokes& dataNavierStokes )
 {
     if ( this != &dataNavierStokes )
     {
-        DataMesh<Mesh>::operator=( dataNavierStokes );
-        DataTime::operator=( dataNavierStokes );
-
+        M_Time                             = dataNavierStokes.M_Time;
+        M_Mesh                             = dataNavierStokes.M_Mesh;
         M_fluid_number                     = dataNavierStokes.M_fluid_number;
         M_density                          = dataNavierStokes.M_density;
         M_viscosity                        = dataNavierStokes.M_viscosity;
@@ -344,6 +402,14 @@ template <typename Mesh>
 void
 DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
 {
+    // If data time has not been set
+    if ( !M_Time.get() )
+        M_Time.reset( new Time_Type( dataFile, "fluid/time_discretization" ) );
+
+    // If data mesh has not been set
+    if ( !M_Mesh.get() )
+        M_Mesh.reset( new Mesh_Type( dataFile, "fluid/space_discretization" ) );
+
     M_stabilization_list.add( "ip", IP_STABILIZATION,   "interior penalty " );
     M_stabilization_list.add( "sd", SD_STABILIZATION,   "stream-line diffusion" );
     M_stabilization_list.add( "none", NO_STABILIZATION, "none (default)" );
@@ -381,7 +447,7 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
 
     // Miscellaneous
     M_verbose      = dataFile( "fluid/miscellaneous/verbose", 1 );
-    M_dump_init    = dataFile( "fluid/miscellaneous/dump_init", getInitialTime() );
+    M_dump_init    = dataFile( "fluid/miscellaneous/dump_init", M_Time->getInitialTime() );
     M_dump_period  = dataFile( "fluid/miscellaneous/dump_period", 1 );
     M_factor       = dataFile( "fluid/miscellaneous/factor", 0. );
     M_Stokes       = dataFile( "fluid/miscellaneous/Stokes", false );
@@ -431,9 +497,9 @@ DataNavierStokes<Mesh>::showMe( std::ostream& output )
     output << "Stokes simulation    = " << M_Stokes << std::endl;
 
     output << "\n*** Values for data [fluid/space_discretization]\n\n";
-    DataMesh<Mesh>::showMe( output );
+    M_Mesh->showMe( output );
     output << "\n*** Values for data [fluid/time_discretization]\n\n";
-    DataTime::showMe( output );
+    M_Time->showMe( output );
 
     output << "stabilization = ";
     switch( M_stab_method )

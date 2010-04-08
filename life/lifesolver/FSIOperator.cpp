@@ -48,7 +48,7 @@ FSIOperator::FSIOperator():
 //     M_solidLin                           ( ),
     M_bdf                                ( ),
     M_dataFile                           ( ),
-    M_dataFluid                          ( ),
+    M_dataFluid                          ( new data_fluid() ),
     M_dataSolid                          ( ),
     M_fluidInterfaceMap                  ( ),
     M_solidInterfaceMap                  ( ),
@@ -143,7 +143,7 @@ FSIOperator::setDataFromGetPot( const GetPot& dataFile )
 {
 	M_dataFile               = dataFile;
 
-    M_dataFluid.reset( new data_fluid(dataFile) );
+    M_dataFluid->setup( M_dataFile );
     M_dataSolid.reset( new data_solid(dataFile) );
 
     M_method                 = dataFile( "problem/method",    "steklovPoincare" );
@@ -259,7 +259,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSIOperator: building the fluid FESpace ... ");
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_dataFluid->mesh(), *M_epetraComm));
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_dataFluid->dataMesh()->mesh(), *M_epetraComm));
 
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
 															//dOrder,
@@ -287,7 +287,7 @@ FSIOperator::setupFEspace()
     }
     else
     {
-        M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
+        M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataFluid->dataMesh()->mesh(),
 															//dOrder,
 															*refFE_struct,
                                                             *qR_struct,
@@ -295,7 +295,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             *M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
+        M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->dataMesh()->mesh(),
 															//uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -303,7 +303,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             *M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
+        M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->dataMesh()->mesh(),
 															//pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -351,7 +351,7 @@ FSIOperator::setupDOF( void )
 {
     Displayer disp(M_epetraWorldComm);
     disp.leaderPrint("FSIOperator: setting DOF ... " );
-    Dof uDof(*M_dataFluid->mesh(), M_uFESpace->refFE());
+    Dof uDof(*M_dataFluid->dataMesh()->mesh(), M_uFESpace->refFE());
 //     Dof pDof(*M_dataFluid->mesh(), M_pFESpace->refFE());
     Dof dDof(*M_dataSolid->mesh(), M_dFESpace->refFE());
 
@@ -383,8 +383,8 @@ FSIOperator::setupDOF( void )
 
 	M_dofHarmonicExtensionToFluid->setup(   M_uFESpace->refFE(),  uDof, //M_uFESpace->dof(),
 										    M_uFESpace->refFE(),  uDof); //M_uFESpace->dof() );
-	M_dofHarmonicExtensionToFluid->update( *M_dataFluid->mesh(),  M_harmonicInterfaceFlag,
-										   *M_dataFluid->mesh(),  M_fluidInterfaceFlag,
+	M_dofHarmonicExtensionToFluid->update( *M_dataFluid->dataMesh()->mesh(),  M_harmonicInterfaceFlag,
+										   *M_dataFluid->dataMesh()->mesh(),  M_fluidInterfaceFlag,
 										    M_interfaceTolerance );
 
 	M_epetraWorldComm->Barrier();
@@ -508,7 +508,7 @@ FSIOperator::setupFluidSolid( void )
     	M_rhs.reset( new vector_type( M_fluid->getMap() ) );
 
     	//BDF initialization
-        M_bdf.reset( new BdfT<vector_type>( M_dataFluid->getBDF_order() ) );
+        M_bdf.reset( new BdfT<vector_type>( M_dataFluid->dataTime()->getBDF_order() ) );
         M_bdf->initialize_unk( *M_un );
     }
 
@@ -598,7 +598,7 @@ FSIOperator::updateSystem( const vector_type& /*lambda*/ )
         transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
         *M_un                = M_fluid->solution();
-        *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
+        *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->dataTime()->getTimeStep() );
 
         //*this->M_rhs               = M_fluid->matrMass()* (*this->M_un);
         //*this->M_rhs*=this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
@@ -619,12 +619,12 @@ void FSIOperator::couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype
     {
         firstIter = false;
 
-        *lambda     += M_dataFluid->getTimeStep()*lambdaDotSolid();
+        *lambda     += M_dataFluid->dataTime()->getTimeStep()*lambdaDotSolid();
     }
     else
     {
-        *lambda     += 1.5*M_dataFluid->getTimeStep()*lambdaDotSolid(); // *1.5
-        *lambda     -= M_dataFluid->getTimeStep()*0.5*(*lambdaDot);
+        *lambda     += 1.5*M_dataFluid->dataTime()->getTimeStep()*lambdaDotSolid(); // *1.5
+        *lambda     -= M_dataFluid->dataTime()->getTimeStep()*0.5*(*lambdaDot);
     }
 
 	*lambdaDot   = lambdaDotSolid();
@@ -881,13 +881,12 @@ Displayer const&
 FSIOperator::displayer()
 {
     if ( isFluid() &&  M_fluid.get())
-    {
         return M_fluid->getDisplayer();
-    }
 
-    if( M_solid.get() )
-        return M_solid->getDisplayer();
-    std::cout<<"displayer not ready"<<std::endl;
+    if( !isSolid() || !M_solid.get() )
+        std::cout << "ERROR: displayer not ready" << std::endl;
+
+    return M_solid->getDisplayer();
 }
 
 
@@ -946,7 +945,7 @@ void
 FSIOperator::setTime( const Real& time )
 {
 	M_time = time;
-	M_dataFluid->setTime(time);
+	M_dataFluid->dataTime()->setTime(time);
 	M_dataSolid->setTime(time);
 }
 
@@ -1102,8 +1101,8 @@ FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
 
-    M_AlphafCoef  = 2*(this->dataSolid().rho()*h)/this->dataFluid().getTimeStep();
-    M_AlphafCoef += h*this->dataSolid().young(0)*this->dataFluid().getTimeStep() /
+    M_AlphafCoef  = 2*(this->dataSolid().rho()*h)/this->dataFluid().dataTime()->getTimeStep();
+    M_AlphafCoef += h*this->dataSolid().young(0)*this->dataFluid().dataTime()->getTimeStep() /
                     (2*pow(R,2) *(1-pow(dataSolid().poisson(0),2)));
 }
 

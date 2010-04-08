@@ -134,8 +134,10 @@ exactJacobian::imposeFlux( void )
 	UInt numLM = super::imposeFlux();
 
     std::vector<BCName> fluxVector = M_BCh_du->getBCWithType( Flux );
-    if( numLM != (static_cast<UInt>(fluxVector.size())) )
+    if( numLM != ( static_cast<UInt> ( fluxVector.size() ) ) )
+    {
     	ERROR_MSG("Different number of fluxes imposed on Fluid and on LinearFluid");
+    }
 
     UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
                 + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
@@ -186,7 +188,7 @@ void exactJacobian::eval(const vector_type& _disp,
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_dataFluid->getTimeStep());
+        this->veloFluidMesh()    *= 1./(M_dataFluid->dataTime()->getTimeStep());
 
         if( iter==0 || !this->M_dataFluid->isSemiImplicit() )
             {
@@ -203,13 +205,13 @@ void exactJacobian::eval(const vector_type& _disp,
                 vector_type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
                 this->interpolateVelocity(meshDispDiff, *M_beta);
 
-                *M_beta *= -1./M_dataFluid->getTimeStep();
+                *M_beta *= -1./M_dataFluid->dataTime()->getTimeStep();
 
                 *M_beta  += *this->M_un;
 
                 if(recomputeMatrices)
                     {
-                        double alpha = 1./M_dataFluid->getTimeStep();
+                        double alpha = 1./M_dataFluid->dataTime()->getTimeStep();
                         this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
                     }
                 else
@@ -394,11 +396,11 @@ void  exactJacobian::solveLinearFluid()
     //dispFluidDomainRep = dispFluidMesh;//import
     dispFluidDomain=dispFluidMesh;//import
     this->derVeloFluidMesh() = dispFluidMesh;
-    this->derVeloFluidMesh() *= 1./(M_dataFluid->getTimeStep());
+    this->derVeloFluidMesh() *= 1./(M_dataFluid->dataTime()->getTimeStep());
     this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
     *M_rhsNew *= 0.;
 
-    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
+    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->dataTime()->getTimeStep();
 
     if(!this->M_fluid->stab())//if using P1Bubble
     {

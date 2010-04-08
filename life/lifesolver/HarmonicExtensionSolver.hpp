@@ -365,7 +365,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
         std::cout << "  HE- Solving the system ... \n" << std::flush;
 
     // solving the system. Note: setMatrix(M_matrHE) done in setUp()
-    int numIter = M_linearSolver.solveSystem( M_f, M_disp, M_matrHE );
+    M_linearSolver.solveSystem( M_f, M_disp, M_matrHE );
 
     //    M_dispDiff =  M_disp ;
     //    M_dispDiff -= M_dispOld;

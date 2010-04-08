@@ -181,20 +181,20 @@ public:
 //@@    mesh_type& mesh() { return this->_mesh;}
     const DataType & dataType() const {return M_dataType;}
 
-    mesh_type& mesh()             {return M_dataType.mesh();}
-    const mesh_type& mesh() const {return M_dataType.mesh();}
+    mesh_type& mesh()             {return M_dataType.dataMesh()->mesh();}
+    const mesh_type& mesh() const {return M_dataType.dataMesh()->mesh();}
 
-    std::string meshDir() {return M_dataType.meshDir();}
-    std::string meshFile(){return M_dataType.meshFile();}
+    std::string meshDir() {return M_dataType.dataMesh()->meshDir();}
+    std::string meshFile(){return M_dataType.dataMesh()->meshFile();}
 
-    Real        dt()   {return M_dataType.getTimeStep();}
-    Real  timestep()   {return M_dataType.getTimeStep();}
-    Real  inittime()   {return M_dataType.getInitialTime();}
-    Real   endtime()   {return M_dataType.getEndTime();}
+    Real        dt()   {return M_dataType.dataTime()->getTimeStep();}
+    Real  timestep()   {return M_dataType.dataTime()->getTimeStep();}
+    Real  inittime()   {return M_dataType.dataTime()->getInitialTime();}
+    Real   endtime()   {return M_dataType.dataTime()->getEndTime();}
     Real   density()   {return M_dataType.density();}
     Real viscosity()   {return M_dataType.viscosity();}
 
-    unsigned int order_bdf() const {return M_dataType.getBDF_order();}
+    unsigned int order_bdf() const {return M_dataType.dataTime()->getBDF_order();}
 
     void showMe()  {return M_dataType.showMe();}
     UInt verbose() {return M_dataType.verbose();}

@@ -165,7 +165,7 @@ void fixedPoint::eval( const vector_type& _disp,
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= this->dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_dataFluid->getTimeStep());
+        this->veloFluidMesh()    *= 1./(M_dataFluid->dataTime()->getTimeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
@@ -181,11 +181,11 @@ void fixedPoint::eval( const vector_type& _disp,
 
         this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
 
-        *M_beta *= -1./M_dataFluid->getTimeStep();
+        *M_beta *= -1./M_dataFluid->dataTime()->getTimeStep();
 
         *M_beta += this->M_bdf->extrap();
 
-        double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
+        double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->dataTime()->getTimeStep();
 
         //*M_rhsNew   = *this->M_rhs;
         //*M_rhsNew  *= alpha;

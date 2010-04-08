@@ -57,6 +57,9 @@ public:
     //! @name Constructors & Destructor
 	//@{
 
+    //! Empty Constructor
+    DataTime();
+
     //! Constructor
     /*!
      * @param dataFile GetPot data file

@@ -40,6 +40,15 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
+DataTime::DataTime( ) :
+    M_initialTime   ( 0. ),
+    M_endTime       ( 1. ),
+    M_time          ( M_initialTime ),
+    M_timeStep      ( M_endTime ),
+    M_BDF_order     ( 1 )
+{
+}
+
 DataTime::DataTime( const GetPot& dfile, const std::string& section ) :
 	M_initialTime	( dfile(( section + "/initialtime" 	).data(), 0.) ),
 	M_endTime		( dfile(( section + "/endtime" 		).data(), 1.) ),
@@ -77,7 +86,7 @@ DataTime::showMe( std::ostream& output ) const
 Real
 DataTime::round( const Real n, const Int decimal ) const
 {
-    return std::floor( n * std::pow(static_cast<Real>(10), decimal) + 0.5 )  / std::pow(static_cast<Real>(10), decimal);
+    return std::floor( n * std::pow(10.0, decimal) + 0.5 )  / std::pow(10.0, decimal);
 }
 
 }

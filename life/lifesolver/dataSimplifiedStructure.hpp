@@ -37,7 +37,7 @@
 namespace LifeV
 {
 /*!
-  \class DataNavierStokes
+  \class DataSimplifiedStructure
 
   Base class which holds usual data for reduced
   structural models (algegraic law and independent ring model)

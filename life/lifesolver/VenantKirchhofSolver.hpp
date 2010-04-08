@@ -693,7 +693,7 @@ iterate( bchandler_raw_type& bch )
     // solving the system
     M_linearSolver->setMatrix(*matrFull);
 
-    int numIter = M_linearSolver->solveSystem( rhsFull, M_disp, matrFull);
+    M_linearSolver->solveSystem( rhsFull, M_disp, matrFull);
 
     M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
