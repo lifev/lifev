@@ -70,7 +70,7 @@ fullMonolithic::setupFluidSolid()
        }*/
     //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
     vector_type u0(*this->M_monolithicMap);
-    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
+    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->dataTime()->getBDF_order()));
     M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
@@ -128,7 +128,7 @@ fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix, int coupling
             {
                 if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
-                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->getTimeStep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
+                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->dataTime()->getTimeStep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
                 }
             }
         }
@@ -170,7 +170,7 @@ fullMonolithic::evalResidual( vector_type&       res,
     //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
     //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
-    double alpha = 1/M_dataFluid->getTimeStep();
+    double alpha = 1/M_dataFluid->dataTime()->getTimeStep();
     vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
     this->moveMesh(mmRep);// re-initialize the mesh points
     *meshDispDiff -= *meshDispOld;//relative displacement
@@ -196,7 +196,7 @@ fullMonolithic::evalResidual( vector_type&       res,
     M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
     if(iter==0)
     {
-        *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->getTimeStep() );// fluid time discr.
+        *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->dataTime()->getTimeStep() );// fluid time discr.
         super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
         super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
     }
@@ -525,7 +525,7 @@ void fullMonolithic::initializeMesh(vector_ptrtype fluid_dispOld)
 
 void fullMonolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
-    double alpha = 1./M_dataFluid->getTimeStep();
+    double alpha = 1./M_dataFluid->dataTime()->getTimeStep();
     vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
     vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
     vector_type uk(M_uFESpace->map()+M_pFESpace->map());
