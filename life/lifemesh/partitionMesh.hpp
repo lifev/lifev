@@ -498,15 +498,15 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
                 {
                     procIndex[k]=std::make_pair( maxs[k], k);
                 }
-
+/*
 struct booleanCondition
 {
-    const bool reordering( std::pair<UInt, int>& a, std::pair<UInt, int>& b)
+    bool reordering( std::pair<UInt, int>& a, std::pair<UInt, int>& b)
     {
         return a.first>b.first;
     }
 };
-
+*/
 
 // std::vector<int> procIndex(nprocs);
             //std::vector<int>::const_iterator Iter1;
@@ -732,7 +732,7 @@ struct booleanCondition
     // local mesh construction
     // ***********************
 
-    if (!M_me) std::cout << "Building local mesh ... \n" << std::flush;
+    if (!M_me) std::cout << "Building local mesh ...                        " << std::flush;
 
     std::map<int, int>::iterator  im;
     std::set<int>::iterator       is;
@@ -1326,8 +1326,8 @@ struct booleanCondition
 //    M_mesh->showMe();
 //    MPI_Barrier(MPI_COMM_WORLD);
 
-    if (!M_me) std::cout << "ok." << std::endl;
-    if (!M_me) std::cout << "Creating the map ... " << std::flush;
+    if (!M_me) std::cout << "done" << std::endl;
+    if (!M_me) std::cout << "Creating the map ...                           " << std::flush;
 
     // *********************
     // repeated map creation
@@ -1429,6 +1429,7 @@ struct booleanCondition
     }
 #endif
 
+    if (!M_me) std::cout << "done" << std::endl;
 }
 
 

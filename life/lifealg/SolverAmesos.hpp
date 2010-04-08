@@ -92,7 +92,7 @@ public:
     void setReusePreconditioner( const bool& /*reuse*/ );
 
     void setDataFromGetPot( const GetPot& dfile, const std::string& section );
-    void SetParameters(bool cerr_warning_if_unused = false);
+    void SetParameters();
 
     void setTolMaxiter(const double tol, const int maxiter=-1);
 

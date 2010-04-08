@@ -106,9 +106,8 @@ void SolverAmesos::setOperator( Epetra_Operator& /*op*/)
 }
 
 
-void SolverAmesos::SetParameters(bool cerr_warning_if_unused)
+void SolverAmesos::SetParameters()
 {
-
 }
 
 
