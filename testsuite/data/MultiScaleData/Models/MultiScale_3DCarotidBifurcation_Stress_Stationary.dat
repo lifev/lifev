@@ -25,10 +25,10 @@ couplingsPath	= './MultiScaleData/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '	
-			0		Fluid3D				Fluid3D_Cylinder
-			1		Fluid3D				Fluid3D_Carotid
-			2		Fluid3D				Fluid3D_Cylinder
-			3		Fluid3D				Fluid3D_Cylinder
+			0		Fluid3D				Fluid3D_Cylinder_Stokes
+			1		Fluid3D				Fluid3D_Carotid_Stokes
+			2		Fluid3D				Fluid3D_Cylinder_Stokes
+			3		Fluid3D				Fluid3D_Cylinder_Stokes
 		 '
 ###################################################################################################
 

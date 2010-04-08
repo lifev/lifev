@@ -23,7 +23,9 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = Fluid3D_Cylinder.dat \
+					Fluid3D_Cylinder_Stokes.dat \
 					Fluid3D_Carotid.dat \
+					Fluid3D_Carotid_Stokes.dat \
                     MultiScale_3Dbifurcation_FluxStress.dat \
                     MultiScale_3Dbifurcation_FluxStress_Stationary.dat \
                     MultiScale_3Dbifurcation_Stress_Stationary.dat \
