@@ -145,8 +145,10 @@ DebugStream& operator<< ( DebugStream& __s, T const* __t )
     __s << __os.str();
     return __s;
 }
+#ifdef HAVE_BACKTRACE
 std::string backtrace ();
 std::string backtrace ( int );
+#endif
 
 class NdebugStream
 {
@@ -182,7 +184,6 @@ DebugStream Debug( bool cond, int area = 0, DebugStream::stprintf = 0 );
 #else
 #define Debug Ndebug
 inline NdebugStream Ndebug( int = 0, NdebugStream::stprintf = &printf ) { return NdebugStream(); }
-inline NdebugStream Ndebug( bool cond, int = 0, NdebugStream::stprintf = &printf ) { return NdebugStream(); }
 #endif
 
 DebugStream Warning( int area = 0 );

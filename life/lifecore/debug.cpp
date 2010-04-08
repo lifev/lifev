@@ -456,17 +456,18 @@ Fatal( bool cond, int area )
         return DebugStream( 0, 0, false );
 }
 
+#ifdef HAVE_BACKTRACE
 std::string
 backtrace ()
 {
     // show all backtrace
     return backtrace( -1 );
 }
+
 std::string
 backtrace ( int __levels )
 {
     std::ostringstream os;
-#ifdef HAVE_BACKTRACE
 
     void* trace[256];
     int n = backtrace ( trace, 256 );
@@ -480,9 +481,10 @@ backtrace ( int __levels )
         os << i << ": " << strings[i] << "\n";
     os << "]\n";
     free (strings);
-#endif
+
     return os.str();
 }
+#endif
 }
 
 LifeV::DebugStream&
