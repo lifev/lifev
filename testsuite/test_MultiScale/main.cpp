@@ -66,6 +66,9 @@
 
 #include <lifemc/lifesolver/MS_Solver.hpp>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 LifeV::AboutData
 makeAbout()
 {
