@@ -36,9 +36,9 @@
 
 namespace LifeV {
 
-bool MS_ExitFlag = EXIT_SUCCESS;
 std::string MS_ProblemFolder = "";
-UInt MS_ProblemStep = 0;
+UInt        MS_ProblemStep   = 0;
+bool        MS_ExitFlag      = EXIT_SUCCESS;
 
 // ===================================================
 // Constructors
@@ -57,16 +57,10 @@ MS_Solver::MS_Solver() :
     Debug( 8000 ) << "MS_Solver::MS_Solver() \n";
 #endif
 
-    //Models & Couplings & Algorithms map creation
-    modelsMap["MultiScale"]           = MultiScale;
-    modelsMap["Fluid3D"]              = Fluid3D;
-    couplingsMap["BoundaryCondition"] = BoundaryCondition;
-    couplingsMap["Stress"]            = Stress;
-    couplingsMap["FluxStress"]        = FluxStress;
-    algorithmMap["Aitken"]            = Aitken;
-    algorithmMap["Newton"]            = Newton;
+    //Define the maps of MS objects
+    MS_MapsDefinition();
 
-    //Models & Couplings Factory registration
+    //Register the objects
     FactoryModels::instance().registerProduct   ( MultiScale,        &createMultiScale );
     FactoryModels::instance().registerProduct   ( Fluid3D,           &createFluid3D );
     FactoryCouplings::instance().registerProduct( Stress,            &createStress );
