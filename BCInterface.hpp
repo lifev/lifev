@@ -45,6 +45,7 @@
 #include <lifemc/lifefem/BCInterface_FSI.hpp>
 
 namespace LifeV {
+
 //! BCInterface - LifeV Interface to load Boundary Conditions completely from a GetPot file
 /*!
  *  @author Cristiano Malossi
@@ -120,7 +121,7 @@ class BCInterface
 {
 public:
 
-    typedef singleton< factory< BCInterface_Function< Operator > , std::string > > BCInterfaceFunctionFactory;
+    typedef singleton< factory< BCInterface_Function< Operator > , BCBaseList > > FactoryBCInterface_Function;
 
     //! @name Constructors & Destructor
     //@{
@@ -281,7 +282,10 @@ private:
 
     template< class BCInterfaceBase >
     inline void AddBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
-                         const std::string& Oper );
+                         const BCBaseList& Oper );
+
+    // This method should be removed: it is a workaround due to legacy of LifeV BC.
+    inline void AddBCManager( BCVectorInterface& base );
 
     template< class BCBase >
     inline void AddBCManager( BCBase& base );
@@ -301,38 +305,46 @@ private:
     boost::shared_ptr< BCHandler >  M_handler;
 
     // Data
-    BCInterface_Data< Operator >     M_data;
+    BCInterface_Data< Operator >    M_data;
 
     // Functions
-    static std::vector< boost::shared_ptr< BCInterface_Function< Operator > > > M_vectorFunction;
+    //static std::vector< boost::shared_ptr< BCInterface_Function< Operator > > > M_vectorFunction;
+    std::vector< boost::shared_ptr< BCInterface_Function< Operator > > > M_vectorFunction;
+
+    // Functions Directions
+    std::vector< boost::shared_ptr< BCFunctionDirectional > >            M_vectorFunctionDirection;
 
     // FSI Functions
-    static std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > >      M_vectorFSI;
+    //static std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > >      M_vectorFSI;
+    std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > >      M_vectorFSI;
 };
 
 // ===================================================
 // Template implementation
 // ===================================================
 // Initialize static variables
-template< class Operator >
-std::vector< boost::shared_ptr< BCInterface_Function< Operator > > > BCInterface< Operator >::M_vectorFunction;
+//template< class Operator >
+//std::vector< boost::shared_ptr< BCInterface_Function< Operator > > > BCInterface< Operator >::M_vectorFunction;
 
-template< class Operator >
-std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > > BCInterface< Operator >::M_vectorFSI;
+//template< class Operator >
+//std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > > BCInterface< Operator >::M_vectorFSI;
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 template< class Operator >
 BCInterface< Operator >::BCInterface( const GetPot& dataFile, const std::string& dataSection ) :
-    M_dataFile      ( dataFile ),
-    M_dataSection   ( dataSection + "/boundary_conditions/" ),
-    M_list          (),
-    M_listSize      ( 0 ),
-    M_bcNumber      ( 0 ),
-    M_hint          ( BCHandler::HINT_BC_NONE ),
-    M_handler       (),
-    M_data          ()
+    M_dataFile                ( dataFile ),
+    M_dataSection             ( dataSection + "/boundary_conditions/" ),
+    M_list                    (),
+    M_listSize                ( 0 ),
+    M_bcNumber                ( 0 ),
+    M_hint                    ( BCHandler::HINT_BC_NONE ),
+    M_handler                 (),
+    M_data                    (),
+    M_vectorFunction          (),
+    M_vectorFunctionDirection (),
+    M_vectorFSI               ()
 {
 
 #ifdef DEBUG
@@ -343,22 +355,25 @@ BCInterface< Operator >::BCInterface( const GetPot& dataFile, const std::string&
     SetList( ( M_dataSection + "list" ).c_str() );
 
     //Factory registration
-    BCInterfaceFunctionFactory::instance().registerProduct( "function",         &createFunction< Operator > );
-    BCInterfaceFunctionFactory::instance().registerProduct( "functionFile",     &createFunctionFile< Operator > );
-    BCInterfaceFunctionFactory::instance().registerProduct( "OPERfunction",     &createOperatorFunction< Operator > );
-    BCInterfaceFunctionFactory::instance().registerProduct( "OPERfunctionFile", &createOperatorFunctionFile< Operator > );
+    FactoryBCInterface_Function::instance().registerProduct( function,         &createFunction< Operator > );
+    FactoryBCInterface_Function::instance().registerProduct( functionFile,     &createFunctionFile< Operator > );
+    FactoryBCInterface_Function::instance().registerProduct( OPERfunction,     &createOperatorFunction< Operator > );
+    FactoryBCInterface_Function::instance().registerProduct( OPERfunctionFile, &createOperatorFunctionFile< Operator > );
 }
 
 template< class Operator >
 BCInterface< Operator >::BCInterface( const BCInterface& interface ) :
-    M_dataFile      ( interface.M_dataFile ),
-    M_dataSection   ( interface.M_dataSection ),
-    M_list          ( interface.M_list ),
-    M_listSize      ( interface.M_listSize ),
-    M_bcNumber      ( interface.M_bcNumber ),
-    M_hint          ( interface.M_hint ),
-    M_handler       ( interface.M_handler ),
-    M_data          ( interface.M_data )
+    M_dataFile                ( interface.M_dataFile ),
+    M_dataSection             ( interface.M_dataSection ),
+    M_list                    ( interface.M_list ),
+    M_listSize                ( interface.M_listSize ),
+    M_bcNumber                ( interface.M_bcNumber ),
+    M_hint                    ( interface.M_hint ),
+    M_handler                 ( interface.M_handler ),
+    M_data                    ( interface.M_data ),
+    M_vectorFunction          ( interface.M_vectorFunction ),
+    M_vectorFunctionDirection ( interface.M_vectorFunctionDirection ),
+    M_vectorFSI               ( interface.M_vectorFSI )
 {
 }
 
@@ -371,14 +386,17 @@ BCInterface< Operator >::operator=( const BCInterface& interface )
 {
     if ( this != &interface )
     {
-        M_dataFile    = interface.M_dataFile;
-        M_dataSection = interface.M_dataSection;
-        M_list        = interface.M_list;
-        M_listSize    = interface.M_listSize;
-        M_bcNumber    = interface.M_bcNumber;
-        M_hint        = interface.M_hint;
-        M_handler     = interface.M_handler;
-        M_data        = interface.M_data;
+        M_dataFile                = interface.M_dataFile;
+        M_dataSection             = interface.M_dataSection;
+        M_list                    = interface.M_list;
+        M_listSize                = interface.M_listSize;
+        M_bcNumber                = interface.M_bcNumber;
+        M_hint                    = interface.M_hint;
+        M_handler                 = interface.M_handler;
+        M_data                    = interface.M_data;
+        M_vectorFunction          = interface.M_vectorFunction;
+        M_vectorFunctionDirection = interface.M_vectorFunctionDirection;
+        M_vectorFSI               = interface.M_vectorFSI;
     }
 
     return *this;
@@ -556,7 +574,7 @@ BCInterface< Operator >::BuildBase()
     Debug( 5020 ) << "BCInterface::BuildBase\n";
 #endif
 
-    UInt position;
+    //UInt position;
 
     switch ( M_data.GetBase().second )
     {
@@ -565,19 +583,21 @@ BCInterface< Operator >::BuildBase()
         case OPERfunction:
         case OPERfunctionFile:
 
-            if ( NewBase( M_vectorFunction, position ) )
-                AddBase( M_vectorFunction, M_data.GetBase().first );
+            //if ( NewBase( M_vectorFunction, position ) )
+                AddBase( M_vectorFunction, M_data.GetBase().second );
 
-            AddBCManager( M_vectorFunction[position]->GetBase() );
+            //AddBCManager( M_vectorFunction[position]->GetBase() );
+            AddBCManager( M_vectorFunction.back()->GetBase() );
 
             break;
 
         case FSI:
 
-            if ( NewBase( M_vectorFSI, position ) )
+            //if ( NewBase( M_vectorFSI, position ) )
                 AddBase( M_vectorFSI );
 
-            AddBCManager( M_vectorFSI[position]->GetBase() );
+            //AddBCManager( M_vectorFSI[position]->GetBase() );
+            AddBCManager( M_vectorFSI.back()->GetBase() );
 
             break;
     }
@@ -618,13 +638,44 @@ BCInterface< Operator >::AddBase( std::vector< boost::shared_ptr< BCInterfaceBas
 template< class Operator > template< class BCInterfaceBase >
 inline void
 BCInterface< Operator >::AddBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
-                                  const std::string& Oper )
+                                  const BCBaseList& Oper )
 {
-    boost::shared_ptr< BCInterfaceBase > Function( BCInterfaceFunctionFactory::instance().createObject( Oper ) );
+    boost::shared_ptr< BCInterfaceBase > Function( FactoryBCInterface_Function::instance().createObject( Oper ) );
 
     Function->SetData( M_data );
 
     baseVector.push_back( Function );
+}
+
+template< class Operator >
+inline void
+BCInterface< Operator >::AddBCManager( BCVectorInterface& base )
+{
+    switch ( M_data.GetMode() )
+    {
+        case Scalar:
+        case Normal:
+        case Tangential:
+        case Directional:
+        case Component:
+
+#ifdef DEBUG
+            Debug( 5020 ) << "BCInterface::AddBCManager                              others" << "\n\n";
+#endif
+
+            std::cout << "ERROR: Scalar, Normal, Tangential, Directional, Component NOT AVAILABLE FOR FSI BC" << std::endl;
+        break;
+
+        case Full:
+
+#ifdef DEBUG
+            Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
+#endif
+
+            M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
+
+        break;
+    }
 }
 
 template< class Operator > template< class BCBase >
@@ -643,7 +694,30 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
             M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base );
 
-            break;
+        break;
+
+        case Directional:
+
+#ifdef DEBUG
+            Debug( 5020 ) << "BCInterface::AddBCManager                              Directional" << "\n\n";
+#endif
+        {
+            // Parameters for direction BC
+            M_data.SetName( M_data.GetName() + "_direction" );
+            M_data.SetBase( make_pair( "function", function ) );
+            M_data.SetBaseString( M_data.GetDirection() );
+
+            // Directional field
+            AddBase( M_vectorFunction, M_data.GetBase().second );
+
+            // Directional base
+            boost::shared_ptr< BCFunctionDirectional > directionalBase( new BCFunctionDirectional( base.Function(), M_vectorFunction.back()->GetBase().Function() ) );
+            M_vectorFunctionDirection.push_back( directionalBase );
+
+            M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), *M_vectorFunctionDirection.back() );
+        }
+
+        break;
 
         case Full:
 
@@ -653,7 +727,7 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
             M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
 
-            break;
+        break;
 
         case Component:
 
@@ -663,7 +737,7 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
             M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComV() );
 
-            break;
+        break;
     }
 }
 

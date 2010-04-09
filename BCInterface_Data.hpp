@@ -146,6 +146,12 @@ public:
      */
     void SetComV( const UInt& comV, const UInt& index );
 
+    //! Set the direction string of the boundary condition
+    /*!
+     * @param direction Boundary condition direction string
+     */
+    void SetDirection( const std::string& direction );
+
     //! Set the base string of the boundary condition
     /*!
      * @param baseString Boundary condition base string
@@ -156,7 +162,7 @@ public:
     /*!
      * @param base Boundary condition base type
      */
-    void SetBase( const std::pair< std::string, BCBaseList > base );
+    void SetBase( const std::pair< std::string, BCBaseList >& base );
 
     //@}
 
@@ -185,6 +191,9 @@ public:
     //! Get the number of components of the boundary condition
     const ID& GetComN() const;
 
+    //! Get the direction string of the boundary condition
+    const std::string& GetDirection() const;
+
     //! Get the base string of the boundary condition
     const std::string& GetBaseString() const;
 
@@ -206,6 +215,8 @@ private:
 
     inline void ReadComV( const char* component, const GetPot& dataFile );
 
+    inline void ReadDirection( const char* direction, const GetPot& dataFile );
+
     inline void ReadBase( const std::string& base, const GetPot& dataFile );
 
     inline bool IsBase( const char* base, const GetPot& dataFile );
@@ -219,6 +230,7 @@ private:
     BCType                                M_type;
     BCMode                                M_mode;
     BCComV                                M_comV;
+    std::string                           M_direction;
     std::string                           M_baseString;
     std::pair< std::string, BCBaseList >  M_base;
 
@@ -233,30 +245,33 @@ private:
 // ===================================================
 template< class Operator >
 BCInterface_Data< Operator >::BCInterface_Data() :
-    M_operator      (),
-    M_name          (),
-    M_flag          (),
-    M_type          (),
-    M_mode          (),
-    M_comV          (),
-    M_baseString    (),
-    M_base          (),
-    M_mapType       (),
-    M_mapMode       (),
-    M_mapBase       ()
+    M_operator           (),
+    M_name               (),
+    M_flag               (),
+    M_type               (),
+    M_mode               (),
+    M_comV               (),
+    M_direction          (),
+    M_baseString         (),
+    M_base               (),
+    M_mapType            (),
+    M_mapMode            (),
+    M_mapBase            ()
 {
     //Set mapType
-    M_mapType["Essential"] = Essential;
-    M_mapType["Natural"]   = Natural;
-    M_mapType["Mixte"]     = Mixte;
-    M_mapType["Flux"]      = Flux;
+    M_mapType["Essential"]  = Essential;
+    M_mapType["Natural"]    = Natural;
+    M_mapType["Mixte"]      = Mixte;
+    M_mapType["Flux"]       = Flux;
+    M_mapType["Resistance"] = Resistance;
 
     //Set mapMode
-    M_mapMode["Scalar"]     = Scalar;
-    M_mapMode["Full"]       = Full;
-    M_mapMode["Component"]  = Component;
-    M_mapMode["Normal"]     = Normal;
-    M_mapMode["Tangential"] = Tangential;
+    M_mapMode["Scalar"]      = Scalar;
+    M_mapMode["Full"]        = Full;
+    M_mapMode["Component"]   = Component;
+    M_mapMode["Normal"]      = Normal;
+    M_mapMode["Tangential"]  = Tangential;
+    M_mapMode["Directional"] = Directional;
 
     //Set mapBase
     M_mapBase["function"]         = function;
@@ -268,17 +283,18 @@ BCInterface_Data< Operator >::BCInterface_Data() :
 
 template< class Operator >
 BCInterface_Data< Operator >::BCInterface_Data( const BCInterface_Data& data ) :
-    M_operator      ( data.M_operator ),
-    M_name          ( data.M_name ),
-    M_flag          ( data.M_flag ),
-    M_type          ( data.M_type ),
-    M_mode          ( data.M_mode ),
-    M_comV          ( data.M_comV ),
-    M_baseString    ( data.M_baseString ),
-    M_base          ( data.M_base ),
-    M_mapType       ( data.M_mapType ),
-    M_mapMode       ( data.M_mapMode ),
-    M_mapBase       ( data.M_mapBase )
+    M_operator          ( data.M_operator ),
+    M_name              ( data.M_name ),
+    M_flag              ( data.M_flag ),
+    M_type              ( data.M_type ),
+    M_mode              ( data.M_mode ),
+    M_comV              ( data.M_comV ),
+    M_direction         ( data.M_direction ),
+    M_baseString        ( data.M_baseString ),
+    M_base              ( data.M_base ),
+    M_mapType           ( data.M_mapType ),
+    M_mapMode           ( data.M_mapMode ),
+    M_mapBase           ( data.M_mapBase )
 {
 }
 
@@ -291,17 +307,18 @@ BCInterface_Data< Operator >::operator=( const BCInterface_Data& data )
 {
     if ( this != &data )
     {
-        M_operator      = data.M_operator;
-        M_name          = data.M_name;
-        M_flag          = data.M_flag;
-        M_type          = data.M_type;
-        M_mode          = data.M_mode;
-        M_comV          = data.M_comV;
-        M_baseString    = data.M_baseString;
-        M_base          = data.M_base;
-        M_mapType       = data.M_mapType;
-        M_mapMode       = data.M_mapMode;
-        M_mapBase       = data.M_mapBase;
+        M_operator          = data.M_operator;
+        M_name              = data.M_name;
+        M_flag              = data.M_flag;
+        M_type              = data.M_type;
+        M_mode              = data.M_mode;
+        M_comV              = data.M_comV;
+        M_direction         = data.M_direction;
+        M_baseString        = data.M_baseString;
+        M_base              = data.M_base;
+        M_mapType           = data.M_mapType;
+        M_mapMode           = data.M_mapMode;
+        M_mapBase           = data.M_mapBase;
     }
 
     return *this;
@@ -312,8 +329,8 @@ BCInterface_Data< Operator >::operator=( const BCInterface_Data& data )
 // ===================================================
 template< class Operator >
 inline void BCInterface_Data< Operator >::ReadBC( const BCName& name,
-                                                 const std::string& dataSection,
-                                                 const GetPot& dataFile )
+                                                  const std::string& dataSection,
+                                                  const GetPot& dataFile )
 {
     M_name = name;
 
@@ -321,6 +338,7 @@ inline void BCInterface_Data< Operator >::ReadBC( const BCName& name,
     ReadType( ( dataSection + name + "/type" ).c_str(), dataFile );
     ReadMode( ( dataSection + name + "/mode" ).c_str(), dataFile );
     ReadComV( ( dataSection + name + "/component" ).c_str(), dataFile );
+    ReadDirection( ( dataSection + name + "/direction" ).c_str(), dataFile );
     ReadBase( dataSection + name + "/", dataFile );
 }
 
@@ -376,6 +394,12 @@ void BCInterface_Data< Operator >::SetComV( const UInt& comV, const UInt& index 
 }
 
 template< class Operator >
+void BCInterface_Data< Operator >::SetDirection( const std::string& direction )
+{
+    M_direction = direction;
+}
+
+template< class Operator >
 void BCInterface_Data< Operator >::SetBaseString( const std::string& baseString )
 {
     M_baseString = baseString;
@@ -383,7 +407,7 @@ void BCInterface_Data< Operator >::SetBaseString( const std::string& baseString 
 }
 
 template< class Operator >
-void BCInterface_Data< Operator >::SetBase( const std::pair< std::string, BCBaseList > base )
+void BCInterface_Data< Operator >::SetBase( const std::pair< std::string, BCBaseList >& base )
 {
     M_base = base;
 }
@@ -438,6 +462,13 @@ const ID&
 BCInterface_Data< Operator >::GetComN() const
 {
     return M_comV.front();
+}
+
+template< class Operator >
+const std::string&
+BCInterface_Data< Operator >::GetDirection() const
+{
+    return M_direction;
 }
 
 template< class Operator >
@@ -506,6 +537,16 @@ inline void BCInterface_Data< Operator >::ReadComV( const char* component, const
     Debug( 5020 ) << output.str() << "\n";
 #endif
 
+}
+
+template< class Operator >
+inline void BCInterface_Data< Operator >::ReadDirection( const char* direction, const GetPot& dataFile  )
+{
+    M_direction = dataFile( direction, " " );
+
+#ifdef DEBUG
+    Debug( 5020 ) << "BCInterface_Data::ReadDirection              direction: " << M_direction << "\n";
+#endif
 }
 
 template< class Operator >

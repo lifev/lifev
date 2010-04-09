@@ -70,9 +70,7 @@ enum BCBaseList
     FSI
 };
 
-// Map objects
-//extern std::map< std::string, algorithmsTypes > algorithmMap;
-
+// Type definitions
 typedef std::string       BCName;
 typedef EntityFlag        BCFlag;
 typedef std::vector< ID > BCComV;
