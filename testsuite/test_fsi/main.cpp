@@ -40,9 +40,8 @@
 #include <life/lifefilters/ensight.hpp>
 
 #ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
+	#include <life/lifefilters/hdf5exporter.hpp>
 #endif
-
 
 #include <Epetra_ConfigDefs.h>
 
@@ -150,9 +149,8 @@ public:
     typedef FSIOperator::vector_type                        vector_type;
     typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
 
-    //typedef Ensight<FSIOperator::mesh_type>                 filter_type;
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter<FSIOperator::mesh_type>                 filter_type;
+    typedef Hdf5exporter<FSIOperator::mesh_type>            filter_type;
 #else
     typedef Ensight<FSIOperator::mesh_type>                 filter_type;
 #endif
@@ -180,7 +178,7 @@ public:
     	MPI_Barrier( MPI_COMM_WORLD );
 
     	Debug( 10000 ) << "Setting up the BC \n";
-    	//M_fsi->setSourceTerms( fZero, fZero );
+
 		M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
 		M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension(*M_fsi->FSIOper()));
 		M_fsi->setSolidBC(BCh_solid(*M_fsi->FSIOper()));
