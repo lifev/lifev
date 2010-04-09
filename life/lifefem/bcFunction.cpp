@@ -29,11 +29,10 @@
    \date 2004-10-12
  */
 #include <life/lifecore/life.hpp>
-
 #include <life/lifefem/bcFunction.hpp>
 
-namespace LifeV
-{
+namespace LifeV {
+
 //
 // BCFunctionBase
 //
@@ -55,6 +54,13 @@ void
 BCFunctionBase::setFunction( function_type g )
 {
     _M_g = g;
+}
+
+//! get the function
+BCFunctionBase::function_type&
+BCFunctionBase::Function()
+{
+    return _M_g;
 }
 
 //! Overloading function operator by calling attribut _g
@@ -99,6 +105,13 @@ BCFunctionMixte::setFunctions_Mixte( function_type g, function_type coef )
     _M_coef = coef;
 }
 
+//! set the functions after having built it.
+BCFunctionBase::function_type&
+BCFunctionMixte::Functions_Mixte()
+{
+    return _M_coef;
+}
+
 Real
 BCFunctionMixte::coef( const Real& t, const Real& x, const Real& y,
                        const Real& z, const ID& icomp ) const
@@ -113,21 +126,6 @@ createBCFunctionMixte( BCFunctionBase const* __bc )
 }
 // register BCFunctionMixte in factory for cloning
 const bool __bcmixte = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
-
-
-
-
-}
-
-
-
-
-
-
-namespace LifeV
-{
-
-
 
 
 BCFunctionUDepBase::BCFunctionUDepBase(function_type g ):_M_g(g)
@@ -156,10 +154,6 @@ createBCFunctionUDep( BCFunctionUDepBase const* __bc )
 }
 const bool __bcUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct(
         typeid(BCFunctionUDepBase), &createBCFunctionUDep );
-
-
-
-
 
 BCFunctionUDepMixte::BCFunctionUDepMixte(function_type g,function_type coef):
                 BCFunctionUDepBase(g),_M_coef(coef)
@@ -216,6 +210,13 @@ BCFunctionDirectional::setFunctions_Directional( function_type g, function_type 
 {
     setFunction( g );
     _M_vectFct = vectFct;
+}
+
+//! set the functions after having built it.
+BCFunctionBase::function_type&
+BCFunctionDirectional::Functions_Directional()
+{
+    return _M_vectFct;
 }
 
 Real

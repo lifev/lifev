@@ -36,15 +36,12 @@
 #include <life/lifecore/singleton.hpp>
 #include <life/lifecore/factory.hpp>
 
-namespace LifeV
-{
-// ============ BCFunctionBase ================
+namespace LifeV {
 
 /*!
-
  \class BCFunctionBase
 
- Base class (STL functor) that holds the function used for imposing BC.
+  Base class (STL functor) that holds the function used for imposing BC.
 
   The data functions given by the user must have the following declaration
   Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
@@ -52,21 +49,18 @@ namespace LifeV
   Mixed boundary conditions.
 
 */
-
 class BCFunctionBase
 {
 public:
+
     //! Type for a generic user defined  function
-    //typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_type;
 
     //! Default constructor
     /*!
       The user must supply a function by calling setFunction(..)
     */
-    BCFunctionBase()
-    {}
-    ;
+    BCFunctionBase() {}
 
     //! Constructing from a user defined function
     /*!
@@ -80,14 +74,19 @@ public:
     */
     BCFunctionBase( const BCFunctionBase& bcf );
 
-    virtual ~BCFunctionBase()
-        {}
+    virtual ~BCFunctionBase() {}
 
     //! Set the function
     /*!
       \param g the user defined function
     */
     void setFunction( function_type g );
+
+    //! Get the function
+    /*!
+      \return the user defined function
+    */
+    function_type& Function();
 
     //! Overloading function operator by calling _g
     /*!
@@ -106,7 +105,6 @@ protected:
     function_type _M_g;
 };
 
-
 /*!
 
  \class BCFunctionMixte
@@ -116,9 +114,7 @@ protected:
   The data funcitions given by the user must have the following declaration
  Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
 */
-class BCFunctionMixte
-    :
-    public BCFunctionBase
+class BCFunctionMixte : public BCFunctionBase
 {
 public:
 
@@ -128,9 +124,7 @@ public:
     /*!
       The user must supply a function by calling setFunction(..)
     */
-    BCFunctionMixte()
-        {}
-
+    BCFunctionMixte() {}
 
     //! Constructing from user defined functions
     /*!
@@ -145,7 +139,6 @@ public:
     */
     BCFunctionMixte( const BCFunctionMixte& bcf );
 
-
     //! Set the functions in the mixte case (beware : plural!)
     /*!
       \param g : the user defined function
@@ -153,6 +146,11 @@ public:
     */
     void setFunctions_Mixte( function_type g, function_type coef );
 
+    //! Get the function mixte
+    /*!
+      \return user defined function
+    */
+    function_type& Functions_Mixte();
 
     //! Method to call the auxiliary user defined function
     /*!
@@ -166,24 +164,12 @@ public:
     Real coef( const Real& t, const Real& x, const Real& y,
                const Real& z, const ID& i ) const;
 private:
+
     //! user defined function
     function_type _M_coef;
 };
 
-
-
-
-
-
 typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBCFunction;
-
-
-
-}
-
-
-namespace LifeV
-{
 
 /* much similar to BCFunctionBase but different func prototipe
    for bc, I derive BCFunctionBaseUDepending from BCFunctionBase
@@ -208,7 +194,6 @@ protected:
   function_type _M_g;
 };
 
-
 class BCFunctionUDepMixte: public BCFunctionUDepBase
 {
 public:
@@ -226,13 +211,6 @@ private:
 };
 
 typedef LifeV::singleton< LifeV::factoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
-
-
-
-
-
-/* now I can store this in a BCBase */
-
 
 /*!
 
@@ -255,8 +233,7 @@ public:
     /*!
       The user must supply a function by calling setFunction(..)
     */
-    BCFunctionDirectional()
-        {}
+    BCFunctionDirectional() {}
 
 
     //! Constructing from user defined functions
@@ -280,6 +257,11 @@ public:
     */
     void setFunctions_Directional( function_type g, function_type vectFct );
 
+    //! Set the functions in the mixte case (beware : plural!)
+    /*!
+      \return user defined function to defined the direction where the Dirichlet condition is imposed
+    */
+    function_type& Functions_Directional();
 
     //! Method to call the auxiliary user defined function
     /*!
@@ -300,8 +282,3 @@ private:
 }//End of namespace LifeV
 
 #endif
-
-
-
-
-
