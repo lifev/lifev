@@ -115,14 +115,14 @@ enum errorsTypes
     MS_CouplingType             /*!< Coupling type not recognized */
 };
 
-// Exit Flag
-extern bool MS_ExitFlag;
-
 // Folder of the problem
 extern std::string MS_ProblemFolder;
 
 // Step of the problem ( > 0 when performing a restart )
 extern UInt MS_ProblemStep;
+
+// Exit Flag
+extern bool MS_ExitFlag;
 
 // Map objects
 extern std::map< std::string, algorithmsTypes > algorithmMap;
@@ -135,6 +135,7 @@ class MS_Algorithm;
 class MS_PhysicalModel;
 class MS_PhysicalCoupling;
 
+// Type definitions
 typedef EntityFlag                                                BCFlag;
 
 typedef EpetraVector                                              VectorType;
@@ -167,6 +168,21 @@ typedef singleton< factory< CouplingType, couplingsTypes > >      FactoryCouplin
 // ===================================================
 // MS Utility Methods
 // ===================================================
+
+//! Define the map of the MS objects
+inline void
+MS_MapsDefinition()
+{
+    modelsMap["MultiScale"]           = MultiScale;
+    modelsMap["Fluid3D"]              = Fluid3D;
+
+    couplingsMap["BoundaryCondition"] = BoundaryCondition;
+    couplingsMap["Stress"]            = Stress;
+    couplingsMap["FluxStress"]        = FluxStress;
+
+    algorithmMap["Aitken"]            = Aitken;
+    algorithmMap["Newton"]            = Newton;
+}
 
 //! Perform a dynamic cast from a base class to a derived class
 /*!
