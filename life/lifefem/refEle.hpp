@@ -1,164 +1,204 @@
-/*-*- mode: c++ -*-
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+//@HEADER
+/*
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-#ifndef _REFELE_H_INCLUDE
-#define _REFELE_H_INCLUDE
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-#include <life/lifecore/life.hpp>
-#include <life/lifearray/tab.hpp>
-#include <life/lifemesh/basisElSh.hpp>
-#include <life/lifefem/quadRule.hpp>
+************************************************************************
+*/
+//@HEADER
 
 /*!
-  \file refEle.h
-  \brief Base class for RefFE and GeoMap
-*/
+    @file
+    @brief Base class for RefFE and GeoMap
+ */
+
+#ifndef REFELE_H
+#define REFELE_H 1
+
+#include <life/lifecore/life.hpp>
+
+#include <life/lifemesh/basisElSh.hpp>
+
 
 namespace LifeV
 {
-/*!
-  \class RefEle
-  \brief Base class for RefGeo and RefFE
-  \author J.-F. Gerbeau
-  \date 04/2002
 
-  It contains the basis functions and their values on quadrature points.
-  These functions will be used either by RefFE (finite element) or by
-  GeoMap (geometrical mapping).
-*/
-
-
-
-//! Indicates the LOCAL (reference element) coordinates
+// Some typedefs for 
 typedef const Real & cRRef;
 typedef Real ( * Fct ) ( cRRef, cRRef , cRRef );
 
+
+//! RefEle - The basis class for the geometric mapping and the reference finite elements.
+/*!
+  @author J.-F. Gerbeau
+  @date 04/2002
+
+  Implemented orginially by J.-F. Gerbeau (04/2002) but totally modified by S.Quinodoz (samuel.quinodoz@epfl.ch , 04/2010)
+
+  This class contains all the basis functions, their derivatives and the reference coordinates. It is the basis class for the geometric map (LifeV::GeoMap) and the reference finite element (LifeV::RefFE). 
+*/
 class RefEle
 {
-protected:
-    const SetOfQuadRule* _sqr; //!< pointer on the set of quadrature rules
-    const Fct* _phi; //!< pointer on the basis functions
-    const Fct* _dPhi; //!< pointer on the derivatives of the basis functions
-    const Fct* _d2Phi; //!< pointer on the second derivatives of the basis functions
-    const Real* _refCoor; //!< reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
+
 public:
-    const std::string name; //!< name of the reference element
-    const ReferenceShapes shape; //!< geometrical shape of the element
-    const int nbDof;   //!< Total number of degrees of freedom
-    const int nbCoor;  //!< Number of local coordinates
-private:
-    //!   values of the basis functions on all quadrature points
-    KN<Real> _phiQuad;
-    //! values of the derivatives of the basis functions on all quadrature points
-    KN<Real> _dPhiQuad;
-    //! values of the second derivatives of the basis functions on all quadrature points
-    KN<Real> _d2PhiQuad;
-    //! values of the second derivatives of the basis functions on all quadrature points
-    KN<int> _idxQuad; //!< _idxQuad[t] = index of the quadrature rules of id t in _phiQuad
-    KN<int> _idxDQuad; //!< _idxDQuad[t] = index of the quadrature rules of id t in _dPhiQuad
-    KN<int> _idxD2Quad; //!< _idxD2Quad[t] = index of the quadrature rules of id t in _d2PhiQuad
-public:
-    //! constructor
-    RefEle( std::string _name, ReferenceShapes _shape, int _nbDof, int _nbCoor,
-            const Fct* phi, const Fct* dPhi,
-            const Fct* d2Phi, const Real* _refCoor, const SetOfQuadRule& sqr );
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Full constructor
+    /*!
+      @param name Name of the reference element
+      @param shape Shape related to this reference element
+      @param nbDof Number of degrees of freedom
+      @param nbCoor Number of local coordinates
+      @param phi Array of the basis functions
+      @param dPhi Array of the derivatives of the basis functions
+      @param d2Phi Array of the second derivatives of the basis functions
+      @param refCoor Array of the reference coordinates for this reference element
+     */
+    RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor,
+            const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Real* _refCoor);
+
+    //! Destructor
     ~RefEle();
+
+    //@}
+
+
+
+    //! @name Methods
+    //@{
+
     //! return the first local coordinate of the i-th node of the reference element
-    inline Real xi( int i ) const
+    inline Real xi( UInt i ) const
     {
-        ASSERT_BD( i < nbDof )
-        return _refCoor[ 3 * i ];
+        ASSERT_BD( i < M_nbDof )
+        return M_refCoor[ 3 * i ];
     }
     //! return the second local coordinate of the i-th node of the reference element
-    inline Real eta( int i ) const
+    inline Real eta( UInt i ) const
     {
-        ASSERT_BD( i < nbDof )
-        return _refCoor[ 3 * i + 1 ];
+        ASSERT_BD( i < M_nbDof )
+        return M_refCoor[ 3 * i + 1 ];
     }
     //! return the third local coordinate of the i-th node of the reference element
-    inline Real zeta( int i ) const
+    inline Real zeta( UInt i ) const
     {
-        ASSERT_BD( i < nbDof )
-        return _refCoor[ 3 * i + 2 ];
+        ASSERT_BD( i < M_nbDof )
+        return M_refCoor[ 3 * i + 2 ];
     }
     //! return the icoor-th local coordinate of the i-th node of the reference element
-    inline Real refCoor( int i, int icoor ) const
+    inline Real refCoor( UInt i, UInt icoor ) const
     {
-        ASSERT_BD( i < nbDof && icoor < nbCoor )
-        return _refCoor[ 3 * i + icoor ];
+        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
+        return M_refCoor[ 3 * i + icoor ];
     }
     //! return the value of the i-th basis function on point (x,y,z)
-    inline double phi( int i, cRRef x, cRRef y, cRRef z ) const
+    inline Real phi( UInt i, cRRef x, cRRef y, cRRef z ) const
     {
-        ASSERT_BD( i < nbDof )
-        return _phi[ i ] ( x, y, z );
-    }
-    //!return the value of the i-th basis function on the ig-th point of integration of quadrature rule qr
-    inline Real phi( int i, int ig, const QuadRule& qr ) const
-    {
-        ASSERT_BD( i < nbDof && ig < qr.nbQuadPt )
-        return _phiQuad( _idxQuad( qr.id ) + ig * nbDof + i );
-    }
-    //! return the array of the values of the basis functions phi_1[ig],phi_2[ig],... on the integration point ig of the quadrature rule qr.
-    /*!This function is written in order to avoid too many calls to function
-      phi(i,ig,qr), please check if it improves really efficiency. If yes,
-      analogous function should be written for the derivatives.  */
-    inline RN_ phiQuadPt( int ig, const QuadRule& qr ) const
-    {
-        ASSERT_BD( ig < qr.nbQuadPt )
-        return _phiQuad( SubArray( nbDof, _idxQuad( qr.id ) + ig * nbDof ) );
-    }
-    //! return the array of the values of the i-th basis functions phi_i[ig=1],phi_i[ig=2],...on all the integration points of the quadrature rule qr.
-    /*! This function is written in order to avoid too many calls to
-      function phi(i,ig,qr), please check if it improves really
-      efficiency. If yes, analogous function should be written for the
-      derivatives.  */
-    inline RN_ phiI( int i, const QuadRule& qr ) const
-    {
-        ASSERT_BD( i < nbDof )
-        return _phiQuad( SubArray( qr.nbQuadPt, _idxQuad( qr.id ) + i, nbDof ) );
+        ASSERT_BD( i < M_nbDof )
+        return M_phi[ i ] ( x, y, z );
     }
     //! return the value of the icoor-th derivative of the i-th basis function on point (x,y,z)
-    inline double dPhi( int i, int icoor, cRRef x, cRRef y, cRRef z ) const
+    inline Real dPhi( UInt i, UInt icoor, cRRef x, cRRef y, cRRef z ) const
     {
-        ASSERT_BD( i < nbDof && icoor < nbCoor )
-        return _dPhi[ i * nbCoor + icoor ] ( x, y, z );
-    }
-    //! return the value of icoor-th derivative of the i-th basis function on the ig-th point of integration of quadrature rule qr
-    inline Real dPhi( int i, int icoor, int ig, const QuadRule& qr ) const
-    {
-        ASSERT_BD( i < nbDof && ig < qr.nbQuadPt && icoor < nbCoor )
-        return _dPhiQuad( _idxDQuad( qr.id ) + ( ig * nbDof + i ) * nbCoor + icoor );
+        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
+        return M_dPhi[ i * M_nbCoor + icoor ] ( x, y, z );
     }
     //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point (x,y,z)
-    inline double d2Phi( int i, int icoor, int jcoor, cRRef x, cRRef y, cRRef z ) const
+    inline Real d2Phi( UInt i, UInt icoor, UInt jcoor, cRRef x, cRRef y, cRRef z ) const
     {
-        ASSERT_BD( i < nbDof && icoor < nbCoor && jcoor < nbCoor )
-        return _d2Phi[ ( i * nbCoor + icoor ) * nbCoor + jcoor ] ( x, y, z );
+        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
+        return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( x, y, z );
     }
-    //! return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on the ig-th point of integration of quadrature rule qr
-    inline Real d2Phi( int i, int icoor, int jcoor, int ig, const QuadRule& qr ) const
+
+    //@}
+
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Return the name of the reference element.
+    inline const std::string& name() const
     {
-        ASSERT_BD( i < nbDof && ig < qr.nbQuadPt && icoor < nbCoor )
-        return _d2PhiQuad( _idxD2Quad( qr.id ) + ( ( ig * nbDof + i ) * nbCoor + icoor ) * nbCoor + jcoor );
+        return M_name;
     }
-    void check() const; //!< A simple check function
-    friend std::ostream& operator << ( std::ostream& f, const RefEle& fe );
+
+    //! Return the number of degrees of freedom for this reference element
+    const UInt& nbDof() const
+    {
+        return M_nbDof;
+    }
+
+    //! Return the number of local coordinates
+    const UInt& nbCoor() const
+    {
+        return M_nbCoor;
+    };
+    
+    //@}
+
+
+private:
+
+    //! @name Private Methods
+    //@{
+
+    //! No way to use the empty constructor
+    RefEle();
+    
+    //! No way to use the copy constuctor
+    RefEle(const RefEle&);
+    
+    //@}
+
+
+    //! pointer on the basis functions
+    const Fct* M_phi;
+
+    //! pointer on the derivatives of the basis functions
+    const Fct* M_dPhi;
+
+    //! pointer on the second derivatives of the basis functions
+    const Fct* M_d2Phi;
+
+    //! reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
+    const Real* M_refCoor;
+    
+
+    //! name of the reference element
+    const std::string M_name;
+
+    //! geometrical shape of the element
+    /*
+      It is actually never used, but we keep it for backward compatibility...
+     */
+    const ReferenceShapes M_shape;
+
+    //! Total number of degrees of freedom
+    const UInt M_nbDof;
+
+    //! Number of local coordinates
+    const UInt M_nbCoor; 
+
 };
 
 
