@@ -37,14 +37,13 @@
 //#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/dataNavierStokes.hpp>
 
-#include <life/lifefilters/ensight.hpp>
-
 #ifdef HAVE_HDF5
 	#include <life/lifefilters/hdf5exporter.hpp>
+#else
+	#include <life/lifefilters/ensight.hpp>	
 #endif
 
 #include <Epetra_ConfigDefs.h>
-
 #ifdef EPETRA_MPI
 	#include <Epetra_MpiComm.h>
 #else
