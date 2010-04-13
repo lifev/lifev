@@ -21,109 +21,133 @@
 namespace LifeV
 {
 CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr )
-        :
-        nbGeoNode( _geoMap.nbDof ),
-        nbNode( _refFE.nbDof ),
-        nbCoor( _refFE.nbCoor ),
-        nbQuadPt( _qr.nbQuadPt ),
-        nbDiag( _refFE.nbDiag() ),
-        nbUpper( _refFE.nbUpper() ) ,
-        nbPattern( _refFE.nbPattern() ),
-        point( nbGeoNode, nbCoor ),
-        refFE( _refFE ),
-        geoMap( _geoMap ),
-        qr( _qr ),
-        phi( nbNode, nbQuadPt ),
-        dPhiRef( nbNode, nbCoor, nbQuadPt ),
-        dPhiRef2( nbNode, nbCoor, nbCoor, nbQuadPt ),
-        phiDer( nbNode, nbCoor, nbQuadPt ),
-        jacobian( nbCoor, nbCoor, nbQuadPt ),
-        tInvJac( nbCoor, nbCoor, nbQuadPt ),
-        phiGeo( nbGeoNode, nbQuadPt ),
-        dPhiGeo( nbGeoNode, nbCoor, nbQuadPt ),
-        weightDet( nbQuadPt ),
-        detJac( nbQuadPt ),
-        quadPt( nbQuadPt, 3 ),
-        phiDer2( nbNode, nbCoor, nbCoor, nbQuadPt )
+    :
+    nbNode( _refFE.nbDof() ),
+    M_nbCoor( _refFE.nbCoor() ),
+    M_nbDiag( _refFE.nbDiag() ),
+    M_nbUpper( _refFE.nbUpper() ) ,
+    M_nbPattern( _refFE.nbPattern() ),
+    
+    M_nbGeoNode( _geoMap.nbDof() ),
+    M_nbQuadPt( UInt(_qr.nbQuadPt()) ),
+        
+    M_refFE( _refFE ),
+    M_geoMap( _geoMap ),
+    M_quadRule(new QuadRule(_qr)),
+    
+    
+    M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
+    M_quadNodes(boost::extents[M_nbQuadPt][M_nbCoor]),
+    M_dphiGeoMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
+    M_jacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_wDetJacobian(boost::extents[M_nbQuadPt]),
+    M_tInverseJacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_phi(boost::extents[nbNode][M_nbQuadPt]),
+    M_dphi(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]),
+    M_d2phi(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_dphiRef(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]),
+    M_d2phiRef(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    
+    
+    M_cellNodesUpdated(false),
+    M_quadNodesUpdated(false),
+    M_dphiGeoMapUpdated(false),
+    M_jacobianUpdated(false),
+    M_wDetJacobianUpdated(false),
+    M_tInverseJacobianUpdated(false),
+    M_phiUpdated(false),
+    M_dphiUpdated(false),
+    M_d2phiUpdated(false),
+    M_dphiRefUpdated(false),
+    M_d2phiRefUpdated(false)
+    
 {
     CONSTRUCTOR( "CurrentFE" );
 
-    ASSERT( nbCoor < 4, "nbCoor must be smaller than 4");
+    ASSERT( M_nbCoor < 4, "M_nbCoor must be smaller than 4");
 
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( UInt iterQuad(0); iterQuad < M_nbQuadPt; ++iterQuad )
     {
-        for ( int i = 0;i < nbNode;i++ )
+        for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
         {
-            phi( i, ig ) = refFE.phi( i, ig, qr );
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            M_phi[iterNode][iterQuad] = M_refFE.phi( iterNode,
+                                                     M_quadRule->quadPointCoor(iterQuad,0),
+                                                     M_quadRule->quadPointCoor(iterQuad,1),
+                                                     M_quadRule->quadPointCoor(iterQuad,2));
+
+            for ( UInt icoor(0); icoor<M_nbCoor; ++icoor )
             {
-                dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
-                for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
-                    dPhiRef2( i, icoor, jcoor, ig ) = refFE.d2Phi( i, icoor, jcoor, ig, qr );
+                M_dphiRef[iterNode][icoor][iterQuad] = M_refFE.dPhi( iterNode,
+                                                                     icoor,
+                                                                     M_quadRule->quadPointCoor(iterQuad,0),
+                                                                     M_quadRule->quadPointCoor(iterQuad,1),
+                                                                     M_quadRule->quadPointCoor(iterQuad,2));
+                
+                for ( UInt jcoor(0); jcoor<M_nbCoor; ++jcoor )
+                {
+                    M_d2phiRef[iterNode][icoor][jcoor][iterQuad] = M_refFE.d2Phi( iterNode,
+                                                                                  icoor, jcoor,
+                                                                                  M_quadRule->quadPointCoor(iterQuad,0),
+                                                                                  M_quadRule->quadPointCoor(iterQuad,1),
+                                                                                  M_quadRule->quadPointCoor(iterQuad,2) );
+                }
             }
         }
-        for ( int k = 0;k < nbGeoNode;k++ )
+        for ( UInt k(0); k < M_nbGeoNode; ++k )
         {
-            phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {
-                dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
+                M_dphiGeoMap[k][icoor][iterQuad] = M_geoMap.dPhi( k, icoor,
+                                                                  M_quadRule->quadPointCoor(iterQuad,0),
+                                                                  M_quadRule->quadPointCoor(iterQuad,1),
+                                                                  M_quadRule->quadPointCoor(iterQuad,2) );
             }
         }
     }
 
-#ifdef TEST_PRE
-    _hasJac = false;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
+    M_dphiGeoMapUpdated=true;
+    M_phiUpdated=true;
+    M_dphiRefUpdated=true;
+    M_d2phiRefUpdated=true;
+
 }
-//----------------------------------------------------------------------
-void CurrentFE::coorMap( Real& x, Real& y, Real& z,
-                         const Real & xi, const Real & eta, const Real & zeta ) const
+
+CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap )
+    :
+    nbNode( _refFE.nbDof() ),
+    M_nbCoor( _refFE.nbCoor() ),
+    M_nbDiag( _refFE.nbDiag() ),
+    M_nbUpper( _refFE.nbUpper() ) ,
+    M_nbPattern( _refFE.nbPattern() ),
+    
+    M_nbGeoNode( _geoMap.nbDof() ),
+    M_nbQuadPt(0),
+        
+    M_refFE( _refFE ),
+    M_geoMap( _geoMap ),
+    M_quadRule(0),
+    
+    
+    M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
+
+
+    M_cellNodesUpdated(false),
+    M_quadNodesUpdated(false),
+    M_dphiGeoMapUpdated(false),
+    M_jacobianUpdated(false),
+    M_wDetJacobianUpdated(false),
+    M_tInverseJacobianUpdated(false),
+    M_phiUpdated(false),
+    M_dphiUpdated(false),
+    M_d2phiUpdated(false),
+    M_dphiRefUpdated(false),
+    M_d2phiRefUpdated(false)
+    
 {
-    x = y = z = 0.;
-
-    /* former code using THREEDIM (commented out VM 07/04)
-    // remove it permanently if the switch seems ok.
-    for(int i=0;i<nbGeoNode;i++){
-      x += point(i,0) * geoMap.phi(i,xi,eta,zeta);
-      y += point(i,1) * geoMap.phi(i,xi,eta,zeta);
-    #if defined(THREEDIM)
-      z += point(i,2) * geoMap.phi(i,xi,eta,zeta);
-    #endif
-    }
-    */
-
-    //! I did NOT fully test this (VM)
-    switch ( nbCoor )
-    {
-    case 1:    //! 1D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            x += point( i, 0 ) * geoMap.phi( i, xi, eta, zeta );
-        }
-        break;
-    case 2:    //! 2D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            x += point( i, 0 ) * geoMap.phi( i, xi, eta, zeta );
-            y += point( i, 1 ) * geoMap.phi( i, xi, eta, zeta );
-        }
-        break;
-    case 3:    //! 3D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            x += point( i, 0 ) * geoMap.phi( i, xi, eta, zeta );
-            y += point( i, 1 ) * geoMap.phi( i, xi, eta, zeta );
-            z += point( i, 2 ) * geoMap.phi( i, xi, eta, zeta );
-        }
-        break;
-    default:
-        ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
-    }
+    CONSTRUCTOR( "CurrentFE" );
 }
+
+//----------------------------------------------------------------------
 
   // Added by S. Quinodoz
 void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
@@ -148,13 +172,13 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
   // For "simplicity", we use Cramer's formula (no need for an heavy solver)
 
 
-  if (nbCoor ==1)
+  if (M_nbCoor ==1)
     {
 
       // 1D Case
 
-      const Real a11=point(1,0)-point(0,0);
-      const Real b1=x-point(0,0);
+      const Real a11=M_cellNodes[1][0]-M_cellNodes[0][0];
+      const Real b1=x-M_cellNodes[0][0];
 
       Real lambda=b1/a11;
 
@@ -162,17 +186,17 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
       eta = 0;
       zeta= 0;
 
-    } else if ( nbCoor ==2)
+    } else if ( M_nbCoor ==2)
     {
 
       // 2D Case
 
-      const Real a11=point(1,0)-point(0,0);
-      const Real a12=point(2,0)-point(0,0);
-      const Real a21=point(1,1)-point(0,1);
-      const Real a22=point(2,1)-point(0,1);
-      const Real b1 =x-point(0,0);
-      const Real b2 =y-point(0,1);
+      const Real a11=M_cellNodes[1][0]-M_cellNodes[0][0];
+      const Real a12=M_cellNodes[2][0]-M_cellNodes[0][0];
+      const Real a21=M_cellNodes[1][1]-M_cellNodes[0][1];
+      const Real a22=M_cellNodes[2][1]-M_cellNodes[0][1];
+      const Real b1 =x-M_cellNodes[0][0];
+      const Real b2 =y-M_cellNodes[0][1];
 
       Real D= a11*a22 - a21*a12;
       Real lambda_1= b1*a22 - b2*a12;
@@ -185,23 +209,23 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
       eta = lambda_1 * 0 + lambda_2 * 1; // 0=refFE.eta(1) -refFE.eta(0) ; 1=refFE.eta(2) -refFE.eta(0);
       zeta= 0;
 
-    }else if (nbCoor == 3)
+    }else if (M_nbCoor == 3)
     {
 
       // 3D Case
 
-      const Real a11=point(1,0)-point(0,0);
-      const Real a12=point(2,0)-point(0,0);
-      const Real a13=point(3,0)-point(0,0);
-      const Real a21=point(1,1)-point(0,1);
-      const Real a22=point(2,1)-point(0,1);
-      const Real a23=point(3,1)-point(0,1);
-      const Real a31=point(1,2)-point(0,2);
-      const Real a32=point(2,2)-point(0,2);
-      const Real a33=point(3,2)-point(0,2);
-      const Real b1 =x-point(0,0);
-      const Real b2 =y-point(0,1);
-      const Real b3 =z-point(0,2);
+      const Real a11=M_cellNodes[1][0]-M_cellNodes[0][0];
+      const Real a12=M_cellNodes[2][0]-M_cellNodes[0][0];
+      const Real a13=M_cellNodes[3][0]-M_cellNodes[0][0];
+      const Real a21=M_cellNodes[1][1]-M_cellNodes[0][1];
+      const Real a22=M_cellNodes[2][1]-M_cellNodes[0][1];
+      const Real a23=M_cellNodes[3][1]-M_cellNodes[0][1];
+      const Real a31=M_cellNodes[1][2]-M_cellNodes[0][2];
+      const Real a32=M_cellNodes[2][2]-M_cellNodes[0][2];
+      const Real a33=M_cellNodes[3][2]-M_cellNodes[0][2];
+      const Real b1 =x-M_cellNodes[0][0];
+      const Real b2 =y-M_cellNodes[0][1];
+      const Real b3 =z-M_cellNodes[0][2];
 
       const Real D= a11*a22*a33 + a31*a12*a23 + a21*a32*a13 - a11*a32*a23 - a31*a22*a13 - a21*a12*a33;
       Real lambda_1= b1*a22*a33 + b3*a12*a23 + b2*a32*a13 - b1*a32*a23 - b3*a22*a13 - b2*a12*a33;
@@ -234,9 +258,9 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
 {
   Real jac(0);
 
-  for ( int i = 0; i < nbGeoNode;i++ )
+  for ( UInt i = 0; i < M_nbGeoNode;i++ )
   {
-    jac += point( i, comp_x ) * geoMap.dPhi( i , comp_zeta , hat_x, hat_y, hat_z );
+    jac += M_cellNodes[i][comp_x] * M_geoMap.dPhi( i , comp_zeta , hat_x, hat_y, hat_z );
   };
 
   return jac;
@@ -245,11 +269,11 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
 Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
 				     int comp_x, int comp_zeta) const
 {
-  if ( nbCoor ==1 )
+  if ( M_nbCoor ==1 )
     {
 
       return 1/ pointJacobian(hat_x,hat_y,hat_z,comp_x,comp_zeta);
-    } else if (nbCoor ==2)
+    } else if (M_nbCoor ==2)
     {
 
       Real a11= pointJacobian(hat_x,hat_y,hat_z,0,0);
@@ -264,7 +288,7 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
 
       return mysign*pointJacobian(hat_x,hat_y,hat_z,comp_zeta,comp_x)/(a11*a22-a12*a21);
 
-    } else if (nbCoor ==3)
+    } else if (M_nbCoor ==3)
     {
 
       Real a11= pointJacobian(hat_x,hat_y,hat_z,0,0);
@@ -304,447 +328,584 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
       return cof[comp_x][comp_zeta]/det;
     } else
     {
-        ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
+        ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
     };
     return 0.;
 };
 
-//========Barycenter===============================
-void CurrentFE::barycenter( Real& x, Real& y, Real& z )
-{
-    x = y = z = 0.;
-    /*
-    // former code using THREEDIM (commented out VM 07/04)
-    // remove it permanently if the switch seems ok.
-    for(int i=0;i<nbGeoNode;i++){
-      x += point(i,0);
-      y += point(i,1);
-    #if defined(THREEDIM)
-      z += point(i,2);
-    #endif
-    }
-    */
-    switch ( nbCoor )
-    {
-    case 1:    //! 1D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            x += point( i, 0 );
-        }
-        break;
-    case 2:    //! 2D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            x += point( i, 0 );
-            y += point( i, 1 );
-        }
-        break;
-    case 3:    //! 3D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            x += point( i, 0 );
-            y += point( i, 1 );
-            z += point( i, 2 );
-        }
-        break;
-    default:
-        ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
-    }
-
-    x /= nbGeoNode;
-    y /= nbGeoNode;
-    z /= nbGeoNode;
-}
-//=====End of Barycenter=============================
 //----------------------------------------------------------------------
+
+void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag)
+{
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+
+    M_cellNodesUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_CELL_NODES) != 0)
+    {
+        computeCellNodes(pts);
+    };
+
+    M_quadNodesUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_QUAD_NODES) != 0)
+    {
+        computeQuadNodes();
+    };
+
+    /*M_phiUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_PHI) != 0)
+    {
+        computePhi();
+    }; */
+
+    /*M_dphiGeoMapUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_DPHI_GEO_MAP) != 0)
+    {
+        computeDphiGeoMap();
+    };*/
+
+    M_jacobianUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_JACOBIAN) != 0)
+    {
+        computeJacobian();
+    };
+
+    M_tInverseJacobianUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_T_INVERSE_JACOBIAN) != 0)
+    {
+        computeTInverseJacobian();
+    };
+    
+    M_wDetJacobianUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_W_DET_JACOBIAN) != 0)
+    {
+        computeWDetJacobian();
+    };
+
+    /*M_dphiRefUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_DPHI_REF) != 0)
+    {
+        computeDphiRef();
+    };*/
+    
+    M_dphiUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_DPHI) != 0)
+    {
+        computeDphi();
+    };
+
+    /*M_d2phiRefUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_D2PHI_REF) != 0)
+    {
+        computeD2phiRef();
+    };*/
+
+    M_d2phiUpdated=false;
+    if ( (upFlag & UPDATE_ONLY_D2PHI) != 0)
+    {
+        computeD2phi();
+    };
+    
+}
+
+Real CurrentFE::detJac(const UInt& quadNode) const
+{
+    ASSERT(M_jacobianUpdated,"Jacobian is not updated!");
+
+    Real a ( M_jacobian[0][0][quadNode] );
+    Real b ( M_jacobian[0][1][quadNode] );
+    Real c ( M_jacobian[0][2][quadNode] );
+    Real d ( M_jacobian[1][0][quadNode] );
+    Real e ( M_jacobian[1][1][quadNode] );
+    Real f ( M_jacobian[1][2][quadNode] );
+    Real g ( M_jacobian[2][0][quadNode] );
+    Real h ( M_jacobian[2][1][quadNode] );
+    Real i ( M_jacobian[2][2][quadNode] );
+    
+    Real ei ( e * i );
+    Real fh ( f * h );
+    Real bi ( b * i );
+    Real ch ( c * h );
+    Real bf ( b * f );
+    Real ce ( c * e );
+    return ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
+}
+
 Real CurrentFE::measure() const
 {
-    ASSERT_PRE( _hasJac, "The det of jacobian must have been computed" )
-    Real meas = 0.;
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
-        meas += weightDet( ig );
+    ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
+
+    Real meas (0.0);
+    for ( UInt iterQuadNode(0); iterQuadNode < M_nbQuadPt; ++iterQuadNode )
+    {
+        meas += M_wDetJacobian[iterQuadNode];
+    };
     return meas;
 }
 
-//----------------------------------------------------------------------
+void CurrentFE::barycenter( Real& x, Real& y, Real& z ) const
+{
+    ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+
+    x=0.0;
+    y=0.0;
+    z=0.0;
+    switch ( M_nbCoor )
+    {
+    case 1:    // 1D
+        for ( UInt i(0); i < M_nbGeoNode ; ++i)
+        {
+            x += M_cellNodes[i][0];
+        }
+        break;
+    case 2:    // 2D
+        for ( UInt i(0); i < M_nbGeoNode ; ++i)
+        {
+            x += M_cellNodes[i][0];
+            y += M_cellNodes[i][1];
+        }
+        break;
+    case 3:    // 3D
+        for ( UInt i(0); i < M_nbGeoNode ; ++i)
+        {
+            x += M_cellNodes[i][0];
+            y += M_cellNodes[i][1];
+            z += M_cellNodes[i][2];
+        }
+        break;
+    default:
+        ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+    }
+
+    x /= M_nbGeoNode;
+    y /= M_nbGeoNode;
+    z /= M_nbGeoNode;
+}
+
 Real CurrentFE::diameter() const
 {
-	int i, j, icoor;
-    Real s, h = 0.;
-    for ( i = 0;i < nbGeoNode - 1;i++ )
+    ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+
+    Real s(0.0);
+    Real h(0.0);
+    for ( UInt i(0); i < M_nbGeoNode - 1; ++i)
     {
-        for ( j = i + 1;j < nbGeoNode;j++ )
+        for ( UInt j(i+1); j<M_nbGeoNode; ++j )
         {
-            s = 0.;
-            for ( icoor = 0;icoor < (int)nDimensions; icoor++ )
+            s = 0.0;
+            for ( int icoor(0); icoor < (int)nDimensions; ++icoor )
             {
-                s += fabs( point( i, icoor ) - point( j, icoor ) );
+                s += abs( M_cellNodes[i][icoor] - M_cellNodes[j][icoor] );
             }
             if ( s > h )
+            {
                 h = s;
+            }
         }
     }
+
     return h;
 }
 
-//----------------------------------------------------------------------
 Real CurrentFE::diameter2() const
 {
-	int i, j, icoor;
-    Real s, d, h = 0.;
-    for ( i = 0;i < nbGeoNode - 1;i++ )
+    ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+
+    Real s(0.0);
+    Real d(0.0);
+    Real h(0.0);
+    for ( UInt i(0); i < M_nbGeoNode - 1; ++i)
     {
-        for ( j = i + 1;j < nbGeoNode;j++ )
+        for ( UInt j(i+1); j < M_nbGeoNode; ++j)
         {
             s = 0.;
-            for ( icoor = 0;icoor < (int)nDimensions; icoor++ )
+            for ( int icoor(0); icoor < (int)nDimensions; ++icoor)
             {
-                d = ( point( i, icoor ) - point( j, icoor ) );
+                d = ( M_cellNodes[i][icoor] - M_cellNodes[j][icoor] );
                 d = d*d;
                 s += d;
             }
             s = sqrt(s);
             if ( s > h )
+            {
                 h = s;
+            }
         }
     }
     return h;
 }
 
-
-//----------------------------------------------------------------------
-void CurrentFE::_comp_quad_point_coor()
+void CurrentFE::coorMap( Real& x, Real& y, Real& z,
+                         const Real & xi, const Real & eta, const Real & zeta ) const
 {
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
-    {
-        coorMap( quadPt( ig, 0 ), quadPt( ig, 1 ), quadPt( ig, 2 ),
-                 qr.quadPointCoor( ig, 0 ), qr.quadPointCoor( ig, 1 ),
-                 qr.quadPointCoor( ig, 2 ) );
-    }
-}
+    ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
 
-//----------------------------------------------------------------------
-void CurrentFE::_comp_jacobian()
-{
-    Real fctDer;
-    // derivatives of geo map:
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    x=0.0;
+    y=0.0;
+    z=0.0;
+
+    switch ( M_nbCoor )
     {
-        for ( int icoor = 0;icoor < nbCoor;icoor++ )
+    case 1:    // 1D
+        for ( UInt i(0); i < M_nbGeoNode; ++i )
         {
-            for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
-            {
-                fctDer = 0.;
-                for ( int j = 0;j < nbGeoNode;j++ )
-                {
-                    fctDer += point( j, icoor ) * dPhiGeo( j, jcoor, ig );
-                }
-                jacobian( icoor, jcoor, ig ) = fctDer;
-            }
-        }
-    }
-}
-//----------------------------------------------------------------------
-void CurrentFE::_comp_jacobian_and_det()
-{
-    //!first compute the jacobian matrix
-    _comp_jacobian();
-
-    /*
-    // former code using THREEDIM (commented out VM 07/04)
-    // remove it permanently if the switch seems ok.
-
-    // determinant on integrations points
-    #if defined(TWODIM)
-    // *** 2D code ***
-    Real a,b,c,d;
-    for(int ig=0;ig<nbQuadPt;ig++){
-      a = jacobian(0,0,ig);
-      b = jacobian(0,1,ig);
-      c = jacobian(1,0,ig);
-      d = jacobian(1,1,ig);
-      detJac(ig) = a*d - b*c;
-      weightDet(ig) = detJac(ig) * qr.weight(ig);
-    }
-    #elif defined(THREEDIM)
-    // *** 3D code ***
-    Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce;
-    for(int ig=0;ig<nbQuadPt;ig++){
-      a = jacobian(0,0,ig);
-      b = jacobian(0,1,ig);
-      c = jacobian(0,2,ig);
-      d = jacobian(1,0,ig);
-      e = jacobian(1,1,ig);
-      f = jacobian(1,2,ig);
-      g = jacobian(2,0,ig);
-      h = jacobian(2,1,ig);
-      i = jacobian(2,2,ig);
-      ei=e*i;
-      fh=f*h;
-      bi=b*i;
-      ch=c*h;
-      bf=b*f;
-      ce=c*e;
-      detJac(ig) = a*(ei-fh) + d*(ch-bi) + g*(bf-ce);
-      weightDet(ig) = detJac(ig) * qr.weight(ig);
-    }
-    #endif
-    */
-    Real a, b, c, d, e, f, g, h, i, ei, fh, bi, ch, bf, ce;
-    // determinant on integrations points
-    switch ( nbCoor )
-    {
-    case 1:    //! 1D
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
-        {
-            detJac( ig ) = jacobian( 0, 0, ig );
-            weightDet( ig ) = detJac( ig ) * qr.weight( ig );
+            x += M_cellNodes[i][0]* M_geoMap.phi( i, xi, eta, zeta );
         }
         break;
-    case 2:    //! 2D
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
+    case 2:    // 2D
+        for ( UInt i(0); i < M_nbGeoNode; ++i )
         {
-            a = jacobian( 0, 0, ig );
-            b = jacobian( 0, 1, ig );
-            c = jacobian( 1, 0, ig );
-            d = jacobian( 1, 1, ig );
-            detJac( ig ) = a * d - b * c;
-            weightDet( ig ) = detJac( ig ) * qr.weight( ig );
+            x += M_cellNodes[i][0] * M_geoMap.phi( i, xi, eta, zeta );
+            y += M_cellNodes[i][1] * M_geoMap.phi( i, xi, eta, zeta );
         }
         break;
-    case 3:    //! 3D
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
+    case 3:    // 3D
+        for ( UInt i(0); i < M_nbGeoNode; ++i )
         {
-            a = jacobian( 0, 0, ig );
-            b = jacobian( 0, 1, ig );
-            c = jacobian( 0, 2, ig );
-            d = jacobian( 1, 0, ig );
-            e = jacobian( 1, 1, ig );
-            f = jacobian( 1, 2, ig );
-            g = jacobian( 2, 0, ig );
-            h = jacobian( 2, 1, ig );
-            i = jacobian( 2, 2, ig );
-            ei = e * i;
-            fh = f * h;
-            bi = b * i;
-            ch = c * h;
-            bf = b * f;
-            ce = c * e;
-            detJac( ig ) = a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce );
-            weightDet( ig ) = detJac( ig ) * qr.weight( ig );
+            x += M_cellNodes[i][0] * M_geoMap.phi( i, xi, eta, zeta );
+            y += M_cellNodes[i][1] * M_geoMap.phi( i, xi, eta, zeta );
+            z += M_cellNodes[i][2] * M_geoMap.phi( i, xi, eta, zeta );
         }
         break;
     default:
-        ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
-    }
-
-}
-//----------------------------------------------------------------------
-void CurrentFE::_comp_inv_jacobian_and_det()
-{
-    //!first compute the jacobian matrix
-    _comp_jacobian();
-
-    /*
-    // former code using THREEDIM (commented out VM 07/04)
-    // remove it permanently if the switch seems ok.
-
-    // determinant on integrations points an inverse tranpose jacobian
-    #if defined(TWODIM)
-    // *** 2D code ***
-    Real a,b,c,d,det;
-    for(int ig=0;ig<nbQuadPt;ig++){
-      a = jacobian(0,0,ig);
-      b = jacobian(0,1,ig);
-      c = jacobian(1,0,ig);
-      d = jacobian(1,1,ig);
-      det = a*d - b*c;
-      detJac(ig) = det;
-      weightDet(ig) = detJac(ig) * qr.weight(ig);
-      tInvJac(0,0,ig) = d/det ;
-      tInvJac(0,1,ig) =-c/det ;
-      tInvJac(1,0,ig) =-b/det ;
-      tInvJac(1,1,ig) = a/det ;
-    }
-    #elif defined(THREEDIM)
-    // *** 3D code ***
-    Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce,det;
-    for(int ig=0;ig<nbQuadPt;ig++){
-      a = jacobian(0,0,ig);
-      b = jacobian(0,1,ig);
-      c = jacobian(0,2,ig);
-      d = jacobian(1,0,ig);
-      e = jacobian(1,1,ig);
-      f = jacobian(1,2,ig);
-      g = jacobian(2,0,ig);
-      h = jacobian(2,1,ig);
-      i = jacobian(2,2,ig);
-      ei=e*i;
-      fh=f*h;
-      bi=b*i;
-      ch=c*h;
-      bf=b*f;
-      ce=c*e;
-      det = a*(ei-fh) + d*(ch-bi) + g*(bf-ce);
-      detJac(ig) = det;
-      weightDet(ig) = detJac(ig) * qr.weight(ig);
-      tInvJac(0,0,ig) = (  ei - fh )/det ;
-      tInvJac(0,1,ig) = (-d*i + f*g)/det ;
-      tInvJac(0,2,ig) = ( d*h - e*g)/det ;
-
-      tInvJac(1,0,ig) = ( -bi + ch )/det ;
-      tInvJac(1,1,ig) = ( a*i - c*g)/det ;
-      tInvJac(1,2,ig) = (-a*h + b*g)/det ;
-
-      tInvJac(2,0,ig) = (  bf - ce )/det ;
-      tInvJac(2,1,ig) = (-a*f + c*d)/det ;
-      tInvJac(2,2,ig) = ( a*e - b*d)/det ;
-    }
-    #endif
-    */
-
-    Real a, b, c, d, e, f, g, h, i, ei, fh, bi, ch, bf, ce, det;
-    //! determinant on integrations points an inverse transpose jacobian
-    switch ( nbCoor )
-    {
-    case 1:    //! 1D
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
-        {
-            det = jacobian( 0, 0, ig );
-            detJac( ig ) = det;
-            weightDet( ig ) = detJac( ig ) * qr.weight( ig );
-            tInvJac( 0, 0, ig ) = 1 / det ;
-        }
-        break;
-    case 2:    //! 2D
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
-        {
-            a = jacobian( 0, 0, ig );
-            b = jacobian( 0, 1, ig );
-            c = jacobian( 1, 0, ig );
-            d = jacobian( 1, 1, ig );
-            det = a * d - b * c;
-            detJac( ig ) = det;
-            weightDet( ig ) = detJac( ig ) * qr.weight( ig );
-            tInvJac( 0, 0, ig ) = d / det ;
-            tInvJac( 0, 1, ig ) = -c / det ;
-            tInvJac( 1, 0, ig ) = -b / det ;
-            tInvJac( 1, 1, ig ) = a / det ;
-        }
-        break;
-    case 3:    //! 3D
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
-        {
-            a = jacobian( 0, 0, ig );
-            b = jacobian( 0, 1, ig );
-            c = jacobian( 0, 2, ig );
-            d = jacobian( 1, 0, ig );
-            e = jacobian( 1, 1, ig );
-            f = jacobian( 1, 2, ig );
-            g = jacobian( 2, 0, ig );
-            h = jacobian( 2, 1, ig );
-            i = jacobian( 2, 2, ig );
-            ei = e * i;
-            fh = f * h;
-            bi = b * i;
-            ch = c * h;
-            bf = b * f;
-            ce = c * e;
-            det = a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce );
-            detJac( ig ) = det;
-            weightDet( ig ) = detJac( ig ) * qr.weight( ig );
-            tInvJac( 0, 0, ig ) = ( ei - fh ) / det ;
-            tInvJac( 0, 1, ig ) = ( -d * i + f * g ) / det ;
-            tInvJac( 0, 2, ig ) = ( d * h - e * g ) / det ;
-
-            tInvJac( 1, 0, ig ) = ( -bi + ch ) / det ;
-            tInvJac( 1, 1, ig ) = ( a * i - c * g ) / det ;
-            tInvJac( 1, 2, ig ) = ( -a * h + b * g ) / det ;
-
-            tInvJac( 2, 0, ig ) = ( bf - ce ) / det ;
-            tInvJac( 2, 1, ig ) = ( -a * f + c * d ) / det ;
-            tInvJac( 2, 2, ig ) = ( a * e - b * d ) / det ;
-        }
-        break;
-    default:
-        ERROR_MSG( "Dimension (nbCoor): only 1, 2 or 3!" );
+        ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
     }
 }
 
-//----------------------------------------------------------------------
-void CurrentFE::_comp_phiDer()
+
+void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
 {
-    Real x;
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    // Set the quadrature
+    delete M_quadRule;
+    M_quadRule = new QuadRule(newQuadRule);
+    
+    // Adjust the constants related to the quadrature
+    M_nbQuadPt =  UInt( newQuadRule.nbQuadPt() );
+    
+    // Resize all the arrays that need it
+    M_quadNodes.resize(boost::extents[M_nbQuadPt][M_nbCoor]);
+    M_dphiGeoMap.resize(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]);
+    M_jacobian.resize(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_wDetJacobian.resize(boost::extents[M_nbQuadPt]);
+    M_tInverseJacobian.resize(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_phi.resize(boost::extents[nbNode][M_nbQuadPt]);
+    M_dphi.resize(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]);
+    M_d2phi.resize(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_dphiRef.resize(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]);
+    M_d2phiRef.resize(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
+
+    // All the updates have to be done again
+    M_cellNodesUpdated=false;
+    M_quadNodesUpdated=false;
+    M_dphiGeoMapUpdated=false;
+    M_jacobianUpdated=false;
+    M_wDetJacobianUpdated=false;
+    M_tInverseJacobianUpdated=false;
+    M_phiUpdated=false;
+    M_dphiUpdated=false;
+    M_d2phiUpdated=false;
+    M_dphiRefUpdated=false;
+    M_d2phiRefUpdated=false;
+
+    // Update what can be updated
+    for ( UInt iterQuad(0); iterQuad < M_nbQuadPt; ++iterQuad )
     {
-        for ( int j = 0;j < nbNode;j++ )
+        for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
         {
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            M_phi[iterNode][iterQuad] = M_refFE.phi( iterNode,
+                                                     M_quadRule->quadPointCoor(iterQuad,0),
+                                                     M_quadRule->quadPointCoor(iterQuad,1),
+                                                     M_quadRule->quadPointCoor(iterQuad,2));
+            
+            for ( UInt icoor(0); icoor<M_nbCoor; ++icoor )
             {
-                x = 0.;
-                for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
+                M_dphiRef[iterNode][icoor][iterQuad] = M_refFE.dPhi( iterNode,
+                                                                     icoor,
+                                                                     M_quadRule->quadPointCoor(iterQuad,0),
+                                                                     M_quadRule->quadPointCoor(iterQuad,1),
+                                                                     M_quadRule->quadPointCoor(iterQuad,2));
+                
+                for ( UInt jcoor(0); jcoor<M_nbCoor; ++jcoor )
                 {
-                    x += tInvJac( icoor, jcoor, ig ) * dPhiRef( j, jcoor, ig ) ;
+                    M_d2phiRef[iterNode][icoor][jcoor][iterQuad] = M_refFE.d2Phi( iterNode,
+                                                                                  icoor, jcoor,
+                                                                                  M_quadRule->quadPointCoor(iterQuad,0),
+                                                                                  M_quadRule->quadPointCoor(iterQuad,1),
+                                                                                  M_quadRule->quadPointCoor(iterQuad,2) );
                 }
-                phiDer( j, icoor, ig ) = x;
+            }
+        }
+        for ( UInt k(0); k < M_nbGeoNode; ++k )
+        {
+            for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
+            {
+                M_dphiGeoMap[k][icoor][iterQuad] = M_geoMap.dPhi( k, icoor,
+                                                                  M_quadRule->quadPointCoor(iterQuad,0),
+                                                                  M_quadRule->quadPointCoor(iterQuad,1),
+                                                                  M_quadRule->quadPointCoor(iterQuad,2) );
             }
         }
     }
+    
+    M_dphiGeoMapUpdated=true;
+    M_phiUpdated=true;
+    M_dphiRefUpdated=true;
+    M_d2phiRefUpdated=true;
 }
 
-//----------------------------------------------------------------------
-void CurrentFE::_comp_phiDer2()
+
+void CurrentFE::computeCellNodes( const std::vector< std::vector<Real> >& pts)
 {
-    Real x;
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for (UInt iterNode(0); iterNode< M_nbGeoNode; ++iterNode)
     {
-        for ( int j = 0;j < nbNode;j++ )
+        for (UInt iterCoord(0); iterCoord < M_nbCoor; ++iterCoord)
         {
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            M_cellNodes[iterNode][iterCoord] = pts[iterNode][iterCoord];
+        }
+    }
+    M_cellNodesUpdated=true;
+}
+
+void CurrentFE::computeQuadNodes()
+{
+    ASSERT(M_cellNodesUpdated,"Missing update: cellNodes");
+
+    for ( UInt iterQuadNode (0); iterQuadNode < M_nbQuadPt; ++iterQuadNode)
+    {
+        coorMap( M_quadNodes[iterQuadNode][0],
+                 M_quadNodes[iterQuadNode][1], 
+                 M_quadNodes[iterQuadNode][2],
+                 M_quadRule->quadPointCoor( iterQuadNode, 0 ), 
+                 M_quadRule->quadPointCoor( iterQuadNode, 1 ), 
+                 M_quadRule->quadPointCoor( iterQuadNode, 2 ) );
+    }
+    M_quadNodesUpdated=true;
+}
+
+void CurrentFE::computePhi()
+{
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        {
+            M_phi[iterNode][iterQuad] = M_refFE.phi(iterNode,
+                                                    M_quadRule->quadPointCoor(iterQuad,0),
+                                                    M_quadRule->quadPointCoor(iterQuad,1),
+                                                    M_quadRule->quadPointCoor(iterQuad,2));
+        }
+    }
+}
+
+void CurrentFE::computeDphiGeoMap()
+{
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        for (UInt iterNode(0); iterNode< M_nbGeoNode; ++iterNode)
+        {
+            for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
-                for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
+                M_dphiGeoMap[iterNode][iterCoor][iterQuad] = M_geoMap.dPhi(iterNode,iterCoor,
+                                                                           M_quadRule->quadPointCoor(iterQuad,0),
+                                                                           M_quadRule->quadPointCoor(iterQuad,1),
+                                                                           M_quadRule->quadPointCoor(iterQuad,2));
+            }
+        }
+    }
+    M_dphiGeoMapUpdated=true;
+}
+
+void CurrentFE::computeJacobian()
+{
+    ASSERT(M_cellNodesUpdated,"Missing update: cellNodes");
+    ASSERT(M_dphiGeoMapUpdated,"Missing update: dphiGeoMap");
+
+    Real partialSum;
+
+    for (UInt iterQuad(0); iterQuad < M_nbQuadPt ; ++iterQuad)
+    {
+        for (UInt icoord(0); icoord < M_nbCoor; ++icoord)
+        {
+            for (UInt jcoord(0); jcoord < M_nbCoor; ++jcoord)
+            {
+                partialSum=0;
+                for (UInt iterNode(0); iterNode < M_nbGeoNode; ++iterNode)
                 {
-                    x = 0.;
-                    for ( int k1 = 0;k1 < nbCoor;k1++ )
+                    partialSum += M_cellNodes[iterNode][icoord] * M_dphiGeoMap[iterNode][jcoord][iterQuad];
+                }
+                M_jacobian[icoord][jcoord][iterQuad] = partialSum;
+            }
+        }
+    }
+    M_jacobianUpdated=true;
+}
+
+void CurrentFE::computeTInverseJacobian()
+{
+    ASSERT(M_jacobianUpdated,"Missing update: jacobian");
+
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        Real a ( M_jacobian[0][0][iterQuad] );
+        Real b ( M_jacobian[0][1][iterQuad] );
+        Real c ( M_jacobian[0][2][iterQuad] );
+        Real d ( M_jacobian[1][0][iterQuad] );
+        Real e ( M_jacobian[1][1][iterQuad] );
+        Real f ( M_jacobian[1][2][iterQuad] );
+        Real g ( M_jacobian[2][0][iterQuad] );
+        Real h ( M_jacobian[2][1][iterQuad] );
+        Real i ( M_jacobian[2][2][iterQuad] );
+
+        Real ei ( e * i );
+        Real fh ( f * h );
+        Real bi ( b * i );
+        Real ch ( c * h );
+        Real bf ( b * f );
+        Real ce ( c * e );
+        Real det ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
+       
+        M_tInverseJacobian[0][0][iterQuad] = ( ei - fh ) / det ;
+        M_tInverseJacobian[0][1][iterQuad] = ( -d * i + f * g ) / det ;
+        M_tInverseJacobian[0][2][iterQuad] = ( d * h - e * g ) / det ;
+        
+        M_tInverseJacobian[1][0][iterQuad] = ( -bi + ch ) / det ;
+        M_tInverseJacobian[1][1][iterQuad] = ( a * i - c * g ) / det ;
+        M_tInverseJacobian[1][2][iterQuad] = ( -a * h + b * g ) / det ;
+        
+        M_tInverseJacobian[2][0][iterQuad] = ( bf - ce ) / det ;
+        M_tInverseJacobian[2][1][iterQuad] = ( -a * f + c * d ) / det ;
+        M_tInverseJacobian[2][2][iterQuad] = ( a * e - b * d ) / det ;
+    }
+
+    M_tInverseJacobianUpdated=true;
+}
+
+void CurrentFE::computeWDetJacobian()
+{
+    ASSERT(M_jacobianUpdated,"Missing update: jacobian");
+
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        Real a ( M_jacobian[0][0][iterQuad] );
+        Real b ( M_jacobian[0][1][iterQuad] );
+        Real c ( M_jacobian[0][2][iterQuad] );
+        Real d ( M_jacobian[1][0][iterQuad] );
+        Real e ( M_jacobian[1][1][iterQuad] );
+        Real f ( M_jacobian[1][2][iterQuad] );
+        Real g ( M_jacobian[2][0][iterQuad] );
+        Real h ( M_jacobian[2][1][iterQuad] );
+        Real i ( M_jacobian[2][2][iterQuad] );
+
+        Real ei (e*i);
+        Real fh (f*h);
+        Real bi (b*i);
+        Real ch (c*h);
+        Real bf (b*f);
+        Real ce (c*e);
+        
+        Real det( a*(ei-fh) + d*(ch-bi) + g*( bf-ce));
+        M_wDetJacobian[iterQuad]= det*M_quadRule->weight(iterQuad);
+    }
+    M_wDetJacobianUpdated=true;
+}
+
+
+void CurrentFE::computeDphiRef()
+{
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        {
+            for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
+            {
+                M_dphiRef[iterNode][iterCoor][iterQuad] = M_refFE.dPhi(iterNode,iterCoor,
+                                                                       M_quadRule->quadPointCoor(iterQuad,0),
+                                                                       M_quadRule->quadPointCoor(iterQuad,1),
+                                                                       M_quadRule->quadPointCoor(iterQuad,2));
+            }
+        }
+    }
+    M_dphiRefUpdated=true;
+}
+
+void CurrentFE::computeDphi()
+{
+    ASSERT(M_jacobianUpdated,"Missing update: tInverseJacobian");
+    ASSERT(M_dphiRefUpdated,"Missing update: dphiRef");
+
+    Real partialSum(0);
+
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        {
+            for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
+            {
+                partialSum=0;
+                for (UInt iter(0); iter<M_nbCoor; ++iter)
+                {
+                    partialSum += M_tInverseJacobian[iterCoor][iter][iterQuad] * M_dphiRef[iterNode][iter][iterQuad];
+                }
+                M_dphi[iterNode][iterCoor][iterQuad] = partialSum;
+            }
+        }
+    }
+    M_dphiUpdated=true;
+}
+
+
+void CurrentFE::computeD2phiRef()
+{
+    for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
+    {
+        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        {
+            for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
+            {
+                for (UInt iterCoor2(0); iterCoor2 < M_nbCoor; ++iterCoor2)
+                {
+                    M_d2phiRef[iterNode][iterCoor][iterCoor2][iterQuad] = M_refFE.d2Phi(iterNode,iterCoor,iterCoor2,
+                                                                                        M_quadRule->quadPointCoor(iterQuad,0),
+                                                                                        M_quadRule->quadPointCoor(iterQuad,1),
+                                                                                        M_quadRule->quadPointCoor(iterQuad,2));
+                }
+            }
+        }
+    }
+    M_d2phiRefUpdated=true;
+}
+
+
+void CurrentFE::computeD2phi()
+{
+    ASSERT(M_jacobianUpdated,"Missing update: tInverseJacobian");
+    ASSERT(M_d2phiRefUpdated,"Missing update: d2phiRef");
+
+    Real partialSum(0);
+    for ( UInt iterQuad (0); iterQuad < M_nbQuadPt ; ++iterQuad )
+    {
+        for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
+        {
+            for ( UInt icoor(0);icoor < M_nbCoor; ++icoor )
+            {
+                for ( UInt jcoor(0);jcoor < M_nbCoor; ++jcoor )
+                {
+                    partialSum = 0.;
+                    for ( UInt k1 (0);k1 < M_nbCoor; ++k1 )
                     {
-                        for ( int k2 = 0;k2 < nbCoor;k2++ )
+                        for ( UInt k2 (0) ;k2 < M_nbCoor; ++k2 )
                         {
-                            x += tInvJac( icoor, k1, ig ) * dPhiRef2( j, k1, k2, ig ) * tInvJac( jcoor, k2, ig );
+                            partialSum += M_tInverseJacobian[icoor][k1][iterQuad]
+                                        * M_d2phiRef[iterNode][k1][k2][iterQuad]
+                                        * M_tInverseJacobian[jcoor][k2][iterQuad];
                         }
                     }
-                    phiDer2( j, icoor, jcoor, ig ) = x;
+                    M_d2phi[iterNode][icoor][jcoor][iterQuad] = partialSum;
                 }
             }
         }
     }
+    M_d2phiUpdated=true;
 }
-//----------------------------------------------------------------------
-void CurrentFE::_comp_phiDerDer2()
-{
-    Real x1, x2;
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
-    {
-        for ( int j = 0;j < nbNode;j++ )
-        {
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
-            {
-                x1 = 0.;
-                for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
-                {
-            x1 += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig);
-                    x2 = 0.;
-                    for ( int k1 = 0;k1 < nbCoor;k1++ )
-                    {
-                        for ( int k2 = 0;k2 < nbCoor;k2++ )
-                        {
-                            x2 += tInvJac( icoor, k1, ig ) * dPhiRef2( j, k1, k2, ig ) * tInvJac( jcoor, k2, ig );
-                        }
-                    }
-                    phiDer2( j, icoor, jcoor, ig ) = x2;
-                }
-                phiDer( j, icoor, ig ) = x1;
-            }
-        }
-    }
-}
-}
+
+} // END OF THE NAMESPACE
+
+

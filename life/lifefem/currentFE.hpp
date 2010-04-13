@@ -1,179 +1,598 @@
-/* -*- mode: c++ -*-
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+//@HEADER
+/*
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-#ifndef _CURRENTFE_H
-#define _CURRENTFE_H
+//@HEADER
+
+/*!
+    @file
+    @brief This file contains the CurrentFE class that is one of the most important classes required
+    for the assembly of the matrices
+
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 13 Apr 2010
+
+    This file existed before I reimplemented it. It was due to J.-F. Gerbeau (04/2002) and V. Martin(07/2004).
+    Many idea present in this class were taken from that file.
+ */
+
+
+#ifndef CURRENTFE_H
+#define CURRENTFE_H 1
+
 
 #include <life/lifecore/life.hpp>
+
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/refFE.hpp>
-//#include <life/lifefem/geoMap.hpp>
-/*!
-  \file currentFE.h
-  \brief Structure for the current finite element
+#include <life/lifefem/quadRule.hpp>
+
+#include <boost/multi_array.hpp>
+
+namespace LifeV {
+
+/*! \page update_procedure Update of the current finite element
+
+  \section general_section General issues
+
+  When the update method of the LifeV::currentFE class is called, several arrays of values are updated with respect to the current cell (and the current quadrature). However, in order to avoid redundant computations, intermediate values are also computed. The next figure shows all the possible values that can be updated.
+
+  \image html update_complete_scheme.png "Complete tree of the values. The arrow between two values means that the first value require the second value to be already computed."
+
+  However, one could want only a part of the values to be updated (we maybe do not want the second derivative for a simple elliptic problem). This is why a set of flag has been set up. With this flags, one selects the values that he needs (represented on the top of the last figure) and all the needed values are updated, without redundancy. For example, if one calles the update method with the flag UPDATE_DPHI, only the values visible on the next figure will be updated.
+
+  \image html update_dphi_scheme.png "Values updated when only the derivatives of the basis functions are required."
+
+
+  Of course, it is possible to combine the different flags to update several values in the same time.
+
+  \section flags_section Flags explaination
+
+  In this section, we explain how flags work. This can be of interest if one wants to add a new flag.
+
+  \subsection flag_sub1 What is a flag?
+  
+  At first sight, we might think that a flag is a complicated class implemented to do exaclty what we want, with overloaded operators... Actually, it is much simpler: a LifeV::flag_Type is just an unsigned integer.
+
+  \subsection How to define a flag?
+
+  The flags use the binary representation of the integers to work. This enables a very fast definition and use of the flags. To understand it, let us make a simple example. Suppose that we can update three quantities A,B and C.
+  
+  The first step is to define a "primitive" flag for each of these quantities. These flags are defined as powers of 2. Here, we will define
+
+  \code
+  flag_Type UPDATE_A(1);
+  flag_Type UPDATE_B(2);
+  flag_Type UPDATE_C(4);
+  \endcode
+
+  We need here powers of 2 because this makes the binary representation of the "primitive" flags simple: UPDATE_A is 001, UPDATE_B is 010 and UPDATE_C is 100 (if the integers are coded on 3 bits, otherwise there are many zeros before). The fact that we want A to be update is then represented by a 1 in the third position, for B it is the second position and for C the first position.
+  
+  So now, if we want to build a flag that updates A and C, we want it to be in binary 101, that is 5. So, the flag UPDATE_AC will be defined as:
+
+  \code
+  flag_Type UPDATE_AC(5);
+  \endcode
+
+  \subsection flag_sub2 How to combine flags?
+
+  With the last example, one could think that is it just a matter of addition, but it is not. Suppose that we want to combine the flags UPDATE_A and UPDATE_AC. If we add the corresponding values, we will get 1+5=6 that is represented in binary by 110. This would mean update B and C, what is not what we want!
+  
+  To combine flags, we use the binary operator | that do exactly the job that we want: 1|5=5.
+  
+  \subsection flag_sub3 How to detect flags?
+
+  Now that we can build every flag that we want, we want to detect quickly the different flags. This is achievied by using the binary operator & and the "primitive" flags. 
+
+  Suppose that we want to know if A has to be updated. Then, we perform that operation "& UPDATE_A" on the incoming flag. If the result is zero, then we do not need to update it: for example, UPDATE_B & UPDATE_A = 0 . Otherwise, we have to update it: for example, UPDATE_AC & UPDATE_A = 1.
+
+
+  \section list_section Possible flags
+
+  There are several flags defined for you. Here is a list of the possible flags that are usually used:
+
+  <table>
+   <tr>
+    <th> Flag name </th> <th> Effect </th>
+   </tr>
+   <tr>
+    <th> UPDATE_QUAD_NODES </th> <th> Update everything needed to know the position of the quadrature nodes in the current cell </th>
+   </tr>
+   <tr>
+    <th> UPDATE_PHI </th> <th> Update everything needed to know the values of the basis functions in the quadrature nodes (in the current cell) </th>
+   </tr>
+   <tr>
+    <th> UPDATE_DPHI </th> <th>  Update everything needed to know the values of the derivatives of the basis functions in the quadrature nodes (in the current cell) </th>
+   </tr>
+   <tr>
+    <th> UPDATE_D2PHI </th> <th>  Update everything needed to know the values of the second derivatives of the basis functions in the quadrature nodes (in the current cell) </th>
+   </tr>
+   <tr>
+    <th> UPDATE_WDET </th> <th>  Update everything needed to know the determinant of the transformation multiplied by the weights of the quadrature. </th>
+   </tr>
+
+  </table>
+
+  Besides this usual flags, there are a couple of "primitive" flags, that update only a particular element in the currentFE structure. Be sure to know what you are doing before using them.
+
 */
 
-namespace LifeV
-{
+
+
+// This is a 32 bits type, so we can store up to 32 different flags
+typedef unsigned int flag_Type;
+
+const flag_Type UPDATE_ONLY_CELL_NODES(1);
+const flag_Type UPDATE_ONLY_QUAD_NODES(2);
+const flag_Type UPDATE_ONLY_PHI(4);
+const flag_Type UPDATE_ONLY_DPHI_GEO_MAP(8);
+const flag_Type UPDATE_ONLY_JACOBIAN(16);
+const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN(32);
+const flag_Type UPDATE_ONLY_W_DET_JACOBIAN(64);
+const flag_Type UPDATE_ONLY_DPHI_REF(128);
+const flag_Type UPDATE_ONLY_DPHI(256);
+const flag_Type UPDATE_ONLY_D2PHI_REF(512);
+const flag_Type UPDATE_ONLY_D2PHI(1024);
+
+const flag_Type UPDATE_QUAD_NODES(UPDATE_ONLY_CELL_NODES
+                                  |UPDATE_ONLY_QUAD_NODES);
+
+const flag_Type UPDATE_PHI(UPDATE_ONLY_PHI);
+
+const flag_Type UPDATE_DPHI(UPDATE_ONLY_CELL_NODES
+                            |UPDATE_ONLY_DPHI_GEO_MAP
+                            |UPDATE_ONLY_JACOBIAN
+                            |UPDATE_ONLY_T_INVERSE_JACOBIAN
+                            |UPDATE_ONLY_DPHI_REF
+                            |UPDATE_ONLY_DPHI);
+
+const flag_Type UPDATE_D2PHI(UPDATE_ONLY_CELL_NODES
+                             |UPDATE_ONLY_DPHI_GEO_MAP
+                             |UPDATE_ONLY_JACOBIAN
+                             |UPDATE_ONLY_T_INVERSE_JACOBIAN
+                             |UPDATE_ONLY_D2PHI_REF
+                             |UPDATE_ONLY_D2PHI);
+
+const flag_Type UPDATE_WDET(UPDATE_ONLY_CELL_NODES
+                            |UPDATE_ONLY_DPHI_GEO_MAP
+                            |UPDATE_ONLY_JACOBIAN
+                            |UPDATE_ONLY_W_DET_JACOBIAN);
+
+
+
+
+//! currentFE - A primordial class for the assembly of the local matrices/vectors retaining the values on the real cells.
 /*!
-  \class CurrentFE
-  \brief The class for a finite element
-  \author J.-F. Gerbeau
-  \date 04/2002
+  This class is an essential piece of any finite element solver implemented in LifeV, as it is used each time one wants to assemble the matrix or the right hand side associated to a given discrete problem (in variational form). The role of the class is, given a cell (or similar data), to compute the values of the basis function, their derivatives, the location of the quadrature nodes,... 
 
-     I also factorized some code, and
-     postponed the implementation of template methods
-     after the class declaration.
-  \author Vincent Martin
-  \date 07/2004
+  During the assembly procedure, the code of the solver will typically loops on the cells of a given mesh. Each time a cell is selected, a local matrix is built (using only the degrees of freedom of that cell). This local matrix represents a local contribution that is added in the global matrix (concerning all the degrees of freedom of the problem).
+
+  <b>Example</b>: suppose that we are assembling the local matrix of a Laplacian problem. The local contributions are given by \f$ \int_{K} \nabla \phi_i \cdot \nabla \phi_j \f$ where \f$K\f$ is the considered cell. As we use numerical quadrature, to build the local matrix, we have to provide:
+ 
+  <ol>
+  <li> The values of the <b>derivatives</b> of the basis functions in the quadrature nodes
+  <li> The <b>weights</b> associated to the quadrature and adapted to the considered cell
+  </ol>
+  
+  The CurrentFE has then to compute these values. To precise that we want to be able to access these values, we use flags. Here we need the two flags (see \ref update_procedure "this page" for more informations on the flags)
+  
+  <ol>
+  <li> For the derivative of the basis functions : UPDATE_DPHI
+  <li> For the modified weights : UPDATE_WDET
+  </ol>
+
+  The code that we would typically use is:
+  
+  \code
+  my_currentFE.update(my_mesh.volumeList(i), UPDATE_DPHI | UPDATE_WDET);
+  \endcode
+
+  This line of code asks the CurrentFE to compute the values specified with the flags and corresponding to the cell given by the i-th volume of the desired mesh. Now, these values are accessible using simple calls:
+
+  \code
+  Real my_value = my_currentFE.dphi(0,0,1);
+  Real my_weight = my_currentFE.wDetJacobian(1);
+  \endcode
+
+  These two lines just get some values already stored in the CurrentFE (so it is quite cheap!). Usually, one here uses the elementary operation already defined in the file lifefem/elemOper.hpp.
+
+
+  <b>Note</b>: One can change the quadrature of the CurrentFE at any moment, but this is a quite expensive operation and all updates previously done are lost. Use this feature only when it is really needed!
+
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 13 Apr 2010
+    @version 2.0
+
+    \todo Put all the remaining public member in private
+    \todo Put ifdef for the checks?
+    \todo Put phiRef here
+    \todo CXXFLAG to disable the boost asserts: -DBOOST_DISABLE_ASSERTS?
+    
 */
-
 class CurrentFE
 {
-private:
-    //! compute only the jacobian matrix
-    void _comp_jacobian();
-    //! call _comp_jacobian() and compute its determinant
-    void _comp_jacobian_and_det();
-    //! call _comp_jacobian() and compute its inverse and its determinant
-    void _comp_inv_jacobian_and_det();
-    void _comp_quad_point_coor();
 
-    //! update the definition of the geo points  (VM 07/2004)
-    //! contains a switch over nbCoor (= dimension of pb): slow???
-    template <class GEOELE>
-    void _update_point( const GEOELE& geoele );
-
-    //! compute phiDer
-    void _comp_phiDer();
-    //! compute the second derivative phiDer2
-    void _comp_phiDer2();
-    //! compute phiDer and phiDer2
-    void _comp_phiDerDer2();
-
-
-    UInt _currentId;
-    UInt _currentLocalId;
-
-
-
-#ifdef TEST_PRE
-
-    bool _hasJac;
-    bool _hasFirstDeriv;
-    bool _hasSecondDeriv;
-    bool _hasQuadPtCoor;
-#endif
 public:
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Full constructor with default quadrature
+    /*!
+      @param _refFE Reference finite element used
+      @param _geoMap Geometric mapping used
+      @param _qr Quadrature rule for the computations
+     */
     CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr );
-private:
-    CurrentFE( );
-    CurrentFE( const CurrentFE& );
-public:
-    const int nbGeoNode;
-    const int nbNode;
-    const int nbCoor;
-    const int nbQuadPt;
-    const int nbDiag;
-    const int nbUpper;
-    const int nbPattern;
-    KNM<Real> point;
-    const RefFE& refFE;
-    const GeoMap& geoMap;
-    const QuadRule& qr;
-    KNM<Real> phi;
-    KNMK<Real> dPhiRef;
-    KNMKL<Real> dPhiRef2;
-    //
-    KNMK<Real> phiDer;
-    KNMK<Real> jacobian;
-    KNMK<Real> tInvJac;
-    KNM<Real> phiGeo;
-    KNMK<Real> dPhiGeo;
-    KN<Real> weightDet;
-    KN<Real> detJac;
-    KNM<Real> quadPt;  //!< Coordinates of the quadrature points on the current element
-    //second derivatives not yet done (four dimensions KNMKL ?)
-    KNMKL<Real> phiDer2;
-    //--------------------------------------------------------------------------
-    /*!
-      return the diameter of the element in the 1-norm
-    */
-    Real diameter() const;
-    /*!
-      return the diameter of the element in the 2-norm
-    */
-    Real diameter2() const;
-    /*!
-      return the id of the current element (updated with the update* functions)
-     */
-    inline UInt currentId() const
-    {
-        return _currentId;
-    }
 
-    inline UInt currentLocalId() const
-    {
-        return _currentLocalId;
-    }
-#ifdef TEST_PRE
+    //! Constructor without quadrature specification
     /*!
-      return true if the determinant has been updated
-      (can ONLY be used if TEST_PRE is defined at compilation time)
+      If you use this constructor, you have to use the method CurrentFE::setQuadRule before
+      using any update method!
+
+      @param _refFE Reference finite element used
+      @param _geoMap Geometric mapping used
      */
-    inline bool hasJac() const
-    {
-        return _hasJac;
-    }
+    CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap);
+
+    //! Destructor
+    ~CurrentFE(){ delete M_quadRule; }
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Update method using a given element.
     /*!
-      return true if the first derivatives have been updated
-      (can ONLY be used if TEST_PRE is defined at compilation time)
+      This method is the most important one in this class. It allows the user to update different values on 
+      the selected cell, like the values of the derivatives of the basis functions,... 
+      @param geoele The cell that we are looking at
+      @param upFlag The flag to explain the quantities that we want to update
      */
-    inline bool hasFirstDeriv() const
-    {
-        return _hasFirstDeriv;
-    }
-    /*!
-      return true if the second derivatives have been updated
-      (can ONLY be used if TEST_PRE is defined at compilation time)
-     */
-    inline bool hasSecondDeriv() const
-    {
-        return _hasSecondDeriv;
-    }
-    /*!
-      return true if the coordinate of the quadrature points have been updated
-      (can ONLY be used if TEST_PRE is defined at compilation time)
-     */
-    inline bool hasQuadPtCoor() const
-    {
-        return _hasQuadPtCoor;
-    }
-#endif
+    template<typename GeoElement>
+    void update(const GeoElement& geoele, const flag_Type& upFlag);
+
+    //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
+    void update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag);
+
+    //! Computes the determinant of the jacobian in a given quadrature node
+    Real detJac(const UInt& quadNode) const;
+
+    //! Return the measure of the current element
+    Real measure() const;
+
+    //! return the barycenter of the element
+    void barycenter( Real& x, Real& y, Real& z ) const;
+    
+    //! return the diameter of the element in the 1-norm
+    Real diameter() const;
+    
+    //! return the diameter of the element in the 2-norm
+    Real diameter2() const;
+
     /*!
       compute the coordinate (x,y,z)= F(xi,eta,zeta), (F: geo mappping)
       where (xi,eta,zeta) are the coor in the ref element
       and   (x,y,z) the coor in the current element
       (if the code is compiled in 2D mode then z=0 and zeta is disgarded)
     */
-    void coorMap( Real& x, Real& y, Real& z,
-                  const Real & xi, const Real & eta, const Real &
-                  zeta ) const;
+    void coorMap( Real& x, Real& y, Real& z, const Real & xi, const Real & eta, const Real & zeta ) const;
+   
+    //@}
+    
+
+    //! @name Set Methods
+    //@{
+    
+    //! Setter for the quadrature rule
+    /*! This method can be used to change the quadrature rule used. Notice that it is an 
+      expensive method. Use it only when it is really needed.
+      @param newQuadRule The new quadrature rule
+     */
+    void setQuadRule(const QuadRule& newQuadRule);
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+    
+    //! Getter for the ID of the current cell
+    inline const UInt& currentId() const
+    {
+        return M_currentId;
+    }
+    
+    //! Getter for the local ID of the current cell
+    inline const UInt& currentLocalId() const
+    {
+        return M_currentLocalId;
+    }
+
+    //! Getter for the number of quadrature nodes
+    inline const UInt& nbQuadPt() const
+    {
+        return M_nbQuadPt;
+    }
+
+    //! Getter for the number of nodes
+    inline const UInt& nbFENode() const
+    {
+        return nbNode;
+    }
+
+    //! Getter for the reference FE
+    inline const RefFE& refFE() const
+    {
+        return M_refFE;
+    };
+
+    //! Getter for the quadrature rule
+    inline const QuadRule& quadRule() const
+    {
+        return *M_quadRule;
+    };
+
+    //! Getter for the number of entries in the pattern
+    inline const UInt& nbPattern() const
+    {
+        return M_nbPattern;
+    };
+
+    //! Getter for the diagonal entries in the pattern
+    inline const UInt& nbDiag() const
+    {
+        return M_nbDiag;
+    };
+
+    //! Getter for the number of entries in the pattern
+    inline const UInt& nbUpper() const
+    {
+        return M_nbUpper;
+    };
+
+    //! Getter for the number of coordinates
+    inline const UInt& nbCoor() const
+    {
+        return M_nbCoor;
+    };
+
+    //@}
+
+
+    //! @name Get Methods for the FE values 
+    //@{
+
+    //! Getter for the nodes of the cell
+    inline const Real& cellNode(const UInt& node, const UInt& coordinate) const
+    {
+        ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+        return M_cellNodes[node][coordinate];
+    };
+
+    //! Getter for the quadrature nodes
+    inline const Real& quadNode(const UInt& node, const UInt& coordinate) const
+    {
+        ASSERT(M_quadNodesUpdated,"Quad nodes are not updated!");
+        return M_quadNodes[node][coordinate];
+    };
+
+    //! Getter for the weighted jacobian determinant
+    inline const Real& wDetJacobian(const UInt& quadNode) const
+    {
+        ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
+        return M_wDetJacobian[quadNode];
+    };
+
+    //! Getter for the inverse of the jacobian
+    inline const Real& tInverseJacobian(const UInt& element1, const UInt& element2, const UInt& quadNode) const
+    {
+        ASSERT(M_tInverseJacobianUpdated,"Inverse jacobian is not updated!");
+        return M_tInverseJacobian[element1][element2][quadNode];
+    };
+
+    //! Getter for basis function values
+    inline const Real& phi(const UInt& node, const UInt& quadNode) const
+    {
+        ASSERT(M_phiUpdated,"Function values are not updated!");
+        return M_phi[node][quadNode];
+    };
+
+    //! Getter for the derivatives of the basis functions
+    inline const Real& dphi(const UInt& node, const UInt& derivative, const UInt& quadNode) const
+    {
+        ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
+        return M_dphi[node][derivative][quadNode];
+    };
+    
+    //! Getter for the second derivatives of the basis functions
+    inline const Real& d2phi(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
+    {
+        ASSERT(M_d2phiUpdated,"Basis second derivatives are not updated!");
+        return M_d2phi[node][derivative1][derivative2][quadNode];
+    };
+
+    //@}
+
+
+    
+    //! @name Old methods (for backward compatibility, avoid using them) 
+    //@{
+
+    //! Getter for the nodes of the cell (Old style)
+    inline const Real& point(const UInt& node, const UInt& coordinate) const
+    {
+        ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+        return M_cellNodes[node][coordinate];
+    };
+
+    //! Getter for the quadrature nodes (Old style)
+    inline const Real& quadPt(const UInt& node, const UInt& coordinate) const
+    {
+        ASSERT(M_quadNodesUpdated,"Quad nodes are not updated!");
+        return M_quadNodes[node][coordinate];
+    };
+    
+    //! Getter for the weighted jacobian determinant (Old style)
+    inline const Real& weightDet(const UInt& quadNode) const
+    {
+        ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
+        return M_wDetJacobian[quadNode];
+    };
+
+    //! Getter for the inverse of the jacobian (Old style)
+    inline const Real& tInvJac(const UInt& element1, const UInt& element2, const UInt& quadNode) const
+    {
+        ASSERT(M_tInverseJacobianUpdated,"Inverse jacobian is not updated!");
+        return M_tInverseJacobian[element1][element2][quadNode];
+    };
+
+    //! Getter for the derivatives of the basis functions (Old style)
+    inline const Real& phiDer(const UInt& node, const UInt& derivative, const UInt& quadNode) const
+    {
+        ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
+        return M_dphi[node][derivative][quadNode];
+    };
+    
+    //! Getter for the second derivatives of the basis functions (Old style)
+    inline const Real& phiDer2(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
+    {
+        ASSERT(M_d2phiUpdated,"Basis second derivatives are not updated!");
+        return M_d2phi[node][derivative1][derivative2][quadNode];
+    };
+
+    //@}
+    
+
+
+
+private:
+    CurrentFE( );
+    CurrentFE( const CurrentFE& );
+
+    //! Update the nodes of the cell to the current one.
+    template<typename GeoElement>
+    void computeCellNodes(const GeoElement& geoele);
+
+    //! Update only the nodes of the cells to the current one.
+    void computeCellNodes(const std::vector<std::vector< Real> >& pts);
+
+    //! Update the location of the quadrature in the current cell.
+    void computeQuadNodes();
+    
+    //! Compute the values of the basis functions in the quadrature nodes
+    void computePhi();
+
+    //! Compute the values of the derivatives of the mapping in the quadrature nodes
+    void computeDphiGeoMap();
+
+    //! Compute the jacobian in the quadrature nodes
+    void computeJacobian();
+
+    //! Compute the transposed inverse of the jacobian in the quadrature nodes
+    void computeTInverseJacobian();
+
+    //! Compute the determinant of the jacobian in the quadrature nodes
+    void computeWDetJacobian();
+
+    //! Compute the value of the derivatives in the reference frame
+    void computeDphiRef();
+    
+    //! Compute the value of the derivatives in the current element
+    void computeDphi();
+
+    //! Compute the value of the second derivatives in the reference frame
+    void computeD2phiRef();
+
+    //! Compute the value of the derivatives in the current element
+    void computeD2phi();
+
+    // Constants
+public:
+    UInt nbNode;  
+private:
+    const UInt M_nbCoor;
+    const UInt M_nbDiag;
+    const UInt M_nbUpper;
+    const UInt M_nbPattern;
+
+    UInt M_currentId;
+    UInt M_currentLocalId;
+
+    UInt M_nbGeoNode;
+    UInt M_nbQuadPt;
+ 
+    // Important structures
+
+    const RefFE& M_refFE;
+    const GeoMap& M_geoMap;
+    QuadRule* M_quadRule;
+    
+
+    // Internal storage for the data
+
+    // Nodes of the current cell
+    boost::multi_array<Real,2> M_cellNodes;
+    boost::multi_array<Real,2> M_quadNodes;
+    
+    boost::multi_array<Real,3> M_dphiGeoMap;
+    boost::multi_array<Real,3> M_jacobian;
+    boost::multi_array<Real,1> M_wDetJacobian;
+    boost::multi_array<Real,3> M_tInverseJacobian;
+
+    boost::multi_array<Real,2> M_phi;
+    boost::multi_array<Real,3> M_dphi;
+    boost::multi_array<Real,4> M_d2phi;
+
+    // M_phiRef is useless
+    boost::multi_array<Real,3> M_dphiRef;
+    boost::multi_array<Real,4> M_d2phiRef;
+
+    // Check
+    bool M_cellNodesUpdated;
+    bool M_quadNodesUpdated;
+    
+    bool M_dphiGeoMapUpdated;
+    bool M_jacobianUpdated;
+    bool M_wDetJacobianUpdated;
+    bool M_tInverseJacobianUpdated;
+
+    bool M_phiUpdated;
+    bool M_dphiUpdated;
+    bool M_d2phiUpdated;
+
+    bool M_dphiRefUpdated;
+    bool M_d2phiRefUpdated;
+    
+// OLD FUNCTIONS
+
+public:
+
+    //! @name Old methods (for backward compatibility, avoid using them) 
+    //@{
+
     /*!
       compute the coordinate (xi,eta,zeta)=inv(F)(x,y,z)
     */
@@ -193,10 +612,7 @@ public:
     Real pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
 		  int compx, int compzeta) const;
 
-    /*!
-      return the barycenter of the element
-     */
-    void barycenter( Real& x, Real& y, Real& z );
+   
     /*!  return (x,y,z) = the global coordinates of the quadrature point ig
       in the current element. \warning this function is almost obsolete since if
       you call the function updateFirstDerivQuadPt rather than updateFirstDeriv
@@ -206,24 +622,20 @@ public:
     */
     inline void coorQuadPt( Real& x, Real& y, Real& z, const int ig ) const
     {
-        coorMap( x, y, z, qr.quadPointCoor( ig, 0 ), qr.quadPointCoor( ig, 1 ),
-                 qr.quadPointCoor( ig, 2 ) );
+        coorMap( x, y, z, M_quadRule->quadPointCoor( ig, 0 ), M_quadRule->quadPointCoor( ig, 1 ),
+                 M_quadRule->quadPointCoor( ig, 2 ) );
     }
     //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern
     inline int patternFirst( int i ) const
     {
-        return refFE.patternFirst( i );
+        return M_refFE.patternFirst( i );
     }
     //! patternSecond(i): column index in the element matrix of the i-th term of the pattern
     inline int patternSecond( int i ) const
     {
-        return refFE.patternSecond( i );
+        return M_refFE.patternSecond( i );
     }
 
-    /*!
-      Return the measure of the current element
-    */
-    Real measure() const;
 
     //---------------------------------------
     //! DECLARATION of the update methods
@@ -282,60 +694,47 @@ public:
     template <class GEOELE>
     void updateFirstSecondDerivQuadPt( const GEOELE& geoele );
 
+    //@}
+
 };
 
 
-//----------------------------------------------------------------------
-//! IMPLEMENTATION
-//----------------------------------------------------------------------
-//! update the definition of the geo points (VM 07/04)
-template <class GEOELE>
-void CurrentFE::_update_point( const GEOELE& geoele )
+
+
+template<typename GeoElement>
+void CurrentFE::update(const GeoElement& geoele, const flag_Type& upFlag)
 {
-
-    ASSERT( nbCoor < 4, "nbCoor must be smaller than 4");
-
-    //! Nicer way to do the same as in the switch
-    Real const * pointCoordinate;
-    for ( ID i(0); i < nbGeoNode; ++i )
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
+    
+    std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
+    
+    for ( UInt i(0); i < M_nbGeoNode; ++i )
     {
-        pointCoordinate = geoele.point( i + 1  ).coor();
-        for( ID icoor(0); icoor < nbCoor; ++icoor)
-            point( i, icoor ) =  pointCoordinate[icoor];
+        for( UInt icoor(0); icoor < M_nbCoor; ++icoor)
+        {
+            pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
+        }
     }
-    return;
-    /*
-    switch ( nbCoor )
-    {
-    case 1:    //! 1D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-        }
-        break;
-    case 2:    //! 2D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-        }
-        break;
-    case 3:    //! 3D
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-            point( i, 2 ) = geoele.point( i + 1 ).z();
-        }
-        break;
-    default:
-        std::ostringstream err_msg;
-        err_msg << "Dimension " << nbCoor << " not available.";
+    update(pts);
+};
 
-        ERROR_MSG( err_msg.str().c_str() );
+
+template<typename GeoElement>
+void CurrentFE::computeCellNodes(const GeoElement& geoele)
+{
+    std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
+    
+    for ( UInt i(0); i < M_nbGeoNode; ++i )
+    {
+        for( UInt icoor(0); icoor < M_nbCoor; ++icoor)
+        {
+            pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
+        }
+        
     }
-    */
-}
+    computeCellNodes(pts);
+};
 
 //---------------------------------------
 //! IMPLEMENTATION of the CurrentFE::update methods
@@ -347,15 +746,8 @@ void CurrentFE::_update_point( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::update( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = false;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
 }
 
 /*!
@@ -365,19 +757,14 @@ void CurrentFE::update( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateJac( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the jacobian and its determinant...
-    _comp_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
 }
 
 /*!
@@ -387,21 +774,16 @@ void CurrentFE::updateJac( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateJacQuadPt( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = true;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
-    //! compute the jacobian and its determinant...
-    _comp_jacobian_and_det();
-    //! and the coordinates of the quadrature points
-    _comp_quad_point_coor();
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
+    // compute the jacobian and its determinant...
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    // and the coordinates of the quadrature points
+    computeQuadNodes();
 }
 
 /*!
@@ -411,21 +793,18 @@ void CurrentFE::updateJacQuadPt( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateFirstDeriv( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    _comp_inv_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    computeTInverseJacobian();
     //! product InvJac by dPhiRef to compute phiDer
-    _comp_phiDer();
+    computeDphiRef();
+    computeDphi();
 }
 
 /*!
@@ -435,23 +814,20 @@ void CurrentFE::updateFirstDeriv( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateFirstDerivQuadPt( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = true;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    _comp_inv_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    computeTInverseJacobian();
     //! product InvJac by dPhiRef to compute phiDer
-    _comp_phiDer();
+    computeDphiRef();
+    computeDphi();
     //! and the coordinates of the quadrature points
-    _comp_quad_point_coor();
+    computeQuadNodes();
 }
 
 // A. Veneziani, October 30, 2002
@@ -462,21 +838,18 @@ void CurrentFE::updateFirstDerivQuadPt( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateSecondDeriv( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = false;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    _comp_inv_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    computeTInverseJacobian();
     //! compute the second derivative
-    _comp_phiDer2();
+    computeD2phiRef();
+    computeD2phi();
 }
 
 /*!
@@ -486,23 +859,20 @@ void CurrentFE::updateSecondDeriv( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateSecondDerivQuadPt( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = true;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    _comp_inv_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    computeTInverseJacobian();
     //! compute the second derivative
-    _comp_phiDer2();
+    computeD2phiRef();
+    computeD2phi();
     //! and the coordinates of the quadrature points
-    _comp_quad_point_coor();
+    computeQuadNodes();
 }
 /*!
     compute the arrays detJac, weightDet, jacobian,
@@ -511,21 +881,20 @@ void CurrentFE::updateSecondDerivQuadPt( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateFirstSecondDeriv( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = false;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    _comp_inv_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    computeTInverseJacobian();
     //! compute phiDer and phiDer2
-    _comp_phiDerDer2();
+    computeDphiRef();
+    computeDphi();
+    computeD2phiRef();
+    computeD2phi();
 }
 /*!
     compute the arrays detJac, weightDet, jacobian,
@@ -534,24 +903,24 @@ void CurrentFE::updateFirstSecondDeriv( const GEOELE& geoele )
 template <class GEOELE>
 void CurrentFE::updateFirstSecondDerivQuadPt( const GEOELE& geoele )
 {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = true;
-#endif
-
-    _currentId      = geoele.id();
-    _currentLocalId = geoele.localId();
-    //! update the definition of the geo points
-    _update_point( geoele );
+    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    M_currentId      = geoele.id();
+    M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    _comp_inv_jacobian_and_det();
+    computeCellNodes(geoele);
+    computeDphiGeoMap();
+    computeJacobian();
+    computeWDetJacobian();
+    computeTInverseJacobian();
     //! compute phiDer and phiDer2
-    _comp_phiDerDer2();
+    computeDphiRef();
+    computeD2phiRef();
+    computeDphi();
+    computeD2phi();
     //! and the coordinates of the quadrature points
-    _comp_quad_point_coor();
-}
+    computeQuadNodes();
 }
 
-#endif
+} // Namespace LifeV
+
+#endif /* CURRENTFE_H */
