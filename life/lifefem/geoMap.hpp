@@ -1,166 +1,177 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-#ifndef _GEOMAP_H
-#define _GEOMAP_H
+//@HEADER
+
+/*!
+    @file
+    @brief This file contains the definition of the GeoMap class (and an helper function)
+ */
+
+#ifndef GEOMAP_H
+#define GEOMAP_H 1
 
 #include <life/lifecore/life.hpp>
+
 #include <life/lifefem/refEle.hpp>
-/*!
-  \file geoMap.h
-  \brief Structure for the geometrical mapping
-*/
 
 namespace LifeV
 {
+
+//! GeoMap - Structure for the geometrical mapping
 /*!
-  \class GeoMap
-  \brief Structure for the geometrical mapping
-  \author J.-F. Gerbeau
-  \date 04/2002
+  @author J.-F. Gerbeau
+  @date 04/2002
 
   This class contains the geometrical transformation that maps the reference
-  element on the current element, and its values on integration points
+  element on the current element.
 
-  \par How to add a new geometrical mapping
-
-  The way is very similar to a reference finite element see refFE.h
+  Modified by S. Quinodoz (samuel.quinodoz@epfl.ch, 04.2010)
 */
-
 class GeoMap:
         public RefEle
 {
-    const GeoMap* _boundaryMap;
 public:
-    //! Constructor of a geo map
+    
+    //! @name Constructor & Destructor
+    //@{
+    
+    //! Full Constructor of a geo map
     /*!
-      Constructor of a geo map. The arguments are:
-
-      _name : the name of the f.e.
-
-      _shape : the geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
-
-       _nbDof : the total number of d.o.f.
-
-       _nbCoor : number of local coordinates
-
-       phi : the static array containing the basis functions (defined in refEle.h)
-
-       dPhi : the static array containing the derivatives of the basis functions (defined in refEle.h)
-
-       d2Phi : the static array containing the second derivatives of the basis functions (defined in refEle.h)
-
-       refCoor : the static array containing the coordinates of the nodes on the reference element (defined in refEle.h)
-
-       sqr : a set of quadrature rule (defined in quadRule.cc)
-
-       bdMap : a pointer on the natural associated mapping for the boundary of the element
+      @param _name : the name of the f.e.
+      @param _shape : the geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
+      @param _nbDof : the total number of d.o.f.
+      @param _nbCoor : number of local coordinates
+      @param phi : the static array containing the basis functions (defined in refEle.h)
+      @param dPhi : the static array containing the derivatives of the basis functions (defined in refEle.h)
+      @param d2Phi : the static array containing the second derivatives of the basis functions (defined in refEle.h)
+      @param refCoor : the static array containing the coordinates of the nodes on the reference element (defined in refEle.h)
+      @param  bdMap : a pointer on the natural associated mapping for the boundary of the element
      */
     GeoMap( std::string          _name,
             ReferenceShapes      _shape,
-            int                  _nbDof,
-            int                  _nbCoor,
+            UInt                  _nbDof,
+            UInt                  _nbCoor,
             const Fct*           phi,
             const Fct*           dPhi,
             const Fct*           d2Phi,
             const Real*          _refCoor,
-            const SetOfQuadRule& sqr,
             const GeoMap*        bdMap );
 
+    //! Destructor
     ~GeoMap();
 
-    friend std::ostream& operator << ( std:: ostream& f, const GeoMap& geomap );
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
     //! return the natural mapping for the boundary of the element
     inline const GeoMap& boundaryMap() const
     {
-        ASSERT_PRE( _boundaryMap , "No boundary map defined" );
-        return *_boundaryMap;
+        ASSERT( M_boundaryMap!=0 , "No boundary map defined" );
+        return *M_boundaryMap;
     }
+
+    //@}
+    
+private:
+    
+    //! @name Private Methods
+    //@{
+    
+    //! No empty constructor
+    GeoMap();
+    
+    //! No copy constructor
+    GeoMap(const GeoMap&);
+
+    //@}
+
+    const GeoMap* M_boundaryMap;
 };
 
-//--------------------------------------------------
+
+
+//---- Predeclaration of the map (defined in defQuadRuleFE.cpp) ----
+
 extern const GeoMap geoLinearNode;
 extern const GeoMap geoLinearSeg;
 extern const GeoMap geoLinearTria;
 extern const GeoMap geoBilinearQuad;
 extern const GeoMap geoLinearTetra;
 extern const GeoMap geoBilinearHexa;
-//
-/*! Helper function that returns the geomap associated to a mesh
 
-\note To be completed!
-*/
+
+// ----
+
+/*! Helper function that returns the geomap associated to a mesh */
 template <typename RegionMesh>
 const GeoMap& getGeoMap( RegionMesh & /*mesh*/ )
 {
 
     typedef typename RegionMesh::ElementShape ElementShape;
-
-//     std::cout << "element shape = " << ElementShape::Shape << std::endl;
-
-//     typedef typename RegionMesh::BElementShape BElementShape;
-
-//     std::cout << "element shape = " << BElementShape::Shape << std::endl;
-
+    
     switch ( ElementShape::Shape )
     {
     case POINT:
-        //        std::cout << "POINT" << std::endl;
         if ( ElementShape::numPoints == 1 )
             return geoLinearNode;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case LINE:
-        //std::cout << "LINE" << std::endl;
         if ( ElementShape::numPoints == 2 )
             return geoLinearSeg;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case HEXA:
-        //std::cout << "HEXA" << std::endl;
         if ( ElementShape::numPoints == 8 )
             return geoBilinearHexa;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case TETRA:
-        //std::cout << "TETRA" << std::endl;
         if ( ElementShape::numPoints == 4 )
             return geoLinearTetra;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case TRIANGLE:
-        //std::cout << "TRIANGLE" << std::endl;
-            if ( ElementShape::numPoints == 3 )
-                return geoLinearTria;
-            else
-                ERROR_MSG( "Geomap type not yet implemented" );
-            break;
+        if ( ElementShape::numPoints == 3 )
+            return geoLinearTria;
+        else
+            ERROR_MSG( "Geomap type not yet implemented" );
+        break;
     case QUAD:
-        //std::cout << "TQUAD" << std::endl;
-            if ( ElementShape::numPoints == 4 )
-                return geoBilinearQuad;
-            else
-                ERROR_MSG( "Geomap type not yet implemented" );
-            break;
+        if ( ElementShape::numPoints == 4 )
+            return geoBilinearQuad;
+        else
+            ERROR_MSG( "Geomap type not yet implemented" );
+        break;
     default:
         ERROR_MSG( "Geomap type not yet implemented" );
     }
