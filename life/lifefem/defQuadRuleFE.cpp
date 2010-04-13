@@ -37,7 +37,7 @@ const size_t UNKNOWN = size_t( -1 );
 
 const size_t NB_QUAD_RULE_NODE = 3;
 //! id of the quadrature rules on nodes
-const size_t QUAD_RULE_NODE_1PT = 1;
+const int QUAD_RULE_NODE_1PT = 1;
 
 
 static const QuadPoint pt_node_1pt[ 1 ] =
@@ -106,7 +106,6 @@ static const QuadRule quad_rule_seg[ NB_QUAD_RULE_SEG ] =
         quadRuleSeg2pt,
         quadRuleSeg3pt
     };
-const SetOfQuadRule allQuadRuleSeg( quad_rule_seg, NB_QUAD_RULE_SEG );
 /*======================================================================
  *
  *                     Quadrature Rules 2D on triangles
@@ -212,7 +211,6 @@ static const QuadRule quad_rule_tria[ NB_QUAD_RULE_TRIA ] =
         quadRuleTria6pt,
         quadRuleTria7pt
     };
-const SetOfQuadRule allQuadRuleTria( quad_rule_tria, NB_QUAD_RULE_TRIA );
 //----------------------------------------------------------------------
 /*======================================================================
  *
@@ -273,7 +271,6 @@ static const QuadRule quad_rule_quad[ NB_QUAD_RULE_QUAD ] =
         quadRuleQuad4pt,
         quadRuleQuad9pt
     };
-const SetOfQuadRule allQuadRuleQuad( quad_rule_quad, NB_QUAD_RULE_QUAD );
 //----------------------------------------------------------------------
 /*======================================================================
  *
@@ -510,7 +507,6 @@ static const QuadRule quad_rule_tetra[ NB_QUAD_RULE_TETRA ] =
         quadRuleTetra15pt,
         quadRuleTetra64pt
     };
-const SetOfQuadRule allQuadRuleTetra( quad_rule_tetra, NB_QUAD_RULE_TETRA );
 //----------------------------------------------------------------------
 /*======================================================================
  *
@@ -554,7 +550,6 @@ static const QuadRule quad_rule_hexa[ NB_QUAD_RULE_HEXA ] =
         quadRuleHexa1pt,
         quadRuleHexa8pt
     };
-const SetOfQuadRule allQuadRuleHexa( quad_rule_hexa, NB_QUAD_RULE_HEXA );
 //======================================================================
 //
 //                            P0  (0D)
@@ -3442,7 +3437,6 @@ const RefFE fePointP0( "Lagrange P0 on a point",
                        derfct_P0_0D,
                        der2fct_P0_0D,
                        refcoor_P0_0D,
-                       allQuadRuleSeg,
                        STANDARD_PATTERN,
                        ( RefFE* ) NULL );
 
@@ -3457,7 +3451,7 @@ const RefFE fePointP0( "Lagrange P0 on a point",
 
 const RefFE feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
                      fct_P1_1D, derfct_P1_1D, der2fct_P1_1D, refcoor_P1_1D,
-                     allQuadRuleSeg, STANDARD_PATTERN, ( RefFE* ) &fePointP0 );
+                     STANDARD_PATTERN, &fePointP0 );
 
 //======================================================================
 //
@@ -3469,8 +3463,8 @@ const RefFE feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 
 */
 
 const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
-                     fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D, allQuadRuleSeg,
-                     STANDARD_PATTERN, ( RefFE* ) NULL );
+                     fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D,
+                     STANDARD_PATTERN, &fePointP0 );
 
 //======================================================================
 //
@@ -3486,7 +3480,7 @@ const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 
 */
 
 const RefFE feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
-                      fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D, allQuadRuleTria,
+                      fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D,
                       STANDARD_PATTERN, ( RefFE* ) NULL );
 
 //======================================================================
@@ -3503,7 +3497,7 @@ const RefFE feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 
 */
 
 const RefFE feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
-                      fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D, allQuadRuleTria,
+                      fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D,
                       STANDARD_PATTERN, &feSegP1 );
 
 //======================================================================
@@ -3520,7 +3514,7 @@ const RefFE feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 
 */
 
 const RefFE feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
-                      fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D, allQuadRuleTria,
+                      fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D,
                       STANDARD_PATTERN, &feSegP2 );
 
 //======================================================================
@@ -3537,7 +3531,7 @@ const RefFE feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 
 */
 
 const RefFE feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
-                      fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D, allQuadRuleQuad,
+                      fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D,
                       STANDARD_PATTERN, ( RefFE* ) NULL );
 
 //======================================================================
@@ -3554,7 +3548,7 @@ const RefFE feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0,
 */
 
 const RefFE feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0, 4, 2,
-                      fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D, refcoor_Q1_2D, allQuadRuleQuad,
+                      fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D, refcoor_Q1_2D,
                       STANDARD_PATTERN, &feSegP1 );
 
 
@@ -3572,7 +3566,7 @@ const RefFE feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0,
 */
 
 const RefFE feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0, 9, 2,
-                      fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D, refcoor_Q2_2D, allQuadRuleQuad,
+                      fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D, refcoor_Q2_2D,
                       STANDARD_PATTERN, &feSegP2 );
 
 //======================================================================
@@ -3591,7 +3585,7 @@ const RefFE feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0,
 */
 const RefFE feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
                        fct_P0_3D, derfct_P0_3D, der2fct_P0_3D, refcoor_P0_3D,
-                       allQuadRuleTetra, STANDARD_PATTERN, &feTriaP0 );
+                       STANDARD_PATTERN, ( RefFE* ) NULL );
 
 //======================================================================
 //
@@ -3608,7 +3602,7 @@ const RefFE feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1
          1 ----------2
 */
 const RefFE feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0, 4, 3,
-                       fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D, allQuadRuleTetra,
+                       fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D,
                        STANDARD_PATTERN, &feTriaP1 );
 
 //======================================================================
@@ -3627,7 +3621,7 @@ const RefFE feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0
 */
 const RefFE feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D, TETRA, 1, 0, 0, 1, 5, 3,
                              fct_P1bubble_3D, derfct_P1bubble_3D, der2fct_P1bubble_3D, refcoor_P1bubble_3D,
-                             allQuadRuleTetra, STANDARD_PATTERN, &feTriaP1 );
+                             STANDARD_PATTERN, &feTriaP1 );
 
 
 //======================================================================
@@ -3645,7 +3639,7 @@ const RefFE feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D,
          1 -----5----2
 */
 const RefFE feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0, 10, 3,
-                       fct_P2_3D, derfct_P2_3D, der2fct_P2_3D, refcoor_P2_3D, allQuadRuleTetra,
+                       fct_P2_3D, derfct_P2_3D, der2fct_P2_3D, refcoor_P2_3D,
                        STANDARD_PATTERN, &feTriaP2 );
 //======================================================================
 //
@@ -3666,7 +3660,6 @@ const RefFE feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
                             derfct_P2tilde_3D,
                             der2fct_P2tilde_3D,
                             refcoor_P2tilde_3D,
-                            allQuadRuleTetra,
                             STANDARD_PATTERN, &feTriaP2 );
 
 //======================================================================
@@ -3687,7 +3680,7 @@ const RefFE feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
 */
 const RefFE feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1, 3,
                       fct_Q0_3D, derfct_Q0_3D, der2fct_Q0_3D, refcoor_Q0_3D,
-                      allQuadRuleHexa, STANDARD_PATTERN, &feQuadQ0 );
+                      STANDARD_PATTERN, ( RefFE* ) NULL );
 
 //======================================================================
 //
@@ -3707,7 +3700,7 @@ const RefFE feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1
 */
 const RefFE feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8, 3,
                       fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D, refcoor_Q1_3D,
-                      allQuadRuleHexa, STANDARD_PATTERN, &feQuadQ1 );
+                      STANDARD_PATTERN, &feQuadQ1 );
 
 //----------------------------------------------------------------------
 //
@@ -3715,27 +3708,43 @@ const RefFE feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8
 //
 //----------------------------------------------------------------------
 
-const GeoMap geoLinearPoint( "Linear mapping on a segment", POINT, 1, 1,
-                             fct_P0_0D, derfct_P0_0D, der2fct_P0_0D,
-                             refcoor_P0_0D, allQuadRuleSeg, ( GeoMap* ) NULL );
+const GeoMap geoLinearNode( "Mapping of a point", POINT,
+                            1, 1,
+                            fct_P0_0D, derfct_P0_0D, der2fct_P0_0D,
+                            refcoor_P0_0D,
+                            ( GeoMap* ) NULL );
 
-const GeoMap geoLinearSeg( "Linear mapping on a segment", LINE, 2, 1,
+const GeoMap geoLinearSeg( "Linear mapping on a segment", LINE,
+                           2, 1,
                            fct_P1_1D, derfct_P1_1D, der2fct_P1_1D,
-                           refcoor_P1_1D, allQuadRuleSeg, ( GeoMap* ) &geoLinearPoint );
+                           refcoor_P1_1D, 
+                           &geoLinearNode );
 
-const GeoMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD, 4, 2,
-                              fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D,
-                              refcoor_Q1_2D, allQuadRuleQuad, ( GeoMap* ) NULL );
-
-const GeoMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE, 3, 2,
+const GeoMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE,
+                            3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D,
-                            refcoor_P1_2D, allQuadRuleTria, &geoLinearSeg );
+                            refcoor_P1_2D,
+                            &geoLinearSeg );
 
-const GeoMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA, 4, 3,
+const GeoMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD,
+                              4, 2,
+                              fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D,
+                              refcoor_Q1_2D,
+                              &geoLinearSeg );
+
+const GeoMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA,
+                             4, 3,
                              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
-                             refcoor_P1_3D, allQuadRuleTetra, &geoLinearTria );
+                             refcoor_P1_3D,
+                             &geoLinearTria );
 
-const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA, 8, 3,
+const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
+                              8, 3,
                               fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D,
-                              refcoor_Q1_3D, allQuadRuleHexa, &geoBilinearQuad );
+                              refcoor_Q1_3D,
+                              &geoBilinearQuad );
+
+
 }
+
+
