@@ -239,7 +239,7 @@ void Ethiersteinman::checkResult( LifeV::Real const& time,
     }
 
     if ( ul2stored > 0 &&
-         ( std::abs(ul2stored - ul2error) > 1e-4*ul2stored || (std::abs(pl2stored - pl2error) > 1e-4*pl2stored ) ) )
+         ( std::abs(ul2stored - ul2error) > 5e-2*ul2stored || (std::abs(pl2stored - pl2error) > 5e-2*pl2stored ) ) )
          throw Ethiersteinman::RESULT_CHANGED_EXCEPTION(time);
 
 }
