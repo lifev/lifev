@@ -46,11 +46,11 @@
 #include <life/lifecore/life.hpp>
 
 #ifdef TWODIM
-	#include <life/lifemesh/regionMesh2D.hpp>
-	#include <life/lifefilters/readMesh2D.hpp>
+    #include <life/lifemesh/regionMesh2D.hpp>
+    #include <life/lifefilters/readMesh2D.hpp>
 #elif defined THREEDIM
-	#include <life/lifemesh/regionMesh3D.hpp>
-	#include <life/lifefilters/readMesh3D.hpp>
+    #include <life/lifemesh/regionMesh3D.hpp>
+    #include <life/lifefilters/readMesh3D.hpp>
 #endif
 
 namespace LifeV {
@@ -66,14 +66,14 @@ class DataMesh
 {
 public:
 
-	// Typedef
+    // Typedef
     typedef Mesh                                Mesh_Type;
     typedef boost::shared_ptr<Mesh_Type>        Mesh_ptrType;
 
 
     /** @name Constructors, Destructor
      */
-	//@{
+    //@{
 
     //! Empty Constructor
     DataMesh();
@@ -116,23 +116,23 @@ public:
 
     /** @name Get Methods
      */
-	//@{
+    //@{
 
-    const Mesh_ptrType     mesh()		const { return M_mesh; }
+    const Mesh_ptrType   mesh()      const { return M_mesh; }
 
-    const std::string	meshDir()	const { return M_mesh_dir; }
+    const std::string    meshDir()   const { return M_mesh_dir; }
 
-    const std::string	meshFile()	const { return M_mesh_file; }
+    const std::string    meshFile()  const { return M_mesh_file; }
 
     //@}
 
 private:
 
-    Mesh_ptrType       M_mesh;			// the mesh
+    Mesh_ptrType    M_mesh;         // the mesh
 
-    std::string 	M_mesh_dir;		// mesh dir
-    std::string 	M_mesh_file;	// mesh file
-    std::string 	M_mesh_type;	// mesh type
+    std::string     M_mesh_dir;     // mesh dir
+    std::string     M_mesh_file;    // mesh file
+    std::string     M_mesh_type;    // mesh type
 
     bool            M_verbose;
 };
@@ -154,7 +154,7 @@ DataMesh<Mesh>::DataMesh( ):
 template <typename Mesh>
 DataMesh<Mesh>::
 DataMesh( const GetPot& dataFile, const std::string& section ):
-    M_mesh		( new Mesh ),
+    M_mesh      ( new Mesh ),
     M_mesh_dir  ( dataFile( ( section + "/mesh_dir"  ).data(), "./" ) ),
     M_mesh_file ( dataFile( ( section + "/mesh_file" ).data(), "mesh.mesh" ) ),
     M_mesh_type ( dataFile( ( section + "/mesh_type" ).data(), ".mesh" ) ),
@@ -165,14 +165,14 @@ DataMesh( const GetPot& dataFile, const std::string& section ):
 
 template <typename Mesh>
 DataMesh<Mesh>::DataMesh( const DataMesh& dataMesh ):
-	M_mesh        ( dataMesh.M_mesh ),
+    M_mesh        ( dataMesh.M_mesh ),
     M_mesh_dir    ( dataMesh.M_mesh_dir ),
     M_mesh_file   ( dataMesh.M_mesh_file ),
     M_mesh_type   ( dataMesh.M_mesh_type ),
     M_verbose     ( dataMesh.M_verbose )
 {
-	M_mesh->updateElementEdges();
-	M_mesh->updateElementFaces();
+    M_mesh->updateElementEdges();
+    M_mesh->updateElementFaces();
 }
 
 
