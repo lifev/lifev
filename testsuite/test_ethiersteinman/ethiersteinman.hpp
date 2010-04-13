@@ -36,6 +36,9 @@
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifemesh/basisElSh.hpp>
 
+#include "ESSteady_function.hpp"
+#include "ESUnsteady_function.hpp"
+
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
 /*!
@@ -50,9 +53,15 @@ class Ethiersteinman
 //     public LifeV::Application
 {
 public:
-    typedef LifeV::RegionMesh3D<LifeV::LinearTetra> mesh_type;
-    typedef LifeV::Oseen< mesh_type >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
+    typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_type;
+    typedef LifeV::FESpace< mesh_type, LifeV::EpetraMap > fespace_type;
+    typedef LifeV::Oseen< mesh_type >                     fluid_type;
+    typedef fluid_type::vector_type                       vector_type;
+    typedef boost::shared_ptr<vector_type>                vector_ptrtype;
+
+    // Problem definition
+    typedef LifeV::EthierSteinmanUnsteady Problem;
+
 
 
     /** @name Typedefs
@@ -101,7 +110,11 @@ public:
     /** @name  Methods
      */
     //@{
-
+    //! Computes L2 errors
+    void computeError( double const&     time,
+                       fespace_type&     uFESpace,
+                       fespace_type&     pFESpace,
+                       fluid_type const& fluid );
     void run();
 
     //@}
@@ -110,6 +123,8 @@ public:
 private:
     struct Private;
     boost::shared_ptr<Private> d;
+    std::ofstream out_norm;
+
 };
 
 #endif /* __Ethiersteinman_H */

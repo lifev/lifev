@@ -61,8 +61,6 @@
 #include <iostream>
 
 #include "ethiersteinman.hpp"
-#include "ESSteady_function.hpp"
-#include "ESUnsteady_function.hpp"
 
 
 using namespace LifeV;
@@ -161,8 +159,50 @@ Ethiersteinman::Ethiersteinman( int argc,
         std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
         std::cout << "Re = " << d->Re << std::endl
                   << "nu = " << d->nu << std::endl;
+
+        out_norm.open("norm.txt");
+        out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
     }
+
 }
+
+
+void
+Ethiersteinman::computeError( double     const& time,
+                              fespace_type&     uFESpace,
+                              fespace_type&     pFESpace,
+                              fluid_type const& fluid )
+{
+        vector_type vel  (uFESpace.map(), Repeated);
+        vector_type press(pFESpace.map(), Repeated);
+        vector_type velpressure ( fluid.solution(), Repeated );
+
+        velpressure = fluid.solution();
+        vel.subset(velpressure);
+        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+
+        double urelerr;
+        double prelerr;
+        double ul2error;
+        double pl2error;
+
+        ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
+        pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
+
+
+        bool verbose = (d->comm->MyPID() == 0);
+
+         if (verbose)
+         {
+             out_norm << time  << " "
+                      << ul2error << " "
+                      << urelerr << " "
+                      << pl2error << " "
+                      << prelerr << "\n" << std::flush;
+         }
+
+}
+
 
 void
 Ethiersteinman::run()
@@ -177,9 +217,6 @@ Ethiersteinman::run()
 
     chrono.start();
 
-
-    // Problem definition
-    typedef EthierSteinmanUnsteady Problem;
     Problem::setParamsFromGetPot( dataFile );
 
     // Boundary conditions
@@ -260,8 +297,8 @@ Ethiersteinman::run()
     fluid.setUp(dataFile);
     fluid.buildSystem();
 
-    if (verbose) 
-	std::cout << d->comm->MyPID() << " Init time (partial) " << chrono.diff() << " s." << std::endl;
+    if (verbose)
+        std::cout << d->comm->MyPID() << " Init time (partial) " << chrono.diff() << " s." << std::endl;
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -289,23 +326,12 @@ Ethiersteinman::run()
 
     dataNavierStokes.dataTime()->setTime(t0);
     fluid.initialize( Problem::uexact, Problem::pexact );
-    vector_type velpressure ( fluid.solution(), Repeated );
     bdf.bdf_u().initialize_unk( fluid.solution() );
 
     std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
     bool const L2proj( !proj.compare("proj") );
 
-    std::ofstream out_norm;
-    if (verbose)
-    {
-        out_norm.open("norm.txt");
-        out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
-    }
 
-    double urelerr;
-    double prelerr;
-    double ul2error;
-    double pl2error;
 
     Real time = t0 + dt;
     for (  ; time <=  dataNavierStokes.dataTime()->getInitialTime() + dt/2.; time += dt)
@@ -338,26 +364,10 @@ Ethiersteinman::run()
             fluid.iterate(bcH);
         }
 
-
-        vector_type vel  (uFESpace.map(), Repeated);
-        vector_type press(pFESpace.map(), Repeated);
-
-        velpressure = fluid.solution();
-        vel.subset(velpressure);
-        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
-
-        ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
-        pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
-
-         if (verbose)
-         {
-             out_norm << time  << " "
-                      << ul2error << " "
-                      << urelerr << " "
-                      << pl2error << " "
-                      << prelerr << "\n" << std::flush;
-         }
-
+        computeError( time,
+                      uFESpace,
+                      pFESpace,
+                      fluid );
 
 
          bdf.bdf_u().shift_right( fluid.solution() );
@@ -365,7 +375,7 @@ Ethiersteinman::run()
     }
 
     chrono.stop();
-    if (verbose) 
+    if (verbose)
 	std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
     // end initialization step
 
@@ -449,32 +459,14 @@ Ethiersteinman::run()
 
         bdf.bdf_u().shift_right( fluid.solution() );
 
-        velpressure   = fluid.solution();
 
-        vector_type vel  (uFESpace.map(), Repeated);
-        vector_type press(pFESpace.map(), Repeated);
+        computeError( time,
+                      uFESpace,
+                      pFESpace,
+                      fluid );
 
-        vel.subset(velpressure);
-        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
-
-
-        ul2error = uFESpace.L2Error(Problem::uexact, vel  , time, &urelerr );
-        pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
-
-	if (verbose)
-        {
-            out_norm << time << " "
-                     << ul2error << " "
-                     << urelerr << " "
-                     << pl2error << " "
-                     << prelerr << "\n" << std::flush;
-        }
-//         if (((iter % save == 0) || (iter == 1 )))
-//         {
         *velAndPressure = fluid.solution();
         exporter->postProcess( time );
-        //            fluid.postProcess();
-//         }
 
 
         MPI_Barrier(MPI_COMM_WORLD);
