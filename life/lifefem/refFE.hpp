@@ -94,41 +94,37 @@ enum FE_TYPE
 
 class RefFE:
         public RefEle,
-public LocalDofPattern
+        public LocalDofPattern
 {
-    const RefFE* _boundaryFE;
+
 public:
-    //! Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h
-    //const int type;
-    const FE_TYPE type;
     //! Constructor of a reference Lagrangian finite element.
     /*!
       Constructor of a reference finite element. The arguments are:
-      \param _name  the name of the f.e.
-      \param _type  the type of the f.e. (FE_P1_2D,... see the #define at the
+      @param _name  the name of the f.e.
+      @param _type  the type of the f.e. (FE_P1_2D,... see the #define at the
       begining of refFE.h)
-      \param _shape  the geometry belongs to enum ReferenceShapes {NONE, POINT,
+      @param _shape  the geometry belongs to enum ReferenceShapes {NONE, POINT,
       LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
-      \param _nbDofPerVertex  the number of degrees of freedom per vertex
-      \param _nbDofPerEdge  the number of degrees of freedom per edge
-      \param _nbDofPerFace  the number of degrees of freedom per face
-      \param _nbDofPerVolume  the number of degrees of freedom per volume
-      \param _nbDof  the total number of d.o.f ( = _nbDofPerVertex * nb vertex +
+      @param _nbDofPerVertex  the number of degrees of freedom per vertex
+      @param _nbDofPerEdge  the number of degrees of freedom per edge
+      @param _nbDofPerFace  the number of degrees of freedom per face
+      @param _nbDofPerVolume  the number of degrees of freedom per volume
+      @param _nbDof  the total number of d.o.f ( = _nbDofPerVertex * nb vertex +
       _nbDofPerEdge * nb edges + etc...)
-      \param _nbCoor  number of local coordinates
-      \param phi  the static array containing the basis functions (defined in
+      @param _nbCoor  number of local coordinates
+      @param phi  the static array containing the basis functions (defined in
       refEle.h)
-      \param dPhi  the static array containing the derivatives of the basis
+      @param dPhi  the static array containing the derivatives of the basis
       functions (defined in refEle.h)
-      \param d2Phi  the static array containing the second derivatives of the
+      @param d2Phi  the static array containing the second derivatives of the
       basis functions (defined in refEle.h)
-      \param refCoor  the static array containing the coordinates of the nodes on
+      @param refCoor  the static array containing the coordinates of the nodes on
       the reference element (defined in refEle.h)
-      \param sqr  a set of quadrature rule (defined in quadRule.cc)
-      \param _patternType  in most of cases STANDARD_PATTERN, except for elements
+      @param _patternType  in most of cases STANDARD_PATTERN, except for elements
       like P1isoP2 (to define a new pattern, add a new #define in refFE.h and
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
-      \param bdRefFE  a pointer on the associated reference finite element on the boundary
+      @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
     RefFE( std::string          _name,
            FE_TYPE                  _type,
@@ -143,19 +139,38 @@ public:
            const Fct*           dPhi,
            const Fct*           d2Phi,
            const Real*          _refCoor,
-           const SetOfQuadRule& sqr,
            DofPatternType _patternType,
            const RefFE*         bdRefFE );
 
+    //! Destructor
     ~RefFE();
 
-    friend std::ostream& operator << ( std::ostream& f, const RefFE& fe );
-    //! return the natural reference finite element for the boundary
+    //! Getter for the boundary finite element
     inline const RefFE& boundaryFE() const
-        {
-            ASSERT_PRE( _boundaryFE , "No boundary FE defined" );
-            return *_boundaryFE;
-        }
+    {
+        ASSERT( M_boundaryFE , "No boundary FE defined" );
+        return *M_boundaryFE;
+    }
+
+    //! Getter for the type of the finite element
+    inline const FE_TYPE& type() const
+    {
+        return M_type;
+    }
+
+private:
+
+    //! No empty constructor
+    RefFE();
+    
+    //! No copy constructor
+    RefFE(const RefFE&);
+
+    //! Reference to the boundary finite element
+    const RefFE* M_boundaryFE;
+
+    //! Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h
+    const FE_TYPE M_type;
 };
 
 //--------------------------------------------------
@@ -179,5 +194,6 @@ extern const RefFE feTetraP2tilde;
 
 extern const RefFE feHexaQ0;
 extern const RefFE feHexaQ1;
+
 }
 #endif

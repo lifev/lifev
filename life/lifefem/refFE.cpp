@@ -16,8 +16,8 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
 #include <life/lifefem/refFE.hpp>
-# include <set>
 
 namespace LifeV
 {
@@ -26,11 +26,11 @@ RefFE::RefFE( std::string _name, FE_TYPE _type, ReferenceShapes _shape,
               int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace,
               int _nbDofPerVolume, int _nbDof, int _nbCoor, const Fct* phi,
               const Fct* dPhi, const Fct* d2Phi, const Real* _refCoor,
-              const SetOfQuadRule& sqr, DofPatternType _patternType,
+              DofPatternType _patternType,
               const RefFE* bdRefFE ) :
-        RefEle( _name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, _refCoor, sqr ),
+        RefEle( _name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, _refCoor ),
         LocalDofPattern( _nbDof, _nbDofPerVertex, _nbDofPerEdge, _nbDofPerFace, _nbDofPerVolume, _patternType ),
-        _boundaryFE( bdRefFE ), type( _type )
+        M_boundaryFE( bdRefFE ), M_type( _type )
 {
     CONSTRUCTOR( "RefFE" );
 }
@@ -40,45 +40,6 @@ RefFE::~RefFE()
     DESTRUCTOR( "RefFE" );
 }
 
-std::ostream& operator << ( std::ostream& f, const RefFE& fe )
-{
-    f << "-------------------------\n";
-    f << "Reference Finite Element: " << fe.name << std::endl;
-    f << "-------------------------\n";
-    f << "*** Shape : " << fe.shape << std::endl;
-    f << "*** Local coordinate of the nodes :\n";
-    for ( int i = 0;i < fe.nbDof;i++ )
-    {
-        f << fe.xi( i ) << " " << fe.eta( i ) << " " << fe.zeta( i ) << std::endl;
-    }
-    f << "*** Pattern :\n";
-    for ( int i = 0;i < fe.nbPattern();i++ )
-        f << "(" << fe.patternFirst( i ) << "," << fe.patternSecond( i ) << ") \n";
-    for ( int k = 0;k < fe._sqr->nbQuadRule;k++ )
-    {
-        const QuadRule& qr = fe._sqr->quadRule( k );
-        f << "\n*** Quadrature rule : " << qr.name << std::endl;
-        for ( int ig = 0;ig < qr.nbQuadPt;ig++ )
-        {
-            f << "    - Quadrature point : " << ig << std::endl;
-            //      f << "     number and values of basis functions = " << fe.phiQuadPt(ig,qr) << std::endl;
-            for ( int i = 0;i < fe.nbDof;i++ )
-            {
-                f << "      Basif fct " << i << std::endl;
-                f << "         Value = " << fe.phi( i, ig, qr ) << std::endl;
-                f << "         Derivatives = " ;
-                for ( int icoor = 0;icoor < fe.nbCoor;icoor++ )
-                    f << " " << fe.dPhi( i, icoor, ig, qr );
-                f << std::endl;
-                f << "         Second derivatives = " ;
-                for ( int icoor = 0;icoor < fe.nbCoor;icoor++ )
-                    for ( int jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                        f << " " << fe.d2Phi( i, icoor, jcoor, ig, qr );
-                f << std::endl;
-            }
-        }
-    }
-    return f;
-}
+
 
 }
