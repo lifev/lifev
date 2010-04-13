@@ -72,7 +72,7 @@ elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
     Int ig;
     UInt ic;
     Real s = 0., f, x, y, z;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         for ( ic = 0; ic < nbcomp; ic++ )
@@ -272,6 +272,17 @@ public:
     const vector_type& originalVector) const;
 
 
+    //@}
+
+    //! @name Set Methods
+    //@{
+    
+    //! Method to set replace the quadrule
+    /*!
+      @param Qr The new quadrule to be used in the FESpace
+     */
+    void setQuadRule(const QuadRule& Qr);
+    
     //@}
 
 
@@ -901,7 +912,7 @@ FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, cons
 
         for ( ic = 0; ic < M_fieldDim; ic++ )
         {
-            for ( ig = 0; ig < this->fe().nbQuadPt; ig++ )
+            for ( ig = 0; ig < this->fe().nbQuadPt(); ig++ )
             {
                 this->fe().coorQuadPt( x, y, z, ig );
                 f = fct( t, x, y, z, ic + 1 );
@@ -1098,7 +1109,7 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 //         Real s      = 0;
 //         Real volume = M_FESpace.fe().detJac(0);
 
-//         for ( int ig = 0; ig < M_FESpace.fe().nbQuadPt; ++ig )
+//         for ( int ig = 0; ig < M_FESpace.fe().nbQuadPt(); ++ig )
 //         {
 //             for ( int k = 0; k < M_FESpace.fe().nbNode; ++k )
 //             {
@@ -1306,6 +1317,11 @@ FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
     Real grad(0);
 
     // Loop over the DoFs
+    std::vector<Real> invJac(3,0);
+    invJac[0]= M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,0);
+    invJac[1]= M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,1);
+    invJac[2]= M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,2);
+
     for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
     {
         // The global ID of the selected dof
@@ -1314,7 +1330,7 @@ FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
         for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
         {
             grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof,iter_dim,hat_x,hat_y,hat_z)
-                * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,iter_dim);
+                * invJac[iter_dim];
         };
     };
 
@@ -1829,6 +1845,16 @@ P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
   // finite element).
   vector_type return_vector(Interpolated,Unique,Insert);
   return return_vector;
+};
+
+
+template<typename Mesh, typename Map>
+void
+FESpace<Mesh,Map>::
+setQuadRule(const QuadRule& Qr)
+{
+    M_Qr = &Qr;
+    M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
 };
 
 } // end of the namespace
