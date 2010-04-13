@@ -200,6 +200,47 @@ Ethiersteinman::computeError( double     const& time,
                       << pl2error << " "
                       << prelerr << "\n" << std::flush;
          }
+         checkResult(time, ul2error, pl2error);
+
+}
+
+void Ethiersteinman::checkResult( LifeV::Real const& time,
+                                  double const&      ul2error,
+                                  double const&      pl2error )
+{
+
+    double ul2stored(0);
+    double pl2stored(0);
+
+    if (std::abs(time) < 1e-8)
+    {
+        ul2stored =  0.0434792;
+        pl2stored =  0.11569;
+    }
+    if (std::abs(time - 0.01) < 1e-8)
+    {
+        ul2stored = 0.075432;
+        pl2stored =  1.92917;
+    }
+    if (std::abs(time - 0.02) < 1e-8)
+    {
+        ul2stored =  0.0936949;
+        pl2stored =  0.706018;
+    }
+    if (std::abs(time - 0.03) < 1e-8)
+    {
+        ul2stored =  0.104034;
+        pl2stored =  0.445147;
+    }
+    if (std::abs(time - 0.04) < 1e-8)
+    {
+        ul2stored =  0.110704;
+        pl2stored =  0.354164;
+    }
+
+    if ( ul2stored > 0 &&
+         ( std::abs(ul2stored - ul2error) > 1e-4*ul2stored || (std::abs(pl2stored - pl2error) > 1e-4*pl2stored ) ) )
+         throw Ethiersteinman::RESULT_CHANGED_EXCEPTION(time);
 
 }
 

@@ -111,16 +111,32 @@ public:
      */
     //@{
     //! Computes L2 errors
-    void computeError( double const&     time,
-                       fespace_type&     uFESpace,
-                       fespace_type&     pFESpace,
-                       fluid_type const& fluid );
     void run();
 
     //@}
 
 
 private:
+
+    void computeError( double const&     time,
+                       fespace_type&     uFESpace,
+                       fespace_type&     pFESpace,
+                       fluid_type const& fluid );
+
+    void checkResult( LifeV::Real const& time,
+                      double const&      ul2error,
+                      double const&      pl2error );
+
+    struct RESULT_CHANGED_EXCEPTION
+    {
+    public:
+        RESULT_CHANGED_EXCEPTION(LifeV::Real time)
+        {
+            std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
+        }
+    };
+
+
     struct Private;
     boost::shared_ptr<Private> d;
     std::ofstream out_norm;
