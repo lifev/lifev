@@ -88,14 +88,14 @@ class DataNavierStokes
 {
 public:
 
-	//! @name Constructors & Destructor
-	//@{
-
     typedef DataTime                                                  Time_Type;
     typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
 
     typedef DataMesh<Mesh>                                            Mesh_Type;
     typedef boost::shared_ptr< Mesh_Type >                            Mesh_ptrType;
+
+	//! @name Constructors & Destructor
+	//@{
 
     //! Empty Constructor
     DataNavierStokes();
@@ -128,7 +128,7 @@ public:
 
     //! external setup
 
-    void setup( const GetPot& dataFile );
+    void setup( const GetPot& dataFile, const std::string& section = "fluid" );
 
     //@}
 
@@ -400,28 +400,28 @@ DataNavierStokes<Mesh>::operator=( const DataNavierStokes& dataNavierStokes )
 
 template <typename Mesh>
 void
-DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
+DataNavierStokes<Mesh>::setup( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_Time.get() )
-        M_Time.reset( new Time_Type( dataFile, "fluid/time_discretization" ) );
+        M_Time.reset( new Time_Type( dataFile, section + "/time_discretization" ) );
 
     // If data mesh has not been set
     if ( !M_Mesh.get() )
-        M_Mesh.reset( new Mesh_Type( dataFile, "fluid/space_discretization" ) );
+        M_Mesh.reset( new Mesh_Type( dataFile, section + "/space_discretization" ) );
 
     M_stabilization_list.add( "ip", IP_STABILIZATION,   "interior penalty " );
     M_stabilization_list.add( "sd", SD_STABILIZATION,   "stream-line diffusion" );
     M_stabilization_list.add( "none", NO_STABILIZATION, "none (default)" );
 
     // Physics
-    UInt temp = dataFile("fluid/physics/fluid_number", 0 );
+    UInt temp = dataFile( (section + "/physics/fluid_number" ).data(), 0 );
 
     if (temp == 0) // Old fashion of declaring fluids
     {
         M_fluid_number = 1;
-        M_density.push_back( dataFile( "fluid/physics/density", 1. ) );
-        M_viscosity.push_back ( dataFile( "fluid/physics/viscosity", 1. ) );
+        M_density.push_back( dataFile( ( section + "/physics/density" ).data(), 1. ) );
+        M_viscosity.push_back ( dataFile( ( section + "/physics/viscosity" ).data(), 1. ) );
     }
     else   // New fashion of declaring fluids
     {
@@ -432,7 +432,7 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
         for (UInt iter_fluid(0); iter_fluid<temp; ++iter_fluid)
         {
             // build the section name
-            std::string iter_fluid_section("fluid/physics/fluid_");
+            std::string iter_fluid_section( section + "/physics/fluid_");
             iter_fluid_section += number2string(iter_fluid);
 
             // Read the quantities
@@ -442,31 +442,32 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile )
     }
 
     // FE Order
-    M_uOrder       = dataFile( "fluid/space_discretization/vel_order", "P1");
-    M_pOrder       = dataFile( "fluid/space_discretization/press_order", "P1");
+    M_uOrder       = dataFile( ( section + "/space_discretization/vel_order" ).data(), "P1");
+    M_pOrder       = dataFile( ( section + "/space_discretization/press_order" ).data(), "P1");
 
     // Miscellaneous
-    M_verbose      = dataFile( "fluid/miscellaneous/verbose", 1 );
-    M_dump_init    = dataFile( "fluid/miscellaneous/dump_init", M_Time->getInitialTime() );
-    M_dump_period  = dataFile( "fluid/miscellaneous/dump_period", 1 );
-    M_factor       = dataFile( "fluid/miscellaneous/factor", 0. );
-    M_Stokes       = dataFile( "fluid/miscellaneous/Stokes", false );
+    M_verbose      = dataFile( ( section + "/miscellaneous/verbose" ).data(), 1 );
+    M_dump_init    = dataFile( ( section + "/miscellaneous/dump_init" ).data(), M_Time->getInitialTime() );
+    M_dump_period  = dataFile( ( section + "/miscellaneous/dump_period" ).data(), 1 );
+    M_factor       = dataFile( ( section + "/miscellaneous/factor" ).data(), 0. );
+    M_Stokes       = dataFile( ( section + "/miscellaneous/Stokes" ).data(), false );
 
-    M_stab_method  = NSStabilization ( M_stabilization_list.value( dataFile( "fluid/space_discretization/stabilization", "none") ) );
+    M_stab_method  = NSStabilization ( M_stabilization_list.value(
+                                       dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
 
     // Semi-implicit and shape derivatives
-    M_semiImplicit     = dataFile( "fluid/semiImplicit", false ) ;
-    M_shapeDerivatives = dataFile( "fluid/useShapeDerivatives", false ) ;
+    M_semiImplicit     = dataFile( ( section + "/semiImplicit" ).data(), false ) ;
+    M_shapeDerivatives = dataFile( ( section + "/useShapeDerivatives" ).data(), false ) ;
     setSemiImplicit( M_semiImplicit );
 
     // Mean values per section
-    M_computeMeanValuesPerSection = dataFile( "fluid/valuespersection/computeMeanValuesPerSection", 0 );
-    M_NbZSections      = dataFile( "fluid/valuespersection/nb_z_section", 2 );
-    M_ToleranceSection = dataFile( "fluid/valuespersection/tol_section", 2e-2 );
-    M_XSectionFrontier = dataFile( "fluid/valuespersection/x_section_frontier", 0. );
-    M_ZSectionInit     = dataFile( "fluid/valuespersection/z_section_init", -1. );
-    M_ZSectionFinal    = dataFile( "fluid/valuespersection/z_section_final", 0. );
-    M_NbPolygonEdges   = dataFile( "fluid/valuespersection/nb_polygon_edges", 10 );
+    M_computeMeanValuesPerSection = dataFile( ( section + "/valuespersection/computeMeanValuesPerSection" ).data(), 0 );
+    M_NbZSections      = dataFile( ( section + "/valuespersection/nb_z_section" ).data(), 2 );
+    M_ToleranceSection = dataFile( ( section + "/valuespersection/tol_section" ).data(), 2e-2 );
+    M_XSectionFrontier = dataFile( ( section + "/valuespersection/x_section_frontier" ).data(), 0. );
+    M_ZSectionInit     = dataFile( ( section + "/valuespersection/z_section_init" ).data(), -1. );
+    M_ZSectionFinal    = dataFile( ( section + "/valuespersection/z_section_final" ).data(), 0. );
+    M_NbPolygonEdges   = dataFile( ( section + "/valuespersection/nb_polygon_edges" ).data(), 10 );
 }
 
 template <typename Mesh>
