@@ -26,6 +26,9 @@
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/geoMap.hpp>
+#include <life/lifearray/tab.hpp>
+#include <life/lifefem/quadRule.hpp>
+
 /*!
   \file staticBdFE.h
   \brief Structure for a Static boundary finite element

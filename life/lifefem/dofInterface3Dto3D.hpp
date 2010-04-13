@@ -506,7 +506,7 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
     // Updating face connections at the interface
     _updateFaceConnections( mesh1, flag1, mesh2, flag2, tol );
 
-    if ( _refFE1->nbDof > _refFE2->nbDof )
+    if ( _refFE1->nbDof() > _refFE2->nbDof() )
     {
         // Update of the Dof connections when we need interpolation
         _dof->update( mesh2 ); // Building auxiliary dof
@@ -545,7 +545,7 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
-    UInt nDofElem = _refFE2->nbDof; // Number of Dof per element in the lowDof mesh
+    UInt nDofElem = _refFE2->nbDof(); // Number of Dof per element in the lowDof mesh
 
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element

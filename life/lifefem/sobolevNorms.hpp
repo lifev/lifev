@@ -35,10 +35,10 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const DofType& dof )
     int i, inod, ig;
     UInt eleID = fe.currentLocalId();
     Real s = 0, u_ig;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         u_ig = 0.;
-        for ( i = 0;i < fe.nbNode;i++ )
+        for ( i = 0;i < fe.nbFENode();i++ )
         {
             inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -60,10 +60,10 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
     Real s = 0, u_ig;
     for ( ic = 0; ic < (UInt)nbcomp; ic++ )
     {
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             u_ig = 0.;
-            for ( i = 0;i < fe.nbNode;i++ )
+            for ( i = 0;i < fe.nbFENode();i++ )
             {
                 inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
                 u_ig += u( inod ) * fe.phi( i, ig );
@@ -80,7 +80,7 @@ elem_L2_2( boost::function<Real( Real,Real,Real )> fct,
            const CurrentFE& fe )
 {
     Real s = 0., f, x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         f = fct( x, y, z );
@@ -97,7 +97,7 @@ elem_L2_2( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
     int ig;
     UInt ic;
     Real s = 0., f, x, y, z;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         for ( ic = 0; ic < nbcomp; ic++ )
@@ -115,7 +115,7 @@ elem_f_L2_2( boost::function<Real( Real,Real,Real )> fct,
            const CurrentFE& fe )
 {
     Real s = 0., f, x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         f = fct( x, y, z );
@@ -132,7 +132,7 @@ elem_f_L2_2( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
     int ig;
     UInt ic;
     Real s = 0., f, x, y, z;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         for ( ic = 0; ic < nbcomp; ic++ )
@@ -154,19 +154,19 @@ elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int 
     Real s = 0;
     for (int ic = 0; ic < nbcomp; ic++ )
     {
-    	for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    	for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
 		{
     		Real u_ig(0.);
-    		Vector grad_u_ig = ZeroVector(fe.nbCoor);
-    		for ( int i = 0;i < fe.nbNode;i++ )
+    		Vector grad_u_ig = ZeroVector(fe.nbCoor());
+    		for ( int i = 0;i < fe.nbFENode();i++ )
     		{
     			int inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
     			u_ig += u( inod ) * fe.phi( i, ig );
-    			for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+    			for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
     				grad_u_ig(icoor) += u( inod ) * fe.phiDer( i, icoor, ig );
     		}
     		Real s_tmp = u_ig * u_ig;
-    		for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+    		for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
     			s_tmp += pow(grad_u_ig(icoor),2);
     		s += s_tmp*fe.weightDet( ig );
 		}
@@ -180,11 +180,11 @@ Real
 elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
 {
     Real s(0), x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         Real s_tmp = pow(fct( x, y, z ),2);
-        for(int icoor = 0; icoor < fe.nbCoor; icoor++)
+        for(int icoor = 0; icoor < fe.nbCoor(); icoor++)
         	s_tmp += pow(fct.grad(icoor+1, x,y,z),2);
         s += s_tmp * fe.weightDet( ig );
     }
@@ -196,13 +196,13 @@ template <typename UsrFct>
 Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
     Real s(0), x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         for ( UInt ic = 0;ic < nbcomp;ic++ )
         {
             Real s_tmp = pow(fct(t, x, y, z, ic+1 ),2);
-            for(int icoor = 0; icoor < fe.nbCoor; icoor++)
+            for(int icoor = 0; icoor < fe.nbCoor(); icoor++)
             	s_tmp += pow(fct.grad(icoor+1, t,x,y,z, ic+1),2);
             s += s_tmp * fe.weightDet( ig );
         }
@@ -220,10 +220,10 @@ Real elem_L2_diff_2( VectorType & u,
 {
     UInt eleID = fe.currentLocalId();
     Real s(0), x, y, z;
-    for (int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for (int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         Real u_ig(0);
-        for (int i = 0;i < fe.nbNode;i++ )
+        for (int i = 0;i < fe.nbFENode();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -246,12 +246,12 @@ Real elem_L2_diff_2( VectorType & u,
     // returns the square of the L2 norm of (u-fct) on the current element
     UInt eleID = fe.currentLocalId();
     Real s(0), x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         for (int ic = 0; ic < nbcomp; ic++ )
         {
             Real u_ig(0);
-            for (int i = 0;i < fe.nbNode;i++ )
+            for (int i = 0;i < fe.nbFENode();i++ )
             {
                 int inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
                 u_ig += u( inod ) * fe.phi( i, ig );
@@ -271,25 +271,25 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 {
     UInt eleID = fe.currentLocalId();
     Real s(0), x, y, z;
-    for (int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for (int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         Real u_ig = 0.;
-        Vector grad_u_ig = ZeroVector(fe.nbCoor);
+        Vector grad_u_ig = ZeroVector(fe.nbCoor());
 
-        for (int i = 0;i < fe.nbNode;i++ )
+        for (int i = 0;i < fe.nbFENode();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
-            for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+            for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
             	grad_u_ig(icoor) += u( inod ) * fe.phiDer( i, icoor, ig );
         }
         fe.coorQuadPt( x, y, z, ig );
         Real diff_ig = u_ig - fct( x, y, z );
         Vector grad_diff_ig = grad_u_ig;
-        for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+        for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
         	grad_diff_ig(icoor) -= fct.grad(icoor+1, x, y, z);
         Real s_tmp = diff_ig*diff_ig;
-        for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+        for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
         	s_tmp += pow(grad_diff_ig(icoor),2);
         s += s_tmp* fe.weightDet( ig );
     }
@@ -303,27 +303,27 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 {
 	UInt eleID = fe.currentLocalId();
 	Real s(0), x, y, z;
-	for (int ig = 0;ig < fe.nbQuadPt;ig++ )
+	for (int ig = 0;ig < fe.nbQuadPt();ig++ )
 	{
         for (UInt ic = 0; ic < nbcomp; ic++ )
         {
         	Real u_ig = 0.;
-        	Vector grad_u_ig = ZeroVector(fe.nbCoor);
+        	Vector grad_u_ig = ZeroVector(fe.nbCoor());
 
-        	for (int i = 0;i < fe.nbNode;i++ )
+        	for (int i = 0;i < fe.nbFENode();i++ )
         	{
         		int inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
         		u_ig += u( inod ) * fe.phi( i, ig );
-        		for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+        		for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
         			grad_u_ig(icoor) += u( inod ) * fe.phiDer( i, icoor, ig );
         	}
         	fe.coorQuadPt( x, y, z, ig );
             Real diff_ig = u_ig - fct(t, x, y, z, ic+1);
             Vector grad_diff_ig = grad_u_ig;
-            for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+            for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
             	grad_diff_ig(icoor) -= fct.grad(icoor+1, t, x, y, z, ic+1);
             Real s_tmp = diff_ig*diff_ig;
-            for (int icoor = 0; icoor < fe.nbCoor; icoor++)
+            for (int icoor = 0; icoor < fe.nbCoor(); icoor++)
             	s_tmp += pow(grad_diff_ig(icoor),2);
             s += s_tmp* fe.weightDet( ig );
         }
@@ -341,11 +341,11 @@ Real elem_integral_diff( VectorType & u,
 {
     UInt eleID = fe.currentLocalId();
     Real s(0), x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         Real u_ig(0);
-        for ( int i = 0;i < fe.nbNode;i++ )
+        for ( int i = 0;i < fe.nbFENode();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 )+ (nbcomp-1) * dof.numTotalDof();
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -365,10 +365,10 @@ Real elem_integral( VectorType & u,
 {
     UInt eleID = fe.currentLocalId();
     Real s(0);
-    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         Real u_ig(0);
-        for ( int i = 0;i < fe.nbNode;i++ )
+        for ( int i = 0;i < fe.nbFENode();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 ) + (nbcomp-1) * dof.numTotalDof();
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -386,7 +386,7 @@ elem_integral( boost::function<Real( Real, Real, Real,
                const CurrentFE& fe, const Real t, const int nbcomp )
 {
     Real s(0), x, y, z;
-    for (int ig = 0;ig < fe.nbQuadPt;ig++ )
+    for (int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         s += fct( t, x, y, z, nbcomp ) * fe.weightDet( ig );

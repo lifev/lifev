@@ -301,7 +301,7 @@ void compute_mat( ElemMat& elmat, Oper& oper,
         for ( j = 0;j < ( UInt ) fe.nbNode;j++ )
         {
             s = 0;
-            for ( ig = 0;ig < ( UInt ) fe.nbQuadPt;ig++ )
+            for ( ig = 0;ig < ( UInt ) fe.nbQuadPt();ig++ )
             {
 #ifdef SPACE_DEP_OPERATOR
                 fe.coorQuadPt( x, y, z, ig );
@@ -341,7 +341,7 @@ void compute_mat_mixed( ElemMat& elmat, Oper& oper,
             //          of the type FE1 and FE2 in mainAZ.h.
             //          Therefore the same quadrature rule must be chosen
             //          for both FE1 and FE2.
-            for ( ig = 0;ig < fe1.nbQuadPt;ig++ )
+            for ( ig = 0;ig < fe1.nbQuadPt();ig++ )
             {
                 fe1.coorQuadPt( x, y, z, ig );
                 s += oper( i, j, ig, x, y, z, iblock, jblock ) * fe1.weightDet( ig );
@@ -363,11 +363,11 @@ void compute_mat_symm( ElemMat& elmat, Oper& oper,
     //
     // diagonal
     //
-    for ( i = 0;i < ( UInt ) fe.nbDiag;i++ )
+    for ( i = 0;i < ( UInt ) fe.nbDiag();i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < ( UInt ) fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < ( UInt ) fe.nbQuadPt();ig++ )
         {
 #ifdef SPACE_DEP_OPERATOR
             fe.coorQuadPt( x, y, z, ig );
@@ -380,12 +380,12 @@ void compute_mat_symm( ElemMat& elmat, Oper& oper,
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag;i < ( UInt ) fe.nbDiag + fe.nbUpper;i++ )
+    for ( i = fe.nbDiag();i < ( UInt ) fe.nbDiag() + fe.nbUpper();i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < ( UInt ) fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < ( UInt ) fe.nbQuadPt();ig++ )
         {
 #ifdef SPACE_DEP_OPERATOR
             fe.coorQuadPt( x, y, z, ig );
@@ -657,7 +657,7 @@ assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe, const 
     int i, j, k;
     UInt ig, jg;
     UInt eleId = fe.currentLocalId();
-    for ( k = 0 ; k < fe.nbPattern ; k++ )
+    for ( k = 0 ; k < fe.nbPattern() ; k++ )
     {
         i = fe.patternFirst( k );
         j = fe.patternSecond( k );
@@ -693,7 +693,7 @@ assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe1, const
     UInt ig, jg;
     UInt eleId1 = fe1.currentId();
     UInt eleId2 = fe2.currentId();
-    for ( k = 0 ; k < fe1.nbPattern ; k++ )
+    for ( k = 0 ; k < fe1.nbPattern() ; k++ )
     {
         i = fe1.patternFirst( k );
         j = fe2.patternSecond( k );
@@ -946,7 +946,7 @@ void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, int ib
     for ( i = 0;i < fe.nbNode;i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             fe.coorQuadPt( x, y, z, ig );
             s += fe.phi( i, ig ) * fct( x, y, z, iblock + 1 ) * fe.weightDet( ig );
@@ -973,7 +973,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe,
     for ( i = 0;i < fe.nbNode;i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             fe.coorQuadPt( x, y, z, ig );
             s += fct( i, ig, x, y, z, iblock + 1 ) * fe.weightDet( ig );
@@ -992,7 +992,7 @@ void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, const 
     for ( i = 0;i < fe.nbNode;i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             x = fe.quadPt( ig, 0 );
             y = fe.quadPt( ig, 1 );
@@ -1014,7 +1014,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t
     for ( i = 0;i < fe.nbNode;i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             fe.coorQuadPt( x, y, z, ig );
             s += fct( i, ig, x, y, z, t, iblock + 1 ) * fe.weightDet( ig );

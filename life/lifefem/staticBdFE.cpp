@@ -26,10 +26,10 @@ namespace LifeV
 */
 StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                         const QuadRule& _qr ) :
-        nbGeoNode ( _geoMap.nbDof ),
-        nbNode    ( _refFE.nbDof ),
-        nbCoor    ( _refFE.nbCoor ),
-        nbQuadPt  ( _qr.nbQuadPt ),
+    nbGeoNode ( _geoMap.nbDof() ),
+    nbNode    ( _refFE.nbDof() ),
+    nbCoor    ( _refFE.nbCoor() ),
+    nbQuadPt  ( _qr.nbQuadPt() ),
         point     ( nbGeoNode, nbCoor + 1 ),
         refFE     ( _refFE ),
         geoMap    ( _geoMap ), qr( _qr ),
@@ -50,18 +50,35 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
     {
         for ( int i = 0;i < nbNode;i++ )
         {
-            phi( i, ig ) = refFE.phi( i, ig, qr );
+            //phi( i, ig ) = refFE.phi( i, ig, qr );
+            phi( i, ig ) = refFE.phi( i,
+                                      qr.quadPointCoor(ig,0),
+                                      qr.quadPointCoor(ig,1),
+                                      qr.quadPointCoor(ig,2));
+
             for ( int icoor = 0;icoor < nbCoor;icoor++ )
             {
-                dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
+                //dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
+                dPhiRef( i, icoor, ig ) = refFE.dPhi( i,
+                                                      icoor,
+                                                      qr.quadPointCoor(ig,0),
+                                                      qr.quadPointCoor(ig,1),
+                                                      qr.quadPointCoor(ig,2));
             }
         }
         for ( int k = 0;k < nbGeoNode;k++ )
         {
-            phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
+            //phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
+            phiGeo( k, ig ) = geoMap.phi( k,
+                                          qr.quadPointCoor(ig,0),
+                                          qr.quadPointCoor(ig,1),
+                                          qr.quadPointCoor(ig,2));
             for ( int icoor = 0;icoor < nbCoor;icoor++ )
             {
-                dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
+                //dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
+                dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, qr.quadPointCoor(ig,0),
+                                                       qr.quadPointCoor(ig,1),
+                                                       qr.quadPointCoor(ig,2));
             }
         }
     }
@@ -76,8 +93,8 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
  nodes on the current element)
 */
 StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap ) :
-        nbGeoNode( _geoMap.nbDof ), nbNode( _refFE.nbDof ), nbCoor( _refFE.nbCoor ),
-        nbQuadPt( quadRuleDummy.nbQuadPt ), point( nbGeoNode, nbCoor + 1 ),
+    nbGeoNode( _geoMap.nbDof() ), nbNode( _refFE.nbDof() ), nbCoor( _refFE.nbCoor() ),
+    nbQuadPt( quadRuleDummy.nbQuadPt() ), point( nbGeoNode, nbCoor + 1 ),
         refFE( _refFE ), geoMap( _geoMap ), qr( quadRuleDummy ),
         phi( ( int ) nbNode, ( int ) nbQuadPt ), dPhiRef( ( int ) nbNode, ( int ) nbCoor,
                 ( int ) nbQuadPt ),
@@ -105,8 +122,8 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                         const QuadRule& _qr, const Real* refcoor,
                         UInt currentid, Real _invarea ) :
         _currentId( currentid ),
-        nbGeoNode( _geoMap.nbDof ), nbNode( _refFE.nbDof ), nbCoor( _refFE.nbCoor ),
-        nbQuadPt( _qr.nbQuadPt ), point( nbGeoNode, nbCoor + 1 ),
+        nbGeoNode( _geoMap.nbDof() ), nbNode( _refFE.nbDof() ), nbCoor( _refFE.nbCoor() ),
+        nbQuadPt( _qr.nbQuadPt() ), point( nbGeoNode, nbCoor + 1 ),
         refFE( _refFE ), geoMap( _geoMap ), qr( _qr ),
         phi( ( int ) nbNode, ( int ) nbQuadPt ), dPhiRef( ( int ) nbNode, ( int ) nbCoor,
                 ( int ) nbQuadPt ),
@@ -124,22 +141,39 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
     {
         for ( int i = 0;i < nbNode;i++ )
         {
-            phi( i, ig ) = invArea * refFE.phi( i, ig, qr ); // invArea added here
+            //phi( i, ig ) = refFE.phi( i, ig, qr );
+            phi( i, ig ) = invArea*refFE.phi( i,               // invArea added here
+                                      qr.quadPointCoor(ig,0),
+                                      qr.quadPointCoor(ig,1),
+                                      qr.quadPointCoor(ig,2));
+
             for ( int icoor = 0;icoor < nbCoor;icoor++ )
             {
-                dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
+                //dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
+                dPhiRef( i, icoor, ig ) = refFE.dPhi( i,
+                                                      icoor,
+                                                      qr.quadPointCoor(ig,0),
+                                                      qr.quadPointCoor(ig,1),
+                                                      qr.quadPointCoor(ig,2));
             }
         }
         for ( int k = 0;k < nbGeoNode;k++ )
         {
-            phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
+            //phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
+            phiGeo( k, ig ) = geoMap.phi( k,
+                                          qr.quadPointCoor(ig,0),
+                                          qr.quadPointCoor(ig,1),
+                                          qr.quadPointCoor(ig,2));
             for ( int icoor = 0;icoor < nbCoor;icoor++ )
             {
-                dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
+                //dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
+                dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, qr.quadPointCoor(ig,0),
+                                                       qr.quadPointCoor(ig,1),
+                                                       qr.quadPointCoor(ig,2));
             }
         }
     }
-    //
+   
     for ( int i = 0;i < nbGeoNode;i++ )
     {
         point( i, 0 ) = refcoor[ 3 * i ];

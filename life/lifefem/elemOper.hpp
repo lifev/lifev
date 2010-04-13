@@ -118,7 +118,30 @@ namespace LifeV
   void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock = 0 );
   void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock );
 
+    //! Assembly for the source term \f$ \int c v \f$ where \f$c\f$ is a given by the values in the quadrature nodes.
+    /*!
+      This function add in the elementary vector the term \f$ \int c v \f$.
+      The function \f$c\f$ is given by its values in the quadrature nodes.
+      
+      @param constant Values of the function in the quadrature nodes
+      @param elvec The local vector where to add the values
+      @param currentFe The currentFE associated to the cell where to assemble
+      @param iblock The component of v that is concerned
+    */
+    void source_mass(const std::vector<Real>& constant, ElemVec& elvec, const CurrentFE& currentFe, const int& iblock);
 
+    //! Assembly for the source term \f$ \int \nabla c \cdot \nabla v \f$ where \f$c\f$ is a given by the values in the quadrature nodes.
+    /*!
+      The function \f$\nabla c\f$ is given by its values in the quadrature nodes, coordinate after coordinate (first,
+      the values for the first componant of the gradient in all the quadrature nodes, then second component,...).
+      
+      @param constant Values of the gradient in the quadrature nodes
+      @param elvec The local vector where to add the values
+      @param currentFe The currentFE associated to the cell where to assemble
+      @param iblock The component of v that is concerned
+    */
+    void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const CurrentFE& currentFe, const int& iblock);
+    
   //!@}
   //!@name Elementary operations for the interior penalty stabilization
   //!@{
@@ -178,6 +201,16 @@ void ipstab_bagrad( const Real           coef,
 	     const CurrentFE& fe1, const CurrentFE& fe2, const CurrentFE& fe3,
 	     int iblock = 0, int jblock = 0 );
 
+    //! Conective term with a local vector given by quadrature node
+    /*!
+      To use this function, we must ensure that the velocity is stored in a good way in the std::vector:
+      If there are nQ quadrature nodes, the i-th component (starting from 0) of the velocity in the iq-th quadrature node
+      (also starting from 0) has to be stored in the ( i*nQ + iq)-th element of the std::vector.
+    */
+    void grad( const int& icoor, const std::vector<Real>& localVector, ElemMat& elmat,
+               const CurrentFE& currentFE1, const CurrentFE& currentFE2,
+               const int& iblock=0, const int& jblock=0);
+
   //! Convective term with a local vector coefficient for Navier-Stokes problem in Skew-Symmetric form
   void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 		const CurrentFE& fe1, const CurrentFE& fe2,
@@ -194,14 +227,13 @@ void ipstab_bagrad( const Real           coef,
   template <typename UsrFct>
   void source( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, int iblock = 0 )
   {
-    ASSERT_PRE( fe.hasQuadPtCoor(), "Source with space dependent fonction need updated quadrature point coordinates. Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()." );
-    int i, ig;
+    UInt i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0;i < fe.nbNode;i++ )
       {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
 	  {
             s += fe.phi( i, ig ) * fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ),
                                         iblock ) * fe.weightDet( ig );
@@ -217,14 +249,13 @@ void ipstab_bagrad( const Real           coef,
   template <typename UsrFct>
   void source( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t, int iblock = 0 )
   {
-    ASSERT_PRE( fe.hasQuadPtCoor(), "Source with space dependent fonction need updated quadrature point coordinates. Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()." );
-    int i, ig;
+    UInt i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0;i < fe.nbNode;i++ )
       {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
 	  {
             s += fe.phi( i, ig ) * fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ), t,
                                         iblock ) * fe.weightDet( ig );
