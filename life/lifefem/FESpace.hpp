@@ -354,8 +354,8 @@ public:
 							const Real 			time,
 							Real* 				relError = 0 );
 
-    template<typename function, typename vector_type>
-    Real L2Error(			const function&		fexact,
+    template<typename vector_type>
+    Real L2Error(			const Function&		fexact,
 							const vector_type&	vec,
 							const Real			time,
 							Real*				relError=0 );
@@ -930,18 +930,20 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
                               const Real time,
                               Real* relError )
 {
-    Real sum2      = 0.;
-    Real sum1      = 0.;
-    Real sum0      = 0.;
+    Real normU      = 0.;
+    Real meanU      = 0.;
+    Real mass      = 0.;
     Real sumExact2 = 0.;
     Real sumExact1 = 0.;
 
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
         this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-        sum2 += elem_L2_diff_2( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
-        sum1 += elem_integral_diff( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
-        sum0 += this->fe().measure();
+
+        normU += elem_L2_diff_2( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
+
+        meanU += elem_integral_diff( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
+        mass += this->fe().measure();
         if (relError)
         {
             sumExact2 += elem_f_L2_2( fexact, this->fe(), time, 1 );
@@ -950,27 +952,23 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
     }
 
 
-    Real sendbuff[5] = {sum0, sum1, sum2, sumExact1, sumExact2};
+    Real sendbuff[5] = {mass, meanU, normU, sumExact1, sumExact2};
     Real recvbuff[5];
 
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 5);
 
 
-    //int me = this->map().Comm().MyPID();
-
-//     if (me == 0)
-//     {
-    sum0      = recvbuff[0];
-    sum1      = recvbuff[1];
-    sum2      = recvbuff[2];
+    mass       = recvbuff[0];
+    meanU      = recvbuff[1];
+    normU      = recvbuff[2];
     sumExact1 = recvbuff[3];
     sumExact2 = recvbuff[4];
 
-    Real absError = sqrt( sum2 - sum1*sum1/sum0 );
+    Real absError = sqrt( normU - meanU*meanU/mass );
 
     if (relError)
     {
-        Real normExact = sqrt( sumExact2 - sumExact1*sumExact1/sum0 );
+        Real normExact = sqrt( sumExact2 - sumExact1*sumExact1/mass );
         *relError = absError / normExact;
     }
     return absError;
@@ -978,36 +976,34 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
 
 
 
-    template <typename Mesh, typename Map>
-    template<typename function, typename vector_type>
-    Real
-    FESpace<Mesh, Map>::L2Error( const function&    fexact,
+template <typename Mesh, typename Map>
+template<typename vector_type>
+Real
+FESpace<Mesh, Map>::L2Error( const Function&    fexact,
                                  const vector_type& vec,
                                  const Real       time,
                                  Real*            relError )
+{
+    Real normU       = 0.;
+    Real sumExact    = 0.;
+
+    for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        Real normU       = 0.;
-        Real sumExact    = 0.;
+        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
-        for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
+        normU += elem_L2_diff_2( vec, fexact,
+                                 this->fe(),
+                                 this->dof(),
+                                 time,
+                                 M_fieldDim );
+        if (relError)
         {
-            this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-
-            normU += elem_L2_diff_2( vec, fexact,
-                                     this->fe(),
-                                     //p1,
-                                     this->dof(),
-                                     time,
-                                     M_fieldDim );
-            if (relError)
-            {
-                sumExact += elemL22( fexact,
-                                     this->fe(),
-                                     //p1,
-                                     time,
-                                     M_fieldDim );
-            }
+            sumExact += elemL22( fexact,
+                                 this->fe(),
+                                 time,
+                                 M_fieldDim );
         }
+    }
 
 
     Real sendbuff[2] = {normU, sumExact};
@@ -1015,11 +1011,6 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
 
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
 
-
-//    int me = this->map().Comm().MyPID();
-
-//     if (me == 0)
-//     {
     normU    = recvbuff[0];
     sumExact = recvbuff[1];
 
@@ -1027,7 +1018,6 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
     {
         *relError = sqrt( normU / sumExact );
     }
-//     }
 
     return sqrt( normU );
 }
