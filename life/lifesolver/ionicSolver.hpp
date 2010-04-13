@@ -488,7 +488,7 @@ void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real /*Cm*/, ElemVec& elv
 	Real G1 = this->M_data.c1/this->M_data.T/pow(this->M_data.A,2.0);
 	Real G2 = this->M_data.c2/this->M_data.T;
 
-    for ( int ig = 0; ig < uFESpace.fe().nbQuadPt;ig++ )
+        for ( int ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         u_ig = w_ig = 0.;
         for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
@@ -893,7 +893,7 @@ void Luo_Rudy<Mesh, SolverType>::computeIion(  Real Cm, ElemVec& elvec, ElemVec&
 {
 
 	Real Iion_ig;
-    for ( int ig = 0; ig < uFESpace.fe().nbQuadPt;ig++ )
+        for ( int ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         Iion_ig = 0.;
         for ( int i = 0;i < uFESpace.fe().nbNode;i++ )

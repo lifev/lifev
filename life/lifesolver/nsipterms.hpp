@@ -218,7 +218,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
             {
                 UInt iloc = M_fToP( iFaEl, iNode+1 );
-                for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+                for ( int iCoor = 0; iCoor < M_fe1.nbCoor(); ++iCoor )
                 {
                     UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
                     if (state.BlockMap().LID(ig + 1) >= 0)
@@ -227,7 +227,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             }
 
             // second, calculate its max norm
-            for ( int l = 0; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
+            for ( int l = 0; l < int( M_fe1.nbCoor()*M_feBd.nbNode ); ++l )
             {
                 if ( bmax < fabs( beta.vec()[ l ] ) )
                     bmax = fabs( beta.vec()[ l ] );
@@ -319,7 +319,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             Real bcmax = 0;
             for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode ) {
                 Real bn = 0;
-                for ( int iCoor=0; iCoor<M_fe1.nbCoor; ++iCoor ) {
+                for ( int iCoor=0; iCoor<M_fe1.nbCoor(); ++iCoor ) {
                     bn += normal(iNode, iCoor) *
                         beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
                     bcmax = std::max<Real>

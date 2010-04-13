@@ -1436,7 +1436,7 @@ FSIOperator::interpolateVelocity( const vector_type& _vec1, vector_type& _vec2 )
     UInt nElemF = GeoShape::numFaces;    // Number of element's faces
 
     //    UInt nDofElem = M_uFESpace->refFE().nbDof; // Number of local dof per element of the M_uFESpace->mesh() (_mesh.getRefFE().nbDof)
-    UInt nDofElemMesh = M_mmFESpace->refFE().nbDof;
+    UInt nDofElemMesh = M_mmFESpace->refFE().nbDof();
 
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
