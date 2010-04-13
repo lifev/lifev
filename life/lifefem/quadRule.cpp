@@ -21,9 +21,16 @@
 namespace LifeV
 {
 QuadRule::QuadRule( const QuadPoint* pt, int _id, std::string _name,
-                    ReferenceShapes _shape, int _nbQuadPt, int _degOfExact ) :
-        _pt( pt ), shape( _shape ), id( _id ), name( _name ),
-        nbQuadPt( _nbQuadPt ), degOfExact( _degOfExact )
+                    ReferenceShapes _shape, UInt _nbQuadPt, UInt _degOfExact ) :
+        M_pt( pt ), M_shape( _shape ), M_id( _id ), M_name( _name ),
+        M_nbQuadPt( _nbQuadPt ), M_degOfExact( _degOfExact )
+{
+    CONSTRUCTOR( "QuadRule" );
+}
+
+QuadRule::QuadRule( const QuadRule& qr ) :
+        M_pt( qr.M_pt ), M_shape( qr.M_shape ), M_id( qr.M_id ), M_name( qr.M_name ),
+        M_nbQuadPt( qr.M_nbQuadPt ), M_degOfExact( qr.M_degOfExact )
 {
     CONSTRUCTOR( "QuadRule" );
 }
@@ -35,42 +42,15 @@ QuadRule::~QuadRule()
 
 std::ostream& operator << ( std::ostream& c, const QuadRule& qr )
 {
-    c << " name: " << qr.name << std::endl;
-    c << " shape:" << ( int ) qr.shape << std::endl;
-    c << " id: " << qr.id << std::endl;
-    c << " nbQuadPt: " << qr.nbQuadPt << std::endl;
+    c << " name: " << qr.M_name << std::endl;
+    c << " shape:" << ( int ) qr.M_shape << std::endl;
+    c << " id: " << qr.M_id << std::endl;
+    c << " nbQuadPt: " << qr.M_nbQuadPt << std::endl;
     c << " Points: \n";
-    for ( int i = 0;i < qr.nbQuadPt;i++ )
-        c << qr._pt[ i ] << std::endl;
+    for ( UInt i (0);i < qr.M_nbQuadPt;++i )
+        c << qr.M_pt[ i ] << std::endl;
     return c;
 }
 
-SetOfQuadRule::SetOfQuadRule( const QuadRule* qr, int _nb )
-        : _qr( qr ), nbQuadRule( _nb )
-{
-    CONSTRUCTOR( "SetOfQuadRule" );
-    _totalNbQuadPoint = 0;
-    _maxIdQuadRule = 0;
-    for ( int i = 0;i < nbQuadRule;i++ )
-    {
-        if ( qr[ i ].shape != qr[ 0 ].shape )
-        {
-            std::cout << "Error in File : " << __FILE__ << " Line : " << __LINE__ << std::endl;
-            ERROR_MSG( "All quadrature rules of a set of quadrature rules \n should have the same geometric reference shape" );
-        }
-        _totalNbQuadPoint += qr[ i ].nbQuadPt;
-        if ( qr[ i ].id > _maxIdQuadRule )
-            _maxIdQuadRule = qr[ i ].id;
-    }
-    _posQuadRule = new int[ _maxIdQuadRule + 1 ]; // don't forget the +1 !
-    for ( int i = 0;i < nbQuadRule;i++ )
-    {
-        _posQuadRule[ qr[ i ].id ] = i;
-    }
-}
 
-SetOfQuadRule::~SetOfQuadRule()
-{
-    DESTRUCTOR( "SetOfQuadRule" );
-}
 }
