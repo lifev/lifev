@@ -40,13 +40,13 @@ namespace LifeV
 
 */
 
-template <class Fct, class Vector, class Real, class Norm>
-void lineSearch_cubic( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Vector& step,
-                       Real& normRes, Real& lambda, Real slope, UInt iter )
+template <class Fct, class Vector>
+Int lineSearch_cubic( Fct& fonctional, Vector& residual, Vector& sol, Vector& step,
+                      Real& normRes, Real& lambda, Real slope, UInt iter, bool const verbose = true )
 {
     //----------------------------------------------------------------------
-
-    std::cout << "Cubic line search ..." << std::endl;
+    if (verbose)
+        std::cout << "Cubic line search ..." << std::endl;
 
     const Real sigma0 = 0.1;
     const Real sigma1 = 0.5;
@@ -64,8 +64,7 @@ void lineSearch_cubic( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Ve
     lambda_old = lambda;
     sol_cur = sol;
     sol += lambda * step;
-    f.evalResidual( residual, sol, iter );
-//    f.evalResidual( sol, iter, residual );
+    fonctional.evalResidual( residual, sol, iter );
     normRes_test = residual.NormInf();
     ftest = 0.5 * normRes_test * normRes_test;
     fold = ftest;
@@ -77,18 +76,21 @@ void lineSearch_cubic( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Ve
         lambda *= 2;
         sol =  sol_cur;
         sol += lambda * step;
-        std::cout << "--- line search (extrapolation, Goldstein rule)" << std::endl;
-        f.evalResidual( residual, sol, iter );
-//        f.evalResidual( sol, iter, residual );
-        std::cout << "    line search iter : " << iter_linesearch << " residual test = "
-        << normRes_test << ", lambda = " << lambda << std::endl;
+        if (verbose)
+            std::cout << "--- line search (extrapolation, Goldstein rule)" << std::endl;
+        fonctional.evalResidual( residual, sol, iter );
+//        fonctional.evalResidual( sol, iter, residual );
+        if (verbose)
+            std::cout << "    line search iter : " << iter_linesearch << " residual test = "
+                      << normRes_test << ", lambda = " << lambda << std::endl;
         normRes_test = residual.NormInf();
         ftest = 0.5 * normRes_test * normRes_test;
     }
     if ( iter_linesearch == max_linesearch )
     {
-        std::cout << "line search: too many extrapolations" << std::endl;
-        exit( 1 );
+        if (verbose)
+            std::cout << "line search: too many extrapolations" << std::endl;
+        return EXIT_FAILURE;
     }
     lambda_old = lambda;
     while ( ftest > f0 + m1 * slope * lambda // Armijo's rule: lambda is too large
@@ -133,21 +135,26 @@ void lineSearch_cubic( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Ve
         //--
         sol =  sol_cur;
         sol += lambda * step;
-        std::cout << "--- line search (cubic interpolation, Armijo rule)" << std::endl;
-//        f.evalResidual( sol, iter, residual );
-        f.evalResidual( residual, sol, iter );
+        if (verbose)
+            std::cout << "--- line search (cubic interpolation, Armijo rule)" << std::endl;
+        fonctional.evalResidual( residual, sol, iter );
         normRes_test = residual.NormInf();
-        std::cout << "    line search iter : " << iter_linesearch << " residual test = "
-        << normRes_test << ", lambda = " << lambda << std::endl;
+        if (verbose)
+            std::cout << "    line search iter : " << iter_linesearch << " residual test = "
+                      << normRes_test << ", lambda = " << lambda << std::endl;
         ftest = 0.5 * normRes_test * normRes_test;
     }
     if ( iter_linesearch == max_linesearch )
     {
-        std::cout << "line search: too many interpolations" << std::endl;
-        exit( 1 );
+        if (verbose)
+            std::cout << "line search: too many interpolations" << std::endl;
+        return EXIT_FAILURE;
     }
     normRes = normRes_test;
-    std::cout << "ok." << std::endl;
+    if (verbose)
+        std::cout << "Parabolic line search: final residual = " << normRes << std::endl;
+    return EXIT_SUCCESS;
+
 
 }
 }

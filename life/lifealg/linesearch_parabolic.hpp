@@ -44,12 +44,13 @@ namespace LifeV
 
   */
 
-template <class Fct, class Vector, class Real, class Norm>
-void lineSearch_parab( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Vector& step, Real& normRes,
-                       Real& lambda, UInt iter )
+template <class Fct, class Vector>
+Int lineSearch_parab( Fct& fonctional, Vector& residual, Vector& sol, Vector& step, Real& normRes,
+                       Real& lambda, UInt iter, bool const verbose = true)
 {
     //----------------------------------------------------------------------
-    std::cout << "Parabolic line search ..." << std::endl;
+    if (verbose)
+        std::cout << "Parabolic line search ..." << std::endl;
     const Real sigma0 = 0.1;
     const Real sigma1 = 0.5;
     const Real alpha = 1.e-4;
@@ -64,8 +65,7 @@ void lineSearch_parab( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Ve
     lambda_cur = lambda;
     sol_cur = sol;
     sol += lambda * step;
-//    f.evalResidual( sol, iter, residual );
-    f.evalResidual( residual, sol, iter );
+    fonctional.evalResidual( residual, sol, iter );
     normRes_test = residual.NormInf();
     res_test2 = normRes_test * normRes_test;
     res_test_old2 = res_test2;
@@ -87,27 +87,32 @@ void lineSearch_parab( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Ve
             if ( lambda > sigma1 * lambda_cur )
                 lambda = sigma1 * lambda_cur;
         }
-        std::cout << "--- line search " << iter_linesearch << " : residual test = "
-        << normRes_test << ", reduction = " << lambda << std::endl;
+        if (verbose)
+            std::cout << "--- line search " << iter_linesearch << " : residual test = "
+                      << normRes_test << ", reduction = " << lambda << std::endl;
         // update sol_test
         sol =  sol_cur;
         sol += lambda * step;
         lambda_old = lambda_cur;
         lambda_cur = lambda;
         // eval norms
-//        f.evalResidual( sol, iter, residual );
-        f.evalResidual( residual, sol, iter );
+        fonctional.evalResidual( residual, sol, iter );
         normRes_test = residual.NormInf();
         res_test_old2 = res_test2;
         res_test2 = normRes_test * normRes_test;
         if ( iter_linesearch > max_linesearch )
         {
-            std::cout << "!!! Too many iterations in the line search algorithm" << std::endl;
-            exit( 1 );
+            if (verbose)
+                std::cout << "!!! Too many iterations in the line search algorithm" << std::endl;
+            return EXIT_FAILURE;
         }
     }
     normRes = normRes_test;
-    std::cout << "ok." << std::endl;
+    if (verbose)
+        std::cout << "Parabolic line search: final residual = " << normRes << std::endl;
+
+    return EXIT_SUCCESS;
+
 }
 }
 #endif

@@ -30,6 +30,7 @@
 #ifndef TWODIM
 
 #include <life/lifesolver/FSISolver.hpp>
+#include <life/lifealg/nonLinRichardson.hpp>
 
 namespace LifeV {
 
@@ -61,9 +62,7 @@ FSISolver::FSISolver( const std::string& method ):
     M_epetraComm        ( ),
     M_epetraWorldComm   ( ),
     M_localComm         ( new MPI_Comm ),
-    M_interComm         ( new MPI_Comm ),
-    M_out_iter          ( "iter" ),
-    M_out_res           ( "res" )
+    M_interComm         ( new MPI_Comm )
 {
 #ifdef DEBUG
     Debug( 6220 ) << "FSISolver::FSISolver constructor starts\n";
@@ -208,6 +207,13 @@ FSISolver::FSISolver( const std::string& method ):
 
     M_oper->setComm( M_epetraComm, M_epetraWorldComm );
 
+    // opening files for output on the leader only
+    if (M_epetraWorldComm->MyPID() == 0)
+    {
+        M_out_iter.open("iter");
+        M_out_res .open("res");
+    }
+
     M_epetraWorldComm->Barrier();
 
 #ifdef DEBUG
@@ -338,7 +344,6 @@ FSISolver::iterate( const Real& time )
 
     status = nonLinRichardson( *M_lambda,
                                *M_oper,
-                               norm_inf_adaptor(),
                                M_abstol,
                                M_reltol,
                                maxiter,
@@ -347,7 +352,7 @@ FSISolver::iterate( const Real& time )
                                M_out_res,
                                time );
 
-    if(status == 1)
+    if(status == EXIT_FAILURE)
     {
         std::ostringstream __ex;
         __ex << "FSISolver::iterate ( " << time << " ) Inners iterations failed to converge\n";
@@ -357,12 +362,12 @@ FSISolver::iterate( const Real& time )
     {
         M_oper->displayer().leaderPrint("End of time " , time);
         M_oper->displayer().leaderPrint("Number of inner iterations       : ", maxiter );
-        M_out_iter << time << " " << maxiter << " "
-                 << M_oper->nbEval() << std::endl;
+        if (M_epetraWorldComm->MyPID() == 0)
+        {
+            M_out_iter << time << " " << maxiter << " "
+                       << M_oper->nbEval() << std::endl;
+        }
 
-//#warning: removed postprocessing from solver
-// 	if (M_oper->isSolid()) M_oper->solid().postProcess();
-//      if (M_oper->isFluid()) M_oper->fluid().postProcess();
     }
 
     M_oper->shiftSolution();

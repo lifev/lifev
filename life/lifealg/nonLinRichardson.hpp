@@ -23,24 +23,23 @@
 #include <life/lifealg/linesearch_parabolic.hpp>
 #include <life/lifealg/linesearch_cubic.hpp>
 #include <life/lifealg/generalizedAitken.hpp>
+#include <life/lifearray/EpetraVector.hpp>
 
 // debug
 #include <life/lifefilters/medit_wrtrs.hpp>
 //
 namespace LifeV
 {
-template <class Fct, class VectorType, class Real, class Norm>
-Int nonLinRichardson( VectorType& sol,
-                      Fct& f,
-                      const Norm& norm,
-                      Real abstol,
-                      Real reltol,
-                      UInt& maxit,
-                      Real eta_max,
-                      Int linesearch,
+template < class Fct >
+Int nonLinRichardson( EpetraVector& sol,
+                      Fct&        fonctional,
+                      Real        abstol,
+                      Real        reltol,
+                      UInt&       maxit,
+                      Real        eta_max,
+                      Int         linesearch,
                       std::ofstream& out_res,
                       const Real& time )
-//                      const Real omega )
 {
     /*
       sol            :  the solution
@@ -82,8 +81,8 @@ Int nonLinRichardson( VectorType& sol,
 
     UInt iter = 0;
 
-    VectorType residual ( sol.getMap() );
-    VectorType step     ( sol.getMap() );
+    EpetraVector residual ( sol.getMap() );
+    EpetraVector step     ( sol.getMap() );
 
     step *= 0.;
 
@@ -92,10 +91,10 @@ Int nonLinRichardson( VectorType& sol,
     if (verbose)
     {
         std::cout << "------------------------------------------------------------------" << std::endl;
-	std::cout << "  NonLinRichardson: starting " << std::endl;
-	std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "  NonLinRichardson: starting " << std::endl;
+        std::cout << "------------------------------------------------------------------" << std::endl;
     }
-    f.evalResidual( residual, sol, iter );
+    fonctional.evalResidual( residual, sol, iter );
 
     Real normRes      = residual.NormInf();
     Real stop_tol     = abstol + reltol*normRes;
@@ -109,26 +108,28 @@ Int nonLinRichardson( VectorType& sol,
 
     //
 
-    out_res << std::scientific;
-    out_res << "# time = ";
-    out_res << time << "   " << "initial norm_res " <<  normRes
-            << " stop tol = " << stop_tol
-            << "initial norm_sol "
-            << sol.NormInf() << std::endl;
-    out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
-
+    if (verbose)
+    {
+        out_res << std::scientific;
+        out_res << "# time = ";
+        out_res << time << "   " << "initial norm_res " <<  normRes
+                << " stop tol = " << stop_tol
+                << "initial norm_sol "
+                << sol.NormInf() << std::endl;
+        out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
+    }
     while ( normRes > stop_tol && iter < maxit )
     {
         if (verbose)
-	{
-	    std::cout << std::endl;
-	    std::cout << "------------------------------------------------------------------" << std::endl;
-	    std::cout << "  NonLinRichardson: iter = " << iter
-		      << ", residual = " << normRes
-		      << ", stoping tolerance = " << stop_tol << std::endl;
-	    std::cout << "------------------------------------------------------------------" << std::endl;
-	    std::cout << std::endl;
-	}
+        {
+            std::cout << std::endl;
+            std::cout << "------------------------------------------------------------------" << std::endl;
+            std::cout << "  NonLinRichardson: iter = " << iter
+                      << ", residual = " << normRes
+                      << ", stoping tolerance = " << stop_tol << std::endl;
+            std::cout << "------------------------------------------------------------------" << std::endl;
+            std::cout << std::endl;
+        }
 
         iter++;
 
@@ -136,41 +137,46 @@ Int nonLinRichardson( VectorType& sol,
         normResOld = normRes;
         normRes    = residual.NormInf();
 
-        f.solveJac(step, -1.*residual, linearRelTol);
+        fonctional.solveJac(step, -1.*residual, linearRelTol); // J*step = -R
 
-        out_res   << std::setw(5) << iter
-                  << std::setw(15) << sol.NormInf()
-                  << std::setw(15) << step.NormInf();
-
+        if (verbose)
+        {
+            out_res   << std::setw(5) << iter
+                      << std::setw(15) << sol.NormInf()
+                      << std::setw(15) << step.NormInf();
+        }
         linres = linearRelTol;
 
         lambda = 1.;
         slope  = normRes * normRes * ( linres * linres - 1 );
 
+        Int status(EXIT_SUCCESS);
         switch ( linesearch )
         {
             case 0: // no linesearch
                 sol += step;
-                f.evalResidual( residual, sol, iter);
+                fonctional.evalResidual( residual, sol, iter);
 //                normRes = residual.NormInf();
                 break;
             case 1:
-                lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+                status = lineSearch_parab( fonctional, residual, sol, step, normRes, lambda, iter, verbose );
                 break;
             case 2:  // recommended
-                lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+                status = lineSearch_cubic( fonctional, residual, sol, step, normRes, lambda, slope, iter, verbose );
                 break;
             default:
                 std::cout << "Unknown linesearch \n";
-                exit( 1 );
+                status = EXIT_FAILURE;
         }
+        if (status = EXIT_FAILURE)
+            return status;
 
 
 
-        //f.displacementOnInterface();
         normRes = residual.NormInf();
 
-        out_res << std::setw(15) << normRes << std::endl;
+        if (verbose)
+            out_res << std::setw(15) << normRes << std::endl;
 
         if ( eta_max > 0 )
         {
@@ -185,7 +191,7 @@ Int nonLinRichardson( VectorType& sol,
                                              std::max<Real>( linearRelTol,
                                                              .5 * stop_tol / normRes ) );
             if (verbose)
-	        std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+                std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
         }
 
     }
@@ -193,22 +199,21 @@ Int nonLinRichardson( VectorType& sol,
     if ( normRes > stop_tol )
     {
         if (verbose)
-	    std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
+            std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
         maxit = iter;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    //f.displacementOnInterface();
     if (verbose)
     {
-	std::cout << "------------------------------------------------------------------" << std::endl;
-	std::cout << "--- NonLinRichardson: convergence (" << normRes
-		  <<") in " << iter << " iterations\n\n";
-	std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "--- NonLinRichardson: convergence (" << normRes
+                  <<") in " << iter << " iterations\n\n";
+        std::cout << "------------------------------------------------------------------" << std::endl;
     }
     maxit = iter;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 }
 #endif
