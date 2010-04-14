@@ -3,11 +3,22 @@
 HOWTO to make a release X_Y_Z
 =============================
 
-1- update configure.in.in VERSION
+1- branch HEAD with the tag LIFEV_X_2Y_BRANCH
+   cd top_srcdir
+   cvs tag -b LIFEV_X_2Y_BRANCH
 
-2- update NEWS
+   and
 
-3- run make distcheck
+   tag LIFEV_X_2Y_BRANCH with the tag LIFEV_X_2Y_Z
+   cd top_srcdir
+   cvs tag LIFEV_X_2Y_Z
+
+2- update configure.in.in VERSION
+
+3- update NEWS
+
+
+4- run make distcheck
    o you can try the following command to speed up this check
 
  make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-opt2" AM_MAKEFLAGS="-j <n>"
@@ -16,7 +27,7 @@ HOWTO to make a release X_Y_Z
 
 e.g.:
 
- make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-debug --with-aztec=/usr/people1e/deparis/CODICE/supersizing/local/   --with-mpi-include=/usr/lib/mpich/include/ --with-mpi-lib=/usr/lib/mpich/lib/  F77=gfortran"
+ nohup make distcheck DISTCHECK_CONFIGURE_FLAGS="--with-trilinos=/u/cmcs/deparis/local/debug64-openmpi/trilinos-9 --prefix=/usr/scratch/deparis/lifev-clean/local --enable-debug --disable-shared --enable-static --with-hdf5=/usr --with-mpi --with-mpi=/usr/lib/openmpi --with-superlu=/usr --with-umfpack-include=-I/usr/include/suitesparse --with-libs='-lsuperlu -lumfpack -lamd'  F77=gfortran"
 
 
    o ensures that the generated tarball is complete
@@ -24,13 +35,20 @@ e.g.:
 
 If step 3 went fine then
 
-4- tag HEAD with the tag LIFEV_X_Y_Z_BRANCH
+5- if any changes/updates/bugfixes : tag again and go to 2
+
+   tag LIFEV_X_2Y_BRANCH with the tag LIFEV_X_2Y_Z
    cd top_srcdir
-   cvs tag LIFEV_X_Y_Z_BRANCH
+   cvs tag LIFEV_X_2Y_Z
 
-5- upload the tarball on cmcsforge.epfl.ch
+6- merge fixes to HEAD: cd lifev-head
+   cvs up -j LIFEV_X_2Y_BRANCH   files
+   or
+   cvs up -j LIFEV_X_2Y_Z2  -r LIFEV_X_2Y_Z2  files
 
-6- add news on cmcsforge.epfl.ch and www.lifev.org
+7- upload the tarball on cmcsforge.epfl.ch
 
-7- send email on lifev-dev@ and eventually other lists like
+8- add news on cmcsforge.epfl.ch and www.lifev.org
+
+9- send email on lifev-dev@ and eventually other lists like
    cmcs.personnel@
