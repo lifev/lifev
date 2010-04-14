@@ -1,5 +1,17 @@
 # -*- readme-debian -*-
 
+LifeV  1.2.2:
+=============
+
+This is the first release candidate of the parallel version of LifeV.
+
+Recent new features includes:
+* better doxygen documentation (although a lot of work is still needed in this direction)
+* gcc 4.4.2 compatibility
+* fixed distribution files
+
+
+
 LifeV  1.1.1:
 =============
 
