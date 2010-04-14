@@ -31,12 +31,9 @@ SUBDIRS		= data  \
               test_heart \
               test_structure \
               test_ethiersteinman \
-              test_masstransport \
 	          test_fsi \
-              test_cavity \
               test_ns_flux \
               test_meshReorder \
-	          test_ML \
 	          test_laplacian \
               test_filters
               $(DO_NOT_COMPILE)
