@@ -37,7 +37,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
     
     
     M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
-    M_quadNodes(boost::extents[M_nbQuadPt][M_nbCoor]),
+    M_quadNodes(boost::extents[M_nbQuadPt][3]),
     M_dphiGeoMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
     M_jacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
     M_wDetJacobian(boost::extents[M_nbQuadPt]),
@@ -351,18 +351,6 @@ void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Ty
         computeQuadNodes();
     };
 
-    /*M_phiUpdated=false;
-    if ( (upFlag & UPDATE_ONLY_PHI) != 0)
-    {
-        computePhi();
-    }; */
-
-    /*M_dphiGeoMapUpdated=false;
-    if ( (upFlag & UPDATE_ONLY_DPHI_GEO_MAP) != 0)
-    {
-        computeDphiGeoMap();
-    };*/
-
     M_jacobianUpdated=false;
     if ( (upFlag & UPDATE_ONLY_JACOBIAN) != 0)
     {
@@ -381,23 +369,11 @@ void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Ty
         computeWDetJacobian();
     };
 
-    /*M_dphiRefUpdated=false;
-    if ( (upFlag & UPDATE_ONLY_DPHI_REF) != 0)
-    {
-        computeDphiRef();
-    };*/
-    
     M_dphiUpdated=false;
     if ( (upFlag & UPDATE_ONLY_DPHI) != 0)
     {
         computeDphi();
     };
-
-    /*M_d2phiRefUpdated=false;
-    if ( (upFlag & UPDATE_ONLY_D2PHI_REF) != 0)
-    {
-        computeD2phiRef();
-    };*/
 
     M_d2phiUpdated=false;
     if ( (upFlag & UPDATE_ONLY_D2PHI) != 0)
@@ -410,24 +386,48 @@ void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Ty
 Real CurrentFE::detJac(const UInt& quadNode) const
 {
     ASSERT(M_jacobianUpdated,"Jacobian is not updated!");
-
-    Real a ( M_jacobian[0][0][quadNode] );
-    Real b ( M_jacobian[0][1][quadNode] );
-    Real c ( M_jacobian[0][2][quadNode] );
-    Real d ( M_jacobian[1][0][quadNode] );
-    Real e ( M_jacobian[1][1][quadNode] );
-    Real f ( M_jacobian[1][2][quadNode] );
-    Real g ( M_jacobian[2][0][quadNode] );
-    Real h ( M_jacobian[2][1][quadNode] );
-    Real i ( M_jacobian[2][2][quadNode] );
     
-    Real ei ( e * i );
-    Real fh ( f * h );
-    Real bi ( b * i );
-    Real ch ( c * h );
-    Real bf ( b * f );
-    Real ce ( c * e );
-    return ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
+    switch (M_nbCoor)
+    {
+    case 1:
+    {
+        return M_jacobian[0][0][quadNode];
+    }    
+        break;
+    case 2:
+    {
+        Real a ( M_jacobian[0][0][quadNode] );
+        Real b ( M_jacobian[0][1][quadNode] );
+        Real c ( M_jacobian[1][0][quadNode] );
+        Real d ( M_jacobian[1][1][quadNode] );
+        
+        return ( a*d - b*c );
+    }
+        break;
+    case 3:
+    {
+        Real a ( M_jacobian[0][0][quadNode] );
+        Real b ( M_jacobian[0][1][quadNode] );
+        Real c ( M_jacobian[0][2][quadNode] );
+        Real d ( M_jacobian[1][0][quadNode] );
+        Real e ( M_jacobian[1][1][quadNode] );
+        Real f ( M_jacobian[1][2][quadNode] );
+        Real g ( M_jacobian[2][0][quadNode] );
+        Real h ( M_jacobian[2][1][quadNode] );
+        Real i ( M_jacobian[2][2][quadNode] );
+        
+        Real ei ( e * i );
+        Real fh ( f * h );
+        Real bi ( b * i );
+        Real ch ( c * h );
+        Real bf ( b * f );
+        Real ce ( c * e );
+        return ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
+    }
+        break;
+    default:
+        ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+    }
 }
 
 Real CurrentFE::measure() const
@@ -582,7 +582,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
     M_nbQuadPt =  UInt( newQuadRule.nbQuadPt() );
     
     // Resize all the arrays that need it
-    M_quadNodes.resize(boost::extents[M_nbQuadPt][M_nbCoor]);
+    M_quadNodes.resize(boost::extents[M_nbQuadPt][3]);
     M_dphiGeoMap.resize(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]);
     M_jacobian.resize(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
     M_wDetJacobian.resize(boost::extents[M_nbQuadPt]);
@@ -744,35 +744,71 @@ void CurrentFE::computeTInverseJacobian()
 
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
-        Real a ( M_jacobian[0][0][iterQuad] );
-        Real b ( M_jacobian[0][1][iterQuad] );
-        Real c ( M_jacobian[0][2][iterQuad] );
-        Real d ( M_jacobian[1][0][iterQuad] );
-        Real e ( M_jacobian[1][1][iterQuad] );
-        Real f ( M_jacobian[1][2][iterQuad] );
-        Real g ( M_jacobian[2][0][iterQuad] );
-        Real h ( M_jacobian[2][1][iterQuad] );
-        Real i ( M_jacobian[2][2][iterQuad] );
-
-        Real ei ( e * i );
-        Real fh ( f * h );
-        Real bi ( b * i );
-        Real ch ( c * h );
-        Real bf ( b * f );
-        Real ce ( c * e );
-        Real det ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
-       
-        M_tInverseJacobian[0][0][iterQuad] = ( ei - fh ) / det ;
-        M_tInverseJacobian[0][1][iterQuad] = ( -d * i + f * g ) / det ;
-        M_tInverseJacobian[0][2][iterQuad] = ( d * h - e * g ) / det ;
+        switch (M_nbCoor)
+        {
+        case 1:
+        {
+            Real a ( M_jacobian[0][0][iterQuad] );
+            
+            M_tInverseJacobian[0][0][iterQuad] = 1.0/ a ;
+            
+            break;
+        }
+        case 2:
+        {
+            Real a ( M_jacobian[0][0][iterQuad] );
+            Real b ( M_jacobian[0][1][iterQuad] );
+            Real c ( M_jacobian[1][0][iterQuad] );
+            Real d ( M_jacobian[1][1][iterQuad] );
+            
+            Real det ( a*d - b*c );
+            
+            M_tInverseJacobian[0][0][iterQuad] = ( a ) / det ;
+            M_tInverseJacobian[0][1][iterQuad] = ( -b ) / det ;
+            
+            M_tInverseJacobian[1][0][iterQuad] = ( -c ) / det ;
+            M_tInverseJacobian[1][1][iterQuad] = ( d ) / det ;
+            
+            break;
+        }
+        case 3:
+        {
+            Real a ( M_jacobian[0][0][iterQuad] );
+            Real b ( M_jacobian[0][1][iterQuad] );
+            Real c ( M_jacobian[0][2][iterQuad] );
+            Real d ( M_jacobian[1][0][iterQuad] );
+            Real e ( M_jacobian[1][1][iterQuad] );
+            Real f ( M_jacobian[1][2][iterQuad] );
+            Real g ( M_jacobian[2][0][iterQuad] );
+            Real h ( M_jacobian[2][1][iterQuad] );
+            Real i ( M_jacobian[2][2][iterQuad] );
+            
+            Real ei ( e * i );
+            Real fh ( f * h );
+            Real bi ( b * i );
+            Real ch ( c * h );
+            Real bf ( b * f );
+            Real ce ( c * e );
+            Real det ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
+            
+            M_tInverseJacobian[0][0][iterQuad] = ( ei - fh ) / det ;
+            M_tInverseJacobian[0][1][iterQuad] = ( -d * i + f * g ) / det ;
+            M_tInverseJacobian[0][2][iterQuad] = ( d * h - e * g ) / det ;
+            
+            M_tInverseJacobian[1][0][iterQuad] = ( -bi + ch ) / det ;
+            M_tInverseJacobian[1][1][iterQuad] = ( a * i - c * g ) / det ;
+            M_tInverseJacobian[1][2][iterQuad] = ( -a * h + b * g ) / det ;
+            
+            M_tInverseJacobian[2][0][iterQuad] = ( bf - ce ) / det ;
+            M_tInverseJacobian[2][1][iterQuad] = ( -a * f + c * d ) / det ;
+            M_tInverseJacobian[2][2][iterQuad] = ( a * e - b * d ) / det ;
+            
+            break;
+        }
+        default:
+            ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        }
         
-        M_tInverseJacobian[1][0][iterQuad] = ( -bi + ch ) / det ;
-        M_tInverseJacobian[1][1][iterQuad] = ( a * i - c * g ) / det ;
-        M_tInverseJacobian[1][2][iterQuad] = ( -a * h + b * g ) / det ;
-        
-        M_tInverseJacobian[2][0][iterQuad] = ( bf - ce ) / det ;
-        M_tInverseJacobian[2][1][iterQuad] = ( -a * f + c * d ) / det ;
-        M_tInverseJacobian[2][2][iterQuad] = ( a * e - b * d ) / det ;
     }
 
     M_tInverseJacobianUpdated=true;
@@ -784,25 +820,53 @@ void CurrentFE::computeWDetJacobian()
 
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
-        Real a ( M_jacobian[0][0][iterQuad] );
-        Real b ( M_jacobian[0][1][iterQuad] );
-        Real c ( M_jacobian[0][2][iterQuad] );
-        Real d ( M_jacobian[1][0][iterQuad] );
-        Real e ( M_jacobian[1][1][iterQuad] );
-        Real f ( M_jacobian[1][2][iterQuad] );
-        Real g ( M_jacobian[2][0][iterQuad] );
-        Real h ( M_jacobian[2][1][iterQuad] );
-        Real i ( M_jacobian[2][2][iterQuad] );
-
-        Real ei (e*i);
-        Real fh (f*h);
-        Real bi (b*i);
-        Real ch (c*h);
-        Real bf (b*f);
-        Real ce (c*e);
-        
-        Real det( a*(ei-fh) + d*(ch-bi) + g*( bf-ce));
-        M_wDetJacobian[iterQuad]= det*M_quadRule->weight(iterQuad);
+        switch (M_nbCoor)
+        {
+        case 1:
+        {
+            Real a ( M_jacobian[0][0][iterQuad] );
+            Real det( a);
+            M_wDetJacobian[iterQuad]= det*M_quadRule->weight(iterQuad);
+            
+            break;
+        }
+        case 2:
+        {
+            Real a ( M_jacobian[0][0][iterQuad] );
+            Real b ( M_jacobian[0][1][iterQuad] );
+            Real c ( M_jacobian[0][2][iterQuad] );
+            Real d ( M_jacobian[1][0][iterQuad] );
+            
+            Real det( a*d-b*c);
+            M_wDetJacobian[iterQuad]= det*M_quadRule->weight(iterQuad);
+            break;
+        }
+        case 3:
+        {
+            Real a ( M_jacobian[0][0][iterQuad] );
+            Real b ( M_jacobian[0][1][iterQuad] );
+            Real c ( M_jacobian[0][2][iterQuad] );
+            Real d ( M_jacobian[1][0][iterQuad] );
+            Real e ( M_jacobian[1][1][iterQuad] );
+            Real f ( M_jacobian[1][2][iterQuad] );
+            Real g ( M_jacobian[2][0][iterQuad] );
+            Real h ( M_jacobian[2][1][iterQuad] );
+            Real i ( M_jacobian[2][2][iterQuad] );
+            
+            Real ei (e*i);
+            Real fh (f*h);
+            Real bi (b*i);
+            Real ch (c*h);
+            Real bf (b*f);
+            Real ce (c*e);
+            
+            Real det( a*(ei-fh) + d*(ch-bi) + g*( bf-ce));
+            M_wDetJacobian[iterQuad]= det*M_quadRule->weight(iterQuad);
+            break;
+        }
+        default:
+            ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        }
     }
     M_wDetJacobianUpdated=true;
 }
