@@ -164,7 +164,7 @@ void
 FSIOperator::setupFEspace()
 {
     if( M_epetraComm->MyPID()==0)
-        std::cout<< "FSIOperator: setting RefFE and QuadRule ... ";
+        std::cout<< "FSIOperator: setting RefFE and QuadRule ... \n";
 	std::string uOrder = M_dataFluid->uOrder();
 	std::string pOrder = M_dataFluid->pOrder();
 	std::string dOrder = M_dataSolid->order();
@@ -205,8 +205,7 @@ FSIOperator::setupFEspace()
             }
             else
             {
-                std::cout << uOrder << " velocity FE not implemented yet." << std::endl;
-                exit(0);
+                ERROR_MSG(uOrder + " velocity FE not implemented yet.");
             }
 
     disp.leaderPrint("pressure order = ", pOrder, "\n");
@@ -226,8 +225,7 @@ FSIOperator::setupFEspace()
     	}
     	else
     	{
-    		std::cout << pOrder << " pressure FE not implemented yet." << std::endl;
-    		exit(0);
+    		ERROR_MSG(pOrder +" pressure FE not implemented yet.");
     	}
 
     disp.leaderPrint("structure order = ", dOrder, "\n");
@@ -246,14 +244,8 @@ FSIOperator::setupFEspace()
     	}
     	else
 		{
-			std::cout << dOrder << " structure FE not implemented yet." << std::endl;
-			exit(0);
+			ERROR_MSG(dOrder + " structure FE not implemented yet.");
 		}
-    M_epetraWorldComm->Barrier();
-    disp.leaderPrint("ok.\n");
-
-
-
 
 
     disp.leaderPrint("FSIOperator: building the fluid FESpace ... ");
