@@ -1,8 +1,8 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA       
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
 #           Date: 05-01-2010
@@ -18,7 +18,7 @@ LifeV_Development_Guidelines_TEX = LifeV_Development_Guidelines.tex
 
 all:$(PDF)
 
-.tex.pdf: 
+.tex.pdf:
 	-@if test "x$(PDFLATEX)" = "xpdflatex"; then\
      echo "*** PDFLatex compiling $< ...";\
 	 srcdir=$(srcdir) top_srcdir=$(top_srcdir) /bin/sh $(srcdir)/ltxcompile `basename $< .tex`;\
@@ -26,10 +26,12 @@ all:$(PDF)
     fi
 
 LifeV_Development_Guidelines.pdf: $(LifeV_Development_Guidelines_TEX)
- 
-IMAGES_SRC	= 
 
-EXTRA_DIST = $(LifeV_Development_Guidelines_TEX) $(IMAGES_SRC) ltxcompile
+IMAGES_SRC	=
+
+LISTING_SRC = TemplateClass.hpp TemplateClass.cpp main.cpp LifeV_Makefile.am testsuite.at
+
+EXTRA_DIST = $(LifeV_Development_Guidelines_TEX) $(IMAGES_SRC) $(LISTING_SRC) ltxcompile mcode.sty
 
 MOSTLYCLEANFILES = LifeV_Development_Guidelines.log LifeV_Development_Guidelines.glo LifeV_Development_Guidelines.idx LifeV_Development_Guidelines.ind LifeV_Development_Guidelines.ilg LifeV_Development_Guidelines.aux LifeV_Development_Guidelines.out \
                    LifeV_Development_Guidelines.pdf LifeV_Development_Guidelines.toc LifeV_Development_Guidelines.lof LifeV_Development_Guidelines.lot LifeV_Development_Guidelines.blg LifeV_Development_Guidelines.bbl ltxcompile.log

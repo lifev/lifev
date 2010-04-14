@@ -27,7 +27,7 @@
 \usepackage{xtab}
 \usepackage{tabularx}
 \usepackage{eufrak} % Per fare la F particolare!
-\usepackage{tocloft}
+%\usepackage{tocloft}
 \usepackage{psfrag}
 \usepackage{subfigure}
 \usepackage{verbatim}
@@ -53,7 +53,7 @@
 This short guide provides some useful rules to improve the
 development of \texttt{LifeV} Library. Following the example of
 \texttt{Trilinos} and other well structured libraries, we have understood that
-it is mandatory to follow some common rules in the implementation of our code. 
+it is mandatory to follow some common rules in the implementation of our code.
 A better organization of classes and files, together with the development of a
 complete and exaustive documentation, will help old and new developers to
 take advantage of all the available features of our library, improving
@@ -80,58 +80,58 @@ typedef boost::shared_ptr< vector_constType > vector_ptrConstType;
   letter.
 \begin{lstlisting}
 class datatime; //NO!!!
-  
+
 class DataTime; //OK
 \end{lstlisting}
   \item In case of composed names, each word (starting from the second one)
   should start with capital letter.
 \begin{lstlisting}
 void matrixvectormultiplication( matrixtype& matrix ); //NO!!!
-  
+
 void matrixVectorMultiplication( matrix_Type& matrix ); //OK
 \end{lstlisting}
   \item All variables and methods names should clearly describe what they are
   doing.
 \begin{lstlisting}
 // This is a true bad example taken from EpetraMatrix class
-  
+
 // What do these mean?
 void set_mat_inc( UInt row, UInt col, DataType loc_val );
 void set_mat( UInt row, UInt col, DataType loc_val );
-  
+
 // Now it is clear!
 void insertSingleElement( UInt row, UInt column, data_Type value );
 void replaceSingleElement( UInt row, UInt column, data_Type value );
-  
+
   \end{lstlisting}
   \item Do not use abbreviations in the code! They prevent its readability.
 \begin{lstlisting}
 void elByElMul( vtype& v1, vtype& v2 ); //NOOOOO!!!
-  
+
 void elementByElementMultiplication( vector_Type& vector1,
                                      vector_Type& vector2, ); //OK
 \end{lstlisting}
   \item Member variables in \texttt{LifeV} should start with \texttt{M\_}.
   Moreover all the rules for the names of methods are also valid for class
-  members. 
+  members.
 \begin{lstlisting}
 private:
 
     Real        vel;   //NO!!!
     std::string File;  //NO!!!
-    
+
     Real        M_velocity; //OK
     std::string M_fileName; //OK
 \end{lstlisting}
   \item Static members variables in \texttt{LifeV} should start with
   \texttt{S\_}. Moreover all the rules for the names of methods are also valid for class
-  members. 
+  members.
 \begin{lstlisting}
 private:
 
     static Int counter;   //NO!!!
     static Int M_counter; //NO!!!
-    
+
     static Int S_counter; //OK
 \end{lstlisting}
   \item Avoid function declarations without argument name.
@@ -146,7 +146,7 @@ void setDataFile( const std::string& fileName ); //OK
 \begin{lstlisting}
 matrix_Type&   matrix();     //NO!!!
 matrix_ptrType matrix_ptr(); //NO!!!
-  
+
 const matrix_Type&   matrix() const;     //OK
 const matrix_ptrType matrix_ptr() const; //OK
 \end{lstlisting}
@@ -155,7 +155,7 @@ const matrix_ptrType matrix_ptr() const; //OK
 \begin{lstlisting}
 void matrix( matrix_Type& matrix );          //NO!!!
 void matrix_ptr( matrix_ptrType matrix_ptr); //NO!!!
-  
+
 void setMatrix( matrix_Type& matrix );          //OK
 void setMatrix_ptr( matrix_ptrType matrix_ptr); //OK
 \end{lstlisting}
@@ -180,7 +180,7 @@ working with \texttt{LifeV} library.
   you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
   \item Don't use reference types, expecially for members inside classes.
   \item \texttt{using} directives should be avoided entirely, especially in
-  header files. They cause wanton namespace pollution 
+  header files. They cause wanton namespace pollution
   by bringing in potentially huge numbers of names, many (usually the vast
   majority) of which are unnecessary. The presence of the unnecessary names
   greatly increases the possibility of unintended name conflicts not just in
@@ -207,8 +207,8 @@ working with \texttt{LifeV} library.
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
 #ifdef DEBUG
-    Debug( 3000 ) << "MyClass::myFunction  myVariable = " 
-                  << M_myVariable << "\n"; 
+    Debug( 3000 ) << "MyClass::myFunction  myVariable = "
+                  << M_myVariable << "\n";
 #endif
 \end{lstlisting}
   Thanks to this syntax no output will be displayed, unless the debug
@@ -225,7 +225,7 @@ working with \texttt{LifeV} library.
   \item To uniform the code inside the library, all developers have to
   use the same notation and in particular the same indentation style. The style
   used in \texttt{LifeV} is the BSD/Allman Indent style. Please see
-  \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29} 
+  \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29}
   for more details about this style and its inventor.
   Moreover please note that both Eclipse and Emacs (and probably also other editors)
   have a special utility to help follow this style.
@@ -329,7 +329,7 @@ accessible at the following path: \newline
 In order to be fully documented, the code should follow some simple rules which
 are described on the doxygen website \url{www.doxygen.org}. In particular the
 main doxygen style commands are described at the following page
-\url{http://www.stack.nl/~dimitri/doxygen/manual.html}. 
+\url{http://www.stack.nl/~dimitri/doxygen/manual.html}.
 
 To make things easier for all \texttt{LifeV} developers, a general
 \texttt{LifeV} template class has been generated and attached to this guide
@@ -371,7 +371,7 @@ properly.
 \end{lstlisting}
   and inside each group all the methods contain a full description of their
   usage such as:
-\begin{lstlisting} 
+\begin{lstlisting}
 //! Short description of the equivalence operator
 /*!
    Add more details about this operator.
