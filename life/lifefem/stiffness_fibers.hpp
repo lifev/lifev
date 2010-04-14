@@ -26,14 +26,14 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
     ID eleId=fe.currentLocalId();
     UInt dim = dof.numTotalDof();
 
-    Vector a_l(fe.nbCoor);
-    Vector u_x(fe.nbQuadPt);
-    Vector u_y(fe.nbQuadPt);
-    Vector u_z(fe.nbQuadPt);
+    Vector a_l(fe.nbCoor());
+    Vector u_x(fe.nbQuadPt());
+    Vector u_y(fe.nbQuadPt());
+    Vector u_z(fe.nbQuadPt());
 
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ ){
+    for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbNode;i++){
+        for (i=0;i<fe.nbFENode();i++){
            u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
            u_y[ig]+=cos[dof.localToGlobal(eleId,i+1)+dim]*fe.phi(i,ig);
            u_z[ig]+=cos[dof.localToGlobal(eleId,i+1)+2*dim]*fe.phi(i,ig);
@@ -43,11 +43,11 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
     // diagonal
     //
 
-    for ( i = 0;i < fe.nbDiag;i++ )
+    for ( i = 0;i < fe.nbDiag();i++ )
        {
            iloc = fe.patternFirst( i );
            s = 0;
-           for ( ig = 0;ig < fe.nbQuadPt;ig++ ){
+           for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
                a_l[0] = u_x[ig];
                a_l[1] = u_y[ig];
                a_l[2] = u_z[ig];
@@ -55,10 +55,10 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
                a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
 
              //  std::cout<< a_l[0] << a_l[1] << a_l[2] << " ";            //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-               for ( icoor = 0;icoor < fe.nbCoor;icoor++ ){
+               for ( icoor = 0;icoor < fe.nbCoor();icoor++ ){
                    s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig ) *
                            fe.weightDet( ig )* sigma_t;
-                   for ( jcoor = 0;jcoor < fe.nbCoor; jcoor++ )
+                   for ( jcoor = 0;jcoor < fe.nbCoor(); jcoor++ )
                        s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, jcoor, ig ) *
                            fe.weightDet( ig )* (sigma_l-sigma_t)*a_l[icoor] * a_l[jcoor];
                     }
@@ -72,22 +72,22 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
     {
         s = 0;
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ ){
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
             Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor; icoor++ ){
+            for ( icoor = 0;icoor < fe.nbCoor(); icoor++ ){
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
                         fe.weightDet( ig )* sigma_t;  //diagonal
-                for ( jcoor = 0; jcoor < fe.nbCoor; jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                     s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, jcoor, ig ) *
                         fe.weightDet( ig )* (sigma_l-sigma_t)*a_l[icoor] * a_l[jcoor];
                     }
@@ -112,16 +112,16 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
     Real x,y,z;
 
 
-    Vector a_l(fe.nbCoor);
+    Vector a_l(fe.nbCoor());
     UInt dim = dof.numTotalDof();
-    Vector u_x(fe.nbQuadPt);
-    Vector u_y(fe.nbQuadPt);
-    Vector u_z(fe.nbQuadPt);
+    Vector u_x(fe.nbQuadPt());
+    Vector u_y(fe.nbQuadPt());
+    Vector u_z(fe.nbQuadPt());
 
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbNode;i++)
+        for (i=0;i<fe.nbFENode();i++)
 	{
            u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
            u_y[ig]+=cos[dim+dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);
@@ -132,11 +132,11 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag;i++ )
+    for ( i = 0;i < fe.nbDiag();i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-       for ( ig = 0;ig < fe.nbQuadPt;ig++ ){
+       for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
@@ -145,11 +145,11 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
 
             fe.coorQuadPt(x,y,z,ig);
            //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
 	    {
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig ) *
                         fe.weightDet( ig )* red_sigma(x,y,z,0,id,sigma_t);
-                for ( jcoor = 0;jcoor < fe.nbCoor; jcoor++ )
+                for ( jcoor = 0;jcoor < fe.nbCoor(); jcoor++ )
                     s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, jcoor, ig ) *
                         fe.weightDet( ig )* (red_sigma(x,y,z,0,id, sigma_l)-red_sigma(x,y,z,0,id, sigma_t))*a_l[icoor] * a_l[jcoor];
                  }
@@ -160,12 +160,12 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
     {
         s = 0;
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
 	{
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
@@ -175,11 +175,11 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
 
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor; icoor++ )
+            for ( icoor = 0;icoor < fe.nbCoor(); icoor++ )
 	    {
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
                         fe.weightDet( ig )* red_sigma(x,y,z,0,id,sigma_t);  //diagonal
-                for ( jcoor = 0; jcoor < fe.nbCoor; jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                     s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, jcoor, ig ) *
                         fe.weightDet( ig )* (red_sigma(x,y,z,0,id,sigma_l)-red_sigma(x,y,z,0,id,sigma_t))*a_l[icoor] * a_l[jcoor];
             }
@@ -203,14 +203,14 @@ void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const Current
     double s, coef_s;
     int iu;
     Real x,y,z;
-    for ( i = 0;i < fe.nbDiag;i++ )
+    for ( i = 0;i < fe.nbDiag();i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             fe.coorQuadPt(x,y,z,ig);
-            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
                     * fe.weightDet( ig )*red_sigma(x,y,z,0,id, D);
         }
@@ -223,15 +223,15 @@ void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const Current
     //
 
 
-    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             fe.coorQuadPt(x,y,z,ig);
-            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
                     fe.weightDet( ig )*red_sigma(x,y,z,0,id,D);
         }
