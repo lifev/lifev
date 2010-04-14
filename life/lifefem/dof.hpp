@@ -228,6 +228,10 @@ Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) :
     //Getting the face
     switch( _fe.nbLocalDof() )
     {
+        case 2:
+            // No _fToP (it is 1D)
+            _numLocalDofByFace = 1;
+            break;
         case 4:
             _fToP = LinearTetra::fToP;
             _numLocalDofByFace = 3;
@@ -407,7 +411,7 @@ void Dof::update( Mesh& M )
     _numFaces = M.numFaces();
 
     if(_numLocalDofByFace>0){
-        UInt lfID = 0;
+        //UInt lfID = 0;
         for(UInt k = 1; k <= _nEl; k++)
         {
             for(UInt j = 1; j <= nlf; j++)

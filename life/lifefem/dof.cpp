@@ -28,6 +28,10 @@ Dof::Dof( const LocalDofPattern& _fe, UInt off ) : fe( _fe ), _offset( off ), _t
     //Getting the face
     switch( _fe.nbLocalDof() )
     {
+        case 2:
+            // No _fToP (it is 1D)
+            _numLocalDofByFace = 1;
+            break;
         case 4:
             _fToP = LinearTetra::fToP;
             _numLocalDofByFace = 3;
