@@ -108,6 +108,7 @@ Int nonLinRichardson( EpetraVector& sol,
 
     //
 
+    Real solNormInf(sol.NormInf());
     if (verbose)
     {
         out_res << std::scientific;
@@ -115,7 +116,7 @@ Int nonLinRichardson( EpetraVector& sol,
         out_res << time << "   " << "initial norm_res " <<  normRes
                 << " stop tol = " << stop_tol
                 << "initial norm_sol "
-                << sol.NormInf() << std::endl;
+                << solNormInf << std::endl;
         out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
     }
     while ( normRes > stop_tol && iter < maxit )
