@@ -39,7 +39,16 @@ save       = 1
 
 [fluid]
 
-	[./physics]
+    [./problem]
+    # for  cyl3D.2.2.00.mesh
+    Re              = 1
+    D               = 1.
+    H               = 2.
+    centered        = 1
+    initial_sol     = stokes          # stokes, none
+
+
+	[../physics]
 	density         = 1.0           # density   [kg/m^3]
 	viscosity       = 0.03			# viscosity [kg/m/s]
 
@@ -56,9 +65,9 @@ save       = 1
 
 	verbose         = 0             # verbose during mesh-reading
     linearized      = 0
-    diagonalize     = 1 # weight, 0=off
+    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
 	div_beta_u_v    = 1             # 1=on, 0=off
-	vel_order       = P2	     	# P1, P1Bubble, P2
+	vel_order       = P1Bubble	     	# P1, P1Bubble, P2
 	press_order     = P1		    # P1, P2
 
     [../miscellaneous]

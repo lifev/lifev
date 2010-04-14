@@ -25,7 +25,7 @@ save       = 1
 
 	[../time_discretization]
 	initialtime		= 0.
-	endtime			= 0.2
+	endtime			= 0.001
 	timestep		= 0.0001
 	BDF_order		= 1
 
@@ -36,8 +36,8 @@ save       = 1
 
 	verbose         = 0             # verbose during mesh-reading
     linearized      = 0
-    diagonalize     = 0 # weight, 0=off
-	div_beta_u_v    = 0             # 1=on, 0=off
+    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
+	div_beta_u_v    = 1             # 1=on, 0=off
 	vel_order       = P1Bubble	     	# P1, P1Bubble, P2
 	press_order     = P1		    # P1, P2
 
