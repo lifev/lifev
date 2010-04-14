@@ -139,7 +139,7 @@ public:
     int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
       /** Returns the quantity \f$ \| A \|_\infty\f$ such that
-       \f[\| A \|_\infty = \max_{1\lei\lem} \sum_{j=1}^n |a_{ij}| \f].
+       \f[\| A \|_\infty = \max_{1\le i\le m} \sum_{j=1}^n |a_{ij}| \f].
 
        \warning This method must not be called unless HasNormInf() returns true.
      */
