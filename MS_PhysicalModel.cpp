@@ -201,7 +201,9 @@ MS_PhysicalModel::AddCoupling( const Coupling_ptrType& coupling )
 }
 
 void
-MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale, const boost::array< Real, NDIM >& rotate, const boost::array< Real, NDIM >& translate )
+MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
+                               const boost::array< Real, NDIM >& rotate,
+                               const boost::array< Real, NDIM >& translate )
 {
 
 #ifdef DEBUG
