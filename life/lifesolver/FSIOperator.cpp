@@ -341,7 +341,7 @@ FSIOperator::setupFEspace()
 void
 FSIOperator::setupDOF( void )
 {
-    Displayer disp(M_epetraWorldComm);
+    Displayer disp(M_epetraWorldComm.get());
     disp.leaderPrint("FSIOperator: setting DOF ... " );
     Dof uDof(*M_dataFluid->dataMesh()->mesh(), M_uFESpace->refFE());
 //     Dof pDof(*M_dataFluid->mesh(), M_pFESpace->refFE());
