@@ -89,15 +89,15 @@ BDF_order		= 1
 
 [../space_discretization]
 mesh_dir        = ./Mesh/
-mesh_file       = heart_ref_fine.mesh #ellissoide39850.mesh #ellissoide12586.mesh  #ellissoide12586.mesh #slab5849.mesh #ventricolosx66769.mesh # realgeomsize91111.mesh #ventricolosx66769.mesh #2ellissoidi02.mesh #ventricolosx66769.mesh #ventricolosx5923.mesh #slabmini.mesh #ventricolosx66769.mesh #ventricolosx21602.mesh #slabprova.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #ventricolosx64665.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #-3.51 slabprova.mesh #cubo_regina.vol #ventricolosx5923.mesh # heartvol_cut_77354.vol #ventricolosx64665.mesh
+mesh_file       = ellissoide5272.mesh #ellissoide39850.mesh #ellissoide12586.mesh  #ellissoide12586.mesh #slab5849.mesh #ventricolosx66769.mesh # realgeomsize91111.mesh #ventricolosx66769.mesh #2ellissoidi02.mesh #ventricolosx66769.mesh #ventricolosx5923.mesh #slabmini.mesh #ventricolosx66769.mesh #ventricolosx21602.mesh #slabprova.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #ventricolosx64665.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #-3.51 slabprova.mesh #cubo_regina.vol #ventricolosx5923.mesh # heartvol_cut_77354.vol #ventricolosx64665.mesh
 mesh_type       = .mesh
 
 verbose         = 1                     # verbose during mesh-reading
 
 has_fibers = 1
 fibers_dir = ./Mesh/
-fibers_file = fibers_ref_fine #ZygHeart20Fib6040.vct #ellissoide29560fibers
-fibers_format =  1  # 1 Ensight 0 BB
+fibers_file = ellissoide5272fibers #ZygHeart20Fib6040.vct #ellissoide29560fibers
+fibers_format =  0  # 1 Ensight 0 BB
 
 linearized      = 0
 diagonalize     = 1 #0 # weight, 0=off
