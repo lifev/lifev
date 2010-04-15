@@ -49,7 +49,8 @@
 #include <life/lifesolver/dataMonodomain.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <testsuite/test_heart/stiffness_fibers.hpp>
+#include <life/lifefem/stiffness_fibers.hpp>
+#include <life/lifefem/bdf_template.hpp>
 
 namespace LifeV
 {
@@ -275,7 +276,7 @@ MonodomainSolver( const data_type&          dataType,
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_localMap               ( M_uFESpace.map() ),
     M_localMapVec              (M_localMap+M_localMap+M_localMap),
     M_matrMass               ( ),
@@ -285,7 +286,7 @@ MonodomainSolver( const data_type&          dataType,
     M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
     M_rhsNoBC                ( M_localMap ),
     M_sol_u                  ( M_localMap ),
-    M_fiber_vector           ( getRepeatedEpetraMapVec() ),
+    M_fiber_vector           ( M_localMapVec, Repeated ),
     M_residual               ( M_localMap ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
@@ -337,6 +338,11 @@ void MonodomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_linearSolver.setDataFromGetPot( dataFile, "electric/solver" );
 
     M_maxIterSolver = dataFile( "electric/solver/max_iter", -1);
+
+    std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
+
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_prec.get() != 0, "monodomainSolver : Preconditioner not set");
 
     M_prec->setDataFromGetPot( dataFile, "electric/prec" );
 }
@@ -742,7 +748,7 @@ void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&  
 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
-                 M_data.time() );
+                 M_data.getTime() );
 
    // rhs = rhsFull;
 

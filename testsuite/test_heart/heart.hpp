@@ -31,8 +31,8 @@
 #ifndef __HEART_H
 #define __HEART_H
 
-//#define MONODOMAIN 
-#define BIDOMAIN
+#define MONODOMAIN
+//#define BIDOMAIN
 
 #include <life/lifecore/application.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
@@ -42,7 +42,7 @@
 #include <iostream>
 #ifdef MONODOMAIN
 	#include <life/lifesolver/monodomainSolver.hpp>
-#else	
+#else
 	#include <life/lifesolver/bidomainSolver.hpp>
 #endif
 #include <life/lifesolver/ionicSolver.hpp>
@@ -73,7 +73,7 @@ public:
 #ifdef MONODOMAIN
 	typedef MonodomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
 	typedef MonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
-#else 
+#else
     	typedef BidomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
     	typedef BidomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
 #endif
@@ -119,20 +119,20 @@ public:
     /** @name  Methods
      */
     //@{
-     
+
     //! To build the system and iterate
     void run();
 
-    //! To compute the righthand side of the system  
+    //! To compute the righthand side of the system
 #ifdef MONODOMAIN
-    void computeRhs( vector_type& rhs, 
+    void computeRhs( vector_type& rhs,
     		MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-    		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, 
+    		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
     		DataMonodomain<RegionMesh3D<LinearTetra> >& dataMonodomain );
-#else 
-    void computeRhs( vector_type& rhs, 
+#else
+    void computeRhs( vector_type& rhs,
     		BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-    		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, 
+    		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
     		DataBidomain<RegionMesh3D<LinearTetra> >& dataBidomain );
 #endif
     //@}
