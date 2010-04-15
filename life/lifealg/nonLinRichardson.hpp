@@ -109,6 +109,7 @@ Int nonLinRichardson( EpetraVector& sol,
     //
 
     Real solNormInf(sol.NormInf());
+    Real stepNormInf;
     if (verbose)
     {
         out_res << std::scientific;
@@ -138,13 +139,16 @@ Int nonLinRichardson( EpetraVector& sol,
         normResOld = normRes;
         normRes    = residual.NormInf();
 
+
         fonctional.solveJac(step, -1.*residual, linearRelTol); // J*step = -R
 
+        solNormInf = sol.NormInf();
+        stepNormInf = step.NormInf();
         if (verbose)
         {
             out_res   << std::setw(5) << iter
-                      << std::setw(15) << sol.NormInf()
-                      << std::setw(15) << step.NormInf();
+                      << std::setw(15) << solNormInf
+                      << std::setw(15) << stepNormInf;
         }
         linres = linearRelTol;
 
@@ -169,7 +173,8 @@ Int nonLinRichardson( EpetraVector& sol,
                 std::cout << "Unknown linesearch \n";
                 status = EXIT_FAILURE;
         }
-        if (status = EXIT_FAILURE)
+
+        if (status == EXIT_FAILURE)
             return status;
 
 
