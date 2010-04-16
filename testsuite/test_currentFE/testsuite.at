@@ -1,0 +1,23 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#
+#      Author(s): Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+#           Date: 06-04-2010
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### TEST: CurrentFE ###############################################################################
+###################################################################################################
+
+AT_SETUP([test_currentFE])
+AT_KEYWORDS([])
+AT_DATA([data],[[
+
+# Place here the content of the GetPot data file for the night test.
+
+]])
+AT_CHECK([mpirun -n 1 ../../test_currentFE/test_currentFE -c],[0],[ignore],[ignore])
+AT_CLEANUP([])
+
