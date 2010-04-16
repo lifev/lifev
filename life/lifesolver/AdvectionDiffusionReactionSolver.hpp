@@ -408,12 +408,12 @@ ADRSolver( const data_type&          dataType,
     M_reusePrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
-    M_elmatStiff             ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elmatMass              ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elmatAdv               ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elmatStab              ( M_FESpace.fe().nbFENode(), 1, 1 ),
-//    M_elvec                  ( M_FESpace.fe().nbFENode(), nDimensions ),
-    M_elvec_u                ( M_betaFESpace.fe().nbFENode(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
+    M_elmatStiff             ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatMass              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatAdv               ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatStab              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+//    M_elvec                  ( M_FESpace.fe().nbFEDof(), nDimensions ),
+    M_elvec_u                ( M_betaFESpace.fe().nbFEDof(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
 {
 }
 
@@ -448,11 +448,11 @@ ADRSolver( const data_type&          dataType,
     M_reusePrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
-    M_elmatStiff             ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elmatMass              ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elmatAdv               ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elmatStab              ( M_FESpace.fe().nbFENode(), 1, 1 ),
-    M_elvec_u                ( M_betaFESpace.fe().nbFENode(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
+    M_elmatStiff             ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatMass              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatAdv               ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatStab              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elvec_u                ( M_betaFESpace.fe().nbFEDof(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
 {
 }
 
@@ -750,13 +750,13 @@ updateSystem( Real       alpha,
             UInt eleID = M_betaFESpace.fe().currentLocalId();
             // Non linear term, Semi-implicit approach
             // M_elvec contains the velocity values in the nodes
-            for ( UInt iNode = 0 ; iNode < ( UInt ) M_betaFESpace.fe().nbFENode() ; iNode++ )
+            for ( UInt iNode = 0 ; iNode < ( UInt ) M_betaFESpace.fe().nbFEDof() ; iNode++ )
             {
 	         UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
                 for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
                 {
 		    UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
-                    M_elvec_u.vec()[ iloc + iComp*M_betaFESpace.fe().nbFENode() ] = betaVecRep[ig]; // BASEINDEX + 1
+                    M_elvec_u.vec()[ iloc + iComp*M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ig]; // BASEINDEX + 1
                 }
             }
 
@@ -789,13 +789,13 @@ updateSystem( Real       alpha,
                 Real VLoc_mean  = 0.;
                 Real VLoc_c     = 0.;
 
-                for ( UInt ih_c = 0 ; ih_c < ( UInt ) this->M_betaFESpace.fe().nbFENode() ; ih_c++ )
+                for ( UInt ih_c = 0 ; ih_c < ( UInt ) this->M_betaFESpace.fe().nbFEDof() ; ih_c++ )
                 {
                     UInt iloc = this->M_betaFESpace.fe().patternFirst( ih_c );
                     for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
                     {
                         UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
-                        M_elvec_u.vec()[ iloc + iComp * this->M_betaFESpace.fe().nbFENode() ] = betaVecRep[ ig ];
+                        M_elvec_u.vec()[ iloc + iComp * this->M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ ig ];
                         VLoc_c += betaVecRep[ ig ] * betaVecRep[ ig ];
                     }
 
@@ -806,7 +806,7 @@ updateSystem( Real       alpha,
                         VLoc_infty = VLoc_c;
                 }
 
-                VLoc_mean = VLoc_mean / this->M_betaFESpace.fe().nbFENode();
+                VLoc_mean = VLoc_mean / this->M_betaFESpace.fe().nbFEDof();
 
                 Real coef_stab, Pe_loc = 0;
                 coef_stab=M_gammaBeta*this->M_betaFESpace.fe().diameter()*VLoc_infty; // Alessandro - method
@@ -888,20 +888,20 @@ updateSystem( Real       alpha,
                     fe1.updateFirstDeriv( M_FESpace.mesh()->element( iElAd1 ) );
                     fe2.updateFirstDeriv( M_FESpace.mesh()->element( iElAd2 ) );
 
-                   ElemVec beta(M_betaFESpace.feBd().nbFENode(), nDimensions);
+                   ElemVec beta(M_betaFESpace.feBd().nbFEDof(), nDimensions);
 
                     // first, get the local trace of the velocity into beta
                     // local id of the face in its adjacent element
 
                     UInt iEdEl = M_betaFESpace.mesh()->edge( iEdge ).pos_first();
-                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbFENode(); ++iNode )
+                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbFEDof(); ++iNode )
                     {
                         UInt iloc = eToP( iEdEl, iNode+1 );
                         for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
                         {
                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
                             if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbFENode() + iNode ] = betaVecRep( ig + 1); // BASEINDEX + 1
+                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbFEDof() + iNode ] = betaVecRep( ig + 1); // BASEINDEX + 1
                         }
                     }
 
@@ -958,13 +958,13 @@ updateSystem( Real       alpha,
 
 		    // Old version, removed by SQ
 		    /*
-                    ElemVec beta( M_betaFESpace.feBd().nbFENode(), nDimensions);
+                    ElemVec beta( M_betaFESpace.feBd().nbFEDof(), nDimensions);
 
                     // first, get the local trace of the velocity into beta
                     // local id of the face in its adjacent element
 
                     UInt iFaEl = M_betaFESpace.mesh()->face( iFace ).pos_first();
-                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbFENode(); ++iNode )
+                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbFEDof(); ++iNode )
                     {
                         UInt iloc = fToP( iFaEl, iNode+1 );
                         for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
@@ -973,28 +973,28 @@ updateSystem( Real       alpha,
                             if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
 			      {
 				Real value( betaVecRep( ig + 1) );
-                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbFENode() + iNode ] = value; // BASEINDEX + 1
+                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbFEDof() + iNode ] = value; // BASEINDEX + 1
 			      };
                         }
 		    }*/
 
 		    // New version, added by SQ : beta on the domain, not the boundary!
 		    // See elemOper.cpp for justification of this usage
-                    ElemVec beta( M_betaFESpace.fe().nbFENode(), nDimensions);
+                    ElemVec beta( M_betaFESpace.fe().nbFEDof(), nDimensions);
 
-                    for ( int iNode = 0; iNode < M_betaFESpace.fe().nbFENode(); ++iNode )
+                    for ( int iNode = 0; iNode < M_betaFESpace.fe().nbFEDof(); ++iNode )
                     {
 		        UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
                         for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
                         {
                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) + iCoor*nDof;
-			    beta.vec()[ iloc + iCoor*M_betaFESpace.fe().nbFENode() ] = betaVecRep[ig]; // BASEINDEX + 1
+			    beta.vec()[ iloc + iCoor*M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ig]; // BASEINDEX + 1
 
                         }
 		    }
 
                     // second, calculate its max norm
-                    for ( int l = 0; l < int( M_betaFESpace.fe().nbCoor()*M_betaFESpace.fe().nbFENode() ); ++l ) // SQ: feBd->fe
+                    for ( int l = 0; l < int( M_betaFESpace.fe().nbCoor()*M_betaFESpace.fe().nbFEDof() ); ++l ) // SQ: feBd->fe
                     {
 		      if ( bmax < fabs( beta.vec()[ l ] ) )
 			bmax = fabs( beta.vec()[ l ] );

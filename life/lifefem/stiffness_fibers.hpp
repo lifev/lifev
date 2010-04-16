@@ -33,7 +33,7 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
 
     for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbFENode();i++){
+        for (i=0;i<fe.nbFEDof();i++){
            u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
            u_y[ig]+=cos[dof.localToGlobal(eleId,i+1)+dim]*fe.phi(i,ig);
            u_z[ig]+=cos[dof.localToGlobal(eleId,i+1)+2*dim]*fe.phi(i,ig);
@@ -121,7 +121,7 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
     for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbFENode();i++)
+        for (i=0;i<fe.nbFEDof();i++)
 	{
            u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
            u_y[ig]+=cos[dim+dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);

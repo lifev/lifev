@@ -38,7 +38,7 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const DofType& dof )
     for ( ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         u_ig = 0.;
-        for ( i = 0;i < fe.nbFENode();i++ )
+        for ( i = 0;i < fe.nbFEDof();i++ )
         {
             inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -63,7 +63,7 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
         for ( ig = 0;ig < fe.nbQuadPt();ig++ )
         {
             u_ig = 0.;
-            for ( i = 0;i < fe.nbFENode();i++ )
+            for ( i = 0;i < fe.nbFEDof();i++ )
             {
                 inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
                 u_ig += u( inod ) * fe.phi( i, ig );
@@ -158,7 +158,7 @@ elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int 
 		{
     		Real u_ig(0.);
     		Vector grad_u_ig = ZeroVector(fe.nbCoor());
-    		for ( int i = 0;i < fe.nbFENode();i++ )
+    		for ( int i = 0;i < fe.nbFEDof();i++ )
     		{
     			int inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
     			u_ig += u( inod ) * fe.phi( i, ig );
@@ -223,7 +223,7 @@ Real elem_L2_diff_2( VectorType & u,
     for (int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         Real u_ig(0);
-        for (int i = 0;i < fe.nbFENode();i++ )
+        for (int i = 0;i < fe.nbFEDof();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -251,7 +251,7 @@ Real elem_L2_diff_2( VectorType & u,
         for (int ic = 0; ic < nbcomp; ic++ )
         {
             Real u_ig(0);
-            for (int i = 0;i < fe.nbFENode();i++ )
+            for (int i = 0;i < fe.nbFEDof();i++ )
             {
                 int inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
                 u_ig += u( inod ) * fe.phi( i, ig );
@@ -276,7 +276,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
         Real u_ig = 0.;
         Vector grad_u_ig = ZeroVector(fe.nbCoor());
 
-        for (int i = 0;i < fe.nbFENode();i++ )
+        for (int i = 0;i < fe.nbFEDof();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -310,7 +310,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
         	Real u_ig = 0.;
         	Vector grad_u_ig = ZeroVector(fe.nbCoor());
 
-        	for (int i = 0;i < fe.nbFENode();i++ )
+        	for (int i = 0;i < fe.nbFEDof();i++ )
         	{
         		int inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
         		u_ig += u( inod ) * fe.phi( i, ig );
@@ -345,7 +345,7 @@ Real elem_integral_diff( VectorType & u,
     {
         fe.coorQuadPt( x, y, z, ig );
         Real u_ig(0);
-        for ( int i = 0;i < fe.nbFENode();i++ )
+        for ( int i = 0;i < fe.nbFEDof();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 )+ (nbcomp-1) * dof.numTotalDof();
             u_ig += u( inod ) * fe.phi( i, ig );
@@ -368,7 +368,7 @@ Real elem_integral( VectorType & u,
     for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         Real u_ig(0);
-        for ( int i = 0;i < fe.nbFENode();i++ )
+        for ( int i = 0;i < fe.nbFEDof();i++ )
         {
             int inod = dof.localToGlobal( eleID, i + 1 ) + (nbcomp-1) * dof.numTotalDof();
             u_ig += u( inod ) * fe.phi( i, ig );
