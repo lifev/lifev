@@ -338,7 +338,7 @@ public:
     }
 
     //! Getter for the number of nodes
-    inline const UInt& nbFENode() const
+    inline const UInt& nbFEDof() const
     {
         return nbNode;
     }
@@ -441,42 +441,42 @@ public:
     //! @name Old methods (for backward compatibility, avoid using them) 
     //@{
 
-    //! Getter for the nodes of the cell (Old style)
+    //! Old accessor, use cellNode instead.
     inline const Real& point(const UInt& node, const UInt& coordinate) const
     {
         ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
         return M_cellNodes[node][coordinate];
     };
 
-    //! Getter for the quadrature nodes (Old style)
+    //! Old accessor, use quadNode instead
     inline const Real& quadPt(const UInt& node, const UInt& coordinate) const
     {
         ASSERT(M_quadNodesUpdated,"Quad nodes are not updated!");
         return M_quadNodes[node][coordinate];
     };
     
-    //! Getter for the weighted jacobian determinant (Old style)
+    //! Old accessor, use wDetJacobian instead
     inline const Real& weightDet(const UInt& quadNode) const
     {
         ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
         return M_wDetJacobian[quadNode];
     };
 
-    //! Getter for the inverse of the jacobian (Old style)
+    //! Old accessor, use iInverseJacobian instead
     inline const Real& tInvJac(const UInt& element1, const UInt& element2, const UInt& quadNode) const
     {
         ASSERT(M_tInverseJacobianUpdated,"Inverse jacobian is not updated!");
         return M_tInverseJacobian[element1][element2][quadNode];
     };
 
-    //! Getter for the derivatives of the basis functions (Old style)
+    //! Old accessor, use dphi instead
     inline const Real& phiDer(const UInt& node, const UInt& derivative, const UInt& quadNode) const
     {
         ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
     
-    //! Getter for the second derivatives of the basis functions (Old style)
+    //! Old accessor, use d2phi instead
     inline const Real& phiDer2(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
     {
         ASSERT(M_d2phiUpdated,"Basis second derivatives are not updated!");
