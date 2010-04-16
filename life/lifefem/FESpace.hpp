@@ -160,6 +160,18 @@ public:
     //! @name Methods
     //@{
 
+    //! Method to compute the L2 error when using a weight function
+    /*!
+      The scope of this method is to compute \f$ \left( \int w (u_{\operatorname{exact}} - u_h) \right)^{1/2} \f$.
+      The usual L2 error norm can be retrieved by using \f$ w=1 \f$
+     */
+    template<typename vector_type>
+    Real L2ErrorWeighted(const Function&    exactSolution,
+                         const vector_type& solution,
+                         const Function&    weight,
+                         const Real         time);
+    
+
     //! This method computes the interpolate value of a given FE function in a given point.
     /*!
      * The user of this function has to provide the element and the vector of the DOF values.
@@ -1032,6 +1044,65 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 
     return sqrt( normU );
 }
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+Real
+FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
+                                    const vector_type& solution,
+                                    const Function&    weight,
+                                    const Real         time)
+{
+    // Check that the vector is repeated (needed!)
+    if (solution.getMaptype() == Unique)
+    {
+        return L2ErrorWeighted(exactSolution, EpetraVector(solution,Repeated), weight,time);
+    }
+
+    Real sumOfSquare(0.0);
+    
+    // Compute the integral on this processor
+
+    for (UInt iVol(1); iVol <= this->mesh()->numElements(); ++iVol)
+    {
+        this->fe().update(this->mesh()->element(iVol), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        
+        for (UInt iQuad(0); iQuad< this->fe().nbQuadPt(); ++iQuad)
+        {
+            Real solutionInQuadNode(0.0);
+            
+            for (UInt iDof(0); iDof< this->fe().nbFEDof(); ++iDof)
+            {
+                UInt dofID(this->dof().localToGlobal(iVol,iDof+1));
+                solutionInQuadNode += this->fe().phi(iDof,iQuad) * solution[dofID];
+            };
+            
+            Real x(this->fe().quadNode(iQuad,0));
+            Real y(this->fe().quadNode(iQuad,1));
+            Real z(this->fe().quadNode(iQuad,2));
+            Real weightInQuadNode(weight(time,x,y,z,0));
+            Real exactInQuadNode(exactSolution(time,x,y,z,0));
+
+            sumOfSquare += weightInQuadNode
+                          * (exactInQuadNode - solutionInQuadNode)
+                          * (exactInQuadNode - solutionInQuadNode)
+                          * this->fe().wDetJacobian(iQuad);
+        }
+    }
+
+    // Communicate the results
+
+    Real sendbuff (sumOfSquare);
+    Real recvbuff;
+
+    this->map().Comm().SumAll(&sendbuff,&recvbuff,1);
+    
+    sumOfSquare = recvbuff;
+    
+    return std::sqrt(sumOfSquare);
+}
+
+
 
 
     template <typename Mesh, typename Map>
