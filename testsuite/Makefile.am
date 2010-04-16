@@ -35,8 +35,9 @@ SUBDIRS		= data  \
               test_ns_flux \
               test_meshReorder \
 	          test_laplacian \
+              test_currentFE \
               test_filters
-              $(DO_NOT_COMPILE)
+	      $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_cylinder/testsuite.at \
@@ -44,7 +45,9 @@ TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \
            $(srcdir)/test_filters/testsuite.at \
+	   $(srcdir)/test_currentFE/testsuite.at \
            $(srcdir)/test_meshReorder/testsuite.at
+
 
 
 
