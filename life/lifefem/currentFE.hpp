@@ -716,7 +716,7 @@ void CurrentFE::update(const GeoElement& geoele, const flag_Type& upFlag)
             pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
         }
     }
-    update(pts);
+    update(pts,upFlag);
 };
 
 
