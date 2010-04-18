@@ -31,25 +31,69 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #----------------------------------------------------------------
 #      Data file for cylinder test with Navier-Stokes IP Solver
 #----------------------------------------------------------------
-
-[ensight]
+[exporter]
 multimesh  = false
-save       = 5
+save       = 1
 post_dir = ./
 
 [electric]
 
 [./physics]
 
-test_case   = 2                  # in particular for b.c. condition
-ion_model = 2		# 1: RM 	2: LR
+test_case   = 2             # in particular for b.c. condition
+ion_model = 2				# 1: RM 	2: LR
+u0 = -84.					# 0.: RM	-84.: LR
 
-Chi		= 1e3 #originale: 1e3 		#cm^-1
-Cm		= 1e-3 #funz:10 #originale: 1e-3 //con 1 e mesh vecchia non esplode		#mF/cm^2
-#D       = 0.001 #LR=0.001 RM=0.05 #0.005 #0.001 è per luorudy; 0.05 #funz: 1e3 #originale: 1e-3// "   1e3	 "	#per il momento caso isotropo
+Chi		= 1e3				#cm^-1
+Cm		= 1e-3				#mF/cm^2
 
-#sigmal		= 1.2e-1 #1.2e-3 #1.2e-3 è per luorudy 1.2e-1  #0.2 #0.12 #1 #1.2e-1 #funz:1.2e3 #originale: 1.2e-3	#O^-1cm^-1
-#sigmat		= 2.5562e-2 #2.5562e-4 # 2.5562e-4 è per luorudy 2.5562e-2 #0.01 #0.025 #1.2 #2.5562e-2 #funz:2.5e2 #originale: 2.5562e-4	#O^-1cm^-1
+#Monodomain conductivity
+#RM
+#sigmal		= 0.0328		#O^-1cm^-1
+#sigmat		=  0.00699		#O^-1cm^-1
+#LR
+#sigmal		= 1.2e-3		#O^-1cm^-1
+#sigmat		=  2.56e-4		#O^-1cm^-1
+
+#Bidomain conductivity
+#RM
+#sigmal_i		= 8.19e-2		#O^-1cm^-1
+#sigmat_i		= 8.6e-3 		#O^-1cm^-1
+#sigmal_e		= 5.46e-2 		#O^-1cm^-1
+#sigmat_e		= 3.69e-2 		#O^-1cm^-1
+
+#LR
+sigmal_i		= 3.0e-3  		#O^-1cm^-1
+sigmat_i		= 3.1525e-4 	#O^-1cm^-1
+sigmal_e		= 2.0e-3  		#O^-1cm^-1
+sigmat_e		= 1.3514e-3 	#O^-1cm^-1
+
+
+
+##***********************************************************************##
+#Mitchell & Schaeffer: (active only with #define REO_CASE)
+#sigmal_i		= 3.0e-3 		#O^-1cm^-1
+#sigmal_e		= 3.0e-3 		#O^-1cm^-1
+#sigmat_i		= 3.0e-4 		#O^-1cm^-1
+#sigmat_e		= 1.2e-3 		#O^-1cm^-1
+
+tau_in    = 0.8
+tau_out   = 18.0
+tau_open  = 100.0
+tau_close = 100.0
+vcrit     =  -67.0
+v_min     =  -80.0
+v_max     =  20.0
+reac_amp  =  0.2        #0.05
+
+Time_period       = 700.0
+Iapp_RV_angle     = 360.0
+Iapp_LV_angle     = 360.0
+Iapp_stim_time_RV = 6.0
+Iapp_stim_time_LV = 10.0
+Ventricular_Fibrillation = 0
+nb_fibrillation_sources  = 20
+##*****************************************************************##
 
 heart_diff_fct = 0
 
@@ -58,76 +102,69 @@ heart_diff_fct = 0
 # case 2: reduced diffusion in cyl region
 # case 3: reduced diffusion in box region
 
-stim_center_1 = '-0.137 0.64 -3.27'   
-stim_radius_1 = 1.5 #0.8 #0.3 #1.5 #0.8
-stim_start_1 = 0
-stim_stop_1 = 1 #RM=3
-stim_value_1 = 50 #LR=50 RM=100
-stim_period_1 = 500 #350
+stim_center_1 	= '-0.137 0.64 -3.27'  
+stim_radius_1 	= 1.5 
+stim_start_1 	= 0
+stim_stop_1 	= 1 
+stim_value_1 	= 100
+stim_period_1 	= 500 #350
 
 #per reduced_sigma_sphere (heart_diff_fct=1)
-sigma_reduction  = '0.1, 1.'
-sphere_center = '0., 0., 0.'
-sphere_radius = 0.5
+sigma_reduction	= '0.1, 1.'
+sphere_center 	= '0., 0., 0.'
+sphere_radius 	= 0.5
 
 #per reduced_sigma_box (heart_diff_fct=3)
-#sigma_reduction  = '0.001, 1.'
-#box_vertex_min = '0., 0., 0.'
-#box_vertex_max = '1., 1., 1.'
+#sigma_reduction  	= '0.001, 1.'
+#box_vertex_min 	= '0., 0., 0.'
+#box_vertex_max 	= '1., 1., 1.'
 
-
-
-density         = 1.0          # density
-viscosity       = 0.005         # viscosity
-init_data = 0
-uinit = 0
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.4
-timestep        = 0.1
+endtime			= 20
+timestep		= 0.5
 BDF_order		= 1
 
 [../space_discretization]
-mesh_dir        = ./
-mesh_file       = ellissoide29560.mesh 
+mesh_dir        = ./Mesh/
+mesh_file       = ellipsoid5272.mesh 
 mesh_type       = .mesh
+has_fibers = 1
+fibers_dir = ./Mesh/
+fibers_file = ellipsoid5272fibers 
+fibers_format =  0  # 1 Ensight 0 BB
 
 verbose         = 1                     # verbose during mesh-reading
-
-has_fibers = 1
-
-
-linearized      = 0
-diagonalize     = 0 # weight, 0=off
+diagonalize     = 1 #0 # weight, 0=off
 
 [../miscellaneous]
 verbose         = 1
 
 
 [../solver]
-solver          = cg    #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+solver          = gmres    #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 scaling         = none
-output          = all # warnings , none , last
+output          = all # all, warnings , none , last
 conv            = rhs
 max_iter        = 100
-kspace          = 100
-precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
+kspace          = 200 #100
+#precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
 subdomain_solve = icc #ilu, ilut
 overlap         = 1
-ilut_fill       = 2
+ilut_fill       = 5 #2
 graph_fill      = 0
-drop            = 1.e-4
-tol             = 1.00e-5 
+drop            = 1.e-5 #1.e-4
+tol             = 1.00e-7 #1.00e-5 
 keep_info       = 1
 
 [../prec]
 
 reuse           = true
 overlap         = 1
-droptol         = 1.e-5
-fill 		= 1
-
+droptol         = 1.e-7 #1.e-5
+fill 			= 2 #1
+prectype        = Ifpack
 
 
 ]])
