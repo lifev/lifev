@@ -27,8 +27,6 @@
 */
 #ifndef _DATAMONODOMAIN_H_
 #define _DATAMONODOMAIN_H_
-#include <string>
-#include <iostream>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/dataMesh.hpp>
@@ -179,9 +177,9 @@ setup(  const GetPot& dfile )
 		}
 	else if (dfile("electric/physics/ion_model",1) == 2)
 	{
-		M_D = dfile("electric/physics/D" , 5.7e-4)/M_Chi/M_Cm;  // 5.7e-4 [1/Ohm/cm]              sigmal/3 + sigmat*2/3
-		M_sigmal =  dfile("electric/physics/sigmal", 1.2e-3)/M_Chi/M_Cm;  // 1.2e-3  [1/Ohm/cm]   sigmal_i*sigmal_e/(sigmal_i+sigmal_e)    ColliPavarinoTaccardi2005
-		M_sigmat   = dfile("electric/physics/sigmat", 2.56e-4)/M_Chi/M_Cm; // 2.56e-4 [1/Ohm/cm]   sigmat_i*sigmat_e/(sigmat_i+sigmat_e)    ColliPavarinoTaccardi2005
+		M_D = dfile("electric/physics/D" , 5.7e-4);  // 5.7e-4 [1/Ohm/cm]              sigmal/3 + sigmat*2/3
+		M_sigmal =  dfile("electric/physics/sigmal", 1.2e-3);  // 1.2e-3  [1/Ohm/cm]   sigmal_i*sigmal_e/(sigmal_i+sigmal_e)    ColliPavarinoTaccardi2005
+		M_sigmat   = dfile("electric/physics/sigmat", 2.56e-4); // 2.56e-4 [1/Ohm/cm]   sigmat_i*sigmat_e/(sigmat_i+sigmat_e)    ColliPavarinoTaccardi2005
 	}
 	M_lambda  =  dfile("electric/physics/lambda", 0.66667); // 0.66667 [adim]       sigmal_e/sigmal_i
     M_heart_diff_fct = dfile("electric/physics/heart_diff_fct",0);
@@ -218,8 +216,3 @@ showMe( std::ostream& c )
 
 }
 #endif
-
-
-
-
-

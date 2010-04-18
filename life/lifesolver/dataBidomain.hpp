@@ -29,8 +29,6 @@
 */
 #ifndef _DATABIDOMAIN_H_
 #define _DATABIDOMAIN_H_
-#include <string>
-#include <iostream>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/dataMesh.hpp>
@@ -38,10 +36,9 @@
 #include <life/lifecore/dataString.hpp>
 #include <life/lifearray/tab.hpp>
 
-#undef INRIA_CASE
-//#define INRIA_CASE
-#ifdef INRIA_CASE
-	#include "heartCaseBase.hpp" 
+#undef REO_CASE
+#ifdef REO_CASE
+	#include "heartCaseBase.hpp"
 #else
 	#include "heart_functors.hpp"
 #endif
@@ -64,14 +61,14 @@ class DataBidomain:
 public:
 
     //! Constructors
-#ifdef INRIA_CASE
+#ifdef REO_CASE
     DataBidomain( boost::shared_ptr<HeartCaseBase> B_fct );
 #else
     DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct );
 #endif
 
     DataBidomain( const DataBidomain& dataBidomain );
-    
+
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> fct_type;
 
 
@@ -83,31 +80,31 @@ public:
     void setup( const GetPot& dfile );
 
     //! verbose
-    Real verbose() const {return M_verbose;};  
-        
-        
+    Real verbose() const {return M_verbose;};
+
+
     //! FE space order
     std::string uOrder() const{return M_uOrder;};
     //! Chi
 	inline   Real Chi() const {return M_Chi;}
 	 //! Chi
 	inline   string fibers_file() const {return M_fibers_file;}
-	
+
 	inline int heart_diff_fct() const {return M_heart_diff_fct;}
-	
+
 	inline bool has_fibers() const {return M_has_fibers;}
 	//! format vct (INRIA) or BB (Milan)
 	inline bool fibers_format() const{return M_fibers_format;}
-    
+
 	//! sigma_l
 	inline   Real sigmal_i() const 	{return M_sigmal_i;}
 	inline   Real sigmal_e() const 	{return M_sigmal_e;}
-	
-	    
+
+
 	//! sigma_t
 	inline   Real sigmat_i() const 	{return M_sigmat_i;}
 	inline   Real sigmat_e() const 	{return M_sigmat_e;}
-	
+
 	//! Cm
 	inline   Real Cm() const 	{return M_Cm;}
 	//! D
@@ -116,10 +113,8 @@ public:
 	inline   Real D_e() const 	{return M_D_e;}
 		//! Post_dir
 	inline   string Post_dir() const {return M_post_dir;}
-	
-	inline	 UInt order_bdf() const {return M_order_bdf;}
 
-        inline   UInt CalCoef()   const {return CalCoeff;}
+	inline	 UInt order_bdf() const {return M_order_bdf;}
 
 	fct_type red_sigma_sphere;
 	fct_type red_sigma_cyl;
@@ -129,7 +124,7 @@ public:
 protected:
 
     std::string  M_uOrder;
-    string M_fibers_file;        
+    string M_fibers_file;
     Real M_Chi;
     Real M_Cm;
     Real M_D_i;
@@ -138,18 +133,16 @@ protected:
     Real M_sigmat_i;
     Real M_sigmal_e;
     Real M_sigmat_e;
-    int M_heart_diff_fct;     
+    int M_heart_diff_fct;
     UInt M_verbose;
-    string M_post_dir; //! full name (including path)  
+    string M_post_dir; //! full name (including path)
     string M_fibers_dir;
     bool M_has_fibers;
+    // format of fibers file
     bool M_fibers_format;
-    //add time_discretization BDF order 2
+    // order of time discretization BDF order
     UInt M_order_bdf;
-    // Calcul MassCoeff in bidomainSolver 0 => Coeff = Chi*Cm*bdf.coeffDer/dt   1 => Coeff = 1/dt
-    int  CalCoeff;
 
-    
 private:
 
 
@@ -161,7 +154,7 @@ private:
 
 
 // Constructors
-#ifdef INRIA_CASE
+#ifdef REO_CASE
 template <typename Mesh>
 DataBidomain<Mesh>::
 DataBidomain( boost::shared_ptr<HeartCaseBase> B_fct ) :
@@ -197,15 +190,14 @@ DataBidomain( const DataBidomain& dataBidomain ) :
     M_sigmal_i(dataBidomain.M_sigmal_i),
     M_sigmat_i(dataBidomain.M_sigmat_i),
     M_sigmal_e(dataBidomain.M_sigmal_e),
-    M_sigmat_e(dataBidomain.M_sigmat_e),    
+    M_sigmat_e(dataBidomain.M_sigmat_e),
     M_heart_diff_fct(dataBidomain.M_heart_diff_fct),
     M_verbose(dataBidomain.M_verbose),
     M_post_dir(dataBidomain.M_post_dir),
     M_uOrder(dataBidomain.M_uOrder),
     M_has_fibers(dataBidomain.M_has_fibers),
     M_fibers_format(dataBidomain.M_fibers_format),
-    M_order_bdf(dataBidomain.M_order_bdf),
-    CalCoeff(dataBidomain.CalCoeff)
+    M_order_bdf(dataBidomain.M_order_bdf)
 {
 }
 
@@ -216,10 +208,10 @@ template <typename Mesh>
 void
 DataBidomain<Mesh>::
 setup(  const GetPot& dfile )
-{	
+{
 	M_Chi = dfile("electric/physics/Chi",1e3); 	// [1e-3 1/cm]   ColliPavarinoTaccardi2005
 	M_Cm = dfile("electric/physics/Cm",1e-3);  	// [1e-3 mF/cm2]   ColliPavarinoTaccardi2005
-    	if(dfile("electric/physics/ion_model",1) == 1) 
+    	if(dfile("electric/physics/ion_model",1) == 1)
 		{
     		M_D_i = dfile("electric/physics/D_i" ,3.3e-2);       // 3.3e-2  [1/Ohm/cm]   D_i_LR * D_RM/D_LR  see dataMonodomain
     		M_D_e = dfile("electric/physics/D_e" ,4.29e-2);      // 4.29e-2 [1/Ohm/cm]	D_e_LR * D_RM/D_LR  see dataMonodomain
@@ -230,12 +222,12 @@ setup(  const GetPot& dfile )
 		}
 	else if(dfile("electric/physics/ion_model",1) == 2)
 		{
-		M_D_i = dfile("electric/physics/D_i" , 1.21e-3)/M_Chi/M_Cm;  		// sigmal_i/3 + sigmat_i*2/3
-		M_D_e = dfile("electric/physics/D_e" , 1.57e-3)/M_Chi/M_Cm;  		// sigmal_e/3 + sigmat_e*2/3
-		M_sigmal_i =  dfile("electric/physics/sigmal_i", 3e-3)/M_Chi/M_Cm;  		// 3e-3      [1/Ohm/cm]   ColliPavarinoTaccardi2005
-		M_sigmat_i   = dfile("electric/physics/sigmat_i", 3.1525e-4)/M_Chi/M_Cm; 	// 3.1525e-4 [1/Ohm/cm]   ColliPavarinoTaccardi2005
-		M_sigmal_e =  dfile("electric/physics/sigmal_e", 2e-3)/M_Chi/M_Cm; 		// 2e-3      [1/Ohm/cm]   ColliPavarinoTaccardi2005
-		M_sigmat_e   = dfile("electric/physics/sigmat_e",1.3514e-3)/M_Chi/M_Cm; 	// 1.3514e-3 [1/Ohm/cm]   ColliPavarinoTaccardi2005
+		M_D_i = dfile("electric/physics/D_i" , 1.21e-3);  		// sigmal_i/3 + sigmat_i*2/3
+		M_D_e = dfile("electric/physics/D_e" , 1.57e-3);  		// sigmal_e/3 + sigmat_e*2/3
+		M_sigmal_i =  dfile("electric/physics/sigmal_i", 3e-3);  		// 3e-3      [1/Ohm/cm]   ColliPavarinoTaccardi2005
+		M_sigmat_i   = dfile("electric/physics/sigmat_i", 3.1525e-4); 	// 3.1525e-4 [1/Ohm/cm]   ColliPavarinoTaccardi2005
+		M_sigmal_e =  dfile("electric/physics/sigmal_e", 2e-3); 		// 2e-3      [1/Ohm/cm]   ColliPavarinoTaccardi2005
+		M_sigmat_e   = dfile("electric/physics/sigmat_e",1.3514e-3); 	// 1.3514e-3 [1/Ohm/cm]   ColliPavarinoTaccardi2005
 		}
 	else if(dfile("electric/physics/ion_model",1) == 3)
                 {
@@ -246,27 +238,26 @@ setup(  const GetPot& dfile )
                 M_sigmal_e =  dfile("electric/physics/sigmal_e", 5.46e-2); // 5.46e-2 [1/Ohm/cm]        sigmal_e_LR * D_RM/D_LR
                 M_sigmat_e   = dfile("electric/physics/sigmat_e",3.69e-2); // 3.69e-2 [1/Ohm/cm]        sigmat_e_LR * D_RM/D_LR
                 }
-    M_heart_diff_fct 	= dfile("electric/physics/heart_diff_fct",0);    
+    M_heart_diff_fct 	= dfile("electric/physics/heart_diff_fct",0);
     M_verbose 		= dfile( "electric/miscellaneous/verbose", 1 );
     M_post_dir  	= dfile("electric/miscellaneous/post_dir","./");
     M_uOrder 		= dfile( "electric/space_discretization/u_order", "P1");
     M_fibers_format 	= dfile("electric/space_discretization/fibers_format",0);
     M_has_fibers 	= dfile( "electric/space_discretization/has_fibers", 0);
     M_order_bdf       	= dfile("electric/time_discretization/BDF_order",1);
-    CalCoeff          	= dfile("electric/physics/CalCoeff",1);
-	if (M_has_fibers)
-    	{
-	std::string fibers_dir = dfile( "electric/space_discretization/fibers_dir", this->meshDir().c_str() );
-	std::string fibers_file = this->meshFile();
-    	fibers_file.replace(fibers_file.find(".mesh"), 5, "fibers");
-    	M_fibers_file = fibers_dir + dfile( "electric/space_discretization/fibers_file", fibers_file.c_str() );
-      	std::cout<<"Fibers File: "<<M_fibers_file<<std::endl;    	
-    	}
-    	else
-    	{
-    	M_fibers_file="";
-    	std::cout<<"Fibers not included!"<<std::endl;
-    	}
+    if (M_has_fibers)
+    {
+        std::string fibers_dir = dfile( "electric/space_discretization/fibers_dir", this->meshDir().c_str() );
+        std::string fibers_file = this->meshFile();
+        fibers_file.replace(fibers_file.find(".mesh"), 5, "fibers");
+        M_fibers_file = fibers_dir + dfile( "electric/space_discretization/fibers_file", fibers_file.c_str() );
+        std::cout<<"Fibers File: "<<M_fibers_file<<std::endl;
+    }
+    else
+    {
+        M_fibers_file="";
+        std::cout<<"Fibers not included!"<<std::endl;
+    }
 }
 
 // Output
@@ -284,8 +275,3 @@ showMe( std::ostream& c )
 
 }
 #endif
-
-
-
-
-

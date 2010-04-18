@@ -31,15 +31,14 @@
 #ifndef __HEART_H
 #define __HEART_H
 
-#define MONODOMAIN
-//#define BIDOMAIN
+//#define MONODOMAIN
+#define BIDOMAIN
 
 #include <life/lifecore/application.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifefilters/ensight.hpp>
-#include <iostream>
 #ifdef MONODOMAIN
 	#include <life/lifesolver/monodomainSolver.hpp>
 #else
@@ -141,7 +140,6 @@ public:
 private:
 	UInt ion_model;
 	UInt nbeq;
-	UInt REO;
 	//! Functors container
 //	class HeartFunctors;
     boost::shared_ptr<HeartFunctors> d;

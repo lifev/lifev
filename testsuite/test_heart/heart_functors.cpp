@@ -70,7 +70,8 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
     G_Iapp_stim_time_LV (dataFile("electric/physics/Iapp_stim_time_LV",10.)),
     G_Ventricular_Fibrillation (dataFile("electric/physics/Ventricular_Fibrillation",0)),
     G_nb_fibrillation_sources (dataFile("electric/physics/nb_fibrillation_sources",20)),
-    G_fibrillation_sources (dataFile("electric/physics/fibrillation_sources",0))
+    G_fibrillation_sources (dataFile("electric/physics/fibrillation_sources",0)),
+    u0(dataFile("electric/physics/u0",0.))
     {
 	sigma_reduction(0) = dataFile("electric/physics/sigma_reduction",1.,0);
 	sigma_reduction(1) = dataFile("electric/physics/sigma_reduction",1.,1);

@@ -42,10 +42,9 @@
 #include <boost/program_options.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
-#include <heart.hpp>
-#include <mpi.h>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
+#include <heart.hpp>
 
 LifeV::AboutData
 makeAbout()

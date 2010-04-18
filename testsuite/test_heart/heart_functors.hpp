@@ -9,10 +9,8 @@
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefilters/ensight.hpp>
-#include <iostream>
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
-#include <fstream>
 
 namespace LifeV
 {
@@ -104,6 +102,7 @@ public:
     Real G_Ventricular_Fibrillation;
     Real G_nb_fibrillation_sources;
     Real G_fibrillation_sources;
+    Real u0;
     /**
      * current volume source
      *
@@ -364,6 +363,36 @@ public:
     {
         fct_type f;
         f = boost::bind(&HeartFunctors::reduced_sigma_box, this, _1, _2, _3, _4, _5, _6);
+        return f;
+    }
+
+    Real initial_scalar( const Real& /* t */,
+            const Real& /* x */,
+            const Real& /* y */,
+            const Real& /* z */,
+            const ID& /* i */ )
+    {
+        return u0;
+    }
+    inline const fct_type1 get_initial_scalar()
+    {
+        fct_type1 f;
+        f = boost::bind(&HeartFunctors::initial_scalar, this, _1, _2, _3, _4, _5);
+        return f;
+    }
+
+    Real zero_scalar( const Real& /* t */,
+            const Real& /* x */,
+            const Real& /* y */,
+            const Real& /* z */,
+            const ID& /* i */ )
+    {
+        return 0.;
+    }
+    inline const fct_type1 get_zero_scalar()
+    {
+        fct_type1 f;
+        f = boost::bind(&HeartFunctors::zero_scalar, this, _1, _2, _3, _4, _5);
         return f;
     }
 

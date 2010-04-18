@@ -21,7 +21,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ */
 /**
   \file bidomainSolver.hpp
   \author L. Mirabella M. Perego
@@ -31,7 +31,7 @@
         \date 06/09
 
   \brief This file contains a Oseen equation solver class
-*/
+ */
 #ifndef _BIDOMAINSOLVER_H_
 #define _BIODOMAINSOLVER_H_
 
@@ -54,19 +54,18 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/stiffness_fibers.hpp>
 #include <life/lifefem/bdf_template.hpp>
-#include <fstream>
 namespace LifeV
 {
 /*!
   \class BidomainSolver
 
   This class implements a bidomain solver.
-*/
+ */
 
 const UInt nbComp = 2;
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class BidomainSolver
 {
 
@@ -75,9 +74,9 @@ public:
     typedef DataBidomain<Mesh> data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-                                 const Real&, const ID& );
+            const Real&, const ID& );
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
-                                   const Real&, const ID& )> source_type;
+            const Real&, const ID& )> source_type;
 
     typedef Mesh mesh_type;
 
@@ -98,22 +97,22 @@ public:
       \param potential FE space
       \param bcHandler boundary conditions for potential
       \param Epetra communicator
-    */
+     */
     BidomainSolver( const data_type&          dataType,
-    	   FESpace<Mesh, EpetraMap>& pFESpace,
-           FESpace<Mesh, EpetraMap>& uFESpace,
-           BCHandler&                bcHandler,
-           Epetra_Comm&              comm );
+            FESpace<Mesh, EpetraMap>& pFESpace,
+            FESpace<Mesh, EpetraMap>& uFESpace,
+            BCHandler&                bcHandler,
+            Epetra_Comm&              comm );
 
     /*!
       \param dataType
       \param potential FE space
       \param Epetra communicator
-    */
+     */
     BidomainSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& pFESpace,
-           FESpace<Mesh, EpetraMap>& uFESpace,
-           Epetra_Comm&              comm );
+            FESpace<Mesh, EpetraMap>& pFESpace,
+            FESpace<Mesh, EpetraMap>& uFESpace,
+            Epetra_Comm&              comm );
 
     //! virtual destructor
     virtual ~BidomainSolver();
@@ -129,8 +128,8 @@ public:
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(double       alpha,
-                              vector_type& sourceVec
-                              );
+            vector_type& sourceVec
+    );
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem( vector_type& sourceVec );
@@ -142,6 +141,7 @@ public:
 
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
+    const vector_type& solution_ue() const {return M_sol_ue;}
     const vector_type& solution_uiue() const {return M_sol_uiue;}
     const vector_type& solution_u_extrap() const {return M_sol_u_extrap;}
     const vector_type& fiber_vector() const {return M_fiber_vector;}
@@ -152,17 +152,11 @@ public:
     //! Returns u FE space
     FESpace<Mesh, EpetraMap>& potentialFESpace() {return M_uFESpace;}
 
-    //! Boundary Conditions
-    const bool BCset() const {return M_setBC;}
-
     //! Sets Bidomain BCs
     void setBC(BCHandler &BCh_u)
-        {
-            M_BCh_electric = &BCh_u; M_setBC = true;
-        }
-
-    //! Postprocessing
-    void postProcess(bool _writeMesh = false);
+    {
+        M_BCh_electric = &BCh_u; M_setBC = true;
+    }
 
     void resetPrec() {M_resetPrec = true;}
 
@@ -176,22 +170,28 @@ public:
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
     matrix_type& matrMass()
-        {
-            return *M_matrMass;
-        }
+    {
+        return *M_matrMass;
+    }
 
-    BdfT<vector_type>& bdf_u() {return M_bdf_u;}
+    BdfT<vector_type>& bdf_uiue() {return M_bdf_uiue;}
 
 protected:
 
-	//! Solves PDE system
+    //! Solves PDE system
     void solveSystem            (  matrix_ptrtype matrFull,
-                                   vector_type&   rhsFull );
+            vector_type&   rhsFull );
 
     //! Apply BC
     void applyBoundaryConditions(  matrix_type&        matrix,
-                                   vector_type&        rhs,
-                                   bchandler_raw_type& BCh);
+            vector_type&        rhs,
+            bchandler_raw_type& BCh);
+
+    //! compute mean of vector x
+    Real computeMean( vector_type& x );
+
+    //! removes a scalar from each entry of vector x
+    void removeValue( vector_type& x, Real& value );
 
     //! Data
     const data_type&               M_data;
@@ -229,6 +229,8 @@ protected:
 
     vector_type                    M_sol_u;
 
+    vector_type                    M_sol_ue;
+
     vector_type                    M_sol_uiue_extrap;
 
     vector_type                    M_sol_u_extrap;
@@ -262,14 +264,13 @@ protected:
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
 
-    BdfT<vector_type>		M_bdf_u;
+    BdfT<vector_type>		M_bdf_uiue;
 private:
 
     //! Elementary matrices
-    ElemMat                        M_elmatStiff;
-    ElemMat                        M_elmatMass;
-    Real 			   massCoeff;
-    UInt                       	   M_CalCoef;
+    ElemMat                        	M_elmatStiff;
+    ElemMat                        	M_elmatMass;
+    Real 			   				massCoeff;
     UInt dim_u() const           { return M_uFESpace.dim(); }
 }; // class BidomainSolver
 
@@ -283,620 +284,641 @@ private:
 template<typename Mesh, typename SolverType>
 BidomainSolver<Mesh, SolverType>::
 BidomainSolver( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& pFESpace,
-       FESpace<Mesh, EpetraMap>& uFESpace,
-       BCHandler&                BCh_u,
-       Epetra_Comm&              comm ):
-    M_data                   ( dataType ),
-    M_pFESpace               ( pFESpace ),
-    M_uFESpace               ( uFESpace ),
-    M_BCh_electric           ( &BCh_u ),
-    M_setBC                  ( true ),
-    M_comm                   ( &comm ),
-    M_me                     ( M_comm->MyPID() ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
-    M_localMap               ( pFESpace.map()),
-    M_localMap_u             ( uFESpace.map()),
-    M_localMapVec            (M_localMap_u+M_localMap_u+M_localMap_u),
-    M_matrMass               ( ),
-    M_matrStiff	             ( ),
-    M_matrNoBC               ( ),
-    M_elmatStiff             ( M_pFESpace.fe().nbNode, 2, 2 ),
-    M_elmatMass              ( M_pFESpace.fe().nbNode, 2, 2 ),
-    M_rhsNoBC                ( M_localMap ),
-    M_sol_uiue               ( M_localMap ),
-    M_sol_uiue_extrap        ( M_localMap ),
-    M_sol_u                  ( M_localMap_u ),
-    M_sol_u_extrap           ( M_localMap_u ),
-    M_fiber_vector           ( M_localMapVec, Repeated ),
-    M_residual               ( M_localMap ),
-    M_verbose                ( M_me == 0),
-    M_updated                ( false ),
-    M_reusePrec              ( true ),
-    M_resetPrec              ( true ),
-    M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false ),
-    M_bdf_u                  ( M_data.order_bdf()),
-    M_CalCoef                ( M_data.CalCoef())
-{
-	if (M_data.has_fibers() )
-	    {
-	    	std::stringstream MyPID;
-	        ifstream fibers(M_data.fibers_file().c_str());
-		char line[1024];
-		UInt NumPoints = M_localMap_u.getMap(Unique)->NumGlobalElements();
-		UInt NumGlobalElements= M_localMapVec.getMap(Unique)->NumGlobalElements();
-		std::vector<Real> fiber_global_vector(NumGlobalElements);
-		if (M_data.fibers_format() ){
-			fibers.getline(line,1024);
-			for( UInt i=0; i< NumPoints; ++i)
-				for (UInt k=0; k < 3; ++k)
-					fibers>>fiber_global_vector[i+k*NumPoints];
-		}
-		else{
-			for (UInt i=0 ; i< NumGlobalElements; ++i)
-				fibers>>fiber_global_vector[i];
-		}
-			UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
-			for(UInt j=0; j< NumMyElements; ++j){
-				UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-				M_fiber_vector[ig]= fiber_global_vector[ig-1];
-			}
-			std::cout << std::endl;
-			fiber_global_vector.clear();
-	    }
-};
-
-
-
-template<typename Mesh, typename SolverType>
-BidomainSolver<Mesh, SolverType>::
-BidomainSolver( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& pFESpace,
-       FESpace<Mesh, EpetraMap>& uFESpace,
-       Epetra_Comm&              comm ):
-    M_data               	( dataType ),
-    M_pFESpace              ( pFESpace ),
-    M_uFESpace              ( uFESpace ),
-    M_setBC                 ( false ),
-    M_comm                  ( &comm ),
-    M_me                    ( M_comm->MyPID() ),
-    M_linearSolver          ( ),
-    M_prec                  ( new prec_raw_type() ),
-    M_localMap              ( M_pFESpace.map()),
-    M_localMap_u            ( M_uFESpace.map() ),
-    M_matrMass              ( ),
-    M_matrStiff             ( ),
-    M_matrNoBC              ( ),
-    M_elmatStiff            ( M_pFESpace.fe().nbNode, 2, 2 ),
-    M_elmatMass             ( M_pFESpace.fe().nbNode, 2, 2 ),
-    M_rhsNoBC               ( M_localMap ),
-    M_residual              ( M_localMap ),
-    M_sol_uiue              ( M_localMap ),
-    M_sol_u                 ( M_localMap_u ),
-    M_verbose               ( M_me == 0),
-    M_updated               ( false ),
-    M_reusePrec             ( true ),
-    M_resetPrec             ( true ),
-    M_maxIterSolver         ( -1 ),
-    M_recomputeMatrix       ( false )
-{
-}
-
-
-
-template<typename Mesh, typename SolverType>
-BidomainSolver<Mesh, SolverType>::
-~BidomainSolver()
-{
-}
-
-
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
-{
-
-    M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
-
-    M_reusePrec   = dataFile( "electric/prec/reuse", true);
-
-    M_linearSolver.setDataFromGetPot( dataFile, "electric/solver" );
-
-    M_maxIterSolver = dataFile( "electric/solver/max_iter", -1);
-
-
-    std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
-
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "bidomainSolver : Preconditioner not set");
-
-    M_prec->setDataFromGetPot( dataFile, "electric/prec" );
-
-}
-
-
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::buildSystem()
-{
-    M_matrMass.reset  ( new matrix_type(M_localMap) );
-    M_matrStiff.reset( new matrix_type(M_localMap) );
-
-    if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
-
-    Chrono chrono;
-
-    Chrono chronoDer;
-    Chrono chronoStiff;
-    Chrono chronoMass;
-
-
-    Chrono chronoStiffAssemble;
-    Chrono chronoMassAssemble;
-    Chrono chronoZero;
-
-    M_comm->Barrier();
-
-    chrono.start();
-
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-
-    for ( UInt iVol = 1; iVol <= M_pFESpace.mesh()->numVolumes(); iVol++ )
+        FESpace<Mesh, EpetraMap>& pFESpace,
+        FESpace<Mesh, EpetraMap>& uFESpace,
+        BCHandler&                BCh_u,
+        Epetra_Comm&              comm ):
+            M_data                   ( dataType ),
+            M_pFESpace               ( pFESpace ),
+            M_uFESpace               ( uFESpace ),
+            M_comm                   ( &comm ),
+            M_me                     ( M_comm->MyPID() ),
+            M_BCh_electric           ( &BCh_u ),
+            M_setBC                  ( true ),
+            M_localMap               ( pFESpace.map()),
+            M_localMap_u             ( uFESpace.map()),
+            M_localMapVec            (M_localMap_u+M_localMap_u+M_localMap_u),
+            M_matrMass               ( ),
+            M_matrStiff	             ( ),
+            M_matrNoBC               ( ),
+            M_rhsNoBC                ( M_localMap ),
+            M_sol_uiue               ( M_localMap ),
+            M_sol_u                  ( M_localMap_u ),
+            M_sol_ue                  ( M_localMap_u ),
+            M_sol_uiue_extrap        ( M_localMap ),
+            M_sol_u_extrap           ( M_localMap_u ),
+            M_fiber_vector           ( M_localMapVec, Repeated ),
+            M_residual               ( M_localMap ),
+            M_linearSolver           ( ),
+            M_prec                   ( ),
+            M_verbose                ( M_me == 0),
+            M_updated                ( false ),
+            M_reusePrec              ( true ),
+            M_resetPrec              ( true ),
+            M_maxIterSolver          ( -1 ),
+            M_recomputeMatrix        ( false ),
+            M_bdf_uiue                 ( M_data.order_bdf()),
+            M_elmatStiff             ( M_pFESpace.fe().nbNode, 2, 2 ),
+            M_elmatMass              ( M_pFESpace.fe().nbNode, 2, 2 )
+            {
+    if (M_data.has_fibers() )
     {
-
-
-        chronoZero.start();
-
-        M_elmatStiff.zero();
-        M_elmatMass.zero();
-
-        chronoZero.stop();
-
-        chronoStiff.start();
-        switch(M_data.heart_diff_fct() )
-        {
-        	case 0:
-        		chronoDer.start();
-        		M_pFESpace.fe().updateFirstDeriv( M_pFESpace.mesh()->volumeList( iVol ) );
-        		chronoDer.stop();
-        		if (M_data.has_fibers() )
-        		{
-				stiff( M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0);
-        			stiff( M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1);
-        		}
-        		else
-        		{
-        			stiff( M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), 0, 0 );
-        			stiff( M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), 1, 1 );
-	        	}
-	        break;
-        	case 1:
-        		chronoDer.start();
-        		M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
-        		chronoDer.stop();
-        		if (M_data.has_fibers() )
-        	    {
-        	    	stiff( M_data.red_sigma_sphere,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
-        	    	stiff( M_data.red_sigma_sphere, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
-        	    }
-        	    else
-        	    {
-        	    	stiff( M_data.red_sigma_sphere, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
-        	        stiff( M_data.red_sigma_sphere, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
-        		}
-        	break;
-        	case 2:
-        	    chronoDer.start();
-        	    M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
-        	    chronoDer.stop();
-        	    if (M_data.has_fibers() )
-        	    {
-        	       	stiff( M_data.red_sigma_cyl,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
-        	      	stiff( M_data.red_sigma_cyl, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
-        	    }
-        	    else
-        	    {
-        	       	stiff( M_data.red_sigma_cyl, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0 , 0);
-        	        stiff( M_data.red_sigma_cyl, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
-        	    }
-        	break;
-        	case 3:
-        	    chronoDer.start();
-        	    M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
-        	    chronoDer.stop();
-        	    if (M_data.has_fibers() )
-        	    {
-        	      	stiff( M_data.red_sigma_box, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
-        	       	stiff( M_data.red_sigma_box, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
-        	    }
-        	    else
-        	    {
-        	       	stiff( M_data.red_sigma_box, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0 );
-        	        stiff( M_data.red_sigma_box, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1 );
-        	    }
-        	    break;
+        std::stringstream MyPID;
+        ifstream fibers(M_data.fibers_file().c_str());
+        char line[1024];
+        UInt NumPoints = M_localMap_u.getMap(Unique)->NumGlobalElements();
+        UInt NumGlobalElements= M_localMapVec.getMap(Unique)->NumGlobalElements();
+        std::vector<Real> fiber_global_vector(NumGlobalElements);
+        if (M_data.fibers_format() ){
+            fibers.getline(line,1024);
+            for( UInt i=0; i< NumPoints; ++i)
+                for (UInt k=0; k < 3; ++k)
+                    fibers>>fiber_global_vector[i+k*NumPoints];
         }
-        chronoStiff.stop();
-
-        chronoMass.start();
-        mass( 1., M_elmatMass, M_pFESpace.fe(), 0, 0 );
-        mass( -1., M_elmatMass, M_pFESpace.fe(), 0, 1 );
-        mass( -1., M_elmatMass, M_pFESpace.fe(), 1, 0 );
-        mass( 1., M_elmatMass, M_pFESpace.fe(), 1, 1 );
-        chronoMass.stop();
-
-        chronoStiffAssemble.start();
-        for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
-        	assembleMatrix( *M_matrStiff,
-        	                        M_elmatStiff,
-        	                        M_pFESpace.fe(),
-        	                        M_pFESpace.fe(),
-        	                        M_pFESpace.dof(),
-        	                        M_pFESpace.dof(),
-        	                        iComp, iComp,
-        	                        iComp*dim_u(), iComp*dim_u());
+        else{
+            for (UInt i=0 ; i< NumGlobalElements; ++i)
+                fibers>>fiber_global_vector[i];
         }
-        chronoStiffAssemble.stop();
-
-
-        chronoMassAssemble.start();
-        for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
-        	for ( UInt jComp = 0; jComp < nbComp; jComp++ ){
-        		assembleMatrix( *M_matrMass,
-        		                        M_elmatMass,
-        		                        M_pFESpace.fe(),
-        		                        M_pFESpace.fe(),
-        		                        M_pFESpace.dof(),
-        		                        M_pFESpace.dof(),
-        		                        iComp, jComp,
-        		                        iComp*dim_u(), jComp*dim_u());
-        	}
-         }
-         chronoMassAssemble.stop();
-
+        UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
+        for(UInt j=0; j< NumMyElements; ++j){
+            UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
+            M_fiber_vector[ig]= fiber_global_vector[ig-1];
+        }
+        std::cout << std::endl;
+        fiber_global_vector.clear();
     }
-
-if (M_CalCoef)
-       massCoeff = 1.0/ M_data.getTimeStep();
-else
-       massCoeff = M_data.Chi() * M_data.Cm() * M_bdf_u.coeff_der(0) / M_data.getTimeStep();
-
-	M_comm->Barrier();
-
-	chrono.stop();
-
-	if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
-
-	if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
-	chrono.start();
-
-    	M_matrStiff->GlobalAssemble();
-    	M_matrMass->GlobalAssemble();
-    	M_comm->Barrier();
-
-    	M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
-
-    //! Computing 1.0/dt * M + K
-
-    	*M_matrNoBC += *M_matrStiff;
-
-    	*M_matrNoBC += *M_matrMass*massCoeff;
-
-    	M_matrNoBC->GlobalAssemble();
-
-    	chrono.stop();
-    	if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    	if (false)
-        	std::cout << "partial times:  \n"
-                  << " Der            " << chronoDer.diff_cumul() << " s.\n"
-                  << " Zero           " << chronoZero.diff_cumul() << " s.\n"
-                  << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
-                  << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
-                  << " Mass           " << chronoMass.diff_cumul() << " s.\n"
-                  << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
-                  << std::endl;
-
-}
-
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
-initialize( const source_type& ui0, const source_type& ue0 )
-{
-
-     vector_type ui(M_uFESpace.map());
-     vector_type ue(M_uFESpace.map());
-
-     M_uFESpace.interpolate(ui0, ui, 0.);
-     M_uFESpace.interpolate(ue0, ue, 0.);
-
-     initialize(ui, ue);
-}
-
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
-initialize( const Function& ui0, const Function& ue0 )
-{
-
-     vector_type ui(M_uFESpace.map());
-     vector_type ue(M_uFESpace.map());
-
-     M_uFESpace.interpolate(ui0, ui, 0.);
-     M_uFESpace.interpolate(ue0, ue, 0.);
-
-     initialize(ui, ue);
-}
+            };
 
 
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
-initialize( const vector_type& ui0, const vector_type& ue0 )
-{
-   M_sol_uiue = ui0;
-   M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
 
-    for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
-   	{
-	int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
-        M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
-	}
-   M_sol_uiue_extrap = M_sol_uiue;
-   M_sol_u_extrap = M_sol_u;
-   M_bdf_u.initialize_unk(M_sol_uiue);
-   M_bdf_u.showMe();
-}
+            template<typename Mesh, typename SolverType>
+            BidomainSolver<Mesh, SolverType>::
+            BidomainSolver( const data_type&          dataType,
+                    FESpace<Mesh, EpetraMap>& pFESpace,
+                    FESpace<Mesh, EpetraMap>& uFESpace,
+                    Epetra_Comm&              comm ):
+                        M_data               	( dataType ),
+                        M_pFESpace              ( pFESpace ),
+                        M_uFESpace              ( uFESpace ),
+                        M_comm                  ( &comm ),
+                        M_me                    ( M_comm->MyPID() ),
+                        M_setBC                 ( false ),
+                        M_localMap              ( M_pFESpace.map()),
+                        M_localMap_u            ( M_uFESpace.map() ),
+                        M_matrMass              ( ),
+                        M_matrStiff             ( ),
+                        M_matrNoBC              ( ),
+                        M_rhsNoBC               ( M_localMap ),
+                        M_sol_uiue              ( M_localMap ),
+                        M_sol_u                 ( M_localMap_u ),
+                        M_sol_ue                 ( M_localMap_u ),
+                        M_residual              ( M_localMap ),
+                        M_linearSolver          ( ),
+                        M_prec                  ( new prec_raw_type() ),
+                        M_verbose               ( M_me == 0),
+                        M_updated               ( false ),
+                        M_reusePrec             ( true ),
+                        M_resetPrec             ( true ),
+                        M_maxIterSolver         ( -1 ),
+                        M_recomputeMatrix       ( false ),
+                        M_elmatStiff            ( M_pFESpace.fe().nbNode, 2, 2 ),
+                        M_elmatMass             ( M_pFESpace.fe().nbNode, 2, 2 )
+                        {
+                        }
 
 
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
-updatePDESystem(Real       alpha,
-             vector_type& sourceVec
-             )
-{
 
-    Chrono chrono;
+            template<typename Mesh, typename SolverType>
+            BidomainSolver<Mesh, SolverType>::
+            ~BidomainSolver()
+            {
+            }
 
-    if (M_verbose)
-            std::cout << "  f-  Updating mass term and right hand side... "
-                  << std::flush;
 
-    chrono.start();
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
+            {
 
-    M_rhsNoBC = sourceVec;
-    M_rhsNoBC.GlobalAssemble();
+                M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
 
-    chrono.stop();
+                M_reusePrec   = dataFile( "electric/prec/reuse", true);
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
+                M_linearSolver.setDataFromGetPot( dataFile, "electric/solver" );
 
-    M_updated = false;
+                M_maxIterSolver = dataFile( "electric/solver/max_iter", -1);
 
-    if (M_recomputeMatrix)
-        buildSystem();
 
-    if (M_verbose)
-          std::cout << "  f-  Copying the matrices ...                 "
+                std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
+
+                M_prec.reset( PRECFactory::instance().createObject( precType ) );
+                ASSERT(M_prec.get() != 0, "bidomainSolver : Preconditioner not set");
+
+                M_prec->setDataFromGetPot( dataFile, "electric/prec" );
+
+            }
+
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::buildSystem()
+            {
+                M_matrMass.reset  ( new matrix_type(M_localMap) );
+                M_matrStiff.reset( new matrix_type(M_localMap) );
+
+                if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
+
+                Chrono chrono;
+
+                Chrono chronoDer;
+                Chrono chronoStiff;
+                Chrono chronoMass;
+
+
+                Chrono chronoStiffAssemble;
+                Chrono chronoMassAssemble;
+                Chrono chronoZero;
+
+                M_comm->Barrier();
+
+                chrono.start();
+
+                //! Elementary computation and matrix assembling
+                //! Loop on elements
+
+                for ( UInt iVol = 1; iVol <= M_pFESpace.mesh()->numVolumes(); iVol++ )
+                {
+
+
+                    chronoZero.start();
+
+                    M_elmatStiff.zero();
+                    M_elmatMass.zero();
+
+                    chronoZero.stop();
+
+                    chronoStiff.start();
+                    switch(M_data.heart_diff_fct() )
+                    {
+                    case 0:
+                        chronoDer.start();
+                        M_pFESpace.fe().updateFirstDeriv( M_pFESpace.mesh()->volumeList( iVol ) );
+                        chronoDer.stop();
+                        if (M_data.has_fibers() )
+                        {
+                            stiff( M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0);
+                            stiff( M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1);
+                        }
+                        else
+                        {
+                            stiff( M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), 0, 0 );
+                            stiff( M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), 1, 1 );
+                        }
+                        break;
+                    case 1:
+                        chronoDer.start();
+                        M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
+                        chronoDer.stop();
+                        if (M_data.has_fibers() )
+                        {
+                            stiff( M_data.red_sigma_sphere,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+                            stiff( M_data.red_sigma_sphere, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
+                        }
+                        else
+                        {
+                            stiff( M_data.red_sigma_sphere, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+                            stiff( M_data.red_sigma_sphere, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
+                        }
+                        break;
+                    case 2:
+                        chronoDer.start();
+                        M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
+                        chronoDer.stop();
+                        if (M_data.has_fibers() )
+                        {
+                            stiff( M_data.red_sigma_cyl,  M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+                            stiff( M_data.red_sigma_cyl, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
+                        }
+                        else
+                        {
+                            stiff( M_data.red_sigma_cyl, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0 , 0);
+                            stiff( M_data.red_sigma_cyl, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
+                        }
+                        break;
+                    case 3:
+                        chronoDer.start();
+                        M_pFESpace.fe().updateFirstDerivQuadPt( M_pFESpace.mesh()->volumeList( iVol ) );
+                        chronoDer.stop();
+                        if (M_data.has_fibers() )
+                        {
+                            stiff( M_data.red_sigma_box, M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0);
+                            stiff( M_data.red_sigma_box, M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1);
+                        }
+                        else
+                        {
+                            stiff( M_data.red_sigma_box, M_data.D_i(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 0, 0, 0 );
+                            stiff( M_data.red_sigma_box, M_data.D_e(), M_elmatStiff,  M_pFESpace.fe(), M_pFESpace.dof(), 1, 1, 1 );
+                        }
+                        break;
+                    }
+                    chronoStiff.stop();
+
+                    chronoMass.start();
+                    mass( 1., M_elmatMass, M_pFESpace.fe(), 0, 0 );
+                    mass( -1., M_elmatMass, M_pFESpace.fe(), 0, 1 );
+                    mass( -1., M_elmatMass, M_pFESpace.fe(), 1, 0 );
+                    mass( 1., M_elmatMass, M_pFESpace.fe(), 1, 1 );
+                    chronoMass.stop();
+
+                    chronoStiffAssemble.start();
+                    for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
+                        assembleMatrix( *M_matrStiff,
+                                M_elmatStiff,
+                                M_pFESpace.fe(),
+                                M_pFESpace.fe(),
+                                M_pFESpace.dof(),
+                                M_pFESpace.dof(),
+                                iComp, iComp,
+                                iComp*dim_u(), iComp*dim_u());
+                    }
+                    chronoStiffAssemble.stop();
+
+
+                    chronoMassAssemble.start();
+                    for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
+                        for ( UInt jComp = 0; jComp < nbComp; jComp++ ){
+                            assembleMatrix( *M_matrMass,
+                                    M_elmatMass,
+                                    M_pFESpace.fe(),
+                                    M_pFESpace.fe(),
+                                    M_pFESpace.dof(),
+                                    M_pFESpace.dof(),
+                                    iComp, jComp,
+                                    iComp*dim_u(), jComp*dim_u());
+                        }
+                    }
+                    chronoMassAssemble.stop();
+
+                }
+
+                massCoeff = M_data.Chi() * M_data.Cm() * M_bdf_uiue.coeff_der(0) / M_data.getTimeStep();
+
+                M_comm->Barrier();
+
+                chrono.stop();
+
+                if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+
+                if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
+                chrono.start();
+
+                M_matrStiff->GlobalAssemble();
+                M_matrMass->GlobalAssemble();
+                M_comm->Barrier();
+
+                M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+
+                //! Computing 1.0/dt * M + K
+
+                *M_matrNoBC += *M_matrStiff;
+
+                *M_matrNoBC += *M_matrMass*massCoeff;
+
+                M_matrNoBC->GlobalAssemble();
+
+                chrono.stop();
+                if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+                if (false)
+                    std::cout << "partial times:  \n"
+                    << " Der            " << chronoDer.diff_cumul() << " s.\n"
+                    << " Zero           " << chronoZero.diff_cumul() << " s.\n"
+                    << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
+                    << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
+                    << " Mass           " << chronoMass.diff_cumul() << " s.\n"
+                    << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
+                    << std::endl;
+
+            }
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::
+            initialize( const source_type& ui0, const source_type& ue0 )
+            {
+
+                vector_type ui(M_uFESpace.map());
+                vector_type ue(M_uFESpace.map());
+
+                M_uFESpace.interpolate(ui0, ui, 0.);
+                M_uFESpace.interpolate(ue0, ue, 0.);
+
+                initialize(ui, ue);
+            }
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::
+            initialize( const Function& ui0, const Function& ue0 )
+            {
+
+                vector_type ui(M_uFESpace.map());
+                vector_type ue(M_uFESpace.map());
+
+                M_uFESpace.interpolate(ui0, ui, 0.);
+                M_uFESpace.interpolate(ue0, ue, 0.);
+
+                initialize(ui, ue);
+            }
+
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::
+            initialize( const vector_type& ui0, const vector_type& ue0 )
+            {
+                M_sol_uiue = ui0;
+                M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
+
+                for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                {
+                    int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+                    M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
+                    M_sol_ue[ig] = M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
+                }
+                M_sol_uiue_extrap = M_sol_uiue;
+                M_sol_u_extrap = M_sol_u;
+                M_bdf_uiue.initialize_unk(M_sol_uiue);
+                M_bdf_uiue.showMe();
+            }
+
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::
+            updatePDESystem(Real       alpha,
+                    vector_type& sourceVec
+            )
+            {
+
+                Chrono chrono;
+
+                if (M_verbose)
+                    std::cout << "  f-  Updating mass term and right hand side... "
                     << std::flush;
 
-    chrono.start();
+                chrono.start();
 
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+                M_rhsNoBC = sourceVec;
+                M_rhsNoBC.GlobalAssemble();
 
-    *M_matrNoBC += *M_matrStiff;
+                chrono.stop();
 
-    *M_matrNoBC += *M_matrMass*alpha;
+                if (M_verbose)
+                    std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
 
+                M_updated = false;
 
-    chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
-                             << std::flush;
+                if (M_recomputeMatrix)
+                    buildSystem();
 
+                if (M_verbose)
+                    std::cout << "  f-  Copying the matrices ...                 "
+                    << std::flush;
 
+                chrono.start();
 
-    M_updated = true;
-    M_matrNoBC->GlobalAssemble();
+                M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
-}
+                *M_matrNoBC += *M_matrStiff;
 
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
-updatePDESystem(vector_type& sourceVec )
-{
+                *M_matrNoBC += *M_matrMass*alpha;
 
-    Chrono chrono;
 
-    if (M_verbose)
-            std::cout << "  f-  Updating right hand side... "
-                  << std::flush;
+                chrono.stop();
+                if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
+                << std::flush;
 
-    chrono.start();
 
-    M_rhsNoBC = sourceVec;
-    M_rhsNoBC.GlobalAssemble();
 
-    chrono.stop();
+                M_updated = true;
+                M_matrNoBC->GlobalAssemble();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
+            }
 
-}
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::
+            updatePDESystem(vector_type& sourceVec )
+            {
 
+                Chrono chrono;
 
+                if (M_verbose)
+                    std::cout << "  f-  Updating right hand side... "
+                    << std::flush;
 
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
-{
+                chrono.start();
 
-    Chrono chrono;
+                M_rhsNoBC = sourceVec;
+                M_rhsNoBC.GlobalAssemble();
 
+                chrono.stop();
 
-    chrono.start();
+                if (M_verbose)
+                    std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
 
+            }
 
-    matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
-    vector_type    rhsFull = M_rhsNoBC;
 
-    chrono.stop();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"
-                  << std::flush;
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
+            {
 
-    // boundary conditions update
-    M_comm->Barrier();
-    if (M_verbose) std::cout << "  f-  Applying boundary conditions ...         "
-              << std::flush;
+                Chrono chrono;
 
-    chrono.start();
 
-    applyBoundaryConditions( *matrFull, rhsFull, bch);
+                chrono.start();
 
-    chrono.stop();
 
-    M_comm->Barrier();
+                matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
+                vector_type    rhsFull = M_rhsNoBC;
 
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+                chrono.stop();
 
-    //! Solving the system
-    solveSystem( matrFull, rhsFull );
+                if (M_verbose)
+                    std::cout << "done in " << chrono.diff() << " s.\n"
+                    << std::flush;
 
-    M_residual  = M_rhsNoBC;
-    M_residual -= *M_matrNoBC*M_sol_uiue;
+                // boundary conditions update
+                M_comm->Barrier();
+                if (M_verbose) std::cout << "  f-  Applying boundary conditions ...         "
+                << std::flush;
 
-} // iterate()
+                chrono.start();
 
+                applyBoundaryConditions( *matrFull, rhsFull, bch);
 
+                chrono.stop();
 
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull )
-{
-    Chrono chrono;
-for ( int i = 0 ; i < rhsFull.getEpetraVector().MyLength() ; i++ )
-        {
-        int ig=rhsFull.BlockMap().MyGlobalElements()[i];
-	}
+                M_comm->Barrier();
 
-    if (M_verbose)
-        std::cout << "  f-  Setting up the solver ...                ";
+                if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
 
-    chrono.start();
-    M_linearSolver.setMatrix(*matrFull);
-    chrono.stop();
+                //! Solving the system
+                solveSystem( matrFull, rhsFull );
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"
-                  << std::flush;
+                //    M_residual  = M_rhsNoBC;
+                //    M_residual -= *M_matrNoBC*M_sol_uiue;
 
-    if ( !M_reusePrec || M_resetPrec )
-    {
-        chrono.start();
+            } // iterate()
 
-        if (M_verbose)
-            std::cout << "  f-  Computing the precond ...                ";
 
-        M_prec->buildPreconditioner(matrFull);
-        std::cout << "Before condest"<<std::endl<<std::flush;
-        double condest = M_prec->Condest();
-        std::cout << "After condest"<<std::endl<<std::flush;
 
-        M_linearSolver.setPreconditioner(M_prec);
-        std::cout << "After setPreconditioner"<<std::endl<<std::flush;
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
+                    vector_type&    rhsFull )
+                    {
+                Chrono chrono;
 
-        chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-          	std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
+                if (M_verbose)
+                    std::cout << "  f-  Setting up the solver ...                ";
 
-        M_resetPrec = false;
-    }
-    else
-    {
-        if (M_verbose)
-            std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
-    }
+                chrono.start();
+                M_linearSolver.setMatrix(*matrFull);
+                chrono.stop();
 
+                if (M_verbose)
+                    std::cout << "done in " << chrono.diff() << " s.\n"
+                    << std::flush;
 
-    chrono.start();
+                if ( !M_reusePrec || M_resetPrec )
+                {
+                    chrono.start();
 
-    if (M_verbose)
-        std::cout << "  f-  Solving system ...                                ";
+                    if (M_verbose)
+                        std::cout << "  f-  Computing the precond ...                ";
 
-    int numIter = M_linearSolver.solve(M_sol_uiue, rhsFull);
+                    M_prec->buildPreconditioner(matrFull);
 
+                    double condest = M_prec->Condest();
 
-    chrono.stop();
+                    M_linearSolver.setPreconditioner(M_prec);
 
-    if (M_verbose)
-    {
-        std::cout << "\ndone in " << chrono.diff()
-                  << " s. ( " << numIter << "  iterations. ) \n"
-                  << std::flush;
-    }
+                    chrono.stop();
+                    if (M_verbose)
+                    {
+                        std::cout << "done in " << chrono.diff() << " s.\n";
+                        std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
+                    }
 
+                    M_resetPrec = false;
+                }
+                else
+                {
+                    if (M_verbose)
+                        std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
+                }
 
-    if (numIter > M_maxIterSolver)
-    {
-        M_resetPrec = true;
-    }
-    for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
-       	{
-	UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
-        M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
-	}
-    M_bdf_u.shift_right(M_sol_uiue);
-    M_sol_uiue_extrap = M_bdf_u.extrap();
-    M_bdf_u.showMe();
-    for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
-        {
-        UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
-        M_sol_u_extrap[ig] = M_sol_uiue_extrap[ig] - M_sol_uiue_extrap[ig+dim_u()]; // BASEINDEX + 1
-        }
 
-}
+                chrono.start();
 
-//occhio: to check!
+                if (M_verbose)
+                    std::cout << "  f-  Solving system ...                                ";
 
-template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
-                                                       vector_type&        rhs,
-                                                       bchandler_raw_type& BCh )
-{
+                int numIter = M_linearSolver.solve(M_sol_uiue, rhsFull);
 
-    // BC manage for the PDE
-    if ( !BCh.bdUpdateDone() )
-    {
-        BCh.bdUpdate( *M_pFESpace.mesh(), M_pFESpace.feBd(), M_pFESpace.dof() );
-    }
+                chrono.stop();
 
-    vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
+                if (M_verbose)
+                {
+                    std::cout << "\ndone in " << chrono.diff()
+                    << " s. ( " << numIter << "  iterations. ) \n"
+                    << std::flush;
+                }
 
 
-//    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+                if (numIter > M_maxIterSolver)
+                {
+                    M_resetPrec = true;
+                }
 
-    bcManage( matrix, rhs, *M_pFESpace.mesh(), M_pFESpace.dof(), BCh, M_pFESpace.feBd(), 1.,
-              M_data.getTime() );
 
-    rhs = rhsFull;
+                for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                {
+                    UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+                    M_sol_ue[ig] = M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
+                }
+                Real meanue=computeMean(M_sol_ue);
+                removeValue(M_sol_uiue, meanue);
 
+                for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                {
+                    UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+                    M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
+                    M_sol_ue[ig] = M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
+                }
 
-    if ( BCh.hasOnlyEssential() && M_diagonalize )
-    {
-        matrix.diagonalize( 1*dim_u(),
+                M_bdf_uiue.shift_right(M_sol_uiue);
+                M_sol_uiue_extrap = M_bdf_uiue.extrap();
+
+                for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                {
+                    UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+                    M_sol_u_extrap[ig] = M_sol_uiue_extrap[ig] - M_sol_uiue_extrap[ig+dim_u()]; // BASEINDEX + 1
+                }
+
+                    }
+
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
+                    vector_type&        rhs,
+                    bchandler_raw_type& BCh )
+                    {
+
+                // BC manage for the PDE
+                if ( !BCh.bdUpdateDone() )
+                {
+                    BCh.bdUpdate( *M_pFESpace.mesh(), M_pFESpace.feBd(), M_pFESpace.dof() );
+                }
+
+                vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
+
+
+                //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+
+                bcManage( matrix, rhs, *M_pFESpace.mesh(), M_pFESpace.dof(), BCh, M_pFESpace.feBd(), 1.,
+                        M_data.getTime() );
+
+                rhs = rhsFull;
+
+
+                if ( BCh.hasOnlyEssential() && M_diagonalize )
+                {
+                    matrix.diagonalize( 1*dim_u(),
                             M_diagonalize,
                             rhs,
                             0.);
-    }
+                }
 
-} // applyBoundaryCondition
+                    } // applyBoundaryCondition
 
+            template<typename Mesh, typename SolverType>
+            Real BidomainSolver<Mesh, SolverType>::computeMean( vector_type& x )
+            {
+                Real mean_ue(0.);
+                x.getEpetraVector().MeanValue(&mean_ue);
+                return mean_ue;
 
+            } // computeMean()
+
+            template<typename Mesh, typename SolverType>
+            void BidomainSolver<Mesh, SolverType>::removeValue( vector_type& x, Real& value )
+            {
+                for ( int i = 0 ; i < x.getEpetraVector().MyLength() ; i++ )
+                {
+                    int ig=x.BlockMap().MyGlobalElements()[i];
+                    x[ig] -= value; // BASEINDEX + 1
+                }
+
+            } // removeMean()
 
 } // namespace LifeV
 
 
-#endif //_MONODOMAINSOLVER_H_
+#endif //_BIDOMAINSOLVER_H_

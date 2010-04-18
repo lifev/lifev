@@ -131,6 +131,7 @@ public:
     virtual void updatePDESystem( vector_type& sourceVec );
 
     //! Initialize
+    void initialize( const source_type& );
     void initialize( const Function&  );
     void initialize( const vector_type& );
 
@@ -144,9 +145,6 @@ public:
 
     //! Returns u FE space
     FESpace<Mesh, EpetraMap>& potentialFESpace() {return M_uFESpace;}
-
-    //! Boundary Conditions
-    const bool BCset() const {return M_setBC;}
 
     //! Sets Monodomain BCs
     void setBC(BCHandler &BCh_u)
@@ -271,29 +269,29 @@ MonodomainSolver( const data_type&          dataType,
        Epetra_Comm&              comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
-    M_BCh_electric           ( &BCh_u ),
-    M_setBC                  ( true ),
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
+    M_BCh_electric           ( &BCh_u ),
+    M_setBC                  ( true ),
     M_localMap               ( M_uFESpace.map() ),
     M_localMapVec              (M_localMap+M_localMap+M_localMap),
     M_matrMass               ( ),
     M_matrStiff	             ( ),
     M_matrNoBC               ( ),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
     M_rhsNoBC                ( M_localMap ),
     M_sol_u                  ( M_localMap ),
     M_fiber_vector           ( M_localMapVec, Repeated ),
     M_residual               ( M_localMap ),
+    M_linearSolver           ( ),
+    M_prec                   ( ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false )
+    M_recomputeMatrix        ( false ),
+    M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
+    M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 )
 {
 
 	if (M_data.has_fibers() )
@@ -471,7 +469,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoeff = 1.0 / M_data.getTimeStep();
+    massCoeff = M_data.Chi() * M_data.Cm() / M_data.getTimeStep();
 
     M_comm->Barrier();
 
@@ -510,6 +508,19 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
                   << std::endl;
 
 }
+
+template<typename Mesh, typename SolverType>
+void MonodomainSolver<Mesh, SolverType>::
+initialize( const source_type& u0 )
+{
+
+    vector_type u(M_uFESpace.map());
+
+    M_uFESpace.interpolate(u0, u, 0.);
+
+    initialize(u);
+}
+
 
 
 template<typename Mesh, typename SolverType>

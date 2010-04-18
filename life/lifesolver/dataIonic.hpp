@@ -23,7 +23,7 @@
   \version 1.0
 
   \brief File containing a class for handling Monodomain data with GetPot
-	
+
 	\modif J.Castelneau (INRIA)
 	\date 06/09
 */
@@ -83,7 +83,7 @@ public:
     //! FE space order
     std::string wOrder() const;
 
-    UInt verbose; 
+    UInt verbose;
     string mesh_file;
     Real a;
     Real b;
@@ -106,7 +106,7 @@ public:
 	Real 		reac_amp;
 	Real 		tinit;
 	Real 		tend;
-	Real 		order_bdf;       //= 1  
+	Real 		order_bdf;       //= 1
         bool		has_HeteroTauClose;
 #ifdef REO_CASE
 	Shared_Ptr	M_ShdPtr;
@@ -156,7 +156,7 @@ DataIonic( const DataIonic& dataIonic ) :
     d(dataIonic.d),
     T(dataIonic.T),
     A(dataIonic.A),
-    u0(dataIonic.u0),   
+    u0(dataIonic.u0),
     winit(dataIonic.winit),
 	// Mitchell & Schaeffer
     tau_in(dataIonic.tau_in),
@@ -170,7 +170,7 @@ DataIonic( const DataIonic& dataIonic ) :
     tinit(dataIonic.tinit),
     tend(dataIonic.tend),
     order_bdf(dataIonic.order_bdf),
-    has_HeteroTauClose(dataIonic.has_HeteroTauClose)	
+    has_HeteroTauClose(dataIonic.has_HeteroTauClose)
 {
 }
 
@@ -186,9 +186,9 @@ setup(  const GetPot& dfile )
     c2   		= dfile("electric/physics/c2",0.1);   //0.1    adim //RogersMcCulloch1994
     d   		= dfile("electric/physics/d",1);      //1      adim //RogersMcCulloch1994
     T   		= dfile("electric/physics/T",0.63);    //0.63ms    //RogersMcCulloch1994
-    A   		= dfile("electric/physics/A",130);    //130mV    //RogersMcCulloch1994
+    A   		= dfile("electric/physics/A",110);    //130mV    //RogersMcCulloch1994
     u0   		= dfile("electric/physics/u0",-84.0);	  //-84mV    //RogersMcCulloch1994
-    winit		= dfile("electric/physics/winit", 0);  
+    winit		= dfile("electric/physics/winit", 0);
 	// Mitchell & Schaeffer
     tau_in    = dfile("electric/physics/tau_in",0.8);
     v_min    = dfile("electric/physics/v_min",-80.0);

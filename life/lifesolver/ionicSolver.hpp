@@ -54,7 +54,6 @@
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdf_template.hpp>
-#include <fstream>
 
 namespace LifeV
 {
@@ -481,24 +480,24 @@ void Rogers_McCulloch<Mesh, SolverType>::ionModelSolve( const vector_type& u, co
 }
 
 template<typename Mesh, typename SolverType>
-void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real /*Cm*/, ElemVec& elvec, ElemVec& elvec_u, FESpace<Mesh, EpetraMap>& uFESpace )
+void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real Cm, ElemVec& elvec, ElemVec& elvec_u, FESpace<Mesh, EpetraMap>& uFESpace )
 {
 	Real u_ig, w_ig;
 
 	Real G1 = this->M_data.c1/this->M_data.T/pow(this->M_data.A,2.0);
 	Real G2 = this->M_data.c2/this->M_data.T;
 
-        for ( int ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
+        for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         u_ig = w_ig = 0.;
-        for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
             u_ig += elvec_u( i ) * uFESpace.fe().phi( i, ig );
-        for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
             w_ig += M_elvec( i ) * uFESpace.fe().phi( i, ig );
 
-        for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
         {
-            elvec( i ) -= (G1*(u_ig- this->M_data.u0)*(u_ig - this->M_data.u0 - this->M_data.a*this->M_data.A)*(u_ig - this->M_data.u0 - this->M_data.A) + G2 * (u_ig - this->M_data.u0) * w_ig) * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
+            elvec( i ) -= Cm*(G1*(u_ig- this->M_data.u0)*(u_ig - this->M_data.u0 - this->M_data.a*this->M_data.A)*(u_ig - this->M_data.u0 - this->M_data.A) + G2 * (u_ig - this->M_data.u0) * w_ig) * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
         }
     }
 //std::cout<<"******************elemvec ="<<elvec<<"********************\n"<<std::flush;
@@ -889,19 +888,19 @@ void Luo_Rudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 }
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::computeIion(  Real Cm, ElemVec& elvec, ElemVec& /*elvec_u*/, FESpace<Mesh, EpetraMap>& uFESpace )
+void Luo_Rudy<Mesh, SolverType>::computeIion(  Real /*Cm*/, ElemVec& elvec, ElemVec& /*elvec_u*/, FESpace<Mesh, EpetraMap>& uFESpace )
 {
 
 	Real Iion_ig;
-        for ( int ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
+        for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         Iion_ig = 0.;
-        for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
             Iion_ig += M_elvec_Iion( i ) * uFESpace.fe().phi( i, ig );
 
-        for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
         {
-            elvec( i ) -= Iion_ig/Cm/1000 * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig ); // divide by 1000 to convert microA in mA
+            elvec( i ) -= Iion_ig/1000 * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig ); // divide by 1000 to convert microA in mA
         }
     }
 
