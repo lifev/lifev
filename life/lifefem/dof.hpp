@@ -393,7 +393,7 @@ void Dof::update( Mesh& M )
             lc = lcount;
             for ( l = 0; l < nldpV; ++l )
                 {
-                    _ltg( ++lc, ie ) = gcount + (M.element( ie ).id() - 1) * nldpv + l;
+                    _ltg( ++lc, ie ) = gcount + (M.element( ie ).id() - 1) * nldpV + l;
                 }
         }
     gcount += nV * nldpV;
