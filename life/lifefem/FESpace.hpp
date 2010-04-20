@@ -160,7 +160,7 @@ public:
     //! @name Methods
     //@{
 
-    //! Method to compute the L2 error when using a weight function
+    //! Method to computes the L2 error when using a weight function
     /*!
       The scope of this method is to compute \f$ \left( \int w (u_{\operatorname{exact}} - u_h) \right)^{1/2} \f$.
       The usual L2 error norm can be retrieved by using \f$ w=1 \f$
@@ -1071,22 +1071,25 @@ FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
         {
             Real solutionInQuadNode(0.0);
             
-            for (UInt iDof(0); iDof< this->fe().nbFEDof(); ++iDof)
+            for (UInt iDim(0); iDim< M_fieldDim; ++iDim)
             {
-                UInt dofID(this->dof().localToGlobal(iVol,iDof+1));
-                solutionInQuadNode += this->fe().phi(iDof,iQuad) * solution[dofID];
-            };
-            
-            Real x(this->fe().quadNode(iQuad,0));
-            Real y(this->fe().quadNode(iQuad,1));
-            Real z(this->fe().quadNode(iQuad,2));
-            Real weightInQuadNode(weight(time,x,y,z,0));
-            Real exactInQuadNode(exactSolution(time,x,y,z,0));
-
-            sumOfSquare += weightInQuadNode
-                          * (exactInQuadNode - solutionInQuadNode)
-                          * (exactInQuadNode - solutionInQuadNode)
-                          * this->fe().wDetJacobian(iQuad);
+                for (UInt iDof(0); iDof< this->fe().nbFEDof(); ++iDof)
+                {
+                    UInt dofID(this->dof().localToGlobal(iVol,iDof+1) + iDim*this->dof().numTotalDof());
+                    solutionInQuadNode += this->fe().phi(iDof,iQuad) * solution[dofID];
+                }
+                
+                Real x(this->fe().quadNode(iQuad,0));
+                Real y(this->fe().quadNode(iQuad,1));
+                Real z(this->fe().quadNode(iQuad,2));
+                Real weightInQuadNode(weight(time,x,y,z,iDim));
+                Real exactInQuadNode(exactSolution(time,x,y,z,iDim));
+                
+                sumOfSquare += weightInQuadNode
+                    * (exactInQuadNode - solutionInQuadNode)
+                    * (exactInQuadNode - solutionInQuadNode)
+                    * this->fe().wDetJacobian(iQuad);
+            }
         }
     }
 
@@ -1462,10 +1465,10 @@ FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 
   // First, check that the interpolation is possible
   ASSERT(fieldDim() == OriginalSpace.fieldDim(),"Incompatible field dimension for interpolation");
-  ASSERT(refFE().shape == OriginalSpace.refFE().shape , "Incompatible element shape for interpolation");
+  ASSERT(refFE().shape() == OriginalSpace.refFE().shape() , "Incompatible element shape for interpolation");
 
   // If the spaces are the same, just return the original vector
-  if (refFE().type == OriginalSpace.refFE().type)
+  if (refFE().type() == OriginalSpace.refFE().type())
   {
     return OriginalVector;
   };
@@ -1480,13 +1483,13 @@ FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 
   // Distinguish the other cases
 
-  if (refFE().type == FE_P1_3D)
+  if (refFE().type() == FE_P1_3D)
   {
-    if (OriginalSpace.refFE().type == FE_P1bubble_3D)
+      if (OriginalSpace.refFE().type() == FE_P1bubble_3D)
     {
       return P1bToP1Interpolate(OriginalSpace,OriginalVector);
     }
-    else if (OriginalSpace.refFE().type == FE_P2_3D)
+      else if (OriginalSpace.refFE().type() == FE_P2_3D)
     {
       return P2ToP1Interpolate(OriginalSpace,OriginalVector);
     }
@@ -1495,13 +1498,13 @@ FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
       ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
     };
   }
-  else if (refFE().type == FE_P1bubble_3D)
+  else if (refFE().type() == FE_P1bubble_3D)
   {
-    if (OriginalSpace.refFE().type == FE_P1_3D)
+      if (OriginalSpace.refFE().type() == FE_P1_3D)
     {
       return P1ToP1bInterpolate(OriginalSpace,OriginalVector);
     }
-    else if (OriginalSpace.refFE().type == FE_P2_3D)
+      else if (OriginalSpace.refFE().type() == FE_P2_3D)
     {
       return P2ToP1bInterpolate(OriginalSpace,OriginalVector);
     }
@@ -1510,13 +1513,13 @@ FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
       ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
     };
   }
-  else if (refFE().type == FE_P2_3D)
+  else if (refFE().type() == FE_P2_3D)
   {
-    if (OriginalSpace.refFE().type == FE_P1bubble_3D)
+      if (OriginalSpace.refFE().type() == FE_P1bubble_3D)
     {
       return P1bToP2Interpolate(OriginalSpace,OriginalVector);
     }
-    else if (OriginalSpace.refFE().type == FE_P1_3D)
+      else if (OriginalSpace.refFE().type() == FE_P1_3D)
     {
       return P1ToP2Interpolate(OriginalSpace,OriginalVector);
     }
