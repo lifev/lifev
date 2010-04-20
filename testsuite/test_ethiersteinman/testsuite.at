@@ -41,28 +41,29 @@ save       = 1
 
 [fluid]
 
-[./physics]
-density         = 1.0          # density
-viscosity       = .01       # viscosity
+    [./physics]
+    density         = 1.0          # density
+    viscosity       = .01       # viscosity
 
-[../time_discretization]
-initialtime		= 0.
-endtime			= 0.04
-timestep		= 0.01
-BDF_order		= 1
+    [../time_discretization]
+    initialtime		= 0.
+    endtime			= 0.04
+    timestep		= 0.01
+    BDF_order		= 1
 
-[../space_discretization]
-mesh_dir        = ./   # the directory where the mesh file is
-mesh_file       = cube8x8.mesh          # mesh file
+    [../space_discretization]
+    mesh_dir        = ./   # the directory where the mesh file is
+    #mesh_file       = cube4x4.mesh          # mesh file
+    mesh_file       = cube8x8.mesh          # mesh file
 
-verbose         = 0
-linearized      = 0
-diagonalize     = 1 # weight, 0=off
-div_beta_u_v    = 0 # 1=on, 0=off
-vel_order         = P1
-press_order       = P1
+    verbose         = 0
+    linearized      = 0
+    diagonalize     = 1 # weight, 0=off
+    div_beta_u_v    = 0 # 1=on, 0=off
+    vel_order         = P1
+    press_order       = P1
 
-initialization  = interp                # initialize using proj: L2 projection
+    initialization  = interp            # initialize using proj: L2 projection
                                         #                  interp: interpolation
 
     [../miscellaneous]
@@ -129,32 +130,29 @@ initialization  = interp                # initialize using proj: L2 projection
 			[../]
 		[../]
 
-[../solver]
-solver          = gmres
-scaling         = none
-output          = all # none
-conv            = rhs
-max_iter        = 100
-reuse           = true
-max_iter_reuse  = 80
-kspace          = 100
-tol             = 1.00e-10
+    [../solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 100
+    reuse           = true
+    max_iter_reuse  = 80
+    kspace          = 100
+    tol             = 1.e-10    # AztecOO tolerance
 
+    [../ipstab]
+    gammaBeta  = 0.02
+    gammaDiv   = 0.2
+    gammaPress = 0.2
+    max_iter_reuse  = 60
 
-
-
-[../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.2
-max_iter_reuse  = 60
-
-[../problem]
-#a = 1.57
-#d = 0.78
-sigma = 0
-#neumannList =
-dirichletList = 1,2,3,4,5,6
+    [../problem]
+    #a = 1.57
+    #d = 0.78
+    sigma = 0
+    #neumannList =
+    dirichletList = 1,2,3,4,5,6
 
 
 ]])

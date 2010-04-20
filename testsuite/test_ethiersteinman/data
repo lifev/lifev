@@ -119,8 +119,8 @@ save       = 1
     max_iter_reuse  = 60
 
     [../problem]
-    a = 1.57
-    d = 0.78
+    #a = 1.57
+    #d = 0.78
     sigma = 0
     #neumannList =
     dirichletList = 1,2,3,4,5,6
