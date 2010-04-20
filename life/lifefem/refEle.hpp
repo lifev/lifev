@@ -143,15 +143,21 @@ public:
     }
 
     //! Return the number of degrees of freedom for this reference element
-    const UInt& nbDof() const
+    inline const UInt& nbDof() const
     {
         return M_nbDof;
     }
 
     //! Return the number of local coordinates
-    const UInt& nbCoor() const
+    inline const UInt& nbCoor() const
     {
         return M_nbCoor;
+    };
+
+    //! Return the shape of the element
+    inline const ReferenceShapes& shape() const
+    {
+        return M_shape;
     };
     
     //@}
@@ -188,9 +194,6 @@ private:
     const std::string M_name;
 
     //! geometrical shape of the element
-    /*
-      It is actually never used, but we keep it for backward compatibility...
-     */
     const ReferenceShapes M_shape;
 
     //! Total number of degrees of freedom
