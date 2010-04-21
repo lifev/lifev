@@ -45,13 +45,13 @@ configuration $\OmegaFt$, as well as the velocity $\uu u$ and
 pressure $p$ for the fluid and the displacement $\D$ of
 the structure. We define the ALE mapping
 \begin{equation*}
- \forall t \,,\;  \ALE_t : \hOmegaF \to \OmegaFt,
+ \forall t \,,\;  \ALE{t} : \hOmegaF \rightarrow \OmegaFt,
 \end{equation*}
 i.e. a map that retrieves at each time the current configuration
 of the computational domain $\OmegaFt$. Note in particular that on
-the reference interface $\hWall$, $\uu n_\mf \circ \ALE_t = -\uu
+the reference interface $\hWall$, $\uu n_\mf \circ \ALE{t} = -\uu
 n_\ms$. We denote by $\bY$ the coordinates on the reference
-configuration $\hOmegaF$ and by $\bw=\frac{d \ALE_t}{dt}$ the
+configuration $\hOmegaF$ and by $\bw=\frac{d \ALE{t}}{dt}$ the
 domain velocity.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,15 +59,15 @@ domain velocity.
 For simplicity, we denote in short by $\NS(\ldots)$ and
 $\Str(\ldots)$ the fluid and structure problems, respectively.
 Precisely, for given vector functions $\uu u_\In$, $\uu g_\mf$ and
-$\uu f_\mf$, $\NS(\U,p,\ALE_t;\uu u_\In, \uu g_\mf, \uu f_\mf)$
+$\uu f_\mf$, $\NS(\U,p,\ALE{t};\uu u_\In, \uu g_\mf, \uu f_\mf)$
 means that we consider the following problem whose solution is
-$\U$, $p$, $\ALE_t$:
+$\U$, $p$, $\ALE{t}$:
 \begin{equation}\label{eq:fluid}
-  \NS(\U,p,\ALE_t;\uu u_\In, \uu g_\mf, \uu f_\mf):
+  \NS(\U,p,\ALE{t};\uu u_\In, \uu g_\mf, \uu f_\mf):
   \begin{cases}
-    \dis  \uu \Delta \ALE_{t} = 0 \text{ in } \hOmegaF, \\
-    \dis  \ALE_t = 0 \text{ on } \partial\hOmegaF \setminus\hat\Sigma, \\
-    \dis  \OmegaF_{t} = \ALE_{t}(\hOmegaF), \\
+    \dis  \uu \Delta \ALE{t} = 0 \text{ in } \hOmegaF, \\
+    \dis  \ALE{t} = 0 \text{ on } \partial\hOmegaF \setminus\hat\Sigma, \\
+    \dis  \OmegaF_{t} = \ALE{t}(\hOmegaF), \\
     \dis  \rho_\mf\left(\diffALE \U + (\U-\bw)\cdot \Grad \U\right) \\
     \dis  \qquad = \Div (2\mu\uu \epsilon(\U)) - \Grad p  + \uu f_\mf \text{ in }\OmegaF_{t}, \\
     \dis  \Div\U=0 \text{ in }\OmegaF_{t},\\
@@ -80,7 +80,7 @@ $\strain(\U) = \Strain u$ is the strain rate tensor and $\uu
 \sigma_\mf(\U,p)=-p Id + 2\mu\strain(\U)$ the Cauchy stress
 tensor ($ Id $ is the identity matrix). Note
 that~(\ref{eq:fluid}) does not univocally define a solution
-$(\U,p,\ALE_t)$ as no boundary data are prescribed on the
+$(\U,p,\ALE{t})$ as no boundary data are prescribed on the
 interface $\Sigma_t$.
 
 Similarly, for given vector functions $\uu g_\ms$, $\uu f_\ms$, $\Str(\D;\uu g_\ms, \uu f_\ms)$ means that
@@ -112,9 +112,9 @@ the displacement $\D$ on $\hWall$, at any time the coupling
 conditions on the reference interface $\hWall$ are
 \begin{equation}\label{eq:condizioni}
 \begin{array}{c}
-  \ALE_{t} = \lambda ,\\[4pt]
-  \U \circ \ALE_t = \dot{\D}_{\hWall} ,\\[4pt]
-  (\uu \sigma_\mf(\U,p) \cdot {\uu n}_\mf) \circ \ALE_t +
+  \ALE{t} = \lambda ,\\[4pt]
+  \U \circ \ALE{t} = \dot{\D}_{\hWall} ,\\[4pt]
+  (\uu \sigma_\mf(\U,p) \cdot {\uu n}_\mf) \circ \ALE{t} +
   \uu \sigma_\ms(\D)\cdot {\uu n}_\ms =0,
 \end{array}
 \end{equation}
@@ -305,8 +305,8 @@ is the problem definition part, starting from these lines :
 This will create a new fluid/structure interaction problem that will be solved using a
 non-linear Richardson algorithm on the following interface equation :
 
-\begin{equation}{\label{eqn-interface}
-\lambda^{k+1} & = & \lambda^k + \omega^k f(\lambda^k)
+\begin{equation}\label{eqn-interface}
+\lambda^{k+1}  =  \lambda^k + \omega^k f(\lambda^k)
 \end{equation}
 where $f$ depends on the chosen FSI method. If we look at the FSI problem constructor
 the file \verb!life/lifesolver/FSISolver.cpp!, we have :
@@ -369,7 +369,8 @@ monolithic & 0 & monolithic description of the FSI problem \\
 \end{tabular}
 \end{center}
 \caption{ FSI problem data file parameters
-\ixt{FSI data parameters}{data parameters}}
+%\ixt{FSI data parameters}{data parameters}
+}
 \label{table-fsiparams}
 \end{table}
 
@@ -440,7 +441,7 @@ should not be used for now. Let's have the look at the rest of the FSI problem c
 This part is dedicated at assigning jobs to the different processors. Since we have to deal
 with a separate structure and fluid problems, we define two MPI groups where for each problem.
 For now, by convention, and since the structure problem is resolved more easily than the
-fluid problem by far, the structure group has only the #0 (leader) processor, whereas the fluid group is
+fluid problem by far, the structure group has only the \#0 (leader) processor, whereas the fluid group is
 composed of all the other processors. At the end of these lines, two MPI intracommunicators
 (communicator used in order to communicate within a single group of processes), one for the structure,
 one for the fuid, and one MPI intercommunicator (communicator in order to communicate within two or
@@ -450,7 +451,7 @@ for more informations on intra and intercommunicators.
 From now on, each processor knows if it belongs to the structure or the fluid group. This is
 very important since each group will create its own problem, either stucture of fluid.
 Since the structure problem requires less ressources than the fluid problem, the FSI problem defined in (\ref{eqn-interface})
-will be solved on a lead structure processor (#0 processor within the structure intracommunicator).
+will be solved on a lead structure processor (\#0 processor within the structure intracommunicator).
 
 \begin{verbatim}
 

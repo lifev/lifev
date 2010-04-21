@@ -122,11 +122,11 @@ main( int argc, char** argv )
     // By default, it's data.
 
     GetPot command_line(argc, argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
+    const std::string data_file_name = command_line.follow("data-cavity", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes(dataFile, false, "fluid/discretization/", "fluid/discretization/");
     dataNavierStokes.setup( dataFile );
 
     // Now for the boundary conditions :
@@ -153,7 +153,7 @@ main( int argc, char** argv )
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), comm);
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
@@ -266,18 +266,18 @@ main( int argc, char** argv )
 
     // Initialization
 
-    Real dt     = dataNavierStokes.dataTime()->timestep();
-    Real t0     = dataNavierStokes.dataTime()->inittime();
-    Real tFinal = dataNavierStokes.dataTime()->endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime ();
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.dataTime()->setTime(t0);
+    dataNavierStokes.setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
     // (velocity + pressure)

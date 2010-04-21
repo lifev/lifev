@@ -292,7 +292,7 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
 The main difference is that, using this functions, the boundary condition on ${\partial \Omega}_1$
 now becomes :
 \begin{equation*}
-  u = (x(1 - x), 0, 0) & \mbox{ on } {\partial \Omega}_0 \\
+  u = (x(1 - x), 0, 0) \mbox{ on } {\partial \Omega}_0 \\
 \end{equation*}
 
 We can now proceed to the main block of the code.
@@ -350,7 +350,7 @@ informations on the console ( 0 in our case ).
 
 \end{verbatim}
 
-\noident In this part, a GetPot object (http://getpot.sourceforge.net/) is created
+\noindent In this part, a GetPot object (http://getpot.sourceforge.net/) is created
 and is linked to a data description file using  the ``-f'' ou ``--file'' parameters after
 the main program name. This GetPot object is used to store values like
 \begin{itemize}
@@ -397,13 +397,14 @@ order\_bdf & 1 & time discretization order \\
 & 2 & \\ \hline
 \end{tabular}
 \end{center}
-\caption{ Dluid discretization parameters description
-\ixt{Fluid discretization parameters}{Fluid discretization}}
+\caption{ Fluid discretization parameters description
+%\ixt{Fluid discretization parameters}{Fluid discretization}
+}
 \label{table-bcparams}
 \end{table}
 
 
-\noident After this line, everything we need to know about our problem is stored
+\noindent After this line, everything we need to know about our problem is stored
 in dataNavierStokes. It is time to proceed the solver definition. \\
 
 In order to build a FE solver to solve our cavity problem, we need :
@@ -483,7 +484,8 @@ mode & Scalar & 1 dimension BC \\
 \end{tabular}
 \end{center}
 \caption{ Boundary Condition parameters description
-\ixt{Boundary Conditions parameters}{Boundary Conditions}}
+%\ixt{Boundary Conditions parameters}{Boundary Conditions}
+}
 \label{table-bcparams}
 \end{table}
 
