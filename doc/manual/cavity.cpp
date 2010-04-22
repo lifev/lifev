@@ -126,7 +126,7 @@ main( int argc, char** argv )
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes(dataFile, false, "fluid/discretization/", "fluid/discretization/");
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes(dataFile, false, "fluid/discretization", "fluid/discretization");
     dataNavierStokes.setup( dataFile );
 
     // Now for the boundary conditions :
