@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -28,10 +28,14 @@
  *  @file
  *  @brief MultiScale Model 1D
  *
- *  @gilles fourestey <gilles.fourestey@epfl.ch>
- *  @date 02-26--2010
+ *  @version 1.0
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @date 02-26-2010
+ *
+ *  @version 1.1
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 14-04-2010
  */
-
 
 #ifndef MS_Model_1D_H
 #define MS_Model_1D_H 1
@@ -42,14 +46,7 @@
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
 // LifeV includes
-//#include <life/lifefilters/ensight.hpp>
-//#include <life/lifemesh/partitionMesh.hpp>
-//#include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
-//#include <life/lifefem/bdfNS_template.hpp>
-#include <lifemc/lifesolver/oneDModelSolver.hpp>
-#include <lifemc/lifesolver/oneDBCHandler.hpp>
-//
 #include <life/lifefilters/exporter.hpp>
 
 #ifdef HAVE_HDF5
@@ -58,53 +55,54 @@
     #include <life/lifefilters/ensight.hpp>
 #endif
 
-//#include <life/lifesolver/OseenShapeDerivative.hpp>
+#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Physics_Linear.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Physics_NonLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Flux_Linear.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Flux_NonLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Source_Linear.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Source_NonLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
 
 namespace LifeV {
 
-//! MS_Model_1D - MultiScale model for 3D Fluid simulations
+//! MS_Model_1D - MultiScale model for 1D Fluid simulations
 /*!
- *  @author Cristiano Malossi
+ *  @author Gilles Fourestey, Cristiano Malossi
  *
  *  The MS_Model_1D class is an implementation of the MS_PhysicalModel
- *  for 3D Fluid problem (in particular Oseen with Shape Derivatives).
+ *  for 1D Fluid problem.
  */
-
 class MS_Model_1D: public virtual MS_PhysicalModel
 {
 public:
 
-    typedef MS_PhysicalModel                  super;
+    typedef MS_PhysicalModel                                       super;
 
-    //typedef RegionMesh1D< LinearTetra >       MeshType;
+    typedef OneDimensionalModel_Physics                            Physics_Type;
+    typedef boost::shared_ptr< Physics_Type >                      Physics_PtrType;
 
+    typedef OneDimensionalModel_Flux                               Flux_Type;
+    typedef boost::shared_ptr< Flux_Type >                         Flux_PtrType;
 
+    typedef OneDimensionalModel_Source                             Source_Type;
+    typedef boost::shared_ptr< Source_Type >                       Source_PtrType;
 
-    typedef NonLinearFluxFun1D                    Flux;
-    typedef NonLinearSourceFun1D                  Source;
-    typedef OneDNonLinModelParam                  Params;
+    typedef OneDimensionalModel_BCHandler                          BC_Type;
 
-    typedef OneDModelSolver<Params, Flux, Source> SolverType;
+    typedef OneDimensionalModel_Solver                             Solver_Type;
+    typedef Solver_Type::Data_Type                                 Data_Type;
+    typedef Solver_Type::Mesh_Type                                 Mesh_Type;
+    typedef Solver_Type::Vector_Type                               Vector_Type;
+    typedef Solver_Type::LinearSolver_Type                         LinearSolver_Type;
 
-    typedef SolverType::data_type                 DataType;
-    typedef SolverType::Mesh                      MeshType;
-    typedef SolverType::vector_type               VectorType;
-
-    typedef  OneDBCHandler<Flux>                  BCType;
+    typedef Solver_Type::FESpace_Type                              FESpace_Type;
 
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< MeshType >          OutputType;
+    typedef Hdf5exporter< Mesh_Type >                              IOFile_Type;
 #else
-    typedef Ensight< MeshType >               OutputType;
+    typedef Ensight< Mesh_Type >                                   IOFile_Type;
 #endif
-
-
-//     typedef BCInterface< FluidType >          BCType;
-//     typedef BdfTNS< FluidVectorType >         FluidBDFType;
-//     typedef DataNavierStokes< MeshType >      FluidDataType;
-//     typedef partitionMesh< MeshType >         FluidMeshType;
-
-    typedef FESpace< MeshType, EpetraMap >                  FESpaceType;
 
     //! @name Constructors & Destructor
     //@{
@@ -116,10 +114,10 @@ public:
     /*!
      * @param 1D MS_Model_1D
      */
-    MS_Model_1D( const MS_Model_1D& oneD );
+    MS_Model_1D( const MS_Model_1D& OneD );
 
     //! Destructor
-    ~MS_Model_1D(){};
+    ~MS_Model_1D() {}
 
     //@}
 
@@ -129,10 +127,10 @@ public:
 
     //! Operator=
     /*!
-     * @param fluid3D MS_Model_1D
+     * @param OneD MS_Model_1D
      * @return reference to a copy of the class
      */
-    MS_Model_1D& operator = ( const MS_Model_1D& fluid3D );
+    MS_Model_1D& operator = ( const MS_Model_1D& OneD );
 
     //@}
 
@@ -141,8 +139,17 @@ public:
     //@{
 
     //! Setup the data of the model.
-    void SetupData();
-    void SetupData(const GetPot& dataFile, std::string section);
+    /*!
+     * In particular it does the following operations:
+     * <ol>
+     *     <li> read data from files;
+     *     <li> set global parameter for the MS simulation (viscosity, time, ...);
+     *     <li> perform preliminary operations which don't depend on the couplings.
+     * </ol>
+     *
+     * @param FileName Name of data file.
+     */
+    void SetupData( const std::string& FileName );
 
     //! Setup the model.
     void SetupModel();
@@ -169,7 +176,10 @@ public:
     //@{
 
     //! Setup the data of the linear model
-    void SetupLinearData();
+    /*!
+     * @param FileName Name of data file.
+     */
+    void SetupLinearData( const std::string& FileName );
 
     //! Setup the linear model
     void SetupLinearModel();
@@ -183,28 +193,58 @@ public:
     //@}
 
 
-    //! @name Get functions
+    //! @name Get Methods
     //@{
 
     //! Get the BCInterface container of the boundary conditions of the model
     /*!
      * @return BCInterface container
      */
-    BCType&      GetBC();
+    BC_Type&      GetBC();
 
-    SolverType&  GetSolver(){return *M_solver;}
-    FESpaceType& GetFESpace();
+    //! Get the data container of the 1D model.
+    /*!
+     * @return 1D Model data container.
+     */
+    Data_Type&    GetData();
 
+    //! Get the Physics of the 1D model.
+    /*!
+     * @return 1D Model physics.
+     */
+    Physics_PtrType& GetPhysics();
+
+    //! Get the Flux of the 1D model.
+    /*!
+     * @return 1D Model Flux.
+     */
+    Flux_PtrType& GetFlux();
+
+    //! Get the Source of the 1D model.
+    /*!
+     * @return 1D Model Source.
+     */
+    Source_PtrType& GetSource();
+
+    //! Get the FESpace of the 1D model.
+    /*!
+     * @return 1D model FESpace
+     */
+    FESpace_Type& GetFESpace();
+
+    //! Get the Solver of the 1D model.
+    /*!
+     * @return 1D model solver.
+     */
+    Solver_Type&  GetSolver();
 
     //@}
 
-    //! @name Set functions
+
+    //! @name Set Methods
     //@{
 
-    void SetBC(boost::shared_ptr<BCType> BC)
-    {
-        M_BC = BC;
-    }
+    void SetBC( boost::shared_ptr<BC_Type>& BC );
 
     //@}
 
@@ -214,40 +254,32 @@ private:
     //@{
 
     //! Setup the FE space for pressure and velocity
-    void setUpFESpace();
+    void SetupFESpace();
 
     //@}
 
-    boost::shared_ptr< OutputType >       M_output;
+    boost::shared_ptr< IOFile_Type >       M_Output;
 
-    // 1d physical solver
-    boost::shared_ptr< SolverType >       M_solver;
-
-    // linear solver
-    boost::shared_ptr<solver_type>        M_linearSolver;
-
-    //
-    boost::shared_ptr< BCType >           M_BC;
-
-    //
-    boost::shared_ptr< DataType >         M_data;
-
-    //
-    boost::shared_ptr< Params >           M_params;
-    boost::shared_ptr< Flux>              M_flux;
-    boost::shared_ptr< Source >           M_source;
-
-    boost::shared_ptr< VectorType >       M_solution;
+    // 1D problem
+    boost::shared_ptr< Data_Type >         M_Data;
+    Physics_PtrType                        M_Physics;
+    Flux_PtrType                           M_Flux;
+    Source_PtrType                         M_Source;
+    boost::shared_ptr< Solver_Type >       M_Solver;
+    boost::shared_ptr< BC_Type >           M_BC;
+    boost::shared_ptr< VectorType >        M_Solution;
 
     // FE spaces
-    boost::shared_ptr< FESpaceType >      M_FESpace;
+    boost::shared_ptr< FESpace_Type >      M_FESpace;
+
+    boost::shared_ptr< LinearSolver_Type > M_LinearSolver;
 };
 
-// //! Factory create function
-// inline MS_PhysicalModel* create1D()
-// {
-//     return new MS_Model_1D();
-// }
+//! Factory create function
+inline MS_PhysicalModel* create1D()
+{
+    return new MS_Model_1D();
+}
 
 } // Namespace LifeV
 
