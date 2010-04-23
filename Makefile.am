@@ -28,9 +28,6 @@ lib_LTLIBRARIES	= liblifemcsolver.la
 
 liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                fullMonolithic.cpp \
-                               dataOneDModel.cpp \
-                               vectorFunction1D.cpp \
-                               oneDNonLinModelParam.cpp \
                                MS_Solver.cpp \
                                MS_Algorithm.cpp \
                                MS_Algorithm_Aitken.cpp \
@@ -43,7 +40,18 @@ liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                MS_PhysicalCoupling.cpp \
                                MS_Coupling_BoundaryCondition.cpp \
                                MS_Coupling_Stress.cpp \
-                               MS_Coupling_FluxStress.cpp
+                               MS_Coupling_FluxStress.cpp \
+                               OneDimensionalModel_Data.cpp \
+                               OneDimensionalModel_Physics.cpp \
+                               OneDimensionalModel_Physics_Linear.cpp \
+                               OneDimensionalModel_Physics_NonLinear.cpp \
+                               OneDimensionalModel_Flux.cpp \
+                               OneDimensionalModel_Flux_Linear.cpp \
+                               OneDimensionalModel_Flux_NonLinear.cpp \
+                               OneDimensionalModel_Solver.cpp \
+                               OneDimensionalModel_Source.cpp \
+                               OneDimensionalModel_Source_Linear.cpp \
+                               OneDimensionalModel_Source_NonLinear.cpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 
