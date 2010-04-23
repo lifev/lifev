@@ -85,11 +85,11 @@ public:
     //! @name Methods
     //@{
     /*!
-     * @param name name of the boundary condition
+     * @param FileName Name of the data file.
      * @param dataSection BC section
-     * @param dataFile GetPot file
+     * @param name name of the boundary condition
      */
-    void ReadBC( const BCName& name, const std::string& dataSection, const GetPot& dataFile );
+    void ReadBC( const std::string& FileName, const std::string& dataSection, const BCName& name );
 
     //@}
 
@@ -207,19 +207,19 @@ private:
     //! @name Private Methods
     //@{
 
-    inline void ReadFlag( const char* flag, const GetPot& dataFile );
+    inline void ReadFlag( const std::string& FileName, const char* flag );
 
-    inline void ReadType( const char* type, const GetPot& dataFile );
+    inline void ReadType( const std::string& FileName, const char* type );
 
-    inline void ReadMode( const char* mode, const GetPot& dataFile );
+    inline void ReadMode( const std::string& FileName, const char* mode );
 
-    inline void ReadComV( const char* component, const GetPot& dataFile );
+    inline void ReadComV( const std::string& FileName, const char* component );
 
-    inline void ReadDirection( const char* direction, const GetPot& dataFile );
+    inline void ReadDirection( const std::string& FileName, const char* direction );
 
-    inline void ReadBase( const std::string& base, const GetPot& dataFile );
+    inline void ReadBase( const std::string& FileName, const std::string& base );
 
-    inline bool IsBase( const char* base, const GetPot& dataFile );
+    inline bool IsBase( const std::string& FileName, const char* base );
 
     //@}
 
@@ -328,18 +328,18 @@ BCInterface_Data< Operator >::operator=( const BCInterface_Data& data )
 // Methods
 // ===================================================
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadBC( const BCName& name,
+inline void BCInterface_Data< Operator >::ReadBC( const std::string& FileName,
                                                   const std::string& dataSection,
-                                                  const GetPot& dataFile )
+                                                  const BCName& name )
 {
     M_name = name;
 
-    ReadFlag( ( dataSection + name + "/flag" ).c_str(), dataFile );
-    ReadType( ( dataSection + name + "/type" ).c_str(), dataFile );
-    ReadMode( ( dataSection + name + "/mode" ).c_str(), dataFile );
-    ReadComV( ( dataSection + name + "/component" ).c_str(), dataFile );
-    ReadDirection( ( dataSection + name + "/direction" ).c_str(), dataFile );
-    ReadBase( dataSection + name + "/", dataFile );
+    ReadFlag( FileName, ( dataSection + name + "/flag" ).c_str() );
+    ReadType( FileName, ( dataSection + name + "/type" ).c_str() );
+    ReadMode( FileName, ( dataSection + name + "/mode" ).c_str() );
+    ReadComV( FileName, ( dataSection + name + "/component" ).c_str() );
+    ReadDirection( FileName, ( dataSection + name + "/direction" ).c_str() );
+    ReadBase( FileName, dataSection + name + "/" );
 }
 
 // ===================================================
@@ -489,9 +489,10 @@ BCInterface_Data< Operator >::GetBase() const
 // Private Methods
 // ===================================================
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadFlag( const char* flag, const GetPot& dataFile )
+inline void BCInterface_Data< Operator >::ReadFlag( const std::string& FileName, const char* flag )
 {
-    M_flag = dataFile( flag, 0 );
+    GetPot DataFile( FileName );
+    M_flag = DataFile( flag, 0 );
 
 #ifdef DEBUG
     Debug( 5020 ) << "BCInterface_Data::ReadFlag                        flag: " << static_cast<Real>( M_flag ) << "\n";
@@ -499,35 +500,38 @@ inline void BCInterface_Data< Operator >::ReadFlag( const char* flag, const GetP
 }
 
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadType( const char* type, const GetPot& dataFile )
+inline void BCInterface_Data< Operator >::ReadType( const std::string& FileName, const char* type )
 {
-    M_type = M_mapType[dataFile( type, "Essential" )];
+    GetPot DataFile( FileName );
+    M_type = M_mapType[DataFile( type, "Essential" )];
 
 #ifdef DEBUG
-    Debug( 5020 ) << "BCInterface_Data::ReadType                        type: " << M_type << " (" << dataFile(type, "Essential") << ")\n";
+    Debug( 5020 ) << "BCInterface_Data::ReadType                        type: " << M_type << " (" << DataFile(type, "Essential") << ")\n";
 #endif
 }
 
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadMode( const char* mode, const GetPot& dataFile )
+inline void BCInterface_Data< Operator >::ReadMode( const std::string& FileName, const char* mode )
 {
-    M_mode = M_mapMode[dataFile( mode, "Full" )];
+    GetPot DataFile( FileName );
+    M_mode = M_mapMode[DataFile( mode, "Full" )];
 
 #ifdef DEBUG
-    Debug( 5020 ) << "BCInterface_Data::ReadMode                        mode: " << M_mode << " (" << dataFile(mode, "Full") << ")\n";
+    Debug( 5020 ) << "BCInterface_Data::ReadMode                        mode: " << M_mode << " (" << DataFile(mode, "Full") << ")\n";
 #endif
 }
 
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadComV( const char* component, const GetPot& dataFile )
+inline void BCInterface_Data< Operator >::ReadComV( const std::string& FileName, const char* component )
 {
-    UInt componentSize = dataFile.vector_variable_size( component );
+    GetPot DataFile( FileName );
+    UInt componentSize = DataFile.vector_variable_size( component );
 
     M_comV.clear();
     M_comV.reserve( componentSize );
 
     for ( UInt j( 0 ); j < componentSize; ++j )
-        M_comV.push_back( dataFile( component, 0, j ) );
+        M_comV.push_back( DataFile( component, 0, j ) );
 
 #ifdef DEBUG
     std::stringstream output;
@@ -540,9 +544,10 @@ inline void BCInterface_Data< Operator >::ReadComV( const char* component, const
 }
 
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadDirection( const char* direction, const GetPot& dataFile  )
+inline void BCInterface_Data< Operator >::ReadDirection( const std::string& FileName, const char* direction )
 {
-    M_direction = dataFile( direction, " " );
+    GetPot DataFile( FileName );
+    M_direction = DataFile( direction, " " );
 
 #ifdef DEBUG
     Debug( 5020 ) << "BCInterface_Data::ReadDirection              direction: " << M_direction << "\n";
@@ -550,11 +555,11 @@ inline void BCInterface_Data< Operator >::ReadDirection( const char* direction, 
 }
 
 template< class Operator >
-inline void BCInterface_Data< Operator >::ReadBase( const std::string& base, const GetPot& dataFile )
+inline void BCInterface_Data< Operator >::ReadBase( const std::string& FileName, const std::string& base )
 {
     for ( typename std::map< std::string, BCBaseList >::iterator j = M_mapBase.begin(); j
             != M_mapBase.end(); ++j )
-        if ( IsBase( ( base + j->first ).c_str(), dataFile ) )
+        if ( IsBase( FileName, ( base + j->first ).c_str() ) )
         {
             M_base.first = j->first;
             M_base.second = M_mapBase[j->first];
@@ -569,11 +574,12 @@ inline void BCInterface_Data< Operator >::ReadBase( const std::string& base, con
 }
 
 template< class Operator >
-inline bool BCInterface_Data< Operator >::IsBase( const char* base, const GetPot& dataFile )
+inline bool BCInterface_Data< Operator >::IsBase( const std::string& FileName, const char* base )
 {
-    M_baseString = dataFile( base, " " );
+    GetPot DataFile( FileName );
+    M_baseString = DataFile( base, " " );
 
-    return dataFile.checkVariable( base );
+    return DataFile.checkVariable( base );
 }
 
 } // Namespace LifeV
