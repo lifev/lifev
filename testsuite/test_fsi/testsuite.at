@@ -100,6 +100,7 @@ gammaBeta  = 1
 gammaDiv   = 0.2
 gammaPress = 0.2
 reuse      = true
+max_iter_reuse = 100
 
 [../space_discretization]
 mesh_dir  = ./ # the directory where the mesh file is

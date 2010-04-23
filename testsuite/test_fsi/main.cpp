@@ -67,6 +67,7 @@ namespace
 */
 using namespace LifeV;
 
+int returnValue = EXIT_SUCCESS; // For the final check
 
 
 
@@ -164,7 +165,7 @@ public:
 
       -# initialize and setup the FSIsolver
     */
-    Problem( const GetPot& dataFile, std::string method = "" )
+    Problem( const std::string& dataFileName, std::string method = "" )
     {
     	Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
     	M_fsi = fsi_solver_ptr( new FSISolver( method ) );
@@ -172,6 +173,7 @@ public:
     	MPI_Barrier( MPI_COMM_WORLD );
 
 		Debug( 10000 ) << "Setting up data from GetPot \n";
+		GetPot dataFile( dataFileName );
     	M_fsi->setDataFromGetPot( dataFile );
 
     	MPI_Barrier( MPI_COMM_WORLD );
@@ -340,7 +342,16 @@ public:
 
 private:
 
-    void checkResult( Real& time );
+    void checkResult(LifeV::Real& time)
+    {
+        LifeV::Real dispNorm=M_fsi->displacement().Norm2();
+        if(time==0.0001 && (dispNorm-0.0621691)/dispNorm*(dispNorm-4.43565e-5)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);  else
+        if(time==0.0002 && (dispNorm-0.10668)/dispNorm*(dispNorm-0.000129848)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.0003 && (dispNorm-0.113252)/dispNorm*(dispNorm-0.000251846)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.0004 && (dispNorm-0.107976)/dispNorm*(dispNorm-0.000402367)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.0005 && (dispNorm-0.0995921)/dispNorm*(dispNorm-0.000579832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    }
+
 	fsi_solver_ptr M_fsi;
 	Real           M_Tstart;
 
@@ -360,6 +371,7 @@ private:
         RESULT_CHANGED_EXCEPTION(LifeV::Real time)
         {
             std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
+            returnValue = EXIT_FAILURE;
         }
     };
 };
@@ -370,15 +382,18 @@ private:
 
 struct FSIChecker
 {
-    FSIChecker( const GetPot&      dataFile ):
-        M_dataFile( dataFile ),
-        M_method  ( dataFile( "problem/method", "exactJacobian" ) )
-        {}
+    FSIChecker( const std::string& dataFileName ):
+        M_dataFileName ( dataFileName ),
+        M_method       ()
+        {
+            GetPot dataFile( dataFileName );
+            M_method = dataFile( "problem/method", "exactJacobian" );
+        }
 
-    FSIChecker( const GetPot&      dataFile,
+    FSIChecker( const std::string& dataFileName,
                 const std::string& method   ):
-        M_dataFile ( dataFile ),
-        M_method   ( method )
+        M_dataFileName ( dataFileName ),
+        M_method       ( method )
         {}
 
     void operator()()
@@ -387,33 +402,18 @@ struct FSIChecker
 
     	try
     	{
-    		FSIproblem = boost::shared_ptr<Problem> ( new Problem( M_dataFile, M_method ) );
+    		FSIproblem = boost::shared_ptr<Problem> ( new Problem( M_dataFileName, M_method ) );
     		FSIproblem->run( FSIproblem->fsiSolver()->timeStep(), FSIproblem->fsiSolver()->timeEnd() );
     	}
     	catch ( const std::exception& _ex )
     	{
     		std::cout << "caught exception :  " << _ex.what() << "\n";
     	}
-
-    	//disp = fsip->fsiSolver()->FSIOper()->displacementOnInterface();
 	}
 
-	GetPot                M_dataFile;
+    std::string           M_dataFileName;
 	std::string           M_method;
-	//Vector                 disp;
 };
-
-
-void Problem::checkResult(LifeV::Real& time)
-{
-    LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.0001 && (dispNorm-0.0621691)/dispNorm*(dispNorm-4.43565e-5)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);  else
-    if(time==0.0002 && (dispNorm-0.10668)/dispNorm*(dispNorm-0.000129848)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.0003 && (dispNorm-0.113252)/dispNorm*(dispNorm-0.000251846)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.0004 && (dispNorm-0.107976)/dispNorm*(dispNorm-0.000402367)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.0005 && (dispNorm-0.0995921)/dispNorm*(dispNorm-0.000579832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-}
-
 
 int main( int argc, char** argv )
 {
@@ -429,9 +429,6 @@ int main( int argc, char** argv )
 
     GetPot command_line( argc, argv );
     std::string dataFileName = command_line.follow( "data", 2, "-f", "--file" );
-    GetPot dataFile( dataFileName );
-
-    int returnValue = EXIT_FAILURE;
 
 /*
     const bool check = command_line.search(2, "-c", "--check");
@@ -473,10 +470,8 @@ int main( int argc, char** argv )
     }
 */
 
-    FSIChecker FSIProblem( dataFile );
+    FSIChecker FSIProblem( dataFileName );
     FSIProblem();
-
-    returnValue = EXIT_SUCCESS;
 
     std::cout << "Total sum up " << chrono.diff_cumul() << " s." << std::endl;
 
