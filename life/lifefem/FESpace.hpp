@@ -69,10 +69,9 @@ inline Real
 elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
          const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
-    Int ig;
     UInt ic;
     Real s = 0., f, x, y, z;
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
     {
         fe.coorQuadPt( x, y, z, ig );
         for ( ic = 0; ic < nbcomp; ic++ )
@@ -162,7 +161,7 @@ public:
 
     //! Method to computes the L2 error when using a weight function
     /*!
-      The scope of this method is to compute \f$ \left( \int w (u_{\operatorname{exact}} - u_h) \right)^{1/2} \f$.
+      The scope of this method is to compute \f$ \left( \int w (u_{exact} - u_h) \right)^{1/2} \f$.
       The usual L2 error norm can be retrieved by using \f$ w=1 \f$
      */
     template<typename vector_type>
