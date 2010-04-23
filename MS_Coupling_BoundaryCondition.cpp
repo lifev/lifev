@@ -41,6 +41,7 @@ namespace LifeV {
 // ===================================================
 MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
     super       (),
+    M_FileName  (),
     M_list      (),
     M_listSize  ()
 {
@@ -54,6 +55,7 @@ MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
 
 MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition( const MS_Coupling_BoundaryCondition& BoundaryCondition ) :
     super       ( BoundaryCondition ),
+    M_FileName  ( BoundaryCondition.M_FileName ),
     M_list      ( BoundaryCondition.M_list ),
     M_listSize  ( BoundaryCondition.M_listSize )
 {
@@ -73,6 +75,7 @@ MS_Coupling_BoundaryCondition::operator=( const MS_Coupling_BoundaryCondition& b
     if ( this != &boundaryCondition )
     {
         super::operator=( boundaryCondition );
+        M_FileName     = boundaryCondition.M_FileName;
         M_list         = boundaryCondition.M_list;
         M_listSize     = boundaryCondition.M_listSize;
     }
@@ -83,28 +86,24 @@ MS_Coupling_BoundaryCondition::operator=( const MS_Coupling_BoundaryCondition& b
 // MultiScale PhysicalCoupling Implementation
 // ===================================================
 void
-MS_Coupling_BoundaryCondition::SetupData()
+MS_Coupling_BoundaryCondition::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::SetupData() \n";
 #endif
 
-    //Set number of coupling variables
-    M_couplingIndex.first  = 0;
+    super::SetupData( FileName );
 
-    //Create local vectors
-    CreateLocalVectors();
+    M_FileName = FileName;
+    GetPot DataFile( FileName );
 
     //Load the list of boundary conditions
-    M_listSize = M_dataFile.vector_variable_size( "boundary_conditions/list" );
+    M_listSize = DataFile.vector_variable_size( "boundary_conditions/list" );
 
     M_list.reserve( M_listSize );
     for ( UInt i( 0 ); i < M_listSize; ++i )
-        M_list.push_back( M_dataFile( "boundary_conditions/list", " ", i ) );
-
-    //MPI Barrier
-    M_comm->Barrier();
+        M_list.push_back( DataFile( "boundary_conditions/list", " ", i ) );
 }
 
 void
@@ -114,6 +113,12 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
 #ifdef DEBUG
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::SetupCoupling() \n";
 #endif
+
+    //Set number of coupling variables
+    M_couplingIndex.first  = 0;
+
+    //Create local vectors
+    CreateLocalVectors();
 
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
@@ -130,9 +135,6 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
                 if ( M_displayer->isLeader() )
                     switchErrorMessage( M_models[i] );
         }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 ModelsVector_Type
@@ -161,9 +163,6 @@ MS_Coupling_BoundaryCondition::ShowMe()
             std::cout << M_list[i] << " ";
         std::cout << std::endl << std::endl << std::endl << std::endl;
     }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 void
@@ -190,12 +189,12 @@ MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_dataTime->getTime() << "    " << M_models[i]->GetID()
-                                                    << "    " << M_flags[i]
-                                                    << "    " << Flux
-                                                    << "    " << "NaN          "
-                                                    << "    " << Pressure
-                                                    << "    " << DynamicPressure << std::endl;
+            output << "  " << M_dataPhysics->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
+                                                                      << "    " << M_flags[i]
+                                                                      << "    " << Flux
+                                                                      << "    " << "NaN          "
+                                                                      << "    " << Pressure
+                                                                      << "    " << DynamicPressure << std::endl;
     }
 }
 

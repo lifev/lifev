@@ -83,14 +83,16 @@ MS_Algorithm_Newton::operator=( const MS_Algorithm_Newton& algorithm )
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Newton::SetupData( const GetPot& DataFile )
+MS_Algorithm_Newton::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
     Debug( 8012 ) << "MS_Algorithm_Newton::SetupData( DataFile ) \n";
 #endif
 
-    super::SetupData( DataFile );
+    super::SetupData( FileName );
+
+    GetPot DataFile( FileName );
 
     M_solver.SetCommunicator( *M_comm );
     M_solver.setDataFromGetPot( DataFile, "Solver/Algorithm/Newton_method/AztecOO" );
@@ -188,9 +190,6 @@ MS_Algorithm_Newton::ShowMe()
     {
         super::ShowMe();
     }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 } // Namespace LifeV

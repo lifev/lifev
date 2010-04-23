@@ -94,14 +94,16 @@ MS_Algorithm_Aitken::operator=( const MS_Algorithm_Aitken& algorithm )
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Aitken::SetupData( const GetPot& DataFile )
+MS_Algorithm_Aitken::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::SetupData( algorithm ) \n";
 #endif
 
-    super::SetupData( DataFile );
+    super::SetupData( FileName );
+
+    GetPot DataFile( FileName );
 
     M_generalizedAitken.setDefault( DataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
     M_generalizedAitken.UseDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
@@ -211,9 +213,6 @@ MS_Algorithm_Aitken::ShowMe()
                   << "Minimize inv. Omega = " << ( M_inverseOmega ? "true" : "false" ) << std::endl;
         std::cout << std::endl << std::endl;
     }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 } // Namespace LifeV

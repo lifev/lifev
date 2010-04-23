@@ -32,7 +32,6 @@
  *  @date 12-03-2009
  */
 
-
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
 
 namespace LifeV {
@@ -71,12 +70,12 @@ MS_Model_MultiScale::~MS_Model_MultiScale()
         Debug( 8110 ) << "MS_Model_MultiScale::~MS_Model_MultiScale( ) \n";
     #endif
 
-        // Disconnect models and couplings to allow their destruction
-        for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
-            ( *i )->ClearCouplingsList();
+    // Disconnect models and couplings to allow their destruction
+    for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
+        ( *i )->ClearCouplingsList();
 
-        for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
-            ( *i )->ClearModelsList();
+    for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
+        ( *i )->ClearModelsList();
 }
 
 // ===================================================
@@ -103,37 +102,23 @@ MS_Model_MultiScale::operator=( const MS_Model_MultiScale& multiscale )
 // MultiScale Physical Model
 // ===================================================
 void
-MS_Model_MultiScale::SetupData()
+MS_Model_MultiScale::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::SetupData() \n";
+    Debug( 8110 ) << "MS_Model_MultiScale::SetupData( FileName ) \n";
 #endif
 
-    // Load
-    loadModels();
-    loadCouplings();
-    loadGeometry();
+    super::SetupData( FileName );
 
-    // SetData & SetCommunicator
-    for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
-        ( *i )->SetData( M_dataPhysics, M_dataTime );
+    // Load Models
+    loadModels( FileName );
 
-    for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
-        ( *i )->SetData( M_dataPhysics, M_dataTime );
+    // Load Couplings
+    loadCouplings( FileName );
 
-    for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
-        ( *i )->SetCommunicator( M_comm );
-
-    for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
-        ( *i )->SetCommunicator( M_comm );
-
-    // SetupData
-    for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
-        ( *i )->SetupData();
-
-    for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
-        ( *i )->SetupData();
+    // Load Geometry
+    loadGeometry( FileName );
 }
 
 void
@@ -225,9 +210,6 @@ MS_Model_MultiScale::ShowMe()
 
     for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
         ( *i )->ShowMe();
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 // ===================================================
@@ -356,28 +338,31 @@ MS_Model_MultiScale::GetCouplingVariablesNumber()
 // Private Methods
 // ===================================================
 inline void
-MS_Model_MultiScale::loadModels()
+MS_Model_MultiScale::loadModels( const std::string& FileName )
 {
     UInt id;
     modelsTypes model;
 
     UInt columnNumber = 3.0;
-    UInt linesNumber = M_dataFile.vector_variable_size( "Problem/models" ) / columnNumber;
+    GetPot DataFile( FileName );
+    UInt linesNumber = DataFile.vector_variable_size( "Problem/models" ) / columnNumber;
 
-    std::string path = M_dataFile( "Problem/modelsPath", "./" );
+    std::string path = DataFile( "Problem/modelsPath", "./" );
     M_modelsList.resize( linesNumber );
     for ( UInt i( 0 ); i < linesNumber; ++i )
     {
-        id    =           M_dataFile( "Problem/models", 0, i * columnNumber );
-        model = modelsMap[M_dataFile( "Problem/models", "undefined", i * columnNumber + 1 )];
+        id    =           DataFile( "Problem/models", 0, i * columnNumber );
+        model = modelsMap[DataFile( "Problem/models", "undefined", i * columnNumber + 1 )];
 
         M_modelsList[id] = Model_ptrType( FactoryModels::instance().createObject( model ) );
-        M_modelsList[id]->SetDataFile( path + M_dataFile( "Problem/models", "undefined", i * columnNumber + 2 ) + ".dat" );
+        M_modelsList[id]->SetCommunicator( M_comm );
+        M_modelsList[id]->SetGlobalData( M_dataPhysics );
+        M_modelsList[id]->SetupData( path + DataFile( "Problem/models", "undefined", i * columnNumber + 2 ) + ".dat" );
     }
 }
 
 inline void
-MS_Model_MultiScale::loadCouplings()
+MS_Model_MultiScale::loadCouplings( const std::string& FileName )
 {
     UInt id;
     couplingsTypes coupling;
@@ -386,20 +371,23 @@ MS_Model_MultiScale::loadCouplings()
     std::vector< UInt > flagsIDVector;
 
     UInt columnNumber = 5.0;
-    UInt linesNumber = M_dataFile.vector_variable_size( "Problem/couplings" ) / columnNumber;
+    GetPot DataFile( FileName );
+    UInt linesNumber = DataFile.vector_variable_size( "Problem/couplings" ) / columnNumber;
 
-    std::string path = M_dataFile( "Problem/couplingsPath", "./" );
+    std::string path = DataFile( "Problem/couplingsPath", "./" );
     M_couplingsList.resize( linesNumber );
     for ( UInt i( 0 ); i < linesNumber; ++i )
     {
-        id       =              M_dataFile( "Problem/couplings", 0, i * columnNumber );
-        coupling = couplingsMap[M_dataFile( "Problem/couplings", "undefined", i * columnNumber + 1 )];
+        id       =              DataFile( "Problem/couplings", 0, i * columnNumber );
+        coupling = couplingsMap[DataFile( "Problem/couplings", "undefined", i * columnNumber + 1 )];
 
         M_couplingsList[id] = Coupling_ptrType( FactoryCouplings::instance().createObject( coupling ) );
-        M_couplingsList[id]->SetDataFile( path + M_dataFile( "Problem/couplings", "undefined", i * columnNumber + 2 ) + ".dat" );
+        M_couplingsList[id]->SetCommunicator( M_comm );
+        M_couplingsList[id]->SetGlobalData( M_dataPhysics );
+        M_couplingsList[id]->SetupData( path + DataFile( "Problem/couplings", "undefined", i * columnNumber + 2 ) + ".dat" );
 
-        modelsIDVector = string2numVect< UInt > ( M_dataFile( "Problem/couplings", "undefined", i * columnNumber + 3 ) );
-        flagsIDVector  = string2numVect< UInt > ( M_dataFile( "Problem/couplings", "undefined", i * columnNumber + 4 ) );
+        modelsIDVector = string2numVect< UInt > ( DataFile( "Problem/couplings", "undefined", i * columnNumber + 3 ) );
+        flagsIDVector  = string2numVect< UInt > ( DataFile( "Problem/couplings", "undefined", i * columnNumber + 4 ) );
         for ( UInt j( 0 ); j < static_cast< UInt > ( modelsIDVector.size() ); ++j )
         {
             M_couplingsList[id]->AddModel( M_modelsList[modelsIDVector[j]] );
@@ -410,30 +398,31 @@ MS_Model_MultiScale::loadCouplings()
 }
 
 inline void
-MS_Model_MultiScale::loadGeometry()
+MS_Model_MultiScale::loadGeometry( const std::string& FileName )
 {
     UInt id;
 
     boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
     UInt columnNumber = 10.0;
-    UInt linesNumber = M_dataFile.vector_variable_size( "Problem/offset" ) / columnNumber;
+    GetPot DataFile( FileName );
+    UInt linesNumber = DataFile.vector_variable_size( "Problem/offset" ) / columnNumber;
 
     for ( UInt i( 0 ); i < linesNumber; ++i )
     {
-        id = M_dataFile( "Problem/offset", 0, i * columnNumber );
+        id = DataFile( "Problem/offset", 0, i * columnNumber );
 
-        geometryScale[0]     = M_geometryScale[0]     * M_dataFile( "Problem/offset", 1., i * columnNumber + 1 );
-        geometryScale[1]     = M_geometryScale[1]     * M_dataFile( "Problem/offset", 1., i * columnNumber + 2 );
-        geometryScale[2]     = M_geometryScale[2]     * M_dataFile( "Problem/offset", 1., i * columnNumber + 3 );
+        geometryScale[0]     = M_geometryScale[0]     * DataFile( "Problem/offset", 1., i * columnNumber + 1 );
+        geometryScale[1]     = M_geometryScale[1]     * DataFile( "Problem/offset", 1., i * columnNumber + 2 );
+        geometryScale[2]     = M_geometryScale[2]     * DataFile( "Problem/offset", 1., i * columnNumber + 3 );
 
-        geometryRotate[0]    = M_geometryRotate[0]    + M_dataFile( "Problem/offset", 0., i * columnNumber + 4 ) * Pi / 180;
-        geometryRotate[1]    = M_geometryRotate[1]    + M_dataFile( "Problem/offset", 0., i * columnNumber + 5 ) * Pi / 180;
-        geometryRotate[2]    = M_geometryRotate[2]    + M_dataFile( "Problem/offset", 0., i * columnNumber + 6 ) * Pi / 180;
+        geometryRotate[0]    = M_geometryRotate[0]    + DataFile( "Problem/offset", 0., i * columnNumber + 4 ) * Pi / 180;
+        geometryRotate[1]    = M_geometryRotate[1]    + DataFile( "Problem/offset", 0., i * columnNumber + 5 ) * Pi / 180;
+        geometryRotate[2]    = M_geometryRotate[2]    + DataFile( "Problem/offset", 0., i * columnNumber + 6 ) * Pi / 180;
 
-        geometryTranslate[0] = M_geometryTranslate[0] + M_dataFile( "Problem/offset", 0., i * columnNumber + 7 );
-        geometryTranslate[1] = M_geometryTranslate[1] + M_dataFile( "Problem/offset", 0., i * columnNumber + 8 );
-        geometryTranslate[2] = M_geometryTranslate[2] + M_dataFile( "Problem/offset", 0., i * columnNumber + 9 );
+        geometryTranslate[0] = M_geometryTranslate[0] + DataFile( "Problem/offset", 0., i * columnNumber + 7 );
+        geometryTranslate[1] = M_geometryTranslate[1] + DataFile( "Problem/offset", 0., i * columnNumber + 8 );
+        geometryTranslate[2] = M_geometryTranslate[2] + DataFile( "Problem/offset", 0., i * columnNumber + 9 );
 
         M_modelsList[id]->SetGeometry( geometryScale, geometryRotate, geometryTranslate );
     }

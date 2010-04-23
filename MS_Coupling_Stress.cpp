@@ -93,11 +93,27 @@ MS_Coupling_Stress::operator=( const MS_Coupling_Stress& Stress )
 // MultiScale PhysicalCoupling Implementation
 // ===================================================
 void
-MS_Coupling_Stress::SetupData()
+MS_Coupling_Stress::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::SetupData() \n";
+#endif
+
+    super::SetupData( FileName );
+
+    GetPot DataFile( FileName );
+
+    //Set type of stress coupling
+    M_stressType = stressMap[DataFile( "MultiScale/stressType", "StaticPressure" )];
+}
+
+void
+MS_Coupling_Stress::SetupCoupling()
+{
+
+#ifdef DEBUG
+    Debug( 8220 ) << "MS_Coupling_Stress::SetupCoupling() \n";
 #endif
 
     //Set number of coupling variables
@@ -110,21 +126,6 @@ MS_Coupling_Stress::SetupData()
     M_baseStress.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress, this, _1, _2, _3, _4, _5 ) );
 
     M_baseDeltaStress.setFunction( boost::bind( &MS_Coupling_Stress::FunctionDeltaStress, this, _1, _2, _3, _4, _5 ) );
-
-    //Set type of stress coupling
-    M_stressType = stressMap[M_dataFile( "MultiScale/stressType", "StaticPressure" )];
-
-    //MPI Barrier
-    M_comm->Barrier();
-}
-
-void
-MS_Coupling_Stress::SetupCoupling()
-{
-
-#ifdef DEBUG
-    Debug( 8220 ) << "MS_Coupling_Stress::SetupCoupling() \n";
-#endif
 
     // Impose stress
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
@@ -142,9 +143,6 @@ MS_Coupling_Stress::SetupCoupling()
                 if ( M_displayer->isLeader() )
                     switchErrorMessage( M_models[i] );
         }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 void
@@ -329,12 +327,12 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_dataTime->getTime() << "    " << M_models[i]->GetID()
-                                                    << "    " << M_flags[i]
-                                                    << "    " << Flux
-                                                    << "    " << Stress
-                                                    << "    " << Pressure
-                                                    << "    " << DynamicPressure << std::endl;
+            output << "  " << M_dataPhysics->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
+                                                                      << "    " << M_flags[i]
+                                                                      << "    " << Flux
+                                                                      << "    " << Stress
+                                                                      << "    " << Pressure
+                                                                      << "    " << DynamicPressure << std::endl;
     }
 }
 
@@ -349,9 +347,6 @@ MS_Coupling_Stress::ShowMe()
         std::cout << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[0] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
     }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 // ===================================================

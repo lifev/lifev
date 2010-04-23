@@ -93,7 +93,10 @@ public:
     //@{
 
     //! Setup the data of the coupling
-    void SetupData();
+    /*!
+     *  @param FileName Name of data file
+     */
+    void SetupData( const std::string& FileName );
 
     //! Setup the coupling
     void SetupCoupling();

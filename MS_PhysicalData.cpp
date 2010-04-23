@@ -40,14 +40,16 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 MS_PhysicalData::MS_PhysicalData() :
-    M_fluidDensity  (),
-    M_fluidViscosity()
+    M_DataTime      (),
+    M_FluidDensity  (),
+    M_FluidViscosity()
 {
 }
 
 MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& PhysicalData ) :
-    M_fluidDensity  ( PhysicalData.M_fluidDensity ),
-    M_fluidViscosity( PhysicalData.M_fluidViscosity )
+    M_DataTime      ( PhysicalData.M_DataTime ),
+    M_FluidDensity  ( PhysicalData.M_FluidDensity ),
+    M_FluidViscosity( PhysicalData.M_FluidViscosity )
 {
 }
 
@@ -59,8 +61,9 @@ MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
 {
     if ( this != &PhysicalData )
     {
-        M_fluidDensity   = PhysicalData.M_fluidDensity;
-        M_fluidViscosity = PhysicalData.M_fluidViscosity;
+        M_DataTime       = PhysicalData.M_DataTime;
+        M_FluidDensity   = PhysicalData.M_FluidDensity;
+        M_FluidViscosity = PhysicalData.M_FluidViscosity;
     }
 
     return *this;
@@ -72,30 +75,41 @@ MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
 void
 MS_PhysicalData::ReadData( const GetPot& dataFile )
 {
-    M_fluidDensity   = dataFile( "Physics/fluidDensity", 0. );
-    M_fluidViscosity = dataFile( "Physics/fluidViscosity", 0. );
+    M_DataTime.reset( new Time_Type( dataFile, "Solver/time_discretization" ) );
+    M_FluidDensity   = dataFile( "Physics/fluidDensity", 0. );
+    M_FluidViscosity = dataFile( "Physics/fluidViscosity", 0. );
 }
 
 void
 MS_PhysicalData::ShowMe()
 {
-    std::cout << "Fluid density     = " << M_fluidDensity << std::endl
-              << "Fluid viscosity   = " << M_fluidViscosity << std::endl << std::endl;
+    std::cout << "Fluid density       = " << M_FluidDensity << std::endl
+              << "Fluid viscosity     = " << M_FluidViscosity << std::endl << std::endl;
+
+    std::cout << "Initial time        = " << M_DataTime->getInitialTime() << std::endl
+              << "End time            = " << M_DataTime->getEndTime() << std::endl
+              << "TimeStep            = " << M_DataTime->getTimeStep() << std::endl << std::endl;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
+MS_PhysicalData::Time_ptrType
+MS_PhysicalData::GetDataTime() const
+{
+    return M_DataTime;
+}
+
 const Real&
 MS_PhysicalData::GetFluidDensity() const
 {
-    return M_fluidDensity;
+    return M_FluidDensity;
 }
 
 const Real&
 MS_PhysicalData::GetFluidViscosity() const
 {
-    return M_fluidViscosity;
+    return M_FluidViscosity;
 }
 
 } // Namespace LifeV

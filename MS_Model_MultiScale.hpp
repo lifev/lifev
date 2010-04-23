@@ -93,7 +93,10 @@ public:
     //@{
 
     //! Load data and create the models and the couplings
-    void SetupData();
+    /*!
+     * @param FileName Name of data file.
+     */
+    void SetupData( const std::string& FileName );
 
     //! Setup the model
     void SetupModel();
@@ -162,9 +165,9 @@ private:
     //! @name Private Methods
     //@{
 
-    inline void loadModels();
-    inline void loadCouplings();
-    inline void loadGeometry();
+    inline void loadModels( const std::string& FileName );
+    inline void loadCouplings( const std::string& FileName );
+    inline void loadGeometry( const std::string& FileName );
 
     template< typename number >
     inline std::vector< number > string2numVect( const std::string& string );

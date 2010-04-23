@@ -86,8 +86,11 @@ public:
     //! @name MultiScale PhysicalCoupling Virtual Methods
     //@{
 
-    //! Setup the data of the coupling
-    virtual void SetupData() = 0;
+    //! Setup the data of the coupling.
+    /*!
+     * @param FileName Name of data file
+     */
+    virtual void SetupData( const std::string& FileName );
 
     //! Setup the coupling
     virtual void SetupCoupling() = 0;
@@ -191,12 +194,6 @@ public:
      */
     void SetID( const UInt& id );
 
-    //! Set the data file to load information of the coupling condition
-    /*!
-     * @param dataFile Name and path of data file
-     */
-    void SetDataFile( const std::string& dataFile );
-
     //! Add a pointer to one of the models to couple
     /*!
      * @param model shared_ptr of the model
@@ -206,10 +203,8 @@ public:
     //! Set global data for physical quantities and time
     /*!
      * @param dataPhysics Data container for physical quantities
-     * @param dataTime Data container for time parameters
      */
-    void SetData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics,
-                  const boost::shared_ptr< DataTime >& dataTime );
+    void SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics );
 
     //! Add a flag of one of the models to couple
     /*!
@@ -314,7 +309,6 @@ protected:
     UInt                                 M_ID;
     couplingsTypes                       M_type;
 
-    GetPot                               M_dataFile;
     ModelsVector_Type                    M_models;
     std::string                          M_couplingName;
     std::vector< BCFlag >                M_flags;
@@ -326,7 +320,6 @@ protected:
     Vector_ptrType                       M_LocalDeltaCouplingVariables;
 
     boost::shared_ptr< MS_PhysicalData > M_dataPhysics;
-    boost::shared_ptr< DataTime >        M_dataTime;
 
     boost::shared_ptr< Epetra_Comm >     M_comm;
     boost::shared_ptr< Displayer >       M_displayer;

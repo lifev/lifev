@@ -123,7 +123,10 @@ public:
     //@{
 
     //! Setup the data of the model.
-    void SetupData();
+    /*!
+     * @param FileName Name of data file.
+     */
+    void SetupData( const std::string& FileName );
 
     //! Setup the model.
     void SetupModel();
@@ -150,7 +153,10 @@ public:
     //@{
 
     //! Setup the data of the linear model
-    void SetupLinearData();
+    /*!
+     * @param FileName Name of data file.
+     */
+    void SetupLinearData( const std::string& FileName );
 
     //! Setup the linear model
     void SetupLinearModel();
@@ -164,7 +170,7 @@ public:
     //@}
 
 
-    //! @name Get functions
+    //! @name Get Methods
     //@{
 
     //! Get the BCInterface container of the boundary conditions of the model
@@ -298,7 +304,10 @@ private:
 
     //@}
 
-    boost::shared_ptr< IOFileType >       M_output;
+    boost::shared_ptr< IOFileType >       M_exporter;
+    boost::shared_ptr< IOFileType >       M_importer;
+
+    std::string                           M_FileName; //TODO Temporary - To be removed
 
     // Fluid problem
     boost::shared_ptr< FluidType >        M_Fluid;
