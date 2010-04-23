@@ -46,7 +46,6 @@ UInt MS_PhysicalModel::M_modelsNumber = 0;
 MS_PhysicalModel::MS_PhysicalModel() :
     M_ID                (),
     M_type              (),
-    M_dataFile          (),
     M_couplings         (),
     M_modelName         (),
     M_flags             (),
@@ -54,7 +53,6 @@ MS_PhysicalModel::MS_PhysicalModel() :
     M_geometryRotate    (),
     M_geometryTranslate (),
     M_dataPhysics       (),
-    M_dataTime          (),
     M_comm              (),
     M_displayer         ()
 {
@@ -77,7 +75,6 @@ MS_PhysicalModel::MS_PhysicalModel() :
 MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
     M_ID                ( model.M_ID ),
     M_type              ( model.M_type ),
-    M_dataFile          ( model.M_dataFile ),
     M_couplings         ( model.M_couplings ),
     M_modelName         ( model.M_modelName ),
     M_flags             ( model.M_flags ),
@@ -85,7 +82,6 @@ MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
     M_geometryRotate    ( model.M_geometryRotate ),
     M_geometryTranslate ( model.M_geometryTranslate ),
     M_dataPhysics       ( model.M_dataPhysics ),
-    M_dataTime          ( model.M_dataTime ),
     M_comm              ( model.M_comm ),
     M_displayer         ( model.M_displayer )
 {
@@ -107,7 +103,6 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
     {
         M_ID                = model.M_ID;
         M_type              = model.M_type;
-        M_dataFile          = model.M_dataFile;
         M_couplings         = model.M_couplings;
         M_modelName         = model.M_modelName;
         M_flags             = model.M_flags;
@@ -115,7 +110,6 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
         M_geometryRotate    = model.M_geometryRotate;
         M_geometryTranslate = model.M_geometryTranslate;
         M_dataPhysics       = model.M_dataPhysics;
-        M_dataTime          = model.M_dataTime;
         M_comm              = model.M_comm;
         M_displayer         = model.M_displayer;
     }
@@ -125,6 +119,26 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
 // ===================================================
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
+void
+MS_PhysicalModel::SetupData( const std::string& FileName )
+{
+
+#ifdef DEBUG
+    Debug( 8100 ) << "MS_PhysicalModel::SetupData( FileName ) \n";
+#endif
+
+    GetPot DataFile( FileName );
+
+    // Read modelName
+    M_modelName = DataFile( "MultiScale/modelName", "modelName" );
+
+    // Read flags
+    UInt componentSize = DataFile.vector_variable_size( "MultiScale/couplingFlags" );
+    M_flags.reserve( componentSize );
+    for ( UInt j( 0 ); j < componentSize; ++j )
+        M_flags.push_back( DataFile( "MultiScale/couplingFlags", 0, j ) );
+}
+
 void
 MS_PhysicalModel::ShowMe()
 {
@@ -175,26 +189,6 @@ MS_PhysicalModel::SetID( const UInt& id )
 }
 
 void
-MS_PhysicalModel::SetDataFile( const std::string& dataFile )
-{
-
-#ifdef DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::SetDataFile( dataFile ) \n";
-#endif
-
-    M_dataFile = GetPot( dataFile );
-
-    // Read modelName
-    M_modelName = M_dataFile( "MultiScale/modelName", "modelName" );
-
-    // Read flags
-    UInt componentSize = M_dataFile.vector_variable_size( "MultiScale/couplingFlags" );
-    M_flags.reserve( componentSize );
-    for ( UInt j( 0 ); j < componentSize; ++j )
-        M_flags.push_back( M_dataFile( "MultiScale/couplingFlags", 0, j ) );
-}
-
-void
 MS_PhysicalModel::AddCoupling( const Coupling_ptrType& coupling )
 {
     M_couplings.push_back( coupling );
@@ -216,8 +210,7 @@ MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
 }
 
 void
-MS_PhysicalModel::SetData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics,
-                           const boost::shared_ptr< DataTime >& dataTime )
+MS_PhysicalModel::SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics )
 {
 
 #ifdef DEBUG
@@ -225,7 +218,6 @@ MS_PhysicalModel::SetData( const boost::shared_ptr< MS_PhysicalData >& dataPhysi
 #endif
 
     M_dataPhysics = dataPhysics;
-    M_dataTime    = dataTime;
 }
 
 void

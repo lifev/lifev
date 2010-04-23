@@ -53,6 +53,15 @@ class MS_PhysicalData
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
+    typedef DataTime                                     Time_Type;
+    typedef boost::shared_ptr< Time_Type >               Time_ptrType;
+
+    //@}
+
+
     //! @name Constructors & Destructor
     //@{
 
@@ -102,15 +111,21 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the global fluid density
+    //! Get the time container.
     /*!
-     * @return density of the fluid
+     * @return time container
+     */
+    Time_ptrType GetDataTime() const;
+
+    //! Get the global fluid density.
+    /*!
+     * @return density of the fluid.
      */
     const Real& GetFluidDensity() const;
 
-    //! Get the global fluid viscosity
+    //! Get the global fluid viscosity.
     /*!
-     * @return viscosity of the fluid
+     * @return viscosity of the fluid.
      */
     const Real& GetFluidViscosity() const;
 
@@ -118,8 +133,10 @@ public:
 
 private:
 
-    Real M_fluidDensity;
-    Real M_fluidViscosity;
+    Time_ptrType                        M_DataTime;
+
+    Real                                M_FluidDensity;
+    Real                                M_FluidViscosity;
 
 };
 

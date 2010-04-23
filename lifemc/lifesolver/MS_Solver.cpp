@@ -47,7 +47,6 @@ MS_Solver::MS_Solver() :
     M_multiscale        ( new MS_Model_MultiScale() ),
     M_algorithm         (),
     M_dataPhysics       ( new MS_PhysicalData() ),
-    M_dataTime          (),
     M_comm              (),
     M_displayer         (),
     M_chrono            ()
@@ -74,7 +73,6 @@ MS_Solver::MS_Solver( const MS_Solver& solver ) :
     M_multiscale        ( solver.M_multiscale ),
     M_algorithm         ( solver.M_algorithm ),
     M_dataPhysics       ( solver.M_dataPhysics ),
-    M_dataTime          ( solver.M_dataTime ),
     M_comm              ( solver.M_comm ),
     M_displayer         ( solver.M_displayer ),
     M_chrono            ( solver.M_chrono )
@@ -102,7 +100,6 @@ MS_Solver::operator=( const MS_Solver& solver )
         M_multiscale        = solver.M_multiscale;
         M_algorithm         = solver.M_algorithm;
         M_dataPhysics       = solver.M_dataPhysics;
-        M_dataTime          = solver.M_dataTime;
         M_comm              = solver.M_comm;
         M_displayer         = solver.M_displayer;
         M_chrono            = solver.M_chrono;
@@ -128,15 +125,15 @@ MS_Solver::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
 }
 
 void
-MS_Solver::SetupProblem( const std::string& dataFile, const std::string& problemFolder )
+MS_Solver::SetupProblem( const std::string& FileName, const std::string& problemFolder )
 {
 
 #ifdef DEBUG
-    Debug( 8000 ) << "MS_Solver::SetupData( dataFile, problemFolder ) \n";
+    Debug( 8000 ) << "MS_Solver::SetupData( FileName, problemFolder ) \n";
 #endif
 
     // Load data file
-    GetPot DataFile( dataFile );
+    GetPot DataFile( FileName );
 
     // Define the folder containing the problem
     MS_ProblemFolder = problemFolder;
@@ -145,23 +142,21 @@ MS_Solver::SetupProblem( const std::string& dataFile, const std::string& problem
     if ( DataFile( "Solver/Restart/Restart", false ) )
         MS_ProblemStep = DataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
-    // Main MultiScale problem
-    M_multiscale->SetDataFile( DataFile( "Problem/MS_problem", "./MultiScaleData/Models/Model.dat" ) );
-
     // Time & Physics containers
-    M_dataTime.reset( new DataTime( DataFile, "Solver/time_discretization" ) );
     M_dataPhysics->ReadData( DataFile );
+    M_multiscale->SetGlobalData( M_dataPhysics );
 
-    // Setup MultiScale problem
-    M_multiscale->SetData( M_dataPhysics, M_dataTime );
-    M_multiscale->SetupData();
+    // Setup data from data file
+    M_multiscale->SetupData( DataFile( "Problem/MS_problem", "./MultiScaleData/Models/Model.dat" ) );
+
+    // Setup Models
     M_multiscale->SetupModel();
 
     // Algorithm parameters
     M_algorithm = Algorithm_ptrType( FactoryAlgorithms::instance().createObject( algorithmMap[ DataFile( "Solver/Algorithm/AlgorithmType", "Aitken" ) ] ) );
     M_algorithm->SetCommunicator( M_comm );
     M_algorithm->SetMultiScaleProblem( M_multiscale );
-    M_algorithm->SetupData( DataFile );
+    M_algorithm->SetupData( FileName );
 }
 
 bool
@@ -175,11 +170,11 @@ MS_Solver::SolveProblem()
     // Move to the "true" first time step when restarting a simulation
     if ( MS_ProblemStep > 0 )
     {
-        M_dataTime->updateTime();
-        M_dataTime->setInitialTime( M_dataTime->getTime() );
+        M_dataPhysics->GetDataTime()->updateTime();
+        M_dataPhysics->GetDataTime()->setInitialTime( M_dataPhysics->GetDataTime()->getTime() );
     }
 
-    for ( ; M_dataTime->canAdvance(); M_dataTime->updateTime() )
+    for ( ; M_dataPhysics->GetDataTime()->canAdvance(); M_dataPhysics->GetDataTime()->updateTime() )
     {
         M_chrono.start();
 
@@ -188,12 +183,13 @@ MS_Solver::SolveProblem()
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
             std::cout << "                    MULTISCALE SIMULATION" << std::endl;
-            std::cout << "             time = " << M_dataTime->getTime() << " s; time step number = " << M_dataTime->getTimeStepNumber() << std::endl;
+            std::cout << "             time = " << M_dataPhysics->GetDataTime()->getTime() << " s; "  <<
+                          "time step number = " << M_dataPhysics->GetDataTime()->getTimeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 
         // Build or Update System
-        if ( M_dataTime->isFirstTimeStep() )
+        if ( M_dataPhysics->GetDataTime()->isFirstTimeStep() )
             M_multiscale->BuildSystem();
         else
             M_multiscale->UpdateSystem();
@@ -230,9 +226,8 @@ MS_Solver::ShowMe()
         std::cout << "Problem folder      = " << MS_ProblemFolder << std::endl
                   << "Problem step        = " << MS_ProblemStep << std::endl << std::endl;
 
-        std::cout << "Initial time        = " << M_dataTime->getInitialTime() << std::endl
-                  << "End time            = " << M_dataTime->getEndTime() << std::endl
-                  << "TimeStep            = " << M_dataTime->getTimeStep() << std::endl << std::endl;
+        M_dataPhysics->ShowMe();
+
         std::cout << std::endl << std::endl;
     }
 

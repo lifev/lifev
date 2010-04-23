@@ -98,10 +98,10 @@ public:
 
     //! Setup the problem
     /*!
-     * @param dataFile name and path of the data file
+     * @param FileName Name of the data file.
      * @param problemName the name of the problem (useful for saving data in a specific folder)
      */
-    void SetupProblem( const std::string& dataFile, const std::string& problemName );
+    void SetupProblem( const std::string& FileName, const std::string& problemName );
 
     //! Run the time-loop to solve the MultiScale problem
     /*!
@@ -130,9 +130,6 @@ private:
 
     // PhysicalData container
     boost::shared_ptr< MS_PhysicalData >     M_dataPhysics;
-
-    // DataTime container
-    boost::shared_ptr< DataTime >            M_dataTime;
 
     // Communicator
     boost::shared_ptr< Epetra_Comm >         M_comm;

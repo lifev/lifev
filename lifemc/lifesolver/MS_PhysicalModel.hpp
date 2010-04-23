@@ -103,8 +103,10 @@ public:
      *     <li> set global parameter for the MS simulation (viscosity, time, ...);
      *     <li> perform preliminary operations which don't depend on the couplings.
      * </ol>
+     *
+     * @param FileName Name of data file.
      */
-    virtual void SetupData() = 0;
+    virtual void SetupData( const std::string& FileName );
 
     //! Setup the model.
     /*!
@@ -172,12 +174,6 @@ public:
      */
     void SetID( const UInt& id );
 
-    //! Set the data file to load information of the model
-    /*!
-     * @param dataFile Name and path of data file
-     */
-    void SetDataFile( const std::string& dataFile );
-
     //! Add a pointer to one of the couplings which couple the model
     /*!
      * @param coupling shared_ptr of the coupling
@@ -199,10 +195,8 @@ public:
     /*!
      * This method set all the data
      * @param dataPhysics Data container for physical quantities
-     * @param dataTime Data container for time parameters
      */
-    void SetData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics,
-                  const boost::shared_ptr< DataTime >& dataTime );
+    void SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics );
 
     //! Set the epetra communicator for the model
     /*!
@@ -281,7 +275,6 @@ protected:
     UInt                                 M_ID;                 // Global ID of the model
     modelsTypes                          M_type;               // Type of the model (depends on the derived class)
 
-    GetPot                               M_dataFile;           // GetPot data file
     CouplingsVector_Type                 M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
     std::vector< BCFlag >                M_flags;              // Free flags, available for the couplings
@@ -291,7 +284,6 @@ protected:
     boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
     boost::shared_ptr< MS_PhysicalData > M_dataPhysics;        // Data container for global physical quantities
-    boost::shared_ptr< DataTime >        M_dataTime;           // Data container for time quantities
 
     boost::shared_ptr< Epetra_Comm >     M_comm;               // Communicator
     boost::shared_ptr< Displayer >       M_displayer;          // Displayer

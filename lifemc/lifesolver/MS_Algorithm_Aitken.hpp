@@ -90,9 +90,9 @@ public:
 
     //! Setup the data of the algorithm using a data file
     /*!
-     * @param DataFile GetPot data file containing the settings
+     * @param FileName Name of the data file.
      */
-    void SetupData( const GetPot& DataFile );
+    void SetupData( const std::string& FileName );
 
     //! Perform sub-iteration on the coupling variables
     void SubIterate();

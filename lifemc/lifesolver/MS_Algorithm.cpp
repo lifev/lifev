@@ -99,12 +99,14 @@ MS_Algorithm::operator=( const MS_Algorithm& algorithm )
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm::SetupData( const GetPot& DataFile )
+MS_Algorithm::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
     Debug( 8010 ) << "MS_Algorithm::SetupData( DataFile ) \n";
 #endif
+
+    GetPot DataFile( FileName );
 
     M_SubiterationsMaximumNumber = DataFile( "Solver/Algorithm/subITMax", 100 );
     M_Tolerance                  = DataFile( "Solver/Algorithm/tolerance", 1.e-10 );

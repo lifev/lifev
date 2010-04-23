@@ -90,7 +90,10 @@ public:
     //@{
 
     //! Setup the data of the coupling
-    void SetupData();
+    /*!
+     *  @param FileName Name of data file
+     */
+    void SetupData( const std::string& FileName );
 
     //! Setup the coupling
     void SetupCoupling();
@@ -152,9 +155,10 @@ private:
 
     //@}
 
+    std::string           M_FileName;
+
     std::vector< BCName > M_list;
     UInt                  M_listSize;
-
 };
 
 //! Factory create function
@@ -174,16 +178,13 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions( const UInt& i )
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetBC().ReadExternalBC( M_list[j], "boundary_conditions/", M_dataFile );
+        Model->GetBC().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
 
         Model->GetBC().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
         Model->GetBC().GetDataContainer().SetFlag( M_flags[i] );
 
-        Model->GetBC().InsertExternalBC();
+        Model->GetBC().InsertBC();
     }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 template< class model >
@@ -194,7 +195,7 @@ MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions( const UInt& i )
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetLinearBC().ReadExternalBC( M_list[j], "boundary_conditions/", M_dataFile );
+        Model->GetLinearBC().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
 
         Model->GetLinearBC().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
         Model->GetLinearBC().GetDataContainer().SetFlag( M_flags[i] );
@@ -202,11 +203,8 @@ MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions( const UInt& i )
         Model->GetLinearBC().GetDataContainer().SetBase( make_pair( "function", function ) );
         Model->GetLinearBC().GetDataContainer().SetBaseString( "0" );
 
-        Model->GetLinearBC().InsertExternalBC();
+        Model->GetLinearBC().InsertBC();
     }
-
-    //MPI Barrier
-    M_comm->Barrier();
 }
 
 } // Namespace LifeV
