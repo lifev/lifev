@@ -50,12 +50,13 @@ public:
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;
 
+    NoExport();
     NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId );
     NoExport(const GetPot& dfile, const std::string& prefix);
 
     EpetraMapType mapType() const;
     void postProcess(const Real& /*time*/) {}
-    UInt importFromTime( const Real& /*Time*/ ) {}
+    UInt importFromTime( const Real& /*Time*/ ) { assert(false); return 0; }
     void import(const Real& /*Tstart*/, const Real& /*dt*/) {} // dt is used to rebuild the history up to now
     void import(const Real& /*Tstart*/) {}
     void defineShape() {}
@@ -67,8 +68,14 @@ private:
 };
 
 template<typename Mesh>
+NoExport<Mesh>::NoExport():
+    super()
+{
+}
+
+template<typename Mesh>
 NoExport<Mesh>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
-                       const int& procId)
+                         const int& procId)
     :
     super(dfile,prefix)
 {

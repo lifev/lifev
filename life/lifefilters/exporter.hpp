@@ -216,6 +216,9 @@ public:
     //! @name Constructor & Destructor
     //@{
 
+    //! Empty constructor for Exporter
+    Exporter();
+
     //! Constructor for Exporter without prefix and procID
     /*!
         In this case prefix and procID should be set separately
@@ -286,6 +289,24 @@ protected:
 
 public:
 
+    //! Set data from file.
+    /*!
+     * @param dataFile data file.
+     * @param section section in the data file.
+     */
+    void setDataFromGetPot( const GetPot& dataFile, const std::string& section = "exporter" );
+
+    //! Set prefix.
+    /*!
+     * @param prefix prefix.
+     */
+    void setPrefix( const std::string& prefix );
+
+    //! Set the folder for pre/postprocessing
+    /*!
+     * @param Directory output folder
+     */
+    void setDirectory( const std::string& Directory );
 
     //! Set the folder for pre/postprocessing
     /*!
@@ -293,11 +314,17 @@ public:
      */
     void setStartIndex( const UInt& StartIndex );
 
-    //! Set the folder for pre/postprocessing
+    //! Set how many time step between two saves.
     /*!
-     * @param Directory output folder
+     * @param save steps
      */
-    void setDirectory( const std::string& Directory );
+    void setSave( const UInt& save );
+
+    //! Set if to save the mesh at each time step.
+    /*!
+     * @param multimesh multimesh
+     */
+    void setMultimesh( const bool& multimesh );
 
     void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
 
@@ -340,12 +367,21 @@ protected:
 // Constructors
 // ===================================================
 template<typename Mesh>
+Exporter<Mesh>::Exporter():
+    M_prefix        (),
+    M_post_dir      ( "./" ),
+    M_count         ( 0 ),
+    M_save          ( 1 ),
+    M_multimesh     ( true )
+{}
+
+template<typename Mesh>
 Exporter<Mesh>::Exporter( const GetPot& dfile, const std::string& prefix ):
-    M_prefix        (prefix),
-    M_post_dir      (dfile("exporter/post_dir", "./")),
-    M_count         (dfile("exporter/start",0)),
-    M_save          (dfile("exporter/save",1)),
-    M_multimesh     (dfile("exporter/multimesh",true))
+    M_prefix        ( prefix ),
+    M_post_dir      ( dfile("exporter/post_dir", "./") ),
+    M_count         ( dfile("exporter/start",0) ),
+    M_save          ( dfile("exporter/save",1) ),
+    M_multimesh     ( dfile("exporter/multimesh",true) )
 {}
 
 // ===================================================
@@ -398,15 +434,42 @@ void Exporter<Mesh>::computePostfix()
 // Set Methods
 // ===================================================
 template<typename Mesh>
-void Exporter<Mesh>::setStartIndex( const UInt& StartIndex )
+void Exporter<Mesh>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
-    M_count = StartIndex;
+    M_post_dir      = dataFile( ( section + "/post_dir"  ).data(), "./" );
+    M_count         = dataFile( ( section + "/start"     ).data(), 0 );
+    M_save          = dataFile( ( section + "/save"      ).data(), 1 );
+    M_multimesh     = dataFile( ( section + "/multimesh" ).data(), true );
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setPrefix( const std::string& prefix )
+{
+    M_prefix = prefix;
 }
 
 template<typename Mesh>
 void Exporter<Mesh>::setDirectory( const std::string& Directory )
 {
     M_post_dir = Directory;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setStartIndex( const UInt& StartIndex )
+{
+    M_count = StartIndex;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setSave( const UInt& save )
+{
+    M_save = save;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setMultimesh( const bool& multimesh )
+{
+    M_multimesh = multimesh;
 }
 
 template<typename Mesh>

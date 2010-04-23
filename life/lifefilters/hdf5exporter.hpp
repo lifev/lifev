@@ -80,6 +80,9 @@ public:
     //! @name Constructor & Destructor
     //@{
 
+    //! Empty Constructor for Hdf5exporter
+    Hdf5exporter();
+
     //! Constructor for Hdf5exporter
     /*!
        @param dfile the GetPot data file where you must provide an [exporter] section with:
@@ -201,6 +204,15 @@ private:
 // ===================================================
 // Constructors
 // ===================================================
+template<typename Mesh>
+Hdf5exporter<Mesh>::Hdf5exporter():
+    super               (),
+    M_HDF5              (),
+    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+    M_outputFileName    ( "noninitialisedFileName" )
+{
+}
+
 template<typename Mesh>
 Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
                                  const int& procId) :

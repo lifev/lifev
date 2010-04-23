@@ -51,6 +51,9 @@ public:
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;
 
+    //! Empty constructor
+    Ensight();
+
     /**
        Constructor for Ensight
 
@@ -88,7 +91,7 @@ public:
     /*!
        @param Time the time of the data to be imported
      */
-    UInt importFromTime( const Real& /*Time*/ ) { assert(false); } //Not yet implemented for Ensight
+    UInt importFromTime( const Real& /*Time*/ ) { assert(false); return 0; } //Not yet implemented for Ensight
 
     /**
        Import data from previous simulations
@@ -134,6 +137,16 @@ private:
 //
 // Implementation
 //
+template<typename Mesh>
+Ensight<Mesh>::Ensight():
+    super(),
+    M_import_dir("./"),
+    M_steps(0),
+    M_LtGNodesMap(),
+    M_me()
+{
+}
+
 template<typename Mesh>
 Ensight<Mesh>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
                        const int& procId)
