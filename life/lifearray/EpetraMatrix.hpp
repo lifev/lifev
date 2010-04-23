@@ -882,7 +882,14 @@ void EpetraMatrix<DataType>::openCrsMatrix()
         int meanNumEntries = this->getMeanNumEntries();
         matrix_ptrtype tmp(M_epetraCrs);
         M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
-        *M_epetraCrs += *tmp;
+
+#ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
+        EpetraExt::MatrixMatrix::Add(*tmp, false, 1., *M_epetraCrs, 1., false);
+#elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
+        EpetraExt::MatrixMatrix::Add(*tmp, false, 1., *M_epetraCrs, 1.);
+#else
+#error error: do not have nor EpetraExt 6 nor 7 or 8
+#endif
 	}
 }
 
