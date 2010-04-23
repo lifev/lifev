@@ -29,24 +29,41 @@
 
 #ifndef _ONED_FUNCTIONS_1D_
 #define _ONED_FUNCTIONS_1D_
-#include <cmath>
-#include <life/lifecore/life.hpp>
+#include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
 
-#include <lifemc/lifefem/oneDBCFunctions.hpp>
+namespace LifeV {
 
+typedef OneDimensionalModel_Physics                          Physics_Type;
+typedef boost::shared_ptr< Physics_Type >                    Physics_PtrType;
 
+typedef OneDimensionalModel_BCFunction::Flux_Type            Flux_Type;
+typedef OneDimensionalModel_BCFunction::Flux_PtrType         Flux_PtrType;
 
+typedef OneDimensionalModel_BCFunction::Source_Type          Source_Type;
+typedef OneDimensionalModel_BCFunction::Source_PtrType       Source_PtrType;
 
-namespace LifeV
+typedef OneDimensionalModel_BCFunction::Mesh_Type            Mesh_Type;
+typedef OneDimensionalModel_BCFunction::FESpace_Type         FESpace_Type;
+typedef OneDimensionalModel_BCFunction::Vector_Type          Vector_Type;
+
+//! Const - Base class for One Dimensional BC Functions
+/*!
+ *  @author Lucia Mirabella
+ */
+class Const : public OneDimensionalModel_BCFunction
 {
-
-typedef RegionMesh1D<LinearLine> RegionMesh;
-
+public:
+    Const(const Real val) : M_val(val) {}
+    Real evaluate( const Real& /*time*/ ) {return M_val;}
+    ~Const() {}
+private:
+    Real M_val;
+};
 
 /*!
   \brief A sinusoidal wave
 */
-class Sin : public OneDBCFunctionBase
+class Sin : public OneDimensionalModel_BCFunction
 {
 public:
     /*!
@@ -61,7 +78,7 @@ public:
         const Real scale  = 10,
         const Real period = .01,
         const Real phase  = 0. ) :
-            _M_mean(mean), _M_scale(scale), _M_period(period), _M_phase(phase) {}
+            M_mean(mean), M_scale(scale), M_period(period), M_phase(phase) {}
 
     /*!
       \brief Compute the sinus at the specified time
@@ -71,31 +88,31 @@ public:
     */
     Real evaluate( const Real& time )
     {
-        //         std::cout << "mean  " << _M_mean << std::endl;
-        //         std::cout << "scale  " << _M_scale << std::endl;
-        //         std::cout << "period " << _M_period << std::endl;
-        //         std::cout << "phase  " << _M_phase << std::endl;
+        //         std::cout << "mean  " << M_mean << std::endl;
+        //         std::cout << "scale  " << M_scale << std::endl;
+        //         std::cout << "period " << M_period << std::endl;
+        //         std::cout << "phase  " << M_phase << std::endl;
 
 
-        if (time < _M_period)
+        if (time < M_period)
             {
-                std::cout << time << " Flux BC = " << _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period) << std::endl;
-                return _M_mean + _M_scale*std::sin(_M_phase+2*M_PI*time/_M_period);
+                std::cout << time << " Flux BC = " << M_mean + M_scale*std::sin(M_phase+2*M_PI*time/M_period) << std::endl;
+                return M_mean + M_scale*std::sin(M_phase+2*M_PI*time/M_period);
             }
         else
             {
                 return 0.;
             }
-//         std::cout << "BC imposed at time  " << time << " = " << _M_mean + _M_scale*std::sin(_M_phase + 2*M_PI*time/_M_period) << std::endl;
-//         return _M_mean + _M_scale*std::sin(_M_phase + 2*M_PI*time/_M_period);
+//         std::cout << "BC imposed at time  " << time << " = " << M_mean + M_scale*std::sin(M_phase + 2*M_PI*time/M_period) << std::endl;
+//         return M_mean + M_scale*std::sin(M_phase + 2*M_PI*time/M_period);
     };
 
     ~Sin() {}
 private:
-    Real _M_mean;
-    Real _M_scale;
-    Real _M_period;
-    Real _M_phase;
+    Real M_mean;
+    Real M_scale;
+    Real M_period;
+    Real M_phase;
 };
 
 
@@ -103,7 +120,7 @@ private:
   \brief A superimposition of a sinusoidal and a cosinusoidal waves,
   whose amplitude is damped by exponential terms
 */
-class Cos_min_Sin : public OneDBCFunctionBase
+class Cos_min_Sin : public OneDimensionalModel_BCFunction
 {
 public:
     /*!
@@ -128,10 +145,10 @@ public:
                 const Real coeff_exp_t_sin = 0, const Real mean_sin = 0,
                 const Real amplitude_sin = 10, const Real frequency_sin = 8.*atan(1.),
                 const Real phase_sin = 0. ) :
-            _M_coeff_exp_t_cos(coeff_exp_t_cos), _M_mean_cos(mean_cos),
-            _M_amplitude_cos(amplitude_cos), _M_frequency_cos(frequency_cos), _M_phase_cos(phase_cos),
-            _M_coeff_exp_t_sin(coeff_exp_t_sin), _M_mean_sin(mean_sin),
-            _M_amplitude_sin(amplitude_sin), _M_frequency_sin(frequency_sin), _M_phase_sin(phase_sin) {}
+            M_coeff_exp_t_cos(coeff_exp_t_cos), M_mean_cos(mean_cos),
+            M_amplitude_cos(amplitude_cos), M_frequency_cos(frequency_cos), M_phase_cos(phase_cos),
+            M_coeff_exp_t_sin(coeff_exp_t_sin), M_mean_sin(mean_sin),
+            M_amplitude_sin(amplitude_sin), M_frequency_sin(frequency_sin), M_phase_sin(phase_sin) {}
 
     /*!
       \brief Compute the wave at the specified time
@@ -142,10 +159,10 @@ public:
     */
     Real evaluate( const Real& time )
     {
-        Real result = _M_mean_cos
-            + _M_amplitude_cos * std::cos(_M_phase_cos+time*_M_frequency_cos)
-            - ( _M_mean_sin
-                + _M_amplitude_sin * std::sin(_M_phase_sin+time*_M_frequency_sin) );
+        Real result = M_mean_cos
+            + M_amplitude_cos * std::cos(M_phase_cos+time*M_frequency_cos)
+            - ( M_mean_sin
+                + M_amplitude_sin * std::sin(M_phase_sin+time*M_frequency_sin) );
 
         return result;
     };
@@ -153,30 +170,30 @@ public:
     /*! \name Getters
      */
     //@{
-    Real& coeff_exp_t_cos(){ return _M_coeff_exp_t_cos;}
-    Real& mean_cos(){ return _M_mean_cos;}
-    Real& amplitude_cos(){ return _M_amplitude_cos;}
-    Real& frequency_cos(){ return _M_frequency_cos;}
-    Real& phase_cos(){ return _M_phase_cos;}
-    Real& coeff_exp_t_sin(){ return _M_coeff_exp_t_sin;}
-    Real& mean_sin(){ return _M_mean_sin;}
-    Real& amplitude_sin(){ return _M_amplitude_sin;}
-    Real& frequency_sin(){ return _M_frequency_sin;}
-    Real& phase_sin(){ return _M_phase_sin;}
+    Real& coeff_exp_t_cos(){ return M_coeff_exp_t_cos;}
+    Real& mean_cos(){ return M_mean_cos;}
+    Real& amplitude_cos(){ return M_amplitude_cos;}
+    Real& frequency_cos(){ return M_frequency_cos;}
+    Real& phase_cos(){ return M_phase_cos;}
+    Real& coeff_exp_t_sin(){ return M_coeff_exp_t_sin;}
+    Real& mean_sin(){ return M_mean_sin;}
+    Real& amplitude_sin(){ return M_amplitude_sin;}
+    Real& frequency_sin(){ return M_frequency_sin;}
+    Real& phase_sin(){ return M_phase_sin;}
     //@}
 
     ~Cos_min_Sin() {}
 private:
-    Real _M_coeff_exp_t_cos;
-    Real _M_mean_cos;
-    Real _M_amplitude_cos;
-    Real _M_frequency_cos;
-    Real _M_phase_cos;
-    Real _M_coeff_exp_t_sin;
-    Real _M_mean_sin;
-    Real _M_amplitude_sin;
-    Real _M_frequency_sin;
-    Real _M_phase_sin;
+    Real M_coeff_exp_t_cos;
+    Real M_mean_cos;
+    Real M_amplitude_cos;
+    Real M_frequency_cos;
+    Real M_phase_cos;
+    Real M_coeff_exp_t_sin;
+    Real M_mean_sin;
+    Real M_amplitude_sin;
+    Real M_frequency_sin;
+    Real M_phase_sin;
 };
 
 
@@ -209,10 +226,10 @@ public:
                          Real const& omega ) :
             Cos_min_Sin(0., 0., sol_amplitude_Re, omega, 0.,
                         0., 0., sol_amplitude_Im, omega, 0.),
-            _M_sol_amplitude_Re(sol_amplitude_Re),
-            _M_sol_amplitude_Im(sol_amplitude_Im),
-            _M_kappa_Re(kappa_Re),
-            _M_kappa_Im(kappa_Im)
+            M_sol_amplitude_Re(sol_amplitude_Re),
+            M_sol_amplitude_Im(sol_amplitude_Im),
+            M_kappa_Re(kappa_Re),
+            M_kappa_Im(kappa_Im)
     {}
 
     /*!
@@ -236,23 +253,23 @@ public:
     */
     void update_x( const Real& _x )
     {
-        this->amplitude_cos() = _M_sol_amplitude_Re * std::exp( _M_kappa_Im * _x );
-        this->phase_cos() = - _M_kappa_Re * _x;
-        this->amplitude_sin() = _M_sol_amplitude_Im * std::exp( _M_kappa_Im * _x );
-        this->phase_sin() = - _M_kappa_Re * _x;
+        this->amplitude_cos() = M_sol_amplitude_Re * std::exp( M_kappa_Im * _x );
+        this->phase_cos() = - M_kappa_Re * _x;
+        this->amplitude_sin() = M_sol_amplitude_Im * std::exp( M_kappa_Im * _x );
+        this->phase_sin() = - M_kappa_Re * _x;
     };
 
     ~Analytical_Solution() {}
 
 private:
-    Real _M_sol_amplitude_Re;
-    Real _M_sol_amplitude_Im;
-    Real _M_kappa_Re;
-    Real _M_kappa_Im;
+    Real M_sol_amplitude_Re;
+    Real M_sol_amplitude_Im;
+    Real M_kappa_Re;
+    Real M_kappa_Im;
 };
 
 
-class PhysiologicalFlux : public OneDBCFunctionBase
+class PhysiologicalFlux : public OneDimensionalModel_BCFunction
 {
 public:
     PhysiologicalFlux( GetPot const& data_file );
@@ -261,9 +278,9 @@ public:
 
     ~PhysiologicalFlux() {}
 private:
-	Real _M_rampT;
-	Real _M_time_step;
-    Real _M_scale;
+	Real M_rampT;
+	Real M_time_step;
+    Real M_scale;
 };
 
 
@@ -380,12 +397,12 @@ PhysiologicalFlux::evaluate( const Real& t )
                             0.55457447187998 };
 
 
-      double timescale = _M_scale/numData;
+      double timescale = M_scale/numData;
 
       for (;;)
       {
-          if (time < _M_scale) break;
-          time = time - _M_scale;
+          if (time < M_scale) break;
+          time = time - M_scale;
       }
 
       int     ipos     = time/timescale;
@@ -396,7 +413,7 @@ PhysiologicalFlux::evaluate( const Real& t )
 
       double slope = ipos -  time;
       std::cout << "BC: Flux = " << time*a + b
-                << " period = " << _M_scale << " pos = " << ipos << std::endl;
+                << " period = " << M_scale << " pos = " << ipos << std::endl;
       return time*a + b;
 }
 
@@ -404,18 +421,17 @@ PhysiologicalFlux::evaluate( const Real& t )
 
 
 
-template<class FLUX, class SOURCE, class PARAM>
-class PressureRamp : public Compatibility<FLUX, SOURCE>
+class PressureRamp : public Compatibility
 {
 public:
-    PressureRamp( const FESpace<RegionMesh, EpetraMap>&          fespace,
-                  const FLUX&                                    fluxFun,
-                  const SOURCE&                                  sourceFun,
-                  const std::vector<DataOneDModel::vector_type>& U_thistime,
+    PressureRamp( const FESpace_Type&                            fespace,
+                  const Flux_PtrType                             fluxFun,
+                  const Source_PtrType                           sourceFun,
+                  const std::vector<Vector_Type>& U_thistime,
                   const Real&                                    dt,
                   const std::string&                             border,
                   const std::string&                             var,
-                  const PARAM&                                   onedparam,
+                  const Physics_PtrType                          onedparam,
                   const Real&                                    startT     = .001,
                   const Real&                                    duration   = 0.7,
                   const Real&                                    endvalue   = 106400 );
@@ -436,45 +452,43 @@ public:
     ~PressureRamp() {}
 private:
     //! Reference to the solver parameters
-    const PARAM& _M_onedparam;
+    Physics_PtrType M_onedparam;
 
-    Real _M_startT;
-    Real _M_duration;
-    Real _M_endvalue;
-    Real _M_dt;
+    Real M_startT;
+    Real M_duration;
+    Real M_endvalue;
+    Real M_dt;
 };
 
 
-template<class FLUX, class SOURCE, class PARAM>
-PressureRamp<FLUX, SOURCE, PARAM>::PressureRamp (const FESpace<RegionMesh, EpetraMap>&          fespace,
-                                                 const FLUX&                                    fluxFun,
-                                                 const SOURCE&                                  sourceFun,
-                                                 const std::vector<DataOneDModel::vector_type>& U_thistime,
+PressureRamp::PressureRamp (const FESpace_Type&          fespace,
+                                                 const Flux_PtrType                             fluxFun,
+                                                 const Source_PtrType                           sourceFun,
+                                                 const std::vector<Vector_Type>& U_thistime,
                                                  const Real&                                    dt,
                                                  const std::string&                             border,
                                                  const std::string&                             var,
-                                                 const PARAM&                                   onedparam,
+                                                 const Physics_PtrType                          onedparam,
                                                  const Real&                                    startT,
                                                  const Real&                                    duration,
                                                  const Real&                                    endvalue):
-        Compatibility<FLUX, SOURCE>(fespace, fluxFun, sourceFun, U_thistime,/* W_thistime,*/ dt, border, var),
-        _M_onedparam               (onedparam),
-        _M_startT                  (startT),
-        _M_duration                (duration),
-        _M_endvalue                (endvalue),
-        _M_dt                      (dt)
+        Compatibility             (fespace, fluxFun, sourceFun, U_thistime,/* W_thistime,*/ dt, border, var),
+        M_onedparam               (onedparam),
+        M_startT                  (startT),
+        M_duration                (duration),
+        M_endvalue                (endvalue),
+        M_dt                      (dt)
 {}
 
 
 
-template<class FLUX, class SOURCE, class PARAM>
-Real PressureRamp<FLUX, SOURCE, PARAM>::evaluate( const Real& time )
+Real PressureRamp::evaluate( const Real& time )
 {
     Real W_out, result(0.);
 
-//     Real _P = ( time < (_M_startT + _M_duration) ) ?
-//         ( ( time - _M_startT ) / _M_duration ) : 1;
-    //Real _P = _M_endvalue;
+//     Real _P = ( time < (M_startT + M_duration) ) ?
+//         ( ( time - M_startT ) / M_duration ) : 1;
+    //Real _P = M_endvalue;
     Real t = time;
 
     int    numData = 80;
@@ -564,19 +578,19 @@ Real PressureRamp<FLUX, SOURCE, PARAM>::evaluate( const Real& time )
         };
 
     Real _P = 0;
-//     Real _P = ( time < (_M_startT + _M_duration) ) ?
-//         ( ( time - _M_startT ) / _M_duration ) : 1
+//     Real _P = ( time < (M_startT + M_duration) ) ?
+//         ( ( time - M_startT ) / M_duration ) : 1
     if (t < 0)
-        _P = t/_M_startT*pressure[0];
+        _P = t/M_startT*pressure[0];
     else
     {
 
-        double timescale = _M_duration/numData;
+        double timescale = M_duration/numData;
 
         for (;;)
         {
-            if (t < _M_duration) break;
-            t = t - _M_duration;
+            if (t < M_duration) break;
+            t = t - M_duration;
         }
 
         int     ipos     = t/timescale;
@@ -589,26 +603,26 @@ Real PressureRamp<FLUX, SOURCE, PARAM>::evaluate( const Real& time )
 
         double slope = ipos -  t;
         std::cout << "BC: Pressure = " << _P
-                  << " period = " << _M_duration << " pos = " << ipos << std::endl;
+                  << " period = " << M_duration << " pos = " << ipos << std::endl;
 
         //Real _P = 10000;
     }
 
     Debug( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << _P << "\n";
-    //    Debug( 6030 ) << "[PressureRamp::evaluate] target pressure = " << _M_endvalue << "\n";
+    //    Debug( 6030 ) << "[PressureRamp::evaluate] target pressure = " << M_endvalue << "\n";
 
-    switch( this->_M_oneDBCFunctionsMapStringValues[this->_M_var] )
+    switch( this->M_oneDBCFunctionsMapStringValues[this->M_var] )
         {
         case OneDBCW1:
             W_out = this->extrapolate_W( OneDBCW2 );
-            result = _M_onedparam.W_from_P( _P, W_out, 2, this->_M_boundaryDof);
+            result = M_onedparam->W_from_P( _P, W_out, 2, this->M_boundaryDof);
             break;
         case OneDBCW2:
             W_out = this->extrapolate_W( OneDBCW1 );
-            result = _M_onedparam.W_from_P( _P, W_out, 1, this->_M_boundaryDof);
+            result = M_onedparam->W_from_P( _P, W_out, 1, this->M_boundaryDof);
             break;
         default:
-            std::cout << "\n[PressureRamp::evaluate] incorrect variable identifier: " << this->_M_var << std::endl;
+            std::cout << "\n[PressureRamp::evaluate] incorrect variable identifier: " << this->M_var << std::endl;
         }
 
     Debug( 6030 ) << "[PressureRamp::evaluate] extrapolated exiting characteristic = " << W_out << "\n";
@@ -620,16 +634,15 @@ Real PressureRamp<FLUX, SOURCE, PARAM>::evaluate( const Real& time )
 
 
 
-template<class FLUX, class SOURCE, class PARAM>
-class Resi : public Compatibility<FLUX, SOURCE>
+class Resi : public Compatibility
 {
 public:
     Resi(  const Real & resistance, // const GetPot& data_file,
-           const PARAM& onedparam,
-           const FESpace<RegionMesh, EpetraMap>& FESpace,
-           const FLUX& fluxFun,
-           const SOURCE& sourceFun,
-           const std::vector<DataOneDModel::vector_type>& U_thistime,
+           const Physics_PtrType onedparam,
+           const FESpace_Type& FESpace,
+           const Flux_PtrType fluxFun,
+           const Source_PtrType sourceFun,
+           const std::vector<Vector_Type>& U_thistime,
            const Real& dt,
            const std::string& border,
            const std::string & var,
@@ -640,37 +653,35 @@ public:
     ~Resi() {}
 private:
     //! Resi value
-    Real _M_resistance;
+    Real M_resistance;
     //! Reference to the solver parameters
-    const PARAM& _M_onedparam;
+    Physics_PtrType M_onedparam;
     //! to impose absorbing conditions
-    bool _M_absorbing;
+    bool M_absorbing;
 };
 
 
-template<class FLUX, class SOURCE, class PARAM>
-Resi<FLUX, SOURCE, PARAM>::Resi(const Real &                                   resistance,
-                                const PARAM&                                   onedparam, // const GetPot& data_file,
-                                const FESpace<RegionMesh, EpetraMap>&          fespace,
-                                const FLUX&                                    fluxFun,
-                                const SOURCE&                                  sourceFun,
-                                const std::vector<DataOneDModel::vector_type>& U_thistime,
+Resi::Resi(const Real &                                   resistance,
+                                const Physics_PtrType                          onedparam, // const GetPot& data_file,
+                                const FESpace_Type&          fespace,
+                                const Flux_PtrType                                    fluxFun,
+                                const Source_PtrType                                  sourceFun,
+                                const std::vector<Vector_Type>& U_thistime,
                                 const Real&                                    dt,
                                 const std::string&                             border,
                                 const std::string&                             var,
                                 const bool&                                    absorbing ):
-        Compatibility<FLUX, SOURCE>( fespace, fluxFun, sourceFun, U_thistime, /*W_thistime,*/ dt, border, var),
-        _M_resistance(resistance),
-        _M_onedparam( onedparam ),
-        _M_absorbing( absorbing )
+        Compatibility( fespace, fluxFun, sourceFun, U_thistime, /*W_thistime,*/ dt, border, var),
+        M_resistance(resistance),
+        M_onedparam( onedparam ),
+        M_absorbing( absorbing )
 {
-    Debug( 6030 ) << "[Resi::Resi] resistance = " << _M_resistance << "\n";
+    Debug( 6030 ) << "[Resi::Resi] resistance = " << M_resistance << "\n";
 }
 
 
 
-template<class FLUX, class SOURCE, class PARAM>
-Real Resi<FLUX, SOURCE, PARAM>::evaluate( const Real& /*time*/ )
+Real Resi::evaluate( const Real& /*time*/ )
 {
     //! Coefficients
     Real W_out(0.), result;
@@ -679,59 +690,59 @@ Real Resi<FLUX, SOURCE, PARAM>::evaluate( const Real& /*time*/ )
     this->update_U_boundary();
     this->update_U_internalBd();
 
-    Debug( 6030 ) << "[Resi::Resi] at node " << this->_M_boundaryDof
-                  << ", A  = " << this->_M_U_boundary[0] << "( " << this->_M_U_thistime[0][1] << " ) "
-                  << ", Q  = " << this->_M_U_boundary[1]
-                  << ", W1 = " << this->_M_W_boundary[0]
-                  << ", W2 = " << this->_M_W_boundary[1]
+    Debug( 6030 ) << "[Resi::Resi] at node " << this->M_boundaryDof
+                  << ", A  = " << this->M_U_boundary[0] << "( " << this->M_U_thistime[0][1] << " ) "
+                  << ", Q  = " << this->M_U_boundary[1]
+                  << ", W1 = " << this->M_W_boundary[0]
+                  << ", W2 = " << this->M_W_boundary[1]
                   << "\n";
 
     this->computeEigenValuesVectors();
 
-    a1 = _M_onedparam.pressure(this->_M_U_boundary[0], this->_M_boundaryDof - 1); // pressure at previous time step
+    a1 = M_onedparam->pressure(this->M_U_boundary[0], this->M_boundaryDof - 1); // pressure at previous time step
 
-    a2 = this->_M_U_boundary[1]; // flux at previous time step
+    a2 = this->M_U_boundary[1]; // flux at previous time step
 
-    b1 = _M_onedparam.pressure_WDiff( this->_M_W_boundary[0], this->_M_W_boundary[1], 1, this->_M_boundaryDof - 1);  // dP / dW1
+    b1 = M_onedparam->pressure_WDiff( this->M_W_boundary[0], this->M_W_boundary[1], 1, this->M_boundaryDof - 1);  // dP / dW1
 
-    b2 = this->_M_U_boundary[0] / 2; // dQ / dW1
+    b2 = this->M_U_boundary[0] / 2; // dQ / dW1
 
-    c1 = _M_onedparam.pressure_WDiff( this->_M_W_boundary[0], this->_M_W_boundary[1], 2, this->_M_boundaryDof - 1);  // dP / dW2
+    c1 = M_onedparam->pressure_WDiff( this->M_W_boundary[0], this->M_W_boundary[1], 2, this->M_boundaryDof - 1);  // dP / dW2
 
     c2 = b2; // dQ / dW2
 
     Debug( 6030 ) << "[Resi::evaluate] P(A) = " << a1 << "\n";
     Debug( 6030 ) << "[Resi::evaluate] P(W1,W2) = "
-                  << _M_onedparam.pressure_W(this->_M_W_boundary[0], this->_M_W_boundary[1], this->_M_boundaryDof - 1) << "\n";
+                  << M_onedparam->pressure_W(this->M_W_boundary[0], this->M_W_boundary[1], this->M_boundaryDof - 1) << "\n";
 
-    a11 = a1 - b1*this->_M_W_boundary[0] - c1*this->_M_W_boundary[1];
-    a22 = a2 - b2*this->_M_W_boundary[0] - c2*this->_M_W_boundary[1];
+    a11 = a1 - b1*this->M_W_boundary[0] - c1*this->M_W_boundary[1];
+    a22 = a2 - b2*this->M_W_boundary[0] - c2*this->M_W_boundary[1];
 
-    switch( this->_M_oneDBCFunctionsMapStringValues[this->_M_var] )
+    switch( this->M_oneDBCFunctionsMapStringValues[this->M_var] )
         {
         case OneDBCW1:
-            W_out = this->extrapolate_L_dot_U(this->_M_eigval2, this->_M_left_eigvec2)
-                - dot( this->_M_left_eigvec2, this->_M_U_boundary ) + this->_M_W_boundary[1];
+            W_out = this->extrapolate_L_dot_U(this->M_eigval2, this->M_left_eigvec2)
+                - dot( this->M_left_eigvec2, this->M_U_boundary ) + this->M_W_boundary[1];
 
             break;
         case OneDBCW2:
-            W_out = this->extrapolate_L_dot_U(this->_M_eigval1, this->_M_left_eigvec1)
-                - dot( this->_M_left_eigvec1, this->_M_U_boundary ) + this->_M_W_boundary[0];
+            W_out = this->extrapolate_L_dot_U(this->M_eigval1, this->M_left_eigvec1)
+                - dot( this->M_left_eigvec1, this->M_U_boundary ) + this->M_W_boundary[0];
 
             break;
         default:
-            std::cout << "\n[Resi::evaluate] incorrect variable identifier: " << this->_M_border << std::endl;
+            std::cout << "\n[Resi::evaluate] incorrect variable identifier: " << this->M_border << std::endl;
         }
 
     Debug( 6030 ) << "[Resi::evaluate] extrapolated exiting characteristic = " << W_out << "\n";
 
-    if( _M_absorbing ) {
-        _M_resistance = b1 / b2;
-        Debug( 6030 ) << "[Resi::evaluate] imposing absorbing condition, R = " << _M_resistance << "\n";
+    if( M_absorbing ) {
+        M_resistance = b1 / b2;
+        Debug( 6030 ) << "[Resi::evaluate] imposing absorbing condition, R = " << M_resistance << "\n";
     }
 
-    result = W_out * ((b2*_M_resistance-b1)/(c1-c2*_M_resistance))
-        + ((a22*_M_resistance-a11)/(c1-c2*_M_resistance));
+    result = W_out * ((b2*M_resistance-b1)/(c1-c2*M_resistance))
+        + ((a22*M_resistance-a11)/(c1-c2*M_resistance));
 
     Debug( 6030 ) << "[Resi::evaluate] a1 = " << a1 << "\n";
     Debug( 6030 ) << "[Resi::evaluate] b1 = " << b1 << "\n";

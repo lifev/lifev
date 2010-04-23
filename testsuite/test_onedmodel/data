@@ -3,51 +3,50 @@
 #   Data file for One D Model (Non Linear)
 #-------------------------------------------------
 
-[onedmodel]
+[1D_Model]
 
-[./parameters]
-use_physical_values = 0
-Area0 = 1
-# alphaCor	= 1 	# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= 1.e6		# pressure law exponent
-beta1	= 0.5		# pressure law exponent
-Kr	= 2.419026343 	# friction parameter (source term)
-# Kr	= 0.		# friction parameter (source term)
-R = 2.e4            # terminal resistence
+[./Model]
+PhysicsType          = OneD_NonLinearPhysics
+FluxType             = OneD_NonLinearFlux
+SourceType           = OneD_NonLinearSource
 
-[../time]
-timebeg	 = 0.0		# inittime
-timeend	 = .05		# endtime
-timestep = 1e-5		# timestep
+[../PhysicalParameters]
+use_physical_values  = 0
+Area0                = 1
+# AlphaCoriolis       = 1            # coriolis coeff
+# AlphaCoriolis       = 1.333333333  # coriolis coeff
+Beta0                = 1.e6         # pressure law exponent
+Beta1                = 0.5          # pressure law exponent
+Kr                   = 2.419026343  # friction parameter (source term)
+R                    = 2.e4         # terminal resistence
+
+[../time_discretization]
+initialtime          = 0.0          # inittime
+endtime              = .05          # endtime
+timestep             = 1e-5         # timestep
+
+[../space_discretization]
+x_left               = 0.
+x_right              = 10.
+NumberOfElements     = 100          # number of elements
 
 [../initialize]
-var = Q
-value = 0
-firstnode = 1
-lastnode = 101
-multiplier = 1
-
-[../discretization]
-x_left	= 0.
-x_right	= 10.
-nb_elem	= 100	#   number of elements
+var                  = Q
+value                = 0
+firstnode            = 1
+lastnode             = 101
+multiplier           = 1
 
 [../miscellaneous]
-post_dir = ./                    # the directory for postprocessing files
-post_file = sol                  # the file name
-verbose = 1
-show_graceplot = 0                # 0: no grace plot, 1: show grace plots
-postprocess_timestep = 100
-showCFL = 1
-
+post_dir             = ./           # the directory for postprocessing files
+post_file            = sol          # the file name
+verbose              = 1
+showCFL              = 1
 
 [../solver]
-                [./amesos]
-                solvertype      = Klu
-                redistribute    = true
-                print_status    = false
-                print_timing    = false
 
-
-
+    [./amesos]
+    solvertype            = Umfpack
+    redistribute          = true
+    print_status          = false
+    print_timing          = false

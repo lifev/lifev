@@ -22,7 +22,6 @@
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 
-
 #ifdef EPETRA_MPI
 	#include "Epetra_MpiComm.h"
 	#include <mpi.h>
@@ -30,12 +29,9 @@
 	#include "Epetra_SerialComm.h"
 #endif
 
-//#include <lifemc/lifesolver/dataOneDModel.hpp>
-#include <lifemc/lifesolver/oneDModelSolver.hpp>
-#include <lifemc/lifefem/oneDBCFunctions.hpp>
-#include <lifemc/lifesolver/oneDBCHandler.hpp>
-
-#include <life/lifealg/SolverAmesos.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
+#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
+#include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
 
 #include <lifemc/lifesolver/MS_Model_1D.hpp>
 
@@ -45,19 +41,18 @@
 
 using namespace LifeV;
 
-
 bool checkValue(const double val, const double test, const double tol = 1.e-5, const bool verbose = true)
 {
-    double norm = abs(val - test);
-    std::cout << "value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
+    Real norm = abs(val - test);
+
+    if ( verbose )
+        std::cout << "value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
 
     return (norm < tol);
 }
 
-
 int main(int argc, char** argv)
 {
-
 
 #ifdef EPETRA_MPI
     std::cout << "mpi initialization ... " << std::flush;
@@ -66,30 +61,28 @@ int main(int argc, char** argv)
 
     boost::shared_ptr<Epetra_MpiComm> comm;
     comm.reset(new Epetra_MpiComm( MPI_COMM_WORLD ));
-    int ntasks;
-//    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+
     std::cout << "ok" << std::endl;
 #else
     boost::shared_ptr<Epetra_SerialComm> comm;
     comm.reset(new Epetra_SerialComm());
-#endif;
-
+#endif
 
   // *********************************
   // Useful typedefs
   // *********************************
-  typedef NonLinearFluxFun1D                          Flux1D;
-  typedef NonLinearSourceFun1D                        Source1D;
-  typedef OneDNonLinModelParam                        Params1D;
-  typedef OneDModelSolver<Params1D, Flux1D, Source1D> onedsolver_type;
+  typedef MS_Model_1D::Physics_Type                Physics_Type;
+  typedef MS_Model_1D::Flux_Type                   Flux_Type;
+  typedef MS_Model_1D::Source_Type                 Source_Type;
+  typedef MS_Model_1D::BC_Type                     BC_Type;
 
   // *********************************
   // ***** Reading from data file
   // *********************************
   GetPot command_line(argc,argv);
 
-    // checking if we are checking for the nightly build
-    const bool check = command_line.search(2, "-c", "--check");
+  // checking if we are checking for the nightly build
+  const bool check = command_line.search(2, "-c", "--check");
 
   string data_file_name = command_line.follow("data", 2, "-f","--file");
   GetPot data_file(data_file_name);
@@ -97,50 +90,42 @@ int main(int argc, char** argv)
   // *********************************
   // Build the 1D model
   // *********************************
-  std::cout << "====== Building 1D model " << std::endl;
+  MS_Model_1D OneDModel;
+  OneDModel.SetCommunicator(comm);
+  OneDModel.SetupData( data_file_name );
+  OneDModel.SetupModel();
 
-  const std::string section = "onedmodel";
+  // *********************************
+  // Boundary Conditions of the 1D model
+  // *********************************
+  BC_Type::OneDBCFunction_PtrType resistence ( new Resi( data_file("PhysicalParameters/R",0.),
+                                                         OneDModel.GetPhysics(),
+                                                         OneDModel.GetFESpace(),
+                                                         OneDModel.GetFlux(),
+                                                         OneDModel.GetSource(),
+                                                         OneDModel.GetSolver().U_thistime(),
+                                                         OneDModel.GetData().dataTime()->getTimeStep(),
+                                                         "right" /*border*/,
+                                                         "W2"  /*var*/, true )
+                                             );
 
-  MS_Model_1D od;
-  od.SetCommunicator(comm);
-  od.SetupData(data_file, section);
-  od.SetupModel();
+  BC_Type::OneDBCFunction_PtrType sinusoidal_flux ( new Sin() );
 
-  //
+  OneDModel.GetBC().setBC( sinusoidal_flux, "left",  "first", "Q"  );
+  OneDModel.GetBC().setBC( resistence,      "right", "first", "W2" );
+  OneDModel.GetBC().setDefaultBC(OneDModel.GetFESpace(), OneDModel.GetSource(), OneDModel.GetData().dataTime()->getTimeStep());
 
-  OneDBCFunctionPointer resistence ( new Resi<Flux1D, Source1D, OneDNonLinModelParam>
-                                    ( data_file("parameters/R",0.),
-                                      od.GetSolver().oneDParams(),
-                                      od.GetFESpace(),
-                                      od.GetSolver().FluxFun(),
-                                      od.GetSolver().SourceFun(),
-                                      od.GetSolver().U_thistime(),
-                                      od.GetSolver().timestep(),
-                                      "right" /*border*/,
-                                      "W2"  /*var*/, true));
-
-  OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
-
-  od.GetBC().setBC( sinusoidal_flux, "left",  "first", "Q"  );
-  od.GetBC().setBC( resistence,      "right", "first", "W2" );
-  od.GetBC().setDefaultBC(od.GetFESpace(), od.GetSolver().SourceFun(), od.GetSolver().timestep());
-
+  // *********************************
   // Initialization
-  //
-  Real dt             = od.GetSolver().timestep();
-  Real startT         = od.GetSolver().inittime();
-  Real T              = od.GetSolver().endtime();
-  UInt postprocess_it = data_file("miscellaneous/postprocess_timestep", 10);
+  // *********************************
+  Real dt             = OneDModel.GetData().dataTime()->getTimeStep();
+  Real startT         = OneDModel.GetData().dataTime()->getInitialTime();
+  Real T              = OneDModel.GetData().dataTime()->getEndTime();
+  OneDModel.BuildSystem();
 
-  Debug(6030) << "[main] startT T dt postprocess_it "
-              << startT << " " <<  T << " " << dt
-              << " " << postprocess_it << "\n";
-
-
-  //onedm.initialize();
-  od.BuildSystem();
-
-  // Temporal loop
+  // *********************************
+  // Tempolar loop
+  // *********************************
   printf("\nTemporal loop:\n");
 
   Chrono chronota;
@@ -150,7 +135,7 @@ int main(int argc, char** argv)
 
   int count = 0;
 
-  for (Real time=startT + dt ; time <= T; time+=dt)
+  for ( Real time=startT + dt ; time <= T; time+=dt )
   {
       std::cout << std::endl;
       std::cout << "--------- Iteration " << count << " time = " << time << std::endl;
@@ -160,32 +145,26 @@ int main(int argc, char** argv)
     chrono.start();
     Debug(6030) << "[main] 1d model time advance\n";
     chronota.start();
-    od.UpdateSystem();
+    OneDModel.GetData().dataTime()->updateTime();
+    OneDModel.UpdateSystem();
     chronota.stop();
-
-
 
     Debug(6030) << "[main] 1d model iterate\n";
     chronoit.start();
-    od.SolveSystem();
+    OneDModel.SolveSystem();
     chronoit.stop();
 
-    int leftnodeid = od.GetSolver().LeftNodeId();
-
-    if( !( static_cast<int>( std::floor( count%postprocess_it))))
-		{
-            std::cout << "PostProcessing at time ... " << time << std::endl;
-            //onedm.postProcess( time );
-        }
-
+    //if ( !( static_cast<int>( std::floor( count%postprocess_it))) )
+    {
+        std::cout << "PostProcessing at time ... " << time << std::endl;
+        OneDModel.GetSolver().postProcess( time );
+    }
 
     chrono.stop();
 
-    std::cout << " time adv. computed in " << chronota.diff()
-              << " iter computed in " << chronoit.diff()
+    std::cout << " time adv. computed in " << chronota.diff() << " iter computed in " << chronoit.diff()
               << " total " << chrono.diff() << " s." << std::endl;
   }
-
 
   printf("\nSimulation ended successfully.\n");
 
@@ -193,22 +172,21 @@ int main(int argc, char** argv)
   MPI_Finalize();
 #endif
 
-
-  if (check)
+  if ( check )
   {
       bool ok = true;
-      int rightnodeid = od.GetSolver().RightNodeId();
+      int rightnodeid = OneDModel.GetSolver().RightNodeId();
 
 
-      ok = ok && checkValue( 0.999998  , od.GetSolver().U1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00138076, od.GetSolver().U2_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00276153, od.GetSolver().W1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue( 0.00000000, od.GetSolver().W2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.999998  , OneDModel.GetSolver().U1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00138076, OneDModel.GetSolver().U2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00276153, OneDModel.GetSolver().W1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.00000000, OneDModel.GetSolver().W2_thistime()[rightnodeid - 0]);
 
-      ok = ok && checkValue( 0.999999  , od.GetSolver().U1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00040393, od.GetSolver().U2_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00080833, od.GetSolver().W1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue( 0.00000045, od.GetSolver().W2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.999999  , OneDModel.GetSolver().U1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00040393, OneDModel.GetSolver().U2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00080833, OneDModel.GetSolver().W1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.00000045, OneDModel.GetSolver().W2_thistime()[rightnodeid - 1]);
 
       if (ok)
       {
@@ -223,7 +201,4 @@ int main(int argc, char** argv)
   }
   else
       return 0;
-
-
-
 }
