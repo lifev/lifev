@@ -24,9 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = main.hpp ud_functions.hpp 
+check_HEADERS = test_bdf.hpp
 
 check_PROGRAMS = test_bdf 
-test_bdf_SOURCES = main.cpp 
+test_bdf_SOURCES = main.cpp  test_bdf.cpp
 
 EXTRA_DIST = data testsuite.at
+MOSTLYCLEANFILES	= *.scl *.case *.geo

@@ -29,82 +29,226 @@ AT_SETUP([test_bdf (order 1)])
 AT_KEYWORDS([test_bdf bdf])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for Mesh test
+#      Data file for BDF test
 #-------------------------------------------------
 
-mesh_type  = MESH++
-mesh_dir   = ./                 # the directory where the mesh file is
-mesh_file  = cube_384.m++       # mesh file
-
 [bdf]
-    endtime  = 1
-    timestep = 0.5
-    order    = 1
-]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
-AT_CLEANUP
 
+	endtime  = 1.5
+    timestep = 0.1
+    order    = 1
+	
+
+	[./discretization2D]
+	order     = P2
+	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
+	mesh_type = .msh
+	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
+
+
+	[../discretization3D]
+	order     = P2
+	mesh_dir  = ./  # the directory where the mesh file is
+	mesh_file = cube16x16.mesh      # mesh file
+
+	[../prec]
+	prectype                = ML # ML or Ifpack
+	reuse                   = true
+	displayList             = false
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+        max_levels              = 2
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = both
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 1024
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+# ifpack
+        [../ifpack]
+        #prectype        = Amesos
+		overlap		= 3
+
+          	[./fact]
+          	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+          	[../amesos]
+           	solvertype = Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+
+		[../]
+
+   [../solver]
+   solver          = gmres
+   scaling         = none
+   output          = all # none
+   conv            = rhs
+   max_iter        = 100
+   kspace          = 100
+   tol             = 1.e-10    # AztecOO tolerance
+
+   [./amesos]
+   solvertype	= Umfpack
+   redistribute	= true
+   print_status = true
+   print_timing	= true
+
+
+[exporter]
+multimesh  =    false   # actually we export also the displacement
+start      = 0
+save       = 1
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cube16x16.mesh  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CLEANUP
 
 AT_SETUP([test_bdf (order 2)])
 AT_KEYWORDS([test_bdf bdf])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for Mesh test
+#      Data file for BDF test
 #-------------------------------------------------
 
-mesh_type  = MESH++
-mesh_dir   = ./                 # the directory where the mesh file is
-mesh_file  = cube_384.m++       # mesh file
-
 [bdf]
-    endtime  = 1
-    timestep = 0.5
+
+	endtime  = 1.5
+    timestep = 0.1
     order    = 2
+	
+
+	[./discretization2D]
+	order     = P2
+	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
+	mesh_type = .msh
+	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
+
+
+	[../discretization3D]
+	order     = P2
+	mesh_dir  = ./  # the directory where the mesh file is
+	mesh_file = cube16x16.mesh      # mesh file
+
+	[../prec]
+	prectype                = ML # ML or Ifpack
+	reuse                   = true
+	displayList             = false
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+        max_levels              = 2
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = both
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 1024
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+# ifpack
+        [../ifpack]
+        #prectype        = Amesos
+		overlap		= 3
+
+          	[./fact]
+          	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+          	[../amesos]
+           	solvertype = Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+
+		[../]
+
+   [../solver]
+   solver          = gmres
+   scaling         = none
+   output          = all # none
+   conv            = rhs
+   max_iter        = 100
+   kspace          = 100
+   tol             = 1.e-10    # AztecOO tolerance
+
+   [./amesos]
+   solvertype	= Umfpack
+   redistribute	= true
+   print_status = true
+   print_timing	= true
+
+
+[exporter]
+multimesh  =    false   # actually we export also the displacement
+start      = 0
+save       = 1
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cube16x16.mesh  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP
-
-
-
-
-AT_SETUP([test_bdf (order 3)])
-AT_KEYWORDS([test_bdf bdf])
-AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
-#-------------------------------------------------
-#      Data file for Mesh test
-#-------------------------------------------------
-
-mesh_type  = MESH++
-mesh_dir   = ./                 # the directory where the mesh file is
-mesh_file  = cube_384.m++       # mesh file
-
-[bdf]
-    endtime  = 1
-    timestep = 0.5
-    order    = 3
-]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
-AT_CLEANUP
-
-
-AT_SETUP([test_bdf (order 4)])
-AT_XFAIL_IF(true)
-AT_KEYWORDS([test_bdf bdf])
-AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
-#-------------------------------------------------
-#      Data file for Mesh test
-#-------------------------------------------------
-
-mesh_type  = MESH++
-mesh_dir   = ./                 # the directory where the mesh file is
-mesh_file  = cube_384.m++       # mesh file
-
-[bdf]
-    endtime  = 1
-    timestep = 0.5
-    order    = 4
-]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
-AT_CLEANUP
-
-
