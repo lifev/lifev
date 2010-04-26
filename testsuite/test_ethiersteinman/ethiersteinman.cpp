@@ -56,12 +56,46 @@
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/exportMesh3D.hpp>
+#include <life/lifemesh/structuredMesh3D.hpp>
 
 
 #include <iostream>
+#include <fstream>
 
 #include "ethiersteinman.hpp"
 
+//Boundary condition labels
+
+// Walls
+const int LEFTWALL   = 4;
+const int RIGHTWALL  = 2;
+const int FRONTWALL  = 1;
+const int BACKWALL   = 3;
+const int TOPWALL    = 6;
+const int BOTTOMWALL = 5;
+// Edges
+const int BOTTOMEDGE1 =  7;
+const int BOTTOMEDGE2 =  8;
+const int BOTTOMEDGE3 =  9;
+const int BOTTOMEDGE4 = 10;
+const int SIDEEDGE1   = 11;
+const int SIDEEDGE2   = 12;
+const int SIDEEDGE3   = 13;
+const int SIDEEDGE4   = 14;
+const int TOPEDGE1    = 15;
+const int TOPEDGE2    = 16;
+const int TOPEDGE3    = 17;
+const int TOPEDGE4    = 18;
+// Corners
+const int BOTTOMCORNER1 = 19;
+const int BOTTOMCORNER2 = 20;
+const int BOTTOMCORNER3 = 21;
+const int BOTTOMCORNER4 = 22;
+const int TOPCORNER1    = 23;
+const int TOPCORNER2    = 24;
+const int TOPCORNER3    = 25;
+const int TOPCORNER4    = 26;
 
 using namespace LifeV;
 
@@ -200,7 +234,17 @@ Ethiersteinman::computeError( double     const& time,
                       << pl2error << " "
                       << prelerr << "\n" << std::flush;
          }
-         checkResult(time, ul2error, pl2error);
+
+         if(d->comm->MyPID()==0){
+             //checkResult(time, ul2error, pl2error);
+             std::ofstream outputFile("error.txt",ios_base::app);
+             outputFile << time  << " "
+                        << ul2error << " "
+                        << urelerr << " "
+                        << pl2error << " "
+                        << prelerr << "\n" << std::flush;
+             outputFile.close();
+         }
 
 }
 
@@ -238,6 +282,11 @@ void Ethiersteinman::checkResult( LifeV::Real const& time,
         pl2stored =  0.354164;
     }
 
+    std::cout << "ul2error=" << ul2error << std::endl;
+    std::cout << "ul2stored=" << ul2stored << std::endl;
+    std::cout << "pl2stored=" << pl2stored << std::endl;
+    std::cout << "pl2error=" << pl2error << std::endl;
+
     if ( ul2stored > 0 &&
          ( std::abs(ul2stored - ul2error) > 5e-2*ul2stored || (std::abs(pl2stored - pl2error) > 5e-2*pl2stored ) ) )
          throw Ethiersteinman::RESULT_CHANGED_EXCEPTION(time);
@@ -268,7 +317,7 @@ Ethiersteinman::run()
 
 
     BCHandler::BCHints hint = neumannMarkers.size() != 0 ?
-        BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
+    BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
     BCHandler bcH( 0, hint );
     BCFunctionBase uWall( Problem::uexact );
     BCFunctionBase uNeumann( Problem::fNeumann );
@@ -284,241 +333,280 @@ Ethiersteinman::run()
         bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
     }
 
+    // Finite element tested
+    UInt FEnumber(4);
+    std::string uFE[4]={"P1", "P1Bubble", "P2", "P2"};
+    std::string pFE[4]={"P1", "P1"      , "P1", "P2"};
 
-    // fluid solver
-
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
-    dataNavierStokes.setup( dataFile );
-
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
-
-    std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
-    std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
-
-    if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
-
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
-
-    if (verbose)
-        std::cout << "Building the velocity FE space ... " << std::flush;
-
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
-
-    if (verbose)
-        std::cout << "ok." << std::endl;
-
-    if (verbose)
-        std::cout << "Building the pressure FE space ... " << std::flush;
-
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
-
-    if (verbose)
-        std::cout << "ok." << std::endl;
-
-
-
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
-
-
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
-
-    if (verbose) std::cout << "Calling the fluid constructor ... ";
-
-    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
-                                              uFESpace,
-                                              pFESpace,
-                                              *d->comm);
-    EpetraMap fullMap(fluid.getMap());
-
-    if (verbose) std::cout << "ok." << std::endl;
-
-    fluid.setUp(dataFile);
-    fluid.buildSystem();
-
-    if (verbose)
-        std::cout << d->comm->MyPID() << " Init time (partial) " << chrono.diff() << " s." << std::endl;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    // Initialization
-
-    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes.dataTime()->getEndTime ();
-
-
-    // bdf object to store the previous solutions
-
-    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
-
-    // initialization with exact solution: either interpolation or "L2-NS"-projection
-    t0 -= dt * bdf.bdf_u().order();
-
-    if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
-
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    dataNavierStokes.dataTime()->setTime(t0);
-    fluid.initialize( Problem::uexact, Problem::pexact );
-    bdf.bdf_u().initialize_unk( fluid.solution() );
-
-    std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
-    bool const L2proj( !proj.compare("proj") );
-
-
-
-    Real time = t0 + dt;
-    for (  ; time <=  dataNavierStokes.dataTime()->getInitialTime() + dt/2.; time += dt)
+    // Loop on the mesh refinement
+    for(UInt m(4);m<64;m*=2)
     {
-
-        dataNavierStokes.dataTime()->setTime(time);
-
-        beta *= 0.;
-        rhs  *= 0.;
-
-        if (L2proj)
+        // Loop on the finite element
+        for(UInt i(0);i<FEnumber;++i)
         {
-            uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
-            rhs *= -1.;
-        }
+            if(d->comm->MyPID()==0){
+                std::ofstream outputFile("error.txt",ios_base::app);
+                outputFile << "% Using: -" << uFE[i] << "-" << pFE[i] << " finite element" << std::endl
+                           << "%        -Regular mesh " << m << "x" << m << "x" << m << std::endl << std::flush;
+                outputFile.close();
+                std::cout << "Using: -" << uFE[i] << "-" << pFE[i] << " finite element" << std::endl;
+                std::cout << "       -Regular mesh " << m << "x" << m << "x" << m << std::endl;
+            }
 
-        fluid.initialize( Problem::uexact, Problem::pexact );
+            // fluid solver
 
-        beta = fluid.solution();
+            DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+            dataNavierStokes.setup( dataFile );
 
-        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
-        fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
-        fluid.getDisplayer().leaderPrint("\n");
+            // Call the function to build a mesh
+            regularMesh3D( *dataNavierStokes.dataMesh()->mesh(),
+                           1,
+                           m,m,m,
+                           verbose,
+                           2.0,2.0,2.0,
+                           -1.0,-1.0,-1.0);
+            exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MESH_FORMAT);
+            exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MATLAB_FORMAT);
+            dataNavierStokes.dataMesh()->mesh()->updateElementEdges( true, verbose );
+            dataNavierStokes.dataMesh()->mesh()->updateElementFaces( true, verbose );
+            exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MESH_FORMAT);
+            exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MATLAB_FORMAT);
+
+            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+
+            std::string uOrder =  uFE[i];
+            std::string pOrder =  pFE[i];
+
+            if (verbose) std::cout << std::endl;
+            if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
+
+            dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+
+            if (verbose)
+                std::cout << "Building the velocity FE space ... " << std::flush;
+
+            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
+
+            if (verbose)
+                std::cout << "ok." << std::endl;
+
+            if (verbose)
+                std::cout << "Building the pressure FE space ... " << std::flush;
+
+            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
+
+            if (verbose)
+                std::cout << "ok." << std::endl;
 
 
-        if (L2proj)
-        {
-            fluid.updateSystem( 0., beta, rhs );
-            fluid.iterate(bcH);
-        }
 
-        computeError( time,
-                      uFESpace,
-                      pFESpace,
-                      fluid );
+            UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
+            UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
-         bdf.bdf_u().shift_right( fluid.solution() );
+            if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
+            if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
 
-    }
+            if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    chrono.stop();
-    if (verbose)
-	std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
-    // end initialization step
+            Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+                                                      uFESpace,
+                                                      pFESpace,
+                                                      *d->comm);
+            EpetraMap fullMap(fluid.getMap());
 
-    fluid.resetPrec();
+            if (verbose) std::cout << "ok." << std::endl;
 
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+            fluid.setUp(dataFile);
+            fluid.buildSystem();
 
-    vector_ptrtype velAndPressure;
+            if (verbose)
+                std::cout << d->comm->MyPID() << " Init time (partial) " << chrono.diff() << " s." << std::endl;
 
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            // Initialization
+
+            Real dt     = dataNavierStokes.dataTime()->getTimeStep();
+            Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+            Real tFinal = dataNavierStokes.dataTime()->getEndTime ();
+
+
+            // bdf object to store the previous solutions
+
+            BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
+
+            // initialization with exact solution: either interpolation or "L2-NS"-projection
+            t0 -= dt * bdf.bdf_u().order();
+
+            if (verbose) std::cout << std::endl;
+            if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
+
+            vector_type beta( fullMap );
+            vector_type rhs ( fullMap );
+
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            dataNavierStokes.dataTime()->setTime(t0);
+            fluid.initialize( Problem::uexact, Problem::pexact );
+            bdf.bdf_u().initialize_unk( fluid.solution() );
+
+            std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
+            bool const L2proj( !proj.compare("proj") );
+
+
+
+            Real time = t0 + dt;
+            for (  ; time <=  dataNavierStokes.dataTime()->getInitialTime() + dt/2.; time += dt)
+            {
+
+                dataNavierStokes.dataTime()->setTime(time);
+
+                beta *= 0.;
+                rhs  *= 0.;
+
+                if (L2proj)
+                {
+                    uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
+                    rhs *= -1.;
+                }
+
+                fluid.initialize( Problem::uexact, Problem::pexact );
+
+                beta = fluid.solution();
+
+                fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+                fluid.getDisplayer().leaderPrint("\n");
+                fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+                fluid.getDisplayer().leaderPrint("\n");
+
+
+                if (L2proj)
+                {
+                    fluid.updateSystem( 0., beta, rhs );
+                    fluid.iterate(bcH);
+                }
+
+                /*computeError( time,
+                              uFESpace,
+                              pFESpace,
+                              fluid );*/
+
+
+                bdf.bdf_u().shift_right( fluid.solution() );
+
+            }
+
+            chrono.stop();
+            if (verbose)
+                std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
+            // end initialization step
+
+            fluid.resetPrec();
+
+            boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+
+            vector_ptrtype velAndPressure;
+
+            std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
 #ifdef HAVE_HDF5
-    if (exporterType.compare("hdf5") == 0)
-    {
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
-        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
-    }
-    else
+            if (exporterType.compare("hdf5") == 0)
+            {
+                exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
+                exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+                exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+            }
+            else
 #endif
-    {
-        if (exporterType.compare("none") == 0)
-        {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-        } else {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-        }
-    }
+            {
+                if (exporterType.compare("none") == 0)
+                {
+                    exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+                } else {
+                    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+                }
+            }
 
-    velAndPressure.reset( new vector_type(fluid.solution(), exporter->mapType() ) );
+            velAndPressure.reset( new vector_type(fluid.solution(), exporter->mapType() ) );
 
-    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+            exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
+                                   UInt(0), uFESpace.dof().numTotalDof() );
 
-    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(pFESpace.dof().numTotalDof()) );
-    exporter->postProcess( 0 );
+            exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
+                                   UInt(3*uFESpace.dof().numTotalDof()),
+                                   UInt(pFESpace.dof().numTotalDof()) );
+            exporter->postProcess( 0 );
 
-    std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
-    std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
+            std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
+            std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
 
-    // Temporal loop
+            // Temporal loop
 
-    int iter = 1;
+            int iter = 1;
 
-    Chrono chronoGlobal;
-    chronoGlobal.start();
+            Chrono chronoGlobal;
+            chronoGlobal.start();
 
-    for ( ; time <= tFinal + dt/2.; time += dt, iter++)
-    {
+            for ( ; time <= tFinal + dt/2.; time += dt, iter++)
+            {
 
-        dataNavierStokes.dataTime()->setTime(time);
+                dataNavierStokes.dataTime()->setTime(time);
 
-        if (verbose)
-        {
-            std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
-            std::cout << std::endl;
-        }
+                if (verbose)
+                {
+                    std::cout << std::endl;
+                    std::cout << "We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
+                    std::cout << std::endl;
+                }
 
-        chrono.start();
+                chrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
+                double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
 
-        beta = bdf.bdf_u().extrap();
+                beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
-//        rhs *= alpha;
-//        rhs  = bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
+                rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+                //        rhs *= alpha;
+                //        rhs  = bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 
-        fluid.getDisplayer().leaderPrint("alpha ", alpha);
-        fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
-        fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
-        fluid.getDisplayer().leaderPrint("\n");
+                fluid.getDisplayer().leaderPrint("alpha ", alpha);
+                fluid.getDisplayer().leaderPrint("\n");
+                fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+                fluid.getDisplayer().leaderPrint("\n");
+                fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+                fluid.getDisplayer().leaderPrint("\n");
 
-        fluid.updateSystem( alpha, beta, rhs );
-        fluid.iterate( bcH );
+                fluid.updateSystem( alpha, beta, rhs );
+                fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( fluid.solution() );
-
-
-        computeError( time,
-                      uFESpace,
-                      pFESpace,
-                      fluid );
-
-        *velAndPressure = fluid.solution();
-        exporter->postProcess( time );
+                bdf.bdf_u().shift_right( fluid.solution() );
 
 
-        MPI_Barrier(MPI_COMM_WORLD);
+                /*computeError( time,
+                              uFESpace,
+                              pFESpace,
+                              fluid );*/
 
-        chrono.stop();
-        if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
-    }
+                *velAndPressure = fluid.solution();
+                exporter->postProcess( time );
 
-    chronoGlobal.stop();
-    if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
+                MPI_Barrier(MPI_COMM_WORLD);
+
+                chrono.stop();
+                if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
+            }
+
+            computeError( time,
+                          uFESpace,
+                          pFESpace,
+                          fluid );
+
+            chronoGlobal.stop();
+            if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
+        } // End of loop on the finite elements
+    } // End of loop on the mesh refinement
 }
 
 

@@ -126,6 +126,10 @@ private:
     void checkResult( LifeV::Real const& time,
                       double const&      ul2error,
                       double const&      pl2error );
+    std::vector<LifeV::Real> uL2Error;
+    std::vector<LifeV::Real> pL2Error;
+    std::vector<LifeV::Real> uRelError;
+    std::vector<LifeV::Real> pRelError;
 
     struct RESULT_CHANGED_EXCEPTION
     {
