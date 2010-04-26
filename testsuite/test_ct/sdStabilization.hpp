@@ -368,7 +368,7 @@ namespace LifeV
     // first, get the local velocity into beta
     for ( int iNode = 0; iNode < M_fe.nbNode; ++iNode )
       {
-	for ( int iCoor = 0; iCoor < M_fe.nbCoor; ++iCoor )
+	for ( int iCoor = 0; iCoor < M_fe.nbCoor(); ++iCoor )
 	  {
 	    //UInt ig = M_dof.localToGlobal( iVol, iNode+1 )-1+iCoor*nDof;
 	    UInt ig = M_dof.localToGlobal( iVol, iNode+1) + iCoor*nDof; 
@@ -378,7 +378,7 @@ namespace LifeV
 	
     // second, calculate its max norm
     Real bmax = fabs( beta.vec()[ 0 ] );
-    for ( int l = 1; l < int( M_fe.nbCoor*M_fe.nbNode ); ++l )
+    for ( int l = 1; l < int( M_fe.nbCoor()*M_fe.nbNode ); ++l )
       {
 	if ( bmax < fabs( beta.vec()[ l ] ) )
 	  bmax = fabs( beta.vec()[ l ] );
@@ -398,13 +398,13 @@ namespace LifeV
     ASSERT_PRE(fe.hasFirstDeriv(),
 	       "advection_grad  matrix needs at least the first derivatives");
 
-    ElemMat::matrix_type v(fe.nbCoor,fe.nbQuadPt);
+    ElemMat::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
     Real s;
 
 
     // local velocity at quadrature points
-    for(int ig=0;ig<fe.nbQuadPt;ig++){
-      for(int icoor=0;icoor<fe.nbCoor;icoor++){
+    for(int ig=0;ig<fe.nbQuadPt();ig++){
+      for(int icoor=0;icoor<fe.nbCoor();icoor++){
 	ElemVec::vector_view velicoor=vel.block(icoor);
 	v(icoor,ig)=0.;
 	for(int k=0;k<fe.nbNode;k++){
@@ -413,14 +413,14 @@ namespace LifeV
       }
     }
 
-    for (int ic=0; ic < fe.nbCoor; ++ic) {
-      ElemMat::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor);
-      ElemMat::matrix_view mat_3ic = elmat.block(fe.nbCoor,ic);
+    for (int ic=0; ic < fe.nbCoor(); ++ic) {
+      ElemMat::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor());
+      ElemMat::matrix_view mat_3ic = elmat.block(fe.nbCoor(),ic);
       for(int i=0;i<fe.nbNode;i++){
 	for(int j=0;j<fe.nbNode;j++){
 	  s = 0.0;
-	  for(int ig=0;ig<fe.nbQuadPt;ig++)
-	    for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+	  for(int ig=0;ig<fe.nbQuadPt();ig++)
+	    for(int jcoor=0;jcoor<fe.nbCoor();jcoor++)
 	      s += fe.phiDer(j,ic,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
 	  mat_ic3(i,j) += coef*s;
 	  mat_3ic(j,i) += coef*s;
@@ -442,14 +442,14 @@ namespace LifeV
 
 
     ElemMat::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    ElemMat::matrix_type v( fe.nbCoor,fe.nbQuadPt );
+    ElemMat::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values
-    for(int ig=0; ig<fe.nbQuadPt; ig++)
+    for(int ig=0; ig<fe.nbQuadPt(); ig++)
       {
-	for(int icoor=0; icoor<fe.nbCoor; icoor++)
+	for(int icoor=0; icoor<fe.nbCoor(); icoor++)
 	  {
 	    ElemVec::vector_view velicoor=vel.block(icoor);
 	    v(icoor,ig)=0.;
@@ -462,9 +462,9 @@ namespace LifeV
       for(int j=0;j<fe.nbNode;j++){
 	s = 0.0;
 	
-	for(int ig=0;ig<fe.nbQuadPt;ig++)
-	  for(int icoor=0;icoor<fe.nbCoor;icoor++)
-	    for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+	for(int ig=0;ig<fe.nbQuadPt();ig++)
+	  for(int icoor=0;icoor<fe.nbCoor();icoor++)
+	    for(int jcoor=0;jcoor<fe.nbCoor();jcoor++)
 	      s += fe.phiDer(i,jcoor,ig)*v(jcoor,ig)*v(icoor,ig)*fe.phiDer(j,icoor,ig)*fe.weightDet(ig);
 	mat_tmp(i,j) = coef*s;
       }
@@ -473,8 +473,8 @@ namespace LifeV
     // copy on the components
     for(int icomp=0;icomp<nb;icomp++){
       ElemMat::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-      for(int i=0;i<fe.nbDiag;i++){
-	for(int j=0;j<fe.nbDiag;j++){
+      for(int i=0;i<fe.nbDiag();i++){
+	for(int j=0;j<fe.nbDiag();j++){
 	  mat_icomp(i,j) += mat_tmp(i,j);
 	}
       }
@@ -496,14 +496,14 @@ namespace LifeV
 	       "lapu_bgradv matrix needs second derivatives");
 
     ElemMat::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    ElemMat::matrix_type v( fe.nbCoor,fe.nbQuadPt );
+    ElemMat::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values at quadrature points
-    for(int ig=0; ig<fe.nbQuadPt; ig++)
+    for(int ig=0; ig<fe.nbQuadPt(); ig++)
       {
-	for(int icoor=0; icoor<fe.nbCoor; icoor++)
+	for(int icoor=0; icoor<fe.nbCoor(); icoor++)
 	  {
 	    ElemVec::vector_view velicoor=vel.block(icoor);
 	    v(icoor,ig)=0.;
@@ -519,9 +519,9 @@ namespace LifeV
 	for(int j=0;j<fe.nbNode;j++)
 	  {
 	    s = 0.0;
-	    for(int ig=0;ig<fe.nbQuadPt;ig++)
-	      for(int icoor=0;icoor<fe.nbCoor;icoor++)
-		for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+	    for(int ig=0;ig<fe.nbQuadPt();ig++)
+	      for(int icoor=0;icoor<fe.nbCoor();icoor++)
+		for(int jcoor=0;jcoor<fe.nbCoor();jcoor++)
 		  s += fe.phiDer2(j,icoor,icoor,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
 	    mat_tmp(i,j) = coef*s;
 	  }
@@ -530,8 +530,8 @@ namespace LifeV
     // copy on the components
     for(int icomp=0;icomp<nb;icomp++){
       ElemMat::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-      for(int i=0;i<fe.nbDiag;i++){
-	for(int j=0;j<fe.nbDiag;j++){
+      for(int i=0;i<fe.nbDiag();i++){
+	for(int j=0;j<fe.nbDiag();j++){
 	  mat_icomp(i,j) += mat_tmp(i,j);
 	}
       }
@@ -553,17 +553,17 @@ namespace LifeV
 
     Real s;
 
-    for (int jc=0; jc < fe.nbCoor; ++jc) // loop on column blocks
+    for (int jc=0; jc < fe.nbCoor(); ++jc) // loop on column blocks
       {
-	ElemMat::matrix_view mat_view = elmat.block(fe.nbCoor,jc);
+	ElemMat::matrix_view mat_view = elmat.block(fe.nbCoor(),jc);
 	for(int i=0;i<fe.nbNode;++i) // local rows
 	  {
 	    for(int j=0;j<fe.nbNode;++j) // local columns
 	      {
 		s = 0.0;
 		// quadrature formula
-		for(int ig=0;ig<fe.nbQuadPt;++ig)
-		  for(int jcoor=0;jcoor<fe.nbCoor;++jcoor) // lap
+		for(int ig=0;ig<fe.nbQuadPt();++ig)
+		  for(int jcoor=0;jcoor<fe.nbCoor();++jcoor) // lap
 		    s += fe.phiDer2(j,jcoor,jcoor,ig)*fe.phiDer(i,jc,ig)*fe.weightDet(ig);
 		mat_view(i,j) += coef*s;
 	      }
@@ -591,14 +591,14 @@ namespace LifeV
     ASSERT_PRE(fe.hasFirstDeriv(),
 	       "f_bgradv  vector needs at least the first derivatives");
 
-    ElemMat::matrix_type v(fe.nbCoor,fe.nbQuadPt);
+    ElemMat::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
     Real s;
 
 
     // local velocity at quadrature points
-    for(int ig=0;ig<fe.nbQuadPt;ig++)
+    for(int ig=0;ig<fe.nbQuadPt();ig++)
       {
-	for(int icoor=0;icoor<fe.nbCoor;icoor++)
+	for(int icoor=0;icoor<fe.nbCoor();icoor++)
 	  {
 	    ElemVec::vector_view velicoor=vel.block(icoor);
 	    v(icoor,ig)=0.;
@@ -608,14 +608,14 @@ namespace LifeV
       }
 
     // local vector per block
-    for (int ic=0; ic < fe.nbCoor; ++ic)
+    for (int ic=0; ic < fe.nbCoor(); ++ic)
       {
 	ElemVec::vector_view vec_ic = elvec.block(ic+iblock);
 	for(int i=0;i<fe.nbNode;i++)
 	  {
 	    s = 0.0;
-	    for(int ig=0;ig<fe.nbQuadPt;ig++)
-	      for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+	    for(int ig=0;ig<fe.nbQuadPt();ig++)
+	      for(int jcoor=0;jcoor<fe.nbCoor();jcoor++)
 		s += source(time,fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2),ic+1)
 		  *fe.phiDer(i,jcoor,ig)*v(jcoor,ig)*fe.weightDet(ig);
 	    vec_ic(i) += coef*s;
@@ -639,8 +639,8 @@ namespace LifeV
     for(int i=0;i<fe.nbNode;i++)
       {
 	s = 0.0;
-	for(int ig=0;ig<fe.nbQuadPt;ig++)
-	  for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+	for(int ig=0;ig<fe.nbQuadPt();ig++)
+	  for(int jcoor=0;jcoor<fe.nbCoor();jcoor++)
 	    s += source(time,fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2),jcoor+1)
 	      *fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
 	vec_ic(i) += coef*s;

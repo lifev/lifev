@@ -58,7 +58,9 @@ CT::CT( int argc,
 void
 CT::run()
 {
-
+	Chrono chrono_exec;
+	chrono_exec.start();	
+	std::cout << "\n\t t-  Begin execution time " << std::endl;
     typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
@@ -228,6 +230,7 @@ CT::run()
         chrono.stop();
         if (verbose) std::cout << "\n l-  Total iteration time : " << chrono.diff() << " s." << std::endl;
     }
-
+	chrono_exec.stop();
+	if (verbose) std::cout << "\n\t t-  Total execution time : " << chrono_exec.diff() << " s." << std::endl;
 }
 
