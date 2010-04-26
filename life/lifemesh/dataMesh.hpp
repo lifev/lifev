@@ -49,8 +49,9 @@
     #include <life/lifemesh/regionMesh2D.hpp>
     #include <life/lifefilters/readMesh2D.hpp>
 #elif defined THREEDIM
-    #include <life/lifemesh/regionMesh3D.hpp>
-    #include <life/lifefilters/readMesh3D.hpp>
+	#include <life/lifemesh/regionMesh3D.hpp>
+	#include <life/lifefilters/readMesh3D.hpp>
+    #include <life/lifemesh/structuredMesh3D.hpp>
 #endif
 
 namespace LifeV {
@@ -98,7 +99,7 @@ public:
 
     void setup( const GetPot& dataFile, const std::string& section );
 
-    void readMesh( );
+    void readMesh(const GetPot& dataFile );
 
     virtual void showMe( std::ostream& output = std::cout ) const;
 
@@ -160,7 +161,7 @@ DataMesh( const GetPot& dataFile, const std::string& section ):
     M_mesh_type ( dataFile( ( section + "/mesh_type" ).data(), ".mesh" ) ),
     M_verbose   ( dataFile( ( section + "/verbose" ).data(), false ) )
 {
-    readMesh();
+    readMesh(dataFile);
 }
 
 template <typename Mesh>
@@ -189,12 +190,12 @@ DataMesh<Mesh>::setup( const GetPot& dataFile, const std::string& section )
     M_mesh_type = dataFile( ( section + "/mesh_type" ).data(), ".mesh" );
     M_verbose   = dataFile( ( section + "/verbose" ).data(), 0 );
 
-    readMesh();
+    readMesh(dataFile);
 }
 
 template <typename Mesh>
 void
-DataMesh<Mesh>::readMesh( )
+DataMesh<Mesh>::readMesh( const GetPot& dataFile )
 {
     if ( M_verbose )
         std::cout << "\nBuilding mesh ... ";
@@ -210,6 +211,7 @@ DataMesh<Mesh>::readMesh( )
     M_mesh->updateElementEdges(true);
 
 #elif defined( THREEDIM )
+    bool updateEdgesAndFaces(true);
 
     if ( M_mesh_type == ".mesh" )
         readINRIAMeshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, M_verbose );
@@ -219,12 +221,30 @@ DataMesh<Mesh>::readMesh( )
         readGmshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1 );
     else if ( M_mesh_type == ".vol" )
         readNetgenMesh( *M_mesh, M_mesh_dir + M_mesh_file, 1, M_verbose );
-    else
+    else if ( M_mesh_type == "structured" ){
+        // Reading the parameters
+        std::string section("fluid/space_discretization");
+        UInt m_x( dataFile( ( section + "/mesh_mx"  ).data(), 3   ) );
+        UInt m_y( dataFile( ( section + "/mesh_my"  ).data(), 3   ) );
+        UInt m_z( dataFile( ( section + "/mesh_mz"  ).data(), 3   ) );
+        Real l_x( dataFile( ( section + "/mesh_lx"  ).data(), 1.0 ) );
+        Real l_y( dataFile( ( section + "/mesh_ly"  ).data(), 1.0 ) );
+        Real l_z( dataFile( ( section + "/mesh_lz"  ).data(), 1.0 ) );
+        Real t_x( dataFile( ( section + "/mesh_tx"  ).data(), 0.0 ) );
+        Real t_y( dataFile( ( section + "/mesh_ty"  ).data(), 0.0 ) );
+        Real t_z( dataFile( ( section + "/mesh_tz"  ).data(), 0.0 ) );
+        regularMesh3D( *M_mesh, 1, m_x, m_y, m_z, true, l_x, l_y, l_z, t_x, t_y, t_z);
+    }else if ( M_mesh_type == "insideCode" ){
+        // Do nothing
+        updateEdgesAndFaces = false;
+    }else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
     //Update Edges & Faces
-    M_mesh->updateElementEdges( true, M_verbose );
-    M_mesh->updateElementFaces( true, M_verbose );
+    if(updateEdgesAndFaces){
+        M_mesh->updateElementEdges( true, M_verbose );
+        M_mesh->updateElementFaces( true, M_verbose );
+    }
 
 #endif
 
