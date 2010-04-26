@@ -56,7 +56,7 @@
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifefilters/noexport.hpp>
-#include <life/lifefilters/exportMesh3D.hpp>
+#include "exportMesh3D.hpp"
 #include <life/lifemesh/structuredMesh3D.hpp>
 
 
