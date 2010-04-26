@@ -40,7 +40,7 @@
 #ifdef HAVE_HDF5
 	#include <life/lifefilters/hdf5exporter.hpp>
 #else
-	#include <life/lifefilters/ensight.hpp>	
+	#include <life/lifefilters/ensight.hpp>
 #endif
 
 #include <Epetra_ConfigDefs.h>
@@ -345,11 +345,12 @@ private:
     void checkResult(LifeV::Real& time)
     {
         LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-        if(time==0.0001 && (dispNorm-0.0621691)/dispNorm*(dispNorm-4.43565e-5)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);  else
-        if(time==0.0002 && (dispNorm-0.10668)/dispNorm*(dispNorm-0.000129848)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.0003 && (dispNorm-0.113252)/dispNorm*(dispNorm-0.000251846)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.0004 && (dispNorm-0.107976)/dispNorm*(dispNorm-0.000402367)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.0005 && (dispNorm-0.0995921)/dispNorm*(dispNorm-0.000579832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        if(time==0.002 && (dispNorm-0.062314)>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.001 && (dispNorm-0.107122)>  1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.003 && (dispNorm-0.113679)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.004 && (dispNorm-0.108021)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.005 && (dispNorm-0.0991928)>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        throw Problem::RESULT_CHANGED_EXCEPTION(time);
     }
 
 	fsi_solver_ptr M_fsi;
