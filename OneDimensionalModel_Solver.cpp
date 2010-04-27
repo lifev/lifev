@@ -186,8 +186,8 @@ OneDimensionalModel_Solver::setup()
         M_U_thistime[ii] *= 0.;
 
     // initialize matrices
-    std::fill( M_diffFlux.begin(),    M_diffFlux.end(),    ublas::zero_vector<double>(M_FESpace->dim()) );
-    std::fill( M_diffSrc.begin() ,    M_diffSrc.end() ,    ublas::zero_vector<double>(M_FESpace->dim()) );
+    std::fill( M_diffFlux.begin(),    M_diffFlux.end(),    ublas::zero_vector<Real>(M_FESpace->dim()) );
+    std::fill( M_diffSrc.begin() ,    M_diffSrc.end() ,    ublas::zero_vector<Real>(M_FESpace->dim()) );
 
     for( UInt i = 0; i < 4; ++i )
     {
@@ -234,31 +234,13 @@ OneDimensionalModel_Solver::setup()
 void
 OneDimensionalModel_Solver::initialize()
 {
-    // the discontinuity is comprised between firstnode and lastnode
-    UInt firstnode = M_Physics->Data()->firstNode();
-    UInt lastnode  = M_Physics->Data()->lastNode ();
-
-    ASSERT_PRE( (firstnode <= lastnode) && (lastnode <= M_FESpace->dim()),
+    ASSERT_PRE( (M_leftNodeId <= M_rightNodeId) && (M_rightNodeId <= M_FESpace->dim()),
                 "[initialize] outside tube boundaries" );
 
-    // read initialization type from data file (see OneDimensionalModel_Solver::initialize)
-    std::string init_var = M_Physics->Data()->initVar();
-    Real multiplier      = M_Physics->Data()->multiplier();
-
-    std::cout << "init_var = " << init_var << std::endl;
-    // tell me what I am doing
-    Debug( 6310 ) << "[initialize] 0- Initializing with values:\n";
-    Debug( 6310 ) << "[initialize]\t\tinitialize var = " << init_var << "\n";
-    Debug( 6310 ) << "[initialize]\t\tfirstnode      = " << firstnode << "\n";
-    Debug( 6310 ) << "[initialize]\t\tlastnode       = " << lastnode << "\n";
-    Debug( 6310 ) << "[initialize]\t\tmultiplier     = " << multiplier << "\n";
-
     Real value1, value2;
-    Real width = M_Physics->Data()->width();
 
-    Vector exponent(M_FESpace->dim());
-
-    for (UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+    Vector exponent( M_FESpace->dim() );
+    for ( UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
     {
         exponent[inode - 1] *= 0.;
 
@@ -266,14 +248,14 @@ OneDimensionalModel_Solver::initialize()
         // second half of a gaussian signal, centered in lastnode;
         // width represents the total duration of the gaussian signal
         // (rise + decay)
-        if( (inode < firstnode) || (inode > lastnode) )
+        if( (inode < M_leftNodeId) || (inode > M_rightNodeId) )
         {
-            exponent[inode - 1]  = - std::pow( double(int( inode - firstnode )), 2 );
-            exponent[inode - 1] /= 2*std::pow( width, 2 );
+            exponent[inode - 1]  = - std::pow( Real(int( inode - M_leftNodeId )), 2 );
+            exponent[inode - 1] /= 2*std::pow( M_Physics->Data()->Length(), 2 );
         }
     }
 
-    switch( M_oneDstring2initializeVarMap[init_var] )
+    switch( M_oneDstring2initializeVarMap[M_Physics->Data()->initialVariable()] )
     {
         // case 1, 2: initialize physical variables to desired value
         case OneDInitPressure:
@@ -286,23 +268,21 @@ OneDimensionalModel_Solver::initialize()
             value2 = 0;
 
             Debug( 6310 ) << "[initialize] pressure " << value1 << "\n";
-
-            //ScalarVector( M_FESpace->dim(), value2 );
             M_U_thistime[1] = Vector_Type(M_localMap);
             M_U_thistime[1] = value2;
 
             Debug( 6310 ) << "[initialize] Q done\n";
 
-            for (UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+            for ( UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
             {
                 // reusing value2 as help variable
-                value2 = value1*( 1 + multiplier*std::exp( exponent[inode - 1] ) );
+                value2 = value1*( 1 + M_Physics->Data()->multiplier()*std::exp( exponent[inode - 1] ) );
                 M_U_thistime[0][inode] = M_Physics->A_from_P( value2 );
 
                 Debug( 6310 ) << "[initialize] A(" << inode <<") done\n";
                 M_Physics->W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
-                                       M_U_thistime[0][inode], M_U_thistime[1][inode],
-                                       inode - 1);
+                                     M_U_thistime[0][inode], M_U_thistime[1][inode],
+                                     inode - 1);
                 Debug( 6310 ) << "[initialize] W_i(" << inode <<") done\n";
             }
             break;
@@ -311,7 +291,7 @@ OneDimensionalModel_Solver::initialize()
             Debug( 6310 ) << "[initialize] 0- OneDInitArea\n";
 
             //std::cout << "OneDInitArea" << std::endl;
-            value1 = M_Physics->Data()->initValue();
+            value1 = M_Physics->Data()->initialValue();
             value2 = 0;
 
             //ScalarVector( M_U_thistime[1].size(), value2 );
@@ -319,14 +299,14 @@ OneDimensionalModel_Solver::initialize()
             M_U_thistime[1] = value2;
 
 
-            for (UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+            for ( UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
             {
                 M_U_thistime[0][inode] = value1 *
-                  ( 1 + multiplier * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
 
                 M_Physics->W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
-                                       M_U_thistime[0][inode], M_U_thistime[1][inode],
-                                       inode - 1 );
+                                     M_U_thistime[0][inode], M_U_thistime[1][inode],
+                                     inode - 1 );
             }
             break;
 
@@ -334,46 +314,45 @@ OneDimensionalModel_Solver::initialize()
             // HYPOTHESIS: when initializing flux, area is equal to Area0
             Debug( 6310 ) << "[initialize] 0- OneDInitFlux\n";
 
-
             value1 = M_Physics->Data()->Area0(0); // this if Area0 is constant
-            value2 = M_Physics->Data()->initValue();
+            value2 = M_Physics->Data()->initialValue();
 
-            for (UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+            for ( UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
             {
                 M_U_thistime[0][inode] = M_Physics->Data()->Area0(inode - 1);
-                M_U_thistime[1][inode] = value2*( 1 + multiplier*std::exp( exponent[inode - 1] ) );
+                M_U_thistime[1][inode] = value2*( 1 + M_Physics->Data()->multiplier()*std::exp( exponent[inode - 1] ) );
 
                 M_Physics->W_from_U( M_U_thistime[2][inode], M_U_thistime[3][inode],
-                                       M_U_thistime[0][inode], M_U_thistime[1][inode],
-                                       inode - 1 );
+                                     M_U_thistime[0][inode], M_U_thistime[1][inode],
+                                     inode - 1 );
             }
             break;
 
         case OneDInitRiemann1:
             Debug( 6310 ) << "[initialize] 0- OneDInitRiemann1\n";
-            value1 = M_Physics->Data()->initValue();
+            value1 = M_Physics->Data()->initialValue();
             value2 = -value1;
             std::cout << "[initialize] WARNING! Initializing W2 = - W1"
                       << " (assuming Q = 0)" << std::endl;
 
-            for (UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
+            for ( UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
             {
                 M_U_thistime[2][inode] = value1 *
-                  ( 1 + multiplier * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
                 M_U_thistime[3][inode] = value2 *
-                  ( 1 + multiplier * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
                 M_Physics->U_from_W( M_U_thistime[0][inode],
-                                       M_U_thistime[1][inode],
-                                       M_U_thistime[2][inode],
-                                       M_U_thistime[3][inode],
-                                       inode - 1);
+                                     M_U_thistime[1][inode],
+                                     M_U_thistime[2][inode],
+                                     M_U_thistime[3][inode],
+                                     inode - 1);
             }
 
             break;
 
         case OneDInitRiemann2:
             Debug( 6310 ) << "[initialize] 0- OneDInitRiemann2\n";
-            value1 = M_Physics->Data()->initValue();
+            value1 = M_Physics->Data()->initialValue();
             value2 = - value1;
             std::cout << "[initialize] WARNING! Initializing W1 = - W2"
                       << " (assuming Q = 0)" << std::endl;
@@ -381,14 +360,14 @@ OneDimensionalModel_Solver::initialize()
             for (UInt inode = M_leftNodeId; inode <= M_rightNodeId; ++inode )
             {
                 M_U_thistime[3][inode] = value1 *
-                  ( 1 + multiplier * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
                 M_U_thistime[2][inode] = value2 *
-                  ( 1 + multiplier * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
                 M_Physics->U_from_W( M_U_thistime[0][inode],
-                                       M_U_thistime[1][inode],
-                                       M_U_thistime[2][inode],
-                                       M_U_thistime[3][inode],
-                                       inode );
+                                     M_U_thistime[1][inode],
+                                     M_U_thistime[2][inode],
+                                     M_U_thistime[3][inode],
+                                     inode );
             }
 
             break;
@@ -398,7 +377,7 @@ OneDimensionalModel_Solver::initialize()
     }
 
     Debug( 6310 ) << "[initialize]\t\tvalue1         = " << value1 << "\n";
-    Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * multiplier << "\n";
+    Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * M_Physics->Data()->multiplier() << "\n";
     Debug( 6310 ) << "[initialize]\t\tvalue2         = " << value2 << "\n";
 
     for( UInt i = 0; i < 2; ++i )
@@ -409,25 +388,24 @@ OneDimensionalModel_Solver::initialize()
 
     Vector pressures(4*M_FESpace->dim());
 
-    for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
+    for ( UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
     {
         subrange(pressures, 4*ielem, 4 + 4*ielem) =
             M_Physics->pressure( M_U_thistime [0][ielem + 1],
-                                   M_U_prevtime [0][ielem + 1],
-                                   M_U_2prevtime[0][ielem + 1],
-                                   M_Physics->Data()->dataTime()->getTimeStep(),
-                                   ielem,
-                                   M_Physics->Data()->DPdtSteps(),
-                                   M_Physics->Data()->viscoelasticWall(),
-                                   M_Physics->Data()->linearizeStringModel() );
+                                 M_U_prevtime [0][ielem + 1],
+                                 M_U_2prevtime[0][ielem + 1],
+                                 M_Physics->Data()->dataTime()->getTimeStep(),
+                                 ielem,
+                                 M_Physics->Data()->DPdtSteps(),
+                                 M_Physics->Data()->viscoelasticWall(),
+                                 M_Physics->Data()->linearizeStringModel() );
 
         M_U_thistime[4][ielem + 1] = pressures(4*ielem);
     }
 
-
-    if(M_Physics->Data()->viscoelasticWall())
+    if( M_Physics->Data()->viscoelasticWall() )
     {
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
+        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
         {
             M_U_thistime[M_variable_index_map.find("P_elast")->second][ielem + 1] =
                 pressures(1 + 4*ielem);
@@ -802,7 +780,6 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, const R
     Chrono chrono4;
     Chrono chrono5;
 
-
     if( M_Physics->Data()->UW() )
     {
         Real Ainode, Qinode;
@@ -816,7 +793,14 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, const R
         Real eigval1, eigval2;
         Real tmp11, tmp12, tmp21, tmp22;
 
-        Real deltaX = M_FESpace->mesh()->edgeList( 1 ).point(1).x() - M_FESpace->mesh()->edgeList( 1 ).point(2).x();
+        //Real deltaX = M_FESpace->mesh()->edgeList( 1 ).point(1).x() - M_FESpace->mesh()->edgeList( 1 ).point(2).x();
+        Real delta  = - std::sqrt( ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).x() ) *
+                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).x() ) +
+                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).y() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).y() ) *
+                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).y() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).y() ) +
+                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).z() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).z() ) *
+                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).z() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).z() )
+                                 );
 
         // working on riemann invariants
         Vector_Type W1_UW(M_localMap);
@@ -836,10 +820,10 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, const R
             Ainode = M_U_thistime[0]( ii );
             Qinode = M_U_thistime[1]( ii );
             M_Flux->jacobian_EigenValues_Vectors( Ainode, Qinode,
-                                                    eigval1, eigval2,
-                                                    tmp11, tmp12,
-                                                    tmp21, tmp22,
-                                                    ii );
+                                                  eigval1, eigval2,
+                                                  tmp11, tmp12,
+                                                  tmp21, tmp22,
+                                                  ii );
 
             lambda1_plus = std::max<Real>( eigval1, 0. );
             lambda1_minus = std::min<Real>( eigval1, 0. );
@@ -847,17 +831,17 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, const R
             lambda2_minus = std::min<Real>( eigval2, 0. );
             // update the solution for the next time step
             W1_UW[ii] = M_U_thistime[2][ii]
-                - (M_Physics->Data()->dataTime()->getTimeStep() / deltaX) * lambda1_plus * ( M_U_thistime[2][ii] -
-                                                                  M_U_thistime[2][ii-1])
-                - (M_Physics->Data()->dataTime()->getTimeStep() / deltaX) * lambda1_minus * ( M_U_thistime[2][ii+1] -
-                                                                   M_U_thistime[2][ii])
-                - M_Physics->Data()->dataTime()->getTimeStep() * ( tmp11 * M_SourceVector[0][ii] + tmp12 * M_SourceVector[1][ii] );
+                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda1_plus * ( M_U_thistime[2][ii] -
+                                                                                                   M_U_thistime[2][ii-1])
+                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda1_minus * ( M_U_thistime[2][ii+1] -
+                                                                                                    M_U_thistime[2][ii])
+                      - M_Physics->Data()->dataTime()->getTimeStep() * ( tmp11 * M_SourceVector[0][ii] + tmp12 * M_SourceVector[1][ii] );
             W2_UW[ii] = M_U_thistime[3][ii]
-                - (M_Physics->Data()->dataTime()->getTimeStep() / deltaX) * lambda2_plus * ( M_U_thistime[3][ii] -
-                                                                  M_U_thistime[3][ii-1])
-                - (M_Physics->Data()->dataTime()->getTimeStep() / deltaX) * lambda2_minus * ( M_U_thistime[3][ii+1] -
-                                                                   M_U_thistime[3][ii])
-                - M_Physics->Data()->dataTime()->getTimeStep() * ( tmp21 * M_SourceVector[0][ii] + tmp22 * M_SourceVector[1][ii] );
+                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda2_plus * ( M_U_thistime[3][ii] -
+                                                                                                   M_U_thistime[3][ii-1])
+                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda2_minus * ( M_U_thistime[3][ii+1] -
+                                                                                                    M_U_thistime[3][ii])
+                      - M_Physics->Data()->dataTime()->getTimeStep() * ( tmp21 * M_SourceVector[0][ii] + tmp22 * M_SourceVector[1][ii] );
         }
 
         M_U_thistime[2] = W1_UW;
@@ -1004,11 +988,6 @@ OneDimensionalModel_Solver::CheckCFL() const
 
     Real CFL = 0.;
 
-    // length of the first edge (arbitrary as they are all supposed equal).
-    Real deltaX;
-
-    Real deltaX_min = M_FESpace->mesh()->edgeList( 1 ).point(2).x() - M_FESpace->mesh()->edgeList( 1 ).point(1).x();
-
     Real Ainode, Qinode;
 
     Real lambda1_max = 0.;
@@ -1024,32 +1003,16 @@ OneDimensionalModel_Solver::CheckCFL() const
 
         // compute the eigenvalues at node
         M_Flux->jacobian_EigenValues_Vectors( Ainode, Qinode,
-                                                eigval1, eigval2,
-                                                tmp11, tmp12,
-                                                tmp21, tmp22,
-                                                inode);
+                                              eigval1, eigval2,
+                                              tmp11, tmp12,
+                                              tmp21, tmp22,
+                                              inode);
 
         lambda1_max = std::max<Real>( std::fabs(eigval1), lambda1_max );
         lambda2_max = std::max<Real>( std::fabs(eigval2), lambda2_max );
-
     }
 
-    for ( UInt inode = 1; inode < M_FESpace->dim() ; inode++ )
-    {
-        deltaX     = M_FESpace->mesh()->edgeList( inode ).point(2).x() - M_FESpace->mesh()->edgeList( inode ).point(1).x();
-        deltaX_min = std::min<Real>( std::fabs(deltaX), deltaX_min );
-    }
-
-    CFL = M_Physics->Data()->dataTime()->getTimeStep() / deltaX_min * std::max<Real>( lambda1_max , lambda2_max );
-
-//     if ( M_CFL )
-//       std::cout << "Old CFL = " << M_Physics->Data()->() /
-    /*
-      (M_FESpace->mesh()->edgeList( 1 ).pt2().x() - M_FESpace->mesh()->edgeList( 1 ).pt1().x())
-      * std::max<Real>( lambda1_max , lambda2_max )
-      << std::endl;
-    */
-    //    }
+    CFL = M_Physics->Data()->dataTime()->getTimeStep() / M_FESpace->mesh()->minH() * std::max<Real>( lambda1_max , lambda2_max );
 
     if( CFL > 0.5774 )
         std::cout << "\n[CheckCFL] CFL not respected in " << M_Physics->Data()->PostFile()
@@ -1109,7 +1072,7 @@ OneDimensionalModel_Solver::postProcess( const Real& /*time_val*/ )
 
 //             std::string file_output;
 
-//             Real deltax( M_Physics->Length() /
+//             Real deltax( M_Physics->Data()->Length() /
 //                          static_cast<Real>(M_Physics->Data()->nbElem() - 1) );
 
 //             file_output = "dati.m";
@@ -1417,6 +1380,12 @@ const OneDimensionalModel_Solver::Vector_Type&
 OneDimensionalModel_Solver::W2_thistime() const
 {
     return M_U_thistime[3];
+}
+
+const OneDimensionalModel_Solver::Vector_Type&
+OneDimensionalModel_Solver::P_thistime() const
+{
+    return M_U_thistime[4];
 }
 
 const OneDimensionalModel_Solver::Physics_Type&
@@ -1985,7 +1954,7 @@ OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux 
                 _coeffMass = 1./ meanA0;
             }
         }
-        gamma = M_Physics->Data()->Gamma() / ( 2 * std::sqrt(4*std::atan(1)) );
+        gamma = M_Physics->Data()->ViscoelasticModulus() / ( 2 * std::sqrt(4*std::atan(1)) );
         gamma *= 1 / std::sqrt( meanA0 );
         _coeffStiff = M_Physics->Data()->dataTime()->getTimeStep() * gamma / M_Physics->Data()->DensityRho();
 
@@ -1993,7 +1962,7 @@ OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux 
         M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
         //std::cout << M_FESpace->fe().currentId() << std::endl;
 
-        mass (   _coeffMass,   _elmatMassLHS, M_FESpace->fe(),0, 0 );
+        mass (   _coeffMass,  _elmatMassLHS,  M_FESpace->fe(),0, 0 );
         stiff(   _coeffStiff, _elmatStiffLHS, M_FESpace->fe(),0, 0 );
         stiff( - _coeffStiff, _elmatStiffRHS, M_FESpace->fe(),0, 0 );
 
@@ -2073,7 +2042,7 @@ OneDimensionalModel_Solver::_correct_flux_longitudinal( )
     _massLHS *= 0.;
     _massRHS *= 0.;
 
-    Real _h( M_Physics->Length() / static_cast<Real>(M_Physics->Data()->nbElem() - 1) );
+    Real _h( M_Physics->Data()->Length() / static_cast<Real>(M_Physics->Data()->nbElem() - 1) );
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -2090,7 +2059,7 @@ OneDimensionalModel_Solver::_correct_flux_longitudinal( )
         _coeffMassLHS /= 2;
         _coeffMassLHS = 1./_coeffMassLHS;
 
-        _a = M_Physics->Data()->CoeffA() / std::sqrt(4*std::atan(1));
+        _a = M_Physics->Data()->InertialModulus() / std::sqrt(4*std::atan(1));
         _coeffMassRHS = M_Physics->Data()->dataTime()->getTimeStep() * _a / M_Physics->Data()->DensityRho();
 
         // backward differentiation when near to the left boundary

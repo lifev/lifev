@@ -99,8 +99,6 @@ public :
 
     Real Celerity0( const UInt& i ) const;
 
-    Real Length() const;
-
     //! Compute the pressure (with viscoelastic term)
     /*!
      * @return P = beta0 * ( ( _A / Area0 )^beta1 - 1 ) + 1/(2*sqrt(pi*A)) * gamma * dA / dt

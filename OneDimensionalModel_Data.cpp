@@ -49,9 +49,35 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_FluxType                  (),
     M_SourceType                (),
     M_Time                      (),
-    M_Mesh                      (),
-    M_x_left                    (),
-    M_x_right                   (),
+    M_Mesh                      ( new Mesh_Type() ),
+    M_post_dir                  (),
+    M_post_file                 (),
+    M_verbose                   (),
+    M_CFL                       (),
+    M_UW                        (),
+    M_inertial_wall             (),
+    M_viscoelastic_wall         (),
+    M_linearize_string_model    (),
+    M_linearize_equations       (),
+    M_longitudinal_wall         (),
+    M_flux_second_der           (),
+    M_dP_dt_steps               (),
+    M_initialVariable           (),
+    M_initialValue              (),
+    M_restValue                 (),
+    M_multiplier                (),
+    M_ComputeCoefficients       (),
+    M_PowerlawCoefficient       (),
+    M_Density                   (),
+    M_Viscosity                 (),
+    M_DensityWall               (),
+    M_ThickVessel               (),
+    M_Thickness                 (),
+    M_Young                     (),
+    M_Poisson                   (),
+    M_ViscoelasticModulus       (),
+    M_InertialModulus           (),
+    M_RobertsonCorrection       (),
     M_Area0                     (),
     M_dArea0dz                  (),
     M_PressBeta0                (),
@@ -61,12 +87,6 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_AlphaCoriolis             (),
     M_dAlphaCoriolisdz          (),
     M_FrictionKr                (),
-    M_DensityRho                (),
-    M_DensityWall               (),
-    M_Thickness                 (),
-    M_Gamma                     (),
-    M_CoeffA                    (),
-    M_RobertsonCorrection       (),
     M_Flux11                    (),
     M_Flux12                    (),
     M_Flux21                    (),
@@ -82,26 +102,7 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_Source11                  (),
     M_Source12                  (),
     M_Source21                  (),
-    M_Source22                  (),
-    M_post_dir                  (),
-    M_post_file                 (),
-    M_verbose                   (),
-    M_CFL                       (),
-    M_UW                        (),
-    M_inertial_wall             (),
-    M_viscoelastic_wall         (),
-    M_linearize_string_model    (),
-    M_linearize_equations       (),
-    M_longitudinal_wall         (),
-    M_flux_second_der           (),
-    M_dP_dt_steps               (),
-    M_firstNode                 (),
-    M_lastNode                  (),
-    M_initVar                   (),
-    M_restValue                 (),
-    M_initValue                 (),
-    M_multiplier                (),
-    M_width                     ()
+    M_Source22                  ()
 {
 }
 
@@ -112,7 +113,7 @@ void
 OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_PhysicsType = OneDimensionalModel_PhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_LinearPhysics" ) ];
+    M_PhysicsType = OneDimensionalModel_PhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
     M_FluxType    = OneDimensionalModel_FluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
     M_SourceType  = OneDimensionalModel_SourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
@@ -120,17 +121,13 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     if ( !M_Time.get() )
         M_Time.reset( new Time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
-    // Space Discretization
-    M_x_left                 = dataFile( ( section + "/space_discretization/x_left"                  ).data(), 0. );
-    M_x_right                = dataFile( ( section + "/space_discretization/x_right"                 ).data(), 1. );
-
-    // Mesh setup
+    // Mesh setup - Space Discretization
     std::cout << " 1D- Mesh setup ...                            " << std::flush;
     Chrono chrono;
     chrono.start();
 
-    M_Mesh.reset( new Mesh_Type );
-    M_Mesh->setUp( M_x_left, M_x_right, dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 ) );
+    M_Mesh->setup( dataFile( ( section + "/space_discretization/Length"           ).data(), 1. ),
+                   dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 ) );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s."<< std::endl;
@@ -138,12 +135,41 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     std::cout << " 1D- Mesh nodes:                               " << M_Mesh->numPoints() << std::endl;
     std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
 
+    // Miscellaneous
+    M_post_dir               = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
+    M_post_file              = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
+    M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
+    M_CFL                    = dataFile( ( section + "/miscellaneous/showCFL"                        ).data(), 0 );
+    M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
+    M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
+    M_viscoelastic_wall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
+    M_linearize_string_model = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
+    M_linearize_equations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
+    M_longitudinal_wall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
+    M_flux_second_der        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
+    M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
+
+    // Initialize
+    M_initialVariable        = dataFile( ( section + "/initialize/variable"                          ).data(), "P" );
+    M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
+    M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
+    M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
+
     // Physical Parameters
-    M_DensityRho             = dataFile( ( section + "/PhysicalParameters/rho"                       ).data(), 1. );
-    M_DensityWall            = dataFile( ( section + "/PhysicalParameters/rho_w"                     ).data(), 1. );
+    M_ComputeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
+    M_PowerlawCoefficient    = dataFile( ( section + "/PhysicalParameters/PowerlawCoefficient"       ).data(), 2 );
+
+    M_Density                = dataFile( ( section + "/PhysicalParameters/density"                   ).data(), 1. );
+    M_Viscosity              = dataFile( ( section + "/PhysicalParameters/viscosity"                 ).data(), 0.035 );
+
+    M_DensityWall            = dataFile( ( section + "/PhysicalParameters/densityWall"               ).data(), 1. );
+    M_ThickVessel            = dataFile( ( section + "/PhysicalParameters/thickVessel"               ).data(), false );
     M_Thickness              = dataFile( ( section + "/PhysicalParameters/thickness"                 ).data(), 0. );
-    M_Gamma                  = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
-    M_CoeffA                 = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
+    M_Young                  = dataFile( ( section + "/PhysicalParameters/young"                     ).data(), 4.0E6 );
+    M_Poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
+
+    M_ViscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
+    M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_RobertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
 
     M_Area0.resize( M_Mesh->numPoints() );
@@ -208,93 +234,45 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
         M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0. );
     }
 
-    // Miscellaneous
-    M_post_dir               = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
-    M_post_file              = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
-    M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
-    M_CFL                    = dataFile( ( section + "/miscellaneous/showCFL"                        ).data(), 0 );
-    M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
-    M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
-    M_viscoelastic_wall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_linearize_string_model = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
-    M_linearize_equations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
-    M_longitudinal_wall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
-    M_flux_second_der        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
-    M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
-
-    // Initialize
-    M_firstNode              = dataFile( ( section + "/initialize/firstnode"                         ).data(), 1 );
-    M_lastNode               = dataFile( ( section + "/initialize/lastnode"                          ).data(), 2 );
-    M_initVar                = dataFile( ( section + "/initialize/var"                               ).data(), "P" );
-    M_initValue              = dataFile( ( section + "/initialize/init_value"                        ).data(), 0. );
-    M_restValue              = dataFile( ( section + "/initialize/rest_value"                        ).data(), 0. );
-    M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
-    M_width                  = dataFile( ( section + "/initialize/width"                             ).data(), 5. );
-
-    if( dataFile( ( section + "/PhysicalParameters/use_physical_values" ).data(), false ) ) // CHECK THIS!!!
-    {
-        Debug( 6320 ) << "[OneDimensionalModel_Data_Operator] initializing from physical values\n";
-        initParam( dataFile );
-    }
+    UpdateCoefficients();
 }
 
 void
-OneDimensionalModel_Data::initParam( const GetPot& dataFile )  // CHECK THIS!!!
+OneDimensionalModel_Data::UpdateCoefficients()
 {
-    Real Young_modulus    = dataFile("1d_physics/young"          , 5.e6);
-    Real thickness        = dataFile("1d_physics/thickness"      , 0.05);
-    Real reference_radius = dataFile("1d_physics/radius"         , 1.);
-    Real viscosity        = dataFile("1d_physics/viscosity"      , 0.035);  //???
-    Real ksi              = dataFile("1d_physics/ksi"            , 0.5);  //???
-    Real friction_factor  = dataFile("1d_physics/friction_factor", 8.);  //???
-    bool thick_vessel     = dataFile("1d_physics/thick_vessel"   , 0);
-
-    Real _A0( M_PI*reference_radius*reference_radius );
-
-    Real _beta0, _beta1;
-    if( thick_vessel ){ // see Amadori, Ferrari, Formaggia (MOX report 86)
-        //! beta0
-        _beta0 = - thickness*Young_modulus*sqrt(M_PI) /
-            ( sqrt(_A0) *
-              ( (1 - ksi * ksi)
-                + ksi * (1 + ksi) * (thickness * sqrt(M_PI)
-                                     / sqrt(_A0) )
-                )
-              );
-        //! beta1
-        _beta1 = - 0.5;
-    }
-    else{
-        //! beta0
-        _beta0 = thickness * Young_modulus * sqrt(M_PI) /
-            ( sqrt(_A0) * (1 - ksi * ksi) );
-        //! beta1
-        _beta1 = 0.5;
-    }
-
-    Real _kr( friction_factor * M_PI * viscosity );
-
-    //-------------------------------------------
-    //! Initialisation of the parameter variables
-    //-------------------------------------------
-    //! A0
-    M_Area0.resize( M_Mesh->numPoints() );
-    //! beta0
-    M_PressBeta0.resize( M_Mesh->numPoints() );
-    //! beta1
-    M_PressBeta1.resize( M_Mesh->numPoints() );
-    //! Kr
-    M_FrictionKr.resize( M_Mesh->numPoints() );
-
-    for ( UInt i = 0; i < M_Mesh->numPoints(); ++i )
+    if ( M_ComputeCoefficients )
     {
-        M_Area0[i]         = _A0;
-        M_PressBeta0[i]    = _beta0;
-        M_PressBeta1[i]    = _beta1;
-        M_FrictionKr[i]    = _kr;
-    }
+        Real radius(0);
+        Real profileIntegral(0);
+        for ( UInt i = 0; i < M_Mesh->numPoints(); ++i )
+        {
+            // PowerlawProfile: s(r) = (1+2/gamma)*(1-r^gamma)
+            radius = 1.; //std::sqrt( M_Area0[i] / M_PI );
 
-    M_Thickness  = thickness;
+            // Compute Coriolis Coefficient: Alpha = 2*pi/Area0*Int(s(r)^2)
+            profileIntegral    =     std::pow(1+2./M_PowerlawCoefficient, 2) *
+                                 (   std::pow(radius,2) / 2 +
+                                     std::pow(radius,2*M_PowerlawCoefficient+2) / (2*M_PowerlawCoefficient+2) -
+                                   2*std::pow(radius,  M_PowerlawCoefficient+2) / (  M_PowerlawCoefficient+2) );
+            M_AlphaCoriolis[i] = 2 / std::pow(radius,2) * profileIntegral;
+
+            // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
+            M_FrictionKr[i]    = 2 * M_PI * M_Viscosity / M_Density * ( M_PowerlawCoefficient + 2 ) * std::pow( radius, M_PowerlawCoefficient - 1 );
+
+            // Compute Beta0
+            if( M_ThickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
+            {
+                M_PressBeta0[i] = - M_Thickness * M_Young * std::sqrt(M_PI) / ( std::sqrt( M_Area0[i] ) * ( (1 - M_Poisson * M_Poisson )
+                                  + M_Poisson * ( 1 + M_Poisson ) * ( M_Thickness * std::sqrt(M_PI) / std::sqrt( M_Area0[i] ) ) ) );
+                M_PressBeta1[i] = - 0.5;
+            }
+            else
+            {
+                M_PressBeta0[i] = M_Thickness * M_Young * std::sqrt( M_PI ) / ( std::sqrt( M_Area0[i] ) * (1 - M_Poisson * M_Poisson) );
+                M_PressBeta1[i] = 0.5;
+            }
+        }
+    }
 }
 
 void
@@ -311,7 +289,7 @@ OneDimensionalModel_Data::initLinearParam( const GetPot& /*dataFile*/ )  // CHEC
     */
     for( UInt indz=0; indz < M_Mesh->numPoints(); ++indz )
     {
-        M_Celerity1[indz] = std::sqrt( M_PressBeta0[indz] * M_PressBeta1[indz] / M_DensityRho );
+        M_Celerity1[indz] = std::sqrt( M_PressBeta0[indz] * M_PressBeta1[indz] / M_Density );
         M_Flux21[indz]    = std::pow( M_Celerity1[indz], 2 );
         M_Source22[indz]  = M_FrictionKr[indz] / M_Area0(indz);
     }
@@ -350,12 +328,46 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
 
     // Space Discretization
     output << "\n*** Values for data [space_discretization]\n\n";
-    output << "x_left                 = " << M_x_left << std::endl;
-    output << "x_right                = " << M_x_right << std::endl;
-    output << "nb_elem                = " << M_Mesh->numPoints() << std::endl;
+    output << "Length                 = " << Length() << std::endl;
+    output << "NumberOfElements       = " << M_Mesh->numElements() << std::endl;
+
+    // Miscellaneous
+    output << "\n*** Values for data [miscellaneous]\n\n";
+    output << "post_dir               = " << M_post_dir << std::endl;
+    output << "post_file              = " << M_post_file << std::endl;
+    output << "verbose                = " << M_verbose << std::endl;
+    output << "CFL                    = " << M_CFL << std::endl;
+    output << "UW                     = " << M_UW << std::endl;
+    output << "Use Inertial Wall      = " << M_inertial_wall << std::endl;
+    output << "Use Viscoelastic Wall  = " << M_viscoelastic_wall << std::endl;
+    output << "Linearize Model        = " << M_linearize_string_model << std::endl;
+    output << "Linearize Equations    = " << M_linearize_equations << std::endl;
+    output << "Longitudinal Wall      = " << M_longitudinal_wall << std::endl;
+    output << "Flux Second Derivative = " << M_flux_second_der << std::endl;
+    output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
+
+    // Initialize
+    output << "\n*** Values for data [initialize]\n\n";
+    output << "Initial Variable       = " << M_initialVariable << std::endl;
+    output << "Initial Value          = " << M_initialValue << std::endl;
+    output << "Rest Value             = " << M_restValue << std::endl;
+    output << "Multiplier             = " << M_multiplier << std::endl;
 
     // Physical Parameters
     output << "\n*** Values for data [PhysicalParameters]\n\n";
+    output << "Compute Coefficients   = " << M_ComputeCoefficients << "\n";
+    output << "Powerlaw Coefficient   = " << M_PowerlawCoefficient << "\n";
+    output << "Fluid density          = " << M_Density << "\n";
+    output << "Fluid dyn. viscosity   = " << M_Viscosity << "\n";
+    output << "Wall density           = " << M_DensityWall << "\n";
+    output << "Thick vessel           = " << M_ThickVessel << "\n";
+    output << "Thickness              = " << M_Thickness << "\n";
+    output << "Young modulus          = " << M_Young << "\n";
+    output << "Poisson                = " << M_Poisson << "\n";
+    output << "Viscoelastic modulus   = " << M_ViscoelasticModulus << "\n";
+    output << "Inertial modulus       = " << M_InertialModulus << "\n";
+    output << "Robertson correction   = " << M_RobertsonCorrection << "\n";
+
     output << "Area0                  = " << M_Area0 << "\n";
     output << "dArea0dz               = " << M_dArea0dz << "\n";
     output << "Beta0                  = " << M_PressBeta0 << "\n";
@@ -366,12 +378,7 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Alpha (Coriolis)       = " << M_AlphaCoriolis << "\n";
     output << "dAlpha (Coriolis)      = " << M_dAlphaCoriolisdz << "\n";
 
-    output << "Fluid density          = " << M_DensityRho << "\n";
     output << "Friction               = " << M_FrictionKr << "\n";
-    output << "Wall density           = " << M_DensityWall << "\n";
-    output << "Viscoelastic modulus   = " << M_Gamma << "\n";
-    output << "Inertial modulus       = " << M_CoeffA << "\n";
-    output << "Thickness              = " << M_Thickness << "\n";
 
     // Linear Parameters
     output << "\n*** Values for data [LinearParameters]\n\n";
@@ -391,31 +398,6 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Source12               = " << M_Source12 << "\n";
     output << "Source21               = " << M_Source21 << "\n";
     output << "Source22               = " << M_Source22 << "\n";
-
-    // Miscellaneous
-    output << "\n*** Values for data [miscellaneous]\n\n";
-    output << "post_dir               = " << M_post_dir << std::endl;
-    output << "post_file              = " << M_post_file << std::endl;
-    output << "verbose                = " << M_verbose << std::endl;
-    output << "CFL                    = " << M_CFL << std::endl;
-    output << "UW                     = " << M_UW << std::endl;
-    output << "Use Inertial Wall      = " << M_inertial_wall << std::endl;
-    output << "Use Viscoelastic Wall  = " << M_viscoelastic_wall << std::endl;
-    output << "Linearize Model        = " << M_linearize_string_model << std::endl;
-    output << "Linearize Equations    = " << M_linearize_equations << std::endl;
-    output << "Longitudinal Wall      = " << M_longitudinal_wall << std::endl;
-    output << "Flux Second Derivative = " << M_flux_second_der << std::endl;
-    output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
-
-    // Initialize
-    output << "\n*** Values for data [initialize]\n\n";
-    output << "First Node             = " << M_firstNode << std::endl;
-    output << "Last Node              = " << M_lastNode << std::endl;
-    output << "Init Variable          = " << M_initVar << std::endl;
-    output << "Init Value             = " << M_initValue << std::endl;
-    output << "Rest Value             = " << M_restValue << std::endl;
-    output << "Multiplier             = " << M_multiplier << std::endl;
-    output << "Width                  = " << M_width << std::endl;
 }
 
 // ===================================================
@@ -425,6 +407,36 @@ void
 OneDimensionalModel_Data::setDataTime( const Time_ptrType DataTime )
 {
     M_Time = DataTime;
+}
+
+void
+OneDimensionalModel_Data::setDensity( const Real& Density )
+{
+    M_Density = Density;
+}
+
+void
+OneDimensionalModel_Data::setViscosity( const Real& Viscosity )
+{
+    M_Viscosity = Viscosity;
+}
+
+void
+OneDimensionalModel_Data::setThickness( const Real& Thickness )
+{
+    M_Thickness = Thickness;
+}
+
+void
+OneDimensionalModel_Data::setYoung( const Real& Young )
+{
+    M_Young = Young;
+}
+
+void
+OneDimensionalModel_Data::setPoisson( const Real& Poisson )
+{
+    M_Poisson = Poisson;
 }
 
 void
@@ -478,16 +490,10 @@ OneDimensionalModel_Data::mesh() const
     return M_Mesh;
 }
 
-const Real&
-OneDimensionalModel_Data::xLeft() const
+Real
+OneDimensionalModel_Data::Length() const
 {
-    return M_x_left;
-}
-
-const Real&
-OneDimensionalModel_Data::xRight() const
-{
-    return M_x_right;
+    return M_Mesh->pointList( M_Mesh->numVertices() ).x() - M_Mesh->pointList( 1 ).x();
 }
 
 Real
@@ -568,22 +574,16 @@ OneDimensionalModel_Data::DPdtSteps() const
     return M_dP_dt_steps;
 }
 
-const int&
-OneDimensionalModel_Data::firstNode() const
-{
-    return M_firstNode;
-}
-
-const int&
-OneDimensionalModel_Data::lastNode() const
-{
-    return M_lastNode;
-}
-
 const std::string&
-OneDimensionalModel_Data::initVar() const
+OneDimensionalModel_Data::initialVariable() const
 {
-    return M_initVar;
+    return M_initialVariable;
+}
+
+const Real&
+OneDimensionalModel_Data::initialValue() const
+{
+    return M_initialValue;
 }
 
 const Real&
@@ -593,26 +593,68 @@ OneDimensionalModel_Data::restValue() const
 }
 
 const Real&
-OneDimensionalModel_Data::initValue() const
-{
-    return M_initValue;
-}
-
-const Real&
 OneDimensionalModel_Data::multiplier() const
 {
     return M_multiplier;
 }
 
-const Real&
-OneDimensionalModel_Data::width() const
-{
-    return M_width;
-}
-
 // ===================================================
 // Get Methods - Physical Parameters
 // ===================================================
+const Real&
+OneDimensionalModel_Data::DensityRho() const
+{
+    return M_Density;
+}
+
+const Real&
+OneDimensionalModel_Data::Viscosity() const
+{
+    return M_Viscosity;
+}
+
+const Real&
+OneDimensionalModel_Data::DensityWall() const
+{
+    return M_DensityWall;
+}
+
+const Real&
+OneDimensionalModel_Data::Thickness() const
+{
+    return M_Thickness;
+}
+
+const Real&
+OneDimensionalModel_Data::Young() const
+{
+    return M_Young;
+}
+
+const Real&
+OneDimensionalModel_Data::Poisson() const
+{
+    return M_Poisson;
+}
+
+const Real&
+OneDimensionalModel_Data::ViscoelasticModulus() const
+{
+    return M_ViscoelasticModulus;
+}
+
+const Real&
+OneDimensionalModel_Data::InertialModulus() const
+{
+    return M_InertialModulus;
+}
+
+const Real&
+OneDimensionalModel_Data::RobertsonCorrection() const
+{
+    return M_RobertsonCorrection;
+}
+
 const Real&
 OneDimensionalModel_Data::Area0( const UInt& i ) const
 {
@@ -665,42 +707,6 @@ const Real&
 OneDimensionalModel_Data::FrictionKr( const UInt& i ) const
 {
     return M_FrictionKr[i];
-}
-
-const Real&
-OneDimensionalModel_Data::DensityRho() const
-{
-    return M_DensityRho;
-}
-
-const Real&
-OneDimensionalModel_Data::DensityWall() const
-{
-    return M_DensityWall;
-}
-
-const Real&
-OneDimensionalModel_Data::Thickness() const
-{
-    return M_Thickness;
-}
-
-const Real&
-OneDimensionalModel_Data::Gamma() const
-{
-    return M_Gamma;
-}
-
-const Real&
-OneDimensionalModel_Data::CoeffA() const
-{
-    return M_CoeffA;
-}
-
-const Real&
-OneDimensionalModel_Data::RobertsonCorrection() const
-{
-    return M_RobertsonCorrection;
 }
 
 // ===================================================
