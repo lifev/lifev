@@ -46,7 +46,8 @@ namespace LifeV {
 // ===================================================
 MS_Model_1D::MS_Model_1D() :
     super                          (),
-    M_Output                       (),
+    M_Exporter                     ( new IOFile_Type() ),
+    M_ExporterMesh                 ( new Mesh_Type() ),
     M_Data                         ( new Data_Type() ),
     M_Physics                      (),
     M_Flux                         (),
@@ -94,11 +95,17 @@ MS_Model_1D::SetupData( const std::string& FileName )
     GetPot DataFile( FileName );
 
     M_Data->setup( DataFile );
-    //M_Data->showMe();
 
     M_LinearSolver.reset( new LinearSolver_Type( *M_comm ) );
     M_LinearSolver->setUpPrec        ( DataFile, "1D_Model/prec" );
     M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver");
+
+    //Exporter
+    M_Exporter->setDataFromGetPot( DataFile );
+    M_Exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_Exporter->setDirectory( MS_ProblemFolder );
+
+    M_ExporterMesh->setup( M_Data->Length(), M_Data->nbElem() );
 }
 
 void
@@ -109,23 +116,44 @@ MS_Model_1D::SetupModel()
     Debug( 8130 ) << "MS_Model_1D::SetupProblem() \n";
 #endif
 
+    //1D Model Physics
     M_Physics = Physics_PtrType( Factory_OneDimensionalModel_Physics::instance().createObject( M_Data->PhysicsType() ) );
     M_Physics->SetData( M_Data );
 
+    //1D Model Flux
     M_Flux = Flux_PtrType( Factory_OneDimensionalModel_Flux::instance().createObject( M_Data->FluxType() ) );
     M_Flux->SetPhysics( M_Physics );
 
+    //1D Model Source
     M_Source = Source_PtrType( Factory_OneDimensionalModel_Source::instance().createObject( M_Data->SourceType() ) );
     M_Source->SetPhysics( M_Physics );
 
+    //FEspace
     SetupFESpace();
 
+    //1D Model solver
     M_Solver.reset ( new Solver_Type ( M_Physics, M_Flux, M_Source, M_FESpace, M_comm ) );
     M_Solver->setup();
-
     M_Solver->setLinearSolver( M_LinearSolver );
 
+    //BC
     M_BC.reset( new BC_Type( M_Solver->U_thistime(), M_Flux, M_FESpace->dim() ) );
+
+    //Post-processing
+    M_Exporter->setMeshProcId( M_ExporterMesh, M_comm->MyPID() );
+    M_Solution.resize( 5 );
+    for ( UInt i(0) ; i < static_cast <UInt> ( M_Solution.size() ) ; ++i)
+    {
+        M_Solution[i].reset( new Vector_Type( M_Solver->U_thistime()[i], M_Exporter->mapType() ) );
+        if ( M_Exporter->mapType() == Unique )
+            M_Solution[i]->setCombineMode( Zero );
+    }
+
+    M_Exporter->addVariable( ExporterData::Scalar, "Area",      M_Solution[0], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Flow Rate", M_Solution[1], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "W1",        M_Solution[2], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "W2",        M_Solution[3], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Pressure",  M_Solution[4], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
 }
 
 void
@@ -169,9 +197,15 @@ MS_Model_1D::SaveSolution()
 #endif
 
     //Post-processing
+    for ( UInt i(0) ; i < static_cast <UInt> ( M_Solution.size() ) ; ++i)
+        *(M_Solution[i]) = M_Solver->U_thistime()[i];
 
-//     *M_FluidSolution = M_Fluid->solution();
-//     M_Output->postProcess( M_FluidData->getTime() );
+    M_Exporter->postProcess( M_Data->dataTime()->getTime() );
+
+#ifdef HAVE_HDF5
+    if ( M_Data->dataTime()->isLastTimeStep() )
+        M_Exporter->CloseFile();
+#endif
 
 }
 
@@ -278,12 +312,22 @@ MS_Model_1D::SetupFESpace()
     Debug( 8130 ) << "MS_Model_1D::setupFEspace() \n";
 #endif
 
+    //Transform mesh
+    boost::array< Real, NDIM > NullTransformation;
+    NullTransformation[0] = 0.; NullTransformation[1] = 0.; NullTransformation[2] = 0.;
+
+    //The real mesh can be only scaled due to OneDimensionalModel_Solver conventions
+    M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation );
+
+    //The mesh for the post-processing can be rotated
+    M_ExporterMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+
+    //Setup FESpace
     const RefFE*    refFE = &feSegP1;
     const QuadRule* qR    = &quadRuleSeg3pt;
     const QuadRule* bdQr  = &quadRuleSeg1pt;
 
     M_FESpace.reset( new FESpace_Type( M_Data->mesh(), *refFE, *qR, *bdQr, 1, *M_comm ) );
 }
-
 
 } // Namespace LifeV

@@ -94,6 +94,7 @@ public:
     typedef Solver_Type::Data_Type                                 Data_Type;
     typedef Solver_Type::Mesh_Type                                 Mesh_Type;
     typedef Solver_Type::Vector_Type                               Vector_Type;
+    typedef Solver_Type::Vector_PtrType                            Vector_PtrType;
     typedef Solver_Type::LinearSolver_Type                         LinearSolver_Type;
 
     typedef Solver_Type::FESpace_Type                              FESpace_Type;
@@ -258,7 +259,8 @@ private:
 
     //@}
 
-    boost::shared_ptr< IOFile_Type >       M_Output;
+    boost::shared_ptr< IOFile_Type >       M_Exporter;
+    boost::shared_ptr< Mesh_Type >         M_ExporterMesh;
 
     // 1D problem
     boost::shared_ptr< Data_Type >         M_Data;
@@ -267,7 +269,7 @@ private:
     Source_PtrType                         M_Source;
     boost::shared_ptr< Solver_Type >       M_Solver;
     boost::shared_ptr< BC_Type >           M_BC;
-    boost::shared_ptr< VectorType >        M_Solution;
+    std::vector < Vector_PtrType >         M_Solution;
 
     // FE spaces
     boost::shared_ptr< FESpace_Type >      M_FESpace;
@@ -276,7 +278,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* create1D()
+inline MS_PhysicalModel* createFluid1D()
 {
     return new MS_Model_1D();
 }
