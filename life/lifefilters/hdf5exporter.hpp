@@ -404,25 +404,6 @@ EpetraMapType Hdf5exporter<Mesh>::mapType() const
 template<typename Mesh>
 void Hdf5exporter<Mesh>::defineShape()
 {
-    typedef typename Mesh::VolumeShape ElementShape;
-
-    switch ( ElementShape::numPoints )
-    {
-    case 4:
-        this->M_FEstr = "tetra4";
-        this->M_bdFEstr = "tria3";
-        this->M_nbLocalBdDof = 3;
-        this->M_nbLocalDof = 4;
-        break;
-    case 8:
-        this->M_FEstr = "hexa8";
-        this->M_bdFEstr = "quad4";
-        this->M_nbLocalBdDof = 4;
-        this->M_nbLocalDof = 8;
-        break;
-    default:
-        ERROR_MSG( "FE not allowed in Hdf5exporter writer" );
-    }
 }
 
 template <typename Mesh>
@@ -537,25 +518,24 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     ASSERT (this->M_listData.size() > 0 , "hdf5exporter: ListData is empty");
 
     // Connections
-    // linear map for volumes. we Will have to insert via local ids.
-    Epetra_Map connectionsMap( this->M_nbLocalDof * this->M_mesh->numGlobalVolumes(),
-                this->M_nbLocalDof * this->M_mesh->numVolumes(),
-                0, this->M_listData.begin()->storedArray()->Comm());
+    // linear map for Elements. we Will have to insert via local ids.
+    Epetra_Map connectionsMap( Mesh::ElementShape::numPoints * this->M_mesh->numGlobalElements(),
+                               Mesh::ElementShape::numPoints * this->M_mesh->numElements(),
+                               0, this->M_listData.begin()->storedArray()->Comm());
 
     Epetra_IntVector connections(connectionsMap);
 
     int* connPtr;
     connections.ExtractView(&connPtr);
 
-    for (ID i=1; i <= this->M_mesh->numVolumes(); ++i)
+    for (ID i=1; i <= this->M_mesh->numElements(); ++i)
     {
-        typename Mesh::VolumeType const& vol (this->M_mesh->volume(i));
-        for (ID j=1; j<= this->M_nbLocalDof; ++j, ++connPtr)
+        typename Mesh::ElementType const& element (this->M_mesh->element(i));
+        for (ID j=1; j<= Mesh::ElementShape::numPoints; ++j, ++connPtr)
         {
-            *connPtr = vol.point(j).id();
+            *connPtr = element.point(j).id();
         }
     }
-
 
     this->M_listData.begin()->storedArray()->Comm().Barrier();
 
@@ -571,7 +551,6 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     EpetraVector pointsY(subMap);
     EpetraVector pointsZ(subMap);
 
-
     int gid;
     for(ID i=1; i <= this->M_mesh->numVertices(); ++i)
     {
@@ -585,7 +564,6 @@ void Hdf5exporter<Mesh>::M_wr_geo()
         insertedX = insertedX && pointsX.checkAndSet(gid, point.x());
         insertedY = insertedY && pointsY.checkAndSet(gid, point.y());
         insertedZ = insertedZ && pointsZ.checkAndSet(gid, point.z());
-
     }
 
     // Now we are ready to export the vectors to the hdf5 file
@@ -602,7 +580,6 @@ void Hdf5exporter<Mesh>::M_wr_geo()
         pointsYVarname      += this->M_postfix; // see also in M_wr_geometry
         pointsZVarname      += this->M_postfix; // see also in M_wr_geometry
     }
-
 
     M_HDF5->Write(connectionsVarname, connections);
     // bool writeTranspose (true);
@@ -730,14 +707,27 @@ void Hdf5exporter<Mesh>::M_wr_Xdmf(const Real& time)
 template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_topology  ( std::ofstream& xdmf )
 {
+    std::string FEstring;
+
+    switch ( Mesh::ElementShape::Shape )
+    {
+    case TETRA:
+        FEstring = "Tetrahedron";
+        break;
+    case LINE:
+        FEstring = "Polyline";
+        break;
+    default:
+        ERROR_MSG( "FE not allowed in HDF5 Exporter" );
+    }
 
     xdmf <<
         "      <Topology\n" <<
-        "         Type=\"Tetrahedron\"\n" <<
-        "         NumberOfElements=\"" << this->M_mesh->numGlobalVolumes() << "\"\n" <<
+        "         Type=\"" << FEstring <<"\"\n" <<
+        "         NumberOfElements=\"" << this->M_mesh->numGlobalElements() << "\"\n" <<
         "         BaseOffset=\"1\">\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
-        "                        Dimensions=\""<< this->M_mesh->numGlobalVolumes() << " 4\"\n" <<
+        "                        Dimensions=\""<< this->M_mesh->numGlobalElements() << " " << this->M_mesh->numLocalVertices() << "\"\n" <<
         "                        DataType=\"Int\"\n" <<
         "                        Precision=\"8\">\n" <<
         "             " << M_outputFileName << ":/Connections/Values\n" <<
