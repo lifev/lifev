@@ -41,8 +41,8 @@ namespace LifeV {
 // ===================================================
 MS_Model_Fluid3D::MS_Model_Fluid3D() :
     super                          (),
-    M_exporter                     ( new IOFileType () ),
-    M_importer                     ( new IOFileType () ),
+    M_exporter                     ( new IOFileType() ),
+    M_importer                     ( new IOFileType() ),
     M_FileName                     (),
     M_Fluid                        (),
     M_FluidBC                      ( new FluidBCType() ),
@@ -339,7 +339,7 @@ MS_Model_Fluid3D::SaveSolution()
     M_exporter->postProcess( M_FluidData->dataTime()->getTime() );
 
 #ifdef HAVE_HDF5
-    if ( M_dataPhysics->GetDataTime()->isLastTimeStep() )
+    if ( M_FluidData->dataTime()->isLastTimeStep() )
         M_exporter->CloseFile();
 #endif
 
