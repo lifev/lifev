@@ -213,6 +213,12 @@ namespace LifeV
          */
         Real maxH() const;
 
+        //! Get the minumum H over all the edges of the mesh; @author Cristiano Malossi: 27/04/2010
+        /*!
+         * @return minumum H
+         */
+        Real minH() const;
+
         //! Get the mean H over all the edges of the mesh; @author Cristiano Malossi: 22/02/2010
         /*!
          * \return maximum H
@@ -229,6 +235,8 @@ namespace LifeV
          * It is a generic interface common for all RegionMeshes (3D -- 1D).
          */
         //@{
+        UInt numGlobalElements() const; //!< Number of global elements (volumes)
+        UInt & numGlobalElements(); //!< Number of global elements (volumes)
         UInt numElements() const; //!< Number of elements (volumes)
         UInt & numElements(); //!< Number of elements (volumes)
         UInt numBElements() const; //!< Number of Boundary elements (faces)
@@ -899,6 +907,28 @@ namespace LifeV
     }
 
     template <typename GEOSHAPE, typename MC>
+    Real RegionMesh3D<GEOSHAPE, MC>::minH() const
+    {
+        Real MinH( 1E10 );
+        Real deltaX(0), deltaY(0), deltaZ(0);
+
+        for ( UInt i(0); i < static_cast<UInt> ( edgeList.size() ); ++i )
+        {
+            deltaX = ( edgeList[ i ].point( 2 ) ).x() - ( edgeList[ i ].point( 1 ) ).x();
+            deltaY = ( edgeList[ i ].point( 2 ) ).y() - ( edgeList[ i ].point( 1 ) ).y();
+            deltaZ = ( edgeList[ i ].point( 2 ) ).z() - ( edgeList[ i ].point( 1 ) ).z();
+
+            deltaX *= deltaX;
+            deltaY *= deltaY;
+            deltaZ *= deltaZ;
+
+            MinH = std::min( MinH, deltaX+deltaY+deltaZ );
+        }
+
+        return std::sqrt( MinH );
+    }
+
+    template <typename GEOSHAPE, typename MC>
     Real RegionMesh3D<GEOSHAPE, MC>::meanH() const
     {
         Real MeanH = 0;
@@ -960,6 +990,19 @@ namespace LifeV
     UInt & RegionMesh3D<GEOSHAPE, MC>::numElements()
     {
         return M_numVolumes;
+    }
+
+    template <typename GEOSHAPE, typename MC>
+    UInt
+    RegionMesh3D<GEOSHAPE, MC>::numGlobalElements() const
+    {
+        return M_numGlobalVolumes;
+    }
+
+    template <typename GEOSHAPE, typename MC>
+    UInt & RegionMesh3D<GEOSHAPE, MC>::numGlobalElements()
+    {
+        return M_numGlobalVolumes;
     }
 
     template <typename GEOSHAPE, typename MC>
