@@ -65,21 +65,15 @@ OneDimensionalModel_Physics::Celerity0( const UInt& i ) const
     return std::sqrt( M_Data->Beta0(i) * M_Data->Beta1(i) / M_Data->DensityRho() );
 }
 
-Real
-OneDimensionalModel_Physics::Length() const
-{
-    return M_Data->xRight() - M_Data->xLeft();
-}
-
 ScalVec
 OneDimensionalModel_Physics::pressure( const Real& _A,
-                                             const Real& _A_n,
-                                             const Real& _A_nm1,
-                                             const Real& dt,
-                                             const UInt& indz,
-                                             const UInt& steps,
-                                             const bool& visco,
-                                             const bool& linearized ) const
+                                       const Real& _A_n,
+                                       const Real& _A_nm1,
+                                       const Real& dt,
+                                       const UInt& indz,
+                                       const UInt& steps,
+                                       const bool& visco,
+                                       const bool& linearized ) const
 {
     ScalVec _a(2), _b(2), _c(2), area(2), result(4);
 
@@ -98,7 +92,7 @@ OneDimensionalModel_Physics::pressure( const Real& _A,
 
     result(3) = ( _a(steps) * _A + _b(steps) * _A_n + _c(steps) * _A_nm1 ) / dt; //> dA/dt
 
-    result(2) = M_Data->Gamma() * result(3) / ( 2*sqrt(_pi*area(linearized)) );               //> visc_component
+    result(2) = M_Data->InertialModulus() * result(3) / ( 2*sqrt(_pi*area(linearized)) );               //> visc_component
 
     result(1) = pressure( _A, indz );                                                  //> elast_component
 

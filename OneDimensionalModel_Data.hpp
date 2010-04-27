@@ -132,7 +132,7 @@ public:
 
     void setup( const GetPot& dataFile, const std::string& section = "1D_Model" );
 
-    void initParam( const GetPot& dataFile ); // TO BE CHECKED - DON'T USE IT!
+    void UpdateCoefficients();
 
     void initLinearParam( const GetPot& dataFile ); // TO BE CHECKED - DON'T USE IT!
 
@@ -149,6 +149,16 @@ public:
      * @param DataTime shared_ptr to dataTime container
      */
     void setDataTime( const Time_ptrType DataTime );
+
+    void setDensity( const Real& Density );
+
+    void setViscosity( const Real& Viscosity );
+
+    void setThickness( const Real& Thickness );
+
+    void setYoung( const Real& Young );
+
+    void setPoisson( const Real& Poisson );
 
     void setArea0( const Real& Area0, const UInt& i );
 
@@ -187,9 +197,7 @@ public:
     Time_ptrType       dataTime() const;
 
     Mesh_ptrType       mesh() const;
-
-    const Real&        xLeft() const;
-    const Real&        xRight() const;
+          Real         Length() const;
           Real         nbElem() const;
 
     const std::string& PostDirectory() const;
@@ -209,15 +217,24 @@ public:
 
     const int&         DPdtSteps() const;
 
-    const int&         firstNode() const;
-    const int&         lastNode() const;
-    const std::string& initVar() const;
+    const std::string& initialVariable() const;
+    const Real&        initialValue() const;
     const Real&        restValue() const;
-    const Real&        initValue() const;
     const Real&        multiplier() const;
-    const Real&        width() const;
 
     // Physical Parameters
+    const Real& DensityRho() const;
+    const Real& Viscosity() const;
+
+    const Real& DensityWall() const;
+    const Real& Thickness() const;
+    const Real& Young() const;
+    const Real& Poisson() const;
+
+    const Real& ViscoelasticModulus() const;
+    const Real& InertialModulus() const;
+    const Real& RobertsonCorrection() const;
+
     const Real& Area0( const UInt& i ) const;
     const Real& Beta0( const UInt& i ) const;
     const Real& Beta1( const UInt& i ) const;
@@ -229,12 +246,6 @@ public:
     const Real& dAlphaCordz( const UInt& i ) const;
 
     const Real& FrictionKr( const UInt& i ) const;
-    const Real& DensityRho() const;
-    const Real& DensityWall() const;
-    const Real& Gamma() const;
-    const Real& CoeffA() const;
-    const Real& RobertsonCorrection() const;
-    const Real& Thickness() const;
 
     // Linear Parameters
     const Real& Flux11( const UInt& i ) const;
@@ -270,54 +281,6 @@ protected:
     Time_ptrType      M_Time;
     Mesh_ptrType      M_Mesh;
 
-    //! Space Discretization
-    Real              M_x_left;  //! left coordinate
-    Real              M_x_right; //! right coordinate
-
-    //! Physical Parameters
-    ScalVec M_Area0;
-    ScalVec M_dArea0dz;
-    //! P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
-    ScalVec M_PressBeta0;    // homogeneous to a pressure
-    ScalVec M_dPressBeta0dz; // homogeneous to a pressure
-    ScalVec M_PressBeta1;    // power coeff (>0, often=1/2)
-    ScalVec M_dPressBeta1dz; // power coeff (>0, often=1/2)
-    ScalVec M_AlphaCoriolis; // Coriolis coefficient (often called alpha)
-    ScalVec M_dAlphaCoriolisdz;
-    //! Friction parameter Kr
-    ScalVec M_FrictionKr;
-    Real M_DensityRho;     // Density rho (always taken constant along the vessel)
-    Real M_DensityWall;
-    Real M_Thickness;
-    Real M_Gamma;
-    Real M_CoeffA;
-    Real M_RobertsonCorrection;
-
-    //! Flux matrix
-    ScalVec M_Flux11;
-    ScalVec M_Flux12;
-    ScalVec M_Flux21;
-    ScalVec M_Flux22;
-
-    //! Celerities of the linear problem (eigenvalues of the flux matrix)
-    ScalVec M_Celerity1;
-    ScalVec M_Celerity2;
-
-    //! Eigenvector for first eigenvalue
-    ScalVec M_Celerity1LeftEigenvector1;
-    ScalVec M_Celerity1LeftEigenvector2;
-    //! Eigenvector for second eigenvalue
-    ScalVec M_Celerity2LeftEigenvector1;
-    ScalVec M_Celerity2LeftEigenvector2;
-
-    //! Source matrix
-    ScalVec M_Source10;
-    ScalVec M_Source20;
-    ScalVec M_Source11;
-    ScalVec M_Source12;
-    ScalVec M_Source21;
-    ScalVec M_Source22;
-
     //! Miscellaneous
     std::string       M_post_dir; //! full directory name (including path)
     std::string       M_post_file; //! output file name
@@ -336,13 +299,62 @@ protected:
     int               M_dP_dt_steps;
 
     //! initialize
-    int               M_firstNode;
-    int               M_lastNode;
-    std::string       M_initVar;
+    std::string       M_initialVariable;
+    Real              M_initialValue;
     Real              M_restValue;
-    Real              M_initValue;
     Real              M_multiplier;
-    Real              M_width;
+
+    //! Physical Parameters
+    bool M_ComputeCoefficients;
+    Int  M_PowerlawCoefficient;
+
+    Real M_Density;     // Density rho (always taken constant along the vessel)
+    Real M_Viscosity;
+
+    Real M_DensityWall;
+    bool M_ThickVessel;
+    Real M_Thickness;
+    Real M_Young;
+    Real M_Poisson;
+
+    Real M_ViscoelasticModulus;
+    Real M_InertialModulus;
+    Real M_RobertsonCorrection;
+
+    ScalVec M_Area0;
+    ScalVec M_dArea0dz;
+    //! P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
+    ScalVec M_PressBeta0;    // homogeneous to a pressure
+    ScalVec M_dPressBeta0dz; // homogeneous to a pressure
+    ScalVec M_PressBeta1;    // power coeff (>0, often=1/2)
+    ScalVec M_dPressBeta1dz; // power coeff (>0, often=1/2)
+    ScalVec M_AlphaCoriolis; // Coriolis coefficient (often called alpha)
+    ScalVec M_dAlphaCoriolisdz;
+    ScalVec M_FrictionKr;    //! Friction parameter Kr
+
+    //! Flux matrix
+    ScalVec M_Flux11;
+    ScalVec M_Flux12;
+    ScalVec M_Flux21;
+    ScalVec M_Flux22;
+
+    //! Celerities of the linear problem (eigenvalues of the flux matrix)
+    ScalVec M_Celerity1;
+    ScalVec M_Celerity2;
+
+    //! Eigenvector for first and second eigenvalue
+    ScalVec M_Celerity1LeftEigenvector1;
+    ScalVec M_Celerity1LeftEigenvector2;
+    ScalVec M_Celerity2LeftEigenvector1;
+    ScalVec M_Celerity2LeftEigenvector2;
+
+    //! Source matrix
+    ScalVec M_Source10;
+    ScalVec M_Source20;
+    ScalVec M_Source11;
+    ScalVec M_Source12;
+    ScalVec M_Source21;
+    ScalVec M_Source22;
 };
 
 }

@@ -178,6 +178,7 @@ public:
     typedef SolverAmesos                            LinearSolver_Type;
     typedef boost::shared_ptr< LinearSolver_Type >  LinearSolver_PtrType;
     typedef LinearSolver_Type::vector_type          Vector_Type;
+    typedef boost::shared_ptr< Vector_Type >        Vector_PtrType;
 
     typedef LinearSolver_Type::matrix_type          Matrix_Type;
     typedef boost::shared_ptr<Matrix_Type>          Matrix_PtrType;
@@ -345,6 +346,9 @@ public:
 
     //! Return the Riemann invarant W2 at current time step
     const Vector_Type& W2_thistime() const;
+
+    //! Return the solution at current time step (Pressure)
+    const Vector_Type& P_thistime() const;
 
     //! Get the Physics function
     const Physics_Type& Physics() const;
