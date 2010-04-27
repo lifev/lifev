@@ -29,10 +29,10 @@
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dhexagon_StressAndFluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress_Stationary.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_Stress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial3_Stress_Stationary.dat
@@ -40,16 +40,16 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress_Stationary.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
 #MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress_Stationary.dat
+#MS_problem    = ./MultiScaleData/Models/MultiScale_3DFSIserial1.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
-	#[./restart]
-	#restart         = true          # Restart simulation (true/false)
-	#restart_time	= 0.1			# [s] Time for restart (optional)
-	#restart_iter    = 10            # Iteration for restart (optional)
-
-	[./time_discretization]
+    [./Restart]
+    Restart                    = false
+    RestartFromStepNumber      = 0
+    
+	[../time_discretization]
 	initialtime		= 0.0           # [s]
 	endtime			= 0.5			# [s]
 	timestep		= 0.1          	# [s]
@@ -136,6 +136,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial2_FluxStress.dat
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0                 # density   [g/cm^3]
-fluidViscosity	= 1.005309649148734e-06             # viscosity [g/cm/s]
+fluidDensity	= 1.0                    # density   [g/cm^3]
+fluidViscosity	= 1.005309649148734e-06  # viscosity [g/cm/s]
 ###################################################################################################
