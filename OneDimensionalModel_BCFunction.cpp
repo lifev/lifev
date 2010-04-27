@@ -50,7 +50,7 @@ Riemann::Riemann( const FESpace_Type&                   fespace,
                   const std::vector<Vector_Type>&       U_thistime,
                   const std::string&                    border,
                   const std::string&                    var ):
-    OneDimensionalModel_BCFunction            ( ),
+    super                         ( ),
     M_FESpace                     ( fespace ),
     M_fluxFun                     ( fluxFun ),
     M_U_thistime                  ( U_thistime ),
@@ -131,15 +131,23 @@ Compatibility::Compatibility( const FESpace_Type& fespace,
         case OneDBCLeftBoundary:
             M_internalBoundaryDof = this->M_boundaryDof + 1;
             M_boundaryEdge        = this->M_FESpace.mesh()->edgeList(1);
-            M_boundaryPoint       = M_boundaryEdge.point(1).x();
-            M_internalBdPoint     = M_boundaryEdge.point(2).x();
+            M_boundaryPoint[0]    = M_boundaryEdge.point(1).x();
+            M_boundaryPoint[1]    = M_boundaryEdge.point(1).y();
+            M_boundaryPoint[2]    = M_boundaryEdge.point(1).z();
+            M_internalBdPoint[0]  = M_boundaryEdge.point(2).x();
+            M_internalBdPoint[1]  = M_boundaryEdge.point(2).y();
+            M_internalBdPoint[2]  = M_boundaryEdge.point(2).z();
         break;
 
         case OneDBCRightBoundary:
             M_internalBoundaryDof = this->M_boundaryDof - 1;
             M_boundaryEdge        = this->M_FESpace.mesh()->edgeList(M_nb_elem);
-            M_boundaryPoint       = M_boundaryEdge.point(2).x();
-            M_internalBdPoint     = M_boundaryEdge.point(1).x();
+            M_boundaryPoint[0]    = M_boundaryEdge.point(2).x();
+            M_boundaryPoint[1]    = M_boundaryEdge.point(2).y();
+            M_boundaryPoint[2]    = M_boundaryEdge.point(2).z();
+            M_internalBdPoint[0]  = M_boundaryEdge.point(1).x();
+            M_internalBdPoint[1]  = M_boundaryEdge.point(1).y();
+            M_internalBdPoint[2]  = M_boundaryEdge.point(1).z();
         break;
 
         default:
@@ -182,28 +190,26 @@ Compatibility::update_U_internalBd()
 }
 
 Real
-Compatibility::extrapolate_L_dot_U( Real const& eigval,
-                                                  Vec2D const& eigvec )
+Compatibility::extrapolate_L_dot_U( Real const& eigval, Vec2D const& eigvec )
 {
     ASSERT_PRE( eigvec.size() == 2, "extrapolate_L_dot_U work only for 2D vectors");
 
     Real L_dot_U_extrap;
     Vec2D qlSource(2); // Quasi linear source term
-    Vec2D U_charact_pt=_interpolLinear( M_boundaryPoint, M_internalBdPoint,
-                                        M_time_step, eigval, this->M_U_boundary, M_U_internalBd );
+    Vec2D U_charact_pt=_interpolLinear( M_time_step, eigval, this->M_U_boundary, M_U_internalBd );
 
-    L_dot_U_extrap = dot( eigvec, U_charact_pt);
+    L_dot_U_extrap = dot( eigvec, U_charact_pt );
 
     Debug( 6315 ) << "[extrapolate_L_dot_U] eigvec.size() = " << eigvec.size()
                   << ", U_charact_pt.size() = " << U_charact_pt.size() << "\n";
 
     qlSource[0]=M_sourceFun->QuasiLinearSource( U_charact_pt[0],
-                                               U_charact_pt[1], 1,
-                                               this->M_boundaryDof - 1);
+                                                U_charact_pt[1], 1,
+                                                this->M_boundaryDof - 1);
 
     qlSource[1]=M_sourceFun->QuasiLinearSource( U_charact_pt[0],
-                                               U_charact_pt[1], 2,
-                                               this->M_boundaryDof - 1);
+                                                U_charact_pt[1], 2,
+                                                this->M_boundaryDof - 1);
 
     L_dot_U_extrap-=M_time_step * dot(eigvec, qlSource);
 
@@ -224,7 +230,7 @@ Compatibility::extrapolate_W( OneDBCStringValue const& _W )
     {
         case OneDBCW1:
             W_out = extrapolate_L_dot_U(M_eigval1, M_left_eigvec1)
-            - dot( M_left_eigvec1, this->M_U_boundary ) + this->M_W_boundary[0];
+                  - dot( M_left_eigvec1, this->M_U_boundary ) + this->M_W_boundary[0];
 
 //             std::cout << extrapolate_L_dot_U(M_eigval1, M_left_eigvec1) << " "
 //                       << M_left_eigvec1[0] << " " << M_left_eigvec1[1] << " "
@@ -234,7 +240,7 @@ Compatibility::extrapolate_W( OneDBCStringValue const& _W )
 
         case OneDBCW2:
             W_out = extrapolate_L_dot_U(M_eigval2, M_left_eigvec2)
-            - dot( M_left_eigvec2, this->M_U_boundary ) + this->M_W_boundary[1];
+                  - dot( M_left_eigvec2, this->M_U_boundary ) + this->M_W_boundary[1];
 
 //             std::cout << extrapolate_L_dot_U(M_eigval2, M_left_eigvec2) << " "
 //                       << M_left_eigvec2[0] << " " << M_left_eigvec2[1] << " "
@@ -249,27 +255,29 @@ Compatibility::extrapolate_W( OneDBCStringValue const& _W )
 }
 
 Vec2D
-Compatibility::_interpolLinear( const Real& point_bound, const Real& point_internal,
-                                              const Real& deltaT,      const Real& eigenvalue,
-                                              const Vec2D& U_bound,    const Vec2D& U_intern) const
+Compatibility::_interpolLinear( const Real& deltaT,      const Real& eigenvalue,
+                                const Vec2D& U_bound,    const Vec2D& U_intern) const
 {
     ASSERT_PRE( U_bound.size() == 2 && U_intern.size() == 2, "_interpolLinear work only for 2D vectors");
 
-    Real deltaX = std::abs(point_bound - point_internal);
+    Real deltaX = std::sqrt( std::pow(M_boundaryPoint[0] - M_internalBdPoint[0], 2) +
+                             std::pow(M_boundaryPoint[1] - M_internalBdPoint[1], 2) +
+                             std::pow(M_boundaryPoint[2] - M_internalBdPoint[2], 2) );
 
     Real cfl =  eigenvalue * deltaT / deltaX;
 
     Real weight;   //! weight in the linear approximation
 
-    Debug( 6315 ) << "[Compatibility::_interpolLinear] point_bound "
-                  << point_bound << ", point_internal " << point_internal
-                  << ", deltaT " << deltaT << ", deltaX " << deltaX
+    Debug( 6315 ) << "[Compatibility::_interpolLinear] point_bound ("
+                  << M_boundaryPoint[0] << "," << M_boundaryPoint[1] << "," << M_boundaryPoint[2] << "), point_internal ("
+                  << M_internalBdPoint[0] << "," << M_internalBdPoint[1] << "," << M_internalBdPoint[2]
+                  << "), deltaT " << deltaT << ", deltaX " << deltaX
                   << ", eigenvalue " << eigenvalue
                   << ", A boundary " << U_bound[0] << ", Q boundary " << U_bound[1]
                   << ", A internal " << U_intern[0] << ", Q internal " << U_intern[1]
                   << ", cfl " << cfl << "\n";
 
-    if ( point_bound < point_internal ) //! the edge is on the left of the domain
+    if ( M_internalBoundaryDof == 2 ) //! the edge is on the left of the domain
     {
         ASSERT( -1. < cfl && cfl < 0. ,
                 "This characteristics is wrong!\nEither it is not outcoming " \

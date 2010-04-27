@@ -239,9 +239,7 @@ protected:
 
     Real extrapolate_W( OneDBCStringValue const& _W );
 
-    Vec2D _interpolLinear( const Real&  point_bound,
-                           const Real&  point_internal,
-                           const Real&  deltaT,
+    Vec2D _interpolLinear( const Real&  deltaT,
                            const Real&  eigenvalue,
                            const Vec2D& U_bound,
                            const Vec2D& U_intern ) const;
@@ -264,8 +262,8 @@ protected:
     Mesh_Type::EdgeType                     M_boundaryEdge;
 
     //! Boundary point and internal boundary point
-    Real                                    M_boundaryPoint;
-    Real                                    M_internalBdPoint;
+    boost::array< Real, NDIM >              M_boundaryPoint;
+    boost::array< Real, NDIM >              M_internalBdPoint;
 
     //! Eigen values of the jacobian diffFlux (= dF/dU = H)
     Real                                    M_eigval1;
