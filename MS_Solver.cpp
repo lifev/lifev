@@ -62,6 +62,7 @@ MS_Solver::MS_Solver() :
     //Register the objects
     FactoryModels::instance().registerProduct   ( MultiScale,        &createMultiScale );
     FactoryModels::instance().registerProduct   ( Fluid3D,           &createFluid3D );
+    FactoryModels::instance().registerProduct   ( Fluid1D,           &createFluid1D );
     FactoryCouplings::instance().registerProduct( Stress,            &createStress );
     FactoryCouplings::instance().registerProduct( FluxStress,        &createFluxStress );
     FactoryCouplings::instance().registerProduct( BoundaryCondition, &createBoundaryCondition );

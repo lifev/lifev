@@ -86,7 +86,8 @@ enum algorithmsTypes
 enum modelsTypes
 {
     MultiScale, /*!< MultiScale model */
-    Fluid3D     /*!< Oseen fluid 3D model */
+    Fluid3D,    /*!< Oseen fluid 3D model */
+    Fluid1D     /*!< 1D model */
 };
 
 /*! @enum couplingsTypes
@@ -175,6 +176,7 @@ MS_MapsDefinition()
 {
     modelsMap["MultiScale"]           = MultiScale;
     modelsMap["Fluid3D"]              = Fluid3D;
+    modelsMap["Fluid1D"]              = Fluid1D;
 
     couplingsMap["BoundaryCondition"] = BoundaryCondition;
     couplingsMap["Stress"]            = Stress;
