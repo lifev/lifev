@@ -3,6 +3,13 @@
 #   Data file for One D Model (Non Linear)
 #-------------------------------------------------
 
+[exporter]
+start                = 0             # start index for filenames
+save                 = 1             # how many time steps per posptrocessing
+multimesh            = false         # true if the mesh has to be saved at each post-processing step
+
+
+
 [1D_Model]
 
 [./Model]
@@ -11,30 +18,41 @@ FluxType             = OneD_NonLinearFlux
 SourceType           = OneD_NonLinearSource
 
 [../PhysicalParameters]
-use_physical_values  = 0
+ComputeCoefficients  = false
+PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
+
 Area0                = 1
-# AlphaCoriolis       = 1            # coriolis coeff
-# AlphaCoriolis       = 1.333333333  # coriolis coeff
+density              = 1
+viscosity            = 0.035
+
+thickVessel          = false
+thickness            = 0.056
+young                = 4.0E6 # g/cm/s^2 (dyne/cm^2)
+poisson              = 0.48
+
+AlphaCoriolis        = 1            # coriolis coeff
 Beta0                = 1.e6         # pressure law exponent
 Beta1                = 0.5          # pressure law exponent
 Kr                   = 2.419026343  # friction parameter (source term)
 R                    = 2.e4         # terminal resistence
 
 [../time_discretization]
-initialtime          = 0.0          # inittime
-endtime              = .05          # endtime
+initialtime          = .00001       # inittime
+endtime              = .04999       # endtime
 timestep             = 1e-5         # timestep
 
 [../space_discretization]
-x_left               = 0.
-x_right              = 10.
+Length               = 10.
 NumberOfElements     = 100          # number of elements
 
+transform            = '1.0 1.0 1.0
+                        0.0 90.0 90.0
+                        0.0 0.0 0.0'
+
 [../initialize]
-var                  = Q
-value                = 0
-firstnode            = 1
-lastnode             = 101
+variable             = Q
+initialValue         = 0
+restValue            = 0
 multiplier           = 1
 
 [../miscellaneous]
@@ -50,3 +68,5 @@ showCFL              = 1
     redistribute          = true
     print_status          = false
     print_timing          = false
+    
+    [../]

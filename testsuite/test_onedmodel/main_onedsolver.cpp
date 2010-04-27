@@ -84,21 +84,41 @@ int main(int argc, char** argv)
   // checking if we are checking for the nightly build
   const bool check = command_line.search(2, "-c", "--check");
 
-  string data_file_name = command_line.follow("data", 2, "-f","--file");
-  GetPot data_file(data_file_name);
+  string FileName = command_line.follow("data", 2, "-f","--file");
+  GetPot DataFile(FileName);
 
   // *********************************
   // Build the 1D model
   // *********************************
   MS_Model_1D OneDModel;
   OneDModel.SetCommunicator(comm);
-  OneDModel.SetupData( data_file_name );
+
+  // Scale, Rotate, Translate 1D (if necessary)
+  boost::array< Real, NDIM >    geometryScale;
+  boost::array< Real, NDIM >    geometryRotate;
+  boost::array< Real, NDIM >    geometryTranslate;
+
+  geometryScale[0] = DataFile( "1D_Model/space_discretization/transform", 1., 0);
+  geometryScale[1] = DataFile( "1D_Model/space_discretization/transform", 1., 1);
+  geometryScale[2] = DataFile( "1D_Model/space_discretization/transform", 1., 2);
+
+  geometryRotate[0] = DataFile( "1D_Model/space_discretization/transform", 0., 3) * Pi / 180;
+  geometryRotate[1] = DataFile( "1D_Model/space_discretization/transform", 0., 4) * Pi / 180;
+  geometryRotate[2] = DataFile( "1D_Model/space_discretization/transform", 0., 5) * Pi / 180;
+
+  geometryTranslate[0] = DataFile( "1D_Model/space_discretization/transform", 0., 6);
+  geometryTranslate[1] = DataFile( "1D_Model/space_discretization/transform", 0., 7);
+  geometryTranslate[2] = DataFile( "1D_Model/space_discretization/transform", 0., 8);
+
+  OneDModel.SetGeometry( geometryScale, geometryRotate, geometryTranslate );
+
+  OneDModel.SetupData( FileName );
   OneDModel.SetupModel();
 
   // *********************************
   // Boundary Conditions of the 1D model
   // *********************************
-  BC_Type::OneDBCFunction_PtrType resistence ( new Resi( data_file("PhysicalParameters/R",0.),
+  BC_Type::OneDBCFunction_PtrType resistence ( new Resi( DataFile("PhysicalParameters/R",0.),
                                                          OneDModel.GetPhysics(),
                                                          OneDModel.GetFESpace(),
                                                          OneDModel.GetFlux(),
@@ -116,14 +136,6 @@ int main(int argc, char** argv)
   OneDModel.GetBC().setDefaultBC(OneDModel.GetFESpace(), OneDModel.GetSource(), OneDModel.GetData().dataTime()->getTimeStep());
 
   // *********************************
-  // Initialization
-  // *********************************
-  Real dt             = OneDModel.GetData().dataTime()->getTimeStep();
-  Real startT         = OneDModel.GetData().dataTime()->getInitialTime();
-  Real T              = OneDModel.GetData().dataTime()->getEndTime();
-  OneDModel.BuildSystem();
-
-  // *********************************
   // Tempolar loop
   // *********************************
   printf("\nTemporal loop:\n");
@@ -135,17 +147,19 @@ int main(int argc, char** argv)
 
   int count = 0;
 
-  for ( Real time=startT + dt ; time <= T; time+=dt )
+  OneDModel.BuildSystem();
+  for ( ; OneDModel.GetData().dataTime()->canAdvance() ; OneDModel.GetData().dataTime()->updateTime() )
   {
       std::cout << std::endl;
-      std::cout << "--------- Iteration " << count << " time = " << time << std::endl;
+      std::cout << "--------- Iteration " << count << " time = " << OneDModel.GetData().dataTime()->getTime() << std::endl;
+      //std::cout << "--------- Iteration " << count << " time = " << time << std::endl;
 
     count++;
 
     chrono.start();
     Debug(6030) << "[main] 1d model time advance\n";
     chronota.start();
-    OneDModel.GetData().dataTime()->updateTime();
+    //OneDModel.GetData().dataTime()->updateTime();
     OneDModel.UpdateSystem();
     chronota.stop();
 
@@ -156,8 +170,9 @@ int main(int argc, char** argv)
 
     //if ( !( static_cast<int>( std::floor( count%postprocess_it))) )
     {
-        std::cout << "PostProcessing at time ... " << time << std::endl;
-        OneDModel.GetSolver().postProcess( time );
+        //std::cout << "PostProcessing at time ... " << OneDModel.GetData().dataTime()->getTime() << std::endl;
+        //OneDModel.GetSolver().postProcess( OneDModel.GetData().dataTime()->getTime() );
+        OneDModel.SaveSolution();
     }
 
     chrono.stop();
@@ -169,7 +184,7 @@ int main(int argc, char** argv)
   printf("\nSimulation ended successfully.\n");
 
 #ifdef EPETRA_MPI
-  MPI_Finalize();
+    MPI_Finalize();
 #endif
 
   if ( check )
