@@ -103,8 +103,9 @@ public:
     //! Read  only last timestep
     void import(const Real& Tstart);
 
-    void rd_var(ExporterData& dvar)
-    {super::rd_var(dvar);}
+    void rd_var(ExporterData& dvar) {super::rd_var(dvar);}
+
+    void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
 
 private:
 
@@ -131,6 +132,11 @@ private:
     UInt M_steps;
     std::vector<int> M_LtGNodesMap;
     std::string M_me;
+
+    std::string                 M_FEstr;
+    std::string                 M_bdFEstr;
+    UInt                        M_nbLocalDof;
+    UInt                        M_nbLocalBdDof;
 };
 
 
@@ -169,10 +175,12 @@ Ensight<Mesh>::Ensight(const GetPot& dfile, const std::string& prefix):
     M_me()
 {
 }
-
 template<typename Mesh>
-void Ensight<Mesh>::defineShape()
+void
+Ensight<Mesh>::setMeshProcId( const mesh_ptrtype mesh, const int& procId )
 {
+    super::setMeshProcId( mesh, procId );
+
     initNodesMap();
     initProcId();
 
@@ -181,28 +189,28 @@ void Ensight<Mesh>::defineShape()
     switch ( ElementShape::Shape )
         {
         case TETRA:
-            this->M_FEstr = "tetra4";
-            this->M_bdFEstr = "tria3";
-            this->M_nbLocalBdDof = 3;
-            this->M_nbLocalDof = 4;
+            M_FEstr = "tetra4";
+            M_bdFEstr = "tria3";
+            M_nbLocalBdDof = 3;
+            M_nbLocalDof = 4;
             break;
         case HEXA:
-            this->M_FEstr = "hexa8";
-            this->M_bdFEstr = "quad4";
-            this->M_nbLocalBdDof = 4;
-            this->M_nbLocalDof = 8;
+            M_FEstr = "hexa8";
+            M_bdFEstr = "quad4";
+            M_nbLocalBdDof = 4;
+            M_nbLocalDof = 8;
             break;
         case TRIANGLE:
-            this->M_FEstr = "tria3";
-            this->M_bdFEstr = "bar2";
-            this->M_nbLocalBdDof = 2;
-            this->M_nbLocalDof = 3;
+            M_FEstr = "tria3";
+            M_bdFEstr = "bar2";
+            M_nbLocalBdDof = 2;
+            M_nbLocalDof = 3;
             break;
         case QUAD:
-            this->M_FEstr = "quad4";
-            this->M_bdFEstr = "bar2";
-            this->M_nbLocalBdDof = 4;
-            this->M_nbLocalDof = 3;
+            M_FEstr = "quad4";
+            M_bdFEstr = "bar2";
+            M_nbLocalBdDof = 4;
+            M_nbLocalDof = 3;
             break;
         default:
             ERROR_MSG( "FE not allowed in Ensight writer" );
@@ -211,6 +219,7 @@ void Ensight<Mesh>::defineShape()
     if (!this->M_multimesh)
       M_wr_ascii_geo( this->M_post_dir+this->M_prefix+this->M_me+".geo" );
 }
+
 template<typename Mesh>
 EpetraMapType Ensight<Mesh>::mapType() const
 {
@@ -371,12 +380,12 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
     geof << setw(8) << part << "\n";
     geof << "full geometry\n";
     // elements
-    geof << this->M_FEstr << "\n";
+    geof << M_FEstr << "\n";
     geof << setw(8) << nE << "\n";
     for (ID i=1; i <= nE; ++i)
         {
             geof << setw(8) << i ;
-            for (ID j=1; j<= this->M_nbLocalDof; ++j)
+            for (ID j=1; j<= M_nbLocalDof; ++j)
                 {
                     //geof << M_mesh->volume(i).point(j).id();
                     geof << setw(8) << this->M_mesh->element(i).point(j).localId();

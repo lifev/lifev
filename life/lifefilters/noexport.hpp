@@ -59,7 +59,6 @@ public:
     UInt importFromTime( const Real& /*Time*/ ) { assert(false); return 0; }
     void import(const Real& /*Tstart*/, const Real& /*dt*/) {} // dt is used to rebuild the history up to now
     void import(const Real& /*Tstart*/) {}
-    void defineShape() {}
 
 private:
     virtual void M_rd_scalar( ExporterData& /*dvar*/ ) {}

@@ -279,8 +279,6 @@ protected:
     virtual void M_rd_scalar( ExporterData& dvar ) = 0;
     virtual void M_rd_vector( ExporterData& dvar ) = 0;
 
-    virtual void defineShape() = 0;
-
     //@}
 
 
@@ -326,7 +324,7 @@ public:
      */
     void setMultimesh( const bool& multimesh );
 
-    void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
+    virtual void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
 
     //@}
 
@@ -352,11 +350,6 @@ protected:
     int                         M_procId;
     std::string                 M_postfix;
 
-    std::string                 M_FEstr;
-    std::string                 M_bdFEstr;
-    UInt                        M_nbLocalDof;
-    UInt                        M_nbLocalBdDof;
-
     std::list<ExporterData>     M_listData;
     std::list<Real>             M_timeSteps;
 };
@@ -368,7 +361,7 @@ protected:
 // ===================================================
 template<typename Mesh>
 Exporter<Mesh>::Exporter():
-    M_prefix        (),
+    M_prefix        ( "output"),
     M_post_dir      ( "./" ),
     M_count         ( 0 ),
     M_save          ( 1 ),
@@ -477,8 +470,6 @@ void Exporter<Mesh>::setMeshProcId( const mesh_ptrtype mesh , const int& procId 
 {
     M_mesh   = mesh;
     M_procId = procId;
-
-    this->defineShape();
 }
 
 // ===================================================
