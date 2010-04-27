@@ -345,11 +345,11 @@ private:
     void checkResult(LifeV::Real& time)
     {
         LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-        if(time==0.002 && (dispNorm-0.062314)>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.001 && (dispNorm-0.107122)>  1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.003 && (dispNorm-0.113679)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.004 && (dispNorm-0.108021)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.005 && (dispNorm-0.0991928)>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.001 && (dispNorm-0.0621691)> 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.002 && (dispNorm-0.10668)  > 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.003 && (dispNorm-0.113252) > 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.004 && (dispNorm-0.107976) > 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.005 && (dispNorm-0.0995921)> 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
         throw Problem::RESULT_CHANGED_EXCEPTION(time);
     }
 
