@@ -295,19 +295,8 @@ void test_bdf::run() {
 		Members->comm->Barrier();
 		chrono.start();
 		az_A.setMatrix(*matA_ptr);
-		az_A.setReusePreconditioner(true);
-		/*
-		 * FIXME
-		 * if I set ReusePreconditioner to false,
-		 * then I get a segmentation fault.
-		 * Why does it happen?
-		 */
-		//        az_A.precReset();
-		/*
-		 * FIXME
-		 * I get a segmentation fault if I decomment precReset.
-		 * no idea why this is happening
-		 * */
+		az_A.setReusePreconditioner(false);
+
 		Members->comm->Barrier();
 		az_A.solveSystem(f, u, matA_ptr);
 		chrono.stop();
