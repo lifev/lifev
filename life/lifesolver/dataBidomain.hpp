@@ -23,9 +23,8 @@
   \version 1.0
 
   \brief File containing a class for handling Monodomain data with GetPot
-
-	\modif J.Castelneau (INRIA)
-        \date 06/09
+  \mantainer R. Ruiz
+   \date 2010-04
 */
 #ifndef _DATABIDOMAIN_H_
 #define _DATABIDOMAIN_H_
@@ -35,13 +34,8 @@
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifecore/dataString.hpp>
 #include <life/lifearray/tab.hpp>
+#include <life/lifesolver/heartFunctors.hpp>
 
-#undef REO_CASE
-#ifdef REO_CASE
-	#include "heartCaseBase.hpp"
-#else
-	#include "heart_functors.hpp"
-#endif
 
 namespace LifeV
 {
@@ -61,12 +55,7 @@ class DataBidomain:
 public:
 
     //! Constructors
-#ifdef REO_CASE
-    DataBidomain( boost::shared_ptr<HeartCaseBase> B_fct );
-#else
     DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct );
-#endif
-
     DataBidomain( const DataBidomain& dataBidomain );
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> fct_type;
@@ -93,13 +82,13 @@ public:
 	inline int heart_diff_fct() const {return M_heart_diff_fct;}
 
 	inline bool has_fibers() const {return M_has_fibers;}
-	//! format vct (INRIA) or BB (Milan)
+
+    //! format vct
 	inline bool fibers_format() const{return M_fibers_format;}
 
 	//! sigma_l
 	inline   Real sigmal_i() const 	{return M_sigmal_i;}
 	inline   Real sigmal_e() const 	{return M_sigmal_e;}
-
 
 	//! sigma_t
 	inline   Real sigmat_i() const 	{return M_sigmat_i;}
@@ -135,7 +124,7 @@ protected:
     Real M_sigmat_e;
     int M_heart_diff_fct;
     UInt M_verbose;
-    string M_post_dir; //! full name (including path)
+    string M_post_dir; //! full name
     string M_fibers_dir;
     bool M_has_fibers;
     // format of fibers file
@@ -154,16 +143,6 @@ private:
 
 
 // Constructors
-#ifdef REO_CASE
-template <typename Mesh>
-DataBidomain<Mesh>::
-DataBidomain( boost::shared_ptr<HeartCaseBase> B_fct ) :
-    DataMesh<Mesh>( B_fct->get_data_hdl(), "electric/space_discretization" ),
-    DataTime( B_fct->get_data_hdl() , "electric/time_discretization" )
-{
-    setup(B_fct->get_data_hdl());
-}
-#else
 template <typename Mesh>
 DataBidomain<Mesh>::
 DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct ) :
@@ -175,7 +154,7 @@ DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct ) :
 {
     setup(heart_fct->_dataFile);
 }
-#endif
+
 
 template <typename Mesh>
 DataBidomain<Mesh>::
@@ -200,8 +179,6 @@ DataBidomain( const DataBidomain& dataBidomain ) :
     M_order_bdf(dataBidomain.M_order_bdf)
 {
 }
-
-
 
 
 template <typename Mesh>

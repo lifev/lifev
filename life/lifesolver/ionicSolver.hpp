@@ -188,7 +188,6 @@ IonicSolver<Mesh, SolverType>::
 {
 }
 
-////////////////////////////
 template< typename Mesh,
 	  typename SolverType = LifeV::SolverTrilinos >
 class Mitchell_Schaeffer : public virtual IonicSolver<Mesh, SolverType>
@@ -500,7 +499,6 @@ void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real Cm, ElemVec& elvec, 
             elvec( i ) -= Cm*(G1*(u_ig- this->M_data.u0)*(u_ig - this->M_data.u0 - this->M_data.a*this->M_data.A)*(u_ig - this->M_data.u0 - this->M_data.A) + G2 * (u_ig - this->M_data.u0) * w_ig) * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
         }
     }
-//std::cout<<"******************elemvec ="<<elvec<<"********************\n"<<std::flush;
 }
 
 template<typename Mesh, typename SolverType>
@@ -711,7 +709,6 @@ void Luo_Rudy<Mesh, SolverType>::updateElvec( UInt eleID)
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elvec_Iion.vec()[ iNode ] = M_Iion_VecRep[ig];
-//			std::cout<<"[Luo_Rudy::updateElvec] Processo "<<IonicSolver<Mesh, SolverType>::M_comm->MyPID()<<" Ig: "<<ig<<" M_elvec_Iion.vec()["<<iNode<<" ]= "<<M_elvec_Iion.vec()[iNode]<<"\n"<<std::flush;
 		}
 
 }
@@ -723,14 +720,11 @@ void Luo_Rudy<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real
 	//! Solving dw/dt=eta2 (u/vp -  eta3 w)
 	Chrono chronoionmodelsolve;
 	chronoionmodelsolve.start();
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);
-
+	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 	for ( int i = 0 ; i < u.getEpetraVector().MyLength() ; i++ )
 	{
 		int ig=u.BlockMap().MyGlobalElements()[i];
-//        std::cout<<"[Luo_Rudy::ionModelSolve] Processo "<<IonicSolver<Mesh, SolverType>::M_comm->MyPID()<<": u[ "<<ig<<"]= "<<u[ig]<<"\n"<<std::flush;
-
 		Real u_ig=u[ig];
 		compute_coeff(u_ig);
 	      e_si = 7.7-13.0287*log(M_sol_Ca[ig]);
@@ -842,9 +836,6 @@ void Luo_Rudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 	       a_j = (-1.2714e5*exp(0.2444*u_ig)-3.474e-5*exp(-0.04391*u_ig))*(u_ig+37.78)/(1+exp(0.311*(u_ig+79.23)));
 	       b_j = 0.1212*exp(-0.01052*u_ig)/(1.+exp(-0.1378*(u_ig+40.14)));
 	       }
-	   //for all range of V
-	   /*if (abs(v+47) < eps) a_m=3.2;
-	   else */
 	      a_m = 0.32*(u_ig+47.13)/(1.-exp(-0.1*(u_ig+47.13)));
 	      b_m = 0.08*exp(-u_ig/11.); //%b_m
 
@@ -867,7 +858,7 @@ void Luo_Rudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 	      ak1 = 1.02/(1.+exp(0.2385*(u_ig-e_k1-59.215))); //%ak1
 	      bk1 = (0.49124*exp(0.08032*(u_ig-e_k1+5.476))+exp(0.06175*(u_ig-e_k1-594.31)))/(1.+exp(-0.5143*(u_ig-e_k1+4.753))); //%bk1
 
-	     	      //Plateau potassium outward current-----------------------------------------
+          //Plateau potassium outward current-----------------------------------------
 	      k_p = 1./(1.+exp((7.488-u_ig)/5.98));
 
 	      k_1inf = ak1/(ak1+bk1);
@@ -890,27 +881,23 @@ void Luo_Rudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 template<typename Mesh, typename SolverType>
 void Luo_Rudy<Mesh, SolverType>::computeIion(  Real /*Cm*/, ElemVec& elvec, ElemVec& /*elvec_u*/, FESpace<Mesh, EpetraMap>& uFESpace )
 {
-
-	Real Iion_ig;
-        for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
+   	Real Iion_ig;
+    for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         Iion_ig = 0.;
         for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
             Iion_ig += M_elvec_Iion( i ) * uFESpace.fe().phi( i, ig );
-
         for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
         {
             elvec( i ) -= Iion_ig/1000 * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig ); // divide by 1000 to convert microA in mA
         }
     }
-
 }
 
 template<typename Mesh, typename SolverType>
 void Luo_Rudy<Mesh, SolverType>::
 initialize( )
 {
-
 	 M_sol_h.getEpetraVector().PutScalar(1.);
      M_sol_j.getEpetraVector().PutScalar(1.);
      M_sol_m.getEpetraVector().PutScalar(0.);

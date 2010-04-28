@@ -38,11 +38,6 @@
 #include <life/lifecore/dataString.hpp>
 #include <life/lifearray/tab.hpp>
 
-#undef REO_CASE
-//#define REO_CASE
-#ifdef REO_CASE
-	#include "heartCaseBase.hpp"
-#endif
 namespace LifeV
 {
 using namespace std;
@@ -59,16 +54,8 @@ class DataIonic:
         public DataTime
 {
 public:
-#ifdef REO_CASE
-    typedef boost::shared_ptr<HeartCaseBase>	Shared_Ptr;
-#endif
     //! Constructors
     DataIonic( const GetPot& dfile );
-
-#ifdef REO_CASE
-    DataIonic( Shared_Ptr M_fct );
-#endif
-
     DataIonic( const DataIonic& dataIonic );
 
     //! Ouptut
@@ -107,10 +94,7 @@ public:
 	Real 		tinit;
 	Real 		tend;
 	Real 		order_bdf;       //= 1
-        bool		has_HeteroTauClose;
-#ifdef REO_CASE
-	Shared_Ptr	M_ShdPtr;
-#endif
+    bool		has_HeteroTauClose;
 private:
 
 
@@ -131,18 +115,6 @@ DataIonic( const GetPot& dfile ) :
 {
     setup(dfile);
 }
-#ifdef REO_CASE
-template <typename Mesh>
-DataIonic<Mesh>::
-DataIonic( Shared_Ptr M_fct ) :
-    DataMesh<Mesh>( M_fct->get_data_hdl(), "electric/space_discretization" ),
-    DataTime( M_fct->get_data_hdl(), "electric/time_discretization" ),
-    M_ShdPtr(M_fct)
-{
-    setup(M_fct->get_data_hdl());
-}
-#endif
-
 
 template <typename Mesh>
 DataIonic<Mesh>::
