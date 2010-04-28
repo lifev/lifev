@@ -26,18 +26,14 @@
    \file heart.cpp
    \author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
    \date 2007-11
+   \mantainer R. Ruiz
+   \date 2010-04
  */
 #include <Epetra_ConfigDefs.h>
-#ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
-#else
-#include <Epetra_SerialComm.h>
-#endif
 
 #include <heart.hpp>
 
-#undef REO_CASE
-//#define REO_CASE
 using namespace LifeV;
 
 
@@ -68,12 +64,8 @@ Heart::Heart( int argc,
     //! Pointer to access functors
     d=(boost::shared_ptr<HeartFunctors>) new HeartFunctors(dataFile);
     ion_model=dataFile("electric/physics/ion_model",1);
-#ifdef EPETRA_MPI
     std::cout << "mpi initialization ... " << std::endl;
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
-#else
-    d->comm = new Epetra_SerialComm();
-#endif
 
     if (!d->comm->MyPID()) {
         std::cout << "My PID = " << d->comm->MyPID() << std::endl;
@@ -103,15 +95,12 @@ Heart::run()
 
     //! Boundary conditions handler and function
     BCFunctionBase uZero( zero_scalar );
-#ifdef REO_CASE
-    BCHandler bcH( 1, BCHandler::HINT_BC_NONE );
-    bcH.addBC("Epicarde", 1, Natural, Full, uZero, 1);
-#else
+
     BCHandler bcH( 3, BCHandler::HINT_BC_NONE );
     bcH.addBC( "Endo",   	ENDOCARDIUM,	Natural,	Full,	uZero,  1 );
     bcH.addBC( "Epi",   	EPICARDIUM, 	Natural,   	Full,   uZero, 	1 );
     bcH.addBC( "Trunc",    	TRUNC_SEC,  	Natural, 	Full,   uZero, 	1 );
-#endif
+
     const RefFE*    refFE_w;
     const QuadRule* qR_w;
     const QuadRule* bdQr_w;
@@ -211,11 +200,6 @@ electricModel.setUp( d->_dataFile );std::cout<<"setup ok"<<std::endl;
 
 if (verbose) std::cout << "Calling the ionic model constructor ... ";
 boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel;
-#ifdef REO_CASE
-std::cout<<"Ion Model = Mitchell & Schaeffer"<<std::endl<<std::flush;
-ionicModel.reset(new Mitchell_Schaeffer< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *d->comm));
-electricModel.initialize( d->get_initial_scalar(), d->get_zero_scalar() );
-#else
 if(ion_model==1)
 {
     std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
@@ -229,8 +213,6 @@ if(ion_model==1)
 electricModel.initialize( d->get_initial_scalar());
 #else
 electricModel.initialize( d->get_initial_scalar(), d->get_zero_scalar() );
-#endif
-
 #endif
 
 if (verbose) std::cout << "ok." << std::endl;
@@ -275,8 +257,6 @@ if(_data.has_fibers() )
 
 ensight.postProcess( 0 );
 
-//ensight.removeVariable("fibers");
-
 MPI_Barrier(MPI_COMM_WORLD);
 chronoinitialsettings.stop();
 
@@ -306,7 +286,6 @@ for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     //! Solving the system
     electricModel.PDEiterate( bcH );
 
-    //        normw=ionicModel->solution_w().Norm2();
     normu=electricModel.solution_u().Norm2();
     //       	Real* meanu;
     electricModel.solution_u().getEpetraVector().MeanValue(&meanu);
@@ -325,7 +304,6 @@ for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
 #ifdef BIDOMAIN
     *Ueptr = electricModel.solution_ue();
 #endif
-    //        *Wptr = ionicModel->solution_w();
 
     ensight.postProcess( time );
 
@@ -356,7 +334,6 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
     //! u, w with repeated map
     vector_type uVecRep(electricModel.solution_u(), Repeated);
     ionicModel->updateRepeated();
-    //vector_type wVecRep(ionicModel->solution_w(), ionicModel->getRepeatedEpetraMap() );
     ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ),
     elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
     elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
@@ -364,7 +341,6 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
     for(UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
         electricModel.potentialFESpace().fe().updateJacQuadPt( electricModel.potentialFESpace().mesh()->volumeList( iVol ) );
-
         elvec_Iapp.zero();
         elvec_u.zero();
         elvec_Iion.zero();
@@ -421,18 +397,6 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
     ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ), //1 ),
     elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
     elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
-#ifdef REO_CASE
-    vector_type 	ion (electricModel.getMap()),
-    ion2 (electricModel.getMap()),
-    ionRep (ion, Repeated),
-    iapp (electricModel.getMap()),
-    iapp2 (electricModel.getMap()),
-    iappRep (iapp, Repeated);
-
-    ionRep*=0;iappRep*=0;ion*=0;ion2*=0;iapp*=0;iapp2*=0;
-    Real x, y, z;
-    ID id; EntityFlag ref;
-#endif
     for(UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
         electricModel.potentialFESpace().fe().updateJacQuadPt( electricModel.potentialFESpace().mesh()->volumeList( iVol ) );
@@ -447,14 +411,6 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
         {
             int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
             elvec_u.vec()[ iNode ] = uVecRep[ig];
-#ifdef REO_CASE
-            x = electricModel.potentialFESpace().mesh()->volume(iVol).point(iNode + 1).x();
-            y = electricModel.potentialFESpace().mesh()->volume(iVol).point(iNode + 1).y();
-            z = electricModel.potentialFESpace().mesh()->volume(iVol).point(iNode + 1).z();
-            id = electricModel.potentialFESpace().mesh()->volume(iVol).point(iNode + 1).id();
-            ref = electricModel.potentialFESpace().mesh()->volume(iVol).point(iNode + 1).marker();
-            elvec_Iapp[iNode] = d->get_Iapp()(x, y, z, data.getTime(), ref);
-#endif
         }
 
         UInt eleID = electricModel.potentialFESpace().fe().currentLocalId();
@@ -468,26 +424,10 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
         {
             int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
-#ifdef REO_CASE
-            ionRep[ig] = elvec_Iion.vec()[ iNode ];
-            iappRep[ig] = elvec_Iapp.vec()[ iNode ];
-#else
             rhs.sumIntoGlobalValues (ig, elvec_Iapp.vec()[iNode]+data.Chi()*elvec_Iion.vec()[iNode] ); // or
             rhs.sumIntoGlobalValues (ig+totalUDof, -elvec_Iapp.vec()[iNode+nbNode]-data.Chi()*elvec_Iion.vec()[iNode] );
-#endif
         }
     }
-#ifdef REO_CASE
-    ion.Rep2Unique(ionRep);
-    ion2 +=  data.Chi()*(electricModel.matrMass()*ion);
-
-    iapp.Rep2Unique(iappRep);
-    iapp2 +=(electricModel.matrMass()*iapp);
-
-    rhs+=iapp2;
-    rhs+=ion2;
-#endif
-
     rhs.GlobalAssemble();
 
     rhs+=electricModel.matrMass()*data.Chi()*data.Cm()*electricModel.bdf_uiue().time_der(data.getTimeStep());

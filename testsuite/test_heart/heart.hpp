@@ -26,12 +26,13 @@
    \file heart.hpp
    \author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
    \date 2007-11
+   \mantainer R. Ruiz
+   \date 2010-04
  */
 
 #ifndef __HEART_H
 #define __HEART_H
 
-//#define MONODOMAIN
 #define BIDOMAIN
 
 #include <life/lifecore/application.hpp>
@@ -73,11 +74,11 @@ public:
 	typedef MonodomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
 	typedef MonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
 #else
-    	typedef BidomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
-    	typedef BidomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
+    typedef BidomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
+    typedef BidomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
 #endif
-    	typedef boost::shared_ptr<vector_type> 					vector_ptrtype;
-    	typedef boost::shared_ptr<matrix_type>        				matrix_ptrtype;
+    typedef boost::shared_ptr<vector_type> 					vector_ptrtype;
+    typedef boost::shared_ptr<matrix_type>        				matrix_ptrtype;
     //@}
 
     /** @name Constructors, destructor
@@ -140,8 +141,7 @@ public:
 private:
 	UInt ion_model;
 	UInt nbeq;
-	//! Functors container
-//	class HeartFunctors;
+    //	class HeartFunctors;
     boost::shared_ptr<HeartFunctors> d;
 
 };
