@@ -334,7 +334,12 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            checkResult( time );
+            //try
+            {
+                //if(M_fsi->FSIOper()->isFluid() && M_fsi->FSIOper()->isLeader() )
+                    checkResult( time );
+            }
+            //catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
     	}
 		std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
 		ofile.close();
@@ -344,13 +349,19 @@ private:
 
     void checkResult(LifeV::Real& time)
     {
-        LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-        if(time==0.001 && (dispNorm-0.0621691)> 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.002 && (dispNorm-0.10668)  > 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.003 && (dispNorm-0.113252) > 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.004 && (dispNorm-0.107976) > 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        if(time==0.005 && (dispNorm-0.0995921)> 1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-        throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        assert(M_fsi->timeStep()==0.001);
+        double dispNorm(M_fsi->displacement().Norm2());
+        if((time==0.001) && (dispNorm-0.0621691)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        else
+        if((time==0.002) && (dispNorm-0.10668)  > 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        else
+        if((time==0.003) && (dispNorm-0.113252) > 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        else
+        if((time==0.004) && (dispNorm-0.107976) > 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        else
+        if((time==0.005) && (dispNorm-0.0995918)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        else
+        if(time==0.006 && (dispNorm-0.0751478)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     }
 
 	fsi_solver_ptr M_fsi;
