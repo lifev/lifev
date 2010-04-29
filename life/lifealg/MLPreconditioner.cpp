@@ -60,6 +60,9 @@ int
 MLPreconditioner::buildPreconditioner(operator_type& oper)
 {
 
+	//the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
+	//to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
+	M_Prec.reset();
     M_Oper = oper->getMatrixPtr();
 
     M_Prec.reset(new prec_raw_type(*M_Oper, this->getList(), true));
@@ -100,8 +103,11 @@ MLPreconditioner::getPrec()
 void
 MLPreconditioner::precReset()
 {
+	//the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
+	//to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
+
+	M_Prec.reset();
     M_Oper.reset();
-    M_Prec.reset();
 
     this->M_preconditionerCreated = false;
 }
