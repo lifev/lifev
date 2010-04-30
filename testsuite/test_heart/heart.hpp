@@ -33,7 +33,7 @@
 #ifndef __HEART_H
 #define __HEART_H
 
-#define BIDOMAIN
+#define MONODOMAIN
 
 #include <life/lifecore/application.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
