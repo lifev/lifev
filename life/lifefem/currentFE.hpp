@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -71,13 +71,13 @@ namespace LifeV {
   In this section, we explain how flags work. This can be of interest if one wants to add a new flag.
 
   \subsection flag_sub1 What is a flag?
-  
+
   At first sight, we might think that a flag is a complicated class implemented to do exaclty what we want, with overloaded operators... Actually, it is much simpler: a LifeV::flag_Type is just an unsigned integer.
 
   \subsection How to define a flag?
 
   The flags use the binary representation of the integers to work. This enables a very fast definition and use of the flags. To understand it, let us make a simple example. Suppose that we can update three quantities A,B and C.
-  
+
   The first step is to define a "primitive" flag for each of these quantities. These flags are defined as powers of 2. Here, we will define
 
   \code
@@ -87,7 +87,7 @@ namespace LifeV {
   \endcode
 
   We need here powers of 2 because this makes the binary representation of the "primitive" flags simple: UPDATE_A is 001, UPDATE_B is 010 and UPDATE_C is 100 (if the integers are coded on 3 bits, otherwise there are many zeros before). The fact that we want A to be update is then represented by a 1 in the third position, for B it is the second position and for C the first position.
-  
+
   So now, if we want to build a flag that updates A and C, we want it to be in binary 101, that is 5. So, the flag UPDATE_AC will be defined as:
 
   \code
@@ -97,12 +97,12 @@ namespace LifeV {
   \subsection flag_sub2 How to combine flags?
 
   With the last example, one could think that is it just a matter of addition, but it is not. Suppose that we want to combine the flags UPDATE_A and UPDATE_AC. If we add the corresponding values, we will get 1+5=6 that is represented in binary by 110. This would mean update B and C, what is not what we want!
-  
+
   To combine flags, we use the binary operator | that do exactly the job that we want: 1|5=5.
-  
+
   \subsection flag_sub3 How to detect flags?
 
-  Now that we can build every flag that we want, we want to detect quickly the different flags. This is achievied by using the binary operator & and the "primitive" flags. 
+  Now that we can build every flag that we want, we want to detect quickly the different flags. This is achievied by using the binary operator & and the "primitive" flags.
 
   Suppose that we want to know if A has to be updated. Then, we perform that operation "& UPDATE_A" on the incoming flag. If the result is zero, then we do not need to update it: for example, UPDATE_B & UPDATE_A = 0 . Otherwise, we have to update it: for example, UPDATE_AC & UPDATE_A = 1.
 
@@ -183,26 +183,26 @@ const flag_Type UPDATE_WDET(UPDATE_ONLY_CELL_NODES
 
 //! currentFE - A primordial class for the assembly of the local matrices/vectors retaining the values on the real cells.
 /*!
-  This class is an essential piece of any finite element solver implemented in LifeV, as it is used each time one wants to assemble the matrix or the right hand side associated to a given discrete problem (in variational form). The role of the class is, given a cell (or similar data), to compute the values of the basis function, their derivatives, the location of the quadrature nodes,... 
+  This class is an essential piece of any finite element solver implemented in LifeV, as it is used each time one wants to assemble the matrix or the right hand side associated to a given discrete problem (in variational form). The role of the class is, given a cell (or similar data), to compute the values of the basis function, their derivatives, the location of the quadrature nodes,...
 
   During the assembly procedure, the code of the solver will typically loops on the cells of a given mesh. Each time a cell is selected, a local matrix is built (using only the degrees of freedom of that cell). This local matrix represents a local contribution that is added in the global matrix (concerning all the degrees of freedom of the problem).
 
   <b>Example</b>: suppose that we are assembling the local matrix of a Laplacian problem. The local contributions are given by \f$ \int_{K} \nabla \phi_i \cdot \nabla \phi_j \f$ where \f$K\f$ is the considered cell. As we use numerical quadrature, to build the local matrix, we have to provide:
- 
+
   <ol>
   <li> The values of the <b>derivatives</b> of the basis functions in the quadrature nodes
   <li> The <b>weights</b> associated to the quadrature and adapted to the considered cell
   </ol>
-  
+
   The CurrentFE has then to compute these values. To precise that we want to be able to access these values, we use flags. Here we need the two flags (see \ref update_procedure "this page" for more informations on the flags)
-  
+
   <ol>
   <li> For the derivative of the basis functions : UPDATE_DPHI
   <li> For the modified weights : UPDATE_WDET
   </ol>
 
   The code that we would typically use is:
-  
+
   \code
   my_currentFE.update(my_mesh.volumeList(i), UPDATE_DPHI | UPDATE_WDET);
   \endcode
@@ -227,7 +227,7 @@ const flag_Type UPDATE_WDET(UPDATE_ONLY_CELL_NODES
     \todo Put ifdef for the checks?
     \todo Put phiRef here
     \todo CXXFLAG to disable the boost asserts: -DBOOST_DISABLE_ASSERTS?
-    
+
 */
 class CurrentFE
 {
@@ -266,8 +266,8 @@ public:
 
     //! Update method using a given element.
     /*!
-      This method is the most important one in this class. It allows the user to update different values on 
-      the selected cell, like the values of the derivatives of the basis functions,... 
+      This method is the most important one in this class. It allows the user to update different values on
+      the selected cell, like the values of the derivatives of the basis functions,...
       @param geoele The cell that we are looking at
       @param upFlag The flag to explain the quantities that we want to update
      */
@@ -285,10 +285,10 @@ public:
 
     //! return the barycenter of the element
     void barycenter( Real& x, Real& y, Real& z ) const;
-    
+
     //! return the diameter of the element in the 1-norm
     Real diameter() const;
-    
+
     //! return the diameter of the element in the 2-norm
     Real diameter2() const;
 
@@ -299,15 +299,15 @@ public:
       (if the code is compiled in 2D mode then z=0 and zeta is disgarded)
     */
     void coorMap( Real& x, Real& y, Real& z, const Real & xi, const Real & eta, const Real & zeta ) const;
-   
+
     //@}
-    
+
 
     //! @name Set Methods
     //@{
-    
+
     //! Setter for the quadrature rule
-    /*! This method can be used to change the quadrature rule used. Notice that it is an 
+    /*! This method can be used to change the quadrature rule used. Notice that it is an
       expensive method. Use it only when it is really needed.
       @param newQuadRule The new quadrature rule
      */
@@ -318,13 +318,13 @@ public:
 
     //! @name Get Methods
     //@{
-    
+
     //! Getter for the ID of the current cell
     inline const UInt& currentId() const
     {
         return M_currentId;
     }
-    
+
     //! Getter for the local ID of the current cell
     inline const UInt& currentLocalId() const
     {
@@ -348,6 +348,12 @@ public:
     {
         return M_refFE;
     };
+
+    //! Getter for the GeoMap reference
+    inline const GeoMap& geoMap() const
+    {
+        return M_geoMap;
+    }
 
     //! Getter for the quadrature rule
     inline const QuadRule& quadRule() const
@@ -382,7 +388,7 @@ public:
     //@}
 
 
-    //! @name Get Methods for the FE values 
+    //! @name Get Methods for the FE values
     //@{
 
     //! Getter for the nodes of the cell
@@ -426,7 +432,7 @@ public:
         ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
-    
+
     //! Getter for the second derivatives of the basis functions
     inline const Real& d2phi(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
     {
@@ -437,8 +443,8 @@ public:
     //@}
 
 
-    
-    //! @name Old methods (for backward compatibility, avoid using them) 
+
+    //! @name Old methods (for backward compatibility, avoid using them)
     //@{
 
     //! Old accessor, use cellNode instead.
@@ -454,7 +460,7 @@ public:
         ASSERT(M_quadNodesUpdated,"Quad nodes are not updated!");
         return M_quadNodes[node][coordinate];
     };
-    
+
     //! Old accessor, use wDetJacobian instead
     inline const Real& weightDet(const UInt& quadNode) const
     {
@@ -475,7 +481,7 @@ public:
         ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
-    
+
     //! Old accessor, use d2phi instead
     inline const Real& phiDer2(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
     {
@@ -484,7 +490,7 @@ public:
     };
 
     //@}
-    
+
 
 
 
@@ -501,7 +507,7 @@ private:
 
     //! Update the location of the quadrature in the current cell.
     void computeQuadNodes();
-    
+
     //! Compute the values of the basis functions in the quadrature nodes
     void computePhi();
 
@@ -519,7 +525,7 @@ private:
 
     //! Compute the value of the derivatives in the reference frame
     void computeDphiRef();
-    
+
     //! Compute the value of the derivatives in the current element
     void computeDphi();
 
@@ -531,7 +537,7 @@ private:
 
     // Constants
 public:
-    UInt nbNode;  
+    UInt nbNode;
 private:
     const UInt M_nbCoor;
     const UInt M_nbDiag;
@@ -543,20 +549,20 @@ private:
 
     UInt M_nbGeoNode;
     UInt M_nbQuadPt;
- 
+
     // Important structures
 
     const RefFE& M_refFE;
     const GeoMap& M_geoMap;
     QuadRule* M_quadRule;
-    
+
 
     // Internal storage for the data
 
     // Nodes of the current cell
     boost::multi_array<Real,2> M_cellNodes;
     boost::multi_array<Real,2> M_quadNodes;
-    
+
     boost::multi_array<Real,3> M_dphiGeoMap;
     boost::multi_array<Real,3> M_jacobian;
     boost::multi_array<Real,1> M_wDetJacobian;
@@ -573,7 +579,7 @@ private:
     // Check
     bool M_cellNodesUpdated;
     bool M_quadNodesUpdated;
-    
+
     bool M_dphiGeoMapUpdated;
     bool M_jacobianUpdated;
     bool M_wDetJacobianUpdated;
@@ -585,12 +591,12 @@ private:
 
     bool M_dphiRefUpdated;
     bool M_d2phiRefUpdated;
-    
+
 // OLD FUNCTIONS
 
 public:
 
-    //! @name Old methods (for backward compatibility, avoid using them) 
+    //! @name Old methods (for backward compatibility, avoid using them)
     //@{
 
     /*!
@@ -612,7 +618,7 @@ public:
     Real pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
 		  int compx, int compzeta) const;
 
-   
+
     /*!  return (x,y,z) = the global coordinates of the quadrature point ig
       in the current element. \warning this function is almost obsolete since if
       you call the function updateFirstDerivQuadPt rather than updateFirstDeriv
@@ -706,9 +712,9 @@ void CurrentFE::update(const GeoElement& geoele, const flag_Type& upFlag)
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
-    
+
     std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
-    
+
     for ( UInt i(0); i < M_nbGeoNode; ++i )
     {
         for( UInt icoor(0); icoor < M_nbCoor; ++icoor)
@@ -724,14 +730,14 @@ template<typename GeoElement>
 void CurrentFE::computeCellNodes(const GeoElement& geoele)
 {
     std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
-    
+
     for ( UInt i(0); i < M_nbGeoNode; ++i )
     {
         for( UInt icoor(0); icoor < M_nbCoor; ++icoor)
         {
             pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
         }
-        
+
     }
     computeCellNodes(pts);
 };
