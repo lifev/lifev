@@ -62,7 +62,7 @@ Heart::Heart( int argc,
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile(data_file_name);
     //! Pointer to access functors
-    d=(boost::shared_ptr<HeartFunctors>) new HeartFunctors(dataFile);
+    //d=(boost::shared_ptr<HeartFunctors>) new HeartFunctors(dataFile);
     ion_model=dataFile("electric/physics/ion_model",1);
     std::cout << "mpi initialization ... " << std::endl;
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
@@ -209,11 +209,12 @@ if(ion_model==1)
     std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
     ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *d->comm));
 }
-#ifdef MONODOMAIN
-electricModel.initialize( d->get_initial_scalar());
-#else
-electricModel.initialize( d->get_initial_scalar(), d->get_zero_scalar() );
-#endif
+//#ifdef MONODOMAIN
+//electricModel.initialize( d->get_initial_scalar());
+//#else
+//electricModel.initialize( d->get_initial_scalar(), d->get_zero_scalar() );
+//#endif
+electricModel.initialize(zero_scalar);
 
 if (verbose) std::cout << "ok." << std::endl;
 
