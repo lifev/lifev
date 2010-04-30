@@ -62,6 +62,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
 
 #include "ethiersteinman.hpp"
 
@@ -194,8 +196,8 @@ Ethiersteinman::Ethiersteinman( int argc,
         std::cout << "Re = " << d->Re << std::endl
                   << "nu = " << d->nu << std::endl;
 
-        out_norm.open("norm.txt");
-        out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+        //out_norm.open("norm.txt");
+        //out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
     }
 
 }
@@ -233,17 +235,6 @@ Ethiersteinman::computeError( double     const& time,
                       << urelerr << " "
                       << pl2error << " "
                       << prelerr << "\n" << std::flush;
-         }
-
-         if(d->comm->MyPID()==0){
-             //checkResult(time, ul2error, pl2error);
-             std::ofstream outputFile("error.txt",ios_base::app);
-             outputFile << time  << " "
-                        << ul2error << " "
-                        << urelerr << " "
-                        << pl2error << " "
-                        << prelerr << "\n" << std::flush;
-             outputFile.close();
          }
 
 }
@@ -334,23 +325,30 @@ Ethiersteinman::run()
     }
 
     // Finite element tested
-    UInt FEnumber(4);
+    //UInt FEnumber(4); We do not consider P2-P2
+    UInt FEnumber(3);
     std::string uFE[4]={"P1", "P1Bubble", "P2", "P2"};
     std::string pFE[4]={"P1", "P1"      , "P1", "P2"};
 
     // Loop on the mesh refinement
-    for(UInt m(4);m<64;m*=2)
+    for(UInt m(16);m<17;m*=2)
     {
         // Loop on the finite element
         for(UInt i(0);i<FEnumber;++i)
         {
             if(d->comm->MyPID()==0){
-                std::ofstream outputFile("error.txt",ios_base::app);
-                outputFile << "% Using: -" << uFE[i] << "-" << pFE[i] << " finite element" << std::endl
-                           << "%        -Regular mesh " << m << "x" << m << "x" << m << std::endl << std::flush;
-                outputFile.close();
                 std::cout << "Using: -" << uFE[i] << "-" << pFE[i] << " finite element" << std::endl;
                 std::cout << "       -Regular mesh " << m << "x" << m << "x" << m << std::endl;
+                std::string fileName("norm_");
+                std::ostringstream oss;
+                oss << m;
+                fileName.append(oss.str());
+                fileName.append("_");
+                fileName.append(uFE[i]);
+                fileName.append(pFE[i]);
+                fileName.append(".txt");
+                out_norm.open(fileName.c_str());
+                out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
             }
 
             // fluid solver
@@ -359,6 +357,7 @@ Ethiersteinman::run()
             dataNavierStokes.setup( dataFile );
 
             // Call the function to build a mesh
+            /*
             regularMesh3D( *dataNavierStokes.dataMesh()->mesh(),
                            1,
                            m,m,m,
@@ -371,6 +370,7 @@ Ethiersteinman::run()
             dataNavierStokes.dataMesh()->mesh()->updateElementFaces( true, verbose );
             exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MESH_FORMAT);
             exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MATLAB_FORMAT);
+            */
 
             partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
 
@@ -487,10 +487,10 @@ Ethiersteinman::run()
                     fluid.iterate(bcH);
                 }
 
-                /*computeError( time,
+                computeError( time,
                               uFESpace,
                               pFESpace,
-                              fluid );*/
+                              fluid );
 
 
                 bdf.bdf_u().shift_right( fluid.solution() );
@@ -583,10 +583,10 @@ Ethiersteinman::run()
                 bdf.bdf_u().shift_right( fluid.solution() );
 
 
-                /*computeError( time,
+                computeError( time,
                               uFESpace,
                               pFESpace,
-                              fluid );*/
+                              fluid );
 
                 *velAndPressure = fluid.solution();
                 exporter->postProcess( time );
@@ -598,13 +598,12 @@ Ethiersteinman::run()
                 if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
             }
 
-            computeError( time,
-                          uFESpace,
-                          pFESpace,
-                          fluid );
-
             chronoGlobal.stop();
             if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
+
+            if(d->comm->MyPID()==0){
+                out_norm.close();
+            }
         } // End of loop on the finite elements
     } // End of loop on the mesh refinement
 }
