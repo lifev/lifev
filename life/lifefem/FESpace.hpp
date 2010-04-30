@@ -169,7 +169,7 @@ public:
                          const vector_type& solution,
                          const Function&    weight,
                          const Real         time);
-    
+
 
     //! This method computes the interpolate value of a given FE function in a given point.
     /*!
@@ -287,13 +287,13 @@ public:
 
     //! @name Set Methods
     //@{
-    
+
     //! Method to set replace the quadrule
     /*!
       @param Qr The new quadrule to be used in the FESpace
      */
     void setQuadRule(const QuadRule& Qr);
-    
+
     //@}
 
 
@@ -916,9 +916,8 @@ FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, cons
 
         Real f, x, y, z;
 
-        Int i, inod, ig;
+        UInt i, inod, ig, ic;
         UInt eleID = this->fe().currentLocalId();
-        UInt ic;
         Real u_ig;
 
         for ( ic = 0; ic < M_fieldDim; ic++ )
@@ -1013,8 +1012,12 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
     {
         this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
+        CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+        newFE.update(this->mesh()->element( iVol ),UPDATE_DPHI | UPDATE_WDET);
+
         normU += elem_L2_diff_2( vec, fexact,
-                                 this->fe(),
+                                 //this->fe(),
+                                 newFE,
                                  this->dof(),
                                  time,
                                  M_fieldDim );
@@ -1059,17 +1062,17 @@ FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
     }
 
     Real sumOfSquare(0.0);
-    
+
     // Compute the integral on this processor
 
     for (UInt iVol(1); iVol <= this->mesh()->numElements(); ++iVol)
     {
         this->fe().update(this->mesh()->element(iVol), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
-        
+
         for (UInt iQuad(0); iQuad< this->fe().nbQuadPt(); ++iQuad)
         {
             Real solutionInQuadNode(0.0);
-            
+
             for (UInt iDim(0); iDim< M_fieldDim; ++iDim)
             {
                 for (UInt iDof(0); iDof< this->fe().nbFEDof(); ++iDof)
@@ -1077,13 +1080,13 @@ FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
                     UInt dofID(this->dof().localToGlobal(iVol,iDof+1) + iDim*this->dof().numTotalDof());
                     solutionInQuadNode += this->fe().phi(iDof,iQuad) * solution[dofID];
                 }
-                
+
                 Real x(this->fe().quadNode(iQuad,0));
                 Real y(this->fe().quadNode(iQuad,1));
                 Real z(this->fe().quadNode(iQuad,2));
                 Real weightInQuadNode(weight(time,x,y,z,iDim));
                 Real exactInQuadNode(exactSolution(time,x,y,z,iDim));
-                
+
                 sumOfSquare += weightInQuadNode
                     * (exactInQuadNode - solutionInQuadNode)
                     * (exactInQuadNode - solutionInQuadNode)
@@ -1098,9 +1101,9 @@ FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
     Real recvbuff;
 
     this->map().Comm().SumAll(&sendbuff,&recvbuff,1);
-    
+
     sumOfSquare = recvbuff;
-    
+
     return std::sqrt(sumOfSquare);
 }
 
