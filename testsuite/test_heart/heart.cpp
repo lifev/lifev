@@ -416,11 +416,12 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
         UInt eleID = electricModel.potentialFESpace().fe().currentLocalId();
         ionicModel->updateElvec(eleID);
         ionicModel->computeIion(data.Cm(), elvec_Iion, elvec_u, electricModel.potentialFESpace());
-#ifndef REO_CASE
+
+        //! Computing Iapp
         source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 0);
         source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 1);
         UInt totalUDof  = electricModel.potentialFESpace().map().getMap(Unique)->NumGlobalElements();
-#endif
+
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
         {
             int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
