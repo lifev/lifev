@@ -18,16 +18,17 @@ save       = 1
 
     [../time_discretization]
     initialtime		= 0.
-    endtime			= 0.04
-    timestep		= 0.01
+    endtime			= 1e-4
+    timestep		= 1e-5
     BDF_order		= 1
 
     [../space_discretization]
-    #mesh_dir        = ./Mesh/   # the directory where the mesh file is
+    mesh_dir        = ./Mesh/   # the directory where the mesh file is
     #mesh_dir		 = ./
-    #mesh_file       = cube4x4.mesh          # mesh file
+    mesh_file       = cube4x4.mesh          # mesh file
     #mesh_file       = cube8x8.mesh          # mesh file
-	mesh_type        = insideCode            # The mesh is created inside the source code
+    #mesh_file       = cube16x16.mesh          # mesh file
+	#mesh_type        = insideCode            # The mesh is created inside the source code
 
     verbose         = 0
     linearized      = 0
@@ -108,7 +109,7 @@ save       = 1
     scaling         = none
     output          = all # none
     conv            = rhs
-    max_iter        = 100
+    max_iter        = 1000000
     reuse           = true
     max_iter_reuse  = 80
     kspace          = 100
@@ -125,5 +126,5 @@ save       = 1
     #d = 0.78
     sigma = 0
     #neumannList =
-    #dirichletList = 1,2,3,4,5,6
-    dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    dirichletList = 1,2,3,4,5,6
+    #dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
