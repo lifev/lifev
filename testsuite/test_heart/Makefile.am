@@ -24,10 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = heart_functors.hpp heart.hpp 
+check_HEADERS = heart.hpp
 
 check_PROGRAMS = test_heart
-test_heart_SOURCES = main.cpp heart_functors.cpp heart.cpp 
+test_heart_SOURCES = main.cpp heart.cpp
 
 EXTRA_DIST = data testsuite.at
 
