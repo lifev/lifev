@@ -290,7 +290,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
     {
         // Open the xmf file
         std::ifstream xmfFile;
-        xmfFile.open( ( this->M_post_dir + this->M_prefix + ".xmf" ).c_str(), std::ios::app|std::ios::out );
+        xmfFile.open( ( this->M_post_dir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
 
         // Vector of TimeStep
         std::vector< std::pair< Real, int > > TimeAndPostfix;
@@ -340,7 +340,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
     chrono.stop();
     if ( !this->M_procId )
         std::cout << "done in " << chrono.diff() << " s. (Time " << SelectedTimeAndPostfix.first
-                                                 <<", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
+                                                 << ", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
 
     return static_cast <UInt> ( SelectedTimeAndPostfix.second );
 }
