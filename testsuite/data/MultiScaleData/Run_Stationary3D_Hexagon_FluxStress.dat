@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_FluxStress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -23,9 +23,9 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-	initialtime		= 0.0                # [s]
-	endtime			= 53.610443365117    # [s]
-	timestep		= 0.052353948598747  # [s]
+	initialtime		= 0.0           # [s]
+	endtime			= 0.0			# [s]
+	timestep		= 0.1          	# [s]
 	
     [../Algorithm]
     AlgorithmType              = Newton        # Aitken - Newton
@@ -109,6 +109,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_Stress.dat
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 0.895347939450773   # density   [g/cm^3]
-fluidViscosity	= 0.00189998733800979 # viscosity [g/cm/s]
+fluidDensity	= 1.0                   # density   [g/cm^3]
+fluidViscosity	= 1.005309649148734e-06 # viscosity [g/cm/s]
 ###################################################################################################

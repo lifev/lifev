@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_1Cylinder_tube20.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -23,10 +23,10 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-	initialtime		= 0.0                # [s]
-	endtime			= 53.610443365117    # [s]
-	timestep		= 0.052353948598747  # [s]
-	
+    initialtime                = 0.0                # [s]
+    endtime                    = 53.610443365117    # [s]
+    timestep                   = 0.052353948598747  # [s]   
+    
     [../Algorithm]
     AlgorithmType              = Newton        # Aitken - Newton
     subITMax                   = 2              # Maximum number for coupling subiterations
@@ -109,6 +109,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial6_FluxStress.dat
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 0.895347939450773   # density   [g/cm^3]
-fluidViscosity	= 0.00189998733800979 # viscosity [g/cm/s]
+fluidDensity    = 0.895347939450773   # density   [g/cm^3]
+fluidViscosity  = 0.00189998733800979 # viscosity [g/cm/s]
 ###################################################################################################

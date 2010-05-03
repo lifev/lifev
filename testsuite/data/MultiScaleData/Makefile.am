@@ -27,21 +27,23 @@ SUBDIRS		= 	Couplings\
 
 dist_pkgdata_DATA = MultiScale_test.dat \
 					MultiScale.dat \
-					Run3DCarotidBifurcation_FluxStress.dat \
-					Run3DCarotidBifurcation_Stress.dat \
-					Run3Dhexagon_FluxStress_Stationary.dat \
-					Run3Dhexagon_Stress_Stationary.dat
-					Run3Dserial1_Stationary.dat \
-					Run3Dserial1.dat \
-					Run3DFSIserial1.dat \
-					Run3Dserial2_FluxStress_Stationary.dat \
-					Run3Dserial2_Stress.dat \
-					Run3Dserial5_FluxStress.dat \
-					Run3Dserial5_Stress.dat \
-					Run3Dserial6_FluxStress.dat \
-					Run3Dserial6_Stress.dat \
-					Run3DSyntheticCarotidBifurcation_FluxStress.dat \
-					Run3DSyntheticCarotidBifurcation_Stress.dat
+					Run_CarotidBifurcation3D_FluxStress.dat \
+					Run_CarotidBifurcation3D_Stress.dat \
+					Run_CarotidBifurcation3D_Synthetic_FluxStress.dat \
+					Run_CarotidBifurcation3D_Synthetic_Stress.dat \
+					Run_Stationary3D_1Cylinder.dat \
+					Run_Stationary3D_Hexagon_FluxStress.dat \
+					Run_Stationary3D_Hexagon_Stress.dat \
+					Run_Womersley3D_1Cylinder.dat \
+					Run_Womersley3D_5Cylinders_FluxStress_tube20.dat \
+					Run_Womersley3D_5Cylinders_FluxStress_tube40.dat \
+					Run_Womersley3D_5Cylinders_FluxStress_tube60.dat \
+					Run_Womersley3D_5Cylinders_FluxStress_tube80.dat \
+					Run_Womersley3D_5Cylinders_Stress_tube20.dat \
+					Run_Womersley3D_5Cylinders_Stress_tube40.dat \
+					Run_Womersley3D_5Cylinders_Stress_tube60.dat \
+					Run_Womersley3D_5Cylinders_Stress_tube80.dat \
+					Run3DFSIserial1.dat
 					
 
 check-local:

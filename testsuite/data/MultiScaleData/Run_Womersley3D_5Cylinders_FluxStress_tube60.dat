@@ -13,40 +13,19 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-#MS_problem    = ./MultiScaleData/Models/MultiScale_CarotidBifurcation3D_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_CarotidBifurcation3D_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_CarotidBifurcation3D_Synthetic_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_CarotidBifurcation3D_Synthetic_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_1Cylinder_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Bifurcation_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Bifurcation_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_Mixed.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_1Cylinder_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_FluxStress_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_FluxStress_tube40.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_FluxStress_tube60.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_FluxStress_tube80.dat
-MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress_tube40.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress_tube60.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress_tube80.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale_3DFSIserial1.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress_tube60.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
     [./Restart]
-    Restart                    = true
+    Restart                    = false
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    #initialtime                = 0.0                # [s]
-    #endtime                    = 0.104707897197494  # [s]
-    initialtime                = 0.104707897197494  # [s]
-    endtime                    = 0.523539485987470  # [s]
-    timestep                   = 0.052353948598747  # [s]
+	initialtime		= 0.0                # [s]
+	endtime			= 53.610443365117    # [s]
+	timestep		= 0.052353948598747  # [s]
 	
     [../Algorithm]
     AlgorithmType              = Newton        # Aitken - Newton

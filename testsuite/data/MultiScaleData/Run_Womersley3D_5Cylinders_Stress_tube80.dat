@@ -2,10 +2,10 @@
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2010 EPFL          
+#                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-02-23
+#           Date: 2009-09-01
 #  License Terms: GNU GPL
 #
 ###################################################################################################
@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress_tube80.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -23,9 +23,9 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-	initialtime		= 0.0           # [s]
-	endtime			= 0.0			# [s]
-	timestep		= 0.1          	# [s]
+    initialtime                = 0.0                # [s]
+    endtime                    = 53.610443365117    # [s]
+    timestep                   = 0.052353948598747  # [s]
 	
     [../Algorithm]
     AlgorithmType              = Newton        # Aitken - Newton
@@ -109,6 +109,6 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_3Dserial1_Stationary.dat
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0                   # density   [g/cm^3]
-fluidViscosity	= 0.35                  # viscosity [g/cm/s]
+fluidDensity	= 0.895347939450773   # density   [g/cm^3]
+fluidViscosity	= 0.00189998733800979 # viscosity [g/cm/s]
 ###################################################################################################
