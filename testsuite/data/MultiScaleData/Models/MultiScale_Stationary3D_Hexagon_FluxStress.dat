@@ -5,16 +5,16 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-08
+#           Date: 2009-11-10
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - TEST: Two 3DFluid cylinder - Stress - Stationary ##########################
+### MODEL: MultiScale - TEST: Hexagon - FluxStress - Stationary ###################################
 ###################################################################################################
 
 [MultiScale] ######################################################################################
 ###################################################################################################
-modelName		= 'Test two serial cylinders (3DFluid)'
+modelName		= 'Stationary: Hexagon (tube20 - Fluid3D), FluxStress'
 couplingFlags	= ' '
 
 [Problem] #########################################################################################
@@ -25,24 +25,37 @@ couplingsPath	= './MultiScaleData/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '	
-			0		Fluid3D				Fluid3D_Cylinder_Stokes
-			1		Fluid3D				Fluid3D_Cylinder_Stokes
+			0		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			1		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			2		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			3		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			4		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			5		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			6		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
 		 '
 ###################################################################################################
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	PoiseuilleFlux					0				0
-			1		Stress				Stress_StaticPressure			1,0				0,1
-			2		BoundaryCondition	NoStress						1				1
+			0		BoundaryCondition	UnitaryFlux						0				0
+			1		FluxStress			FluxStress_LagrangeMultiplier	1,0,3,4			0,1,0,0
+			2		FluxStress			FluxStress_LagrangeMultiplier	2,1,5,6			0,1,0,0
+			3		FluxStress			FluxStress_LagrangeMultiplier	3,6				1,1
+			4		FluxStress			FluxStress_LagrangeMultiplier	4,5				1,1
+			5		BoundaryCondition	NoStress						2				1
 		 	'
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '	
-			0		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		-5.075
-			1		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		 0.075
+			0		0.08	0.08	0.08		0.0		0.0		0.0			0.0		0.0		-0.68
+			1		0.08	0.08	0.08		0.0		0.0		0.0			0.0		0.0		-0.2
+			2		0.08	0.08	0.08		0.0		0.0		0.0			0.0		0.0		 0.28
+			3		0.08	0.08	0.08		-60.0	0.0		0.0			0.0		 0.08	-0.24
+			4		0.08	0.08	0.08		60.0	0.0		0.0			0.0		-0.08	-0.24
+			5		0.08	0.08	0.08		120.0	0.0		0.0			0.0		-0.08	 0.24
+			6		0.08	0.08	0.08		-120.0	0.0		0.0			0.0		 0.08	 0.24
 		 '
 ###################################################################################################

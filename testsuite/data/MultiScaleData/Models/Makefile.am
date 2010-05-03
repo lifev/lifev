@@ -22,39 +22,37 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Fluid3D_Cylinder.dat \
-					Fluid3D_Cylinder_Stokes.dat \
+dist_pkgdata_DATA = Fluid1D.dat \
+					Fluid3D_Cylinder_tube20.dat \
+					Fluid3D_Cylinder_tube40.dat \
+					Fluid3D_Cylinder_tube60.dat \
+					Fluid3D_Cylinder_tube80.dat \
+					Fluid3D_Cylinder_Stokes_tube20.dat \
+					Fluid3D_Cylinder_Stokes_tube40.dat \
+					Fluid3D_Cylinder_Stokes_tube60.dat \
+					Fluid3D_Cylinder_Stokes_tube80.dat \
 					Fluid3D_Carotid.dat \
 					Fluid3D_Carotid_Stokes.dat \
-                    MultiScale_3Dbifurcation_FluxStress.dat \
-                    MultiScale_3Dbifurcation_FluxStress_Stationary.dat \
-                    MultiScale_3Dbifurcation_Stress_Stationary.dat \
-                    MultiScale_3DCarotidBifurcation_FluxStress.dat \
-                    MultiScale_3DCarotidBifurcation_FluxStress_Stationary.dat \
-                    MultiScale_3DCarotidBifurcation_Stress.dat \
-                    MultiScale_3DCarotidBifurcation_Stress_Stationary.dat \
-                    MultiScale_3DSyntheticCarotidBifurcation_FluxStress.dat \
-                    MultiScale_3DSyntheticCarotidBifurcation_FluxStress_Stationary.dat \
-                    MultiScale_3DSyntheticCarotidBifurcation_Stress.dat \
-                    MultiScale_3DSyntheticCarotidBifurcation_Stress_Stationary.dat \
-                    MultiScale_3Dhexagon_FluxStress_Stationary.dat \
-                    MultiScale_3Dhexagon_Stress_Stationary.dat \
-                    MultiScale_3Dhexagon_StressAndFluxStress_Stationary.dat \
-                    MultiScale_3DFSIserial1.dat \
-                    MultiScale_3Dserial1.dat \
-                    MultiScale_3Dserial1_Stationary.dat \
-                    MultiScale_3Dserial2_FluxStress.dat \
-                    MultiScale_3Dserial2_FluxStress_Stationary.dat \
-                    MultiScale_3Dserial2_Stress_Stationary.dat \
-                    MultiScale_3Dserial3_FluxStress.dat \
-                    MultiScale_3Dserial3_FluxStress_Stationary.dat \
-                    MultiScale_3Dserial3_Stress_Stationary.dat \
-                    MultiScale_3Dserial5_FluxStress.dat \
-                    MultiScale_3Dserial5_Stress.dat \
-                    MultiScale_3Dserial6_FluxStress.dat \
-                    MultiScale_3Dserial6_FluxStress_Stationary.dat \
-                    MultiScale_3Dserial6_Stress.dat \
-                    MultiScale_3Dserial6_Stress_Stationary.dat
+                    MultiScale_CarotidBifurcation3D_FluxStress.dat \
+                    MultiScale_CarotidBifurcation3D_Stress.dat \
+                    MultiScale_CarotidBifurcation3D_Synthetic_FluxStress.dat \
+                    MultiScale_CarotidBifurcation3D_Synthetic_Stress.dat \
+                    MultiScale_Stationary3D_1Cylinder_tube20.dat \
+                    MultiScale_Stationary3D_Bifurcation_FluxStress.dat \
+                    MultiScale_Stationary3D_Bifurcation_Stress.dat \
+                    MultiScale_Stationary3D_Hexagon_FluxStress.dat \
+                    MultiScale_Stationary3D_Hexagon_Mixed.dat \
+                    MultiScale_Stationary3D_Hexagon_Stress.dat \
+                    MultiScale_Womersley3D_1Cylinder_tube20.dat \
+                    MultiScale_Womersley3D_5Cylinders_FluxStress_tube20.dat \
+                    MultiScale_Womersley3D_5Cylinders_FluxStress_tube40.dat \
+                    MultiScale_Womersley3D_5Cylinders_FluxStress_tube60.dat \
+                    MultiScale_Womersley3D_5Cylinders_FluxStress_tube80.dat \
+                    MultiScale_Womersley3D_5Cylinders_Stress_tube20.dat \
+                    MultiScale_Womersley3D_5Cylinders_Stress_tube40.dat \
+                    MultiScale_Womersley3D_5Cylinders_Stress_tube60.dat \
+                    MultiScale_Womersley3D_5Cylinders_Stress_tube80.dat \
+                    MultiScale_3DFSIserial1.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

@@ -5,16 +5,16 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-08
+#           Date: 2009-09-01
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - TEST: Two 3DFluid cylinder - FluxStress - Stationary ######################
+### MODEL: MultiScale - TEST: Bifurcation with three 3DFluid cylinders - Stress - Stationary ######
 ###################################################################################################
 
 [MultiScale] ######################################################################################
 ###################################################################################################
-modelName		= 'Test two serial cylinders (3DFluid)'
+modelName		= 'Bifurcation (tube20, Fluid3D), Stress'
 couplingFlags	= ' '
 
 [Problem] #########################################################################################
@@ -25,24 +25,26 @@ couplingsPath	= './MultiScaleData/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '	
-			0		Fluid3D				Fluid3D_Cylinder_Stokes
-			1		Fluid3D				Fluid3D_Cylinder_Stokes
+			0		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			1		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
+			2		Fluid3D				Fluid3D_Cylinder_Stokes_tube20
 		 '
 ###################################################################################################
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	Pressure						0				0
-			1		FluxStress			FluxStress_LagrangeMultiplier	1,0				0,1
-			2		BoundaryCondition	NoStress						1				1
+			0		BoundaryCondition	PoiseuilleFlux					0				0
+			1		Stress				Stress_StaticPressure			1,2,0			0,0,1
+			2		BoundaryCondition	NoStress						1,2				1,1
 		 	'
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '	
-			0		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		-5.075
-			1		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		 0.075
+			0		1.0		1.0		1.0			0.0		0.0		0.0			0.0		0.0		-2.5
+			1		1.0		1.0		1.0			-45.0	0.0		0.0			0.0		0.5		3.0
+			2		1.0		1.0		1.0			45.0	0.0		0.0			0.0		-0.5	3.0
 		 '
 ###################################################################################################

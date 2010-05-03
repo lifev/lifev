@@ -2,10 +2,10 @@
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                                 Copyright (C) 2010 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2010-05-03
 #  License Terms: GNU GPL
 #
 ###################################################################################################
@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [MultiScale]
-modelName        = Fluid3D_Cylinder
+modelName        = Fluid3D_Cylinder_tube80
 couplingFlags    = '2 3'
 
 
@@ -39,11 +39,11 @@ diagonalBlockPrec   = false
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      #  1050 Vertex
+    #mesh_file       = tube20.mesh      #  1050 Vertex
     #mesh_file       = tube2x4x20.mesh  #  1785 Vertex
     #mesh_file       = tube40.mesh      # 9486 Vertex
     #mesh_file       = tube60.mesh      # 25063 Vertex
-    #mesh_file       = tube80.mesh      # 71820 Vertex
+    mesh_file       = tube80.mesh      # 71820 Vertex
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
     
@@ -87,8 +87,8 @@ diagonalBlockPrec   = false
     tol             = 1.e-12
     
     [../prec]
-    prectype                = AztecOO 
-    #prectype                = Ifpack 
+    #prectype                = AztecOO 
+    prectype                = Ifpack 
     displayList             = false
         
         [./AztecOO]
