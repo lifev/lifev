@@ -46,6 +46,7 @@
 	#include <life/lifesolver/bidomainSolver.hpp>
 #endif
 #include <life/lifesolver/ionicSolver.hpp>
+//#include <life/lifesolver/heartFunctors.hpp>
 
 
 
@@ -95,27 +96,6 @@ public:
 
     //@}
 
-    /** @name Operator overloads
-     */
-    //@{
-
-
-    //@}
-
-    /** @name Accessors
-     */
-    //@{
-
-
-    //@}
-
-    /** @name  Mutators
-     */
-    //@{
-
-
-    //@}
-
     /** @name  Methods
      */
     //@{
@@ -141,8 +121,7 @@ public:
 private:
 	UInt ion_model;
 	UInt nbeq;
-    //	class HeartFunctors;
-    boost::shared_ptr<HeartFunctors> d;
+    boost::shared_ptr<HeartFunctors> M_heart_fct;
 
 };
 }
