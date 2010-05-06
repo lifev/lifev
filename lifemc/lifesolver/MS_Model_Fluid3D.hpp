@@ -335,6 +335,11 @@ private:
     Real                                  M_alpha;
     boost::shared_ptr< FluidVectorType >  M_beta;
     boost::shared_ptr< FluidVectorType >  M_RHS;
+
+    // NS parameters
+    UInt                                  M_SubiterationsMaximumNumber;
+    Real                                  M_Tolerance;
+    generalizedAitken< VectorType >       M_generalizedAitken;
 };
 
 //! Factory create function

@@ -60,7 +60,10 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_lmDOF                        ( 0 ),
     M_alpha                        ( 0 ),
     M_beta                         (),
-    M_RHS                          ()
+    M_RHS                          (),
+    M_SubiterationsMaximumNumber   (),
+    M_Tolerance                    (),
+    M_generalizedAitken            ()
 {
 
 #ifdef DEBUG
@@ -91,7 +94,10 @@ MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
     M_lmDOF                        ( Fluid3D.M_lmDOF ),
     M_alpha                        ( Fluid3D.M_alpha ),
     M_beta                         ( Fluid3D.M_beta ),
-    M_RHS                          ( Fluid3D.M_RHS )
+    M_RHS                          ( Fluid3D.M_RHS ),
+    M_SubiterationsMaximumNumber   ( Fluid3D.M_SubiterationsMaximumNumber ),
+    M_Tolerance                    ( Fluid3D.M_Tolerance ),
+    M_generalizedAitken            ( Fluid3D.M_generalizedAitken )
 {
 }
 
@@ -123,6 +129,9 @@ MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
         M_alpha                        = Fluid3D.M_alpha;
         M_beta                         = Fluid3D.M_beta;
         M_RHS                          = Fluid3D.M_RHS;
+        M_SubiterationsMaximumNumber   = Fluid3D.M_SubiterationsMaximumNumber;
+        M_Tolerance                    = Fluid3D.M_Tolerance;
+        M_generalizedAitken            = Fluid3D.M_generalizedAitken;
     }
 
     return *this;
@@ -153,6 +162,14 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
         M_FluidData->density( M_dataPhysics->GetFluidDensity() );
     if ( !DataFile.checkVariable( "fluid/physics/viscosity" ) )
         M_FluidData->viscosity( M_dataPhysics->GetFluidViscosity() );
+
+    // Parameters for the NS Iterations
+    M_SubiterationsMaximumNumber = DataFile( "fluid/miscellaneous/SubITMax", 0 );
+    M_Tolerance                  = DataFile( "fluid/miscellaneous/Tolerance", 1.e-6 );
+
+    M_generalizedAitken.setDefault(          DataFile( "fluid/miscellaneous/Omega",         1.e-3 ) );
+    M_generalizedAitken.UseDefaultOmega(     DataFile( "fluid/miscellaneous/fixedOmega",    false ) );
+    M_generalizedAitken.setMinimizationType( DataFile( "fluid/miscellaneous/inverseOmega", true ) );
 
     //Boundary Conditions for the problem
     M_FluidBC->SetOperator( M_Fluid );    //MUST BE MOVED AFTER M_Fluid.reset !!!
@@ -298,31 +315,39 @@ MS_Model_Fluid3D::SolveSystem()
     //Solve the problem
     M_Fluid->iterate( *M_FluidBC->GetHandler() );
 
-    UInt subITMax  = 0;   //TODO: Move this on a file!
-    Real tolerance = 1.e-6; //TODO: Move this on a file!
-    Real residual;
-    for ( UInt subIT = 0; subIT < subITMax; ++subIT )
+    if ( !M_FluidData->Stokes() )
     {
-        residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector
+        Real residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector;
 
         if ( M_displayer->isLeader() )
-        {
-            std::cout << "  F-  Sub-iteration n.:                        " << subIT << std::endl;
             std::cout << "  F-  Residual:                                " << residual << std::endl;
+
+        M_generalizedAitken.restart( true );
+        for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
+        {
+            *M_beta += M_generalizedAitken.computeDeltaLambdaScalar( *M_beta, *M_beta - M_Fluid->solution() );
+
+            //Linear model need to be updated!
+            M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+            M_UpdateLinearModel = true;
+
+            //Solve system
+            M_Fluid->iterate( *M_FluidBC->GetHandler() );
+
+            // Check the new residual
+            residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector
+
+            // Display subiteration information
+            if ( M_displayer->isLeader() )
+            {
+                std::cout << "  F-  Sub-iteration n.:                        " << subIT << std::endl;
+                std::cout << "  F-  Residual:                                " << residual << std::endl;
+            }
+
+            // Verify tolerance
+            if ( residual <= M_Tolerance )
+                break;
         }
-
-        // Verify tolerance
-        if ( residual <= tolerance )
-            break;
-
-        //Picard iteration for NonLinear Navier-Stokes
-        *M_beta = M_Fluid->solution();
-        M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
-
-        //Linear model need to be updated!
-        M_UpdateLinearModel = true;
-
-        M_Fluid->iterate( *M_FluidBC->GetHandler() );
     }
 }
 
@@ -360,7 +385,10 @@ MS_Model_Fluid3D::ShowMe()
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
         std::cout << "maxH                = " << M_FluidData->dataMesh()->mesh()->maxH() << std::endl
-                  << "meanH               = " << M_FluidData->dataMesh()->mesh()->meanH() << std::endl << std::endl << std::endl << std::endl;
+                  << "meanH               = " << M_FluidData->dataMesh()->mesh()->meanH() << std::endl << std::endl;
+
+        std::cout << "NS SubITMax         = " << M_SubiterationsMaximumNumber << std::endl
+                  << "NS Tolerance        = " << M_Tolerance << std::endl << std::endl << std::endl << std::endl;
     }
 }
 
