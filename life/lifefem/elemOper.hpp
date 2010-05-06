@@ -91,7 +91,48 @@ namespace LifeV
   //! \f$ coef \cdot ( trace { [\nabla u^k]^T \nabla u }, \nabla\cdot  v  ) \f$ for Newton on St-Venant
   void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
 
+  // -----------added Rita 2008   for non linear St-Venant----------------------------------------------------------
 
+  // coef * ( (\div u_k) \grad u : \grad v  )--------------------------------------------------------------------controllato!!!
+  void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * ( (\div u) \grad u_k : \grad v  )
+  // part of the jacobian of stiff_divgrad
+  void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * ( \grad u_k : \grad u_k) * ( \grad u : \grad v  )---------------------------------------------controllato!!!
+  void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  )
+  // part of the jacobian stiff_gradgrad
+  void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+   // coef * ( \grad u^k \grad u : \grad v  )------------------------------------------------------------------controllato!!!
+  void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * ( \grad \delta u \grad u^k : \grad v  )
+  // part of the jacobian of stiff_dergrad_gradbis
+  void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+   // coef * ( \grad u^k [\grad u]^T : \grad v  )------------------------------------------------------------controllato!!!
+  void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * ( \grad \delta u [\grad u^k]^T : \grad v  )------------------------------------------------------------controllato!!!
+  // part of the jacobian of stiff_dergrad_gradbis_Tr
+  void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  )------------------------------------------------------------controllato!!!
+  void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  // coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
+  // part of the jacobian of  stiff_gradgradTr_gradbis
+  void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+   //  coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
+   // secondo part of the jacobian of stiff_gradgradTr_gradbis
+  void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe );
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
 
 
   void grad( const int icoor, Real coef, ElemMat& elmat,
@@ -122,7 +163,7 @@ namespace LifeV
     /*!
       This function add in the elementary vector the term \f$ \int c v \f$.
       The function \f$c\f$ is given by its values in the quadrature nodes.
-      
+
       @param constant Values of the function in the quadrature nodes
       @param elvec The local vector where to add the values
       @param currentFe The currentFE associated to the cell where to assemble
@@ -134,14 +175,14 @@ namespace LifeV
     /*!
       The function \f$\nabla c\f$ is given by its values in the quadrature nodes, coordinate after coordinate (first,
       the values for the first componant of the gradient in all the quadrature nodes, then second component,...).
-      
+
       @param constant Values of the gradient in the quadrature nodes
       @param elvec The local vector where to add the values
       @param currentFe The currentFE associated to the cell where to assemble
       @param iblock The component of v that is concerned
     */
     void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const CurrentFE& currentFe, const int& iblock);
-    
+
   //!@}
   //!@name Elementary operations for the interior penalty stabilization
   //!@{
