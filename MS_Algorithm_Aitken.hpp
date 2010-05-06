@@ -116,7 +116,6 @@ protected:
 
     std::map< std::string, methodType >            M_methodMap;
     methodType                                     M_method;
-    bool                                           M_inverseOmega;
     generalizedAitken< VectorType >                M_generalizedAitken;
 
 };
