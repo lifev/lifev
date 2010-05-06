@@ -97,6 +97,12 @@ public:
     void setDefault( const DataType& defaultOmegaS = 0.1,
                      const DataType& defaultOmegaF = 0.1 );
 
+    //! Set starting values for Omega
+    /*!
+     * \param inverseOmega false: minimizing on omega; true: minimizing on omega^-1
+     */
+    void setMinimizationType( const bool& inverseOmega );
+
     //@}
 
 
@@ -142,8 +148,7 @@ public:
 	 * \param invertedOmega - false (default): minimizing on omega; true: minimizing on omega^-1
 	 */
     VectorType computeDeltaLambdaScalar( const VectorType& solution,
-                                         const VectorType& residual,
-                                         const bool        invertedOmega = false );
+                                         const VectorType& residual );
 
     //! Compute Omega * residual - Paragraph 4.2.6 of S. Deparis PhD Thesis
     /*!
@@ -152,7 +157,6 @@ public:
      */
     VectorType computeDeltaLambdaVector( const VectorType& solution,
                                          const VectorType& residual,
-                                         const bool        invertedOmega = false,
                                          const bool        independentOmega = false );
 
     //! Compute Omega * residual - Paragraph 4.2.6 of S. Deparis PhD Thesis
@@ -161,13 +165,11 @@ public:
      * \param residual - vector of residuals
      * \param blocksVector - vector identifying the different blocks ( ID start from 1 )
      * \param blocksNumber - number of different blocks == higher ID (if = 1, it equal to the scalar case)
-     * \param invertedOmega - false (default): minimizing on omega; true: minimizing on omega^-1
      */
     VectorType computeDeltaLambdaVectorBlock( const VectorType& solution,
                                               const VectorType& residual,
                                               const VectorType& blocksVector,
-                                              const UInt        blocksNumber  = 1,
-                                              const bool        invertedOmega = false);
+                                              const UInt        blocksNumber  = 1);
 
     //@}
 
@@ -189,12 +191,15 @@ private:
     // absolute value of the default omega.
     // In this case M_usedefault=true
     bool M_useDefaultOmega;
+
+    // Minimize on omega or omega^-1
+    bool M_inverseOmega;
 };
 
 
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 template <class VectorType, class DataType>
 generalizedAitken<VectorType, DataType>::generalizedAitken() :
@@ -204,7 +209,8 @@ generalizedAitken<VectorType, DataType>::generalizedAitken() :
     M_defaultOmegaS  ( 0.1 ),
     M_defaultOmegaF  ( 0.1 ),
     M_restart        ( true ),
-    M_useDefaultOmega( false )
+    M_useDefaultOmega( false ),
+    M_inverseOmega   ( false )
 {}
 
 template <class VectorType, class DataType>
@@ -216,15 +222,14 @@ generalizedAitken<VectorType, DataType>::generalizedAitken( const DataType defau
     M_defaultOmegaS  ( ),
     M_defaultOmegaF  ( ),
     M_restart        ( true ),
-    M_useDefaultOmega( )
+    M_useDefaultOmega( ),
+    M_inverseOmega   ( false )
 {
     setDefault( defaultOmegaF, defaultOmegaS );
 }
 
-
-
 // ===================================================
-//! Methods
+// Set Methods
 // ===================================================
 template <class VectorType, class DataType>
 void generalizedAitken<VectorType, DataType>::setDefault( const DataType& defaultOmegaS,
@@ -244,6 +249,15 @@ void generalizedAitken<VectorType, DataType>::setDefault( const DataType& defaul
     }
 }
 
+template <class VectorType, class DataType>
+void generalizedAitken<VectorType, DataType>::setMinimizationType( const bool& inverseOmega )
+{
+    M_inverseOmega = inverseOmega;
+}
+
+// ===================================================
+// Methods
+// ===================================================
 template <class VectorType, class DataType>
 VectorType
 generalizedAitken<VectorType, DataType>::computeDeltaLambdaFSI( const VectorType &_lambda,
@@ -307,27 +321,23 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaFSI( const VectorType
         }
         else if (  std::fabs(a22) == 0. )
         {
-            std::cout << "generalizedAitken:  a22 = "
-                      << std::fabs(a22) << std::endl;
+            Debug(7020) << "generalizedAitken:  a22 = " << std::fabs(a22) << "\n";
             omegaS = 0.;
             omegaF = -b1 / a11;
         }
         else if (  std::fabs(a11) == 0. )
         {
-            std::cout << "generalizedAitken:  a11 = "
-                      << std::fabs(a11) << std::endl;
+            Debug(7020) << "generalizedAitken:  a11 = " << std::fabs(a11) << "\n";
             omegaS = -b2 / a22;
             omegaF = 0.;
         }
         else
         {
-            std::cout << "generalizedAitken: Failure: Det=0!!"
-                      << fabs(det) << std::endl;
+            Debug(7020) << "generalizedAitken: Failure: Det=0!!" << fabs(det) << "\n";
         }
 
-        std::cout << " --------------- generalizedAitken: " << std::endl;
-        std::cout << " omegaS = " << omegaS
-                  << " omegaF = " << omegaF << std::endl;
+        Debug(7020) << " --------------- generalizedAitken: \n";
+        Debug(7020) << " omegaS = " << omegaS << " omegaF = " << omegaF << "\n";
 
         deltaLambda = omegaF * _muF + omegaS * _muS;
 
@@ -341,13 +351,12 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaFSI( const VectorType
           set to their default values
         */
 
-        std::cout << " --------------- generalizedAitken: first call" << std::endl;
+        Debug(7020) << " --------------- generalizedAitken: first call\n";
         M_restart = false;
 
         deltaLambda = M_defaultOmegaF * _muF + M_defaultOmegaS * _muS ;
 
-        std::cout << "generalizedAitken: omegaS = " << M_defaultOmegaS
-                  << " omegaF = " << M_defaultOmegaF << std::endl;
+        Debug(7020) << "generalizedAitken: omegaS = " << M_defaultOmegaS << " omegaF = " << M_defaultOmegaF << "\n";
 
         M_oldSolution.reset( new VectorType(_lambda) );
         M_oldResidualF.reset( new VectorType(_muF) );
@@ -361,8 +370,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaFSI( const VectorType
 template <class VectorType, class DataType>
 VectorType
 generalizedAitken<VectorType, DataType>::computeDeltaLambdaScalar( const VectorType& solution,
-                                                                   const VectorType& residual,
-                                                                   const bool        invertedOmega )
+                                                                   const VectorType& residual )
 {
 	if ( M_restart || M_useDefaultOmega )
     {
@@ -371,7 +379,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaScalar( const VectorT
         M_oldSolution.reset ( new VectorType( solution ) );
         M_oldResidualS.reset( new VectorType( residual ) );
 
-        std::cout << "generalizedAitken: omega = " << M_defaultOmegaS << std::endl;
+        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaS << "\n";
 
         return M_defaultOmegaS * residual;
     }
@@ -386,7 +394,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaScalar( const VectorT
 	*M_oldResidualS = residual;
 
 	DataType omega, norm;
-	if ( invertedOmega )
+	if ( M_inverseOmega )
 	{
 	    // Minimization of the inverse omega
 	    omega = deltaX.Dot( deltaX );
@@ -404,12 +412,11 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaScalar( const VectorT
 	if (    std::fabs( omega ) < std::fabs( M_defaultOmegaS )/1024
 		 || std::fabs( omega ) > std::fabs( M_defaultOmegaS )*1024 )
 	{
-		std::cout << "generalizedAitken: Failure: omega too small/big: "
-				  << omega << std::endl;
+	    Debug(7020) << "generalizedAitken: Failure: omega too small/big: " << omega << "\n";
 		omega = M_defaultOmegaS;
 	}
 
-	std::cout << "generalizedAitken: omega = " << omega << std::endl;
+	Debug(7020) << "generalizedAitken: omega = " << omega << "\n";
 
 	return omega * residual;
 }
@@ -418,7 +425,6 @@ template <class VectorType, class DataType>
 VectorType
 generalizedAitken<VectorType, DataType>::computeDeltaLambdaVector( const VectorType& solution,
                                                                    const VectorType& residual,
-                                                                   const bool        invertedOmega,
                                                                    const bool        independentOmega )
 {
     if ( M_restart || M_useDefaultOmega )
@@ -428,7 +434,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaVector( const VectorT
         M_oldSolution.reset ( new VectorType( solution ) );
         M_oldResidualS.reset( new VectorType( residual ) );
 
-        std::cout << "generalizedAitken: omega = " << M_defaultOmegaS << std::endl;
+        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaS << "\n";
 
         return M_defaultOmegaS * residual;
     }
@@ -449,7 +455,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaVector( const VectorT
         deltaR += !deltaR; // add +1 where deltaR is equal to zero!
         omega /= deltaR;
     }
-    else if ( invertedOmega )
+    else if ( M_inverseOmega )
     {
         omega *= deltaX;
         norm = deltaR.Dot( deltaX );
@@ -470,7 +476,8 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaVector( const VectorT
     omega *= !correction;
     omega +=  M_defaultOmegaS * correction;
 
-    std::cout << "generalizedAitken: omega = " << std::endl; omega.ShowMe();
+    //Debug(7020) << "generalizedAitken: omega = " << "\n";
+    //omega.ShowMe();
 
     omega *= residual;
 
@@ -482,8 +489,7 @@ VectorType
 generalizedAitken<VectorType, DataType>::computeDeltaLambdaVectorBlock( const VectorType& solution,
                                                                         const VectorType& residual,
                                                                         const VectorType& blocksVector,
-                                                                        const UInt        blocksNumber,
-                                                                        const bool        invertedOmega)
+                                                                        const UInt        blocksNumber )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -492,7 +498,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaVectorBlock( const Ve
         M_oldSolution.reset(  new VectorType( solution ) );
         M_oldResidualS.reset( new VectorType( residual ) );
 
-        std::cout << "generalizedAitken: omega = " << M_defaultOmegaS << std::endl;
+        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaS << "\n";
 
         return M_defaultOmegaS * residual;
     }
@@ -523,7 +529,7 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaVectorBlock( const Ve
         tempDeltaR  = deltaR;
         tempDeltaR *= tempVector;
 
-        if ( invertedOmega )
+        if ( M_inverseOmega )
         {
             // Minimization of the inverse omega
             tempOmega = -( tempDeltaX.Dot( tempDeltaX ) ) / ( tempDeltaR.Dot( tempDeltaX ) );
@@ -537,15 +543,15 @@ generalizedAitken<VectorType, DataType>::computeDeltaLambdaVectorBlock( const Ve
         if (    std::fabs( tempOmega ) < std::fabs( M_defaultOmegaS )/1024
              || std::fabs( tempOmega ) > std::fabs( M_defaultOmegaS )*1024 )
         {
-            std::cout << "generalizedAitken: Failure: omega too small/big: "
-                      << tempOmega << std::endl;
+            Debug(7020) << "generalizedAitken: Failure: omega too small/big: " << tempOmega << "\n";
             tempOmega = M_defaultOmegaS;
         }
 
         omega += tempOmega * tempVector;
     }
 
-    std::cout << "generalizedAitken: omega = " << std::endl; omega.ShowMe();
+    //Debug(7020) << "generalizedAitken: omega = " << "\n";
+    //omega.ShowMe();
 
     return omega * residual;
 }
