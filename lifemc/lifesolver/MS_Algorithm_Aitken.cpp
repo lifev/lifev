@@ -43,7 +43,6 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
     super               (),
     M_methodMap         (),
     M_method            (),
-    M_inverseOmega      (),
     M_generalizedAitken ()
 {
 
@@ -63,7 +62,6 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm )
     super               ( algorithm ),
     M_methodMap         ( algorithm.M_methodMap ),
     M_method            ( algorithm.M_method ),
-    M_inverseOmega      ( algorithm.M_inverseOmega ),
     M_generalizedAitken ( algorithm.M_generalizedAitken )
 {
 
@@ -84,7 +82,6 @@ MS_Algorithm_Aitken::operator=( const MS_Algorithm_Aitken& algorithm )
         super::operator=( algorithm );
         M_methodMap         = algorithm.M_methodMap;
         M_method            = algorithm.M_method;
-        M_inverseOmega      = algorithm.M_inverseOmega;
         M_generalizedAitken = algorithm.M_generalizedAitken;
     }
     return *this;
@@ -107,8 +104,8 @@ MS_Algorithm_Aitken::SetupData( const std::string& FileName )
 
     M_generalizedAitken.setDefault( DataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
     M_generalizedAitken.UseDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
+    M_generalizedAitken.setMinimizationType( DataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
     M_method       = M_methodMap[ DataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
-    M_inverseOmega = DataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true );
 }
 
 void
@@ -156,19 +153,19 @@ MS_Algorithm_Aitken::SubIterate()
         {
             case Scalar:
 
-                *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaScalar( *M_couplingVariables, *M_couplingResiduals, M_inverseOmega );
+                *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaScalar( *M_couplingVariables, *M_couplingResiduals );
 
                 break;
 
             case Vectorial:
 
-                *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVector( *M_couplingVariables, *M_couplingResiduals, M_inverseOmega, true );
+                *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVector( *M_couplingVariables, *M_couplingResiduals, true );
 
                 break;
 
             case VectorialBlock:
 
-                //*M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVectorBlock( *M_couplingVariables, *M_couplingResiduals, blocksVector, 2, true );
+                //*M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVectorBlock( *M_couplingVariables, *M_couplingResiduals, blocksVector, 2 );
 
                 break;
         }
@@ -184,7 +181,7 @@ MS_Algorithm_Aitken::SubIterate()
 
         // Check the new residual
         M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-        Real residual = M_couplingResiduals->Norm2();
+        residual = M_couplingResiduals->Norm2();
 
         // Display subiteration information
         if ( M_displayer->isLeader() )
@@ -209,8 +206,7 @@ MS_Algorithm_Aitken::ShowMe()
     {
         super::ShowMe();
 
-        std::cout << "Aitken Method       = " << Enum2String( M_method, M_methodMap ) << std::endl
-                  << "Minimize inv. Omega = " << ( M_inverseOmega ? "true" : "false" ) << std::endl;
+        std::cout << "Aitken Method       = " << Enum2String( M_method, M_methodMap ) << std::endl;
         std::cout << std::endl << std::endl;
     }
 }
