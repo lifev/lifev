@@ -387,11 +387,6 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
 void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
-    //std::cout << "---------------------Sono in DIVGRAD-------------------------------"<< std::endl;
-
     double s;
     Real duk[ fe.nbQuadPt() ];      // definizione del vettore che conterra \div u^k at each quadrature point
 
@@ -440,11 +435,7 @@ void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
 void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
     double s;
-
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
 
     // loop on quadrature points
@@ -493,64 +484,55 @@ void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cu
 void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
+    double s,s1;
+    Real gguk[ fe.nbQuadPt() ]; //    (\grad u_k : \grad u_k) at each quadrature point
 
+    // loop on quadrature points
+    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
+    {
+        s=0;
+        // loop on space coordinates
+        for ( int icoor = 0;icoor < fe.nbCoor();icoor++ )
+        {
+            for ( int l = 0; l < fe.nbCoor(); l++ )
+            {
+                s1=0;
+                for ( int i = 0; i < fe.nbFEDof(); i++ )
+                    s1+= fe.phiDer( i, l, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                s += s1*s1;
+            }
+        }// chiude il ciclo su icoor
+        gguk[ ig ] = s;
+    }// chiude il ciclo su ig
 
-         	double s,s1;
-    		Real gguk[ fe.nbQuadPt() ]; //    (\grad u_k : \grad u_k) at each quadrature point
+    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
-         	// loop on quadrature points
-    		for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
-    		{
-    			s=0;
-        		// loop on space coordinates
-        		for ( int icoor = 0;icoor < fe.nbCoor();icoor++ )
-        		{
-        			for ( int l = 0; l < fe.nbCoor(); l++ )
-        			{
-        				s1=0;
-                		for ( int i = 0; i < fe.nbFEDof(); i++ )
-                    		s1+= fe.phiDer( i, l, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-        				s += s1*s1;
-        			}
-        		}// chiude il ciclo su icoor
-        		gguk[ ig ] = s;
-    		}// chiude il ciclo su ig
+    for ( int i = 0; i < fe.nbFEDof(); ++i )
+    {
+        for ( int j = 0; j < fe.nbFEDof(); ++j )
+        {
+            s = 0.0;
+            for ( int k = 0; k < fe.nbCoor(); ++k )
+            {
+                for ( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+                    s += gguk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+            }
+            mat_tmp( i, j ) = coef * s;
+        }
+    }
 
-      		ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
-
-  			for ( int i = 0; i < fe.nbFEDof(); ++i )
-    		{
-    			for ( int j = 0; j < fe.nbFEDof(); ++j )
-        		{
-        			s = 0.0;
-            		for ( int k = 0; k < fe.nbCoor(); ++k )
-            		{
-             			for ( int ig = 0;ig < fe.nbQuadPt(); ++ig )
-                			s += gguk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
-            		}
-            	mat_tmp( i, j ) = coef * s;
-        		}
-     		}
-
-    		for ( int icoor = 0; icoor < fe.nbCoor(); ++icoor )
-    		{
-        		ElemMat::matrix_view mat = elmat.block( icoor, icoor );
-        		mat += mat_tmp;
-    		}
+    for ( int icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
+    }
 }
 
  // Stiffness matrix: coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  ) controllato!!!
 void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
-
     double s;
-
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
 
     // loop on quadrature points
@@ -599,10 +581,6 @@ void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
 // Stiffness matrix: coef * ( \grad d^k \grad d : \grad v  )controllato!!!
 void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
-
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
 
     double s;
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
@@ -658,10 +636,6 @@ void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, co
 void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
-
     double s;
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
 
@@ -715,10 +689,6 @@ void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 // Stiffness matrix: coef * ( \grad \delta d \grad d^k : \grad v  ) controllato!!!
 void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
-
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
 
     double s;
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
@@ -775,10 +745,6 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
  void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
-
     double s;
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
 
@@ -833,9 +799,6 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
 //  Stiffness matrix: coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  ) controllato!!!
 void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
-
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
 
     double s;
     Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
@@ -893,9 +856,6 @@ void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 //  Stiffness matrix: coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )controllato!!!
 void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
-	ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
-
 
     double s;
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
@@ -953,9 +913,6 @@ void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
  //  Stiffness matrix: coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )controllato!!!
 void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
-
-    ASSERT_PRE( fe.hasFirstDeriv(),
-                "Stiffness dergradbis matrix needs at least the first derivatives" );
 
 	double s;
     Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
