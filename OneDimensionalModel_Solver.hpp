@@ -59,10 +59,7 @@
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
-
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Physics_NonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
 
 namespace LifeV {
 
@@ -183,6 +180,9 @@ public:
     typedef LinearSolver_Type::matrix_type          Matrix_Type;
     typedef boost::shared_ptr<Matrix_Type>          Matrix_PtrType;
 
+    typedef std::vector<Vector_Type>                Solution_Type;
+    typedef boost::shared_ptr<Solution_Type>        Solution_PtrType;
+
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const ID& )> Function;
 
@@ -205,16 +205,11 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty Constructor
     /*!
-     * \param data_file GetPot data file
-     * \param onedparam Variable containing parameters for OneD model
+     * Need a call to: setCommunicator, setProblem, setFESpace
      */
-    OneDimensionalModel_Solver( const Physics_PtrType Physics,
-                                const Flux_PtrType    Flux,
-                                const Source_PtrType  Source,
-                                const FESpace_PtrType FESpace,
-                                const Comm_PtrType    Comm );
+    OneDimensionalModel_Solver();
 
     //! Destructor
     ~OneDimensionalModel_Solver(){}
@@ -246,8 +241,8 @@ public:
 
     //! Sets initial condition for the unknowns
     /*!
-     *\param var if var == "physical" then A  = u10 and Q  = u20
-     *           if var == "Riemann"  then W1 = u10 and W2 = u20
+     * @param var if var == "physical" then A  = u10 and Q  = u20
+     *            if var == "Riemann"  then W1 = u10 and W2 = u20
      */
     void initialize( const Real& u10, const Real& u20, const std::string& var = "physical" );
 
@@ -267,7 +262,7 @@ public:
     void timeAdvance();
 
     //! Update convective term, bc treatment and solve the linearized ns system
-    void iterate( OneDimensionalModel_BCHandler& bcH, const Real& time );
+    void iterate( OneDimensionalModel_BCHandler& bcH );
 
     //! Simple cfl computation (correct for constant mesh)
     void CheckCFL() const;
@@ -317,6 +312,17 @@ public:
     //! @name Set Methods
     //@{
 
+    //! Set problem elements
+    void setProblem( const Physics_PtrType Physics,
+                     const Flux_PtrType    Flux,
+                     const Source_PtrType  Source );
+
+    //! Set the communicator
+    void setCommunicator( const Comm_PtrType Comm );
+
+    //! Set the FEspace
+    void setFESpace( const FESpace_PtrType FESpace );
+
     //! Set the linear solver
     void setLinearSolver( const LinearSolver_PtrType linearSolver );
 
@@ -333,7 +339,7 @@ public:
     //@{
 
     //! Return the solution at current time step (U)
-    const std::vector<Vector_Type>& U_thistime() const;
+    const Solution_PtrType U_thistime() const;
 
     //! Return the solution at current time step (Area)
     const Vector_Type& U1_thistime() const;
@@ -372,16 +378,16 @@ public:
     const UInt& RightInternalNodeId() const;
 
     //! Get the Dirichlet boundary conditions (left)
-    Vec2D BCValuesLeft() const;
+    Container2D_Type BCValuesLeft() const;
 
     //! Get the value at neighboring node (left)
-    Vec2D BCValuesInternalLeft() const;
+    Container2D_Type BCValuesInternalLeft() const;
 
     //! Get the Dirichlet boundary conditions (right)
-    Vec2D BCValuesRight() const;
+    Container2D_Type BCValuesRight() const;
 
     //! Get the value at neighboring node (right)
-    Vec2D BCValuesInternalRight() const;
+    Container2D_Type BCValuesInternalRight() const;
 
     //! Return the selection solution (P, A, Q, W1, W2)
     Real value(std::string var, UInt pos) const;
@@ -502,12 +508,10 @@ private:
     FESpace_PtrType                    M_FESpace;
     Comm_PtrType                       M_Comm;
 
-    EpetraMap                          M_localMap;
-
-    const UInt                         M_leftNodeId;
-    const UInt                         M_leftInternalNodeId;
-    const UInt                         M_rightNodeId;
-    const UInt                         M_rightInternalNodeId;
+    UInt                               M_leftNodeId;
+    UInt                               M_leftInternalNodeId;
+    UInt                               M_rightNodeId;
+    UInt                               M_rightInternalNodeId;
 
     //! coefficient in front of the corresponding M_elmat*
     Real                               M_coeffMass;
@@ -515,10 +519,10 @@ private:
     Real                               M_coeffGrad;
     Real                               M_coeffDiv;
 
-    ElemMat                            M_elmatMass;  //!< element mass matrix
-    ElemMat                            M_elmatStiff; //!< element stiffness matrix
-    ElemMat                            M_elmatGrad;  //!< element gradient matrix
-    ElemMat                            M_elmatDiv;   //!< element divergence matrix
+    boost::shared_ptr< ElemMat >       M_elmatMass;  //!< element mass matrix
+    boost::shared_ptr< ElemMat >       M_elmatStiff; //!< element stiffness matrix
+    boost::shared_ptr< ElemMat >       M_elmatGrad;  //!< element gradient matrix
+    boost::shared_ptr< ElemMat >       M_elmatDiv;   //!< element divergence matrix
 
     //! Unknowns at present time step
     /*!
@@ -527,11 +531,11 @@ private:
       U[2] = W1, U[3] = W2
       Other components of U may contain additional variables such as the pressure
     */
-    std::vector<Vector_Type>           M_U_thistime;
+    Solution_PtrType                   M_U_thistime;
 
     //! Unknowns at previous time step (see savesol() )
-    std::vector<Vector_Type>           M_U_prevtime;
-    std::vector<Vector_Type>           M_U_2prevtime;
+    Solution_Type                      M_U_prevtime;
+    Solution_Type                      M_U_2prevtime;
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
     std::vector<Vector_Type>           M_rhs;
@@ -549,7 +553,7 @@ private:
     std::vector<ScalVec>               M_diffSrc;
 
     //! tridiagonal mass matrix
-    Matrix_Type                        M_massMatrix;
+    Matrix_PtrType                     M_massMatrix;
 
     //! tridiagonal mass matrices multiplied by diffSrcij
     std::vector<Matrix_PtrType >       M_massMatrixDiffSrc;
@@ -558,7 +562,7 @@ private:
     std::vector<Matrix_PtrType >       M_stiffMatrixDiffFlux;
 
     //! tridiagonal gradient matrix
-    Matrix_Type                        M_gradMatrix;
+    Matrix_PtrType                     M_gradMatrix;
 
     //! tridiagonal gradient matrices multiplied by diffFluxij
     std::vector<Matrix_PtrType >       M_gradMatrixDiffFlux;
@@ -578,11 +582,10 @@ private:
     //! Trick to use strings in C++ "switch" construct
     std::map<std::string, OneDInitializeVar> M_oneDstring2initializeVarMap;
 
-    Vec2D                        M_bcDirLeft;  //! first -> U1, second ->U2
-    Vec2D                        M_bcDirRight; //
+    Container2D_Type                        M_bcDirLeft;  //! first -> U1, second ->U2
+    Container2D_Type                        M_bcDirRight; //
 
     // maps associating each unknown to a string, a numeric index, a function pointer
-    std::map< std::string, std::string>                                 M_variable_string_map;
     std::map< std::string, UInt>                                        M_variable_index_map;
     std::map< std::string, postproc_funptr>                             M_variable_filter_map;
 };

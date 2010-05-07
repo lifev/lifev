@@ -96,6 +96,7 @@ extern std::map< std::string, OneDimensionalModel_SourceTypes >  OneDimensionalM
 class OneDimensionalModel_Physics;
 class OneDimensionalModel_Flux;
 class OneDimensionalModel_Source;
+class OneDimensionalModel_BCFunction;
 
 // Type definitions
 typedef singleton< factory< OneDimensionalModel_Physics,
@@ -105,20 +106,31 @@ typedef singleton< factory< OneDimensionalModel_Flux,
 typedef singleton< factory< OneDimensionalModel_Source,
                             OneDimensionalModel_SourceTypes > >  Factory_OneDimensionalModel_Source;
 
-typedef ublas::bounded_array<Real, 2>           Vec2D;   // SHOULD BE REMOVED
-typedef ublas::vector<Real>                     ScalVec; // SHOULD BE REMOVED
+//typedef singleton< factoryClone< OneDimensionalModel_BCFunction > > FactoryClone_OneDimensionalModel_BCFunction;
 
-enum OneDBCStringValue {
-                           OneDBCLeftBoundary,
-                           OneDBCRightBoundary,
-                           OneDBCW1,
-                           OneDBCW2,
-                           OneDBCA,
-                           OneDBCQ,
-                           OneDBCFUN,
-                           OneDBCFirstRHS,
-                           OneDBCSecondRHS
-                       };
+typedef boost::array< Real, 2 >                 Container2D_Type;
+
+// ScalVec SHOULD BE REPLACED EVERYWHERE
+// BY EPETRAVECTOR FOR PARALLEL COMPUTATION
+typedef ublas::vector<Real> ScalVec;
+
+enum OneD_BC {
+                 OneD_W1,
+                 OneD_W2,
+                 OneD_A,
+                 OneD_Q,
+                 OneD_P
+             };
+
+enum OneD_BCSide {
+                    OneD_left,
+                    OneD_right
+                 };
+
+enum OneD_BCLine {
+                    OneD_first,
+                    OneD_second
+                 };
 
 // ===================================================
 // OneDimensionalModel Utility Methods
@@ -140,12 +152,12 @@ OneDimensionalModel_MapsDefinition()
 
 //! Scalar product between 2D vectors
 inline Real
-dot( const Vec2D& vec1,
-     const Vec2D& vec2 )
+dot( const Container2D_Type& vector1,
+     const Container2D_Type& vector2 )
 {
-    ASSERT_PRE( vec1.size() == 2 && vec2.size() == 2, "dot works only for 2D vectors" );
+    ASSERT_PRE( vector1.size() == 2 && vector2.size() == 2, "dot works only for 2D vectors" );
 
-    return vec1[0]*vec2[0] + vec1[1] * vec2[1];
+    return vector1[0]*vector2[0] + vector1[1]*vector2[1];
 }
 
 }
