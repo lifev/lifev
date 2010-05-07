@@ -51,8 +51,6 @@
 
 #ifdef HAVE_HDF5
     #include <life/lifefilters/hdf5exporter.hpp>
-#else
-    #include <life/lifefilters/ensight.hpp>
 #endif
 
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
@@ -88,21 +86,24 @@ public:
     typedef OneDimensionalModel_Source                             Source_Type;
     typedef boost::shared_ptr< Source_Type >                       Source_PtrType;
 
-    typedef OneDimensionalModel_BCHandler                          BC_Type;
-
     typedef OneDimensionalModel_Solver                             Solver_Type;
+    typedef boost::shared_ptr< Solver_Type >                       Solver_PtrType;
+
     typedef Solver_Type::Data_Type                                 Data_Type;
     typedef Solver_Type::Mesh_Type                                 Mesh_Type;
     typedef Solver_Type::Vector_Type                               Vector_Type;
     typedef Solver_Type::Vector_PtrType                            Vector_PtrType;
+    typedef Solver_Type::Solution_Type                             Solution_Type;
+    typedef Solver_Type::Solution_PtrType                          Solution_PtrType;
     typedef Solver_Type::LinearSolver_Type                         LinearSolver_Type;
 
     typedef Solver_Type::FESpace_Type                              FESpace_Type;
+    typedef Solver_Type::FESpace_PtrType                           FESpace_PtrType;
+
+    typedef OneDimensionalModel_BCHandler                          BC_Type;
 
 #ifdef HAVE_HDF5
     typedef Hdf5exporter< Mesh_Type >                              IOFile_Type;
-#else
-    typedef Ensight< Mesh_Type >                                   IOFile_Type;
 #endif
 
     //! @name Constructors & Destructor
@@ -201,43 +202,49 @@ public:
     /*!
      * @return BCInterface container
      */
-    BC_Type&      GetBC();
+    BC_Type&      GetBC() const;
 
     //! Get the data container of the 1D model.
     /*!
      * @return 1D Model data container.
      */
-    Data_Type&    GetData();
+    Data_Type&    GetData() const;
 
     //! Get the Physics of the 1D model.
     /*!
      * @return 1D Model physics.
      */
-    Physics_PtrType& GetPhysics();
+    Physics_PtrType GetPhysics() const;
 
     //! Get the Flux of the 1D model.
     /*!
      * @return 1D Model Flux.
      */
-    Flux_PtrType& GetFlux();
+    Flux_PtrType GetFlux() const;
 
     //! Get the Source of the 1D model.
     /*!
      * @return 1D Model Source.
      */
-    Source_PtrType& GetSource();
+    Source_PtrType GetSource() const;
 
     //! Get the FESpace of the 1D model.
     /*!
      * @return 1D model FESpace
      */
-    FESpace_Type& GetFESpace();
+    FESpace_PtrType GetFESpace() const;
 
     //! Get the Solver of the 1D model.
     /*!
      * @return 1D model solver.
      */
-    Solver_Type&  GetSolver();
+    Solver_PtrType  GetSolver() const;
+
+    //! Get the solution of the 1D model.
+    /*!
+     * @return 1D model solution.
+     */
+    const Solution_PtrType  GetSolution() const;
 
     //@}
 
@@ -259,21 +266,24 @@ private:
 
     //@}
 
+#ifdef HAVE_HDF5
     boost::shared_ptr< IOFile_Type >       M_Exporter;
     boost::shared_ptr< Mesh_Type >         M_ExporterMesh;
+#endif
 
     // 1D problem
     boost::shared_ptr< Data_Type >         M_Data;
     Physics_PtrType                        M_Physics;
     Flux_PtrType                           M_Flux;
     Source_PtrType                         M_Source;
-    boost::shared_ptr< Solver_Type >       M_Solver;
+    Solver_PtrType                         M_Solver;
     boost::shared_ptr< BC_Type >           M_BC;
     std::vector < Vector_PtrType >         M_Solution;
 
     // FE spaces
     boost::shared_ptr< FESpace_Type >      M_FESpace;
 
+    // Linear solver
     boost::shared_ptr< LinearSolver_Type > M_LinearSolver;
 };
 

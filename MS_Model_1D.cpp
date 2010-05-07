@@ -46,14 +46,16 @@ namespace LifeV {
 // ===================================================
 MS_Model_1D::MS_Model_1D() :
     super                          (),
+#ifdef HAVE_HDF5
     M_Exporter                     ( new IOFile_Type() ),
     M_ExporterMesh                 ( new Mesh_Type() ),
+#endif
     M_Data                         ( new Data_Type() ),
     M_Physics                      (),
     M_Flux                         (),
     M_Source                       (),
-    M_Solver                       (),
-    M_BC                           (),
+    M_Solver                       ( new Solver_Type() ),
+    M_BC                           ( new BC_Type() ),
     M_Solution                     (),
     M_FESpace                      (),
     M_LinearSolver                 ()
@@ -96,26 +98,6 @@ MS_Model_1D::SetupData( const std::string& FileName )
 
     M_Data->setup( DataFile );
 
-    M_LinearSolver.reset( new LinearSolver_Type( *M_comm ) );
-    M_LinearSolver->setUpPrec        ( DataFile, "1D_Model/prec" );
-    M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver");
-
-    //Exporter
-    M_Exporter->setDataFromGetPot( DataFile );
-    M_Exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
-    M_Exporter->setDirectory( MS_ProblemFolder );
-
-    M_ExporterMesh->setup( M_Data->Length(), M_Data->nbElem() );
-}
-
-void
-MS_Model_1D::SetupModel()
-{
-
-#ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupProblem() \n";
-#endif
-
     //1D Model Physics
     M_Physics = Physics_PtrType( Factory_OneDimensionalModel_Physics::instance().createObject( M_Data->PhysicsType() ) );
     M_Physics->SetData( M_Data );
@@ -128,23 +110,50 @@ MS_Model_1D::SetupModel()
     M_Source = Source_PtrType( Factory_OneDimensionalModel_Source::instance().createObject( M_Data->SourceType() ) );
     M_Source->SetPhysics( M_Physics );
 
+    //Linear Solver
+    M_LinearSolver.reset( new LinearSolver_Type( *M_comm ) );
+    M_LinearSolver->setUpPrec        ( DataFile, "1D_Model/prec" );
+    M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver");
+
+#ifdef HAVE_HDF5
+    //Exporter
+    M_Exporter->setDataFromGetPot( DataFile );
+    M_Exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_Exporter->setDirectory( MS_ProblemFolder );
+
+    M_ExporterMesh->setup( M_Data->Length(), M_Data->nbElem() );
+#endif
+}
+
+void
+MS_Model_1D::SetupModel()
+{
+
+#ifdef DEBUG
+    Debug( 8130 ) << "MS_Model_1D::SetupProblem() \n";
+#endif
+
+    //1D Model Solver
+    M_Solver->setProblem( M_Physics, M_Flux, M_Source );
+    M_Solver->setCommunicator( M_comm );
+
     //FEspace
     SetupFESpace();
 
-    //1D Model solver
-    M_Solver.reset ( new Solver_Type ( M_Physics, M_Flux, M_Source, M_FESpace, M_comm ) );
+    //1D Model Solver setup
     M_Solver->setup();
     M_Solver->setLinearSolver( M_LinearSolver );
 
-    //BC
-    M_BC.reset( new BC_Type( M_Solver->U_thistime(), M_Flux, M_FESpace->dim() ) );
+    //Set default BC (has to be called after setting other BC)
+    M_BC->setDefaultBC( M_Flux, M_Source, M_Solver->U_thistime() );
 
+#ifdef HAVE_HDF5
     //Post-processing
     M_Exporter->setMeshProcId( M_ExporterMesh, M_comm->MyPID() );
     M_Solution.resize( 5 );
     for ( UInt i(0) ; i < static_cast <UInt> ( M_Solution.size() ) ; ++i)
     {
-        M_Solution[i].reset( new Vector_Type( M_Solver->U_thistime()[i], M_Exporter->mapType() ) );
+        M_Solution[i].reset( new Vector_Type( (*M_Solver->U_thistime())[i], M_Exporter->mapType() ) );
         if ( M_Exporter->mapType() == Unique )
             M_Solution[i]->setCombineMode( Zero );
     }
@@ -154,6 +163,7 @@ MS_Model_1D::SetupModel()
     M_Exporter->addVariable( ExporterData::Scalar, "W1",        M_Solution[2], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
     M_Exporter->addVariable( ExporterData::Scalar, "W2",        M_Solution[3], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
     M_Exporter->addVariable( ExporterData::Scalar, "Pressure",  M_Solution[4], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+#endif
 }
 
 void
@@ -185,7 +195,7 @@ MS_Model_1D::SolveSystem()
     Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
 #endif
 
-    M_Solver->iterate( *M_BC, M_Data->dataTime()->getTime() );
+    M_Solver->iterate( *M_BC );
 }
 
 void
@@ -196,13 +206,13 @@ MS_Model_1D::SaveSolution()
     Debug( 8130 ) << "MS_Model_1D::SaveSolution() \n";
 #endif
 
+#ifdef HAVE_HDF5
     //Post-processing
     for ( UInt i(0) ; i < static_cast <UInt> ( M_Solution.size() ) ; ++i)
-        *(M_Solution[i]) = M_Solver->U_thistime()[i];
+        *(M_Solution[i]) = (*M_Solver->U_thistime())[i];
 
     M_Exporter->postProcess( M_Data->dataTime()->getTime() );
 
-#ifdef HAVE_HDF5
     if ( M_Data->dataTime()->isLastTimeStep() )
         M_Exporter->CloseFile();
 #endif
@@ -251,45 +261,51 @@ MS_Model_1D::SolveLinearModel( bool& /*SolveLinearSystem*/ )
 // Get Methods
 // ===================================================
 MS_Model_1D::BC_Type&
-MS_Model_1D::GetBC()
+MS_Model_1D::GetBC() const
 {
     return *M_BC;
 }
 
 MS_Model_1D::Data_Type&
-MS_Model_1D::GetData()
+MS_Model_1D::GetData() const
 {
     return *M_Data;
 }
 
-MS_Model_1D::Physics_PtrType&
-MS_Model_1D::GetPhysics()
+MS_Model_1D::Physics_PtrType
+MS_Model_1D::GetPhysics() const
 {
     return M_Physics;
 }
 
-MS_Model_1D::Flux_PtrType&
-MS_Model_1D::GetFlux()
+MS_Model_1D::Flux_PtrType
+MS_Model_1D::GetFlux() const
 {
     return M_Flux;
 }
 
-MS_Model_1D::Source_PtrType&
-MS_Model_1D::GetSource()
+MS_Model_1D::Source_PtrType
+MS_Model_1D::GetSource() const
 {
     return M_Source;
 }
 
-MS_Model_1D::FESpace_Type&
-MS_Model_1D::GetFESpace()
+MS_Model_1D::FESpace_PtrType
+MS_Model_1D::GetFESpace() const
 {
-    return *M_FESpace;
+    return M_FESpace;
 }
 
-MS_Model_1D::Solver_Type&
-MS_Model_1D::GetSolver()
+MS_Model_1D::Solver_PtrType
+MS_Model_1D::GetSolver() const
 {
-    return *M_Solver;
+    return M_Solver;
+}
+
+const MS_Model_1D::Solution_PtrType
+MS_Model_1D::GetSolution() const
+{
+    return M_Solver->U_thistime();
 }
 
 // ===================================================
@@ -319,8 +335,10 @@ MS_Model_1D::SetupFESpace()
     //The real mesh can be only scaled due to OneDimensionalModel_Solver conventions
     M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation );
 
+#ifdef HAVE_HDF5
     //The mesh for the post-processing can be rotated
     M_ExporterMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+#endif
 
     //Setup FESpace
     const RefFE*    refFE = &feSegP1;
@@ -328,6 +346,7 @@ MS_Model_1D::SetupFESpace()
     const QuadRule* bdQr  = &quadRuleSeg1pt;
 
     M_FESpace.reset( new FESpace_Type( M_Data->mesh(), *refFE, *qR, *bdQr, 1, *M_comm ) );
+    M_Solver->setFESpace( M_FESpace );
 }
 
 } // Namespace LifeV
