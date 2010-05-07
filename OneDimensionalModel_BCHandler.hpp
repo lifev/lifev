@@ -42,10 +42,8 @@
 #define ONEDIMENSIONALMODEL_BCHANDLER_H
 
 // LIFEV - MATHCARD
-#include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
-#include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
+#include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
 
 namespace LifeV {
 
@@ -60,21 +58,13 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::shared_ptr<OneDimensionalModel_BCFunction>    OneDBCFunction_PtrType;
+    typedef OneDimensionalModel_BC::BCFunction_Type         BCFunction_Type;
+    typedef OneDimensionalModel_BC::BCFunction_PtrType         BCFunction_PtrType;
+    typedef OneDimensionalModel_BC::BCFunction_Default_PtrType BCFunction_Default_PtrType;
 
-    typedef OneDimensionalModel_BCFunction::Flux_Type            Flux_Type;
-    typedef OneDimensionalModel_BCFunction::Flux_PtrType         Flux_PtrType;
-
-    typedef OneDimensionalModel_BCFunction::Source_Type          Source_Type;
-    typedef OneDimensionalModel_BCFunction::Source_PtrType       Source_PtrType;
-
-    typedef OneDimensionalModel_BCFunction::Data_Type            Data_Type;
-    typedef OneDimensionalModel_BCFunction::Mesh_Type            Mesh_Type;
-
-    typedef OneDimensionalModel_BCFunction::FESpace_Type         FESpace_Type;
-
-    typedef OneDimensionalModel_BCFunction::LinearSolver_Type    LinearSolver_Type;
-    typedef OneDimensionalModel_BCFunction::Vector_Type          Vector_Type;
+    typedef OneDimensionalModel_BC::Flux_PtrType               Flux_PtrType;
+    typedef OneDimensionalModel_BC::Source_PtrType             Source_PtrType;
+    typedef OneDimensionalModel_BC::Solution_PtrType           Solution_PtrType;
 
     //@}
 
@@ -83,9 +73,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCHandler( const std::vector<Vector_Type>& U_thistime,
-                                   const Flux_PtrType              fluxFun,
-                                   const Real&                     dimDof );
+    OneDimensionalModel_BCHandler();
 
     //! Destructor
     ~OneDimensionalModel_BCHandler() {}
@@ -97,9 +85,11 @@ public:
     //@{
 
     //! Apply boundary conditions
-    void applyBC (const Real&  time_val,
-                        Vec2D& left_BC_dir,
-                        Vec2D& right_BC_dir );
+    void applyBC ( const Real&             time,
+                   const Solution_PtrType& solution,
+                   const Flux_PtrType&     flux,
+                         Container2D_Type& left_BC_dir,
+                         Container2D_Type& right_BC_dir );
 
     //@}
 
@@ -107,19 +97,16 @@ public:
     //! @name Set Methods
     //@{
 
-    void setBC( const OneDBCFunction_PtrType& funptr, const std::string& border,
-                const std::string& line,              const std::string& var );
+    void setBC( const BCFunction_Type& BCfunction, const OneD_BCSide& side,
+                const OneD_BCLine& line,           const OneD_BC& bcType );
 
-    void setBC( const OneDBCFunction_PtrType& funptr, const std::string& border,
-                const std::string& line,              const std::string& var,
-                const Vec2D & matrixrow );
+    void setBC( const BCFunction_Type& BCfunction, const OneD_BCSide& side,
+                const OneD_BCLine& line,           const OneD_BC& bcType,
+                const Container2D_Type& matrixrow );
 
-    inline void setBCLeft_internalnode();
-    inline void setBCRight_internalnode();
-
-    void setDefaultBC( const FESpace_Type&  fespace,
-                       const Source_PtrType sourceFun,
-                       const Real&          dt);
+    void setDefaultBC( const Flux_PtrType     fluxFun,
+                       const Source_PtrType   sourceFun,
+                       const Solution_PtrType solution );
 
     //@}
 
@@ -127,30 +114,18 @@ public:
     //! @name Get Methods
     //@{
 
-    inline OneDimensionalModel_BC& BC( const std::string& bound );
+    const OneDimensionalModel_BC& BC( const OneD_BCSide& side );
 
-    OneDBCFunction_PtrType& leftBCFunction( const std::string& line );
-    OneDBCFunction_PtrType& rightBCFunction( const std::string& line );
-
-    inline bool& leftBCReady( const std::string& line );
-    inline bool& rightBCReady( const std::string& line );
+    const bool& BCReady( const OneD_BCSide& side, const OneD_BCLine& line );
 
     //@}
 
 private:
 
-    //! Trick to use strings in C++ switch construct
-    std::map<std::string, OneDBCStringValue>                 M_OneDimensionalModel_BCHandlerMapStringValues;
+    std::map< OneD_BCSide, boost::shared_ptr< OneDimensionalModel_BC > > M_boundary;
+    std::map< OneD_BCSide, std::map< OneD_BCLine, bool > >               M_boundarySet;
 
-    //! Reference to the solver current unknowns (U)
-    const std::vector<Vector_Type>&                          M_U_thistime;
-
-    //! Reference to the solver non linear flux functions
-    Flux_PtrType                                             M_fluxFun;
-
-    std::map<std::string, boost::shared_ptr<OneDimensionalModel_BC > > M_boundary;
-
-    std::map<std::string, std::map< std::string, bool > >    M_boundarybool;
+    std::vector < BCFunction_Default_PtrType >                           M_defaultBC;
 };
 
 }

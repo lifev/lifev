@@ -42,8 +42,7 @@
 #define ONEDIMENSIONALMODEL_BC_H
 
 // LIFEV - MATHCARD
-#include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
+#include <lifemc/lifefem/OneDimensionalModel_BCFunction_Default.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
 
 namespace LifeV {
@@ -59,18 +58,15 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::shared_ptr<OneDimensionalModel_BCFunction>    OneDimensionalModel_BCFunction_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default::BCFunction_Type   BCFunction_Type;
+    typedef OneDimensionalModel_BCFunction_Default::BCFunction_PtrType   BCFunction_PtrType;
 
-    typedef OneDimensionalModel_BCFunction::Flux_Type            Flux_Type;
-    typedef OneDimensionalModel_BCFunction::Flux_PtrType         Flux_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default                       BCFunction_Default_Type;
+    typedef boost::shared_ptr< BCFunction_Default_Type >                 BCFunction_Default_PtrType;
 
-    typedef OneDimensionalModel_BCFunction::Data_Type            Data_Type;
-    typedef OneDimensionalModel_BCFunction::Mesh_Type            Mesh_Type;
-
-    typedef OneDimensionalModel_BCFunction::FESpace_Type         FESpace_Type;
-
-    typedef OneDimensionalModel_BCFunction::LinearSolver_Type    LinearSolver_Type;
-    typedef OneDimensionalModel_BCFunction::Vector_Type          Vector_Type;
+    typedef OneDimensionalModel_BCFunction_Default::Flux_PtrType         Flux_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default::Source_PtrType       Source_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default::Solution_PtrType     Solution_PtrType;
 
     //@}
 
@@ -79,10 +75,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BC( const std::vector<Vector_Type>& U_thistime,
-                            const Flux_PtrType              fluxFun,
-                            const Real&                     dimDof,
-                            const std::string&              side );
+    OneDimensionalModel_BC( const OneD_BCSide& side );
 
     //! Destructor
     ~OneDimensionalModel_BC() {}
@@ -94,10 +87,25 @@ public:
     //@{
 
     //! Compute [A,Q] at the boundary
-    Vec2D Uboundary(const ScalVec& U1, const ScalVec& U2) const;
+    Container2D_Type Uboundary( const ScalVec& U1, const ScalVec& U2 ) const;
 
     //! Apply boundary conditions
-    void applyBC( const Real& time_val, Vec2D& BC_dir );
+    void applyBC( const Real& time,         const Solution_PtrType& solution,
+                  const Flux_PtrType& flux,       Container2D_Type& BC_dir );
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    void setVariable( const OneD_BCLine& line, const OneD_BC& bc );
+
+    void setInternalFlag( const bool& flag );
+
+    void setRHS( const OneD_BCLine& line, const BCFunction_Type& rhs );
+
+    void setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow );
 
     //@}
 
@@ -105,30 +113,18 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Return the boundary Dof
-    UInt boundaryDof() const;
-
-    //! careful I need them to be setters! do not remove the reference
-    OneDimensionalModel_BCFunction_PtrType& rhs( const std::string& line );
-
-    std::string& variable( const std::string& line );
-
-    Vec2D& matrixrow( const std::string& line );
-
-    bool& isInternal();
-
     //@}
 
-protected:
+private:
 
-    //! @name Protected Methods
+    //! @name Private Methods
     //@{
 
     //! Impose the chosen boundary condition
-    void compute_resBC( const Real& time_val );
+    void compute_resBC( const Real& time, const Solution_PtrType& solution, const Flux_PtrType& flux );
 
-    void compute_resBC_line( std::string line, Vec2D left_eigvec,
-                             Vec2D U, Vec2D W, Real& rhs );
+    void compute_resBC_line( OneD_BCLine line, Container2D_Type left_eigvec,
+                             Container2D_Type U, Container2D_Type W, Real& rhs );
 
     //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
     /*!
@@ -137,31 +133,24 @@ protected:
      *       M_matrixrow_at_line["second"] ]
      * @return A^{-1} * rhs2d
      */
-    Vec2D _solveLinearSyst2x2( const Vec2D& line1, const Vec2D& line2, const Vec2D& rhs2d ) const;
+    Container2D_Type _solveLinearSyst2x2( const Container2D_Type& line1,
+                                          const Container2D_Type& line2,
+                                          const Container2D_Type& rhs2d ) const;
 
     //@}
 
     bool                                          M_isInternal;
 
-    std::map<std::string, std::string>            M_variable_at_line;
+    std::map<OneD_BCLine, OneD_BC>                M_variable_at_line;
 
-    std::map<std::string, Vec2D>                  M_matrixrow_at_line;
+    std::map<OneD_BCLine, Container2D_Type>       M_matrixrow_at_line;
 
-    std::map<std::string, OneDimensionalModel_BCFunction_PtrType> M_rhs_at_line;
-
-    std::map<std::string, OneDBCStringValue>      M_OneDimensionalModel_BCMapStringValues;
+    std::map<OneD_BCLine, BCFunction_Type>        M_rhs_at_line;
 
     //! Result of the 2x2 linear system to be solved at each side
-    Vec2D                                         M_resBC;
+    Container2D_Type                              M_resBC;
 
-    //! Reference to the solver current unknowns (U)
-    const std::vector<Vector_Type>&               M_U_thistime;
-
-    //! Boundary Dof (right or left)
-    UInt                                          M_boundaryDof;
-
-    //! Reference to the solver non linear flux functions
-    Flux_PtrType                                  M_fluxFun;
+    OneD_BCSide                                   M_boundarySide;
 };
 
 }

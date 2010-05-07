@@ -38,7 +38,6 @@
  *  @date 20-04-2010
  */
 
-
 #include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
 
 namespace LifeV {
@@ -46,117 +45,87 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BC::OneDimensionalModel_BC( const std::vector<Vector_Type>&  U_thistime,
-                                                const Flux_PtrType               fluxFun,
-                                                const Real&                      dimDof,
-                                                const std::string&               side ) :
-    M_isInternal                (),
+OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
+    M_isInternal                ( false ),
     M_variable_at_line          (),
     M_matrixrow_at_line         (),
     M_rhs_at_line               (),
-    M_OneDimensionalModel_BCMapStringValues     (),
-    M_resBC                     ( 2 ),
-    M_U_thistime                ( U_thistime ),
-    M_boundaryDof               (),
-    M_fluxFun                   ( fluxFun )
+    M_resBC                     (),
+    M_boundarySide              ( side )
 {
-    (side == "left") ? M_boundaryDof = 1 : M_boundaryDof = dimDof;
-
-    M_isInternal=false;
-
-    M_variable_at_line["first"]="not set";
-    M_variable_at_line["second"]="not set";
-
-    M_matrixrow_at_line["first"]=Vec2D(2);
-    M_matrixrow_at_line["second"]=Vec2D(2);
-
-    M_OneDimensionalModel_BCMapStringValues["W1"]  = OneDBCW1;
-    M_OneDimensionalModel_BCMapStringValues["W2"]  = OneDBCW2;
-    M_OneDimensionalModel_BCMapStringValues["A"]   = OneDBCA;
-    M_OneDimensionalModel_BCMapStringValues["Q"]   = OneDBCQ;
-    M_OneDimensionalModel_BCMapStringValues["fun"] = OneDBCFUN;
+    M_matrixrow_at_line[ OneD_first ]  = Container2D_Type();
+    M_matrixrow_at_line[ OneD_second ] = Container2D_Type();
 }
 
 // ===================================================
 // Methods
 // ===================================================
-Vec2D
-OneDimensionalModel_BC::Uboundary( const ScalVec& U1, const ScalVec& U2 ) const
-{
-    Vec2D Ubound(2);
-    Ubound[0] = U1(M_boundaryDof); Ubound[1] = U2(M_boundaryDof);
-    return Ubound;
-}
-
 void
-OneDimensionalModel_BC::applyBC( const Real& time_val, Vec2D& BC_dir )
+OneDimensionalModel_BC::applyBC( const Real&             time,
+                                 const Solution_PtrType& solution,
+                                 const Flux_PtrType&     flux,
+                                       Container2D_Type& BC_dir )
 {
-    //std::cout << "BC_dir = " << BC_dir[0] << " " << BC_dir[1] << std::endl;
-    ASSERT_PRE( BC_dir.size() == 2,
-                "applyBC works only for 2D vectors");
+    ASSERT_PRE( BC_dir.size() == 2, "applyBC works only for 2D vectors");
 
     if( M_isInternal )
         Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] found internal boundary\n";
     else
     {
-        compute_resBC(time_val);
+        compute_resBC( time, solution, flux );
 
-        for( UInt i = 0; i < 2; ++i )
+        for( UInt i(0) ; i < 2 ; ++i )
             BC_dir[i]=M_resBC[i];
     }
 
-    Debug(6311) << "[OneDimensionalModel_BC::applyBC] at node " << M_boundaryDof
-                << " imposing [ A, Q ] = [ " << BC_dir[0]
-                << ", " << BC_dir[1] << " ]\n";
+    Debug(6311) << "[OneDimensionalModel_BC::applyBC] on side " << M_boundarySide
+                << " imposing [ A, Q ] = [ " << BC_dir[0] << ", " << BC_dir[1] << " ]\n";
 }
 
 // ===================================================
-// Get Methods
+// Set Methods
 // ===================================================
-UInt
-OneDimensionalModel_BC::boundaryDof() const
+void
+OneDimensionalModel_BC::setVariable( const OneD_BCLine& line, const OneD_BC& bc )
 {
-    return M_boundaryDof;
+    M_variable_at_line[line] = bc;
 }
 
-OneDimensionalModel_BC::OneDimensionalModel_BCFunction_PtrType&
-OneDimensionalModel_BC::rhs( const std::string& line )
+void
+OneDimensionalModel_BC::setInternalFlag( const bool& flag )
 {
-    return M_rhs_at_line[line];
+    M_isInternal = flag;
 }
 
-std::string&
-OneDimensionalModel_BC::variable( const std::string& line )
+void
+OneDimensionalModel_BC::setRHS( const OneD_BCLine& line, const BCFunction_Type& rhs )
 {
-    return M_variable_at_line[line];
+    //M_rhs_at_line[line] = rhs;
+    M_rhs_at_line[line] = rhs; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
 }
 
-Vec2D&
-OneDimensionalModel_BC::matrixrow( const std::string& line )
+void
+OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow )
 {
-    return M_matrixrow_at_line[line];
-}
-
-bool&
-OneDimensionalModel_BC::isInternal()
-{
-    return M_isInternal;
+    M_matrixrow_at_line[line] = matrixrow;
 }
 
 // ===================================================
 // Protected Methods
 // ===================================================
 void
-OneDimensionalModel_BC::compute_resBC( const Real& time_val )
+OneDimensionalModel_BC::compute_resBC( const Real&             time,
+                                       const Solution_PtrType& solution,
+                                       const Flux_PtrType&     flux )
 {
-    Vec2D rhsBC(2);
+    Container2D_Type rhsBC;
 
     // Eigen values of the jacobian diffFlux (= dF/dU = H)
     Real  eigval1, eigval2;
 
     // Left eigen vectors for the eigen values eigval1 and eigval2
-    Vec2D left_eigvec1(2), left_eigvec2(2);
-    Vec2D left_eigvec_first(2), left_eigvec_second(2);
+    Container2D_Type left_eigvec1, left_eigvec2;
+    Container2D_Type left_eigvec_first, left_eigvec_second;
 
     left_eigvec1[0] = 0.;
     left_eigvec1[1] = 0.;
@@ -164,28 +133,35 @@ OneDimensionalModel_BC::compute_resBC( const Real& time_val )
     left_eigvec2[0] = 0.;
     left_eigvec2[1] = 0.;
 
-    Vec2D U_boundary(2), W_boundary(2);
+    UInt dof;
+    ( M_boundarySide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->nbElem() + 1;
 
+    Container2D_Type U_boundary, W_boundary;
     for( UInt i = 0; i < 2; ++i )
     {
-        U_boundary[i] = M_U_thistime[i    ](M_boundaryDof);
-        W_boundary[i] = M_U_thistime[2 + i](M_boundaryDof) ;
+        U_boundary[i] = (*solution)[i    ](dof);
+        W_boundary[i] = (*solution)[2 + i](dof) ;
         //std::cout << "bdof " << M_boundaryDof << " : " << M_U_thistime[2 + i](M_boundaryDof) << std::endl;
     }
 
     Real Aboundary = U_boundary[0];
     Real Qboundary = U_boundary[1];
 
-    M_fluxFun->jacobian_EigenValues_Vectors( Aboundary, Qboundary,
-                                             eigval1, eigval2,
-                                             left_eigvec1[0], left_eigvec1[1],
-                                             left_eigvec2[0], left_eigvec2[1],
-                                             M_boundaryDof );
+    flux->jacobian_EigenValues_Vectors( Aboundary, Qboundary,
+                                        eigval1, eigval2,
+                                        left_eigvec1[0], left_eigvec1[1],
+                                        left_eigvec2[0], left_eigvec2[1],
+                                        dof );
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 1\n";
 
-    rhsBC[0] = M_rhs_at_line["first"]->evaluate(time_val);
-    rhsBC[1] = M_rhs_at_line["second"]->evaluate(time_val);
+    rhsBC[0] = M_rhs_at_line[OneD_first](time);
+    if ( M_variable_at_line[OneD_first] == OneD_P )
+        rhsBC[0] = flux->Physics()->A_from_P( rhsBC[0], dof - 1 ); // Index start from 0
+
+    rhsBC[1] = M_rhs_at_line[OneD_second](time);
+    if ( M_variable_at_line[OneD_second] == OneD_P )
+        rhsBC[1] = flux->Physics()->A_from_P( rhsBC[1], dof - 1 ); // Index start from 0
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[0] = " << rhsBC[0] << "\n";;
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[1] = " << rhsBC[1] << "\n";;
@@ -200,32 +176,32 @@ OneDimensionalModel_BC::compute_resBC( const Real& time_val )
     // the same variable on both lines!)
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 2\n";
-    M_OneDimensionalModel_BCMapStringValues[ M_variable_at_line["first"] ] == OneDBCW1 ? //"W1"
+    M_variable_at_line[OneD_first] == OneD_W1 ? //"W1"
         left_eigvec_first = left_eigvec1 :
         left_eigvec_first = left_eigvec2;
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 3\n";
-    M_OneDimensionalModel_BCMapStringValues[ M_variable_at_line["second"] ] == OneDBCW1 ? //"W1"
+    M_variable_at_line[OneD_second] == OneD_W1 ? //"W1"
         left_eigvec_second = left_eigvec1 :
         left_eigvec_second = left_eigvec2;
 
-    compute_resBC_line("first",  left_eigvec_first, U_boundary, W_boundary, rhsBC[0]);
-    compute_resBC_line("second", left_eigvec_second, U_boundary, W_boundary, rhsBC[1]);
+    compute_resBC_line(OneD_first,  left_eigvec_first, U_boundary, W_boundary, rhsBC[0]);
+    compute_resBC_line(OneD_second, left_eigvec_second, U_boundary, W_boundary, rhsBC[1]);
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] solving linear system with "
-                << "\n\tfirst line = " << M_matrixrow_at_line["first"][0]
-                << ", " << M_matrixrow_at_line["first"][1]
-                << "\n\tsecond line = " << M_matrixrow_at_line["second"][0]
-                << ", " << M_matrixrow_at_line["second"][1]
+                << "\n\tfirst line = " << M_matrixrow_at_line[OneD_first][0]
+                << ", " << M_matrixrow_at_line[OneD_first][1]
+                << "\n\tsecond line = " << M_matrixrow_at_line[OneD_second][0]
+                << ", " << M_matrixrow_at_line[OneD_second][1]
                 << "\n\trhs = " << rhsBC[0]
                 << ", " << rhsBC[1]
                 << "\n";
 
-    M_resBC=_solveLinearSyst2x2(M_matrixrow_at_line["first"], M_matrixrow_at_line["second"], rhsBC);
+    M_resBC=_solveLinearSyst2x2(M_matrixrow_at_line[OneD_first], M_matrixrow_at_line[OneD_second], rhsBC);
 }
 
 void
-OneDimensionalModel_BC::compute_resBC_line( std::string line, Vec2D left_eigvec, Vec2D U, Vec2D W, Real& rhs )
+OneDimensionalModel_BC::compute_resBC_line( OneD_BCLine line, Container2D_Type left_eigvec, Container2D_Type U, Container2D_Type W, Real& rhs )
 {
     ASSERT_PRE( left_eigvec.size() == 2 && U.size() == 2 && W.size() == 2,
                 "compute_resBC_line works only for 2D vectors");
@@ -240,9 +216,9 @@ OneDimensionalModel_BC::compute_resBC_line( std::string line, Vec2D left_eigvec,
 
     Real LnUn, add;
 
-    switch( M_OneDimensionalModel_BCMapStringValues[ M_variable_at_line[line] ] )
+    switch( M_variable_at_line[line] )
     {
-        case OneDBCW1: //"W1"
+        case OneD_W1: //"W1"
             //       ASSERT(eigval1<0. && eigval2<0.,
             // "The eigenvalues do no have the expected signs (lam1<0 and lam2<0).");
             M_matrixrow_at_line[line] = left_eigvec;
@@ -251,22 +227,21 @@ OneDimensionalModel_BC::compute_resBC_line( std::string line, Vec2D left_eigvec,
             rhs += add;
 
         break;
-        case OneDBCW2: //"W2"
+        case OneD_W2: //"W2"
             M_matrixrow_at_line[line] = left_eigvec;
             LnUn = dot( left_eigvec, U );
             add = LnUn - W[1];
             rhs += add;
         break;
-        case OneDBCA: //"A"
+        case OneD_A: //"A"
+        case OneD_P: //"P"
             M_matrixrow_at_line[line][0] = 1.; M_matrixrow_at_line[line][1] = 0.;
         break;
-        case OneDBCQ: //"Q"
+        case OneD_Q: //"Q"
             M_matrixrow_at_line[line][0] = 0.; M_matrixrow_at_line[line][1] = 1.;
         break;
-        case OneDBCFUN: //linear combination of A, Q
-        break;
         default: std::cout << "\n[OneDimensionalModel_BC::compute_resBC] Wrong boundary variable as " << line
-                           << " condition at node " << M_boundaryDof;
+                           << " condition on side " << M_boundarySide;
     }
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] to impose variable "
@@ -276,10 +251,10 @@ OneDimensionalModel_BC::compute_resBC_line( std::string line, Vec2D left_eigvec,
                 << M_matrixrow_at_line[line][1] << "\n";
 }
 
-Vec2D
-OneDimensionalModel_BC::_solveLinearSyst2x2( const Vec2D& line1,
-                                             const Vec2D& line2,
-                                             const Vec2D& rhs2d ) const
+Container2D_Type
+OneDimensionalModel_BC::_solveLinearSyst2x2( const Container2D_Type& line1,
+                                             const Container2D_Type& line2,
+                                             const Container2D_Type& rhs2d ) const
 {
     ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs2d.size() == 2,
                 "_solveLinearSyst2x2 works only for 2D vectors");
@@ -307,7 +282,7 @@ OneDimensionalModel_BC::_solveLinearSyst2x2( const Vec2D& line1,
             "Error: the 2x2 system on the boundary is not invertible."
             "\nCheck the boundary conditions.");
 
-    Vec2D res(2);
+    Container2D_Type res;
     res[0] = ( aa22 * rhs2d[0] - aa12 * rhs2d[1] ) / determinant;
     res[1] = ( - aa21 * rhs2d[0] + aa11 * rhs2d[1] ) / determinant;
     return res;
