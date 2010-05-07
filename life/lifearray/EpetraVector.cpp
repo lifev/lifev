@@ -1,33 +1,41 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
- Simone Deparis <simone.deparis@epfl.ch>
- Date: 2006-10-04
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/**
- \file EpetraVector.cpp
- \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-         Simone Deparis <simone.deparis@epfl.ch>
- \date 2006-10-04
+
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Model 1D
+ *
+ *  @version 1.0
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *  @date 04-10-2006
+ *
+ *  @version 1.10
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 15-10-2009
  */
 
 #include <life/lifearray/EpetraVector.hpp>
@@ -36,139 +44,131 @@
 namespace LifeV {
 
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
-EpetraVector::EpetraVector( const EpetraMap& _map, EpetraMapType maptype ):
-    M_epetraMap   (new EpetraMap(_map)),
-    M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
-    M_combineMode (Add)
+EpetraVector::EpetraVector( const EpetraMapType& maptype ):
+    M_epetraMap   (),
+    M_maptype     ( maptype ),
+    M_epetraVector(),
+    M_combineMode ( Add )
 {
 }
 
-EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& _map, EpetraMapType maptype ):
-    M_epetraMap   (_map),
-    M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
-    M_combineMode (Add)
+EpetraVector::EpetraVector( const EpetraMap& map, const EpetraMapType& maptype ):
+    M_epetraMap   ( new EpetraMap( map ) ),
+    M_maptype     ( maptype ),
+    M_epetraVector( new vector_type( *M_epetraMap->getMap(M_maptype) )),
+    M_combineMode ( Add )
+{
+}
+
+EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& map, const EpetraMapType& maptype ):
+    M_epetraMap   ( map ),
+    M_maptype     ( maptype ),
+    M_epetraVector( new vector_type( *M_epetraMap->getMap(M_maptype) ) ),
+    M_combineMode ( Add )
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector):
-    M_epetraMap   (vector.M_epetraMap),
-    M_maptype     (vector.M_maptype),
-    M_epetraVector(vector.M_epetraVector),
-    M_combineMode (vector.M_combineMode)
+    M_epetraMap   ( vector.M_epetraMap ),
+    M_maptype     ( vector.M_maptype ),
+    M_epetraVector( new vector_type( vector.getEpetraVector() ) ), //This make a true copy!
+    M_combineMode ( vector.M_combineMode )
 {
 }
 
-EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype):
-    M_epetraMap   (vector.M_epetraMap),
-    M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
-    M_combineMode (Add)
+EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& maptype):
+    M_epetraMap   ( vector.M_epetraMap ),
+    M_maptype     ( maptype ),
+    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+    M_combineMode ( Add )
 {
     operator = (vector);
 }
 
-EpetraVector::EpetraVector( const EpetraVector& vector, EpetraMapType maptype,
-                            Epetra_CombineMode combineMode):
-    M_epetraMap   (vector.M_epetraMap),
-    M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
-    M_combineMode (Add)
+EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& maptype,
+                            const Epetra_CombineMode& combineMode ):
+    M_epetraMap   ( vector.M_epetraMap ),
+    M_maptype     ( maptype ),
+    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+    M_combineMode ( Add )
 {
-
     if (maptype == vector.M_maptype)
     {
-        M_epetraVector = vector.getEpetraVector();
+        *M_epetraVector = vector.getEpetraVector();
         return;
     }
 
     *this *= 0.; // because of a buggy behaviour in case of multidefined indeces.
 
-    switch (M_maptype) {
+    switch (M_maptype)
+    {
     case Unique:
-        M_epetraVector.Export(vector.M_epetraVector, M_epetraMap->getImporter(), combineMode);
+        M_epetraVector->Export( vector.getEpetraVector(), M_epetraMap->getImporter(), combineMode );
         return ;
     case Repeated:
-        M_epetraVector.Import(vector.M_epetraVector, M_epetraMap->getExporter(), combineMode);
+        M_epetraVector->Import( vector.getEpetraVector(), M_epetraMap->getExporter(), combineMode );
         return ;
     }
 }
 
-// Copies vector to FEvector that comes as Multivector
-EpetraVector::EpetraVector( const Epetra_MultiVector&    vector,
-                            boost::shared_ptr<EpetraMap> _map,
-                            EpetraMapType                maptype ):
-    M_epetraMap   ( _map),
-    M_maptype     (maptype),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
-    M_combineMode (Add)
+EpetraVector::EpetraVector( const Epetra_MultiVector&           vector,
+                            const boost::shared_ptr<EpetraMap>  map,
+                            const EpetraMapType&                maptype ):
+    M_epetraMap   ( map ),
+    M_maptype     ( maptype ),
+    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+    M_combineMode ( Add )
 {
-
-    assert(this->BlockMap().SameAs(vector.Map()) );
-
-    M_epetraVector.Update(1., vector, 0.);
-
+    assert( this->BlockMap().SameAs(vector.Map()) );
+    M_epetraVector->Update(1., vector, 0.);
 }
 
-// Copies vector to a vector which resides only on the processor "reduceToProc"
-EpetraVector::EpetraVector( const EpetraVector& vector, const int reduceToProc):
-    M_epetraMap   (vector.M_epetraMap->createRootMap(reduceToProc)),
-    M_maptype     (Unique),
-    M_epetraVector(*M_epetraMap->getMap(M_maptype)),
-    M_combineMode (Add)
+EpetraVector::EpetraVector( const EpetraVector& vector, const int& reduceToProc):
+    M_epetraMap   ( vector.M_epetraMap->createRootMap( reduceToProc ) ),
+    M_maptype     ( Unique ),
+    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+    M_combineMode ( Add )
 {
-    operator = (vector);
+    operator = ( vector );
 }
 
-
-
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
-//! if row is mine returns the LID
-//! if row is not mine and if the numCpus > 1, returns -1
-//! if row is not mine and if the numCpus == 1, asserts
-int EpetraVector::checkLID(const UInt row) const
+int EpetraVector::checkLID( const UInt row ) const
 {
     int lrow = BlockMap().LID(row); // BASEINDEX + 1, row + 1
 
     if (lrow < 0 && BlockMap().Comm().NumProc() == 1)
     {
-        std::cout << M_epetraVector.Comm().MyPID() << " " << row << " " << lrow << std::endl;
+        std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "EpetraVector::checkLID ERROR : !! lrow < 0\n" );
     }
 
     return lrow;
-
 }
 
-//! if row is mine sets this[row] = value and return true
-//! if row is not mine and if the numCpus > 1, returns false
-//! if row is not mine and if the numCpus == 1, asserts
 bool EpetraVector::checkAndSet(const UInt row, const data_type& value, UInt offset)
 {
     int lrow = checkLID(row + offset);
     if (lrow < 0)
         return false;
 
-    M_epetraVector[0][lrow] = value;
+    (*M_epetraVector)[0][lrow] = value;
     return true;
 }
 
-//! Set the row row of the vector to value. If it isn't on this processor,
-//! store it and send it and send it at next GlobalAssemble
 int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double>& datumVec)
 {
     ASSERT( rVec.size() == datumVec.size(), "Error: rVec and datumVec should have the same size" );
     ASSERT( M_maptype == Unique, "Error: Vector must have a unique map" );
 
     // Coding this part by hands, in fact I do not trust the following line (Simone, June 2008)
-    // return M_epetraVector.ReplaceGlobalValues(rVec.size(), &rVec.front(), &datumVec.front());
+    // return M_epetraVector->ReplaceGlobalValues(rVec.size(), &rVec.front(), &datumVec.front());
 
-    const Epetra_Comm&  Comm(M_epetraVector.Comm());
+    const Epetra_Comm&  Comm(M_epetraVector->Comm());
     int numProcs(Comm.NumProc());
     int MyPID   (Comm.MyPID()   );
     int i;
@@ -179,101 +179,97 @@ int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double
     int*       r;
     data_type* datum;
 
-
     // loop on all proc
     for ( int p(0); p < numProcs; p++)
-        {
-            int sizeVec( static_cast<int>( rVec.size() ) );
-            if ( sizeVec != static_cast<int>( datumVec.size() ) )
-                { //! vectors must be of the same size
-                    ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
-                }
-
-            Comm.Broadcast(&sizeVec, 1, p);
-
-            if ( p == MyPID )
-                {
-                    r    =  &rVec    .front();
-                    datum = &datumVec.front();
-                }
-            else
-                {
-                    r    = new int     [sizeVec];
-                    datum = new data_type[sizeVec];
-                }
-
-            Comm.Broadcast(r,    sizeVec, p);
-            Comm.Broadcast(datum,sizeVec, p);
-
-            // row: if r is mine, Assign values
-            for (i=0; i < sizeVec; ++i)
-                checkAndSet(r[i], datum[i]);
-
-            if ( p != MyPID )
-                {
-                    delete[] r;
-                    delete[] datum;
-                }
-
+    {
+        int sizeVec( static_cast<int>( rVec.size() ) );
+        if ( sizeVec != static_cast<int>( datumVec.size() ) )
+        { //! vectors must be of the same size
+            ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
         }
+
+        Comm.Broadcast(&sizeVec, 1, p);
+
+        if ( p == MyPID )
+        {
+            r    =  &rVec    .front();
+            datum = &datumVec.front();
+        }
+        else
+        {
+            r    = new int     [sizeVec];
+            datum = new data_type[sizeVec];
+        }
+
+        Comm.Broadcast(r,    sizeVec, p);
+        Comm.Broadcast(datum,sizeVec, p);
+
+        // row: if r is mine, Assign values
+        for (i=0; i < sizeVec; ++i)
+            checkAndSet(r[i], datum[i]);
+
+        if ( p != MyPID )
+        {
+            delete[] r;
+            delete[] datum;
+        }
+    }
 
     return 0;
 
 }
 
 int
-EpetraVector::sumIntoGlobalValues (const int GID, const double value)
+EpetraVector::sumIntoGlobalValues ( const int GID, const double value )
 {
-    return M_epetraVector.SumIntoGlobalValues(1, &GID, &value);
+    return M_epetraVector->SumIntoGlobalValues(1, &GID, &value);
 }
 
-
-EpetraVector& EpetraVector::
-add(const EpetraVector& vector,
-    const int           offset )
+EpetraVector&
+EpetraVector::add( const EpetraVector& vector, const int offset )
 {
     if ( offset == 0 )
         return operator+= (vector);
 
-    int numMyEntries = vector.M_epetraVector.MyLength ();
+    int numMyEntries = vector.M_epetraVector->MyLength ();
     const int*    gids       = vector.BlockMap().MyGlobalElements();
 
     // eg: (u,p) += p or (u,p) += u
     for (int i = 0; i < numMyEntries; ++i)
-        {
-            //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
-            (*this)[gids[i]+offset] += vector(gids[i]);
-        }
+    {
+        //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
+        (*this)[gids[i]+offset] += vector(gids[i]);
+    }
 
     return *this;
 }
 
 EpetraVector&
-EpetraVector::subset(const EpetraVector& vector,
-                     const UInt          offset )
+EpetraVector::subset( const EpetraVector& vector,
+                      const UInt          offset )
 {
     return this->subset( vector, getMap(), offset, static_cast<UInt> (0) );
 }
 
-EpetraVector& EpetraVector::
-subset(const EpetraVector& vector,
-       const EpetraMap&    map,
-       const UInt          offset1,
-       const UInt          offset2)
+EpetraVector&
+EpetraVector::subset( const EpetraVector& vector,
+                      const EpetraMap&    map,
+                      const UInt          offset1,
+                      const UInt          offset2 )
 {
     if (M_maptype==Repeated && vector.getMaptype()==Unique )
     {
         return subset(EpetraVector(vector, Repeated), map, offset1, offset2);
     }
-    return subset(vector.M_epetraVector, map, offset1, offset2);
+    return subset(vector.getEpetraVector(), map, offset1, offset2);
 }
 
-EpetraVector& EpetraVector::
-subset(const Epetra_MultiVector& vector,
-       const EpetraMap&    map,
-       const UInt          offset1,
-       const UInt          offset2,
-       const UInt          column)
+EpetraVector&
+EpetraVector::subset( const Epetra_MultiVector& vector,
+                      const EpetraMap&    map,
+                      const UInt          offset1,
+                      const UInt          offset2,
+                      const UInt          column )
 {
     const int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
     const UInt    numMyEntries = map.getMap(M_maptype)->NumMyElements();
@@ -283,13 +279,13 @@ subset(const Epetra_MultiVector& vector,
 
     // eg:  p = (u,p) or u = (u,p)
     for (UInt i = 0; i < numMyEntries; ++i)
-        {
-            lid1 = vector.Map().LID(gids[i]+offset1);
-            lid2 = BlockMap().LID(gids[i]+offset2);
-            ASSERT( lid2 >= 0 & lid1 >= 0, "EpetraVector::subset ERROR : !! lid < 0\n" );
-            //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
-            M_epetraVector[0][lid2] = vector[column][lid1];
-        }
+    {
+        lid1 = vector.Map().LID(gids[i]+offset1);
+        lid2 = BlockMap().LID(gids[i]+offset2);
+        ASSERT( lid2 >= 0 & lid1 >= 0, "EpetraVector::subset ERROR : !! lid < 0\n" );
+        //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
+        (*M_epetraVector)[0][lid2] = vector[column][lid1];
+    }
 
     return *this;
 }
@@ -297,119 +293,119 @@ subset(const Epetra_MultiVector& vector,
 void
 EpetraVector::MeanValue(double* res) const
 {
-    M_epetraVector.MeanValue(res);
+    M_epetraVector->MeanValue(res);
 }
 
 double
 EpetraVector::Norm1() const
 {
     double res;
-    M_epetraVector.Norm1(&res);
+    M_epetraVector->Norm1(&res);
     return res;
 }
 
 void
 EpetraVector::Norm1(double* res) const
 {
-    M_epetraVector.Norm1(res);
+    M_epetraVector->Norm1(res);
 }
 
 void
 EpetraVector::Norm1(double& res) const
 {
-    M_epetraVector.Norm1(&res);
+    M_epetraVector->Norm1(&res);
 }
 
 double
 EpetraVector::Norm2() const
 {
     double res;
-    M_epetraVector.Norm2(&res);
+    M_epetraVector->Norm2(&res);
     return res;
 }
 
 void
 EpetraVector::Norm2(double* res) const
 {
-    M_epetraVector.Norm2(res);
+    M_epetraVector->Norm2(res);
 }
 
 void
 EpetraVector::Norm2( double& res ) const
 {
-    M_epetraVector.Norm2( &res );
+    M_epetraVector->Norm2( &res );
 }
 
 double
 EpetraVector::NormInf() const
 {
     double res;
-    M_epetraVector.NormInf(&res);
+    M_epetraVector->NormInf(&res);
     return res;
 }
 
 void
 EpetraVector::NormInf(double* res) const
 {
-    M_epetraVector.NormInf(res);
+    M_epetraVector->NormInf(res);
 }
 
 void
 EpetraVector::NormInf(double& res) const
 {
-    M_epetraVector.NormInf(&res);
+    M_epetraVector->NormInf(&res);
 }
 
 double
 EpetraVector::MinValue() const
 {
-  double res;
-  M_epetraVector.MinValue(&res);
-  return res;
+    double res;
+    M_epetraVector->MinValue(&res);
+    return res;
 }
 
 double
 EpetraVector::MaxValue() const
 {
-  double res;
-  M_epetraVector.MaxValue(&res);
-  return res;
+    double res;
+    M_epetraVector->MaxValue(&res);
+    return res;
 }
 
 void
 EpetraVector::MinValue(double* res) const
 {
-  M_epetraVector.MinValue(res);
+    M_epetraVector->MinValue(res);
 }
 
 void
 EpetraVector::MaxValue(double* res) const
 {
-  M_epetraVector.MaxValue(res);
+    M_epetraVector->MaxValue(res);
 }
 
 void
 EpetraVector::MinValue(double& res) const
 {
-  M_epetraVector.MinValue(&res);
+    M_epetraVector->MinValue(&res);
 }
 
 void
 EpetraVector::MaxValue(double& res) const
 {
-  M_epetraVector.MaxValue(&res);
+    M_epetraVector->MaxValue(&res);
 }
 
 void
 EpetraVector::Abs( void )
 {
-    M_epetraVector.Abs( M_epetraVector );
+    M_epetraVector->Abs( *M_epetraVector );
 }
 
 void
 EpetraVector::Abs( EpetraVector& vector )
 {
-    vector.M_epetraVector.Abs( M_epetraVector );
+    vector.M_epetraVector->Abs( *M_epetraVector );
 }
 
 // Scalar Products
@@ -417,7 +413,7 @@ EpetraVector::data_type
 EpetraVector::Dot( const EpetraVector& vector ) const
 {
     data_type scalarProduct;
-    M_epetraVector.Dot( vector.M_epetraVector, &scalarProduct );
+    M_epetraVector->Dot( vector.getEpetraVector(), &scalarProduct );
 
     return scalarProduct;
 }
@@ -426,7 +422,7 @@ EpetraVector::Dot( const EpetraVector& vector ) const
 void
 EpetraVector::Dot( const EpetraVector& vector, data_type& scalarProduct )
 {
-    M_epetraVector.Dot( vector.M_epetraVector, &scalarProduct );
+    M_epetraVector->Dot( vector.getEpetraVector(), &scalarProduct );
 }
 
 void EpetraVector::spy( std::string const &filename ) const
@@ -434,7 +430,7 @@ void EpetraVector::spy( std::string const &filename ) const
     // Purpose: Matlab dumping and spy
     std::string nome = filename, uti = " , ";
 
-    int  me    = M_epetraVector.Comm().MyPID();
+    int  me    = M_epetraVector->Comm().MyPID();
 
     if (M_maptype == Repeated)
     {
@@ -443,33 +439,28 @@ void EpetraVector::spy( std::string const &filename ) const
         return;
     }
 
-    //
     // check on the file name
-    //
-
     std::ostringstream myStream;
     myStream << me;
     nome = filename + ".m";
 
-    EpetraExt::MultiVectorToMatlabFile(nome.c_str(), M_epetraVector);
+    EpetraExt::MultiVectorToMatlabFile(nome.c_str(), *M_epetraVector);
 }
 
 void EpetraVector::ShowMe( std::ostream& output ) const
 {
     EpetraVector redVec( *this, 0 ); // reduced vector (all at proc 0)
 
-    if ( redVec.M_epetraVector.Comm().MyPID() )
+    if ( redVec.M_epetraVector->Comm().MyPID() )
         return; // do not need other CPUs now
 
-    const double* Values = redVec.M_epetraVector[0];
-    for ( int i = 0; i < redVec.M_epetraVector.GlobalLength () ; ++i )
+    const double* Values = redVec.getEpetraVector()[0];
+    for ( int i = 0; i < redVec.M_epetraVector->GlobalLength () ; ++i )
         output << Values[i] << std::endl;
 }
 
-
-
 // ===================================================
-//! Operators
+// Operators
 // ===================================================
 EpetraVector::data_type&
 EpetraVector::operator[]( const UInt row )
@@ -479,11 +470,11 @@ EpetraVector::operator[]( const UInt row )
     // hint: with gdb: break LifeV::EpetraVector<double>::operator[](unsigned int)
     if (lrow < 0 )
     {
-        std::cout << M_epetraVector.Comm().MyPID() << " " << row << " " << lrow << std::endl;
+        std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "EpetraVector::operator [] ERROR : !! lrow < 0\n" );
     }
 
-    return (M_epetraVector[0][lrow]);
+    return (*M_epetraVector)[0][lrow];
 }
 
 const EpetraVector::data_type&
@@ -493,12 +484,12 @@ EpetraVector::operator[]( const UInt row ) const
 
     if (lrow < 0 )
     {
-        std::cout << M_epetraVector.Comm().MyPID() << " " << row << " " << lrow << std::endl;
+        std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "EpetraVector::operator () ERROR : !! lrow < 0\n" );
 
     }
 
-    return (M_epetraVector[0][lrow]);
+    return ((*M_epetraVector)[0][lrow]);
 }
 
 EpetraVector::data_type&
@@ -524,7 +515,7 @@ EpetraVector::operator=( const EpetraVector& vector )
 
     if (BlockMap().SameAs(vector.BlockMap()) )
     {
-        M_epetraVector = vector.getEpetraVector();
+        *M_epetraVector = vector.getEpetraVector();
         return *this;
     }
 
@@ -537,22 +528,24 @@ EpetraVector::operator=( const EpetraVector& vector )
         // we shouldn't get here if we have the same maptype!
         assert(M_maptype != vector.M_maptype);
 
-        switch (M_maptype) {
+        switch (M_maptype)
+        {
         case Unique:
-            M_epetraVector.Export(vector.M_epetraVector, M_epetraMap->getImporter(), M_combineMode);
+            M_epetraVector->Export(vector.getEpetraVector(), M_epetraMap->getImporter(), M_combineMode);
             return *this;
         case Repeated:
-             M_epetraVector.Import(vector.M_epetraVector, M_epetraMap->getExporter(), M_combineMode);
+             M_epetraVector->Import(vector.getEpetraVector(), M_epetraMap->getExporter(), M_combineMode);
             return *this;
         }
     }
-    switch (vector.M_maptype) {
+    switch (vector.M_maptype)
+    {
     case Repeated:
         //
         if (M_maptype != Repeated)
-            return Export(vector.M_epetraVector, M_combineMode);
+            return Export(vector.getEpetraVector(), M_combineMode);
     case Unique:
-            return Import(vector.M_epetraVector, M_combineMode);
+            return Import(vector.getEpetraVector(), M_combineMode);
     }
 
     // if we get here, it means that we have two different repeated maps.
@@ -562,8 +555,8 @@ EpetraVector::operator=( const EpetraVector& vector )
               << std::endl;
 
     EpetraVector vectorUnique(*M_epetraMap, Unique);
-    vectorUnique.Export(vector.M_epetraVector, M_combineMode);
-    M_epetraVector.Import(vectorUnique.M_epetraVector, M_epetraMap->getExporter(), M_combineMode);
+    vectorUnique.Export(vector.getEpetraVector(), M_combineMode);
+    M_epetraVector->Import(vectorUnique.getEpetraVector(), M_epetraMap->getExporter(), M_combineMode);
 
     return *this;
 }
@@ -577,7 +570,8 @@ EpetraVector::operator=( const Epetra_MultiVector& vector )
     assert( feVec );
 
     // We hope we are guessing right
-    switch (M_maptype) {
+    switch (M_maptype)
+    {
     case Unique:
         return Export(*feVec, M_combineMode);
     case Repeated:
@@ -590,21 +584,20 @@ EpetraVector::operator=( const Epetra_MultiVector& vector )
 EpetraVector&
 EpetraVector::operator=( data_type t )
 {
-    M_epetraVector.PutScalar(t);
+    M_epetraVector->PutScalar(t);
 
     return *this;
 }
 
-// if the map is not the same, try to import values
 EpetraVector&
 EpetraVector::operator+=( const EpetraVector& vector )
 {
     if ( this->BlockMap().SameAs( vector.BlockMap() ) )
-        M_epetraVector.Update( 1., vector.M_epetraVector, 1. );
+        M_epetraVector->Update( 1., vector.getEpetraVector(), 1. );
     else
     {
         EpetraVector vCopy( vector, M_maptype );
-        M_epetraVector.Update( 1., vCopy.M_epetraVector, 1. );
+        M_epetraVector->Update( 1., vCopy.getEpetraVector(), 1. );
     }
 
     return *this;
@@ -614,26 +607,25 @@ EpetraVector&
 EpetraVector::operator-=( const EpetraVector& vector )
 {
     if ( this->BlockMap().SameAs( vector.BlockMap() ) )
-        M_epetraVector.Update( -1., vector.M_epetraVector, 1. );
+        M_epetraVector->Update( -1., vector.getEpetraVector(), 1. );
     else
     {
         EpetraVector vCopy(vector, M_maptype);
-        M_epetraVector.Update( -1., vCopy.M_epetraVector, 1. );
+        M_epetraVector->Update( -1., vCopy.getEpetraVector(), 1. );
     }
 
     return *this;
 }
 
-// Element by element multiplication
 EpetraVector&
 EpetraVector::operator*=( const EpetraVector& vector )
 {
     if ( this->BlockMap().SameAs( vector.BlockMap() ) )
-        M_epetraVector.Multiply( 1.0, vector.M_epetraVector, M_epetraVector, 0.0 );
+        M_epetraVector->Multiply( 1.0, vector.getEpetraVector(), *M_epetraVector, 0.0 );
     else
     {
         EpetraVector vectorCopy( vector, M_maptype );
-        M_epetraVector.Multiply( 1.0, vectorCopy.M_epetraVector, M_epetraVector, 0.0 );
+        M_epetraVector->Multiply( 1.0, vectorCopy.getEpetraVector(), *M_epetraVector, 0.0 );
     }
 
     return *this;
@@ -643,7 +635,7 @@ EpetraVector::operator*=( const EpetraVector& vector )
 
   if (M_maptype == Unique)
     {
-      numMyEntries = this->M_epetraVector.MyLength();
+      numMyEntries = this->M_epetraVector->MyLength();
       gids  = this->BlockMap().MyGlobalElements();
 
       if (!this->BlockMap().SameAs(vector.BlockMap()))
@@ -656,7 +648,7 @@ EpetraVector::operator*=( const EpetraVector& vector )
 
   if (M_maptype == Repeated)
     {
-      numMyEntries = vector.M_epetraVector.MyLength();
+      numMyEntries = vector.M_epetraVector->MyLength();
       gids   = vector.BlockMap().MyGlobalElements();
 
       if (!this->BlockMap().SameAs(vector.BlockMap()))
@@ -682,11 +674,11 @@ EpetraVector&
 EpetraVector::operator/=( const EpetraVector& vector )
 {
     if ( this->BlockMap().SameAs( vector.BlockMap() ) )
-        M_epetraVector.ReciprocalMultiply( 1.0, vector.M_epetraVector, M_epetraVector, 0.0 );
+        M_epetraVector->ReciprocalMultiply( 1.0, vector.getEpetraVector(), *M_epetraVector, 0.0 );
     else
     {
         EpetraVector vectorCopy( vector, M_maptype );
-        M_epetraVector.ReciprocalMultiply( 1.0, vectorCopy.M_epetraVector, M_epetraVector, 0.0 );
+        M_epetraVector->ReciprocalMultiply( 1.0, vectorCopy.getEpetraVector(), *M_epetraVector, 0.0 );
     }
 
     return *this;
@@ -741,9 +733,9 @@ EpetraVector&
 EpetraVector::operator+=( const data_type& scalar )
 {
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            M_epetraVector[i][j] += scalar;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            (*M_epetraVector)[i][j] += scalar;
 
     return *this;
 }
@@ -761,7 +753,7 @@ EpetraVector::operator-=( const data_type& scalar )
 EpetraVector&
 EpetraVector::operator*=( const data_type& scalar )
 {
-    M_epetraVector.Scale( scalar );
+    M_epetraVector->Scale( scalar );
 
     return *this;
 }
@@ -862,9 +854,9 @@ EpetraVector::operator==( const Real& scalar )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] == scalar ? true : false;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] == scalar ? true : false;
 
     return comparisonVector;
 }
@@ -876,9 +868,9 @@ EpetraVector::operator!=( const Real& scalar )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] != scalar ? true : false;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] != scalar ? true : false;
 
     return comparisonVector;
 }
@@ -890,9 +882,9 @@ EpetraVector::operator<( const Real& scalar )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] < scalar ? true : false;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] < scalar ? true : false;
 
     return comparisonVector;
 }
@@ -904,9 +896,9 @@ EpetraVector::operator>( const Real& scalar )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] > scalar ? true : false;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] > scalar ? true : false;
 
     return comparisonVector;
 }
@@ -918,9 +910,9 @@ EpetraVector::operator<=( const Real& scalar )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] <= scalar ? true : false;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] <= scalar ? true : false;
 
     return comparisonVector;
 }
@@ -932,9 +924,9 @@ EpetraVector::operator>=( const Real& scalar )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] >= scalar ? true : false;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] >= scalar ? true : false;
 
     return comparisonVector;
 }
@@ -946,9 +938,9 @@ EpetraVector::operator&&( const EpetraVector& vector )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] && vector.M_epetraVector[i][j];
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] && vector.getEpetraVector()[i][j];
 
     return comparisonVector;
 }
@@ -960,9 +952,9 @@ EpetraVector::operator||( const EpetraVector& vector )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = M_epetraVector[i][j] || vector.M_epetraVector[i][j];
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] || vector.getEpetraVector()[i][j];
 
     return comparisonVector;
 }
@@ -974,16 +966,16 @@ EpetraVector::operator!( void )
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
     int i, j;
-    for ( i=0; i < M_epetraVector.NumVectors(); ++i )
-        for ( j=0; j < M_epetraVector.MyLength(); ++j )
-            comparisonVector.M_epetraVector[i][j] = !M_epetraVector[i][j];
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            comparisonVector.getEpetraVector()[i][j] = !(*M_epetraVector)[i][j];
 
     return comparisonVector;
 }
 
 
 // ===================================================
-//! Set Methods
+// Set Methods
 // ===================================================
 void
 EpetraVector::setCombineMode( Epetra_CombineMode combineMode )
@@ -997,13 +989,16 @@ EpetraVector::setDefaultCombineMode( )
     setCombineMode(Add);
 }
 
-
+void
+EpetraVector::setMap( const EpetraMap& map )
+{
+    M_epetraMap.reset( new EpetraMap( map ) );
+    M_epetraVector.reset( new vector_type( *M_epetraMap->getMap(M_maptype) ) );
+}
 
 // ===================================================
-//! Private Methods
+// Private Methods
 // ===================================================
-// copies the value of a vector u. If the map is not the same,
-// try to import the values.
 EpetraVector&
 EpetraVector::Import (const Epetra_FEVector& vector, Epetra_CombineMode combineMode)
 {
@@ -1012,20 +1007,18 @@ EpetraVector::Import (const Epetra_FEVector& vector, Epetra_CombineMode combineM
 
     if (BlockMap().SameAs(vector.Map()) )
     {
-        M_epetraVector = vector;
+        *M_epetraVector = vector;
         return *this;
     }
 
     *this *= 0.; // because of a buggy behaviour in case of multidefined indeces.
 
     Epetra_Export reducedExport(BlockMap(), vector.Map());
-    M_epetraVector.Import(vector, reducedExport, combineMode);
+    M_epetraVector->Import(vector, reducedExport, combineMode);
 
     return *this;
 }
 
-// copies the value of a vector u. If the map is not the same,
-// try to import the values.
 EpetraVector&
 EpetraVector::Export (const Epetra_FEVector& vector, Epetra_CombineMode combineMode)
 {
@@ -1034,14 +1027,14 @@ EpetraVector::Export (const Epetra_FEVector& vector, Epetra_CombineMode combineM
 
     if (BlockMap().SameAs(vector.Map()) )
     {
-        M_epetraVector = vector;
+        *M_epetraVector = vector;
         return *this;
     }
 
     *this *= 0.; // because of a buggy behaviour in case of multidefined indeces.
 
     Epetra_Import reducedImport( vector.Map(), BlockMap());
-    M_epetraVector.Export(vector, reducedImport, combineMode);
+    M_epetraVector->Export(vector, reducedImport, combineMode);
 
     return *this;
 }

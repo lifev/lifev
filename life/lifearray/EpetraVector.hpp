@@ -1,48 +1,49 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
  This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
- Simone Deparis <simone.deparis@epfl.ch>
- Date: 2006-10-04
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
- Copyright (C) 2009 EPFL
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
+ This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+ Lesser General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  USA
- */
-/*!
-  \file EpetraVector.hpp
 
-  \version 1.0
-  \date 2006-10-04
-
-  \author Simone Deparis <simone.deparis@epfl.ch>
-  \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-
-  \version 1.10
-  \date 15/10/2009
-  \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-  - Added new operators: (+=, -=, *=, /=) and (+ - * /) for Element By Element and Vector-Scalar operations;
-  - Added new logic operators: &&, ||, ! ;
-  - Added new comparison operators: >=, <=, >, <, ==, != ;
-  - Added Abs() method, and renamed scalar product to Dot() ;
-  - Added ShowMe() method;
-  - Added some doxygen (not finished yet) and reordered functions and methods;
+************************************************************************
 */
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief MultiScale Model 1D
+ *
+ *  @version 1.0
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *  @date 04-10-2006
+ *
+ *  @version 1.10
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 15-10-2009
+ *
+ *  - Added new operators: (+=, -=, *=, /=) and (+ - * /) for Element By Element and Vector-Scalar operations;
+ *  - Added new logic operators: &&, ||, ! ;
+ *  - Added new comparison operators: >=, <=, >, <, ==, != ;
+ *  - Added Abs() method, and renamed scalar product to Dot() ;
+ *  - Added ShowMe() method;
+ *  - Added some doxygen (not finished yet) and reordered functions and methods;
+ */
 
 #ifndef _EPETRAVECTOR_HPP_
 #define _EPETRAVECTOR_HPP_
@@ -67,37 +68,47 @@ class EpetraVector
 {
 public:
 
-    typedef Epetra_FEVector vector_type;
+    //! @name Type definitions
+    //@{
+
+    typedef Epetra_FEVector                      vector_type;
+    typedef boost::shared_ptr< vector_type >     Vector_PtrType;
     typedef Real data_type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor - Using Maps
-    EpetraVector( const EpetraMap& _map, EpetraMapType maptype = Unique );
+    //! Empty Constructor
+    EpetraVector( const EpetraMapType& maptype = Unique );
 
     //! Constructor - Using Maps
-    EpetraVector( const boost::shared_ptr< EpetraMap >& _map, EpetraMapType maptype = Unique );
+    EpetraVector( const EpetraMap& _map, const EpetraMapType& maptype = Unique );
+
+    //! Constructor - Using Maps
+    EpetraVector( const boost::shared_ptr< EpetraMap >& _map, const EpetraMapType& maptype = Unique );
 
     //! Constructor - Using Vector (without using map)
     EpetraVector( const EpetraVector& vector );
 
     //! Constructor - Using Vector (without using map)
-    EpetraVector( const EpetraVector& vector, EpetraMapType maptype );
+    EpetraVector( const EpetraVector& vector, const EpetraMapType& maptype );
 
     //! Constructor - Using Vector (without using map)
     /*! combineMode is only used during the copy, and not in subsequent calls. */
     EpetraVector( const EpetraVector& vector,
-                  EpetraMapType maptype,
-                  Epetra_CombineMode combineMode );
+                  const EpetraMapType& maptype,
+                  const Epetra_CombineMode& combineMode );
 
     //! Constructor - Copies vector to FEvector that comes as Multivector
     EpetraVector( const Epetra_MultiVector& vector,
-                  boost::shared_ptr< EpetraMap > _map,
-                  EpetraMapType maptype );
+                  const boost::shared_ptr< EpetraMap > _map,
+                  const EpetraMapType& maptype );
 
     //! Constructor - Copies vector to a vector which resides only on the processor "reduceToProc"
-    EpetraVector( const EpetraVector& vector, const int reduceToProc );
+    EpetraVector( const EpetraVector& vector, const int& reduceToProc );
 
     //! Destructor
     ~EpetraVector() {}
@@ -110,7 +121,7 @@ public:
 
     int GlobalAssemble( Epetra_CombineMode mode = Add )
     {
-        return M_epetraVector.GlobalAssemble( mode );
+        return M_epetraVector->GlobalAssemble( mode );
     }
 
     //! if row is mine returns the LID
@@ -361,6 +372,14 @@ public:
      */
     void setDefaultCombineMode( );
 
+    //! Sets the map to use for the epetra vector
+    /*!
+        This method can be used when building the EpetraVector using
+        empty constructor.
+        @param map the map of the vector
+     */
+    void setMap( const EpetraMap& map );
+
     //@}
 
     //! @name Get Methods
@@ -373,16 +392,16 @@ public:
 
     vector_type& getEpetraVector()
     {
-        return M_epetraVector;
+        return *M_epetraVector;
     }
     const vector_type& getEpetraVector() const
     {
-        return M_epetraVector;
+        return *M_epetraVector;
     }
 
     const Epetra_BlockMap& BlockMap() const
     {
-        return M_epetraVector.Map();
+        return M_epetraVector->Map();
     }
 
     EpetraMapType getMaptype() const
@@ -407,7 +426,7 @@ public:
 
     int size() const
     {
-        return M_epetraVector.GlobalLength();
+        return M_epetraVector->GlobalLength();
     }
 
     //@}
@@ -442,12 +461,11 @@ private:
      */
     EpetraVector& Export( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
-    boost::shared_ptr< EpetraMap > M_epetraMap;
-    EpetraMapType                  M_maptype;
-    vector_type                    M_epetraVector;
+    boost::shared_ptr< EpetraMap >   M_epetraMap;
+    EpetraMapType                    M_maptype;
+    Vector_PtrType                   M_epetraVector;
 
-    Epetra_CombineMode             M_combineMode;
-
+    Epetra_CombineMode               M_combineMode;
 };
 
 EpetraVector operator-( const EpetraVector& vector );
