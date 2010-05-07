@@ -198,15 +198,19 @@ Heart::run()
     boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel;
     if(ion_model==1)
     {
-        std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
-        ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *M_heart_fct->comm));
+    	std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
+    	ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *M_heart_fct->comm));
     }else if(ion_model==2)
     {
-        std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
-        ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *M_heart_fct->comm));
+    	std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
+    	ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *M_heart_fct->comm));
     }
+#ifdef MONODOMAIN
+    electricModel.initialize( M_heart_fct->get_initial_scalar());
+#else
+    electricModel.initialize( M_heart_fct->get_initial_scalar(), M_heart_fct->get_zero_scalar() );
+#endif
 
-    electricModel.initialize(minus84_scalar);
     if (verbose) std::cout << "ok." << std::endl;
 
     ionicModel->initialize( );
