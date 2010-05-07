@@ -1,22 +1,43 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-//! \author:Vincent Martin 09/04
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief OneDimensionalModel Test
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *  @date 01-09-2004
+ *
+ *  @version 2.0
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 01-01-2010
+ */
+
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/GetPot.hpp>
@@ -53,19 +74,33 @@ bool checkValue(const double val, const double test, const double tol = 1.e-5, c
 
 int main(int argc, char** argv)
 {
+    //Setup main communicator
+    boost::shared_ptr<Epetra_Comm>  comm;
 
+#ifdef HAVE_MPI
+    std::cout << "MPI Initialization" << std::endl;
+    MPI_Init( &argc, &argv );
+#endif
+
+    //MPI Preprocessing
 #ifdef EPETRA_MPI
-    std::cout << "mpi initialization ... " << std::flush;
+    int nprocs;
+    int rank;
 
-    MPI_Init(&argc,&argv);
+    MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
+    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 
-    boost::shared_ptr<Epetra_MpiComm> comm;
-    comm.reset(new Epetra_MpiComm( MPI_COMM_WORLD ));
+    if ( rank == 0 )
+    {
+        std::cout << "MPI Processes: " << nprocs << std::endl;
+        std::cout << "MPI Epetra Initialization ... " << std::endl;
+    }
+    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 
-    std::cout << "ok" << std::endl;
+    comm->Barrier();
 #else
-    boost::shared_ptr<Epetra_SerialComm> comm;
-    comm.reset(new Epetra_SerialComm());
+    std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
+    comm.reset( new Epetra_SerialComm() );
 #endif
 
   // *********************************
@@ -74,7 +109,9 @@ int main(int argc, char** argv)
   typedef MS_Model_1D::Physics_Type                Physics_Type;
   typedef MS_Model_1D::Flux_Type                   Flux_Type;
   typedef MS_Model_1D::Source_Type                 Source_Type;
+
   typedef MS_Model_1D::BC_Type                     BC_Type;
+  typedef BC_Type::BCFunction_Type                 BCFunction_Type;
 
   // *********************************
   // ***** Reading from data file
@@ -113,27 +150,35 @@ int main(int argc, char** argv)
   OneDModel.SetGeometry( geometryScale, geometryRotate, geometryTranslate );
 
   OneDModel.SetupData( FileName );
+
+  // Create BC
+  Sin sinus;
+  BCFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
+
+  // Absorbing
+  BC_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDModel.GetFlux(),
+                                                                                                OneDModel.GetSource(),
+                                                                                                OneDModel.GetSolver()->U_thistime(),
+                                                                                                OneD_right, OneD_W2 ) );
+  BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
+                                      dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1 ) );
+
+
+  // BC to test A_from_P conversion
+  //Constant constantArea( 1.05 );
+  //BCFunction_Type constantAreaFunction( boost::bind( &Constant::operator(), &constantArea, _1 ) );
+
+  //Constant constantPressure( 24695.0765959599 );
+  //BCFunction_Type constantPressureFunction( boost::bind( &Constant::operator(), &constantPressure, _1 ) );
+
+  // Set BC
+  OneDModel.GetBC().setBC( sinusoidalFunction, OneD_left,  OneD_first, OneD_Q  );
+  OneDModel.GetBC().setBC( absorbingFunction,  OneD_right, OneD_first, OneD_W2 );
+  //OneDModel.GetBC().setBC( constantAreaFunction, OneD_right, OneD_first, OneD_A );
+  //OneDModel.GetBC().setBC( constantPressureFunction, OneD_right, OneD_first, OneD_P );
+
+
   OneDModel.SetupModel();
-
-  // *********************************
-  // Boundary Conditions of the 1D model
-  // *********************************
-  BC_Type::OneDBCFunction_PtrType resistence ( new Resi( DataFile("PhysicalParameters/R",0.),
-                                                         OneDModel.GetPhysics(),
-                                                         OneDModel.GetFESpace(),
-                                                         OneDModel.GetFlux(),
-                                                         OneDModel.GetSource(),
-                                                         OneDModel.GetSolver().U_thistime(),
-                                                         OneDModel.GetData().dataTime()->getTimeStep(),
-                                                         "right" /*border*/,
-                                                         "W2"  /*var*/, true )
-                                             );
-
-  BC_Type::OneDBCFunction_PtrType sinusoidal_flux ( new Sin() );
-
-  OneDModel.GetBC().setBC( sinusoidal_flux, "left",  "first", "Q"  );
-  OneDModel.GetBC().setBC( resistence,      "right", "first", "W2" );
-  OneDModel.GetBC().setDefaultBC(OneDModel.GetFESpace(), OneDModel.GetSource(), OneDModel.GetData().dataTime()->getTimeStep());
 
   // *********************************
   // Tempolar loop
@@ -152,14 +197,12 @@ int main(int argc, char** argv)
   {
       std::cout << std::endl;
       std::cout << "--------- Iteration " << count << " time = " << OneDModel.GetData().dataTime()->getTime() << std::endl;
-      //std::cout << "--------- Iteration " << count << " time = " << time << std::endl;
 
     count++;
 
     chrono.start();
     Debug(6030) << "[main] 1d model time advance\n";
     chronota.start();
-    //OneDModel.GetData().dataTime()->updateTime();
     OneDModel.UpdateSystem();
     chronota.stop();
 
@@ -171,7 +214,7 @@ int main(int argc, char** argv)
     //if ( !( static_cast<int>( std::floor( count%postprocess_it))) )
     {
         //std::cout << "PostProcessing at time ... " << OneDModel.GetData().dataTime()->getTime() << std::endl;
-        //OneDModel.GetSolver().postProcess( OneDModel.GetData().dataTime()->getTime() );
+        //OneDModel.GetSolver()->postProcess( OneDModel.GetData().dataTime()->getTime() );
         OneDModel.SaveSolution();
     }
 
@@ -183,25 +226,26 @@ int main(int argc, char** argv)
 
   printf("\nSimulation ended successfully.\n");
 
-#ifdef EPETRA_MPI
+#ifdef HAVE_MPI
+    std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
 
   if ( check )
   {
       bool ok = true;
-      int rightnodeid = OneDModel.GetSolver().RightNodeId();
+      int rightnodeid = OneDModel.GetSolver()->RightNodeId();
 
 
-      ok = ok && checkValue( 0.999998  , OneDModel.GetSolver().U1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00138076, OneDModel.GetSolver().U2_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00276153, OneDModel.GetSolver().W1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue( 0.00000000, OneDModel.GetSolver().W2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.999998  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00138076, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue(-0.00276153, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 0]);
+      ok = ok && checkValue( 0.00000000, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 0]);
 
-      ok = ok && checkValue( 0.999999  , OneDModel.GetSolver().U1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00040393, OneDModel.GetSolver().U2_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00080833, OneDModel.GetSolver().W1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue( 0.00000045, OneDModel.GetSolver().W2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.999999  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00040393, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue(-0.00080833, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 1]);
+      ok = ok && checkValue( 0.00000045, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 1]);
 
       if (ok)
       {
