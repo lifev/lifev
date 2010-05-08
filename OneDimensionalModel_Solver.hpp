@@ -392,6 +392,8 @@ public:
     //! Return the selection solution (P, A, Q, W1, W2)
     Real value(std::string var, UInt pos) const;
 
+    Real BoundaryValue( const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
+
     //@}
 
 private:

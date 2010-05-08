@@ -1457,6 +1457,40 @@ OneDimensionalModel_Solver::value( std::string var, UInt pos ) const
     return (*M_U_thistime)[it->second]( pos );
 }
 
+Real
+OneDimensionalModel_Solver::BoundaryValue( const OneD_BC& bcType, const OneD_BCSide& bcSide ) const
+{
+    UInt boundaryDof;
+
+    switch( bcSide )
+    {
+        case OneD_left:
+            boundaryDof = 1;
+        break;
+
+        case OneD_right:
+            boundaryDof = M_Flux->Physics()->Data()->nbElem() + 1;
+        break;
+    }
+
+    switch( bcType )
+    {
+        case OneD_A:
+            return (*M_U_thistime)[0]( boundaryDof );
+        case OneD_Q:
+            return (*M_U_thistime)[1]( boundaryDof );
+        case OneD_W1:
+            return (*M_U_thistime)[2]( boundaryDof );
+        case OneD_W2:
+            return (*M_U_thistime)[3]( boundaryDof );
+        case OneD_P:
+            return (*M_U_thistime)[4]( boundaryDof );
+        default:
+            std::cout << "Warning: bcType not available!" << std::endl;
+            return 0.;
+    }
+}
+
 // ===================================================
 // Private Methods
 // ===================================================
