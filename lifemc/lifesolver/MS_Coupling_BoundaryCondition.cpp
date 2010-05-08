@@ -168,16 +168,16 @@ MS_Coupling_BoundaryCondition::ShowMe()
 void
 MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
 {
-    Real Flux(0), Pressure(0), DynamicPressure(0);
+    Real FlowRate(0), Pressure(0), DynamicPressure(0);
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
     {
         switch ( M_models[i]->GetType() )
         {
             case Fluid3D:
             {
-                Flux            = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
-                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetDynamicPressure( M_flags[i] );
+                FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
                 break;
             }
@@ -191,7 +191,7 @@ MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
         if ( M_comm->MyPID() == 0 )
             output << "  " << M_dataPhysics->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
                                                                       << "    " << M_flags[i]
-                                                                      << "    " << Flux
+                                                                      << "    " << FlowRate
                                                                       << "    " << "NaN          "
                                                                       << "    " << Pressure
                                                                       << "    " << DynamicPressure << std::endl;

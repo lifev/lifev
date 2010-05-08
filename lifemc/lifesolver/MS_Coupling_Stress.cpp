@@ -162,7 +162,7 @@ MS_Coupling_Stress::InitializeCouplingVariables()
         {
             case Fluid3D:
             {
-                ( *M_LocalCouplingVariables )[0] += MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetStress( M_flags[i], M_stressType );
+                ( *M_LocalCouplingVariables )[0] += MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
 
                 break;
             }
@@ -181,7 +181,7 @@ MS_Coupling_Stress::InitializeCouplingVariables()
             case Fluid3D:
             {
 
-                ( *M_LocalCouplingVariables )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
+                ( *M_LocalCouplingVariables )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
                 break;
             }
@@ -205,7 +205,7 @@ MS_Coupling_Stress::ExportCouplingResiduals( VectorType& CouplingResiduals )
         {
             case Fluid3D:
 
-                ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
+                ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
                 break;
 
@@ -281,7 +281,7 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const
     {
         case Fluid3D:
 
-            Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetDeltaFlux( M_flags[ModelLocalID], SolveLinearSystem );
+            Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
 
@@ -305,17 +305,17 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const
 void
 MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
 {
-    Real Flux(0), Stress(0), Pressure(0), DynamicPressure(0);
+    Real FlowRate(0), Stress(0), Pressure(0), DynamicPressure(0);
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
     {
         switch ( M_models[i]->GetType() )
         {
             case Fluid3D:
             {
-                Flux            = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
+                FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
                 Stress          = ( *M_LocalCouplingVariables )[0];
-                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetDynamicPressure( M_flags[i] );
+                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
                 break;
             }
@@ -329,7 +329,7 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
         if ( M_comm->MyPID() == 0 )
             output << "  " << M_dataPhysics->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
                                                                       << "    " << M_flags[i]
-                                                                      << "    " << Flux
+                                                                      << "    " << FlowRate
                                                                       << "    " << Stress
                                                                       << "    " << Pressure
                                                                       << "    " << DynamicPressure << std::endl;

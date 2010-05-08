@@ -38,7 +38,7 @@
 
 // Mathcard includes
 #include <lifemc/lifealg/AztecOOPreconditioner.hpp>
-#include <lifemc/lifefem/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
 // LifeV includes
@@ -170,7 +170,7 @@ public:
     //@}
 
 
-    //! @name Get Methods
+    //! @name Get Methods (couplings)
     //@{
 
     //! Get the BCInterface container of the boundary conditions of the model
@@ -190,49 +190,49 @@ public:
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real GetDensity( const BCFlag& /*flag*/) const;
+    Real GetBoundaryDensity( const BCFlag& /*flag*/) const;
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real GetViscosity( const BCFlag& /*flag*/) const;
+    Real GetBoundaryViscosity( const BCFlag& /*flag*/) const;
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real GetArea( const BCFlag& Flag ) const;
+    Real GetBoundaryArea( const BCFlag& Flag ) const;
 
-    //! Get the flux on a specific boundary face of the model
+    //! Get the flow rate on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
-     * @return flux value
+     * @return flow rate value
      */
-    Real GetFlux( const BCFlag& Flag ) const;
+    Real GetBoundaryFlowRate( const BCFlag& Flag ) const;
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real GetPressure( const BCFlag& Flag ) const;
+    Real GetBoundaryPressure( const BCFlag& Flag ) const;
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real GetDynamicPressure( const BCFlag& Flag ) const;
+    Real GetBoundaryDynamicPressure( const BCFlag& Flag ) const;
 
     //! Get the value of the Lagrange multiplier associated to a specific boundary face
     /*!
      * @param Flag flag of the boundary face
      * @return Lagrange multiplier value
      */
-    Real GetLagrangeMultiplier( const BCFlag& Flag ) const;
+    Real GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const;
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -240,7 +240,7 @@ public:
      * @param StressType Type of approximation for the stress
      * @return stress value
      */
-    Real GetStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
+    Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
 
     //! Get the variation of the flux (on a specific boundary face) using the linear model
     /*!
@@ -248,7 +248,7 @@ public:
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flux
      */
-    Real GetDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!
@@ -256,7 +256,7 @@ public:
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the pressure
      */
-    Real GetDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the total pressure (on a specific boundary face) using the linear model
     /*!
@@ -264,7 +264,7 @@ public:
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the dynamic pressure
      */
-    Real GetDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
     /*!
@@ -272,7 +272,7 @@ public:
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      * @return Lagrange multiplier value
      */
-    Real GetDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
@@ -281,7 +281,7 @@ public:
      * @param StressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
+    Real GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
 
     //@}
 
