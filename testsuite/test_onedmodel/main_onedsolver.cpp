@@ -50,15 +50,12 @@
 	#include "Epetra_SerialComm.h"
 #endif
 
-#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
-#include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
 
-#include <lifemc/lifesolver/MS_Model_1D.hpp>
+#include <lifemc/lifesolver/MS_Model_FSI1D.hpp>
 
 #include "ud_functions.hpp"
-
-#include <sstream>
 
 using namespace LifeV;
 
@@ -106,11 +103,11 @@ int main(int argc, char** argv)
   // *********************************
   // Useful typedefs
   // *********************************
-  typedef MS_Model_1D::Physics_Type                Physics_Type;
-  typedef MS_Model_1D::Flux_Type                   Flux_Type;
-  typedef MS_Model_1D::Source_Type                 Source_Type;
+  typedef MS_Model_FSI1D::Physics_Type             Physics_Type;
+  typedef MS_Model_FSI1D::Flux_Type                Flux_Type;
+  typedef MS_Model_FSI1D::Source_Type              Source_Type;
 
-  typedef MS_Model_1D::BC_Type                     BC_Type;
+  typedef MS_Model_FSI1D::BC_Type                  BC_Type;
   typedef BC_Type::BCFunction_Type                 BCFunction_Type;
 
   // *********************************
@@ -127,7 +124,7 @@ int main(int argc, char** argv)
   // *********************************
   // Build the 1D model
   // *********************************
-  MS_Model_1D OneDModel;
+  MS_Model_FSI1D OneDModel;
   OneDModel.SetCommunicator(comm);
 
   // Scale, Rotate, Translate 1D (if necessary)
