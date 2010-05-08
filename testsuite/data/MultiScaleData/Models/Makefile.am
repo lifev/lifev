@@ -22,8 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Fluid1D.dat \
-					Fluid3D_Cylinder_tube20.dat \
+dist_pkgdata_DATA = Fluid3D_Cylinder_tube20.dat \
 					Fluid3D_Cylinder_tube40.dat \
 					Fluid3D_Cylinder_tube60.dat \
 					Fluid3D_Cylinder_tube80.dat \
@@ -33,7 +32,8 @@ dist_pkgdata_DATA = Fluid1D.dat \
 					Fluid3D_Cylinder_Stokes_tube80.dat \
 					Fluid3D_Carotid.dat \
 					Fluid3D_Carotid_Stokes.dat \
-                    MultiScale_CarotidBifurcation3D_FluxStress.dat \
+					FSI1D.dat \
+					MultiScale_CarotidBifurcation3D_FluxStress.dat \
                     MultiScale_CarotidBifurcation3D_Stress.dat \
                     MultiScale_CarotidBifurcation3D_Synthetic_FluxStress.dat \
                     MultiScale_CarotidBifurcation3D_Synthetic_Stress.dat \
