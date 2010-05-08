@@ -109,6 +109,8 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_FluxStre
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0                   # density   [g/cm^3]
-fluidViscosity	= 1.005309649148734e-06 # viscosity [g/cm/s]
+FluidDensity	            = 1.0                   # density        [g/cm^3]
+FluidViscosity	            = 1.005309649148734e-06 # viscosity      [g/cm/s]
+StructurePoissonCoefficient = 0                     # Poisson coeff. []
+StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

@@ -109,6 +109,8 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_1Cylinder_tube20
 
 [Physics] #########################################################################################
 ###################################################################################################
-fluidDensity	= 1.0                   # density   [g/cm^3]
-fluidViscosity	= 0.35                  # viscosity [g/cm/s]
+FluidDensity	            = 1.0           # density        [g/cm^3]
+FluidViscosity	            = 0.035         # viscosity      [g/cm/s]
+StructurePoissonCoefficient = 0             # Poisson coeff. []
+StructureYoungModulus       = 0             # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################
