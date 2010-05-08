@@ -47,6 +47,8 @@ namespace LifeV {
  *  <ul>
  *      <li> Fluid density
  *      <li> Fluid viscosity
+ *      <li> Structure Young modulus
+ *      <li> Structure Poisson coefficient
  *  </ul>
  */
 class MS_PhysicalData
@@ -129,6 +131,24 @@ public:
      */
     const Real& GetFluidViscosity() const;
 
+    //! Get the global structural Poisson coefficient.
+    /*!
+     * @return Poisson coefficient of the structure.
+     */
+    const Real& GetStructurePoissonCoefficient() const;
+
+    // //! Get the global structural thickness.
+    // /*!
+    // * @return thickness of the structure.
+    // */
+    // const Real& GetStructureThickness() const;
+
+    //! Get the global structural Young modulus.
+    /*!
+     * @return Young modulus of the structure.
+     */
+    const Real& GetStructureYoungModulus() const;
+
     //@}
 
 private:
@@ -137,6 +157,10 @@ private:
 
     Real                                M_FluidDensity;
     Real                                M_FluidViscosity;
+
+    Real                                M_StructurePoissonCoefficient;
+    //Real                                M_StructureThickness;
+    Real                                M_StructureYoungModulus;
 
 };
 
