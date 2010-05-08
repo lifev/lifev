@@ -133,7 +133,7 @@ MS_Coupling_FluxStress::SetupCoupling()
     M_baseDeltaFlux.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaFlux,   this, _1, _2, _3, _4, _5 ) );
     M_baseDeltaStress.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaStress, this, _1, _2, _3, _4, _5 ) );
 
-    // Impose flux
+    // Impose FlowRate
     switch ( M_models[0]->GetType() )
     {
         case Fluid3D:
@@ -178,13 +178,13 @@ MS_Coupling_FluxStress::InitializeCouplingVariables()
     *M_LocalCouplingVariables      = 0.;
     *M_LocalDeltaCouplingVariables = 0.;
 
-    // Compute the Flux
+    // Compute the FlowRate
     for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
             case Fluid3D:
             {
-                ( *M_LocalCouplingVariables )[0] -= MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
+                ( *M_LocalCouplingVariables )[0] -= MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
                 break;
             }
@@ -200,7 +200,7 @@ MS_Coupling_FluxStress::InitializeCouplingVariables()
     {
         case Fluid3D:
         {
-            ( *M_LocalCouplingVariables )[1] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[0] )->GetStress( M_flags[0], M_stressType );
+            ( *M_LocalCouplingVariables )[1] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[0] )->GetBoundaryStress( M_flags[0], M_stressType );
 
             break;
         }
@@ -221,13 +221,13 @@ MS_Coupling_FluxStress::ExportCouplingResiduals( VectorType& CouplingResiduals )
 
     *M_LocalCouplingResiduals = 0.;
 
-    // Compute the Flux
+    // Compute the FlowRate
     for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
             case Fluid3D:
             {
-                ( *M_LocalCouplingResiduals )[0] -= MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
+                ( *M_LocalCouplingResiduals )[0] -= MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
                 break;
             }
@@ -243,7 +243,7 @@ MS_Coupling_FluxStress::ExportCouplingResiduals( VectorType& CouplingResiduals )
     {
         case Fluid3D:
         {
-            ( *M_LocalCouplingResiduals )[1] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[0] )->GetStress( M_flags[0], M_stressType );
+            ( *M_LocalCouplingResiduals )[1] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[0] )->GetBoundaryStress( M_flags[0], M_stressType );
 
             break;
         }
@@ -318,9 +318,9 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, c
         case Fluid3D:
 
             if ( ModelLocalID == 0 ) // DeltaSigma coefficient
-                Coefficient =  MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetDeltaStress( M_flags[ModelLocalID], SolveLinearSystem, M_stressType );
+                Coefficient =  MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaStress( M_flags[ModelLocalID], SolveLinearSystem, M_stressType );
             else                     // DeltaFlux coefficient
-                Coefficient = -MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetDeltaFlux(  M_flags[ModelLocalID], SolveLinearSystem );
+                Coefficient = -MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux(  M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
 
@@ -348,17 +348,17 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, c
 void
 MS_Coupling_FluxStress::DisplayCouplingValues( std::ostream& output )
 {
-    Real Flux(0), Stress(0), Pressure(0), DynamicPressure(0);
+    Real FlowRate(0), Stress(0), Pressure(0), DynamicPressure(0);
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
     {
         switch ( M_models[i]->GetType() )
         {
             case Fluid3D:
             {
-                Flux            = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetFlux( M_flags[i] );
+                FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
                 Stress          = ( *M_LocalCouplingVariables )[1];
-                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetDynamicPressure( M_flags[i] );
+                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
                 break;
             }
@@ -372,7 +372,7 @@ MS_Coupling_FluxStress::DisplayCouplingValues( std::ostream& output )
         if ( M_comm->MyPID() == 0 )
             output << "  " << M_dataPhysics->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
                                                                       << "    " << M_flags[i]
-                                                                      << "    " << Flux
+                                                                      << "    " << FlowRate
                                                                       << "    " << Stress
                                                                       << "    " << Pressure
                                                                       << "    " << DynamicPressure << std::endl;
@@ -387,7 +387,7 @@ MS_Coupling_FluxStress::ShowMe()
         super::ShowMe();
 
         std::cout << "Stress Type         = " << Enum2String( M_stressType, stressMap ) << std::endl;
-        std::cout << "Coupling Flux       = " << ( *M_LocalCouplingVariables )[0] << std::endl
+        std::cout << "Coupling FlowRate   = " << ( *M_LocalCouplingVariables )[0] << std::endl
                   << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[1] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
     }

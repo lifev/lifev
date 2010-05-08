@@ -26,7 +26,8 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcsolver.la
 
-liblifemcsolver_la_SOURCES   = Monolithic.cpp \
+liblifemcsolver_la_SOURCES   = BCInterface_FSI.cpp \
+                               Monolithic.cpp \
                                fullMonolithic.cpp \
                                MS_Solver.cpp \
                                MS_Algorithm.cpp \
@@ -36,7 +37,7 @@ liblifemcsolver_la_SOURCES   = Monolithic.cpp \
                                MS_PhysicalModel.cpp \
                                MS_Model_MultiScale.cpp \
                                MS_Model_Fluid3D.cpp \
-                               MS_Model_1D.cpp \
+                               MS_Model_FSI1D.cpp \
                                MS_PhysicalCoupling.cpp \
                                MS_Coupling_BoundaryCondition.cpp \
                                MS_Coupling_Stress.cpp \

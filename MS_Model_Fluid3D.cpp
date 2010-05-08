@@ -157,7 +157,7 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_FluidData->setDataTime( M_dataPhysics->GetDataTime() );
     M_FluidData->setup( DataFile );
 
-    //If density and/or viscosity are in the data file, do not replace them
+    //If global physical quantities are specified also in the data file, replace them
     if ( !DataFile.checkVariable( "fluid/physics/density" ) )
         M_FluidData->density( M_dataPhysics->GetFluidDensity() );
     if ( !DataFile.checkVariable( "fluid/physics/viscosity" ) )
@@ -484,66 +484,66 @@ MS_Model_Fluid3D::GetLinearBC()
 }
 
 Real
-MS_Model_Fluid3D::GetDensity( const BCFlag& /*flag*/) const
+MS_Model_Fluid3D::GetBoundaryDensity( const BCFlag& /*flag*/ ) const
 {
     return M_FluidData->density();
 }
 
 Real
-MS_Model_Fluid3D::GetViscosity( const BCFlag& /*flag*/) const
+MS_Model_Fluid3D::GetBoundaryViscosity( const BCFlag& /*flag*/ ) const
 {
     return M_FluidData->viscosity();
 }
 
 Real
-MS_Model_Fluid3D::GetArea( const BCFlag& Flag ) const
+MS_Model_Fluid3D::GetBoundaryArea( const BCFlag& Flag ) const
 {
     return M_Fluid->area( Flag );
 }
 
 Real
-MS_Model_Fluid3D::GetFlux( const BCFlag& Flag ) const
+MS_Model_Fluid3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
     return M_Fluid->flux( Flag );
 }
 
 Real
-MS_Model_Fluid3D::GetPressure( const BCFlag& Flag ) const
+MS_Model_Fluid3D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
     return M_Fluid->pressure( Flag );
 }
 
 Real
-MS_Model_Fluid3D::GetDynamicPressure( const BCFlag& Flag ) const
+MS_Model_Fluid3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 {
-    return 0.5 * GetDensity( Flag ) * ( GetFlux( Flag ) * GetFlux( Flag ) )
-                                    / ( GetArea( Flag ) * GetArea( Flag ) );
+    return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
+                                            / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
 }
 
 Real
-MS_Model_Fluid3D::GetLagrangeMultiplier( const BCFlag& Flag ) const
+MS_Model_Fluid3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
 {
     return M_Fluid->LagrangeMultiplier(Flag, *M_FluidBC->GetHandler() );
 }
 
 Real
-MS_Model_Fluid3D::GetStress( const BCFlag& Flag, const stressTypes& StressType ) const
+MS_Model_Fluid3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType ) const
 {
     switch ( StressType )
     {
         case StaticPressure:
         {
-            return -GetPressure( Flag );
+            return -GetBoundaryPressure( Flag );
         }
 
         case TotalPressure:
         {
-            return -GetPressure( Flag ) + GetDynamicPressure( Flag ) * ( ( GetFlux( Flag ) > 0.0 ) ? 1 : -1 );
+            return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
         }
 
         case LagrangeMultiplier:
         {
-            return -GetLagrangeMultiplier( Flag );
+            return -GetBoundaryLagrangeMultiplier( Flag );
         }
 
         default:
@@ -555,7 +555,7 @@ MS_Model_Fluid3D::GetStress( const BCFlag& Flag, const stressTypes& StressType )
 }
 
 Real
-MS_Model_Fluid3D::GetDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
 {
     SolveLinearModel( SolveLinearSystem );
 
@@ -563,7 +563,7 @@ MS_Model_Fluid3D::GetDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
 }
 
 Real
-MS_Model_Fluid3D::GetDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
     SolveLinearModel( SolveLinearSystem );
 
@@ -571,15 +571,15 @@ MS_Model_Fluid3D::GetDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem 
 }
 
 Real
-MS_Model_Fluid3D::GetDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
     SolveLinearModel( SolveLinearSystem );
 
-    return GetDensity( Flag ) * M_Fluid->GetLinearFlux( Flag ) * GetFlux( Flag ) / ( GetArea( Flag ) * GetArea( Flag ) );
+    return GetBoundaryDensity( Flag ) * M_Fluid->GetLinearFlux( Flag ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
 }
 
 Real
-MS_Model_Fluid3D::GetDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem )
 {
     SolveLinearModel( SolveLinearSystem );
 
@@ -587,23 +587,23 @@ MS_Model_Fluid3D::GetDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLin
 }
 
 Real
-MS_Model_Fluid3D::GetDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
+MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
 {
     switch ( StressType )
     {
         case StaticPressure:
         {
-            return -GetDeltaPressure( Flag, SolveLinearSystem );
+            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
         }
 
         case TotalPressure:
         {
-            return -GetDeltaPressure( Flag, SolveLinearSystem ) + GetDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
         }
 
         case LagrangeMultiplier:
         {
-            return -GetDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
+            return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
         }
         
         default:
