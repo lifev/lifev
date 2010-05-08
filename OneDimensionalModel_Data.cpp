@@ -132,8 +132,8 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s."<< std::endl;
 
-    std::cout << " 1D- Mesh nodes:                               " << M_Mesh->numPoints() << std::endl;
-    std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
+    //std::cout << " 1D- Mesh nodes:                               " << M_Mesh->numPoints() << std::endl;
+    //std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
 
     // Miscellaneous
     M_post_dir               = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
