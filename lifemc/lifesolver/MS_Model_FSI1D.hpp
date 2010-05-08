@@ -37,12 +37,12 @@
  *  @date 14-04-2010
  */
 
-#ifndef MS_Model_1D_H
-#define MS_Model_1D_H 1
+#ifndef MS_Model_FSI1D_H
+#define MS_Model_FSI1D_H 1
 
 // Mathcard includes
 #include <lifemc/lifealg/AztecOOPreconditioner.hpp>
-#include <lifemc/lifefem/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
 // LifeV includes
@@ -64,14 +64,14 @@
 
 namespace LifeV {
 
-//! MS_Model_1D - MultiScale model for 1D Fluid simulations
+//! MS_Model_FSI1D - MultiScale model for 1D Fluid simulations
 /*!
  *  @author Gilles Fourestey, Cristiano Malossi
  *
- *  The MS_Model_1D class is an implementation of the MS_PhysicalModel
+ *  The MS_Model_FSI1D class is an implementation of the MS_PhysicalModel
  *  for 1D Fluid problem.
  */
-class MS_Model_1D: public virtual MS_PhysicalModel
+class MS_Model_FSI1D: public virtual MS_PhysicalModel
 {
 public:
 
@@ -110,16 +110,16 @@ public:
     //@{
 
     //! Constructor
-    MS_Model_1D();
+    MS_Model_FSI1D();
 
     //! Copy constructor
     /*!
-     * @param 1D MS_Model_1D
+     * @param FSI1D MS_Model_FSI1D
      */
-    MS_Model_1D( const MS_Model_1D& OneD );
+    MS_Model_FSI1D( const MS_Model_FSI1D& FSI1D );
 
     //! Destructor
-    ~MS_Model_1D() {}
+    ~MS_Model_FSI1D() {}
 
     //@}
 
@@ -129,10 +129,10 @@ public:
 
     //! Operator=
     /*!
-     * @param OneD MS_Model_1D
+     * @param FSI1D MS_Model_FSI1D
      * @return reference to a copy of the class
      */
-    MS_Model_1D& operator = ( const MS_Model_1D& OneD );
+    MS_Model_FSI1D& operator = ( const MS_Model_FSI1D& FSI1D );
 
     //@}
 
@@ -191,6 +191,62 @@ public:
 
     //! Solve the linear problem
     void SolveLinearModel( bool& SolveLinearSystem );
+
+    //@}
+
+
+    //! @name Get Methods (couplings)
+    //@{
+
+    //! Get the density on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return density value
+     */
+    Real GetBoundaryDensity( const BCFlag& /*flag*/) const;
+
+    //! Get the viscosity on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return viscosity value
+     */
+    Real GetBoundaryViscosity( const BCFlag& /*flag*/) const;
+
+    //! Get the area on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return area value
+     */
+    Real GetBoundaryArea( const BCFlag& Flag ) const;
+
+    //! Get the flux on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return flux value
+     */
+    Real GetBoundaryFlowRate( const BCFlag& Flag ) const;
+
+    //! Get the integral of the pressure (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return pressure value
+     */
+    Real GetBoundaryPressure( const BCFlag& Flag ) const;
+
+    //! Get the integral of the dynamic pressure (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return dynamic pressure value
+     */
+    Real GetBoundaryDynamicPressure( const BCFlag& Flag ) const;
+
+    //! Get the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param StressType Type of approximation for the stress
+     * @return stress value
+     */
+    Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
 
     //@}
 
@@ -288,11 +344,11 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createFluid1D()
+inline MS_PhysicalModel* createFSI1D()
 {
-    return new MS_Model_1D();
+    return new MS_Model_FSI1D();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Model_1D_H */
+#endif /* MS_Model_FSI1D_H */
