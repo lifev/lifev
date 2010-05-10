@@ -35,7 +35,7 @@
 #ifndef MS_Coupling_BoundaryCondition_H
 #define MS_Coupling_BoundaryCondition_H 1
 
-#include <lifemc/lifefem/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface.hpp>
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
