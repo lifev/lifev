@@ -1004,145 +1004,119 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             throw WRONG_PREC_EXCEPTION();
             break;
         case 13:
-            //M_precPtr.reset(dynamic_cast<EpetraPreconditioner*>(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get())));
+            {
             firstCompPrec.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
             M_CompPrec.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
-            //CompPrec = boost::dynamic_pointer_cast< ComposedPreconditioner<Epetra_Operator>, prec_raw_type > (M_precPtr);
             secondCompPrec.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
 
             M_BCh_Robin->setOffset(M_offset);
 
-//             if(M_CompPrec.get())
-//             {
-//                 //CompPrec->replace(M_fluidOper, 0);
-//             }
-//             else
+            M_couplingFluid1.reset(new matrix_type(*M_monolithicMap, 1));
+            M_couplingFluid2.reset(new matrix_type(*M_monolithicMap, 1));
+            M_couplingSolid1.reset(new matrix_type(*M_monolithicMap, 1));
+            M_couplingSolid2.reset(new matrix_type(*M_monolithicMap, 1));
+
+            matrix_ptrtype tmpMatrix(new matrix_type(*M_monolithicMap, 0));
+            addDiagonalEntries(1., M_couplingFluid1, *M_monolithicMap);
+            addDiagonalEntries(1., M_couplingFluid2, *M_monolithicMap);
+            addDiagonalEntries(1., M_couplingSolid1, *M_monolithicMap);
+            EpetraMap fluidPressureMap(M_uFESpace->map());
+            fluidPressureMap+= M_pFESpace->map();
+            if(M_fluxes)
+                fluidPressureMap+= M_fluxes;
+            addDiagonalEntries(1., M_couplingSolid2, fluidPressureMap );
+            addDiagonalEntries(1., M_couplingSolid2, M_dFESpace->map(), M_offset);
+            addDiagonalEntries(-1., M_couplingSolid2, M_monolithicInterfaceMap, M_solidAndFluidDim);
+
+            // fluid part of the preconditioner
+            couplingMatrix(tmpMatrix, 4);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= -1.;//-0.5;
+            tmpMatrix->spy("upright");
+            *M_couplingFluid1 += *tmpMatrix;
+            M_couplingFluid1->GlobalAssemble();
+
+            tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 2);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= -1.;// -0.5;
+            tmpMatrix->spy("lowleft");
+            *M_couplingFluid2 += *tmpMatrix;
+            M_couplingFluid2->GlobalAssemble();
+
+            //TODO: diagonalize the coupling matrices for the Dirichlet b.c.? no
+
+            bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
+            M_solidBlockPrec->GlobalAssemble();
+            bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
+            M_solidBlockPrec->GlobalAssemble();
+
+            // solid part of the preconditioner
+            tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 8);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= -1.;
+            tmpMatrix->spy("rightlow");
+            *M_couplingSolid1 += *tmpMatrix;
+            M_couplingSolid1->GlobalAssemble();
+
+            tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 1);
+            tmpMatrix->GlobalAssemble();
+            tmpMatrix->spy("lowright");
+            *M_couplingSolid2 += *tmpMatrix;
+            M_couplingSolid2->GlobalAssemble();
+
+            M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
+
+            Chrono chrono;
+
+            boost::shared_ptr<Ifpack_Preconditioner> precFluid;
+            this->displayer().leaderPrint("Computing the factorization... ");
+            chrono.start();
+            createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
+            int overlapLevel = M_listFluid.get("overlap level", 2);
+            std::string precType     = M_listFluid.get("prectype", "Amesos");
+            Ifpack factory;
+            precFluid.reset(factory.Create(precType, M_fluidOper->getMatrixPtr().get(), overlapLevel));
+
+            if ( !precFluid.get() )
             {
-                M_couplingFluid1.reset(new matrix_type(*M_monolithicMap, 1));
-                M_couplingFluid2.reset(new matrix_type(*M_monolithicMap, 1));
-                M_couplingSolid1.reset(new matrix_type(*M_monolithicMap, 1));
-                M_couplingSolid2.reset(new matrix_type(*M_monolithicMap, 1));
+                ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+            }
 
-                matrix_ptrtype tmpMatrix(new matrix_type(*M_monolithicMap, 0));
-                addDiagonalEntries(1., M_couplingFluid1, *M_monolithicMap);
-                addDiagonalEntries(1., M_couplingFluid2, *M_monolithicMap);
-                addDiagonalEntries(1., M_couplingSolid1, *M_monolithicMap);
-                EpetraMap fluidPressureMap(M_uFESpace->map());
-                fluidPressureMap+= M_pFESpace->map();
-                if(M_fluxes)
-                    fluidPressureMap+= M_fluxes;
-                addDiagonalEntries(1., M_couplingSolid2, fluidPressureMap );
-                addDiagonalEntries(1., M_couplingSolid2, M_dFESpace->map(), M_offset);
-                addDiagonalEntries(-1., M_couplingSolid2, M_monolithicInterfaceMap, M_solidAndFluidDim);
+            precFluid->SetParameters(M_listFluid);
+            precFluid->Initialize();
+            precFluid->Compute();
 
-                // fluid part of the preconditioner
-                couplingMatrix(tmpMatrix, 4);
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= -1.;//-0.5;
-                tmpMatrix->spy("upright");
-                *M_couplingFluid1 += *tmpMatrix;
-                M_couplingFluid1->GlobalAssemble();
+            chrono.stop();
+            this->displayer().leaderPrintMax("done in ", chrono.diff());
 
-                tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 2);
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= -1.;// -0.5;
-                tmpMatrix->spy("lowleft");
-                *M_couplingFluid2 += *tmpMatrix;
-                M_couplingFluid2->GlobalAssemble();
+            boost::shared_ptr<Ifpack_Preconditioner> precSolid;
+            this->displayer().leaderPrint("Computing the factorization... ");
+            chrono.start();
+            createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
+            overlapLevel = M_listSolid.get("overlap level", 2);
+            precType     = M_listSolid.get("prectype", "Amesos");
 
-                //TODO: diagonalize the coupling matrices for the Dirichlet b.c.? no
-
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
-                M_solidBlockPrec->GlobalAssemble();
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
-                M_solidBlockPrec->GlobalAssemble();
-
-                // solid part of the preconditioner
-                tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 8);
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= -1.;
-                tmpMatrix->spy("rightlow");
-                *M_couplingSolid1 += *tmpMatrix;
-                M_couplingSolid1->GlobalAssemble();
-
-                tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 1);
-                tmpMatrix->GlobalAssemble();
-                tmpMatrix->spy("lowright");
-                *M_couplingSolid2 += *tmpMatrix;
-                M_couplingSolid2->GlobalAssemble();
-
-                M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-                M_fluidBlock->spy("fb");
-                M_solidBlockPrec->spy("sb");
-                M_solidBlock->spy("s");
-                M_monolithicMatrix->spy("j");
-                M_couplingSolid1->spy("cs1");
-                M_couplingSolid2->spy("cs2");
-                M_couplingFluid1->spy("cf1");
-                M_couplingFluid2->spy("cf2");
-
-                Chrono chrono;
-
-                boost::shared_ptr<Ifpack_Preconditioner> precFluid;
-                this->displayer().leaderPrint("Computing the factorization... ");
-                chrono.start();
-                //Teuchos::ParameterList listFluid;
-                createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
-                int overlapLevel = M_listFluid.get("overlap level", 2);
-                std::string precType     = M_listFluid.get("prectype", "Amesos");
-                Ifpack factory;
-                precFluid.reset(factory.Create(precType, M_fluidOper->getMatrixPtr().get(), overlapLevel));
-
-                if ( !precFluid.get() )
-                {
-                    ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-                }
-
-                precFluid->SetParameters(M_listFluid);
-                precFluid->Initialize();
-                precFluid->Compute();
-
-                chrono.stop();
-                this->displayer().leaderPrintMax("done in ", chrono.diff());
-
-                boost::shared_ptr<Ifpack_Preconditioner> precSolid;
-                this->displayer().leaderPrint("Computing the factorization... ");
-                chrono.start();
-                //Teuchos::ParameterList listSolid;
-                createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
-                overlapLevel = M_listSolid.get("overlap level", 2);
-                precType     = M_listSolid.get("prectype", "Amesos");
-
-                precSolid.reset(factory.Create(precType, M_solidOper->getMatrixPtr().get(), overlapLevel));
-                if ( !precSolid.get() )
-                {
-                    ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-                }
-                precSolid->SetParameters( M_listSolid);
-                precSolid->Initialize();
-                precSolid->Compute();
-                chrono.stop();
-                this->displayer().leaderPrintMax("done in ", chrono.diff());
+            precSolid.reset(factory.Create(precType, M_solidOper->getMatrixPtr().get(), overlapLevel));
+            if ( !precSolid.get() )
+            {
+                ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+            }
+            precSolid->SetParameters( M_listSolid);
+            precSolid->Initialize();
+            precSolid->Compute();
+            chrono.stop();
+            this->displayer().leaderPrintMax("done in ", chrono.diff());
 
 
-                //fluid part of the preconditioner
-                //firstCompPrec->buildPreconditioner(M_fluidOper->getPrec());
-                boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr1(new Epetra_FECrsMatrix(*M_couplingFluid1->getMatrixPtr()));
-                boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr2(new Epetra_FECrsMatrix(*M_couplingSolid1->getMatrixPtr()));
+            //fluid part of the preconditioner
+            boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr1(new Epetra_FECrsMatrix(*M_couplingFluid1->getMatrixPtr()));
+            boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr2(new Epetra_FECrsMatrix(*M_couplingSolid1->getMatrixPtr()));
 
                 firstCompPrec->push_back(precFluid, false, false);
-                //firstCompPrec->push_back(boost::dynamic_pointer_cast<Epetra_Operator>(/*ComposedPrecPtr*/matrCrsPtr1), true, false/*already inverted*/);
                 firstCompPrec->push_back(precSolid, false, false);
-                //firstCompPrec->push_back(boost::dynamic_pointer_cast<Epetra_Operator>(/*ComposedPrecPtr*/matrCrsPtr2), true, false/*already inverted*/);
-
-//swap the order so that when ApplyInverse is calles it returns the correct one NO
-//                 ifpackCompPrec->buildPreconditioner(M_solidOper);
-//                 ifpackCompPrec->push_back(M_couplingSolid1, true, false, true/*already inverted*/);
-//                 ifpackCompPrec->push_back(M_couplingFluid1, true, false, true/*already inverted*/);
-//                 ifpackCompPrec->push_back(M_fluidOper);
                 matrCrsPtr1.reset (new Epetra_FECrsMatrix(*M_couplingFluid2->getMatrixPtr()));
                 matrCrsPtr2.reset (new Epetra_FECrsMatrix(*M_couplingSolid2->getMatrixPtr()));
 
@@ -1152,217 +1126,165 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
                 secondCompPrec->push_back(boost::dynamic_pointer_cast<Epetra_Operator>(matrCrsPtr2), true, false/*already inverted*/);
                 secondCompPrec->push_back(precSolid, false, false);
 
-                //ifpackCompPrec2->buildPreconditioner(M_fluidOper);
-                //ifpackCompPrec2->push_back(M_couplingFluid2, true, false, true/*already inverted*/);
-                //ifpackCompPrec2->push_back(M_couplingSolid2, true, false, true/*already inverted*/);
-                //ifpackCompPrec2->push_back(M_solidOper);
-
-//swap the order so that when ApplyInverse is calles it returns the correct one NO
-//                 ifpackCompPrec2->buildPreconditioner(M_solidOper);
-//                 ifpackCompPrec2->push_back(M_couplingSolid2, true, false, true/*already inverted*/);
-//                 ifpackCompPrec2->push_back(M_couplingFluid2, true, false, true/*already inverted*/);
-//                 ifpackCompPrec2->push_back(M_fluidOper);
-
                 M_CompPrec->push_back(firstCompPrec, false, false, false);
-                //M_CompPrec->push_back(secondCompPrec, false, false, true /*sum*/);
-           }
-            break;
+            }
+                break;
         case 14:
-            //M_precPtr.reset(dynamic_cast<EpetraPreconditioner*>(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get())));
+            {
             firstCompPrec.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
             M_CompPrec.reset(new ComposedPreconditioner<Epetra_Operator>);
-            // = boost::dynamic_pointer_cast<ComposedPreconditioner<Epetra_Operator>, compType>(newP);
-            //CompPrec = boost::dynamic_pointer_cast< ComposedPreconditioner<Epetra_Operator>, prec_raw_type > (M_precPtr);
             secondCompPrec.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
 
             M_BCh_Robin->setOffset(M_offset);
 
-//             if(M_CompPrec.get())
-//             {
-//                 //CompPrec->replace(M_fluidOper, 0);
-//             }
-//             else
+            M_couplingFluid1.reset(new matrix_type(*M_monolithicMap, 1));
+            M_couplingFluid2.reset(new matrix_type(*M_monolithicMap, 1));
+            M_couplingSolid1.reset(new matrix_type(*M_monolithicMap, 1));
+            M_couplingSolid2.reset(new matrix_type(*M_monolithicMap, 1));
+
+            bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
+            M_solidBlockPrec->GlobalAssemble();
+            bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
+            M_solidBlockPrec->GlobalAssemble();
+
+            if ( !M_BCh_u->bdUpdateDone() )
+                M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
+
+
+            // fluid part of the preconditioner
+            matrix_ptrtype tmpMatrix(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 4);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= 0.5;
+            tmpMatrix->spy("rightup");
+            *M_couplingFluid1 += *tmpMatrix;
+            couplingMatrix(M_couplingFluid1, 2);
+            *M_couplingFluid1 += *M_fluidBlock;
+            M_couplingFluid1->GlobalAssemble();
+
+
+            tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 8);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= 0.5;
+            tmpMatrix->spy("rightlow");
+            addDiagonalEntries(1., M_couplingSolid1, M_monolithicInterfaceMap, M_solidAndFluidDim);
+            *M_couplingSolid1 += *tmpMatrix;
+            *M_couplingSolid1 += *M_solidBlockPrec;
+            M_couplingSolid1->GlobalAssemble();
+
+            // solid part of the preconditioner
+            tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 8);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= 0.5;
+            tmpMatrix->spy("rightlow");
+            couplingMatrix(M_couplingSolid2, 1);
+            *M_couplingSolid2 += *tmpMatrix;
+            *M_couplingSolid2 += *M_solidBlockPrec;
+
+            M_couplingSolid2->GlobalAssemble();
+
+            tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
+            couplingMatrix(tmpMatrix, 4);
+            tmpMatrix->GlobalAssemble();
+            *tmpMatrix *= 0.5;
+            tmpMatrix->spy("rightup");
+            addDiagonalEntries(1., M_couplingFluid2, M_monolithicInterfaceMap, M_solidAndFluidDim);
+            *M_couplingFluid2 += *tmpMatrix;
+            *M_couplingFluid2 += *M_fluidBlock;
+            M_couplingFluid2->GlobalAssemble();
+
+
+            Chrono chrono;
+
+            boost::shared_ptr<Ifpack_Preconditioner> precFluid1;
+            this->displayer().leaderPrint("Computing the factorization... ");
+            chrono.start();
+            createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
+            int overlapLevel = M_listFluid.get("overlap level", 4);
+            std::string precType     = M_listFluid.get("prectype", "Amesos");
+            Ifpack factory;
+            precFluid1.reset(factory.Create(precType, M_couplingFluid1->getMatrixPtr().get(), overlapLevel));
+            if ( !precFluid1.get() )
             {
-                M_couplingFluid1.reset(new matrix_type(*M_monolithicMap, 1));
-                M_couplingFluid2.reset(new matrix_type(*M_monolithicMap, 1));
-                M_couplingSolid1.reset(new matrix_type(*M_monolithicMap, 1));
-                M_couplingSolid2.reset(new matrix_type(*M_monolithicMap, 1));
+                ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+            }
+            IFPACK_CHK_ERR(precFluid1->SetParameters(M_listFluid));
+            IFPACK_CHK_ERR(precFluid1->Initialize());
+            IFPACK_CHK_ERR(precFluid1->Compute());
+            chrono.stop();
+            this->displayer().leaderPrintMax("done in ", chrono.diff());
 
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
-                M_solidBlockPrec->GlobalAssemble();
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
-                M_solidBlockPrec->GlobalAssemble();
-
-                if ( !M_BCh_u->bdUpdateDone() )
-                    M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-                bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataFluid().dataTime()->getTime() );
-
-
-                // fluid part of the preconditioner
-                matrix_ptrtype tmpMatrix(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 4);
-                //couplingMatrix(M_couplingFluid1, 2);//to kill
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= 0.5;
-                tmpMatrix->spy("rightup");
-                *M_couplingFluid1 += *tmpMatrix;
-                couplingMatrix(M_couplingFluid1, 2);
-                *M_couplingFluid1 += *M_fluidBlock;
-                //addDiagonalEntries(1., M_couplingFluid1, M_monolithicInterfaceMap, M_solidAndFluidDim);//to kill
-                M_couplingFluid1->GlobalAssemble();
+            boost::shared_ptr<Ifpack_Preconditioner> precFluid2;
+            this->displayer().leaderPrint("Computing the factorization... ");
+            chrono.start();
+            createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
+            overlapLevel = M_listFluid.get("overlap level", 4);
+            precType     = M_listFluid.get("prectype", "Amesos");
+            precFluid2.reset(factory.Create(precType, M_couplingFluid2->getMatrixPtr().get(), overlapLevel));
+            if ( !precFluid2.get() )
+            {
+                ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+            }
+            IFPACK_CHK_ERR(precFluid2->SetParameters(M_listFluid));
+            IFPACK_CHK_ERR(precFluid2->Initialize());
+            IFPACK_CHK_ERR(precFluid2->Compute());
+            chrono.stop();
+            this->displayer().leaderPrint(" overlap: ", M_listFluid.get("overlap level", 4));
+            this->displayer().leaderPrintMax(" done in ", chrono.diff());
 
 
-                tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 8);
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= 0.5;
-                tmpMatrix->spy("rightlow");
-                addDiagonalEntries(1., M_couplingSolid1, M_monolithicInterfaceMap, M_solidAndFluidDim);
-                *M_couplingSolid1 += *tmpMatrix;
-                *M_couplingSolid1 += *M_solidBlockPrec;
-                M_couplingSolid1->GlobalAssemble();
+            boost::shared_ptr<Ifpack_Preconditioner> precSolid1;
+            this->displayer().leaderPrint("Computing the factorization... ");
+            chrono.start();
+            createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
+            overlapLevel = M_listSolid.get("overlap level", 2);
+            precType     = M_listSolid.get("prectype", "Amesos");
+            precSolid1.reset(factory.Create(precType, M_couplingSolid1->getMatrixPtr().get(), overlapLevel));
+            if ( !precSolid1.get() )
+            {
+                ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+            }
+            IFPACK_CHK_ERR(precSolid1->SetParameters( M_listSolid));
+            IFPACK_CHK_ERR(precSolid1->Initialize());
+            IFPACK_CHK_ERR(precSolid1->Compute());
+            chrono.stop();
+            this->displayer().leaderPrintMax("done in ", chrono.diff());
 
-                // solid part of the preconditioner
-                tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 8);
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= 0.5;
-                tmpMatrix->spy("rightlow");
-                couplingMatrix(M_couplingSolid2, 1);
-                *M_couplingSolid2 += *tmpMatrix;
-                *M_couplingSolid2 += *M_solidBlockPrec;
-                //addDiagonalEntries(-1., M_couplingSolid2, M_monolithicInterfaceMap, M_solidAndFluidDim);//to kill
-                M_couplingSolid2->GlobalAssemble();
-
-                tmpMatrix.reset(new matrix_type(*M_monolithicMap, 0));
-                couplingMatrix(tmpMatrix, 4);
-                tmpMatrix->GlobalAssemble();
-                *tmpMatrix *= 0.5;
-                tmpMatrix->spy("rightup");
-                addDiagonalEntries(1., M_couplingFluid2, M_monolithicInterfaceMap, M_solidAndFluidDim);
-                *M_couplingFluid2 += *tmpMatrix;
-                *M_couplingFluid2 += *M_fluidBlock;
-                M_couplingFluid2->GlobalAssemble();
-
-                //M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-                M_fluidBlock->spy("fb");
-                M_solidBlockPrec->spy("sb");
-                M_solidBlock->spy("s");
-                M_monolithicMatrix->spy("j");
-                M_couplingSolid1->spy("cs1");
-                M_couplingSolid2->spy("cs2");
-                M_couplingFluid1->spy("cf1");
-                M_couplingFluid2->spy("cf2");
-
-                Chrono chrono;
-
-//                 boost::shared_ptr<IfpackComposedPrec> prec1(new IfpackComposedPrec());
-//                 prec1->buildPreconditioner(M_couplingFluid1);
-//                 prec1->push_back(M_couplingSolid1);
-
-                boost::shared_ptr<Ifpack_Preconditioner> precFluid1;
-                this->displayer().leaderPrint("Computing the factorization... ");
-                chrono.start();
-                //Teuchos::ParameterList listFluid;
-                createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
-                int overlapLevel = M_listFluid.get("overlap level", 4);
-                std::string precType     = M_listFluid.get("prectype", "Amesos");
-                Ifpack factory;
-                precFluid1.reset(factory.Create(precType, M_couplingFluid1->getMatrixPtr().get(), overlapLevel));
-                if ( !precFluid1.get() )
-                {
-                    ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-                }
-                IFPACK_CHK_ERR(precFluid1->SetParameters(M_listFluid));
-                IFPACK_CHK_ERR(precFluid1->Initialize());
-                IFPACK_CHK_ERR(precFluid1->Compute());
-                chrono.stop();
-                this->displayer().leaderPrintMax("done in ", chrono.diff());
+            boost::shared_ptr<Ifpack_Preconditioner> precSolid2;
+            this->displayer().leaderPrint("Computing the factorization... ");
+            chrono.start();
+            //Teuchos::ParameterList listSolid;
+            createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
+            overlapLevel = M_listSolid.get("overlap level", 2);
+            precType     = M_listSolid.get("prectype", "Amesos");
+            precSolid2.reset(factory.Create(precType, M_couplingSolid2->getMatrixPtr().get(), overlapLevel));
+            if ( !precSolid2.get() )
+            {
+                ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+            }
+            IFPACK_CHK_ERR(precSolid2->SetParameters( M_listSolid));
+            IFPACK_CHK_ERR(precSolid2->Initialize());
+            IFPACK_CHK_ERR(precSolid2->Compute());
+            chrono.stop();
+            this->displayer().leaderPrintMax("done in ", chrono.diff());
 
 
-//                 boost::shared_ptr<IfpackComposedPrec> prec2(new IfpackComposedPrec());
-//                 prec1->buildPreconditioner(M_couplingFluid2);
-//                 prec1->push_back(M_couplingSolid2);
+            firstCompPrec->push_back(precFluid1, false, false);
+            firstCompPrec->push_back(precSolid1, false, false);
 
-                boost::shared_ptr<Ifpack_Preconditioner> precFluid2;
-                this->displayer().leaderPrint("Computing the factorization... ");
-                chrono.start();
-                //Teuchos::ParameterList listFluid;
-                createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
-                overlapLevel = M_listFluid.get("overlap level", 4);
-                precType     = M_listFluid.get("prectype", "Amesos");
-                precFluid2.reset(factory.Create(precType, M_couplingFluid2->getMatrixPtr().get(), overlapLevel));
-                if ( !precFluid2.get() )
-                {
-                    ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-                }
-                IFPACK_CHK_ERR(precFluid2->SetParameters(M_listFluid));
-                IFPACK_CHK_ERR(precFluid2->Initialize());
-                IFPACK_CHK_ERR(precFluid2->Compute());
-                chrono.stop();
-                this->displayer().leaderPrint(" overlap: ", M_listFluid.get("overlap level", 4));
-                this->displayer().leaderPrintMax(" done in ", chrono.diff());
+            secondCompPrec->push_back(precFluid2, false, false);
+            secondCompPrec->push_back(precSolid2, false, false);
 
-
-                boost::shared_ptr<Ifpack_Preconditioner> precSolid1;
-                this->displayer().leaderPrint("Computing the factorization... ");
-                chrono.start();
-                //Teuchos::ParameterList listSolid;
-                createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
-                overlapLevel = M_listSolid.get("overlap level", 2);
-                precType     = M_listSolid.get("prectype", "Amesos");
-                precSolid1.reset(factory.Create(precType, M_couplingSolid1->getMatrixPtr().get(), overlapLevel));
-                if ( !precSolid1.get() )
-                {
-                    ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-                }
-                IFPACK_CHK_ERR(precSolid1->SetParameters( M_listSolid));
-                IFPACK_CHK_ERR(precSolid1->Initialize());
-                IFPACK_CHK_ERR(precSolid1->Compute());
-                chrono.stop();
-                this->displayer().leaderPrintMax("done in ", chrono.diff());
-
-                boost::shared_ptr<Ifpack_Preconditioner> precSolid2;
-                this->displayer().leaderPrint("Computing the factorization... ");
-                chrono.start();
-                //Teuchos::ParameterList listSolid;
-                createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
-                overlapLevel = M_listSolid.get("overlap level", 2);
-                precType     = M_listSolid.get("prectype", "Amesos");
-                precSolid2.reset(factory.Create(precType, M_couplingSolid2->getMatrixPtr().get(), overlapLevel));
-                if ( !precSolid2.get() )
-                {
-                    ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
-                }
-                IFPACK_CHK_ERR(precSolid2->SetParameters( M_listSolid));
-                IFPACK_CHK_ERR(precSolid2->Initialize());
-                IFPACK_CHK_ERR(precSolid2->Compute());
-                chrono.stop();
-                this->displayer().leaderPrintMax("done in ", chrono.diff());
-
-
-                firstCompPrec->push_back(precFluid1, false, false);
-                firstCompPrec->push_back(precSolid1, false, false);
-
-                secondCompPrec->push_back(precFluid2, false, false);
-                secondCompPrec->push_back(precSolid2, false, false);
-
-                //                 boost::shared_ptr<ComposedPreconditioner<IfpackComposedPrec> > fakePrec1(new ComposedPreconditioner<IfpackComposedPrec>(M_epetraComm.get()));
-//                 fakePrec1->push_back(prec1);
-//                 boost::shared_ptr<ComposedPreconditioner<IfpackComposedPrec> > fakePrec2(new ComposedPreconditioner<IfpackComposedPrec>(M_epetraComm.get()));
-//                 fakePrec2->push_back(prec2);
-
-                M_CompPrec->push_back(firstCompPrec, false, false, false);
-                M_CompPrec->push_back(secondCompPrec, false, false, true /*sum*/);
-           }
+            M_CompPrec->push_back(firstCompPrec, false, false, false);
+            M_CompPrec->push_back(secondCompPrec, false, false, true /*sum*/);
+        }
             break;
 
         default:
             {
-                // for(short i=0; i<nDimensions; ++i)
-//                     *M_precMatrPtr += *M_monolithicMatrix;
-//                 M_precMatrPtr->GlobalAssemble();
-
             }
             break;
         }
