@@ -1,0 +1,549 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                                 Copyright (C) 2009 EPFL
+#
+#      Author(s): Cristiano Malossi <paolo.crosetto@epfl.ch>
+#           Date: 2009-09-01
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: FSI3D - Cylinder #####################################################################
+###################################################################################################
+
+[MultiScale]
+modelName        = FSI3D_Cylinder
+couplingFlags    = ''
+
+
+[problem]
+
+method     = exactJacobian # fixedPoint, steklovPoincare, exactJacobian
+algorithm  = DirichletNeumann # DirichletNeumann, RobinNeumann, for fixedPoint method
+precond    = 1 # 0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
+DDNprecond = 1 # precond for DD-newton, 0 = lin fluid, 1 lin structure, 2 = both
+reducedFluid = 0 # 0 = exact, 1 = inexact
+defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
+defOmegaS  = 0.01 # matters only with  precond = 2
+defOmegaF  = 0.01 # matters only with  precond = 2
+# only for fixed point and exactJacobian:
+# if updateEvery == 1, normal fixedPoint algorithm
+# if updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
+# if updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit).
+#                        Deprecated when using exactJacobian (better to set ifSemiImplicit=1)
+updateEvery = 1
+linesearch = 0
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+
+abstol     = 0.
+reltol     = 1.e-5
+etamax     = 1.e-8 # tolerance of the interface problem (GMRES),
+                    # if semiImplicit, set   etamax = 1.e-10,
+                    # else (e.g.)            etamax = 1.e-3
+                    #IMPORTANT: etamax < abstol + reltol*res
+semiImplicit = false # (only valid for method = exactJacobian or monolithic).
+maxSubIter = 100
+#monolithic = 0
+
+
+restart    = false   # restart the computations (see also importer)
+#restart    = true
+#Tstart     = 0.005 # restart from time Tstart
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  1 # default: 1
+#solid_flag      =  1 # default: fluid_flag
+#structure_flag  =  1 # default: fluid_flag
+#harmonic_flag   =  1 # default: fluid_flag
+tolerance       =  0 # how far points are to be considered the same on the interface
+
+[exporter]
+multimesh  = false  # actually we export also the displacement
+start      = 0
+#start      = 4
+save       = 1
+
+[fluid]
+
+useShapeDerivatives = true
+
+[./physics]
+density   = 1.0               # density
+viscosity = 0.03              # viscosity
+
+[../time_discretization]
+initialtime		= 0.
+endtime			= 0.006
+timestep		= 0.001
+BDF_order		= 1
+
+# end of fluid preconditioner parameters
+[../ipstab]
+gammaBeta  = 1
+gammaDiv   = 0.2
+gammaPress = 0.2
+reuse      = true
+max_iter_reuse = 100
+
+[../space_discretization]
+mesh_dir  = ./Mesh/ # the directory where the mesh file is
+#mesh_file = stent-fluid-coarse.mesh  # mesh file
+mesh_file = tube20.mesh  # mesh file
+#mesh_file = tube.mesh  # mesh file
+
+vel_order		= P1		# P1, P1Bubble, P2
+press_order		= P1			# P1, P2
+
+[../boundary_conditions]
+# DirichletNeumann conditions
+#list = 'InFlow      OutFlow           InFlowEdge OutFlowEdge Interface'
+#list = 'InFlow_Flux OutFlow           InFlowEdge OutFlowEdge Interface' # Flux
+list = 'InFlow      OutFlow_absorbing InFlowEdge OutFlowEdge Interface' # Nobile-Vergara absorbing BC
+#list = 'InFlow_Flux OutFlow_absorbing InFlowEdge OutFlowEdge Interface' # Flux + Nobile-Vergara absorbing BC
+
+# RobinNeumann conditions
+#list = 'InFlow      OutFlow           InFlowEdge OutFlowEdge Interface_RN1 Interface_RN2'
+
+	[./InFlow]
+	type			= Natural
+	flag			= 2
+	mode			= Full
+	component		= 3
+	#function		= '[0, 0, 13332*(t<0.00300000001)]'
+	functionFile	= physicalFunctions/test_Flux2.dat
+
+	[../InFlow_Flux]
+	type			= Flux
+	flag			= 2
+	mode			= Full
+	component		= 3
+	functionFile	= physicalFunctions/test_Flux1.dat
+
+	[../OutFlow]
+	type			= Natural
+	flag			= 3
+	mode			= Full
+	component		= 3
+	function		= 0
+
+	[../OutFlow_absorbing]
+	type			= Natural
+	flag			= 3
+	mode			= Full
+	component		= 3
+	OPERfunction	= 'a=0.7854; beta=s_thickness*s_young/(1-s_poisson*s_poisson)*pi/a; outflow = ( sqrt(s_density)/(2*sqrt(2))*f_flux/a + sqrt(beta*sqrt(a)) )^2 - beta*sqrt(a); [0., 0., -outflow ]'
+
+	[../InFlowEdge]
+	type			= Essential
+	flag			= 20
+	mode			= Full
+	component		= 3
+	function		= 0
+
+	[../OutFlowEdge]
+	type			= Essential
+	flag			= 30
+	mode			= Full
+	component		= 3
+	function		= 0
+
+	[../Interface]
+	type			= Essential
+	flag			= 1
+	mode			= Full
+	component		= 3
+	FSI				= StructureToFluid
+
+	[../Interface_RN1]
+	type			= Mixte
+	flag			= 1
+	mode			= Full
+	component		= 3
+	FSI				= StructureToFluid
+
+	[../Interface_RN2]
+	type			= Natural
+	flag			= 1
+	mode			= Full
+	component		= 3
+	FSI				= SolidLoadToStructure
+
+	[../]
+
+[../miscellaneous]
+verbose   = 1
+velname   = vel
+pressname = press
+steady    = 0
+factor    = 1
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all  #none
+conv            = rhs
+max_iter        = 100
+reuse           = true
+max_iter_reuse  = 101
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+
+[../prec]
+prectype        = Ifpack
+displayList     = true
+
+[./ifpack]
+prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+overlap         = 2
+
+[./relaxation]
+type                   = Jacobi
+damping_factor         = 1.
+sweeps                 = 1
+min_diagonal_value     = 0
+zero_starting_solution = true
+
+[../partitioner]
+type                   = metis
+#overlap                = 0
+local_parts            = 1
+root_node              = 0
+use_symmetric_graph    = true
+
+[../amesos]
+solvertype             = Amesos_KLU
+
+[../fact]
+drop_tolerance         = 1.e-5
+level-of-fill          = 1
+ilut_level-of-fill     = 1
+absolute_threshold     = 0.
+relative_threshold     = 0.
+relax_value            = 0.
+
+[../schwarz]
+combine_mode           = true
+reordering_type        = none
+filter_singletons      = false
+# end of fluid preconditioner parameters
+
+[lin_fluid]
+
+  [./solver]
+  solver          = gmres
+  scaling         = none
+  output          = all  #none
+  conv            = rhs
+  max_iter        = 100
+  kspace          = 100
+  tol             = 1.e-5    # AztecOO tolerance
+
+[../boundary_conditions]
+# DirichletNeumann & RobinNeumann conditions
+list = '            OutFlow InFlowEdge OutFlowEdge Interface' # EJ
+#list = 'InFlow_Flux OutFlow InFlowEdge OutFlowEdge Interface' # EJ     + Flux
+#list = '            OutFlow InFlowEdge OutFlowEdge'           # Others
+#list = 'InFlow_Flux OutFlow InFlowEdge OutFlowEdge'           # Others + Flux
+
+	[./InFlow]
+	type       = Natural
+	flag       = 2
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../InFlow_Flux]
+	type       = Flux
+	flag       = 2
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../OutFlow]
+	type       = Natural
+	flag       = 3
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../InFlowEdge]
+	type       = Essential
+	flag       = 20
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../OutFlowEdge]
+	type       = Essential
+	flag       = 30
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Interface]
+	type       = Essential
+	flag       = 1
+	mode       = Full
+	component  = 3
+	FSI	       = DerHarmonicExtensionVelToFluid
+
+	[../]
+
+  [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+  prectype        = Ifpack
+  displayList     = false
+
+    [./ifpack]
+    prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+    overlap         = 2
+
+      [./relaxation]
+      type                   = "Jacobi"
+      damping_factor         = 1.
+      sweeps                 = 1
+      min_diagonal_value     = 0
+      zero_starting_solution = true
+
+      [../partitioner]
+      type                   = metis
+      #overlap                = 0
+      local_parts            = 1
+      root_node              = 0
+      use_symmetric_graph    = true
+
+      [../amesos]
+      solvertype             = Amesos_Umfpack
+
+      [../fact]
+      drop_tolerance         = 1.e-5
+      level-of-fill          = 1
+      ilut_level-of-fill     = 1
+      absolute_threshold     = 0.
+      relative_threshold     = 0.
+      relax_value            = 0.
+
+      [../schwarz]
+      combine_mode           = true
+      reordering_type        = none
+      filter_singletons      = false
+      # end of fluid preconditioner parameters
+
+[solid]
+
+[./physics]
+material_flag   = 1 #,2
+young           = 3.0E6 #,1.9E9
+poisson         = 0.30 #,0.30
+
+density         = 1.2					# density
+thickness		= 0.1
+
+[../time_discretization]
+timestep		= 0.001
+
+[../space_discretization]
+mesh_dir  = ./Mesh/  # the directory where the mesh file is
+#mesh_file = stent-solid-coarse.mesh  # mesh file
+mesh_file = vessel20.mesh  # mesh file
+#mesh_file = vessel.mesh  # mesh file
+order     = P1
+
+[../boundary_conditions]
+list = '    Base TopEdge BaseEdge Interface' # EJ/FP
+#list = 'Top Base TopEdge BaseEdge Interface' # EJ/FP
+
+	[./Top]
+	type       = Essential
+	flag       = 3
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Base]
+	type       = Essential
+	flag       = 2
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../TopEdge]
+	type       = Essential
+	flag       = 20
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../BaseEdge]
+	type       = Essential
+	flag       = 30
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Interface]
+	type       = Natural
+	flag       = 1
+	mode       = Full
+	component  = 3
+	FSI	       = FluidLoadToStructure
+
+	[../]
+
+[../miscellaneous]
+factor    = 12
+verbose   = 1
+depname   = dep
+
+
+[../newton]
+maxiter = 1
+abstol  = 1.e-8
+linesearch = 0
+
+[../solver]
+output          = all
+max_iter        = 100
+poly_ord        = 5
+kspace          = 100
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 2
+tol             = 1.e-10
+
+
+[../prec]
+prectype        = Ifpack
+overlap         = 2
+
+[./ifpack]
+
+[./fact]
+droptol         = 1.e-5
+fill            = 2
+
+[../amesos]
+solvertype      = Amesos_Umfpack
+
+
+[mesh_motion]
+
+  [./solver]
+  solver          = cg
+  scaling         = none
+  output          = all  #none
+  conv            = rhs
+  max_iter        = 100
+  reuse           = true
+  max_iter_reuse  = 101
+  kspace          = 100
+  tol             = 1.e-5    # AztecOO tolerance
+
+[../boundary_conditions]
+list = 'Top Base TopEdge BaseEdge Interface' # EJ/FP
+
+	[./Top]
+	type       = Essential
+	flag       = 3
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Base]
+	type       = Essential
+	flag       = 2
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../TopEdge]
+	type       = Essential
+	flag       = 20
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../BaseEdge]
+	type       = Essential
+	flag       = 30
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Interface]
+	type       = Essential
+	flag       = 1
+	mode       = Full
+	component  = 3
+	FSI	       = StructureDispToHarmonicExtension
+
+	[../]
+
+  [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+  prectype        = Ifpack
+  displayList     = false
+
+    [./ifpack]
+    prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+    droptol         = 1.e-5
+    fill            = 4
+    relax_value     = 1
+    overlap         = 1
+
+    [../partitioner]
+    overlap = 1
+
+    [../amesos]
+    solvertype      = Amesos_Umfpack
+
+[jacobian]
+
+solver   = gmres;
+poly_ord = 5;
+kspace   = 40;
+conv     = rhs;
+
+[lin_solid]
+
+[./boundary_conditions]
+list = '    Base TopEdge BaseEdge Interface' # EJ
+#list = '    Base TopEdge BaseEdge'           # Others
+#list = 'Top Base TopEdge BaseEdge Interface' # EJ
+
+	[./Top]
+	type       = Natural
+	flag       = 3
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Base]
+	type       = Essential
+	flag       = 2
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../TopEdge]
+	type       = Essential
+	flag       = 20
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../BaseEdge]
+	type       = Essential
+	flag       = 30
+	mode       = Full
+	component  = 3
+	function   = 0
+
+	[../Interface]
+	type       = Natural
+	flag       = 1
+	mode       = Full
+	component  = 3
+	FSI	       = DerFluidLoadToStructure
+
+	[../]
+	[../]
