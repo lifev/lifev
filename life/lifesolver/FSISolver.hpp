@@ -139,7 +139,12 @@ public:
     //oper_fsi_ptr_mpi FSIOper() const { return M_oper; }
 
     //! get the displacement, which will be on the solidInterfaceMap
-    vector_type const& displacement() const { return *M_lambda; }
+    vector_type const& displacement() const
+    {
+        vector_ptrtype solution;
+        M_oper->getSolution(solution);
+        return *solution;
+    }
 
     //! get access to the \c bchandler_type for the velocity
 //    fluid_bchandler_type& bcHandlerU() { return M_BCh_u; }
@@ -163,7 +168,7 @@ public:
 
     //     bool setFluid				(bool fluid) { M_fluid = fluid; M_oper->set }
     //     bool setSolid				(bool solid) { M_solid = solid; }
-    void initSol                 ( const vector_type& solInit ) { *M_lambda = solInit; }
+    void initSol                 ( const vector_type& solInit ) { M_oper->setSolution(solInit); }
 
     void setSourceTerms          ( const fluid_source_type& fluidSource,
                                    const solid_source_type& solidSource );
@@ -211,11 +216,13 @@ public:
                      const std::string& /*velSName*/,
                      const Real&        /*Tstart = 0.*/);
 
-    virtual void initialize(vector_ptrtype u0, vector_ptrtype v0=vector_ptrtype());
+    virtual void initialize(vector_ptrtype u0=vector_ptrtype(), vector_ptrtype v0=vector_ptrtype());
 
     void iterate( const Real& time );
 
     void showMe() {}
+
+    bool isMonolithic(){return M_monolithic;}
 
 private:
 
@@ -233,9 +240,6 @@ private:
 
     std::string									M_method;
     bool										M_monolithic;
-
-    boost::shared_ptr<vector_type>				M_lambda;
-    boost::shared_ptr<vector_type>				M_lambdaDot;
 
     bool										M_firstIter;
     UInt										M_maxpf;

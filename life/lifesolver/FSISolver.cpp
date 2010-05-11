@@ -48,8 +48,6 @@ FSISolver::FSISolver( const std::string& method ):
     M_oper              ( ),
     M_method            ( method ),
     M_monolithic	    ( !( M_method.compare("monolithic") && M_method.compare("fullMonolithic") ) ),
-    M_lambda            ( ),
-    M_lambdaDot         ( ),
     M_firstIter         ( true ),
 	M_maxpf             ( ),
     M_defomega          ( ),
@@ -265,9 +263,6 @@ FSISolver::setup( void )
 
     M_oper->setupSystem();
 
-    M_lambda.reset   ( new vector_type( *M_oper->getCouplingVariableMap() ) );
-    M_lambdaDot.reset( new vector_type( *M_oper->getCouplingVariableMap() ) );
-
     M_oper->buildSystem();
 }
 
@@ -289,13 +284,17 @@ void
 FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
 {
     if(!u0.get())
-        M_lambda.reset(new vector_type(*M_oper->getCouplingVariableMap())); // couplingVariableMap()
+    {
+        M_oper->setSolution(vector_type(*M_oper->getCouplingVariableMap())); // couplingVariableMap()
+    }
     else
-        *M_lambda=*u0;
+    {
+        M_oper->setSolution(*u0); // couplingVariableMap()//copy
+    }
     if(!v0.get())
-        M_lambdaDot.reset(new vector_type(*M_oper->getCouplingVariableMap()));
+        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
     else
-        *M_lambdaDot=*v0;
+        M_oper->setSolutionDerivative(v0);
     //M_oper->setupBDF(*M_lambda);
 }
 
@@ -323,14 +322,12 @@ FSISolver::iterate( const Real& time )
 //     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);
 //     M_oper->solid().timeAdvance( M_oper->solid().sourceTerm(), time);
 
-    M_oper->updateSystem( *M_lambda );
+    M_oper->updateSystem( );
 
     // displacement prediction
     MPI_Barrier(MPI_COMM_WORLD);
 
     // couplingVariable Extrapolation:
-    M_oper->couplingVariableExtrap( M_lambda, M_lambdaDot, M_firstIter );
-
 
     // END OF couplingVariable Extrapolation
 
@@ -341,8 +338,10 @@ FSISolver::iterate( const Real& time )
     // the newton solver
     UInt status = 1;
     Debug( 6220 ) << "Calling non-linear Richardson \n";
+    vector_ptrtype lambda;
+    M_oper->getSolution(lambda);//copy of a shared_ptr
 
-    status = nonLinRichardson( *M_lambda,
+    status = nonLinRichardson( lambda,
                                *M_oper,
                                M_abstol,
                                M_reltol,
@@ -367,10 +366,10 @@ FSISolver::iterate( const Real& time )
             M_out_iter << time << " " << maxiter << " "
                        << M_oper->nbEval() << std::endl;
         }
-
     }
 
     M_oper->shiftSolution();
+
 
     Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
     Debug( 6220 ) << "============================================================\n";

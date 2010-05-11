@@ -163,9 +163,9 @@ public:
 
     virtual void buildSystem();
 
-    virtual void updateSystem( const vector_type& /*displacement*/ );
+    virtual void updateSystem( );
 
-    virtual void couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter );
+    virtual void couplingVariableExtrap( );
 
     virtual void solveJac( vector_type&       _muk,
                            const vector_type& _res,
@@ -451,6 +451,33 @@ public:
 //     void setBCh_solidDer          ( const solid_bchandler_type& BCh_solidDer)    { M_BCh_dz     = BCh_solidDer; }
 //     void setBCh_solidDerInv       ( const solid_bchandler_type& BCh_solidDerInv) { M_BCh_dz_inv = BCh_solidDerInv; }
 
+    //! gets the solution vector by reference
+    virtual void getSolution                  (vector_ptrtype& lambda){lambda=M_lambda;}
+
+    //! sets the solution vector by reference
+    void setSolutionPtr                             (const vector_ptrtype& sol)
+    {M_lambda = sol;}
+
+    //! sets the solution vector by copy
+    void setSolution                                (const vector_type& sol)
+    {*M_lambda = sol;}
+
+    //! sets the solution time derivative vector by copy
+    virtual  void setSolutionDerivative                                (const vector_ptrtype& lambdaDot){ M_lambdaDot=lambdaDot; }
+
+    //! gets the solid displacement by copy
+    virtual  void getSolidDisp                               (vector_type& soliddisp)
+    { soliddisp = M_solid->disp();}
+
+    //! gets the solid velocity by copy
+    virtual  void getSolidVel                                (vector_type& solidvel)
+    { solidvel = M_solid->vel();}
+
+    //! gets the fluid velocity and pressure by copy
+    virtual  void getFluidVelAndPres                         (vector_type& sol)
+    { sol = M_fluid->solution();}
+
+
 protected:
 
     virtual UInt imposeFlux();
@@ -559,6 +586,8 @@ protected:
 
     boost::shared_ptr<vector_type>                    M_lambdaFluid;
     boost::shared_ptr<vector_type>                    M_lambdaFluidRepeated;
+    boost::shared_ptr<vector_type>                    M_lambda;
+    boost::shared_ptr<vector_type>                    M_lambdaDot;
 
 private:
     // displacement on the interface

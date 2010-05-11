@@ -92,6 +92,8 @@ FSIOperator::FSIOperator():
 //     M_bcvDerStructureAccToReducedFluid   ( new  BCVectorInterface ),
     M_lambdaFluid                        ( ),
     M_lambdaFluidRepeated                ( ),
+    M_lambda                             ( ),
+    M_lambdaDot                             ( ),
     M_lambdaSolid                        ( ),
     M_lambdaSolidRepeated                ( ),
     M_lambdaSolidOld                     ( ),
@@ -569,7 +571,7 @@ FSIOperator::buildSystem()
 
 
 void
-FSIOperator::updateSystem( const vector_type& /*lambda*/ )
+FSIOperator::updateSystem( )
 {
     shiftSolution();
 
@@ -600,29 +602,29 @@ FSIOperator::updateSystem( const vector_type& /*lambda*/ )
     {
         this->M_solid->updateSystem();
     }
+    couplingVariableExtrap();
 }
 
 
 
-void FSIOperator::couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter )
+void FSIOperator::couplingVariableExtrap( )
 {
-	*lambda      = lambdaSolid();
-	if (firstIter)
+	*M_lambda      = lambdaSolid();
+	if (!M_lambdaDot.get())
     {
-        firstIter = false;
-
-        *lambda     += M_dataFluid->dataTime()->getTimeStep()*lambdaDotSolid();
+        M_lambdaDot.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
+        *M_lambda     += M_dataFluid->dataTime()->getTimeStep()*lambdaDotSolid();
     }
     else
     {
-        *lambda     += 1.5*M_dataFluid->dataTime()->getTimeStep()*lambdaDotSolid(); // *1.5
-        *lambda     -= M_dataFluid->dataTime()->getTimeStep()*0.5*(*lambdaDot);
+        *M_lambda     += 1.5*M_dataFluid->dataTime()->getTimeStep()*lambdaDotSolid(); // *1.5
+        *M_lambda     -= M_dataFluid->dataTime()->getTimeStep()*0.5*(*M_lambdaDot);
     }
 
-	*lambdaDot   = lambdaDotSolid();
+	*M_lambdaDot   = lambdaDotSolid();
 
-	displayer().leaderPrint("norm( disp  ) init = ", lambda->NormInf() );
-	displayer().leaderPrint("norm( velo )  init = ", lambdaDot->NormInf());
+	displayer().leaderPrint("norm( disp  ) init = ", M_lambda->NormInf() );
+	displayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->NormInf());
 }
 
 
@@ -1327,6 +1329,7 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
 //FSIOperator::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
 {
     M_lambdaFluid.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_lambda.reset             ( new vector_type(*M_fluidInterfaceMap, Unique) );
     M_lambdaFluidRepeated.reset( new vector_type(*M_fluidInterfaceMap, Repeated) );
 
     if ( this->isFluid() )
