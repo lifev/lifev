@@ -87,7 +87,8 @@ enum modelsTypes
 {
     MultiScale, /*!< MultiScale model */
     Fluid3D,    /*!< Oseen fluid 3D model */
-    FSI1D       /*!< FSI 1D model */
+    FSI1D,       /*!< FSI 1D model */
+    FSI3D       /*!< FSI 3D model */
 };
 
 /*! @enum couplingsTypes
@@ -177,6 +178,7 @@ MS_MapsDefinition()
     modelsMap["MultiScale"]           = MultiScale;
     modelsMap["Fluid3D"]              = Fluid3D;
     modelsMap["FSI1D"]                = FSI1D;
+    modelsMap["FSI3D"]                = FSI3D;
 
     couplingsMap["BoundaryCondition"] = BoundaryCondition;
     couplingsMap["Stress"]            = Stress;
