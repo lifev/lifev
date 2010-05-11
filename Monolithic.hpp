@@ -29,11 +29,24 @@
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
 
+#include <life/lifecore/chrono.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>
 
 #include <lifemc/lifealg/IfpackComposedPrec.hpp>
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#ifdef HAVE_TRILINOS_ANASAZI
+#include <lifemc/lifealg/eigenSolver.hpp>
+#endif
+
+#include <EpetraExt_MatrixMatrix.h>
+
+#include <boost/shared_ptr.hpp>
+
+#include <EpetraExt_Reindex_MultiVector.h>
+
+#include <EpetraExt_Reindex_CrsMatrix.h>
+
 //#include <Epetra_IntVector.h>
 
 namespace LifeV
@@ -173,9 +186,11 @@ public:
     LifeV::Real& computeMaxSingularValue();
 #endif
     /**
-       \small Computes the wall shear stress. Some issues when working in parallel still has to be fixed.
+       \small Computes the normals to the fluid domain. It is an example of how
+       to use the boundary conditions methods to compute the normal field on
+       a surface.
     */
-    vector_ptrtype computeWS();
+    void computeFNormals( vector_type& normals);
 
     /**
        \small Enables the computation of the wall shear stress on the specified boundary.
@@ -207,10 +222,12 @@ public:
     const UInt getDimInterface() const {return nDimensions*M_interface ;}
 
     //! Returns the solution at the previous time step
-    vector_ptrtype const& un(){return M_un;}
+    vector_ptrtype const&       un(){return M_un;}
 
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     bool const isFullMonolithic(){return M_fullMonolithic;}
+
+    UInt const getOffset(){return M_offset;}
 
     //!@}
     //!@name Virtual methods
@@ -259,6 +276,8 @@ public:
        3 preconditioners
        - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, composing
        3 preconditioners
+       - DDBlockPrec = 13-14 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, In particular these cases correspond to a
+Robin-Neumann preconditioned algorithm. These types of preconditioner are still under testing.
     */
     virtual void   solveJac(vector_type&       _muk,
                             const vector_type& _res,
@@ -268,7 +287,7 @@ public:
        updates the meshmotion, advances of a time step
        \param _sol: solution
     */
-    virtual void updateSystem(const vector_type& _sol);
+    virtual void updateSystem();
 
 
     /**
@@ -283,7 +302,31 @@ public:
 
     virtual void initializeMesh(vector_ptrtype fluid_dispOld);
     //!@}
-    virtual void  setupBlockPrec(vector_type& rhs);
+    virtual int  setupBlockPrec(vector_type& rhs);
+
+    void getSolution                  (vector_ptrtype& sol){sol = M_un;}
+    void setSolutionPtr                     (const vector_ptrtype& sol){initialize(sol);}
+    void setSolution                     (const vector_type& sol){*M_un=sol;}
+
+    void getSolidDisp(vector_type& soliddisp)
+    {
+        soliddisp.subset(*un(), M_offset);
+        std::cout<<"solid normDisp "<<soliddisp.NormInf()<<std::endl;
+        std::cout<<"normDisp true "<<un()->NormInf()<<std::endl;
+        soliddisp *= dataFluid().dataTime()->getTimeStep()*M_solid->rescaleFactor();
+    }
+
+    void getSolidVel(vector_type& solidvel)
+    {
+        solidvel.subset(M_solid->vel(), M_offset);
+        solidvel *= dataFluid().dataTime()->getTimeStep()*M_solid->rescaleFactor();
+    }
+
+    void getFluidVelAndPres(vector_type& sol)
+    {
+        sol = *un();
+    }
+
 protected:
 
     //!@name Protected methods
@@ -328,7 +371,7 @@ protected:
        \param alphas: coefficient
        \param inverse if true the inverse of the linear combination is computed. the output matrix is [];
     */
-    void robinCoupling(matrix_ptrtype & IdentityMatrix, Real& alphaf, Real& alphas);
+    void robinCoupling(matrix_ptrtype & IdentityMatrix, Real& alphaf, Real& alphas, int coupling = 4);
 
 
     /**
@@ -453,6 +496,8 @@ protected:
     matrix_ptrtype                                    M_meshBlock;
     boost::shared_ptr<solver_type>                    M_linearSolver;
     vector_ptrtype                                    M_wss;
+    Teuchos::ParameterList                            M_listFluid;
+    Teuchos::ParameterList                            M_listSolid;
     //!}
 private:
     //!@name Private methods
@@ -476,6 +521,13 @@ private:
     bool                                              M_resetPrec;
     UInt                                              M_maxIterSolver;
     bool                                              M_restarts;
+    bool                                              M_robinNeumannCoupling;
+    matrix_ptrtype                                    M_RNcoupling;//used only when robinNeumannCoupling==true
+    matrix_ptrtype                                    M_couplingSolid1;//used only when DDBlockPrec==14
+    matrix_ptrtype                                    M_couplingFluid1;//used only when DDBlockPrec==14
+    matrix_ptrtype                                    M_couplingSolid2;//used only when DDBlockPrec==14
+    matrix_ptrtype                                    M_couplingFluid2;//used only when DDBlockPrec==14
+    boost::shared_ptr<ComposedPreconditioner<Epetra_Operator> > M_CompPrec;
     //!@}
 };
 
@@ -491,11 +543,14 @@ iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr pre
 
     M_solid->getDisplayer().leaderPrint("    Updating the boundary conditions ... ");
 
+    M_monolithicMatrix->GlobalAssemble();
+    //necessary if we did not imposed Dirichlet b.c.
     M_linearSolver->setMatrix(*M_monolithicMatrix);
 
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
-    int numIter = M_linearSolver->solveSystem( rhs, step, prec );
+    int numIter = M_linearSolver->solveSystem( rhs, step, boost::static_pointer_cast< Epetra_Operator >(prec) );
+    //int numIter = M_linearSolver->solveSystem( *const_cast<const vector_type*>(&rhs), step,  );
 
     if (numIter < 0)
         {
