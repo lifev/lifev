@@ -86,7 +86,7 @@ public:
        updates the meshmotion, advances of a time step
        \param displacement: solution
     */
-    void                        updateSystem(const vector_type& displacement);
+    void                        updateSystem();
 
     void                      couplingMatrix(matrix_ptrtype & matrix,
                                              int coupling=31);
@@ -107,7 +107,7 @@ public:
                                            const vector_type& _sol,
                                            const UInt          _iter);
 
-    void                        setupBlockPrec(vector_type& rhs);
+    int                        setupBlockPrec(vector_type& rhs);
 
 
     //    void updateSystem(const vector_type& _sol);

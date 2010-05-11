@@ -104,14 +104,14 @@ fullMonolithic::setDataFromGetPot( GetPot const& data_file )
 
 
 void
-fullMonolithic::updateSystem(const vector_type& solution)
+fullMonolithic::updateSystem()
 {
     //M_meshMotion->dispOld() is at time n-1 !!
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_un, offset); //if the conv. term is to be condidered implicitly
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
-    super::updateSystem(solution);
+    super::updateSystem();
 }
 
 void
@@ -236,7 +236,7 @@ fullMonolithic::evalResidual( vector_type&       res,
 }
 
 
-void fullMonolithic::setupBlockPrec(vector_type& rhs)
+int fullMonolithic::setupBlockPrec(vector_type& rhs)
 {
 
     boost::shared_ptr<IfpackComposedPrec>  ifpackCompPrec;
