@@ -38,6 +38,7 @@
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
 #include <lifemc/lifesolver/MS_Model_FSI1D.hpp>
+#include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Coupling_BoundaryCondition.hpp>
