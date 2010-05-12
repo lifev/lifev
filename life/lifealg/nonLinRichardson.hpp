@@ -31,7 +31,7 @@
 namespace LifeV
 {
 template < class Fct >
-Int nonLinRichardson( boost::shared_ptr< EpetraVector >& sol,
+Int nonLinRichardson( EpetraVector& sol,
                       Fct&        functional,
                       Real        abstol,
                       Real        reltol,
@@ -77,12 +77,12 @@ Int nonLinRichardson( boost::shared_ptr< EpetraVector >& sol,
 
     //----------------------------------------------------------------------
 
-    bool const verbose(sol->Comm().MyPID() == 0);
+    bool const verbose(sol.Comm().MyPID() == 0);
 
     UInt iter = 0;
 
-    EpetraVector residual ( sol->getMap() );
-    EpetraVector step     ( sol->getMap() );
+    EpetraVector residual ( sol.getMap() );
+    EpetraVector step     ( sol.getMap() );
 
     step *= 0.;
 
@@ -94,7 +94,7 @@ Int nonLinRichardson( boost::shared_ptr< EpetraVector >& sol,
         std::cout << "  NonLinRichardson: starting " << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
     }
-    functional.evalResidual( residual, *sol, iter );
+    functional.evalResidual( residual, sol, iter );
 
     Real normRes      = residual.NormInf();
     Real stop_tol     = abstol + reltol*normRes;
@@ -108,7 +108,7 @@ Int nonLinRichardson( boost::shared_ptr< EpetraVector >& sol,
 
     //
 
-    Real solNormInf(sol->NormInf());
+    Real solNormInf(sol.NormInf());
     Real stepNormInf;
     if (verbose)
     {
@@ -142,7 +142,7 @@ Int nonLinRichardson( boost::shared_ptr< EpetraVector >& sol,
 
         functional.solveJac(step, -1.*residual, linearRelTol); // J*step = -R
 
-        solNormInf = sol->NormInf();
+        solNormInf = sol.NormInf();
         stepNormInf = step.NormInf();
         if (verbose)
         {
@@ -159,15 +159,15 @@ Int nonLinRichardson( boost::shared_ptr< EpetraVector >& sol,
         switch ( linesearch )
         {
             case 0: // no linesearch
-                *sol += step;
-                functional.evalResidual( residual, *sol, iter);
+                sol += step;
+                functional.evalResidual( residual, sol, iter);
 //                normRes = residual.NormInf();
                 break;
             case 1:
-                status = lineSearch_parab( functional, residual, *sol, step, normRes, lambda, iter, verbose );
+                status = lineSearch_parab( functional, residual, sol, step, normRes, lambda, iter, verbose );
                 break;
             case 2:  // recommended
-                status = lineSearch_cubic( functional, residual, *sol, step, normRes, lambda, slope, iter, verbose );
+                status = lineSearch_cubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
                 break;
             default:
                 std::cout << "Unknown linesearch \n";

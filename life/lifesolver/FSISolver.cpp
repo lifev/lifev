@@ -341,7 +341,7 @@ FSISolver::iterate( const Real& time )
     vector_ptrtype lambda;
     M_oper->getSolution(lambda);//copy of a shared_ptr
 
-    status = nonLinRichardson( lambda,
+    status = nonLinRichardson( *lambda,
                                *M_oper,
                                M_abstol,
                                M_reltol,
