@@ -107,7 +107,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultBC.back() ) ), _1 ) );
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
-        setBC( BCFunction, OneD_left, OneD_first, OneD_W1 );
+        setBC( OneD_left, OneD_first, OneD_W1, BCFunction );
     }
 
     if( !M_boundarySet[ OneD_left ][OneD_second] )
@@ -123,7 +123,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
 
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
-        setBC( BCFunction, OneD_left, OneD_second, OneD_W2 );
+        setBC( OneD_left, OneD_second, OneD_W2, BCFunction );
     }
 
     if( !M_boundarySet[OneD_right][OneD_first] )
@@ -138,7 +138,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultBC.back() ) ), _1 ) );
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
-        setBC( BCFunction, OneD_right, OneD_first, OneD_W2 );
+        setBC( OneD_right, OneD_first, OneD_W2, BCFunction );
     }
 
     if( !M_boundarySet[OneD_right][OneD_second] )
@@ -149,19 +149,19 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
 
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
         BCFunction_Type BCFunction;
-        BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
+        BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
                                              dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultBC.back() ) ), _1 ) );
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
-        setBC( BCFunction, OneD_right, OneD_second, OneD_W1 );
+        setBC( OneD_right, OneD_second, OneD_W1, BCFunction );
     }
 }
 
 void
-OneDimensionalModel_BCHandler::setBC( const BCFunction_Type& BCfunction,
-                                      const OneD_BCSide& side,
-                                      const OneD_BCLine& line,
-                                      const OneD_BC& bcType )
+OneDimensionalModel_BCHandler::setBC( const OneD_BCSide&     side,
+                                      const OneD_BCLine&     line,
+                                      const OneD_BC&         bcType,
+                                      const BCFunction_Type& BCfunction )
 {
     M_boundarySet[side][line] = true;
     M_boundary[side]->setVariable( line, bcType );
@@ -170,21 +170,6 @@ OneDimensionalModel_BCHandler::setBC( const BCFunction_Type& BCfunction,
                   << side << " boundary ("
                   << line << " line), variable "
                   << bcType << ".\n";
-}
-
-void
-OneDimensionalModel_BCHandler::setBC( const BCFunction_Type& BCfunction,
-                                      const OneD_BCSide& side,
-                                      const OneD_BCLine& line,
-                                      const OneD_BC& bcType,
-                                      const Container2D_Type& matrixrow )
-{
-    ASSERT_PRE( matrixrow.size() == 2, "setBC works only for 2D vectors");
-
-    setBC(BCfunction, side, line, bcType);
-
-    Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setBC] imposing matrix row as well.\n";
-    M_boundary[side]->setMatrixRow( line, matrixrow );
 }
 
 // ===================================================

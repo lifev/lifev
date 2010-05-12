@@ -58,7 +58,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BC::BCFunction_Type         BCFunction_Type;
+    typedef OneDimensionalModel_BC::BCFunction_Type            BCFunction_Type;
     typedef OneDimensionalModel_BC::BCFunction_PtrType         BCFunction_PtrType;
     typedef OneDimensionalModel_BC::BCFunction_Default_PtrType BCFunction_Default_PtrType;
 
@@ -97,12 +97,8 @@ public:
     //! @name Set Methods
     //@{
 
-    void setBC( const BCFunction_Type& BCfunction, const OneD_BCSide& side,
-                const OneD_BCLine& line,           const OneD_BC& bcType );
-
-    void setBC( const BCFunction_Type& BCfunction, const OneD_BCSide& side,
-                const OneD_BCLine& line,           const OneD_BC& bcType,
-                const Container2D_Type& matrixrow );
+    void setBC( const OneD_BCSide& side, const OneD_BCLine& line,
+                const OneD_BC& bcType,   const BCFunction_Type& BCfunction );
 
     void setDefaultBC( const Flux_PtrType     fluxFun,
                        const Source_PtrType   sourceFun,
