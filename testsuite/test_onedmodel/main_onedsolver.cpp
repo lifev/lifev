@@ -148,7 +148,10 @@ int main(int argc, char** argv)
 
   OneDModel.SetupData( FileName );
 
-  // Create BC
+  // Set BC using BCInterface
+  //OneDModel.GetBCInterface().FillHandler( FileName, "1D_Model" );
+
+  // Set BC using standard approach
   Sin sinus;
   BCFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
@@ -157,7 +160,7 @@ int main(int argc, char** argv)
                                                                                                 OneDModel.GetSource(),
                                                                                                 OneDModel.GetSolver()->U_thistime(),
                                                                                                 OneD_right, OneD_W2 ) );
-  BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
+  BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
                                       dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1 ) );
 
 
@@ -168,12 +171,11 @@ int main(int argc, char** argv)
   //Constant constantPressure( 24695.0765959599 );
   //BCFunction_Type constantPressureFunction( boost::bind( &Constant::operator(), &constantPressure, _1 ) );
 
-  // Set BC
-  OneDModel.GetBC().setBC( sinusoidalFunction, OneD_left,  OneD_first, OneD_Q  );
-  OneDModel.GetBC().setBC( absorbingFunction,  OneD_right, OneD_first, OneD_W2 );
-  //OneDModel.GetBC().setBC( constantAreaFunction, OneD_right, OneD_first, OneD_A );
-  //OneDModel.GetBC().setBC( constantPressureFunction, OneD_right, OneD_first, OneD_P );
+  OneDModel.GetBC().setBC( OneD_left,  OneD_first, OneD_Q,  sinusoidalFunction  );
+  OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_W2, absorbingFunction );
 
+  //OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_A,   constantAreaFunction );
+  //OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_P,   constantPressureFunction );
 
   OneDModel.SetupModel();
 

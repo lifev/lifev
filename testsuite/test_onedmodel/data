@@ -70,3 +70,21 @@ showCFL              = 1
     print_timing          = false
     
     [../]
+    
+[../boundary_conditions]
+    list = 'Inlet Outlet'
+    
+    [./Inlet]
+    side       = left
+    type       = Q
+    line       = first
+    function   = 'a=10; p=0.01; (t<p)*a*sin(2*pi*t/p)'
+    
+    [../Outlet]
+    side       = right
+    type       = W2
+    line       = first
+    Default    = Absorbing
+    
+    [../]
+ 
