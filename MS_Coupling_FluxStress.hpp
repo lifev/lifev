@@ -192,7 +192,7 @@ MS_Coupling_FluxStress::ImposeFlux( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetBC().addBC( "imposeFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlux, 3 );
+    Model->GetBCInterface().addBC( "imposeFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlux, 3 );
 }
 
 template< class model >
@@ -201,7 +201,7 @@ MS_Coupling_FluxStress::ImposeStress( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetBC().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress );
+    Model->GetBCInterface().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress );
 }
 
 template< class model >
@@ -210,7 +210,7 @@ MS_Coupling_FluxStress::ImposeDeltaFlux( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetLinearBC().addBC( "imposeDeltaFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseDeltaFlux, 3 );
+    Model->GetLinearBCInterface().addBC( "imposeDeltaFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseDeltaFlux, 3 );
 }
 
 template< class model >
@@ -219,7 +219,7 @@ MS_Coupling_FluxStress::ImposeDeltaStress( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetLinearBC().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseDeltaStress );
+    Model->GetLinearBCInterface().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseDeltaStress );
 }
 
 } // Namespace LifeV

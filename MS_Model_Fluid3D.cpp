@@ -41,17 +41,17 @@ namespace LifeV {
 // ===================================================
 MS_Model_Fluid3D::MS_Model_Fluid3D() :
     super                          (),
-    M_exporter                     ( new IOFileType() ),
-    M_importer                     ( new IOFileType() ),
+    M_exporter                     ( new IOFile_Type() ),
+    M_importer                     ( new IOFile_Type() ),
     M_FileName                     (),
     M_Fluid                        (),
-    M_FluidBC                      ( new FluidBCType() ),
+    M_FluidBC                      ( new BCInterface_Type() ),
     M_FluidBDF                     (),
-    M_FluidData                    ( new FluidDataType() ),
+    M_FluidData                    ( new Data_Type() ),
     M_FluidMesh                    (),
     M_FluidFullMap                 (),
     M_FluidSolution                (),
-    M_LinearFluidBC                ( new FluidBCType() ),
+    M_LinearFluidBC                ( new BCInterface_Type() ),
     M_UpdateLinearModel            ( true ),
     M_uFESpace                     (),
     M_pFESpace                     (),
@@ -205,10 +205,10 @@ MS_Model_Fluid3D::SetupModel()
     SetupDOF();
 
     //Add flow rate offset to BC
-    SetupBCOffset( M_FluidBC );
+    SetupBCOffset( M_FluidBC->GetHandler() );
 
     //Fluid
-    M_Fluid.reset( new FluidType( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, M_lmDOF ) );
+    M_Fluid.reset( new Fluid_Type( *M_FluidData, *M_uFESpace, *M_pFESpace, *M_comm, M_lmDOF ) );
     GetPot DataFile( M_FileName );
     M_Fluid->setUp( DataFile ); //Remove Preconditioner and Solver if possible!
 
@@ -216,19 +216,19 @@ MS_Model_Fluid3D::SetupModel()
     M_FluidFullMap.reset( new EpetraMap( M_Fluid->getMap() ) );
 
     //BDF
-    M_FluidBDF.reset( new FluidBDFType( M_FluidData->dataTime()->getBDF_order() ) );
+    M_FluidBDF.reset( new BDF_Type( M_FluidData->dataTime()->getBDF_order() ) );
 
     //Problem coefficients
-    M_beta.reset( new FluidVectorType( M_FluidFullMap ) );
-    M_RHS.reset ( new FluidVectorType( M_FluidFullMap ) );
+    M_beta.reset( new VectorType( M_FluidFullMap ) );
+    M_RHS.reset ( new VectorType( M_FluidFullMap ) );
 
     //Post-processing
     M_exporter->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
 
-    //M_FluidSolution.reset( new FluidVectorType( M_FluidFullMap, Repeated ) );
-    //M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), Repeated ) );
+    //M_FluidSolution.reset( new VectorType( M_FluidFullMap, Repeated ) );
+    //M_FluidSolution.reset( new VectorType( M_Fluid->solution(), Repeated ) );
 
-    M_FluidSolution.reset( new FluidVectorType( M_Fluid->solution(), M_exporter->mapType() ) );
+    M_FluidSolution.reset( new VectorType( M_Fluid->solution(), M_exporter->mapType() ) );
     if ( M_exporter->mapType() == Unique )
         M_FluidSolution->setCombineMode( Zero );
 
@@ -416,7 +416,7 @@ MS_Model_Fluid3D::SetupLinearModel()
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
 #endif
 
-    SetupBCOffset( M_LinearFluidBC );
+    SetupBCOffset( M_LinearFluidBC->GetHandler() );
 }
 
 void
@@ -428,7 +428,7 @@ MS_Model_Fluid3D::UpdateLinearModel()
 #endif
 
     //Create an empty vector
-    FluidVectorType VectorZero( *M_FluidSolution ); VectorZero = 0.0;
+    VectorType VectorZero( *M_FluidSolution ); VectorZero = 0.0;
 
     //UpdateLinearModel
     M_Fluid->updateLinearSystem( M_Fluid->matrNoBC(),
@@ -471,26 +471,26 @@ MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
 // ===================================================
 // Get Methods
 // ===================================================
-MS_Model_Fluid3D::FluidBCType&
-MS_Model_Fluid3D::GetBC()
+MS_Model_Fluid3D::BCInterface_Type&
+MS_Model_Fluid3D::GetBCInterface()
 {
     return *M_FluidBC;
 }
 
-MS_Model_Fluid3D::FluidBCType&
-MS_Model_Fluid3D::GetLinearBC()
+MS_Model_Fluid3D::BCInterface_Type&
+MS_Model_Fluid3D::GetLinearBCInterface()
 {
     return *M_LinearFluidBC;
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDensity( const BCFlag& /*flag*/ ) const
+MS_Model_Fluid3D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
 {
     return M_FluidData->density();
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryViscosity( const BCFlag& /*flag*/ ) const
+MS_Model_Fluid3D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 {
     return M_FluidData->viscosity();
 }
@@ -629,7 +629,7 @@ MS_Model_Fluid3D::SetupFEspace()
     M_FluidData->dataMesh()->mesh()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_FluidMesh.reset( new FluidMeshType( *M_FluidData->dataMesh()->mesh(), *M_comm ) );
+    M_FluidMesh.reset( new PartitionMesh_Type( *M_FluidData->dataMesh()->mesh(), *M_comm ) );
     M_FluidData->dataMesh()->setMesh( M_FluidMesh->mesh() );
 
     //Velocity FE Space
@@ -689,8 +689,8 @@ MS_Model_Fluid3D::SetupFEspace()
             exit( EXIT_FAILURE );
         }
 
-    M_uFESpace.reset( new FESpaceType( *M_FluidMesh, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
-    M_pFESpace.reset( new FESpaceType( *M_FluidMesh, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
+    M_uFESpace.reset( new FESpace_Type( *M_FluidMesh, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
+    M_pFESpace.reset( new FESpace_Type( *M_FluidMesh, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
 }
 
 void
@@ -711,7 +711,7 @@ MS_Model_Fluid3D::SetupDOF()
 }
 
 void
-MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC )
+MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< BC_Type >& BC )
 {
 
 #ifdef DEBUG
@@ -720,9 +720,9 @@ MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC )
 
     UInt offset = M_uFESpace->map().getMap( Unique )->NumGlobalElements() + M_pFESpace->map().getMap( Unique )->NumGlobalElements();
 
-    std::vector< BCName > FluxVector = BC->GetHandler()->getBCWithType( Flux );
+    std::vector< BCName > FluxVector = BC->getBCWithType( Flux );
     for ( UInt i = 0; i < M_lmDOF; ++i )
-        BC->GetHandler()->setOffset( FluxVector[i], offset + i );
+        BC->setOffset( FluxVector[i], offset + i );
 }
 
 void

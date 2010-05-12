@@ -36,6 +36,7 @@
 #define MS_Coupling_BoundaryCondition_H 1
 
 #include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface1D.hpp>
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
@@ -178,12 +179,12 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions( const UInt& i )
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetBC().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
+        Model->GetBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetBC().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
-        Model->GetBC().GetDataContainer().SetFlag( M_flags[i] );
+        Model->GetBCInterface().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
+        Model->GetBCInterface().GetDataContainer().SetFlag( M_flags[i] );
 
-        Model->GetBC().InsertBC();
+        Model->GetBCInterface().InsertBC();
     }
 }
 
@@ -195,15 +196,15 @@ MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions( const UInt& i )
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetLinearBC().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
+        Model->GetLinearBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetLinearBC().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
-        Model->GetLinearBC().GetDataContainer().SetFlag( M_flags[i] );
+        Model->GetLinearBCInterface().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
+        Model->GetLinearBCInterface().GetDataContainer().SetFlag( M_flags[i] );
 
-        Model->GetLinearBC().GetDataContainer().SetBase( make_pair( "function", function ) );
-        Model->GetLinearBC().GetDataContainer().SetBaseString( "0" );
+        Model->GetLinearBCInterface().GetDataContainer().SetBase( make_pair( "function", BCInterface_function ) );
+        Model->GetLinearBCInterface().GetDataContainer().SetBaseString( "0" );
 
-        Model->GetLinearBC().InsertBC();
+        Model->GetLinearBCInterface().InsertBC();
     }
 }
 

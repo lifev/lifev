@@ -41,17 +41,8 @@
 #define MS_Model_FSI1D_H 1
 
 // Mathcard includes
-#include <lifemc/lifealg/AztecOOPreconditioner.hpp>
-#include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface1D.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
-
-// LifeV includes
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefilters/exporter.hpp>
-
-#ifdef HAVE_HDF5
-    #include <life/lifefilters/hdf5exporter.hpp>
-#endif
 
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Physics_Linear.hpp>
@@ -61,6 +52,12 @@
 #include <lifemc/lifesolver/OneDimensionalModel_Source_Linear.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Source_NonLinear.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
+
+// LifeV includes
+#include <life/lifefem/FESpace.hpp>
+#ifdef HAVE_HDF5
+    #include <life/lifefilters/hdf5exporter.hpp>
+#endif
 
 namespace LifeV {
 
@@ -100,6 +97,7 @@ public:
     typedef Solver_Type::FESpace_Type                              FESpace_Type;
     typedef Solver_Type::FESpace_PtrType                           FESpace_PtrType;
 
+    typedef BCInterface1D< Solver_Type >                           BCInterface_Type;
     typedef OneDimensionalModel_BCHandler                          BC_Type;
 
 #ifdef HAVE_HDF5
@@ -198,19 +196,25 @@ public:
     //! @name Get Methods (couplings)
     //@{
 
+    //! Get the BCInterface container of the boundary conditions of the model
+    /*!
+     * @return BCInterface container
+     */
+    BCInterface_Type& GetBCInterface() const;
+
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real GetBoundaryDensity( const BCFlag& /*flag*/) const;
+    Real GetBoundaryDensity( const BCFlag& /*Flag*/) const;
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real GetBoundaryViscosity( const BCFlag& /*flag*/) const;
+    Real GetBoundaryViscosity( const BCFlag& /*Flag*/) const;
 
     //! Get the area on a specific boundary face of the model
     /*!
@@ -254,11 +258,11 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the BCInterface container of the boundary conditions of the model
+    //! Get the BC handler container of the boundary conditions of the model
     /*!
-     * @return BCInterface container
+     * @return BC handler
      */
-    BC_Type&      GetBC() const;
+    BC_Type& GetBC() const;
 
     //! Get the data container of the 1D model.
     /*!
@@ -304,14 +308,6 @@ public:
 
     //@}
 
-
-    //! @name Set Methods
-    //@{
-
-    void SetBC( boost::shared_ptr<BC_Type>& BC );
-
-    //@}
-
 private:
 
     //! @name Private Methods
@@ -333,7 +329,7 @@ private:
     Flux_PtrType                           M_Flux;
     Source_PtrType                         M_Source;
     Solver_PtrType                         M_Solver;
-    boost::shared_ptr< BC_Type >           M_BC;
+    boost::shared_ptr< BCInterface_Type >  M_BC;
     std::vector < Vector_PtrType >         M_Solution;
 
     // FE spaces
