@@ -357,13 +357,13 @@ public:
     const Vector_Type& P_thistime() const;
 
     //! Get the Physics function
-    const Physics_Type& Physics() const;
+    const Physics_PtrType& Physics() const;
 
     //! Get the flux function
-    const Flux_Type& Flux() const;
+    const Flux_PtrType& Flux() const;
 
     //! Get the source function
-    const Source_Type& Source() const;
+    const Source_PtrType& Source() const;
 
     //! Get the left node identifier
     const UInt& LeftNodeId() const;

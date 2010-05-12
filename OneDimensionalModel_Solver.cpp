@@ -1363,22 +1363,22 @@ OneDimensionalModel_Solver::P_thistime() const
     return (*M_U_thistime)[4];
 }
 
-const OneDimensionalModel_Solver::Physics_Type&
+const OneDimensionalModel_Solver::Physics_PtrType&
 OneDimensionalModel_Solver::Physics() const
 {
-    return *M_Physics;
+    return M_Physics;
 }
 
-const OneDimensionalModel_Solver::Flux_Type&
+const OneDimensionalModel_Solver::Flux_PtrType&
 OneDimensionalModel_Solver::Flux() const
 {
-    return *M_Flux;
+    return M_Flux;
 }
 
-const OneDimensionalModel_Solver::Source_Type&
+const OneDimensionalModel_Solver::Source_PtrType&
 OneDimensionalModel_Solver::Source() const
 {
-    return *M_Source;
+    return M_Source;
 }
 
 const UInt&
@@ -1467,9 +1467,11 @@ OneDimensionalModel_Solver::BoundaryValue( const OneD_BC& bcType, const OneD_BCS
         case OneD_left:
             boundaryDof = 1;
         break;
-
         case OneD_right:
             boundaryDof = M_Flux->Physics()->Data()->nbElem() + 1;
+        default:
+            std::cout << "Warning: bcSide not available!" << std::endl;
+            return 0;
         break;
     }
 
