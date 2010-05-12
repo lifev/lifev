@@ -55,7 +55,7 @@ MS_Model_FSI1D::MS_Model_FSI1D() :
     M_Flux                         (),
     M_Source                       (),
     M_Solver                       ( new Solver_Type() ),
-    M_BC                           ( new BC_Type() ),
+    M_BC                           ( new BCInterface_Type() ),
     M_Solution                     (),
     M_FESpace                      (),
     M_LinearSolver                 ()
@@ -173,6 +173,16 @@ MS_Model_FSI1D::SetupData( const std::string& FileName )
     M_LinearSolver->setUpPrec        ( DataFile, "1D_Model/prec" );
     M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver");
 
+    //1D Model Solver
+    M_Solver->setCommunicator( M_comm );
+    M_Solver->setProblem( M_Physics, M_Flux, M_Source );
+    M_Solver->setLinearSolver( M_LinearSolver );
+
+    //BC - We need to create the BCHandler before using it
+    M_BC->SetOperator( M_Solver );
+    M_BC->CreateHandler();
+    //M_BC->FillHandler( FileName, "1D_Model" );
+
 #ifdef HAVE_HDF5
     //Exporter
     M_Exporter->setDataFromGetPot( DataFile );
@@ -192,19 +202,14 @@ MS_Model_FSI1D::SetupModel()
     Debug( 8130 ) << "MS_Model_FSI1D::SetupProblem() \n";
 #endif
 
-    //1D Model Solver
-    M_Solver->setProblem( M_Physics, M_Flux, M_Source );
-    M_Solver->setCommunicator( M_comm );
-
     //FEspace
     SetupFESpace();
 
     //1D Model Solver setup
     M_Solver->setup();
-    M_Solver->setLinearSolver( M_LinearSolver );
 
     //Set default BC (has to be called after setting other BC)
-    M_BC->setDefaultBC( M_Flux, M_Source, M_Solver->U_thistime() );
+    M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source, M_Solver->U_thistime() );
 
 #ifdef HAVE_HDF5
     //Post-processing
@@ -254,7 +259,8 @@ MS_Model_FSI1D::SolveSystem()
     Debug( 8130 ) << "MS_Model_FSI1D::SolveSystem() \n";
 #endif
 
-    M_Solver->iterate( *M_BC );
+    M_BC->UpdateOperatorVariables();
+    M_Solver->iterate( *M_BC->GetHandler() );
 }
 
 void
@@ -329,14 +335,20 @@ MS_Model_FSI1D::SolveLinearModel( bool& /*SolveLinearSystem*/ )
 // ===================================================
 // Get Methods (couplings)
 // ===================================================
+MS_Model_FSI1D::BCInterface_Type&
+MS_Model_FSI1D::GetBCInterface() const
+{
+    return *M_BC;
+}
+
 Real
-MS_Model_FSI1D::GetBoundaryDensity( const BCFlag& /*flag*/ ) const
+MS_Model_FSI1D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
 {
     return M_Data->DensityRho();
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryViscosity( const BCFlag& /*flag*/ ) const
+MS_Model_FSI1D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 {
     return M_Data->Viscosity();
 }
@@ -395,8 +407,9 @@ MS_Model_FSI1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& Stress
 MS_Model_FSI1D::BC_Type&
 MS_Model_FSI1D::GetBC() const
 {
-    return *M_BC;
+    return *(M_BC->GetHandler());
 }
+
 
 MS_Model_FSI1D::Data_Type&
 MS_Model_FSI1D::GetData() const
@@ -438,15 +451,6 @@ const MS_Model_FSI1D::Solution_PtrType
 MS_Model_FSI1D::GetSolution() const
 {
     return M_Solver->U_thistime();
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-MS_Model_FSI1D::SetBC( boost::shared_ptr<BC_Type>& BC )
-{
-    M_BC = BC;
 }
 
 // ===================================================

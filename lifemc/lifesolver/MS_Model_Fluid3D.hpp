@@ -42,12 +42,10 @@
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
 // LifeV includes
-#include <life/lifefilters/ensight.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
-#include <life/lifefilters/exporter.hpp>
 #ifdef HAVE_HDF5
     #include <life/lifefilters/hdf5exporter.hpp>
 #else
@@ -68,25 +66,25 @@ class MS_Model_Fluid3D: public virtual MS_PhysicalModel
 {
 public:
 
-    typedef MS_PhysicalModel                  super;
+    typedef MS_PhysicalModel                   super;
 
-    typedef RegionMesh3D< LinearTetra >       MeshType;
-    typedef OseenShapeDerivative< MeshType >  FluidType;
+    typedef RegionMesh3D< LinearTetra >        Mesh_Type;
+    typedef partitionMesh< Mesh_Type >         PartitionMesh_Type;
+
+    typedef OseenShapeDerivative< Mesh_Type >  Fluid_Type;
 
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< MeshType >          IOFileType;
+    typedef Hdf5exporter< Mesh_Type >          IOFile_Type;
 #else
-    typedef Ensight< MeshType >               IOFileType;
+    typedef Ensight< Mesh_Type >               IOFile_Type;
 #endif
 
-    typedef FluidType::vector_type            FluidVectorType;
+    typedef BCInterface< Fluid_Type >          BCInterface_Type;
+    typedef BCHandler                          BC_Type;
+    typedef BdfTNS< VectorType >               BDF_Type;
+    typedef DataNavierStokes< Mesh_Type >      Data_Type;
 
-    typedef BCInterface< FluidType >          FluidBCType;
-    typedef BdfTNS< FluidVectorType >         FluidBDFType;
-    typedef DataNavierStokes< MeshType >      FluidDataType;
-    typedef partitionMesh< MeshType >         FluidMeshType;
-
-    typedef FESpace< MeshType, EpetraMap >    FESpaceType;
+    typedef FESpace< Mesh_Type, EpetraMap >    FESpace_Type;
 
     //! @name Constructors & Destructor
     //@{
@@ -177,13 +175,13 @@ public:
     /*!
      * @return BCInterface container
      */
-    FluidBCType& GetBC();
+    BCInterface_Type& GetBCInterface();
 
     //! Get the BCInterface container of the boundary conditions of the linear model
     /*!
      * @return BCInterface container
      */
-    FluidBCType& GetLinearBC();
+    BCInterface_Type& GetLinearBCInterface();
 
     //! Get the density on a specific boundary face of the model
     /*!
@@ -297,49 +295,49 @@ private:
     void SetupDOF();
 
     //! Setup the offset for fluxes boundary conditions
-    void SetupBCOffset( const boost::shared_ptr< FluidBCType >& BC );
+    void SetupBCOffset( const boost::shared_ptr< BC_Type >& BC );
 
     //! Setup the solution.
     void SetupSolution();
 
     //@}
 
-    boost::shared_ptr< IOFileType >       M_exporter;
-    boost::shared_ptr< IOFileType >       M_importer;
+    boost::shared_ptr< IOFile_Type >        M_exporter;
+    boost::shared_ptr< IOFile_Type >        M_importer;
 
-    std::string                           M_FileName; //TODO Temporary - To be removed
+    std::string                             M_FileName; //TODO Temporary - To be removed
 
     // Fluid problem
-    boost::shared_ptr< FluidType >        M_Fluid;
-    boost::shared_ptr< FluidBCType >      M_FluidBC;
-    boost::shared_ptr< FluidBDFType >     M_FluidBDF;
-    boost::shared_ptr< FluidDataType >    M_FluidData;
-    boost::shared_ptr< FluidMeshType >    M_FluidMesh;
-    boost::shared_ptr< EpetraMap >        M_FluidFullMap;
-    boost::shared_ptr< FluidVectorType >  M_FluidSolution;
+    boost::shared_ptr< Fluid_Type >         M_Fluid;
+    boost::shared_ptr< BCInterface_Type >   M_FluidBC;
+    boost::shared_ptr< BDF_Type >           M_FluidBDF;
+    boost::shared_ptr< Data_Type >          M_FluidData;
+    boost::shared_ptr< PartitionMesh_Type > M_FluidMesh;
+    boost::shared_ptr< EpetraMap >          M_FluidFullMap;
+    boost::shared_ptr< VectorType >         M_FluidSolution;
 
     // Linear Fluid problem
-    boost::shared_ptr< FluidBCType >      M_LinearFluidBC;
-    bool                                  M_UpdateLinearModel;
+    boost::shared_ptr< BCInterface_Type >   M_LinearFluidBC;
+    bool                                    M_UpdateLinearModel;
 
     // FE spaces
-    boost::shared_ptr< FESpaceType >      M_uFESpace;
-    boost::shared_ptr< FESpaceType >      M_pFESpace;
+    boost::shared_ptr< FESpace_Type >       M_uFESpace;
+    boost::shared_ptr< FESpace_Type >       M_pFESpace;
 
     // Degrees of freedom of the problem
-    UInt                                  M_uDOF;  // Velocity degrees of freedom (one component)
-    UInt                                  M_pDOF;  // Pressure degrees of freedom
-    UInt                                  M_lmDOF; // Lagrange Multipliers degrees of freedom
+    UInt                                    M_uDOF;  // Velocity degrees of freedom (one component)
+    UInt                                    M_pDOF;  // Pressure degrees of freedom
+    UInt                                    M_lmDOF; // Lagrange Multipliers degrees of freedom
 
     // Problem coefficients
-    Real                                  M_alpha;
-    boost::shared_ptr< FluidVectorType >  M_beta;
-    boost::shared_ptr< FluidVectorType >  M_RHS;
+    Real                                    M_alpha;
+    boost::shared_ptr< VectorType >         M_beta;
+    boost::shared_ptr< VectorType >         M_RHS;
 
     // NS parameters
-    UInt                                  M_SubiterationsMaximumNumber;
-    Real                                  M_Tolerance;
-    generalizedAitken< VectorType >       M_generalizedAitken;
+    UInt                                    M_SubiterationsMaximumNumber;
+    Real                                    M_Tolerance;
+    generalizedAitken< VectorType >         M_generalizedAitken;
 };
 
 //! Factory create function

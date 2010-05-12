@@ -86,8 +86,8 @@ enum algorithmsTypes
 enum modelsTypes
 {
     MultiScale, /*!< MultiScale model */
-    Fluid3D,    /*!< Oseen fluid 3D model */
-    FSI1D,       /*!< FSI 1D model */
+    Fluid3D,    /*!< Fluid (Oseen) 3D model */
+    FSI1D,      /*!< FSI 1D model */
     FSI3D       /*!< FSI 3D model */
 };
 

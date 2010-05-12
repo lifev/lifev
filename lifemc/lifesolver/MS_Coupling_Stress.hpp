@@ -173,8 +173,8 @@ MS_Coupling_Stress::ImposeStress( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetBC().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
-                          M_flags[i], Natural, Normal, M_baseStress );
+    Model->GetBCInterface().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
+                                   M_flags[i], Natural, Normal, M_baseStress );
 }
 
 template< class model >
@@ -183,8 +183,8 @@ MS_Coupling_Stress::ImposeDeltaStress( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetLinearBC().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
-                                M_flags[i], Natural, Normal, M_baseDeltaStress );
+    Model->GetLinearBCInterface().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
+                                         M_flags[i], Natural, Normal, M_baseDeltaStress );
 }
 
 } // Namespace LifeV
