@@ -24,7 +24,13 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_Womersley3D_5Cylinders_Stress
     
     [../time_discretization]
     initialtime                = 0.0                # [s]
-    endtime                    = 53.610443365117    # [s]
+    #endtime                    = 13.402610841279232 # [s]
+    #initialtime                = 13.402610841279232 # [s]
+    #endtime                    = 26.805221682558464 # [s]
+    #initialtime                = 26.805221682558464 # [s]
+    #endtime                    = 40.207832523837695 # [s]
+    #initialtime                = 40.207832523837695 # [s]
+    endtime                    = 53.610443365117   # [s]
     timestep                   = 0.052353948598747  # [s]
 	
     [../Algorithm]
