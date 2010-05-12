@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief BCInterface_Function
+ *  @brief BCInterface_OperatorFunction
  *
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 24-08-2009
@@ -38,7 +38,6 @@
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
-#include <lifemc/lifesolver/BCInterface_Data.hpp>
 #include <lifemc/lifesolver/BCInterface_Function.hpp>
 
 namespace LifeV {
@@ -76,7 +75,14 @@ class BCInterface_OperatorFunction: public virtual BCInterface_Function< Operato
 {
 public:
 
-    typedef BCInterface_Function< Operator > super;
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_Function< Operator >                        super;
+    typedef typename super::Data_Type                               Data_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -88,7 +94,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_OperatorFunction( const BCInterface_Data< Operator >& data );
+    BCInterface_OperatorFunction( const Data_Type& data );
 
     //! Copy constructor
     /*!
@@ -116,14 +122,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterface_Data< Operator >& data );
-
-    //! Compare function
-    /*!
-     * @param data BC data loaded from GetPot file
-     * @return true if the functions are equal, false if they aren't
-     */
-    virtual bool Compare( const BCInterface_Data< Operator >& data );
+    virtual void SetData( const Data_Type& data );
 
     //! Set variable function
     /*!
@@ -139,10 +138,10 @@ public:
 
 protected:
 
-    //! @name Protected functions
+    //! @name Protected Methods
     //@{
 
-    inline void CreateAccessList();
+    inline void CreateAccessList( const Data_Type& data );
 
     //@}
 
@@ -163,21 +162,25 @@ protected:
     boost::shared_ptr< Operator >         M_operator;
     BCFlag                                M_flag;
     std::set< operatorList >              M_list;
-    std::map< std::string, operatorList > M_mapList;
 
 private:
 
-    inline void CreateFluidMap();
-    inline void CreateSolidMap();
-    inline void CreateList();
+    //! @name Private Methods
+    //@{
+
+    inline void CreateFluidMap( std::map< std::string, operatorList >& mapList );
+    inline void CreateSolidMap( std::map< std::string, operatorList >& mapList );
+    inline void CreateList( const std::map< std::string, operatorList >& mapList, const Data_Type& data );
 
     inline void SwitchErrorMessage( const std::string& operatorType );
+
+    //@}
 
 };
 
 //! Factory create function
 template< typename Operator >
-inline BCInterface_Function< Operator >* createOperatorFunction()
+inline BCInterface_Function< Operator >* BCInterface_CreateOperatorFunction()
 {
     return new BCInterface_OperatorFunction< Operator > ();
 }
@@ -187,11 +190,10 @@ inline BCInterface_Function< Operator >* createOperatorFunction()
 // ===================================================
 template< class Operator >
 BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction() :
-    BCInterface_Function< Operator > (),
+    super                            (),
     M_operator                       (),
     M_flag                           (),
-    M_list                           (),
-    M_mapList                        ()
+    M_list                           ()
 {
 
 #ifdef DEBUG
@@ -201,13 +203,11 @@ BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction() :
 }
 
 template< class Operator >
-BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const BCInterface_Data<
-        Operator >& data ) :
-    BCInterface_Function< Operator > (),
+BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const Data_Type& data ) :
+    super                            (),
     M_operator                       (),
     M_flag                           (),
-    M_list                           (),
-    M_mapList                        ()
+    M_list                           ()
 {
 
 #ifdef DEBUG
@@ -219,11 +219,10 @@ BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const BC
 
 template< class Operator >
 BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const BCInterface_OperatorFunction& function ) :
-    BCInterface_Function< Operator > ( function ),
+    super                            ( function ),
     M_operator                       ( function.M_operator ),
     M_flag                           ( function.M_flag ),
-    M_list                           ( function.M_list ),
-    M_mapList                        ( function.M_mapList )
+    M_list                           ( function.M_list )
 {
 }
 
@@ -241,7 +240,6 @@ BCInterface_OperatorFunction< Operator >::operator=( const BCInterface_OperatorF
         M_operator = function.M_operator;
         M_flag     = function.M_flag;
         M_list     = function.M_list;
-        M_mapList  = function.M_mapList;
     }
 
     return *this;
@@ -249,7 +247,7 @@ BCInterface_OperatorFunction< Operator >::operator=( const BCInterface_OperatorF
 
 template< class Operator >
 void
-BCInterface_OperatorFunction< Operator >::SetData( const BCInterface_Data< Operator >& data )
+BCInterface_OperatorFunction< Operator >::SetData( const Data_Type& data )
 {
 
 #ifdef DEBUG
@@ -261,15 +259,7 @@ BCInterface_OperatorFunction< Operator >::SetData( const BCInterface_Data< Opera
 
     super::SetData( data );
 
-    CreateAccessList();
-}
-
-template< class Operator >
-bool
-BCInterface_OperatorFunction< Operator >::Compare( const BCInterface_Data< Operator >& data )
-{
-    return super::M_baseString.compare( data.GetBaseString() ) == 0 && super::M_comV
-            == data.GetComV() && M_flag == data.GetFlag();
+    CreateAccessList( data );
 }
 
 template< class Operator >
@@ -525,42 +515,57 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
 // ===================================================
 template< >
 inline void
-BCInterface_OperatorFunction< FSIOperator >::CreateAccessList()
+BCInterface_OperatorFunction< FSIOperator >::CreateAccessList( const Data_Type& data )
 {
 
 #ifdef DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<FSIOperator>::createAccessList" << "\n";
 #endif
 
-    CreateFluidMap();
-    CreateSolidMap();
-    CreateList();
+    std::map< std::string, operatorList > mapList;
+
+    CreateFluidMap( mapList );
+    CreateSolidMap( mapList );
+    CreateList( mapList, data );
+
+    //if ( M_operator.get() )
+    //    UpdateOperatorVariables();
 }
 
 template< >
 inline void
-BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAccessList()
+BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAccessList( const Data_Type& data )
 {
 
 #ifdef DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<Oseen>::createAccessList" << "\n";
 #endif
 
-    CreateFluidMap();
-    CreateList();
+    std::map< std::string, operatorList > mapList;
+
+    CreateFluidMap( mapList );
+    CreateList( mapList, data );
+
+    //if ( M_operator.get() )
+    //    UpdateOperatorVariables();
 }
 
 template< >
 inline void
-BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::CreateAccessList()
+BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::CreateAccessList( const Data_Type& data )
 {
 
 #ifdef DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<OseenShapeDerivative>::createAccessList" << "\n";
 #endif
 
-    CreateFluidMap();
-    CreateList();
+    std::map< std::string, operatorList > mapList;
+
+    CreateFluidMap( mapList );
+    CreateList( mapList, data );
+
+    //if ( M_operator.get() )
+    //    UpdateOperatorVariables();
 }
 
 // ===================================================
@@ -568,32 +573,32 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
 // ===================================================
 template< class Operator >
 inline void
-BCInterface_OperatorFunction< Operator >::CreateFluidMap()
+BCInterface_OperatorFunction< Operator >::CreateFluidMap( std::map< std::string, operatorList >& mapList )
 {
-    M_mapList["f_area"]      = f_area;
-    M_mapList["f_density"]   = f_density;
-    M_mapList["f_flux"]      = f_flux;
-    M_mapList["f_pressure"]  = f_pressure;
-    M_mapList["f_viscosity"] = f_viscosity;
+    mapList["f_area"]      = f_area;
+    mapList["f_density"]   = f_density;
+    mapList["f_flux"]      = f_flux;
+    mapList["f_pressure"]  = f_pressure;
+    mapList["f_viscosity"] = f_viscosity;
 }
 
 template< class Operator >
 inline void
-BCInterface_OperatorFunction< Operator >::CreateSolidMap()
+BCInterface_OperatorFunction< Operator >::CreateSolidMap( std::map< std::string, operatorList >& mapList )
 {
-    M_mapList["s_density"]   = s_density;
-    M_mapList["s_poisson"]   = s_poisson;
-    M_mapList["s_thickness"] = s_thickness;
-    M_mapList["s_young"]     = s_young;
+    mapList["s_density"]   = s_density;
+    mapList["s_poisson"]   = s_poisson;
+    mapList["s_thickness"] = s_thickness;
+    mapList["s_young"]     = s_young;
 }
 
 template< class Operator >
 inline void
-BCInterface_OperatorFunction< Operator >::CreateList()
+BCInterface_OperatorFunction< Operator >::CreateList( const std::map< std::string, operatorList >& mapList, const Data_Type& data )
 {
     M_list.clear();
-    for ( typename std::map< std::string, operatorList >::iterator j = M_mapList.begin(); j != M_mapList.end(); ++j )
-        if ( boost::find_first( super::M_baseString, j->first ) )
+    for ( typename std::map< std::string, operatorList >::const_iterator j = mapList.begin(); j != mapList.end(); ++j )
+        if ( boost::find_first( data.GetBaseString(), j->first ) )
             M_list.insert( j->second );
 }
 

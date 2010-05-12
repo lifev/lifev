@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief BCInterface_Function
+ *  @brief BCInterface_FunctionFile
  *
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 09-07-2009
@@ -88,7 +88,14 @@ class BCInterface_FunctionFile: public virtual BCInterface_Function< Operator >
 {
 public:
 
-    typedef BCInterface_Function< Operator > super;
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_Function< Operator >                        super;
+    typedef typename super::Data_Type                               Data_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -100,7 +107,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_FunctionFile( const BCInterface_Data< Operator >& data );
+    BCInterface_FunctionFile( const Data_Type& data );
 
     //! Copy constructor
     /*!
@@ -128,44 +135,32 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterface_Data< Operator >& data );
-
-    //! Compare function
-    /*!
-     * @param data BC data loaded from GetPot file
-     * @return true if the functions are equal, false if they aren't
-     */
-    virtual bool Compare( const BCInterface_Data< Operator >& data );
+    virtual void SetData( const Data_Type& data );
 
     //@}
 
-protected:
-
-    std::string M_fileName;
-
 private:
-
-    std::vector< std::string >                   M_variables;
-    std::vector< Real >                          M_scale;
-    bool                                         M_loop;
-    std::map< std::string, std::vector< Real > > M_data;
-    std::vector< Real >::iterator                M_dataIterator;
 
     //! @name Private functions
     //@{
 
     //! loadData
-    inline void LoadData( BCInterface_Data< Operator > data );
+    inline void LoadData( Data_Type data );
 
     //! Linear interpolation (extrapolation) between two values of the data.
     inline void DataInterpolation();
 
     //@}
+
+    std::vector< std::string >                   M_variables;
+    bool                                         M_loop;
+    std::map< std::string, std::vector< Real > > M_data;
+    std::vector< Real >::iterator                M_dataIterator;
 };
 
 //! Factory create function
 template< typename Operator >
-inline BCInterface_Function< Operator >* createFunctionFile()
+inline BCInterface_Function< Operator >* BCInterface_CreateFunctionFile()
 {
     return new BCInterface_FunctionFile< Operator > ();
 }
@@ -175,10 +170,8 @@ inline BCInterface_Function< Operator >* createFunctionFile()
 // ===================================================
 template< typename Operator >
 BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile() :
-    BCInterface_Function< Operator > (),
-    M_fileName                       (),
+    super                            (),
     M_variables                      (),
-    M_scale                          (),
     M_loop                           (),
     M_data                           (),
     M_dataIterator                   ()
@@ -191,11 +184,9 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile() :
 }
 
 template< typename Operator >
-BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterface_Data< Operator >& data ) :
-    BCInterface_Function< Operator > (),
-    M_fileName                       (),
+BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const Data_Type& data ) :
+    super                            (),
     M_variables                      (),
-    M_scale                          (),
     M_loop                           (),
     M_data                           (),
     M_dataIterator                   ()
@@ -210,10 +201,8 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterfac
 
 template< typename Operator >
 BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const BCInterface_FunctionFile& function ) :
-    BCInterface_Function< Operator > ( function ),
-    M_fileName                       ( function.M_fileName ),
+    super                            ( function ),
     M_variables                      ( function.M_variables ),
-    M_scale                          ( function.M_scale ),
     M_loop                           ( function.M_loop ),
     M_data                           ( function.M_data ),
     M_dataIterator                   ( function.M_dataIterator )
@@ -230,9 +219,7 @@ BCInterface_FunctionFile< Operator >::operator=( const BCInterface_FunctionFile&
     if ( this != &function )
     {
         super::operator=( function );
-        M_fileName     = function.M_fileName;
         M_variables    = function.M_variables;
-        M_scale        = function.M_scale;
         M_loop         = function.M_loop;
         M_data         = function.M_data;
         M_dataIterator = function.M_dataIterator;
@@ -243,33 +230,25 @@ BCInterface_FunctionFile< Operator >::operator=( const BCInterface_FunctionFile&
 
 template< typename Operator >
 void
-BCInterface_FunctionFile< Operator >::SetData( const BCInterface_Data< Operator >& data )
+BCInterface_FunctionFile< Operator >::SetData( const Data_Type& data )
 {
-    M_fileName = data.GetBaseString(); //The base string contains the file name
-
-#ifdef DEBUG
-    Debug( 5022 ) << "BCInterface_FunctionFile::setData             fileName: " << M_fileName << "\n";
-#endif
-
     LoadData( data );
 }
 
-template< typename Operator >
-bool
-BCInterface_FunctionFile< Operator >::Compare( const BCInterface_Data< Operator >& data )
-{
-    return M_fileName.compare( data.GetBaseString() ) == 0 && super::M_comV == data.GetComV();
-}
-
 // ===================================================
-// Private functions
+// Private Methods
 // ===================================================
 template< typename Operator >
 inline void
-BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > data )
+BCInterface_FunctionFile< Operator >::LoadData( Data_Type data )
 {
+
+#ifdef DEBUG
+    Debug( 5022 ) << "BCInterface_FunctionFile::setData             fileName: " << data.GetBaseString() << "\n";
+#endif
+
     std::vector< std::string > stringsVector;
-    boost::split( stringsVector, M_fileName, boost::is_any_of( "[" ) );
+    boost::split( stringsVector, data.GetBaseString(), boost::is_any_of( "[" ) );
 
     //Load data from file
     GetPot dataFile( stringsVector[0] );
@@ -280,13 +259,13 @@ BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > dat
     M_variables.clear();
     M_variables.reserve( variablesNumber );
 
-    M_scale.clear();
-    M_scale.reserve( variablesNumber );
+    std::vector< Real > scale;
+    scale.reserve( variablesNumber );
 
     for ( UInt j( 0 ); j < variablesNumber; ++j )
     {
         M_variables.push_back( dataFile( "variables", "unknown", j ) );
-        M_scale.push_back( dataFile( "scale", 1.0, j ) );
+        scale.push_back( dataFile( "scale", 1.0, j ) );
     }
 
 #ifdef DEBUG
@@ -297,7 +276,7 @@ BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > dat
 
     output << "\n                                                           scale: ";
     for ( UInt j(0); j < variablesNumber; ++j )
-        output << M_scale[j] << "  ";
+        output << scale[j] << "  ";
 
     Debug( 5022 ) << output.str() << "\n";
 #endif
@@ -314,7 +293,7 @@ BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > dat
 
     for ( UInt i( 0 ); i < dataLines; ++i )
         for ( UInt j( 0 ); j < variablesNumber; ++j )
-            M_data[M_variables[j]].push_back( M_scale[j] * dataFile( "data", 0.0, i
+            M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i
                     * variablesNumber + j ) );
 
 #ifdef DEBUG
@@ -351,6 +330,7 @@ BCInterface_FunctionFile< Operator >::LoadData( BCInterface_Data< Operator > dat
 #ifdef DEBUG
     Debug( 5022 ) << "                                             function: " << data.GetBaseString() << "\n";
 #endif
+
 }
 
 template< typename Operator >

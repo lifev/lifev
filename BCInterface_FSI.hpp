@@ -54,11 +54,20 @@ class BCInterface_FSI
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_Data< Operator >                                          Data_Type;
+    typedef BCVectorInterface                                                     BCFunction_Type;
+
+    //@}
+
+
     //! @name Constructors & Destructor
     //@{
 
     BCInterface_FSI() {}
-    BCInterface_FSI( const BCInterface_Data< Operator >& /*data*/) {}
+    BCInterface_FSI( const Data_Type& /*data*/) {}
     BCInterface_FSI( const BCInterface_FSI& /*fsi*/) {}
 
     ~BCInterface_FSI() {}
@@ -70,12 +79,7 @@ public:
     //@{
 
     BCInterface_FSI& operator=( const BCInterface_FSI& /*fsi*/) {}
-    void SetData( const BCInterface_Data< Operator >& /*data*/) {}
-
-    bool Compare( const BCInterface_Data< Operator >& /*data*/)
-    {
-        return true;
-    }
+    void SetData( const Data_Type& /*data*/) {}
 
     //@}
 
@@ -83,7 +87,7 @@ public:
     //! @name Get functions
     //@{
 
-    BCVectorInterface& GetBase()
+    BCFunction_Type& GetBase()
     {
         return *M_base;
     }
@@ -92,7 +96,7 @@ public:
 
 private:
 
-    boost::shared_ptr< BCVectorInterface > M_base;
+    boost::shared_ptr< BCFunction_Type > M_base;
 };
 
 //! BCInterface_FSI - specialized template implementation for FSI problems.
@@ -132,10 +136,17 @@ private:
  */
 template< >
 class BCInterface_FSI< FSIOperator >
-//     :
-//     public LifeV::Application
 {
 public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_Data< FSIOperator >                                       Data_Type;
+    typedef BCVectorInterface                                                     BCFunction_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -147,7 +158,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_FSI( const BCInterface_Data< FSIOperator >& data );
+    BCInterface_FSI( const Data_Type& data );
 
     //! Copy constructor
     /*!
@@ -175,14 +186,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void SetData( const BCInterface_Data< FSIOperator >& data );
-
-    //! Compare function
-    /*!
-     * @param data BC data loaded from GetPot file
-     * @return true if the functions are equal, false if they aren't
-     */
-    bool Compare( const BCInterface_Data< FSIOperator >& data );
+    void SetData( const Data_Type& data );
 
     //@}
 
@@ -191,10 +195,7 @@ public:
     //@{
 
     //! Get the base of the boundary condition
-    BCVectorInterface& GetBase()
-    {
-        return *M_base;
-    }
+    BCFunction_Type& GetBase();
 
     //@}
 
@@ -203,10 +204,8 @@ private:
     //! @name Private functions
     //@{
 
-    inline void CheckMethod();
-
     template< class method >
-    inline void CheckFunction();
+    inline void CheckFunction( const Data_Type& data );
 
     //@}
 
@@ -231,35 +230,32 @@ private:
     };
 
     boost::shared_ptr< FSIOperator >       M_operator;
-    std::string                            M_baseString;
-    boost::shared_ptr< BCVectorInterface > M_base;
-
-    std::map< std::string, FSIMethod >     M_mapMethod;
-    std::map< std::string, FSIFunction >   M_mapFunction;
+    boost::shared_ptr< BCFunction_Type >   M_base;
 };
 
 // ===================================================
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface_FSI< FSIOperator >::CheckFunction()
+inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data )
 {
     method *operMethod = dynamic_cast< method * > ( &*M_operator );
 
     //Set mapFunction
-    M_mapFunction["DerFluidLoadToFluid"]              = DerFluidLoadToFluid;
-    M_mapFunction["DerFluidLoadToStructure"]          = DerFluidLoadToStructure;
-    M_mapFunction["DerHarmonicExtensionVelToFluid"]   = DerHarmonicExtensionVelToFluid;
-    M_mapFunction["DerStructureDispToSolid"]          = DerStructureDispToSolid;
-    M_mapFunction["FluidInterfaceDisp"]               = FluidInterfaceDisp;
-    M_mapFunction["FluidLoadToStructure"]             = FluidLoadToStructure;
-    M_mapFunction["HarmonicExtensionVelToFluid"]      = HarmonicExtensionVelToFluid;
-    M_mapFunction["SolidLoadToStructure"]             = SolidLoadToStructure;
-    M_mapFunction["StructureDispToHarmonicExtension"] = StructureDispToHarmonicExtension;
-    M_mapFunction["StructureDispToSolid"]             = StructureDispToSolid;
-    M_mapFunction["StructureToFluid"]                 = StructureToFluid;
+    std::map< std::string, FSIFunction > mapFunction;
+    mapFunction["DerFluidLoadToFluid"]              = DerFluidLoadToFluid;
+    mapFunction["DerFluidLoadToStructure"]          = DerFluidLoadToStructure;
+    mapFunction["DerHarmonicExtensionVelToFluid"]   = DerHarmonicExtensionVelToFluid;
+    mapFunction["DerStructureDispToSolid"]          = DerStructureDispToSolid;
+    mapFunction["FluidInterfaceDisp"]               = FluidInterfaceDisp;
+    mapFunction["FluidLoadToStructure"]             = FluidLoadToStructure;
+    mapFunction["HarmonicExtensionVelToFluid"]      = HarmonicExtensionVelToFluid;
+    mapFunction["SolidLoadToStructure"]             = SolidLoadToStructure;
+    mapFunction["StructureDispToHarmonicExtension"] = StructureDispToHarmonicExtension;
+    mapFunction["StructureDispToSolid"]             = StructureDispToSolid;
+    mapFunction["StructureToFluid"]                 = StructureToFluid;
 
-    switch ( M_mapFunction[M_baseString] )
+    switch ( mapFunction[ data.GetBaseString() ] )
     {
         case DerFluidLoadToFluid:
 

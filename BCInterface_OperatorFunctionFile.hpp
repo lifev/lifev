@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief BCInterface_Function
+ *  @brief BCInterface_OperatorFunctionFile
  *
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 26-08-2009
@@ -56,8 +56,17 @@ class BCInterface_OperatorFunctionFile: public virtual BCInterface_FunctionFile<
 {
 public:
 
-    typedef BCInterface_FunctionFile< Operator > super1;
-    typedef BCInterface_OperatorFunction< Operator > super2;
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_Function< Operator >                        super0;
+    typedef BCInterface_FunctionFile< Operator >                    super1;
+    typedef BCInterface_OperatorFunction< Operator >                super2;
+
+    typedef typename super0::Data_Type                              Data_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -69,7 +78,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_OperatorFunctionFile( const BCInterface_Data< Operator >& data );
+    BCInterface_OperatorFunctionFile( const Data_Type& data );
 
     //! Copy constructor
     /*!
@@ -97,14 +106,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterface_Data< Operator >& data );
-
-    //! Compare function
-    /*!
-     * @param data BC data loaded from GetPot file
-     * @return true if the functions are equal, false if they aren't
-     */
-    virtual bool Compare( const BCInterface_Data< Operator >& data );
+    virtual void SetData( const Data_Type& data );
 
     //@}
 
@@ -112,7 +114,7 @@ public:
 
 //! Factory create function
 template< typename Operator >
-inline BCInterface_Function< Operator >* createOperatorFunctionFile()
+inline BCInterface_Function< Operator >* BCInterface_CreateOperatorFunctionFile()
 {
     return new BCInterface_OperatorFunctionFile< Operator > ();
 }
@@ -122,9 +124,9 @@ inline BCInterface_Function< Operator >* createOperatorFunctionFile()
 // ===================================================
 template< class Operator >
 BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile() :
-    BCInterface_Function< Operator >         (),
-    BCInterface_FunctionFile< Operator >     (),
-    BCInterface_OperatorFunction< Operator > ()
+    super0      (),
+    super1      (),
+    super2      ()
 {
 
 #ifdef DEBUG
@@ -134,10 +136,10 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile()
 }
 
 template< class Operator >
-BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const BCInterface_Data< Operator >& data ) :
-    BCInterface_Function< Operator >         (),
-    BCInterface_FunctionFile< Operator >     (),
-    BCInterface_OperatorFunction< Operator > ()
+BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const Data_Type& data ) :
+    super0      (),
+    super1      (),
+    super2      ()
 {
 
 #ifdef DEBUG
@@ -149,9 +151,9 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( 
 
 template< class Operator >
 BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const BCInterface_OperatorFunctionFile& function ) :
-    BCInterface_Function< Operator >         ( function ),
-    BCInterface_FunctionFile< Operator >     ( function ),
-    BCInterface_OperatorFunction< Operator > ( function )
+    super0      ( function ),
+    super1      ( function ),
+    super2      ( function )
 {
 }
 
@@ -173,7 +175,7 @@ BCInterface_OperatorFunctionFile< Operator >::operator=( const BCInterface_Opera
 
 template< class Operator >
 void
-BCInterface_OperatorFunctionFile< Operator >::SetData( const BCInterface_Data< Operator >& data )
+BCInterface_OperatorFunctionFile< Operator >::SetData( const Data_Type& data )
 {
 
 #ifdef DEBUG
@@ -185,16 +187,7 @@ BCInterface_OperatorFunctionFile< Operator >::SetData( const BCInterface_Data< O
     super2::M_operator = data.GetOperator();
     super2::M_flag     = data.GetFlag();
 
-    super2::CreateAccessList();
-}
-
-template< class Operator >
-bool
-BCInterface_OperatorFunctionFile< Operator >::Compare( const BCInterface_Data< Operator >& data )
-{
-    return super1::M_fileName.compare( data.GetBaseString() ) == 0 &&
-           super1::M_comV == data.GetComV() &&
-           super2::M_flag == data.GetFlag();
+    super2::CreateAccessList( data );
 }
 
 } // Namespace LifeV

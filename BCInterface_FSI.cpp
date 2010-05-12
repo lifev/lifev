@@ -41,10 +41,7 @@ namespace LifeV {
 // ===================================================
 BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
     M_operator      (),
-    M_baseString    (),
-    M_base          (),
-    M_mapMethod     (),
-    M_mapFunction   ()
+    M_base          ()
 {
 
 #ifdef DEBUG
@@ -53,12 +50,9 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
 
 }
 
-BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_Data< FSIOperator >& data ) :
+BCInterface_FSI< FSIOperator >::BCInterface_FSI( const Data_Type& data ) :
     M_operator      (),
-    M_baseString    (),
-    M_base          (),
-    M_mapMethod     (),
-    M_mapFunction   ()
+    M_base          ()
 {
 
 #ifdef DEBUG
@@ -70,10 +64,7 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_Data< FSIOper
 
 BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_FSI& fsi ) :
     M_operator    ( fsi.M_operator ),
-    M_baseString  ( fsi.M_baseString ),
-    M_base        ( fsi.M_base ),
-    M_mapMethod   ( fsi.M_mapMethod ),
-    M_mapFunction ( fsi.M_mapFunction )
+    M_base        ( fsi.M_base )
 {
 }
 
@@ -86,16 +77,14 @@ BCInterface_FSI< FSIOperator >::operator=( const BCInterface_FSI& fsi )
     if ( this != &fsi )
     {
         M_operator    = fsi.M_operator;
-        M_baseString  = fsi.M_baseString;
         M_base        = fsi.M_base;
-        M_mapMethod   = fsi.M_mapMethod;
-        M_mapFunction = fsi.M_mapFunction;
     }
 
     return *this;
 }
 
-void BCInterface_FSI< FSIOperator >::SetData( const BCInterface_Data< FSIOperator >& data )
+void
+BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
 {
 
 #ifdef DEBUG
@@ -103,28 +92,16 @@ void BCInterface_FSI< FSIOperator >::SetData( const BCInterface_Data< FSIOperato
 #endif
 
     M_operator   = data.GetOperator();
-    M_baseString = data.GetBaseString();
 
-    this->CheckMethod();
-}
-
-bool BCInterface_FSI< FSIOperator >::Compare( const BCInterface_Data< FSIOperator >& data )
-{
-    return M_baseString.compare( data.GetBaseString() ) == 0; //&& add compare for Operator!
-}
-
-// ===================================================
-// Private functions
-// ===================================================
-inline void BCInterface_FSI< FSIOperator >::CheckMethod()
-{
     //Set mapMethod
-    M_mapMethod["exactJacobian"]   = EXACTJACOBIAN;
-    M_mapMethod["fixedPoint"]      = FIXEDPOINT;
-    M_mapMethod["monolithic"]      = MONOLITHIC;
-    M_mapMethod["steklovPoincare"] = STEKLOVPOINCARE;
+    std::map< std::string, FSIMethod > mapMethod;
 
-    switch ( M_mapMethod[M_operator->method()] )
+    mapMethod["exactJacobian"]   = EXACTJACOBIAN;
+    mapMethod["fixedPoint"]      = FIXEDPOINT;
+    mapMethod["monolithic"]      = MONOLITHIC;
+    mapMethod["steklovPoincare"] = STEKLOVPOINCARE;
+
+    switch ( mapMethod[M_operator->method()] )
     {
         case EXACTJACOBIAN:
 
@@ -132,7 +109,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckMethod()
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
-            CheckFunction< exactJacobian > ();
+            CheckFunction< exactJacobian > ( data );
 
             break;
 
@@ -142,7 +119,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckMethod()
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
-            CheckFunction< fixedPoint > ();
+            CheckFunction< fixedPoint > ( data );
 
             break;
 
@@ -152,7 +129,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckMethod()
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithic" << "\n";
 #endif
 
-            CheckFunction< Monolithic >();
+            CheckFunction< Monolithic >( data );
 
             break;
 
@@ -162,10 +139,19 @@ inline void BCInterface_FSI< FSIOperator >::CheckMethod()
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
-            //CheckFunction< steklovPoincare >();
+            //CheckFunction< steklovPoincare >( data );
 
             break;
     }
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+BCInterface_FSI< FSIOperator >::BCFunction_Type&
+BCInterface_FSI< FSIOperator >::GetBase()
+{
+    return *M_base;
 }
 
 } // Namespace LifeV

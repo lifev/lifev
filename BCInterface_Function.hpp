@@ -56,23 +56,23 @@ namespace LifeV {
  *
  *  The function string has to be in this form:
  *
- *  function = '(u, v, w)'
+ *  function = '[u, v, w]'
  *
  *  where u(x,y,z,t), v(x,y,z,t), w(x,y,z,t).
  *  Here there is an example:
  *
- *  function = '(x^2 + y^2, 0, 2*sin(2*pi*t))'
+ *  function = '[x^2 + y^2, 0, 2*sin(2*pi*t)]'
  *
  *  To set a constant for complicate expression it is possible to add them before the expression
  *  using a semicolon ";":
  *
- *  function = 'a=5.67436; (x^2+y^2,0,c*sin(2*pi*C*t)^C)'
+ *  function = 'a=5.67436; [x^2+y^2,0,a*sin(2*pi*t)^a]'
  *
  *  NOTE:
  *  In the boundary condition file, if you have three component with the same expression
  *  (the same function) you can both write:
  *
- *  function = '(0, 0, 0)'
+ *  function = '[0, 0, 0]'
  *
  *  and
  *
@@ -86,11 +86,14 @@ class BCInterface_Function
 {
 public:
 
-    typedef boost::function< Real( Real const& t,
-                                   Real const& x,
-                                   Real const& y,
-                                   Real const& z,
-                                   ID const& id ) > function_type;
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_Data< Operator >                                          Data_Type;
+    typedef BCFunctionBase                                                        BCFunction_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -102,7 +105,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_Function( const BCInterface_Data< Operator >& data );
+    BCInterface_Function( const Data_Type& data );
 
     //! Copy constructor
     /*!
@@ -130,36 +133,22 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const BCInterface_Data< Operator >& data );
-
-    //! Compare function
-    /*!
-     * @param data BC data loaded from GetPot file
-     * @return true if the functions are equal, false if they aren't
-     */
-    virtual bool Compare( const BCInterface_Data< Operator >& data );
+    virtual void SetData( const Data_Type& data );
 
     //@}
 
 
-    //! @name Get functions
+    //! @name Get Methods
     //@{
 
     //! Get the base of the boundary condition
-    BCFunctionBase& GetBase()
-    {
-        return M_base;
-    }
+    BCFunction_Type& GetBase();
 
     //@}
 
 protected:
 
-    std::string                       M_baseString;
-    BCComV                            M_comV;
-    boost::shared_ptr< Parser >       M_parser;
-
-    //! @name Protected functions
+    //! @name Protected Methods
     //@{
 
     //! dataInterpolation
@@ -167,16 +156,12 @@ protected:
 
     //@}
 
+    boost::shared_ptr< Parser >       M_parser;
+
 private:
 
-    BCFunctionBase                   M_base;
-    std::map< ID, ID >               M_mapID;
-
-    //! @name Private functions
+    //! @name Private Methods
     //@{
-
-    //! SetFunction
-    inline void SetFunction();
 
     //! Function
     Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
@@ -185,11 +170,15 @@ private:
     Real FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
+
+    BCFunction_Type                  M_base;
+    std::map< ID, ID >               M_mapID;
+
 };
 
 //! Factory create function
 template< typename Operator >
-inline BCInterface_Function< Operator >* createFunction()
+inline BCInterface_Function< Operator >* BCInterface_CreateFunction()
 {
     return new BCInterface_Function< Operator > ();
 }
@@ -199,8 +188,6 @@ inline BCInterface_Function< Operator >* createFunction()
 // ===================================================
 template< typename Operator >
 BCInterface_Function< Operator >::BCInterface_Function() :
-    M_baseString(),
-    M_comV      (),
     M_parser    (),
     M_base      (),
     M_mapID     ()
@@ -213,9 +200,7 @@ BCInterface_Function< Operator >::BCInterface_Function() :
 }
 
 template< typename Operator >
-BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Data< Operator >& data ) :
-    M_baseString(),
-    M_comV      (),
+BCInterface_Function< Operator >::BCInterface_Function( const Data_Type& data ) :
     M_parser    (),
     M_base      (),
     M_mapID     ()
@@ -230,8 +215,6 @@ BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Data< 
 
 template< typename Operator >
 BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Function& function ) :
-    M_baseString( function.M_baseString ),
-    M_comV      ( function.M_comV ),
     M_parser    ( function.M_parser ),
     M_base      ( function.M_base ),
     M_mapID     ( function.M_mapID )
@@ -247,8 +230,6 @@ BCInterface_Function< Operator >::operator=( const BCInterface_Function& functio
 {
     if ( this != &function )
     {
-        M_baseString = function.M_baseString;
-        M_comV       = function.M_comV;
         M_parser     = function.M_parser;
         M_base       = function.M_base;
         M_mapID      = function.M_mapID;
@@ -259,37 +240,18 @@ BCInterface_Function< Operator >::operator=( const BCInterface_Function& functio
 
 template< typename Operator >
 void
-BCInterface_Function< Operator >::SetData( const BCInterface_Data< Operator >& data )
+BCInterface_Function< Operator >::SetData( const Data_Type& data )
 {
 
 #ifdef DEBUG
     Debug( 5022 ) << "BCInterface_Function::setData" << "\n";
 #endif
 
-    M_comV = data.GetComV();
-    M_baseString = data.GetBaseString();
-
     if ( M_parser )
-        M_parser->SetString( M_baseString );
+        M_parser->SetString( data.GetBaseString() );
     else
-        M_parser.reset( new Parser( M_baseString ) );
+        M_parser.reset( new Parser( data.GetBaseString() ) );
 
-    SetFunction();
-}
-
-template< typename Operator >
-bool
-BCInterface_Function< Operator >::Compare( const BCInterface_Data< Operator >& data )
-{
-    return M_baseString.compare( data.GetBaseString() ) == 0 && M_comV == data.GetComV();
-}
-
-// ===================================================
-// Private functions
-// ===================================================
-template< typename Operator >
-inline void BCInterface_Function< Operator >::SetFunction()
-{
     /*
      * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
      * ------------------------------------------|---------------------------------------------------
@@ -313,16 +275,26 @@ inline void BCInterface_Function< Operator >::SetFunction()
     else
     {
         //Create the ID map
-        if ( M_comV.size() > 1 ) // Component
-            for ( ID i( 0 ); i < static_cast< ID > ( M_comV.size() ); ++i )
-                M_mapID[M_comV[i]] = i + 1;
+        if ( data.GetComV().size() > 1 ) // Component
+            for ( ID i( 0 ); i < static_cast< ID > ( data.GetComV().size() ); ++i )
+                M_mapID[data.GetComV()[i]] = i + 1;
         else
-            // if ( M_comV.front() == arguments )  Full
-            for ( ID i( 1 ); i <= M_comV.front(); ++i )
+            // if ( data.GetComV().front() == arguments )  Full
+            for ( ID i( 1 ); i <= data.GetComV().front(); ++i )
                 M_mapID[i] = i;
 
         M_base.setFunction( boost::bind( &BCInterface_Function::FunctionID, this, _1, _2, _3, _4, _5 ) );
     }
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+template< typename Operator >
+typename BCInterface_Function< Operator >::BCFunction_Type&
+BCInterface_Function< Operator >::GetBase()
+{
+    return M_base;
 }
 
 template< typename Operator >

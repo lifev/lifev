@@ -61,13 +61,13 @@
 namespace LifeV {
 
 // Enum objects
-enum BCBaseList
+enum BCInterface_BaseList
 {
-    function,
-    functionFile,
-    OPERfunction,
-    OPERfunctionFile,
-    FSI
+    BCInterface_function,
+    BCInterface_functionFile,
+    BCInterface_OPERfunction,
+    BCInterface_OPERfunctionFile,
+    BCInterface_OPERFSI
 };
 
 // Type definitions

@@ -51,6 +51,14 @@ class BCInterface_Data
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface_BaseList                                                       BCBaseList_Type;
+
+    //@}
+
+
     //! @name Constructors & Destructor
     //@{
 
@@ -162,7 +170,7 @@ public:
     /*!
      * @param base Boundary condition base type
      */
-    void SetBase( const std::pair< std::string, BCBaseList >& base );
+    void SetBase( const std::pair< std::string, BCBaseList_Type >& base );
 
     //@}
 
@@ -198,7 +206,7 @@ public:
     const std::string& GetBaseString() const;
 
     //! Get the base type of the boundary condition
-    const std::pair< std::string, BCBaseList >& GetBase() const;
+    const std::pair< std::string, BCBaseList_Type >& GetBase() const;
 
     //@}
 
@@ -223,21 +231,21 @@ private:
 
     //@}
 
-    boost::shared_ptr< Operator >         M_operator;
+    boost::shared_ptr< Operator >             M_operator;
 
-    BCName                                M_name;
-    BCFlag                                M_flag;
-    BCType                                M_type;
-    BCMode                                M_mode;
-    BCComV                                M_comV;
-    std::string                           M_direction;
-    std::string                           M_baseString;
-    std::pair< std::string, BCBaseList >  M_base;
+    BCName                                    M_name;
+    BCFlag                                    M_flag;
+    BCType                                    M_type;
+    BCMode                                    M_mode;
+    BCComV                                    M_comV;
+    std::string                               M_direction;
+    std::string                               M_baseString;
+    std::pair< std::string, BCBaseList_Type > M_base;
 
     // Maps
-    std::map< std::string, BCType >       M_mapType;
-    std::map< std::string, BCMode >       M_mapMode;
-    std::map< std::string, BCBaseList >   M_mapBase;
+    std::map< std::string, BCType >           M_mapType;
+    std::map< std::string, BCMode >           M_mapMode;
+    std::map< std::string, BCBaseList_Type >  M_mapBase;
 };
 
 // ===================================================
@@ -274,11 +282,11 @@ BCInterface_Data< Operator >::BCInterface_Data() :
     M_mapMode["Directional"] = Directional;
 
     //Set mapBase
-    M_mapBase["function"]         = function;
-    M_mapBase["functionFile"]     = functionFile;
-    M_mapBase["OPERfunction"]     = OPERfunction;
-    M_mapBase["OPERfunctionFile"] = OPERfunctionFile;
-    M_mapBase["FSI"]              = FSI;
+    M_mapBase["function"]         = BCInterface_function;
+    M_mapBase["functionFile"]     = BCInterface_functionFile;
+    M_mapBase["OPERfunction"]     = BCInterface_OPERfunction;
+    M_mapBase["OPERfunctionFile"] = BCInterface_OPERfunctionFile;
+    M_mapBase["FSI"]              = BCInterface_OPERFSI;
 }
 
 template< class Operator >
@@ -407,7 +415,7 @@ void BCInterface_Data< Operator >::SetBaseString( const std::string& baseString 
 }
 
 template< class Operator >
-void BCInterface_Data< Operator >::SetBase( const std::pair< std::string, BCBaseList >& base )
+void BCInterface_Data< Operator >::SetBase( const std::pair< std::string, BCBaseList_Type >& base )
 {
     M_base = base;
 }
@@ -479,7 +487,7 @@ BCInterface_Data< Operator >::GetBaseString() const
 }
 
 template< class Operator >
-const std::pair< std::string, BCBaseList >&
+const std::pair< std::string, typename BCInterface_Data< Operator >::BCBaseList_Type >&
 BCInterface_Data< Operator >::GetBase() const
 {
     return M_base;
@@ -557,7 +565,7 @@ inline void BCInterface_Data< Operator >::ReadDirection( const std::string& File
 template< class Operator >
 inline void BCInterface_Data< Operator >::ReadBase( const std::string& FileName, const std::string& base )
 {
-    for ( typename std::map< std::string, BCBaseList >::iterator j = M_mapBase.begin(); j
+    for ( typename std::map< std::string, BCBaseList_Type >::iterator j = M_mapBase.begin(); j
             != M_mapBase.end(); ++j )
         if ( IsBase( FileName, ( base + j->first ).c_str() ) )
         {
