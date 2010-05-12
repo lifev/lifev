@@ -47,8 +47,8 @@ diagonalBlockPrec   = false
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
     
-    #vel_order       = P1               # P1, P1Bubble, P2
-    vel_order       = P1Bubble         # P1, P1Bubble, P2
+    vel_order       = P1               # P1, P1Bubble, P2
+    #vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
     stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it

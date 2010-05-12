@@ -45,7 +45,7 @@ diagonalBlockPrec   = false
 
     [../time_discretization]
     #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
-    BDF_order       = 1               # [s]
+    BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
@@ -53,8 +53,8 @@ diagonalBlockPrec   = false
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
     
-    #vel_order       = P1               # P1, P1Bubble, P2
-    vel_order       = P1Bubble         # P1, P1Bubble, P2
+    vel_order       = P1               # P1, P1Bubble, P2
+    #vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
     stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
@@ -98,8 +98,8 @@ diagonalBlockPrec   = false
     tol             = 1.e-12
     
     [../prec]
-    prectype                = AztecOO 
-    #prectype                = Ifpack 
+    #prectype                = AztecOO 
+    prectype                = Ifpack 
     displayList             = false
         
         [./AztecOO]
