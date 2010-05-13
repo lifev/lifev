@@ -623,8 +623,8 @@ void FSIOperator::couplingVariableExtrap( )
 
 	*M_lambdaDot   = lambdaDotSolid();
 
-	displayer().leaderPrint("norm( disp  ) init = ", M_lambda->NormInf() );
-	displayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->NormInf());
+	displayer().leaderPrint("\n norm( disp  ) init = ", M_lambda->NormInf() );
+	displayer().leaderPrint("\n norm( velo )  init = ", M_lambdaDot->NormInf());
 }
 
 
@@ -1329,7 +1329,8 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
 //FSIOperator::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
 {
     M_lambdaFluid.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_lambda.reset             ( new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_lambda.reset             ( new vector_type(*M_solidInterfaceMap, Unique) );
+    M_lambdaDot.reset             ( new vector_type(*M_solidInterfaceMap, Unique) );
     M_lambdaFluidRepeated.reset( new vector_type(*M_fluidInterfaceMap, Repeated) );
 
     if ( this->isFluid() )
