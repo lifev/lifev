@@ -24,9 +24,9 @@ MS_problem = ./MultiScaleData/Models/MultiScale_CarotidBifurcation3D_FluxStress.
     
     [../time_discretization]
 	initialtime		= 0.0   # [s]
-	#endtime		= 1.0   # [s]
-	#initialtime	= 1.0   # [s]
-	endtime		    = 2.0   # [s]
+	#endtime		= 0.8   # [s]
+	#initialtime	= 0.8   # [s]
+	endtime		    = 1.6   # [s]
 	timestep		= 0.001 # [s]
 	
     [../Algorithm]
