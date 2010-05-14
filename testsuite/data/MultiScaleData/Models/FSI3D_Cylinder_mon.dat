@@ -14,7 +14,7 @@
 
 #[MultiScale]
 #modelName        = FSI3D_Cylinder
-#couplingFlags    = ''
+#couplingFlags    = '2 3'
 
 
 [problem]
@@ -121,7 +121,7 @@ verbose         = 0                # verbose during mesh-reading
 # DirichletNeumann conditions
 #list = 'InFlow      OutFlow           InFlowEdge OutFlowEdge'
 #list = 'InFlow_Flux OutFlow           InFlowEdge OutFlowEdge Interface' # Flux
-list = 'InFlow      OutFlow_absorbing InFlowEdge OutFlowEdge' # Nobile-Vergara absorbing BC
+list = 'InFlowEdge OutFlowEdge' # Nobile-Vergara absorbing BC
 #list = 'InFlow_Flux OutFlow_absorbing InFlowEdge OutFlowEdge Interface' # Flux + Nobile-Vergara absorbing BC
 
 # RobinNeumann conditions
