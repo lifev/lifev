@@ -130,6 +130,13 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
 
                 break;
 
+            case FSI3D:
+
+                ApplyBoundaryConditions< MS_Model_FSI3D > ( i );
+                ApplyDeltaBoundaryConditions< MS_Model_Fluid3D > ( i );
+
+                break;
+
             default:
 
                 if ( M_displayer->isLeader() )
@@ -178,6 +185,15 @@ MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
                 FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
                 Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
                 DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+
+                break;
+            }
+
+            case FSI3D:
+            {
+                FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+                Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+                DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
                 break;
             }

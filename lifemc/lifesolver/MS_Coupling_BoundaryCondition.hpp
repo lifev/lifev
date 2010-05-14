@@ -40,6 +40,7 @@
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
+#include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
 
 namespace LifeV {
 
