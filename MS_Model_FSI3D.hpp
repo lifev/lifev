@@ -114,8 +114,10 @@ public:
     typedef VenantKirchhofSolver< mesh_type >                                              solid_type;
     typedef FSISolverType::vector_type                                                     vector_type;
     typedef FSISolverType::vector_ptrtype                                                  vector_ptrtype;
-    typedef BCInterface< FSIOperator >                                                     fluid_bc_type;
     typedef BCInterface< FSIOperator >                                                     solid_bc_type;
+
+    typedef BCHandler                                                                      BC_Type;
+    typedef BCInterface< FSIOperator >                                                     BCInterface_Type;
 
     //@}
 
@@ -164,6 +166,121 @@ public:
 
     //@}
 
+    //! @name Get Methods (couplings)
+    //@{
+
+    //! Get the BCInterface container of the boundary conditions of the model
+    /*!
+     * @return BCInterface container
+     */
+    BCInterface_Type& GetBCInterface();
+
+    //! Get the BCInterface container of the boundary conditions of the linear model
+    /*!
+     * @return BCInterface container
+     */
+    BCInterface_Type& GetLinearBCInterface();
+
+    //! Get the density on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return density value
+     */
+    Real GetBoundaryDensity( const BCFlag& /*flag*/) const;
+
+    //! Get the viscosity on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return viscosity value
+     */
+    Real GetBoundaryViscosity( const BCFlag& /*flag*/) const;
+
+    //! Get the area on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return area value
+     */
+    Real GetBoundaryArea( const BCFlag& Flag ) const;
+
+    //! Get the flow rate on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return flow rate value
+     */
+    Real GetBoundaryFlowRate( const BCFlag& Flag ) const;
+
+    //! Get the integral of the pressure (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return pressure value
+     */
+    Real GetBoundaryPressure( const BCFlag& Flag ) const;
+
+    //! Get the integral of the dynamic pressure (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return dynamic pressure value
+     */
+    Real GetBoundaryDynamicPressure( const BCFlag& Flag ) const;
+
+    //! Get the value of the Lagrange multiplier associated to a specific boundary face
+    /*!
+     * @param Flag flag of the boundary face
+     * @return Lagrange multiplier value
+     */
+    Real GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const;
+
+    //! Get the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param StressType Type of approximation for the stress
+     * @return stress value
+     */
+    Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
+
+    //! Get the variation of the flux (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the flux
+     */
+    Real GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the pressure (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the pressure
+     */
+    Real GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the total pressure (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the dynamic pressure
+     */
+    Real GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
+    /*!
+     * @param Flag flag of the boundary face
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return Lagrange multiplier value
+     */
+    Real GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param StressType Type of approximation for the stress
+     * @return variation of the stress
+     */
+    Real GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
+
+    //@}
+
 
 private:
 
@@ -183,11 +300,11 @@ private:
     vector_ptrtype                        M_solidVel;
     vector_ptrtype                        M_velAndPressure;
     vector_ptrtype                        M_fluidDisp;
-    Real                                  M_time;
-    boost::shared_ptr< fluid_bc_type >       M_fluidBC;
+    //Real                                  M_time;
+    boost::shared_ptr< BCInterface_Type >       M_fluidBC;
     boost::shared_ptr< solid_bc_type >       M_solidBC;
     boost::shared_ptr< solid_bc_type >       M_harmonicExtensionBC;
-    boost::shared_ptr< fluid_bc_type >       M_linearizedFluidBC;
+    boost::shared_ptr< BCInterface_Type >       M_linearizedFluidBC;
     boost::shared_ptr< solid_bc_type >       M_linearizedSolidBC;
 };
 

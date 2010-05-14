@@ -88,11 +88,23 @@ MS_Model_FSI3D::SetupData( const std::string& FileName )
         SetUpExporter(M_exporterFluid, dataFile( "exporter/fluid/filename", "fluid"), dataFile );
     if(M_solver->isSolid())
         SetUpExporter(M_exporterSolid, dataFile( "exporter/solid/filename", "solid"), dataFile );
-    M_time = dataFile("fluid/time_discretization/initialtime"   ,0.);
+    //M_time = dataFile("fluid/time_discretization/initialtime"   ,0.);
     if(M_solver->isMonolithic())
         updateBCMonolithic(FileName);
     else
         updateBCSegregated(FileName);
+    /* ->
+    //If global physical quantities are specified also in the data file, replace them
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/density" ) )
+        M_Data->setDensity( M_dataPhysics->GetFluidDensity() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
+        M_Data->setViscosity( M_dataPhysics->GetFluidViscosity() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/poisson" ) )
+        M_Data->setPoisson( M_dataPhysics->GetStructurePoissonCoefficient() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/young" ) )
+        M_Data->setYoung( M_dataPhysics->GetStructureYoungModulus() );
+    M_Data->setTime( M_dataPhysics->GetDataTime() );
+    */
 }
 
 void
@@ -143,10 +155,10 @@ MS_Model_FSI3D::SolveSystem()
     }
     if(M_solver->isFluid())
         M_solver->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
-    M_solver->iterate(M_time);
+    M_solver->iterate(M_dataPhysics->GetDataTime()->getTime());
     if(M_solver->isFluid())
         *M_fluidDisp      = M_solver->FSIOper()->meshDisp();
-    M_time += M_solver->timeStep();
+    //M_time += M_solver->timeStep();
     // NOTE: the last iteration will not be post-processed in this way
 }
 
@@ -175,6 +187,154 @@ void
 MS_Model_FSI3D::ShowMe()
 {
     /*show-me*/
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+MS_Model_FSI3D::BCInterface_Type&
+MS_Model_FSI3D::GetBCInterface()
+{
+    return *M_fluidBC;
+}
+
+MS_Model_FSI3D::BCInterface_Type&
+MS_Model_FSI3D::GetLinearBCInterface()
+{
+    //return *M_LinearFluidBC;
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
+{
+    return M_solver->FSIOper()->dataFluid().density();
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
+{
+    return M_solver->FSIOper()->dataFluid().viscosity();
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryArea( const BCFlag& Flag ) const
+{
+    return M_solver->FSIOper()->fluid().area( Flag );
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
+{
+    return M_solver->FSIOper()->fluid().flux( Flag/*, M_solver->FSIOper()->un()*/ ); //VErify that is the flux
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryPressure( const BCFlag& Flag ) const
+{
+    return M_solver->FSIOper()->fluid().pressure( Flag/*, M_solver->FSIOper()->un()*/ ); //VErify that is the scalar value of the pressure
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
+{
+    return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
+                                            / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
+{
+    //return M_Fluid->LagrangeMultiplier(Flag, *M_fluidBC->GetHandler(), un() ); // Overload of function to pass the vector of the solution
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType ) const
+{
+    switch ( StressType )
+    {
+        case StaticPressure:
+        {
+            return -GetBoundaryPressure( Flag );
+        }
+
+        case TotalPressure:
+        {
+            return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
+        }
+
+        case LagrangeMultiplier:
+        {
+            return -GetBoundaryLagrangeMultiplier( Flag );
+        }
+
+        default:
+
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+
+            return 0.0;
+    }
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return M_Fluid->GetLinearFlux( Flag );
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return M_Fluid->GetLinearPressure( Flag );
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return GetBoundaryDensity( Flag ) * M_Fluid->GetLinearFlux( Flag ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return M_Fluid->LinearLagrangeMultiplier(Flag, *M_LinearFluidBC->GetHandler() );
+}
+
+Real
+MS_Model_FSI3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
+{
+    /*
+    switch ( StressType )
+    {
+        case StaticPressure:
+        {
+            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
+        }
+
+        case TotalPressure:
+        {
+            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+        }
+
+        case LagrangeMultiplier:
+        {
+            return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
+        }
+
+        default:
+
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+
+            return 0.0;
+    }
+    */
 }
 
 // ===================================================

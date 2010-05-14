@@ -138,6 +138,13 @@ MS_Coupling_Stress::SetupCoupling()
 
                 break;
 
+            case FSI3D:
+
+                ImposeStress< MS_Model_FSI3D > ( i );
+                ImposeDeltaStress< MS_Model_Fluid3D > ( i );
+
+                break;
+
             default:
 
                 if ( M_displayer->isLeader() )
@@ -167,6 +174,13 @@ MS_Coupling_Stress::InitializeCouplingVariables()
                 break;
             }
 
+            case FSI3D:
+            {
+                ( *M_LocalCouplingVariables )[0] += MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+
+                break;
+            }
+
             default:
 
                 if ( M_displayer->isLeader() )
@@ -182,6 +196,14 @@ MS_Coupling_Stress::InitializeCouplingVariables()
             {
 
                 ( *M_LocalCouplingVariables )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+
+                break;
+            }
+
+            case FSI3D:
+            {
+
+                ( *M_LocalCouplingVariables )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
                 break;
             }
@@ -206,6 +228,12 @@ MS_Coupling_Stress::ExportCouplingResiduals( VectorType& CouplingResiduals )
             case Fluid3D:
 
                 ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+
+                break;
+
+            case FSI3D:
+
+                ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
                 break;
 
@@ -285,6 +313,12 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const
 
             break;
 
+        case FSI3D:
+
+            Coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux( M_flags[ModelLocalID], SolveLinearSystem );
+
+            break;
+
         default:
 
             if ( M_displayer->isLeader() )
@@ -316,6 +350,16 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
                 Stress          = ( *M_LocalCouplingVariables )[0];
                 Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
                 DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+
+                break;
+            }
+
+            case FSI3D:
+            {
+                FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+                Stress          = ( *M_LocalCouplingVariables )[0];
+                Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+                DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
                 break;
             }
