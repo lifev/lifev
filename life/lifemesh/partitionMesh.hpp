@@ -2,7 +2,7 @@
 //@HEADER
 
 /*!
-  \brief short description of file
+  \brief Class that handles mesh partitioning
   \file partitionMesh.hpp
   \author Gilles Fourestey gilles.fourestey@epfl.ch (Modified by Radu Popescu radu.popescu@epfl.ch)
 */
@@ -22,7 +22,7 @@
 namespace LifeV
 {
 /*!
-  \brief short description of class
+  \brief Class that handles mesh partitioning
   \author Gilles Fourestey gilles.fourestey@epfl.ch (Modified by Radu Popescu radu.popescu@epfl.ch)
 
   This class implements the partitioning of a mesh using (par)Metis.
@@ -73,7 +73,7 @@ private:
     //! Private Methods
     //@{
     //! Execute mesh partitioning using the configured MPI processes
-    /*! 
+    /*!
       This function takes exactly the same arguments as the constructor. The body
       of the constructor has been moved inside this function. The is the first step
       towards having an empty constructor. Right now this doesn't change the
@@ -99,16 +99,16 @@ private:
     void setElementParameters();
     //! Build the graph vertex distribution vector
     /*!
-      Updates the member M_vertexDist according to the number of processors to be 
+      Updates the member M_vertexDist according to the number of processors to be
       used by ParMETIS (the number of processes started for MPI
       \param numElements - UInt - number of elements in the mesh
      */
     void distributeElements(UInt numElements);
     //! Find faces on the boundaries between domains (FSI)
     /*!
-      Identifies the element faces that are common to both the fluid and the solid 
-      meshes and creates a map between the faces that reside on the boundary between 
-      the two meshes and the processors used. Updates the members M_repeatedFace and 
+      Identifies the element faces that are common to both the fluid and the solid
+      meshes and creates a map between the faces that reside on the boundary between
+      the two meshes and the processors used. Updates the members M_repeatedFace and
       M_isOnProc.
       \param _mesh - Mesh& - the unpartitioned mesh
       \param interfaceMap - Epetra_Map*
@@ -293,14 +293,14 @@ void partitionMesh<Mesh>::distributeElements(UInt numElements)
 }
 
 template<typename Mesh>
-void partitionMesh<Mesh>::findRepeatedFacesFSI(Mesh &_mesh, Epetra_Map *interfaceMap, 
+void partitionMesh<Mesh>::findRepeatedFacesFSI(Mesh &_mesh, Epetra_Map *interfaceMap,
                                                Epetra_Map *interfaceMapRep)
 {
     std::vector<int>                     myRepeatedFace; // used for the solid partitioning
     boost::shared_ptr<std::vector<int> > myIsOnProc;     // used for the solid partitioning
 
     myIsOnProc.reset(new std::vector<int>(_mesh.numVolumes()));
-    
+
     bool myFaceRep;
     bool myFace(false);
     short count;
@@ -327,11 +327,11 @@ void partitionMesh<Mesh>::findRepeatedFacesFSI(Mesh &_mesh, Epetra_Map *interfac
             {
                 myFace = false;
                 myFaceRep = false;
-                count = 0;                    
+                count = 0;
                 for(int ipoint = 1; ipoint <= (int) M_faceNodes; ++ipoint) // vertex-based dofs
                 {
                     myFaceRep = ((interfaceMap->LID(_mesh.face(face).point(ipoint).id())
-                                  /* first is fluid */ == -1) && 
+                                  /* first is fluid */ == -1) &&
                                  (interfaceMapRep->LID(_mesh.face(face).point(ipoint).id())
                                   /* first is fluid */ != -1));
                     myFace = myFace || (interfaceMap->LID(_mesh.face(face).point(ipoint).id()) != -1);
@@ -360,9 +360,9 @@ void partitionMesh<Mesh>::findRepeatedFacesFSI(Mesh &_mesh, Epetra_Map *interfac
     M_isOnProc.reset(new std::vector<int> (*myIsOnProc));
 
     // Lot of communication here!!
-    MPI_Allreduce(&myRepeatedFace[0], &(*M_repeatedFace)[0], myRepeatedFace.size(), 
+    MPI_Allreduce(&myRepeatedFace[0], &(*M_repeatedFace)[0], myRepeatedFace.size(),
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(), 
+    MPI_Allreduce(&(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(),
                   MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 }
 
@@ -486,7 +486,7 @@ void partitionMesh<Mesh>::partitionConnectivityGraph(Mesh &_mesh,
         adjwgtPtr = (int*) &adjwgt[0];
     }
     ParMETIS_V3_PartKway((int*) &M_vertexDist[0], (int*) &M_iadj[0], (int*) &M_jadj[0],
-                         vwgt,  adjwgtPtr, &wgtflag, &numflag, &ncon, &nparts, &tpwgts[0], 
+                         vwgt,  adjwgtPtr, &wgtflag, &numflag, &ncon, &nparts, &tpwgts[0],
                          &ubvec[0], &options[0], &edgecut, &M_part[0], &MPIcomm);
 
     M_comm->Barrier();
@@ -503,14 +503,14 @@ void partitionMesh<Mesh>::partitionConnectivityGraph(Mesh &_mesh,
     {
         // here we are associating the vertex global ID to the subdomain ID
         M_locProc[M_part[ii]].push_back(ii + M_vertexDist[M_me]);
-    }    
+    }
 }
 
 template<typename Mesh>
 void partitionMesh<Mesh>::matchFluidPartitionsFSI()
 {
     Epetra_MpiComm* mpiComm = dynamic_cast <Epetra_MpiComm*> (M_comm);
-    MPI_Comm MPIcomm = mpiComm->Comm();       
+    MPI_Comm MPIcomm = mpiComm->Comm();
     int nprocs;
     MPI_Comm_size(MPIcomm, &nprocs);
 
@@ -539,7 +539,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
 
     for(UInt j=0; (int)j<nprocs; ++j)
     {
-        MPI_Allreduce(&mymatchesForProc[j][0], &matchesForProc[j][0], nprocs, 
+        MPI_Allreduce(&mymatchesForProc[j][0], &matchesForProc[j][0], nprocs,
                       MPI_INT, MPI_SUM, MPIcomm);
     }
 
@@ -568,7 +568,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
     {
         MPI_Bcast(&maxs[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
     }
-        
+
     std::vector<pair<UInt, int> > procIndex(nprocs);
     for(int k = 0; k < nprocs; ++k)
     {
@@ -598,7 +598,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
         else
         {
             std::cout << "Ordering error when assigning the processor"
-                      << M_me << " to the partition," << std::endl 
+                      << M_me << " to the partition," << std::endl
                       << " parmetis did a bad job." << std::endl;
             for (int i = nprocs; i > 0; --i)
             {
@@ -618,7 +618,7 @@ template<typename Mesh>
 void partitionMesh<Mesh>::redistributeElements()
 {
     Epetra_MpiComm* mpiComm = dynamic_cast <Epetra_MpiComm*> (M_comm);
-    MPI_Comm MPIcomm = mpiComm->Comm();       
+    MPI_Comm MPIcomm = mpiComm->Comm();
     int nProc;
     MPI_Comm_size(MPIcomm, &nProc);
 
@@ -639,9 +639,9 @@ void partitionMesh<Mesh>::redistributeElements()
         // all processes other than me are sending vertices
         // belonging to my subdomain
         if (int(M_me) != iproc)
-        {                                                  
+        {
             size = M_locProc[iproc].size();
-   
+
             // tell me how many vertices belonging to me you have to send me
             MPI_Isend(&size, 1, MPI_INT, iproc, 10, MPIcomm, &send_request);
             ssize[iproc] = size;
@@ -670,17 +670,17 @@ void partitionMesh<Mesh>::redistributeElements()
                 int incr = 1 ;
                 int pos = 0;
                 int size_part = size;
-                
+
                 // divide the whole data set into smaller packets
                 while (size_part > max_int)
                 {
                     incr += 1;
                     size_part = size / incr;
                 }
-                
+
                 MPI_Send(&incr, 1, MPI_INT, iproc, 20, MPIcomm);
                 MPI_Send(&size_part, 1, MPI_INT, iproc, 30, MPIcomm);
-                
+
                 for (int kk = 0; kk < incr; ++kk)
                 {
                     MPI_Send(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm);
@@ -714,11 +714,11 @@ void partitionMesh<Mesh>::redistributeElements()
                 {
                     size = rsize[jproc];
                     std::vector<int> stack(size, 0);
-                    
+
                     if (size > max_int)
                     {
                         int size_part, pos, incr;
-                        
+
                         MPI_Recv(&incr, 1, MPI_INT, jproc, 20, MPIcomm, &status);
                         MPI_Recv(&size_part, 1, MPI_INT, jproc, 30, MPIcomm, &status);
 
@@ -739,7 +739,7 @@ void partitionMesh<Mesh>::redistributeElements()
                     else
                     {
                         if (size != 0)
-                        {                            
+                        {
                             MPI_Recv(&stack[0], size , MPI_INT, jproc, 60, MPIcomm, &status);
                         }
                     }
@@ -756,8 +756,8 @@ void partitionMesh<Mesh>::redistributeElements()
 template<typename Mesh>
 void partitionMesh<Mesh>::constructLocalMesh(Mesh &_mesh)
 {
-    if (!M_me) 
-    {    
+    if (!M_me)
+    {
         std::cout << "Building local mesh ..." << std::flush;
     }
 
@@ -797,7 +797,7 @@ void partitionMesh<Mesh>::constructLocalMesh(Mesh &_mesh)
         	// store here the global numbering of the edge
           	M_localEdges.insert(_mesh.localEdgeId(ielem + 1, ii));
         }
-        
+
         // cycle on element's faces
         for (UInt ii = 1; ii <= M_elementFaces; ++ii)
         {
@@ -940,7 +940,7 @@ void partitionMesh<Mesh>::constructFaces(Mesh &_mesh)
     std::set<int>::iterator      is;
 
     typename Mesh::FaceType * pf = 0;
-    
+
     UInt inode;
     int count = 1;
 
@@ -1066,7 +1066,7 @@ void partitionMesh<Mesh>::finalSetup(Mesh &_mesh)
 
     M_mesh->updateElementFaces();
 
-    if (!M_me) 
+    if (!M_me)
     {
         std::cout << "done" << std::endl;
         std::cout << "Creating the map ... " << std::flush;
@@ -1161,7 +1161,7 @@ void partitionMesh<Mesh>::execute(Mesh &_mesh, Epetra_Comm &_comm,
     //      on the interface
 
 
-    //////////////////// BEGIN OF SOLID PARTITION PART ////////////////////////    
+    //////////////////// BEGIN OF SOLID PARTITION PART ////////////////////////
     if(interfaceMap)
     {
         findRepeatedFacesFSI(_mesh, interfaceMap, interfaceMapRep);
