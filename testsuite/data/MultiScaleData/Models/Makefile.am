@@ -37,6 +37,10 @@ dist_pkgdata_DATA = Fluid3D_Cylinder_tube20.dat \
                     MultiScale_CarotidBifurcation3D_Stress.dat \
                     MultiScale_CarotidBifurcation3D_Synthetic_FluxStress.dat \
                     MultiScale_CarotidBifurcation3D_Synthetic_Stress.dat \
+                    MultiScale_Stationary3D_CarotidBifurcation_FluxStress.dat \
+                    MultiScale_Stationary3D_CarotidBifurcation_Stress.dat \
+                    MultiScale_Stationary3D_CarotidBifurcation_Synthetic_FluxStress.dat \
+                    MultiScale_Stationary3D_CarotidBifurcation_Synthetic_Stress.dat \
                     MultiScale_Stationary3D_1Cylinder_tube20.dat \
                     MultiScale_Stationary3D_Bifurcation_FluxStress.dat \
                     MultiScale_Stationary3D_Bifurcation_Stress.dat \
