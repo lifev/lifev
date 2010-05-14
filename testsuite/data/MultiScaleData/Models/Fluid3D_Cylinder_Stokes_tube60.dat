@@ -57,8 +57,8 @@ diagonalBlockPrec   = false
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
     
     [../miscellaneous]
-    Stokes          = true            # Solve a Stokes problem
-    SubITMax        = 0               # Maximum number of iterations 
+    Stokes          = true             # Solve a Stokes problem
+    SubITMax        = 20               # Maximum number of iterations 
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.1              # Relaxation parameter
     fixedOmega      = false            # Use fixed relaxation

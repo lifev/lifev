@@ -64,7 +64,7 @@ diagonalBlockPrec   = false
     
     [../miscellaneous]
     Stokes          = true             # Solve a Stokes problem
-    SubITMax        = 0               # Maximum number of iterations 
+    SubITMax        = 20               # Maximum number of iterations 
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.1              # Relaxation parameter
     fixedOmega      = false            # Use fixed relaxation
