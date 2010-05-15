@@ -264,7 +264,7 @@ MS_Model_Fluid3D::BuildSystem()
     if ( M_FluidData->Stokes() )
     {
         M_alpha  = 0.0;
-        *M_beta  = M_Fluid->solution();
+        *M_beta  = M_Fluid->solution(); //It is a stationary Navier-Stokes
         *M_RHS  *= 0.0;
     }
     else
@@ -315,7 +315,7 @@ MS_Model_Fluid3D::SolveSystem()
     //Solve the problem
     M_Fluid->iterate( *M_FluidBC->GetHandler() );
 
-    if ( !M_FluidData->Stokes() )
+    if ( M_SubiterationsMaximumNumber > 0 )
     {
         Real residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector;
 
