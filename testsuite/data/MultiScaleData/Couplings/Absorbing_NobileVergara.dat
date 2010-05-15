@@ -1,0 +1,28 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-05-15
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Absorbing (Nobile-Vergara) ######################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_Absorbing_NobileVergara
+
+[boundary_conditions]
+list = 'OutFlow_absorbing'
+	
+	[./OutFlow_absorbing]
+	type			= Natural
+	mode			= Full
+	component		= 3
+	OPERfunction	= 'a=0.7854; beta=s_thickness*s_young/(1-s_poisson*s_poisson)*pi/a; outflow = ( sqrt(s_density)/(2*sqrt(2))*f_flux/a + sqrt(beta*sqrt(a)) )^2 - beta*sqrt(a); [0., 0., -outflow ]'
+	
+	
+	[../]

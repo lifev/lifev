@@ -22,7 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = SinusoidalFlux.dat \
+dist_pkgdata_DATA = Absorbing_NobileVergara.dat \
+                    SinusoidalFlux.dat \
 					SinusoidalPressure.dat \
 					WomersleySinusoidalFlux.dat \
 					WomersleySinusoidalPressure.dat \
@@ -42,6 +43,8 @@ dist_pkgdata_DATA = SinusoidalFlux.dat \
                     Stress_TotalPressure.dat \
                     Stress_LagrangeMultiplier.dat \
                     NoStress.dat \
+                    TestFlux.dat \
+                    TestStress.dat \
                     XY_ZeroTangentialVelocity.dat
 					
 check-local:

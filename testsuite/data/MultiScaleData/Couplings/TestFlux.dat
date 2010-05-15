@@ -1,0 +1,27 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-05-15
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Test Flux #######################################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_TestFlux
+
+[boundary_conditions]
+list = 'TestFlux'
+	
+	[./TestFlux]
+	type			= Flux
+	mode			= Full
+	component		= 3
+	functionFile	= physicalFunctions/test_Flux1.dat
+	
+	[../]
