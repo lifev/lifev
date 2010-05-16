@@ -85,10 +85,10 @@ enum algorithmsTypes
  */
 enum modelsTypes
 {
-    MultiScale, /*!< MultiScale model */
-    Fluid3D,    /*!< Fluid (Oseen) 3D model */
-    FSI1D,      /*!< FSI 1D model */
-    FSI3D       /*!< FSI 3D model */
+    MultiScale,          /*!< MultiScale model */
+    Fluid3D,             /*!< Fluid (Oseen) 3D model */
+    OneDimensionalModel, /*!< FSI 1D model */
+    FSI3D                /*!< FSI 3D model */
 };
 
 /*! @enum couplingsTypes
@@ -177,7 +177,7 @@ MS_MapsDefinition()
 {
     modelsMap["MultiScale"]           = MultiScale;
     modelsMap["Fluid3D"]              = Fluid3D;
-    modelsMap["FSI1D"]                = FSI1D;
+    modelsMap["OneDimensionalModel"]  = OneDimensionalModel;
     modelsMap["FSI3D"]                = FSI3D;
 
     couplingsMap["BoundaryCondition"] = BoundaryCondition;

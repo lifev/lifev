@@ -31,14 +31,10 @@
  *  @version 1.0
  *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
  *  @date 02-26-2010
- *
- *  @version 1.1
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 14-04-2010
  */
 
-#ifndef MS_Model_FSI1D_H
-#define MS_Model_FSI1D_H 1
+#ifndef MS_Model_1D_H
+#define MS_Model_1D_H 1
 
 // Mathcard includes
 #include <lifemc/lifesolver/BCInterface1D.hpp>
@@ -61,14 +57,14 @@
 
 namespace LifeV {
 
-//! MS_Model_FSI1D - MultiScale model for 1D Fluid simulations
+//! MS_Model_1D - MultiScale model for 1D Fluid simulations
 /*!
  *  @author Gilles Fourestey, Cristiano Malossi
  *
- *  The MS_Model_FSI1D class is an implementation of the MS_PhysicalModel
+ *  The MS_Model_1D class is an implementation of the MS_PhysicalModel
  *  for 1D Fluid problem.
  */
-class MS_Model_FSI1D: public virtual MS_PhysicalModel
+class MS_Model_1D: public virtual MS_PhysicalModel
 {
 public:
 
@@ -108,16 +104,16 @@ public:
     //@{
 
     //! Constructor
-    MS_Model_FSI1D();
+    MS_Model_1D();
 
     //! Copy constructor
     /*!
-     * @param FSI1D MS_Model_FSI1D
+     * @param OneDimensionalModel MS_Model_1D
      */
-    MS_Model_FSI1D( const MS_Model_FSI1D& FSI1D );
+    MS_Model_1D( const MS_Model_1D& OneDimensionalModel );
 
     //! Destructor
-    ~MS_Model_FSI1D() {}
+    ~MS_Model_1D() {}
 
     //@}
 
@@ -127,10 +123,10 @@ public:
 
     //! Operator=
     /*!
-     * @param FSI1D MS_Model_FSI1D
+     * @param OneDimensionalModel MS_Model_1D
      * @return reference to a copy of the class
      */
-    MS_Model_FSI1D& operator = ( const MS_Model_FSI1D& FSI1D );
+    MS_Model_1D& operator = ( const MS_Model_1D& OneDimensionalModel );
 
     //@}
 
@@ -340,11 +336,11 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createFSI1D()
+inline MS_PhysicalModel* createOneDimensionalModel()
 {
-    return new MS_Model_FSI1D();
+    return new MS_Model_1D();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Model_FSI1D_H */
+#endif /* MS_Model_1D_H */

@@ -60,15 +60,15 @@ MS_Solver::MS_Solver() :
     MS_MapsDefinition();
 
     //Register the objects
-    FactoryModels::instance().registerProduct   ( MultiScale,        &createMultiScale );
-    FactoryModels::instance().registerProduct   ( Fluid3D,           &createFluid3D );
-    FactoryModels::instance().registerProduct   ( FSI1D,             &createFSI1D );
-    FactoryModels::instance().registerProduct   ( FSI3D,             &createModelFSI3D );
-    FactoryCouplings::instance().registerProduct( Stress,            &createStress );
-    FactoryCouplings::instance().registerProduct( FluxStress,        &createFluxStress );
-    FactoryCouplings::instance().registerProduct( BoundaryCondition, &createBoundaryCondition );
-    FactoryAlgorithms::instance().registerProduct( Aitken,           &createAitken );
-    FactoryAlgorithms::instance().registerProduct( Newton,           &createNewton );
+    FactoryModels::instance().registerProduct   ( MultiScale,          &createMultiScale );
+    FactoryModels::instance().registerProduct   ( Fluid3D,             &createFluid3D );
+    FactoryModels::instance().registerProduct   ( OneDimensionalModel, &createOneDimensionalModel );
+    FactoryModels::instance().registerProduct   ( FSI3D,               &createModelFSI3D );
+    FactoryCouplings::instance().registerProduct( Stress,              &createStress );
+    FactoryCouplings::instance().registerProduct( FluxStress,          &createFluxStress );
+    FactoryCouplings::instance().registerProduct( BoundaryCondition,   &createBoundaryCondition );
+    FactoryAlgorithms::instance().registerProduct( Aitken,             &createAitken );
+    FactoryAlgorithms::instance().registerProduct( Newton,             &createNewton );
 }
 
 MS_Solver::MS_Solver( const MS_Solver& solver ) :
