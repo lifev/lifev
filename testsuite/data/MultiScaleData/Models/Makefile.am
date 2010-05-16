@@ -32,7 +32,7 @@ dist_pkgdata_DATA = Fluid3D_Cylinder_tube20.dat \
 					Fluid3D_Cylinder_Stokes_tube80.dat \
 					Fluid3D_Carotid.dat \
 					Fluid3D_Carotid_Stokes.dat \
-					FSI1D.dat \
+					OneDimensionalModel.dat \
 					MultiScale_CarotidBifurcation3D_FluxStress.dat \
                     MultiScale_CarotidBifurcation3D_Stress.dat \
                     MultiScale_CarotidBifurcation3D_Synthetic_FluxStress.dat \

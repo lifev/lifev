@@ -31,20 +31,16 @@
  *  @version 1.0
  *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
  *  @date 02-25-2010
- *
- *  @version 1.1
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 14-04-2010
  */
 
-#include "MS_Model_FSI1D.hpp"
+#include "MS_Model_1D.hpp"
 
 namespace LifeV {
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Model_FSI1D::MS_Model_FSI1D() :
+MS_Model_1D::MS_Model_1D() :
     super                          (),
 #ifdef HAVE_HDF5
     M_Exporter                     ( new IOFile_Type() ),
@@ -62,10 +58,10 @@ MS_Model_FSI1D::MS_Model_FSI1D() :
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::MS_Model_FSI1D() \n";
+    Debug( 8130 ) << "MS_Model_1D::MS_Model_1D() \n";
 #endif
 
-    M_type = FSI1D;
+    M_type = OneDimensionalModel;
 
     //Define the maps of the OneDimensionalModel objects
     OneDimensionalModel_MapsDefinition();
@@ -81,46 +77,46 @@ MS_Model_FSI1D::MS_Model_FSI1D() :
     Factory_OneDimensionalModel_Source::instance().registerProduct(  OneD_NonLinearSource,  &Create_OneDimensionalModel_Source_NonLinear );
 }
 
-MS_Model_FSI1D::MS_Model_FSI1D( const MS_Model_FSI1D& FSI1D ) :
-    super                          ( FSI1D ),
+MS_Model_1D::MS_Model_1D( const MS_Model_1D& OneDimensionalModel ) :
+    super                          ( OneDimensionalModel ),
 #ifdef HAVE_HDF5
-    M_Exporter                     ( FSI1D.M_Exporter ),
-    M_ExporterMesh                 ( FSI1D.M_ExporterMesh ),
+    M_Exporter                     ( OneDimensionalModel.M_Exporter ),
+    M_ExporterMesh                 ( OneDimensionalModel.M_ExporterMesh ),
 #endif
-    M_Data                         ( FSI1D.M_Data ),
-    M_Physics                      ( FSI1D.M_Physics ),
-    M_Flux                         ( FSI1D.M_Flux ),
-    M_Source                       ( FSI1D.M_Source ),
-    M_Solver                       ( FSI1D.M_Solver ),
-    M_BC                           ( FSI1D.M_BC ),
-    M_Solution                     ( FSI1D.M_Solution ),
-    M_FESpace                      ( FSI1D.M_FESpace ),
-    M_LinearSolver                 ( FSI1D.M_LinearSolver )
+    M_Data                         ( OneDimensionalModel.M_Data ),
+    M_Physics                      ( OneDimensionalModel.M_Physics ),
+    M_Flux                         ( OneDimensionalModel.M_Flux ),
+    M_Source                       ( OneDimensionalModel.M_Source ),
+    M_Solver                       ( OneDimensionalModel.M_Solver ),
+    M_BC                           ( OneDimensionalModel.M_BC ),
+    M_Solution                     ( OneDimensionalModel.M_Solution ),
+    M_FESpace                      ( OneDimensionalModel.M_FESpace ),
+    M_LinearSolver                 ( OneDimensionalModel.M_LinearSolver )
 {
 }
 
 // ===================================================
 // Operators
 // ===================================================
-MS_Model_FSI1D&
-MS_Model_FSI1D::operator=( const MS_Model_FSI1D& FSI1D )
+MS_Model_1D&
+MS_Model_1D::operator=( const MS_Model_1D& OneDimensionalModel )
 {
-    if ( this != &FSI1D )
+    if ( this != &OneDimensionalModel )
     {
-        super::operator=( FSI1D );
+        super::operator=( OneDimensionalModel );
 #ifdef HAVE_HDF5
-        M_Exporter                     = FSI1D.M_Exporter;
-        M_ExporterMesh                 = FSI1D.M_ExporterMesh;
+        M_Exporter                     = OneDimensionalModel.M_Exporter;
+        M_ExporterMesh                 = OneDimensionalModel.M_ExporterMesh;
 #endif
-        M_Data                         = FSI1D.M_Data;
-        M_Physics                      = FSI1D.M_Physics;
-        M_Flux                         = FSI1D.M_Flux;
-        M_Source                       = FSI1D.M_Source;
-        M_Solver                       = FSI1D.M_Solver;
-        M_BC                           = FSI1D.M_BC;
-        M_Solution                     = FSI1D.M_Solution;
-        M_FESpace                      = FSI1D.M_FESpace;
-        M_LinearSolver                 = FSI1D.M_LinearSolver;
+        M_Data                         = OneDimensionalModel.M_Data;
+        M_Physics                      = OneDimensionalModel.M_Physics;
+        M_Flux                         = OneDimensionalModel.M_Flux;
+        M_Source                       = OneDimensionalModel.M_Source;
+        M_Solver                       = OneDimensionalModel.M_Solver;
+        M_BC                           = OneDimensionalModel.M_BC;
+        M_Solution                     = OneDimensionalModel.M_Solution;
+        M_FESpace                      = OneDimensionalModel.M_FESpace;
+        M_LinearSolver                 = OneDimensionalModel.M_LinearSolver;
     }
 
     return *this;
@@ -130,11 +126,11 @@ MS_Model_FSI1D::operator=( const MS_Model_FSI1D& FSI1D )
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_Model_FSI1D::SetupData( const std::string& FileName )
+MS_Model_1D::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::SetupData( ) \n";
+    Debug( 8130 ) << "MS_Model_1D::SetupData( ) \n";
 #endif
 
     super::SetupData( FileName );
@@ -195,11 +191,11 @@ MS_Model_FSI1D::SetupData( const std::string& FileName )
 }
 
 void
-MS_Model_FSI1D::SetupModel()
+MS_Model_1D::SetupModel()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::SetupProblem() \n";
+    Debug( 8130 ) << "MS_Model_1D::SetupProblem() \n";
 #endif
 
     //FEspace
@@ -231,32 +227,32 @@ MS_Model_FSI1D::SetupModel()
 }
 
 void
-MS_Model_FSI1D::BuildSystem()
+MS_Model_1D::BuildSystem()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::BuildSystem() \n";
+    Debug( 8130 ) << "MS_Model_1D::BuildSystem() \n";
 #endif
 
     M_Solver->initialize();
 }
 
 void
-MS_Model_FSI1D::UpdateSystem()
+MS_Model_1D::UpdateSystem()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::UpdateSystem() \n";
+    Debug( 8130 ) << "MS_Model_1D::UpdateSystem() \n";
 #endif
 
     M_Solver->timeAdvance();
 }
 
 void
-MS_Model_FSI1D::SolveSystem()
+MS_Model_1D::SolveSystem()
 {
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::SolveSystem() \n";
+    Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
 #endif
 
     M_BC->UpdateOperatorVariables();
@@ -264,11 +260,11 @@ MS_Model_FSI1D::SolveSystem()
 }
 
 void
-MS_Model_FSI1D::SaveSolution()
+MS_Model_1D::SaveSolution()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::SaveSolution() \n";
+    Debug( 8130 ) << "MS_Model_1D::SaveSolution() \n";
 #endif
 
 #ifdef HAVE_HDF5
@@ -285,7 +281,7 @@ MS_Model_FSI1D::SaveSolution()
 }
 
 void
-MS_Model_FSI1D::ShowMe()
+MS_Model_1D::ShowMe()
 {
     if ( M_displayer->isLeader() )
     {
@@ -303,31 +299,31 @@ MS_Model_FSI1D::ShowMe()
 // Methods
 // ===================================================
 void
-MS_Model_FSI1D::SetupLinearData( const std::string& /*FileName*/ )
+MS_Model_1D::SetupLinearData( const std::string& /*FileName*/ )
 {
 
 }
 
 void
-MS_Model_FSI1D::SetupLinearModel()
+MS_Model_1D::SetupLinearModel()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::SetupLinearModel( ) \n";
+    Debug( 8130 ) << "MS_Model_1D::SetupLinearModel( ) \n";
 #endif
 }
 
 void
-MS_Model_FSI1D::UpdateLinearModel()
+MS_Model_1D::UpdateLinearModel()
 {
 }
 
 void
-MS_Model_FSI1D::SolveLinearModel( bool& /*SolveLinearSystem*/ )
+MS_Model_1D::SolveLinearModel( bool& /*SolveLinearSystem*/ )
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::SolveLinearModel() \n";
+    Debug( 8130 ) << "MS_Model_1D::SolveLinearModel() \n";
 #endif
 
 }
@@ -335,51 +331,51 @@ MS_Model_FSI1D::SolveLinearModel( bool& /*SolveLinearSystem*/ )
 // ===================================================
 // Get Methods (couplings)
 // ===================================================
-MS_Model_FSI1D::BCInterface_Type&
-MS_Model_FSI1D::GetBCInterface() const
+MS_Model_1D::BCInterface_Type&
+MS_Model_1D::GetBCInterface() const
 {
     return *M_BC;
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
+MS_Model_1D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
 {
     return M_Data->DensityRho();
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
+MS_Model_1D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 {
     return M_Data->Viscosity();
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryArea( const BCFlag& Flag ) const
+MS_Model_1D::GetBoundaryArea( const BCFlag& Flag ) const
 {
     return M_Solver->BoundaryValue( OneD_A, (Flag == 0) ? OneD_left : OneD_right );
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryFlowRate( const BCFlag& Flag ) const
+MS_Model_1D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
     return M_Solver->BoundaryValue( OneD_Q, (Flag == 0) ? OneD_left : OneD_right );
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryPressure( const BCFlag& Flag ) const
+MS_Model_1D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
     return M_Solver->BoundaryValue( OneD_P, (Flag == 0) ? OneD_left : OneD_right );
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
+MS_Model_1D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 {
     return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
                                             / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
 }
 
 Real
-MS_Model_FSI1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType ) const
+MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType ) const
 {
     switch ( StressType )
     {
@@ -404,51 +400,51 @@ MS_Model_FSI1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& Stress
 // ===================================================
 // Get Methods
 // ===================================================
-MS_Model_FSI1D::BC_Type&
-MS_Model_FSI1D::GetBC() const
+MS_Model_1D::BC_Type&
+MS_Model_1D::GetBC() const
 {
     return *(M_BC->GetHandler());
 }
 
 
-MS_Model_FSI1D::Data_Type&
-MS_Model_FSI1D::GetData() const
+MS_Model_1D::Data_Type&
+MS_Model_1D::GetData() const
 {
     return *M_Data;
 }
 
-MS_Model_FSI1D::Physics_PtrType
-MS_Model_FSI1D::GetPhysics() const
+MS_Model_1D::Physics_PtrType
+MS_Model_1D::GetPhysics() const
 {
     return M_Physics;
 }
 
-MS_Model_FSI1D::Flux_PtrType
-MS_Model_FSI1D::GetFlux() const
+MS_Model_1D::Flux_PtrType
+MS_Model_1D::GetFlux() const
 {
     return M_Flux;
 }
 
-MS_Model_FSI1D::Source_PtrType
-MS_Model_FSI1D::GetSource() const
+MS_Model_1D::Source_PtrType
+MS_Model_1D::GetSource() const
 {
     return M_Source;
 }
 
-MS_Model_FSI1D::FESpace_PtrType
-MS_Model_FSI1D::GetFESpace() const
+MS_Model_1D::FESpace_PtrType
+MS_Model_1D::GetFESpace() const
 {
     return M_FESpace;
 }
 
-MS_Model_FSI1D::Solver_PtrType
-MS_Model_FSI1D::GetSolver() const
+MS_Model_1D::Solver_PtrType
+MS_Model_1D::GetSolver() const
 {
     return M_Solver;
 }
 
-const MS_Model_FSI1D::Solution_PtrType
-MS_Model_FSI1D::GetSolution() const
+const MS_Model_1D::Solution_PtrType
+MS_Model_1D::GetSolution() const
 {
     return M_Solver->U_thistime();
 }
@@ -457,11 +453,11 @@ MS_Model_FSI1D::GetSolution() const
 // Private Methods
 // ===================================================
 void
-MS_Model_FSI1D::SetupFESpace()
+MS_Model_1D::SetupFESpace()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_FSI1D::setupFEspace() \n";
+    Debug( 8130 ) << "MS_Model_1D::setupFEspace() \n";
 #endif
 
     //Transform mesh
