@@ -1262,7 +1262,7 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
     // M_rhsFull = M_rhsNoBC;
 
     // BC manage for the velocity
-    if ( !BCh.bdUpdateDone() )
+    if ( !BCh.bdUpdateDone() ||  M_recomputeMatrix )
     {
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
