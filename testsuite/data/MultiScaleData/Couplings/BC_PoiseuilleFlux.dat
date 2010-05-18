@@ -25,4 +25,8 @@ list = 'PoiseuilleFlux'  # Poiseuille Flux
 	function   			= '-(pi*1)/(8*0.035)*(0.5^4)'                       #TEMPORARY FIX
 	#OPERfunction		= '-(pi*f_density)/(8*f_viscosity)*((f_area/pi)^2)'
 	
+    # Additional parameters for 1D BC
+    quantity        = Q
+    line            = first
+    
 	[../]

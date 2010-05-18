@@ -32,8 +32,8 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	PoiseuilleFlux					0				0
-			1		BoundaryCondition	NoStress						0				1,2
+			0		BoundaryCondition	BC_PoiseuilleFlux					0				0
+			1		BoundaryCondition	BC_NoStress						0				1,2
 		 	'
 ###################################################################################################
 

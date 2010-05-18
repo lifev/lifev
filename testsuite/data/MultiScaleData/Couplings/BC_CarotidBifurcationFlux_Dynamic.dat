@@ -5,22 +5,29 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-12-02
+#           Date: 2009-11-24
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Sinusoidal Pressure #############################################
+### COUPLING: BoundaryCondition - Carotid bifurcation Flux ########################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_SinusoidalPressure
+couplingName	= BoundaryCondition_CarotidBifurcationFlux
 
 [boundary_conditions]
-list = 'SinusoidalPressure'  # Sinusoidal Pressure
-	
-	[./SinusoidalPressure]
-	type			= Natural
-	mode			= Normal
-	function		= 'p=1; -sin(2*pi*t/p)'
-	
+list = 'CarotidBifurcationFlux'
+
+	[./CarotidBifurcationFlux]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	functionFile		= physicalFunctions/CarotidBifurcationPhysicalFlux.dat[A] #Physiological
+	#functionFile		= physicalFunctions/CarotidBifurcationPhysicalFlux.dat[B] #Approximate
+
+	# Additional parameters for 1D BC
+	quantity        = Q
+    line            = first
+    
 	[../]
+	

@@ -22,30 +22,30 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Absorbing_NobileVergara.dat \
-                    SinusoidalFlux.dat \
-					SinusoidalPressure.dat \
-					WomersleySinusoidalFlux.dat \
-					WomersleySinusoidalPressure.dat \
-					UnitaryFlux.dat \
-                    UnitaryPressure.dat \
-                    Pressure.dat \
-                    Pressure_Dynamic_STP.dat \
-                    PoiseuilleFlux.dat \
-                    PoiseuilleFlux_Dynamic_STP.dat \
-                    PoiseuilleVelocity.dat \
-                    PoiseuilleVelocity_Dynamic_STP.dat \
-                    CarotidBifurcationFlux_Dynamic.dat \
+dist_pkgdata_DATA = BC_Absorbing_NobileVergara.dat \
+                    BC_SinusoidalFlux.dat \
+					BC_SinusoidalPressure.dat \
+					BC_WomersleySinusoidalFlux.dat \
+					BC_WomersleySinusoidalPressure.dat \
+					BC_UnitaryFlux.dat \
+                    BC_UnitaryPressure.dat \
+                    BC_Pressure.dat \
+                    BC_Pressure_Dynamic_STP.dat \
+                    BC_PoiseuilleFlux.dat \
+                    BC_PoiseuilleFlux_Dynamic_STP.dat \
+                    BC_PoiseuilleVelocity.dat \
+                    BC_PoiseuilleVelocity_Dynamic_STP.dat \
+                    BC_CarotidBifurcationFlux_Dynamic.dat \
+                    BC_NoStress.dat \
+                    BC_TestFlux.dat \
+                    BC_TestStress.dat \
+                    BC_XY_ZeroTangentialVelocity.dat \
                     FluxStress_StaticPressure.dat \
                     FluxStress_TotalPressure.dat \
                     FluxStress_LagrangeMultiplier.dat \
                     Stress_StaticPressure.dat \
                     Stress_TotalPressure.dat \
-                    Stress_LagrangeMultiplier.dat \
-                    NoStress.dat \
-                    TestFlux.dat \
-                    TestStress.dat \
-                    XY_ZeroTangentialVelocity.dat
+                    Stress_LagrangeMultiplier.dat
 					
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

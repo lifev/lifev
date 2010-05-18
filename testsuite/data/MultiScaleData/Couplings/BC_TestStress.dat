@@ -2,26 +2,31 @@
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                                 Copyright (C) 2010 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-28
+#           Date: 2010-05-15
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux ########################################
+### COUPLING: BoundaryCondition - Test Stress #####################################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_UnitaryFlux
+couplingName	= BoundaryCondition_TestStress
 
 [boundary_conditions]
-list = 'UnitaryFlux'  # Unitary Flux
+list = 'TestStress'
 	
-	[./UnitaryFlux]
-	type				= Flux
-	mode				= Full
-	component			= 3
-	function   			= '-1' 
+	[./TestStress]
+	type			= Natural
+	mode			= Full
+	component		= 3
+	#function		= '[0, 0, 13332*(t<0.00300000001)]'
+	functionFile	= physicalFunctions/test_Flux2.dat
 	
+    # Additional parameters for 1D BC
+    quantity        = P
+    line            = first
+    
 	[../]

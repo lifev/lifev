@@ -5,22 +5,27 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2009-12-02
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Pressure Dynamic ################################################
+### COUPLING: BoundaryCondition - Sinusoidal Pressure #############################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_PressureDynamic
+couplingName	= BoundaryCondition_WomersleySinusoidalPressure
 
 [boundary_conditions]
-list = 'PressureDynamic'
+list = 'WomersleySinusoidalPressure'  # Womersley Sinusoidal Pressure
+	
+	[./WomersleySinusoidalPressure]
+	type			= Natural
+	mode			= Normal
+	function		= 'T=29.6088132032681; -sin(2*pi*t/T)' 
+	                # Wo = 5, Re = 600 (with rho = 0.00593454445511297, mu = 2.79658816105093, D = 1)
 
-	[./PressureDynamic]
-	type				= Natural
-	mode				= Normal
-	functionFile	    = physicalFunctions/SmoothTrapezoidalProfile.dat[C]
-
+    # Additional parameters for 1D BC
+    quantity        = P
+    line            = first
+    	
 	[../]

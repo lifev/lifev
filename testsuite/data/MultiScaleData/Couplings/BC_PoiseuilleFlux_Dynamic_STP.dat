@@ -5,22 +5,29 @@
 #                                 Copyright (C) 2009 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2009-10-28
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Unitary Pressure ################################################
+### COUPLING: BoundaryCondition - Poiseuille Flux Dynamic #########################################
 ###################################################################################################
 
 [MultiScale]
-couplingName	= BoundaryCondition_UnitaryPressure
+couplingName	= BoundaryCondition_PoiseuilleFluxDynamic
 
 [boundary_conditions]
-list = 'UnitaryPressure'
+list = 'PoiseuilleFluxDynamic'
 
-	[./UnitaryPressure]
-	type				= Natural
-	mode				= Normal
-	function			= '-1'
-	
+	[./PoiseuilleFluxDynamic]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	functionFile		= physicalFunctions/SmoothTrapezoidalProfile.dat[B]
+	#OPERfunctionFile	= physicalFunctions/SmoothTrapezoidalProfile.dat[B]
+
+    # Additional parameters for 1D BC
+    quantity        = Q
+    line            = first
+    
 	[../]
+	

@@ -38,12 +38,12 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	UnitaryFlux						0				0
+			0		BoundaryCondition	BC_UnitaryFlux						0				0
 			1		FluxStress			FluxStress_LagrangeMultiplier	1,0,3,4			0,1,0,0
 			2		FluxStress			FluxStress_LagrangeMultiplier	2,1,5,6			0,1,0,0
 			3		FluxStress			FluxStress_LagrangeMultiplier	3,6				1,1
 			4		FluxStress			FluxStress_LagrangeMultiplier	4,5				1,1
-			5		BoundaryCondition	NoStress						2				1
+			5		BoundaryCondition	BC_NoStress						2				1
 		 	'
 ###################################################################################################
 

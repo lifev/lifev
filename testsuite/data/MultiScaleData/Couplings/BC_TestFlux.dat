@@ -23,5 +23,9 @@ list = 'TestFlux'
 	mode			= Full
 	component		= 3
 	functionFile	= physicalFunctions/test_Flux1.dat
-	
+
+    # Additional parameters for 1D BC
+    quantity        = Q
+    line            = first
+    
 	[../]
