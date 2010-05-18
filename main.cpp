@@ -552,28 +552,28 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 void Problem::checkGCEResult(LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-684898)/dispNorm*(dispNorm-504035)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-850537)/dispNorm*(dispNorm-914879)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-1.10523e+06)/dispNorm*(dispNorm-1.26589e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.004 && (dispNorm-807697)/dispNorm*(dispNorm-777523)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-869367)/dispNorm*(dispNorm-938905)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-794390)/dispNorm*(dispNorm-753279)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-794135)/dispNorm*(dispNorm-835605)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-752333)/dispNorm*(dispNorm-717966)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-762949)/dispNorm*(dispNorm-779217)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if(time==0.001 && (dispNorm-684898)     /dispNorm*(dispNorm-684898)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.002 && (dispNorm-854345)     /dispNorm*(dispNorm-850537)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.003 && (dispNorm-1.11118e+06)/dispNorm*(dispNorm-1.10523e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.004 && (dispNorm-802296)     /dispNorm*(dispNorm-807697)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.005 && (dispNorm-869612)     /dispNorm*(dispNorm-869367)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.006 && (dispNorm-799188)     /dispNorm*(dispNorm-794390)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.007 && (dispNorm-795947)     /dispNorm*(dispNorm-794135)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.008 && (dispNorm-756083)     /dispNorm*(dispNorm-752333)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.009 && (dispNorm-765216)     /dispNorm*(dispNorm-762949)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 
 void Problem::checkCEResult(LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-472128)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-787299)/dispNorm*(dispNorm-913593)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-773835)/dispNorm*(dispNorm-1.28524e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.004 && (dispNorm-654622)/dispNorm*(dispNorm-788936)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-543915)/dispNorm*(dispNorm-946694)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-517692)/dispNorm*(dispNorm-755566)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-497380)/dispNorm*(dispNorm-825823)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-486165)/dispNorm*(dispNorm-695446)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-478644)/dispNorm*(dispNorm-765094)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.002 && (dispNorm-787299)/dispNorm*(dispNorm-787299)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.003 && (dispNorm-773835)/dispNorm*(dispNorm-773835)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+    if(time==0.004 && (dispNorm-654622)/dispNorm*(dispNorm-654622)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.005 && (dispNorm-543915)/dispNorm*(dispNorm-543915)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.006 && (dispNorm-517692)/dispNorm*(dispNorm-517692)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.007 && (dispNorm-497380)/dispNorm*(dispNorm-497380)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.008 && (dispNorm-486165)/dispNorm*(dispNorm-486165)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.009 && (dispNorm-478644)/dispNorm*(dispNorm-478644)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
