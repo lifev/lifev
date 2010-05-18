@@ -210,15 +210,11 @@ public:
         M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
         M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
-        M_WSS.reset      ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                       UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
          M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                        UInt(0),
                                        M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-
-        M_exporterSolid->addVariable( ExporterData::Vector, "s-wss", M_WSS,
-                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
 
         M_Tstart = data_file("fluid/time_discretization/initialtime"   ,0.);
@@ -246,9 +242,8 @@ public:
         boost::timer _overall_timer;
         int _i = 1;
         LifeV::Real time=M_Tstart + dt;
-        LifeV::UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()+M_fsi->FSIOper()->BCh_flux()->size();
+        LifeV::UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
-	    dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->enableWssComputation(1);
 #ifdef HAVE_HDF5
         M_exporterFluid->postProcess( 0 );//ugly way to avoid that hdf5 starts with a deformed mesh
 #endif
@@ -265,26 +260,23 @@ public:
                 boost::timer _timer;
 
 
-
-                M_solidDisp->subset(M_fsi->displacement(), offset);
-                *M_solidDisp *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
-                M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
-                *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
-
-                *M_velAndPressure = M_fsi->displacement();
-                *M_WSS= *(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeWS());
+                M_fsi->FSIOper()->getSolidDisp(*M_solidDisp);//    displacement(), M_offset);
+                M_fsi->FSIOper()->getSolidVel(*M_solidVel);//    displacement(), M_offset);
+                M_fsi->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
 
                 M_exporterSolid->postProcess( time );
 
                 M_fsi->iterate( time );
-
-                dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->computeMaxSingularValue();
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
                 M_exporterFluid->postProcess( time );
 
                 //                    }
+
+                M_fsi->FSIOper()->displayer().leaderPrint( "average inlet pressure = ", M_fsi->FSIOper()->fluid().pressure(2, *M_velAndPressure));
+                M_fsi->FSIOper()->displayer().leaderPrint( "average outlet pressure = ", M_fsi->FSIOper()->fluid().pressure(3, *M_velAndPressure));
+
 
                 std::cout << "[fsi_run] Iteration " << _i << " was done in : "
                           << _timer.elapsed() << "\n";
@@ -341,7 +333,6 @@ private:
     vector_ptrtype M_fluidDisp;
     vector_ptrtype M_solidDisp;
     vector_ptrtype M_solidVel;
-    vector_ptrtype M_WSS;
     LifeV::FlowConditions FC0;
     struct RESULT_CHANGED_EXCEPTION
     {
@@ -498,10 +489,6 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
          M_importerSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                        UInt(0),
                                        M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-
-        M_importerSolid->addVariable( ExporterData::Vector, "s-wss", M_WSS,
-                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-
 
 
     using namespace LifeV;
