@@ -25,7 +25,6 @@ couplingsPath      = './MultiScaleData/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 ##            0       FSI3D               FSI3D_Cylinder_mon
-##            1       Fluid3D             Fluid3D_Cylinder
 models = '
             0       FSI3D               FSI3D_Cylinder_mon
          '
@@ -33,11 +32,10 @@ models = '
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
-# 			0		BoundaryCondition	WomersleySinusoidalFlux 		0				0
-# 			1		FluxStress			FluxStress_LagrangeMultiplier	1,0				0,1
-# 			2		BoundaryCondition	NoStress						1				1
-
-couplings = ' '
+couplings = '	
+			0		BoundaryCondition	TestStress				 		0				0
+			1		BoundaryCondition	Absorbing_NobileVergara  		0				1
+		 	'
 ###################################################################################################
 
 # Geometry offset #################################################################################
