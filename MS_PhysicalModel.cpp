@@ -52,7 +52,6 @@ MS_PhysicalModel::MS_PhysicalModel() :
     M_geometryScale     (),
     M_geometryRotate    (),
     M_geometryTranslate (),
-    M_dataPhysics       (),
     M_comm              (),
     M_displayer         ()
 {
@@ -81,7 +80,6 @@ MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
     M_geometryScale     ( model.M_geometryScale ),
     M_geometryRotate    ( model.M_geometryRotate ),
     M_geometryTranslate ( model.M_geometryTranslate ),
-    M_dataPhysics       ( model.M_dataPhysics ),
     M_comm              ( model.M_comm ),
     M_displayer         ( model.M_displayer )
 {
@@ -109,7 +107,6 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
         M_geometryScale     = model.M_geometryScale;
         M_geometryRotate    = model.M_geometryRotate;
         M_geometryTranslate = model.M_geometryTranslate;
-        M_dataPhysics       = model.M_dataPhysics;
         M_comm              = model.M_comm;
         M_displayer         = model.M_displayer;
     }
@@ -207,17 +204,6 @@ MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
     M_geometryScale     = scale;
     M_geometryRotate    = rotate;
     M_geometryTranslate = translate;
-}
-
-void
-MS_PhysicalModel::SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics )
-{
-
-#ifdef DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::SetData( dataPhysics, dataTime ) \n";
-#endif
-
-    M_dataPhysics = dataPhysics;
 }
 
 void

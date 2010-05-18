@@ -41,18 +41,6 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-// MS_Model_FSI3D::MS_Model_FSI3D(FSISolverPtrType solver) :\
-//     super(),
-//     M_solver (solver),
-//     M_exporterSolid(),
-//     M_exporterFluid(),
-//     M_solidDisp(),
-//     M_solidVel(),
-//     M_velAndPressure(),
-//     M_fluidDisp()
-// {
-// }
-
 MS_Model_FSI3D::MS_Model_FSI3D() :
     super                          (),
     M_solver                       (),
@@ -93,18 +81,25 @@ MS_Model_FSI3D::SetupData( const std::string& FileName )
         updateBCMonolithic(FileName);
     else
         updateBCSegregated(FileName);
-    /* ->
-    //If global physical quantities are specified also in the data file, replace them
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/density" ) )
-        M_Data->setDensity( M_dataPhysics->GetFluidDensity() );
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
-        M_Data->setViscosity( M_dataPhysics->GetFluidViscosity() );
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/poisson" ) )
-        M_Data->setPoisson( M_dataPhysics->GetStructurePoissonCoefficient() );
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/young" ) )
-        M_Data->setYoung( M_dataPhysics->GetStructureYoungModulus() );
-    M_Data->setTime( M_dataPhysics->GetDataTime() );
-    */
+}
+
+void
+MS_Model_FSI3D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
+{
+
+    //PAOLO: this new method is for setting global variables in place of
+    //       standard/default values. It is mandatory for global dataTime.
+    //       this method has to be called after SetupData( dataFile )
+    //       In the future I will improve it. For now it is required.
+
+    //Global data time
+    //M_Data->setDataTime( PhysicalData->GetDataTime() );
+
+    //Global physical quantities
+    //M_Data->setDensity( PhysicalData->GetFluidDensity() );
+    //M_Data->setViscosity( PhysicalData->GetFluidViscosity() );
+    //M_Data->setPoisson( PhysicalData->GetStructurePoissonCoefficient() );
+    //M_Data->setYoung( PhysicalData->GetStructureYoungModulus() );
 }
 
 void
@@ -155,7 +150,7 @@ MS_Model_FSI3D::SolveSystem()
     }
     if(M_solver->isFluid())
         M_solver->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
-    M_solver->iterate(M_dataPhysics->GetDataTime()->getTime());
+    M_solver->iterate( M_solver->FSIOper()->dataFluid().dataTime()->getTime() );
     if(M_solver->isFluid())
         *M_fluidDisp      = M_solver->FSIOper()->meshDisp();
     //M_time += M_solver->timeStep();

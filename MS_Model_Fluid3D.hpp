@@ -126,6 +126,12 @@ public:
      */
     void SetupData( const std::string& FileName );
 
+    //! Setup the global data of the model.
+    /*!
+     * @param PhysicalData Global data container.
+     */
+    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
+
     //! Setup the model.
     void SetupModel();
 
@@ -164,6 +170,18 @@ public:
 
     //! Solve the linear problem
     void SolveLinearModel( bool& SolveLinearSystem );
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the solution vector
+    /*!
+     * @param Solution Solution vector
+     */
+    void SetSolution( const boost::shared_ptr< VectorType >& Solution );
 
     //@}
 
@@ -280,6 +298,24 @@ public:
      * @return variation of the stress
      */
     Real GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the data container
+    /*!
+     * @return Data container
+     */
+    const Data_Type& GetData() const;
+
+    //! Get the solution vector
+    /*!
+     * @return Solution vector
+     */
+    const VectorType& GetSolution() const;
 
     //@}
 

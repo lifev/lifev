@@ -136,16 +136,15 @@ public:
 
     //! Setup the data of the model.
     /*!
-     * In particular it does the following operations:
-     * <ol>
-     *     <li> read data from files;
-     *     <li> set global parameter for the MS simulation (viscosity, time, ...);
-     *     <li> perform preliminary operations which don't depend on the couplings.
-     * </ol>
-     *
      * @param FileName Name of data file.
      */
     void SetupData( const std::string& FileName );
+
+    //! Setup the global data of the model.
+    /*!
+     * @param PhysicalData Global data container.
+     */
+    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
 
     //! Setup the model.
     void SetupModel();

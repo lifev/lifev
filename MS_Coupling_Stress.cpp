@@ -371,12 +371,12 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_dataPhysics->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
-                                                                      << "    " << M_flags[i]
-                                                                      << "    " << FlowRate
-                                                                      << "    " << Stress
-                                                                      << "    " << Pressure
-                                                                      << "    " << DynamicPressure << std::endl;
+            output << "  " << M_PhysicalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
+                                                                       << "    " << M_flags[i]
+                                                                       << "    " << FlowRate
+                                                                       << "    " << Stress
+                                                                       << "    " << Pressure
+                                                                       << "    " << DynamicPressure << std::endl;
     }
 }
 

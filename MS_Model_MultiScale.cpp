@@ -122,6 +122,16 @@ MS_Model_MultiScale::SetupData( const std::string& FileName )
 }
 
 void
+MS_Model_MultiScale::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
+{
+    for ( ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
+        ( *i )->SetupGlobalData( PhysicalData );
+
+    for ( CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
+        ( *i )->SetupGlobalData( PhysicalData );
+}
+
+void
 MS_Model_MultiScale::SetupModel()
 {
 
@@ -356,7 +366,6 @@ MS_Model_MultiScale::loadModels( const std::string& FileName )
 
         M_modelsList[id] = Model_ptrType( FactoryModels::instance().createObject( model ) );
         M_modelsList[id]->SetCommunicator( M_comm );
-        M_modelsList[id]->SetGlobalData( M_dataPhysics );
         M_modelsList[id]->SetupData( path + DataFile( "Problem/models", "undefined", i * columnNumber + 2 ) + ".dat" );
     }
 }
@@ -383,7 +392,6 @@ MS_Model_MultiScale::loadCouplings( const std::string& FileName )
 
         M_couplingsList[id] = Coupling_ptrType( FactoryCouplings::instance().createObject( coupling ) );
         M_couplingsList[id]->SetCommunicator( M_comm );
-        M_couplingsList[id]->SetGlobalData( M_dataPhysics );
         M_couplingsList[id]->SetupData( path + DataFile( "Problem/couplings", "undefined", i * columnNumber + 2 ) + ".dat" );
 
         modelsIDVector = string2numVect< UInt > ( DataFile( "Problem/couplings", "undefined", i * columnNumber + 3 ) );
