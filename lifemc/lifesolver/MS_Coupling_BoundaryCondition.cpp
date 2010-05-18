@@ -133,7 +133,7 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
             case FSI3D:
 
                 ApplyBoundaryConditions< MS_Model_FSI3D > ( i );
-                ApplyDeltaBoundaryConditions< MS_Model_Fluid3D > ( i );
+                ApplyDeltaBoundaryConditions< MS_Model_FSI3D > ( i );
 
                 break;
 

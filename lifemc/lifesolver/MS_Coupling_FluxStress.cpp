@@ -146,7 +146,7 @@ MS_Coupling_FluxStress::SetupCoupling()
         case FSI3D:
 
             ImposeFlux< MS_Model_FSI3D > ( 0 );
-            ImposeDeltaFlux< MS_Model_Fluid3D > ( 0 );
+            ImposeDeltaFlux< MS_Model_FSI3D > ( 0 );
 
             break;
 
@@ -170,7 +170,7 @@ MS_Coupling_FluxStress::SetupCoupling()
             case FSI3D:
 
                 ImposeStress< MS_Model_FSI3D > ( i );
-                ImposeDeltaStress< MS_Model_Fluid3D > ( i );
+                ImposeDeltaStress< MS_Model_FSI3D > ( i );
 
                 break;
 
