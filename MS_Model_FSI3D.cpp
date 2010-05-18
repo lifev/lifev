@@ -68,6 +68,7 @@ MS_Model_FSI3D::~MS_Model_FSI3D()
 void
 MS_Model_FSI3D::SetupData( const std::string& FileName )
 {
+    super::SetupData(FileName);
     GetPot dataFile(FileName);
     M_solver.reset(new FSISolverType(dataFile("problem/method", "monolithic")));
 	M_solver->setDataFromGetPot(dataFile);
@@ -196,7 +197,7 @@ MS_Model_FSI3D::GetBCInterface()
 MS_Model_FSI3D::BCInterface_Type&
 MS_Model_FSI3D::GetLinearBCInterface()
 {
-    //return *M_LinearFluidBC;
+    return *M_fluidBC;//    return *M_LinearFluidBC;
 }
 
 Real
@@ -220,13 +221,13 @@ MS_Model_FSI3D::GetBoundaryArea( const BCFlag& Flag ) const
 Real
 MS_Model_FSI3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    return M_solver->FSIOper()->fluid().flux( Flag/*, M_solver->FSIOper()->un()*/ ); //VErify that is the flux
+    return M_solver->FSIOper()->fluid().flux( Flag, *M_solver->FSIOper()->un() ); //VErify that is the flux
 }
 
 Real
 MS_Model_FSI3D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
-    return M_solver->FSIOper()->fluid().pressure( Flag/*, M_solver->FSIOper()->un()*/ ); //VErify that is the scalar value of the pressure
+    return M_solver->FSIOper()->fluid().pressure( Flag, *M_solver->FSIOper()->un() ); //VErify that is the scalar value of the pressure
 }
 
 Real
