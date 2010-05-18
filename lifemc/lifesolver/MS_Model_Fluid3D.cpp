@@ -154,14 +154,7 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     GetPot DataFile( FileName );
 
     //Fluid data
-    M_FluidData->setDataTime( M_dataPhysics->GetDataTime() );
     M_FluidData->setup( DataFile );
-
-    //If global physical quantities are specified also in the data file, replace them
-    if ( !DataFile.checkVariable( "fluid/physics/density" ) )
-        M_FluidData->density( M_dataPhysics->GetFluidDensity() );
-    if ( !DataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_FluidData->viscosity( M_dataPhysics->GetFluidViscosity() );
 
     // Parameters for the NS Iterations
     M_SubiterationsMaximumNumber = DataFile( "fluid/miscellaneous/SubITMax", 0 );
@@ -188,6 +181,22 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_importer->setDataFromGetPot( DataFile );
     M_importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
     M_importer->setDirectory( MS_ProblemFolder );
+}
+
+void
+MS_Model_Fluid3D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupGlobalData( PhysicalData ) \n";
+#endif
+
+    //Global data time
+    M_FluidData->setDataTime( PhysicalData->GetDataTime() );
+
+    //Global physical quantities
+    M_FluidData->density(   PhysicalData->GetFluidDensity() );
+    M_FluidData->viscosity( PhysicalData->GetFluidViscosity() );
 }
 
 void
@@ -469,7 +478,18 @@ MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
 }
 
 // ===================================================
-// Get Methods
+// Set Methods
+// ===================================================
+void
+MS_Model_Fluid3D::SetSolution( const boost::shared_ptr< VectorType >& Solution )
+{
+    M_FluidSolution = Solution;
+
+    SetupSolution();
+}
+
+// ===================================================
+// Get Methods (couplings)
 // ===================================================
 MS_Model_Fluid3D::BCInterface_Type&
 MS_Model_Fluid3D::GetBCInterface()
@@ -612,6 +632,21 @@ MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearS
 
             return 0.0;
     }
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+const MS_Model_Fluid3D::Data_Type&
+MS_Model_Fluid3D::GetData() const
+{
+    return *M_FluidData;
+}
+
+const VectorType&
+MS_Model_Fluid3D::GetSolution() const
+{
+    return *M_FluidSolution;
 }
 
 // ===================================================

@@ -92,6 +92,12 @@ public:
      */
     virtual void SetupData( const std::string& FileName );
 
+    //! Setup the global data of the model.
+    /*!
+     * @param PhysicalData Global data container.
+     */
+    virtual void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
+
     //! Setup the coupling
     virtual void SetupCoupling() = 0;
 
@@ -199,12 +205,6 @@ public:
      * @param model shared_ptr of the model
      */
     void AddModel( const Model_ptrType& model );
-
-    //! Set global data for physical quantities and time
-    /*!
-     * @param dataPhysics Data container for physical quantities
-     */
-    void SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics );
 
     //! Add a flag of one of the models to couple
     /*!
@@ -319,7 +319,7 @@ protected:
     Vector_ptrType                       M_LocalCouplingResiduals;
     Vector_ptrType                       M_LocalDeltaCouplingVariables;
 
-    boost::shared_ptr< MS_PhysicalData > M_dataPhysics;
+    boost::shared_ptr< MS_PhysicalData > M_PhysicalData;
 
     boost::shared_ptr< Epetra_Comm >     M_comm;
     boost::shared_ptr< Displayer >       M_displayer;

@@ -53,7 +53,7 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
     M_LocalCouplingVariables      (),
     M_LocalCouplingResiduals      (),
     M_LocalDeltaCouplingVariables (),
-    M_dataPhysics                 (),
+    M_PhysicalData                (),
     M_comm                        (),
     M_displayer                   ()
 {
@@ -75,7 +75,7 @@ MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) 
     M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
     M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
     M_LocalDeltaCouplingVariables ( coupling.M_LocalDeltaCouplingVariables ),
-    M_dataPhysics                 ( coupling.M_dataPhysics ),
+    M_PhysicalData                ( coupling.M_PhysicalData ),
     M_comm                        ( coupling.M_comm ),
     M_displayer                   ( coupling.M_displayer )
 
@@ -105,7 +105,7 @@ MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
         M_LocalCouplingVariables      = coupling.M_LocalCouplingVariables;
         M_LocalCouplingResiduals      = coupling.M_LocalCouplingResiduals;
         M_LocalDeltaCouplingVariables = coupling.M_LocalDeltaCouplingVariables;
-        M_dataPhysics                 = coupling.M_dataPhysics;
+        M_PhysicalData                = coupling.M_PhysicalData;
         M_comm                        = coupling.M_comm;
         M_displayer                   = coupling.M_displayer;
     }
@@ -133,6 +133,17 @@ MS_PhysicalCoupling::SetupData( const std::string& FileName )
     M_flags.reserve( componentSize );
     for ( UInt j( 0 ); j < componentSize; ++j )
         M_flags.push_back( DataFile( "MultiScale/couplingFlags", 0, j ) ); // flags
+}
+
+void
+MS_PhysicalCoupling::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
+{
+
+#ifdef DEBUG
+    Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( PhysicalData ) \n";
+#endif
+
+    M_PhysicalData = PhysicalData;
 }
 
 void
@@ -243,7 +254,7 @@ MS_PhysicalCoupling::SaveSolution()
     {
         std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Coupling_" + number2string( M_ID ) + ".mfile";
 
-        if ( M_dataPhysics->GetDataTime()->isFirstTimeStep() )
+        if ( M_PhysicalData->GetDataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
             output << "% Coupling Type: " << Enum2String( M_type, couplingsMap ) << std::endl << std::endl;
@@ -278,17 +289,6 @@ void
 MS_PhysicalCoupling::AddModel( const Model_ptrType& model )
 {
     M_models.push_back( model );
-}
-
-void
-MS_PhysicalCoupling::SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics )
-{
-
-#ifdef DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::SetData( dataPhysics, dataTime ) \n";
-#endif
-
-    M_dataPhysics = dataPhysics;
 }
 
 void

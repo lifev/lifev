@@ -60,15 +60,17 @@ MS_Solver::MS_Solver() :
     MS_MapsDefinition();
 
     //Register the objects
-    FactoryModels::instance().registerProduct   ( MultiScale,          &createMultiScale );
-    FactoryModels::instance().registerProduct   ( Fluid3D,             &createFluid3D );
-    FactoryModels::instance().registerProduct   ( OneDimensionalModel, &createOneDimensionalModel );
-    FactoryModels::instance().registerProduct   ( FSI3D,               &createModelFSI3D );
-    FactoryCouplings::instance().registerProduct( Stress,              &createStress );
-    FactoryCouplings::instance().registerProduct( FluxStress,          &createFluxStress );
-    FactoryCouplings::instance().registerProduct( BoundaryCondition,   &createBoundaryCondition );
-    FactoryAlgorithms::instance().registerProduct( Aitken,             &createAitken );
-    FactoryAlgorithms::instance().registerProduct( Newton,             &createNewton );
+    FactoryModels::instance().registerProduct   (  MultiScale,          &createMultiScale );
+    FactoryModels::instance().registerProduct   (  Fluid3D,             &createFluid3D );
+    FactoryModels::instance().registerProduct   (  OneDimensionalModel, &createOneDimensionalModel );
+    FactoryModels::instance().registerProduct   (  FSI3D,               &createModelFSI3D );
+
+    FactoryCouplings::instance().registerProduct(  Stress,              &createStress );
+    FactoryCouplings::instance().registerProduct(  FluxStress,          &createFluxStress );
+    FactoryCouplings::instance().registerProduct(  BoundaryCondition,   &createBoundaryCondition );
+
+    FactoryAlgorithms::instance().registerProduct( Aitken,              &createAitken );
+    FactoryAlgorithms::instance().registerProduct( Newton,              &createNewton );
 }
 
 MS_Solver::MS_Solver( const MS_Solver& solver ) :
@@ -144,12 +146,12 @@ MS_Solver::SetupProblem( const std::string& FileName, const std::string& problem
     if ( DataFile( "Solver/Restart/Restart", false ) )
         MS_ProblemStep = DataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
-    // Time & Physics containers
-    M_dataPhysics->ReadData( DataFile );
-    M_multiscale->SetGlobalData( M_dataPhysics );
-
     // Setup data from data file
     M_multiscale->SetupData( DataFile( "Problem/MS_problem", "./MultiScaleData/Models/Model.dat" ) );
+
+    // Setup global data
+    M_dataPhysics->ReadData( DataFile );
+    M_multiscale->SetupGlobalData( M_dataPhysics );
 
     // Setup Models
     M_multiscale->SetupModel();

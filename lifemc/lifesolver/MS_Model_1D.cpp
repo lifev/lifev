@@ -139,19 +139,6 @@ MS_Model_1D::SetupData( const std::string& FileName )
 
     M_Data->setup( DataFile );
 
-    //If global physical quantities are specified also in the data file, replace them
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/density" ) )
-        M_Data->setDensity( M_dataPhysics->GetFluidDensity() );
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
-        M_Data->setViscosity( M_dataPhysics->GetFluidViscosity() );
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/poisson" ) )
-        M_Data->setPoisson( M_dataPhysics->GetStructurePoissonCoefficient() );
-    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/young" ) )
-        M_Data->setYoung( M_dataPhysics->GetStructureYoungModulus() );
-
-    //After changing some parameters we need to update the coefficients
-    M_Data->UpdateCoefficients();
-
     //1D Model Physics
     M_Physics = Physics_PtrType( Factory_OneDimensionalModel_Physics::instance().createObject( M_Data->PhysicsType() ) );
     M_Physics->SetData( M_Data );
@@ -188,6 +175,27 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_ExporterMesh->setup( M_Data->Length(), M_Data->nbElem() );
 #endif
 
+}
+
+void
+MS_Model_1D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_1D::SetupGlobalData( ) \n";
+#endif
+
+    //Global data time
+    M_Data->setDataTime( PhysicalData->GetDataTime() );
+
+    //Global physical quantities
+    M_Data->setDensity( PhysicalData->GetFluidDensity() );
+    M_Data->setViscosity( PhysicalData->GetFluidViscosity() );
+    M_Data->setPoisson( PhysicalData->GetStructurePoissonCoefficient() );
+    M_Data->setYoung( PhysicalData->GetStructureYoungModulus() );
+
+    //After changing some parameters we need to update the coefficients
+    M_Data->UpdateCoefficients();
 }
 
 void

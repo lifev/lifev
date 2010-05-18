@@ -108,6 +108,14 @@ public:
      */
     virtual void SetupData( const std::string& FileName );
 
+    //! Setup the global data of the model.
+    /*!
+     * In particular it replaces the local values specified in the model data file with global ones.
+     *
+     * @param PhysicalData Global data container.
+     */
+    virtual void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData ) = 0;
+
     //! Setup the model.
     /*!
      * In particular it does the following operations:
@@ -190,13 +198,6 @@ public:
     void SetGeometry( const boost::array< Real, NDIM >& scale,
                       const boost::array< Real, NDIM >& rotate,
                       const boost::array< Real, NDIM >& translate );
-
-    //! Set global data for physical quantities and time
-    /*!
-     * This method set all the data
-     * @param dataPhysics Data container for physical quantities
-     */
-    void SetGlobalData( const boost::shared_ptr< MS_PhysicalData >& dataPhysics );
 
     //! Set the epetra communicator for the model
     /*!
@@ -282,8 +283,6 @@ protected:
     boost::array< Real, NDIM >           M_geometryScale;      // Global geometrical scale
     boost::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation
     boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
-
-    boost::shared_ptr< MS_PhysicalData > M_dataPhysics;        // Data container for global physical quantities
 
     boost::shared_ptr< Epetra_Comm >     M_comm;               // Communicator
     boost::shared_ptr< Displayer >       M_displayer;          // Displayer

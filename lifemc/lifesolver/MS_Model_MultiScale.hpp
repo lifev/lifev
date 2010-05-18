@@ -100,6 +100,12 @@ public:
      */
     void SetupData( const std::string& FileName );
 
+    //! Setup the global data of the model.
+    /*!
+     * @param PhysicalData Global data container.
+     */
+    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
+
     //! Setup the model
     void SetupModel();
 
