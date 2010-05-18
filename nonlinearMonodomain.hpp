@@ -52,7 +52,7 @@
 #include <life/lifesolver/dataMonodomain.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include "testsuite/test_elecmech/stiffness_fibers_NL.hpp"
+#include <life/lifefem/stiffnessFibers.hpp"
 #include <life/lifefem/bdf_template.hpp>
 #include <fstream>
 namespace LifeV
