@@ -265,7 +265,8 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
                                                                                     data.GetOperator()->Source(),
                                                                                     data.GetOperator()->U_thistime(),
                                                                                     data.GetSide(),
-                                                                                    data.GetType()
+                                                                                    data.GetType(),
+                                                                                    0. //Resistance value (add)
                              ) );
 
             M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
