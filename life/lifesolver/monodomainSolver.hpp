@@ -49,7 +49,7 @@
 #include <life/lifesolver/dataMonodomain.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/stiffness_fibers.hpp>
+#include <life/lifefem/stiffnessFibers.hpp>
 #include <life/lifefem/bdf_template.hpp>
 
 namespace LifeV
