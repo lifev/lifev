@@ -95,7 +95,7 @@ diagonalBlockPrec   = false
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-12
+    tol             = 1.e-13
     
     [../prec]
     prectype                = AztecOO 

@@ -36,7 +36,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '	
-			0		BoundaryCondition	WomersleySinusoidalFlux			0				0
+			0		BoundaryCondition	WomersleySinusoidalPressure		0				0
 			1		Stress				Stress_StaticPressure			1,0				0,1
 			2		Stress				Stress_StaticPressure			2,1				0,1
 			3		Stress				Stress_StaticPressure			3,2				0,1

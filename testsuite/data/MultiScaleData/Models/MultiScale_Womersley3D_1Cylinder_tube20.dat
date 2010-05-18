@@ -32,7 +32,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   WomersleySinusoidalFlux         0               0
+            0       BoundaryCondition   WomersleySinusoidalPressure     0               0
             1       BoundaryCondition   NoStress                        0               1
             '
 ###################################################################################################

@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [MultiScale]
-modelName        = Fluid3D_Cylinder_tube40
+modelName        = Fluid3D_Cylinder
 couplingFlags    = '2 3'
 
 
@@ -89,7 +89,7 @@ diagonalBlockPrec   = false
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-12
+    tol             = 1.e-13
     
     [../prec]
     #prectype                = AztecOO 
