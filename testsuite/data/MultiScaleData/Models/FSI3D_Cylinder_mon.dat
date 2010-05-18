@@ -12,9 +12,9 @@
 ### MODEL: FSI3D - Cylinder #####################################################################
 ###################################################################################################
 
-#[MultiScale]
-#modelName        = FSI3D_Cylinder
-#couplingFlags    = '2 3'
+[MultiScale]
+modelName        = FSI3D_Cylinder
+couplingFlags    = '2 3'
 
 
 [problem]
@@ -303,7 +303,7 @@ order     = P1
 
 
 [../boundary_conditions]
-list = '    Base TopEdge BaseEdge' # EJ/FP
+list = 'Base TopEdge BaseEdge' # EJ/FP
 #list = 'Top Base TopEdge BaseEdge Interface' # EJ/FP
 
 	[./Top]
