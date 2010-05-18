@@ -311,8 +311,6 @@ Robin-Neumann preconditioned algorithm. These types of preconditioner are still 
     void getSolidDisp(vector_type& soliddisp)
     {
         soliddisp.subset(*un(), M_offset);
-        std::cout<<"solid normDisp "<<soliddisp.NormInf()<<std::endl;
-        std::cout<<"normDisp true "<<un()->NormInf()<<std::endl;
         soliddisp *= dataFluid().dataTime()->getTimeStep()*M_solid->rescaleFactor();
     }
 
