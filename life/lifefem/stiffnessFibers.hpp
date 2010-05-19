@@ -45,19 +45,19 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
 template <class reduced_sigma>
 void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock, ID id=0);
 
-template <class vector_type>
+/* template <class vector_type>
 void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
-             const Dof& dof, UInt iblock, UInt jblock)
+             const Dof& dof, UInt iblock, UInt jblock);
 
     template <class vector_type>
     void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
-                 const Dof& dof, UInt iblock, UInt jblock, UInt nb)
+                 const Dof& dof, UInt iblock, UInt jblock, UInt nb);
 
     template <class vector_type>
     void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
                  const vector_type& cos, ElemMat& elmat, const CurrentFE& fe,
-                 const Dof& dof, UInt iblock, UInt jblock)
-
+                 const Dof& dof, UInt iblock, UInt jblock);
+*/
 
 template <class vector_type>
 void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock)
