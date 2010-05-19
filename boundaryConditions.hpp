@@ -18,6 +18,7 @@ assign is vectorial and the boundary condition is of type \c Full \c.
 
 #include "life/lifecore/life.hpp"
 #include "flowConditions.hpp"
+#include "lumpedHeart.hpp"
 #include "ud_functions.hpp"
 #include "life/lifefem/bcHandler.hpp"
 #include "life/lifefem/bcFunction.hpp"
@@ -59,11 +60,11 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 
     if (_oper.method() == "monolithic")
     {
-        Debug(10000) << "EJ harmonic extension\n";
-        Monolithic *EJOper = dynamic_cast<Monolithic *>(&_oper);
-        EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
+        Debug(10000) << "Monolithic GCE harmonic extension\n";
+        Monolithic *MOper = dynamic_cast<Monolithic *>(&_oper);
+        MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
-        *EJOper->bcvStructureDispToHarmonicExtension(), 3);
+                      *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
    else if (_oper.method() == "fullMonolithic")
     {
@@ -80,7 +81,6 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux()
 {
   FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
-
   BCFunctionBase flow_3 (fluxFunction);
 
      //uncomment  to use fluxes
@@ -90,7 +90,7 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux()
   return BCh_fluid;
 }
 
-FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper)
+FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
@@ -103,12 +103,17 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper)
     BCFunctionBase bcf      (fZero);
     //BCFunctionBase in_flow  (/*uInterpolated*/u2/*aortaPhisPress*/);
     //    BCFunctionBase out_flow (fZero);
+    BCFunctionBase in_flow  (LumpedHeart::outPressure);
 
-    BCFunctionBase out_flow (FlowConditions::outPressure0);
+    BCFunctionBase out_press (FlowConditions::outPressure0);
 
 
-    //    BCh_fluid->addBC("InFlow" , INLET,  Natural/*Essential*/,   Full, in_flow, 3);
-    BCh_fluid->addBC("OutFlow", OUTLET,  Natural/*Essential*/,   Normal, out_flow);
+//     if(isOpen)
+//         BCh_fluid->addBC("InFlow" , INLET,  Natural,   Normal, in_flow);
+//     else
+//         BCh_fluid->addBC("InFlow" , INLET,  Essential,   Full, bcf, 3);
+
+    BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
     return BCh_fluid;
 }
 

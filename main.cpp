@@ -92,6 +92,7 @@
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
 #include "flowConditions.hpp"
+#include "lumpedHeart.hpp"
 
 
 // LifeV::FlowConditions FC0;
@@ -228,6 +229,7 @@ public:
             }
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
+        LH.initParameters( *M_fsi->FSIOper(), "dataHM");
     }
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
@@ -248,9 +250,25 @@ public:
         M_exporterFluid->postProcess( 0 );//ugly way to avoid that hdf5 starts with a deformed mesh
 #endif
 
+        bool valveIsOpen=true;
+
         for ( ; time <= T; time += dt, ++_i)
             {
+
+                std::cout<<"flux : "<<M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement())<<std::endl;
+                if ( valveIsOpen && M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement()) > 0.5)
+                    valveIsOpen=false;
+                // close the valve
+                else{
+                if ( (!valveIsOpen) && M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement()) < -0.5)
+                    valveIsOpen=true;
+                }
+                M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+
+                int flag =2;
                 FC0.renewParameters( *M_fsi, 3 );
+                LH.renewParameters( *M_fsi->FSIOper(), flag, time );
+
                 //                 FC0.renewParameters( *M_fsi, 6 );
                 //                 FC1.renewParameters( *M_fsi, 3, 4 );
                 //                 FC2.renewParameters( *M_fsi, 3, 5 );
@@ -334,6 +352,8 @@ private:
     vector_ptrtype M_solidDisp;
     vector_ptrtype M_solidVel;
     LifeV::FlowConditions FC0;
+    LifeV::LumpedHeart LH;
+
     struct RESULT_CHANGED_EXCEPTION
     {
     public:
