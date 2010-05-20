@@ -522,7 +522,7 @@ BCInterface1D< Operator >::AddBCManager( BCBase& base )
     if ( !M_handler.get() ) // If BCHandler has not been created yet, we do it now
         CreateHandler();
 
-    M_handler->setBC( M_data.GetSide(), M_data.GetLine(), M_data.GetType(), base );
+    M_handler->setBC( M_data.GetSide(), M_data.GetLine(), M_data.GetQuantity(), base );
 }
 
 } // Namespace LifeV

@@ -123,11 +123,11 @@ public:
      */
     void SetLine( const OneD_BCLine& line );
 
-    //! Set the type of the boundary condition
+    //! Set the quantity of the boundary condition
     /*!
-     * @param type Boundary condition type
+     * @param quantity Boundary condition quantity
      */
-    void SetType( const OneD_BC& type );
+    void SetQuantity( const OneD_BC& quantity );
 
     //! Set the base string of the boundary condition
     /*!
@@ -156,8 +156,8 @@ public:
     //! Get the mode of the boundary condition
     const OneD_BCLine& GetLine() const;
 
-    //! Get the type of the boundary condition
-    const OneD_BC& GetType() const;
+    //! Get the quantity of the boundary condition
+    const OneD_BC& GetQuantity() const;
 
     //! Get the base string of the boundary condition
     const std::string& GetBaseString() const;
@@ -176,7 +176,7 @@ private:
 
     inline void ReadLine( const std::string& FileName, const char* line );
 
-    inline void ReadType( const std::string& FileName, const char* type );
+    inline void ReadQuantity( const std::string& FileName, const char* quantity );
 
     inline void ReadBase( const std::string& FileName, const std::string& base );
 
@@ -188,13 +188,13 @@ private:
 
     OneD_BCSide                               M_side;
     OneD_BCLine                               M_line;
-    OneD_BC                                   M_type;
+    OneD_BC                                   M_quantity;
     std::string                               M_baseString;
     std::pair< std::string, BCBaseList_Type > M_base;
 
     // Maps
     std::map< std::string, OneD_BCSide >      M_mapSide;
-    std::map< std::string, OneD_BC >          M_mapType;
+    std::map< std::string, OneD_BC >          M_mapQuantity;
     std::map< std::string, OneD_BCLine >      M_mapLine;
     std::map< std::string, BCBaseList_Type >  M_mapBase;
 };
@@ -207,11 +207,11 @@ BCInterface1D_Data< Operator >::BCInterface1D_Data() :
     M_operator           (),
     M_side               (),
     M_line               (),
-    M_type               (),
+    M_quantity           (),
     M_baseString         (),
     M_base               (),
     M_mapSide            (),
-    M_mapType            (),
+    M_mapQuantity        (),
     M_mapLine            (),
     M_mapBase            ()
 {
@@ -219,12 +219,12 @@ BCInterface1D_Data< Operator >::BCInterface1D_Data() :
     M_mapSide["left"]   = OneD_left;
     M_mapSide["right"]  = OneD_right;
 
-    //Set mapType
-    M_mapType["A"]      = OneD_A;
-    M_mapType["Q"]      = OneD_Q;
-    M_mapType["W1"]     = OneD_W1;
-    M_mapType["W2"]     = OneD_W2;
-    M_mapType["P"]      = OneD_P;
+    //Set mapQuantity
+    M_mapQuantity["A"]      = OneD_A;
+    M_mapQuantity["Q"]      = OneD_Q;
+    M_mapQuantity["W1"]     = OneD_W1;
+    M_mapQuantity["W2"]     = OneD_W2;
+    M_mapQuantity["P"]      = OneD_P;
 
     //Set mapLine
     M_mapLine["first"]  = OneD_first;
@@ -243,11 +243,11 @@ BCInterface1D_Data< Operator >::BCInterface1D_Data( const BCInterface1D_Data& da
     M_operator          ( data.M_operator ),
     M_side              ( data.M_side ),
     M_line              ( data.M_line ),
-    M_type              ( data.M_type ),
+    M_quantity          ( data.M_quantity ),
     M_baseString        ( data.M_baseString ),
     M_base              ( data.M_base ),
     M_mapSide           ( data.M_mapSide ),
-    M_mapType           ( data.M_mapType ),
+    M_mapQuantity       ( data.M_mapQuantity ),
     M_mapLine           ( data.M_mapLine ),
     M_mapBase           ( data.M_mapBase )
 {
@@ -265,11 +265,11 @@ BCInterface1D_Data< Operator >::operator=( const BCInterface1D_Data& data )
         M_operator          = data.M_operator;
         M_side              = data.M_side;
         M_line              = data.M_line;
-        M_type              = data.M_type;
+        M_quantity          = data.M_quantity;
         M_baseString        = data.M_baseString;
         M_base              = data.M_base;
         M_mapSide           = data.M_mapSide;
-        M_mapType           = data.M_mapType;
+        M_mapQuantity       = data.M_mapQuantity;
         M_mapLine           = data.M_mapLine;
         M_mapBase           = data.M_mapBase;
     }
@@ -286,7 +286,7 @@ inline void BCInterface1D_Data< Operator >::ReadBC( const std::string& FileName,
                                                     const BCName&      name )
 {
     ReadSide( FileName, ( dataSection + name + "/side" ).c_str() );
-    ReadType( FileName, ( dataSection + name + "/type" ).c_str() );
+    ReadQuantity( FileName, ( dataSection + name + "/quantity" ).c_str() );
     ReadLine( FileName, ( dataSection + name + "/line" ).c_str() );
     ReadBase( FileName, dataSection + name + "/" );
 }
@@ -307,9 +307,9 @@ void BCInterface1D_Data< Operator >::SetSide( const OneD_BCSide& side )
 }
 
 template< class Operator >
-void BCInterface1D_Data< Operator >::SetType( const OneD_BC& type )
+void BCInterface1D_Data< Operator >::SetQuantity( const OneD_BC& quantity )
 {
-    M_type = type;
+    M_quantity = quantity;
 }
 
 template< class Operator >
@@ -350,9 +350,9 @@ BCInterface1D_Data< Operator >::GetSide() const
 
 template< class Operator >
 const OneD_BC&
-BCInterface1D_Data< Operator >::GetType() const
+BCInterface1D_Data< Operator >::GetQuantity() const
 {
-    return M_type;
+    return M_quantity;
 }
 
 template< class Operator >
@@ -391,13 +391,13 @@ inline void BCInterface1D_Data< Operator >::ReadSide( const std::string& FileNam
 }
 
 template< class Operator >
-inline void BCInterface1D_Data< Operator >::ReadType( const std::string& FileName, const char* type )
+inline void BCInterface1D_Data< Operator >::ReadQuantity( const std::string& FileName, const char* quantity )
 {
     GetPot DataFile( FileName );
-    M_type = M_mapType[DataFile( type, "A" )];
+    M_quantity = M_mapQuantity[DataFile( quantity, "A" )];
 
 #ifdef DEBUG
-    Debug( 5020 ) << "BCInterface1D_Data::ReadType                        type: " << M_type << " (" << DataFile(type, "A") << ")\n";
+    Debug( 5020 ) << "BCInterface1D_Data::ReadQuantity                quantity: " << M_quantity << " (" << DataFile(quantity, "A") << ")\n";
 #endif
 }
 
