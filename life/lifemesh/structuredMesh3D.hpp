@@ -44,6 +44,43 @@
 
 namespace LifeV {
 
+/*
+namespace structuredMeshFlags {
+// The boundary of the structured mesh
+// is composed by 26 labels.
+
+// Walls
+const int LEFTWALL   = 4;
+const int RIGHTWALL  = 2;
+const int FRONTWALL  = 1;
+const int BACKWALL   = 3;
+const int TOPWALL    = 6;
+const int BOTTOMWALL = 5;
+// Edges
+const int BOTTOMEDGE1 =  7;
+const int BOTTOMEDGE2 =  8;
+const int BOTTOMEDGE3 =  9;
+const int BOTTOMEDGE4 = 10;
+const int SIDEEDGE1   = 11;
+const int SIDEEDGE2   = 12;
+const int SIDEEDGE3   = 13;
+const int SIDEEDGE4   = 14;
+const int TOPEDGE1    = 15;
+const int TOPEDGE2    = 16;
+const int TOPEDGE3    = 17;
+const int TOPEDGE4    = 18;
+// Corners
+const int BOTTOMCORNER1 = 19;
+const int BOTTOMCORNER2 = 20;
+const int BOTTOMCORNER3 = 21;
+const int BOTTOMCORNER4 = 22;
+const int TOPCORNER1    = 23;
+const int TOPCORNER2    = 24;
+const int TOPCORNER3    = 25;
+const int TOPCORNER4    = 26;
+}
+*/
+
 //! @name Methods
 //@{
 
@@ -116,6 +153,13 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     UInt N_y(n_x);
     UInt N_z(n_x*n_y);
 
+    // We calculate in advance the bound which
+    // will determine the flip of the reference
+    // cube.
+    UInt mid_x(m_x/2);
+    UInt mid_y(m_y/2);
+    UInt mid_z(m_z/2);
+
     // Data about the mesh
     UInt verticesNumber(n_x*n_y*n_z);
     UInt boundaryVerticesNumber(verticesNumber-(n_x-2)*(n_y-2)*(n_z-2)); //Total-inside points
@@ -166,6 +210,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     mesh.setNumBPoints(boundaryPointsNumber);
     mesh.setMaxNumPoints(pointsNumber,true);
     mesh.setMaxNumGlobalPoints(pointsNumber);
+
     // About vertices:
     mesh.setNumVertices(verticesNumber);
     mesh.setNumGlobalVertices(verticesNumber);
@@ -175,15 +220,15 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     // About edges:
     mesh.setNumEdges(edgesNumber);
     mesh.setNumBEdges(boundaryEdgesNumber);
+    //mesh.setMaxNumEdges(edgesNumber); //mpp++
     mesh.setMaxNumEdges(boundaryEdgesNumber);
-    //mesh.setMaxNumGlobalEdges(boundaryEdgesNumber);
     mesh.setMaxNumGlobalEdges(edgesNumber);
 
     // About faces:
     mesh.setNumFaces(facesNumber);
     mesh.setNumBFaces(boundaryFacesNumber);
-    //mesh.setMaxNumFaces(boundaryFacesNumber);
-    mesh.setMaxNumFaces(facesNumber);
+    //mesh.setMaxNumFaces(facesNumber); // i.g. the # of stored faces
+    mesh.setMaxNumFaces(boundaryFacesNumber); //try
     mesh.setMaxNumGlobalFaces(boundaryFacesNumber);
 
     // About volumes
@@ -195,15 +240,16 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
 
     // Declaration of pointers on the different mesh entities
     typename RegionMesh3D<GeoShape,MC>::PointType*  pointPtr  = 0;
-    typename RegionMesh3D<GeoShape,MC>::EdgeType*   edgePtr   = 0;
-    typename RegionMesh3D<GeoShape,MC>::FaceType*   facePtr   = 0;
+    //typename RegionMesh3D<GeoShape,MC>::EdgeType*   edgePtr   = 0;
+    //typename RegionMesh3D<GeoShape,MC>::FaceType*   facePtr   = 0;
     typename RegionMesh3D<GeoShape,MC>::VolumeType* volumePtr = 0;
 
     // Build the points of the mesh
     std::cout<<"building the points of the mesh...";
-    Real xPosition,yPosition,zPosition;
-    UInt nodeID;
-    EntityFlag nodeFlag;
+    Real xPosition(0.0),yPosition(0.0),zPosition(0.0);
+    EntityFlag nodeFlag(0);
+    UInt nodeID(0);
+    UInt P0(0),P1(0),P2(0),P3(0),P4(0),P5(0),P6(0),P7(0);
 
     for(UInt k(0);k<n_z;++k)
     {
@@ -242,91 +288,108 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     }
     std::cout<<"done"<<std::endl;
 
-
+    /*
     // Build the boundary edges (ONLY!)
     std::cout<<"building the boundary edges...";
-    UInt P1,P2;
 
      //edges l_x x l_y
     for(UInt j(0);j<m_y;++j)
     {
         for(UInt i(0);i<m_x;++i)
         {
-            nodeID = j*N_y+i+1;
+            // The ex,ey,ez unit vectors are oriented
+            //        y
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 o-->x
+            //       /
+            //      z
+            P0 = j*N_y+i+1;
+            P1 = P0+N_x;
+            P2 = P0+N_y;
+            P3 = P0+N_x+N_y;
 
             // Diagonal bottom - marker = 5
-            edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_x;
-            P2=nodeID+N_y;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            if((i+1<=mid_x && j+1<=mid_y)||(i+1>mid_x && j+1>mid_y)){
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P3).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P3));
+            }else{
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setPoint(2,mesh.point(P2));
+            }
 
             // Edge 1 bottom
             if(i>0){
                 edgePtr = &mesh.addEdge(true);
-                P1=nodeID;
-                P2=nodeID+N_y;
-                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
                 edgePtr->setPoint(2,mesh.point(P2));
             }
 
             // Edge 2 bottom
             if(j>0){
                 edgePtr = &mesh.addEdge(true);
-                P1=nodeID;
-                P2=nodeID+N_x;
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P1).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P1));
+            }
+
+            // The ex,ey,ez unit vectors are oriented
+            //        y
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 o-->x
+            //       /
+            //      z
+            P0 += N_z*(n_z-1);
+            P1 = P0+N_x;
+            P2 = P0+N_y;
+            P3 = P0+N_x+N_y;
+
+            // Diagonal top - marker = 6
+            if((i+1<=mid_x && j+1<=mid_y)||(i+1>mid_x && j+1>mid_y)){
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P3).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P3));
+            }else{
+                edgePtr = &mesh.addEdge(true);
                 edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
                 edgePtr->setPoint(1,mesh.point(P1));
                 edgePtr->setPoint(2,mesh.point(P2));
             }
 
-            nodeID += N_z*(n_z-1);
-
-            // Diagonal top - marker = 6
-            edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_x;
-            P2=nodeID+N_y;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
-
             // Edge 1 top
             if(i==0){
                 edgePtr = &mesh.addEdge(true);
-                P1=nodeID;
-                P2=nodeID+N_y;
-                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
                 edgePtr->setPoint(2,mesh.point(P2));
             }
 
             // Edge 2 top
             if(j==0){
                 edgePtr = &mesh.addEdge(true);
-                P1=nodeID;
-                P2=nodeID+N_x;
-                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-                edgePtr->setPoint(1,mesh.point(P1));
-                edgePtr->setPoint(2,mesh.point(P2));
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P1).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P1));
             }
 
             // Edge 3 top
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_x;
-            P2=nodeID+N_x+N_y;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P3).marker());
             edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setPoint(2,mesh.point(P3));
 
             // Edge 4 top
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_y;
-            P2=nodeID+N_x+N_y;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setWeakerMarker(mesh.point(P2).marker(),mesh.point(P3).marker());
+            edgePtr->setPoint(1,mesh.point(P2));
+            edgePtr->setPoint(2,mesh.point(P3));
         }
     }
     //edges l_x x l_z
@@ -334,57 +397,75 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     {
         for(UInt i(0);i<m_x;++i)
         {
-            nodeID = j*N_z+i+1;
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^ y
+            // |   |  |/
+            // P0--P1 0-->x
+            P0 = j*N_z+i+1;
+            P1 = P0+N_x;
+            P2 = P0+N_z;
+            P3 = P0+N_x+N_z;
 
             // Diagonal front - marker = 1
-            edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_x;
-            P2=nodeID+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            if((i+1<=mid_x && j+1<=mid_z)||(i+1>mid_x && j+1>mid_z)){
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P3).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P3));
+            }else{
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setPoint(2,mesh.point(P2));
+            }
 
             // Edge 1 front
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID;
-            P2=nodeID+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
+            edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P2).marker());
+            edgePtr->setPoint(1,mesh.point(P0));
             edgePtr->setPoint(2,mesh.point(P2));
 
             // Edge 2 front
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID;
-            P2=nodeID+N_x;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P1).marker());
+            edgePtr->setPoint(1,mesh.point(P0));
+            edgePtr->setPoint(2,mesh.point(P1));
 
-            nodeID += N_y*(n_y-1);
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^ y
+            // |   |  |/
+            // P0--P1 0-->x
+            P0 += N_y*(n_y-1);
+            P1 = P0+N_x;
+            P2 = P0+N_z;
+            P3 = P0+N_x+N_z;
 
             // Diagonal back - marker = 3
-            edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_x;
-            P2=nodeID+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            if((i+1<=mid_x && j+1<=mid_z)||(i+1>mid_x && j+1>mid_z)){
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P3).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P3));
+            }else{
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setPoint(2,mesh.point(P2));
+            }
 
             // Edge 1 back
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_x;
-            P2=nodeID+N_x+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P3).marker());
             edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setPoint(2,mesh.point(P3));
 
             // Edge 2 back
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID;
-            P2=nodeID+N_x;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P1).marker());
+            edgePtr->setPoint(1,mesh.point(P0));
+            edgePtr->setPoint(2,mesh.point(P1));
         }
     }
     //edges l_y x l_z
@@ -392,56 +473,78 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     {
         for(UInt i(0);i<m_y;++i)
         {
-            nodeID = j*N_z+i*N_y+1;
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 0-->y
+            //       /
+            //      x
+            P0 = j*N_z+i*N_y+1;
+            P1 = P0+N_y;
+            P2 = P0+N_z;
+            P3 = P0+N_y+N_z;
 
             // Diagonal left - marker = 4
-            edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_y;
-            P2=nodeID+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            if((i+1<=mid_y && j+1<=mid_z)||(i+1>mid_y && j+1>mid_z)){
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P3).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P3));
+            }else{
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setPoint(2,mesh.point(P2));
+            }
 
             // Edge 1 left
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID;
-            P2=nodeID+N_y;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P1).marker());
+            edgePtr->setPoint(1,mesh.point(P0));
+            edgePtr->setPoint(2,mesh.point(P1));
 
             // Edge 2 left
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_y;
-            P2=nodeID+N_y+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P3).marker());
             edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setPoint(2,mesh.point(P3));
 
-            nodeID += N_x*(n_x-1);
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 0-->y
+            //       /
+            //      x
+            P0 += N_x*(n_x-1);
+            P1 = P0+N_y;
+            P2 = P0+N_z;
+            P3 = P0+N_y+N_z;
 
             // Diagonal right - marker = 2
-            edgePtr = &mesh.addEdge(true);
-            P1=nodeID+N_y;
-            P2=nodeID+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            if((i+1<=mid_y && j+1<=mid_z)||(i+1>mid_y && j+1>mid_z)){
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P3).marker());
+                edgePtr->setPoint(1,mesh.point(P0));
+                edgePtr->setPoint(2,mesh.point(P3));
+            }else{
+                edgePtr = &mesh.addEdge(true);
+                edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
+                edgePtr->setPoint(1,mesh.point(P1));
+                edgePtr->setPoint(2,mesh.point(P2));
+            }
 
             // Edge 1 right
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID;
-            P2=nodeID+N_y;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
-            edgePtr->setPoint(2,mesh.point(P2));
+            edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P1).marker());
+            edgePtr->setPoint(1,mesh.point(P0));
+            edgePtr->setPoint(2,mesh.point(P1));
 
             // Edge 2 right
             edgePtr = &mesh.addEdge(true);
-            P1=nodeID;
-            P2=nodeID+N_z;
-            edgePtr->setWeakerMarker(mesh.point(P1).marker(),mesh.point(P2).marker());
-            edgePtr->setPoint(1,mesh.point(P1));
+            edgePtr->setWeakerMarker(mesh.point(P0).marker(),mesh.point(P2).marker());
+            edgePtr->setPoint(1,mesh.point(P0));
             edgePtr->setPoint(2,mesh.point(P2));
         }
     }
@@ -454,37 +557,89 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     {
         for(UInt i(0);i<m_x;++i)
         {
-            nodeID = j*N_y+i+1;
+            // The ex,ey,ez unit vectors are oriented
+            //        y
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 o-->x
+            //       /
+            //      z
+            P0 = j*N_y+i+1;
+            P1 = P0+N_x;
+            P2 = P0+N_y;
+            P3 = P0+N_x+N_y;
 
-            // Face 1 bottom - marker = 5
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(5);
-            facePtr->setPoint(1,mesh.point(nodeID));
-            facePtr->setPoint(2,mesh.point(nodeID+N_y));
-            facePtr->setPoint(3,mesh.point(nodeID+N_x));
+            if((i+1<=mid_x && j+1<=mid_y)||(i+1>mid_x && j+1>mid_y)){
+                // Face 1 bottom - marker = 5
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(5);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P1));
 
-            // Face 2 bottom
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(5);
-            facePtr->setPoint(1,mesh.point(nodeID+N_x));
-            facePtr->setPoint(2,mesh.point(nodeID+N_y));
-            facePtr->setPoint(3,mesh.point(nodeID+N_x+N_y));
+                // Face 2 bottom
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(5);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P3));
+            }else{
+                // Face 1 bottom - marker = 5
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(5);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P1));
 
-            nodeID += N_z*(n_z-1);
+                // Face 2 bottom
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(5);
+                facePtr->setPoint(1,mesh.point(P1));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P3));
+            }
 
-            // Face 1 top - marker = 6
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(6);
-            facePtr->setPoint(1,mesh.point(nodeID));
-            facePtr->setPoint(2,mesh.point(nodeID+N_x));
-            facePtr->setPoint(3,mesh.point(nodeID+N_y));
+            // The ex,ey,ez unit vectors are oriented
+            //        y
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 o-->x
+            //       /
+            //      z
+            P0 += N_z*(n_z-1);
+            P1 = P0+N_x;
+            P2 = P0+N_y;
+            P3 = P0+N_x+N_y;
 
-            // Face 2 top
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(6);
-            facePtr->setPoint(1,mesh.point(nodeID+N_x));
-            facePtr->setPoint(2,mesh.point(nodeID+N_x+N_y));
-            facePtr->setPoint(3,mesh.point(nodeID+N_y));
+            if((i+1<=mid_x && j+1<=mid_y)||(i+1>mid_x && j+1>mid_y)){
+                // Face 1 top - marker = 6
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(6);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P1));
+                facePtr->setPoint(3,mesh.point(P3));
+
+                // Face 2 top
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(6);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P2));
+            }else{
+                // Face 1 top - marker = 6
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(6);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P1));
+                facePtr->setPoint(3,mesh.point(P2));
+
+                // Face 2 top
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(6);
+                facePtr->setPoint(1,mesh.point(P1));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P2));
+            }
         }
     }
     // Faces l_x x l_z
@@ -492,37 +647,85 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     {
         for(UInt i(0);i<m_x;++i)
         {
-            nodeID = j*N_z+i+1;
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^ y
+            // |   |  |/
+            // P0--P1 0-->x
+            P0 = j*N_z+i+1;
+            P1 = P0+N_x;
+            P2 = P0+N_z;
+            P3 = P0+N_x+N_z;
 
-            // Face 1 front - marker = 1
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(1);
-            facePtr->setPoint(1,mesh.point(nodeID));
-            facePtr->setPoint(2,mesh.point(nodeID+N_x));
-            facePtr->setPoint(3,mesh.point(nodeID+N_z));
+            if((i+1<=mid_x && j+1<=mid_z)||(i+1>mid_x && j+1>mid_z)){
+                // Face 1 front - marker = 1
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(1);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P1));
+                facePtr->setPoint(3,mesh.point(P3));
 
-            // Face 2 front
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(1);
-            facePtr->setPoint(1,mesh.point(nodeID+N_x));
-            facePtr->setPoint(2,mesh.point(nodeID+N_x+N_z));
-            facePtr->setPoint(3,mesh.point(nodeID+N_z));
+                // Face 2 front
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(1);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P2));
+            }else{
+                // Face 1 front - marker = 1
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(1);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P1));
+                facePtr->setPoint(3,mesh.point(P2));
 
-            nodeID += N_y*(n_y-1);
+                // Face 2 front
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(1);
+                facePtr->setPoint(1,mesh.point(P1));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P2));
+            }
 
-            // Face 1 back - marker = 3
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(3);
-            facePtr->setPoint(1,mesh.point(nodeID));
-            facePtr->setPoint(2,mesh.point(nodeID+N_z));
-            facePtr->setPoint(3,mesh.point(nodeID+N_x));
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^ y
+            // |   |  |/
+            // P0--P1 0-->x
+            P0 += N_y*(n_y-1);
+            P1 = P0+N_x;
+            P2 = P0+N_z;
+            P3 = P0+N_x+N_z;
 
-            // Face 2 back
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(3);
-            facePtr->setPoint(1,mesh.point(nodeID+N_x));
-            facePtr->setPoint(2,mesh.point(nodeID+N_z));
-            facePtr->setPoint(3,mesh.point(nodeID+N_x+N_z));
+            if((i+1<=mid_x && j+1<=mid_z)||(i+1>mid_x && j+1>mid_z)){
+                // Face 1 back - marker = 3
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(3);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P3));
+
+                // Face 2 back
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(3);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P1));
+            }else{
+                // Face 1 back - marker = 3
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(3);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P1));
+
+                // Face 2 back
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(3);
+                facePtr->setPoint(1,mesh.point(P1));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P3));
+            }
         }
     }
     // Faces l_y x l_z
@@ -530,120 +733,209 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     {
         for(UInt i(0);i<m_y;++i)
         {
-            nodeID = j*N_z+i*N_y+1;
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 0-->y
+            //       /
+            //      x
+            P0 = j*N_z+i*N_y+1;
+            P1 = P0+N_y;
+            P2 = P0+N_z;
+            P3 = P0+N_y+N_z;
 
-            // Face 1 left - marker = 4
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(4);
-            facePtr->setPoint(1,mesh.point(nodeID));
-            facePtr->setPoint(2,mesh.point(nodeID+N_z));
-            facePtr->setPoint(3,mesh.point(nodeID+N_y));
+            if((i+1<=mid_y && j+1<=mid_z)||(i+1>mid_y && j+1>mid_z)){
+                // Face 1 left - marker = 4
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(4);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P3));
 
-            // Face 2 left
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(4);
-            facePtr->setPoint(1,mesh.point(nodeID+N_y));
-            facePtr->setPoint(2,mesh.point(nodeID+N_z));
-            facePtr->setPoint(3,mesh.point(nodeID+N_y+N_z));
+                // Face 2 left
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(4);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P1));
+            }else{
+                // Face 1 left - marker = 4
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(4);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P1));
 
-            nodeID += N_x*(n_x-1);
+                // Face 2 left
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(4);
+                facePtr->setPoint(1,mesh.point(P1));
+                facePtr->setPoint(2,mesh.point(P2));
+                facePtr->setPoint(3,mesh.point(P3));
+            }
 
-            // Face 1 right - marker = 2
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(2);
-            facePtr->setPoint(1,mesh.point(nodeID));
-            facePtr->setPoint(2,mesh.point(nodeID+N_y));
-            facePtr->setPoint(3,mesh.point(nodeID+N_z));
+            // The ex,ey,ez unit vectors are oriented
+            //        z
+            // P2--P3 ^
+            // |   |  |
+            // P0--P1 0-->y
+            //       /
+            //      x
+            P0 += N_x*(n_x-1);
+            P1 = P0+N_y;
+            P2 = P0+N_z;
+            P3 = P0+N_y+N_z;
 
-            // Face 2 right
-            facePtr = &mesh.addFace(true);
-            facePtr->setMarker(2);
-            facePtr->setPoint(1,mesh.point(nodeID+N_y));
-            facePtr->setPoint(2,mesh.point(nodeID+N_y+N_z));
-            facePtr->setPoint(3,mesh.point(nodeID+N_z));
+            if((i+1<=mid_y && j+1<=mid_z)||(i+1>mid_y && j+1>mid_z)){
+                // Face 1 right - marker = 2
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(2);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P2));
+
+                // Face 2 right
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(2);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P1));
+                facePtr->setPoint(3,mesh.point(P3));
+            }else{
+                // Face 1 right - marker = 2
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(2);
+                facePtr->setPoint(1,mesh.point(P0));
+                facePtr->setPoint(2,mesh.point(P1));
+                facePtr->setPoint(3,mesh.point(P2));
+
+                // Face 2 right
+                facePtr = &mesh.addFace(true);
+                facePtr->setMarker(2);
+                facePtr->setPoint(1,mesh.point(P1));
+                facePtr->setPoint(2,mesh.point(P3));
+                facePtr->setPoint(3,mesh.point(P2));
+            }
         }
     }
     std::cout<<"done"<<std::endl;
+*/
 
     // Build the volumes
     std::cout<<"building the volumes...";
     UInt volumeID(0);
-    UInt nodes[8];
     for(UInt k(0);k<m_z;++k)
     {
         for(UInt j(0);j<m_y;++j)
         {
             for(UInt i(0);i<m_x;++i)
             {
-                nodeID = k*N_z+j*N_y+i;
-                nodes[0]=nodeID+1;
-                nodes[1]=nodeID+N_x+1;
-                nodes[2]=nodeID+N_y+1;
-                nodes[3]=nodeID+N_x+N_y+1;
-                nodes[4]=nodeID+N_z+1;
-                nodes[5]=nodeID+N_x+N_z+1;
-                nodes[6]=nodeID+N_y+N_z+1;
-                nodes[7]=nodeID+N_x+N_y+N_z+1;
                 volumeID=(k*m_y*m_x+j*m_y+i)*6 ;
+
+                if((i+1<=mid_x && j+1<=mid_y && k+1<=mid_z)||(i+1>mid_x && j+1>mid_y && k+1>mid_z)){
+                    // Zone 0,7
+                    nodeID = k*N_z+j*N_y+i;
+                    P4=nodeID+1;
+                    P6=nodeID+N_x+1;
+                    P5=nodeID+N_y+1;
+                    P7=nodeID+N_x+N_y+1;
+                    P0=nodeID+N_z+1;
+                    P2=nodeID+N_x+N_z+1;
+                    P1=nodeID+N_y+N_z+1;
+                    P3=nodeID+N_x+N_y+N_z+1;
+                }else if((i+1>mid_x && j+1<=mid_y && k+1<=mid_z)||(i+1<=mid_x && j+1>mid_y && k+1>mid_z)){
+                    // Zone 1,6
+                    nodeID = k*N_z+j*N_y+i;
+                    P1=nodeID+1;
+                    P3=nodeID+N_x+1;
+                    P0=nodeID+N_y+1;
+                    P2=nodeID+N_x+N_y+1;
+                    P5=nodeID+N_z+1;
+                    P7=nodeID+N_x+N_z+1;
+                    P4=nodeID+N_y+N_z+1;
+                    P6=nodeID+N_x+N_y+N_z+1;
+                }else if((i+1<=mid_x && j+1>mid_y && k+1<=mid_z)||(i+1>mid_x && j+1<=mid_y && k+1>mid_z)){
+                    // Zone 2,5
+                    nodeID = k*N_z+j*N_y+i;
+                    P2=nodeID+1;
+                    P0=nodeID+N_x+1;
+                    P3=nodeID+N_y+1;
+                    P1=nodeID+N_x+N_y+1;
+                    P6=nodeID+N_z+1;
+                    P4=nodeID+N_x+N_z+1;
+                    P7=nodeID+N_y+N_z+1;
+                    P5=nodeID+N_x+N_y+N_z+1;
+                }else if((i+1<=mid_x && j+1<=mid_y && k+1>mid_z)||(i+1>mid_x && j+1>mid_y && k+1<=mid_z)){
+                    // Zone 3,4
+                    nodeID = k*N_z+j*N_y+i;
+                    P0=nodeID+1;
+                    P1=nodeID+N_x+1;
+                    P2=nodeID+N_y+1;
+                    P3=nodeID+N_x+N_y+1;
+                    P4=nodeID+N_z+1;
+                    P5=nodeID+N_x+N_z+1;
+                    P6=nodeID+N_y+N_z+1;
+                    P7=nodeID+N_x+N_y+N_z+1;
+                }
 
                 // Tetra 1
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+1);
                 volumePtr->setLocalId(volumeID+1);
-                volumePtr->setPoint(1, mesh.point(nodes[0]));
-                volumePtr->setPoint(2, mesh.point(nodes[1]));
-                volumePtr->setPoint(3, mesh.point(nodes[2]));
-                volumePtr->setPoint(4, mesh.point(nodes[4]));
+                volumePtr->setPoint(1, mesh.point(P0));
+                volumePtr->setPoint(2, mesh.point(P1));
+                volumePtr->setPoint(3, mesh.point(P3));
+                volumePtr->setPoint(4, mesh.point(P4));
                 volumePtr->setMarker(regionFlag);
 
                 // Tetra 2
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+2);
                 volumePtr->setLocalId(volumeID+2);
-                volumePtr->setPoint(1, mesh.point(nodes[5]));
-                volumePtr->setPoint(2, mesh.point(nodes[4]));
-                volumePtr->setPoint(3, mesh.point(nodes[2]));
-                volumePtr->setPoint(4, mesh.point(nodes[1]));
+                volumePtr->setPoint(1, mesh.point(P1));
+                volumePtr->setPoint(2, mesh.point(P3));
+                volumePtr->setPoint(3, mesh.point(P4));
+                volumePtr->setPoint(4, mesh.point(P5));
                 volumePtr->setMarker(regionFlag);
 
                 // Tetra 3
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+3);
                 volumePtr->setLocalId(volumeID+3);
-                volumePtr->setPoint(1, mesh.point(nodes[6]));
-                volumePtr->setPoint(2, mesh.point(nodes[4]));
-                volumePtr->setPoint(3, mesh.point(nodes[2]));
-                volumePtr->setPoint(4, mesh.point(nodes[5]));
+                volumePtr->setPoint(1, mesh.point(P4));
+                volumePtr->setPoint(2, mesh.point(P5));
+                volumePtr->setPoint(3, mesh.point(P3));
+                volumePtr->setPoint(4, mesh.point(P7));
                 volumePtr->setMarker(regionFlag);
 
                 // Tetra 4
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+4);
                 volumePtr->setLocalId(volumeID+4);
-                volumePtr->setPoint(1, mesh.point(nodes[7]));
-                volumePtr->setPoint(2, mesh.point(nodes[5]));
-                volumePtr->setPoint(3, mesh.point(nodes[6]));
-                volumePtr->setPoint(4, mesh.point(nodes[3]));
+                volumePtr->setPoint(1, mesh.point(P0));
+                volumePtr->setPoint(2, mesh.point(P3));
+                volumePtr->setPoint(3, mesh.point(P2));
+                volumePtr->setPoint(4, mesh.point(P4));
                 volumePtr->setMarker(regionFlag);
 
                 // Tetra 5
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+5);
                 volumePtr->setLocalId(volumeID+5);
-                volumePtr->setPoint(1, mesh.point(nodes[2]));
-                volumePtr->setPoint(2, mesh.point(nodes[5]));
-                volumePtr->setPoint(3, mesh.point(nodes[3]));
-                volumePtr->setPoint(4, mesh.point(nodes[6]));
+                volumePtr->setPoint(1, mesh.point(P6));
+                volumePtr->setPoint(2, mesh.point(P3));
+                volumePtr->setPoint(3, mesh.point(P4));
+                volumePtr->setPoint(4, mesh.point(P2));
                 volumePtr->setMarker(regionFlag);
 
                 // Tetra 6
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+6);
                 volumePtr->setLocalId(volumeID+6);
-                volumePtr->setPoint(1, mesh.point(nodes[1]));
-                volumePtr->setPoint(2, mesh.point(nodes[3]));
-                volumePtr->setPoint(3, mesh.point(nodes[2]));
-                volumePtr->setPoint(4, mesh.point(nodes[5]));
+                volumePtr->setPoint(1, mesh.point(P7));
+                volumePtr->setPoint(2, mesh.point(P6));
+                volumePtr->setPoint(3, mesh.point(P3));
+                volumePtr->setPoint(4, mesh.point(P4));
                 volumePtr->setMarker(regionFlag);
             }
         }
