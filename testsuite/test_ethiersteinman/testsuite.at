@@ -3,7 +3,8 @@
 #  This file is part of the LifeV library
 #
 #  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#       Date: 2004-08-29
+#             Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+#       Date: 2010-05-17
 #
 #  Copyright (C) 2004 EPFL, INRIA and Politecnico di Milano
 #
@@ -23,7 +24,8 @@
 #
 # \file testsuite.at
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-# \date 2004-08-29
+# \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+# \date 2010-05-17
 #
 AT_SETUP([test_ethiersteinman])
 AT_KEYWORDS([ns fluid])
@@ -47,14 +49,12 @@ save       = 1
 
     [../time_discretization]
     initialtime		= 0.
-    endtime			= 0.04
-    timestep		= 0.01
+    endtime			= 1e-4
+    timestep		= 1e-5
     BDF_order		= 1
 
     [../space_discretization]
-    mesh_dir        = ./   # the directory where the mesh file is
-    #mesh_file       = cube4x4.mesh          # mesh file
-    mesh_file       = cube8x8.mesh          # mesh file
+	mesh_type        = insideCode            # The mesh is created inside the source code
 
     verbose         = 0
     linearized      = 0
@@ -135,7 +135,7 @@ save       = 1
     scaling         = none
     output          = all # none
     conv            = rhs
-    max_iter        = 100
+    max_iter        = 1000000
     reuse           = true
     max_iter_reuse  = 80
     kspace          = 100
@@ -151,12 +151,12 @@ save       = 1
     #a = 1.57
     #d = 0.78
     sigma = 0
-    #neumannList =
-    dirichletList = 1,2,3,4,5,6
+    neumannList = 1
+    dirichletList = 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    #dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
 
 
 ]])
-AT_CHECK([ln -sf ../../data/mesh/inria/cube8x8.mesh &&
-          mpirun -np 2 ../../test_ethiersteinman/test_ethiersteinman -c],[0],[ignore],[ignore])
+AT_CHECK([mpirun -np 3 ../../test_ethiersteinman/test_ethiersteinman -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 

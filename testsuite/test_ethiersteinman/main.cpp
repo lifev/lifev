@@ -3,9 +3,10 @@
   This file is part of the LifeV Applications.
 
   Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2005-04-16
+             Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+       Date: 2010-05-18
 
-  Copyright (C) 2005 EPFL
+  Copyright (C) 2010 EPFL
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,7 +26,8 @@
 /**
    \file main.cpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-04-16
+   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+   \date 2010-05-18
  */
 
 #ifdef TWODIM
@@ -53,15 +55,16 @@
 LifeV::AboutData
 makeAbout()
 {
-    LifeV::AboutData about( "life_turek_cylinder" ,
-                            "life_turek_cylinder" ,
+    LifeV::AboutData about( "life_ethier_steinman" ,
+                            "life_ethier_steinman" ,
                             "0.1",
-                            "3D cylinder test case",
+                            "Ethier-Steinman test case",
                             LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2005 EPFL");
+                            "Copyright (c) 2010 EPFL");
 
     about.addAuthor("Christophe Prud'homme", "developer", "christophe.prudhomme@epfl.ch", "");
     about.addAuthor("Christoph Winkelmann", "developer", "christoph.winkelmann@epfl.ch", "");
+    about.addAuthor("Gwenol Grandperrin", "developer", "gwenol.grandperrin@epfl.ch", "");
     return about;
 
 }

@@ -152,6 +152,27 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
                 ofile << mesh.point(i).marker() << std::endl;
             }
 
+            // Writing the triangles
+            ofile<< "\nTriangles\n";
+            ofile<< mesh.storedFaces() << std::endl;
+            for(UInt i(1);i<=mesh.storedFaces();++i){
+                ofile << mesh.face(i).point(1).id() << " ";
+                ofile << mesh.face(i).point(2).id() << " ";
+                ofile << mesh.face(i).point(3).id() << " ";
+                ofile << mesh.face(i).marker() << std::endl;
+            }
+
+            /*
+            // Writing the triangles
+            ofile<< "\nEdges\n";
+            ofile<< mesh.storedEdges() << std::endl;
+            for(UInt i(1);i<=mesh.storedFaces();++i){
+                ofile << mesh.edge(i).point(1).id() << " ";
+                ofile << mesh.edge(i).point(2).id() << " ";
+                ofile << mesh.edge(i).marker() << std::endl;
+            }
+            */
+
             // Writing the volumes
             ofile<< "\nTetrahedra\n";
             ofile<< mesh.storedVolumes() << std::endl;

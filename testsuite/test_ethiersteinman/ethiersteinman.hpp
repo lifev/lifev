@@ -3,9 +3,10 @@
   This file is part of the LifeV Applications.
 
   Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2005-04-19
+             Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+       Date: 2010-05-18
 
-  Copyright (C) 2005 EPFL
+  Copyright (C) 2010 EPFL
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,7 +26,8 @@
 /**
    \file ethiersteiman.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-04-19
+   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+   \date 2010-05-18
  */
 
 #ifndef __Ethiersteinman_H
@@ -46,8 +48,10 @@ enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
  * \brief 2D/3D Ethiersteinman Simulation class
  *
  *  @author Christophe Prud'homme
+ *  @author Gwenol Grandperrin
  *  @see
  */
+
 class Ethiersteinman
 //     :
 //     public LifeV::Application
@@ -119,24 +123,22 @@ public:
 private:
 
     void computeError( double const&     time,
+                       const LifeV::UInt& iFE,
+                       const LifeV::UInt& iDisc,
                        fespace_type&     uFESpace,
                        fespace_type&     pFESpace,
-                       fluid_type const& fluid );
+                       fluid_type const& fluid);
 
-    void checkResult( LifeV::Real const& time,
-                      double const&      ul2error,
-                      double const&      pl2error );
-    std::vector<LifeV::Real> uL2Error;
-    std::vector<LifeV::Real> pL2Error;
-    std::vector<LifeV::Real> uRelError;
-    std::vector<LifeV::Real> pRelError;
+    void checkResult();
+    std::vector<std::vector<LifeV::Real> > uL2Error;
+    std::vector<std::vector<LifeV::Real> > pL2Error;
 
     struct RESULT_CHANGED_EXCEPTION
     {
     public:
-        RESULT_CHANGED_EXCEPTION(LifeV::Real time)
+        RESULT_CHANGED_EXCEPTION()
         {
-            std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
+            std::cout << "Some modifications led to changes in the l2 norm of the solution" << std::endl;
         }
     };
 
@@ -144,6 +146,23 @@ private:
     struct Private;
     boost::shared_ptr<Private> d;
     std::ofstream out_norm;
+
+    // Internal data used to check the different
+    // configuration (meshes+FE)
+    #define FEnumber 3 // Number of Finite elements
+    #define discretizationNumber 3 // Number of mesh discretization
+    static const std::string uFE[FEnumber]; // Finite element for the velocity
+    static const std::string pFE[FEnumber]; // Finite element for the pressure
+    static const LifeV::UInt meshDiscretization[discretizationNumber]; // Discretization
+    static const LifeV::Real uConvergenceOrder[FEnumber]; // Convergence order for u
+    static const LifeV::Real pConvergenceOrder[FEnumber]; // Convergence order for p
+
+    // Tolerance of the test (should be <1)
+    // Actually for convTol=1, the test failed
+    // if the improvement of accuracy is less
+    // than predicted by the theory.
+    // convTol lower down the theoretical bounds
+    LifeV::Real convTol;
 
 };
 
