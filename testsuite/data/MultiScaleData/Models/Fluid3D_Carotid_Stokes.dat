@@ -71,7 +71,7 @@ diagonalBlockPrec   = false
     inverseOmega    = true             # Use inverse minimization
 
     [../ipstab]
-    gammaBeta       = 0.02
+    gammaBeta       = 1.0
     gammaDiv        = 0.2
     gammaPress      = 0.2
     max_iter_reuse  = 100
