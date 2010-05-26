@@ -33,8 +33,8 @@ liblifefem_la_SOURCES	= assemb.cpp\
           currentFE.cpp currentBdFE.cpp defQuadRuleFE.cpp dof.cpp \
           dofInterface3Dto2D.cpp dofInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \
           elemOper.cpp  geoMap.cpp \
-          localDofPattern.cpp quadRule.cpp refEle.cpp refFE.cpp \
-          staticBdFE.cpp regionMesh3D_ALE.cpp \
+          localDofPattern.cpp quadRule.cpp refEle.cpp refFE.cpp refFEScalar.cpp refFEHdiv.cpp \
+          refFEHybrid.cpp staticBdFE.cpp regionMesh3D_ALE.cpp \
           bcManage.cpp
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
