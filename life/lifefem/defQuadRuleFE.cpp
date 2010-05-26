@@ -17,7 +17,9 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include <life/lifefem/quadRule.hpp>
-#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/refFEScalar.hpp>
+#include <life/lifefem/refFEHdiv.hpp>
+#include <life/lifefem/refFEHybrid.hpp>
 #include <life/lifefem/geoMap.hpp>
 
 namespace LifeV
@@ -550,6 +552,53 @@ static const QuadRule quad_rule_hexa[ NB_QUAD_RULE_HEXA ] =
         quadRuleHexa1pt,
         quadRuleHexa8pt
     };
+
+
+
+//----------------------------------------------------------------------
+//
+//                       GeoMaps
+//
+//----------------------------------------------------------------------
+
+const GeoMap geoLinearNode( "Mapping of a point", POINT,
+                            1, 1,
+                            fct_P0_0D, derfct_P0_0D, der2fct_P0_0D,
+                            refcoor_P0_0D,
+                            ( GeoMap* ) NULL );
+
+const GeoMap geoLinearSeg( "Linear mapping on a segment", LINE,
+                           2, 1,
+                           fct_P1_1D, derfct_P1_1D, der2fct_P1_1D,
+                           refcoor_P1_1D, 
+                           &geoLinearNode );
+
+const GeoMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE,
+                            3, 2,
+                            fct_P1_2D, derfct_P1_2D, der2fct_P1_2D,
+                            refcoor_P1_2D,
+                            &geoLinearSeg );
+
+const GeoMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD,
+                              4, 2,
+                              fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D,
+                              refcoor_Q1_2D,
+                              &geoLinearSeg );
+
+const GeoMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA,
+                             4, 3,
+                             fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
+                             refcoor_P1_3D,
+                             &geoLinearTria );
+
+const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
+                              8, 3,
+                              fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D,
+                              refcoor_Q1_3D,
+                              &geoBilinearQuad );
+
+
+
 //======================================================================
 //
 //                            P0  (0D)
@@ -3186,7 +3235,6 @@ Real der2fct8_33_Q1_3D( cRRef, cRRef, cRRef )
     return 0;
 }
 
-
 //======================================================================
 //
 //                            RT0 Hexa  (3D)
@@ -3213,107 +3261,107 @@ Real der2fct8_33_Q1_3D( cRRef, cRRef, cRRef )
 
 */
 
-Real fct1_RT0_1_3D( cRRef, cRRef, cRRef )
+Real fct1_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
-Real fct1_RT0_2_3D( cRRef, cRRef, cRRef )
+Real fct1_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
-Real fct1_RT0_3_3D( cRRef, cRRef, cRRef z )
+Real fct1_RT0_3_HEXA_3D( cRRef, cRRef, cRRef z )
 {
-    return z -1;
-}
-
-Real fct2_RT0_1_3D( cRRef x, cRRef, cRRef )
-{
-    return x -1;
-}
-Real fct2_RT0_2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real fct2_RT0_3_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
+    return z - 1.;
 }
 
-Real fct3_RT0_1_3D( cRRef, cRRef, cRRef )
+Real fct2_RT0_1_HEXA_3D( cRRef x, cRRef, cRRef )
 {
-    return 0;
+    return x - 1.;
 }
-Real fct3_RT0_2_3D( cRRef, cRRef y, cRRef )
+Real fct2_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return y -1;
+    return 0.;
 }
-Real fct3_RT0_3_3D( cRRef, cRRef, cRRef )
+Real fct2_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
 
-Real fct4_RT0_1_3D( cRRef x, cRRef, cRRef )
+Real fct3_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
+{
+    return 0.;
+}
+Real fct3_RT0_2_HEXA_3D( cRRef, cRRef y, cRRef )
+{
+    return y - 1.;
+}
+Real fct3_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
+{
+    return 0.;
+}
+
+Real fct4_RT0_1_HEXA_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real fct4_RT0_2_3D( cRRef, cRRef, cRRef )
+Real fct4_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
-Real fct4_RT0_3_3D( cRRef, cRRef, cRRef )
+Real fct4_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
 
-Real fct5_RT0_1_3D( cRRef, cRRef, cRRef )
+Real fct5_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
-Real fct5_RT0_2_3D( cRRef, cRRef y, cRRef )
+Real fct5_RT0_2_HEXA_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real fct5_RT0_3_3D( cRRef, cRRef, cRRef )
+Real fct5_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
 
-Real fct6_RT0_1_3D( cRRef, cRRef, cRRef )
+Real fct6_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
-Real fct6_RT0_2_3D( cRRef, cRRef, cRRef )
+Real fct6_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 0;
+    return 0.;
 }
-Real fct6_RT0_3_3D( cRRef, cRRef, cRRef z )
+Real fct6_RT0_3_HEXA_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
 
-Real fct1_DIV_RT0_3D( cRRef, cRRef, cRRef )
+Real fct1_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 1 ;
+    return 1.;
 }
-Real fct2_DIV_RT0_3D( cRRef, cRRef, cRRef )
+Real fct2_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 1 ;
+    return 1.;
 }
-Real fct3_DIV_RT0_3D( cRRef, cRRef, cRRef )
+Real fct3_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 1 ;
+    return 1.;
 }
-Real fct4_DIV_RT0_3D( cRRef, cRRef, cRRef )
+Real fct4_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 1 ;
+    return 1.;
 }
-Real fct5_DIV_RT0_3D( cRRef, cRRef, cRRef )
+Real fct5_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 1 ;
+    return 1.;
 }
-Real fct6_DIV_RT0_3D( cRRef, cRRef, cRRef )
+Real fct6_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
 {
-    return 1 ;
+    return 1.;
 }
 
 //======================================================================
@@ -3346,73 +3394,73 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 
 */
 
-Real fct3_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
+Real fct3_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
 {
-    return 2 * x;
+    return 2. * x;
 }
-Real fct3_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
+Real fct3_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
 {
-    return 2 * y;
+    return 2. * y;
 }
-Real fct3_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
+Real fct3_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
 {
-    return 2 * z;
-}
-
-Real fct4_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
-{
-    return 2 * x - 2;
-}
-Real fct4_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
-{
-    return 2 * y;
-}
-Real fct4_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
-{
-    return 2 * z;
+    return 2. * z;
 }
 
-Real fct2_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
+Real fct4_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
 {
-    return 2 * x;
+    return 2. * x - 2.;
 }
-Real fct2_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
+Real fct4_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
 {
-    return 2 * y - 2;
+    return 2. * y;
 }
-Real fct2_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
+Real fct4_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
 {
-    return 2 * z;
-}
-
-Real fct1_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
-{
-    return 2 * x;
-}
-Real fct1_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
-{
-    return 2 * y;
-}
-Real fct1_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
-{
-    return 2 * z - 2;
+    return 2. * z;
 }
 
-Real fct1_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
+Real fct2_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
 {
-    return 6 ;
+    return 2. * x;
 }
-Real fct2_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
+Real fct2_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
 {
-    return 6 ;
+    return 2. * y - 2.;
 }
-Real fct3_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
+Real fct2_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
 {
-    return 6 ;
+    return 2. * z;
 }
-Real fct4_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
+
+Real fct1_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
 {
-    return 6 ;
+    return 2. * x;
+}
+Real fct1_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
+{
+    return 2. * y;
+}
+Real fct1_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
+{
+    return 2. * z - 2.;
+}
+
+Real fct1_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+{
+    return 6.;
+}
+Real fct2_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+{
+    return 6.;
+}
+Real fct3_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+{
+    return 6.;
+}
+Real fct4_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+{
+    return 6.;
 }
 
 //======================================================================
@@ -3424,21 +3472,21 @@ Real fct4_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
                            1
 */
 
-const RefFE fePointP0( "Lagrange P0 on a point",
-                       FE_P0_0D,
-                       POINT,
-                       1,                           // nb dof per vertex
-                       0,                           // nb dof per edge
-                       0,                           // nb dof per face
-                       0,                           // nb dof per volume
-                       1,                           // nb dof
-                       1,                           // nb coor
-                       fct_P0_0D,
-                       derfct_P0_0D,
-                       der2fct_P0_0D,
-                       refcoor_P0_0D,
-                       STANDARD_PATTERN,
-                       ( RefFE* ) NULL );
+const RefFEScalar fePointP0( "Lagrange P0 on a point",
+                             FE_P0_0D,
+                             POINT,
+                             1,                           // nb dof per vertex
+                             0,                           // nb dof per edge
+                             0,                           // nb dof per face
+                             0,                           // nb dof per volume
+                             1,                           // nb dof
+                             1,                           // nb coor
+                             fct_P0_0D,
+                             derfct_P0_0D,
+                             der2fct_P0_0D,
+                             refcoor_P0_0D,
+                             STANDARD_PATTERN,
+                             ( RefFE* ) NULL );
 
 //======================================================================
 //
@@ -3449,9 +3497,9 @@ const RefFE fePointP0( "Lagrange P0 on a point",
                            1-----2
 */
 
-const RefFE feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
-                     fct_P1_1D, derfct_P1_1D, der2fct_P1_1D, refcoor_P1_1D,
-                     STANDARD_PATTERN, &fePointP0 );
+const RefFEScalar feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
+                           fct_P1_1D, derfct_P1_1D, der2fct_P1_1D, refcoor_P1_1D,
+                           STANDARD_PATTERN, &fePointP0 );
 
 //======================================================================
 //
@@ -3462,9 +3510,9 @@ const RefFE feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 
                            1--3--2
 */
 
-const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
-                     fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D,
-                     STANDARD_PATTERN, &fePointP0 );
+const RefFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
+                           fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D,
+                           STANDARD_PATTERN, &fePointP0 );
 
 //======================================================================
 //
@@ -3479,9 +3527,9 @@ const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 
                             ---
 */
 
-const RefFE feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
-                      fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D,
-                      STANDARD_PATTERN, ( RefFE* ) NULL );
+const RefFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
+                            fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D,
+                            STANDARD_PATTERN, ( RefFE* ) NULL );
 
 //======================================================================
 //
@@ -3496,9 +3544,9 @@ const RefFE feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 
                            1---2
 */
 
-const RefFE feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
-                      fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D,
-                      STANDARD_PATTERN, &feSegP1 );
+const RefFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
+                            fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D,
+                            STANDARD_PATTERN, &feSegP1 );
 
 //======================================================================
 //
@@ -3513,9 +3561,9 @@ const RefFE feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 
                            1-4-2
 */
 
-const RefFE feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
-                      fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D,
-                      STANDARD_PATTERN, &feSegP2 );
+const RefFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
+                            fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D,
+                            STANDARD_PATTERN, &feSegP2 );
 
 //======================================================================
 //
@@ -3530,9 +3578,9 @@ const RefFE feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 
                             -------
 */
 
-const RefFE feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
-                      fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D,
-                      STANDARD_PATTERN, ( RefFE* ) NULL );
+const RefFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
+                            fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D,
+                            STANDARD_PATTERN, ( RefFE* ) NULL );
 
 //======================================================================
 //
@@ -3547,9 +3595,9 @@ const RefFE feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0,
                            1-------2
 */
 
-const RefFE feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0, 4, 2,
-                      fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D, refcoor_Q1_2D,
-                      STANDARD_PATTERN, &feSegP1 );
+const RefFEScalar feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0, 4, 2,
+                            fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D, refcoor_Q1_2D,
+                            STANDARD_PATTERN, &feSegP1 );
 
 
 //======================================================================
@@ -3565,9 +3613,9 @@ const RefFE feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0,
                            1---5---2
 */
 
-const RefFE feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0, 9, 2,
-                      fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D, refcoor_Q2_2D,
-                      STANDARD_PATTERN, &feSegP2 );
+const RefFEScalar feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0, 9, 2,
+                            fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D, refcoor_Q2_2D,
+                            STANDARD_PATTERN, &feSegP2 );
 
 //======================================================================
 //
@@ -3583,9 +3631,9 @@ const RefFE feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0,
            /.       \!
            ----------
 */
-const RefFE feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
-                       fct_P0_3D, derfct_P0_3D, der2fct_P0_3D, refcoor_P0_3D,
-                       STANDARD_PATTERN, ( RefFE* ) NULL );
+const RefFEScalar feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
+                             fct_P0_3D, derfct_P0_3D, der2fct_P0_3D, refcoor_P0_3D,
+                             STANDARD_PATTERN, &feTriaP0 );
 
 //======================================================================
 //
@@ -3601,9 +3649,9 @@ const RefFE feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1
            /.       \!
          1 ----------2
 */
-const RefFE feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0, 4, 3,
-                       fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D,
-                       STANDARD_PATTERN, &feTriaP1 );
+const RefFEScalar feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0, 4, 3,
+                             fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D,
+                             STANDARD_PATTERN, &feTriaP1 );
 
 //======================================================================
 //
@@ -3619,9 +3667,9 @@ const RefFE feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0
            /.       \!
          1 ----------2
 */
-const RefFE feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D, TETRA, 1, 0, 0, 1, 5, 3,
-                             fct_P1bubble_3D, derfct_P1bubble_3D, der2fct_P1bubble_3D, refcoor_P1bubble_3D,
-                             STANDARD_PATTERN, &feTriaP1 );
+const RefFEScalar feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D, TETRA, 1, 0, 0, 1, 5, 3,
+                                   fct_P1bubble_3D, derfct_P1bubble_3D, der2fct_P1bubble_3D, refcoor_P1bubble_3D,
+                                   STANDARD_PATTERN, &feTriaP1 );
 
 
 //======================================================================
@@ -3638,9 +3686,9 @@ const RefFE feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D,
            /.       \!
          1 -----5----2
 */
-const RefFE feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0, 10, 3,
-                       fct_P2_3D, derfct_P2_3D, der2fct_P2_3D, refcoor_P2_3D,
-                       STANDARD_PATTERN, &feTriaP2 );
+const RefFEScalar feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0, 10, 3,
+                             fct_P2_3D, derfct_P2_3D, der2fct_P2_3D, refcoor_P2_3D,
+                             STANDARD_PATTERN, &feTriaP2 );
 //======================================================================
 //
 //                            P2tilde  (3D)
@@ -3655,12 +3703,12 @@ const RefFE feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0
            /.       \!
          1 -----5----2
 */
-const RefFE feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
-                            TETRA, 1, 1, 0, 1, 11, 3, fct_P2tilde_3D,
-                            derfct_P2tilde_3D,
-                            der2fct_P2tilde_3D,
-                            refcoor_P2tilde_3D,
-                            STANDARD_PATTERN, &feTriaP2 );
+const RefFEScalar feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
+                                  TETRA, 1, 1, 0, 1, 11, 3, fct_P2tilde_3D,
+                                  derfct_P2tilde_3D,
+                                  der2fct_P2tilde_3D,
+                                  refcoor_P2tilde_3D,
+                                  STANDARD_PATTERN, &feTriaP2 );
 
 //======================================================================
 //
@@ -3678,9 +3726,9 @@ const RefFE feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
      |.      |/
      |_______|
 */
-const RefFE feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1, 3,
-                      fct_Q0_3D, derfct_Q0_3D, der2fct_Q0_3D, refcoor_Q0_3D,
-                      STANDARD_PATTERN, ( RefFE* ) NULL );
+const RefFEScalar feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1, 3,
+                            fct_Q0_3D, derfct_Q0_3D, der2fct_Q0_3D, refcoor_Q0_3D,
+                            STANDARD_PATTERN, &feQuadQ0 );
 
 //======================================================================
 //
@@ -3698,51 +3746,233 @@ const RefFE feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1
      |.      |/
      1_______2
 */
-const RefFE feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8, 3,
-                      fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D, refcoor_Q1_3D,
-                      STANDARD_PATTERN, &feQuadQ1 );
+const RefFEScalar feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8, 3,
+                            fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D, refcoor_Q1_3D,
+                            STANDARD_PATTERN, &feQuadQ1 );
+
+//======================================================================
+//
+//                            RT0 (3D)
+//
+//======================================================================
+/*
+
+        8-------7
+       /.      /|
+      / .     / |
+     5_______6  |
+     |  .    |  |
+     |  4....|..3
+     | .     | /
+     |.      |/
+     1_______2
+
+   face 1: 1,4,3,2
+   face 2: 1,5,8,4
+   face 3: 1,2,6,5
+   face 4: 2,3,7,6
+   face 5: 3,4,8,7
+   face 6: 5,6,7,8
+
+*/
+const RefFEHdiv feHexaRT0( "Lagrange RT0 on a hexaedra", FE_RT0_HEXA_3D, HEXA, 0, 0, 1, 0, 6, 3,
+                           fct_RT0_HEXA_3D, fct_DIV_RT0_HEXA_3D, refcoor_RT0_HEXA_3D,
+                           STANDARD_PATTERN, &feQuadQ0);
+
+//======================================================================
+//
+//                            RT0 (3D)
+//
+//======================================================================
+/*
+                4
+               / .
+              /  \.3
+             /  . \\
+            / .    \\
+           /.       \!
+         1 ----------2
+
+
+   face 1: 1, 3, 2
+   face 2: 1, 2, 4
+   face 3: 2, 3, 4
+   face 4: 1, 4, 3
+*/
+const RefFEHdiv feTetraRT0( "Lagrange RT0 on a tetraedra", FE_RT0_TETRA_3D, TETRA, 0, 0, 1, 0, 4, 3,
+                            fct_RT0_TETRA_3D, fct_DIV_RT0_TETRA_3D, refcoor_RT0_TETRA_3D,
+                            STANDARD_PATTERN, &feTriaP0 );                      
+
 
 //----------------------------------------------------------------------
 //
-//                       GeoMaps
+//                       Mixed Hybrid FE
 //
 //----------------------------------------------------------------------
 
-const GeoMap geoLinearNode( "Mapping of a point", POINT,
-                            1, 1,
-                            fct_P0_0D, derfct_P0_0D, der2fct_P0_0D,
-                            refcoor_P0_0D,
-                            ( GeoMap* ) NULL );
+//======================================================================
+//
+//                           RT0 HYBRID (3D)
+//                Element defined on FACES :  Q0 on each QUAD face.
+//
+//======================================================================
+/*!
 
-const GeoMap geoLinearSeg( "Linear mapping on a segment", LINE,
-                           2, 1,
-                           fct_P1_1D, derfct_P1_1D, der2fct_P1_1D,
-                           refcoor_P1_1D, 
-                           &geoLinearNode );
+        8-------7
+       /.      /|
+      / .     / |
+     5_______6  |
+     |  .    |  |
+     |  4....|..3
+     | .     | /
+     |.      |/
+     1_______2
 
-const GeoMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE,
-                            3, 2,
-                            fct_P1_2D, derfct_P1_2D, der2fct_P1_2D,
-                            refcoor_P1_2D,
-                            &geoLinearSeg );
+   face 1: 1,4,3,2
+   face 2: 1,5,8,4
+   face 3: 1,2,6,5
+   face 4: 2,3,7,6
+   face 5: 3,4,8,7
+   face 6: 5,6,7,8
 
-const GeoMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD,
-                              4, 2,
-                              fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D,
-                              refcoor_Q1_2D,
-                              &geoLinearSeg );
 
-const GeoMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA,
-                             4, 3,
-                             fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
-                             refcoor_P1_3D,
-                             &geoLinearTria );
+*/
 
-const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
-                              8, 3,
-                              fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D,
-                              refcoor_Q1_3D,
-                              &geoBilinearQuad );
+// N.B. : the hybrid classes and arrays depend on the quadrature rules,
+//        geometrical mappings and other reference elements :
+//        thus they must be defined AFTER the definitions of quadrule, geomap, refFE...
+
+//! Total number of Boundary elements for the hybrid MFE for HEXA (= Number of faces, common for RT0,RT1...)
+#define NB_BDFE_HYB_HEXA 6
+static const StaticBdFE BdFE_RT0_HYB_HEXA_1( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_1, 0 );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_2( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_2, 1 );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_3( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_3, 2 );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_4( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_4, 3 );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_5( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_5, 4 );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_6( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_6, 5 );
+
+static const StaticBdFE HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
+    {
+        BdFE_RT0_HYB_HEXA_1, BdFE_RT0_HYB_HEXA_2,
+        BdFE_RT0_HYB_HEXA_3, BdFE_RT0_HYB_HEXA_4,
+        BdFE_RT0_HYB_HEXA_5, BdFE_RT0_HYB_HEXA_6
+    };
+
+//const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 elements on a hexaedra",
+//         FE_RT0_HYB_HEXA_3D, HEXA, 0,0,1,0,6,3,
+//         refcoor_RT0HYB_HEXA,STANDARD_PATTERN);
+static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_1( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_1, 0, 1. );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_2( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_2, 1, 1. );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_3( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_3, 2, 1. );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_4( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_4, 3, 1. );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_5( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_5, 4, 1. );
+static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_6( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+        refcoor_HYB_HEXA_FACE_6, 5, 1. );
+
+static const StaticBdFE HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
+    {
+        BdFE_RT0_HYB_HEXA_VdotN_1, BdFE_RT0_HYB_HEXA_VdotN_2,
+        BdFE_RT0_HYB_HEXA_VdotN_3, BdFE_RT0_HYB_HEXA_VdotN_4,
+        BdFE_RT0_HYB_HEXA_VdotN_5, BdFE_RT0_HYB_HEXA_VdotN_6
+    };
+
+const RefFEHybrid feHexaRT0Hyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
+								0, 0, 1, 0, 6, 3, NB_BDFE_HYB_HEXA, HybRT0HexaList,                                
+                                refcoor_RT0HYB_HEXA, STANDARD_PATTERN );
+
+const RefFEHybrid feHexaRT0VdotNHyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
+                                     0, 0, 1, 0, 6, 3, NB_BDFE_HYB_HEXA, HybRT0HexaVdotNList,
+                                     refcoor_RT0HYB_HEXA, STANDARD_PATTERN );
+
+
+//======================================================================
+//
+//                           RT0 TETRA HYBRID (3D)
+//                Element defined on FACES :  Q0 on each QUAD face.
+//
+//======================================================================
+/*!
+
+                4
+               / .
+              /  \.3
+             /  . \\
+            / .    \\
+           /.       \!
+         1 ----------2
+
+SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+   point 1: 0, 0, 0
+   point 2: 1, 0, 0
+   point 3: 0, 1, 0
+   point 4: 0, 0, 1
+
+   face 1: 1, 3, 2
+   face 2: 1, 2, 4
+   face 3: 2, 3, 4
+   face 4: 1, 4, 3
+
+
+*/
+// N.B. : the hybrid classes and arrays depend on the quadrature rules,
+//        geometric mappings and other reference elements :
+//        thus they must be defined AFTER the definitions of quadrule, geomap, refFE...
+
+//! Total number of Boundary elements for the hybrid MFE for TETRA (= Number of faces. common for RT0,RT1...)
+#define NB_BDFE_RT0_HYB_TETRA 4
+static const StaticBdFE BdFE_RT0_HYB_TETRA_1( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_1, 0 );
+static const StaticBdFE BdFE_RT0_HYB_TETRA_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_2, 1 );
+static const StaticBdFE BdFE_RT0_HYB_TETRA_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_3, 2 );
+static const StaticBdFE BdFE_RT0_HYB_TETRA_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_4, 3 );
+
+static const StaticBdFE HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
+    {
+        BdFE_RT0_HYB_TETRA_1, BdFE_RT0_HYB_TETRA_2,
+        BdFE_RT0_HYB_TETRA_3, BdFE_RT0_HYB_TETRA_4
+    };
+
+/*const RefHybridFE feTetraRT0Hyb (NB_BDFE_RT0_HYB_TETRA,HybRT0TetraList,"Hybrid RT0 elements on a tetrahedron",
+    FE_RT0_HYB_TETRA_3D, TETRA, 0,0,1,0,4,3,
+    refcoor_RT0HYB_TETRA,STANDARD_PATTERN);*/
+
+
+static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_1( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_1, 0, 2. );
+static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_2, 1, 2. );
+static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_3, 2, 2. / sqrt( 3. ) );
+static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
+        refcoor_HYB_TETRA_FACE_4, 3, 2. );
+
+static const StaticBdFE HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
+    {
+        BdFE_RT0_HYB_TETRA_VdotN_1, BdFE_RT0_HYB_TETRA_VdotN_2,
+        BdFE_RT0_HYB_TETRA_VdotN_3, BdFE_RT0_HYB_TETRA_VdotN_4
+    };
+
+const RefFEHybrid feTetraRT0Hyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA, 
+								  0, 0, 1, 0, 4, 3, NB_BDFE_RT0_HYB_TETRA, HybRT0TetraList, 
+                                  refcoor_RT0HYB_TETRA, STANDARD_PATTERN );
+
+const RefFEHybrid feTetraRT0VdotNHyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA,
+										0, 0, 1, 0, 4, 3, NB_BDFE_RT0_HYB_TETRA, HybRT0TetraVdotNList, 
+                                       refcoor_RT0HYB_TETRA, STANDARD_PATTERN );
 
 
 }
