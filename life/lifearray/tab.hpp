@@ -312,6 +312,10 @@ typedef boost::numeric::ublas::unit_vector<double> UnitVector;
 typedef boost::numeric::ublas::scalar_vector<double> ScalarVector;
 typedef boost::numeric::ublas::zero_vector<double> ZeroVector;
 
+// Type for storing the geometric vectors (instead of x,y,z)
+typedef boost::numeric::ublas::vector<Real> GeoVector;
+
+
 inline double
 dot( Vector const &ex_v1, Vector const &ex_v2 )
 {
