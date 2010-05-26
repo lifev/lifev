@@ -222,7 +222,7 @@ public:
     //! MONOLITHIC Solver methods - Implemented there
     //     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
-    virtual vector_ptrtype const& un()              {assert(false); }
+    virtual vector_ptrtype const& un(){return M_un;}
     virtual  void initialize( vector_ptrtype /*u0*/){assert(false); }
     virtual void setupBDF(vector_type const& /*u0*/){}
 
