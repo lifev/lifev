@@ -19,7 +19,7 @@
 /*! file regionMesh3D_ALE.h
   \brief Extension of the  mesh classes interfaces for ALE schemes
 
-  \version $Revision: 1.7 $ Miguel Fernandez
+  \version $Revision: 1.8 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -29,7 +29,8 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifemesh/basisElSh.hpp>
-#include <life/lifefem/refFE.hpp>
+
+#include <life/lifefem/refFEScalar.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/quadRule.hpp>
 
