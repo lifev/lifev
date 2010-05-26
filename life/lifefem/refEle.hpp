@@ -73,8 +73,8 @@ public:
       @param d2Phi Array of the second derivatives of the basis functions
       @param refCoor Array of the reference coordinates for this reference element
      */
-    RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor,
-            const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Real* _refCoor);
+    RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt FEDim,
+            const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi, const Real* refCoor);
 
     //! Destructor
     ~RefEle();
@@ -116,6 +116,12 @@ public:
         ASSERT_BD( i < M_nbDof )
         return M_phi[ i ] ( x, y, z );
     }
+    //! return the value of the component icoor-th of the i-th basis function on point (x,y,z).
+    inline Real phi( UInt i, UInt icoor, cRRef x, cRRef y, cRRef z ) const
+    {
+        ASSERT_BD( i < M_nbDof && icoor < M_FEDim )
+        return M_phi[ i * M_FEDim + icoor ] ( x, y, z );
+    }
     //! return the value of the icoor-th derivative of the i-th basis function on point (x,y,z)
     inline Real dPhi( UInt i, UInt icoor, cRRef x, cRRef y, cRRef z ) const
     {
@@ -127,6 +133,34 @@ public:
     {
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
         return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( x, y, z );
+    }
+    //! return the value of the divergence of the i-th basis function on point (x,y,z).
+    inline Real divPhi( UInt i, cRRef x, cRRef y, cRRef z ) const
+    {
+        ASSERT_BD( i < M_nbDof )
+        return M_divPhi[ i ] ( x, y, z );
+    }
+
+
+    //! Check if the refEle has phi functions
+    inline bool hasPhi() const
+    {
+        return ( M_phi != static_cast<Fct*>(NULL) );
+    }
+    //! Check if the refEle has dPhi functions
+    inline bool hasDPhi() const
+    {
+        return ( M_dPhi != static_cast<Fct*>(NULL) );
+    }
+    //! Check if the refEle has d2Phi functions
+    inline bool hasD2Phi() const
+    {
+        return ( M_d2Phi != static_cast<Fct*>(NULL) );
+    }
+    //! Check if the refEle has divPhi functions
+    inline bool hasDivPhi() const
+    {
+        return ( M_divPhi != static_cast<Fct*>(NULL) );
     }
 
     //@}
@@ -153,6 +187,13 @@ public:
     {
         return M_nbCoor;
     };
+
+    //! Return the dimension of the FE (scalar vs vectorial FE)
+    inline const UInt& FEDim() const
+    {
+        return M_FEDim;
+    };
+    
 
     //! Return the shape of the element
     inline const ReferenceShapes& shape() const
@@ -186,8 +227,12 @@ private:
     //! pointer on the second derivatives of the basis functions
     const Fct* M_d2Phi;
 
+    //! pointer on the divergence of the basis functions
+    const Fct* M_divPhi; 
+
     //! reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
     const Real* M_refCoor;
+
     
 
     //! name of the reference element
@@ -201,6 +246,9 @@ private:
 
     //! Number of local coordinates
     const UInt M_nbCoor; 
+
+    //! Number of dimension of the FE (1 for scalar FE, more for vectorial FE)
+    const UInt M_FEDim;
 
 };
 
@@ -1680,5 +1728,164 @@ static const Fct der2fct_Q1_3D[ 72 ] =
         der2fct8_21_Q1_3D, der2fct8_22_Q1_3D, der2fct8_23_Q1_3D,
         der2fct8_31_Q1_3D, der2fct8_32_Q1_3D, der2fct8_33_Q1_3D
     };
+
+
+    //!======================================================================
+//!
+//!                           RT0  (3D)
+//!
+//!======================================================================
+/*!
+
+       8-------7
+      /.      /|
+     / .     / |
+    5_______6  |
+    |  .    |  |
+    |  4....|..3
+    | .     | /
+    |.      |/
+    1_______2
+
+face 1: 1,4,3,2
+face 2: 1,5,8,4
+face 3: 1,2,6,5
+face 4: 2,3,7,6
+face 5: 3,4,8,7
+face 6: 5,6,7,8
+
+*/
+
+Real fct1_RT0_1_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct1_RT0_2_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct1_RT0_3_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct2_RT0_1_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct2_RT0_2_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct2_RT0_3_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct3_RT0_1_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct3_RT0_2_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct3_RT0_3_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct4_RT0_1_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct4_RT0_2_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct4_RT0_3_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct5_RT0_1_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct5_RT0_2_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct5_RT0_3_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct6_RT0_1_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct6_RT0_2_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct6_RT0_3_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct1_DIV_RT0_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct2_DIV_RT0_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct3_DIV_RT0_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct4_DIV_RT0_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct5_DIV_RT0_HEXA_3D( cRRef x, cRRef y, cRRef z );
+Real fct6_DIV_RT0_HEXA_3D( cRRef x, cRRef y, cRRef z );
+
+static const Real refcoor_RT0_HEXA_3D[ 18 ] =
+    {
+        0.5 , 0.5 , 0.  ,
+        0.  , 0.5 , 0.5 ,
+        0.5 , 0.  , 0.5 ,
+        1.  , 0.5 , 0.5 ,
+        0.5 , 1.  , 0.5 ,
+        0.5 , 0.5 , 1.
+    };
+
+static const Fct fct_RT0_HEXA_3D[ 18 ] =
+    {
+        fct1_RT0_1_HEXA_3D, fct1_RT0_2_HEXA_3D, fct1_RT0_3_HEXA_3D,
+        fct2_RT0_1_HEXA_3D, fct2_RT0_2_HEXA_3D, fct2_RT0_3_HEXA_3D,
+        fct3_RT0_1_HEXA_3D, fct3_RT0_2_HEXA_3D, fct3_RT0_3_HEXA_3D,
+        fct4_RT0_1_HEXA_3D, fct4_RT0_2_HEXA_3D, fct4_RT0_3_HEXA_3D,
+        fct5_RT0_1_HEXA_3D, fct5_RT0_2_HEXA_3D, fct5_RT0_3_HEXA_3D,
+        fct6_RT0_1_HEXA_3D, fct6_RT0_2_HEXA_3D, fct6_RT0_3_HEXA_3D
+    };
+
+static const Fct fct_DIV_RT0_HEXA_3D[ 6 ] =
+    {
+        fct1_DIV_RT0_HEXA_3D, fct2_DIV_RT0_HEXA_3D,
+        fct3_DIV_RT0_HEXA_3D, fct4_DIV_RT0_HEXA_3D,
+        fct5_DIV_RT0_HEXA_3D, fct6_DIV_RT0_HEXA_3D
+    };
+
+
+//!======================================================================
+//!
+//!                           RT0  (3D)
+//!
+//!======================================================================
+/*
+
+    4
+    | .
+    |  \.3
+    |  . \\
+    | .    \\
+    |.       \
+    1 ---------2
+
+SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+point 1: 0, 0, 0
+point 2: 1, 0, 0
+point 3: 0, 1, 0
+point 4: 0, 0, 1
+
+face 1: 2, 3, 4
+face 2: 1, 4, 3
+face 3: 1, 2, 4
+face 4: 1, 3, 2
+*/
+
+Real fct1_RT0_1_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct1_RT0_2_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct1_RT0_3_TETRA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct2_RT0_1_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct2_RT0_2_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct2_RT0_3_TETRA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct3_RT0_1_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct3_RT0_2_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct3_RT0_3_TETRA_3D( cRRef x, cRRef y, cRRef z );
+
+Real fct4_RT0_1_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct4_RT0_2_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct4_RT0_3_TETRA_3D( cRRef x, cRRef y, cRRef z );
+
+
+Real fct1_DIV_RT0_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct2_DIV_RT0_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct3_DIV_RT0_TETRA_3D( cRRef x, cRRef y, cRRef z );
+Real fct4_DIV_RT0_TETRA_3D( cRRef x, cRRef y, cRRef z );
+
+
+static const Real refcoor_RT0_TETRA_3D[ 12 ] =
+    {
+        1. / 3  , 1. / 3. , 0.      ,
+        1. / 3. , 0.      , 1. / 3. ,
+        1. / 3. , 1. / 3. , 1. / 3. ,
+        0.      , 1. / 3. , 1. / 3.
+    };
+
+static const Fct fct_RT0_TETRA_3D[ 12 ] =
+    {
+        fct1_RT0_1_TETRA_3D, fct1_RT0_2_TETRA_3D, fct1_RT0_3_TETRA_3D,
+        fct2_RT0_1_TETRA_3D, fct2_RT0_2_TETRA_3D, fct2_RT0_3_TETRA_3D,
+        fct3_RT0_1_TETRA_3D, fct3_RT0_2_TETRA_3D, fct3_RT0_3_TETRA_3D,
+        fct4_RT0_1_TETRA_3D, fct4_RT0_2_TETRA_3D, fct4_RT0_3_TETRA_3D
+    };
+
+static const Fct fct_DIV_RT0_TETRA_3D[ 4 ] =
+    {
+        fct1_DIV_RT0_TETRA_3D, fct2_DIV_RT0_TETRA_3D,
+        fct3_DIV_RT0_TETRA_3D, fct4_DIV_RT0_TETRA_3D
+    };
+
 }
 #endif
