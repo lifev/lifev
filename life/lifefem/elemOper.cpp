@@ -4542,10 +4542,245 @@ void shape_terms(
             }
         }
     }
-
-
-
 }
+
+
+//----------------------------------------------------------------------
+// Compute the gradient in the Hdiv space, i.e. the opposite and transpose of the divergence matrix.
+void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
+{
+	ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Real sumdivphi(0.);
+    const QuadRule& dualQuadRule( dualFE.quadRule() );
+    
+    // Loop over all the degrees of freedom of the dual variable.
+    for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
+    {
+    	// Loop over all the degrees of freedom of the primal variable.
+        for ( UInt j(0); j < primalFE.nbFEDof(); ++j )
+        {
+            sumdivphi = 0.;
+            // Loop over all the quadrature points.
+            for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
+            {
+	            // There is no jacobian because of property of Piola transformation.
+                sumdivphi -= primalFE.phi( j, ig ) * dualFE.divPhiRef( i, ig ) * dualQuadRule.weight( ig );            
+            }
+            mat( i, j ) += coef * sumdivphi;
+        }
+    }
+}
+
+//----------------------------------------------------------------------
+// Compute the divergence in the Hdiv space.
+void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
+{
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Real sumdivphi(0.);
+    const QuadRule& dualQuadRule( dualFE.quadRule() );
+    
+    // Loop over all the degrees of freedom of the dual variable.
+    for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
+    {
+    	// Loop over all the degrees of freedom of the primal variable.
+        for ( UInt j(0); j < primalFE.nbFEDof(); ++j )
+        {
+            sumdivphi = 0.;
+            // Loop over all the quadrature points.
+            for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
+            {
+                // There is no jacobian because of property of Piola transformation.            
+                sumdivphi += primalFE.phi( j, ig ) * dualFE.divPhiRef( i, ig ) * dualQuadRule.weight( ig );
+            }
+            mat( j, i ) += coef * sumdivphi;
+        }
+    }
+}
+
+//----------------------------------------------------------------------
+// Compute a Hdiv function dot product with the outwart unit normal times a hybrid function.
+void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
+                    const RefFEHybrid& dualDotNFE, int iblock, int jblock )
+{
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+	UInt nbnode;
+	Real sum(0.);
+	
+	// Loop over all the staticBdFE. 
+    for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
+    {
+        // Take the staticBdFE of the hybrid finite element.
+        const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
+        // Take the staticBdFE of the Hdiv function dot product outward unit normal.
+        const StaticBdFE & boundaryElementDualDotNFE( dualDotNFE[ nf ] );
+        nbnode = boundaryElementHybridFE.nbNode;
+
+		// Loop over all the the degrees of freedom of the dual dot normal variable.
+        for ( UInt i(0); i < nbnode; ++i )
+        {
+        	// Loop over all the degrees of freedom of the hybrid variable.
+            for ( UInt j(0); j < nbnode; ++j )
+            {
+                sum = 0.;
+                // Loop over all the quadrature point.
+                for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt; ++ig )          	
+                    // Using the Piola transform properties.
+                    sum += boundaryElementHybridFE.phi( j , ig ) * 
+                    	   boundaryElementDualDotNFE.phi( i , ig ) * 
+                    	   boundaryElementHybridFE.weightMeas( ig );
+
+                // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
+                mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------
+// Compute the mass matrix for hybrid variable.
+void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int iblock, int jblock )
+{
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    UInt nbnode;
+    Real sum(0.);
+    
+	// Loop over all the staticBdFE. 
+    for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
+    {
+        // Take the staticBdFE of the hybrid finite element.
+        const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
+        nbnode = boundaryElementHybridFE.nbNode;
+        
+		// Loop over all the degrees of freedom of the first hybrid variable.
+        for ( UInt i(0); i < nbnode; ++i )
+        {
+       		// Loop over all the the degrees of freedom of the second hybrid variable.
+            for ( UInt j(0); j < nbnode; ++j )
+            {
+                sum = 0.;
+                // Loop over all the quadrature point.               
+                for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt ; ++ig )
+                	// Using the Piola transform properties.                
+                    sum += boundaryElementHybridFE.phi( j , ig ) * 
+                    	   boundaryElementHybridFE.phi( i , ig ) * 
+                    	   boundaryElementHybridFE.weightMeas( ig );
+
+                // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
+                mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;
+            }
+        }
+    }
+}
+
+
+//----------------------------------------------------------------------
+// Compute the mass matrix in Hdiv with a real scalar coefficient.
+void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+{
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Real sum(0.);
+    
+    // Loop over all the degrees of freedom of the first dual variable.
+    for ( UInt j(0); j < dualFE.nbFEDof(); ++j )
+    {
+        // Loop over all the degrees of freedom of the second dual variable.
+        for ( UInt i(0); i < dualFE.nbFEDof() /* by symmetry j+1 */; ++i )
+        {
+            sum = 0.;
+            // Loop over all the quadrature point.
+            for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
+            {
+            	// Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
+                for ( UInt icoor(0); icoor < dualFE.nbCoor() ; ++icoor )
+                {
+                    sum += dualFE.phi( j, icoor, ig ) * dualFE.phi( i, icoor, ig ) * dualFE.wDetJacobian( ig );
+                }
+            }
+            // Beware coef is the inverse of the permeability, not the permeability.
+            mat( i, j ) += sum * coef;
+        }
+    }
+}
+
+//----------------------------------------------------------------------
+// Compute the mass matrix in Hdiv with a real matrix coefficient.
+void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+{
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+	Real partialSum(0.), sum(0.);
+	
+    // Loop over all the degrees of freedom of the first dual variable.
+    for ( UInt j(0); j < dualFE.nbFEDof(); ++j )
+    {
+        // Loop over all the degrees of freedom of the second dual variable.
+        for ( UInt i(0); i < dualFE.nbFEDof() /* by symmetry j+1 */; ++i )
+        {
+            sum = 0.;
+            // Loop over all the quadrature point.
+            for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
+            {
+	            // partialSum = phi[icoor]^T * K^-1 * phi[jcoor] for all icorr and jcoor.
+            	partialSum = 0.;
+              	/* Loop over all the space dimension of the first dual variable,
+               	   e.g. in 3D three times, in 2D two times.*/
+                for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
+                {
+    	            /* Loop over all the space dimension of the first dual variable,
+	               	   e.g. in 3D three times, in 2D two times.*/
+                    for ( UInt jcoor(0); jcoor < dualFE.nbCoor(); ++jcoor )
+                    {
+                        // Invperm is the inverse of the permeability.
+                        partialSum += ( Invperm( icoor, jcoor ) *
+                                        dualFE.phi( j, jcoor, ig ) *
+                                        dualFE.phi( i, icoor, ig ) );
+                    }
+                }
+                sum += partialSum * dualFE.wDetJacobian( ig );
+            }
+            mat( i, j ) += sum ;
+        }
+    }
+}
+
+//----------------------------------------------------------------------
+// Compute the mass matrix in Hdiv with a real function coefficient.
+void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ), 
+			    ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+{	
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Real sum(0.), x(0.), y(0.), z(0.);
+    
+    // Loop over all the degrees of freedom of the first dual variable.
+    for ( UInt j(0); j < dualFE.nbFEDof(); ++j )
+    {
+        // Loop over all the degrees of freedom of the second dual variable.    
+        for ( UInt i(0); i < dualFE.nbFEDof() /* by symmetry j+1 */; ++i )
+        {
+            sum = 0.;
+            // Loop over all the quadrature point.            
+            for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
+            {
+            	// Get the coordinate in the current element of the current quadrature point.
+            	x = dualFE.quadNode(ig, 0);
+            	y = dualFE.quadNode(ig, 1);
+            	z = dualFE.quadNode(ig, 2);
+            	
+            	// Loop over all the space dimension, e.g. in 3D three times, in 2D two times.           	
+                for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
+                {
+                    // Caution Invperm is the inverse of the permeability.
+                    sum += InvpermFun( x, y, z ) *
+                           dualFE.phi( j, icoor, ig ) *
+                           dualFE.phi( i, icoor, ig ) *
+                           dualFE.wDetJacobian( ig );
+                }
+            }
+            mat( i, j ) += sum;
+        }
+    }
+}
+
+
 
 }
 
