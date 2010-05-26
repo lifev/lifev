@@ -39,7 +39,7 @@ GeoMap::GeoMap( std::string _name, ReferenceShapes _shape,
                 const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
                 const Real* _refCoor,
                 const GeoMap* bdMap ) :
-        RefEle( _name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, _refCoor ),
+    RefEle( _name, _shape, _nbDof, _nbCoor,1, phi, dPhi, d2Phi, static_cast<Fct*>(NULL),  _refCoor ),
         M_boundaryMap( bdMap )
 {
     CONSTRUCTOR( "GeoMap" );
