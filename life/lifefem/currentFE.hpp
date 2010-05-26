@@ -53,6 +53,9 @@
 
 #include <boost/multi_array.hpp>
 
+#include <iostream>
+#include <fstream>
+
 namespace LifeV {
 
 /*! \page update_procedure Update of the current finite element
