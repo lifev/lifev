@@ -151,7 +151,8 @@ MS_Model_FSI3D::SolveSystem()
     }
     if(M_solver->isFluid())
         M_solver->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
-    M_solver->iterate( M_solver->FSIOper()->dataFluid().dataTime()->getTime() );
+    Real time = M_solver->FSIOper()->dataFluid().dataTime()->getTime()+M_solver->FSIOper()->dataFluid().dataTime()->getTimeStep();
+        M_solver->iterate( time );
     if(M_solver->isFluid())
         *M_fluidDisp      = M_solver->FSIOper()->meshDisp();
     //M_time += M_solver->timeStep();
@@ -356,6 +357,9 @@ MS_Model_FSI3D::SetUpExporter( filter_ptrtype& exporter, const std::string name,
             exporter.reset( new  ensightfilter_type( dataFile, name) );
         }
     }
+    exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID )+name );
+    exporter->setDirectory( MS_ProblemFolder );
+
 }
 
 
