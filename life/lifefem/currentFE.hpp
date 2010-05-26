@@ -44,7 +44,11 @@
 #include <life/lifecore/life.hpp>
 
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifefem/refFE.hpp>
+
+#include <life/lifefem/refFEScalar.hpp>
+#include <life/lifefem/refFEHdiv.hpp>
+#include <life/lifefem/refFEHybrid.hpp>
+
 #include <life/lifefem/quadRule.hpp>
 
 #include <boost/multi_array.hpp>
@@ -153,6 +157,10 @@ const flag_Type UPDATE_ONLY_DPHI_REF(128);
 const flag_Type UPDATE_ONLY_DPHI(256);
 const flag_Type UPDATE_ONLY_D2PHI_REF(512);
 const flag_Type UPDATE_ONLY_D2PHI(1024);
+const flag_Type UPDATE_ONLY_PHI_VECT(2048);
+const flag_Type UPDATE_ONLY_DIV_PHI_REF(4096);
+const flag_Type UPDATE_ONLY_DET_JACOBIAN(8192);
+
 
 const flag_Type UPDATE_QUAD_NODES(UPDATE_ONLY_CELL_NODES
                                   |UPDATE_ONLY_QUAD_NODES);
@@ -176,8 +184,16 @@ const flag_Type UPDATE_D2PHI(UPDATE_ONLY_CELL_NODES
 const flag_Type UPDATE_WDET(UPDATE_ONLY_CELL_NODES
                             |UPDATE_ONLY_DPHI_GEO_MAP
                             |UPDATE_ONLY_JACOBIAN
+                            |UPDATE_ONLY_DET_JACOBIAN
                             |UPDATE_ONLY_W_DET_JACOBIAN);
 
+const flag_Type UPDATE_PHI_VECT(UPDATE_ONLY_CELL_NODES
+                                |UPDATE_ONLY_DPHI_GEO_MAP
+                                |UPDATE_ONLY_JACOBIAN
+                                |UPDATE_ONLY_DET_JACOBIAN
+                                |UPDATE_ONLY_PHI_VECT);
+
+const flag_Type UPDATE_DIV_PHI(UPDATE_ONLY_DIV_PHI_REF);
 
 
 
@@ -224,8 +240,8 @@ const flag_Type UPDATE_WDET(UPDATE_ONLY_CELL_NODES
     @version 2.0
 
     \todo Put all the remaining public member in private
-    \todo Put ifdef for the checks?
-    \todo Put phiRef here
+    \todo Put ifdef for the checks (definition of the booleans)
+    \todo Change the old update for wrappers to the new update
     \todo CXXFLAG to disable the boost asserts: -DBOOST_DISABLE_ASSERTS?
 
 */
@@ -256,7 +272,7 @@ public:
     CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap);
 
     //! Destructor
-    ~CurrentFE(){ delete M_quadRule; }
+    ~CurrentFE(){ delete M_quadRule;}
 
     //@}
 
@@ -277,8 +293,8 @@ public:
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
     void update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag);
 
-    //! Computes the determinant of the jacobian in a given quadrature node
-    Real detJac(const UInt& quadNode) const;
+    //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
+    void update(const std::vector<GeoVector>& pts, const flag_Type& upFlag);
 
     //! Return the measure of the current element
     Real measure() const;
@@ -300,6 +316,17 @@ public:
     */
     void coorMap( Real& x, Real& y, Real& z, const Real & xi, const Real & eta, const Real & zeta ) const;
 
+    //! Export the quadrature rule on the current FE
+    /*!
+      This method can be used to position of the quadrature nodes in the
+      considered element using VTK format. The quadrature point must be updated.
+      It differs from the quadRule::VTKexport in the sens that here, the quadrature
+      is mapped on the current element, while it is still in the reference element
+      for quadRule::VTKexport.
+     */
+    void QuadRuleVTKexport( const std::string& filename) const;
+
+   
     //@}
 
 
@@ -346,13 +373,13 @@ public:
     //! Getter for the reference FE
     inline const RefFE& refFE() const
     {
-        return M_refFE;
+        return *M_refFE;
     };
 
     //! Getter for the GeoMap reference
     inline const GeoMap& geoMap() const
     {
-        return M_geoMap;
+        return *M_geoMap;
     }
 
     //! Getter for the quadrature rule
@@ -405,6 +432,13 @@ public:
         return M_quadNodes[node][coordinate];
     };
 
+    //! Getter for the determinant of the jacobian in a given quadrature node
+    inline const Real& detJacobian(const UInt& quadNode) const
+    {
+        ASSERT(M_detJacobianUpdated,"Jacobian determinant is not updated!");
+        return M_detJacobian[quadNode];
+    };
+
     //! Getter for the weighted jacobian determinant
     inline const Real& wDetJacobian(const UInt& quadNode) const
     {
@@ -419,11 +453,18 @@ public:
         return M_tInverseJacobian[element1][element2][quadNode];
     };
 
-    //! Getter for basis function values
+    //! Getter for basis function values (scalar FE case)
     inline const Real& phi(const UInt& node, const UInt& quadNode) const
     {
         ASSERT(M_phiUpdated,"Function values are not updated!");
-        return M_phi[node][quadNode];
+        return M_phi[node][0][quadNode];
+    };
+
+    //! Getter for basis function values (vectorial FE case)
+    inline const Real& phi(const UInt& node, const UInt& component, const UInt& quadNode) const
+    {
+        ASSERT(M_phiVectUpdated,"Function values are not updated!");
+        return M_phiVect[node][component][quadNode];
     };
 
     //! Getter for the derivatives of the basis functions
@@ -438,6 +479,13 @@ public:
     {
         ASSERT(M_d2phiUpdated,"Basis second derivatives are not updated!");
         return M_d2phi[node][derivative1][derivative2][quadNode];
+    };
+
+    //! Getter for the divergence of a vectorial FE in the reference frame.
+    inline const Real& divPhiRef(const UInt& node, const UInt& quadNode) const
+    {
+        ASSERT(M_divPhiRefUpdated,"Basis divergence are not updated!");
+        return M_divPhiRef[node][quadNode];
     };
 
     //@}
@@ -466,6 +514,13 @@ public:
     {
         ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
         return M_wDetJacobian[quadNode];
+    };
+
+    //! Getter for the determinant of the jacobian in a given quadrature node
+    inline const Real& detJac(const UInt& quadNode) const
+    {
+        ASSERT(M_detJacobianUpdated,"Jacobian determinant is not updated!");
+        return M_detJacobian[quadNode];
     };
 
     //! Old accessor, use iInverseJacobian instead
@@ -520,6 +575,9 @@ private:
     //! Compute the transposed inverse of the jacobian in the quadrature nodes
     void computeTInverseJacobian();
 
+    //! Compute the determinant of the jacobian
+    void computeDetJacobian();
+
     //! Compute the determinant of the jacobian in the quadrature nodes
     void computeWDetJacobian();
 
@@ -534,6 +592,9 @@ private:
 
     //! Compute the value of the derivatives in the current element
     void computeD2phi();
+
+    //! Compute the value of the vectorial FE using Piola transform
+    void computePhiVect();
 
     // Constants
 public:
@@ -552,8 +613,10 @@ private:
 
     // Important structures
 
-    const RefFE& M_refFE;
-    const GeoMap& M_geoMap;
+    //const RefFE& M_refFE;
+    //const GeoMap& M_geoMap;
+    const RefFE* M_refFE;
+    const GeoMap* M_geoMap;
     QuadRule* M_quadRule;
 
 
@@ -565,16 +628,19 @@ private:
 
     boost::multi_array<Real,3> M_dphiGeoMap;
     boost::multi_array<Real,3> M_jacobian;
+    boost::multi_array<Real,1> M_detJacobian;
     boost::multi_array<Real,1> M_wDetJacobian;
     boost::multi_array<Real,3> M_tInverseJacobian;
 
-    boost::multi_array<Real,2> M_phi;
+    boost::multi_array<Real,3> M_phi;
     boost::multi_array<Real,3> M_dphi;
     boost::multi_array<Real,4> M_d2phi;
+    boost::multi_array<Real,3> M_phiVect;
 
-    // M_phiRef is useless
+    // M_phiRef is useless because M_phi is already the same.
     boost::multi_array<Real,3> M_dphiRef;
     boost::multi_array<Real,4> M_d2phiRef;
+    boost::multi_array<Real,2> M_divPhiRef;
 
     // Check
     bool M_cellNodesUpdated;
@@ -582,15 +648,18 @@ private:
 
     bool M_dphiGeoMapUpdated;
     bool M_jacobianUpdated;
+    bool M_detJacobianUpdated;
     bool M_wDetJacobianUpdated;
     bool M_tInverseJacobianUpdated;
 
     bool M_phiUpdated;
     bool M_dphiUpdated;
     bool M_d2phiUpdated;
+    bool M_phiVectUpdated;
 
     bool M_dphiRefUpdated;
     bool M_d2phiRefUpdated;
+    bool M_divPhiRefUpdated;
 
 // OLD FUNCTIONS
 
@@ -634,12 +703,12 @@ public:
     //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern
     inline int patternFirst( int i ) const
     {
-        return M_refFE.patternFirst( i );
+        return M_refFE->patternFirst( i );
     }
     //! patternSecond(i): column index in the element matrix of the i-th term of the pattern
     inline int patternSecond( int i ) const
     {
-        return M_refFE.patternSecond( i );
+        return M_refFE->patternSecond( i );
     }
 
 
@@ -770,6 +839,7 @@ void CurrentFE::updateJac( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
 }
 
@@ -787,6 +857,7 @@ void CurrentFE::updateJacQuadPt( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     // and the coordinates of the quadrature points
     computeQuadNodes();
@@ -806,6 +877,7 @@ void CurrentFE::updateFirstDeriv( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     computeTInverseJacobian();
     //! product InvJac by dPhiRef to compute phiDer
@@ -827,6 +899,7 @@ void CurrentFE::updateFirstDerivQuadPt( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     computeTInverseJacobian();
     //! product InvJac by dPhiRef to compute phiDer
@@ -851,6 +924,7 @@ void CurrentFE::updateSecondDeriv( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     computeTInverseJacobian();
     //! compute the second derivative
@@ -872,6 +946,7 @@ void CurrentFE::updateSecondDerivQuadPt( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     computeTInverseJacobian();
     //! compute the second derivative
@@ -894,6 +969,7 @@ void CurrentFE::updateFirstSecondDeriv( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     computeTInverseJacobian();
     //! compute phiDer and phiDer2
@@ -916,6 +992,7 @@ void CurrentFE::updateFirstSecondDerivQuadPt( const GEOELE& geoele )
     computeCellNodes(geoele);
     computeDphiGeoMap();
     computeJacobian();
+    computeDetJacobian();
     computeWDetJacobian();
     computeTInverseJacobian();
     //! compute phiDer and phiDer2
