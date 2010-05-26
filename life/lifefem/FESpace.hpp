@@ -391,6 +391,9 @@ public:
 
     template<typename vector_type>
     Real L2Norm( const vector_type& vec );
+    
+    template<typename function>
+    Real L2NormFunction( const function& f);
 
     template<typename vector_type>
     Real H1Norm( const vector_type& vec );
@@ -533,12 +536,16 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
         M_dof			( new Dof( *M_mesh, *M_refFE ) ),
         M_dim			( M_dof->numTotalDof() ),
         M_fe			( new CurrentFE  ( *M_refFE,              getGeoMap( *M_mesh ),               *M_Qr ) ),
-        M_feBd			( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) ),
+        M_feBd			( ),
         M_map			( )
 {
-	Map map( *M_refFE, *M_mesh, comm );
-	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-		M_map += map;
+    if (M_refFE->hasBoundaryFE())
+    {
+        M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+    }
+    Map map( *M_refFE, *M_mesh, comm );
+    for ( UInt ii = 0; ii < M_fieldDim; ++ii )
+        M_map += map;
 }
 
 template <typename Mesh, typename Map>
@@ -569,7 +576,11 @@ FESpace(	partitionMesh<Mesh>&	mesh,
 	M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
 	M_dim = M_dof->numTotalDof();
 	M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
-	M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        
+        if (M_refFE->hasBoundaryFE())
+        {
+            M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        }
 
 	// Build Map
 	Map map( *M_refFE, *M_mesh, comm );
@@ -594,12 +605,17 @@ FESpace(	mesh_ptrtype			mesh,
     M_dof			( new Dof( *M_mesh, *M_refFE ) ),
     M_dim			( M_dof->numTotalDof() ),
     M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
-    M_feBd			( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) ),
+    M_feBd			( ),
     M_map			( )
 {
 	Map map( *M_refFE, *M_mesh, comm );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
 		M_map += map;
+        
+        if (M_refFE->hasBoundaryFE())
+        {
+            M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        }
 }
 
 template <typename Mesh, typename Map>
@@ -630,7 +646,11 @@ FESpace(	mesh_ptrtype			mesh,
 	M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
 	M_dim = M_dof->numTotalDof();
 	M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
-	M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        
+        if (M_refFE->hasBoundaryFE())
+        {
+            M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        };
 
 	// Build Map
 	Map map( *M_refFE, *M_mesh, comm );
@@ -1045,6 +1065,34 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
     }
 
     return sqrt( normU );
+}
+
+template <typename Mesh, typename Map>
+template<typename function>
+Real
+FESpace<Mesh, Map>::L2NormFunction( const function& f)
+{
+    //
+    ID nbComp = M_fieldDim; // Number of components of the mesh velocity
+    //
+    Real sumExact = 0.;
+    //
+    for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
+    {
+        this->fe().update( this->mesh()->element( ielem ), UPDATE_WDET  );
+	
+        sumExact += elemL22( f, this->fe(), static_cast<Real>(0), M_fieldDim );
+    }
+    
+    Real sendbuff[1] = {sumExact};
+    Real recvbuff[1];
+    
+    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
+    
+    sumExact    = recvbuff[0];
+
+    return sqrt( sumExact );
+
 }
 
 template<typename Mesh, typename Map>
