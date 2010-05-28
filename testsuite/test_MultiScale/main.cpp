@@ -77,7 +77,7 @@ makeAbout()
                             "0.1",
                             "Under development",
                             LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2009 EPFL");
+                            "Copyright (c) 2010 EPFL");
 
     about.addAuthor("Cristiano Malossi", "Developer", "cristiano.malossi@epfl.ch", "");
     return about;
