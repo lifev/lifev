@@ -40,12 +40,16 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 MS_Coupling_FluxStress::MS_Coupling_FluxStress() :
-    super              (),
-    M_baseFlux         (),
-    M_baseStress       (),
-    M_baseDeltaFlux    (),
-    M_baseDeltaStress  (),
-    M_stressType       ()
+    super                (),
+    M_baseFlux3D         (),
+    M_baseStress3D       (),
+    M_baseDeltaFlux3D    (),
+    M_baseDeltaStress3D  (),
+    M_baseFlux1D         (),
+    M_baseStress1D       (),
+    M_baseDeltaFlux1D    (),
+    M_baseDeltaStress1D  (),
+    M_stressType         ()
 {
 
 #ifdef DEBUG
@@ -61,12 +65,16 @@ MS_Coupling_FluxStress::MS_Coupling_FluxStress() :
 }
 
 MS_Coupling_FluxStress::MS_Coupling_FluxStress( const MS_Coupling_FluxStress& FluxStress ) :
-    super              ( FluxStress ),
-    M_baseFlux         ( FluxStress.M_baseFlux ),
-    M_baseStress       ( FluxStress.M_baseStress ),
-    M_baseDeltaFlux    ( FluxStress.M_baseDeltaFlux ),
-    M_baseDeltaStress  ( FluxStress.M_baseDeltaStress ),
-    M_stressType       ( FluxStress.M_stressType )
+    super                ( FluxStress ),
+    M_baseFlux3D         ( FluxStress.M_baseFlux3D ),
+    M_baseStress3D       ( FluxStress.M_baseStress3D ),
+    M_baseDeltaFlux3D    ( FluxStress.M_baseDeltaFlux3D ),
+    M_baseDeltaStress3D  ( FluxStress.M_baseDeltaStress3D ),
+    M_baseFlux1D         ( FluxStress.M_baseFlux1D ),
+    M_baseStress1D       ( FluxStress.M_baseStress1D ),
+    M_baseDeltaFlux1D    ( FluxStress.M_baseDeltaFlux1D ),
+    M_baseDeltaStress1D  ( FluxStress.M_baseDeltaStress1D ),
+    M_stressType         ( FluxStress.M_stressType )
 {
 
 #ifdef DEBUG
@@ -84,11 +92,15 @@ MS_Coupling_FluxStress::operator=( const MS_Coupling_FluxStress& FluxStress )
     if ( this != &FluxStress )
     {
         super::operator=( FluxStress );
-        M_baseFlux         = FluxStress.M_baseFlux;
-        M_baseStress       = FluxStress.M_baseStress;
-        M_baseDeltaFlux    = FluxStress.M_baseDeltaFlux;
-        M_baseDeltaStress  = FluxStress.M_baseDeltaStress;
-        M_stressType       = FluxStress.M_stressType;
+        M_baseFlux3D         = FluxStress.M_baseFlux3D;
+        M_baseStress3D       = FluxStress.M_baseStress3D;
+        M_baseDeltaFlux3D    = FluxStress.M_baseDeltaFlux3D;
+        M_baseDeltaStress3D  = FluxStress.M_baseDeltaStress3D;
+        M_baseFlux1D         = FluxStress.M_baseFlux1D;
+        M_baseStress1D       = FluxStress.M_baseStress1D;
+        M_baseDeltaFlux1D    = FluxStress.M_baseDeltaFlux1D;
+        M_baseDeltaStress1D  = FluxStress.M_baseDeltaStress1D;
+        M_stressType         = FluxStress.M_stressType;
     }
     return *this;
 }
@@ -127,26 +139,39 @@ MS_Coupling_FluxStress::SetupCoupling()
     CreateLocalVectors();
 
     //Set Functions
-    M_baseFlux.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionFlux,   this, _1, _2, _3, _4, _5 ) );
-    M_baseStress.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionStress, this, _1, _2, _3, _4, _5 ) );
+    M_baseFlux3D.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionFlux3D,   this, _1, _2, _3, _4, _5 ) );
+    M_baseStress3D.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionStress3D, this, _1, _2, _3, _4, _5 ) );
 
-    M_baseDeltaFlux.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaFlux,   this, _1, _2, _3, _4, _5 ) );
-    M_baseDeltaStress.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaStress, this, _1, _2, _3, _4, _5 ) );
+    M_baseDeltaFlux3D.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaFlux3D,   this, _1, _2, _3, _4, _5 ) );
+    M_baseDeltaStress3D.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaStress3D, this, _1, _2, _3, _4, _5 ) );
+
+    M_baseFlux1D.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionFlux1D,   this, _1 ) );
+    M_baseStress1D.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionStress1D, this, _1 ) );
+
+    M_baseDeltaFlux1D.setFunction  ( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaFlux1D,   this, _1 ) );
+    M_baseDeltaStress1D.setFunction( boost::bind( &MS_Coupling_FluxStress::FunctionDeltaStress1D, this, _1 ) );
 
     // Impose FlowRate
     switch ( M_models[0]->GetType() )
     {
         case Fluid3D:
 
-            ImposeFlux< MS_Model_Fluid3D > ( 0 );
-            ImposeDeltaFlux< MS_Model_Fluid3D > ( 0 );
+            ImposeFlux3D< MS_Model_Fluid3D > ( 0 );
+            ImposeDeltaFlux3D< MS_Model_Fluid3D > ( 0 );
 
             break;
 
         case FSI3D:
 
-            ImposeFlux< MS_Model_FSI3D > ( 0 );
-            ImposeDeltaFlux< MS_Model_FSI3D > ( 0 );
+            ImposeFlux3D< MS_Model_FSI3D > ( 0 );
+            //ImposeDeltaFlux3D< MS_Model_FSI3D > ( 0 );
+
+            break;
+
+        case OneDimensional:
+
+            ImposeFlux1D< MS_Model_1D > ( 0 );
+            //ImposeDeltaFlux1D< MS_Model_1D > ( 0 );
 
             break;
 
@@ -162,15 +187,22 @@ MS_Coupling_FluxStress::SetupCoupling()
         {
             case Fluid3D:
 
-                ImposeStress< MS_Model_Fluid3D > ( i );
-                ImposeDeltaStress< MS_Model_Fluid3D > ( i );
+                ImposeStress3D< MS_Model_Fluid3D > ( i );
+                ImposeDeltaStress3D< MS_Model_Fluid3D > ( i );
 
                 break;
 
             case FSI3D:
 
-                ImposeStress< MS_Model_FSI3D > ( i );
-                ImposeDeltaStress< MS_Model_FSI3D > ( i );
+                ImposeStress3D< MS_Model_FSI3D > ( i );
+                //ImposeDeltaStress3D< MS_Model_FSI3D > ( i );
+
+                break;
+
+            case OneDimensional:
+
+                ImposeStress1D< MS_Model_1D > ( i );
+                //ImposeDeltaStress1D< MS_Model_1D > ( i );
 
                 break;
 
@@ -210,6 +242,13 @@ MS_Coupling_FluxStress::InitializeCouplingVariables()
                 break;
             }
 
+            case OneDimensional:
+            {
+                ( *M_LocalCouplingVariables )[0] -= MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+
+                break;
+            }
+
             default:
 
                 if ( M_displayer->isLeader() )
@@ -229,6 +268,13 @@ MS_Coupling_FluxStress::InitializeCouplingVariables()
         case FSI3D:
         {
             ( *M_LocalCouplingVariables )[1] = MS_DynamicCast< MS_Model_FSI3D >( M_models[0] )->GetBoundaryStress( M_flags[0], M_stressType );
+
+            break;
+        }
+
+        case OneDimensional:
+        {
+            ( *M_LocalCouplingVariables )[1] = MS_DynamicCast< MS_Model_1D >( M_models[0] )->GetBoundaryStress( M_flags[0], M_stressType );
 
             break;
         }
@@ -267,6 +313,13 @@ MS_Coupling_FluxStress::ExportCouplingResiduals( VectorType& CouplingResiduals )
                 break;
             }
 
+            case OneDimensional:
+            {
+                ( *M_LocalCouplingResiduals )[0] -= MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+
+                break;
+            }
+
             default:
 
                 if ( M_displayer->isLeader() )
@@ -286,6 +339,13 @@ MS_Coupling_FluxStress::ExportCouplingResiduals( VectorType& CouplingResiduals )
         case FSI3D:
         {
             ( *M_LocalCouplingResiduals )[1] = MS_DynamicCast< MS_Model_FSI3D >( M_models[0] )->GetBoundaryStress( M_flags[0], M_stressType );
+
+            break;
+        }
+
+        case OneDimensional:
+        {
+            ( *M_LocalCouplingResiduals )[1] = MS_DynamicCast< MS_Model_1D >( M_models[0] )->GetBoundaryStress( M_flags[0], M_stressType );
 
             break;
         }
@@ -379,6 +439,17 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, c
             break;
         }
 
+        case OneDimensional:
+        {
+
+            if ( ModelLocalID == 0 ) // DeltaSigma coefficient
+                Coefficient =  MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaStress( M_flags[ModelLocalID], SolveLinearSystem, M_stressType );
+            else                     // DeltaFlux coefficient
+                Coefficient = -MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux(  M_flags[ModelLocalID], SolveLinearSystem );
+
+            break;
+        }
+
         default:
 
             if ( M_displayer->isLeader() )
@@ -428,6 +499,16 @@ MS_Coupling_FluxStress::DisplayCouplingValues( std::ostream& output )
                 break;
             }
 
+            case OneDimensional:
+            {
+                FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+                Stress          = ( *M_LocalCouplingVariables )[1];
+                Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+                DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+
+                break;
+            }
+
             default:
 
                 if ( M_displayer->isLeader() )
@@ -462,25 +543,49 @@ MS_Coupling_FluxStress::ShowMe()
 // Private Methods
 // ===================================================
 Real
-MS_Coupling_FluxStress::FunctionFlux( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+MS_Coupling_FluxStress::FunctionFlux3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
 {
     return ( *M_LocalCouplingVariables )[0];
 }
 
 Real
-MS_Coupling_FluxStress::FunctionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+MS_Coupling_FluxStress::FunctionStress3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
 {
     return ( *M_LocalCouplingVariables )[1];
 }
 
 Real
-MS_Coupling_FluxStress::FunctionDeltaFlux( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+MS_Coupling_FluxStress::FunctionDeltaFlux3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
 {
     return ( *M_LocalDeltaCouplingVariables )[0];
 }
 
 Real
-MS_Coupling_FluxStress::FunctionDeltaStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+MS_Coupling_FluxStress::FunctionDeltaStress3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+{
+    return ( *M_LocalDeltaCouplingVariables )[1];
+}
+
+Real
+MS_Coupling_FluxStress::FunctionFlux1D( const Real& /*t*/ )
+{
+    return ( *M_LocalCouplingVariables )[0];
+}
+
+Real
+MS_Coupling_FluxStress::FunctionStress1D( const Real& /*t*/ )
+{
+    return ( *M_LocalCouplingVariables )[1];
+}
+
+Real
+MS_Coupling_FluxStress::FunctionDeltaFlux1D( const Real& /*t*/ )
+{
+    return ( *M_LocalDeltaCouplingVariables )[0];
+}
+
+Real
+MS_Coupling_FluxStress::FunctionDeltaStress1D( const Real& /*t*/ )
 {
     return ( *M_LocalDeltaCouplingVariables )[1];
 }

@@ -366,7 +366,8 @@ MS_Model_MultiScale::loadModels( const std::string& FileName )
 
         M_modelsList[id] = Model_ptrType( FactoryModels::instance().createObject( model ) );
         M_modelsList[id]->SetCommunicator( M_comm );
-        M_modelsList[id]->SetupData( path + DataFile( "Problem/models", "undefined", i * columnNumber + 2 ) + ".dat" );
+        M_modelsList[id]->SetupData( path + Enum2String( model, modelsMap ) + "/"
+                                          + DataFile( "Problem/models", "undefined", i * columnNumber + 2 ) + ".dat" );
     }
 }
 
@@ -392,7 +393,8 @@ MS_Model_MultiScale::loadCouplings( const std::string& FileName )
 
         M_couplingsList[id] = Coupling_ptrType( FactoryCouplings::instance().createObject( coupling ) );
         M_couplingsList[id]->SetCommunicator( M_comm );
-        M_couplingsList[id]->SetupData( path + DataFile( "Problem/couplings", "undefined", i * columnNumber + 2 ) + ".dat" );
+        M_couplingsList[id]->SetupData( path + Enum2String( coupling, couplingsMap ) + "/"
+                                             + DataFile( "Problem/couplings", "undefined", i * columnNumber + 2 ) + ".dat" );
 
         modelsIDVector = string2numVect< UInt > ( DataFile( "Problem/couplings", "undefined", i * columnNumber + 3 ) );
         flagsIDVector  = string2numVect< UInt > ( DataFile( "Problem/couplings", "undefined", i * columnNumber + 4 ) );

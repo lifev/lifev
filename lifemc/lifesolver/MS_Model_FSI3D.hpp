@@ -25,74 +25,38 @@
 //@HEADER
 
 /*!
-    @file
-    @brief A short description of the file content
-
-    @author Paolo Crosetto <paolo.crosetto@epfl.ch>
-    @date 19 Apr 2010
-
-    A more detailed description of the file (if necessary)
+ *  @file
+ *  @brief MultiScale Model FSI3D
+ *
+ *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *  @date 19-04-2010
+ *
  */
 
 #ifndef MS_MODEL_FSI3D_H
 #define MS_MODEL_FSI3D_H 1
 
+// Mathcard includes
+#include <lifemc/lifealg/AztecOOPreconditioner.hpp>
+#include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
-#include <lifemc/lifesolver/BCInterface.hpp>
-
+// LifeV includes
 #include <life/lifesolver/FSISolver.hpp>
 
-#include <life/lifecore/life.hpp>
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/noexport.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
+    #include <life/lifefilters/hdf5exporter.hpp>
 #endif
-
 
 namespace LifeV {
 
-//! MS_Model_FSI3D -
+//! MS_Model_FSI3D - MultiScale model for 3D FSI simulations
 /*!
-    @author Paolo Crosetto
-    @see Reference to papers (if available)
-
-    Here write a long and detailed description of the class.
-
-    For this purpose you can use a lot of standard HTML code.
-    Here there is a list with some useful examples:
-
-    For bold text use: <b>BOLD TEXT</b>
-
-    For empatyze a word type @e followed by the word
-
-    For verbatim a word type @c followed by the word
-
-    For vertical space (empty lines) use: <br>
-
-    For creating list type:
-    <ol>
-        <li> First element of the enumerated list
-        <ul>
-             <li> First element of the dotted sublist.
-             <li> Second element of the dotted sublist
-        </ul>
-        <li> Second element of the enumerated list
-        <li> Third element of the enumerated list
-    </ol>
-
-    For writing a warning type: @warning followed by the description
-    of the warning
-
-    It is possible to use a lot of other standard HTML commands.
-    Visit http://www.stack.nl/~dimitri/doxygen/htmlcmds.html for
-    a detailed list.
-
-    For any other kind of information visit www.doxygen.org.
+ *  @author Paolo Crosetto
  */
-class MS_Model_FSI3D:
-       public virtual MS_PhysicalModel
+class MS_Model_FSI3D: public virtual MS_PhysicalModel
 {
 public:
 
@@ -128,14 +92,10 @@ public:
     //! Constructor
     MS_Model_FSI3D();
 
-private:
-    MS_Model_FSI3D( const MS_Model_FSI3D& FSI3D ){}
-public:
     //! Destructor
     ~MS_Model_FSI3D();
 
     //@}
-
 
 
     //! @name MultiScale PhysicalModel Virtual Methods
@@ -172,6 +132,7 @@ public:
     void ShowMe();
 
     //@}
+
 
     //! @name Get Methods (couplings)
     //@{
@@ -288,33 +249,35 @@ public:
 
     //@}
 
-
 private:
 
-    void
-    SetUpExporter( filter_ptrtype& exporter, const std::string name, const GetPot& dataFile );
-    void
-    SetExporterFluid(const filter_ptrtype& exporter);
-    void
-    SetExporterSolid(const filter_ptrtype& exporter);
-    void updateBCSegregated(const std::string& dataFileName);
-    void updateBCMonolithic(const std::string& dataFileName);
+    //! @name Private Methods
+    //@{
 
-    filter_ptrtype                        M_exporterSolid;
-    filter_ptrtype                        M_exporterFluid;
+    void SetUpExporter( filter_ptrtype& exporter, const std::string name, const GetPot& dataFile );
+    void SetExporterFluid( const filter_ptrtype& exporter );
+    void SetExporterSolid( const filter_ptrtype& exporter );
+    void updateBCSegregated( const std::string& dataFileName );
+    void updateBCMonolithic( const std::string& dataFileName );
+
+    //@}
+
     FSISolverPtrType                      M_solver;
+    filter_ptrtype                        M_exporterFluid;
+    filter_ptrtype                        M_exporterSolid;
     vector_ptrtype                        M_solidDisp;
     vector_ptrtype                        M_solidVel;
     vector_ptrtype                        M_velAndPressure;
     vector_ptrtype                        M_fluidDisp;
-    //Real                                  M_time;
-    boost::shared_ptr< BCInterface_Type >       M_fluidBC;
+
+    boost::shared_ptr< BCInterface_Type >    M_fluidBC;
     boost::shared_ptr< solid_bc_type >       M_solidBC;
     boost::shared_ptr< solid_bc_type >       M_harmonicExtensionBC;
-    boost::shared_ptr< BCInterface_Type >       M_linearizedFluidBC;
+    boost::shared_ptr< BCInterface_Type >    M_linearizedFluidBC;
     boost::shared_ptr< solid_bc_type >       M_linearizedSolidBC;
 };
 
+//! Factory create function
 inline MS_PhysicalModel* createModelFSI3D()
 {
     return new MS_Model_FSI3D();

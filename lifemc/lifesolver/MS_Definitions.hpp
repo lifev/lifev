@@ -85,19 +85,19 @@ enum algorithmsTypes
  */
 enum modelsTypes
 {
-    MultiScale,          /*!< MultiScale model */
     Fluid3D,             /*!< Fluid (Oseen) 3D model */
-    OneDimensionalModel, /*!< FSI 1D model */
-    FSI3D                /*!< FSI 3D model */
+    FSI3D,               /*!< FSI 3D model */
+    MultiScale,          /*!< MultiScale model */
+    OneDimensional       /*!< 1D model */
 };
 
 /*! @enum couplingsTypes
  */
 enum couplingsTypes
 {
-    BoundaryCondition, /*!< Boundary condition */
-    Stress,            /*!< All stress coupling condition */
-    FluxStress         /*!< Flux/stress coupling condition */
+    BoundaryCondition,   /*!< Boundary condition */
+    FluxStress,          /*!< Flux/stress coupling condition */
+    Stress               /*!< All stress coupling condition */
 };
 
 /*! @enum stressTypes
@@ -175,14 +175,14 @@ typedef singleton< factory< CouplingType, couplingsTypes > >      FactoryCouplin
 inline void
 MS_MapsDefinition()
 {
-    modelsMap["MultiScale"]           = MultiScale;
-    modelsMap["Fluid3D"]              = Fluid3D;
-    modelsMap["OneDimensionalModel"]  = OneDimensionalModel;
-    modelsMap["FSI3D"]                = FSI3D;
+    modelsMap["Fluid3D"]         = Fluid3D;
+    modelsMap["FSI3D"]           = FSI3D;
+    modelsMap["MultiScale"]      = MultiScale;
+    modelsMap["OneDimensional"]  = OneDimensional;
 
     couplingsMap["BoundaryCondition"] = BoundaryCondition;
-    couplingsMap["Stress"]            = Stress;
     couplingsMap["FluxStress"]        = FluxStress;
+    couplingsMap["Stress"]            = Stress;
 
     algorithmMap["Aitken"]            = Aitken;
     algorithmMap["Newton"]            = Newton;
