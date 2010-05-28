@@ -201,6 +201,7 @@ MS_Model_1D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& Physic
     //Global physical quantities
     M_Data->setDensity( PhysicalData->GetFluidDensity() );
     M_Data->setViscosity( PhysicalData->GetFluidViscosity() );
+    M_Data->setDensityWall( PhysicalData->GetStructureDensity() );
     M_Data->setPoisson( PhysicalData->GetStructurePoissonCoefficient() );
     M_Data->setYoung( PhysicalData->GetStructureYoungModulus() );
 

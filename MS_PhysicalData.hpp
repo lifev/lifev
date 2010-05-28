@@ -135,6 +135,12 @@ public:
     /*!
      * @return Poisson coefficient of the structure.
      */
+    const Real& GetStructureDensity() const;
+
+    //! Get the global structural density.
+    /*!
+     * @return density of the structure.
+     */
     const Real& GetStructurePoissonCoefficient() const;
 
     // //! Get the global structural thickness.
@@ -158,6 +164,7 @@ private:
     Real                                M_FluidDensity;
     Real                                M_FluidViscosity;
 
+    Real                                M_StructureDensity;
     Real                                M_StructurePoissonCoefficient;
     //Real                                M_StructureThickness;
     Real                                M_StructureYoungModulus;
