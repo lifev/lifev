@@ -247,6 +247,53 @@ public:
      */
     Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
 
+    //! Get the BCInterface container of the boundary conditions of the linear model
+    /*!
+     * @return BCInterface container
+     */
+    BCInterface_Type& GetLinearBCInterface();
+
+    //! Get the variation of the area (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the area
+     */
+    Real GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the flux (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the flux
+     */
+    Real GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the pressure (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the pressure
+     */
+    Real GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the total pressure (on a specific boundary face) using the linear model
+    /*!
+     * @param Flag flag of the boundary face on which quantity should be computed
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the dynamic pressure
+     */
+    Real GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+
+    //! Get the variation of the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param StressType Type of approximation for the stress
+     * @return variation of the stress
+     */
+    Real GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
+
     //@}
 
 
@@ -335,7 +382,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createOneDimensionalModel()
+inline MS_PhysicalModel* createOneDimensional()
 {
     return new MS_Model_1D();
 }
