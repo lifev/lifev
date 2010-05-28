@@ -224,7 +224,7 @@ MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
             output << "  " << M_PhysicalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
                                                                        << "    " << M_flags[i]
                                                                        << "    " << FlowRate
-                                                                       << "    " << "NaN          "
+                                                                       << "    " << "NaN                   "
                                                                        << "    " << Pressure
                                                                        << "    " << DynamicPressure << std::endl;
     }
