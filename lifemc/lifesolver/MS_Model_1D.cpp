@@ -61,7 +61,7 @@ MS_Model_1D::MS_Model_1D() :
     Debug( 8130 ) << "MS_Model_1D::MS_Model_1D() \n";
 #endif
 
-    M_type = OneDimensionalModel;
+    M_type = OneDimensional;
 
     //Define the maps of the OneDimensionalModel objects
     OneDimensionalModel_MapsDefinition();
@@ -133,11 +133,21 @@ MS_Model_1D::SetupData( const std::string& FileName )
     Debug( 8130 ) << "MS_Model_1D::SetupData( ) \n";
 #endif
 
+    // Preliminary setup of the communicator
+#ifdef EPETRA_MPI
+    MPI_Comm LocalComm;
+    MPI_Comm_split( ( dynamic_cast<Epetra_MpiComm*> ( &(*M_comm) ) )->Comm(), M_comm->MyPID(), M_comm->MyPID(), &LocalComm );
+    M_comm.reset( new Epetra_MpiComm( LocalComm ) );
+#else
+    M_comm.reset( new Epetra_SerialComm() );
+#endif
+
     super::SetupData( FileName );
 
     GetPot DataFile( FileName );
 
     M_Data->setup( DataFile );
+    //M_Data->showMe();
 
     //1D Model Physics
     M_Physics = Physics_PtrType( Factory_OneDimensionalModel_Physics::instance().createObject( M_Data->PhysicsType() ) );
@@ -182,7 +192,7 @@ MS_Model_1D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& Physic
 {
 
 #ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_1D::SetupGlobalData( ) \n";
+    Debug( 8130 ) << "MS_Model_1D::SetupGlobalData( ) \n";
 #endif
 
     //Global data time
@@ -232,6 +242,7 @@ MS_Model_1D::SetupModel()
     M_Exporter->addVariable( ExporterData::Scalar, "W2",        M_Solution[3], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
     M_Exporter->addVariable( ExporterData::Scalar, "Pressure",  M_Solution[4], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
 #endif
+
 }
 
 void
@@ -242,6 +253,7 @@ MS_Model_1D::BuildSystem()
     Debug( 8130 ) << "MS_Model_1D::BuildSystem() \n";
 #endif
 
+    //M_Data->showMe();
     M_Solver->initialize();
 }
 
@@ -253,18 +265,38 @@ MS_Model_1D::UpdateSystem()
     Debug( 8130 ) << "MS_Model_1D::UpdateSystem() \n";
 #endif
 
-    M_Solver->timeAdvance();
 }
 
 void
 MS_Model_1D::SolveSystem()
 {
+
 #ifdef DEBUG
     Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
 #endif
 
-    M_BC->UpdateOperatorVariables();
-    M_Solver->iterate( *M_BC->GetHandler() );
+    // Subiterate to respect CFL
+    UInt SubiterationNumber(1);
+    Real timeStep = M_Data->dataTime()->getTimeStep();
+
+    Real CFL = M_Solver->ComputeCFL( M_Data->dataTime()->getTimeStep() );
+    if ( CFL > M_Data->CFLmax() )
+    {
+        SubiterationNumber = std::ceil( CFL / M_Data->CFLmax() );
+        timeStep /= SubiterationNumber;
+    }
+
+    if ( M_displayer->isLeader() )
+        std::cout << " 1D-  CFL                                      " << CFL*timeStep/M_Data->dataTime()->getTimeStep() << std::endl;
+
+    for ( UInt i(0) ; i < SubiterationNumber ; ++i )
+    {
+        if ( M_displayer->isLeader() )
+            std::cout << " 1D-  Subiteration                             " << (i+1) << "/" << SubiterationNumber << std::endl;
+
+        M_BC->UpdateOperatorVariables();
+        M_Solver->iterate( *M_BC->GetHandler(), M_Data->dataTime()->getTime() + i*timeStep, timeStep );
+    }
 }
 
 void
@@ -286,6 +318,8 @@ MS_Model_1D::SaveSolution()
         M_Exporter->CloseFile();
 #endif
 
+    //Matlab post-processing
+    //M_Solver->postProcess( M_Data->dataTime()->getTime() );
 }
 
 void
@@ -366,7 +400,7 @@ MS_Model_1D::GetBoundaryArea( const BCFlag& Flag ) const
 Real
 MS_Model_1D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( OneD_Q, (Flag == 0) ? OneD_left : OneD_right );
+    return M_Solver->BoundaryValue( OneD_Q, (Flag == 0) ? OneD_left : OneD_right );;
 }
 
 Real
@@ -378,8 +412,7 @@ MS_Model_1D::GetBoundaryPressure( const BCFlag& Flag ) const
 Real
 MS_Model_1D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 {
-    return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
-                                            / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    return 0.5 * GetBoundaryDensity( Flag ) * std::pow( GetBoundaryFlowRate( Flag ) / GetBoundaryArea( Flag ), 2 );
 }
 
 Real
@@ -398,10 +431,73 @@ MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressTyp
         }
 
         default:
-
+        {
             std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
 
             return 0.0;
+        }
+    }
+}
+
+MS_Model_1D::BCInterface_Type&
+MS_Model_1D::GetLinearBCInterface()
+{
+    //return *M_LinearFluidBC;
+}
+
+Real
+MS_Model_1D::GetBoundaryDeltaFlux( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return M_Fluid->GetLinearFlux( Flag );
+}
+
+Real
+MS_Model_1D::GetBoundaryDeltaArea( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return M_Solver->BoundaryValue( OneD_A, (Flag == 0) ? OneD_left : OneD_right );
+}
+
+Real
+MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return M_Fluid->GetLinearPressure( Flag );
+}
+
+Real
+MS_Model_1D::GetBoundaryDeltaDynamicPressure( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+{
+    //SolveLinearModel( SolveLinearSystem );
+
+    //return GetBoundaryDensity( Flag ) * M_Fluid->GetLinearFlux( Flag ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+}
+
+Real
+MS_Model_1D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
+{
+    switch ( StressType )
+    {
+        case StaticPressure:
+        {
+            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
+        }
+
+        case TotalPressure:
+        {
+            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+        }
+
+        default:
+        {
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+
+            return 0.0;
+        }
     }
 }
 
@@ -473,7 +569,13 @@ MS_Model_1D::SetupFESpace()
     NullTransformation[0] = 0.; NullTransformation[1] = 0.; NullTransformation[2] = 0.;
 
     //The real mesh can be only scaled due to OneDimensionalModel_Solver conventions
-    M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation );
+    M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x-dimension
+
+    for ( UInt i(0); i < M_Data->NumberOfNodes() ; ++i )
+        M_Data->setArea0( M_Data->Area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area
+
+    //After changing some parameters we need to update the coefficients
+    M_Data->UpdateCoefficients();
 
 #ifdef HAVE_HDF5
     //The mesh for the post-processing can be rotated
