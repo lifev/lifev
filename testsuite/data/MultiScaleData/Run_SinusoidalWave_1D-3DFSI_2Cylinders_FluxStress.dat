@@ -111,6 +111,7 @@ MS_problem = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D-3DFSI_2Cylinde
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+StructureDensity            = 1.2           # density        [g/cm^3]
 StructurePoissonCoefficient = 0.48          # Poisson coeff. []
 StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

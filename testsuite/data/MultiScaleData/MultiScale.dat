@@ -132,6 +132,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
 ###################################################################################################
 FluidDensity	            = 0.895347939450773     # density        [g/cm^3]
 FluidViscosity	            = 0.00189998733800979   # viscosity      [g/cm/s]
+StructureDensity            = 0                     # density        [g/cm^3]
 StructurePoissonCoefficient = 0                     # Poisson coeff. []
 StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################
