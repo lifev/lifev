@@ -41,6 +41,7 @@
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
 #include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
+#include <lifemc/lifesolver/MS_Model_1D.hpp>
 
 namespace LifeV {
 
@@ -147,13 +148,21 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Apply the boundary condition to the specific model
+    //! Apply the boundary condition to the specific 1D model
     template< class model >
-    inline void ApplyBoundaryConditions( const UInt& i );
+    inline void ApplyBoundaryConditions1D( const UInt& i );
 
-    //! Apply the boundary condition to linear version of the specific model
+    //! Apply the boundary condition to linear version of the specific 1D model
     template< class model >
-    inline void ApplyDeltaBoundaryConditions( const UInt& i );
+    inline void ApplyDeltaBoundaryConditions1D( const UInt& i );
+
+    //! Apply the boundary condition to the specific 3D model
+    template< class model >
+    inline void ApplyBoundaryConditions3D( const UInt& i );
+
+    //! Apply the boundary condition to linear version of the specific 3D model
+    template< class model >
+    inline void ApplyDeltaBoundaryConditions3D( const UInt& i );
 
     //@}
 
@@ -174,7 +183,42 @@ inline MS_PhysicalCoupling* createBoundaryCondition()
 // ===================================================
 template< class model >
 inline void
-MS_Coupling_BoundaryCondition::ApplyBoundaryConditions( const UInt& i )
+MS_Coupling_BoundaryCondition::ApplyBoundaryConditions1D( const UInt& i )
+{
+    model *Model = MS_DynamicCast< model >( M_models[i] );
+
+    for ( UInt j( 0 ); j < M_listSize; ++j )
+    {
+        Model->GetBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
+
+        Model->GetBCInterface().GetDataContainer().SetSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
+
+        Model->GetBCInterface().InsertBC();
+    }
+}
+
+template< class model >
+inline void
+MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions1D( const UInt& i )
+{
+    model *Model = MS_DynamicCast< model >( M_models[i] );
+
+    for ( UInt j( 0 ); j < M_listSize; ++j )
+    {
+        Model->GetLinearBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
+
+        Model->GetLinearBCInterface().GetDataContainer().SetSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
+
+        Model->GetLinearBCInterface().GetDataContainer().SetBase( make_pair( "function", BCInterface1D_function ) );
+        Model->GetLinearBCInterface().GetDataContainer().SetBaseString( "0" );
+
+        Model->GetLinearBCInterface().InsertBC();
+    }
+}
+
+template< class model >
+inline void
+MS_Coupling_BoundaryCondition::ApplyBoundaryConditions3D( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
@@ -191,7 +235,7 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions( const UInt& i )
 
 template< class model >
 inline void
-MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions( const UInt& i )
+MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions3D( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 

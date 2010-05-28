@@ -62,7 +62,7 @@ MS_Solver::MS_Solver() :
     //Register the objects
     FactoryModels::instance().registerProduct   (  MultiScale,          &createMultiScale );
     FactoryModels::instance().registerProduct   (  Fluid3D,             &createFluid3D );
-    FactoryModels::instance().registerProduct   (  OneDimensionalModel, &createOneDimensionalModel );
+    FactoryModels::instance().registerProduct   (  OneDimensional,      &createOneDimensional );
     FactoryModels::instance().registerProduct   (  FSI3D,               &createModelFSI3D );
 
     FactoryCouplings::instance().registerProduct(  Stress,              &createStress );
@@ -227,8 +227,8 @@ MS_Solver::ShowMe()
         std::cout << std::endl << std::endl
                   << "=============== MultiScale Solver Information ===============" << std::endl << std::endl;
 
-        std::cout << "Problem folder      = " << MS_ProblemFolder << std::endl
-                  << "Problem step        = " << MS_ProblemStep << std::endl << std::endl;
+        std::cout << "Problem folder                = " << MS_ProblemFolder << std::endl
+                  << "Problem step                  = " << MS_ProblemStep << std::endl << std::endl;
 
         M_dataPhysics->ShowMe();
 
