@@ -30,7 +30,8 @@ thickness            = 0.056
 young                = 4.0E6 # g/cm/s^2 (dyne/cm^2)
 poisson              = 0.48
 
-AlphaCoriolis        = 1            # coriolis coeff
+# Use Fixed Coefficients
+AlphaCoriolis        = 1            # Coriolis Coefficients
 Beta0                = 1.e6         # pressure law exponent
 Beta1                = 0.5          # pressure law exponent
 Kr                   = 2.419026343  # friction parameter (source term)
@@ -59,7 +60,7 @@ multiplier           = 1
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name
 verbose              = 1
-showCFL              = 1
+CFLmax               = 0.5774       # Maximum admissible value of the CFL 
 
 [../solver]
 
@@ -76,13 +77,13 @@ showCFL              = 1
     
     [./Inlet]
     side       = left
-    type       = Q
+    quantity   = Q
     line       = first
     function   = 'a=10; p=0.01; (t<p)*a*sin(2*pi*t/p)'
     
     [../Outlet]
     side       = right
-    type       = W2
+    quantity   = W2
     line       = first
     Default    = Absorbing
     

@@ -34,7 +34,6 @@
  *
  *  @version 2.0
  *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 01-01-2010
  */
 
@@ -100,163 +99,160 @@ int main(int argc, char** argv)
     comm.reset( new Epetra_SerialComm() );
 #endif
 
-  // *********************************
-  // Useful typedefs
-  // *********************************
-  typedef MS_Model_1D::Physics_Type                Physics_Type;
-  typedef MS_Model_1D::Flux_Type                   Flux_Type;
-  typedef MS_Model_1D::Source_Type                 Source_Type;
+    // *********************************
+    // Useful typedefs
+    // *********************************
+    typedef MS_Model_1D::Physics_Type                Physics_Type;
+    typedef MS_Model_1D::Flux_Type                   Flux_Type;
+    typedef MS_Model_1D::Source_Type                 Source_Type;
 
-  typedef MS_Model_1D::BC_Type                     BC_Type;
-  typedef BC_Type::BCFunction_Type                 BCFunction_Type;
+    typedef MS_Model_1D::BC_Type                     BC_Type;
+    typedef BC_Type::BCFunction_Type                 BCFunction_Type;
 
-  // *********************************
-  // ***** Reading from data file
-  // *********************************
-  GetPot command_line(argc,argv);
+    // *********************************
+    // Reading from data file
+    // *********************************
+    GetPot command_line(argc,argv);
 
-  // checking if we are checking for the nightly build
-  const bool check = command_line.search(2, "-c", "--check");
+    // checking if we are checking for the nightly build
+    const bool check = command_line.search(2, "-c", "--check");
 
-  string FileName = command_line.follow("data", 2, "-f","--file");
-  GetPot DataFile(FileName);
+    string FileName = command_line.follow("data", 2, "-f","--file");
+    GetPot DataFile(FileName);
 
-  // *********************************
-  // Build the 1D model
-  // *********************************
-  MS_Model_1D OneDModel;
-  OneDModel.SetCommunicator(comm);
+    // *********************************
+    // Build the 1D model
+    // *********************************
+    MS_Model_1D OneDModel;
+    OneDModel.SetCommunicator(comm);
 
-  // Scale, Rotate, Translate 1D (if necessary)
-  boost::array< Real, NDIM >    geometryScale;
-  boost::array< Real, NDIM >    geometryRotate;
-  boost::array< Real, NDIM >    geometryTranslate;
+    // Scale, Rotate, Translate 1D (if necessary)
+    boost::array< Real, NDIM >    geometryScale;
+    boost::array< Real, NDIM >    geometryRotate;
+    boost::array< Real, NDIM >    geometryTranslate;
 
-  geometryScale[0] = DataFile( "1D_Model/space_discretization/transform", 1., 0);
-  geometryScale[1] = DataFile( "1D_Model/space_discretization/transform", 1., 1);
-  geometryScale[2] = DataFile( "1D_Model/space_discretization/transform", 1., 2);
+    geometryScale[0] = DataFile( "1D_Model/space_discretization/transform", 1., 0);
+    geometryScale[1] = DataFile( "1D_Model/space_discretization/transform", 1., 1);
+    geometryScale[2] = DataFile( "1D_Model/space_discretization/transform", 1., 2);
 
-  geometryRotate[0] = DataFile( "1D_Model/space_discretization/transform", 0., 3) * Pi / 180;
-  geometryRotate[1] = DataFile( "1D_Model/space_discretization/transform", 0., 4) * Pi / 180;
-  geometryRotate[2] = DataFile( "1D_Model/space_discretization/transform", 0., 5) * Pi / 180;
+    geometryRotate[0] = DataFile( "1D_Model/space_discretization/transform", 0., 3) * Pi / 180;
+    geometryRotate[1] = DataFile( "1D_Model/space_discretization/transform", 0., 4) * Pi / 180;
+    geometryRotate[2] = DataFile( "1D_Model/space_discretization/transform", 0., 5) * Pi / 180;
 
-  geometryTranslate[0] = DataFile( "1D_Model/space_discretization/transform", 0., 6);
-  geometryTranslate[1] = DataFile( "1D_Model/space_discretization/transform", 0., 7);
-  geometryTranslate[2] = DataFile( "1D_Model/space_discretization/transform", 0., 8);
+    geometryTranslate[0] = DataFile( "1D_Model/space_discretization/transform", 0., 6);
+    geometryTranslate[1] = DataFile( "1D_Model/space_discretization/transform", 0., 7);
+    geometryTranslate[2] = DataFile( "1D_Model/space_discretization/transform", 0., 8);
 
-  OneDModel.SetGeometry( geometryScale, geometryRotate, geometryTranslate );
+    OneDModel.SetGeometry( geometryScale, geometryRotate, geometryTranslate );
 
-  OneDModel.SetupData( FileName );
+    OneDModel.SetupData( FileName );
 
-  // Set BC using BCInterface
-  //OneDModel.GetBCInterface().FillHandler( FileName, "1D_Model" );
+    // *********************************
+    // BC for the 1D model
+    // *********************************
 
-  // Set BC using standard approach
-  Sin sinus;
-  BCFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
+    // Set BC using BCInterface
+    //OneDModel.GetBCInterface().FillHandler( FileName, "1D_Model" );
 
-  // Absorbing
-  BC_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDModel.GetFlux(),
-                                                                                                OneDModel.GetSource(),
-                                                                                                OneDModel.GetSolver()->U_thistime(),
-                                                                                                OneD_right, OneD_W2 ) );
-  BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
-                                      dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1 ) );
+    // Set BC using standard approach
+    Sin sinus;
+    BCFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
+    // Absorbing
+    BC_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDModel.GetFlux(),
+                                                                                                  OneDModel.GetSource(),
+                                                                                                  OneDModel.GetSolver()->U_thistime(),
+                                                                                                  OneD_right, OneD_W2 ) );
+    BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
+                                        dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
-  // BC to test A_from_P conversion
-  //Constant constantArea( 1.05 );
-  //BCFunction_Type constantAreaFunction( boost::bind( &Constant::operator(), &constantArea, _1 ) );
+    // BC to test A_from_P conversion
+    //Constant constantArea( 1.05 );
+    //BCFunction_Type constantAreaFunction( boost::bind( &Constant::operator(), &constantArea, _1 ) );
 
-  //Constant constantPressure( 24695.0765959599 );
-  //BCFunction_Type constantPressureFunction( boost::bind( &Constant::operator(), &constantPressure, _1 ) );
+    //Constant constantPressure( 24695.0765959599 );
+    //BCFunction_Type constantPressureFunction( boost::bind( &Constant::operator(), &constantPressure, _1 ) );
 
-  OneDModel.GetBC().setBC( OneD_left,  OneD_first, OneD_Q,  sinusoidalFunction  );
-  OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_W2, absorbingFunction );
+    OneDModel.GetBC().setBC( OneD_left,  OneD_first, OneD_Q,  sinusoidalFunction  );
+    OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_W2, absorbingFunction );
 
-  //OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_A,   constantAreaFunction );
-  //OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_P,   constantPressureFunction );
+    //OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_A,   constantAreaFunction );
+    //OneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_P,   constantPressureFunction );
 
-  OneDModel.SetupModel();
+    OneDModel.SetupModel();
 
-  // *********************************
-  // Tempolar loop
-  // *********************************
-  printf("\nTemporal loop:\n");
+    // *********************************
+    // Tempolar loop
+    // *********************************
+    printf("\nTemporal loop:\n");
 
-  Chrono chronota;
-  Chrono chronoit;
+    Chrono chronota;
+    Chrono chronoit;
+    Chrono chrono;
 
-  Chrono chrono;
+    int count = 0;
 
-  int count = 0;
-
-  OneDModel.BuildSystem();
-  for ( ; OneDModel.GetData().dataTime()->canAdvance() ; OneDModel.GetData().dataTime()->updateTime() )
-  {
-      std::cout << std::endl;
-      std::cout << "--------- Iteration " << count << " time = " << OneDModel.GetData().dataTime()->getTime() << std::endl;
-
-    count++;
-
-    chrono.start();
-    Debug(6030) << "[main] 1d model time advance\n";
-    chronota.start();
-    OneDModel.UpdateSystem();
-    chronota.stop();
-
-    Debug(6030) << "[main] 1d model iterate\n";
-    chronoit.start();
-    OneDModel.SolveSystem();
-    chronoit.stop();
-
-    //if ( !( static_cast<int>( std::floor( count%postprocess_it))) )
+    for ( ; OneDModel.GetData().dataTime()->canAdvance() ; OneDModel.GetData().dataTime()->updateTime(), ++count )
     {
-        //std::cout << "PostProcessing at time ... " << OneDModel.GetData().dataTime()->getTime() << std::endl;
-        //OneDModel.GetSolver()->postProcess( OneDModel.GetData().dataTime()->getTime() );
+        std::cout << std::endl << "--------- Iteration " << count << " time = " << OneDModel.GetData().dataTime()->getTime() << std::endl;
+
+        chrono.start();
+        Debug(6030) << "[main] 1d model time advance\n";
+        chronota.start();
+        if ( OneDModel.GetData().dataTime()->isFirstTimeStep() )
+            OneDModel.BuildSystem();
+        else
+            OneDModel.UpdateSystem();
+        chronota.stop();
+
+        Debug(6030) << "[main] 1d model iterate\n";
+        chronoit.start();
+        OneDModel.SolveSystem();
+        chronoit.stop();
+
+		//Save solution
         OneDModel.SaveSolution();
+
+        chrono.stop();
+
+        std::cout << " time adv. computed in " << chronota.diff() << " iter computed in " << chronoit.diff()
+                  << " total " << chrono.diff() << " s." << std::endl;
     }
 
-    chrono.stop();
+    printf("\nSimulation ended successfully.\n");
 
-    std::cout << " time adv. computed in " << chronota.diff() << " iter computed in " << chronoit.diff()
-              << " total " << chrono.diff() << " s." << std::endl;
-  }
-
-  printf("\nSimulation ended successfully.\n");
-
-#ifdef HAVE_MPI
+    #ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
-#endif
+    #endif
 
-  if ( check )
-  {
-      bool ok = true;
-      int rightnodeid = OneDModel.GetSolver()->RightNodeId();
+    if ( check )
+    {
+        bool ok = true;
+        int rightnodeid = OneDModel.GetSolver()->RightNodeId();
 
 
-      ok = ok && checkValue( 0.999998  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00138076, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue(-0.00276153, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 0]);
-      ok = ok && checkValue( 0.00000000, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 0]);
+        ok = ok && checkValue( 0.999998  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 0]);
+        ok = ok && checkValue(-0.00138076, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 0]);
+        ok = ok && checkValue(-0.00276153, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 0]);
+        ok = ok && checkValue( 0.00000000, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 0]);
 
-      ok = ok && checkValue( 0.999999  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00040393, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue(-0.00080833, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 1]);
-      ok = ok && checkValue( 0.00000045, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 1]);
+        ok = ok && checkValue( 0.999999  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 1]);
+        ok = ok && checkValue(-0.00040393, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 1]);
+        ok = ok && checkValue(-0.00080833, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 1]);
+        ok = ok && checkValue( 0.00000045, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 1]);
 
-      if (ok)
-      {
-          std::cout << "Test succesful" << std::endl;
-          return 0;
-      }
-      else
-      {
-          std::cout << "Test unseccesful" << std::endl;
-          return -1;
-      }
-  }
-  else
-      return 0;
+        if (ok)
+        {
+            std::cout << "Test succesful" << std::endl;
+            return 0;
+        }
+        else
+        {
+            std::cout << "Test unseccesful" << std::endl;
+            return -1;
+        }
+    }
+    else
+        return 0;
 }
