@@ -79,7 +79,7 @@ enum NSStabilization
 };
 
 //! DataNavierStokes - LifeV Base class which holds usual data for the NavierStokes equations solvers
-/*
+/*!
  *  @author M.A. Fernandez, Cristiano Malossi, Samuel Quinodoz
  *
  */
@@ -101,8 +101,7 @@ public:
     DataNavierStokes();
 
     //! Constructor
-	// DataNavierStokes( const GetPot& dataFile,  const Time_ptrType DataTime, const Mesh_ptrType DataMesh )
-        ;
+	// DataNavierStokes( const GetPot& dataFile,  const Time_ptrType DataTime, const Mesh_ptrType DataMesh );
 
 	//! Copy constructor
 	/*!
