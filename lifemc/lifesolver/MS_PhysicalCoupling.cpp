@@ -248,7 +248,7 @@ MS_PhysicalCoupling::SaveSolution()
 #endif
 
     std::ofstream output;
-    output << std::scientific << std::setprecision( 6 );
+    output << std::scientific << std::setprecision( 15 );
 
     if ( M_comm->MyPID() == 0 )
     {
@@ -258,7 +258,7 @@ MS_PhysicalCoupling::SaveSolution()
         {
             output.open( filename.c_str(), std::ios::trunc );
             output << "% Coupling Type: " << Enum2String( M_type, couplingsMap ) << std::endl << std::endl;
-            output << "% TIME            ID   FLAG FLUX            STRESS           S. PRESSURE     D. PRESSURE" << std::endl;
+            output << "% TIME                     ID   FLAG FLUX                     STRESS                    S. PRESSURE              D. PRESSURE" << std::endl;
         }
         else
             output.open( filename.c_str(), std::ios::app );
