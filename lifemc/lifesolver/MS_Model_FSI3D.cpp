@@ -108,6 +108,7 @@ MS_Model_FSI3D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& Phy
 
     // WE HAVE TO CHANGE dataElasticStructure to add these parameters
     //M_solver->FSIOper()->dataSolid()->setDataTime( PhysicalData->GetDataTime() );
+    //M_solver->FSIOper()->dataSolid()->rho( PhysicalData->GetStructureDensity() );
     //M_solver->FSIOper()->dataSolid()->setPoisson( PhysicalData->GetStructurePoissonCoefficient() );
     //M_solver->FSIOper()->dataSolid()->setYoung( PhysicalData->GetStructureYoungModulus() );
 }
