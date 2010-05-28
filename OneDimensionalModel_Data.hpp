@@ -111,10 +111,10 @@ class OneDimensionalModel_Data
 public:
 
     typedef DataTime                                                  Time_Type;
-    typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
+    typedef boost::shared_ptr< Time_Type >                            Time_PtrType;
 
     typedef RegionMesh1D< LinearLine >                                Mesh_Type;
-    typedef boost::shared_ptr< Mesh_Type >                            Mesh_ptrType;
+    typedef boost::shared_ptr< Mesh_Type >                            Mesh_PtrType;
 
     //! @name Constructors & Destructor
     //@{
@@ -148,7 +148,7 @@ public:
     /*!
      * @param DataTime shared_ptr to dataTime container
      */
-    void setDataTime( const Time_ptrType DataTime );
+    void setDataTime( const Time_PtrType DataTime );
 
     void setDensity( const Real& Density );
 
@@ -194,18 +194,18 @@ public:
     /*!
      * @return shared_ptr to dataTime container
      */
-    Time_ptrType       dataTime() const;
+    Time_PtrType       dataTime() const;
 
-    Mesh_ptrType       mesh() const;
+    Mesh_PtrType       mesh() const;
           Real         Length() const;
-          Real         nbElem() const;
+          UInt         nbElem() const;
+          UInt         NumberOfNodes() const;
 
     const std::string& PostDirectory() const;
     const std::string& PostFile() const;
 
     const int&         verbose() const;
 
-    const Real&        CFL() const;
     const bool&        UW() const;
     const bool&        inertialWall() const;
     const bool&        viscoelasticWall() const;
@@ -216,6 +216,7 @@ public:
     const bool&        fluxSecondDer() const;
 
     const int&         DPdtSteps() const;
+    const Real&        CFLmax() const;
 
     const std::string& initialVariable() const;
     const Real&        initialValue() const;
@@ -278,14 +279,13 @@ protected:
     OneDimensionalModel_SourceTypes  M_SourceType;
 
     //! Data containers for time and mesh
-    Time_ptrType      M_Time;
-    Mesh_ptrType      M_Mesh;
+    Time_PtrType      M_Time;
+    Mesh_PtrType      M_Mesh;
 
     //! Miscellaneous
     std::string       M_post_dir; //! full directory name (including path)
     std::string       M_post_file; //! output file name
     int               M_verbose;
-    Real              M_CFL;
     bool              M_UW;
     //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
     bool              M_inertial_wall;
@@ -297,6 +297,7 @@ protected:
     bool              M_flux_second_der;
     //! approximation of pressure temporal derivative: how many time steps?
     int               M_dP_dt_steps;
+    Real              M_CFLmax;
 
     //! initialize
     std::string       M_initialVariable;

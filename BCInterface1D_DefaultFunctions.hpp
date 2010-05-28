@@ -223,7 +223,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
                              ) );
 
             M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunction ) ), _1 ) );
+                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
             break;
 
@@ -237,7 +237,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
                              ) );
 
             M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunction ) ), _1 ) );
+                                              dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
             break;
 
@@ -255,7 +255,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
                              ) );
 
             M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *M_defaultFunction ) ), _1 ) );
+                                              dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
             break;
 
@@ -270,7 +270,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
                              ) );
 
             M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Resistance *> ( &( *M_defaultFunction ) ), _1 ) );
+                                              dynamic_cast<OneDimensionalModel_BCFunction_Resistance *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
 
             break;

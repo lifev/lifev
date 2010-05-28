@@ -362,48 +362,14 @@ OneDimensionalModel_Solver::initialize()
         M_U_2prevtime[i] = M_U_prevtime[i];
     }
 
-    Vector pressures(4*M_FESpace->dim());
-
-    for ( UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
-    {
-        subrange(pressures, 4*ielem, 4 + 4*ielem) =
-            M_Physics->pressure( (*M_U_thistime) [0][ielem + 1],
-                                 M_U_prevtime [0][ielem + 1],
-                                 M_U_2prevtime[0][ielem + 1],
-                                 M_Physics->Data()->dataTime()->getTimeStep(),
-                                 ielem,
-                                 M_Physics->Data()->DPdtSteps(),
-                                 M_Physics->Data()->viscoelasticWall(),
-                                 M_Physics->Data()->linearizeStringModel() );
-
-        (*M_U_thistime)[4][ielem + 1] = pressures(4*ielem);
-    }
-
-    if( M_Physics->Data()->viscoelasticWall() )
-    {
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
-        {
-            (*M_U_thistime)[M_variable_index_map.find("P_elast")->second][ielem + 1] =
-                pressures(1 + 4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("P_visc")->second][ielem + 1]  =
-                pressures(2 + 4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("dA_dt")->second][ielem + 1]   =
-                pressures(3 + 4*ielem);
-        }
-    }
-    // resetting the file buffers
-    //resetFileBuffers();
-
-    // create matlab scripts
-    //create_movie_file();
+    // Compute initial pressure (taking into account the viscoelastic wall)
+    _updatePressure( M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     openFileBuffers();
-
-    // Write down initial condition
-    //output2FileBuffers( 0. );
-    //postProcess( 0. );
 }
+
+
 
 void
 OneDimensionalModel_Solver::initialize( const Real& u10, const Real& u20, const std::string& var )
@@ -459,39 +425,11 @@ OneDimensionalModel_Solver::initialize( const Real& u10, const Real& u20, const 
         M_U_2prevtime[i] = M_U_prevtime[i];
     }
 
-    ScalVec pressures(4*M_FESpace->dim());
+    // Compute initial pressure (taking into account the viscoelastic wall)
+    _updatePressure( M_Physics->Data()->dataTime()->getTimeStep() );
 
-    for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
-    {
-        subrange(pressures, 4*ielem, 4+4*ielem) =
-            M_Physics->pressure( (*M_U_thistime) [0][ielem + 1],
-                                 M_U_prevtime [0][ielem + 1],
-                                 M_U_2prevtime[0][ielem + 1],
-                                 M_Physics->Data()->dataTime()->getTimeStep(),
-                                 ielem,
-                                 M_Physics->Data()->DPdtSteps(),
-                                 M_Physics->Data()->viscoelasticWall(),
-                                 M_Physics->Data()->linearizeStringModel() );
-        (*M_U_thistime)[4][ielem + 1] = pressures(4*ielem);
-    }
-
-    if(M_Physics->Data()->viscoelasticWall())
-    {
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
-        {
-            (*M_U_thistime)[M_variable_index_map.find("P_elast")->second][ielem + 1] = pressures(1+4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("P_visc")->second][ielem + 1]  = pressures(2+4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("dA_dt")->second][ielem + 1]   = pressures(3+4*ielem);
-        }
-    }
-    // create matlab scripts
-    create_movie_file();
-
+    // Prepare the buffers
     openFileBuffers();
-
-    output2FileBuffers( 0. );
-
-    //postProcess( 0. );
 }
 
 void
@@ -502,11 +440,8 @@ OneDimensionalModel_Solver::initialize( const Vector_Type& u10, const Vector_Typ
 
     for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
     {
-//         (*M_U_thistime)[0][ielem] = u10;
-//         (*M_U_thistime)[1][ielem] = u20;
-
         M_Physics->W_from_U( (*M_U_thistime)[2][ielem], (*M_U_thistime)[3][ielem],
-                               (*M_U_thistime)[0][ielem], (*M_U_thistime)[1][ielem], ielem );
+                             (*M_U_thistime)[0][ielem], (*M_U_thistime)[1][ielem], ielem );
     }
 
     for( UInt i=0; i<2; ++i )
@@ -515,38 +450,11 @@ OneDimensionalModel_Solver::initialize( const Vector_Type& u10, const Vector_Typ
         M_U_2prevtime[i] = M_U_prevtime[i];
     }
 
-    Vector pressures(4 * M_FESpace->dim());
+    // Compute initial pressure (taking into account the viscoelastic wall)
+    _updatePressure( M_Physics->Data()->dataTime()->getTimeStep() );
 
-    for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
-    {
-        subrange(pressures, 4*ielem, 4+4*ielem) =
-              M_Physics->pressure( (*M_U_thistime)[0][ielem],
-                                   M_U_prevtime[0][ielem], M_U_2prevtime[0][ielem],
-                                   M_Physics->Data()->dataTime()->getTimeStep(), ielem,
-                                   M_Physics->Data()->DPdtSteps(), M_Physics->Data()->viscoelasticWall(),
-                                   M_Physics->Data()->linearizeStringModel() );
-
-        (*M_U_thistime)[4][ielem] = pressures(4*ielem);
-    }
-
-    if(M_Physics->Data()->viscoelasticWall())
-    {
-        for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
-        {
-            (*M_U_thistime)[M_variable_index_map.find("P_elast")->second][ielem] = pressures(1+4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("P_visc")->second][ielem]  = pressures(2+4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("dA_dt")->second][ielem]   = pressures(3+4*ielem);
-        }
-    }
-
-    // create matlab scripts
-    //create_movie_file();
-
-    //openFileBuffers();
-
-    //output2FileBuffers( 0. );
-
-    //postProcess( 0. );
+    // Prepare the buffers
+    openFileBuffers();
 }
 
 void
@@ -555,182 +463,38 @@ OneDimensionalModel_Solver::initialize( const Real& u20 )
     (*M_U_thistime)[1] = Vector_Type( M_FESpace->map() );
     (*M_U_thistime)[1] = u20;
 
-    ScalVec pressures(4*M_FESpace->dim());
-
     for (UInt ielem = 0; ielem <= M_FESpace->dim() ; ielem++ )
     {
         (*M_U_thistime)[0][ielem]=M_Physics->Data()->Area0(ielem);
-        for( UInt i=0; i<2; ++i )
-        {
-            M_U_prevtime [i][ielem]=(*M_U_thistime)[i][ielem];
-            M_U_2prevtime[i][ielem]=M_U_prevtime[i][ielem];
-        }
         M_Physics->W_from_U( (*M_U_thistime)[2][ielem], (*M_U_thistime)[3][ielem],
                              (*M_U_thistime)[0][ielem], (*M_U_thistime)[1][ielem], ielem );
-
-        //      for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ ) {
-        subrange(pressures, 4*ielem, 4+4*ielem) =
-              M_Physics->pressure( (*M_U_thistime)[0][ielem],
-                                   M_U_prevtime[0][ielem], M_U_2prevtime[0][ielem],
-                                   M_Physics->Data()->dataTime()->getTimeStep(), ielem,
-                                   M_Physics->Data()->DPdtSteps(), M_Physics->Data()->viscoelasticWall(),
-                                   M_Physics->Data()->linearizeStringModel() );
-
-        (*M_U_thistime)[4][ielem] = pressures(4*ielem);
     }
 
-    if(M_Physics->Data()->viscoelasticWall())
+    for( UInt i=0; i<2; ++i )
     {
-        for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
-        {
-            (*M_U_thistime)[M_variable_index_map.find("P_elast")->second][ielem] = pressures(1+4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("P_visc")->second][ielem]  = pressures(2+4*ielem);
-            (*M_U_thistime)[M_variable_index_map.find("dA_dt")->second][ielem]   = pressures(3+4*ielem);
-        }
+        M_U_prevtime[i] = (*M_U_thistime)[i];
+        M_U_2prevtime[i] = M_U_prevtime[i];
     }
 
-    // create matlab scripts
-    create_movie_file();
+    // Compute initial pressure (taking into account the viscoelastic wall)
+    _updatePressure( M_Physics->Data()->dataTime()->getTimeStep() );
 
+    // Prepare the buffers
     openFileBuffers();
-
-    output2FileBuffers( 0. );
-
-    //postProcess( 0. );
 }
 
 void
-OneDimensionalModel_Solver::timeAdvance()
+OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, const Real& Time, const Real& TimeStep )
 {
-    Chrono chrono;
-    Chrono chronoall;
+    // Update the RHS and the matrices
+    _updateSystem( TimeStep );
 
-    chronoall.start();
-
-    Real dt2over2 = M_Physics->Data()->dataTime()->getTimeStep() * M_Physics->Data()->dataTime()->getTimeStep() * 0.5;
-
-    Debug( 6310 ) << "[timeAdvance]\t o-  updates of flux and sources... " << "\n";
-    chrono.start();
-
-    // output cfl
-    CheckCFL();
-    chrono.stop();
-    Debug( 6310 ) << "[timeAdvance]\t\t CFL checked in    " << chrono.diff() << " s.\n";
-    // update the vector containing the values of the flux at the nodes and its jacobian
-
-    chrono.start();
-    _updateFluxDer();
-    chrono.stop();
-
-    Debug( 6310 ) << "[timeAdvance]\t\t Flux updated in   " << chrono.diff() << " s.\n";
-
-    // update the vector containing the values of the source term at the nodes and its jacobian
-    chrono.start();
-    _updateSourceDer();
-    chrono.stop();
-
-    Debug( 6310 ) << "[timeAdvance]\t\t Source updated in " << chrono.diff() << " s.\n";
-    Debug( 6310 ) << "[timeAdvance]\t o-  updates of matrices... ";
-
-    chrono.start();
-    // update the matrices for the non-linear terms
-    _updateMatrices();
-    chrono.stop();
-
-    Debug( 6310 ) << "done in " << chrono.diff() << " s.\n";
-
-    /*!
-      ---------------------------------------------------
-      Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T )
-      ---------------------------------------------------
-
-      (Un+1, phi) =                             // massFactor^{-1} * Un+1
-      (Un, phi)                         //            mass * U
-      + dt     * (       Fh(Un), dphi/dz )         //            grad * F(U)
-      - dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     // gradDiffFlux(U) * S(U)
-      + dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //   divDiffSrc(U) * F(U)
-      - dt^2/2 * (diffFh(Un) dFh/dz(Un), dphi/dz ) //stiffDiffFlux(U) * F(U)
-      - dt     * (       Sh(Un), phi )             //            mass * S(U)
-      + dt^2/2 * (diffSh(Un) Sh(Un), phi )         //  massDiffSrc(U) * S(U)
-      ---------------------------------------------------
-    */
-
-    Debug( 6310 ) << "[timeAdvance]\t o-  Matrix vector products... " << "\n";
-    chrono.start();
-
-    //--------------------------------------------------------
-    // 1/, 2/ compute M_rhs[0], M_rhs[1] (systems in U1=A, U2=Q)
-    //--------------------------------------------------------
-
-    for( UInt i = 0; i < 2; ++i )
-    {
-        // rhs = mass * Un
-        //M_massMatrix.Axpy( 1., (*M_U_thistime)[i] , 0., M_rhs[i] );
-        M_rhs[i] = (*M_massMatrix)*(*M_U_thistime)[i];
-        //M_gradMatrix.Axpy( M_Physics->Data()->dataTime()->getTimeStep(), M_FluxVector[i] , 1., M_rhs[i] );
-        M_rhs[i] += (*M_gradMatrix)*(M_Physics->Data()->dataTime()->getTimeStep()*M_FluxVector[i]);
-
-
-        // rhs = rhs - dt * mass * S(Un)
-        M_rhs[i] += (*M_massMatrix)*(- M_Physics->Data()->dataTime()->getTimeStep()*M_SourceVector[i]);
-
-        for( UInt j=0; j<2; ++j )
-        {
-            // rhs = rhs - dt^2/2 * gradDiffFlux * S(Un)
-            M_gradMatrixDiffFlux[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j]*(- dt2over2*M_SourceVector[j]);
-
-            // rhs = rhs + dt^2/2 * divDiffSrc * F(Un)
-            //M_divMatrixDiffSrc[2*i+j].Axpy( dt2over2, M_FluxVector[j] , 1., M_rhs[i] );
-            M_divMatrixDiffSrc[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_divMatrixDiffSrc[2*i + j]*(dt2over2*M_FluxVector[j]);
-
-            // rhs = rhs - dt^2/2 * stiffDiffFlux * F(Un)
-            //M_stiffMatrixDiffFlux[2*i+j].Axpy( -dt2over2, M_FluxVector[j] , 1., M_rhs[i] );
-            M_stiffMatrixDiffFlux[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(- dt2over2*M_FluxVector[j]);
-
-            // rhs = rhs + dt^2/2 * massDiffSrc * S(Un)
-            //M_massMatrixDiffSrc[2*i+j].Axpy( dt2over2, M_SourceVector[j] , 1., M_rhs[i] );
-            M_massMatrixDiffSrc[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_massMatrixDiffSrc[2*i + j]*(dt2over2*M_SourceVector[j]);
-        }
-    }
-
-    Debug( 6310 ) << "[timeAdvance] \tcomputed rhs\n";
-    //---------------------------------------------------
-    // 3/ take into account the BOUNDARY CONDITIONS
-    //---------------------------------------------------
-    // compute the values for the boundary conditions
-//     Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
-
-// //     std::cout <<  (*M_U_thistime)[0](101) << std::endl;
-// //     std::cout <<  (*M_U_thistime)[1](101) << std::endl;
-// //     std::cout <<  (*M_U_thistime)[2](101) << std::endl;
-// //     std::cout <<  (*M_U_thistime)[3](101) << std::endl;
-
-//     _computeBC( time_val );
-//     // take into account the bc
-//     Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
-//     _updateBCDirichletVector();
-
-//     Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
-//     Debug( 6310 ) << "[timeAdvance] \trhs1 norm2 = " << M_rhs[1].Norm2() << "\n";
-
-    // *******************************************************
-    chronoall.stop();
-    Debug( 6310 ) << "[timeAdvance] ovall computation time " << chronoall.diff() << " s.\n";
-}
-
-void
-OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
-{
     //---------------------------------------------------
     // 3/ take into account the BOUNDARY CONDITIONS
     //---------------------------------------------------
     // compute the values for the boundary conditions
     Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
-    bcH.applyBC( M_Physics->Data()->dataTime()->getTime(), M_U_thistime, M_Flux, M_bcDirLeft, M_bcDirRight );
+    bcH.applyBC( Time, TimeStep, M_U_thistime, M_Flux, M_bcDirLeft, M_bcDirRight );
 
     // take into account the bc
     Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
@@ -739,7 +503,7 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
     Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
     Debug( 6310 ) << "[timeAdvance] \trhs1 norm2 = " << M_rhs[1].Norm2() << "\n";
 
-    Debug( 6310 ) << "[iterate] o-  Solving the system... t = " << M_Physics->Data()->dataTime()->getTime() << " ... \n";
+    Debug( 6310 ) << "[iterate] o-  Solving the system... t = " << Time << " ... \n";
     Chrono chrono;
 
     Chrono chrono1;
@@ -799,17 +563,13 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
             lambda2_minus = std::min<Real>( eigval2, 0. );
             // update the solution for the next time step
             W1_UW[ii] = (*M_U_thistime)[2][ii]
-                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda1_plus * ( (*M_U_thistime)[2][ii] -
-                                                                                                   (*M_U_thistime)[2][ii-1])
-                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda1_minus * ( (*M_U_thistime)[2][ii+1] -
-                                                                                                    (*M_U_thistime)[2][ii])
-                      - M_Physics->Data()->dataTime()->getTimeStep() * ( tmp11 * M_SourceVector[0][ii] + tmp12 * M_SourceVector[1][ii] );
+                      - (TimeStep / delta)  * lambda1_plus  * ( (*M_U_thistime)[2][ii]   - (*M_U_thistime)[2][ii-1])
+                      - (TimeStep / delta)  * lambda1_minus * ( (*M_U_thistime)[2][ii+1] - (*M_U_thistime)[2][ii])
+                      -  TimeStep * ( tmp11 * M_SourceVector[0][ii] + tmp12 * M_SourceVector[1][ii] );
             W2_UW[ii] = (*M_U_thistime)[3][ii]
-                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda2_plus * ( (*M_U_thistime)[3][ii] -
-                                                                                                   (*M_U_thistime)[3][ii-1])
-                      - (M_Physics->Data()->dataTime()->getTimeStep() / delta) * lambda2_minus * ( (*M_U_thistime)[3][ii+1] -
-                                                                                                    (*M_U_thistime)[3][ii])
-                      - M_Physics->Data()->dataTime()->getTimeStep() * ( tmp21 * M_SourceVector[0][ii] + tmp22 * M_SourceVector[1][ii] );
+                      - (TimeStep / delta)  * lambda2_plus  * ( (*M_U_thistime)[3][ii]   - (*M_U_thistime)[3][ii-1])
+                      - (TimeStep / delta)  * lambda2_minus * ( (*M_U_thistime)[3][ii+1] - (*M_U_thistime)[3][ii])
+                      -  TimeStep * ( tmp21 * M_SourceVector[0][ii] + tmp22 * M_SourceVector[1][ii] );
         }
 
         (*M_U_thistime)[2] = W1_UW;
@@ -839,7 +599,8 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
         //matrFull->GlobalAssemble();
 
         chrono2.start();
-        //            matrFull->spy("matr");
+        //matrFull->spy("matr");
+        //M_rhs[0].ShowMe();
         M_linearSolver->setMatrix(*matrFull);
         M_linearSolver->setReusePreconditioner(false);
         M_linearSolver->solveSystem( M_rhs[0], sol0, matrFull );
@@ -872,7 +633,7 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
         if( M_Physics->Data()->viscoelasticWall() )
         {
             (*M_U_thistime)[M_variable_index_map.find("Q_visc")->second] =
-                _correct_flux_viscoelastic( M_rhs[1] );
+                _correct_flux_viscoelastic( M_rhs[1], TimeStep );
             M_rhs[1] += (*M_U_thistime)[M_variable_index_map.find("Q_visc")->second];
         }
         // compute L2 projection of d2Q_dx2
@@ -892,41 +653,21 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
         {
             M_U_2prevtime[i] = M_U_prevtime[i];
             M_U_prevtime [i] = (*M_U_thistime)[i];
-            (*M_U_thistime) [i] = M_rhs[i];
+            (*M_U_thistime)[i] = M_rhs[i];
         }
 
         chrono4.stop();
         chrono5.start();
-        Vector pressures(4 * M_FESpace->dim());
         for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
         {
             M_Physics->W_from_U( (*M_U_thistime)[2][ielem + 1], (*M_U_thistime)[3][ielem + 1],
-                                   (*M_U_thistime)[0][ielem + 1], (*M_U_thistime)[1][ielem + 1],
-                                   ielem);
-            //        for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ ) {
-            subrange(pressures, 4*ielem, 4 + 4*ielem) =
-                M_Physics->pressure( (*M_U_thistime) [0][ielem + 1],
-                                     M_U_prevtime [0][ielem + 1],
-                                     M_U_2prevtime[0][ielem + 1],
-                                     M_Physics->Data()->dataTime()->getTimeStep(), ielem,
-                                     M_Physics->Data()->DPdtSteps(), M_Physics->Data()->viscoelasticWall(),
-                                     M_Physics->Data()->linearizeStringModel() );
-
-            (*M_U_thistime)[4][ielem + 1] = pressures(4*ielem);
+                                 (*M_U_thistime)[0][ielem + 1], (*M_U_thistime)[1][ielem + 1],
+                                  ielem);
         }
 
-        if(M_Physics->Data()->viscoelasticWall())
-        {
-            for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
-            {
-                (*M_U_thistime)[M_variable_index_map.find("P_elast")->second][ielem] =
-                    pressures(1+4*ielem);
-                (*M_U_thistime)[M_variable_index_map.find("P_visc")->second][ielem] =
-                    pressures(2+4*ielem);
-                (*M_U_thistime)[M_variable_index_map.find("dA_dt")->second][ielem] =
-                    pressures(3+4*ielem);
-            }
-        }
+        // Update the pressure (taking into account the viscoelastic wall)
+        _updatePressure( TimeStep );
+
         chrono5.stop();
         chrono.stop();
     }
@@ -939,50 +680,30 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH )
     Debug( 6310 ) << "chrono  " << chrono.diff() << " s.\n";
 
     Debug( 6310 ) << "[iterate] \tdone in " << chrono.diff() << " s.\n";
-
-    //output2FileBuffers( time_val );
-
-    //    postProcess( time_val );
 }
 
-void
-OneDimensionalModel_Solver::CheckCFL() const
+Real
+OneDimensionalModel_Solver::ComputeCFL( const Real& timeStep ) const
 {
-    Debug(6310) << "[CheckCFL] checking the CFL ... ";
-
     Real CFL = 0.;
 
-    Real Ainode, Qinode;
-
-    Real lambda1_max = 0.;
-    Real lambda2_max = 0.;
+    Real lambdaMax = 0.;
 
     Real eigval1, eigval2;
     Real tmp11, tmp12, tmp21, tmp22;
 
-    for ( UInt inode = 1; inode <= M_FESpace->dim() ; inode++ )
+    for ( UInt inode(1); inode <= M_FESpace->dim() ; ++inode )
     {
-        Ainode = (*M_U_thistime)[0]( inode );
-        Qinode = (*M_U_thistime)[1]( inode );
-
         // compute the eigenvalues at node
-        M_Flux->jacobian_EigenValues_Vectors( Ainode, Qinode,
+        M_Flux->jacobian_EigenValues_Vectors( (*M_U_thistime)[0]( inode ), //A
+                                              (*M_U_thistime)[1]( inode ), //Q
                                               eigval1, eigval2,
-                                              tmp11, tmp12,
-                                              tmp21, tmp22,
-                                              inode);
+                                              tmp11, tmp12, tmp21, tmp22, inode );
 
-        lambda1_max = std::max<Real>( std::fabs(eigval1), lambda1_max );
-        lambda2_max = std::max<Real>( std::fabs(eigval2), lambda2_max );
+        lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigval1), std::fabs(eigval2) ), lambdaMax );
     }
 
-    CFL = M_Physics->Data()->dataTime()->getTimeStep() / M_FESpace->mesh()->minH() * std::max<Real>( lambda1_max , lambda2_max );
-
-    if( CFL > 0.5774 )
-        std::cout << "\n[CheckCFL] CFL not respected in " << M_Physics->Data()->PostFile()
-                  << ": CFL = " << CFL << std::endl;
-
-    Debug(6310) << "[CheckCFL] ok.";
+    return CFL = lambdaMax * timeStep / M_FESpace->mesh()->minH();
 }
 
 void
@@ -1272,6 +993,7 @@ void
 OneDimensionalModel_Solver::setCommunicator( const Comm_PtrType Comm )
 {
     M_Comm = Comm;
+    M_Displayer.SetCommunicator( *Comm );
 }
 
 void
@@ -1462,15 +1184,16 @@ OneDimensionalModel_Solver::BoundaryValue( const OneD_BC& bcType, const OneD_BCS
 {
     UInt boundaryDof;
 
-    switch( bcSide )
+    switch( static_cast<OneD_BCSide> (bcSide) )
     {
         case OneD_left:
             boundaryDof = 1;
         break;
         case OneD_right:
             boundaryDof = M_Flux->Physics()->Data()->nbElem() + 1;
+        break;
         default:
-            std::cout << "Warning: bcSide not available!" << std::endl;
+            std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
             return 0;
         break;
     }
@@ -1480,15 +1203,17 @@ OneDimensionalModel_Solver::BoundaryValue( const OneD_BC& bcType, const OneD_BCS
         case OneD_A:
             return (*M_U_thistime)[0]( boundaryDof );
         case OneD_Q:
-            return (*M_U_thistime)[1]( boundaryDof );
+            // Flow rate is positive with respect to the outgoing normal
+            return (*M_U_thistime)[1]( boundaryDof ) * ( ( bcSide == OneD_left ) ? -1. : 1. );
         case OneD_W1:
             return (*M_U_thistime)[2]( boundaryDof );
         case OneD_W2:
             return (*M_U_thistime)[3]( boundaryDof );
         case OneD_P:
-            return (*M_U_thistime)[4]( boundaryDof );
+            // Pressure is positive with respect to the outgoing normal
+            return (*M_U_thistime)[4]( boundaryDof ) * ( ( bcSide == OneD_left ) ? -1. : 1. );
         default:
-            std::cout << "Warning: bcType not available!" << std::endl;
+            std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;
             return 0.;
     }
 }
@@ -1496,6 +1221,90 @@ OneDimensionalModel_Solver::BoundaryValue( const OneD_BC& bcType, const OneD_BCS
 // ===================================================
 // Private Methods
 // ===================================================
+void
+OneDimensionalModel_Solver::_updatePressure( const Real& TimeStep )
+{
+    Vector pressures(4*M_FESpace->dim());
+
+    for ( UInt i(0); i < M_FESpace->dim() ; ++i )
+    {
+        ublas::subrange(pressures, 4*i, 4 + 4*i) = M_Physics->pressure( (*M_U_thistime) [0][i+1],
+                                                                          M_U_prevtime  [0][i+1],
+                                                                          M_U_2prevtime [0][i+1],
+                                                                          i,
+                                                                          TimeStep );
+        (*M_U_thistime)[4][i + 1] = pressures(4*i);
+    }
+
+    if( M_Physics->Data()->viscoelasticWall() )
+    {
+        for ( UInt i(0); i < M_FESpace->dim() ; ++i )
+        {
+            (*M_U_thistime)[M_variable_index_map.find("P_elast")->second][i + 1] = pressures(1 + 4*i);
+            (*M_U_thistime)[M_variable_index_map.find("P_visc")->second][i + 1]  = pressures(2 + 4*i);
+            (*M_U_thistime)[M_variable_index_map.find("dA_dt")->second][i + 1]   = pressures(3 + 4*i);
+        }
+    }
+}
+
+void
+OneDimensionalModel_Solver::_updateSystem( const Real& TimeStep )
+{
+    Chrono chrono; chrono.start();
+
+    // Update the vector containing the values of the flux at the nodes and its jacobian
+    _updateFluxDer();
+
+    // Update the vector containing the values of the source term at the nodes and its jacobian
+    _updateSourceDer();
+
+    // Update the matrices for the non-linear terms
+    _updateMatrices();
+
+    // Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T )
+    // (Un+1, phi) =                                // massFactor^{-1} * Un+1
+    // (Un, phi)                                    //            mass * U
+    // + dt     * (       Fh(Un), dphi/dz )         //            grad * F(U)
+    // - dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     // gradDiffFlux(U) * S(U)
+    // + dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //   divDiffSrc(U) * F(U)
+    // - dt^2/2 * (diffFh(Un) dFh/dz(Un), dphi/dz ) //stiffDiffFlux(U) * F(U)
+    // - dt     * (       Sh(Un), phi )             //            mass * S(U)
+    // + dt^2/2 * (diffSh(Un) Sh(Un), phi )         //  massDiffSrc(U) * S(U)
+
+    // Compute M_rhs[0], M_rhs[1] (systems in U1=A, U2=Q)
+    Real dt2over2 = TimeStep * TimeStep * 0.5;
+    for( UInt i(0); i < 2; ++i )
+    {
+        // rhs = mass * Un
+        M_rhs[i]  = (*M_massMatrix) * (*M_U_thistime)[i];
+        M_rhs[i] += (*M_gradMatrix) * (TimeStep*M_FluxVector[i]);
+
+        // rhs = rhs - dt * mass * S(Un)
+        M_rhs[i] += (*M_massMatrix) * (- TimeStep*M_SourceVector[i]);
+
+        for( UInt j(0); j<2; ++j )
+        {
+            // rhs = rhs - dt^2/2 * gradDiffFlux * S(Un)
+            M_gradMatrixDiffFlux[2*i + j]->GlobalAssemble();
+            M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j]*(- dt2over2*M_SourceVector[j]);
+
+            // rhs = rhs + dt^2/2 * divDiffSrc * F(Un)
+            M_divMatrixDiffSrc[2*i + j]->GlobalAssemble();
+            M_rhs[i] += *M_divMatrixDiffSrc[2*i + j]*(dt2over2*M_FluxVector[j]);
+
+            // rhs = rhs - dt^2/2 * stiffDiffFlux * F(Un)
+            M_stiffMatrixDiffFlux[2*i + j]->GlobalAssemble();
+            M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(- dt2over2*M_FluxVector[j]);
+
+            // rhs = rhs + dt^2/2 * massDiffSrc * S(Un)
+            M_massMatrixDiffSrc[2*i + j]->GlobalAssemble();
+            M_rhs[i] += *M_massMatrixDiffSrc[2*i + j]*(dt2over2*M_SourceVector[j]);
+        }
+    }
+
+    chrono.stop(); Debug( 6310 ) << "[timeAdvance] overall computation time " << chrono.diff() << " s.\n";
+}
+
 void
 OneDimensionalModel_Solver::_updateFlux()
 {
@@ -1915,7 +1724,7 @@ OneDimensionalModel_Solver::_correct_flux_inertial( const Vector_Type& flux )
 }
 
 OneDimensionalModel_Solver::Vector_Type
-OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux )
+OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux, const Real& TimeStep )
 {
     Matrix_Type _matrixLHS(M_FESpace->map());
     Matrix_Type _stiffRHS (M_FESpace->map());
@@ -1967,7 +1776,7 @@ OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux 
         }
         gamma = M_Physics->Data()->ViscoelasticModulus() / ( 2 * std::sqrt(4*std::atan(1)) );
         gamma *= 1 / std::sqrt( meanA0 );
-        _coeffStiff = M_Physics->Data()->dataTime()->getTimeStep() * gamma / M_Physics->Data()->DensityRho();
+        _coeffStiff = TimeStep * gamma / M_Physics->Data()->DensityRho();
 
         // update the current element
         M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));

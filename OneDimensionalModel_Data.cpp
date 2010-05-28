@@ -53,7 +53,6 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_post_dir                  (),
     M_post_file                 (),
     M_verbose                   (),
-    M_CFL                       (),
     M_UW                        (),
     M_inertial_wall             (),
     M_viscoelastic_wall         (),
@@ -62,6 +61,7 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_longitudinal_wall         (),
     M_flux_second_der           (),
     M_dP_dt_steps               (),
+    M_CFLmax                    (),
     M_initialVariable           (),
     M_initialValue              (),
     M_restValue                 (),
@@ -122,15 +122,8 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
         M_Time.reset( new Time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
-    std::cout << " 1D- Mesh setup ...                            " << std::flush;
-    Chrono chrono;
-    chrono.start();
-
     M_Mesh->setup( dataFile( ( section + "/space_discretization/Length"           ).data(), 1. ),
                    dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 ) );
-
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s."<< std::endl;
 
     //std::cout << " 1D- Mesh nodes:                               " << M_Mesh->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
@@ -139,7 +132,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_post_dir               = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_post_file              = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
-    M_CFL                    = dataFile( ( section + "/miscellaneous/showCFL"                        ).data(), 0 );
     M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
     M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
     M_viscoelastic_wall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
@@ -148,6 +140,10 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_longitudinal_wall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
     M_flux_second_der        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
     M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
+    M_CFLmax                 = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+
+    if ( M_CFLmax > std::sqrt(3)/3. )
+        std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
     // Initialize
     M_initialVariable        = dataFile( ( section + "/initialize/variable"                          ).data(), "P" );
@@ -336,7 +332,6 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "post_dir               = " << M_post_dir << std::endl;
     output << "post_file              = " << M_post_file << std::endl;
     output << "verbose                = " << M_verbose << std::endl;
-    output << "CFL                    = " << M_CFL << std::endl;
     output << "UW                     = " << M_UW << std::endl;
     output << "Use Inertial Wall      = " << M_inertial_wall << std::endl;
     output << "Use Viscoelastic Wall  = " << M_viscoelastic_wall << std::endl;
@@ -345,6 +340,7 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Longitudinal Wall      = " << M_longitudinal_wall << std::endl;
     output << "Flux Second Derivative = " << M_flux_second_der << std::endl;
     output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
+    output << "Maximum admissible CFL = " << M_CFLmax << std::endl;
 
     // Initialize
     output << "\n*** Values for data [initialize]\n\n";
@@ -404,7 +400,7 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Data::setDataTime( const Time_ptrType DataTime )
+OneDimensionalModel_Data::setDataTime( const Time_PtrType DataTime )
 {
     M_Time = DataTime;
 }
@@ -478,13 +474,13 @@ OneDimensionalModel_Data::SourceType() const
     return M_SourceType;
 }
 
-OneDimensionalModel_Data::Time_ptrType
+OneDimensionalModel_Data::Time_PtrType
 OneDimensionalModel_Data::dataTime( void ) const
 {
     return M_Time;
 }
 
-OneDimensionalModel_Data::Mesh_ptrType
+OneDimensionalModel_Data::Mesh_PtrType
 OneDimensionalModel_Data::mesh() const
 {
     return M_Mesh;
@@ -496,10 +492,16 @@ OneDimensionalModel_Data::Length() const
     return M_Mesh->pointList( M_Mesh->numVertices() ).x() - M_Mesh->pointList( 1 ).x();
 }
 
-Real
+UInt
 OneDimensionalModel_Data::nbElem() const
 {
     return M_Mesh->numElements();
+}
+
+UInt
+OneDimensionalModel_Data::NumberOfNodes() const
+{
+    return M_Mesh->numPoints();
 }
 
 const std::string&
@@ -518,12 +520,6 @@ const int&
 OneDimensionalModel_Data::verbose() const
 {
     return M_verbose;
-}
-
-const Real&
-OneDimensionalModel_Data::CFL() const
-{
-    return M_CFL;
 }
 
 const bool&
@@ -572,6 +568,12 @@ const int&
 OneDimensionalModel_Data::DPdtSteps() const
 {
     return M_dP_dt_steps;
+}
+
+const Real&
+OneDimensionalModel_Data::CFLmax() const
+{
+    return M_CFLmax;
 }
 
 const std::string&
