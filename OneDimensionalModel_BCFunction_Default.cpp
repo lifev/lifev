@@ -87,7 +87,7 @@ OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( 
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Riemann::operator()( const Real& /*time*/ )
+OneDimensionalModel_BCFunction_Riemann::operator()( const Real& /*time*/, const Real& /*timeStep*/ )
 {
     update_U_boundary();
 
@@ -159,17 +159,17 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Compatibility::operator()( Real const& /*time*/ )
+OneDimensionalModel_BCFunction_Compatibility::operator()( const Real& /*time*/, const Real& timeStep )
 {
     Debug( 6315 ) << "[Compatibility::evaluate] variable " << this->M_bcType << "\n";
-    return extrapolate_W( this->M_bcType );
+    return extrapolate_W( this->M_bcType, timeStep );
 }
 
 // ===================================================
 // Protected Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Compatibility::extrapolate_W( const OneD_BC& W )
+OneDimensionalModel_BCFunction_Compatibility::extrapolate_W( const OneD_BC& W, const Real& timeStep )
 {
     Real W_out(0.);
 
@@ -179,7 +179,7 @@ OneDimensionalModel_BCFunction_Compatibility::extrapolate_W( const OneD_BC& W )
     switch( W )
     {
         case OneD_W1:
-            W_out = extrapolate_L_dot_U(M_eigval1, M_left_eigvec1)
+            W_out = extrapolate_L_dot_U( M_eigval1, M_left_eigvec1, timeStep )
                   - dot( M_left_eigvec1, this->M_U_boundary ) + this->M_W_boundary[0];
 
 //             std::cout << extrapolate_L_dot_U(M_eigval1, M_left_eigvec1) << " "
@@ -189,7 +189,7 @@ OneDimensionalModel_BCFunction_Compatibility::extrapolate_W( const OneD_BC& W )
         break;
 
         case OneD_W2:
-            W_out = extrapolate_L_dot_U(M_eigval2, M_left_eigvec2)
+            W_out = extrapolate_L_dot_U( M_eigval2, M_left_eigvec2, timeStep )
                   - dot( M_left_eigvec2, this->M_U_boundary ) + this->M_W_boundary[1];
 
 //             std::cout << extrapolate_L_dot_U(M_eigval2, M_left_eigvec2) << " "
@@ -216,13 +216,13 @@ OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::extrapolate_L_dot_U( Real const& eigval, Container2D_Type const& eigvec )
+OneDimensionalModel_BCFunction_Compatibility::extrapolate_L_dot_U( const Real& eigval, const Container2D_Type& eigvec, const Real& timeStep )
 {
     ASSERT_PRE( eigvec.size() == 2, "extrapolate_L_dot_U work only for 2D vectors");
 
     Real L_dot_U_extrap;
     Container2D_Type qlSource; // Quasi linear source term
-    Container2D_Type U_charact_pt=_interpolLinear( this->M_Flux->Physics()->Data()->dataTime()->getTimeStep(), eigval, this->M_U_boundary );
+    Container2D_Type U_charact_pt=_interpolLinear( eigval, this->M_U_boundary, timeStep );
 
     L_dot_U_extrap = dot( eigvec, U_charact_pt );
 
@@ -230,20 +230,20 @@ OneDimensionalModel_BCFunction_Compatibility::extrapolate_L_dot_U( Real const& e
                   << ", U_charact_pt.size() = " << U_charact_pt.size() << "\n";
 
     qlSource[0]=this->M_Source->QuasiLinearSource( U_charact_pt[0],
-                                                U_charact_pt[1], 1,
-                                                this->M_boundaryDof - 1);
+                                                   U_charact_pt[1], 1,
+                                                   this->M_boundaryDof - 1);
 
     qlSource[1]=this->M_Source->QuasiLinearSource( U_charact_pt[0],
-                                                U_charact_pt[1], 2,
-                                                this->M_boundaryDof - 1);
+                                                   U_charact_pt[1], 2,
+                                                   this->M_boundaryDof - 1);
 
-    L_dot_U_extrap -= this->M_Flux->Physics()->Data()->dataTime()->getTimeStep() * dot(eigvec, qlSource);
+    L_dot_U_extrap -= timeStep * dot(eigvec, qlSource);
 
     return L_dot_U_extrap;
 }
 
 Container2D_Type
-OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& deltaT, const Real& eigenvalue, const Container2D_Type& U_bound ) const
+OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& eigenvalue, const Container2D_Type& U_bound, const Real& timeStep ) const
 {
     ASSERT_PRE( U_bound.size() == 2, "_interpolLinear work only for 2D vectors");
 
@@ -251,14 +251,14 @@ OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& delta
                              std::pow(M_boundaryPoint[1] - M_internalBdPoint[1], 2) +
                              std::pow(M_boundaryPoint[2] - M_internalBdPoint[2], 2) );
 
-    Real cfl =  eigenvalue * deltaT / deltaX;
+    Real cfl =  eigenvalue * timeStep / deltaX;
 
     Real weight;   //! weight in the linear approximation
 
     Debug( 6315 ) << "[Compatibility::_interpolLinear] point_bound ("
                   << M_boundaryPoint[0] << "," << M_boundaryPoint[1] << "," << M_boundaryPoint[2] << "), point_internal ("
                   << M_internalBdPoint[0] << "," << M_internalBdPoint[1] << "," << M_internalBdPoint[2]
-                  << "), deltaT " << deltaT << ", deltaX " << deltaX
+                  << "), deltaT " << timeStep << ", deltaX " << deltaX
                   << ", eigenvalue " << eigenvalue
                   << ", A boundary " << U_bound[0] << ", Q boundary " << U_bound[1]
                   << ", A internal " << (*this->M_Solution)[0](M_internalBoundaryDof) << ", Q internal " << (*this->M_Solution)[1](M_internalBoundaryDof)
@@ -305,7 +305,7 @@ OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbi
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Absorbing::operator()( Real const& /*time*/ )
+OneDimensionalModel_BCFunction_Absorbing::operator()( Real const& /*time*/, const Real& timeStep )
 {
     Real W_out(0.);
     Real a1, a2, a11, a22, b1, b2, c1, c2;
@@ -343,12 +343,12 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( Real const& /*time*/ )
     switch( this->M_bcType )
     {
     case OneD_W1:
-        W_out = this->extrapolate_L_dot_U(this->M_eigval2, this->M_left_eigvec2)
+        W_out = this->extrapolate_L_dot_U(this->M_eigval2, this->M_left_eigvec2, timeStep )
               - dot( this->M_left_eigvec2, this->M_U_boundary ) + this->M_W_boundary[1];
 
         break;
     case OneD_W2:
-        W_out = this->extrapolate_L_dot_U(this->M_eigval1, this->M_left_eigvec1)
+        W_out = this->extrapolate_L_dot_U(this->M_eigval1, this->M_left_eigvec1, timeStep )
               - dot( this->M_left_eigvec1, this->M_U_boundary ) + this->M_W_boundary[0];
 
         break;

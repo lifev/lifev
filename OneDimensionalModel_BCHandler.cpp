@@ -66,6 +66,7 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler() :
 // ===================================================
 void
 OneDimensionalModel_BCHandler::applyBC( const Real&              time,
+                                        const Real&              timeStep,
                                         const Solution_PtrType&  solution,
                                         const Flux_PtrType&      flux,
                                               Container2D_Type&  left_BC_dir,
@@ -73,8 +74,8 @@ OneDimensionalModel_BCHandler::applyBC( const Real&              time,
 {
     ASSERT_PRE( left_BC_dir.size() == 2 && right_BC_dir.size() == 2, "applyBC works only for 2D vectors" );
 
-    M_boundary[ OneD_left  ]->applyBC( time, solution, flux, left_BC_dir  );
-    M_boundary[ OneD_right ]->applyBC( time, solution, flux, right_BC_dir );
+    M_boundary[ OneD_left  ]->applyBC( time, timeStep, solution, flux, left_BC_dir  );
+    M_boundary[ OneD_right ]->applyBC( time, timeStep, solution, flux, right_BC_dir );
 
     Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at left "
                 << " imposing [ A, Q ] = [ " << left_BC_dir[0]
@@ -104,7 +105,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
         BCFunction_Type BCFunction;
         BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
-                                             dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultBC.back() ) ), _1 ) );
+                                             dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultBC.back() ) ), _1, _2 ) );
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
         setBC( OneD_left, OneD_first, OneD_W1, BCFunction );
@@ -119,7 +120,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
         BCFunction_Type BCFunction;
         BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
-                                             dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultBC.back() ) ), _1 ) );
+                                             dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultBC.back() ) ), _1, _2 ) );
 
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
@@ -135,7 +136,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
         BCFunction_Type BCFunction;
         BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
-                                             dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultBC.back() ) ), _1 ) );
+                                             dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultBC.back() ) ), _1, _2 ) );
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
         setBC( OneD_right, OneD_first, OneD_W2, BCFunction );
@@ -150,7 +151,7 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType     flux,
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
         BCFunction_Type BCFunction;
         BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
-                                             dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultBC.back() ) ), _1 ) );
+                                             dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultBC.back() ) ), _1, _2 ) );
 
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
         setBC( OneD_right, OneD_second, OneD_W1, BCFunction );

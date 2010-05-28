@@ -62,6 +62,7 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
 // ===================================================
 void
 OneDimensionalModel_BC::applyBC( const Real&             time,
+                                 const Real&             timeStep,
                                  const Solution_PtrType& solution,
                                  const Flux_PtrType&     flux,
                                        Container2D_Type& BC_dir )
@@ -72,7 +73,8 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] found internal boundary\n";
     else
     {
-        compute_resBC( time, solution, flux );
+        // Update the time step (Compatibility condition need it)
+        compute_resBC( time, timeStep, solution, flux );
 
         for( UInt i(0) ; i < 2 ; ++i )
             BC_dir[i]=M_resBC[i];
@@ -100,7 +102,6 @@ OneDimensionalModel_BC::setInternalFlag( const bool& flag )
 void
 OneDimensionalModel_BC::setRHS( const OneD_BCLine& line, const BCFunction_Type& rhs )
 {
-    //M_rhs_at_line[line] = rhs;
     M_rhs_at_line[line] = rhs; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
 }
 
@@ -115,6 +116,7 @@ OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D
 // ===================================================
 void
 OneDimensionalModel_BC::compute_resBC( const Real&             time,
+                                       const Real&             timeStep,
                                        const Solution_PtrType& solution,
                                        const Flux_PtrType&     flux )
 {
@@ -155,13 +157,26 @@ OneDimensionalModel_BC::compute_resBC( const Real&             time,
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 1\n";
 
-    rhsBC[0] = M_rhs_at_line[OneD_first](time);
+    // Compute RHS
+    rhsBC[0] = M_rhs_at_line[OneD_first](time, timeStep);
+    rhsBC[1] = M_rhs_at_line[OneD_second](time, timeStep);
+
+    // If is a pressure BC, convert it into an area
     if ( M_variable_at_line[OneD_first] == OneD_P )
         rhsBC[0] = flux->Physics()->A_from_P( rhsBC[0], dof - 1 ); // Index start from 0
 
-    rhsBC[1] = M_rhs_at_line[OneD_second](time);
     if ( M_variable_at_line[OneD_second] == OneD_P )
         rhsBC[1] = flux->Physics()->A_from_P( rhsBC[1], dof - 1 ); // Index start from 0
+
+    // The flow rate  and the pressure are given positive with respect to
+    // the normal direction: (left) <=  --------  => (right)
+    if ( M_boundarySide == OneD_left )
+    {
+        if ( M_variable_at_line[OneD_first] == OneD_Q || M_variable_at_line[OneD_first] == OneD_P )
+            rhsBC[0] *= -1;
+        if ( M_variable_at_line[OneD_second] == OneD_Q || M_variable_at_line[OneD_second] == OneD_P )
+            rhsBC[1] *= -1;
+    }
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[0] = " << rhsBC[0] << "\n";;
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[1] = " << rhsBC[1] << "\n";;

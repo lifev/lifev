@@ -96,7 +96,7 @@ public:
     //! @name Methods
     //@{
 
-    virtual Real operator() ( const Real& /*time*/ ) = 0;
+    virtual Real operator() ( const Real& /*time*/, const Real& /*timeStep*/ ) = 0;
 
     //@}
 
@@ -137,7 +137,7 @@ public:
     //! @name Methods
     //@{
 
-    virtual Real operator() ( const Real& /*time*/ );
+    virtual Real operator() ( const Real& /*time*/, const Real& /*timeStep*/ );
 
     //@}
 
@@ -196,7 +196,7 @@ public:
     //! @name Methods
     //@{
 
-    virtual Real operator() ( const Real& time );
+    virtual Real operator() ( const Real& time, const Real& timeStep );
 
     //@}
 
@@ -205,15 +205,13 @@ protected:
     //! @name Protected Methods
     //@{
 
-    Real extrapolate_W( OneD_BC const& W );
+    Real extrapolate_W( const OneD_BC& W, const Real& timeStep );
 
     void computeEigenValuesVectors();
 
-    Real extrapolate_L_dot_U( Real const& eigval, Container2D_Type const& eigvec );
+    Real extrapolate_L_dot_U( const Real& eigval, const Container2D_Type& eigvec, const Real& timeStep );
 
-    Container2D_Type _interpolLinear( const Real&  deltaT,
-                                      const Real&  eigenvalue,
-                                      const Container2D_Type& U_bound ) const;
+    Container2D_Type _interpolLinear( const Real& eigenvalue, const Container2D_Type& U_bound, const Real& timeStep ) const;
 
     //@}
 
@@ -272,7 +270,7 @@ public:
     //! @name Methods
     //@{
 
-    Real operator() ( const Real& time );
+    Real operator() ( const Real& time, const Real& timeStep );
 
     //@}
 

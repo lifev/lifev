@@ -90,8 +90,8 @@ public:
     Container2D_Type Uboundary( const ScalVec& U1, const ScalVec& U2 ) const;
 
     //! Apply boundary conditions
-    void applyBC( const Real& time,         const Solution_PtrType& solution,
-                  const Flux_PtrType& flux,       Container2D_Type& BC_dir );
+    void applyBC( const Real& time, const Real& timeStep, const Solution_PtrType& solution,
+                  const Flux_PtrType& flux, Container2D_Type& BC_dir );
 
     //@}
 
@@ -121,7 +121,8 @@ private:
     //@{
 
     //! Impose the chosen boundary condition
-    void compute_resBC( const Real& time, const Solution_PtrType& solution, const Flux_PtrType& flux );
+    void compute_resBC( const Real& time,                 const Real& timeStep,
+                        const Solution_PtrType& solution, const Flux_PtrType& flux );
 
     void compute_resBC_line( OneD_BCLine line, Container2D_Type left_eigvec,
                              Container2D_Type U, Container2D_Type W, Real& rhs );

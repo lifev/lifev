@@ -57,7 +57,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef boost::function<Real ( const Real& )> Function_Type;
+    typedef boost::function<Real ( const Real&, const Real&  )> Function_Type;
 
     //@}
 
@@ -87,7 +87,7 @@ public:
 
     OneDimensionalModel_BCFunction& operator= ( const OneDimensionalModel_BCFunction& BCFunction );
 
-    Real operator() ( const Real& time ) const;
+    Real operator() ( const Real& time, const Real& timeStep = 0. ) const;
 
     //@}
 
@@ -119,6 +119,7 @@ private:
 
     Function_Type M_function;
 };
+
 /*
 //! Factory create function
 inline OneDimensionalModel_BCFunction*

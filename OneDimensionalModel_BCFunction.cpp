@@ -72,9 +72,9 @@ OneDimensionalModel_BCFunction::operator=( const OneDimensionalModel_BCFunction&
 }
 
 Real
-OneDimensionalModel_BCFunction::operator()( const Real& time ) const
+OneDimensionalModel_BCFunction::operator()( const Real& time, const Real& timeStep ) const
 {
-    return M_function( time );
+    return M_function( time, timeStep );
 }
 
 // ===================================================
@@ -94,6 +94,5 @@ OneDimensionalModel_BCFunction::Function() const
 {
     return M_function;
 }
-
 
 }
