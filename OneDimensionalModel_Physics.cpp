@@ -69,11 +69,8 @@ ScalVec
 OneDimensionalModel_Physics::pressure( const Real& _A,
                                        const Real& _A_n,
                                        const Real& _A_nm1,
-                                       const Real& dt,
                                        const UInt& indz,
-                                       const UInt& steps,
-                                       const bool& visco,
-                                       const bool& linearized ) const
+                                       const Real& timeStep ) const
 {
     ScalVec _a(2), _b(2), _c(2), area(2), result(4);
 
@@ -90,13 +87,13 @@ OneDimensionalModel_Physics::pressure( const Real& _A,
 
     Real _pi( 4*std::atan(1) );
 
-    result(3) = ( _a(steps) * _A + _b(steps) * _A_n + _c(steps) * _A_nm1 ) / dt; //> dA/dt
+    result(3) = ( _a(M_Data->DPdtSteps()) * _A + _b(M_Data->DPdtSteps()) * _A_n + _c(M_Data->DPdtSteps()) * _A_nm1 ) / timeStep; //> dA/dt
 
-    result(2) = M_Data->InertialModulus() * result(3) / ( 2*sqrt(_pi*area(linearized)) );               //> visc_component
+    result(2) = M_Data->InertialModulus() * result(3) / ( 2*sqrt(_pi*area(M_Data->linearizeStringModel())) );               //> visc_component
 
     result(1) = pressure( _A, indz );                                                  //> elast_component
 
-    result(0) = result(1) + visco * result(2);
+    result(0) = result(1) + M_Data->viscoelasticWall() * result(2);
 
     return result;
 }

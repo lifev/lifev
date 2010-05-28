@@ -258,14 +258,20 @@ public:
      */
     void initialize( const Real& u20 );
 
-    //! Update the right hand side for time advancing
-    void timeAdvance();
+    //! Update convective term and BC. Then solve the linearized NS system
+    /*!
+     * @param bcH The BC handler
+     * @param Time the time
+     * @param TimeStep the time step
+     */
+    void iterate( OneDimensionalModel_BCHandler& bcH, const Real& Time, const Real& TimeStep );
 
-    //! Update convective term, bc treatment and solve the linearized ns system
-    void iterate( OneDimensionalModel_BCHandler& bcH );
-
-    //! Simple cfl computation (correct for constant mesh)
-    void CheckCFL() const;
+    //! CFL computation (correct for constant mesh)
+    /*!
+     * @param TimeStep the time step
+     * @return CFL
+     */
+    Real ComputeCFL( const Real& timeStep ) const;
 
     //! Save the solution for the next timestep
     void savesol();
@@ -392,6 +398,13 @@ public:
     //! Return the selection solution (P, A, Q, W1, W2)
     Real value(std::string var, UInt pos) const;
 
+    //! Return the value of a quantity (P, A, Q, W1, W2) on a specified boundary.
+    /*!
+     *  Given a bcType and a bcSide it return the value of the quantity.
+     *  @param bcType Type of the asked boundary value.
+     *  @param bcSide Side of the boundary.
+     *  @return value of the quantity on the specified side.
+     */
     Real BoundaryValue( const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
 
     //@}
@@ -401,8 +414,17 @@ private:
     //! @name Private Methods
     //@{
 
+    //! Update the pressure
+    void _updatePressure( const Real& TimeStep );
+
+    //! Update the right hand side and the matrices
+    /*!
+     *  @param TimeStep The time step.
+     */
+    void _updateSystem( const Real& TimeStep );
+
     //! Update the P1 flux vector from U: M_Fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
-    void                          _updateFlux();
+    void _updateFlux();
 
     //! Call _updateFlux and update the P0 derivative of flux vector from U:
     /*!
@@ -412,10 +434,10 @@ private:
      *  (mean value of the two extremal values of dF/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void                          _updateFluxDer();
+    void _updateFluxDer();
 
     //! Update the P1 source vector from U: M_Sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
-    void                          _updateSource();
+    void _updateSource();
 
     //! Call _updateSource and update the P0 derivative of source vector from U:
     /*!
@@ -425,7 +447,7 @@ private:
      *  (mean value of the two extremal values of dS/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void                          _updateSourceDer();
+    void _updateSourceDer();
 
     //! Update the matrices
     /*!
@@ -487,7 +509,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    Vector_Type                   _correct_flux_viscoelastic(const Vector_Type &);
+    Vector_Type                   _correct_flux_viscoelastic(const Vector_Type&, const Real& TimeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -509,6 +531,7 @@ private:
     Source_PtrType                     M_Source;
     FESpace_PtrType                    M_FESpace;
     Comm_PtrType                       M_Comm;
+    Displayer                          M_Displayer;
 
     UInt                               M_leftNodeId;
     UInt                               M_leftInternalNodeId;

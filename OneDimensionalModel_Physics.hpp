@@ -103,9 +103,8 @@ public :
     /*!
      * @return P = beta0 * ( ( _A / Area0 )^beta1 - 1 ) + 1/(2*sqrt(pi*A)) * gamma * dA / dt
      */
-    ScalVec pressure( const Real& _A,   const Real& _A_n, const Real& _A_nm1,
-                      const Real& dt,   const UInt& indz, const UInt& steps = 1,
-                      const bool& visco = 1, const bool& linearized = 1 ) const;
+    ScalVec pressure( const Real& _A,   const Real& _A_n,    const Real& _A_nm1, 
+                      const UInt& indz, const Real& timeStep ) const;
 
     //! compute the pressure : beta0 * ( ( _A / Area0 )^beta1 - 1 )
     Real pressure( const Real& _A, const UInt& indz = 0 ) const;
