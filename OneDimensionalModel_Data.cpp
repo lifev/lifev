@@ -418,6 +418,12 @@ OneDimensionalModel_Data::setViscosity( const Real& Viscosity )
 }
 
 void
+OneDimensionalModel_Data::setDensityWall( const Real& DensityWall )
+{
+    M_DensityWall = DensityWall;
+}
+
+void
 OneDimensionalModel_Data::setThickness( const Real& Thickness )
 {
     M_Thickness = Thickness;
