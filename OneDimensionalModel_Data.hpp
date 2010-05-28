@@ -154,6 +154,8 @@ public:
 
     void setViscosity( const Real& Viscosity );
 
+    void setDensityWall( const Real& DensityWall );
+
     void setThickness( const Real& Thickness );
 
     void setYoung( const Real& Young );
