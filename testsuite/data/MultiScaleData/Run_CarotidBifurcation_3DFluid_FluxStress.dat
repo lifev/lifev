@@ -13,45 +13,24 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_Synthetic_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_Synthetic_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_1Cylinder_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Bifurcation_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Bifurcation_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_Mixed.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_1Cylinder_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube40.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube60.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube80.dat
-MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube40.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube60.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube80.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/3DFSIserial1.dat
+MS_problem = ./MultiScaleData/Models/MultiScale/CarotidBifurcation_3DFluid_FluxStress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
     [./Restart]
-    Restart                    = true
+    Restart                    = false
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    #initialtime                = 0.0                # [s]
-    #endtime                    = 0.104707897197494  # [s]
-    initialtime                = 0.104707897197494  # [s]
-    endtime                    = 0.523539485987470  # [s]
-    timestep                   = 0.052353948598747  # [s]
-	
+    initialtime                = 0.0   # [s]
+    endtime                    = 0.8   # [s]
+    timestep                   = 0.001 # [s]
+    
     [../Algorithm]
-    AlgorithmType              = Newton        # Aitken - Newton
-    subITMax                   = 2              # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6            # Tolerance on the coupling values
+    AlgorithmType              = Newton            # Aitken - Newton
+    subITMax                   = 1                 # Maximum number for coupling subiterations
+    tolerance                  = 1.e-6             # Tolerance on the coupling values
     
         [./Aitken_method]
         Omega                      = 0.5           # omega starting value
@@ -130,8 +109,8 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity	            = 0.895347939450773     # density        [g/cm^3]
-FluidViscosity	            = 0.00189998733800979   # viscosity      [g/cm/s]
-StructurePoissonCoefficient = 0                     # Poisson coeff. []
-StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
+FluidDensity                = 1.0           # density        [g/cm^3]
+FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+StructurePoissonCoefficient = 0.48          # Poisson coeff. []
+StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

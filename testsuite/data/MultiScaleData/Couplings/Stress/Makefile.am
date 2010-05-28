@@ -22,11 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-SUBDIRS		= 	BoundaryCondition\
-				FluxStress\
-				Stress
-
-dist_pkgdata_DATA = 
+dist_pkgdata_DATA = StaticPressure.dat \
+                    TotalPressure.dat \
+                    LagrangeMultiplier.dat
 					
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

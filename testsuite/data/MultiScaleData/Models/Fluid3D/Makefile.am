@@ -22,12 +22,17 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-SUBDIRS		= 	BoundaryCondition\
-				FluxStress\
-				Stress
+dist_pkgdata_DATA = Carotid.dat \
+                    Carotid_Stokes.dat \
+                    Cylinder_tube20.dat \
+					Cylinder_tube40.dat \
+					Cylinder_tube60.dat \
+					Cylinder_tube80.dat \
+					Cylinder_Stokes_tube20.dat \
+					Cylinder_Stokes_tube40.dat \
+					Cylinder_Stokes_tube60.dat \
+					Cylinder_Stokes_tube80.dat
 
-dist_pkgdata_DATA = 
-					
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
 	 for i in $(dist_pkgdata_DATA); do \

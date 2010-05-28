@@ -1,0 +1,31 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-11-25
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Sinusoidal Flux #################################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_SinusoidalFlux
+
+[boundary_conditions]
+list = 'SinusoidalFlux'  # Sinusoidal Flux
+	
+	[./SinusoidalFlux]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	function		    = 'T=1; -sin(2*pi*t/T)'
+
+    # Additional parameters for 1D BC
+    quantity        = Q
+    line            = first	
+    
+	[../]

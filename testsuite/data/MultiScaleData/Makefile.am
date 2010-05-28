@@ -27,24 +27,34 @@ SUBDIRS		= 	Couplings\
 
 dist_pkgdata_DATA = MultiScale_test.dat \
 					MultiScale.dat \
-					Run_CarotidBifurcation3D_FluxStress.dat \
-					Run_CarotidBifurcation3D_Stress.dat \
-					Run_CarotidBifurcation3D_Synthetic_FluxStress.dat \
-					Run_CarotidBifurcation3D_Synthetic_Stress.dat \
-					Run_Stationary3D_1Cylinder.dat \
-					Run_Stationary3D_Hexagon_FluxStress.dat \
-					Run_Stationary3D_Hexagon_Stress.dat \
-					Run_Womersley3D_1Cylinder.dat \
-					Run_Womersley3D_5Cylinders_FluxStress_tube20.dat \
-					Run_Womersley3D_5Cylinders_FluxStress_tube40.dat \
-					Run_Womersley3D_5Cylinders_FluxStress_tube60.dat \
-					Run_Womersley3D_5Cylinders_FluxStress_tube80.dat \
-					Run_Womersley3D_5Cylinders_Stress_tube20.dat \
-					Run_Womersley3D_5Cylinders_Stress_tube40.dat \
-					Run_Womersley3D_5Cylinders_Stress_tube60.dat \
-					Run_Womersley3D_5Cylinders_Stress_tube80.dat \
-					Run3DFSIserial1.dat
-					
+					Run_CarotidBifurcation_1D-3DFluid_FluxStress.dat \
+					Run_CarotidBifurcation_1D-3DFSI_FluxStress.dat \
+					Run_CarotidBifurcation_3DFluid.dat \
+					Run_CarotidBifurcation_3DFluid_FluxStress.dat \
+					Run_CarotidBifurcation_3DFluid_Stress.dat \
+					Run_CarotidBifurcation_3DFluid_Synthetic_FluxStress.dat \
+					Run_CarotidBifurcation_3DFluid_Synthetic_Stress.dat \
+					Run_Stationary_3DFluid_1Cylinder.dat \
+					Run_Stationary_3DFluid_CarotidBifurcation_FluxStress.dat \
+					Run_Stationary_3DFluid_Hexagon_FluxStress.dat \
+					Run_Stationary_3DFluid_Hexagon_Stress.dat \
+					Run_SinusoidalWave_1D_1Cylinder.dat \
+					Run_SinusoidalWave_1D_2Cylinders_Stress.dat \
+					Run_SinusoidalWave_1D_2Cylinders_FluxStress.dat \
+					Run_SinusoidalWave_1D-3DFluid_2Cylinders_FluxStress.dat \
+					Run_SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress.dat \
+					Run_TestStress_3DFSI_1Cylinder.dat \
+                    Run_TestStress_3DFSI_2Cylinders_FluxStress.dat \
+                    Run_TestStress_3DFSI_2Cylinders_Stress.dat \
+					Run_Womersley_3DFluid_1Cylinder.dat \
+					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube20.dat \
+					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube40.dat \
+					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube60.dat \
+					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube80.dat \
+					Run_Womersley_3DFluid_5Cylinders_Stress_tube20.dat \
+					Run_Womersley_3DFluid_5Cylinders_Stress_tube40.dat \
+					Run_Womersley_3DFluid_5Cylinders_Stress_tube60.dat \
+					Run_Womersley_3DFluid_5Cylinders_Stress_tube80.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

@@ -1,11 +1,11 @@
 # -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Applications
+#                                 Copyright (C) 2010 EPFL
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2010-04-26
 #  License Terms: GNU GPL
 #
 ###################################################################################################
@@ -13,54 +13,33 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_Synthetic_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/CarotidBifurcation3D_Synthetic_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_1Cylinder_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Bifurcation_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Bifurcation_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_FluxStress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_Mixed.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_Stress.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_1Cylinder_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube40.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube60.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_FluxStress_tube80.dat
-MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube20.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube40.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube60.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress_tube80.dat
-#MS_problem    = ./MultiScaleData/Models/MultiScale/3DFSIserial1.dat
+MS_problem = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_1Cylinder_tube20.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
     [./Restart]
-    Restart                    = true
+    Restart                    = false
     RestartFromStepNumber      = 0
-    
+
     [../time_discretization]
-    #initialtime                = 0.0                # [s]
-    #endtime                    = 0.104707897197494  # [s]
-    initialtime                = 0.104707897197494  # [s]
-    endtime                    = 0.523539485987470  # [s]
-    timestep                   = 0.052353948598747  # [s]
-	
+    initialtime                = 0.0     # [s]
+    endtime                    = 0.01    # [s]
+    timestep                   = 0.001   # [s]
+
     [../Algorithm]
-    AlgorithmType              = Newton        # Aitken - Newton
-    subITMax                   = 2              # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6            # Tolerance on the coupling values
-    
+    AlgorithmType              = Newton            # Aitken - Newton
+    subITMax                   = 0                 # Maximum number for coupling subiterations
+    tolerance                  = 1.e-6             # Tolerance on the coupling values
+
         [./Aitken_method]
         Omega                      = 0.5           # omega starting value
         fixedOmega                 = false         # use fixed omega (if omega = 1 -> fixed point)
         method                     = Vectorial     # Scalar, Vectorial
         inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1
-        
+
         [../Newton_method]
-        
+
             [./AztecOO]
             solver                     = gmres
             scaling                    = none
@@ -71,11 +50,11 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
             max_iter_reuse             = 100
             kspace                     = 100
             tol                        = 1.e-14
-            
+
             [../Preconditioner]
             prectype                   = Ifpack #Ifpack
             displayList                = false
-    
+
                 [./AztecOO]
                 precond                    = 'dom_decomp'
                 prec_calc                  = calc
@@ -85,7 +64,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
                 subdomain_solve            = ILUT
                 ilut_fill                  = 4
                 drop                       = 1.e-5
-                
+
                 [../ifpack]
                 overlap                    = 3 #ok
                 prectype                   = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
@@ -96,7 +75,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
                     damping_factor         = 1.
                     min_diagonal_value     = 0
                     zero_starting_solution = true
-            
+
                     [../partitioner]
                     type                   = metis
                     overlap                = 2
@@ -106,7 +85,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
 
                     [../amesos]
                     solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-                           
+
                     [../fact]
                     level-of-fill          = 4
                     ilut_level-of-fill     = 4
@@ -120,7 +99,7 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
                     compute_condest        = true
                     reordering_type        = none       #none, metis, rcm
                     filter_singletons      = true
-    
+
                     [../]
                 [../]
             [../]
@@ -130,8 +109,8 @@ MS_problem    = ./MultiScaleData/Models/MultiScale/Womersley3D_5Cylinders_Stress
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity	            = 0.895347939450773     # density        [g/cm^3]
-FluidViscosity	            = 0.00189998733800979   # viscosity      [g/cm/s]
-StructurePoissonCoefficient = 0                     # Poisson coeff. []
-StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
+FluidDensity                = 1.0           # density        [g/cm^3]
+FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+StructurePoissonCoefficient = 0.48          # Poisson coeff. []
+StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

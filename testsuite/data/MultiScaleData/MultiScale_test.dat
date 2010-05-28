@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_Mixed.dat
+MS_problem    = ./MultiScaleData/Models/MultiScale/Stationary3D_Hexagon_Mixed.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -23,10 +23,10 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_Mixed.da
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-	initialtime		= 0.0           # [s]
-	endtime			= 0.0			# [s]
-	timestep		= 0.1          	# [s]
-	
+    initialtime        = 0.0           # [s]
+    endtime            = 0.0            # [s]
+    timestep        = 0.1              # [s]
+    
     [../Algorithm]
     AlgorithmType              = Newton        # Aitken - Newton
     subITMax                   = 2              # Maximum number for coupling subiterations
@@ -109,8 +109,8 @@ MS_problem    = ./MultiScaleData/Models/MultiScale_Stationary3D_Hexagon_Mixed.da
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity	            = 1.0                   # density        [g/cm^3]
-FluidViscosity	            = 1.005309649148734e-06 # viscosity      [g/cm/s]
+FluidDensity                = 1.0                   # density        [g/cm^3]
+FluidViscosity                = 1.005309649148734e-06 # viscosity      [g/cm/s]
 StructurePoissonCoefficient = 0                     # Poisson coeff. []
 StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

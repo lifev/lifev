@@ -22,12 +22,27 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-SUBDIRS		= 	BoundaryCondition\
-				FluxStress\
-				Stress
-
-dist_pkgdata_DATA = 
-					
+dist_pkgdata_DATA = Absorbing_1D.dat \
+					Absorbing_NobileVergara.dat \
+                    SinusoidalFlux.dat \
+                    SinusoidalFluxWave.dat \
+					SinusoidalPressure.dat \
+					WomersleySinusoidalFlux.dat \
+					WomersleySinusoidalPressure.dat \
+					UnitaryFlux.dat \
+                    UnitaryPressure.dat \
+                    Pressure.dat \
+                    Pressure_Dynamic_STP.dat \
+                    PoiseuilleFlux.dat \
+                    PoiseuilleFlux_Dynamic_STP.dat \
+                    PoiseuilleVelocity.dat \
+                    PoiseuilleVelocity_Dynamic_STP.dat \
+                    CarotidBifurcationFlux_Dynamic.dat \
+                    NoStress.dat \
+                    TestFlux.dat \
+                    TestStress.dat \
+                    XY_ZeroTangentialVelocity.dat 
+                    
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
 	 for i in $(dist_pkgdata_DATA); do \
