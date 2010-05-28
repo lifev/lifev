@@ -41,13 +41,15 @@ ExporterData::ExporterData( const  ExporterData::Type type,
                             const vector_ptrtype& vr,
                             UInt start,
                             UInt size,
-                            UInt steady ):
+                            UInt steady,
+			    const ExporterData::Where where):
     M_variableName  ( variableName ),
     M_vr            ( vr ),
     M_size          ( size ),
     M_start         ( start ),
     M_type          ( type ),
-    M_steady        ( steady )
+    M_steady        ( steady ),
+    M_where         ( where )
 {}
 
 const std::string&
@@ -106,5 +108,25 @@ ExporterData::typeDim() const
 
     return 0;
 }
+
+const ExporterData::Where&
+ExporterData::where() const
+{
+    return M_where;
+}
+
+std::string ExporterData::whereName() const
+{
+    switch (M_where)
+    {
+        case Node:
+            return "Node";
+        case Cell:
+            return "Cell";
+    }
+
+    return "ERROR string";
+}
+
 
 }

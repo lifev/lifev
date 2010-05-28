@@ -88,6 +88,13 @@ public:
         Vector  /*!< Vector stands for vectorfield */
     };
 
+    //! Where is data centered /
+    enum Where
+    {
+        Node, /*!< Node centered */
+        Cell  /*!< Cell centered */
+    };
+
     //@}
 
 
@@ -104,8 +111,9 @@ public:
                               Useful in case you want to define a subrange of the vector *vec
         @param size         - size of the array to store (not yet multiplied by the dimension of the vector)
         @param steady       - if  file name for postprocessing has to include time dependency
+        @param where        - where is variable located (Node or Cell)
     */
-    ExporterData(const Type type, const std::string variableName, vector_ptrtype const& vec, UInt start, UInt size, UInt steady);
+  ExporterData(const Type type, const std::string variableName, vector_ptrtype const& vec, UInt start, UInt size, UInt steady, const Where where);
 
     //@}
 
@@ -162,6 +170,12 @@ public:
 
     //! returns 1 (if Scalar) or 3 (if Vector)
     UInt typeDim() const;
+  
+    //! Node or Cell centered ?
+    const Where& where() const;
+
+    //! returns Node or Cell centered string
+    std::string whereName() const;
 
     //@}
 
@@ -193,6 +207,9 @@ private:
 
     //! equal to 0 if file name for postprocessing has to include time dependency
     UInt M_steady;
+
+    //! Node or Cell centered
+    Where M_where;
 };
 
 
@@ -245,7 +262,7 @@ public:
         @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
         @param size the number of Dof for that variable
     */
-    void addVariable(const ExporterData::Type type, const std::string variableName, const vector_ptrtype& map, UInt start, UInt size, UInt steady =0 );
+  void addVariable(const ExporterData::Type type, const std::string variableName, const vector_ptrtype& map, UInt start, UInt size, UInt steady =0, ExporterData::Where where =ExporterData::Node );
 
     //! Post-process the variables added to the list
     /*!
@@ -386,9 +403,10 @@ void Exporter<Mesh>::addVariable(const ExporterData::Type type,
                                  const vector_ptrtype& vr,
                                  UInt start,
                                  UInt size,
-                                 UInt steady)
+                                 UInt steady,
+				 ExporterData::Where where)
 {
-    M_listData.push_back( ExporterData(type,variableName,vr,start, size, steady) );
+  M_listData.push_back( ExporterData(type,variableName,vr,start, size, steady, where) );
 }
 
 template <typename Mesh>

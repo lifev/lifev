@@ -35,6 +35,8 @@
 #ifndef HDF5EXPORTER_H
 #define HDF5EXPORTER_H 1
 
+#include <vector>
+
 #include <lifeconfig.h>
 
 #ifndef HAVE_HDF5
@@ -50,6 +52,8 @@
 #include <boost/algorithm/string.hpp>
 #include <EpetraExt_DistArray.h>
 #include <Epetra_IntVector.h>
+#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifefem/refFE.hpp>
 
 namespace LifeV {
 
@@ -509,31 +513,40 @@ void Hdf5exporter<Mesh>::M_wr_geo()
        write out
     */
 
-    // I need a map, I suppose var[0] has one:
-    //     dvar.storedArray()->BlockMap()
-    // but this map probably includes more dimensions or P2 elements ...
-    // ok: I assume that anyway it starts with the P1 elements of the first dimensions,
-    //  I will discart the following entries.
-
+  // We need a map ,but it's not always possible to use that from the variables 
+  // (if we write out a P0 variable)
+  // We build a map for the connections based on the element numbers and for the points we fake a P1 map
+  
     ASSERT (this->M_listData.size() > 0 , "hdf5exporter: ListData is empty");
 
     // Connections
-    // linear map for Elements. we Will have to insert via local ids.
-    Epetra_Map connectionsMap( Mesh::ElementShape::numPoints * this->M_mesh->numGlobalElements(),
-                               Mesh::ElementShape::numPoints * this->M_mesh->numElements(),
-                               0, this->M_listData.begin()->storedArray()->Comm());
+    // Need to use elements not dofs for this map. Recover local element lists
+
+    std::vector<int> elementList;
+    elementList.reserve(this->M_mesh->numElements()*Mesh::ElementShape::numPoints);
+    for (ID i=1; i <= this->M_mesh->numElements(); ++i)
+      {
+        typename Mesh::ElementType const& element (this->M_mesh->element(i));
+	UInt lid=(i-1)*Mesh::ElementShape::numPoints;
+        for (ID j=1; j<= Mesh::ElementShape::numPoints; ++j, ++lid)
+	{
+	  elementList[lid] = (element.id()-1)*Mesh::ElementShape::numPoints+(j-1);
+        }
+    }
+
+    Epetra_Map connectionsMap(this->M_mesh->numGlobalElements()*Mesh::ElementShape::numPoints, 
+			      this->M_mesh->numElements()*Mesh::ElementShape::numPoints,
+			      &elementList[0],
+			      0, this->M_listData.begin()->storedArray()->Comm());
 
     Epetra_IntVector connections(connectionsMap);
-
-    int* connPtr;
-    connections.ExtractView(&connPtr);
-
     for (ID i=1; i <= this->M_mesh->numElements(); ++i)
     {
         typename Mesh::ElementType const& element (this->M_mesh->element(i));
-        for (ID j=1; j<= Mesh::ElementShape::numPoints; ++j, ++connPtr)
+	UInt lid=(i-1)*Mesh::ElementShape::numPoints;
+        for (ID j=1; j<= Mesh::ElementShape::numPoints; ++j, ++lid)
         {
-            *connPtr = element.point(j).id();
+	  connections[lid] = element.point(j).id();
         }
     }
 
@@ -544,8 +557,43 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     int const hdf5Offset(0);
 
     // Points
-    EpetraMap subMap(this->M_listData.begin()->storedArray()->BlockMap(), hdf5Offset, this->M_mesh->numGlobalVertices(),
-                     this->M_listData.begin()->storedArray()->BlockMap().IndexBase() - hdf5Offset );
+    
+    // Build a map for linear elements, even though the origianl FE might be P0
+    // This gives the right map for the coordinate arrays
+
+    EpetraMap subMap;
+    switch ( Mesh::ElementShape::Shape )
+    {
+    case TETRA:
+      {
+        const RefFE & refFEP1 = feTetraP1;
+        EpetraMap tmpMapP1(refFEP1, *this->M_mesh, 
+		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
+        subMap = tmpMapP1;
+        break;
+      }
+    case HEXA:
+      {
+        const RefFE & refFEQ1 = feHexaQ1;
+        EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh, 
+		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
+        subMap = tmpMapQ1;
+        break;
+      }
+    case LINE:
+      {
+        const RefFE & refFEP11D = feSegP1;
+        EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh, 
+		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
+        subMap = tmpMapQ11D;
+        break;
+      }
+    default:
+        ERROR_MSG( "FE not allowed in HDF5 Exporter" );
+
+    }
+    //    EpetraMap subMap(refFE, *this->M_mesh, 
+    //		     const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
 
     EpetraVector pointsX(subMap);
     EpetraVector pointsY(subMap);
@@ -714,6 +762,9 @@ void Hdf5exporter<Mesh>::M_wr_topology  ( std::ofstream& xdmf )
     case TETRA:
         FEstring = "Tetrahedron";
         break;
+    case HEXA:
+        FEstring = "Hexahedron";
+        break;
     case LINE:
         FEstring = "Polyline";
         break;
@@ -739,34 +790,34 @@ template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_geometry  ( std::ofstream& xdmf )
 {
 
-    std::string geoVarName;
+  std::string postfix_string;
 
-    // see also in postProcess
-    if (this->M_multimesh)
-        geoVarName = "Points" + this->M_postfix;
-    else
-        geoVarName = "Points";
-
-
+  // see also in postProcess
+  if (this->M_multimesh)
+    postfix_string = this->M_postfix;
+  else
+    postfix_string = "";
+  
+ 
     xdmf <<
         "      <Geometry Type=\"X_Y_Z\">\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
         "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
         "                        DataType=\"Float\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             " << M_outputFileName << ":/" << geoVarName << "X/Values\n" <<
+      "             " << M_outputFileName << ":/" << "PointsX" << postfix_string << "/Values\n" <<
         "         </DataStructure>\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
         "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
         "                        DataType=\"Float\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             " << M_outputFileName << ":/" << geoVarName << "Y/Values\n" <<
+        "             " << M_outputFileName << ":/" << "PointsY" << postfix_string << "/Values\n" <<
         "         </DataStructure>\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
         "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
         "                        DataType=\"Float\"\n" <<
         "                        Precision=\"8\">\n" <<
-        "             " << M_outputFileName << ":/" << geoVarName << "Z/Values\n" <<
+        "             " << M_outputFileName << ":/" << "PointsZ" << postfix_string << "/Values\n" <<
         "         </DataStructure>\n" <<
         "      </Geometry>\n" <<
         "\n";
@@ -782,7 +833,7 @@ void Hdf5exporter<Mesh>::M_wr_attributes  ( std::ofstream& xdmf )
         xdmf <<
             "\n      <Attribute\n" <<
             "         Type=\"" << i->typeName() << "\"\n" <<
-            "         Center=\"Node\"\n" <<
+	  "         Center=\"" << i->whereName() << "\"\n" <<
             "         Name=\"" << i->variableName()<<"\">\n";
 
         switch( i->type() )
@@ -808,13 +859,13 @@ void Hdf5exporter<Mesh>::M_wr_scalar_datastructure  ( std::ofstream& xdmf, const
     xdmf <<
 
         "         <DataStructure ItemType=\"HyperSlab\"\n" <<
-        "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << " " << dvar.typeDim() << "\"\n" <<
+        "                        Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
         "                        Type=\"HyperSlab\">\n" <<
         "           <DataStructure  Dimensions=\"3 2\"\n" <<
         "                           Format=\"XML\">\n" <<
         "               0    0\n" <<
         "               1    1\n" <<
-        "               " << this->M_mesh->numGlobalVertices() << " " << dvar.typeDim() << "\n" <<
+        "               " << dvar.size() << " " << dvar.typeDim() << "\n" <<
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
