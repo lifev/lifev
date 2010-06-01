@@ -374,7 +374,7 @@ Ethiersteinman::run()
 
                 if (L2proj)
                 {
-
+                    /*
                     // Interpolation of the solutions
                     vector_type fluidInit(uFESpace.map());
                     vector_type pressureInit(pFESpace.map());
@@ -396,7 +396,7 @@ Ethiersteinman::run()
                     fluid.updateSystem(0.,beta,rhs);
 
                     fluid.iterate(bcH);
-
+                    */
 
                     /*
                     // Old version
@@ -405,6 +405,13 @@ Ethiersteinman::run()
                     fluid.updateSystem( 0., beta, rhs );
                     fluid.iterate(bcH);
                     */
+
+
+                    //rhs = fluid.solution();
+                    //rhs = fluid.matrMass()*rhs;
+                    //adr.updateSystem(1., betaFluid, rhsADR);
+                    //adr.iterate(bcADR);
+
                 }
 
                 // Computation of the error
