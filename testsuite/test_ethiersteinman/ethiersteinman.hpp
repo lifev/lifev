@@ -62,6 +62,7 @@ public:
     typedef LifeV::Oseen< mesh_type >                     fluid_type;
     typedef fluid_type::vector_type                       vector_type;
     typedef boost::shared_ptr<vector_type>                vector_ptrtype;
+    typedef fluid_type::matrix_type                       matrix_type;
 
     // Problem definition
     typedef LifeV::EthierSteinmanUnsteady Problem;
@@ -121,17 +122,6 @@ public:
 
 
 private:
-
-    void computeError( double const&     time,
-                       const LifeV::UInt& iFE,
-                       const LifeV::UInt& iDisc,
-                       fespace_type&     uFESpace,
-                       fespace_type&     pFESpace,
-                       fluid_type const& fluid);
-
-    void checkResult();
-    std::vector<std::vector<LifeV::Real> > uL2Error;
-    std::vector<std::vector<LifeV::Real> > pL2Error;
 
     struct RESULT_CHANGED_EXCEPTION
     {

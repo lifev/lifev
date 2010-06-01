@@ -168,94 +168,6 @@ const UInt Ethiersteinman::meshDiscretization[discretizationNumber]={4,8,16};
 const Real Ethiersteinman::uConvergenceOrder[FEnumber]={2,2,3};
 const Real Ethiersteinman::pConvergenceOrder[FEnumber]={2,2,2};
 
-
-void
-Ethiersteinman::computeError( double     const& time,
-                              const UInt& iFE,
-                              const UInt& iDisc,
-                              fespace_type&     uFESpace,
-                              fespace_type&     pFESpace,
-                              fluid_type const& fluid)
-{
-        vector_type vel  (uFESpace.map(), Repeated);
-        vector_type press(pFESpace.map(), Repeated);
-        vector_type velpressure ( fluid.solution(), Repeated );
-
-        velpressure = fluid.solution();
-        vel.subset(velpressure);
-        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
-
-        double urelerr;
-        double prelerr;
-        double ul2error;
-        double pl2error;
-
-        ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
-        pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
-
-
-        bool verbose = (d->comm->MyPID() == 0);
-
-         if (verbose)
-         {
-             out_norm << time  << " "
-                      << ul2error << " "
-                      << urelerr << " "
-                      << pl2error << " "
-                      << prelerr << "\n" << std::flush;
-         }
-         uL2Error[iFE][iDisc] = ul2error;
-         pL2Error[iFE][iDisc] = pl2error;
-}
-
-void Ethiersteinman::checkResult()
-{
-    // We want to check the convergence of the error and
-    // see if it matches the theory.
-    std::cout << "Checking the convergence:" << std::endl;
-
-    // Test variable
-    bool success(true); // Variable to keep trace of a previous error
-    Real h1(0.0), h2(0.0); // Space discretization step
-    Real uBound(0.0), pBound(0.0); // Velocity and pressure bounds
-    Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
-    std::string status(""); // Information string
-
-    for(UInt i(0);i<FEnumber;++i)
-    {
-        std::cout << "    - " << uFE[i] << "-" << pFE[i] << " ... ";
-
-        // Everything is OK a priori
-        status = "OK";
-
-        for(UInt j(1);j<discretizationNumber;++j){
-            h1 = 1.0/meshDiscretization[j-1];
-            h2 = 1.0/meshDiscretization[j];
-
-            uBound = convTol*pow(h1/h2,uConvergenceOrder[i]);
-            pBound = convTol*pow(h1/h2,pConvergenceOrder[i]);
-
-            uErrRatio = uL2Error[i][j-1]/uL2Error[i][j]; // E1/E2
-            pErrRatio = pL2Error[i][j-1]/pL2Error[i][j];
-
-            if(uErrRatio < uBound){
-                status = "FAILED";
-                success = false;
-            }
-            if(pErrRatio < pBound && i>1){
-                status = "FAILED";
-                success = false;
-            }
-        }
-        std::cout << status << std::endl;
-
-    }
-    if(!success){
-        throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
-    }
-}
-
-
 void
 Ethiersteinman::run()
 {
@@ -277,32 +189,34 @@ Ethiersteinman::run()
     // +-----------------------------------------------+
 
     // Initialization of the errors array
+    std::vector<std::vector<LifeV::Real> > uL2Error;
+    std::vector<std::vector<LifeV::Real> > pL2Error;
     uL2Error.clear();
     pL2Error.clear();
-    std::vector<LifeV::Real> a(discretizationNumber,0.0);
-    for(UInt i(0);i<FEnumber;++i){
-        uL2Error.push_back(a);
-        pL2Error.push_back(a);
+    std::vector<LifeV::Real> tmpVec(discretizationNumber,0.0);
+    for(UInt iElem(0);iElem<FEnumber;++iElem){
+        uL2Error.push_back(tmpVec);
+        pL2Error.push_back(tmpVec);
     }
 
     // Loop on the mesh refinement
-    for(UInt j(0);j<discretizationNumber;++j)
+    for(UInt jDiscretization(0);jDiscretization<discretizationNumber;++jDiscretization)
     {
-        UInt m = meshDiscretization[j];
+        UInt mElem = meshDiscretization[jDiscretization];
 
         // Loop on the finite element
-        for(UInt i(0);i<FEnumber;++i)
+        for(UInt iElem(0);iElem<FEnumber;++iElem)
         {
             if(d->comm->MyPID()==0){
-                std::cout << "Using: -" << uFE[i] << "-" << pFE[i] << " finite element" << std::endl;
-                std::cout << "       -Regular mesh " << m << "x" << m << "x" << m << std::endl;
+                std::cout << "Using: -" << uFE[iElem] << "-" << pFE[iElem] << " finite element" << std::endl;
+                std::cout << "       -Regular mesh " << mElem << "x" << mElem << "x" << mElem << std::endl;
                 std::string fileName("norm_");
                 std::ostringstream oss;
-                oss << m;
+                oss << mElem;
                 fileName.append(oss.str());
                 fileName.append("_");
-                fileName.append(uFE[i]);
-                fileName.append(pFE[i]);
+                fileName.append(uFE[iElem]);
+                fileName.append(pFE[iElem]);
                 fileName.append(".txt");
                 out_norm.open(fileName.c_str());
                 out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
@@ -312,7 +226,9 @@ Ethiersteinman::run()
             // |   Solving the problem for one configuration   |
             // +-----------------------------------------------+
 
+            //
             // Boundary conditions
+            //
             std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
             std::set<UInt> dirichletMarkers = parseList( dirichletList );
             std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
@@ -337,8 +253,9 @@ Ethiersteinman::run()
                 bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
             }
 
+            //
             // fluid solver
-
+            //
             DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
             dataNavierStokes.setup( dataFile );
 
@@ -346,7 +263,7 @@ Ethiersteinman::run()
                 // Call the function to build a mesh
                 regularMesh3D( *dataNavierStokes.dataMesh()->mesh(),
                                1,
-                               m,m,m,
+                               mElem,mElem,mElem,
                                verbose,
                                2.0,2.0,2.0,
                                -1.0,-1.0,-1.0);
@@ -356,8 +273,8 @@ Ethiersteinman::run()
 
             partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
 
-            std::string uOrder =  uFE[i];
-            std::string pOrder =  pFE[i];
+            std::string uOrder =  uFE[iElem];
+            std::string pOrder =  pFE[iElem];
 
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
@@ -439,7 +356,9 @@ Ethiersteinman::run()
             bool const L2proj( !proj.compare("proj") );
 
 
-
+            //
+            // Initial solution loading (interpolation or projection)
+            //
             Real time = t0 + dt;
             for (  ; time <=  dataNavierStokes.dataTime()->getInitialTime() + dt/2.; time += dt)
             {
@@ -449,34 +368,76 @@ Ethiersteinman::run()
                 beta *= 0.;
                 rhs  *= 0.;
 
-                if (L2proj)
-                {
-                    uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
-                    rhs *= -1.;
-                }
-
                 fluid.initialize( Problem::uexact, Problem::pexact );
 
                 beta = fluid.solution();
 
-                fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
-                fluid.getDisplayer().leaderPrint("\n");
-                fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
-                fluid.getDisplayer().leaderPrint("\n");
-
-
                 if (L2proj)
                 {
+
+                    // Interpolation of the solutions
+                    vector_type fluidInit(uFESpace.map());
+                    vector_type pressureInit(pFESpace.map());
+                    vector_type garbage(fullMap);
+
+                    uFESpace.L2ScalarProduct(Problem::uexact, fluidInit, time);
+                    pFESpace.L2ScalarProduct(Problem::pexact, pressureInit, time);
+
+                    rhs = fluidInit;
+                    rhs.add(pressureInit,nDimensions*uFESpace.dof().numTotalDof());
+
+                    // We compute A*Pi_uh
+                    fluid.updateSystem( 0., beta, rhs );
+                    matrix_type A(fullMap);
+                    fluid.getFluidMatrixWithBC(A,garbage,bcH);
+                    A.GlobalAssemble();
+                    rhs = A*rhs;
+
+                    fluid.updateSystem(0.,beta,rhs);
+
+                    fluid.iterate(bcH);
+
+
+                    /*
+                    // Old version
+                    uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
+                    rhs *= -1.;
                     fluid.updateSystem( 0., beta, rhs );
                     fluid.iterate(bcH);
+                    */
                 }
 
-                computeError( time,i,j,
-                              uFESpace,
-                              pFESpace,
-                              fluid);
+                // Computation of the error
+                vector_type vel  (uFESpace.map(), Repeated);
+                vector_type press(pFESpace.map(), Repeated);
+                vector_type velpressure ( fluid.solution(), Repeated );
+
+                velpressure = fluid.solution();
+                vel.subset(velpressure);
+                press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+
+                double urelerr;
+                double prelerr;
+                double ul2error;
+                double pl2error;
+
+                ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
+                pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
 
 
+                bool verbose = (d->comm->MyPID() == 0);
+
+                if (verbose)
+                {
+                    out_norm << time  << " "
+                             << ul2error << " "
+                             << urelerr << " "
+                             << pl2error << " "
+                             << prelerr << "\n" << std::flush;
+                }
+
+
+                // Updating bdf
                 bdf.bdf_u().shift_right( fluid.solution() );
 
             }
@@ -525,8 +486,9 @@ Ethiersteinman::run()
             if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
             if (verbose) std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
 
-            // Temporal loop
-
+            //
+            // Solving Navier-Stokes (Temporal loop)
+            //
             int iter = 1;
 
             Chrono chronoGlobal;
@@ -564,12 +526,40 @@ Ethiersteinman::run()
 
                 bdf.bdf_u().shift_right( fluid.solution() );
 
+                // Computation of the error
+                vector_type vel  (uFESpace.map(), Repeated);
+                vector_type press(pFESpace.map(), Repeated);
+                vector_type velpressure ( fluid.solution(), Repeated );
 
-                computeError( time,i,j,
-                              uFESpace,
-                              pFESpace,
-                              fluid);
+                velpressure = fluid.solution();
+                vel.subset(velpressure);
+                press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
 
+                double urelerr;
+                double prelerr;
+                double ul2error;
+                double pl2error;
+
+                ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
+                pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
+
+
+                bool verbose = (d->comm->MyPID() == 0);
+
+                if (verbose)
+                {
+                    out_norm << time  << " "
+                             << ul2error << " "
+                             << urelerr << " "
+                             << pl2error << " "
+                             << prelerr << "\n" << std::flush;
+                }
+
+                // Saving the errors for the final test
+                uL2Error[iElem][jDiscretization] = ul2error;
+                pL2Error[iElem][jDiscretization] = pl2error;
+
+                // Exporting the solution
                 *velAndPressure = fluid.solution();
                 exporter->postProcess( time );
 
@@ -589,8 +579,56 @@ Ethiersteinman::run()
         } // End of loop on the finite elements
     } // End of loop on the mesh refinement
 
+    // +-----------------------------------------------+
+    // |         Test of the convergence rates         |
+    // +-----------------------------------------------+
+
     // Check if the correct convergence is achieved
-    if(verbose) checkResult();
+    if(verbose){
+        // We want to check the convergence of the error and
+        // see if it matches the theory.
+        std::cout << "Checking the convergence:" << std::endl;
+
+        // Test variable
+        bool success(true); // Variable to keep trace of a previous error
+        Real h1(0.0), h2(0.0); // Space discretization step
+        Real uBound(0.0), pBound(0.0); // Velocity and pressure bounds
+        Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
+        std::string status(""); // Information string
+
+        for(UInt iElem(0);iElem<FEnumber;++iElem)
+        {
+            std::cout << "    - " << uFE[iElem] << "-" << pFE[iElem] << " ... ";
+
+            // Everything is OK a priori
+            status = "OK";
+
+            for(UInt jDiscretization(1);jDiscretization<discretizationNumber;++jDiscretization){
+                h1 = 1.0/meshDiscretization[jDiscretization-1];
+                h2 = 1.0/meshDiscretization[jDiscretization];
+
+                uBound = convTol*pow(h1/h2,uConvergenceOrder[iElem]);
+                pBound = convTol*pow(h1/h2,pConvergenceOrder[iElem]);
+
+                uErrRatio = uL2Error[iElem][jDiscretization-1]/uL2Error[iElem][jDiscretization]; // E1/E2
+                pErrRatio = pL2Error[iElem][jDiscretization-1]/pL2Error[iElem][jDiscretization];
+
+                if(uErrRatio < uBound){
+                    status = "FAILED";
+                    success = false;
+                }
+                if(pErrRatio < pBound && iElem>1){
+                    status = "FAILED";
+                    success = false;
+                }
+            }
+            std::cout << status << std::endl;
+
+        }
+        if(!success){
+            throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
+        }
+    }
 }
 
 
