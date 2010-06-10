@@ -170,6 +170,7 @@ public:
     //! Return the internal EpetraMap of the EpetraMatrix
     const EpetraMap& getMap() const
     {
+        ASSERT( M_epetraMap.get() != 0, "EpetraMatrix::getMap: Error: M_epetraMap pointer is null" );
         return *M_epetraMap;
     }
 
@@ -235,7 +236,7 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int
 // Copies _matrix to a matrix which resides only on the processor "reduceToProc"
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc):
-    M_epetraMap   (_matrix.M_epetraMap->createRootMap(reduceToProc)),
+    M_epetraMap   (_matrix.getMap().createRootMap(reduceToProc)),
     M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries
                                      (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20,
                                      false) ),
