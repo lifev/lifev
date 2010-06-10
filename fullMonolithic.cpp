@@ -74,6 +74,7 @@ fullMonolithic::setupFluidSolid()
     M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
+    M_uk.reset (new vector_type(*this->M_monolithicMap));
     M_un.reset (new vector_type(*this->M_monolithicMap));
     M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
                                                *M_epetraComm,
@@ -109,9 +110,10 @@ fullMonolithic::updateSystem()
     //M_meshMotion->dispOld() is at time n-1 !!
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
-    meshDispDiff->subset(*M_un, offset); //if the conv. term is to be condidered implicitly
+    meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
     super::updateSystem();
+    M_un.reset(new vector_type(*M_uk));
 }
 
 void
@@ -225,6 +227,7 @@ fullMonolithic::evalResidual( vector_type&       res,
         if(!M_robinCoupling.get())
         {
             M_robinCoupling.reset( new matrix_type(*M_monolithicMap));//this matrix is a preconditioner that mixes the coupling conditions at the interface
+            addDiagonalEntries(1., M_robinCoupling, *M_monolithicMap);
             super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
             M_robinCoupling->GlobalAssemble();
         }
@@ -319,7 +322,7 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
                 M_meshMotion->setMatrix(M_solidBlockPrec);
                 M_solidBlockPrec->GlobalAssemble();
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
-
+                ifpackCompPrec->buildPreconditioner(M_fluidOper);
                 ifpackCompPrec->push_back(M_solidOper);
             }
         }
@@ -379,7 +382,6 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
             //*M_fluidBlock+=*M_matrShapeDer;
             shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
 
-            M_BCh_flux->setOffset(M_offset-M_fluxes);
             if ( !M_BCh_flux->bdUpdateDone() )
                 M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );//to kill
 
@@ -438,7 +440,6 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
             couplingMatrix(M_fluidBlock, 7);
             //this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/);
 
-            M_BCh_flux->setOffset(M_offset-M_fluxes);
             bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
             bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
             //	      M_fluidBlock->GlobalAssemble();
@@ -457,7 +458,7 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
                 M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
                 *M_solidBlockPrec += *M_solidBlock;
                 addDiagonalEntries(1., M_solidBlockPrec, M_uFESpace->map() );
-                addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map(), M_uFESpace->dof().numTotalDof()*nDimensions );
+                addDiagonalEntries(1., M_solidBlockPrec, M_pFESpace->map()+M_fluxes, M_uFESpace->dof().numTotalDof()*nDimensions );
                 addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
                 addDiagonalEntries(1., M_solidBlockPrec, M_mmFESpace->map(), M_solidAndFluidDim + nDimensions*M_interface);
                 M_BCh_Robin->setOffset(M_offset);

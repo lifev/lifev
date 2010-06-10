@@ -139,6 +139,7 @@ public:
     {
         return this->M_meshMotion->dispOld();
     }
+    void getSolution                  (vector_ptrtype& sol){sol = M_uk;}
     //}
 
 
@@ -150,7 +151,6 @@ public:
                                             FSIOperator::solid_type::value_type::Function const& df0 );
 
     void                        initializeMesh(vector_ptrtype fluid_dispOld);
-
 
 private:
 

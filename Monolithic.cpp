@@ -42,7 +42,6 @@ Monolithic::Monolithic():
     M_fluxes(0),
     M_BChWSS(),
     M_bdMass(),
-    M_bcfWss(),
     M_robinCoupling(),
     M_alphaf(0.),
     M_alphas(0.),
@@ -56,7 +55,6 @@ Monolithic::Monolithic():
     M_solidBlockPrec(),
     M_meshBlock(),
     M_linearSolver(),
-    M_wss(),
     M_listFluid(),
     M_listSolid(),
     //end of protected attributes
@@ -838,14 +836,13 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
 void Monolithic::
 evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
 {
-    vector_type rhsFullSolid(*rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
     if(M_solid->offset())
         bchSolid.setOffset(M_solid->offset());
     if ( !bchSolid.bdUpdateDone() )
         bchSolid.bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
 
-    bcManage( *M_monolithicMatrix, rhsFullSolid, *M_dFESpace->mesh(), M_dFESpace->dof(), bchSolid, M_dFESpace->feBd(), 1.,
+    bcManage( *M_monolithicMatrix, *rhs, *M_dFESpace->mesh(), M_dFESpace->dof(), bchSolid, M_dFESpace->feBd(), 1.,
               dataFluid().dataTime()->getTime() );
 
     // matrix is GlobalAssembled by  bcManage
@@ -853,13 +850,10 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
     if ( !bchFluid.bdUpdateDone() )
         bchFluid.bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
-    vector_type rhsFull(rhsFullSolid);
-    bcManage( *M_monolithicMatrix, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
+    bcManage( *M_monolithicMatrix, *rhs, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
               dataFluid().dataTime()->getTime() );
 
     M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
-
-    *rhs = rhsFull;
 
     evalResidual(sol,rhs, res, diagonalScaling);
 }
@@ -906,6 +900,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             if(false && !M_robinCoupling.get())
             {
                 M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+                addDiagonalEntries(1., M_robinCoupling, *M_monolithicMap);
                 robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
                 M_robinCoupling->GlobalAssemble();
             }
@@ -1314,6 +1309,7 @@ void  Monolithic::solveJac(vector_type         &_step,
     case 4:
     case 5:
     case 6:
+        M_linearSolver->buildPreconditioner(M_precMatrPtr);
         this->iterateMonolithic(_res, _step, M_precMatrPtr->getMatrixPtr(), M_linearSolver);
         break;
 
