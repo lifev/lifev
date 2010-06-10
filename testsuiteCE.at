@@ -59,7 +59,6 @@ reltol     =  1.e-5 # tolerance in nonLinearRichardson
 restart    = 0
 maxSubIter = 20
 
-semiImplicit = false # (only valid for method = monolithic or monolithic).
 
 [exporter]
 multimesh  = false   # actually we export also the displacement
@@ -69,8 +68,9 @@ type       = hdf5
 
 [fluid]
 useShapeDerivatives           = true
-domainVelImplicit        = true
+domainVelImplicit             = true
 convectiveTermDer             = false
+semiImplicit                  = false # (only valid for method = monolithic or monolithic).
 
 [./physics]
 density   = 1.0               # density
@@ -110,7 +110,15 @@ DDBlockPrec = 6
 #3: segregated R-N (not working well)
 #4: segregated R-N (not working well)
 #5: AztecOO preconditioner (or direct parallel solver, in the future updates)
-#6: Preconditioner J_QN for the Newton system. It works only with fullMonolithic
+#6: Preconditioner J_QN (block G-S) for the Newton system. It works only with fullMonolithic.
+#7: Preconditioner for the Monolithic case (not fullMonolithic): modular block G-S + A.S.
+#8: Preconditioner for the Monolithic case (not fullMonolithic): modular block G-S + A.S.
+#9: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
+#10: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
+#11: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
+#12: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
+#13: Preconditioner for the Monolithic case (not fullMonolithic): sum of 2 modular block G-S + A.S preconditioners.
+#14: Preconditioner for the Monolithic case (not fullMonolithic): sum of 2 modular block G-S + A.S preconditioners.
 fluid_flag      =  1 # default: 1
 alphaf = 0.
 alphas = 0.1 # parameters for Robin-Robin DDBlock preconditioner

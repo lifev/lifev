@@ -587,13 +587,12 @@ void Problem::checkGCEResult(LifeV::Real& time)
 void Problem::checkCEResult(LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-787299)/dispNorm*(dispNorm-787299)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-773835)/dispNorm*(dispNorm-773835)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.004 && (dispNorm-654622)/dispNorm*(dispNorm-654622)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-543915)/dispNorm*(dispNorm-543915)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-517692)/dispNorm*(dispNorm-517692)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-497380)/dispNorm*(dispNorm-497380)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-486165)/dispNorm*(dispNorm-486165)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-478644)/dispNorm*(dispNorm-478644)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.002 && (dispNorm-1.00181e+06)/dispNorm*(dispNorm-1.00181e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.003 && (dispNorm-1.01128e+06)/dispNorm*(dispNorm-1.01128e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
+        if(time==0.004 && (dispNorm-644936)/dispNorm*(dispNorm-644936)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.005 && (dispNorm-652025)/dispNorm*(dispNorm-652025)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+        if(time==0.006 && (dispNorm-555216)/dispNorm*(dispNorm-555216)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+    if(time==0.007 && (dispNorm-538934)/dispNorm*(dispNorm-538934)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
+        if(time==0.008 && (dispNorm-520004)/dispNorm*(dispNorm-520004)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
