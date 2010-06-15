@@ -786,9 +786,14 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::ifstream __is ( filename.c_str() );
     Debug() << "gmsh reading: "<< filename << "\n";
 
-    char __buf[256];
-    __is >> __buf;
-    Debug() << "buf: "<< __buf << "\n";
+    //    char __buf[256];
+    std::string __buf;
+    for (int ii = 0; ii < 6; ++ii)
+    {
+        __is >> __buf;
+        std::cout << "buf: "<< __buf << "\n";
+    }
+
     UInt __n;
     __is >> __n;
     Debug() << "number of nodes: " << __n;
@@ -802,6 +807,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::vector<UInt> __whichboundary(__n);
     Debug() << "reading "<< __n << " nodes\n";
     std::map<int,int> itoii;
+
     for( UInt __i = 0; __i < __n;++__i )
     {
         UInt __ni;
@@ -810,7 +816,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
              >> __x[3*__i+1]
              >> __x[3*__i+2];
 
-        itoii[__ni-1] = __i;
+        itoii[__ni - 1] = __i;
     }
     __is >> __buf;
     Debug() << "buf: "<< __buf << "\n";
@@ -819,8 +825,8 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     UInt __nele;
     __is >> __nele;
 
-    typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
-    typename RegionMesh3D<GeoShape, MC>::FaceType * pf = 0;
+    typename RegionMesh3D<GeoShape, MC>::EdgeType   * pe = 0;
+    typename RegionMesh3D<GeoShape, MC>::FaceType   * pf = 0;
     typename RegionMesh3D<GeoShape, MC>::VolumeType * pv = 0;
 
 
@@ -830,35 +836,86 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::vector<std::vector<int> > __e(__nele);
     std::vector<int> __et(__nele);
     std::vector<int> __etype( __nele );
-    std::vector<int> __gt(16);
-    __gt.assign( 16, 0 );
+    std::vector<int> __gt(32);
+    __gt.assign( 32, 0 );
 
     for( UInt __i = 0; __i < __nele;++__i )
     {
         int __ne, __t, __tag, __np, __dummy;
-        __is >> __ne
-             >> __t
-             >> __tag
-             >> __dummy
-             >> __np;
+
+        //Debug() << __i + 1 << " ";
+
+        __is >> __buf;
+        __is >> __ne;
+
+        //Debug() << __ne << " ";
+
+        switch (__ne)
+        {
+        case(2):
+            __np = 3;
+            break;
+        case(4):
+            __np = 4;
+            break;
+        case(15):
+            __np = 1;
+            break;
+        default:
+            Debug() << "Element type unknown " << __ne << "\n";
+            ASSERT(true, "Elements type unsupported.\n")
+        }
+
+        __is >> __t;
+
+        //Debug() << __t << " ";
+
+        bool ibcSet = false;
+        int  flag   = 0;
+
+        for (int iflag = 0; iflag < __t; ++iflag)
+        {
+            __is >> flag;
+            //Debug() << flag << " ";
+
+            if (!ibcSet)
+            {
+                __tag = flag;
+                ibcSet = true;
+            }
+        }
 
 
-        ++__gt[ __t ];
-        __etype[__i] = __t;
+        // >> __tag
+        //      >> __dummy
+        //      >> __np;
+
+
+        ++__gt[ __ne];
+
+        __etype[__i] = __ne;
+
         __et[__i] = __tag;
         __e[__i].resize( __np );
+
         int __p = 0;
         while ( __p != __np )
         {
-            __is >> __e[__i][__p];
-            __e[__i][__p] = itoii[ __e[__i][__p]-1];
+            int node;
+            __is >> node;
+            __e[__i][__p] = node;
+            //Debug() << node << " ";
+            __e[__i][__p] = itoii[ __e[__i][__p] - 1];
             __e[__i][__p] += 1;
 
             ++__p;
         }
+        //Debug() << "\n";
     }
-    std::for_each( __gt.begin(), __gt.end(),  std::cout << boost::lambda::_1 << " " );
-    std::cout << "\n";
+
+
+    // std::for_each( __gt.begin(), __gt.end(),  std::cout << boost::lambda::_1 << " " );
+    // std::cout << "\n";
 
     // Euler formulas
     UInt n_volumes = __gt[4];
