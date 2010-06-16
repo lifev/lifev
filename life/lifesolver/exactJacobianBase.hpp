@@ -131,7 +131,7 @@ public:
     void fluidPostProcess() {
         if ( false && this->isFluid() )
          {
-             *M_velAndPressure = this->M_fluid->solution();
+             *M_velAndPressure = *this->M_fluid->solution();
              M_ensightFluid->postProcess( M_nbEvalAux++ );
          }
     }

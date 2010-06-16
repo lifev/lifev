@@ -218,8 +218,8 @@ void fixedPoint::eval( const vector_type& _disp,
             vector_type vel  (this->fluid().velFESpace().map());
             vector_type press(this->fluid().pressFESpace().map());
 
-            vel.subset(this->M_fluid->solution());
-            press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+            vel.subset(*this->M_fluid->solution());
+            press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
 
             std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
             std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;

@@ -289,7 +289,7 @@ Cylinder::run()
     // fluid solver
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
-    
+
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
 
     if (verbose) std::cout << std::endl;
@@ -427,13 +427,13 @@ Cylinder::run()
 //    fluid.postProcess();
 
 
-    bdf.bdf_u().initialize_unk( fluid.solution() );
+    bdf.bdf_u().initialize_unk( *fluid.solution() );
 
     fluid.resetPrec();
 
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
+    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), Repeated ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -470,11 +470,11 @@ Cylinder::run()
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( fluid.solution() );
+        bdf.bdf_u().shift_right( *fluid.solution() );
 
 //         if (((iter % save == 0) || (iter == 1 )))
 //         {
-        *velAndPressure = fluid.solution();
+        *velAndPressure = *fluid.solution();
         ensight.postProcess( time );
 //        fluid.postProcess();
 //         }

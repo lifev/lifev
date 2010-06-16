@@ -64,10 +64,10 @@ typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
 
 template <class Mesh, class Map>
-void 
-computeP0pressure(FESpace< Mesh, Map >& pFESpace, 
-		  FESpace< Mesh, Map >& p0FESpace, 
-		  const FESpace<Mesh, Map >& uFESpace, 
+void
+computeP0pressure(FESpace< Mesh, Map >& pFESpace,
+		  FESpace< Mesh, Map >& p0FESpace,
+		  const FESpace<Mesh, Map >& uFESpace,
 		  const vector_type& velAndPressureExport,
 		  vector_type& P0pres, Real time);
 
@@ -163,12 +163,12 @@ EnsightToHdf5::run()
 
     if (verbose) std::cout << "Building the P0 pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > p0FESpace(meshPart, feTetraP0, quadRuleTetra1pt, 
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > p0FESpace(meshPart, feTetraP0, quadRuleTetra1pt,
 							      quadRuleTria1pt, 1,*d->comm);
 
     if (verbose) std::cout << "ok." << std::endl;
 
-    
+
 
     UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
@@ -224,8 +224,8 @@ EnsightToHdf5::run()
     importer->setDirectory( "./" ); // This is a test to see if M_post_dir is working
     importer->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
 
-    vector_ptrtype velAndPressureExport ( new vector_type(fluid.solution(), exporter->mapType() ) );
-    vector_ptrtype velAndPressureImport ( new vector_type(fluid.solution(), importer->mapType() ) );
+    vector_ptrtype velAndPressureExport ( new vector_type(*fluid.solution(), exporter->mapType() ) );
+    vector_ptrtype velAndPressureImport ( new vector_type(*fluid.solution(), importer->mapType() ) );
 
     if ( exporter->mapType() == Unique )
         velAndPressureExport->setCombineMode(Zero);
@@ -239,7 +239,7 @@ EnsightToHdf5::run()
 
     *velAndPressureExport = *velAndPressureImport;
 
-    
+
     vector_ptrtype P0pres ( new vector_type(p0FESpace.map()) );
     MPI_Barrier(MPI_COMM_WORLD);
     computeP0pressure(pFESpace, p0FESpace, uFESpace, *velAndPressureImport, *P0pres, t0);
@@ -252,7 +252,7 @@ EnsightToHdf5::run()
                            UInt(pFESpace.dof().numTotalDof()) );
 
     exporter->addVariable(ExporterData::Scalar, "P0pressure", P0pres,
-			  UInt(0), UInt(p0FESpace.dof().numTotalDof()), 
+			  UInt(0), UInt(p0FESpace.dof().numTotalDof()),
 			  UInt(0), ExporterData::Cell );
     exporter->postProcess( t0 );
 
@@ -279,10 +279,10 @@ EnsightToHdf5::run()
 
 
 template<class Mesh, class Map>
-void 
-computeP0pressure(FESpace< Mesh, Map >& pFESpace, 
-		  FESpace< Mesh, Map >& p0FESpace, 
-		  const FESpace< Mesh, Map >& uFESpace, 
+void
+computeP0pressure(FESpace< Mesh, Map >& pFESpace,
+		  FESpace< Mesh, Map >& p0FESpace,
+		  const FESpace< Mesh, Map >& uFESpace,
 		  const vector_type& velAndPressure,
 		  vector_type& P0pres, Real time)
 {
@@ -290,7 +290,7 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
   int MyPID;
   MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
   UInt offset = 3*uFESpace.dof().numTotalDof();
-  
+
   std::vector<int> gid0Vec(0);
   gid0Vec.reserve(p0FESpace.mesh()->numVolumes());
   std::vector<Real> val0Vec(0);
@@ -301,17 +301,17 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
 
     pFESpace.fe().update( pFESpace.mesh()->volumeList( ivol ), UPDATE_DPHI );
     p0FESpace.fe().update( p0FESpace.mesh()->volumeList( ivol ) );
-    
+
     UInt eleID = pFESpace.fe().currentLocalId();
-    
+
     double tmpsum=0.;
     for (UInt iNode=0; iNode < (UInt) pFESpace.fe().nbFEDof(); iNode++)
     {
       int ig = pFESpace.dof().localToGlobal( eleID, iNode + 1 );
       tmpsum += velAndPressure(ig+offset);
-      gid0Vec.push_back( p0FESpace.fe().currentId() ); 
-      val0Vec.push_back( tmpsum / (double) pFESpace.fe().nbFEDof() );  
-    }   
+      gid0Vec.push_back( p0FESpace.fe().currentId() );
+      val0Vec.push_back( tmpsum / (double) pFESpace.fe().nbFEDof() );
+    }
   }
 
   P0pres.replaceGlobalValues(gid0Vec, val0Vec);

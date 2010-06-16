@@ -256,8 +256,11 @@ public:
     			M_ensightSolid->import(M_Tstart, M_fsi->timeStep());
 				M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
     		}
-
     	}
+        else
+        {
+            M_fsi->initialize();
+        }
     	//std::cout << "in problem" << std::endl;
     	//M_fsi->FSIOper()->fluid().postProcess();
 	}
@@ -316,7 +319,7 @@ public:
 				if ( isFluidLeader )
 					ofile << flux << " " << std::endl;
 
-				*M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
+				*M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
 				*M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
 				M_ensightFluid->postProcess( time );
             }

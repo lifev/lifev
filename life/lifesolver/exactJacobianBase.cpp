@@ -235,8 +235,8 @@ void exactJacobian::eval(const vector_type& _disp,
         vector_type vel  (this->fluid().velFESpace().map());
         vector_type press(this->fluid().pressFESpace().map());
 
-        vel.subset(this->M_fluid->solution());
-        press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+        vel.subset(*this->M_fluid->solution());
+        press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
 
         std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
         std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
@@ -408,7 +408,7 @@ void  exactJacobian::solveLinearFluid()
         this->M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
                                            alpha,
                                            *M_un,
-                                           M_fluid->solution(),
+                                           *M_fluid->solution(),
                                            dispFluidMesh,
                                            this->veloFluidMesh(),
                                            this->derVeloFluidMesh(),
@@ -425,7 +425,7 @@ void  exactJacobian::solveLinearFluid()
                                                   *M_matrShapeDer,
                                                   alpha,
                                                   *M_un,
-                                                  M_fluid->solution(),
+                                                  *M_fluid->solution(),
                                                   //dispFluidMesh,
                                                   this->veloFluidMesh(),
                                                   (UInt)0,

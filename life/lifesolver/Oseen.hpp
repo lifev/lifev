@@ -97,6 +97,7 @@ public:
     typedef typename SolverType::matrix_type      matrix_type;
     typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
     typedef typename SolverType::vector_type      vector_type;
+    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
@@ -178,7 +179,7 @@ public:
 
     //! returns the local solution vector
 
-    const vector_type& solution() const {return M_sol;}
+    const vector_ptrtype& solution() const {return M_sol;}
 
     //! returns the local residual vector
 
@@ -281,7 +282,7 @@ public:
     bool          getIsDiagonalBlockPrec() {return M_isDiagonalBlockPrec;}
     void          setBlockPreconditioner(matrix_ptrtype blockPrec);
     void          getFluidMatrix( matrix_type& matrFull );
-    void          updateUn( )                              {*M_un = M_sol;}
+    void          updateUn( )                              {*M_un = *M_sol;}
     void          updateUn(const vector_type& sol )        {*M_un = sol;}// for the monolithic
     void          setupPostProc(const EntityFlag& flag, const Mesh meshPart);
 protected:
@@ -343,7 +344,7 @@ protected:
     vector_type                    M_rhsFull;
 
     //! Global solution _u and _p
-    vector_type                    M_sol;
+    vector_ptrtype                    M_sol;
 
     //! residual
 
@@ -427,7 +428,7 @@ Oseen( const data_type&          dataType,
     M_matrStab               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_rhsFull                ( M_localMap ),
-    M_sol                    ( M_localMap ),
+    M_sol                    ( new vector_type(M_localMap) ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
     M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
@@ -484,7 +485,7 @@ Oseen( const data_type&          dataType,
     M_matrStab               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_rhsFull                ( M_localMap ),
-    M_sol                    ( M_localMap ),
+    M_sol                    ( ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
     M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
@@ -540,7 +541,7 @@ Oseen( const data_type&          dataType,
     M_matrStab               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_rhsFull                ( M_localMap ),
-    M_sol                    ( M_localMap ),
+    M_sol                    ( new vector_type(M_localMap) ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
     M_post_proc              ( new PostProc<Mesh>(M_uFESpace.mesh(),
@@ -849,9 +850,9 @@ void Oseen<Mesh, SolverType>::
 initialize( const vector_type& u0, const vector_type& p0 )
 {
 
-    M_sol = u0;
+    *M_sol = u0;
     *M_un = u0;
-    M_sol.add(p0, nDimensions*M_uFESpace.dof().numTotalDof());
+    M_sol->add(p0, nDimensions*M_uFESpace.dof().numTotalDof());
     M_un->add(p0, nDimensions*M_uFESpace.dof().numTotalDof());
 
 }
@@ -861,7 +862,7 @@ void Oseen<Mesh, SolverType>::
 initialize( const vector_type& velAndPressure)
 {
 
-    M_sol = velAndPressure;
+    *M_sol = velAndPressure;
     *M_un = velAndPressure;
 
 }
@@ -1145,7 +1146,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
 
-    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
+    int numIter = M_linearSolver.solveSystem( rhsFull, *M_sol, matrFull );
 
     // if the preconditioner has been rese the stab terms are to be updated
     if( numIter < 0 || numIter > M_iterReuseStab )
@@ -1154,7 +1155,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     }
 
     M_residual  = M_rhsNoBC;
-    M_residual -= *M_matrNoBC*M_sol;
+    M_residual -= *M_matrNoBC*(*M_sol);
 
     //M_residual.spy("residual");
 } // iterate()
@@ -1165,7 +1166,7 @@ template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::reduceSolution( Vector& u,
                                               Vector& p )
 {
-    vector_type vel(M_sol, 0);
+    vector_type vel(*M_sol, 0);
 
     if (false/*S_verbose*/)
     {
@@ -1239,7 +1240,7 @@ Real Oseen<Mesh, SolverType>::removeMean( vector_type& x )
 
     M_matrMassPr->GlobalAssemble();
 
-    vector_type ones(M_sol);
+    vector_type ones(*M_sol);
     ones = 1.0;
 
     Real mean;
@@ -1330,20 +1331,20 @@ Oseen<Mesh, SolverType>::post_proc_set_phi()
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::flux(const EntityFlag& flag)
 {
-    return flux(flag, M_sol);
+    return flux(flag, *M_sol);
 }
 
 //! Computes the pressure on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag)
 {
-  return pressure(flag, M_sol);
+  return pressure(flag, *M_sol);
 }
 
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC )
 {
-  return LagrangeMultiplier( Flag, BC, M_sol );
+  return LagrangeMultiplier( Flag, BC, *M_sol );
 }
 
 //! Computes the flux on a given part of the boundary
@@ -1428,7 +1429,7 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 //     if (_writeMesh || (M_count / M_data.verbose() == 0) )
 //         writeMesh  ("partedMesh." + me + ".mesh", M_pFESpace.mesh() );
 
-    vector_type velAndPressure(M_sol, Repeated);
+    vector_type velAndPressure(*M_sol, Repeated);
     vector_type res(M_residual, Repeated);
 
 
