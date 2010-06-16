@@ -38,11 +38,11 @@ namespace LifeV {
 
 ExporterData::ExporterData( const  ExporterData::Type type,
                             const std::string variableName,
-                            const vector_ptrtype& vr,
+                            vector_ptrtype& vr,
                             UInt start,
                             UInt size,
                             UInt steady,
-			    const ExporterData::Where where):
+                            const ExporterData::Where where):
     M_variableName  ( variableName ),
     M_vr            ( vr ),
     M_size          ( size ),
