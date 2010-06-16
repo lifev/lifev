@@ -577,7 +577,7 @@ FSIOperator::updateSystem( )
         transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
         if(M_fluid->solution().get())
-            M_un                = M_fluid->solution();
+            M_un.reset(new vector_type(*M_fluid->solution()));
         *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->dataTime()->getTimeStep() );
     }
 
