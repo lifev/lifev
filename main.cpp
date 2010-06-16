@@ -152,10 +152,6 @@ public:
 #endif
 			M_fsi->setDataFromGetPot( data_file );
 
-			MPI_Barrier( MPI_COMM_WORLD );
-
-            MPI_Barrier(MPI_COMM_WORLD);
-
 #ifdef DEBUG
             Debug( 10000 ) << "Setting up the BC \n";
 #endif
@@ -218,15 +214,17 @@ public:
                                        M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
 
-        M_Tstart = data_file("fluid/time_discretization/initialtime"   ,0.);
-
-		//to load using ensight/hdf5
-		std::string loadInitSol(data_file("problem/initSol","-1"));
+		//! load using ensight/hdf5
+		std::string loadInitSol(data_file("importer/initSol","-1"));
 
 		if(loadInitSol.compare("-1"))
-            {
-                initialize(loadInitSol, data_file);
-            }
+        {
+            initialize(loadInitSol, data_file);
+        }
+        else
+        {
+            M_fsi->initialize();
+        }
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
@@ -242,12 +240,17 @@ public:
     run( LifeV::Real dt, LifeV::Real T)
     {
         boost::timer _overall_timer;
+        M_Tstart=M_fsi->FSIOper()->dataFluid().dataTime()->getInitialTime();
         int _i = 1;
         LifeV::Real time=M_Tstart + dt;
         LifeV::UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
 #ifdef HAVE_HDF5
-        M_exporterFluid->postProcess( 0 );//ugly way to avoid that hdf5 starts with a deformed mesh
+        if (M_exporterFluid->mapType() == LifeV::Unique)
+        {
+            M_exporterFluid->postProcess( M_Tstart );//ugly way to avoid that hdf5 starts with a deformed mesh
+            M_exporterSolid->postProcess( M_Tstart );//ugly way to avoid that hdf5 starts with a deformed mesh
+        }
 #endif
 
         bool valveIsOpen=true;
@@ -339,7 +342,6 @@ private:
     void checkGCEResult(LifeV::Real& time);
 
     fsi_solver_ptr M_fsi;
-    double         M_Tstart;
 
     MPI_Comm*      M_comm;
 
@@ -353,6 +355,7 @@ private:
     vector_ptrtype M_solidVel;
     LifeV::FlowConditions FC0;
     LifeV::LumpedHeart LH;
+    LifeV::Real    M_Tstart;
 
     struct RESULT_CHANGED_EXCEPTION
     {
@@ -528,18 +531,17 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     //                        }
     //upcast necessary
 
-    Real init= data_file("problem/Tstart"   ,0.);
-    Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
-    M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,init);
+    Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();
+    M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);
 
-    M_importerFluid->import(init-dt, dt);
-    M_importerSolid->import(init-dt, dt);
+    M_importerFluid->import(M_Tstart-dt, dt);
+    M_importerSolid->import(M_Tstart-dt, dt);
 
     UniqueVFDOld.reset(new vector_type(*M_fluidDisp, Unique, Zero));
     dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
 
-    M_importerFluid->import(init);
-    M_importerSolid->import(init);
+    M_importerFluid->import(M_Tstart);
+    M_importerSolid->import(M_Tstart);
 
 
     UniqueV.reset( new vector_type(*M_velAndPressure, Unique, Zero));
