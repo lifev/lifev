@@ -237,7 +237,7 @@ MS_Model_Fluid3D::SetupModel()
     //M_FluidSolution.reset( new VectorType( M_FluidFullMap, Repeated ) );
     //M_FluidSolution.reset( new VectorType( M_Fluid->solution(), Repeated ) );
 
-    M_FluidSolution.reset( new VectorType( M_Fluid->solution(), M_exporter->mapType() ) );
+    M_FluidSolution.reset( new VectorType( *M_Fluid->solution(), M_exporter->mapType() ) );
     if ( M_exporter->mapType() == Unique )
         M_FluidSolution->setCombineMode( Zero );
 
@@ -267,13 +267,13 @@ MS_Model_Fluid3D::BuildSystem()
     M_Fluid->buildSystem();
 
     //Initialize BDF
-    M_FluidBDF->bdf_u().initialize_unk( M_Fluid->solution() );
+    M_FluidBDF->bdf_u().initialize_unk( *M_Fluid->solution() );
 
     //Define problem coefficients
     if ( M_FluidData->Stokes() )
     {
         M_alpha  = 0.0;
-        *M_beta  = M_Fluid->solution(); //It is a stationary Navier-Stokes
+        *M_beta  = *M_Fluid->solution(); //It is a stationary Navier-Stokes
         *M_RHS  *= 0.0;
     }
     else
@@ -296,7 +296,7 @@ MS_Model_Fluid3D::UpdateSystem()
 #endif
 
     //Update BDF
-    M_FluidBDF->bdf_u().shift_right( M_Fluid->solution() );
+    M_FluidBDF->bdf_u().shift_right( *M_Fluid->solution() );
 
     //Update problem coefficients
     M_alpha = M_FluidBDF->bdf_u().coeff_der( 0 ) / M_FluidData->dataTime()->getTimeStep();
@@ -326,7 +326,7 @@ MS_Model_Fluid3D::SolveSystem()
 
     if ( M_SubiterationsMaximumNumber > 0 )
     {
-        Real residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector;
+        Real residual = ( *M_beta - *M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector;
 
         if ( M_displayer->isLeader() )
             std::cout << "  F-  Residual:                                " << residual << std::endl;
@@ -334,7 +334,7 @@ MS_Model_Fluid3D::SolveSystem()
         M_generalizedAitken.restart( true );
         for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
         {
-            *M_beta += M_generalizedAitken.computeDeltaLambdaScalar( *M_beta, *M_beta - M_Fluid->solution() );
+            *M_beta += M_generalizedAitken.computeDeltaLambdaScalar( *M_beta, *M_beta - *M_Fluid->solution() );
 
             //Linear model need to be updated!
             M_Fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
@@ -344,7 +344,7 @@ MS_Model_Fluid3D::SolveSystem()
             M_Fluid->iterate( *M_FluidBC->GetHandler() );
 
             // Check the new residual
-            residual = ( *M_beta - M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector
+            residual = ( *M_beta - *M_Fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector
 
             // Display subiteration information
             if ( M_displayer->isLeader() )
@@ -369,7 +369,7 @@ MS_Model_Fluid3D::SaveSolution()
 #endif
 
     //Post-processing
-    *M_FluidSolution = M_Fluid->solution();
+    *M_FluidSolution = *M_Fluid->solution();
     M_exporter->postProcess( M_FluidData->dataTime()->getTime() );
 
 #ifdef HAVE_HDF5
@@ -443,7 +443,7 @@ MS_Model_Fluid3D::UpdateLinearModel()
     M_Fluid->updateLinearSystem( M_Fluid->matrNoBC(),
                                  M_alpha,
                                  *M_beta,
-                                 M_Fluid->solution(),
+                                 *M_Fluid->solution(),
                                  VectorZero,
                                  VectorZero,
                                  VectorZero,
@@ -625,7 +625,7 @@ MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearS
         {
             return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
         }
-        
+
         default:
 
             std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
