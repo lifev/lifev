@@ -285,11 +285,14 @@ FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
 {
     if(!u0.get())
     {
-        M_oper->setSolution(vector_type(*M_oper->getCouplingVariableMap())); // couplingVariableMap()
+        u0.reset(new vector_type(*M_oper->getCouplingVariableMap()));
+        M_oper->setSolution(*u0); // couplingVariableMap()
+        M_oper->initializeBDF(u0);
     }
     else
     {
         M_oper->setSolution(*u0); // couplingVariableMap()//copy
+        M_oper->initializeBDF(M_oper->un());
     }
     if(!v0.get())
         M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy

@@ -498,12 +498,7 @@ FSIOperator::setupFluidSolid( void )
 //             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_dataSolid, *M_dFESpace, *M_epetraComm ) );
 
         //Vector initialization
-    	M_un.reset ( new vector_type( M_fluid->getMap() ) );
     	M_rhs.reset( new vector_type( M_fluid->getMap() ) );
-
-    	//BDF initialization
-        M_bdf.reset( new BdfT<vector_type>( M_dataFluid->dataTime()->getBDF_order() ) );
-        M_bdf->initialize_unk( *M_un );
     }
 
     if ( this->isSolid() )
@@ -577,25 +572,13 @@ FSIOperator::updateSystem( )
 
     if ( this->isFluid() )
     {
-//        Real alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
-
-//         vector_type beta = M_bdf->extrap();
-//         vector_type rhs  = M_bdf->time_der( M_dataFluid->getTimeStep() );
-
-//        this->M_fluid->updateSystem( alpha, beta, rhs );
-
-//         this->transferMeshMotionOnFluid(M_meshMotion->displacement(),
-//                                         *this->M_veloFluidMesh);
-
         M_meshMotion->updateSystem();
 
         transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
-        *M_un                = M_fluid->solution();
+        if(M_fluid->solution().get())
+            M_un                = M_fluid->solution();
         *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->dataTime()->getTimeStep() );
-
-        //*this->M_rhs               = M_fluid->matrMass()* (*this->M_un);
-        //*this->M_rhs*=this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
     }
 
     if ( this->isSolid() )
@@ -634,7 +617,7 @@ FSIOperator::shiftSolution()
 {
     if ( this->isFluid() )
     {
-        this->M_bdf->shift_right( M_fluid->solution() );
+        this->M_bdf->shift_right( *M_fluid->solution() );
     }
 }
 
@@ -1358,6 +1341,13 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
     M_sigmaSolidRepeated.reset    ( new vector_type(*M_solidInterfaceMap, Repeated) );
 }
 
+void FSIOperator::initializeBDF(vector_ptrtype un)
+{
+    M_un = un;
+    //BDF initialization
+    M_bdf.reset( new BdfT<vector_type>( M_dataFluid->dataTime()->getBDF_order() ) );
+    M_bdf->initialize_unk( *un );
+}
 
 
 void

@@ -175,7 +175,7 @@ public:
                                const vector_type& _disp,
                                const UInt         _iter ) = 0;
 
-    virtual void shiftSolution();
+    virtual void shiftSolution( );
 
     virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
                              FSIOperator::fluid_type::value_type::Function const& p0,
@@ -190,6 +190,10 @@ public:
         if (this->isFluid())
             fluid().initialize(u0, p0);
     }
+
+
+    void initializeBDF(vector_ptrtype un);
+
 
 
     void createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension);
@@ -460,7 +464,7 @@ public:
 
     //! sets the solution vector by copy
     void setSolution                                (const vector_type& sol)
-    {*M_lambda = sol;}
+    {M_lambda.reset(new vector_type(sol));}
 
     //! sets the solution time derivative vector by copy
     virtual  void setSolutionDerivative                                (const vector_ptrtype& lambdaDot){ M_lambdaDot=lambdaDot; }
@@ -475,7 +479,7 @@ public:
 
     //! gets the fluid velocity and pressure by copy
     virtual  void getFluidVelAndPres                         (vector_type& sol)
-    { sol = M_fluid->solution();}
+    { sol = *M_fluid->solution();}
 
 
 protected:
