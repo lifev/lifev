@@ -289,9 +289,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
 {
     Chrono chrono;
     chrono.start();
-
-    if (M_verbose)
-        std::cout << " he-  Computing constant matrices ...        " <<  std::flush;
+    M_Displayer.leaderPrint(" HE-  Computing constant matrices ...          ");
 
     M_matrHE.reset( new matrix_type (M_localMap ) );
 
@@ -313,9 +311,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
     M_matrHE->GlobalAssemble();
 
     chrono.stop();
-
-    if (M_verbose)
-        std::cout << " done in " << chrono.diff() << std::endl;
+    M_Displayer.leaderPrintMax("done in " , chrono.diff() );
 
 
     // Initializations
@@ -331,14 +327,11 @@ template <typename Mesh, typename SolverType>
 void
 HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
 {
-    if (M_verbose)
-        std::cout << "  HE- Updating the system      ... " << std::flush;
+    M_Displayer.leaderPrint(" HE-  Updating the system ...                  ");
 
     M_dispOld = M_disp;
 
-    if (M_verbose)
-        std::cout << "  ok." << std::endl;
-
+    M_Displayer.leaderPrint("done \n");
 }
 
 
@@ -346,31 +339,20 @@ HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
 void
 HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
 {
-
     Chrono chrono;
 
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint(" HE-  Updating the boundary conditions ...     ");
-
+    M_Displayer.leaderPrint(" HE-  Applying boundary conditions ...         ");
     chrono.start();
 
-    // Initializations
     M_f    *= 0.;
     applyBoundaryConditions(M_f, BCh);
 
-
-    // Real f_norm_inf(M_f.NormInf());
-
-    if (M_verbose)
-        std::cout << "  HE- Solving the system ... \n" << std::flush;
+    chrono.stop();
+    M_Displayer.leaderPrintMax("done in " , chrono.diff() );
 
     // solving the system. Note: setMatrix(M_matrHE) done in setUp()
     M_linearSolver.solveSystem( M_f, M_disp, M_matrHE );
-
-    //    M_dispDiff =  M_disp ;
-    //    M_dispDiff -= M_dispOld;
-
-
 }
 
 template <typename Mesh, typename SolverType>
@@ -393,25 +375,21 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_type& 
     if (  ! BCh.bdUpdateDone() )
     {
         // BC boundary information update
-        if (M_verbose) std::cout << "\n      - Updating the BC " << std::flush;
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
     if(M_offset)//mans that this is the fullMonolithic case
-        {
-    	BCh.setOffset(M_offset);
-        }
+    {
+        BCh.setOffset(M_offset);
+    }
     else
-        {
-            if (M_verbose) std::cout << "\n  HE- Filling the rhs " << std::flush;
-            //    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *BCh, M_FESpace.feBd(), 0., 1.0 );
-            //bcManageVector(rhs, M_FESpace, *BCh, 0., 1.0 );
-            bcManageVector(rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 0., 1.0);
-            if (M_verbose) std::cout << "\n" << std::flush;
-        }
-        if (M_verbose) std::cout << "\n      - Filling the matrix " ;
-        bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
-        if (M_verbose) std::cout << "\n" << std::flush;
+    {
+        //    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *BCh, M_FESpace.feBd(), 0., 1.0 );
+        //bcManageVector(rhs, M_FESpace, *BCh, 0., 1.0 );
+        bcManageVector(rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 0., 1.0);
+    }
+
+    bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
 }
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem
