@@ -90,9 +90,13 @@ Int nonLinRichardson( EpetraVector& sol,
 
     if (verbose)
     {
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "  NonLinRichardson: starting " << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        //std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+        std::cout << "      Non-Linear Richardson: starting          " << std::endl;
+        std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+        std::cout << std::endl;
+        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
     functional.evalResidual( residual, sol, iter );
 
@@ -125,12 +129,15 @@ Int nonLinRichardson( EpetraVector& sol,
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "------------------------------------------------------------------" << std::endl;
-            std::cout << "  NonLinRichardson: iter = " << iter
-                      << ", residual = " << normRes
-                      << ", stoping tolerance = " << stop_tol << std::endl;
-            std::cout << "------------------------------------------------------------------" << std::endl;
+            //std::cout << "------------------------------------------------------------------" << std::endl;
+            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+            std::cout << "      Non-Linear Richardson: iteration  =      " << iter << std::endl
+                      << "                             residual   =      " << normRes << std::endl
+                      << "                             tolerance  =      " << stop_tol << std::endl;
+            std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
             std::cout << std::endl;
+            //std::cout << "------------------------------------------------------------------" << std::endl;
+            //std::cout << std::endl;
         }
 
         iter++;
@@ -196,8 +203,8 @@ Int nonLinRichardson( EpetraVector& sol,
             linearRelTol = std::min<Real>( eta_max,
                                              std::max<Real>( linearRelTol,
                                                              .5 * stop_tol / normRes ) );
-            if (verbose)
-                std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+            //if (verbose)
+            //    std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
         }
 
     }
@@ -212,10 +219,14 @@ Int nonLinRichardson( EpetraVector& sol,
 
     if (verbose)
     {
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "--- NonLinRichardson: convergence (" << normRes
-                  <<") in " << iter << " iterations\n\n";
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl;
+        //std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+        std::cout << "      Non-Linear Richardson: convergence =     " << normRes << std::endl
+                  << "                             iterations  =     " << iter << std::endl;
+        std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+        std::cout << std::endl;
+        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
     maxit = iter;
 
