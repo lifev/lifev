@@ -13,7 +13,8 @@
 ###################################################################################################
 
 [MultiScale]
-modelName        = FSI3D_Cylinder
+modelName        = FSI3D_Cylinder_tube20_Monolithic
+modelType        = FSI3D
 couplingFlags    = '2 3'
 
 
@@ -23,26 +24,10 @@ multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
 type       = hdf5
-nRestart   = 0
-    
-    [./fluid]
-    filename   = fluid4
-
-    [../solid]
-    filename   = solid4
-    
-    [../]
+nRestart   = 0       # THIS MUST BE REMOVED IN THE MULTISCALE FRAMEWORK
 
 [importer]
 type       = hdf5
-    
-    [./fluid]
-    filename   = fluidExp
-    
-    [../solid]
-    filename   = solidExp
-    
-    [../]
 
 
 
@@ -80,13 +65,11 @@ convectiveTermDer   = false  # tells if the velocity is to be considered implici
 semiImplicit        = true   # tells if we advance in time after the first nonlinear iteration or not
 
     [./physics]
-    density         = 1.0             # density   [g/cm^3]
-    viscosity       = 0.035           # viscosity [g/cm/s]
+    #density         = 1.0             # density   [g/cm^3]
+    #viscosity       = 0.035           # viscosity [g/cm/s]
 
     [../time_discretization]
-    initialtime                = 0.0    # [s]
-    endtime                    = 0.05   # [s]
-    timestep                   = 0.0001 # [s]
+    #timestep                   = 0.0001 # [s]
     BDF_order       = 1
 
     [../space_discretization]
@@ -247,7 +230,6 @@ DDBlockPrec = 7
 fluid_flag      =  1   # default: 1
 alphaf          =  0.
 alphas          =  0.1 # parameters for Robin-Robin DDBlock preconditioner
-fluid_flag      =  1   # default: 1
 tolerance       =  0   # how far points are to be considered the same on the interface
 
 
@@ -255,15 +237,14 @@ tolerance       =  0   # how far points are to be considered the same on the int
 [solid]
 
     [./physics]
-    density   = 1.2    # density
-    young     = 4.0E6
-    poisson   = 0.48
+    #density   = 1.2    # density
+    #young     = 4.0E6
+    #poisson   = 0.48
 
     [../time_discretization]
-    initialtime                = 0.0    # [s]
-    endtime                    = 0.05   # [s]
-    timestep                   = 0.0001 # [s]
-
+    #timestep                   = 0.0001 # [s]
+    BDF_order       = 1
+    
     [../space_discretization]
     mesh_dir         = ./Mesh/ 
     mesh_file        = vessel20.mesh  # mesh file
