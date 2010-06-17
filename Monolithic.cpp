@@ -35,7 +35,6 @@ Monolithic::Monolithic():
     M_monolithicMatrix(),
     M_precMatrPtr(),
     M_precPtr(),
-    M_DDBlockPrec(),
     M_rhsFull(),
     M_BCh_flux(new fluid_bchandler_raw_type),
     M_BCh_Robin(new fluid_bchandler_raw_type),
@@ -43,8 +42,6 @@ Monolithic::Monolithic():
     M_BChWSS(),
     M_bdMass(),
     M_robinCoupling(),
-    M_alphaf(0.),
-    M_alphas(0.),
     M_offset(0),
     M_solidAndFluidDim(0),
     M_solidOper(),
@@ -70,8 +67,7 @@ Monolithic::Monolithic():
     M_reusePrec(true),
     M_resetPrec(true),
     M_maxIterSolver(-1),
-    M_restarts(false),
-    M_robinNeumannCoupling(true)
+    M_restarts(false)
 {}
 
 // Destructor
@@ -85,8 +81,8 @@ Monolithic::setupFEspace()
 	super::setupFEspace();
 
 	// Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( M_dataSolid->mesh(),
-                                                         M_dataSolid->order(),
+    M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( M_data->dataSolid()->dataMesh()->mesh(),
+                                                         M_data->dataSolid()->order(),
                                                          nDimensions,
                                                          *M_epetraComm));
 }
@@ -96,9 +92,9 @@ Monolithic::setupDOF( void )
 {
 	M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
 											    M_dFESpace->refFE(), M_dFESpace->dof() );
-	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_structureInterfaceFlag,
-											   *M_dFESpace->mesh(),  M_harmonicInterfaceFlag,
-											    M_interfaceTolerance );
+	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->structureInterfaceFlag(),
+											   *M_dFESpace->mesh(),  M_data->harmonicInterfaceFlag(),
+											    M_data->interfaceTolerance() );
 
     createInterfaceMaps(M_dofStructureToHarmonicExtension);
 }
@@ -246,18 +242,14 @@ void Monolithic::setupFluidSolid()
 
 
 void
-Monolithic::setDataFromGetPot( GetPot const& data_file )
+Monolithic::setDataFile( const GetPot& dataFile )
 {
-    super::setDataFromGetPot(data_file);
+    super::setDataFile( dataFile );
 
-    M_DDBlockPrec = data_file( "interface/DDBlockPrec",  0 );
-    M_fullMonolithic  = !(M_method.compare("fullMonolithic"));
-    M_diagonalScale           = data_file( "solid/prec/diagonalScaling",  false );
-    M_entry            = data_file( "solid/prec/entry",  0. );
-    M_alphaf           = data_file( "interface/alphaf",  0.5 );
-    M_alphas           = data_file( "interface/alphas",  0.5 );
-    M_restarts         = data_file( "exporter/start"  ,  0   );
-    M_robinNeumannCoupling         = data_file( "interface/robinNeumannCoupling",  false );
+    M_fullMonolithic   = !(M_data->method().compare("fullMonolithic"));
+    M_diagonalScale    = dataFile( "solid/prec/diagonalScaling",  false );
+    M_entry            = dataFile( "solid/prec/entry",  0. );
+    M_restarts         = dataFile( "exporter/start"  ,  0   );
 }
 
 void
@@ -269,11 +261,11 @@ Monolithic::buildSystem()
     M_solidBlock.reset(new matrix_type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
     M_solid->buildSystem(M_solidBlock);
     M_solidBlock->GlobalAssemble();
-    *M_solidBlock *= (M_dataSolid->getTimeStep()*M_solid->rescaleFactor());
+    *M_solidBlock *= (M_data->dataSolid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());
     M_solid->rescaleMatrices();
     M_couplingMatrix->GlobalAssemble();
 
-    if(M_DDBlockPrec==7 || M_DDBlockPrec==8 || M_DDBlockPrec>=13)
+    if(M_data->DDBlockPreconditioner()==7 || M_data->DDBlockPreconditioner()==8 || M_data->DDBlockPreconditioner()>=13)
     {
         EpetraMap fluidPressureMap(M_uFESpace->map());
         fluidPressureMap+= M_pFESpace->map();
@@ -282,7 +274,7 @@ Monolithic::buildSystem()
 
         M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solidBlock;
-         if(M_DDBlockPrec>=13)
+         if(M_data->DDBlockPreconditioner()>=13)
          {
              matrix_ptrtype swap;
              M_solidBlockPrec->GlobalAssemble();
@@ -292,9 +284,9 @@ Monolithic::buildSystem()
              *M_solidBlockPrec += *swap;
          }
          addDiagonalEntries(1., M_solidBlockPrec, fluidPressureMap );
-         if(!(M_DDBlockPrec==14))
+         if(!(M_data->DDBlockPreconditioner()==14))
              addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
-         if(M_DDBlockPrec==8)
+         if(M_data->DDBlockPreconditioner()==8)
              couplingMatrix(M_solidBlockPrec, 8);
     }
 
@@ -329,7 +321,7 @@ Monolithic::couplingMatrix(matrix_ptrtype & bigMatrix, int coupling) // not work
                     flag -= 2;
                 }
                 if(flag-1>=0)//low right
-                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (M_offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.*M_solid->rescaleFactor()/*/M_dataFluid->timestep()*/));//low right
+                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, (M_offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.*M_solid->rescaleFactor()/*/M_data->dataFluid()->timestep()*/));//low right
 
                 bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim , (int)(*this->M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*M_interface + M_solidAndFluidDim, 0.0);
             }
@@ -339,7 +331,7 @@ Monolithic::couplingMatrix(matrix_ptrtype & bigMatrix, int coupling) // not work
 
 
 void
-Monolithic::robinCoupling(matrix_ptrtype & IdentityMatrix, Real& alphaf, Real& alphas, int coupling) // not working with non-matching grids
+Monolithic::robinCoupling( matrix_ptrtype& IdentityMatrix, const Real& alphaf, const Real& alphas, int coupling ) // not working with non-matching grids
 {
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
@@ -600,7 +592,7 @@ Monolithic::evalResidual( vector_type&       res,
     //            eval(disp, iter);
 
 
-    if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
+    if((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
         setDispSolid(disp);
 
@@ -608,7 +600,7 @@ Monolithic::evalResidual( vector_type&       res,
 
         monolithicToInterface(lambdaFluid, disp);
 
-        lambdaFluid *= (M_dataFluid->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));//because of the matrix scaling
+        lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));//because of the matrix scaling
         this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
         M_meshMotion->iterate(*M_BCh_mesh);
         M_meshMotion->updateDispDiff();
@@ -621,7 +613,7 @@ Monolithic::evalResidual( vector_type&       res,
         meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
         this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-        double alpha = 1./M_dataFluid->dataTime()->getTimeStep();//mesh velocity w
+        double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
 
         *this->M_beta *= -alpha;
         vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
@@ -631,7 +623,7 @@ Monolithic::evalResidual( vector_type&       res,
 
         M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
 
-        if(M_DDBlockPrec==1)
+        if(M_data->DDBlockPreconditioner()==1)
         {
             M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
             M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock );
@@ -639,7 +631,7 @@ Monolithic::evalResidual( vector_type&       res,
             *M_monolithicMatrix += *M_fluidBlock;
         }
         else
-            if( M_DDBlockPrec==7 || M_DDBlockPrec==8 || M_DDBlockPrec>=13 )
+            if( M_data->DDBlockPreconditioner()==7 || M_data->DDBlockPreconditioner()==8 || M_data->DDBlockPreconditioner()>=13 )
             {
                 matrix_ptrtype newMatrix(new matrix_type(*M_monolithicMap));
                 M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, newMatrix );
@@ -649,19 +641,19 @@ Monolithic::evalResidual( vector_type&       res,
 
                 M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
 
-                if( M_DDBlockPrec >= 13 )
+                if( M_data->DDBlockPreconditioner() >= 13 )
                 {
                     *newMatrix *= 0.5;
-                    if( M_DDBlockPrec == 13 )
+                    if( M_data->DDBlockPreconditioner() == 13 )
                         addDiagonalEntries(1., M_fluidBlock, M_monolithicInterfaceMap, M_solidAndFluidDim);
                 }
                 *M_fluidBlock += *newMatrix;
 
                 addDiagonalEntries(1., M_fluidBlock, M_dFESpace->map(), M_offset);
-                if(M_DDBlockPrec==7)
+                if(M_data->DDBlockPreconditioner()==7)
                     couplingMatrix(M_fluidBlock, 7);
                 else
-                    if(M_DDBlockPrec==8)
+                    if(M_data->DDBlockPreconditioner()==8)
                         couplingMatrix(M_fluidBlock, 6);
 
                 if ( !M_BCh_flux->bdUpdateDone() )
@@ -676,7 +668,7 @@ Monolithic::evalResidual( vector_type&       res,
                 M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_monolithicMatrix );//here it assembles the fluid matrices
             }
 
-        if(!( M_DDBlockPrec==7 || M_DDBlockPrec==8 || M_DDBlockPrec>=13 ))
+        if(!( M_data->DDBlockPreconditioner()==7 || M_data->DDBlockPreconditioner()==8 || M_data->DDBlockPreconditioner()>=13 ))
             this->M_fluid->updateStab(*M_monolithicMatrix);
 
 
@@ -688,7 +680,7 @@ Monolithic::evalResidual( vector_type&       res,
         {
             M_nbEval = 0; // new time step
             M_resetPrec=true;
-            *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->dataTime()->getTimeStep() );
+            *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
             couplingRhs(this->M_rhs, M_un);
 
             if (!M_restarts)
@@ -699,15 +691,15 @@ Monolithic::evalResidual( vector_type&       res,
             updateSolidSystem(this->M_rhs);
         }
 
-        ASSERT(!(M_robinNeumannCoupling && (M_DDBlockPrec >= 13)), "disable robinNeumannCoupling!");
-            if(M_robinNeumannCoupling)
+        ASSERT(!(M_data->RobinNeumannCoupling() && (M_data->DDBlockPreconditioner() >= 13)), "disable robinNeumannCoupling!");
+            if(M_data->RobinNeumannCoupling())
             {
                 M_RNcoupling.reset(new matrix_type(*M_monolithicMap, 0));
                 matrix_ptrtype tmpMatrix(new matrix_type(*M_monolithicMap, 0));
                 Real zero(0.);
-                robinCoupling(M_RNcoupling, zero, M_alphas, 1);
+                robinCoupling(M_RNcoupling, zero, M_data->RobinNeumannSolidCoefficient(), 1);
                 M_RNcoupling->GlobalAssemble();
-                //*M_RNcoupling *= M_dataFluid->getTimeStep();
+                //*M_RNcoupling *= M_data->dataFluid()->getTimeStep();
                 M_RNcoupling->spy("rn");
                 M_monolithicMatrix->GlobalAssemble();
                 int err = EpetraExt::MatrixMatrix::
@@ -721,7 +713,7 @@ Monolithic::evalResidual( vector_type&       res,
                 tmpMatrix->spy("tmp");
                 matrix_ptrtype swap;
 
-                if(M_DDBlockPrec>6)
+                if(M_data->DDBlockPreconditioner()>6)
                 {
                     *M_fluidBlock += *tmpMatrix;
                     M_fluidBlock->GlobalAssemble();
@@ -764,19 +756,19 @@ Monolithic::evalResidual( vector_type&       res,
 
         evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhsFull, res, M_diagonalScale);
 
-        if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8 && M_DDBlockPrec<13)
+        if(M_data->DDBlockPreconditioner()>=2 && M_data->DDBlockPreconditioner()!=5 && M_data->DDBlockPreconditioner()!=7 && M_data->DDBlockPreconditioner()!=8 && M_data->DDBlockPreconditioner()<13)
         {
             if(!M_robinCoupling.get())
             {
                 M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
                 addDiagonalEntries(1., M_robinCoupling, *M_monolithicMap);
-                robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                robinCoupling(M_robinCoupling, M_data->RobinNeumannFluidCoefficient(), M_data->RobinNeumannSolidCoefficient());
                 M_robinCoupling->GlobalAssemble();
             }
             this->applyPreconditioner(M_robinCoupling, *M_rhsFull);
         }
 
-        if(M_DDBlockPrec!=5 && M_DDBlockPrec!=7 &&M_DDBlockPrec!=8 && M_DDBlockPrec<13)
+        if(M_data->DDBlockPreconditioner()!=5 && M_data->DDBlockPreconditioner()!=7 &&M_data->DDBlockPreconditioner()!=8 && M_data->DDBlockPreconditioner()<13)
             M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
         M_nbEval++ ;
     }
@@ -853,7 +845,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
     bcManage( *M_monolithicMatrix, *rhs, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
               dataFluid().dataTime()->getTime() );
 
-    M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
+    //M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
 
     evalResidual(sol,rhs, res, diagonalScaling);
 }
@@ -866,7 +858,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
 
     if( !M_reusePrec || M_resetPrec )
     {
-        switch(M_DDBlockPrec)
+        switch(M_data->DDBlockPreconditioner())
         {
         case 1:
             *M_precMatrPtr += *M_fluidBlock;
@@ -901,7 +893,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             {
                 M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
                 addDiagonalEntries(1., M_robinCoupling, *M_monolithicMap);
-                robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                robinCoupling(M_robinCoupling, M_data->RobinNeumannFluidCoefficient(), M_data->RobinNeumannSolidCoefficient());
                 M_robinCoupling->GlobalAssemble();
             }
             *M_precMatrPtr += *M_monolithicMatrix;
@@ -1067,7 +1059,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             Chrono chrono;
 
             boost::shared_ptr<Ifpack_Preconditioner> precFluid;
-            this->displayer().leaderPrint("Computing the factorization... ");
+            this->displayer().leaderPrint("  M-  Computing prec. factorization ...        ");
             chrono.start();
             createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
             int overlapLevel = M_listFluid.get("overlap level", 2);
@@ -1088,7 +1080,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             this->displayer().leaderPrintMax("done in ", chrono.diff());
 
             boost::shared_ptr<Ifpack_Preconditioner> precSolid;
-            this->displayer().leaderPrint("Computing the factorization... ");
+            this->displayer().leaderPrint("  M-  Computing prec. factorization ...        ");
             chrono.start();
             createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
             overlapLevel = M_listSolid.get("overlap level", 2);
@@ -1195,7 +1187,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             Chrono chrono;
 
             boost::shared_ptr<Ifpack_Preconditioner> precFluid1;
-            this->displayer().leaderPrint("Computing the factorization... ");
+            this->displayer().leaderPrint("  M-  Computing prec. factorization ...        ");
             chrono.start();
             createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
             int overlapLevel = M_listFluid.get("overlap level", 4);
@@ -1213,7 +1205,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             this->displayer().leaderPrintMax("done in ", chrono.diff());
 
             boost::shared_ptr<Ifpack_Preconditioner> precFluid2;
-            this->displayer().leaderPrint("Computing the factorization... ");
+            this->displayer().leaderPrint("  M-  Computing prec. factorization ...        ");
             chrono.start();
             createIfpackList(M_dataFile, "/solid/prec", M_listFluid);
             overlapLevel = M_listFluid.get("overlap level", 4);
@@ -1232,7 +1224,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
 
 
             boost::shared_ptr<Ifpack_Preconditioner> precSolid1;
-            this->displayer().leaderPrint("Computing the factorization... ");
+            this->displayer().leaderPrint("  M-  Computing prec. factorization ...        ");
             chrono.start();
             createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
             overlapLevel = M_listSolid.get("overlap level", 2);
@@ -1249,7 +1241,7 @@ int  Monolithic::setupBlockPrec(vector_type& rhs)
             this->displayer().leaderPrintMax("done in ", chrono.diff());
 
             boost::shared_ptr<Ifpack_Preconditioner> precSolid2;
-            this->displayer().leaderPrint("Computing the factorization... ");
+            this->displayer().leaderPrint("  M-  Computing prec. factorization ...        ");
             chrono.start();
             //Teuchos::ParameterList listSolid;
             createIfpackList(M_dataFile, "/solid/prec",M_listSolid);
@@ -1292,16 +1284,15 @@ void  Monolithic::solveJac(vector_type         &_step,
 {
     setupBlockPrec(*const_cast<vector_type*>(&_res));
     // #if OBSOLETE
-    //     if(!M_dataFluid->useShapeDerivatives())
+    //     if(!M_data->dataFluid()->useShapeDerivatives())
     // #endif
 
     //M_precMatrPtr->spy("p");
 
-    M_solid->getDisplayer().leaderPrint("solveJac: NormInf res ", _res.NormInf());
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.NormInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
-    M_solid->getDisplayer().leaderPrint("Solving Jacobian system... \n" );
-
-    switch(M_DDBlockPrec)
+    switch(M_data->DDBlockPreconditioner())
     {
     case 1:
     case 2:
@@ -1342,8 +1333,7 @@ void  Monolithic::solveJac(vector_type         &_step,
         break;
     }
 
-    this->M_solid->getDisplayer().leaderPrint("done, step: .\n");
-    std::cout<<_step.NormInf()<<std::endl;
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.NormInf(), "\n");
 }
 
 void
@@ -1353,7 +1343,7 @@ Monolithic::iterateMesh(const vector_type& disp)
 
     monolithicToInterface(lambdaFluid, disp);
 
-    lambdaFluid *= (M_dataFluid->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));
+    lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));
 
     this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
@@ -1365,7 +1355,7 @@ Monolithic::iterateMesh(const vector_type& disp)
 void Monolithic::variablesInit(const std::string& dOrder)
 {
     //    EpetraMap interfaceMap(*M_solidInterfaceMap);
-    M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm/*, M_solidInterfaceMap->getMap(Unique).get(), M_solidInterfaceMap->getMap(Repeated).get()*/));
+    M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_data->dataSolid()->dataMesh()->mesh(), *M_epetraComm/*, M_solidInterfaceMap->getMap(Unique).get(), M_solidInterfaceMap->getMap(Repeated).get()*/));
 
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
                                                        dOrder,
@@ -1419,7 +1409,7 @@ updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
 // void
 // Monolithic::setupBDF( vector_type const& u0)
 // {
-//     M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
+//     M_bdf.reset(new BdfT<vector_type>(M_data->dataFluid()->getBDF_order()));
 //     std::cout<<"initial condition : "<<u0.NormInf()<<std::endl;
 //     M_bdf->initialize_unk(u0);
 // }
@@ -1435,8 +1425,6 @@ Monolithic::setupSystem( )
 void
 Monolithic::setUp( const GetPot& dataFile )
 {
-    M_solid->getDisplayer().leaderPrint("\n S-  Displacement unknowns: ",  M_dFESpace->dof().numTotalDof() );
-    M_solid->getDisplayer().leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
     M_linearSolver.reset(new solver_type(*M_epetraComm));
     M_reusePrec     = dataFile( "solid/prec/reuse", true);
     //M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
@@ -1469,7 +1457,7 @@ diagonalScale(vector_type& rhs, matrix_ptrtype matrFull)
 //void Monolithic::solidInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
 void Monolithic::solidInit(std::string const& dOrder)
 {   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
+    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_data->dataSolid()->dataMesh()->mesh(),
                                                        dOrder,
                                                        //*refFE_struct,
                                                        //*qR_struct,
@@ -1506,16 +1494,16 @@ void Monolithic::initialize( FSIOperator::fluid_type::value_type::Function const
                              FSIOperator::solid_type::value_type::Function const& /*w0*/ )
 {
     vector_type u(M_uFESpace->map());
-    M_uFESpace->interpolate(u0, u, M_dataFluid->dataTime()->getTime());
+    M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->getTime());
 
     vector_type p(M_pFESpace->map());
-    M_pFESpace->interpolate(p0, p, M_dataFluid->dataTime()->getTime());
+    M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->getTime());
 
     vector_type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_dataSolid->getTime());
+    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->getTime());
 
     //vector_type w(M_dFESpace->map());
-    //M_dFESpace->interpolate(w0, w, M_dataSolid->getTime());
+    //M_dFESpace->interpolate(w0, w, M_data->dataSolid()->getTime());
 
     initialize(u, p, d);
     //fluid().initialize(u0,p0);

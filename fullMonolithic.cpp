@@ -48,6 +48,12 @@ fullMonolithic::setUp( const GetPot& dataFile )
 }
 
 void
+fullMonolithic::setDataFile( const GetPot& dataFile )
+{
+    super::setDataFile( dataFile );
+}
+
+void
 fullMonolithic::setupFEspace()
 {
 	super::setupFEspace();
@@ -63,14 +69,14 @@ fullMonolithic::setupFluidSolid()
 
     *this->M_monolithicMap += this->M_mmFESpace->map();
     /* OBSOLETE
-       if(M_dataFluid->useShapeDerivatives())
+       if(M_data->dataFluid()->useShapeDerivatives())
        {
        M_epetraOper.reset( new Epetra_FullMonolithic(this));
        M_solid->setOperator(*M_epetraOper);
        }*/
     //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
     vector_type u0(*this->M_monolithicMap);
-    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->dataTime()->getBDF_order()));
+    M_bdf.reset(new BdfT<vector_type>(M_data->dataFluid()->dataTime()->getBDF_order()));
     M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
@@ -94,15 +100,6 @@ fullMonolithic::setupFluidSolid()
                                           ));
 
 }
-
-
-void
-fullMonolithic::setDataFromGetPot( GetPot const& data_file )
-{
-    super::setDataFromGetPot(data_file);
-    this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
-}
-
 
 void
 fullMonolithic::updateSystem()
@@ -130,7 +127,7 @@ fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix, int coupling
             {
                 if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
-                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->dataTime()->getTimeStep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
+                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, M_offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_data->dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
                 }
             }
         }
@@ -144,7 +141,7 @@ fullMonolithic::buildSystem ()
 {
     super::buildSystem();
     M_meshMotion->computeMatrix();
-    //    double dt = M_dataFluid->timestep();
+    //    double dt = M_data->dataFluid()->timestep();
     //    M_meshMotion->rescaleMatrix(dt);
 }
 void
@@ -172,7 +169,7 @@ fullMonolithic::evalResidual( vector_type&       res,
     //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
     //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
-    double alpha = 1/M_dataFluid->dataTime()->getTimeStep();
+    double alpha = 1/M_data->dataFluid()->dataTime()->getTimeStep();
     vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
     this->moveMesh(mmRep);// re-initialize the mesh points
     *meshDispDiff -= *meshDispOld;//relative displacement
@@ -198,7 +195,7 @@ fullMonolithic::evalResidual( vector_type&       res,
     M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
     if(iter==0)
     {
-        *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->dataTime()->getTimeStep() );// fluid time discr.
+        *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );// fluid time discr.
         super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
         super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
     }
@@ -214,26 +211,26 @@ fullMonolithic::evalResidual( vector_type&       res,
     M_BCh_flux->setOffset(M_offset-M_fluxes);
     if ( !M_BCh_flux->bdUpdateDone() )
         M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
 
     M_BCh_Robin->setOffset(M_offset);
     if ( !M_BCh_Robin->bdUpdateDone() )
         M_BCh_Robin->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+    bcManage( *M_monolithicMatrix, *this->M_rhsFull, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
 
     super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
-    if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5 && M_DDBlockPrec!=7 && M_DDBlockPrec!=8 && M_DDBlockPrec<11)
+    if(M_data->DDBlockPreconditioner()>=2 && M_data->DDBlockPreconditioner()!=5 && M_data->DDBlockPreconditioner()!=7 && M_data->DDBlockPreconditioner()!=8 && M_data->DDBlockPreconditioner()<11)
     {
         if(!M_robinCoupling.get())
         {
             M_robinCoupling.reset( new matrix_type(*M_monolithicMap));//this matrix is a preconditioner that mixes the coupling conditions at the interface
             addDiagonalEntries(1., M_robinCoupling, *M_monolithicMap);
-            super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+            super::robinCoupling(M_robinCoupling, M_data->RobinNeumannFluidCoefficient(), M_data->RobinNeumannSolidCoefficient());
             M_robinCoupling->GlobalAssemble();
         }
     }
 
-    if(M_DDBlockPrec!=5 && M_DDBlockPrec<9)
+    if(M_data->DDBlockPreconditioner()!=5 && M_data->DDBlockPreconditioner()<9)
         M_precMatrPtr.reset(new matrix_type(*M_monolithicMap));
     super::evalResidual( disp, M_rhsFull, res, false );
 }
@@ -244,9 +241,9 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
 
     boost::shared_ptr<IfpackComposedPrec>  ifpackCompPrec;
 
-    if(M_dataFluid->useShapeDerivatives())
+    if(M_data->dataFluid()->useShapeDerivatives())
     {
-        if(M_DDBlockPrec==6)
+        if(M_data->DDBlockPreconditioner()==6)
         {
             M_precMatrPtr.reset(new matrix_type(*M_monolithicMatrix));
         }
@@ -258,7 +255,7 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
 
         //meshMotion().updateDispDiff();//updates M_dispDiff to xk-xn-1
     }
-    switch(M_DDBlockPrec)
+    switch(M_data->DDBlockPreconditioner())
     {
     case 1:
         {
@@ -298,11 +295,11 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
 
             M_BCh_Robin->setOffset(M_offset);
             M_BCh_flux->setOffset(M_offset-M_fluxes);
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
             M_fluidBlock->GlobalAssemble();
-            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
             super::applyPreconditioner(M_robinCoupling, rhs);
             super::applyPreconditioner(M_robinCoupling, M_fluidBlock);
             M_fluidBlock->GlobalAssemble();
@@ -339,12 +336,12 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
             shapeDerivatives(M_fluidBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
 
             M_BCh_Robin->setOffset(M_offset);
-            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
             M_BCh_flux->setOffset(M_offset-M_fluxes);
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
 
-            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
 
             super::applyPreconditioner(M_robinCoupling, rhs);
             super::applyPreconditioner(M_robinCoupling, M_fluidBlock);
@@ -385,8 +382,8 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
             if ( !M_BCh_flux->bdUpdateDone() )
                 M_BCh_flux->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );//to kill
 
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
 
             M_fluidBlock->GlobalAssemble();
 
@@ -417,8 +414,8 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
                 addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
                 addDiagonalEntries(1., M_solidBlockPrec, M_mmFESpace->map(), M_solidAndFluidDim + nDimensions*M_interface);
                 M_BCh_Robin->setOffset(M_offset);
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
                 M_solidBlockPrec->GlobalAssemble();
 
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
@@ -440,8 +437,8 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
             couplingMatrix(M_fluidBlock, 7);
             //this->shapeDerivatives(M_fluidBlock,*M_uk /*subX*/);
 
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().getTime() );
-            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_flux, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+            bcManageMatrix( *M_fluidBlock, *M_uFESpace->mesh(), M_uFESpace->dof(), *this->M_BCh_u, M_uFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
             //	      M_fluidBlock->GlobalAssemble();
             M_fluidBlock->GlobalAssemble();
             //M_fluidBlock->spy("fb");
@@ -462,8 +459,8 @@ int fullMonolithic::setupBlockPrec(vector_type& rhs)
                 addDiagonalEntries(1., M_solidBlockPrec, M_monolithicInterfaceMap, M_solidAndFluidDim);
                 addDiagonalEntries(1., M_solidBlockPrec, M_mmFESpace->map(), M_solidAndFluidDim + nDimensions*M_interface);
                 M_BCh_Robin->setOffset(M_offset);
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().getTime() );
-                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *this->M_BCh_Robin, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
+                bcManageMatrix( *M_solidBlockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1., dataSolid().dataTime()->getTime() );
                 M_solidBlockPrec->GlobalAssemble();
 
                 M_solidOper.reset(new IfpackComposedPrec::operator_raw_type(*M_solidBlockPrec));
@@ -510,7 +507,7 @@ void fullMonolithic::initialize( FSIOperator::fluid_type::value_type::Function c
     super::initialize(u0, p0, d0, w0, df0);
 
     vector_type df(M_mmFESpace->map());
-    M_mmFESpace->interpolate(df0, df, M_dataSolid->getTime());
+    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->getTime());
 
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
 
@@ -526,7 +523,7 @@ void fullMonolithic::initializeMesh(vector_ptrtype fluid_dispOld)
 
 void fullMonolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
-    double alpha = 1./M_dataFluid->dataTime()->getTimeStep();
+    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
     vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
     vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
     vector_type uk(M_uFESpace->map()+M_pFESpace->map());
@@ -584,7 +581,7 @@ void fullMonolithic::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type
   {
   vector_type meshv(M_meshMotion->dispDeltaDiff());
   meshv -= *M_meshVel;
-  meshv *= M_dataFluid->getTimeStep();
+  meshv *= M_data->dataFluid()->getTimeStep();
   return meshv;
   }
 */

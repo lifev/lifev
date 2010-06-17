@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
    This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -235,7 +235,7 @@ public:
 
 
     /** sets the parameters from the data file*/
-    virtual void setDataFromGetPot( GetPot const& data );
+    virtual void setDataFile( const GetPot& dataFile );
 
     virtual void setUp( const GetPot& dataFile );
 
@@ -369,7 +369,7 @@ protected:
        \param alphas: coefficient
        \param inverse if true the inverse of the linear combination is computed. the output matrix is [];
     */
-    void robinCoupling(matrix_ptrtype & IdentityMatrix, Real& alphaf, Real& alphas, int coupling = 4);
+    void robinCoupling(matrix_ptrtype& IdentityMatrix, const Real& alphaf, const Real& alphas, int coupling = 4);
 
 
     /**
@@ -468,7 +468,6 @@ protected:
     matrix_ptrtype                                    M_monolithicMatrix;
     matrix_ptrtype                                    M_precMatrPtr;
     prec_type                                         M_precPtr;
-    UInt                                              M_DDBlockPrec;
     boost::shared_ptr<vector_type>                    M_rhsFull;
 
     fluid_bchandler_type                              M_BCh_flux;
@@ -479,10 +478,6 @@ protected:
     BCFunctionMixte                                   M_bcfWss;
     matrix_ptrtype                                    M_robinCoupling;
     //    matrix_ptrtype                                    M_robinCouplingInv;
-    //! coefficient of the Robin preconditioner
-    Real                                              M_alphaf;
-    //! coefficient of the Robin preconditioner
-    Real                                              M_alphas;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
     IfpackComposedPrec::operator_type                 M_solidOper;
@@ -519,7 +514,6 @@ private:
     bool                                              M_resetPrec;
     UInt                                              M_maxIterSolver;
     bool                                              M_restarts;
-    bool                                              M_robinNeumannCoupling;
     matrix_ptrtype                                    M_RNcoupling;//used only when robinNeumannCoupling==true
     matrix_ptrtype                                    M_couplingSolid1;//used only when DDBlockPrec==14
     matrix_ptrtype                                    M_couplingFluid1;//used only when DDBlockPrec==14
@@ -534,17 +528,12 @@ template <typename SolverType, typename PrecOperatorPtr>
 void Monolithic::
 iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
 {
-    M_solid->getDisplayer().leaderPrint("    preconditioner type : ", M_DDBlockPrec );
+    M_solid->getDisplayer().leaderPrint("  M-  Preconditioner type:                     ", M_data->DDBlockPreconditioner(), "\n" );
     Chrono chrono;
-
-    M_solid->getDisplayer().leaderPrint("    Solving the system ... \n" );
-
-    M_solid->getDisplayer().leaderPrint("    Updating the boundary conditions ... ");
 
     M_monolithicMatrix->GlobalAssemble();
     //necessary if we did not imposed Dirichlet b.c.
     M_linearSolver->setMatrix(*M_monolithicMatrix);
-
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
     int numIter = M_linearSolver->solveSystem( rhs, step, boost::static_pointer_cast< Epetra_Operator >(prec) );
@@ -560,7 +549,7 @@ iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr pre
                 M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
         }
 
-    M_solid->getDisplayer().leaderPrint("   system solved.\n ");
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian system solved                   \n");
 }
 
 class WRONG_PREC_EXCEPTION{

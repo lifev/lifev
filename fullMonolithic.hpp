@@ -77,10 +77,9 @@ public:
     void                       setupFEspace();
 
 
+    void                       setDataFile( const GetPot& dataFile );
+
     void                       setupFluidSolid();
-
-
-    void                       setDataFromGetPot( GetPot const& data_file );
 
     /**
        updates the meshmotion, advances of a time step
