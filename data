@@ -30,6 +30,7 @@ reltol     =  1.e-5 # tolerance in nonLinearRichardson
 restart    = 0
 maxSubIter = 20
 
+
 [exporter]
 multimesh  = false   # actually we export also the displacement
 start      = 0
@@ -107,7 +108,6 @@ DDBlockPrec = 7
 fluid_flag      =  1 # default: 1
 alphaf = 0.
 alphas = 0.1 # parameters for Robin-Robin DDBlock preconditioner
-fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
 
 [solid]
@@ -118,7 +118,7 @@ young     = 3.0E6
 poisson   = 0.30
 
 [../time_discretization]
-initialtime		= 0.000
+initialtime		= 0.
 endtime			= 0.01
 timestep		= 0.001
 
@@ -236,6 +236,7 @@ relax_value                   = 0
 
 [../amesos]
 solvertype = Amesos_Umfpack
+
 
 [jacobian]
 

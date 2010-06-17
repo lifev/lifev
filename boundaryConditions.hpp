@@ -58,7 +58,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
     BCh_he->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
 
-    if (_oper.method() == "monolithic")
+    if (_oper.data().method() == "monolithic")
     {
         Debug(10000) << "Monolithic GCE harmonic extension\n";
         Monolithic *MOper = dynamic_cast<Monolithic *>(&_oper);
@@ -66,7 +66,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
                       *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
-   else if (_oper.method() == "fullMonolithic")
+   else if (_oper.data().method() == "fullMonolithic")
     {
 
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,

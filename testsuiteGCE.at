@@ -119,10 +119,10 @@ DDBlockPrec = 7
 #12: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
 #13: Preconditioner for the Monolithic case (not fullMonolithic): sum of 2 modular block G-S + A.S preconditioners.
 #14: Preconditioner for the Monolithic case (not fullMonolithic): sum of 2 modular block G-S + A.S preconditioners.
+
 fluid_flag      =  1 # default: 1
 alphaf = 0.
 alphas = 0.1 # parameters for Robin-Robin DDBlock preconditioner
-fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
 
 [solid]

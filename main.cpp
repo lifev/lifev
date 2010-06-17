@@ -70,7 +70,7 @@
 
 #include <life/lifesolver/FSISolver.hpp>
 
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/DataFSI.hpp>
 
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/noexport.hpp>
@@ -109,6 +109,9 @@ class Problem
 public:
     typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
+    typedef LifeV::FSIOperator::data_Type                          data_Type;
+    typedef LifeV::FSIOperator::data_PtrType                       data_PtrType;
+
     typedef LifeV::FSIOperator::vector_type        vector_type;
     typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
 
@@ -133,24 +136,35 @@ public:
     Problem( GetPot const& data_file, std::string _oper = "" )
     {
         using namespace LifeV;
+
+        M_data = data_PtrType( new data_Type() );
+        M_data->setup( data_file );
+        M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
+        M_data->showMe();
+
         if(!_oper.compare("monolithic"))
             FSIFactory::instance().registerProduct( "monolithic", &createM );
         else if(!_oper.compare("fullMonolithic"))
-            {
-                FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
-            }
+            FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
 
 #ifdef DEBUG
 			Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
 #endif
-			M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
-
-			MPI_Barrier( MPI_COMM_WORLD );
+        M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
+        MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
 			Debug( 10000 ) << "Setting up data from GetPot \n";
 #endif
-			M_fsi->setDataFromGetPot( data_file );
+        M_fsi->setData( M_data );
+        M_fsi->FSIOper()->setDataFile( data_file ); //TO BE REMOVED!
+        MPI_Barrier( MPI_COMM_WORLD );
+
+        // Setting FESpace and DOF
+        Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+        M_fsi->FSIOper()->setupFEspace();
+        M_fsi->FSIOper()->setupDOF();
+        MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
             Debug( 10000 ) << "Setting up the BC \n";
@@ -209,7 +223,7 @@ public:
 
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                       UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-         M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
+        M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                        UInt(0),
                                        M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
@@ -228,21 +242,23 @@ public:
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
+        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->getTimeStep() );
+        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->getInitialTime() );
     }
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
 
+    data_PtrType fsiData() { return M_data; }
 
     /*!
       This routine runs the temporal loop
     */
     void
-    run( LifeV::Real dt, LifeV::Real T)
+    run()
     {
         boost::timer _overall_timer;
         M_Tstart=M_fsi->FSIOper()->dataFluid().dataTime()->getInitialTime();
         int _i = 1;
-        LifeV::Real time=M_Tstart + dt;
         LifeV::UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
 #ifdef HAVE_HDF5
@@ -255,7 +271,7 @@ public:
 
         bool valveIsOpen=true;
 
-        for ( ; time <= T; time += dt, ++_i)
+        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), ++_i)
             {
 
                 std::cout<<"flux : "<<M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement())<<std::endl;
@@ -270,7 +286,7 @@ public:
 
                 int flag =2;
                 FC0.renewParameters( *M_fsi, 3 );
-                LH.renewParameters( *M_fsi->FSIOper(), flag, time );
+                LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->getTime() );
 
                 //                 FC0.renewParameters( *M_fsi, 6 );
                 //                 FC1.renewParameters( *M_fsi, 3, 4 );
@@ -285,13 +301,13 @@ public:
                 M_fsi->FSIOper()->getSolidVel(*M_solidVel);//    displacement(), M_offset);
                 M_fsi->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
 
-                M_exporterSolid->postProcess( time );
+                M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
 
-                M_fsi->iterate( time );
+                M_fsi->iterate();
 
                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
-                M_exporterFluid->postProcess( time );
+                M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
 
                 //                    }
 
@@ -308,9 +324,9 @@ public:
                 ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             //try{
             if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
-                checkCEResult(time);
+                checkCEResult(M_data->dataFluid()->dataTime()->getTime());
             else
-                checkGCEResult(time);
+                checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
             //}catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
                 ///////// END OF CHECK
             }
@@ -319,14 +335,14 @@ public:
                 M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
 
                 M_solidDisp->subset(M_fsi->displacement(), offset);
-                *M_solidDisp *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
+                *M_solidDisp *= M_data->dataSolid()->dataTime()->getTimeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
                 M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
-                *M_solidVel *= M_fsi->timeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
+                *M_solidVel  *= M_data->dataFluid()->dataTime()->getTimeStep()*M_fsi->FSIOper()->solid().rescaleFactor();
 
                 *M_velAndPressure = M_fsi->displacement();
-                M_exporterSolid->postProcess( time );
+                M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-                M_exporterFluid->postProcess( time );
+                M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
             }
 
         std::cout << "Total computation time = "
@@ -338,10 +354,11 @@ private:
 
     void initialize(std::string& loadInitSol,  GetPot const& data_file);
 
-    void checkCEResult(LifeV::Real& time);
-    void checkGCEResult(LifeV::Real& time);
+    void checkCEResult(const LifeV::Real& time);
+    void checkGCEResult(const LifeV::Real& time);
 
     fsi_solver_ptr M_fsi;
+    data_PtrType   M_data;
 
     MPI_Comm*      M_comm;
 
@@ -391,9 +408,9 @@ struct FSIChecker
             {
                 fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
 
-                fsip->fsiSolver()->FSIOper()->setPreconditioner( prec );
+                fsip->fsiData()->setPreconditioner( prec );
 
-                fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
+                fsip->run();
             }
         catch ( std::exception const& _ex )
             {
@@ -531,7 +548,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     //                        }
     //upcast necessary
 
-    Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();
+    Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);
 
     M_importerFluid->import(M_Tstart-dt, dt);
@@ -552,7 +569,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 
     UniqueV.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
     UniqueV->subset(*M_solidDisp, M_solidDisp->getMap(), (UInt)0, offset);
-    *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
+    *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
 
@@ -566,12 +583,12 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 
     initSolSVel.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
     initSolSVel->subset(*M_solidVel,M_solidVel->getMap(), (UInt)0, offset);
-    *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_fsi->timeStep());
+    *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
 }
 
-void Problem::checkGCEResult(LifeV::Real& time)
+void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
     if(time==0.001 && (dispNorm-684898)     /dispNorm*(dispNorm-684898)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
@@ -586,7 +603,7 @@ void Problem::checkGCEResult(LifeV::Real& time)
 }
 
 
-void Problem::checkCEResult(LifeV::Real& time)
+void Problem::checkCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
     if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
