@@ -56,7 +56,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
     BCh_he->addBC("EdgesOut",    30, Essential, Full, bcf,   3);
 
 
-    if (_oper.method() == "steklovPoincare")
+    if (_oper.data().method() == "steklovPoincare")
     {
 //         Debug(10000) << "SP harmonic extension\n";
 //         steklovPoincare *SPOper = dynamic_cast<steklovPoincare *>(&_oper);
@@ -64,7 +64,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 //         BCh_he->addBC("Interface", 1, Essential, Full,
 //                       *SPOper->bcvFluidInterfaceDisp(), 3);
     }
-    else if (_oper.method() == "exactJacobian")
+    else if (_oper.data().method() == "exactJacobian")
     {
         Debug(10000) << "EJ harmonic extension\n";
         exactJacobian *EJOper = dynamic_cast<exactJacobian *>(&_oper);
@@ -72,7 +72,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
         BCh_he->addBC("Interface", 1, Essential, Full,
                       *EJOper->bcvStructureDispToHarmonicExtension(), 3);
     }
-    else if (_oper.method() == "fixedPoint")
+    else if (_oper.data().method() == "fixedPoint")
     {
         Debug(10000) << "FP harmonic extension\n";
         fixedPoint *FPOper = dynamic_cast<fixedPoint *>(&_oper);
@@ -122,7 +122,7 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
     _oper.setStructureToFluid(_oper.veloFluidMesh());
     // _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
 
-    if(_oper.algorithm()=="RobinNeumann")
+    if(_oper.data().algorithm()=="RobinNeumann")
     {
         // _oper.setAlphafbcf(alpha); // if alpha is bcFunction define in ud_function.cpp
 
@@ -192,14 +192,14 @@ FSIOperator::fluid_bchandler_type BCh_fluidLin(FSIOperator &_oper)
     //BCh_fluidLin->addBC("ainterface",  1,  Essential,   Full, bcf,     3);
 
 
-    if (_oper.method() == "steklovPoincare")
+    if (_oper.data().method() == "steklovPoincare")
     {
 //             steklovPoincare *SPOper = dynamic_cast<steklovPoincare *>(&_oper);
 //             SPOper->setDerHarmonicExtensionVelToFluid(_oper.dw());
 //             BCh_fluidLin->addBC("Wall"     , 1, Essential  , Full,
 //                                 *SPOper->bcvDerHarmonicExtensionVelToFluid(), 3);
     }
-    if (_oper.method() == "exactJacobian")
+    if (_oper.data().method() == "exactJacobian")
     {
             exactJacobian* EJOper = dynamic_cast<exactJacobian *>(&_oper);
             EJOper->setDerHarmonicExtensionVelToFluid(_oper.derVeloFluidMesh());
@@ -236,7 +236,7 @@ FSIOperator::solid_bchandler_type BCh_solid(FSIOperator &_oper)
 
 //     Debug(10000) << "SP harmonic extension\n";
 
-    if (_oper.method() == "steklovPoincare")
+    if (_oper.data().method() == "steklovPoincare")
     {
 //         steklovPoincare *SPOper = dynamic_cast<steklovPoincare *>(&_oper);
 //         SPOper->setSolidInterfaceDisp((LifeV::Vector&) _oper.displacement());
@@ -244,7 +244,7 @@ FSIOperator::solid_bchandler_type BCh_solid(FSIOperator &_oper)
 //         BCh_solid->addBC("Interface", 1, Essential, Full,
 //                          *SPOper->bcvSolidInterfaceDisp(), 3);
     }
-    else if (_oper.method() == "exactJacobian")
+    else if (_oper.data().method() == "exactJacobian")
     {
         exactJacobian  *EJOper = dynamic_cast<exactJacobian *>(&_oper);
         EJOper->setFluidLoadToStructure(_oper.sigmaSolidRepeated());
@@ -252,7 +252,7 @@ FSIOperator::solid_bchandler_type BCh_solid(FSIOperator &_oper)
         BCh_solid->addBC("Interface", 1, Natural,   Full,
                    *EJOper->bcvFluidLoadToStructure(), 3);
     }
-    else if (_oper.method() == "fixedPoint")
+    else if (_oper.data().method() == "fixedPoint")
     {
         fixedPoint *FPOper = dynamic_cast<fixedPoint *>(&_oper);
 
@@ -287,7 +287,7 @@ FSIOperator::solid_bchandler_type BCh_solidLin(FSIOperator &_oper)
     //BCh_solidLin->addBC("Edges",    30, Essential, Component, bcf,  zComp);
     BCh_solidLin->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
 
-    if (_oper.method() == "steklovPoincare")
+    if (_oper.data().method() == "steklovPoincare")
     {
 //             steklovPoincare *SPOper = dynamic_cast<steklovPoincare *>(&_oper);
 //             SPOper->setSolidLinInterfaceDisp((LifeV::Vector&) _oper.displacement());
@@ -295,7 +295,7 @@ FSIOperator::solid_bchandler_type BCh_solidLin(FSIOperator &_oper)
 //                                 *SPOper->bcvSolidLinInterfaceDisp(), 3);
     }
     else
-    if (_oper.method() == "exactJacobian")
+    if (_oper.data().method() == "exactJacobian")
     {
             exactJacobian  *EJOper = dynamic_cast<exactJacobian *>(&_oper);
             EJOper->setDerFluidLoadToStructure(_oper.sigmaSolidRepeated());

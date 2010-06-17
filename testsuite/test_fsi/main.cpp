@@ -35,7 +35,7 @@
 #include <life/lifesolver/FSIOperator.hpp>
 //#include "life/lifesolver/exactJacobianBase.hpp"
 //#include "life/lifesolver/fixedPointBase.hpp"
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/DataFSI.hpp>
 
 #ifdef HAVE_HDF5
 	#include <life/lifefilters/hdf5exporter.hpp>
@@ -145,6 +145,8 @@ class Problem
 public:
 
 	typedef boost::shared_ptr<FSISolver>                    fsi_solver_ptr;
+	typedef FSIOperator::data_Type                          data_Type;
+	typedef FSIOperator::data_PtrType                       data_PtrType;
 
     typedef FSIOperator::vector_type                        vector_type;
     typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
@@ -167,19 +169,27 @@ public:
     */
     Problem( const std::string& dataFileName, std::string method = "" )
     {
-    	Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
-    	M_fsi = fsi_solver_ptr( new FSISolver( method ) );
-
-    	MPI_Barrier( MPI_COMM_WORLD );
-
 		Debug( 10000 ) << "Setting up data from GetPot \n";
 		GetPot dataFile( dataFileName );
-    	M_fsi->setDataFromGetPot( dataFile );
-
+        M_data = data_PtrType( new data_Type() );
+        M_data->setup( dataFile );
+        M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
+        //M_data->showMe();
     	MPI_Barrier( MPI_COMM_WORLD );
 
-    	Debug( 10000 ) << "Setting up the BC \n";
+        Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+        M_fsi = fsi_solver_ptr( new FSISolver( M_data->method() ) );
+        M_fsi->setData( M_data );
+        M_fsi->FSIOper()->setDataFile( dataFile ); //TO BE REMOVED!
+        MPI_Barrier( MPI_COMM_WORLD );
 
+        // Setting FESpace and DOF
+        Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+        M_fsi->FSIOper()->setupFEspace();
+        M_fsi->FSIOper()->setupDOF();
+        MPI_Barrier( MPI_COMM_WORLD );
+
+    	Debug( 10000 ) << "Setting up the BC \n";
 		M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
 		M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension(*M_fsi->FSIOper()));
 		M_fsi->setSolidBC(BCh_solid(*M_fsi->FSIOper()));
@@ -248,30 +258,33 @@ public:
 
     		if ( M_fsi->isFluid() )
     		{
-    			M_ensightFluid->import(M_Tstart, M_fsi->timeStep());
+    			M_ensightFluid->import(M_Tstart, M_data->dataFluid()->dataTime()->getTimeStep());
     			M_fsi->FSIOper()->initializeFluid( *M_velAndPressure, *M_fluidDisp );
     		}
     		if ( M_fsi->isSolid() )
     		{
-    			M_ensightSolid->import(M_Tstart, M_fsi->timeStep());
+    			M_ensightSolid->import(M_Tstart, M_data->dataSolid()->dataTime()->getTimeStep());
 				M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
     		}
     	}
-        else
+    	else
         {
             M_fsi->initialize();
         }
+    	M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->getTimeStep() );
+    	M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->getInitialTime() );
     	//std::cout << "in problem" << std::endl;
     	//M_fsi->FSIOper()->fluid().postProcess();
 	}
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
 
+    data_PtrType fsiData() { return M_data; }
+
     /*!
       This routine runs the temporal loop
     */
-    void
-    run( Real dt, Real T)
+    void run()
 	{
     	std::ofstream ofile;
 
@@ -284,24 +297,24 @@ public:
     	Real flux;
     	int _i = 1;
 
-    	for ( Real time = M_Tstart + dt; time <= T; time += dt, ++_i )
+    	for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), ++_i )
     	{
-    		boost::timer _timer;
+    	    boost::timer _timer;
 
     		if ( M_absorbingBC && M_fsi->isFluid() )
 			{
 				BCFunctionBase outFlow;
 				outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
 				M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
-                std::cout << "   F- pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
+                //std::cout << "  F-  Pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
 			}
 
-    		M_fsi->iterate( time );
+    		M_fsi->iterate();
 
     		if ( M_fsi->isFluid() )
             {
 				if ( isFluidLeader )
-					ofile << time << " ";
+					ofile << M_data->dataFluid()->dataTime()->getTime() << " ";
 
 				flux = M_fsi->FSIOper()->fluid().flux(2);
 				if ( isFluidLeader )
@@ -321,14 +334,14 @@ public:
 
 				*M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
 				*M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-				M_ensightFluid->postProcess( time );
+				M_ensightFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
             }
 
     		if ( M_fsi->isSolid() )
     		{
     			*M_solidDisp = M_fsi->FSIOper()->solid().disp();
     			*M_solidVel = M_fsi->FSIOper()->solid().vel();
-    			M_ensightSolid->postProcess( time );
+    			M_ensightSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
     		}
 
 			std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
@@ -337,12 +350,7 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //try
-            {
-                //if(M_fsi->FSIOper()->isFluid() && M_fsi->FSIOper()->isLeader() )
-                    checkResult( time );
-            }
-            //catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
+            checkResult( M_data->dataFluid()->dataTime()->getTime() );
     	}
 		std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
 		ofile.close();
@@ -350,9 +358,9 @@ public:
 
 private:
 
-    void checkResult(LifeV::Real& time)
+    void checkResult(const LifeV::Real& time)
     {
-        assert(M_fsi->timeStep()==0.001);
+        assert(M_data->dataFluid()->dataTime()->getTimeStep()==0.001);
         double dispNorm(M_fsi->displacement().Norm2());
         if((time==0.001) && (dispNorm-0.0621691)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
         else
@@ -368,6 +376,7 @@ private:
     }
 
 	fsi_solver_ptr M_fsi;
+	data_PtrType   M_data;
 	Real           M_Tstart;
 
 	bool           M_absorbingBC;
@@ -418,7 +427,7 @@ struct FSIChecker
     	try
     	{
     		FSIproblem = boost::shared_ptr<Problem> ( new Problem( M_dataFileName, M_method ) );
-    		FSIproblem->run( FSIproblem->fsiSolver()->timeStep(), FSIproblem->fsiSolver()->timeEnd() );
+    		FSIproblem->run();
     	}
     	catch ( const std::exception& _ex )
     	{

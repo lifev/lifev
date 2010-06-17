@@ -192,7 +192,7 @@ filter_singletons      = false
 [solid]
 
 [./physics]
-material_flag   = 1 #,2
+material_flag   = 1 # '1 2'
 young           = 3.0E6 #,1.9E9
 poisson         = 0.30 #,0.30
 
