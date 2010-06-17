@@ -101,7 +101,7 @@ BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
     mapMethod["monolithic"]      = MONOLITHIC;
     mapMethod["steklovPoincare"] = STEKLOVPOINCARE;
 
-    switch ( mapMethod[M_operator->method()] )
+    switch ( mapMethod[M_operator->data().method()] )
     {
         case EXACTJACOBIAN:
 
