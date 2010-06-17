@@ -32,6 +32,7 @@ liblifemcsolver_la_SOURCES   = BCInterface_FSI.cpp \
                                MS_Solver.cpp \
                                MS_Algorithm.cpp \
                                MS_Algorithm_Aitken.cpp \
+                               MS_Algorithm_Explicit.cpp \
                                MS_Algorithm_Newton.cpp \
                                MS_PhysicalData.cpp \
                                MS_PhysicalModel.cpp \
