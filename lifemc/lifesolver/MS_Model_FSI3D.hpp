@@ -45,7 +45,6 @@
 #include <life/lifesolver/FSISolver.hpp>
 
 #include <life/lifefilters/ensight.hpp>
-#include <life/lifefilters/noexport.hpp>
 #ifdef HAVE_HDF5
     #include <life/lifefilters/hdf5exporter.hpp>
 #endif
@@ -64,21 +63,27 @@ public:
     //@{
 
     typedef MS_PhysicalModel                                                               super;
-    typedef FSISolver                                                                      FSISolverType;
-    typedef boost::shared_ptr< FSISolverType >                                             FSISolverPtrType;
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filter_ptrtype;
-    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>                                  ensightfilter_type;
-    typedef boost::shared_ptr<ensightfilter_type>                                          ensightfilter_ptrtype;
+
+    typedef FSISolver                                                                      FSISolver_Type;
+
+    typedef FSIOperator::data_Type                                                         data_Type;
+    typedef FSIOperator::data_PtrType                                                      data_PtrType;
+
+    typedef FSIOperator::mesh_type                                                         mesh_Type;
+
+    typedef FSIOperator::fluid_raw_type                                                    fluid_Type;
+    typedef FSIOperator::solid_raw_type                                                    solid_Type;
+
+    typedef FSIOperator::vector_type                                                       vector_Type;
+    typedef FSIOperator::vector_ptrtype                                                    vector_PtrType;
+
+    typedef Exporter< mesh_Type >                                                          IOFile_Type;
+    typedef boost::shared_ptr< IOFile_Type >                                               IOFile_PtrType;
+
+    typedef Ensight< mesh_Type >                                                           ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_type>                             hdf5filter_type;
-    typedef boost::shared_ptr<hdf5filter_type>                                             hdf5filter_ptrtype;
+    typedef Hdf5exporter< mesh_Type >                                                      hdf5IOFile_Type;
 #endif
-    typedef RegionMesh3D<LinearTetra>                                                      mesh_type;
-    typedef OseenShapeDerivative< mesh_type >                                              fluid_type;
-    typedef VenantKirchhofSolver< mesh_type >                                              solid_type;
-    typedef FSISolverType::vector_type                                                     vector_type;
-    typedef FSISolverType::vector_ptrtype                                                  vector_ptrtype;
-    typedef BCInterface< FSIOperator >                                                     solid_bc_type;
 
     typedef BCHandler                                                                      BC_Type;
     typedef BCInterface< FSIOperator >                                                     BCInterface_Type;
@@ -106,12 +111,6 @@ public:
      * @param FileName Name of data file.
      */
     void SetupData( const std::string& FileName );
-
-    //! Setup the global data of the model.
-    /*!
-     * @param PhysicalData Global data container.
-     */
-    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
 
     //! Setup the model.
     void SetupModel();
@@ -254,31 +253,50 @@ private:
     //! @name Private Methods
     //@{
 
-    void SetUpExporter( filter_ptrtype& exporter, const std::string name, const GetPot& dataFile );
-    void SetExporterFluid( const filter_ptrtype& exporter );
-    void SetExporterSolid( const filter_ptrtype& exporter );
-    void updateBCSegregated( const std::string& dataFileName );
-    void updateBCMonolithic( const std::string& dataFileName );
+    //! Setup the global data of the model.
+    /*!
+     * In particular, it replaces the default local values with the ones in the global container.
+     * If a value is already specified in the data file, do not perform the replacement.
+     *
+     * @param FileName File name of the specific model.
+     */
+    void SetupGlobalData( const std::string& FileName );
+
+    void SetupExporter( IOFile_PtrType& exporter, const GetPot& dataFile, const std::string& label = "" );
+    void SetExporterFluid( const IOFile_PtrType& exporter );
+    void SetExporterSolid( const IOFile_PtrType& exporter );
+
+    void setupBC( const std::string& fileName );
+    void setupSegregatedBC( const std::string& fileName );
 
     //@}
 
-    FSISolverPtrType                      M_solver;
-    filter_ptrtype                        M_exporterFluid;
-    filter_ptrtype                        M_exporterSolid;
-    vector_ptrtype                        M_solidDisp;
-    vector_ptrtype                        M_solidVel;
-    vector_ptrtype                        M_velAndPressure;
-    vector_ptrtype                        M_fluidDisp;
+    // Solver
+    boost::shared_ptr< FSISolver_Type >    M_solver;
 
-    boost::shared_ptr< BCInterface_Type >    M_fluidBC;
-    boost::shared_ptr< solid_bc_type >       M_solidBC;
-    boost::shared_ptr< solid_bc_type >       M_harmonicExtensionBC;
-    boost::shared_ptr< BCInterface_Type >    M_linearizedFluidBC;
-    boost::shared_ptr< solid_bc_type >       M_linearizedSolidBC;
+    // Data
+    data_PtrType                           M_data;
+
+    // Exporters
+    IOFile_PtrType                         M_exporterFluid;
+    IOFile_PtrType                         M_exporterSolid;
+
+    // Solution
+    vector_PtrType                         M_fluidVelocityPressure;
+    vector_PtrType                         M_fluidDisplacement;
+    vector_PtrType                         M_solidVelocity;
+    vector_PtrType                         M_solidDisplacement;
+
+    // Boundary Conditions
+    boost::shared_ptr< BCInterface_Type >  M_fluidBC;
+    boost::shared_ptr< BCInterface_Type >  M_solidBC;
+    boost::shared_ptr< BCInterface_Type >  M_harmonicExtensionBC;
+    boost::shared_ptr< BCInterface_Type >  M_linearizedFluidBC;
+    boost::shared_ptr< BCInterface_Type >  M_linearizedSolidBC;
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createModelFSI3D()
+inline MS_PhysicalModel* MS_createModelFSI3D()
 {
     return new MS_Model_FSI3D();
 }
