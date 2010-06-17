@@ -47,7 +47,8 @@
  *
  *  Algorithms available:
  *  <ol>
- *      <li> Aitken (and fixpoint)
+ *      <li> Aitken
+ *      <li> Explicit
  *      <li> Newton
  *  </ol>
  *
@@ -126,8 +127,8 @@ main( int argc, char** argv )
 
     // Command line parameters
     GetPot commandLine( argc, argv );
-    std::string dataFile    = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
-    bool verbose            = commandLine.follow( false, 2, "-s", "--showme" );
+    std::string dataFile      = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
+    bool verbose              = commandLine.follow( false, 2, "-s", "--showme" );
     std::string problemFolder = commandLine.follow( "MultiScale", 2, "-n", "--name" );
 
     // Create the problem folder
