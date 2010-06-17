@@ -1,259 +1,524 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-/*!
-  \file dataElasticStructure.h
-  \author M.A. Fernandez
-  \date 10/2003
-  \version 1.0
-  \brief
-*/
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-#ifndef _DATAELASTICSTRUCTURE_H_
-#define _DATAELASTICSTRUCTURE_H_
+************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief DataElasticStructure - File containing a data container for solid problems with elastic structure
+ *
+ *  @version 1.0
+ *  @author M.A. Fernandez
+ *  @date 01-10-2003
+ *
+ *  @version 1.18
+ *  @author Cristiano Malossi
+ *  @date 10-06-2010
+ */
+
+#ifndef DATAELASTICSTRUCTURE_H
+#define DATAELASTICSTRUCTURE_H
+
 #include <string>
 #include <iostream>
+#include <map>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <map>
-#include <list>
 
-namespace LifeV
-{
+namespace LifeV {
+
+//! DataElasticStructure - Data container for solid problems with elastic structure
 /*!
-  \class DataElasticStructure
-*/
+ *  @author M.A. Fernandez
+ */
 template <typename Mesh>
-class DataElasticStructure:
-            public DataMesh<Mesh>,
-            public DataTime
+class DataElasticStructure
 {
 public:
 
-    //! Constructor
-    DataElasticStructure( const GetPot& dfile );
-    DataElasticStructure( const DataElasticStructure &dataElasticStructure );
+    //! @name Type definitions
+    //@{
 
-    //! Ouptut
-    void showMe( std::ostream& c = std::cout ) const;
+    typedef DataTime                                                  Time_Type;
+    typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
 
-    //! getters
+    typedef DataMesh<Mesh>                                            Mesh_Type;
+    typedef boost::shared_ptr< Mesh_Type >                            Mesh_ptrType;
 
-    /*const*/ Real rho()     const {return _rho;}
-//     const Real young()   const {return _E;}
-//     const Real poisson() const {return _nu;}
+    typedef std::map<UInt, Real>                                      MaterialContainer_Type;
+    typedef MaterialContainer_Type::const_iterator                    MaterialContainer_ConstIterator;
 
-//     const Real lambda()  const {return _lambda;}
-//     const Real mu()      const {return _mu;}
-    /*const*/ Real factor()  const {return _factor;}
+    //@}
 
-    /*const*/ UInt verbose() const {return _verbose;}
 
-    /*const*/ double poisson(int mat = 1) const
-        {
-            if (M_poisson.size() == 1)
-                return _nu;
-            else
-                return M_poisson.find(mat)->second;
-        }
+    //! @name Constructors & Destructor
+    //@{
 
-    /*const*/ double young(int mat = 1) const
-        {
-            if (M_young.size() == 1)
-                return _E;
-            else
-                return M_young.find(mat)->second;
-        }
+    //! Empty Constructor
+    DataElasticStructure();
 
-    /*const*/ double lambda(int mat = 1) const
-        {
-            if (M_lambda.size() == 1)
-                return _lambda;
-            else
-                return M_lambda.find(mat)->second;
-        }
-    /*const*/ double mu(int mat = 1) const
-        {
-            if (M_mu.size() == 1)
-                return _mu;
-            else
-                return M_mu.find(mat)->second;
-        }
+    //! Copy constructor
+    /*!
+     * @param dataElasticStructure - DataElasticStructure
+     */
+    DataElasticStructure( const DataElasticStructure& dataElasticStructure );
 
-    /*const*/ double thickness() const {return M_thickness;}
+    //@}
 
-//     /*const*/ double lambda()    const {return _lambda;}
-//     /*const*/ double mu()        const {return _mu;}
 
-    std::string order()          const {return M_order;}
+    //! @name Operators
+    //@{
+
+    //! Operator=
+    /*!
+     * @param dataElasticStructure - DataElasticStructure
+     */
+    DataElasticStructure& operator=( const DataElasticStructure& dataElasticStructure );
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Read the dataFile and set all the quantities
+    /*!
+     * @param dataFile data file
+     * @param section section of the file
+     */
+    void setup( const GetPot& dataFile, const std::string& section = "solid" );
+
+    //! Display the values
+    void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
+
+
+    //! @name Set methods
+    //@{
+
+    //! Set data time container
+    /*!
+     * @param DataTime shared_ptr to dataTime container
+     */
+    inline void setDataTime( const Time_ptrType DataTime );
+
+    //! Set mesh container
+    /*!
+     * @param DataMesh shared_ptr to dataMesh container
+     */
+    inline void setDataMesh( const Mesh_ptrType DataMesh );
+
+    //! Set density
+    /*!
+     * @param density solid density value
+     */
+    inline void setDensity( const Real& density );
+
+    //! Set thickness
+    /*!
+     * @param thickness solid thickness value
+     */
+    inline void setThickness( const Real& thickness );
+
+    //! Set poisson
+    /*!
+     * @param poisson solid poisson value
+     * @param material material ID (1 by default)
+     */
+    inline void setPoisson( const Real& poisson, const UInt& material = 1 );
+
+    //! Set Young modulus
+    /*!
+     * @param Young solid young modulus value
+     * @param material material ID (1 by default)
+     */
+    inline void setYoung( const Real& young, const UInt& material = 1 );
+
+    //@}
+
+
+    //! @name Get methods
+    //@{
+
+    //! Get data time container
+    /*!
+     * @return shared_ptr to dataTime container
+     */
+    Time_ptrType dataTime() const;
+
+    //! Get mesh container
+    /*!
+     * @return shared_ptr to dataMesh container
+     */
+    Mesh_ptrType dataMesh() const;
+
+    //! Get solid density
+    /*!
+     * @return Solid density
+     */
+    inline const Real& rho() const;
+
+    //! Get solid thickness
+    /*!
+     * @return Solid thickness
+     */
+    inline const Real& thickness() const;
+
+    //! Get solid poisson coefficient
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid poisson coefficient
+     */
+    inline const Real& poisson( const UInt& material = 1 ) const;
+
+    //! Get solid young modulus
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid young modulus
+     */
+    inline const Real& young( const UInt& material = 1 ) const;
+
+    //! Get solid first lame coefficient
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid first Lame coefficient
+     */
+    inline Real lambda( const UInt& material = 1 ) const;
+
+    //! Get solid second Lame coefficient
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid second Lame coefficient
+     */
+    inline Real mu( const UInt& material = 1 ) const;
+
+    //! Get FE order
+    /*!
+     * @return FE order
+     */
+    inline const std::string& order()     const;
+
+    //! Get solid amplification factor
+    /*!
+     * @return Solid amplification factor
+     */
+    inline const Real& factor()    const;
+
+    //! Get verbose level
+    /*!
+     * @return verbose level
+     */
+    inline const UInt& verbose()   const;
+
+    //@}
 
 private:
-    //! Physics
-    Real                   _rho; // densisty
-    Real                   _E;  // Young modulus
-    Real                   _nu; // Poisson coeficient
-    Real                   _lambda, _mu; // Lame coefficients
 
+    //! Data containers for time and mesh
+    Time_ptrType           M_time;
+    Mesh_ptrType           M_mesh;
+
+    //! Physics
+    Real                   M_density;
     Real                   M_thickness;
 
-    std::map<int, double>  M_poisson;
-    std::map<int, double>  M_young;
+    MaterialContainer_Type M_poisson;
+    MaterialContainer_Type M_young;
 
-    std::map<int, double>  M_lambda;
-    std::map<int, double>  M_mu;
-
-    //! Miscellaneous
-    Real                   _factor; // amplification factor for deformed mesh
-    UInt                   _verbose; // temporal output verbose
+    //! Space discretization
     std::string            M_order;
 
+    //! Miscellaneous
+    Real                   M_factor;  // amplification factor for deformed mesh
+    UInt                   M_verbose; // temporal output verbose
 };
 
 
 
-//
-// IMPLEMENTATION
-//
 
 
-// Constructor
+// ===================================================
+// Constructors
+// ===================================================
 template <typename Mesh>
-DataElasticStructure<Mesh>::
-DataElasticStructure( const GetPot& dfile ) :
-        DataMesh<Mesh>( dfile, "solid/space_discretization" ),
-        DataTime( dfile, "solid/time_discretization" )
+DataElasticStructure<Mesh>::DataElasticStructure() :
+        M_time                             ( ),
+        M_mesh                             ( ),
+        M_density                          ( ),
+        M_thickness                        ( ),
+        M_poisson                          ( ),
+        M_young                            ( ),
+        M_order                            ( ),
+        M_factor                           ( ),
+        M_verbose                          ( )
 {
-    // physics
-    _rho     = dfile( "solid/physics/density", 1. );
-//     _E       = dfile( "solid/physics/young" , 1. );
-//     _nu      = dfile( "solid/physics/poisson" , 0.25 );
+}
 
-    // miscellaneous
-    _factor  = dfile( "solid/miscellaneous/factor", 1.0 );
-//    std::cout << "factor " << _factor << std::endl;
-    _verbose = dfile( "solid/miscellaneous/verbose", 1 );
+template <typename Mesh>
+DataElasticStructure<Mesh>::DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
+    M_time                             ( dataElasticStructure.M_time ),
+    M_mesh                             ( dataElasticStructure.M_mesh ),
+    M_density                          ( dataElasticStructure.M_density ),
+    M_thickness                        ( dataElasticStructure.M_thickness ),
+    M_poisson                          ( dataElasticStructure.M_poisson ),
+    M_young                            ( dataElasticStructure.M_young ),
+    M_order                            ( dataElasticStructure.M_order ),
+    M_factor                           ( dataElasticStructure.M_factor ),
+    M_verbose                          ( dataElasticStructure.M_verbose )
+{
+}
 
-    M_order  = dfile( "solid/space_discretization/order", "P1");
-
-    M_thickness = dfile("solid/physics/thickness", 0.1);
-
-    // Lame coefficients
-//     _lambda  = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
-//     _mu      = _E / ( 2.0 * ( 1.0 + _nu ) );
-
-    std::string flagList;
-    flagList = dfile("solid/physics/material_flag", "0");
-    std::list<int> fList;
-    parseList(flagList, fList);
-
-    std::string youngList;
-    youngList =  dfile("solid/physics/young", "0.");
-    std::list<double> yList;
-    parseList(youngList, yList);
-
-    std::string poissonList;
-    poissonList = dfile("solid/physics/poisson", "0.");
-    std::list<double> pList;
-    parseList(poissonList, pList);
-
-//    if ((fList.size() != yList.size()) || (flist.size() != pList.size()))
-    ASSERT((fList.size() == yList.size()) && (fList.size() == pList.size()),"problem with the young modulus and poisson coef definiton : inconsistant sizes");
-
-    std::list<int>::iterator    fit;
-    std::list<double>::iterator yit = yList.begin();
-    std::list<double>::iterator pit = pList.begin();
-
-
-
-    for (fit = fList.begin(); fit != fList.end(); ++fit, ++yit, ++pit)
+// ===================================================
+// Operators
+// ===================================================
+template <typename Mesh>
+DataElasticStructure<Mesh>&
+DataElasticStructure<Mesh>::operator=( const DataElasticStructure& dataElasticStructure )
+{
+    if ( this != &dataElasticStructure )
     {
-        double young   = *yit;
-        double poisson = *pit;
-
-        M_young.insert(make_pair(*fit, young));
-        M_poisson.insert(make_pair(*fit, poisson));
-
-        double lambda = young*poisson/( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
-        M_lambda.insert(make_pair(*fit, lambda));
-
-        double mu = young/( 2.0 * ( 1.0 + poisson ) );
-        M_mu.insert(make_pair(*fit, mu));
-
-        if (fList.size() == 1)
-            {
-                _E      = young;
-                _nu     = poisson;
-
-                _lambda = lambda;
-                _mu     = mu;
-            }
+        M_time                             = dataElasticStructure.M_time;
+        M_mesh                             = dataElasticStructure.M_mesh;
+        M_density                          = dataElasticStructure.M_density;
+        M_thickness                        = dataElasticStructure.M_thickness;
+        M_poisson                          = dataElasticStructure.M_poisson;
+        M_young                            = dataElasticStructure.M_young;
+        M_order                            = dataElasticStructure.M_order;
+        M_factor                           = dataElasticStructure.M_factor;
+        M_verbose                          = dataElasticStructure.M_verbose;
     }
 
+    return *this;
 }
 
-
+// ===================================================
+// Methods
+// ===================================================
 template <typename Mesh>
-DataElasticStructure<Mesh>::
-DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
-    DataMesh<Mesh>               ( dataElasticStructure ),
-    DataTime                     ( dataElasticStructure ),
-    _rho                         ( dataElasticStructure._rho ),
-    _E                           ( dataElasticStructure._E ),
-    _nu                          ( dataElasticStructure._nu ),
-    _lambda                      ( dataElasticStructure._lambda ),
-    _mu                          ( dataElasticStructure._mu ),
-    M_young                      ( dataElasticStructure.M_young ),
-    M_poisson                    ( dataElasticStructure.M_poisson ),
-    M_lambda                     ( dataElasticStructure.M_lambda ),
-    M_mu                         ( dataElasticStructure.M_mu ),
-    _factor                      ( dataElasticStructure._factor ),
-    _verbose                     ( dataElasticStructure._verbose ),
-    M_order                      ( dataElasticStructure.M_order )
+void
+DataElasticStructure<Mesh>::setup( const GetPot& dataFile, const std::string& section )
 {
+    // If data time has not been set
+    if ( !M_time.get() )
+        M_time.reset( new Time_Type( dataFile, section + "/time_discretization" ) );
+
+    // If data mesh has not been set
+    if ( !M_mesh.get() )
+        M_mesh.reset( new Mesh_Type( dataFile, section + "/space_discretization" ) );
+
+    // physics
+    M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
+    M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
+
+    UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
+    if ( materialsNumber == 0 )
+    {
+        M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
+        M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+    }
+    else
+    {
+        ASSERT( materialsNumber == dataFile.vector_variable_size( ( section + "/physics/young" ).data()),   "!!! ERROR: Inconsistent size for Young Modulus !!!");
+        ASSERT( materialsNumber == dataFile.vector_variable_size( ( section + "/physics/poisson" ).data() ), "!!! ERROR: Inconsistent size for Poisson Coeff. !!!");
+
+        UInt material(0);
+        for ( UInt i(0) ; i < materialsNumber ; ++i )
+        {
+            material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
+            M_young[material]   = dataFile( ( section + "/physics/young" ).data(), 0. );
+            M_poisson[material] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+        }
+    }
+
+    // space_discretization
+    M_order     = dataFile( "solid/space_discretization/order", "P1" );
+
+    // miscellaneous
+    M_factor  = dataFile( "solid/miscellaneous/factor", 1.0 );
+    M_verbose = dataFile( "solid/miscellaneous/verbose", 1 );
 }
 
-
-
-
-// Output
 template <typename Mesh>
-void DataElasticStructure<Mesh>::
-showMe( std::ostream& c ) const
+void
+DataElasticStructure<Mesh>::showMe( std::ostream& output ) const
 {
     // physics
-    c << "\n*** Values for data [solid/physics]\n\n";
-    c << "density                          = " << _rho << std::endl;
-    c << "young                            = " << _E << std::endl;
-    c << "poisson                          = " << _nu << std::endl;
-    c << "lame constants (lambda, mu)      = " << _lambda << " " << _mu << std::endl;
+    output << "\n*** Values for data [solid/physics]\n\n";
+    output << "density                          = " << M_density << std::endl;
+    output << "thickness                        = " << M_thickness << std::endl;
+    for ( MaterialContainer_ConstIterator i = M_young.begin() ; i != M_young.end() ; ++i )
+        output << "young[" << i->first << "]                         = " << i->second << std::endl;
+    for ( MaterialContainer_ConstIterator i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
+        output << "poisson[" << i->first << "]                       = " << i->second << std::endl;
 
-    c << "\n*** Values for data [solid/miscellaneous]\n\n";
-    c << "deformation factor               = " << _factor << std::endl;
-    c << "verbose                          = " << _verbose << std::endl;
+    for ( MaterialContainer_ConstIterator i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
+    {
+        output << "Lame - lambda[" << i->first << "]                 = " << lambda( i->first ) << std::endl;
+        output << "Lame - mu[" << i->first << "]                     = " << mu( i->first ) << std::endl;
+    }
 
-    c << "\n*** Values for data [solid/space_discretization]\n\n";
-    DataMesh<Mesh>::showMe();
-    c << "\n*** Values for data [solid/time_discretization]\n\n";
-    DataTime::showMe( c );
+    output << "\n*** Values for data [solid/miscellaneous]\n\n";
+    output << "deformation factor               = " << M_factor << std::endl;
+    output << "verbose                          = " << M_verbose << std::endl;
+
+    output << "\n*** Values for data [solid/space_discretization]\n\n";
+    output << "FE order                         = " << M_order << std::endl;
+    M_mesh->showMe( output );
+
+    output << "\n*** Values for data [solid/time_discretization]\n\n";
+    M_time->showMe( output );
 }
 
+// ===================================================
+// Set Method
+// ===================================================
+template <typename Mesh>
+inline void
+DataElasticStructure<Mesh>::setDataTime( const Time_ptrType DataTime )
+{
+    M_time = DataTime;
 }
 
-#endif
+template <typename Mesh>
+inline void
+DataElasticStructure<Mesh>::setDataMesh( const Mesh_ptrType DataMesh )
+{
+    M_mesh = DataMesh;
+}
+
+template <typename Mesh>
+inline void
+DataElasticStructure<Mesh>::setDensity( const Real& density )
+{
+    M_density = density;
+}
+
+template <typename Mesh>
+inline void
+DataElasticStructure<Mesh>::setThickness( const Real& thickness )
+{
+    M_thickness = thickness;
+}
+
+template <typename Mesh>
+inline void
+DataElasticStructure<Mesh>::setPoisson( const Real& poisson, const UInt& material )
+{
+    M_poisson[material] = poisson;
+}
+
+template <typename Mesh>
+inline void
+DataElasticStructure<Mesh>::setYoung( const Real& young, const UInt& material )
+{
+    M_young[material] = young;
+}
+
+// ===================================================
+// Get Method
+// ===================================================
+template <typename Mesh>
+typename DataElasticStructure<Mesh>::Time_ptrType
+DataElasticStructure<Mesh>::dataTime() const
+{
+    return M_time;
+}
+
+template <typename Mesh>
+typename DataElasticStructure<Mesh>::Mesh_ptrType
+DataElasticStructure<Mesh>::dataMesh() const
+{
+    return M_mesh;
+}
+
+template <typename Mesh>
+inline const Real&
+DataElasticStructure<Mesh>::rho() const
+{
+    return M_density;
+}
+
+template <typename Mesh>
+inline const Real&
+DataElasticStructure<Mesh>::thickness() const
+{
+    return M_thickness;
+}
+
+template <typename Mesh>
+inline const Real&
+DataElasticStructure<Mesh>::poisson( const UInt& material ) const
+{
+    return M_poisson.find( material )->second;
+}
+
+template <typename Mesh>
+inline const Real&
+DataElasticStructure<Mesh>::young( const UInt& material ) const
+{
+    return M_young.find( material )->second;
+}
+
+template <typename Mesh>
+inline Real
+DataElasticStructure<Mesh>::lambda( const UInt& material ) const
+{
+    return M_young.find( material )->second * M_poisson.find( material )->second /
+           ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
+}
+
+template <typename Mesh>
+inline Real
+DataElasticStructure<Mesh>::mu( const UInt& material ) const
+{
+    return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );
+}
+
+template <typename Mesh>
+inline const std::string&
+DataElasticStructure<Mesh>::order() const
+{
+    return M_order;
+}
+
+template <typename Mesh>
+inline const Real&
+DataElasticStructure<Mesh>::factor() const
+{
+    return M_factor;
+}
+
+template <typename Mesh>
+inline const UInt&
+DataElasticStructure<Mesh>::verbose() const
+{
+    return M_verbose;
+}
+
+} // end namespace LifeV
+
+#endif // end DATAELASTICSTRUCTURE_H
