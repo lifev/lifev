@@ -175,9 +175,10 @@ Structure::run3d()
 
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    DataElasticStructure< RegionMesh3D<LinearTetra > >    dataStructure( dataFile );
+    DataElasticStructure< RegionMesh3D<LinearTetra > >    dataStructure;
+    dataStructure.setup(dataFile);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >            meshPart( *dataStructure.mesh(),
+    partitionMesh< RegionMesh3D<LinearTetra> >            meshPart( *dataStructure.dataMesh()->mesh(),
                                                                     *parameters->comm );
 
 //    meshPart.rebuildMesh();
@@ -185,7 +186,7 @@ Structure::run3d()
 
 //    exit(0);
 
-    dataStructure.setMesh(meshPart.mesh());
+    dataStructure.dataMesh()->setMesh(meshPart.mesh());
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,*parameters->comm);
@@ -216,8 +217,8 @@ Structure::run3d()
     //
     // Temporal data and initial conditions
     //
-    Real dt = dataStructure.getTimeStep();
-    Real T  = dataStructure.getEndTime();
+    Real dt = dataStructure.dataTime()->getTimeStep();
+    Real T  = dataStructure.dataTime()->getEndTime();
 
     vector_ptrtype disp(new vector_type(solid.disp(), Unique));
     vector_ptrtype vel(new vector_type(solid.vel(), Unique));
@@ -280,12 +281,12 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 
-      dataStructure.setTime(time);
+      dataStructure.dataTime()->setTime(time);
 
         if (verbose)
             {
                 std::cout << std::endl;
-                std::cout << "S- Now we are at time " << dataStructure.getTime() << " s." << std::endl;
+                std::cout << "S- Now we are at time " << dataStructure.dataTime()->getTime() << " s." << std::endl;
             }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side
