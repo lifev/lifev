@@ -36,7 +36,7 @@
 
 namespace LifeV {
 
-std::map< std::string, stressTypes > stressMap;
+std::map< std::string, stressTypes > MS_stressesMap;
 
 // ===================================================
 // Constructors & Destructor
@@ -55,11 +55,6 @@ MS_Coupling_Stress::MS_Coupling_Stress() :
 #endif
 
     M_type = Stress;
-
-    //Set type of stress coupling: StaticPressure, TotalPressure
-    stressMap["StaticPressure"]     = StaticPressure;
-    stressMap["TotalPressure"]      = TotalPressure;
-    stressMap["LagrangeMultiplier"] = LagrangeMultiplier;
 }
 
 MS_Coupling_Stress::MS_Coupling_Stress( const MS_Coupling_Stress& Stress ) :
@@ -111,7 +106,7 @@ MS_Coupling_Stress::SetupData( const std::string& FileName )
     GetPot DataFile( FileName );
 
     //Set type of stress coupling
-    M_stressType = stressMap[DataFile( "MultiScale/stressType", "StaticPressure" )];
+    M_stressType = MS_stressesMap[DataFile( "MultiScale/stressType", "StaticPressure" )];
 }
 
 void
@@ -248,7 +243,7 @@ MS_Coupling_Stress::InitializeCouplingVariables()
 }
 
 void
-MS_Coupling_Stress::ExportCouplingResiduals( VectorType& CouplingResiduals )
+MS_Coupling_Stress::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
 {
 #ifdef DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::ExportCouplingResiduals()  \n";
@@ -290,7 +285,7 @@ MS_Coupling_Stress::ExportCouplingResiduals( VectorType& CouplingResiduals )
     ExportCouplingVector( *M_LocalCouplingResiduals, CouplingResiduals );
 }
 
-ModelsVector_Type
+MS_ModelsVector_Type
 MS_Coupling_Stress::GetListOfPerturbedModels( const UInt& LocalCouplingVariableID )
 {
 
@@ -298,7 +293,7 @@ MS_Coupling_Stress::GetListOfPerturbedModels( const UInt& LocalCouplingVariableI
     Debug( 8220 ) << "MS_Coupling_Stress::GetListOfPerturbedModels( LocalCouplingVariableID ) \n";
 #endif
 
-    ModelsVector_Type perturbedModelsList(0);
+    MS_ModelsVector_Type perturbedModelsList(0);
 
     if ( LocalCouplingVariableID == 0 )
     {
@@ -312,7 +307,7 @@ MS_Coupling_Stress::GetListOfPerturbedModels( const UInt& LocalCouplingVariableI
 }
 
 void
-MS_Coupling_Stress::InsertJacobianConstantCoefficients( MatrixType& Jacobian )
+MS_Coupling_Stress::InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian )
 {
 
 #ifdef DEBUG
@@ -331,7 +326,7 @@ MS_Coupling_Stress::InsertJacobianConstantCoefficients( MatrixType& Jacobian )
 }
 
 void
-MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem )
+MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem )
 {
 
 #ifdef DEBUG
@@ -425,12 +420,12 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_PhysicalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
-                                                                       << "    " << M_flags[i]
-                                                                       << "    " << FlowRate
-                                                                       << "    " << Stress
-                                                                       << "    " << Pressure
-                                                                       << "    " << DynamicPressure << std::endl;
+            output << "  " << M_globalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
+                                                                     << "    " << M_flags[i]
+                                                                     << "    " << FlowRate
+                                                                     << "    " << Stress
+                                                                     << "    " << Pressure
+                                                                     << "    " << DynamicPressure << std::endl;
     }
 }
 
@@ -441,7 +436,7 @@ MS_Coupling_Stress::ShowMe()
     {
         super::ShowMe();
 
-        std::cout << "Stress Type         = " << Enum2String( M_stressType, stressMap ) << std::endl;
+        std::cout << "Stress Type         = " << Enum2String( M_stressType, MS_stressesMap ) << std::endl;
         std::cout << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[0] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
     }

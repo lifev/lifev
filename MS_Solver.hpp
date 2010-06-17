@@ -39,6 +39,7 @@
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 #include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
+#include <lifemc/lifesolver/MS_Algorithm_Explicit.hpp>
 #include <lifemc/lifesolver/MS_Algorithm_Newton.hpp>
 
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
@@ -122,14 +123,14 @@ private:
 
     //@}
 
-    // The main multiscale model
-    boost::shared_ptr< MS_Model_MultiScale > M_multiscale;
+    // The main model (can be a specific model or a MultiScale model)
+    MS_Model_PtrType                         M_model;
 
     // Algorithm for subiterations
-    Algorithm_ptrType                        M_algorithm;
+    MS_Algorithm_PtrType                     M_algorithm;
 
     // PhysicalData container
-    boost::shared_ptr< MS_PhysicalData >     M_dataPhysics;
+    MS_GlobalDataContainer_PtrType           M_globalData;
 
     // Communicator
     boost::shared_ptr< Epetra_Comm >         M_comm;

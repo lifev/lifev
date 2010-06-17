@@ -102,20 +102,20 @@ public:
     void InitializeCouplingVariables();
 
     //! Update the values of the coupling residuals
-    void ExportCouplingResiduals( VectorType& CouplingResiduals );
+    void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals );
 
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID );
+    MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param Jacobian the Jacobian matrix
      */
-    void InsertJacobianConstantCoefficients( MatrixType& Jacobian );
+    void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -124,7 +124,7 @@ public:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem );
+    void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem );
 
     //! Display some information about the coupling
     /*!
@@ -175,7 +175,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* createStress()
+inline MS_PhysicalCoupling* MS_createStress()
 {
     return new MS_Coupling_Stress();
 }

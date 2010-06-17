@@ -36,7 +36,7 @@
 
 namespace LifeV {
 
-std::map< std::string, couplingsTypes > couplingsMap;
+std::map< std::string, couplingsTypes > MS_couplingsMap;
 
 UInt MS_PhysicalCoupling::M_couplingsNumber = 0;
 
@@ -53,7 +53,7 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
     M_LocalCouplingVariables      (),
     M_LocalCouplingResiduals      (),
     M_LocalDeltaCouplingVariables (),
-    M_PhysicalData                (),
+    M_globalData                  (),
     M_comm                        (),
     M_displayer                   ()
 {
@@ -75,7 +75,7 @@ MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) 
     M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
     M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
     M_LocalDeltaCouplingVariables ( coupling.M_LocalDeltaCouplingVariables ),
-    M_PhysicalData                ( coupling.M_PhysicalData ),
+    M_globalData                  ( coupling.M_globalData ),
     M_comm                        ( coupling.M_comm ),
     M_displayer                   ( coupling.M_displayer )
 
@@ -105,7 +105,7 @@ MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
         M_LocalCouplingVariables      = coupling.M_LocalCouplingVariables;
         M_LocalCouplingResiduals      = coupling.M_LocalCouplingResiduals;
         M_LocalDeltaCouplingVariables = coupling.M_LocalDeltaCouplingVariables;
-        M_PhysicalData                = coupling.M_PhysicalData;
+        M_globalData                  = coupling.M_globalData;
         M_comm                        = coupling.M_comm;
         M_displayer                   = coupling.M_displayer;
     }
@@ -136,27 +136,16 @@ MS_PhysicalCoupling::SetupData( const std::string& FileName )
 }
 
 void
-MS_PhysicalCoupling::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
-{
-
-#ifdef DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( PhysicalData ) \n";
-#endif
-
-    M_PhysicalData = PhysicalData;
-}
-
-void
 MS_PhysicalCoupling::ShowMe()
 {
     std::cout << "Coupling id         = " << M_ID << std::endl
               << "Coupling name       = " << M_couplingName << std::endl
-              << "Coupling type       = " << Enum2String( M_type, couplingsMap ) << std::endl << std::endl;
+              << "Coupling type       = " << Enum2String( M_type, MS_couplingsMap ) << std::endl << std::endl;
 
     std::cout << "Models number       = " << GetModelsNumber() << std::endl;
     std::cout << "Models type(s)      = ";
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
-        std::cout << Enum2String( M_models[i]->GetType(), modelsMap ) << " ";
+        std::cout << Enum2String( M_models[i]->GetType(), MS_modelsMap ) << " ";
     std::cout << std::endl;
     std::cout << "Flags list          = ";
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
@@ -181,7 +170,7 @@ MS_PhysicalCoupling::CreateCouplingMap( EpetraMap& couplingMap )
 }
 
 void
-MS_PhysicalCoupling::ImportCouplingVariables( const VectorType& CouplingVariables )
+MS_PhysicalCoupling::ImportCouplingVariables( const MS_Vector_Type& CouplingVariables )
 {
 
 #ifdef DEBUG
@@ -192,7 +181,7 @@ MS_PhysicalCoupling::ImportCouplingVariables( const VectorType& CouplingVariable
 }
 
 void
-MS_PhysicalCoupling::ExportCouplingVariables( VectorType& CouplingVariables )
+MS_PhysicalCoupling::ExportCouplingVariables( MS_Vector_Type& CouplingVariables )
 {
 
 #ifdef DEBUG
@@ -203,7 +192,7 @@ MS_PhysicalCoupling::ExportCouplingVariables( VectorType& CouplingVariables )
 }
 
 void
-MS_PhysicalCoupling::ExportJacobian( MatrixType& Jacobian )
+MS_PhysicalCoupling::ExportJacobian( MS_Matrix_Type& Jacobian )
 {
 
 #ifdef DEBUG
@@ -212,7 +201,7 @@ MS_PhysicalCoupling::ExportJacobian( MatrixType& Jacobian )
 
     // Definitions
     bool SolveLinearSystem;                  // Flag to avoid multiple solution of the same linear system
-    ModelsVector_Type ListOfPerturbedModels; // List of perturbed model
+    MS_ModelsVector_Type ListOfPerturbedModels; // List of perturbed model
 
     // Insert constant values in the Jacobian (due to this coupling condition)
     InsertJacobianConstantCoefficients( Jacobian );
@@ -226,7 +215,7 @@ MS_PhysicalCoupling::ExportJacobian( MatrixType& Jacobian )
         ListOfPerturbedModels = GetListOfPerturbedModels( i );
 
         // Loop on all the models, that could be influenced by the perturbation of the coupling variable
-        for ( ModelsVector_Iterator j = ListOfPerturbedModels.begin() ; j < ListOfPerturbedModels.end() ; ++j )
+        for ( MS_ModelsVector_Iterator j = ListOfPerturbedModels.begin() ; j < ListOfPerturbedModels.end() ; ++j )
         {
             SolveLinearSystem = true;
 
@@ -254,10 +243,10 @@ MS_PhysicalCoupling::SaveSolution()
     {
         std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Coupling_" + number2string( M_ID ) + ".mfile";
 
-        if ( M_PhysicalData->GetDataTime()->isFirstTimeStep() )
+        if ( M_globalData->GetDataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
-            output << "% Coupling Type: " << Enum2String( M_type, couplingsMap ) << std::endl << std::endl;
+            output << "% Coupling Type: " << Enum2String( M_type, MS_couplingsMap ) << std::endl << std::endl;
             output << "% TIME                     ID   FLAG FLUX                     STRESS                    S. PRESSURE              D. PRESSURE" << std::endl;
         }
         else
@@ -286,7 +275,7 @@ MS_PhysicalCoupling::SetID( const UInt& id )
 }
 
 void
-MS_PhysicalCoupling::AddModel( const Model_ptrType& model )
+MS_PhysicalCoupling::AddModel( const MS_Model_PtrType& model )
 {
     M_models.push_back( model );
 }
@@ -301,6 +290,17 @@ void
 MS_PhysicalCoupling::AddFlagID( const UInt& flagID )
 {
     M_flags.push_back( M_models.back()->GetFlag( flagID ) );
+}
+
+void
+MS_PhysicalCoupling::SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
+{
+
+#ifdef DEBUG
+    Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( globalData ) \n";
+#endif
+
+    M_globalData = globalData;
 }
 
 void
@@ -352,7 +352,7 @@ MS_PhysicalCoupling::GetModelLocalID( const UInt& ID ) const
     return -1;
 }
 
-Model_ptrType
+MS_Model_PtrType
 MS_PhysicalCoupling::GetModel( const UInt& LocalID ) const
 {
     return M_models[LocalID];
@@ -385,7 +385,7 @@ MS_PhysicalCoupling::CreateLocalVectors()
 }
 
 void
-MS_PhysicalCoupling::ImportCouplingVector( const VectorType& globalVector, VectorType& localVector )
+MS_PhysicalCoupling::ImportCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector )
 {
     Real value(0);
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
@@ -400,7 +400,7 @@ MS_PhysicalCoupling::ImportCouplingVector( const VectorType& globalVector, Vecto
 }
 
 void
-MS_PhysicalCoupling::ExportCouplingVector( const VectorType& localVector, VectorType& globalVector )
+MS_PhysicalCoupling::ExportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector )
 {
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
         if ( M_comm->MyPID() == 0 )
@@ -408,10 +408,10 @@ MS_PhysicalCoupling::ExportCouplingVector( const VectorType& localVector, Vector
 }
 
 void
-MS_PhysicalCoupling::switchErrorMessage( const Model_ptrType& model )
+MS_PhysicalCoupling::switchErrorMessage( const MS_Model_PtrType& model )
 {
-    MS_ErrorCheck( MS_ModelType, "Invalid model type ["  + Enum2String( model->GetType(), modelsMap ) +
-                                 "] for coupling type [" + Enum2String( M_type, couplingsMap ) +"]\n" );
+    MS_ErrorCheck( MS_ModelType, "Invalid model type ["  + Enum2String( model->GetType(), MS_modelsMap ) +
+                                 "] for coupling type [" + Enum2String( M_type, MS_couplingsMap ) +"]\n" );
 }
 
 } // Namespace LifeV

@@ -36,7 +36,7 @@
 
 namespace LifeV {
 
-std::map< std::string, algorithmsTypes > algorithmMap;
+std::map< std::string, algorithmsTypes > MS_algorithmsMap;
 
 // ===================================================
 // Constructors & Destructor
@@ -113,11 +113,24 @@ MS_Algorithm::SetupData( const std::string& FileName )
 }
 
 void
+MS_Algorithm::SubIterate()
+{
+
+#ifdef DEBUG
+    Debug( 8010 ) << "MS_Algorithm::SubIterate( tolerance, subITMax ) \n";
+#endif
+
+    // Algorithm Type
+    if ( M_displayer->isLeader() )
+        std::cout << " MS-  " << Enum2String( M_type, MS_algorithmsMap ) << " Algorithm" << std::endl;
+}
+
+void
 MS_Algorithm::ShowMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
 
-    std::cout << "Algorithm type      = " << Enum2String( M_type, algorithmMap ) << std::endl
+    std::cout << "Algorithm type      = " << Enum2String( M_type, MS_algorithmsMap ) << std::endl
               << "Max Sub-iterations  = " << M_SubiterationsMaximumNumber << std::endl
               << "Tolerance           = " << M_Tolerance << std::endl << std::endl;
     std::cout << std::endl << std::endl;
@@ -139,14 +152,14 @@ MS_Algorithm::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
 }
 
 void
-MS_Algorithm::SetMultiScaleProblem( const boost::shared_ptr< MS_Model_MultiScale > multiscale )
+MS_Algorithm::SetModel( const MS_Model_PtrType model )
 {
 
 #ifdef DEBUG
     Debug( 8010 ) << "MS_Algorithm::SetMultiScaleProblem( multiscale ) \n";
 #endif
 
-    M_multiscale = multiscale;
+    M_multiscale = boost::dynamic_pointer_cast< MS_Model_MultiScale >( model );
 
     // Build coupling variables and residuals vectors
     std::vector<int> MyGlobalElements(0);
@@ -172,13 +185,13 @@ MS_Algorithm::GetMultiScaleProblem() const
     return M_multiscale;
 }
 
-const Vector_ptrType
+const MS_Vector_PtrType
 MS_Algorithm::GetCouplingVariables() const
 {
     return M_couplingVariables;
 }
 
-const Vector_ptrType
+const MS_Vector_PtrType
 MS_Algorithm::GetCouplingResiduals() const
 {
     return M_couplingResiduals;
@@ -200,6 +213,26 @@ const Real&
 MS_Algorithm::GetTolerance() const
 {
     return M_Tolerance;
+}
+
+// ===================================================
+// Protected Methods
+// ===================================================
+bool
+MS_Algorithm::ToleranceSatisfied()
+{
+    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
+    Real residual = M_couplingResiduals->Norm2();
+
+    // Display residual value
+    if ( M_displayer->isLeader() )
+        std::cout << " MS-  Residual:                                " << residual << std::endl;
+
+    // Is the tolerance satisfied?
+    if ( residual <= M_Tolerance )
+        return true;
+    else
+        return false;
 }
 
 } // Namespace LifeV

@@ -155,6 +155,8 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
 
     //Fluid data
     M_FluidData->setup( DataFile );
+    if ( M_globalData.get() )
+        SetupGlobalData( FileName );
 
     // Parameters for the NS Iterations
     M_SubiterationsMaximumNumber = DataFile( "fluid/miscellaneous/SubITMax", 0 );
@@ -181,22 +183,6 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_importer->setDataFromGetPot( DataFile );
     M_importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
     M_importer->setDirectory( MS_ProblemFolder );
-}
-
-void
-MS_Model_Fluid3D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupGlobalData( PhysicalData ) \n";
-#endif
-
-    //Global data time
-    M_FluidData->setDataTime( PhysicalData->GetDataTime() );
-
-    //Global physical quantities
-    M_FluidData->density(   PhysicalData->GetFluidDensity() );
-    M_FluidData->viscosity( PhysicalData->GetFluidViscosity() );
 }
 
 void
@@ -228,8 +214,8 @@ MS_Model_Fluid3D::SetupModel()
     M_FluidBDF.reset( new BDF_Type( M_FluidData->dataTime()->getBDF_order() ) );
 
     //Problem coefficients
-    M_beta.reset( new VectorType( M_FluidFullMap ) );
-    M_RHS.reset ( new VectorType( M_FluidFullMap ) );
+    M_beta.reset( new FluidVector_Type( M_FluidFullMap ) );
+    M_RHS.reset ( new FluidVector_Type( M_FluidFullMap ) );
 
     //Post-processing
     M_exporter->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
@@ -237,16 +223,12 @@ MS_Model_Fluid3D::SetupModel()
     //M_FluidSolution.reset( new VectorType( M_FluidFullMap, Repeated ) );
     //M_FluidSolution.reset( new VectorType( M_Fluid->solution(), Repeated ) );
 
-    M_FluidSolution.reset( new VectorType( *M_Fluid->solution(), M_exporter->mapType() ) );
+    M_FluidSolution.reset( new FluidVector_Type( *M_Fluid->solution(), M_exporter->mapType() ) );
     if ( M_exporter->mapType() == Unique )
         M_FluidSolution->setCombineMode( Zero );
 
-    M_exporter->addVariable( ExporterData::Vector, "Velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
-#ifdef HAVE_HDF5
-    M_exporter->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
-#else
-    M_exporter->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
-#endif
+    M_exporter->addVariable( ExporterData::Vector, "Fluid Velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
+    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
 
     //Setup linear model
     SetupLinearModel();
@@ -386,15 +368,15 @@ MS_Model_Fluid3D::ShowMe()
     {
         super::ShowMe();
 
-        std::cout << "uOrder              = " << M_FluidData->uOrder() << std::endl
-                  << "pOrder              = " << M_FluidData->pOrder() << std::endl << std::endl;
+        std::cout << "Velocity FE order   = " << M_FluidData->uOrder() << std::endl
+                  << "Pressure FE order   = " << M_FluidData->pOrder() << std::endl << std::endl;
 
-        std::cout << "uDOF                = " << 3 * M_uDOF << std::endl
-                  << "pDOF                = " << M_pDOF << std::endl
+        std::cout << "Velocity DOF        = " << 3 * M_uDOF << std::endl
+                  << "Pressure DOF        = " << M_pDOF << std::endl
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
-        std::cout << "maxH                = " << M_FluidData->dataMesh()->mesh()->maxH() << std::endl
-                  << "meanH               = " << M_FluidData->dataMesh()->mesh()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << M_FluidData->dataMesh()->mesh()->maxH() << std::endl
+                  << "Fluid mesh meanH    = " << M_FluidData->dataMesh()->mesh()->meanH() << std::endl << std::endl;
 
         std::cout << "NS SubITMax         = " << M_SubiterationsMaximumNumber << std::endl
                   << "NS Tolerance        = " << M_Tolerance << std::endl << std::endl << std::endl << std::endl;
@@ -437,7 +419,7 @@ MS_Model_Fluid3D::UpdateLinearModel()
 #endif
 
     //Create an empty vector
-    VectorType VectorZero( *M_FluidSolution ); VectorZero = 0.0;
+    FluidVector_Type VectorZero( *M_FluidSolution ); VectorZero = 0.0;
 
     //UpdateLinearModel
     M_Fluid->updateLinearSystem( M_Fluid->matrNoBC(),
@@ -481,7 +463,7 @@ MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
 // Set Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetSolution( const boost::shared_ptr< VectorType >& Solution )
+MS_Model_Fluid3D::SetSolution( const boost::shared_ptr< FluidVector_Type >& Solution )
 {
     M_FluidSolution = Solution;
 
@@ -568,7 +550,7 @@ MS_Model_Fluid3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& Stre
 
         default:
 
-            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
 
             return 0.0;
     }
@@ -628,7 +610,7 @@ MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearS
 
         default:
 
-            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
 
             return 0.0;
     }
@@ -643,7 +625,7 @@ MS_Model_Fluid3D::GetData() const
     return *M_FluidData;
 }
 
-const VectorType&
+const MS_Model_Fluid3D::FluidVector_Type&
 MS_Model_Fluid3D::GetSolution() const
 {
     return *M_FluidSolution;
@@ -652,6 +634,26 @@ MS_Model_Fluid3D::GetSolution() const
 // ===================================================
 // Private Methods
 // ===================================================
+void
+MS_Model_Fluid3D::SetupGlobalData( const std::string& FileName )
+{
+
+#ifdef DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupGlobalData( FileName ) \n";
+#endif
+
+    GetPot DataFile( FileName );
+
+    //Global data time
+    M_FluidData->setDataTime( M_globalData->GetDataTime() );
+
+    //Global physical quantities
+    if ( !DataFile.checkVariable( "fluid/physics/density" ) )
+        M_FluidData->density( M_globalData->GetFluidDensity() );
+    if ( !DataFile.checkVariable( "fluid/physics/viscosity" ) )
+        M_FluidData->viscosity( M_globalData->GetFluidViscosity() );
+}
+
 void
 MS_Model_Fluid3D::SetupFEspace()
 {

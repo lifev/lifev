@@ -105,7 +105,7 @@ MS_Algorithm_Aitken::SetupData( const std::string& FileName )
     M_generalizedAitken.setDefault( DataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
     M_generalizedAitken.UseDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
     M_generalizedAitken.setMinimizationType( DataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
-    M_method       = M_methodMap[ DataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
+    M_method = M_methodMap[ DataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
 }
 
 void
@@ -116,18 +116,11 @@ MS_Algorithm_Aitken::SubIterate()
     Debug( 8011 ) << "MS_Algorithm_Aitken::SubIterate( tolerance, subITMax ) \n";
 #endif
 
-    // Check if it is necessary to performs subiterations
-    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-    Real residual = M_couplingResiduals->Norm2();
+    super::SubIterate();
 
-    if ( M_displayer->isLeader() )
-        std::cout << " MS-  Residual:                                " << residual << std::endl;
-
-    if ( residual <= M_Tolerance )
+    // Verify tolerance
+    if ( ToleranceSatisfied() )
         return;
-
-    if ( M_displayer->isLeader() )
-        std::cout << " MS-  Aitken Algorithm" << std::endl;
 
     M_multiscale->ExportCouplingVariables( *M_couplingVariables );
 
@@ -179,23 +172,16 @@ MS_Algorithm_Aitken::SubIterate()
         // SolveSystem
         M_multiscale->SolveSystem();
 
-        // Check the new residual
-        M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-        residual = M_couplingResiduals->Norm2();
-
         // Display subiteration information
         if ( M_displayer->isLeader() )
-        {
             std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
-            std::cout << " MS-  Residual:                                " << residual << std::endl;
-        }
 
         // Verify tolerance
-        if ( residual <= M_Tolerance )
+        if ( ToleranceSatisfied() )
             return;
     }
 
-    MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( residual ) +
+    MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
                                  " (required: " + number2string( M_Tolerance ) + ")\n" );
 }
 

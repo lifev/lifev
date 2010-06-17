@@ -108,14 +108,6 @@ public:
      */
     virtual void SetupData( const std::string& FileName );
 
-    //! Setup the global data of the model.
-    /*!
-     * In particular it replaces the local values specified in the model data file with global ones.
-     *
-     * @param PhysicalData Global data container.
-     */
-    virtual void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData ) = 0;
-
     //! Setup the model.
     /*!
      * In particular it does the following operations:
@@ -186,7 +178,16 @@ public:
     /*!
      * @param coupling shared_ptr of the coupling
      */
-    void AddCoupling( const Coupling_ptrType& coupling );
+    void AddCoupling( const MS_Coupling_PtrType& coupling );
+
+    //! Setup the global data of the model.
+    /*!
+     * In particular, it can be used to replace the local values specified in
+     * the model data file, with the ones in the global container.
+     *
+     * @param globalData Global data container.
+     */
+    void SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
 
     //! Scale, rotate and translate the Model in the 3D space
     /*!
@@ -260,7 +261,7 @@ public:
      * @param ID local ID of the coupling
      * @return Pointer to the coupling
      */
-    Coupling_ptrType GetCoupling( const UInt& LocalID ) const;
+    MS_Coupling_PtrType GetCoupling( const UInt& LocalID ) const;
 
     //@}
 
@@ -276,9 +277,11 @@ protected:
     UInt                                 M_ID;                 // Global ID of the model
     modelsTypes                          M_type;               // Type of the model (depends on the derived class)
 
-    CouplingsVector_Type                 M_couplings;          // Container for the couplings
+    MS_CouplingsVector_Type              M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
     std::vector< BCFlag >                M_flags;              // Free flags, available for the couplings
+
+    MS_GlobalDataContainer_PtrType       M_globalData;         // GlobalDataContainer
 
     boost::array< Real, NDIM >           M_geometryScale;      // Global geometrical scale
     boost::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation

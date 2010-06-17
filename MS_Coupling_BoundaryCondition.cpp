@@ -151,7 +151,7 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
         }
 }
 
-ModelsVector_Type
+MS_ModelsVector_Type
 MS_Coupling_BoundaryCondition::GetListOfPerturbedModels( const UInt& /*LocalCouplingVariableID*/ )
 {
 
@@ -159,7 +159,7 @@ MS_Coupling_BoundaryCondition::GetListOfPerturbedModels( const UInt& /*LocalCoup
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::GetListOfPerturbedModels() \n";
 #endif
 
-    ModelsVector_Type emptyList;
+    MS_ModelsVector_Type emptyList;
 
     return emptyList;
 }
@@ -221,12 +221,12 @@ MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_PhysicalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
-                                                                       << "    " << M_flags[i]
-                                                                       << "    " << FlowRate
-                                                                       << "    " << "NaN                   "
-                                                                       << "    " << Pressure
-                                                                       << "    " << DynamicPressure << std::endl;
+            output << "  " << M_globalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
+                                                                     << "    " << M_flags[i]
+                                                                     << "    " << FlowRate
+                                                                     << "    " << "NaN                   "
+                                                                     << "    " << Pressure
+                                                                     << "    " << DynamicPressure << std::endl;
     }
 }
 

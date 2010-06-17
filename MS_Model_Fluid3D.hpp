@@ -72,6 +72,7 @@ public:
     typedef partitionMesh< Mesh_Type >         PartitionMesh_Type;
 
     typedef OseenShapeDerivative< Mesh_Type >  Fluid_Type;
+    typedef Fluid_Type::vector_type            FluidVector_Type;
 
 #ifdef HAVE_HDF5
     typedef Hdf5exporter< Mesh_Type >          IOFile_Type;
@@ -79,9 +80,9 @@ public:
     typedef Ensight< Mesh_Type >               IOFile_Type;
 #endif
 
-    typedef BCInterface< Fluid_Type >          BCInterface_Type;
     typedef BCHandler                          BC_Type;
-    typedef BdfTNS< VectorType >               BDF_Type;
+    typedef BCInterface< Fluid_Type >          BCInterface_Type;
+    typedef BdfTNS< FluidVector_Type >         BDF_Type;
     typedef DataNavierStokes< Mesh_Type >      Data_Type;
 
     typedef FESpace< Mesh_Type, EpetraMap >    FESpace_Type;
@@ -125,12 +126,6 @@ public:
      * @param FileName Name of data file.
      */
     void SetupData( const std::string& FileName );
-
-    //! Setup the global data of the model.
-    /*!
-     * @param PhysicalData Global data container.
-     */
-    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
 
     //! Setup the model.
     void SetupModel();
@@ -181,7 +176,7 @@ public:
     /*!
      * @param Solution Solution vector
      */
-    void SetSolution( const boost::shared_ptr< VectorType >& Solution );
+    void SetSolution( const boost::shared_ptr< FluidVector_Type >& Solution );
 
     //@}
 
@@ -315,7 +310,7 @@ public:
     /*!
      * @return Solution vector
      */
-    const VectorType& GetSolution() const;
+    const FluidVector_Type& GetSolution() const;
 
     //@}
 
@@ -323,6 +318,15 @@ private:
 
     //! @name Private Methods
     //@{
+
+    //! Setup the global data of the model.
+    /*!
+     * In particular, it replaces the default local values with the ones in the global container.
+     * If a value is already specified in the data file, do not perform the replacement.
+     *
+     * @param FileName File name of the specific model.
+     */
+    void SetupGlobalData( const std::string& FileName );
 
     //! Setup the FE space for pressure and velocity
     void SetupFEspace();
@@ -350,7 +354,7 @@ private:
     boost::shared_ptr< Data_Type >          M_FluidData;
     boost::shared_ptr< PartitionMesh_Type > M_FluidMesh;
     boost::shared_ptr< EpetraMap >          M_FluidFullMap;
-    boost::shared_ptr< VectorType >         M_FluidSolution;
+    boost::shared_ptr< FluidVector_Type >   M_FluidSolution;
 
     // Linear Fluid problem
     boost::shared_ptr< BCInterface_Type >   M_LinearFluidBC;
@@ -367,17 +371,17 @@ private:
 
     // Problem coefficients
     Real                                    M_alpha;
-    boost::shared_ptr< VectorType >         M_beta;
-    boost::shared_ptr< VectorType >         M_RHS;
+    boost::shared_ptr< FluidVector_Type >   M_beta;
+    boost::shared_ptr< FluidVector_Type >   M_RHS;
 
     // NS parameters
     UInt                                    M_SubiterationsMaximumNumber;
     Real                                    M_Tolerance;
-    generalizedAitken< VectorType >         M_generalizedAitken;
+    generalizedAitken< FluidVector_Type >   M_generalizedAitken;
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createFluid3D()
+inline MS_PhysicalModel* MS_createFluid3D()
 {
     return new MS_Model_Fluid3D();
 }

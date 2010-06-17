@@ -116,12 +116,12 @@ protected:
 
     std::map< std::string, methodType >            M_methodMap;
     methodType                                     M_method;
-    generalizedAitken< VectorType >                M_generalizedAitken;
+    generalizedAitken< MS_Vector_Type >            M_generalizedAitken;
 
 };
 
 //! Factory create function
-inline MS_Algorithm* createAitken()
+inline MS_Algorithm* MS_createAitken()
 {
     return new MS_Algorithm_Aitken();
 }

@@ -147,7 +147,8 @@ MS_Model_1D::SetupData( const std::string& FileName )
     GetPot DataFile( FileName );
 
     M_Data->setup( DataFile );
-    //M_Data->showMe();
+    if ( M_globalData.get() )
+        SetupGlobalData( FileName );
 
     //1D Model Physics
     M_Physics = Physics_PtrType( Factory_OneDimensionalModel_Physics::instance().createObject( M_Data->PhysicsType() ) );
@@ -188,28 +189,6 @@ MS_Model_1D::SetupData( const std::string& FileName )
 }
 
 void
-MS_Model_1D::SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData )
-{
-
-#ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupGlobalData( ) \n";
-#endif
-
-    //Global data time
-    M_Data->setDataTime( PhysicalData->GetDataTime() );
-
-    //Global physical quantities
-    M_Data->setDensity( PhysicalData->GetFluidDensity() );
-    M_Data->setViscosity( PhysicalData->GetFluidViscosity() );
-    M_Data->setDensityWall( PhysicalData->GetStructureDensity() );
-    M_Data->setPoisson( PhysicalData->GetStructurePoissonCoefficient() );
-    M_Data->setYoung( PhysicalData->GetStructureYoungModulus() );
-
-    //After changing some parameters we need to update the coefficients
-    M_Data->UpdateCoefficients();
-}
-
-void
 MS_Model_1D::SetupModel()
 {
 
@@ -237,11 +216,11 @@ MS_Model_1D::SetupModel()
             M_Solution[i]->setCombineMode( Zero );
     }
 
-    M_Exporter->addVariable( ExporterData::Scalar, "Area",      M_Solution[0], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "Flow Rate", M_Solution[1], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "W1",        M_Solution[2], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "W2",        M_Solution[3], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "Pressure",  M_Solution[4], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Solid Area",      M_Solution[0], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", M_Solution[1], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "W1",              M_Solution[2], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "W2",              M_Solution[3], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  M_Solution[4], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
 #endif
 
 }
@@ -330,7 +309,7 @@ MS_Model_1D::ShowMe()
     {
         super::ShowMe();
 
-        std::cout << "FE space            = " << "P1" << std::endl
+        std::cout << "FE order            = " << "P1" << std::endl
                   << "DOF                 = " << M_Data->mesh()->numPoints() << std::endl << std::endl;
 
         std::cout << "maxH                = " << M_Data->mesh()->maxH() << std::endl
@@ -433,7 +412,7 @@ MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressTyp
 
         default:
         {
-            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
 
             return 0.0;
         }
@@ -495,7 +474,7 @@ MS_Model_1D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem
 
         default:
         {
-            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, stressMap ) << "]" << std::endl;
+            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
 
             return 0.0;
         }
@@ -557,6 +536,35 @@ MS_Model_1D::GetSolution() const
 // ===================================================
 // Private Methods
 // ===================================================
+void
+MS_Model_1D::SetupGlobalData( const std::string& FileName )
+{
+
+#ifdef DEBUG
+    Debug( 8130 ) << "MS_Model_1D::SetupGlobalData( FileName ) \n";
+#endif
+
+    GetPot DataFile( FileName );
+
+    //Global data time
+    M_Data->setDataTime( M_globalData->GetDataTime() );
+
+    //Global physical quantities
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/density" ) )
+        M_Data->setDensity( M_globalData->GetFluidDensity() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
+        M_Data->setViscosity( M_globalData->GetFluidViscosity() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/densityWall" ) )
+        M_Data->setDensityWall( M_globalData->GetStructureDensity() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/poisson" ) )
+        M_Data->setPoisson( M_globalData->GetStructurePoissonCoefficient() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/young" ) )
+        M_Data->setYoung( M_globalData->GetStructureYoungModulus() );
+
+    //After changing some parameters we need to update the coefficients
+    M_Data->UpdateCoefficients();
+}
+
 void
 MS_Model_1D::SetupFESpace()
 {

@@ -77,8 +77,9 @@ namespace LifeV {
  */
 enum algorithmsTypes
 {
-    Aitken, /*!< Aitken method */
-    Newton  /*!< Newton method (with Jacobian Matrix)*/
+    Aitken,   /*!< Aitken method */
+    Explicit, /*!< Explicit method */
+    Newton    /*!< Newton method (with exact Jacobian Matrix) */
 };
 
 /*! @enum modelsTypes
@@ -127,45 +128,48 @@ extern UInt MS_ProblemStep;
 extern bool MS_ExitFlag;
 
 // Map objects
-extern std::map< std::string, algorithmsTypes > algorithmMap;
-extern std::map< std::string, modelsTypes >     modelsMap;
-extern std::map< std::string, couplingsTypes >  couplingsMap;
-extern std::map< std::string, stressTypes >     stressMap;
+extern std::map< std::string, algorithmsTypes > MS_algorithmsMap;
+extern std::map< std::string, modelsTypes >     MS_modelsMap;
+extern std::map< std::string, couplingsTypes >  MS_couplingsMap;
+extern std::map< std::string, stressTypes >     MS_stressesMap;
 
 // Forward class declarations
 class MS_Algorithm;
 class MS_PhysicalModel;
 class MS_PhysicalCoupling;
+class MS_PhysicalData;
 
 // Type definitions
-typedef EntityFlag                                                BCFlag;
+typedef EntityFlag                                                 BCFlag;
 
-typedef EpetraVector                                              VectorType;
-typedef boost::shared_ptr< VectorType >                           Vector_ptrType;
+typedef EpetraVector                                               MS_Vector_Type;
+typedef boost::shared_ptr< MS_Vector_Type >                        MS_Vector_PtrType;
 
-typedef EpetraMatrix< Real >                                      MatrixType;
-typedef boost::shared_ptr< MatrixType >                           Matrix_ptrType;
+typedef EpetraMatrix< Real >                                       MS_Matrix_Type;
+typedef boost::shared_ptr< MS_Matrix_Type >                        MS_Matrix_PtrType;
 
-typedef MS_Algorithm                                              AlgorithmType;
-typedef boost::shared_ptr< AlgorithmType >                        Algorithm_ptrType;
+typedef MS_Algorithm                                               MS_Algorithm_Type;
+typedef boost::shared_ptr< MS_Algorithm_Type >                     MS_Algorithm_PtrType;
+typedef singleton< factory< MS_Algorithm_Type, algorithmsTypes > > MS_Algorithm_Factory;
 
-typedef MS_PhysicalModel                                          ModelType;
-typedef boost::shared_ptr< ModelType >                            Model_ptrType;
+typedef MS_PhysicalModel                                           MS_Model_Type;
+typedef boost::shared_ptr< MS_Model_Type >                         MS_Model_PtrType;
+typedef singleton< factory< MS_Model_Type, modelsTypes > >         MS_Model_Factory;
 
-typedef MS_PhysicalCoupling                                       CouplingType;
-typedef boost::shared_ptr< CouplingType >                         Coupling_ptrType;
+typedef MS_PhysicalCoupling                                        MS_Coupling_Type;
+typedef boost::shared_ptr< MS_Coupling_Type >                      MS_Coupling_PtrType;
+typedef singleton< factory< MS_Coupling_Type, couplingsTypes > >   MS_Coupling_Factory;
 
-typedef std::vector<Model_ptrType>                                ModelsVector_Type;
-typedef ModelsVector_Type::iterator                               ModelsVector_Iterator;
-typedef ModelsVector_Type::const_iterator                         ModelsVector_ConstIterator;
+typedef std::vector< MS_Model_PtrType >                            MS_ModelsVector_Type;
+typedef MS_ModelsVector_Type::iterator                             MS_ModelsVector_Iterator;
+typedef MS_ModelsVector_Type::const_iterator                       MS_ModelsVector_ConstIterator;
 
-typedef std::vector<Coupling_ptrType>                             CouplingsVector_Type;
-typedef CouplingsVector_Type::iterator                            CouplingsVector_Iterator;
-typedef CouplingsVector_Type::const_iterator                      CouplingsVector_ConstIterator;
+typedef std::vector< MS_Coupling_PtrType >                         MS_CouplingsVector_Type;
+typedef MS_CouplingsVector_Type::iterator                          MS_CouplingsVector_Iterator;
+typedef MS_CouplingsVector_Type::const_iterator                    MS_CouplingsVector_ConstIterator;
 
-typedef singleton< factory< AlgorithmType, algorithmsTypes > >    FactoryAlgorithms;
-typedef singleton< factory< ModelType, modelsTypes > >            FactoryModels;
-typedef singleton< factory< CouplingType, couplingsTypes > >      FactoryCouplings;
+typedef MS_PhysicalData                                            MS_GlobalDataContainer_Type;
+typedef boost::shared_ptr< MS_GlobalDataContainer_Type >           MS_GlobalDataContainer_PtrType;
 
 // ===================================================
 // MS Utility Methods
@@ -175,17 +179,22 @@ typedef singleton< factory< CouplingType, couplingsTypes > >      FactoryCouplin
 inline void
 MS_MapsDefinition()
 {
-    modelsMap["Fluid3D"]         = Fluid3D;
-    modelsMap["FSI3D"]           = FSI3D;
-    modelsMap["MultiScale"]      = MultiScale;
-    modelsMap["OneDimensional"]  = OneDimensional;
+    MS_modelsMap["Fluid3D"]              = Fluid3D;
+    MS_modelsMap["FSI3D"]                = FSI3D;
+    MS_modelsMap["MultiScale"]           = MultiScale;
+    MS_modelsMap["OneDimensional"]       = OneDimensional;
 
-    couplingsMap["BoundaryCondition"] = BoundaryCondition;
-    couplingsMap["FluxStress"]        = FluxStress;
-    couplingsMap["Stress"]            = Stress;
+    MS_couplingsMap["BoundaryCondition"] = BoundaryCondition;
+    MS_couplingsMap["FluxStress"]        = FluxStress;
+    MS_couplingsMap["Stress"]            = Stress;
 
-    algorithmMap["Aitken"]            = Aitken;
-    algorithmMap["Newton"]            = Newton;
+    MS_algorithmsMap["Aitken"]           = Aitken;
+    MS_algorithmsMap["Explicit"]         = Explicit;
+    MS_algorithmsMap["Newton"]           = Newton;
+
+    MS_stressesMap["StaticPressure"]     = StaticPressure;
+    MS_stressesMap["TotalPressure"]      = TotalPressure;
+    MS_stressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
 }
 
 //! Perform a dynamic cast from a base class to a derived class

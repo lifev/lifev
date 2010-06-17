@@ -92,12 +92,6 @@ public:
      */
     virtual void SetupData( const std::string& FileName );
 
-    //! Setup the global data of the model.
-    /*!
-     * @param PhysicalData Global data container.
-     */
-    virtual void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
-
     //! Setup the coupling
     virtual void SetupCoupling() = 0;
 
@@ -108,20 +102,20 @@ public:
     /*!
      * @param CouplingResiduals Global vector of variables
      */
-    virtual void ExportCouplingResiduals( VectorType& CouplingResiduals ) = 0;
+    virtual void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals ) = 0;
 
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    virtual ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID ) = 0;
+    virtual MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID ) = 0;
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param Jacobian the Jacobian matrix
      */
-    virtual void InsertJacobianConstantCoefficients( MatrixType& Jacobian ) = 0;
+    virtual void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian ) = 0;
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -130,7 +124,7 @@ public:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    virtual void InsertJacobianDeltaCoefficients( MatrixType& Jacobian, const UInt& Column, const UInt& ID, bool& LinearSystemSolved ) = 0;
+    virtual void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& LinearSystemSolved ) = 0;
 
     //! Display some information about the coupling
     /*!
@@ -157,26 +151,26 @@ public:
     /*!
      * @param CouplingVariables Global vector of coupling variables
      */
-    void ImportCouplingVariables( const VectorType& CouplingVariables );
+    void ImportCouplingVariables( const MS_Vector_Type& CouplingVariables );
 
     //! Export the values of the coupling variables
     /*!
      * @param CouplingVariables Global vector of coupling variables
      */
-    void ExportCouplingVariables( VectorType& CouplingVariables );
+    void ExportCouplingVariables( MS_Vector_Type& CouplingVariables );
 
     //! Export the Jacobian matrix
     /*!
      * @param Jacobian Jacobian Matrix
      */
-    void ExportJacobian( MatrixType& Jacobian );
+    void ExportJacobian( MS_Matrix_Type& Jacobian );
 
     //! Export the values of the Jacobian product
     /*!
      * @param deltaCouplingVariables variation of the coupling variables
      * @param JacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
      */
-    void ExportJacobianProduct( const VectorType& deltaCouplingVariables, VectorType& JacobianProduct );
+    void ExportJacobianProduct( const MS_Vector_Type& deltaCouplingVariables, MS_Vector_Type& JacobianProduct );
 
     //! Save the coupling variables information on a file
     void SaveSolution();
@@ -204,7 +198,7 @@ public:
     /*!
      * @param model shared_ptr of the model
      */
-    void AddModel( const Model_ptrType& model );
+    void AddModel( const MS_Model_PtrType& model );
 
     //! Add a flag of one of the models to couple
     /*!
@@ -217,6 +211,15 @@ public:
      * @param flagID get from the model the flag with this flagID
      */
     void AddFlagID( const UInt& flagID );
+
+    //! Setup the global data of the coupling.
+    /*!
+     * In particular, it can be used to replace the local values specified in
+     * the model data file, with the ones in the global container.
+     *
+     * @param globalData Global data container.
+     */
+    void SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
 
     //! Set the epetra communicator for the coupling
     /*!
@@ -263,7 +266,7 @@ public:
      * @param ID local ID of the model
      * @return Pointer to the model
      */
-    Model_ptrType GetModel( const UInt& LocalID ) const;
+    MS_Model_PtrType GetModel( const UInt& LocalID ) const;
 
     //! Get the number of the coupling variables
     /*!
@@ -286,7 +289,7 @@ protected:
      * @param globalVector the global vector
      * @param localVector the local vector
      */
-    void ImportCouplingVector( const VectorType& globalVector, VectorType& localVector );
+    void ImportCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector );
 
     //! Export the content of the Local Vector in the Global vector
     /*!
@@ -294,13 +297,13 @@ protected:
      * @param localVector the local vector
      * @param globalVector the global vector
      */
-    void ExportCouplingVector( const VectorType& localVector, VectorType& globalVector );
+    void ExportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector );
 
     //! Display and error message for the specific model
     /*!
      * @param model shared_ptr to the specific model
      */
-    void switchErrorMessage( const Model_ptrType& model );
+    void switchErrorMessage( const MS_Model_PtrType& model );
 
     //@}
 
@@ -309,17 +312,17 @@ protected:
     UInt                                 M_ID;
     couplingsTypes                       M_type;
 
-    ModelsVector_Type                    M_models;
+    MS_ModelsVector_Type                 M_models;
     std::string                          M_couplingName;
     std::vector< BCFlag >                M_flags;
 
+    MS_GlobalDataContainer_PtrType       M_globalData;
+
     std::pair< UInt, UInt >              M_couplingIndex;
 
-    Vector_ptrType                       M_LocalCouplingVariables;
-    Vector_ptrType                       M_LocalCouplingResiduals;
-    Vector_ptrType                       M_LocalDeltaCouplingVariables;
-
-    boost::shared_ptr< MS_PhysicalData > M_PhysicalData;
+    MS_Vector_PtrType                    M_LocalCouplingVariables;
+    MS_Vector_PtrType                    M_LocalCouplingResiduals;
+    MS_Vector_PtrType                    M_LocalDeltaCouplingVariables;
 
     boost::shared_ptr< Epetra_Comm >     M_comm;
     boost::shared_ptr< Displayer >       M_displayer;

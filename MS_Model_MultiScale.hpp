@@ -100,12 +100,6 @@ public:
      */
     void SetupData( const std::string& FileName );
 
-    //! Setup the global data of the model.
-    /*!
-     * @param PhysicalData Global data container.
-     */
-    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
-
     //! Setup the model
     void SetupModel();
 
@@ -140,19 +134,19 @@ public:
     void InitializeCouplingVariables();
 
     //! Import the values of the coupling variables
-    void ImportCouplingVariables( const VectorType& CouplingVariables );
+    void ImportCouplingVariables( const MS_Vector_Type& CouplingVariables );
 
     //! Export the values of the coupling variables
-    void ExportCouplingVariables( VectorType& CouplingVariables );
+    void ExportCouplingVariables( MS_Vector_Type& CouplingVariables );
 
     //! Export the values of the coupling residuals
-    void ExportCouplingResiduals( VectorType& CouplingResiduals );
+    void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals );
 
     //! Export the Jacobian matrix
     /*!
      * @param Jacobian Matrix
      */
-    void ExportJacobian( MatrixType& Jacobian );
+    void ExportJacobian( MS_Matrix_Type& Jacobian );
 
     //@}
 
@@ -175,7 +169,6 @@ private:
 
     inline void loadModels( const std::string& FileName );
     inline void loadCouplings( const std::string& FileName );
-    inline void loadGeometry( const std::string& FileName );
 
     template< typename number >
     inline std::vector< number > string2numVect( const std::string& string );
@@ -183,12 +176,12 @@ private:
     //@}
 
     // Models & Couplings
-    ModelsVector_Type        M_modelsList;
-    CouplingsVector_Type     M_couplingsList;
+    MS_ModelsVector_Type        M_modelsList;
+    MS_CouplingsVector_Type     M_couplingsList;
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createMultiScale()
+inline MS_PhysicalModel* MS_createMultiScale()
 {
     return new MS_Model_MultiScale();
 }
