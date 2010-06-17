@@ -189,6 +189,18 @@ public:
     */
     void insertZeroDiagonal(int from = -1, int to = -2);
 
+    //! Compute the norm 1 of the global matrix
+    /*!
+     * @return norm 1
+     */
+    double NormOne() const;
+
+    //! Compute the norm inf of the global matrix
+    /*!
+     * @return norm inf
+     */
+    double NormInf() const;
+
 private:
     //! insert the given value into the diagonal
     /*! Pay intention that this will add values to the diagonal,
@@ -971,9 +983,17 @@ int EpetraMatrix<DataType>::Multiply(bool transposeA, const vector_type& x, vect
     return M_epetraCrs->Multiply(transposeA,x.getEpetraVector(),y.getEpetraVector());
 }
 
+template <typename DataType>
+double EpetraMatrix<DataType>::NormOne() const
+{
+    return M_epetraCrs->NormOne();
+}
 
-
-
+template <typename DataType>
+double EpetraMatrix<DataType>::NormInf() const
+{
+    return M_epetraCrs->NormInf();
+}
 
 }
 //@@
