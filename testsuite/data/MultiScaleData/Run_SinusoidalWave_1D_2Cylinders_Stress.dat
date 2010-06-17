@@ -13,7 +13,8 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_2Cylinders_Stress.dat
+ProblemType = MultiScale
+ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_2Cylinders_Stress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -23,12 +24,12 @@ MS_problem = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_2Cylinders_Str
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    initialtime                = .00001   # [s]
+    initialtime                = .00000   # [s]
     endtime                    = .04999   # [s]
     timestep                   = 1e-5     # [s]
     
     [../Algorithm]
-    AlgorithmType              = Newton            # Aitken - Newton
+    AlgorithmType              = Explicit          # Aitken, Explicit, Newton
     subITMax                   = 0                 # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
     

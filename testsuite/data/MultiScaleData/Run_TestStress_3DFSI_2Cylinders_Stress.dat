@@ -13,7 +13,8 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_2Cylinders_Stress_tube20.dat
+ProblemType = MultiScale
+ProblemFile = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_2Cylinders_Stress_tube20.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -28,7 +29,7 @@ MS_problem = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_2Cylinders_Stre
     timestep                   = 0.001   # [s]
 
     [../Algorithm]
-    AlgorithmType              = Newton            # Aitken - Newton
+    AlgorithmType              = Explicit          # Aitken, Explicit, Newton
     subITMax                   = 0                 # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
 

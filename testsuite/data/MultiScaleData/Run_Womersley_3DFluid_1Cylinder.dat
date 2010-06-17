@@ -13,7 +13,8 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_1Cylinder_tube20.dat
+ProblemType = MultiScale
+ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_1Cylinder_tube20.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -28,7 +29,7 @@ MS_problem = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_1Cylinder_tube
     timestep                   = 0.115659426575266  # [s]
 
     [../Algorithm]
-    AlgorithmType              = Newton            # Aitken - Newton
+    AlgorithmType              = Newton            # Aitken, Explicit, Newton
     subITMax                   = 1                 # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
 

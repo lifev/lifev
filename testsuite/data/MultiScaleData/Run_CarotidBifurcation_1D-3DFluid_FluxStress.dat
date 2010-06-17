@@ -13,7 +13,8 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-MS_problem = ./MultiScaleData/Models/MultiScale/CarotidBifurcation_1D-3DFluid_FluxStress.dat
+ProblemType = MultiScale
+ProblemFile = ./MultiScaleData/Models/MultiScale/CarotidBifurcation_1D-3DFluid_FluxStress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -28,9 +29,9 @@ MS_problem = ./MultiScaleData/Models/MultiScale/CarotidBifurcation_1D-3DFluid_Fl
     timestep                   = 0.001 # [s]
     
     [../Algorithm]
-    AlgorithmType              = Newton           # Aitken - Newton
-    subITMax                   = 0                # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6            # Tolerance on the coupling values
+    AlgorithmType              = Explicit          # Aitken, Explicit, Newton
+    subITMax                   = 0                 # Maximum number for coupling subiterations
+    tolerance                  = 1.e-6             # Tolerance on the coupling values
     
         [./Aitken_method]
         Omega                      = 0.5           # omega starting value
