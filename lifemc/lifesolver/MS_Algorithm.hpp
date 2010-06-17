@@ -93,7 +93,7 @@ public:
     virtual void SetupData( const std::string& FileName );
 
     //! Perform sub-iteration on the coupling variables
-    virtual void SubIterate() = 0;
+    virtual void SubIterate();
 
     //! Display some information about the algorithm
     virtual void ShowMe();
@@ -110,11 +110,11 @@ public:
      */
     void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
 
-    //! Set the main MultiScale Problem
+    //! Set the main MultiScale model
     /*!
-     * @param multiscale Main MultiScale problem
+     * @param model MultiScale model
      */
-    void SetMultiScaleProblem( const boost::shared_ptr< MS_Model_MultiScale > multiscale );
+    void SetModel( const MS_Model_PtrType model );
 
     //@}
 
@@ -138,13 +138,13 @@ public:
     /*!
      * @return pointer to the coupling variables vector
      */
-    const Vector_ptrType GetCouplingVariables() const;
+    const MS_Vector_PtrType GetCouplingVariables() const;
 
     //! Get the coupling residuals
     /*!
      * @return pointer to the coupling residuals vector
      */
-    const Vector_ptrType GetCouplingResiduals() const;
+    const MS_Vector_PtrType GetCouplingResiduals() const;
 
     //! Get the communicator
     /*!
@@ -171,14 +171,20 @@ protected:
     //! @name Protected Methods
     //@{
 
+    //! Check if the tolerance has been satisfied
+    /*!
+     * @return true if the tolerance is satisfied
+     */
+    bool ToleranceSatisfied();
+
     //@}
 
     algorithmsTypes                          M_type;
 
     boost::shared_ptr< MS_Model_MultiScale > M_multiscale;
 
-    Vector_ptrType                           M_couplingVariables;
-    Vector_ptrType                           M_couplingResiduals;
+    MS_Vector_PtrType                        M_couplingVariables;
+    MS_Vector_PtrType                        M_couplingResiduals;
 
     boost::shared_ptr< Epetra_Comm >         M_comm;
     boost::shared_ptr< Displayer >           M_displayer;

@@ -36,7 +36,7 @@
 
 namespace LifeV {
 
-std::map< std::string, modelsTypes > modelsMap;
+std::map< std::string, modelsTypes > MS_modelsMap;
 
 UInt MS_PhysicalModel::M_modelsNumber = 0;
 
@@ -49,6 +49,7 @@ MS_PhysicalModel::MS_PhysicalModel() :
     M_couplings         (),
     M_modelName         (),
     M_flags             (),
+    M_globalData        (),
     M_geometryScale     (),
     M_geometryRotate    (),
     M_geometryTranslate (),
@@ -77,6 +78,7 @@ MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
     M_couplings         ( model.M_couplings ),
     M_modelName         ( model.M_modelName ),
     M_flags             ( model.M_flags ),
+    M_globalData        ( model.M_globalData ),
     M_geometryScale     ( model.M_geometryScale ),
     M_geometryRotate    ( model.M_geometryRotate ),
     M_geometryTranslate ( model.M_geometryTranslate ),
@@ -104,6 +106,7 @@ MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
         M_couplings         = model.M_couplings;
         M_modelName         = model.M_modelName;
         M_flags             = model.M_flags;
+        M_globalData        = model.M_globalData;
         M_geometryScale     = model.M_geometryScale;
         M_geometryRotate    = model.M_geometryRotate;
         M_geometryTranslate = model.M_geometryTranslate;
@@ -141,12 +144,12 @@ MS_PhysicalModel::ShowMe()
 {
     std::cout << "Model id            = " << M_ID << std::endl
               << "Model name          = " << M_modelName << std::endl
-              << "Model type          = " << Enum2String( M_type, modelsMap ) << std::endl;
+              << "Model type          = " << Enum2String( M_type, MS_modelsMap ) << std::endl;
 
     std::cout << "Couplings number    = " << GetCouplingsNumber() << std::endl;
     std::cout << "Couplings type(s)   = ";
     for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
-        std::cout << Enum2String( M_couplings[i]->GetType(), couplingsMap ) << " ";
+        std::cout << Enum2String( M_couplings[i]->GetType(), MS_couplingsMap ) << " ";
     std::cout << std::endl;
     std::cout << "Flags list          = ";
     for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
@@ -186,9 +189,15 @@ MS_PhysicalModel::SetID( const UInt& id )
 }
 
 void
-MS_PhysicalModel::AddCoupling( const Coupling_ptrType& coupling )
+MS_PhysicalModel::AddCoupling( const MS_Coupling_PtrType& coupling )
 {
     M_couplings.push_back( coupling );
+}
+
+void
+MS_PhysicalModel::SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
+{
+    M_globalData = globalData;
 }
 
 void
@@ -267,7 +276,7 @@ MS_PhysicalModel::GetCouplingLocalID( const UInt& ID ) const
     return -1;
 }
 
-Coupling_ptrType
+MS_Coupling_PtrType
 MS_PhysicalModel::GetCoupling( const UInt& LocalID ) const
 {
     return M_couplings[LocalID];

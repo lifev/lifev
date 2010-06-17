@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -26,14 +26,14 @@
 
 /*!
  *  @file
- *  @brief MultiScale Newton Algorithm
+ *  @brief MultiScale Explicit Algorithm
  *
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 26-10-2009
  */
 
-#ifndef MS_Algorithm_Newton_H
-#define MS_Algorithm_Newton_H 1
+#ifndef MS_Algorithm_Explicit_H
+#define MS_Algorithm_Explicit_H 1
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
@@ -44,14 +44,14 @@
 
 namespace LifeV {
 
-//! MS_Algorithm_Newton - The MultiScale Algorithm implementation of Newton
+//! MS_Algorithm_Explicit - The MultiScale Algorithm implementation of Explicit
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Algorithm_Newton is an implementation of MS_Algorithm
- *  which implements the Newton method.
+ *  The MS_Algorithm_Explicit is an implementation of MS_Algorithm
+ *  which implements the Explicit method.
  */
-class MS_Algorithm_Newton : public virtual MS_Algorithm
+class MS_Algorithm_Explicit : public virtual MS_Algorithm
 {
 public:
 
@@ -61,16 +61,16 @@ public:
     //@{
 
     //! Constructor
-    MS_Algorithm_Newton();
+    MS_Algorithm_Explicit();
 
     //! Copy constructor
     /*!
-     * @param algorithm MS_Algorithm_Newton
+     * @param algorithm MS_Algorithm_Explicit
      */
-    MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm );
+    MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algorithm );
 
     //! Destructor
-    ~MS_Algorithm_Newton() {}
+    ~MS_Algorithm_Explicit() {}
 
     //@}
 
@@ -83,7 +83,7 @@ public:
      * @param algorithm MS_Algorithm
      * @return reference to a copy of the class
      */
-    MS_Algorithm_Newton& operator=( const MS_Algorithm_Newton& algorithm );
+    MS_Algorithm_Explicit& operator=( const MS_Algorithm_Explicit& algorithm );
 
     //@}
 
@@ -105,23 +105,14 @@ public:
 
     //@}
 
-protected:
-
-    //! @name Protected Methods
-    //@{
-
-    //@}
-
-    SolverTrilinos                           M_solver;
-    MS_Matrix_PtrType                        M_Jacobian;
 };
 
 //! Factory create function
-inline MS_Algorithm* MS_createNewton()
+inline MS_Algorithm* MS_createExplicit()
 {
-    return new MS_Algorithm_Newton();
+    return new MS_Algorithm_Explicit();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Algorithm_Newton_H */
+#endif /* MS_Algorithm_Explicit_H */

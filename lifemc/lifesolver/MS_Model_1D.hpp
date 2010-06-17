@@ -140,12 +140,6 @@ public:
      */
     void SetupData( const std::string& FileName );
 
-    //! Setup the global data of the model.
-    /*!
-     * @param PhysicalData Global data container.
-     */
-    void SetupGlobalData( const boost::shared_ptr< MS_PhysicalData >& PhysicalData );
-
     //! Setup the model.
     void SetupModel();
 
@@ -355,6 +349,15 @@ private:
     //! @name Private Methods
     //@{
 
+    //! Setup the global data of the model.
+    /*!
+     * In particular, it replaces the default local values with the ones in the global container.
+     * If a value is already specified in the data file, do not perform the replacement.
+     *
+     * @param FileName File name of the specific model.
+     */
+    void SetupGlobalData( const std::string& FileName );
+
     //! Setup the FE space for pressure and velocity
     void SetupFESpace();
 
@@ -382,7 +385,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createOneDimensional()
+inline MS_PhysicalModel* MS_createOneDimensional()
 {
     return new MS_Model_1D();
 }

@@ -46,7 +46,7 @@ MS_Algorithm_Newton::MS_Algorithm_Newton() :
 {
 
 #ifdef DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton() \n";
+    Debug( 8013 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton() \n";
 #endif
 
     M_type = Newton;
@@ -59,7 +59,7 @@ MS_Algorithm_Newton::MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm )
 {
 
 #ifdef DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton( algorithm ) \n";
+    Debug( 8013 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton( algorithm ) \n";
 #endif
 
 }
@@ -87,7 +87,7 @@ MS_Algorithm_Newton::SetupData( const std::string& FileName )
 {
 
 #ifdef DEBUG
-    Debug( 8012 ) << "MS_Algorithm_Newton::SetupData( DataFile ) \n";
+    Debug( 8013 ) << "MS_Algorithm_Newton::SetupData( DataFile ) \n";
 #endif
 
     super::SetupData( FileName );
@@ -96,7 +96,7 @@ MS_Algorithm_Newton::SetupData( const std::string& FileName )
 
     M_solver.SetCommunicator( *M_comm );
     M_solver.setDataFromGetPot( DataFile, "Solver/Algorithm/Newton_method/AztecOO" );
-    //M_solver.setUpPrec(         DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
+    //M_solver.setUpPrec( DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
 }
 
 void
@@ -104,34 +104,26 @@ MS_Algorithm_Newton::SubIterate()
 {
 
 #ifdef DEBUG
-    Debug( 8012 ) << "MS_Algorithm_Newton::SubIterate( tolerance, subITMax ) \n";
+    Debug( 8013 ) << "MS_Algorithm_Newton::SubIterate( tolerance, subITMax ) \n";
 #endif
 
-    // Check if it is necessary to performs subiterations
-    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-    Real residual = M_couplingResiduals->Norm2();
+    super::SubIterate();
 
-    if ( M_displayer->isLeader() )
-        std::cout << " MS-  Residual:                                " << residual << std::endl;
-
-    if ( residual <= M_Tolerance )
+    // Verify tolerance
+    if ( ToleranceSatisfied() )
         return;
-
-    // Starting Newton Algorithm
-    if ( M_displayer->isLeader() )
-        std::cout << " MS-  Newton Algorithm" << std::endl;
 
     M_multiscale->ExportCouplingVariables( *M_couplingVariables );
 
-    VectorType delta( *M_couplingResiduals ); delta = 0.0;
-    VectorType minusCouplingResidual( *M_couplingResiduals ); minusCouplingResidual = 0.0;
+    MS_Vector_Type delta( *M_couplingResiduals ); delta = 0.0;
+    MS_Vector_Type minusCouplingResidual( *M_couplingResiduals ); minusCouplingResidual = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian
         if ( subIT == 1 )
         {
-            M_Jacobian.reset( new MatrixType( M_couplingVariables->getMap(), 50, 0 ) );
+            M_Jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
             M_multiscale->ExportJacobian( *M_Jacobian );
             M_Jacobian->GlobalAssemble();
             M_solver.setMatrix( *M_Jacobian );
@@ -163,23 +155,16 @@ MS_Algorithm_Newton::SubIterate()
         // SolveSystem
         M_multiscale->SolveSystem();
 
-        // Check the new residual
-        M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-        Real residual = M_couplingResiduals->Norm2();
-
         // Display subiteration information
         if ( M_displayer->isLeader() )
-        {
             std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
-            std::cout << " MS-  Residual:                                " << residual << std::endl;
-        }
 
         // Verify tolerance
-        if ( residual <= M_Tolerance )
+        if ( ToleranceSatisfied() )
             return;
     }
 
-    MS_ErrorCheck( MS_Tolerance, "Newton algorithm residual: " + number2string( residual ) +
+    MS_ErrorCheck( MS_Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
                                  " (required: " + number2string( M_Tolerance ) + ")\n" );
 }
 
