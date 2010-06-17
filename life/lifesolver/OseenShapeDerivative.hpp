@@ -311,13 +311,12 @@ void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
 template<typename Mesh, typename SolverType>
 void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch )
 {
+    this->M_Displayer.leaderPrint(" LF-  Finalizing the matrix and vectors ...    ");
+
     Chrono chrono;
-
-    // matrix and vector assembling communication
-    this->M_Displayer.leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
-
     chrono.start();
 
+    // matrix and vector assembling communication
     this->M_matrNoBC->GlobalAssemble();
 
     M_rhsLinNoBC.GlobalAssemble();
@@ -333,18 +332,13 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     this->M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
     // boundary conditions update
-
-    this->M_Displayer.leaderPrint("  f-  Applying boundary conditions...          ");
-
-//    std::cout << "    norm_inf( rhsFullNoBC )     = " << rhsFull.NormInf() << std::endl;
-
+    this->M_Displayer.leaderPrint(" LF-  Applying boundary conditions ...         ");
     chrono.start();
 
     bch.bdUpdate( *this->M_uFESpace.mesh(), this->M_uFESpace.feBd(), this->M_uFESpace.dof() );
     applyBoundaryConditions( *matrFull, rhsFull, bch );
 
     chrono.stop();
-
     this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
     // solving the system
@@ -377,8 +371,6 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
                                                             const vector_type& dw,           //Mesh deltaVelocity
                                                             const vector_type& sourceVec)    //RHS (usually 0 )
 {
-    this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
-
     Chrono chrono;
 
     int nbCompU = nDimensions;
@@ -387,8 +379,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
 
     if(this->M_data.useShapeDerivatives())
         {
-            this->M_Displayer.leaderPrint("  f-  Updating the right hand side          ... ");
-
+            this->M_Displayer.leaderPrint(" LF-  Updating the right hand side ...         ");
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
             //
@@ -541,8 +532,6 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                                                 bool convectiveTermDerivative
                                                                 )
 {
-    this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
-
     Chrono chrono;
 
     UInt nbCompU = nDimensions;
@@ -551,8 +540,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
     if(this->M_data.useShapeDerivatives())
         {
-
-            this->M_Displayer.leaderPrint("  f-  updating shape derivative blocks... ");
+            this->M_Displayer.leaderPrint(" LF-  Updating shape derivative blocks ...     ");
 
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM

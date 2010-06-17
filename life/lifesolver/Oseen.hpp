@@ -629,7 +629,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
 //    M_comm->Barrier();
 
-    M_Displayer.leaderPrint("  f-  Computing constant matrices ...          ");
+    M_Displayer.leaderPrint("  F-  Computing constant matrices ...          ");
 
     Chrono chrono;
 
@@ -805,7 +805,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
     M_Displayer.leaderPrintMax( "done in " , chrono.diff());
 
 
-    M_Displayer.leaderPrint( "  f-  Finalizing the matrices ...              ");
+    M_Displayer.leaderPrint( "  F-  Finalizing the matrices ...              ");
 
     chrono.start();
 
@@ -899,7 +899,7 @@ updateSystem(const double       alpha,
     M_matrMassPr.reset( );
 
 
-    M_Displayer.leaderPrint("  f-  Updating mass term on right hand side... ");
+    M_Displayer.leaderPrint("  F-  Updating mass term on right hand side... ");
 
     chrono.start();
 
@@ -922,7 +922,7 @@ updateSystem(const double       alpha,
     if (M_recomputeMatrix)
         buildSystem();
 
-    M_Displayer.leaderPrint( "  f-  Copying the matrices ...                 ");
+    M_Displayer.leaderPrint( "  F-  Copying the matrices ...                 ");
 
     chrono.start();
 
@@ -947,7 +947,7 @@ updateSystem(const double       alpha,
 
     if (normInf != 0.)
     {
-        M_Displayer.leaderPrint("  f-  Sharing convective term ...              ");
+        M_Displayer.leaderPrint("  F-  Sharing convective term ...              ");
         chrono.start();
 
         // vector with repeated nodes over the processors
@@ -958,7 +958,7 @@ updateSystem(const double       alpha,
         chrono.stop();
 
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-        M_Displayer.leaderPrint("  f-  Updating the convective terms ...        ");
+        M_Displayer.leaderPrint("  F-  Updating the convective terms ...        ");
         chrono.start();
 
         for ( UInt iVol = 1; iVol<= M_uFESpace.mesh()->numVolumes(); ++iVol )
@@ -1024,7 +1024,7 @@ updateSystem(const double       alpha,
 
         if ( M_stab && (M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) ) )
         {
-            M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...     ");
+            M_Displayer.leaderPrint("  F-  Updating the stabilization terms ...     ");
             chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVecRep, false );
@@ -1039,7 +1039,7 @@ updateSystem(const double       alpha,
         {
             if (M_stab)
                 {
-                    M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...     ");
+                    M_Displayer.leaderPrint("  F-  Updating the stabilization terms ...     ");
                     chrono.start();
 
                     if ( M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) )
@@ -1110,7 +1110,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     Chrono chrono;
 
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...     ");
+    M_Displayer.leaderPrint("  F-  Updating the boundary conditions ...     ");
 
     chrono.start();
 
@@ -1133,7 +1133,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     // boundary conditions update
     //M_comm->Barrier();
-    M_Displayer.leaderPrint("  f-  Applying boundary conditions ...         ");
+    M_Displayer.leaderPrint("  F-  Applying boundary conditions ...         ");
 
     chrono.start();
     applyBoundaryConditions( *matrFull, rhsFull, bch);
