@@ -555,7 +555,7 @@ Cylinder::run()
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
 #endif
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), ensight.mapType() ) );
+    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -583,12 +583,12 @@ Cylinder::run()
 
 //    fluid.postProcess();
 
-            *velAndPressure = fluid.solution();
+            *velAndPressure = *fluid.solution();
             ensight.postProcess( 0 );
             fluid.resetPrec();
         }
 
-    bdf.bdf_u().initialize_unk( fluid.solution() );
+    bdf.bdf_u().initialize_unk( *fluid.solution() );
 
     // Temporal loop
 
@@ -618,11 +618,11 @@ Cylinder::run()
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( fluid.solution() );
+        bdf.bdf_u().shift_right( *fluid.solution() );
 
 //         if (((iter % save == 0) || (iter == 1 )))
 //         {
-        *velAndPressure = fluid.solution();
+        *velAndPressure = *fluid.solution();
         ensight.postProcess( time );
 //         }
 //         postProcessFluxesPressures(fluid, bcH, time, verbose);

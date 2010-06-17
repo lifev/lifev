@@ -350,7 +350,7 @@ Ethiersteinman::run()
 
             dataNavierStokes.dataTime()->setTime(t0);
             fluid.initialize( Problem::uexact, Problem::pexact );
-            bdf.bdf_u().initialize_unk( fluid.solution() );
+            bdf.bdf_u().initialize_unk( *fluid.solution() );
 
             std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
             bool const L2proj( !proj.compare("proj") );
@@ -370,7 +370,7 @@ Ethiersteinman::run()
 
                 fluid.initialize( Problem::uexact, Problem::pexact );
 
-                beta = fluid.solution();
+                beta = *fluid.solution();
 
                 if (L2proj)
                 {
@@ -417,9 +417,9 @@ Ethiersteinman::run()
                 // Computation of the error
                 vector_type vel  (uFESpace.map(), Repeated);
                 vector_type press(pFESpace.map(), Repeated);
-                vector_type velpressure ( fluid.solution(), Repeated );
+                vector_type velpressure ( *fluid.solution(), Repeated );
 
-                velpressure = fluid.solution();
+                velpressure = *fluid.solution();
                 vel.subset(velpressure);
                 press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
 
@@ -445,7 +445,7 @@ Ethiersteinman::run()
 
 
                 // Updating bdf
-                bdf.bdf_u().shift_right( fluid.solution() );
+                bdf.bdf_u().shift_right( *fluid.solution() );
 
             }
 
@@ -480,7 +480,7 @@ Ethiersteinman::run()
                 }
             }
 
-            velAndPressure.reset( new vector_type(fluid.solution(), exporter->mapType() ) );
+            velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
 
             exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                                    UInt(0), uFESpace.dof().numTotalDof() );
@@ -531,14 +531,14 @@ Ethiersteinman::run()
                 fluid.updateSystem( alpha, beta, rhs );
                 fluid.iterate( bcH );
 
-                bdf.bdf_u().shift_right( fluid.solution() );
+                bdf.bdf_u().shift_right( *fluid.solution() );
 
                 // Computation of the error
                 vector_type vel  (uFESpace.map(), Repeated);
                 vector_type press(pFESpace.map(), Repeated);
-                vector_type velpressure ( fluid.solution(), Repeated );
+                vector_type velpressure ( *fluid.solution(), Repeated );
 
-                velpressure = fluid.solution();
+                velpressure = *fluid.solution();
                 vel.subset(velpressure);
                 press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
 
@@ -567,7 +567,7 @@ Ethiersteinman::run()
                 pL2Error[iElem][jDiscretization] = pl2error;
 
                 // Exporting the solution
-                *velAndPressure = fluid.solution();
+                *velAndPressure = *fluid.solution();
                 exporter->postProcess( time );
 
 
