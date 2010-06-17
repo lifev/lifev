@@ -34,27 +34,12 @@
 
 namespace LifeV {
 
-
 // ===================================================
-//! Constructors
+// Constructors
 // ===================================================
 FSISolver::FSISolver( const std::string& method ):
-//     M_dataFluid         ( data_file ),
-//     M_dataSolid         ( data_file ),
-//     M_BCh_u             (new fluid_bchandler_raw_type),
-//     M_BCh_du            (new fluid_bchandler_raw_type),
-//     M_BCh_d             (new fluid_bchandler_raw_type),
-//     M_BCh_mesh          (new fluid_bchandler_raw_type),
     M_oper              ( ),
-    M_method            ( method ),
-    M_monolithic	    ( !( M_method.compare("monolithic") && M_method.compare("fullMonolithic") ) ),
-    M_firstIter         ( true ),
-	M_maxpf             ( ),
-    M_defomega          ( ),
-    M_abstol            ( ),
-    M_reltol            ( ),
-    M_etamax            ( ),
-    M_linesearch        ( ),
+    M_data              ( ),
     M_fluidInterfaceMap ( ),
     M_solidInterfaceMap ( ),
     M_epetraComm        ( ),
@@ -76,7 +61,7 @@ FSISolver::FSISolver( const std::string& method ):
     int  fluidLeader(0);
     int  solidLeader(0);
 
-    if( !M_monolithic )
+    if( ( method.compare("monolithic") && method.compare("fullMonolithic") ) )
 	{
 		MPI_Group  originGroup, newGroup;
 		MPI_Comm   newComm;
@@ -129,8 +114,7 @@ FSISolver::FSISolver( const std::string& method ):
 			M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
 		}
 	}
-
-    if( M_monolithic )
+    else // Monolithic or FullMonolithic
 	{
 		fluid = true;
 		solid = true;
@@ -191,11 +175,7 @@ FSISolver::FSISolver( const std::string& method ):
     MPI_Barrier(MPI_COMM_WORLD);
     */
 
-#ifdef DEBUG
-    Debug( 6220 ) << "FSISolver::setFSIOperator " << M_method << "\n";
-#endif
-
-    this->setFSIOperator( M_method );
+    this->setFSIOperator( method );
 
     M_oper->setFluid( fluid );
     M_oper->setSolid( solid );
@@ -228,33 +208,16 @@ FSISolver::FSISolver( const std::string& method ):
 //     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
 }
 
-
 // ===================================================
-//! Methods
+// Methods
 // ===================================================
 void
-FSISolver::setDataFromGetPot( const GetPot& dataFile )
+FSISolver::setData( const data_PtrType& data )
 {
-    M_maxpf      = dataFile( "problem/maxSubIter", 300 );
-    M_defomega   = dataFile( "problem/defOmega"  , 0.01 );
-    M_abstol     = dataFile( "problem/abstol"    , 1.e-07 );
-    M_reltol     = dataFile( "problem/reltol"    , 1.e-04 );
-    M_etamax     = dataFile( "problem/etamax"    , 1.e-03 );
-    M_linesearch = static_cast<Int> ( dataFile( "problem/linesearch" , 0 ) );
+    M_data = data;
 
-    M_oper->setDataFromGetPot( dataFile );
-
-#ifdef DEBUG
-    Debug( 6220 ) << "FSISolver::preconditioner: " << dataFile( "problem/precond", DIRICHLET_NEUMANN ) << "\n";
-#endif
-    M_oper->setPreconditioner( static_cast<Preconditioner> ( dataFile( "problem/precond", DIRICHLET_NEUMANN ) ) );
-
-    M_oper->setupFEspace();
-
-    M_oper->setupDOF();
+    M_oper->setData( data );
 }
-
-
 
 void
 FSISolver::setup( void )
@@ -314,16 +277,11 @@ FSISolver::initialize( fluid_function const& u0,
 
 
 void
-FSISolver::iterate( const Real& time )
+FSISolver::iterate()
 {
     Debug( 6220 ) << "============================================================\n";
-    Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
+    Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->getTime() << " with FSIOperator: " << M_data->method()  << "\n";
     Debug( 6220 ) << "============================================================\n";
-
-    M_oper->setTime( time );
-
-//     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);
-//     M_oper->solid().timeAdvance( M_oper->solid().sourceTerm(), time);
 
     M_oper->updateSystem( );
 
@@ -336,7 +294,7 @@ FSISolver::iterate( const Real& time )
 
     //MPI_Barrier(MPI_COMM_WORLD);
 
-    UInt maxiter = M_maxpf;
+    UInt maxiter = M_data->maxSubIterationNumber();
 
     // the newton solver
     UInt status = 1;
@@ -346,27 +304,26 @@ FSISolver::iterate( const Real& time )
 
     status = nonLinRichardson( *lambda,
                                *M_oper,
-                               M_abstol,
-                               M_reltol,
+                               M_data->absoluteTolerance(),
+                               M_data->relativeTolerance(),
                                maxiter,
-                               M_etamax,
-                               M_linesearch,
+                               M_data->errorTolerance(),
+                               M_data->linesearch(),
                                M_out_res,
-                               time );
+                               M_data->dataFluid()->dataTime()->getTime() );
 
     if(status == EXIT_FAILURE)
     {
         std::ostringstream __ex;
-        __ex << "FSISolver::iterate ( " << time << " ) Inners iterations failed to converge\n";
+        __ex << "FSISolver::iterate ( " << M_data->dataFluid()->dataTime()->getTime() << " ) Inners iterations failed to converge\n";
         throw std::logic_error( __ex.str() );
     }
     else
     {
-        M_oper->displayer().leaderPrint("End of time " , time);
-        M_oper->displayer().leaderPrint("Number of inner iterations       : ", maxiter );
+        //M_oper->displayer().leaderPrint("FSI-  Number of inner iterations:              ", maxiter, "\n" );
         if (M_epetraWorldComm->MyPID() == 0)
         {
-            M_out_iter << time << " " << maxiter << " "
+            M_out_iter << M_data->dataFluid()->dataTime()->getTime() << " " << maxiter << " "
                        << M_oper->nbEval() << std::endl;
         }
     }
@@ -374,18 +331,14 @@ FSISolver::iterate( const Real& time )
     M_oper->shiftSolution();
 
 
-    Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
+    Debug( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->getTime() << " done\n";
     Debug( 6220 ) << "============================================================\n";
     std::cout << std::flush;
 
 }
 
-
-
-
-
 // ===================================================
-//! Set Functions
+// Set Functions
 // ===================================================
 void
 FSISolver::setSourceTerms( const fluid_source_type& fluidSource,
@@ -462,7 +415,6 @@ void FSISolver::setFluxBC(fluid_bchandler_type const& bc_fluid)
      if (this->isFluid())
          M_oper->setRobinBC(bc_Robin);
  }
-
 
 // void
 // FSISolver::setReducedLinFluidBC( const fluid_bchandler_type& bc_dredfluid )

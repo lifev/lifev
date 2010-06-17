@@ -76,6 +76,8 @@ public:
      */
     //@{
 
+    typedef boost::shared_ptr<FSIOperator>                          oper_fsi_ptr_mpi;
+
     typedef FSIOperator::mesh_type									mesh_type;
 
     typedef FSIOperator::fluid_type::value_type						fluid_value_type;
@@ -95,6 +97,8 @@ public:
 
     typedef fluid_value_type::data_type								data_fluid;
     typedef solid_value_type::data_type								data_solid;
+
+    typedef FSIOperator::data_PtrType                               data_PtrType;
 
     typedef FSIOperator::vector_type								vector_type;
     typedef FSIOperator::vector_ptrtype								vector_ptrtype;
@@ -124,15 +128,6 @@ public:
     /** @name Get Functions
      */
     //@{
-
-    //! get the time step
-    Real timeStep() const { return M_oper->dataFluid().dataTime()->getTimeStep(); }
-
-    //! get the final time
-    Real timeEnd() const { return M_oper->dataFluid().dataTime()->getEndTime(); }
-
-    //! get the initial time
-    Real timeInitial() const { return M_oper->dataFluid().dataTime()->getInitialTime(); }
 
     //! get the FSI operator
     oper_fsi_ptr_mpi const& FSIOper() const { return M_oper; }
@@ -199,7 +194,7 @@ public:
      */
     //@{
 
-    void setDataFromGetPot( const GetPot& dataFile );
+    void setData( const data_PtrType& data );
 
     void setup( );
 
@@ -218,11 +213,9 @@ public:
 
     virtual void initialize(vector_ptrtype u0=vector_ptrtype(), vector_ptrtype v0=vector_ptrtype());
 
-    void iterate( const Real& time );
+    void iterate();
 
     void showMe() {}
-
-    bool isMonolithic(){return M_monolithic;}
 
 private:
 
@@ -238,18 +231,7 @@ private:
     //Private members
     oper_fsi_ptr_mpi							M_oper;
 
-    std::string									M_method;
-    bool										M_monolithic;
-
-    bool										M_firstIter;
-    UInt										M_maxpf;
-    Real										M_defomega;
-
-    Real										M_abstol;
-    Real										M_reltol;
-    Real										M_etamax;
-
-    Int											M_linesearch;
+    data_PtrType                                M_data;
 
     boost::shared_ptr<EpetraMap>				M_fluidInterfaceMap;
     boost::shared_ptr<EpetraMap>				M_solidInterfaceMap;

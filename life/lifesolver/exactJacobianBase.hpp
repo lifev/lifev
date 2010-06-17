@@ -72,7 +72,7 @@ public:
 
     void setupFluidSolid();
 
-    void setDataFromGetPot( GetPot const& data );
+    void setDataFile( GetPot const& data );
 
 //     vector_type & displacement()    {return this->solid().disp();}
 //     vector_type & residual()        {return M_interfaceStress;}
@@ -151,7 +151,6 @@ private:
     boost::shared_ptr<vector_type>       M_rhsNew;
     boost::shared_ptr<vector_type>       M_beta;
 
-    Real                                 M_defOmega;
     generalizedAitken<vector_type, Real> M_aitkFS;
 
 

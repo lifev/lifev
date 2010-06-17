@@ -37,7 +37,6 @@ Real fzeroEJ(const Real& /*t*/,
 
 exactJacobian::exactJacobian():
     super       (),
-    M_updateEvery(0),
     M_nbEvalAux(0),
     M_matrShapeDer()
 //    M_epetraOper(this)
@@ -53,30 +52,16 @@ exactJacobian::~exactJacobian()
 {}
 
 void
-exactJacobian::setDataFromGetPot( GetPot const& data )
+exactJacobian::setDataFile( const GetPot& dataFile )
 {
-    // 0-order transpiration bnd conditions
-    // If M_updateEvery == 1, normal Newton algorithm
-    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
-    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
-      M_updateEvery = data("problem/updateEvery", 0);
+    super::setDataFile( dataFile );
 
-     // call the super class to setup the data from getpot file if needed
-    super::setDataFromGetPot( data );
+    M_aitkFS.setDefault( M_data->defaultOmega(), 0.001 );
 
-    M_linearSolver.setDataFromGetPot(data, "jacobian");
+    M_linearSolver.setDataFromGetPot(dataFile, "jacobian");
 
     if (false && this->isFluid())
-        M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( data, "fixedPtFluidInnerIterations") );
-
-
-
-    M_defOmega = data("problem/defOmega", 0.001);
-
-    Debug( 6205 ) << "fixedPoint::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
-
-    M_aitkFS.setDefault(M_defOmega, 0.001);
-
+        M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( dataFile, "fixedPtFluidInnerIterations") );
 }
 
 void
@@ -157,9 +142,9 @@ void exactJacobian::eval(const vector_type& _disp,
 {
     Chrono chronoFluid, chronoSolid, chronoInterface;
 
-    bool recomputeMatrices ( iter == 0 || ( !this->M_dataFluid->isSemiImplicit() &&
-                                            ( M_updateEvery > 0 &&
-                                              (iter % M_updateEvery == 0) ) ) );
+    bool recomputeMatrices ( iter == 0 || ( !this->M_data->dataFluid()->isSemiImplicit() &&
+                                            ( M_data->updateEvery() > 0 &&
+                                              (iter % M_data->updateEvery() == 0) ) ) );
 
     if(iter == 0)
         {
@@ -188,9 +173,9 @@ void exactJacobian::eval(const vector_type& _disp,
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_dataFluid->dataTime()->getTimeStep());
+        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
 
-        if( iter==0 || !this->M_dataFluid->isSemiImplicit() )
+        if( iter==0 || !this->M_data->dataFluid()->isSemiImplicit() )
             {
                 // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
                 // the value of the displacement for some points
@@ -205,13 +190,13 @@ void exactJacobian::eval(const vector_type& _disp,
                 vector_type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
                 this->interpolateVelocity(meshDispDiff, *M_beta);
 
-                *M_beta *= -1./M_dataFluid->dataTime()->getTimeStep();
+                *M_beta *= -1./M_data->dataFluid()->dataTime()->getTimeStep();
 
                 *M_beta  += *this->M_un;
 
                 if(recomputeMatrices)
                     {
-                        double alpha = 1./M_dataFluid->dataTime()->getTimeStep();
+                        double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
                         this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
                     }
                 else
@@ -228,7 +213,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_epetraWorldComm->Barrier();
     chronoFluid.stop();
-    this->displayer().leaderPrintMax( "Fluid solution: total time : " , chronoFluid.diff() );
+    this->displayer().leaderPrintMax("      Fluid solution total time:               ", chronoFluid.diff() );
 
     if ( false && this->isFluid() )
     {
@@ -269,7 +254,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_epetraWorldComm->Barrier();
     chronoSolid.stop();
-    this->displayer().leaderPrintMax( "Solid solution: total time : " , chronoSolid.diff() );
+    this->displayer().leaderPrintMax("      Solid solution total time:               ", chronoSolid.diff() );
 
     chronoInterface.start();
 
@@ -285,7 +270,7 @@ void exactJacobian::eval(const vector_type& _disp,
     this->setSigmaSolid(     sigmaSolidUnique);
 
     chronoInterface.stop();
-    this->displayer().leaderPrintMax( "Interface transfer: total time : " , chronoInterface.diff_cumul() );
+    this->displayer().leaderPrintMax("      Interface transfer total time:           ", chronoInterface.diff_cumul() );
 
     if ( false && this->isSolid() )
     {
@@ -294,22 +279,19 @@ void exactJacobian::eval(const vector_type& _disp,
 
 // possibly unsafe when using more cpus, since both has repeated maps
 
+    this->displayer().leaderPrint("      Norm(disp     )    =                     ", _disp.NormInf(), "\n");
+    this->displayer().leaderPrint("      Norm(dispNew  )    =                     " , this->lambdaSolid().NormInf(), "\n" );
+    this->displayer().leaderPrint("      Norm(velo     )    =                     " , this->lambdaDotSolid().NormInf(), "\n" );
+    this->displayer().leaderPrint("      Max Residual Fluid =                     " , this->sigmaFluid().NormInf(), "\n" );
+    this->displayer().leaderPrint("      Max Residual Solid =                     " , this->sigmaSolid().NormInf(), "\n" );
 
-
-    this->displayer().leaderPrint( " ::: norm(disp     )    = ", _disp.NormInf(), "\n");
-    this->displayer().leaderPrint( " ::: norm(dispNew  )    = " , this->lambdaSolid().NormInf(), "\n" );
-    this->displayer().leaderPrint( " ::: norm(velo     )    = " , this->lambdaDotSolid().NormInf(), "\n" );
-    this->displayer().leaderPrint( " ::: max Residual Fluid = " , this->sigmaFluid().NormInf(), "\n" );
-    this->displayer().leaderPrint( " ::: max Residual Solid = " , this->sigmaSolid().NormInf(), "\n" );
-
-    if (this->isFluid())
-        this->displayer().leaderPrint( "Max ResidualF        = " , M_fluid->residual().NormInf(), "\n" );
-    if (this->isSolid())
-        {
-            this->displayer().leaderPrint( "NL2 DiplacementS     = " , M_solid->disp().Norm2(), "\n" );
-            this->displayer().leaderPrint( "Max ResidualS        = " , M_solid->residual().NormInf(), "\n" );
-        }
-
+    if ( this->isFluid() )
+        this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().NormInf(), "\n" );
+    if ( this->isSolid() )
+    {
+        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->disp().Norm2(), "\n" );
+        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->residual().NormInf(), "\n" );
+    }
 }
 
 void exactJacobian::evalResidual(vector_type&       res,
@@ -318,9 +300,7 @@ void exactJacobian::evalResidual(vector_type&       res,
 {
     if (this->isSolid())
     {
-        std::cout << "*** Residual computation g(x_" << iter <<" )";
-        if (iter == 0) std::cout << " [NEW TIME STEP] ";
-        std::cout << std::endl;
+        std::cout << "      Residual computation g(x_" << iter <<" )\n";
     }
 
     this->setLambdaSolidOld(disp);
@@ -331,9 +311,9 @@ void exactJacobian::evalResidual(vector_type&       res,
     res  = this->lambdaSolid();
     res -=  disp;
 
-    this->displayer().leaderPrint( "NormInf res   " , res.NormInf(), "\n" );
+    this->displayer().leaderPrint("      NormInf res        =                     " , res.NormInf(), "\n" );
     if (this->isSolid())
-        this->displayer().leaderPrint( "NormInf res_d " , this->solid().residual().NormInf(), "\n" );
+        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().NormInf(), "\n" );
 
 }
 
@@ -374,7 +354,7 @@ void  exactJacobian::solveLinearFluid()
     dispFluidDomain.setCombineMode(Zero);
     vector_type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
-    if(false && this->M_dataFluid->isSemiImplicit()==true)// not working in parallel
+    if(false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
         {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
             //is solved at each GMRES iteration
 
@@ -396,11 +376,11 @@ void  exactJacobian::solveLinearFluid()
     //dispFluidDomainRep = dispFluidMesh;//import
     dispFluidDomain=dispFluidMesh;//import
     this->derVeloFluidMesh() = dispFluidMesh;
-    this->derVeloFluidMesh() *= 1./(M_dataFluid->dataTime()->getTimeStep());
+    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
     this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
     *M_rhsNew *= 0.;
 
-    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->dataTime()->getTimeStep();
+    double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
 
     if(!this->M_fluid->stab())//if using P1Bubble
     {

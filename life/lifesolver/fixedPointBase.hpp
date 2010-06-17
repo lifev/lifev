@@ -58,9 +58,7 @@ public:
 
     void setUpBC     ();
 
-    Real   defOmega() {return M_defOmega;}
-
-    void setDataFromGetPot( GetPot const& data );
+    void setDataFile( GetPot const& data );
 
     void setupFEspace();
 
@@ -73,12 +71,6 @@ public:
 
 private:
 
-    Real                                 M_defOmega;
-
-    // If M_updateEvery == 1, normal fixedPoint algorithm
-    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
-    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
-    int                                  M_updateEvery;
     generalizedAitken<vector_type, Real> M_aitkFS;
 
 //     boost::shared_ptr<vector_type>       M_displacement;

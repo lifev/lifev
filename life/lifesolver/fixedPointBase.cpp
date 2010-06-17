@@ -27,8 +27,6 @@ namespace LifeV
 {
 fixedPoint::fixedPoint():
     super(),
-    M_defOmega( 0.001 ),
-    M_updateEvery(1),
     M_aitkFS(),
     //    M_displacement(),
     //    M_stress(),
@@ -37,7 +35,6 @@ fixedPoint::fixedPoint():
     M_rhsNew(),
     M_beta()
 {
-    M_aitkFS.setDefault( M_defOmega );
 }
 
 
@@ -46,28 +43,16 @@ fixedPoint::~fixedPoint()
 
 
 void
-fixedPoint::setDataFromGetPot( GetPot const& data )
+fixedPoint::setDataFile( GetPot const& dataFile )
 {
-    // call the super class to setup the data from getpot file if needed
-    super::setDataFromGetPot( data );
+    super::setDataFile( dataFile );
 
-    M_defOmega = data("problem/defOmega", 0.001);
+    M_aitkFS.setDefault(M_data->defaultOmega(), 0.001);
+    if( M_data->algorithm() == "RobinNeumann" )
+        M_aitkFS.setDefault(-1, 1);
 
-    Debug( 6205 ) << "fixedPoint::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
-
-    M_aitkFS.setDefault(M_defOmega, 0.001);
-
-    // 0-order transpiration bnd conditions
-    // If M_updateEvery == 1, normal fixedPoint algorithm
-    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
-    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
-    M_updateEvery = data("problem/updateEvery", 1);
-
-    if(this->algorithm()=="RobinNeumann")  M_aitkFS.setDefault(-1, 1); //RN
-
-    if (false && this->isFluid())
-        M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( data, "fixedPtFluidInnerIterations") );
-
+    if ( false && this->isFluid() )
+        M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( dataFile, "fixedPtFluidInnerIterations") );
 }
 
 
@@ -129,11 +114,11 @@ void fixedPoint::eval( const vector_type& _disp,
     // If M_updateEvery == 1, normal fixedPoint algorithm
     // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
     // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
-    bool recomputeMatrices ( iter == 0 || ( M_updateEvery > 0 && iter % M_updateEvery == 0 ) );
+    bool recomputeMatrices ( iter == 0 || ( M_data->updateEvery() > 0 && iter % M_data->updateEvery() == 0 ) );
 
     std::cout << "recomputeMatrices = " << recomputeMatrices << " == " << true
               << "; iter = " << iter
-              << "; M_updateEvery = " << M_updateEvery << std::endl;
+              << "; M_updateEvery = " << M_data->updateEvery() << std::endl;
 
     if (iter == 0 && this->isFluid())
         {
@@ -152,7 +137,7 @@ void fixedPoint::eval( const vector_type& _disp,
 
     //Change in sign in the residual for RN:
     // if(this->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( sigmaSolidUnique );
-    if(this->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
+    if(M_data->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
 
 
     vector_type sigmaFluidUnique (this->sigmaFluid().getMap(), Unique);
@@ -165,7 +150,7 @@ void fixedPoint::eval( const vector_type& _disp,
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= this->dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_dataFluid->dataTime()->getTimeStep());
+        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
@@ -181,11 +166,11 @@ void fixedPoint::eval( const vector_type& _disp,
 
         this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
 
-        *M_beta *= -1./M_dataFluid->dataTime()->getTimeStep();
+        *M_beta *= -1./M_data->dataFluid()->dataTime()->getTimeStep();
 
         *M_beta += this->M_bdf->extrap();
 
-        double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->dataTime()->getTimeStep();
+        double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
 
         //*M_rhsNew   = *this->M_rhs;
         //*M_rhsNew  *= alpha;
@@ -340,7 +325,7 @@ void  fixedPoint::solveJac(vector_type        &muk,
 {
     if (M_nbEval == 1) M_aitkFS.restart();
 
-    if(this->algorithm()=="RobinNeumann")
+    if(M_data->algorithm()=="RobinNeumann")
     {
         muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
     }

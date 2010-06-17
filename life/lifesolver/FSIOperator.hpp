@@ -17,8 +17,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef TWODIM
-
 #ifndef __FSIOPERATOR_H
 #define __FSIOPERATOR_H
 
@@ -27,8 +25,8 @@
 
 #include <life/lifefem/dofInterface3Dto3D.hpp>
 #include <life/lifefem/dofInterface3Dto2D.hpp>
+#include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
-//#include <life/lifesolver/Oseen.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
@@ -56,23 +54,6 @@
 
 namespace LifeV {
 
-enum Preconditioner
-{
-    NO_PRECONDITIONER = -1,
-    NEUMANN_DIRICHLET,
-    DIRICHLET_NEUMANN,
-    NEUMANN_NEUMANN,
-    NEWTON
-};
-
-enum DDNPreconditioner
-{
-    DDN_NO_PRECONDITIONER = -1,
-    DDN_NEUMANN_DIRICHLET,
-    DDN_DIRICHLET_NEUMANN,
-    DDN_NEUMANN_NEUMANN
-};
-
 /*!
   \class FSIOperator
   \brief Fluid-Structure Interface operator class
@@ -87,6 +68,7 @@ public:
 
 //     typedef VenantKirchhofSolver   < RegionMesh3D_ALE<LinearTetra> > solid_raw_type;
 //     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
+
     typedef RegionMesh3D<LinearTetra>              mesh_type;
 
     typedef OseenShapeDerivative   <mesh_type>     fluid_raw_type;
@@ -125,8 +107,8 @@ public:
     typedef solid_raw_type::bchandler_type         solid_bchandler_type;
     typedef solid_raw_type::bchandler_raw_type     solid_bchandler_raw_type;
 
-    typedef FSIOperator::fluid_type::value_type::data_type    data_fluid;
-    typedef FSIOperator::solid_type::value_type::data_type    data_solid;
+    typedef DataFSI<mesh_type>                     data_Type;
+    typedef boost::shared_ptr<data_Type>           data_PtrType;
 
     typedef std::map<ID, ID>::const_iterator                        Iterator;
 
@@ -151,7 +133,7 @@ public:
      */
     //@{
 
-    virtual void setDataFromGetPot( const GetPot& data );
+    virtual void setDataFile( const GetPot& data );
 
     virtual void setupFEspace();
 
@@ -211,9 +193,9 @@ public:
 //     void solveLinearFluid();
 //     void solveLinearSolid();
 
-  virtual void setFluxBC             (fluid_bchandler_type /*bc_fluid*/){}
+    virtual void setFluxBC             (fluid_bchandler_type /*bc_fluid*/){}
 
-  virtual void setRobinBC             (fluid_bchandler_type /*bc_solid*/){}
+    virtual void setRobinBC             (fluid_bchandler_type /*bc_solid*/){}
 
     void transferFluidOnInterface( const vector_type& _vec1, vector_type& _vec2 );
 
@@ -226,10 +208,9 @@ public:
     //! MONOLITHIC Solver methods - Implemented there
     //     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
-    virtual vector_ptrtype const& un(){return M_un;}
-    virtual  void initialize( vector_ptrtype /*u0*/){assert(false); }
-    virtual void setupBDF(vector_type const& /*u0*/){}
-
+    virtual const vector_ptrtype& un(){ return M_un; }
+    virtual void initialize( vector_ptrtype /*u0*/){ assert(false); }
+    virtual void setupBDF( const vector_type& /*u0*/ ){ }
 
     //@}
 
@@ -274,15 +255,8 @@ public:
     const vector_type& minusSigmaFluid()                          const { return *M_minusSigmaFluid; }
     const vector_type& minusSigmaFluidRepeated()                  const { return *M_minusSigmaFluidRepeated; }
 
-    string             algorithm()	                              const { return M_algorithm;}
-    std::string       method()                                   const { return M_method; }
-
     vector_type&       Alphaf()                                   const { return *M_Alphaf;}
-    Real               time()                                     const { return M_time; }
     const UInt&        nbEval()                                   const { return M_nbEval; }
-
-    Preconditioner     preconditioner()                           const { return M_precond; }
-    DDNPreconditioner  DDNpreconditioner()                        const { return M_DDNprecond; }
 
     Epetra_Comm &       worldComm()                                const { return *M_epetraWorldComm; }
 
@@ -305,8 +279,9 @@ public:
 //     fluidlin_type::value_type& fluidLin()                               { return *M_fluidLin; }
 //     solidlin_type::value_type& solidLin()                               { return *M_solidLin; }
 
-    const data_fluid& dataFluid()                                 const { return *M_dataFluid; }
-    const data_solid& dataSolid()                                 const { return *M_dataSolid; }
+    const data_Type& data()                                       const { return *M_data; }
+    const data_Type::dataFluid_Type& dataFluid()                  const { return *M_data->dataFluid(); }
+    const data_Type::dataSolid_Type& dataSolid()                  const { return *M_data->dataSolid(); }
 
     const partitionMesh< mesh_type >& fluidMesh()                 const { return *M_fluidMeshPart; }
     const partitionMesh< mesh_type >& solidMesh()                 const { return *M_solidMeshPart; }
@@ -330,11 +305,11 @@ public:
 //     std::vector<int>& dofInterfaceFluid()                               { return M_dofInterfaceFluid; }
 //     std::vector<int>& dofInterfaceSolid()                               { return M_dofInterfaceSolid; }
 
-            boost::shared_ptr<EpetraMap>& fluidInterfaceMap()              { return M_fluidInterfaceMap; }
-            boost::shared_ptr<EpetraMap>& solidInterfaceMap()              { return M_solidInterfaceMap; }
-    virtual boost::shared_ptr<EpetraMap>& getCouplingVariableMap()            { return M_solidInterfaceMap; }
+            boost::shared_ptr<EpetraMap>& fluidInterfaceMap()           { return M_fluidInterfaceMap; }
+            boost::shared_ptr<EpetraMap>& solidInterfaceMap()           { return M_solidInterfaceMap; }
+    virtual boost::shared_ptr<EpetraMap>& getCouplingVariableMap()      { return M_solidInterfaceMap; }
 
-    BCFunctionMixte& bcfMixteOuterWall()                                   { return M_bcfMixteOuterWall; }
+    BCFunctionMixte& bcfMixteOuterWall()                                { return M_bcfMixteOuterWall; }
 
     bc_vector_interface bcvStructureDisptoFluid()                 const { return M_bcvStructureDispToFluid; }
     bc_vector_interface bcvStructureToFluid()                     const { return M_bcvStructureToFluid; }
@@ -358,8 +333,26 @@ public:
     const solid_bchandler_type& BCh_solid()                       const { return M_BCh_d; }
     const solid_bchandler_type& BCh_dz()                          const { return M_BCh_dz; }
     const solid_bchandler_type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
-    virtual const fluid_bchandler_type& BCh_flux()                const { }
+    virtual const fluid_bchandler_type& BCh_flux()                const
+    {
+        assert(false);
 
+        // Return fluid BCHandler to avoid warning
+        fluid_bchandler_type bch ( new fluid_bchandler_raw_type() );
+        return bch;
+    }
+
+    //! gets the solution vector by reference
+    virtual void getSolution( vector_ptrtype& lambda )                  { lambda = M_lambda; }
+
+    //! gets the solid displacement by copy
+    virtual void getSolidDisp( vector_type& soliddisp )                 { soliddisp = M_solid->disp(); }
+
+    //! gets the solid velocity by copy
+    virtual void getSolidVel( vector_type& solidvel )                   { solidvel = M_solid->vel(); }
+
+    //! gets the fluid velocity and pressure by copy
+    virtual void getFluidVelAndPres( vector_type& sol )                 { sol = *M_fluid->solution(); }
 
 //     quasi_newton_type getReducedLinFluid()                              { return M_reducedLinFluid; }
 //     UInt reducedFluid()                                                 { return M_reducedFluid; }
@@ -374,10 +367,7 @@ public:
 
     void setComm( const boost::shared_ptr<Epetra_MpiComm>& comm, const boost::shared_ptr<Epetra_MpiComm>& worldComm );
 
-    void setPreconditioner   ( const Preconditioner&    P ) { M_precond    = P; }
-    void setDDNPreconditioner( const DDNPreconditioner& P ) { M_DDNprecond = P; }
-
-    void setTime( const Real& time );
+    void setData( const data_PtrType& data ) { M_data = data; }
 
     void setFluid( const fluid_type& fluid, const meshmotion_type& meshmotion );
     void setSolid( const solid_type& solid );
@@ -439,7 +429,16 @@ public:
     void setFluidLoadToStructure             ( const vector_type& load,  UInt type = 0 );
     void setDerFluidLoadToStructure          ( const vector_type& dload, UInt type = 0 );
     void setDerFluidLoadToFluid              ( const vector_type& dload, UInt type = 0 );
-    void setMixteOuterWall(function_type const& dload, function_type const& E);
+    void setMixteOuterWall                   ( const function_type& dload, const function_type& E);
+
+    //! sets the solution vector by reference
+    void setSolutionPtr                      ( const vector_ptrtype& sol )      { M_lambda = sol; }
+
+    //! sets the solution vector by copy
+    void setSolution                         ( const vector_type& sol )         { M_lambda.reset( new vector_type( sol ) ); }
+
+    //! sets the solution time derivative vector by copy
+    virtual void setSolutionDerivative       ( const vector_ptrtype& lambdaDot ){ M_lambdaDot=lambdaDot; }
 
 //     void setDerReducedFluidLoadToStructure   ( vector_type &dload, UInt type = 0 );
 //     void setDerStructureAccToReducedFluid    ( vector_type &acc,   UInt type = 0 );
@@ -455,31 +454,7 @@ public:
 //     void setBCh_solidDer          ( const solid_bchandler_type& BCh_solidDer)    { M_BCh_dz     = BCh_solidDer; }
 //     void setBCh_solidDerInv       ( const solid_bchandler_type& BCh_solidDerInv) { M_BCh_dz_inv = BCh_solidDerInv; }
 
-    //! gets the solution vector by reference
-    virtual void getSolution                  (vector_ptrtype& lambda){lambda=M_lambda;}
-
-    //! sets the solution vector by reference
-    void setSolutionPtr                             (const vector_ptrtype& sol)
-    {M_lambda = sol;}
-
-    //! sets the solution vector by copy
-    void setSolution                                (const vector_type& sol)
-    {M_lambda.reset(new vector_type(sol));}
-
-    //! sets the solution time derivative vector by copy
-    virtual  void setSolutionDerivative                                (const vector_ptrtype& lambdaDot){ M_lambdaDot=lambdaDot; }
-
-    //! gets the solid displacement by copy
-    virtual  void getSolidDisp                               (vector_type& soliddisp)
-    { soliddisp = M_solid->disp();}
-
-    //! gets the solid velocity by copy
-    virtual  void getSolidVel                                (vector_type& solidvel)
-    { solidvel = M_solid->vel();}
-
-    //! gets the fluid velocity and pressure by copy
-    virtual  void getFluidVelAndPres                         (vector_type& sol)
-    { sol = *M_fluid->solution();}
+    //@}
 
 
 protected:
@@ -534,8 +509,7 @@ protected:
     boost::shared_ptr<BdfT<vector_type> >             M_bdf;
 
     GetPot                                            M_dataFile;
-    boost::shared_ptr<data_fluid>                     M_dataFluid;
-    boost::shared_ptr<data_solid>                     M_dataSolid;
+    data_PtrType                                      M_data;
 
 //     quasi_newton_type         M_reducedLinFluid;
 
@@ -556,12 +530,6 @@ protected:
     dof_interface_type3D                              M_dofHarmonicExtensionToFluid;
 //     dof_interface_type3D                              M_dofStructureToReducedFluid;
 //     dof_interface_type3D                              M_dofReducedFluidToStructure;
-
-    int                                               M_fluidInterfaceFlag;
-    int                                               M_solidInterfaceFlag;
-    int                                               M_structureInterfaceFlag;
-    int                                               M_harmonicInterfaceFlag;
-    Real                                              M_interfaceTolerance;
 
     dof_interface_type2D                              M_dofFluid;
     dof_interface_type2D                              M_dofSolid;
@@ -627,7 +595,6 @@ protected:
 
     Real                                              M_AlphafCoef;
     Real                                              M_betamedio;
-    Real                                              M_time;
 //     boost::shared_ptr<vector_type>                    M_w;
 //     boost::shared_ptr<vector_type>                    M_dw;
 
@@ -635,14 +602,8 @@ protected:
 
     boost::shared_ptr<Epetra_Comm>                    M_epetraComm;
     boost::shared_ptr<Epetra_Comm>                    M_epetraWorldComm;
-    std::string                                       M_method;
 
 private:
-
-//     UInt                      M_reducedFluid;
-    std::string                                       M_algorithm;
-    Preconditioner                                    M_precond;
-    DDNPreconditioner                                 M_DDNprecond;
 
     bool                                              M_mpi;
     bool                                              M_isFluid;
@@ -655,105 +616,8 @@ private:
     int                                               M_solidLeader;
 };
 
-
-
-
-
-// ===================================================
-//! MACROS
-// ===================================================
-typedef boost::shared_ptr<FSIOperator>                 oper_fsi_ptr_mpi;
-typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
-
-/*!
-   \def  FOR_EACH_INTERFACE_DOF( Expr )
-
-   \c FOR_EACH_INTERFACE_DOF is an helper macro to ease the
-   the computation of quantities like the residual on the interface
-   of the Fluid and Structure.
-
- */
-//    UInt iBCf = M_fluid->BCh_fluid().getBCbyName("Wall");
-
-
-
-#define FOR_EACH_INTERFACE_DOF( Expr )                              \
-{   \
-    \
-    \
-    UInt iBCf = M_harmonicExtension->bcHandler().getBCbyName("Interface"); \
-    BCBase const &BC_fluidInterface = M_harmonicExtension->bcHandler()[iBCf]; \
-    UInt nDofInterface = BC_fluidInterface.list_size();             \
-    UInt nDimF = BC_fluidInterface.numberOfComponents();            \
-                                                                    \
-    UInt totalDofFluid = M_fluid->velFESpace().dof().numTotalDof();             \
-    UInt totalDofSolid = M_solid->dFESpace().dof().numTotalDof();             \
-                                                                    \
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)                 \
-    {                                                               \
-        ID IDfluid = BC_fluidInterface(iBC)->id();                  \
-                                                                    \
-        BCVectorInterface const *BCVInterface =                     \
-            dynamic_cast <BCVectorInterface const *>                \
-            (BC_fluidInterface.pointerToBCVector());                \
-                                                                    \
-        assert( BCVInterface != 0 );                                \
-                                                                    \
-        ID IDsolid = BCVInterface->                                 \
-            dofInterface().getInterfaceDof(IDfluid);                \
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)                   \
-        {                                                           \
-            ( Expr );                                               \
-        }                                                           \
-    }                                                               \
-}
-
-
-
-#define FOR_EACH_INTERFACE_DOF_SOLID( Expr )                              \
-{   \
-    \
-    \
-\
-    std::map<ID, ID> solidDofMap = M_dofSolid->locDofMap();\
-\
-    UInt totalDofSolid = M_solid->dFESpace().dof().numTotalDof();\
-\
-    for (std::map<ID,ID>::const_iterator it = solidDofMap.begin(); it != solidDofMap.end(); ++it)\
-    {\
-        ID dofS  = it->first - 1;\
-        ID dofFS = it->second - 1;\
-\
-        for (UInt jDim = 0; jDim < 3; ++jDim)\
-        {\
-            ( Expr );\
-        }\
-    }\
-}
-
-
-
-#define FOR_EACH_INTERFACE_DOF_FLUID( Expr )                              \
-{   \
-    \
-    \
-\
-    std::map<ID, ID> fluidDofMap = M_dofFluid->locDofMap();\
-\
-    UInt totalDofFluid = M_fluid->velFESpace().dof().numTotalDof();\
-\
-    for (std::map<ID,ID>::const_iterator it = fluidDofMap.begin(); it != fluidDofMap.end(); ++it)\
-    {\
-        ID dofF  = it->first - 1;\
-        ID dofFS = it->second - 1;\
-        for (UInt jDim = 0; jDim < 3; ++jDim)\
-        {\
-            ( Expr );\
-        }\
-    }\
-}
+typedef singleton<factory<FSIOperator, std::string> >           FSIFactory;
 
 } // Namespace LifeV
 
 #endif /* __FSIOPERATOR_H */
-#endif /* TWODIM */
