@@ -81,12 +81,14 @@ enum NSStabilization
 //! DataNavierStokes - LifeV Base class which holds usual data for the NavierStokes equations solvers
 /*!
  *  @author M.A. Fernandez, Cristiano Malossi, Samuel Quinodoz
- *
  */
 template <typename Mesh>
 class DataNavierStokes
 {
 public:
+
+    //! @name Type definitions
+    //@{
 
     typedef DataTime                                                  Time_Type;
     typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
@@ -94,41 +96,48 @@ public:
     typedef DataMesh<Mesh>                                            Mesh_Type;
     typedef boost::shared_ptr< Mesh_Type >                            Mesh_ptrType;
 
+    //@}
+
+
 	//! @name Constructors & Destructor
 	//@{
 
     //! Empty Constructor
     DataNavierStokes();
 
-    //! Constructor
-	// DataNavierStokes( const GetPot& dataFile,  const Time_ptrType DataTime, const Mesh_ptrType DataMesh );
-
 	//! Copy constructor
 	/*!
-	 * \param dataNavierStokes - DataNavierStokes
+	 * @param dataNavierStokes DataNavierStokes
 	 */
 	DataNavierStokes( const DataNavierStokes& dataNavierStokes );
 
 	//@}
 
 
-
-    //! @name Methods
+    //! @name Operators
     //@{
 
-	//! Operator=
-	/*!
-	 * \param dataNavierStokes - DataNavierStokes
-	 */
-	DataNavierStokes& operator=( const DataNavierStokes& dataNavierStokes );
+    //! Operator=
+    /*!
+     * @param dataNavierStokes DataNavierStokes
+     */
+    DataNavierStokes& operator=( const DataNavierStokes& dataNavierStokes );
 
-    //! Ouptut
-    void showMe( std::ostream& output = std::cout );
+    //@}
 
 
-    //! external setup
+	//! @name Methods
+    //@{
 
+    //! Read the dataFile and set all the quantities
+    /*!
+     * @param dataFile data file
+     * @param section section of the file
+     */
     void setup( const GetPot& dataFile, const std::string& section = "fluid" );
+
+    //! Display the values
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -301,36 +310,6 @@ DataNavierStokes<Mesh>::DataNavierStokes( ) :
 {
 }
 
-// template <typename Mesh>
-// DataNavierStokes<Mesh>::DataNavierStokes( const GetPot& dataFile,
-//                                           const Time_ptrType DataTime,
-//                                           const Mesh_ptrType DataMesh ) :
-//         M_time                             ( DataTime ),
-//         M_mesh                             ( DataMesh ),
-//         M_density                          ( ),
-//         M_viscosity                        ( ),
-//         M_uOrder                           ( ),
-//         M_pOrder                           ( ),
-//         M_verbose                          ( ),
-//         M_dump_init                        ( ),
-//         M_dump_period                      ( ),
-//         M_factor                           ( ),
-//         M_Stokes                           ( false ),
-//         M_stab_method                      ( ),
-//         M_semiImplicit                     ( false ),
-//         M_shapeDerivatives                 ( false ),
-//         M_computeMeanValuesPerSection      ( ),
-//         M_NbZSections                      ( ),
-//         M_ToleranceSection                 ( ),
-//         M_XSectionFrontier                 ( ),
-//         M_ZSectionInit                     ( ),
-//         M_ZSectionFinal                    ( ),
-//         M_NbPolygonEdges                   ( ),
-//         M_stabilization_list               ( "fluid/space_discretization/stabilization" )
-// {
-//     setup( dataFile );
-// }
-
 template <typename Mesh>
 DataNavierStokes<Mesh>::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     M_time                             ( dataNavierStokes.M_time ),
@@ -362,7 +341,7 @@ DataNavierStokes<Mesh>::DataNavierStokes( const DataNavierStokes& dataNavierStok
 
 
 // ===================================================
-// Methods
+// Operators
 // ===================================================
 template <typename Mesh>
 DataNavierStokes<Mesh>&
@@ -398,6 +377,9 @@ DataNavierStokes<Mesh>::operator=( const DataNavierStokes& dataNavierStokes )
 	return *this;
 }
 
+// ===================================================
+// Methods
+// ===================================================
 template <typename Mesh>
 void
 DataNavierStokes<Mesh>::setup( const GetPot& dataFile, const std::string& section )
@@ -472,7 +454,7 @@ DataNavierStokes<Mesh>::setup( const GetPot& dataFile, const std::string& sectio
 
 template <typename Mesh>
 void
-DataNavierStokes<Mesh>::showMe( std::ostream& output )
+DataNavierStokes<Mesh>::showMe( std::ostream& output ) const
 {
     if (M_fluid_number == 1)
     {
