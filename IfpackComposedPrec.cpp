@@ -122,7 +122,7 @@ IfpackComposedPrec::push_back(operator_type& oper,
     Chrono chrono;
     prec_raw_type::prec_type prec;
 
-    this->M_displayer.leaderPrint("Computing the factorization... ");
+    this->M_displayer.leaderPrint("ICP-  Computing prec. factorization ...        ");
     chrono.start();
     createIfpackPrec(oper, prec);
     chrono.stop();
@@ -143,7 +143,7 @@ IfpackComposedPrec::replace(operator_type& oper,
     M_OperVector[index] = oper;
     Chrono chrono;
     prec_raw_type::prec_type prec;
-    this->M_displayer.leaderPrint("Computing the factorization... ");
+    this->M_displayer.leaderPrint("ICP-  Computing prec. factorization ...        ");
     chrono.start();
     createIfpackPrec(oper, prec);
     chrono.stop();
