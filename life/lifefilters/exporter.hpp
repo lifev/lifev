@@ -262,7 +262,8 @@ public:
         @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
         @param size the number of Dof for that variable
     */
-  void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype& vector, UInt start, UInt size, UInt steady =0, ExporterData::Where where =ExporterData::Node );
+  void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype& vector, UInt start, UInt size,
+                   UInt steady = 0, ExporterData::Where where = ExporterData::Node );
 
     //! Post-process the variables added to the list
     /*!
