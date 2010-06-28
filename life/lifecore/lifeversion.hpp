@@ -40,11 +40,11 @@
 #endif
 
 #if !defined(LIFEV_VERSION_MINOR)
-#define LIFEV_VERSION_MINOR 2
+#define LIFEV_VERSION_MINOR 3
 #endif
 
 #if !defined(LIFEV_VERSION_MICRO)
-#define LIFEV_VERSION_MICRO 2
+#define LIFEV_VERSION_MICRO 1
 #endif
 
 #define LIFEV_VERSION \
