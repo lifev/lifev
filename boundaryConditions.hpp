@@ -18,7 +18,7 @@ assign is vectorial and the boundary condition is of type \c Full \c.
 
 #include "life/lifecore/life.hpp"
 #include "flowConditions.hpp"
-#include "lumpedHeart.hpp"
+//#include "lumpedHeart.hpp"
 #include "ud_functions.hpp"
 #include "life/lifefem/bcHandler.hpp"
 #include "life/lifefem/bcFunction.hpp"
@@ -66,11 +66,11 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
                       *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
-   else if (_oper.data().method() == "fullMonolithic")
+    else if (_oper.data().method() == "fullMonolithic")
     {
 
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
-        bcf, 3);
+                      bcf, 3);
     }
 
     return BCh_he;
@@ -79,15 +79,15 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 
 FSIOperator::fluid_bchandler_type BCh_monolithicFlux()
 {
-  FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
+    FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
-  BCFunctionBase flow_3 (fluxFunction);
+    BCFunctionBase flow_3 (fluxFunction);
 
-     //uncomment  to use fluxes
-  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
-  //  BCh_fluid->addBC("InFlow" , OUTLET,  Flux, Normal, flow_3);
+    //uncomment  to use fluxes
+    BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+    //  BCh_fluid->addBC("InFlow" , OUTLET,  Flux, Normal, flow_3);
 
-  return BCh_fluid;
+    return BCh_fluid;
 }
 
 FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
