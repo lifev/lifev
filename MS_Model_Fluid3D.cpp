@@ -48,7 +48,9 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_FluidBC                      ( new BCInterface_Type() ),
     M_FluidBDF                     (),
     M_FluidData                    ( new Data_Type() ),
+    M_DataMesh                     ( new DataMesh()),
     M_FluidMesh                    (),
+    M_FluidMeshPart                (),
     M_FluidFullMap                 (),
     M_FluidSolution                (),
     M_LinearFluidBC                ( new BCInterface_Type() ),
@@ -82,7 +84,9 @@ MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
     M_FluidBC                      ( Fluid3D.M_FluidBC ),
     M_FluidBDF                     ( Fluid3D.M_FluidBDF ),
     M_FluidData                    ( Fluid3D.M_FluidData ),
+    M_DataMesh                     ( Fluid3D.M_DataMesh ),
     M_FluidMesh                    ( Fluid3D.M_FluidMesh ),
+    M_FluidMeshPart                ( Fluid3D.M_FluidMeshPart ),
     M_FluidFullMap                 ( Fluid3D.M_FluidFullMap ),
     M_FluidSolution                ( Fluid3D.M_FluidSolution ),
     M_LinearFluidBC                ( Fluid3D.M_LinearFluidBC ),
@@ -116,7 +120,9 @@ MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
         M_Fluid                        = Fluid3D.M_Fluid;
         M_FluidBC                      = Fluid3D.M_FluidBC;
         M_FluidBDF                     = Fluid3D.M_FluidBDF;
+        M_DataMesh                     = Fluid3D.M_DataMesh;
         M_FluidMesh                    = Fluid3D.M_FluidMesh;
+        M_FluidMeshPart                = Fluid3D.M_FluidMeshPart;
         M_FluidFullMap                 = Fluid3D.M_FluidFullMap;
         M_FluidSolution                = Fluid3D.M_FluidSolution;
         M_LinearFluidBC                = Fluid3D.M_LinearFluidBC;
@@ -157,6 +163,12 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_FluidData->setup( DataFile );
     if ( M_globalData.get() )
         SetupGlobalData( FileName );
+
+    M_FluidMesh.reset(new Mesh_Type());
+    M_DataMesh->setup(DataFile, "fluid/space_discretization");
+    readMesh(*M_FluidMesh, *M_DataMesh);
+
+    M_FluidMeshPart.reset( new PartitionMesh_Type(*M_FluidMesh, *M_comm) );
 
     // Parameters for the NS Iterations
     M_SubiterationsMaximumNumber = DataFile( "fluid/miscellaneous/SubITMax", 0 );
@@ -218,7 +230,7 @@ MS_Model_Fluid3D::SetupModel()
     M_RHS.reset ( new FluidVector_Type( M_FluidFullMap ) );
 
     //Post-processing
-    M_exporter->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
+    M_exporter->setMeshProcId( M_FluidMeshPart->mesh(), M_comm->MyPID() );
 
     //M_FluidSolution.reset( new VectorType( M_FluidFullMap, Repeated ) );
     //M_FluidSolution.reset( new VectorType( M_Fluid->solution(), Repeated ) );
@@ -375,13 +387,14 @@ MS_Model_Fluid3D::ShowMe()
                   << "Pressure DOF        = " << M_pDOF << std::endl
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
-        std::cout << "Fluid mesh maxH     = " << M_FluidData->dataMesh()->mesh()->maxH() << std::endl
-                  << "Fluid mesh meanH    = " << M_FluidData->dataMesh()->mesh()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << M_FluidMesh->maxH() << std::endl
+                  << "Fluid mesh meanH    = " << M_FluidMesh->meanH() << std::endl << std::endl;
 
         std::cout << "NS SubITMax         = " << M_SubiterationsMaximumNumber << std::endl
                   << "NS Tolerance        = " << M_Tolerance << std::endl << std::endl << std::endl << std::endl;
     }
 }
+
 
 // ===================================================
 // Methods
@@ -663,11 +676,11 @@ MS_Model_Fluid3D::SetupFEspace()
 #endif
 
     //Transform mesh
-    M_FluidData->dataMesh()->mesh()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_FluidMesh.reset( new PartitionMesh_Type( *M_FluidData->dataMesh()->mesh(), *M_comm ) );
-    M_FluidData->dataMesh()->setMesh( M_FluidMesh->mesh() );
+    M_FluidMeshPart.reset( new PartitionMesh_Type( *M_FluidMesh, *M_comm ) );
+    //M_FluidData->dataMesh()->setMesh( M_FluidMesh );
 
     //Velocity FE Space
     const RefFE* u_refFE;
@@ -726,8 +739,8 @@ MS_Model_Fluid3D::SetupFEspace()
             exit( EXIT_FAILURE );
         }
 
-    M_uFESpace.reset( new FESpace_Type( *M_FluidMesh, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
-    M_pFESpace.reset( new FESpace_Type( *M_FluidMesh, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
+    M_uFESpace.reset( new FESpace_Type( *M_FluidMeshPart, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
+    M_pFESpace.reset( new FESpace_Type( *M_FluidMeshPart, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
 }
 
 void
@@ -772,7 +785,7 @@ MS_Model_Fluid3D::SetupSolution()
 
     if ( MS_ProblemStep > 0 )
     {
-        M_importer->setMeshProcId( M_FluidMesh->mesh(), M_comm->MyPID() );
+        M_importer->setMeshProcId( M_FluidMeshPart->mesh(), M_comm->MyPID() );
 
         M_importer->addVariable( ExporterData::Vector, "Velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
         #ifdef HAVE_HDF5

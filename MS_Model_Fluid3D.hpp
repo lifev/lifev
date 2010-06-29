@@ -44,6 +44,7 @@
 // LifeV includes
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #ifdef HAVE_HDF5
@@ -83,7 +84,7 @@ public:
     typedef BCHandler                          BC_Type;
     typedef BCInterface< Fluid_Type >          BCInterface_Type;
     typedef BdfTNS< FluidVector_Type >         BDF_Type;
-    typedef DataNavierStokes< Mesh_Type >      Data_Type;
+    typedef DataNavierStokes		       Data_Type;
 
     typedef FESpace< Mesh_Type, EpetraMap >    FESpace_Type;
 
@@ -352,7 +353,9 @@ private:
     boost::shared_ptr< BCInterface_Type >   M_FluidBC;
     boost::shared_ptr< BDF_Type >           M_FluidBDF;
     boost::shared_ptr< Data_Type >          M_FluidData;
-    boost::shared_ptr< PartitionMesh_Type > M_FluidMesh;
+    boost::shared_ptr <DataMesh>            M_DataMesh;
+    boost::shared_ptr< Mesh_Type >          M_FluidMesh;
+    boost::shared_ptr< PartitionMesh_Type > M_FluidMeshPart;
     boost::shared_ptr< EpetraMap >          M_FluidFullMap;
     boost::shared_ptr< FluidVector_Type >   M_FluidSolution;
 
