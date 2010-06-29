@@ -513,10 +513,10 @@ void Hdf5exporter<Mesh>::M_wr_geo()
        write out
     */
 
-  // We need a map ,but it's not always possible to use that from the variables 
+  // We need a map ,but it's not always possible to use that from the variables
   // (if we write out a P0 variable)
   // We build a map for the connections based on the element numbers and for the points we fake a P1 map
-  
+
     ASSERT (this->M_listData.size() > 0 , "hdf5exporter: ListData is empty");
 
     // Connections
@@ -534,7 +534,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
         }
     }
 
-    Epetra_Map connectionsMap(this->M_mesh->numGlobalElements()*Mesh::ElementShape::numPoints, 
+    Epetra_Map connectionsMap(this->M_mesh->numGlobalElements()*Mesh::ElementShape::numPoints,
 			      this->M_mesh->numElements()*Mesh::ElementShape::numPoints,
 			      &elementList[0],
 			      0, this->M_listData.begin()->storedArray()->Comm());
@@ -557,7 +557,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     int const hdf5Offset(0);
 
     // Points
-    
+
     // Build a map for linear elements, even though the origianl FE might be P0
     // This gives the right map for the coordinate arrays
 
@@ -567,7 +567,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     case TETRA:
       {
         const RefFE & refFEP1 = feTetraP1;
-        EpetraMap tmpMapP1(refFEP1, *this->M_mesh, 
+        EpetraMap tmpMapP1(refFEP1, *this->M_mesh,
 		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
         subMap = tmpMapP1;
         break;
@@ -575,7 +575,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     case HEXA:
       {
         const RefFE & refFEQ1 = feHexaQ1;
-        EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh, 
+        EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh,
 		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
         subMap = tmpMapQ1;
         break;
@@ -583,7 +583,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     case LINE:
       {
         const RefFE & refFEP11D = feSegP1;
-        EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh, 
+        EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh,
 		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
         subMap = tmpMapQ11D;
         break;
@@ -592,7 +592,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
         ERROR_MSG( "FE not allowed in HDF5 Exporter" );
 
     }
-    //    EpetraMap subMap(refFE, *this->M_mesh, 
+    //    EpetraMap subMap(refFE, *this->M_mesh,
     //		     const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
 
     EpetraVector pointsX(subMap);
@@ -797,8 +797,8 @@ void Hdf5exporter<Mesh>::M_wr_geometry  ( std::ofstream& xdmf )
     postfix_string = this->M_postfix;
   else
     postfix_string = "";
-  
- 
+
+
     xdmf <<
         "      <Geometry Type=\"X_Y_Z\">\n" <<
         "         <DataStructure Format=\"HDF\"\n" <<
@@ -833,7 +833,7 @@ void Hdf5exporter<Mesh>::M_wr_attributes  ( std::ofstream& xdmf )
         xdmf <<
             "\n      <Attribute\n" <<
             "         Type=\"" << i->typeName() << "\"\n" <<
-	  "         Center=\"" << i->whereName() << "\"\n" <<
+            "         Center=\"" << i->whereName() << "\"\n" <<
             "         Name=\"" << i->variableName()<<"\">\n";
 
         switch( i->type() )
@@ -855,17 +855,29 @@ void Hdf5exporter<Mesh>::M_wr_attributes  ( std::ofstream& xdmf )
 template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_scalar_datastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
 {
+
+    Int globalUnknowns (0);
+    switch ( dvar.where() )
+    {
+    case ExporterData::Node:
+        globalUnknowns = this->M_mesh->numGlobalVertices();
+        break;
+    case ExporterData::Cell:
+        globalUnknowns = this->M_mesh->numGlobalElements();
+        break;
+    }
+
     // First: hyperslab definition, then description of the data
     xdmf <<
 
         "         <DataStructure ItemType=\"HyperSlab\"\n" <<
-        "                        Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
+        "                        Dimensions=\"" << globalUnknowns << " " << dvar.typeDim() << "\"\n" <<
         "                        Type=\"HyperSlab\">\n" <<
         "           <DataStructure  Dimensions=\"3 2\"\n" <<
         "                           Format=\"XML\">\n" <<
         "               0    0\n" <<
         "               1    1\n" <<
-        "               " << dvar.size() << " " << dvar.typeDim() << "\n" <<
+        "               " << globalUnknowns << " " << dvar.typeDim() << "\n" <<
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
