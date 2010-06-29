@@ -33,7 +33,7 @@ namespace LifeV
 
 /*!
   \class DataString
- 
+
   A data string contains a string (the name used
   in a data file), a integer value (the value used inside
   the code), a small help text
@@ -44,6 +44,7 @@ class DataString
     int _val;
     std::string _help;
 public:
+
     DataString( std::string str, int val, std::string help );
     inline const std::string& str () const
     {
@@ -73,27 +74,27 @@ public:
 
 /*!
   \class DataStringList
- 
+
   To build a list of data string.
- 
+
   Example:
- 
+
   You want to propose to the user three solvers: cg, gmres, cgs
   inside the code these solvers are identified by the values 1, 2, 3
- 
+
   You first create the list:
- 
+
   DataStringList solver_list("My solvers");
   solver_list.add("cg",1,"preconditioned conjugate gradient method");
   solver_list.add("gmres",2,"preconditioned gmres method");
   solver_list.add("cgs",2,"preconditioned cg squared method");
- 
+
   Next, you read (for example) a GetPot data file, where the user
   gives you a string string_string. To get the value corresponding
   the string provided by the user:
- 
+
   solver = aztec_solver_list.value(user_string);
- 
+
   if the "user_string" belongs to the list, then solver has the corresponding
   value,
   else, the list of possible choices (with help) is given and

@@ -340,10 +340,11 @@ void  exactJacobian::solveJac(vector_type         &_muk,
     M_linearSolver.setOperator(*M_epetraOper);
 
     this->displayer().leaderPrint( "Solving Jacobian system... " );
+
     M_recomputeShapeDer=true;
     M_linearSolver.solve(_muk, res);
 
-    this->displayer().leaderPrint( "done.\n" );
+    this->displayer().leaderPrint( "Solving the Jacobian system done.\n" );
 }
 
 

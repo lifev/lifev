@@ -106,11 +106,11 @@ public:
       \param bcHandler boundary conditions for the velocity
     */
     ADRSolver( const data_type&     dataType,
-                        const EpetraMap&     localMap,
-                        FESpace<Mesh>&       uFESpace,
-                        FESpace<Mesh>&       pFESpace,
-                        BCHandler&           bcHandler,
-                        Epetra_Comm&         comm );
+               const EpetraMap&     localMap,
+               FESpace<Mesh>&       uFESpace,
+               FESpace<Mesh>&       pFESpace,
+               BCHandler&           bcHandler,
+               Epetra_Comm&         comm );
 
     //! virtual destructor
 

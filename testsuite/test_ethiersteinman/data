@@ -18,21 +18,27 @@ save       = 1
 
     [../time_discretization]
     initialtime		= 0.
-    endtime			= 1e-4
-    timestep		= 1e-5
+    endtime			= 0.01
+    timestep		= 0.0001
     BDF_order		= 1
 
     [../space_discretization]
-	mesh_type        = insideCode            # The mesh is created inside the source code
+    mesh_dir        = ./Mesh/   # the directory where the mesh file is
+    #mesh_dir		 = ./
+    mesh_file       = hexa32x32.mesh
+    #mesh_file       = cube-4.mesh          # mesh file
+    #mesh_file       = cube4x4.mesh          # mesh file
+    #mesh_file       = cube8x8.mesh          # mesh file
+#	mesh_type        = insideCode            # The mesh is created inside the source code
 
     verbose         = 0
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    vel_order         = P1
+    vel_order         = P2
     press_order       = P1
 
-    initialization  = interp            # initialize using proj: L2 projection
+    initialization  = proj            # initialize using proj: L2 projection
                                         #                  interp: interpolation
 
     [../miscellaneous]
@@ -41,7 +47,7 @@ save       = 1
 
 	[../prec]
 	prectype                = Ifpack # Ifpack or ML
-	displayList             = true
+	displayList             = false
 
 		[./ML]
 		analyze_smoother        = false
@@ -60,8 +66,8 @@ save       = 1
 			damping_factor          = 1
 
 			[../coarse]
-			type                    = Amesos-UMFPACK
-			#type                    = Amesos-KLU
+			#type                    = Amesos-UMFPACK
+			type                    = Amesos-KLU
 			sweeps                  = 1
 			pre_or_post             = both
 			max_size                = 200
@@ -123,3 +129,4 @@ save       = 1
     neumannList = 1
     dirichletList = 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
     #dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    dirichletList = 1

@@ -37,6 +37,7 @@
 #endif
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -287,15 +288,20 @@ Cylinder::run()
 
 
     // fluid solver
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    DataNavierStokes dataNavierStokes;
     dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+    DataMesh dataMesh;
+    dataMesh.setup(dataFile, "fluid/space_discretization");
+
+    RegionMesh3D<LinearTetra> mesh;
+
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;

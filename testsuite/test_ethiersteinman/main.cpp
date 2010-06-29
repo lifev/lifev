@@ -101,7 +101,12 @@ main( int argc, char** argv )
     LifeV::po::options_description desc("Specific options");
     desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
     Ethiersteinman es( argc, argv, makeAbout(), desc );
-    es.run();
+
+    GetPot command_line( argc, argv );
+    const bool check = command_line.search(2, "-c", "--check");
+
+    if (check) es.check();
+    else es.run();
 
 #ifdef HAVE_MPI
     MPI_Finalize();

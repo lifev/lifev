@@ -286,7 +286,7 @@ FSISolver::iterate()
     M_oper->updateSystem( );
 
     // displacement prediction
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
 
     // couplingVariable Extrapolation:
 

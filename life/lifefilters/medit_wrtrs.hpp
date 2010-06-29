@@ -167,7 +167,7 @@ namespace LifeV
 
 //         std::map<int, int>::iterator im;
 //    UInt iface;
-/*
+
          typedef typename Mesh::FaceShape FaceShape;
 
          switch ( FaceShape::Shape )
@@ -199,7 +199,7 @@ namespace LifeV
              ofile << mesh.boundaryFace( k ).marker() << "\n";
          }
          ofile << "\n";
-*/
+
          typedef typename Mesh::VolumeShape ElementShape;
 
          switch ( ElementShape::Shape )

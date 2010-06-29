@@ -27,8 +27,8 @@ DO_NOT_COMPILE=
 SUBDIRS		= data  \
               test_TemplateTest \
               test_cylinder \
+              test_restartFluid \
               test_getpot \
-              test_heart \
               test_structure \
               test_ethiersteinman \
 	          test_fsi \
@@ -41,6 +41,7 @@ SUBDIRS		= data  \
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_cylinder/testsuite.at \
+           $(srcdir)/test_restartFluid/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \

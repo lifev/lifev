@@ -51,6 +51,7 @@
 
 #include <life/lifesolver/nsipterms.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
+//#include <life/lifesolver/dataMesh.hpp>
 
 //
 #include <boost/shared_ptr.hpp>
@@ -76,7 +77,9 @@ class Oseen
 
 public:
 
-    typedef DataNavierStokes<Mesh> data_type;
+    typedef Mesh                                  mesh_type;
+    typedef DataNavierStokes                      data_type;
+
 
 //     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
 //                                  const Real&, const ID& );
@@ -88,7 +91,6 @@ public:
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> source_type;
 
-    typedef Mesh mesh_type;
 
     typedef BCHandler                             bchandler_raw_type;
     typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
@@ -1143,6 +1145,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
+    //matrFull->spy("matrFull");
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
 

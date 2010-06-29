@@ -79,7 +79,7 @@ class ADRSolver
 
 public:
 
-    typedef DataADR<Mesh>  data_type;
+    typedef DataADR                               data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
@@ -1210,215 +1210,225 @@ void ADRSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        m
 template<typename Mesh, typename SolverType> Real
 ADRSolver<Mesh, SolverType>::flux(const EntityFlag& flag) {
 
-  Real flux = 0.0;
+    //! WARNING  THIS PROCEDURE IS DEPRECATED
 
-  PhysVectUnknown<Vector> u(nDimensions*dim());
+    return 0.;
 
-  reduceSolution(u);
+//   Real flux = 0.0;
 
-  if (M_verbose)
-  {
-	  typedef  typename Mesh::ElementShape GeoShape;
-	  typedef typename GeoShape::GeoBShape GeoBShape;
+//   PhysVectUnknown<Vector> u(nDimensions*dim());
 
-	  // Some useful local variables, to save some typing
-	  UInt nDofPerVert = M_FESpace.refFE().nbDofPerVertex; // number of Dof per vertices
-	  UInt nDofPerEdge = M_FESpace.refFE().nbDofPerEdge;   // number of Dof per edges
-	  UInt nDofPerFace = M_FESpace.refFE().nbDofPerFace;   // number of Dof per faces
+//   reduceSolution(u);
 
-	  UInt nBElementV = GeoBShape::numVertices; // Number of face's vertices
-	  UInt nBElementE = GeoBShape::numEdges;    // Number of face's edges
+//   if (M_verbose)
+//   {
+// 	  typedef  typename Mesh::ElementShape GeoShape;
+// 	  typedef typename GeoShape::GeoBShape GeoBShape;
 
-	  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
-	  UInt nElemE = GeoShape::numEdges;    // Number of element's edges
+// 	  // Some useful local variables, to save some typing
+// 	  UInt nDofPerVert = M_FESpace.refFE().nbDofPerVertex; // number of Dof per vertices
+// 	  UInt nDofPerEdge = M_FESpace.refFE().nbDofPerEdge;   // number of Dof per edges
+// 	  UInt nDofPerFace = M_FESpace.refFE().nbDofPerFace;   // number of Dof per faces
 
-	  UInt nDofBElV = nDofPerVert * nBElementV; // number of vertex's Dof on a face
-	  UInt nDofBElE = nDofPerEdge * nBElementE; // number of edge's Dof on a face
+// 	  UInt nBElementV = GeoBShape::numVertices; // Number of face's vertices
+// 	  UInt nBElementE = GeoBShape::numEdges;    // Number of face's edges
 
-#ifdef TWODIM
-    UInt nDofBEl = nDofBElV + nDofBElE; // number of total Dof on a boundary element
-#elif defined THREEDIM
-    UInt nDofBEl = nDofBElV + nDofBElE + nDofPerFace; // number of total Dof on a boundary element
-#endif
+// 	  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
+// 	  UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
-	  UInt nDofElemV = nElemV*nDofPerVert; // number of vertex's Dof on a Element
-	  UInt nDofElemE = nElemE*nDofPerEdge; // number of edge's Dof on a Element
+// 	  UInt nDofBElV = nDofPerVert * nBElementV; // number of vertex's Dof on a face
+// 	  UInt nDofBElE = nDofPerEdge * nBElementE; // number of edge's Dof on a face
 
-	  UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
+// #ifdef TWODIM
+//     UInt nDofBEl = nDofBElV + nDofBElE; // number of total Dof on a boundary element
+// #elif defined THREEDIM
+//     UInt nDofBEl = nDofBElV + nDofBElE + nDofPerFace; // number of total Dof on a boundary element
+// #endif
 
-	  std::list<std::pair<ID, SimpleVect<ID> > > faces;
-	  ID ibF;
-	  UInt iElAd, iVeEl, iBElEl, iEdEl;
-	  ID lDof, gDof, numTotalDof=M_FESpace.dof().numTotalDof();
+// 	  UInt nDofElemV = nElemV*nDofPerVert; // number of vertex's Dof on a Element
+// 	  UInt nDofElemE = nElemE*nDofPerEdge; // number of edge's Dof on a Element
 
-	  EntityFlag marker;
-	  typedef std::list<pair<ID, SimpleVect<ID> > >::iterator Iterator;
+// 	  UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
 
-	  //
-	  // Loop on boundary faces: List of boundary faces
-	  // with marker = flag
-	  //
-	  for (ID i=1 ; i<=bdnF; ++i) {
-	    marker = M_data.mesh()->bElement(i).marker();
-	    if ( marker == flag  ) {
-	      faces.push_front(make_pair(i,SimpleVect<ID>(nDofBEl)));
-	    }
-	  }
+// 	  std::list<std::pair<ID, SimpleVect<ID> > > faces;
+// 	  ID ibF;
+// 	  UInt iElAd, iVeEl, iBElEl, iEdEl;
+// 	  ID lDof, gDof, numTotalDof=M_FESpace.dof().numTotalDof();
 
-	  //
-	  // Loop on faces: building the local to global vector
-	  // for these boundary faces
-	  //
-	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
+// 	  EntityFlag marker;
+// 	  typedef std::list<pair<ID, SimpleVect<ID> > >::iterator Iterator;
 
-	    ibF = j->first;
+// 	  //
+// 	  // Loop on boundary faces: List of boundary faces
+// 	  // with marker = flag
+// 	  //
+// 	  for (ID i=1 ; i<=bdnF; ++i) {
+// 	    marker = M_data.mesh()->bElement(i).marker();
+// 	    if ( marker == flag  ) {
+// 	      faces.push_front(make_pair(i,SimpleVect<ID>(nDofBEl)));
+// 	    }
+// 	  }
 
-	    iElAd = M_data.mesh()->bElement(ibF).ad_first();  // id of the element adjacent to the face
-	    iBElEl = M_data.mesh()->bElement(ibF).pos_first(); // local id of the boundary Element in its adjacent element
+// 	  //
+// 	  // Loop on faces: building the local to global vector
+// 	  // for these boundary faces
+// 	  //
+// 	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
-	    // Vertex based Dof
-	    if ( nDofPerVert ) {
+// 	    ibF = j->first;
 
-	      // loop on face vertices
-	      for (ID iVeBEl=1; iVeBEl<=nBElementV; ++iVeBEl){
+// 	    iElAd = M_data.mesh()->bElement(ibF).ad_first();  // id of the element adjacent to the face
+// 	    iBElEl = M_data.mesh()->bElement(ibF).pos_first(); // local id of the boundary Element in its adjacent element
+
+// 	    // Vertex based Dof
+// 	    if ( nDofPerVert ) {
+
+// 	      // loop on face vertices
+// 	      for (ID iVeBEl=1; iVeBEl<=nBElementV; ++iVeBEl){
 
 
-#ifdef TWODIM
-				iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
-#elif defined THREEDIM
-                iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
-#endif
+// #ifdef TWODIM
+// 				iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
+// #elif defined THREEDIM
+//                 iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
+// #endif
 
-	      	// Loop number of Dof per vertex
-	      	for (ID l=1; l<=nDofPerVert; ++l) {
-	      		lDof =   (iVeBEl-1) * nDofPerVert + l ; // local Dof j-esimo grado di liberta' su una faccia
-	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, (iVeEl-1)*nDofPerVert + l); // global Dof
-	      		j->second( lDof ) =  gDof; // local to global on this face
-	      	}
-	      }
-	    }
+// 	      	// Loop number of Dof per vertex
+// 	      	for (ID l=1; l<=nDofPerVert; ++l) {
+// 	      		lDof =   (iVeBEl-1) * nDofPerVert + l ; // local Dof j-esimo grado di liberta' su una faccia
+// 	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, (iVeEl-1)*nDofPerVert + l); // global Dof
+// 	      		j->second( lDof ) =  gDof; // local to global on this face
+// 	      	}
+// 	      }
+// 	    }
 
-	    // Edge based Dof
-	    if (nDofPerEdge) {
+// 	    // Edge based Dof
+// 	    if (nDofPerEdge) {
 
-	      // loop on boundary element edges
-	      for (ID iEdBEl=1; iEdBEl<=nBElementE; ++iEdBEl) {
-#ifdef TWODIM
-              iEdEl = iBElEl; // local edge number (in element)
-#elif defined THREEDIM
-                iEdEl = GeoShape::fToE( iBElEl, iEdBEl ).first; // local edge number (in element)
-#endif
-	      		// Loop number of Dof per edge
-	      	for (ID l=1; l<=nDofPerEdge; ++l) {
+// 	      // loop on boundary element edges
+// 	      for (ID iEdBEl=1; iEdBEl<=nBElementE; ++iEdBEl) {
+// #ifdef TWODIM
+//               iEdEl = iBElEl; // local edge number (in element)
+// #elif defined THREEDIM
+//                 iEdEl = GeoShape::fToE( iBElEl, iEdBEl ).first; // local edge number (in element)
+// #endif
+// 	      		// Loop number of Dof per edge
+// 	      	for (ID l=1; l<=nDofPerEdge; ++l) {
 
-	      		lDof =  nDofBElV + (iEdBEl-1) * nDofPerEdge + l ; // local Dof sono messi dopo gli lDof dei vertici
-	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofPerEdge + l); // global Dof
-	      		j->second( lDof ) =  gDof; // local to global on this face
-	      	}
-	      }
-	    }
-#ifndef TWODIM
-	    // Face based Dof
-	    if (nDofPerFace) {
+// 	      		lDof =  nDofBElV + (iEdBEl-1) * nDofPerEdge + l ; // local Dof sono messi dopo gli lDof dei vertici
+// 	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofPerEdge + l); // global Dof
+// 	      		j->second( lDof ) =  gDof; // local to global on this face
+// 	      	}
+// 	      }
+// 	    }
+// #ifndef TWODIM
+// 	    // Face based Dof
+// 	    if (nDofPerFace) {
 
-	      // Loop on number of Dof per face
-	      for (ID l=1; l<=nDofPerFace; ++l) {
-	      	lDof = nDofBElE + nDofBElV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
-	      	gDof = M_FESpace.dof().localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
-	      	j->second( lDof ) =  gDof; // local to global on this face
-	      }
-	    }
-#endif
-	  }
+// 	      // Loop on number of Dof per face
+// 	      for (ID l=1; l<=nDofPerFace; ++l) {
+// 	      	lDof = nDofBElE + nDofBElV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
+// 	      	gDof = M_FESpace.dof().localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
+// 	      	j->second( lDof ) =  gDof; // local to global on this face
+// 	      }
+// 	    }
+// #endif
+// 	  }
 
-	  // Number of velocity components
-	  UInt nc_u=nDimensions;
+// 	  // Number of velocity components
+// 	  UInt nc_u=nDimensions;
 
-	  // Nodal values of the velocity in the current face
-	  std::vector<Real> u_local(nc_u*nDofBEl);
+// 	  // Nodal values of the velocity in the current face
+// 	  std::vector<Real> u_local(nc_u*nDofBEl);
 
-	  // Loop on faces
-	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
+// 	  // Loop on faces
+// 	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
-	    // Extracting nodal values of the velocity in the current face
-	    for (UInt ic =0; ic<nc_u; ++ic) {
-	      for (ID l=1; l<=nDofBEl; ++l) {
-	      	gDof = j->second(l);
-	      	u_local[ic*nDofBEl+l-1] = u(ic*numTotalDof+gDof-1);
-	      }
-	    }
+// 	    // Extracting nodal values of the velocity in the current face
+// 	    for (UInt ic =0; ic<nc_u; ++ic) {
+// 	      for (ID l=1; l<=nDofBEl; ++l) {
+// 	      	gDof = j->second(l);
+// 	      	u_local[ic*nDofBEl+l-1] = u(ic*numTotalDof+gDof-1);
+// 	      }
+// 	    }
 
-	    // Updating quadrature data on the current face
-	    M_FESpace.feBd().updateMeasNormalQuadPt(M_data.mesh()->bElement(j->first));
+// 	    // Updating quadrature data on the current face
+// 	    M_FESpace.feBd().updateMeasNormalQuadPt(M_data.mesh()->bElement(j->first));
 
-	    // Quadrature formula
-	    // Loop on quadrature points
-	    for(int iq=0; iq< M_FESpace.feBd().nbQuadPt; ++iq) {
+// 	    // Quadrature formula
+// 	    // Loop on quadrature points
+// 	    for(int iq=0; iq< M_FESpace.feBd().nbQuadPt; ++iq) {
 
-	      // Dot product
-	      // Loop on components
-	      for (UInt ic =0; ic<nc_u; ++ic) {
+// 	      // Dot product
+// 	      // Loop on components
+// 	      for (UInt ic =0; ic<nc_u; ++ic) {
 
-	      	// Interpolation
-	      	// Loop on local dof
-	      	for (ID l=1; l<=nDofBEl; ++l)
-	      		flux += M_FESpace.feBd().weightMeas(iq)
-	      							* u_local[ic*nDofBEl+l-1]
-	      		          * M_FESpace.feBd().phi(int(l-1),iq)
-	      		          * M_FESpace.feBd().normal(int(ic),iq);
-	      	}
-	    	}
-	  	}
-  }
+// 	      	// Interpolation
+// 	      	// Loop on local dof
+// 	      	for (ID l=1; l<=nDofBEl; ++l)
+// 	      		flux += M_FESpace.feBd().weightMeas(iq)
+// 	      							* u_local[ic*nDofBEl+l-1]
+// 	      		          * M_FESpace.feBd().phi(int(l-1),iq)
+// 	      		          * M_FESpace.feBd().normal(int(ic),iq);
+// 	      	}
+// 	    	}
+// 	  	}
+//   }
 
-  return flux;
+//   return flux;
 }
 
 
 
 //! Computes the area on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
-ADRSolver<Mesh, SolverType>::area(const EntityFlag& flag) {
+ADRSolver<Mesh, SolverType>::area(const EntityFlag& flag)
+{
 
-  EpetraVector area( EpetraMap( M_comm->NumProc(), 1, &M_me, 0, *M_comm) );
-  area *= 0.0;
 
-	UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
+    //! WARNING  THIS PROCEDURE IS DEPRECATED
 
-  std::list<ID> faces;
-  typedef std::list<ID>::iterator Iterator;
+    return 0.;
 
-  EntityFlag marker;
-  //
-  // Loop on boundary faces: List of boundary faces
-  // with marker = flag
-  //
-  for (ID i=1 ; i<=bdnF; ++i) {
-    marker = M_data.mesh()->bElement(i).marker();
-    if ( marker == flag  ) {
-      faces.push_front(i);
-    }
-  }
+//   EpetraVector area( EpetraMap( M_comm->NumProc(), 1, &M_me, 0, *M_comm) );
+//   area *= 0.0;
 
-  //
-  // Loop on processor faces
-  //
-  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
+//   UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
 
-    M_FESpace.feBd().updateMeas( M_data.mesh()->bElement( *j ) );  // updating finite element information
+//   std::list<ID> faces;
+//   typedef std::list<ID>::iterator Iterator;
 
-    area[M_me] += M_FESpace.feBd().measure();
+//   EntityFlag marker;
+//   //
+//   // Loop on boundary faces: List of boundary faces
+//   // with marker = flag
+//   //
+//   for (ID i=1 ; i<=bdnF; ++i) {
+//     marker = M_data.mesh()->bElement(i).marker();
+//     if ( marker == flag  ) {
+//       faces.push_front(i);
+//     }
+//   }
 
-  }
+//   //
+//   // Loop on processor faces
+//   //
+//   for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
-  Real total_area(0.);
-  EpetraVector local_area( area, M_me );
-  for( int i=0; i<M_comm->NumProc(); ++i )
-  	total_area += local_area[i];
+//     M_FESpace.feBd().updateMeas( M_data.mesh()->bElement( *j ) );  // updating finite element information
 
-//  area.MeanValue( &total_area );
+//     area[M_me] += M_FESpace.feBd().measure();
 
-	return total_area;
+//   }
+
+//   Real total_area(0.);
+//   EpetraVector local_area( area, M_me );
+//   for( int i=0; i<M_comm->NumProc(); ++i )
+//   	total_area += local_area[i];
+
+// //  area.MeanValue( &total_area );
+
+// 	return total_area;
 }
 
 

@@ -6,7 +6,7 @@
 [exporter]
 multimesh  = false
 start      = 0
-save       = 1
+save       = 10
 
 [fluid]
 
@@ -93,7 +93,7 @@ save       = 1
            	relax_value                   = 0
 
            	[../amesos]
-           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+           	solvertype =  Amesos_KLU # Amesos_KLU or Amesos_Umfpack
 
            	[../partitioner]
            	overlap = 2

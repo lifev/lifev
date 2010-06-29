@@ -42,6 +42,7 @@
 
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -120,9 +121,16 @@ EnsightToHdf5::run()
     bool verbose = (d->comm->MyPID() == 0);
 
 	// Fluid solver
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    DataNavierStokes dataNavierStokes;
     dataNavierStokes.setup( dataFile );
 
+    DataMesh dataMesh;
+    dataMesh.setup(dataFile, "fluid/space_discretization");
+
+    RegionMesh3D<LinearTetra> mesh;
+    readMesh(mesh, dataMesh);
+
+    writeMesh("test.mesh", mesh);
     // Scale, Rotate, Translate (if necessary)
     boost::array< Real, NDIM >    geometryScale;
     boost::array< Real, NDIM >    geometryRotate;
@@ -140,14 +148,14 @@ EnsightToHdf5::run()
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
     geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
 
-    dataNavierStokes.dataMesh()->mesh()->transformMesh( geometryScale, geometryRotate, geometryTranslate );
+    mesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 

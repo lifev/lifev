@@ -30,6 +30,7 @@
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 
 #include <life/lifealg/generalizedAitken.hpp>
@@ -107,7 +108,7 @@ public:
     typedef solid_raw_type::bchandler_type         solid_bchandler_type;
     typedef solid_raw_type::bchandler_raw_type     solid_bchandler_raw_type;
 
-    typedef DataFSI<mesh_type>                     data_Type;
+    typedef DataFSI                                data_Type;
     typedef boost::shared_ptr<data_Type>           data_PtrType;
 
     typedef std::map<ID, ID>::const_iterator                        Iterator;
@@ -283,8 +284,15 @@ public:
     const data_Type::dataFluid_Type& dataFluid()                  const { return *M_data->dataFluid(); }
     const data_Type::dataSolid_Type& dataSolid()                  const { return *M_data->dataSolid(); }
 
-    const partitionMesh< mesh_type >& fluidMesh()                 const { return *M_fluidMeshPart; }
-    const partitionMesh< mesh_type >& solidMesh()                 const { return *M_solidMeshPart; }
+    mesh_type& fluidMesh()                                        const { return *M_fluidMesh; }
+    mesh_type& solidMesh()                                        const { return *M_solidMesh; }
+
+    // const mesh_type& fluidMesh()                                  const { return *M_fluidMesh; }
+    // const mesh_type& solidMesh()                                  const { return *M_solidMesh; }
+
+    const partitionMesh< mesh_type >& fluidMeshPart()             const { return *M_fluidMeshPart; }
+    const partitionMesh< mesh_type >& solidMeshPart()             const { return *M_solidMeshPart; }
+
 
     const FESpace<mesh_type, EpetraMap>& uFESpace()               const { return *M_uFESpace; }
     const FESpace<mesh_type, EpetraMap>& pFESpace()               const { return *M_pFESpace; }
@@ -477,10 +485,15 @@ protected:
                                   vector_type&                         _vec2,
                                   dof_interface_type3D&                _dofInterface);
 
+    boost::shared_ptr<mesh_type>                      M_mesh;
+
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_uFESpace;
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_pFESpace;
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_dFESpace;
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_mmFESpace;
+
+    boost::shared_ptr<mesh_type>                      M_fluidMesh;
+    boost::shared_ptr<mesh_type>                      M_solidMesh;
 
     boost::shared_ptr<partitionMesh< mesh_type > >    M_fluidMeshPart;
     boost::shared_ptr<partitionMesh< mesh_type > >    M_solidMeshPart;
@@ -509,6 +522,10 @@ protected:
     boost::shared_ptr<BdfT<vector_type> >             M_bdf;
 
     GetPot                                            M_dataFile;
+
+    boost::shared_ptr<DataMesh>                       M_dataMeshFluid;
+    boost::shared_ptr<DataMesh>                       M_dataMeshSolid;
+
     data_PtrType                                      M_data;
 
 //     quasi_newton_type         M_reducedLinFluid;

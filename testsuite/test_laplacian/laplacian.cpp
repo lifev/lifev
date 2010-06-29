@@ -71,6 +71,7 @@ Solve the problem
 #endif
 
 #include <life/lifealg/EpetraMap.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataADR.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -376,11 +377,18 @@ laplacian::run()
     bcADR.addBC( "Back",    BACK,   Essential, Full,      uZero, 1 );
 #endif
 
-    DataADR<RegionMesh> dataADR( dataFile, discretization_section);
+    DataADR dataADR;
+    dataADR.setup( dataFile );
+
+    DataMesh dataMesh;
+    dataMesh.setup(dataFile, discretization_section);
+
+
+    RegionMesh3D<LinearTetra> mesh;
 
     //dataADR.mesh()->orderMesh( Members->comm->Comm() );
-    partitionMesh< RegionMesh>   meshPart(* dataADR.mesh(), *Members->comm);
-    dataADR.setMesh(meshPart.mesh());
+    partitionMesh< RegionMesh>   meshPart(mesh, *Members->comm);
+    //dataADR.setMesh(meshPart.mesh());
 
     if(verbose) dataADR.showMe();
 

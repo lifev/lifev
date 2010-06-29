@@ -37,7 +37,9 @@
 // #include <life/lifefilters/importer.hpp>
 
 //#include "NavierStokesSolverIP.hpp"
+
 #include <life/lifealg/EpetraMap.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataElasticStructure.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
@@ -175,18 +177,23 @@ Structure::run3d()
 
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    DataElasticStructure< RegionMesh3D<LinearTetra > >    dataStructure;
+    DataElasticStructure dataStructure;
     dataStructure.setup(dataFile);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >            meshPart( *dataStructure.dataMesh()->mesh(),
-                                                                    *parameters->comm );
+    DataMesh             dataMesh;
+    dataMesh.setup(dataFile, "solid/space_discretization");
+
+    RegionMesh3D<LinearTetra> mesh;
+    readMesh(mesh, dataMesh);
+
+
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( mesh, *parameters->comm );
 
 //    meshPart.rebuildMesh();
 
 
 //    exit(0);
 
-    dataStructure.dataMesh()->setMesh(meshPart.mesh());
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,*parameters->comm);
@@ -213,7 +220,7 @@ Structure::run3d()
 
     BCh.addBC("Base2 ", 2 , Essential, Full, fixed, 3);
     BCh.addBC("Base3 ", 3 , Essential, Full, fixed, 3);
-   
+
     //
     // Temporal data and initial conditions
     //

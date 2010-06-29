@@ -151,11 +151,11 @@ public:
     typedef FSIOperator::vector_type                        vector_type;
     typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
 
-#ifdef HAVE_HDF5
-    typedef Hdf5exporter<FSIOperator::mesh_type>            filter_type;
-#else
+// #ifdef HAVE_HDF5
+//     typedef Hdf5exporter<FSIOperator::mesh_type>            filter_type;
+// #else
     typedef Ensight<FSIOperator::mesh_type>                 filter_type;
-#endif
+// #endif
 
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
@@ -311,7 +311,7 @@ public:
 
     		M_fsi->iterate();
 
-    		if ( M_fsi->isFluid() )
+   		if ( M_fsi->isFluid() )
             {
 				if ( isFluidLeader )
 					ofile << M_data->dataFluid()->dataTime()->getTime() << " ";

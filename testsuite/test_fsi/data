@@ -53,7 +53,7 @@ save       = 1
 [fluid]
 
 useShapeDerivatives = true
-absorbing_bc		= true
+absorbing_bc		= false
 
 [./physics]
 density   = 1.0               # density
@@ -79,7 +79,7 @@ mesh_dir  = ./Mesh/ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
 
-vel_order		= P1		# P1, P1Bubble, P2
+vel_order		= P1Bubble		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
 
 [../miscellaneous]

@@ -26,8 +26,8 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES   = FSIOperator.cpp fixedPointBase.cpp \
-			                 exactJacobianBase.cpp FSISolver.cpp heartFunctors.cpp
+liblifesolver_la_SOURCES   = DataFSI.cpp dataADR.cpp dataElasticStructure.cpp dataNavierStokes.cpp FSIOperator.cpp fixedPointBase.cpp \
+			                 exactJacobianBase.cpp FSISolver.cpp
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 

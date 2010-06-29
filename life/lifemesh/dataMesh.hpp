@@ -37,6 +37,9 @@
  *  \author Cristiano Malossi<cristiano.malossi@epfl.ch>
  */
 
+
+
+
 #ifndef _DATAMESH_H_
 #define _DATAMESH_H_
 
@@ -62,14 +65,13 @@ namespace LifeV {
  *
  *  The class is a container for time information.
  */
-template <typename Mesh>
 class DataMesh
 {
 public:
 
     // Typedef
-    typedef Mesh                                Mesh_Type;
-    typedef boost::shared_ptr<Mesh_Type>        Mesh_ptrType;
+    //    typedef Mesh                                Mesh_Type;
+    //typedef boost::shared_ptr<Mesh_Type>        Mesh_ptrType;
 
 
     /** @name Constructors, Destructor
@@ -99,7 +101,7 @@ public:
 
     void setup( const GetPot& dataFile, const std::string& section );
 
-    void readMesh(const GetPot& dataFile );
+    //void readMesh(const GetPot& dataFile );
 
     virtual void showMe( std::ostream& output = std::cout ) const;
 
@@ -110,7 +112,7 @@ public:
      */
     //@{
 
-    void  setMesh( const Mesh_ptrType& mesh ) { M_mesh = mesh; }
+    //void  setMesh( const Mesh_ptrType& mesh ) { M_mesh = mesh; }
 
     //@}
 
@@ -119,17 +121,18 @@ public:
      */
     //@{
 
-    const Mesh_ptrType   mesh()      const { return M_mesh; }
+    //const Mesh_ptrType   mesh()      const { return M_mesh; }
 
     const std::string    meshDir()   const { return M_mesh_dir; }
-
     const std::string    meshFile()  const { return M_mesh_file; }
+    const std::string    meshType()  const { return M_mesh_type; }
 
+    const bool           verbose()   const { return M_verbose; }
     //@}
 
 private:
 
-    Mesh_ptrType    M_mesh;         // the mesh
+    //Mesh_ptrType    M_mesh;         // the mesh
 
     std::string     M_mesh_dir;     // mesh dir
     std::string     M_mesh_file;    // mesh file
@@ -140,70 +143,16 @@ private:
 
 
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
 template <typename Mesh>
-DataMesh<Mesh>::DataMesh( ):
-    M_mesh      ( new Mesh ),
-    M_mesh_dir  ( "./" ),
-    M_mesh_file ( "mesh.mesh" ),
-    M_mesh_type ( ".mesh" ),
-    M_verbose   ( false )
-{}
-
-template <typename Mesh>
-DataMesh<Mesh>::
-DataMesh( const GetPot& dataFile, const std::string& section ):
-    M_mesh      ( new Mesh ),
-    M_mesh_dir  ( dataFile( ( section + "/mesh_dir"  ).data(), "./" ) ),
-    M_mesh_file ( dataFile( ( section + "/mesh_file" ).data(), "mesh.mesh" ) ),
-    M_mesh_type ( dataFile( ( section + "/mesh_type" ).data(), ".mesh" ) ),
-    M_verbose   ( dataFile( ( section + "/verbose" ).data(), false ) )
+void readMesh(Mesh& mesh, const DataMesh data )
 {
-    readMesh(dataFile);
-}
-
-template <typename Mesh>
-DataMesh<Mesh>::DataMesh( const DataMesh& dataMesh ):
-    M_mesh        ( dataMesh.M_mesh ),
-    M_mesh_dir    ( dataMesh.M_mesh_dir ),
-    M_mesh_file   ( dataMesh.M_mesh_file ),
-    M_mesh_type   ( dataMesh.M_mesh_type ),
-    M_verbose     ( dataMesh.M_verbose )
-{
-    M_mesh->updateElementEdges();
-    M_mesh->updateElementFaces();
-}
-
-
-
-// ===================================================
-// Methods
-// ===================================================
-template <typename Mesh>
-void
-DataMesh<Mesh>::setup( const GetPot& dataFile, const std::string& section )
-{
-    M_mesh_dir  = dataFile( ( section + "/mesh_dir"  ).data(), "./" );
-    M_mesh_file = dataFile( ( section + "/mesh_file" ).data(), "mesh.mesh" );
-    M_mesh_type = dataFile( ( section + "/mesh_type" ).data(), ".mesh" );
-    M_verbose   = dataFile( ( section + "/verbose" ).data(), 0 );
-
-    readMesh(dataFile);
-}
-
-template <typename Mesh>
-void
-DataMesh<Mesh>::readMesh( const GetPot& dataFile )
-{
-    if ( M_verbose )
+    if ( data.verbose() )
         std::cout << "\nBuilding mesh ... ";
 
 #ifdef TWODIM
 
-    if ( M_mesh_type == ".msh" )
-        readFreeFemFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbatim );
+    if ( data.meshType() == ".msh" )
+        readFreeFemFile( mesh, data.meshDir() + M_meshFile(), 1, verbatim );
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
@@ -211,54 +160,53 @@ DataMesh<Mesh>::readMesh( const GetPot& dataFile )
     M_mesh->updateElementEdges(true);
 
 #elif defined( THREEDIM )
+
     bool updateEdgesAndFaces(true);
 
-    if ( M_mesh_type == ".mesh" )
-        readINRIAMeshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, M_verbose );
-    else if ( M_mesh_type == ".m++" )
-        readMppFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, M_verbose );
-    else if ( M_mesh_type == ".msh" )
-        readGmshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1 );
-    else if ( M_mesh_type == ".vol" )
-        readNetgenMesh( *M_mesh, M_mesh_dir + M_mesh_file, 1, M_verbose );
-    else if ( M_mesh_type == "structured" ){
-        // Reading the parameters
-        std::string section("fluid/space_discretization");
-        UInt m_x( dataFile( ( section + "/mesh_mx"  ).data(), 3   ) );
-        UInt m_y( dataFile( ( section + "/mesh_my"  ).data(), 3   ) );
-        UInt m_z( dataFile( ( section + "/mesh_mz"  ).data(), 3   ) );
-        Real l_x( dataFile( ( section + "/mesh_lx"  ).data(), 1.0 ) );
-        Real l_y( dataFile( ( section + "/mesh_ly"  ).data(), 1.0 ) );
-        Real l_z( dataFile( ( section + "/mesh_lz"  ).data(), 1.0 ) );
-        Real t_x( dataFile( ( section + "/mesh_tx"  ).data(), 0.0 ) );
-        Real t_y( dataFile( ( section + "/mesh_ty"  ).data(), 0.0 ) );
-        Real t_z( dataFile( ( section + "/mesh_tz"  ).data(), 0.0 ) );
-        regularMesh3D( *M_mesh, 1, m_x, m_y, m_z, true, l_x, l_y, l_z, t_x, t_y, t_z);
-    }else if ( M_mesh_type == "insideCode" ){
-        // Do nothing
-        updateEdgesAndFaces = false;
-    }else
+    if ( data.meshType() == ".mesh" )
+        readINRIAMeshFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    else if ( data.meshType() == ".m++" )
+        readMppFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    else if ( data.meshType() == ".msh" )
+        readGmshFile( mesh, data.meshDir() + data.meshFile(), 1 );
+    else if ( data.meshType() == ".vol" )
+        readNetgenMesh( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    // else if ( data.meshType() == "structured" )
+    // {
+    //     // Reading the parameters
+    //     std::string section("fluid/space_discretization");
+    //     UInt m_x( dataFile( ( section + "/mesh_mx"  ).data(), 3   ) );
+    //     UInt m_y( dataFile( ( section + "/mesh_my"  ).data(), 3   ) );
+    //     UInt m_z( dataFile( ( section + "/mesh_mz"  ).data(), 3   ) );
+    //     Real l_x( dataFile( ( section + "/mesh_lx"  ).data(), 1.0 ) );
+    //     Real l_y( dataFile( ( section + "/mesh_ly"  ).data(), 1.0 ) );
+    //     Real l_z( dataFile( ( section + "/mesh_lz"  ).data(), 1.0 ) );
+    //     Real t_x( dataFile( ( section + "/mesh_tx"  ).data(), 0.0 ) );
+    //     Real t_y( dataFile( ( section + "/mesh_ty"  ).data(), 0.0 ) );
+    //     Real t_z( dataFile( ( section + "/mesh_tz"  ).data(), 0.0 ) );
+    //     regularMesh3D( *M_mesh, 1, m_x, m_y, m_z, true, l_x, l_y, l_z, t_x, t_y, t_z);
+    // }
+    // else if ( data.meshType() == "insideCode" )
+    // {
+    //     // Do nothing
+    //     updateEdgesAndFaces = false;
+    //}
+    else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
     //Update Edges & Faces
     if(updateEdgesAndFaces){
-        M_mesh->updateElementEdges( true, M_verbose );
-        M_mesh->updateElementFaces( true, M_verbose );
+        mesh.updateElementEdges( true, data.verbose() );
+        mesh.updateElementFaces( true, data.verbose() );
     }
 
 #endif
 
-    if ( M_verbose )
+    if ( data.verbose() )
         std::cout << "ok.\n" << std::endl;
 }
 
-template <typename Mesh>
-void DataMesh<Mesh>::showMe( std::ostream& output ) const
-{
-    output << "mesh_dir   = " << M_mesh_dir << std::endl;
-    output << "mesh_file  = " << M_mesh_file << std::endl;
-    output << "mesh_type  = " << M_mesh_type << std::endl;
-}
+
 
 } // namespace LifeV
 

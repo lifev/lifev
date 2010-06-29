@@ -87,10 +87,10 @@ public:
     typedef boost::shared_ptr<vector_type>         vector_ptrtype;
 
 
-    typedef typename SolverType::prec_raw_type    prec_raw_type;
-    typedef typename SolverType::prec_type        prec_type;
+    typedef typename SolverType::prec_raw_type     prec_raw_type;
+    typedef typename SolverType::prec_type         prec_type;
 
-    typedef DataElasticStructure<Mesh>    data_type;
+    typedef DataElasticStructure                   data_type;
 
 
 

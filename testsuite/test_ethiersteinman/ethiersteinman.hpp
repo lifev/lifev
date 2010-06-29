@@ -116,6 +116,8 @@ public:
      */
     //@{
     //! Computes L2 errors
+
+    void check();
     void run();
 
     //@}
@@ -135,7 +137,7 @@ private:
 
     struct Private;
     boost::shared_ptr<Private> d;
-    std::ofstream out_norm;
+    std::ofstream              out_norm;
 
     // Internal data used to check the different
     // configuration (meshes+FE)

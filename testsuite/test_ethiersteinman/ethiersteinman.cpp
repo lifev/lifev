@@ -2,7 +2,7 @@
 
   This file is part of the LifeV Applications.
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
              Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
        Date: 2010-05-18
 
@@ -25,7 +25,7 @@
 */
 /**
    \file ethiersteiman.cpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \author Gilles Fourestey <gilles.fourestey@epfl.ch>
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    \date 2010-05-18
  */
@@ -41,6 +41,7 @@
 //#include "NavierStokesSolverBlockIP.hpp"
 
 //#include "Epetra_SerialComm.h"
+
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
@@ -52,6 +53,7 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
@@ -158,8 +160,6 @@ Ethiersteinman::Ethiersteinman( int argc,
                   << "nu = " << d->nu << std::endl;
     }
 
-    convTol = 0.95;
-
 }
 
 const std::string Ethiersteinman::uFE[FEnumber]={"P1", "P1Bubble", "P2"};
@@ -170,6 +170,283 @@ const Real Ethiersteinman::pConvergenceOrder[FEnumber]={2,2,2};
 
 void
 Ethiersteinman::run()
+{
+
+    Chrono chrono;
+
+    // Reading from data file
+    //
+    GetPot dataFile( d->data_file_name.c_str() );
+
+    bool verbose = (d->comm->MyPID() == 0);
+
+    chrono.start();
+
+    Problem::setParamsFromGetPot( dataFile );
+
+    // Boundary conditions
+    std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
+    std::set<UInt> dirichletMarkers = parseList( dirichletList );
+    std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
+    std::set<UInt> neumannMarkers = parseList( neumannList );
+
+
+    BCHandler::BCHints hint = neumannMarkers.size() != 0 ?
+        BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
+    BCHandler bcH( 0, hint );
+    BCFunctionBase uWall( Problem::uexact );
+    BCFunctionBase uNeumann( Problem::fNeumann );
+
+    for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
+         it != dirichletMarkers.end(); ++it)
+    {
+        bcH.addBC( "Wall", *it, Essential, Full, uWall, 3 );
+    }
+    for (std::set<UInt>::const_iterator it = neumannMarkers.begin();
+         it != neumannMarkers.end(); ++it)
+    {
+        bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
+    }
+
+
+    // fluid solver
+
+    DataNavierStokes dataNavierStokes;
+    dataNavierStokes.setup( dataFile );
+
+    DataMesh dataMesh;
+    dataMesh.setup(dataFile, "fluid/space_discretization");
+
+    RegionMesh3D<LinearTetra> mesh;
+    readMesh(mesh, dataMesh);
+
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
+
+    std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P1");
+    std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
+
+    if (verbose) std::cout << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
+
+    //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+
+    if (verbose)
+        std::cout << "Building the velocity FE space ... " << std::flush;
+
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart, uOrder, 3, *d->comm);
+
+    if (verbose)
+        std::cout << "ok." << std::endl;
+
+    if (verbose)
+        std::cout << "Building the pressure FE space ... " << std::flush;
+
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
+
+    if (verbose)
+        std::cout << "ok." << std::endl;
+
+
+
+    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+
+
+    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+
+    if (verbose) std::cout << "Calling the fluid constructor ... ";
+
+    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+                                              uFESpace,
+                                              pFESpace,
+                                              *d->comm);
+    EpetraMap fullMap(fluid.getMap());
+
+    if (verbose) std::cout << "ok." << std::endl;
+
+    fluid.setUp(dataFile);
+    fluid.buildSystem();
+
+    if (verbose)
+        std::cout << "  Init time (partial) " << chrono.diff() << " s." << std::endl;
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    // Initialization
+
+    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
+    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+    Real tFinal = dataNavierStokes.dataTime()->getEndTime ();
+
+
+    // bdf object to store the previous solutions
+
+    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
+
+    // initialization with exact solution: either interpolation or "L2-NS"-projection
+    t0 -= dt * bdf.bdf_u().order();
+
+    if (verbose) std::cout << std::endl;
+    if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
+
+    vector_type beta( fullMap );
+    vector_type rhs ( fullMap );
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    dataNavierStokes.dataTime()->setTime(t0);
+    fluid.initialize( Problem::uexact, Problem::pexact );
+
+    bdf.bdf_u().initialize_unk( *fluid.solution() );
+
+    std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
+    bool const L2proj( !proj.compare("proj") );
+
+
+
+    Real time = t0 + dt;
+    for (  ; time <=  dataNavierStokes.dataTime()->getInitialTime() + dt/2.; time += dt)
+    {
+
+        dataNavierStokes.dataTime()->setTime(time);
+
+        beta *= 0.;
+        rhs  *= 0.;
+
+        if (L2proj)
+        {
+            uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
+            rhs *= -1.;
+        }
+
+        fluid.initialize( Problem::uexact, Problem::pexact );
+
+        beta = *fluid.solution();
+
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
+
+
+        if (L2proj)
+        {
+            fluid.updateSystem( 0., beta, rhs );
+            fluid.iterate(bcH);
+        }
+
+
+         bdf.bdf_u().shift_right( *fluid.solution() );
+
+    }
+
+    chrono.stop();
+    if (verbose)
+	std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
+    // end initialization step
+
+    fluid.resetPrec();
+
+    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+
+    vector_ptrtype velAndPressure;
+
+    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+    {
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
+        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+    }
+    else
+#endif
+    {
+        if (exporterType.compare("none") == 0)
+        {
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        } else {
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        }
+    }
+
+    velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
+
+    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
+                         UInt(0), uFESpace.dof().numTotalDof() );
+
+    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
+                         UInt(3*uFESpace.dof().numTotalDof()),
+                         UInt(pFESpace.dof().numTotalDof()) );
+    exporter->postProcess( 0 );
+
+    std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
+    std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
+
+    // Temporal loop
+
+    int iter = 1;
+
+    Chrono chronoGlobal;
+    chronoGlobal.start();
+
+    for ( ; time <= tFinal + dt/2.; time += dt, iter++)
+    {
+
+        dataNavierStokes.dataTime()->setTime(time);
+
+        if (verbose)
+        {
+            std::cout << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
+            std::cout << std::endl;
+        }
+
+        chrono.start();
+
+        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
+
+        beta = bdf.bdf_u().extrap();
+
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+//        rhs *= alpha;
+//        rhs  = bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
+
+        fluid.getDisplayer().leaderPrint("alpha ", alpha);
+        fluid.getDisplayer().leaderPrint("\n");
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("\n");
+
+        fluid.updateSystem( alpha, beta, rhs );
+        fluid.iterate( bcH );
+
+        bdf.bdf_u().shift_right( *fluid.solution() );
+
+        *velAndPressure = *fluid.solution();
+        exporter->postProcess( time );
+
+
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        chrono.stop();
+        if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
+    }
+
+    chronoGlobal.stop();
+    if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
+
+
+
+}
+
+
+
+void
+Ethiersteinman::check()
 {
     Chrono chrono;
 
@@ -207,7 +484,8 @@ Ethiersteinman::run()
         // Loop on the finite element
         for(UInt iElem(0);iElem<FEnumber;++iElem)
         {
-            if(d->comm->MyPID()==0){
+            if(d->comm->MyPID()==0)
+            {
                 std::cout << "Using: -" << uFE[iElem] << "-" << pFE[iElem] << " finite element" << std::endl;
                 std::cout << "       -Regular mesh " << mElem << "x" << mElem << "x" << mElem << std::endl;
                 std::string fileName("norm_");
@@ -255,23 +533,45 @@ Ethiersteinman::run()
 
             //
             // fluid solver
-            //
-            DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+
+            DataNavierStokes dataNavierStokes;
             dataNavierStokes.setup( dataFile );
 
-            if(meshType=="insideCode"){
-                // Call the function to build a mesh
-                regularMesh3D( *dataNavierStokes.dataMesh()->mesh(),
-                               1,
-                               mElem,mElem,mElem,
-                               verbose,
-                               2.0,2.0,2.0,
-                               -1.0,-1.0,-1.0);
-                dataNavierStokes.dataMesh()->mesh()->updateElementEdges( true, verbose );
-                dataNavierStokes.dataMesh()->mesh()->updateElementFaces( true, verbose );
+            DataMesh dataMesh;
+            dataMesh.setup(dataFile, "fluid/space_discratization");
+
+            RegionMesh3D<LinearTetra> mesh;
+
+            // Call the function to build a mesh
+            regularMesh3D( mesh,
+                           1,
+                           mElem, mElem, mElem,
+                           verbose,
+                             2.0,   2.0,   2.0,
+                            -1.0,  -1.0,  -1.0);
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MESH_FORMAT);
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MATLAB_FORMAT);
+            // dataNavierStokes.dataMesh()->mesh()->updateElementEdges( true, verbose );
+            // dataNavierStokes.dataMesh()->mesh()->updateElementFaces( true, verbose );
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MESH_FORMAT);
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MATLAB_FORMAT);
+
+            if (d->comm->MyPID()==0)
+            {
+                std::string fname = "cube-" + number2string(mElem) + ".mesh";
+                writeMesh(fname, mesh);
             }
 
-            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MESH_FORMAT);
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MATLAB_FORMAT);
+
+            mesh.updateElementEdges( true, verbose );
+            mesh.updateElementFaces( true, verbose );
+
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MESH_FORMAT);
+            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MATLAB_FORMAT);
+
+            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
 
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
@@ -279,12 +579,12 @@ Ethiersteinman::run()
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
 
-            dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+            //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
             if (verbose)
                 std::cout << "Building the velocity FE space ... " << std::flush;
 
-            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
+            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart, uOrder, 3, *d->comm);
 
             if (verbose)
                 std::cout << "ok." << std::endl;
@@ -292,7 +592,7 @@ Ethiersteinman::run()
             if (verbose)
                 std::cout << "Building the pressure FE space ... " << std::flush;
 
-            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
+            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart, pOrder, 1, *d->comm);
 
             if (verbose)
                 std::cout << "ok." << std::endl;
@@ -303,7 +603,7 @@ Ethiersteinman::run()
             UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bdUpdate( *dataNavierStokes.dataMesh()->mesh(), uFESpace.feBd(), uFESpace.dof());
+            bcH.bdUpdate( mesh, uFESpace.feBd(), uFESpace.dof());
 
             if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
             if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -338,7 +638,7 @@ Ethiersteinman::run()
             BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
 
             // initialization with exact solution: either interpolation or "L2-NS"-projection
-            t0 -= dt * bdf.bdf_u().order();
+            t0 -= dt*bdf.bdf_u().order();
 
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
@@ -350,11 +650,14 @@ Ethiersteinman::run()
 
             dataNavierStokes.dataTime()->setTime(t0);
             fluid.initialize( Problem::uexact, Problem::pexact );
+
             bdf.bdf_u().initialize_unk( *fluid.solution() );
 
             std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
             bool const L2proj( !proj.compare("proj") );
 
+            if (verbose) std::cout << std::endl;
+            if (verbose) std::cout << "Time loop ... " << std::endl << std::endl;
 
             //
             // Initial solution loading (interpolation or projection)
@@ -389,7 +692,9 @@ Ethiersteinman::run()
                     // We compute A*Pi_uh
                     fluid.updateSystem( 0., beta, rhs );
                     matrix_type A(fullMap);
-                    fluid.getFluidMatrixWithBC(A,garbage,bcH);
+
+                    //fluid.getFluidMatrixWithBC(A, garbage, bcH);
+
                     A.GlobalAssemble();
                     rhs = A*rhs;
 

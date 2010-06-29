@@ -114,7 +114,7 @@ Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& 
     if (t <= 0.03) return 1000.*t - 30.;
     return 0;
 
-                      int    numData = 100;
+    int    numData = 100;
     double flux[101] = { 0.,
                          0.55312181720914,
                           0.55299302643153,

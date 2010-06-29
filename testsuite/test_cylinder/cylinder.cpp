@@ -49,6 +49,7 @@
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -68,33 +69,12 @@
 using namespace LifeV;
 
 
-//cylinder
 
-//#define CYL2D_MESH_SETTINGS
-//#define CYL3D_MESH_SETTINGS
-#define TUBE20_MESH_SETTINGS
-
-
-#ifdef CYL2D_MESH_SETTINGS // cyl2D.mesh
-const int INLET    = 1;
-const int SLIPWALL = 20;
-const int CYLINDER = 2;
-#endif
-#ifdef CYL3D_2_MESH_SETTINGS // cyl3D-2.mesh
-const int INLET    = 40;
-const int WALL     = 60;
-const int SLIPWALL = 61;
-const int OUTLET   = 50;
-const int CYLINDER = 70;
-#endif
-#ifdef TUBE20_MESH_SETTINGS
- const int INLET       = 2;
- const int WALL        = 1;
- const int RINGIN      = 20;
- const int RINGOUT     = 30;
- const int OUTLET      = 3;
-#endif
-
+const int INLET       = 2;
+const int WALL        = 1;
+const int OUTLET      = 3;
+const int RINGIN      = 20;
+const int RINGOUT     = 30;
 
 
 Real zero_scalar( const Real& /* t */,
@@ -253,23 +233,6 @@ struct Cylinder::Private
               const ID&   id ) const
         {
 
-#ifdef CYL2D_MESH_SETTINGS // cyl3D-2.mesh
-            if ( id == 1 )
-                {
-                  return 1.;
-                  return 1./(20.*20.)*(y + 20.)*(20. - y);
-                  // 	         if ( centered ) {
-//                      return Um_2d() * (y+H)*(H-y) / (H*H);
-//                  } else {
-//                      return 4 * Um_2d() * y * (H-y) / (H*H);
-//                  }
-                }
-            else
-                {
-                    return 0.;
-                }
-#endif
-#ifdef TUBE20_MESH_SETTINGS
             switch(id) {
             case 1: // x component
                 return 0.0;
@@ -288,9 +251,6 @@ struct Cylinder::Private
                 break;
             }
             return 0;
-#endif
-
-
         }
 
     fct_type getU_2d()
@@ -336,7 +296,7 @@ struct Cylinder::Private
             //            if (id == 3)
                 return 10.;
 
-            return 0.;
+            return -1.;
         }
 
     fct_type getU_one()
@@ -403,7 +363,7 @@ Cylinder::run()
     //
     GetPot dataFile( d->data_file_name );
 
-//    int save = dataFile("fluid/miscellaneous/save", 1);
+    //    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (d->comm->MyPID() == 0);
 
@@ -418,42 +378,33 @@ Cylinder::run()
     BCFunctionBase uPois(  d->getU_pois() );
 
 
-#ifdef CYL2D_MESH_SETTINGS // cyl3D-2.mesh
-
-    //cylinder
-    bcH.addBC( "Inlet",    INLET,    Essential, Full,      uIn,   3 );
-//     if ( WALL != INLET )
-    bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
-    bcH.addBC( "Cylinder", CYLINDER, Essential, Full,      uZero, 3 );
-    //    bcH.addBC( "Slipwall", SLIPWALL, Essential, Full, uZero , 3 );
-#endif
-
-#ifdef TUBE20_MESH_SETTINGS
     //BCFunctionBase unormal(  d->get_normal() );
 
     //cylinder
 
-    //bcH.addBC( "Inlet",    INLET,    Natural,   Full,      uIn, 3 );
-    bcH.addBC( "Inlet",    INLET,    Flux,        Full,     uOne, 3);
+    bcH.addBC( "Inlet",    INLET,    Essential,     Full,     uPois  , 3 );
+    bcH.addBC( "Ringin",   RINGIN,   Essential,     Full,     uZero  , 3 );
+    bcH.addBC( "Ringout",  RINGOUT,  Essential,     Full,     uZero  , 3 );
     bcH.addBC( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
-    //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
-    //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
     bcH.addBC( "Wall",     WALL,     Essential,   Full,     uZero, 3 );
-    bcH.addBC( "RingIn",   RINGIN,  Essential,   Full,      uZero, 3 );
-    bcH.addBC( "RingOut",  RINGOUT, Essential,   Full,      uZero, 3 );
-#endif
 
-    int numLM = 1;
+    int numLM = 0;
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
+    DataNavierStokes dataNavierStokes;
     dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+    DataMesh dataMesh;
+    dataMesh.setup(dataFile, "fluid/space_discretization");
+
+    RegionMesh3D<LinearTetra> mesh;
+    readMesh(mesh, dataMesh);
+
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     if (verbose)
@@ -490,43 +441,8 @@ Cylinder::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm,
-                                              numLM);
+                                              *d->comm, numLM);
     EpetraMap fullMap(fluid.getMap());
-
-
-// #ifdef TUBE20_MESH_SETTINGS
-//     vector_type vec_lambda_aux(fullMap),	mixtevec_aux(fullMap);
-//     vec_lambda_aux.getEpetraVector().PutScalar(1);
-//     vec_lambda_aux.GlobalAssemble();
-//     mixtevec_aux.getEpetraVector().PutScalar(1);
-//     mixtevec_aux.GlobalAssemble();
-
-//     vector_type vec_lambda(fluid.getMap(), Repeated), mixtevec(fluid.getMap(), Repeated);
-
-//     vec_lambda = vec_lambda_aux;
-//     mixtevec = mixtevec_aux;
-
-//     // Robin BC
-//     BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof());
-
-//     // Neumann BC, normal component
-//     //BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof(),1);
-
-//     robin_wall.setMixteCoef(0);
-//     robin_wall.setMixteVec(mixtevec);
-
-//     vec_lambda_aux.spy("lambda");
-//     vec_lambda.spy("lambdaRep");
-
-
-
-//     bcH.addBC( "Wall",      1, Mixte, Full,  robin_wall, 3 );
-//     //bcH.addBC( "Wall",      1, Natural, Full,  robin_wall, 3 );
-// #endif
-
-
-
 
     if (verbose) std::cout << "ok." << std::endl;
 
