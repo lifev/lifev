@@ -62,9 +62,9 @@ void FlowConditions::initParameters( FSIOperator&  oper,
     Epetra_SerialDenseVector solidQuantities(2); // M_beta and M_rhos
 
     if (oper.isFluid())
-        {
-            fluidQuantities(0) = oper.fluid().area(outflowFlag);
-        }
+    {
+        fluidQuantities(0) = oper.fluid().area(outflowFlag);
+    }
 
     M_area0      = fluidQuantities(0);
     M_outRadius0 = std::sqrt(M_area0/pi);
@@ -75,18 +75,18 @@ void FlowConditions::initParameters( FSIOperator&  oper,
 
 
     if (oper.isSolid())
-        {
-            solidQuantities(0) =  ( ( oper.solid().thickness()*oper.solid().young()     ) /
-                                    ( 1 - oper.solid().poisson()*oper.solid().poisson() )*
-                                    pi/M_area0 );
+    {
+        solidQuantities(0) =  ( ( oper.solid().thickness()*oper.solid().young()     ) /
+                                ( 1 - oper.solid().poisson()*oper.solid().poisson() )*
+                                pi/M_area0 );
 
-            solidQuantities(1) = oper.solid().rho();
+        solidQuantities(1) = oper.solid().rho();
 
-            oper.displayer().leaderPrint( "  Outflow BC : thickness = " , oper.solid().thickness() );
-            oper.displayer().leaderPrint( "  Outflow BC : young     = " , oper.solid().young() );
-            oper.displayer().leaderPrint( "  Outflow BC : poisson   = " , oper.solid().poisson() );
+        oper.displayer().leaderPrint( "  Outflow BC : thickness = " , oper.solid().thickness() );
+        oper.displayer().leaderPrint( "  Outflow BC : young     = " , oper.solid().young() );
+        oper.displayer().leaderPrint( "  Outflow BC : poisson   = " , oper.solid().poisson() );
 
-        }
+    }
 
     //oper.worldComm().Broadcast( solidQuantities.Values(), solidQuantities.Length(),
     //oper.getSolidLeaderId() );
@@ -109,10 +109,10 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
     FSIOperator* oper(oper_.FSIOper().get());
 
     if (oper->isFluid())
-        {
-            fluidQuantities(0) = oper->fluid().flux(outflowFlag, oper_.displacement());
-            fluidQuantities(1) = oper->fluid().area(outflowFlag);
-        }
+    {
+        fluidQuantities(0) = oper->fluid().flux(outflowFlag, oper_.displacement());
+        fluidQuantities(1) = oper->fluid().area(outflowFlag);
+    }
 
     oper->worldComm().Broadcast( fluidQuantities.Values(), fluidQuantities.Length(),
                                  oper->getFluidLeaderId() );
@@ -127,18 +127,18 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
     // Setting parameters for our simulation:
     // if imposing the absorbing boundary condition through the pressure:
     if (bcOnFluid)
-        {
-            M_outP =  pow((M_rhos/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
-                - M_beta*sqrt(M_area0);
-            FlowConditions::outputVector[conditionNumber]=M_outP;
+    {
+        M_outP =  pow((M_rhos/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
+            - M_beta*sqrt(M_area0);
+        FlowConditions::outputVector[conditionNumber]=M_outP;
 
-            oper->displayer().leaderPrint( " Flow rate = " , qn );
-            oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
+        oper->displayer().leaderPrint( " Flow rate = " , qn );
+        oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
 
-            M_outDeltaRadius = 0;
+        M_outDeltaRadius = 0;
 
 
-        } else {
+    } else {
         // if imposing the absorbing boundary condition through change in radius: --> Not ready
 #ifdef  TESTING
         M_outP = Pout;
