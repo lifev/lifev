@@ -41,7 +41,6 @@ SUBDIRS		= data  \
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_cylinder/testsuite.at \
-           $(srcdir)/test_restartFluid/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \
