@@ -114,10 +114,10 @@ void SolverAmesos::SetParameters()
 
 void SolverAmesos::setDataFromGetPot( const GetPot& dfile, const std::string& section )
 {
-    M_solverType    = dfile(( section + "/amesos/solvertype").data(), "Superludist");
-    M_redistribute  = dfile(( section + "/amesos/redistribute").data(), true);
-    M_printTiming   = dfile(( section + "/amesos/print_timing").data(), false);
-    M_printStatus   = dfile(( section + "/amesos/print_status").data(), false);
+    M_solverType       = dfile(( section + "/amesos/solvertype").data(), "Klu");
+    M_redistribute     = dfile(( section + "/amesos/redistribute").data(), true);
+    M_printTiming      = dfile(( section + "/amesos/print_timing").data(), false);
+    M_printStatus      = dfile(( section + "/amesos/print_status").data(), false);
 }
 
 
