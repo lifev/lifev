@@ -51,8 +51,6 @@ fixedPoint::setDataFile( GetPot const& dataFile )
     if( M_data->algorithm() == "RobinNeumann" )
         M_aitkFS.setDefault(-1, 1);
 
-    if ( false && this->isFluid() )
-        M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( dataFile, "fixedPtFluidInnerIterations") );
 }
 
 
@@ -81,28 +79,6 @@ fixedPoint::setupFluidSolid()
         {
             M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
             M_beta.reset(new vector_type(this->M_fluid->getMap()));
-        }
-
-    if ( false && this->isFluid())
-        {
-            if (M_ensightFluid.get() == 0)
-                M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( "", "fixedPtFluidInnerIterations") );
-
-            assert( M_uFESpace.get() );
-            assert( M_uFESpace->mesh().get() );
-
-            M_ensightFluid->setMeshProcId(M_uFESpace->mesh(), M_uFESpace->map().Comm().MyPID());
-
-            assert( this->M_fluid.get() );
-            M_velAndPressure.reset( new vector_type( this->M_fluid->getMap() , Repeated ));
-
-            M_ensightFluid->addVariable( ExporterData::Vector, "velocityInner", M_velAndPressure,
-                                         UInt(0), M_uFESpace->dof().numTotalDof() );
-
-            M_ensightFluid->addVariable( ExporterData::Scalar, "pressureInner", M_velAndPressure,
-                                         UInt(3*M_uFESpace->dof().numTotalDof()),
-                                         UInt(3*M_uFESpace->dof().numTotalDof()+M_pFESpace->dof().numTotalDof()) );
-
         }
 
 //@    setUpBC();
@@ -208,11 +184,6 @@ void fixedPoint::eval( const vector_type& _disp,
 
             std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
             std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
-
-            //              this->M_fluid->postProcess();
-            //              *M_velAndPressure = this->M_fluid->solution();
-            //              M_ensightFluid->postProcess( M_nbEval );
-
 
         }
 

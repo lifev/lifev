@@ -60,8 +60,6 @@ exactJacobian::setDataFile( const GetPot& dataFile )
 
     M_linearSolver.setDataFromGetPot(dataFile, "jacobian");
 
-    if (false && this->isFluid())
-        M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( dataFile, "fixedPtFluidInnerIterations") );
 }
 
 void
@@ -85,28 +83,6 @@ exactJacobian::setupFluidSolid()
         M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
         M_beta.reset  (new vector_type(this->M_fluid->getMap()));
     }
-
-    if ( false && this->isFluid())
-        {
-            if (M_ensightFluid.get() == 0)
-                M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( "", "fixedPtFluidInnerIterations") );
-
-            assert( M_uFESpace.get() );
-            assert( M_uFESpace->mesh().get() );
-
-            M_ensightFluid->setMeshProcId(M_uFESpace->mesh(), M_uFESpace->map().Comm().MyPID());
-
-            assert( this->M_fluid.get() );
-            M_velAndPressure.reset( new vector_type( this->M_fluid->getMap(), Repeated ));
-
-            M_ensightFluid->addVariable( ExporterData::Vector, "velocityInner", M_velAndPressure,
-                                         UInt(0), M_uFESpace->dof().numTotalDof() );
-
-            M_ensightFluid->addVariable( ExporterData::Scalar, "pressureInner", M_velAndPressure,
-                                         UInt(3*M_uFESpace->dof().numTotalDof()),
-                                         UInt(3*M_uFESpace->dof().numTotalDof()+M_pFESpace->dof().numTotalDof()) );
-
-        }
 
 
 //    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));

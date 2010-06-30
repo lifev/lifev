@@ -23,7 +23,6 @@
 #define _EJ_HPP
 
 #include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifefilters/ensight.hpp>
 
 namespace LifeV
 {
@@ -128,14 +127,6 @@ public:
 //         exactJacobian* M_pFS;
 //     };
 
-    void fluidPostProcess() {
-        if ( false && this->isFluid() )
-         {
-             *M_velAndPressure = *this->M_fluid->solution();
-             M_ensightFluid->postProcess( M_nbEvalAux++ );
-         }
-    }
-
     //Displayer const& getDisplayer(){return displayer();}
 private:
 
@@ -153,9 +144,6 @@ private:
 
     generalizedAitken<vector_type, Real> M_aitkFS;
 
-
-    boost::shared_ptr< Ensight< RegionMesh3D<LinearTetra> > > M_ensightFluid;
-    boost::shared_ptr<vector_type>                            M_velAndPressure;
 
 //     bc_vector_interface     M_bcvFluidLoadToStructure;
 

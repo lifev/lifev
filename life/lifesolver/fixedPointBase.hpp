@@ -23,7 +23,6 @@
 #define _FP_HPP
 
 #include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifefilters/ensight.hpp>
 
 namespace LifeV
 {
@@ -80,9 +79,6 @@ private:
 
     boost::shared_ptr<vector_type>       M_rhsNew;
     boost::shared_ptr<vector_type>       M_beta;
-
-    boost::shared_ptr< Ensight< RegionMesh3D<LinearTetra> > > M_ensightFluid;
-    boost::shared_ptr<vector_type>                            M_velAndPressure;
 
     void eval( const vector_type& disp, UInt status );
 
