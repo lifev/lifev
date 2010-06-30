@@ -74,13 +74,13 @@ using namespace LifeV;
  const int OUTEDGES   = 5;
 
 Real zero_scalar(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
-{  
+{
   return 0.0;
 }
 
 
 Real p0(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
-{  
+{
   return 10;
 }
 
@@ -100,7 +100,7 @@ Real velocity(const Real& t, const Real& x, const Real& y, const Real& z, const 
       break;
     }
   return 0;
-  } 
+  }
 
 
 
@@ -121,7 +121,7 @@ struct  ResistanceProblem::Private
    double L;   /**< height and width of the domain (in cm) */
    double R;   /**< radius of the cylinder (in cm) */
    double resistance;
-   Epetra_Comm* comm;  
+   Epetra_Comm* comm;
 };
 
 
@@ -142,7 +142,7 @@ struct  ResistanceProblem::Private
      dataFile( "fluid/physics/density", 1. );
      d->L = dataFile( "fluid/problem/L", 5. );
      d->R  = 0.5;
-     Real  pi = 3.14159265358979 ; 
+     Real  pi = 3.14159265358979 ;
 
      d->resistance = 8*d->nu*d->L/(pi*pow(d->R,4));
 
@@ -167,7 +167,7 @@ struct  ResistanceProblem::Private
 	        << " lenght = "<< d->L <<"\n"
 	        << " radius = "<< d->R <<"\n"
 		<< " resistance = "<< d->resistance <<"\n"
-		<<"######################\n \n";  
+		<<"######################\n \n";
     }
 
 }
@@ -183,7 +183,7 @@ ResistanceProblem::run()
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
     // typedef boost::shared_ptr<BCVectorInterface>   bc_vector_interface;
     // Reading from data file
-    
+
     GetPot dataFile( d->data_file_name.c_str() );
 
     int save = dataFile("fluid/miscellaneous/save", 1);
@@ -206,7 +206,7 @@ ResistanceProblem::run()
 
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
-    
+
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
@@ -297,22 +297,19 @@ ResistanceProblem::run()
                                               pFESpace,
                                               *d->comm);
     EpetraMap fullMap(fluid.getMap());
- 
-   
 
     if (verbose) std::cout << "ok." << std::endl;
 
-
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "poiseuille", d->comm->MyPID());
-    
+
     vector_ptrtype velAndPressure ( new vector_type(fluid.solution(),Repeated ) );
-    
+
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
 
     ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(3*uFESpace.dof().numTotalDof()+pFESpace.dof().numTotalDof()) );
+                         UInt(3*uFESpace.dof().numTotalDof() ),
+                         UInt(  pFESpace.dof().numTotalDof() ) );
 
 
     // Initialization
@@ -325,25 +322,21 @@ ResistanceProblem::run()
 
     BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
 
-   
-
     // initialization with stokes solution
-    if (verbose)
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
     dataNavierStokes.dataTime()->setTime(t0);
-
 
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
 
     BCFunctionBase uZero(zero_scalar);
-   
+
     // parabolic profile
 
-    BCFunctionBase  uPois( velocity );  
-  
-   
+    BCFunctionBase  uPois( velocity );
+
+
     // Resistance condition:
 
     vector_type bcvector(fluid.getMap(),Repeated);
@@ -351,66 +344,66 @@ ResistanceProblem::run()
     bcvector.getEpetraVector().PutScalar(0.0);
 
     BCVector bcResistance(bcvector,uFESpace.dof().numTotalDof(),1);
-      
+
     bcResistance.setResistanceCoef(d->resistance);
 
     // Boundary conditions
-   
+
     bcH.addBC( "Wall",    1,   Essential,  Full,  uZero,  3 );
     bcH.addBC( "InFlow",  2,   Essential,  Full,  uPois  , 3 );
     bcH.addBC( "Edges",   20,  Essential,  Full,  uZero, 3 );
     bcH.addBC( "OutFlow", 3,   Resistance, Full,  bcResistance, 3);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    
+
     beta *= 0.;
     rhs  *= 0.;
-    
-    //initiliation fluid 
+
+    //initiliation fluid
     fluid.initialize(velocity, zero_scalar);
     //  fluid.initialize(zero_scalar, zero_scalar);
 
-    bdf.bdf_u().initialize_unk(fluid.solution()); 
-    
+    bdf.bdf_u().initialize_unk(fluid.solution());
+
     fluid.setUp(dataFile);
 
     fluid.buildSystem();
 
     MPI_Barrier(MPI_COMM_WORLD);
-    
-    fluid.resetPrec(); 
-    
+
+    fluid.resetPrec();
+
     // Temporal loop
-    
+
     int iter = 1, ii = 0;
-    
+
     chronoSet.stop();
-   
+
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
         dataNavierStokes.dataTime()->setTime(time);
-  
+
         chrono.start();
 
         double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
 
         beta = bdf.bdf_u().extrap();
-	rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
         bdf.bdf_u().shift_right( fluid.solution() );
         *velAndPressure = fluid.solution();
-      
-	ensight.postProcess( time );
+
+        ensight.postProcess( time );
 
         MPI_Barrier(MPI_COMM_WORLD);
 
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
     }
-   
+
 }
 
 
