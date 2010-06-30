@@ -841,7 +841,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     for( UInt __i = 0; __i < __nele;++__i )
     {
-        int __ne, __t, __tag, __np, __dummy;
+        int __ne, __t, __tag, __np;
 
         //Debug() << __i + 1 << " ";
 
@@ -876,7 +876,6 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         for (int iflag = 0; iflag < __t; ++iflag)
         {
             __is >> flag;
-            //Debug() << flag << " ";
 
             if (!ibcSet)
             {
@@ -884,12 +883,6 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
                 ibcSet = true;
             }
         }
-
-
-        // >> __tag
-        //      >> __dummy
-        //      >> __np;
-
 
         ++__gt[ __ne];
 
@@ -904,18 +897,13 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
             int node;
             __is >> node;
             __e[__i][__p] = node;
-            //Debug() << node << " ";
             __e[__i][__p] = itoii[ __e[__i][__p] - 1];
             __e[__i][__p] += 1;
 
             ++__p;
         }
-        //Debug() << "\n";
     }
 
-
-    // std::for_each( __gt.begin(), __gt.end(),  std::cout << boost::lambda::_1 << " " );
-    // std::cout << "\n";
 
     // Euler formulas
     UInt n_volumes = __gt[4];
