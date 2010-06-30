@@ -150,7 +150,7 @@ public:
     //! name assigned to this variable in output file
     const std::string&  variableName() const;
 
-    //! size of the stored array. was: dim()
+    //! size of the stored array
     const UInt& size() const;
 
     //! address of first datum in the array
@@ -260,7 +260,7 @@ public:
         @param type the type fo the variable Ensight::Scalar or Ensight::Vector
         @param prefix the prefix of the files storing the variable (ex: "velocity" for velocity.***)
         @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
-        @param size the number of Dof for that variable
+        @param size size of the stored array
     */
   void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype& vector, UInt start, UInt size,
                    UInt steady = 0, ExporterData::Where where = ExporterData::Node );
