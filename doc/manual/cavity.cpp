@@ -256,8 +256,8 @@ main( int argc, char** argv )
 
     // and the pressure
     ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(3*uFESpace.dof().numTotalDof() + pFESpace.dof().numTotalDof()) );
+                         UInt(3*uFESpace.dof().numTotalDof() ),
+                         UInt(  pFESpace.dof().numTotalDof() ) );
 
     // everything is ready now
     // a little barrier to synchronize the processes
