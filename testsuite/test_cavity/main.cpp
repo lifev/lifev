@@ -166,7 +166,7 @@ main( int argc, char** argv )
     // everything ( mesh included ) will be stored in a class
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
-    
+
     // Now for the boundary conditions :
     // BCHandler is the class that stores the boundary conditions. Here we will
     // set 3 boundary conditions :
@@ -274,13 +274,8 @@ main( int argc, char** argv )
 
 //     // and the pressure
      ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                          UInt(3*uFESpace.dof().numTotalDof()),
-                          UInt(3*uFESpace.dof().numTotalDof() + pFESpace.dof().numTotalDof()) );
-
-    // everything is ready now
-    // a little barrier to synchronize the processes
-    MPI_Barrier(MPI_COMM_WORLD);
-
+                          UInt(3*uFESpace.dof().numTotalDof() ),
+                          UInt(  pFESpace.dof().numTotalDof() ) );
 
 
     if (verbose) std::cout << std::endl;

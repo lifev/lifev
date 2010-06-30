@@ -222,8 +222,8 @@ public:
                                          UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
     		M_ensightFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-										UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
-										UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+                                         UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ),
+                                         UInt(  M_fsi->FSIOper()->pFESpace().dof().numTotalDof() ) );
 
     		M_ensightFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
 										UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
@@ -237,9 +237,9 @@ public:
     		M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_ensightSolid->mapType() ));
     		M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_ensightSolid->mapType() ));
     		M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-										UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                                         UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
     		M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-										UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                                         UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
     	}
 
     	bool restart = dataFile("problem/restart",false);

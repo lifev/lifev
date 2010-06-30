@@ -505,8 +505,8 @@ MassTransport::run()
                            UInt(0), uFESpace.dof().numTotalDof() );
 
     exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                           UInt(3*uFESpace.dof().numTotalDof()),
-                           UInt(3*uFESpace.dof().numTotalDof() + pFESpace.dof().numTotalDof()) );
+                           UInt(3*uFESpace.dof().numTotalDof() ),
+                           UInt(  pFESpace.dof().numTotalDof() ) );
 
     exporter->addVariable( ExporterData::Scalar, "concentration", concentration,
                            UInt(0), UInt(adrFESpace.dof().numTotalDof()));

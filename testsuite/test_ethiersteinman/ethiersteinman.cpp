@@ -791,8 +791,8 @@ Ethiersteinman::check()
                                    UInt(0), uFESpace.dof().numTotalDof() );
 
             exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                                   UInt(3*uFESpace.dof().numTotalDof()),
-                                   UInt(pFESpace.dof().numTotalDof()) );
+                                   UInt(3*uFESpace.dof().numTotalDof() ),
+                                   UInt(  pFESpace.dof().numTotalDof() ) );
             exporter->postProcess( 0 );
 
             if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;

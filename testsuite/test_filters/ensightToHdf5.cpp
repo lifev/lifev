@@ -241,8 +241,8 @@ EnsightToHdf5::run()
     importer->addVariable( ExporterData::Vector, "velocity", velAndPressureImport,
                            UInt(0), uFESpace.dof().numTotalDof() );
     importer->addVariable( ExporterData::Scalar, "pressure", velAndPressureImport,
-                           UInt(3*uFESpace.dof().numTotalDof()),
-                           UInt(pFESpace.dof().numTotalDof()) );
+                           UInt(3*uFESpace.dof().numTotalDof() ),
+                           UInt(  pFESpace.dof().numTotalDof() ) );
     importer->import( t0 );
 
     *velAndPressureExport = *velAndPressureImport;
@@ -256,12 +256,13 @@ EnsightToHdf5::run()
                            UInt(0), uFESpace.dof().numTotalDof() );
 
     exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressureExport,
-                           UInt(3*uFESpace.dof().numTotalDof()),
-                           UInt(pFESpace.dof().numTotalDof()) );
+                           UInt(3*uFESpace.dof().numTotalDof() ),
+                           UInt(  pFESpace.dof().numTotalDof() ) );
 
     exporter->addVariable(ExporterData::Scalar, "P0pressure", P0pres,
-			  UInt(0), UInt(p0FESpace.dof().numTotalDof()),
-			  UInt(0), ExporterData::Cell );
+                          UInt(0),
+                          UInt(p0FESpace.dof().numTotalDof()),
+                          UInt(0), ExporterData::Cell );
     exporter->postProcess( t0 );
 
     // Temporal loop

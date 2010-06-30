@@ -235,8 +235,9 @@ void test_bdf::run() {
 
 	boost::shared_ptr<EpetraVector> u_display_ptr(new EpetraVector(
 			FeSpace.map(), Repeated));
-	exporter->addVariable(ExporterData::Scalar, "u", u_display_ptr, UInt(0),
-			UInt(FeSpace.dof().numTotalDof()));
+	exporter->addVariable(ExporterData::Scalar, "u", u_display_ptr,
+                          UInt(0),
+                          UInt(FeSpace.dof().numTotalDof()));
 	*u_display_ptr = u;
 	exporter->postProcess(0);
 #endif
