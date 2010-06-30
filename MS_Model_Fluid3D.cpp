@@ -788,11 +788,7 @@ MS_Model_Fluid3D::SetupSolution()
         M_importer->setMeshProcId( M_FluidMeshPart->mesh(), M_comm->MyPID() );
 
         M_importer->addVariable( ExporterData::Vector, "Velocity", M_FluidSolution, static_cast <UInt> ( 0 ), M_uDOF );
-        #ifdef HAVE_HDF5
-            M_importer->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
-        #else
-            M_importer->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, 3 * M_uDOF + M_pDOF );
-        #endif
+        M_importer->addVariable( ExporterData::Scalar, "Pressure", M_FluidSolution, 3 * M_uDOF, M_pDOF);
 
         // Import
         M_exporter->setStartIndex( M_importer->importFromTime( M_FluidData->dataTime()->getInitialTime() ) + 1 );
