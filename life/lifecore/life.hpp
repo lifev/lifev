@@ -194,7 +194,8 @@ typedef detail::unsigned_integer<32>::type uint32_type;
 typedef detail::unsigned_integer<64>::type uint64_type;
 
 //! Generic integer data
-typedef int16_type Int;
+typedef int32_type  Int;
+typedef int16_type  SInt;
 //! generic unsigned integer (used mainly for addressing)
 typedef uint32_type UInt;
 typedef uint16_type USInt;
@@ -212,7 +213,8 @@ typedef size_t size_type;
 
 #else
 //! Generic integer data
-typedef int Int;
+typedef int   Int;
+typedef short SInt;
 //! generic unsigned integer (used mainly for addressing)
 typedef unsigned int UInt;
 typedef unsigned short USInt;
