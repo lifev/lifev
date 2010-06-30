@@ -265,20 +265,31 @@ public:
 
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), ++_i)
         {
-
-            std::cout<<"flux : "<<M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement())<<std::endl;
-            if ( valveIsOpen && M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement()) > 0.5)
-                valveIsOpen=false;
+            LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
+            std::cout<<"flux : "<<flux<<std::endl;
+            if ( valveIsOpen)
+            {
+                if (flux > 0.5)
+                {
+                    valveIsOpen=false;
+                    M_fsi->setFluxBC(LifeV::BCh_monolithicFlux(valveIsOpen));
+                    M_fsi->setup(/*data_file*/);
+                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+                }
+            }
             // close the valve
             else{
-                if ( (!valveIsOpen) && M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement()) < -0.5)
+                if (M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
+                {
                     valveIsOpen=true;
+                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+                }
             }
-            M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
 
             int flag =2;
             FC0.renewParameters( *M_fsi, 3 );
-            LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->getTime() );
+            LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->getTime(), flux );
 
             //                 FC0.renewParameters( *M_fsi, 6 );
             //                 FC1.renewParameters( *M_fsi, 3, 4 );
@@ -288,9 +299,11 @@ public:
 
             boost::timer _timer;
 
-
             M_fsi->FSIOper()->getSolidDisp(*M_solidDisp);//    displacement(), M_offset);
             M_fsi->FSIOper()->getSolidVel(*M_solidVel);//    displacement(), M_offset);
+            *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+            *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+
             M_fsi->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
 
             M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
@@ -328,6 +341,9 @@ public:
 
             M_solidDisp->subset(M_fsi->displacement(), offset);
             M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
+            *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+            *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+
 
             *M_velAndPressure = M_fsi->displacement();
             M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
