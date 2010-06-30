@@ -31,8 +31,10 @@
 */
 
 
+#include <math.h>
 #include "lumpedHeart.hpp"
 #define TESTING
+#define PI 3.14159265
 
 namespace LifeV
 {
@@ -40,13 +42,12 @@ namespace LifeV
 void LumpedHeart::initParameters( FSIOperator&  oper,
                                   const std::string&    FileName )
 {
-    //M_fluid      =oper.fluid();
-    M_ODEscheme.initialize_unk(M_flux);
+    M_ODEscheme.initialize_unk(0.);
 
     GetPot       dataFile(FileName);
     M_dt         =dataFile("problem/timestep", 0.001);
-    M_T_max      =dataFile("problem/T_max", 0.01);
-    M_E_max      =dataFile("problem/E_max", 10);
+    M_T_max      =dataFile("problem/T_max", 0.8);
+    M_E_max      =dataFile("problem/E_max", 1333.22);
     M_V_0        =dataFile("problem/V_0", 2);
     M_Vt_ao      =dataFile("problem/Vt_ao", 5);
     M_RV_art     =dataFile("problem/RV_art", 10);
@@ -54,7 +55,8 @@ void LumpedHeart::initParameters( FSIOperator&  oper,
     M_LV_art     =dataFile("problem/LV_art", 0.6879);
     M_LA_V       =dataFile("problem/LA_V", 0.6670);
     M_pressure   =dataFile("problem/p0", 1000);
-    M_flux       =dataFile("problem/flux0", 0);
+    M_Tpb        =dataFile("problem/Tpb", 0.1);
+    M_Tpw        =dataFile("problem/Tpw", 0.55);
 }
 
 Real& LumpedHeart::outPressure         (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -62,25 +64,27 @@ Real& LumpedHeart::outPressure         (const Real& t, const Real& x, const Real
     return LumpedHeart::M_pressure;
 }
 
-void LumpedHeart::renewParameters ( FSIOperator&  oper, const int& flag, const Real& time )
+void LumpedHeart::renewParameters ( FSIOperator&  oper, const int& flag, const Real& time , const Real& flux)
 {
     vector_ptrtype solution;
     oper.getSolution(solution);
-    M_flux = oper.fluid().flux(flag, *solution);
-    M_intFlux += M_flux*M_dt;
+    M_intFlux += flux*M_dt;
     //should have a different sign, but it is assigned as a Normal bc so we take the opposite
-    LumpedHeart::M_pressure = (-M_flux*(M_RV_art)-M_elastance(time)*(M_Vt_ao-M_intFlux-M_V_0))+(M_LV_art)*(-M_flux/M_dt+M_ODEscheme.time_der(M_dt));
-    //    M_flux     = (M_ODEScheme.time_der(M_dt)-M_Pressure+M_elastance*(M_Vt_ao-M_intFlux-M_V_0))/(M_LV_art+M_elastance*M_dt+M_RV_art);
-    M_ODEscheme.shift_right(M_flux);
-    M_PV= (M_Vt_ao-M_intFlux-M_V_0)/M_elastance(time);
+    LumpedHeart::M_pressure = (-flux*(M_RV_art)-M_elastance(time)*(M_Vt_ao-M_intFlux-M_V_0))+(M_LV_art)*(-flux/M_dt+M_ODEscheme.time_der(M_dt));
+    //    flux     = (M_ODEScheme.time_der(M_dt)-M_Pressure+M_elastance*(M_Vt_ao-M_intFlux-M_V_0))/(M_LV_art+M_elastance*M_dt+M_RV_art);
+    M_ODEscheme.shift_right(flux);
 }
 
-Real& LumpedHeart::M_elastance(const Real& t)
+Real LumpedHeart::M_elastance(const Real& t)
 {
-    Real ret = 2660 - ((t-0.25)*(t-0.25)*42560);
-    if(ret<0.01)
-        ret=0.01;
-    return ret;
+    Real ret = 1 - cos((t-M_Tpb)/M_Tpw*2*PI);
+    if(t<M_Tpb)
+        return (0.0);
+    else
+        if(t<M_Tpb+M_Tpw)
+            return ret*1333.22;
+        else
+            return (0.0);
 }
 
 

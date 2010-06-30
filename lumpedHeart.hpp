@@ -46,9 +46,6 @@ public:
 
     LumpedHeart()
         :
-        //        super(),
-        M_flux(),
-        //M_pressure(),
         M_time(0.),
         M_BC(),
         M_ODEscheme(1),
@@ -70,7 +67,7 @@ public:
 
     static Real& outPressure         (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-    void renewParameters     ( FSIOperator&  oper , const int& flag, const Real& time);
+    void renewParameters     ( FSIOperator&  oper , const int& flag, const Real& time, const Real& flux);
 
     Real fZero               (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
@@ -81,7 +78,7 @@ private:
     //! @name Private Methods
     //@{
 
-    Real&                                      M_elastance(const Real& t);
+    Real                                      M_elastance(const Real& t);
 
     //! Short description of this method
     /*!
@@ -92,8 +89,6 @@ private:
 
     //@}
 
-    Real                                      M_flux;
-    //Real                                      M_pressure;
     Real                                      M_time;
     boost::shared_ptr< bc_type >              M_BC;
     BdfT<Real>                                M_ODEscheme;
@@ -108,7 +103,8 @@ private:
     Real                                      M_PV     ; //ventricular pressure
     Real                                      M_intFlux;
     Real                                      M_Vt_ao;
-
+    Real                                      M_Tpb  ;
+    Real                                      M_Tpw  ;
 };
 }
 
