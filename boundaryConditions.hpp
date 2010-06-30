@@ -77,15 +77,20 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluid_bchandler_type BCh_monolithicFlux()
+FSIOperator::fluid_bchandler_type BCh_monolithicFlux(bool isOpen=true)
 {
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
-    BCFunctionBase flow_3 (fluxFunction);
+  BCFunctionBase flow_3 (fluxFunction);
+  BCFunctionBase bcf      (fZero);
+     //uncomment  to use fluxes
+
+  //  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+//   if(!isOpen)
+//       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
 
     //uncomment  to use fluxes
     BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
-    //  BCh_fluid->addBC("InFlow" , OUTLET,  Flux, Normal, flow_3);
 
     return BCh_fluid;
 }
@@ -101,17 +106,15 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, bool c
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
     BCFunctionBase bcf      (fZero);
-    //BCFunctionBase in_flow  (/*uInterpolated*/u2/*aortaPhisPress*/);
+    BCFunctionBase in_flow  (/*uInterpolated*/u2/*aortaPhisPress*/);
     //    BCFunctionBase out_flow (fZero);
-    BCFunctionBase in_flow  (LumpedHeart::outPressure);
+    //BCFunctionBase in_flow  (LumpedHeart::outPressure);
 
     BCFunctionBase out_press (FlowConditions::outPressure0);
 
 
 //     if(isOpen)
-//         BCh_fluid->addBC("InFlow" , INLET,  Natural,   Normal, in_flow);
-//     else
-//         BCh_fluid->addBC("InFlow" , INLET,  Essential,   Full, bcf, 3);
+    BCh_fluid->addBC("InFlow" , INLET,  Natural,   Normal, in_flow);
 
     BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
     return BCh_fluid;
@@ -126,7 +129,7 @@ FSIOperator::solid_bchandler_type BCh_monolithicRobin(FSIOperator &_oper)
 
     //robin condition on the outer wall
     _oper.setMixteOuterWall(hyd, young);
-    BCh_solid->addBC("OuterWall", OUTERWALL, Mixte, Normal, _oper.bcfMixteOuterWall());
+    //BCh_solid->addBC("OuterWall", OUTERWALL, Mixte, Normal, _oper.bcfMixteOuterWall());
 
     return BCh_solid;
 }
