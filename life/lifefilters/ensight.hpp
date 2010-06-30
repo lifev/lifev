@@ -322,7 +322,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
 
     UInt count=0;
 
-    UInt dim   = dvar.size();
+    UInt size   = dvar.size();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
     UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
@@ -338,7 +338,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
             {
                 // int id = this->M_mesh->pointList( i ).id();
                 int id = this->M_LtGNodesMap[i];
-                vctf << setw(12) << float(dvar(start+j*dim+id)) ;
+                vctf << setw(12) << float(dvar(start+j*size+id)) ;
                 ++count;
                 if ( count == 6 )
                     {
@@ -564,7 +564,6 @@ void Ensight<Mesh>::M_rd_scalar( ExporterData& dvar )
 
     // UInt count=0;
 
-//    UInt dim = dvar.size();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
     UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
@@ -610,7 +609,7 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_vector(ExporterData& dvar)
 
 //    UInt count=0;
 
-    UInt dim   = dvar.size();
+    UInt size   = dvar.size();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
     UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
@@ -630,7 +629,7 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_vector(ExporterData& dvar)
                 // int id = this->M_mesh->pointList( i ).id();
                 int id = this->M_LtGNodesMap[i];
                 vctf.width(12);
-                vctf >> dvar(start+j*dim+id) ;
+                vctf >> dvar(start+j*size+id) ;
                 /*
                 ++count;
                 if ( count == 6 )

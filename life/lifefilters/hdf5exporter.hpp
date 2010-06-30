@@ -435,10 +435,10 @@ void Hdf5exporter<Mesh>::M_wr_scalar(const ExporterData& dvar)
     M_HDF5->Write("RHS", RHS);
     */
 
-    UInt dim   = dvar.size();
+    UInt size  = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
     vector_type subVar(subMap);
     subVar.subset(*dvar.storedArray(),start);
 
@@ -451,7 +451,7 @@ template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 {
 
-    UInt dim   = dvar.size();
+    UInt size  = dvar.size();
     UInt start = dvar.start();
 
     using namespace boost;
@@ -473,14 +473,14 @@ void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        EpetraMap subMap(dvar.storedArray()->BlockMap(), start+d*dim, dim);
+        EpetraMap subMap(dvar.storedArray()->BlockMap(), start+d*size, size);
         ArrayOfVectors[d].reset(new  vector_type(subMap));
-        ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*dim);
+        ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*size);
 
         ArrayOfVectors[d]->getEpetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
     }
 
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
     Epetra_MultiVector multiVector(View, *subMap.getMap(Unique), ArrayOfPointers, nDimensions);
 
 
@@ -934,10 +934,10 @@ template <typename Mesh>
 void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
 {
 
-    UInt dim   = dvar.size();
+    UInt size  = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     std::string varname (dvar.variableName()); // see also in M_wr_attributes
@@ -957,7 +957,7 @@ void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
 template <typename Mesh>
 void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
 {
-    UInt dim   = dvar.size();
+    UInt size  = dvar.size();
     UInt start = dvar.start();
 
     using namespace boost;
@@ -965,7 +965,7 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
     // solution array has first to be read has Multivector.
 
     // first read the multivector:
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, dim);
+    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     bool readTranspose (true);
@@ -982,7 +982,7 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        dvar.storedArray()->subset(*subVar, subMap,  0, start+d*dim, d );
+        dvar.storedArray()->subset(*subVar, subMap,  0, start+d*size, d );
     }
 
     delete subVar;
