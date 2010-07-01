@@ -27,6 +27,7 @@ DO_NOT_COMPILE=
 SUBDIRS		= data  \
               test_TemplateTest \
               test_cylinder \
+              test_restartFluid \
               test_getpot \
               test_structure \
               test_ethiersteinman \

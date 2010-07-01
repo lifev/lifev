@@ -24,21 +24,10 @@
 */
 /**
    \file cylinder.cpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \author Gilles Fourestey <gilles.fourestey@epfl.ch>
    \date 2005-04-19
  */
 
-// #include <lifeconfig.h>
-
-// #include <life/lifecore/life.hpp>
-// #include <life/lifecore/GetPot.hpp>
-// #include <life/lifecore/debug.hpp>
-
-// #include <life/lifefilters/importer.hpp>
-
-//#include "NavierStokesSolverBlockIP.hpp"
-
-//#include "Epetra_SerialComm.h"
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 	#include <Epetra_MpiComm.h>
@@ -46,7 +35,7 @@
 #else
 	#include <Epetra_SerialComm.h>
 #endif
-//#include "life/lifesolver/NavierStokesSolver.hpp"
+
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
@@ -77,6 +66,8 @@ const int RINGIN      = 20;
 const int RINGOUT     = 30;
 
 
+
+
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
                   const Real& /* y */,
@@ -95,14 +86,10 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
   case 3:
        if ( t <= 0.003 )
           return 1.3332e4;
-//      return 0.01;
       return 0.0;
       break;
   case 2:
       return 0.0;
-//      return 1.3332e4;
-//    else
-//      return 0.0;
     break;
   }
   return 0;
@@ -296,7 +283,7 @@ struct Cylinder::Private
             //            if (id == 3)
                 return 10.;
 
-            return -1.;
+            return 0.;
         }
 
     fct_type getU_one()
@@ -354,16 +341,16 @@ Cylinder::Cylinder( int argc,
 
 void
 Cylinder::run()
-
 {
+    typedef RegionMesh3D<LinearTetra>                        Mesh;
 
     typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
+    typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name );
 
-    //    int save = dataFile("fluid/miscellaneous/save", 1);
+//    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (d->comm->MyPID() == 0);
 
@@ -377,10 +364,6 @@ Cylinder::run()
     BCFunctionBase uOne (  d->getU_one() );
     BCFunctionBase uPois(  d->getU_pois() );
 
-
-    //BCFunctionBase unormal(  d->get_normal() );
-
-    //cylinder
 
     bcH.addBC( "Inlet",    INLET,    Essential,     Full,     uPois  , 3 );
     bcH.addBC( "Ringin",   RINGIN,   Essential,     Full,     uZero  , 3 );
@@ -396,10 +379,10 @@ Cylinder::run()
     DataMesh dataMesh;
     dataMesh.setup(dataFile, "fluid/space_discretization");
 
-    RegionMesh3D<LinearTetra> mesh;
+    Mesh mesh;
     readMesh(mesh, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
+    partitionMesh< Mesh >   meshPart(mesh, *d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
@@ -410,7 +393,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
+    FESpace< Mesh, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -421,14 +404,13 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
+    FESpace< Mesh, EpetraMap > pFESpace(meshPart, pOrder, 1, *d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
 
     UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
-
 
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
@@ -465,30 +447,25 @@ Cylinder::run()
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
 
-#ifdef HAVE_HDF5
-    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
-#else
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
-#endif
 
-    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
+    std::string expFileName = dataFile( "exporter/filename", "fluid");
+    LifeV::Hdf5exporter<Mesh> exporter( dataFile, meshPart.mesh(), expFileName, d->comm->MyPID());
 
-    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), exporter.mapType() ) );
 
-    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-<<<<<<< cylinder.cpp
-                         UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(pFESpace.dof().numTotalDof()) );
-=======
-                         UInt(3*uFESpace.dof().numTotalDof() ),
-                         UInt(  pFESpace.dof().numTotalDof() ) );
->>>>>>> 1.21
+    exporter.addVariable( ExporterData::Vector, "velocity", velAndPressure,
+                          UInt(0), uFESpace.dof().numTotalDof() );
+
+    exporter.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
+                          UInt(3*uFESpace.dof().numTotalDof()),
+                          UInt(pFESpace.dof().numTotalDof()) );
+
+
 
     // initialization with stokes solution
 
     if (d->initial_sol == "stokes")
-        {
+    {
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
@@ -505,11 +482,82 @@ Cylinder::run()
 //    fluid.postProcess();
 
             *velAndPressure = *fluid.solution();
-            ensight.postProcess( 0 );
+            exporter.postProcess( 0 );
             fluid.resetPrec();
-        }
+    }
+    else    if (d->initial_sol == "restart")
+    {
+        // if (verbose)
+        //     std::cout << "  f- Restarting the solver at time " << t0 << " ... " << std::flush;
+
+        std::string start    = dataFile( "fluid/importer/start", "00000");
+        UInt        iStart   = atoi(start);
+        std::string filename = dataFile("fluid/importer/filename", "cylinder");
+
+        LifeV::Hdf5exporter<Mesh> importer( dataFile, filename);
+        importer.setMeshProcId(uFESpace.mesh(), d->comm->MyPID());
+
+        importer.addVariable( ExporterData::Vector,
+                              "Velocity",
+                              velAndPressure,
+                              UInt ( 0 ),
+                              uFESpace.dof().numTotalDof() );
+
+        importer.addVariable( ExporterData::Scalar,
+                              "Pressure",
+                              velAndPressure,
+                              3*uFESpace.dof().numTotalDof(),
+                              pFESpace.dof().numTotalDof());
+
+        exporter.setStartIndex(importer.importFromTime(0.0));
+
+
+        //
+#if 0
+        vector_ptrtype vel      (new LifeV::EpetraVector(uFESpace.map(), importer.mapType()));
+        vector_ptrtype pressure (new LifeV::EpetraVector(pFESpace.map(), importer.mapType()));
+
+        LifeV::ExporterData initSolVel(LifeV::ExporterData::Vector,
+                                       std::string("velocity." + start),
+                                       vel,
+                                       UInt(0),
+                                       uFESpace.dof().numTotalDof(),
+                                       UInt(0),
+                                       LifeV::ExporterData::Node );
+
+        LifeV::ExporterData initSolPress(LifeV::ExporterData::Scalar,
+                                         std::string("pressure." + start),
+                                         pressure,
+                                         UInt(0),
+                                         pFESpace.dof().numTotalDof(),
+                                         UInt(0),
+                                         LifeV::ExporterData::Node  );
+
+        importer.rd_var(initSolVel  );
+        importer.rd_var(initSolPress);
+
+        velAndPressure->subset(*vel,           vel->getMap(), (UInt) 0,                            0);
+        velAndPressure->subset(*pressure, pressure->getMap(), (UInt) 0, uFESpace.dof().numTotalDof());
+
+        std::cout << vel->Norm2() << std::endl;
+        std::cout << pressure->Norm2() << std::endl;
+
+        //
+#endif
+
+        std::cout << "ok." << std::endl;
+        exporter.postProcess( 0. );
+
+        double norm = velAndPressure->Norm2();
+        if (verbose)
+            std::cout << "   f- restart solution norm = " << norm << std::endl;
+        fluid.initialize(*velAndPressure);
+
+    }
+
 
     bdf.bdf_u().initialize_unk( *fluid.solution() );
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // Temporal loop
 
@@ -541,13 +589,8 @@ Cylinder::run()
 
         bdf.bdf_u().shift_right( *fluid.solution() );
 
-//         if (((iter % save == 0) || (iter == 1 )))
-//         {
         *velAndPressure = *fluid.solution();
-        ensight.postProcess( time );
-//         }
-//         postProcessFluxesPressures(fluid, bcH, time, verbose);
-
+        exporter.postProcess( time );
 
         MPI_Barrier(MPI_COMM_WORLD);
 
