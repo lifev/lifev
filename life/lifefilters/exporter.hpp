@@ -113,7 +113,13 @@ public:
         @param steady       - if  file name for postprocessing has to include time dependency
         @param where        - where is variable located (Node or Cell)
     */
-  ExporterData(const Type type, const std::string variableName, vector_ptrtype& vec, UInt start, UInt size, UInt steady, const Where where=ExporterData::Node);
+    ExporterData(const             Type type,
+                 const std::string variableName,
+                 vector_ptrtype&   vec,
+                 UInt              start,
+                 UInt              size,
+                 UInt              steady,
+                 const             Where where = ExporterData::Node);
 
     //@}
 
@@ -407,7 +413,7 @@ void Exporter<Mesh>::addVariable(const ExporterData::Type type,
                                  UInt steady,
                                  ExporterData::Where where)
 {
-  M_listData.push_back( ExporterData(type,variableName,vr,start, size, steady, where) );
+  M_listData.push_back( ExporterData(type,variableName, vr, start, size, steady, where) );
 }
 
 template <typename Mesh>

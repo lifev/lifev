@@ -131,6 +131,13 @@ public:
      */
     UInt importFromTime( const Real& Time );
 
+    //! Import data from previous simulations at a certain time
+    /*!
+       @param Time the time of the data to be imported
+       @return number of iteration corresponding at the time step
+     */
+    UInt importFromIter( const UInt& );
+
     //! Import data from previous simulations
     /*!
        @param time the solver time
@@ -348,6 +355,97 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
 
     return static_cast <UInt> ( SelectedTimeAndPostfix.second );
 }
+
+
+
+template<typename Mesh>
+UInt Hdf5exporter<Mesh>::importFromIter( const UInt& iter )
+{
+    // Container for the time and the postfix
+    std::pair< Real, int > SelectedTimeAndPostfix;
+    if ( !this->M_procId )
+    {
+        // Open the xmf file
+        std::ifstream xmfFile;
+        xmfFile.open( ( this->M_post_dir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
+
+        // Vector of TimeStep
+        std::vector< std::pair< Real, int > > TimeAndPostfix;
+
+        if ( xmfFile.is_open() )
+        {
+            // Define some variables
+            std::string line;
+            std::vector<std::string> stringsVector;
+
+            // Read one-by-one all the lines of the file
+            while ( !xmfFile.eof() )
+            {
+                std::getline( xmfFile, line, '\n' );
+
+                // If the line begin with "<!-- Time " it is the beginning of a new block
+                if ( !line.compare( 0, 10, "<!-- Time " ) )
+                {
+                    boost::split( stringsVector, line, boost::is_any_of( " " ) );
+                    TimeAndPostfix.push_back( make_pair( string2number( stringsVector[2] ), string2number( stringsVector[4] ) ) );
+                }
+            }
+        }
+
+        xmfFile.close();
+
+        // Find the closest time step
+        SelectedTimeAndPostfix = TimeAndPostfix.front();
+        bool found             = false;
+
+        for ( std::vector< std::pair< Real, int > >::const_iterator i = TimeAndPostfix.begin(); i < TimeAndPostfix.end()  ; ++i )
+        {
+            if ( i->second == iter )
+            {
+                SelectedTimeAndPostfix = *i;
+                found = true;
+                break;
+            }
+        }
+
+        ASSERT(found, "Selected iteration not found");
+
+    }
+
+
+
+    //std::cout << "  x-  HDF5 import from time " << SelectedTimeAndPostfix.first << " iteration " << SelectedTimeAndPostfix.second << std::endl;
+    this->M_listData.begin()->storedArray()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
+    this->M_count = SelectedTimeAndPostfix.second;
+
+    std::ostringstream index;
+    index.fill('0');
+
+    index << std::setw(5) << this->M_count;
+    this->M_postfix = "." + index.str();
+
+    //    this->computePostfix();
+
+    // Importing
+    if ( !this->M_procId )
+        std::cout << "  x-  HDF5 importing iteration " << index << " ...                       " << std::flush;
+
+    Chrono chrono;
+    chrono.start();
+    for ( std::list< ExporterData >::iterator i = this->M_listData.begin(); i != this->M_listData.end(); ++i )
+    {
+        this->rd_var(*i);
+        std::cout << "       ok" << std::endl;;
+    }
+    chrono.stop();
+
+    if ( !this->M_procId )
+        std::cout << "done in " << chrono.diff() << " s. (Time " << SelectedTimeAndPostfix.first
+                  << ", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
+
+    return static_cast <UInt> ( SelectedTimeAndPostfix.second );
+}
+
 
 template<typename Mesh>
 void Hdf5exporter<Mesh>::import(const Real& Tstart, const Real& dt)
@@ -881,7 +979,7 @@ void Hdf5exporter<Mesh>::M_wr_scalar_datastructure  ( std::ofstream& xdmf, const
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
-        "                           Dimensions=\"" << dvar.size()  << " " << dvar.typeDim() << "\"\n" <<
+        "                           Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
         "                           DataType=\"Float\"\n" <<
         "                           Precision=\"8\">\n" <<
         "               " << M_outputFileName << ":/" << dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
@@ -970,6 +1068,7 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
 
     bool readTranspose (true);
     std::string varname (dvar.variableName()); // see also in M_wr_attributes
+
     if(this->M_postfix!="")
     {
         varname += this->M_postfix;
