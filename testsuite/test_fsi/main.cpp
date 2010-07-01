@@ -37,11 +37,8 @@
 //#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/DataFSI.hpp>
 
-#ifdef HAVE_HDF5
-	#include <life/lifefilters/hdf5exporter.hpp>
-#else
-	#include <life/lifefilters/ensight.hpp>
-#endif
+#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ensight.hpp>
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -151,12 +148,7 @@ public:
     typedef FSIOperator::vector_type                        vector_type;
     typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
 
-// #ifdef HAVE_HDF5
-//     typedef Hdf5exporter<FSIOperator::mesh_type>            filter_type;
-// #else
-    typedef Ensight<FSIOperator::mesh_type>                 filter_type;
-// #endif
-
+    typedef Exporter<FSIOperator::mesh_type>                filter_type;
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
     /*!
@@ -208,37 +200,51 @@ public:
 
     	MPI_Barrier( MPI_COMM_WORLD );
 
+        std::string const exporterType =  dataFile( "exporter/type", "hdf5");
+        std::string const exporterName =  dataFile( "exporter/filename", "fixedPt");
+
 		Debug( 10000 ) << "Setting up Ensight \n";
     	if ( M_fsi->isFluid() )
     	{
-    		M_ensightFluid.reset( new  filter_type( dataFile, "fixedPtFluid") );
+#ifdef HAVE_HDF5
+            if (exporterType.compare("hdf5") == 0)
+                M_exporterFluid.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
+            else
+#endif
+                M_exporterFluid.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
 
-    		M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
-    		M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(),      M_ensightFluid->mapType() ));
-    		M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_ensightFluid->mapType() ));
+    		M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
-    		M_ensightFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
+    		M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
+    		M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
+
+    		M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                          UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
-    		M_ensightFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
+    		M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
                                          UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ),
                                          UInt(  M_fsi->FSIOper()->pFESpace().dof().numTotalDof() ) );
 
-    		M_ensightFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
+    		M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
 										UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
     	}
     	if ( M_fsi->isSolid() )
     	{
-    		M_ensightSolid.reset( new  filter_type ( dataFile, "fixedPtSolid") );
+#ifdef HAVE_HDF5
+            if (exporterType.compare("hdf5") == 0)
+                M_exporterSolid.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
+            else
+#endif
+                M_exporterSolid.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
 
-    		M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
+    		M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
-    		M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_ensightSolid->mapType() ));
-    		M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_ensightSolid->mapType() ));
-    		M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
+    		M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
+    		M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
+    		M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                          UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-    		M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
+    		M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                          UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
     	}
 
@@ -258,12 +264,12 @@ public:
 
     		if ( M_fsi->isFluid() )
     		{
-    			M_ensightFluid->import(M_Tstart, M_data->dataFluid()->dataTime()->getTimeStep());
+    			M_exporterFluid->import(M_Tstart, M_data->dataFluid()->dataTime()->getTimeStep());
     			M_fsi->FSIOper()->initializeFluid( *M_velAndPressure, *M_fluidDisp );
     		}
     		if ( M_fsi->isSolid() )
     		{
-    			M_ensightSolid->import(M_Tstart, M_data->dataSolid()->dataTime()->getTimeStep());
+    			M_exporterSolid->import(M_Tstart, M_data->dataSolid()->dataTime()->getTimeStep());
 				M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
     		}
     	}
@@ -334,14 +340,14 @@ public:
 
 				*M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
 				*M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-				M_ensightFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+				M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
             }
 
     		if ( M_fsi->isSolid() )
     		{
     			*M_solidDisp = M_fsi->FSIOper()->solid().disp();
     			*M_solidVel = M_fsi->FSIOper()->solid().vel();
-    			M_ensightSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+    			M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
     		}
 
 			std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
@@ -381,8 +387,8 @@ private:
 
 	bool           M_absorbingBC;
 
-	filter_ptrtype M_ensightFluid;
-	filter_ptrtype M_ensightSolid;
+	filter_ptrtype M_exporterFluid;
+	filter_ptrtype M_exporterSolid;
 
 	vector_ptrtype M_velAndPressure;
 	vector_ptrtype M_fluidDisp;
