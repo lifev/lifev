@@ -477,13 +477,8 @@ Cylinder::run()
                          UInt(0), uFESpace.dof().numTotalDof() );
 
     ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-<<<<<<< cylinder.cpp
-                         UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(pFESpace.dof().numTotalDof()) );
-=======
                          UInt(3*uFESpace.dof().numTotalDof() ),
                          UInt(  pFESpace.dof().numTotalDof() ) );
->>>>>>> 1.21
 
     // initialization with stokes solution
 
