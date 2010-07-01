@@ -134,9 +134,9 @@ public:
     //! Import data from previous simulations at a certain time
     /*!
        @param Time the time of the data to be imported
-       @return number of iteration corresponding at the time step
+       @return the simulation time corresponding to the iteration
      */
-    UInt importFromIter( const UInt& );
+    double importFromIter( const UInt& );
 
     //! Import data from previous simulations
     /*!
@@ -359,7 +359,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
 
 
 template<typename Mesh>
-UInt Hdf5exporter<Mesh>::importFromIter( const UInt& iter )
+double Hdf5exporter<Mesh>::importFromIter( const UInt& iter )
 {
     // Container for the time and the postfix
     std::pair< Real, int > SelectedTimeAndPostfix;
@@ -428,14 +428,16 @@ UInt Hdf5exporter<Mesh>::importFromIter( const UInt& iter )
 
     // Importing
     if ( !this->M_procId )
-        std::cout << "  x-  HDF5 importing iteration " << index << " ...                       " << std::flush;
+        std::cout << "  x-  HDF5 importing iteration "
+                  << index.str()
+                  << " at time " << SelectedTimeAndPostfix.first
+                  << " ... " << std::flush;
 
     Chrono chrono;
     chrono.start();
     for ( std::list< ExporterData >::iterator i = this->M_listData.begin(); i != this->M_listData.end(); ++i )
     {
         this->rd_var(*i);
-        std::cout << "       ok" << std::endl;;
     }
     chrono.stop();
 
@@ -443,7 +445,7 @@ UInt Hdf5exporter<Mesh>::importFromIter( const UInt& iter )
         std::cout << "done in " << chrono.diff() << " s. (Time " << SelectedTimeAndPostfix.first
                   << ", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
 
-    return static_cast <UInt> ( SelectedTimeAndPostfix.second );
+    return SelectedTimeAndPostfix.first;
 }
 
 
