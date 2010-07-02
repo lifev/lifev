@@ -47,10 +47,9 @@
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
+#include <life/lifefilters/ensight.hpp>
 #ifdef HAVE_HDF5
     #include <life/lifefilters/hdf5exporter.hpp>
-#else
-    #include <life/lifefilters/ensight.hpp>
 #endif
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
@@ -67,6 +66,9 @@ class MS_Model_Fluid3D: public virtual MS_PhysicalModel
 {
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef MS_PhysicalModel                   super;
 
     typedef RegionMesh3D< LinearTetra >        Mesh_Type;
@@ -75,18 +77,23 @@ public:
     typedef OseenShapeDerivative< Mesh_Type >  Fluid_Type;
     typedef Fluid_Type::vector_type            FluidVector_Type;
 
+    typedef Exporter< Mesh_Type >              IOFile_Type;
+    typedef boost::shared_ptr< IOFile_Type >   IOFile_PtrType;
+
+    typedef Ensight< Mesh_Type >               EnsightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< Mesh_Type >          IOFile_Type;
-#else
-    typedef Ensight< Mesh_Type >               IOFile_Type;
+    typedef Hdf5exporter< Mesh_Type >          HDF5IOFile_Type;
 #endif
 
     typedef BCHandler                          BC_Type;
     typedef BCInterface< Fluid_Type >          BCInterface_Type;
     typedef BdfTNS< FluidVector_Type >         BDF_Type;
-    typedef DataNavierStokes		       Data_Type;
+    typedef DataNavierStokes		           Data_Type;
 
     typedef FESpace< Mesh_Type, EpetraMap >    FESpace_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -329,6 +336,15 @@ private:
      */
     void SetupGlobalData( const std::string& FileName );
 
+    //! Setup the exporter and the importer
+    /*!
+     * @param FileName File name of the specific model.
+     */
+    void SetupExporterImporter( const std::string& FileName );
+
+    //! Setup the mesh for the fluid problem
+    void SetupMesh();
+
     //! Setup the FE space for pressure and velocity
     void SetupFEspace();
 
@@ -343,34 +359,31 @@ private:
 
     //@}
 
-    boost::shared_ptr< IOFile_Type >        M_exporter;
-    boost::shared_ptr< IOFile_Type >        M_importer;
+    IOFile_PtrType                          M_exporter;
+    IOFile_PtrType                          M_importer;
 
-    std::string                             M_FileName; //TODO Temporary - To be removed
+    std::string                             M_fileName; //TODO Temporary - To be removed
 
     // Fluid problem
-    boost::shared_ptr< Fluid_Type >         M_Fluid;
-    boost::shared_ptr< BCInterface_Type >   M_FluidBC;
-    boost::shared_ptr< BDF_Type >           M_FluidBDF;
-    boost::shared_ptr< Data_Type >          M_FluidData;
-    boost::shared_ptr <DataMesh>            M_DataMesh;
-    boost::shared_ptr< Mesh_Type >          M_FluidMesh;
-    boost::shared_ptr< PartitionMesh_Type > M_FluidMeshPart;
-    boost::shared_ptr< EpetraMap >          M_FluidFullMap;
-    boost::shared_ptr< FluidVector_Type >   M_FluidSolution;
+    boost::shared_ptr< Fluid_Type >         M_fluid;
+    boost::shared_ptr< BCInterface_Type >   M_BC;
+    boost::shared_ptr< BDF_Type >           M_BDF;
+    boost::shared_ptr< Data_Type >          M_data;
+    boost::shared_ptr< DataMesh >           M_dataMesh;
+    boost::shared_ptr< PartitionMesh_Type > M_mesh;
+    boost::shared_ptr< EpetraMap >          M_map;
+    boost::shared_ptr< FluidVector_Type >   M_solution;
 
     // Linear Fluid problem
-    boost::shared_ptr< BCInterface_Type >   M_LinearFluidBC;
-    bool                                    M_UpdateLinearModel;
+    boost::shared_ptr< BCInterface_Type >   M_linearBC;
+    bool                                    M_updateLinearModel;
 
     // FE spaces
     boost::shared_ptr< FESpace_Type >       M_uFESpace;
     boost::shared_ptr< FESpace_Type >       M_pFESpace;
 
-    // Degrees of freedom of the problem
-    UInt                                    M_uDOF;  // Velocity degrees of freedom (one component)
-    UInt                                    M_pDOF;  // Pressure degrees of freedom
-    UInt                                    M_lmDOF; // Lagrange Multipliers degrees of freedom
+    // Lagrange multipliers
+    UInt                                    M_lmDOF;
 
     // Problem coefficients
     Real                                    M_alpha;
@@ -378,8 +391,8 @@ private:
     boost::shared_ptr< FluidVector_Type >   M_RHS;
 
     // NS parameters
-    UInt                                    M_SubiterationsMaximumNumber;
-    Real                                    M_Tolerance;
+    UInt                                    M_subiterationsMaximumNumber;
+    Real                                    M_tolerance;
     generalizedAitken< FluidVector_Type >   M_generalizedAitken;
 };
 
