@@ -28,7 +28,10 @@ couplingFlags    = '2 3 4'
 start            = 0             # start index for filenames
 save             = 1             # how many time steps per posptrocessing
 multimesh        = false         # true if the mesh has to be saved at each post-processing step
+type             = hdf5
 
+[importer]
+type             = hdf5
 
 
 [problem]
