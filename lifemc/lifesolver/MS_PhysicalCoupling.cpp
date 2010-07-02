@@ -49,11 +49,11 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
     M_models                      (),
     M_couplingName                (),
     M_flags                       (),
+    M_globalData                  (),
     M_couplingIndex               (),
     M_LocalCouplingVariables      (),
     M_LocalCouplingResiduals      (),
     M_LocalDeltaCouplingVariables (),
-    M_globalData                  (),
     M_comm                        (),
     M_displayer                   ()
 {
@@ -71,11 +71,11 @@ MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) 
     M_models                      ( coupling.M_models ),
     M_couplingName                ( coupling.M_couplingName ),
     M_flags                       ( coupling.M_flags ),
+    M_globalData                  ( coupling.M_globalData ),
     M_couplingIndex               ( coupling.M_couplingIndex ),
     M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
     M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
     M_LocalDeltaCouplingVariables ( coupling.M_LocalDeltaCouplingVariables ),
-    M_globalData                  ( coupling.M_globalData ),
     M_comm                        ( coupling.M_comm ),
     M_displayer                   ( coupling.M_displayer )
 
@@ -101,11 +101,11 @@ MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
         M_models                      = coupling.M_models;
         M_couplingName                = coupling.M_couplingName;
         M_flags                       = coupling.M_flags;
+        M_globalData                  = coupling.M_globalData;
         M_couplingIndex               = coupling.M_couplingIndex;
         M_LocalCouplingVariables      = coupling.M_LocalCouplingVariables;
         M_LocalCouplingResiduals      = coupling.M_LocalCouplingResiduals;
         M_LocalDeltaCouplingVariables = coupling.M_LocalDeltaCouplingVariables;
-        M_globalData                  = coupling.M_globalData;
         M_comm                        = coupling.M_comm;
         M_displayer                   = coupling.M_displayer;
     }
