@@ -841,7 +841,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     for( UInt __i = 0; __i < __nele;++__i )
     {
-        int __ne, __t, __tag, __np;
+        int __ne, __t, __np;
 
         //Debug() << __i + 1 << " ";
 
@@ -862,6 +862,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
             __np = 1;
             break;
         default:
+            __np = 0;
             Debug() << "Element type unknown " << __ne << "\n";
             ASSERT(true, "Elements type unsupported.\n")
         }
@@ -872,6 +873,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
         bool ibcSet = false;
         int  flag   = 0;
+        int __tag(0);
 
         for (int iflag = 0; iflag < __t; ++iflag)
         {
