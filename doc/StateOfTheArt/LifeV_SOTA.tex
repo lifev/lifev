@@ -81,9 +81,9 @@ This solver deals with the Laplace equation:
 +\text{b.c.}\nonumber
 \end{eqnarray}
  However more features have been implemented to use it as a tool in the Arbitrary Eulerian Lagrangian (ALE) framework (more informations can be found in~\cite{nobile} or~\cite{quarteroni}). The harmonic extension technique allows  for example to move the points of a mesh in the latter framework.
- 
+
 The following table gives an overview of the main methods available in the HarmonicExtensionSolver class:
- 
+
 %\begin{table}[H]
 \begin{center}
 \begin{longtable}{p{3cm}p{7cm}}
@@ -305,7 +305,7 @@ We consider the following equations:
 \end{eqnarray}
 where $v$ is the electrical potential, $w$ is the gating variable, $M$ a given tensor and $f$, $g$ two given functional. This solver has been developped to simulate electricity propagation through the heart. In particular, this solver takes into account the orientation of the muscles fibers.
 
-The name of this solver has been chosen to contrast with the Bidomain solver where the equations are applied to \emph{two} superposed domains. 
+The name of this solver has been chosen to contrast with the Bidomain solver where the equations are applied to \emph{two} superposed domains.
 
 The main methods of the class are the followings:
 %\begin{table}[H]
@@ -535,10 +535,10 @@ At the moment, the finite elements available in LifeV are only 3D tetrahedra ele
 The degrees of freedom and their numbering is presented in Figure~\ref{fig:FE}.
 \begin{figure}[H]
 \begin{center}
-\subfigure[$\mathbb{P}0$]{\includegraphics[width=2cm]{images/FE/P03D.pdf}}
-\subfigure[$\mathbb{P}1$]{\includegraphics[width=2cm]{images/FE/P13D.pdf}}
-\subfigure[$\mathbb{P}1$Bubble]{\includegraphics[width=2cm]{images/FE/P1Bubble3D.pdf}}
-\subfigure[$\mathbb{P}2$]{\includegraphics[width=2cm]{images/FE/P23D.pdf}}
+\subfigure[$\mathbb{P}0$]{\includegraphics[width=2cm]{images/fe/p03d.pdf}}
+\subfigure[$\mathbb{P}1$]{\includegraphics[width=2cm]{images/fe/p03d.pdf}}
+\subfigure[$\mathbb{P}1$Bubble]{\includegraphics[width=2cm]{images/fe/P1Bubble3D.pdf}}
+\subfigure[$\mathbb{P}2$]{\includegraphics[width=2cm]{images/fe/p23d.pdf}}
 \end{center}
 \caption{Overview of the 3D finite elements available}
 \label{fig:FE}
@@ -555,7 +555,7 @@ Other elements and 2D elements are probably retrievable from LifeV-serial. Each 
 %$\mathbb{P}$1Bubble & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} &  \includegraphics[width=2cm]{images/FE/P1Bubble3D.pdf} \\
 %$\mathbb{P}$2 & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/P21D.pdf} & \includegraphics[width=2cm]{images/FE/P22D.pdf} &  \includegraphics[width=2cm]{images/FE/P23D.pdf} \\
 %$\mathbb{P}$2tilde & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} &  \includegraphics[width=2cm]{images/FE/P2Tilde3D.pdf} \\
-%RT0 & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} &  \includegraphics[width=2cm]{images/FE/RT0Tetra3D.pdf} 
+%RT0 & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} & \includegraphics[width=2cm]{images/FE/NA.pdf} &  \includegraphics[width=2cm]{images/FE/RT0Tetra3D.pdf}
 %\end{tabular}
 %\end{center}
 %\caption{Overview of the finite elements available}
@@ -624,7 +624,7 @@ Let $\mathbf{f}$ be a vector map from $\mathbb{R}^d$ to $\mathbb{R}^d$. We want 
 	Exit
 }{
 	Compute $\omega^{k+1}=\frac{(\mathcal{R}(\mathbf{x}^{k+1})-\mathcal{R}(\mathbf{x}^k))\cdot(\mathbf{x}^{k+1}-\mathbf{x}^k)}{\norm{\mathcal{R}(\mathbf{x}^{k+1})-\mathcal{R}(\mathbf{x}^k)}^2}$\\ $k=k+1$\\ Return to $2$.
-} 
+}
 \end{enumerate}
 \caption{Aitken acceleration method}
 \label{algoAitkenAccelerationMethod}
@@ -654,7 +654,7 @@ The LifeV release proposes lots of meshes like cylinders or cubes used in exampl
 %============================
 \section{Applications}
 \label{sec:applications}
-In this section, we give an overview of the problem solved with LifeV. 
+In this section, we give an overview of the problem solved with LifeV.
 
 % Convergence: Eithersteinman
 \subsection{Convergence: Eithiersteinman}
@@ -950,7 +950,7 @@ The management of a level set function has been introduced in LifeV for the Syne
 
 Let us consider a partition $\Omega_1(t)$, $\Omega_2(t)$ of a domain $\Omega(t)$ (which can depend on the time $t$) and let $\Gamma_I$ denotes the interface between the two subsets. The level set method describes the interface as the zero level set of a function $\phi$:
 
-\begin{equation} 
+\begin{equation}
 \label{levelsetfct}
 \left\{ \begin{array}{ll}
 \phi(\mathbf{x},t) > 0 & \mathbf{x}\in\Omega_1(t)\\
@@ -964,7 +964,7 @@ so that
 \end{equation}
 
 Let $H$ be the Heavyside function defined by
-\begin{equation} 
+\begin{equation}
 \label{heavysidefct}
 H(z)=
 \left\{ \begin{array}{ll}
@@ -973,7 +973,7 @@ H(z)=
 \end{array}\right. ,
 \end{equation}
 such that the density and the viscosity quantities in $\Omega$ can be rewritten as
-\begin{equation} 
+\begin{equation}
 \label{heavysidefct}
 \begin{array}{ll}
 \rho = \rho_1+(\rho_2-\rho_1)H(z)\\
@@ -982,7 +982,7 @@ such that the density and the viscosity quantities in $\Omega$ can be rewritten 
 \end{equation}
 
 The final system that describes the evolution of the fluid is composed of the Navier-Stokes equations~(\ref{eqn:NS1}) and~(\ref{eqn:NS2}) as well as the equation~(\ref{eqn:levelset}).
-\begin{equation} 
+\begin{equation}
 \label{eqn:levelset}
 \begin{array}{ll}
 \frac{\partial\phi}{\partial t}+\mathbf{u}\cdot\nabla\phi = 0 & \text{in }\Omega\times[0,T]\\
@@ -995,7 +995,7 @@ where $\Sigma_{in} = \{(\mathbf{x},t)\in\partial\Omega\times(0,T)\mid\mathbf{u}(
 The main advantages of this method is that the interface remains sharp and handle any change in the topology of $\Gamma_I$. However it has drawbacks such as the distorsion of the interface caused by the numerical errors. To overcome this problem, one should use reinitialization of the interface.
 
 \subsubsection{Level set solver}
-The level set solver solves the equations~(\ref{eqn:levelset}). It manages also the reinitialization of the interface by using the geometric approach. Methods to compute the surface and the volumes of the domains  and to export the interface are available (only for $\phi$ approximate with $\mathbb{P}1$ finite element). 
+The level set solver solves the equations~(\ref{eqn:levelset}). It manages also the reinitialization of the interface by using the geometric approach. Methods to compute the surface and the volumes of the domains  and to export the interface are available (only for $\phi$ approximate with $\mathbb{P}1$ finite element).
 
 From the coding point of view, the level set solver is a class which inheritates from the AdvectionDiffusionReaction solver.
 
