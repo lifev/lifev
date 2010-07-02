@@ -92,29 +92,26 @@ main( int argc, char** argv )
     //Setup main communicator
     boost::shared_ptr<Epetra_Comm>	comm;
 
-#ifdef HAVE_MPI
-    std::cout << "MPI Initialization" << std::endl;
-    MPI_Init( &argc, &argv );
-#endif
+    //Setup MPI variables
+    int nprocs(1);
+    int rank(0);
 
-	//MPI Preprocessing
-#ifdef EPETRA_MPI
-    int nprocs;
-    int rank;
+#ifdef HAVE_MPI
+    MPI_Init( &argc, &argv );
 
     MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+#endif
 
     if ( rank == 0 )
-    {
         std::cout << "MPI Processes: " << nprocs << std::endl;
-        std::cout << "MPI Epetra Initialization ... " << std::endl;
-    }
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 
-    comm->Barrier();
+#ifdef EPETRA_MPI
+    if ( rank == 0 )
+        std::cout << "MPI Epetra Initialization ... " << std::endl;
+    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 #else
-    std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
+    std::cout << "SERIAL Epetra Initialization ... " << std::endl;
     comm.reset( new Epetra_SerialComm() );
 #endif
 
@@ -151,7 +148,8 @@ main( int argc, char** argv )
     exitFlag = MS.SolveProblem();
 
 #ifdef HAVE_MPI
-    std::cout << "MPI Finalization" << std::endl;
+    if ( rank == 0 )
+        std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
 
