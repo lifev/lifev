@@ -85,15 +85,13 @@ MS_Model_FSI3D::SetupData( const std::string& fileName )
     if ( M_globalData.get() )
         SetupGlobalData( fileName );
 
-    // Mesh transformation
-    M_solver->FSIOper()->fluidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
-
-    M_solver->FSIOper()->solidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
-
-
     M_solver.reset( new FSISolver_Type( M_data->method() ) );
     M_solver->setData( M_data );
     M_solver->FSIOper()->setDataFile( dataFile );
+
+    // Mesh transformation
+    M_solver->FSIOper()->fluidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_solver->FSIOper()->solidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     // ##################################################
     // ### THIS BLOCK SHOULD BE MOVED IN SetupModel() ###
