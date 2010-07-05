@@ -138,6 +138,9 @@ public:
 
     //! @name Methods
     //@{
+
+#ifdef USE_PARTMESH_HDF5
+
     //! Add the partition graph to the post processing data file
     /*!
       Add the partition graph to the post processing data file.
@@ -193,6 +196,9 @@ public:
     /*!
         @param time the solver time
     */
+
+#endif // USE_PARTMESH_HDF5
+
     void postProcess(const Real& time);
 
     //! Import data from previous simulations at a certain time
@@ -271,12 +277,16 @@ private:
     void M_rd_scalar( ExporterData& dvar);
     void M_rd_vector( ExporterData& dvar);
 
+#ifdef USE_PARTMESH_HDF5
+
     // The following private methods are for writing the partitioned graph
     // and mesh to the output file
     void writeGraph();
     void writePartition(mesh_ptrtype partition, std::string& suffix);
     void writeParallelMesh();
     void writeSerialMesh();
+
+#endif // USE_PARTMESH_HDF5
 
     //@}
 
@@ -287,10 +297,14 @@ private:
     std::streampos    M_closingLinesPosition;
     std::string       M_outputFileName;
 
+#ifdef USE_PARTMESH_HDF5
+
     serial_mesh_ptrtype   M_serialMesh;
     mesh_ptrtype          M_parallelMesh;
     graph_ptrtype         M_graph;
     Epetra_Comm*          M_comm;
+
+#endif // USE_PARTMESH_HDF5
 
 };
 
@@ -331,6 +345,9 @@ Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, const std::string& prefix)
 // ===================================================
 // Methods
 // ===================================================
+
+#ifdef USE_PARTMESH_HDF5
+
 template<typename Mesh>
 void Hdf5exporter<Mesh>::loadGraph(graph_ptrtype graph, Epetra_Comm *comm)
 {
@@ -626,19 +643,25 @@ void Hdf5exporter<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, Epetra_Comm
 
 }
 
+#endif // USE_PARTMESH_HDF5
+
 template<typename Mesh>
 void Hdf5exporter<Mesh>::postProcess(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
+#ifdef USE_PARTMESH_HDF5
         if (this->M_listData.size() != 0)
         {
+#endif // USE_PARTMESH_HDF5
             M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
+#ifdef USE_PARTMESH_HDF5
         }
         else
         {
             M_HDF5.reset(new hdf5_type(*M_comm));
         }
+#endif // USE_PARTMESH_HDF5
         M_outputFileName=this->M_prefix+".h5";
         M_HDF5->Create(this->M_post_dir+M_outputFileName);
 
@@ -647,9 +670,12 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
 
         if (!this->M_multimesh)
         {
+#ifdef USE_PARTMESH_HDF5
             if (this->M_listData.size() != 0)
             {
+#endif // USE_PARTMESH_HDF5
                 M_wr_geo(); // see also M_wr_geometry
+#ifdef USE_PARTMESH_HDF5
             }
 
             if (M_graph.get() != 0)
@@ -670,6 +696,7 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
                 // Write mesh partition that belongs to you (parallel op)
                 writeParallelMesh();
             }
+#endif // USE_PARTMESH_HDF5
 
             M_HDF5->Flush();
         }
@@ -1503,6 +1530,8 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
     delete subVar;
 }
 
+#ifdef USE_PARTMESH_HDF5
+
 template <typename Mesh>
 void Hdf5exporter<Mesh>::writeGraph()
 {
@@ -1757,6 +1786,8 @@ void Hdf5exporter<Mesh>::writeParallelMesh()
 
     writePartition(M_parallelMesh, suffix);
 }
+
+#endif // USE_PARTMESH_HDF5
 
 }
 #endif
