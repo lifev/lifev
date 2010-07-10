@@ -328,12 +328,12 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //try{
+            try{
             if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
                 checkCEResult(M_data->dataFluid()->dataTime()->getTime());
             else
                 checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
-            //}catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
+            }catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
         if(!M_fsi->FSIOper()->dataFluid().useShapeDerivatives())
