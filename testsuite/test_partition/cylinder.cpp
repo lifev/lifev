@@ -55,9 +55,7 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
-#ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
-#endif
+#include <life/lifefilters/HDF5Filter3DMesh.hpp>
 #include <life/lifefilters/ensight.hpp>
 
 #include <life/lifesolver/Oseen.hpp>
@@ -397,11 +395,11 @@ Cylinder::run()
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart;
     meshPart.setup(dataFile, *(d->comm));
 
-    Hdf5exporter<RegionMesh3D<LinearTetra> > HDF5input(dataFile, "cylinderPart");
-    HDF5input.loadGraph(meshPart.graph(), d->comm);
+    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
+    HDF5Input.loadGraph(meshPart.graph(), d->comm);
     meshPart.update();
-    HDF5input.loadMyPartition(meshPart.mesh(), d->comm);
-    HDF5input.CloseFile();
+    HDF5Input.loadMyPartition(meshPart.mesh(), d->comm);
+    HDF5Input.CloseFile();
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
@@ -466,7 +464,7 @@ Cylinder::run()
     vector_type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
 #else
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
 #endif

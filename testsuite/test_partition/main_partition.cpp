@@ -47,7 +47,7 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
-#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/HDF5Filter3DMesh.hpp>
 
 #include <iostream>
 #include <string>
@@ -102,11 +102,11 @@ int main( int argc, char** argv )
     meshPart.doPartitionGraph();
     meshPart.doPartitionMesh();
 
-    Hdf5exporter<RegionMesh3D<LinearTetra> > HDF5output(dataFile, "cylinderPart");
-    HDF5output.addPartitionGraph(meshPart.graph(), &comm);
-    HDF5output.addMeshPartitionAll(meshPart.meshAllPartitions(), &comm);
-    HDF5output.postProcess(0);
-    HDF5output.CloseFile();
+    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, "cylinderPart");
+    HDF5Output.addPartitionGraph(meshPart.graph(), &comm);
+    HDF5Output.addMeshPartitionAll(meshPart.meshAllPartitions(), &comm);
+    HDF5Output.postProcess(0);
+    HDF5Output.CloseFile();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
