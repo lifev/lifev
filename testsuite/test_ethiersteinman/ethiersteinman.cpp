@@ -162,12 +162,6 @@ Ethiersteinman::Ethiersteinman( int argc,
 
 }
 
-const std::string Ethiersteinman::uFE[FEnumber]={"P1", "P1Bubble", "P2"};
-const std::string Ethiersteinman::pFE[FEnumber]={"P1", "P1"      , "P1"};
-const UInt Ethiersteinman::meshDiscretization[discretizationNumber]={4,8,16};
-const Real Ethiersteinman::uConvergenceOrder[FEnumber]={2,2,3};
-const Real Ethiersteinman::pConvergenceOrder[FEnumber]={2,2,2};
-
 void
 Ethiersteinman::run()
 {
@@ -191,8 +185,15 @@ Ethiersteinman::run()
     std::set<UInt> neumannMarkers = parseList( neumannList );
 
 
-    BCHandler::BCHints hint = neumannMarkers.size() != 0 ?
-        BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
+    BCHandler::BCHints hint;
+    if(neumannMarkers.size() != 0){
+        hint = BCHandler::HINT_BC_NONE;
+    }else{
+        if(verbose){
+            std::cout << "Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
+        }
+        hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
+    }
     BCHandler bcH( 0, hint );
     BCFunctionBase uWall( Problem::uexact );
     BCFunctionBase uNeumann( Problem::fNeumann );
@@ -456,14 +457,45 @@ Ethiersteinman::check()
 
     bool verbose = (d->comm->MyPID() == 0);
 
-    chrono.start();
-
     Problem::setParamsFromGetPot( dataFile );
 
 
     // +-----------------------------------------------+
     // |             Settings of the test              |
     // +-----------------------------------------------+
+
+    // Loading the discretization to be tested
+    UInt discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
+    std::vector<UInt> meshDiscretization;
+    for ( UInt i( 0 ); i < discretizationNumber; ++i )
+    {
+        meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
+    }
+
+    // Loading the Finite element to be tested
+    UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
+    std::vector<std::string> uFE;
+    for ( UInt i( 0 ); i < FEnumber; ++i )
+    {
+        uFE.push_back(dataFile( "fluid/space_discretization/vel_order", "P1", i ));
+    }
+    std::vector<std::string> pFE;
+    for ( UInt i( 0 ); i < FEnumber; ++i )
+    {
+        pFE.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
+    }
+
+    // Loading the convergence rate for the finite elements tested
+    std::vector<UInt> uConvergenceOrder;
+    for ( UInt i( 0 ); i < FEnumber; ++i )
+    {
+        uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
+    }
+    std::vector<UInt> pConvergenceOrder;
+    for ( UInt i( 0 ); i < FEnumber; ++i )
+    {
+        pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
+    }
 
     // Initialization of the errors array
     std::vector<std::vector<LifeV::Real> > uL2Error;
@@ -484,6 +516,8 @@ Ethiersteinman::check()
         // Loop on the finite element
         for(UInt iElem(0);iElem<FEnumber;++iElem)
         {
+            chrono.start();
+
             if(d->comm->MyPID()==0)
             {
                 std::cout << "Using: -" << uFE[iElem] << "-" << pFE[iElem] << " finite element" << std::endl;
@@ -511,11 +545,17 @@ Ethiersteinman::check()
             std::set<UInt> dirichletMarkers = parseList( dirichletList );
             std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
             std::set<UInt> neumannMarkers = parseList( neumannList );
-            std::string meshType = dataFile("fluid/space_discretization/mesh_type","");
 
 
-            BCHandler::BCHints hint = neumannMarkers.size() != 0 ?
-                BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
+            BCHandler::BCHints hint;
+            if(neumannMarkers.size() != 0){
+                hint = BCHandler::HINT_BC_NONE;
+            }else{
+                if(verbose){
+                    std::cout << "Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
+                }
+                hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
+            }
             BCHandler bcH( 0, hint );
             BCFunctionBase uWall( Problem::uexact );
             BCFunctionBase uNeumann( Problem::fNeumann );
@@ -537,8 +577,9 @@ Ethiersteinman::check()
             DataNavierStokes dataNavierStokes;
             dataNavierStokes.setup( dataFile );
 
-            DataMesh dataMesh;
-            dataMesh.setup(dataFile, "fluid/space_discratization");
+            // THE DATAMESH IS NOT REQUIRED WHEN WE BUILD THE MESH
+            //DataMesh dataMesh;
+            //dataMesh.setup(dataFile, "fluid/space_discratization");
 
             RegionMesh3D<LinearTetra> mesh;
 
@@ -549,12 +590,6 @@ Ethiersteinman::check()
                            verbose,
                              2.0,   2.0,   2.0,
                             -1.0,  -1.0,  -1.0);
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MESH_FORMAT);
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MATLAB_FORMAT);
-            // dataNavierStokes.dataMesh()->mesh()->updateElementEdges( true, verbose );
-            // dataNavierStokes.dataMesh()->mesh()->updateElementFaces( true, verbose );
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MESH_FORMAT);
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MATLAB_FORMAT);
 
             if (d->comm->MyPID()==0)
             {
@@ -562,14 +597,8 @@ Ethiersteinman::check()
                 writeMesh(fname, mesh);
             }
 
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MESH_FORMAT);
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4a",MATLAB_FORMAT);
-
-            mesh.updateElementEdges( true, verbose );
-            mesh.updateElementFaces( true, verbose );
-
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MESH_FORMAT);
-            // exportMesh3D(*dataNavierStokes.dataMesh()->mesh(),"cube4x4b",MATLAB_FORMAT);
+            // exportMesh3D(mesh,"cube4x4",MESH_FORMAT);
+            // exportMesh3D(mesh,"cube4x4",MATLAB_FORMAT);
 
             partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
 
@@ -603,7 +632,7 @@ Ethiersteinman::check()
             UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bdUpdate( mesh, uFESpace.feBd(), uFESpace.dof());
+            bcH.bdUpdate( *meshPart.mesh(), uFESpace.feBd(), uFESpace.dof());
 
             if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
             if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -677,46 +706,12 @@ Ethiersteinman::check()
 
                 if (L2proj)
                 {
-                    /*
-                    // Interpolation of the solutions
-                    vector_type fluidInit(uFESpace.map());
-                    vector_type pressureInit(pFESpace.map());
-                    vector_type garbage(fullMap);
-
-                    uFESpace.L2ScalarProduct(Problem::uexact, fluidInit, time);
-                    pFESpace.L2ScalarProduct(Problem::pexact, pressureInit, time);
-
-                    rhs = fluidInit;
-                    rhs.add(pressureInit,nDimensions*uFESpace.dof().numTotalDof());
-
-                    // We compute A*Pi_uh
-                    fluid.updateSystem( 0., beta, rhs );
-                    matrix_type A(fullMap);
-
-                    //fluid.getFluidMatrixWithBC(A, garbage, bcH);
-
-                    A.GlobalAssemble();
-                    rhs = A*rhs;
-
-                    fluid.updateSystem(0.,beta,rhs);
-
-                    fluid.iterate(bcH);
-                    */
-
-                    /*
-                    // Old version
-                    uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
+                    uFESpace.interpolate(Problem::uderexact, rhs, time);
+                    //uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
                     rhs *= -1.;
+                    rhs = fluid.matrMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
                     fluid.iterate(bcH);
-                    */
-
-
-                    //rhs = fluid.solution();
-                    //rhs = fluid.matrMass()*rhs;
-                    //adr.updateSystem(1., betaFluid, rhsADR);
-                    //adr.iterate(bcADR);
-
                 }
 
                 // Computation of the error
@@ -756,7 +751,7 @@ Ethiersteinman::check()
 
             chrono.stop();
             if (verbose)
-                std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
+                std::cout << d->comm->MyPID() << " Total init time " << chrono.diff() << " s." << std::endl;
             // end initialization step
 
             fluid.resetPrec();
@@ -764,6 +759,10 @@ Ethiersteinman::check()
             boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
             vector_ptrtype velAndPressure;
+            vector_ptrtype exactPressPtr;                     //DEBUG
+            vector_type exactPress(pFESpace.map(), Repeated); //DEBUG
+            vector_ptrtype exactVelPtr;                       //DEBUG
+            vector_type exactVel(uFESpace.map(), Repeated);   //DEBUG
 
             std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
@@ -786,13 +785,21 @@ Ethiersteinman::check()
             }
 
             velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
+            exactPressPtr.reset( new vector_type(exactPress, exporter->mapType() ) ); //DEBUG
+            pFESpace.interpolate(Problem::pexact, *exactPressPtr, 0);                 //DEBUG
+            exactVelPtr.reset( new vector_type(exactVel, exporter->mapType() ) );     //DEBUG
+            uFESpace.interpolate(Problem::uexact, *exactVelPtr, 0);                   //DEBUG
 
             exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                                    UInt(0), uFESpace.dof().numTotalDof() );
 
             exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                                   UInt(3*uFESpace.dof().numTotalDof() ),
-                                   UInt(  pFESpace.dof().numTotalDof() ) );
+                                   UInt(3*uFESpace.dof().numTotalDof()),
+                                   UInt(pFESpace.dof().numTotalDof()) );
+            exporter->addVariable( ExporterData::Scalar, "exactPressure", exactPressPtr, //DEBUG
+                                   UInt(0), UInt(pFESpace.dof().numTotalDof()) );
+            exporter->addVariable( ExporterData::Vector, "exactVelocity", exactVelPtr,   //DEBUG
+                                   UInt(0), UInt(uFESpace.dof().numTotalDof()) );
             exporter->postProcess( 0 );
 
             if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
@@ -822,7 +829,9 @@ Ethiersteinman::check()
 
                 double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
 
-                beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
+                //beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
+                beta *= 0;
+                uFESpace.interpolate(Problem::uexact, beta, time);
 
                 rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
 
@@ -873,6 +882,8 @@ Ethiersteinman::check()
 
                 // Exporting the solution
                 *velAndPressure = *fluid.solution();
+                pFESpace.interpolate(Problem::pexact, *exactPressPtr, time); //DEBUG
+                uFESpace.interpolate(Problem::uexact, *exactVelPtr, time);   //DEBUG
                 exporter->postProcess( time );
 
 
@@ -929,7 +940,7 @@ Ethiersteinman::check()
                     status = "FAILED";
                     success = false;
                 }
-                if(pErrRatio < pBound && iElem>1){
+                if(pErrRatio < pBound){
                     status = "FAILED";
                     success = false;
                 }
@@ -938,7 +949,10 @@ Ethiersteinman::check()
 
         }
         if(!success){
-            throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
+            if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
+            //throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
+        }else{
+            if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
         }
     }
 }

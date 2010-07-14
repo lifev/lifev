@@ -103,7 +103,7 @@ Real EthierSteinmanUnsteady::x0( const Real& /* t */, const Real& x, const Real&
     return xexact(0.,x, y, z, i);
 }
 
-
+// Derivative of u with respect to the time
 Real EthierSteinmanUnsteady::uderexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
@@ -226,6 +226,7 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
         std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
                   << std::endl;
     }
+
     switch(i) {
         case 1:
             return - pexact(t, x, y, z, 1) * nx
@@ -251,6 +252,28 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
         default:
             exit(1);
     }
+
+    /*
+    switch(i) {
+        case 1:
+            return - mu/nu*pexact(t, x, y, z, 1) * nx
+                + mu * ( ux(t, x, y, z, 1) * nx +
+                         uy(t, x, y, z, 1) * ny +
+                         uz(t, x, y, z, 1) * nz );
+        case 2:
+            return - mu/nu*pexact(t, x, y, z, 1) * ny
+                + mu * ( ux(t, x, y, z, 2) * nx +
+                         uy(t, x, y, z, 2) * ny +
+                         uz(t, x, y, z, 2) * nz );
+        case 3:
+            return - mu/nu*pexact(t, x, y, z, 1) * nz
+                + mu * ( ux(t, x, y, z, 3) * nx +
+                         uy(t, x, y, z, 3) * ny +
+                         uz(t, x, y, z, 3) * nz);
+        default:
+            exit(1);
+    }
+    */
 }
 
 void EthierSteinmanUnsteady::setParamsFromGetPot( const GetPot& dataFile )

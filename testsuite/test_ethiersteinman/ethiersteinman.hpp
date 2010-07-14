@@ -139,16 +139,6 @@ private:
     boost::shared_ptr<Private> d;
     std::ofstream              out_norm;
 
-    // Internal data used to check the different
-    // configuration (meshes+FE)
-    #define FEnumber 3 // Number of Finite elements
-    #define discretizationNumber 3 // Number of mesh discretization
-    static const std::string uFE[FEnumber]; // Finite element for the velocity
-    static const std::string pFE[FEnumber]; // Finite element for the pressure
-    static const LifeV::UInt meshDiscretization[discretizationNumber]; // Discretization
-    static const LifeV::Real uConvergenceOrder[FEnumber]; // Convergence order for u
-    static const LifeV::Real pConvergenceOrder[FEnumber]; // Convergence order for p
-
     // Tolerance of the test (should be <1)
     // Actually for convTol=1, the test failed
     // if the improvement of accuracy is less
