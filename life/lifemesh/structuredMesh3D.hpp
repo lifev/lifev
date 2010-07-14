@@ -964,6 +964,10 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "
          << testClosedDomain(mesh,oStr) << std::endl
          << " IS (ALMOST) ZERO" << std::endl;
+
+    // Updates the connectivity of the mesh
+    mesh.updateElementEdges( true, verbose );
+    mesh.updateElementFaces( true, verbose );
 }
 
 //@}
