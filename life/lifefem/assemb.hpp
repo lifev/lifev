@@ -416,30 +416,61 @@ assembleVector( EpetraVector&    vec,
                 int              ipos = 0 )
 
 {
-//    elmat.showMe();
+    UInt eleID = fe.currentLocalId();
+    assembleVector(vec,eleID,elvec,fe.nbFEDof(),dof,iblock,ipos);
+}
+
+template <typename DOF>
+void
+assembleVector( EpetraVector&    vec,
+                const UInt&      eleID,
+                ElemVec&         elvec,
+                const UInt&      feNbDof,
+                const DOF&       dof,
+                int              iblock,
+                int              ipos = 0,
+                bool             verbose = false)
+
+{
     ElemVec::vector_view vecView = elvec.block( iblock );
 
-//    UInt totdof = dof.numTotalDof();
-
-    int i;
     UInt ig;
 
-    UInt eleID = fe.currentLocalId();
-
-    bool verbose = false;
-
-    for ( i = 0 ; i < fe.nbNode ; i++ )
+    for ( UInt i (0) ; i < feNbDof ; i++ )
     {
-        ig = dof.localToGlobal( eleID, i + 1 ) + ipos;/*+ iblock*totdof*/  // damned 1-base vs 0-base !
-            vec.sumIntoGlobalValues( ig, vecView( i ) );
+        ig = dof.localToGlobal( eleID, i + 1 ) + ipos;
+        vec.sumIntoGlobalValues( ig, vecView( i ) );
     }
 
     if (verbose)
         std::cout << "ok." << std::endl;
 }
 
+template <typename DOF>
+void
+assembleMatrix( EpetraMatrix<double>&   M,
+				const UInt&      		eleID,
+                ElemMat&          		elmat,
+                const UInt&             feNbDof,
+                const DOF&       		dof,
+                int                     iblock,
+                int                     jblock,
+                int              		ipos,
+                int              		jpos)
 
+{
 
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+
+    assembleMatrix( M,
+                    eleID,
+                    eleID,
+                    mat,
+                    feNbDof,
+                    feNbDof,
+                    dof,
+                    dof, ipos, jpos);
+}
 
 template <typename DOF>
 void
@@ -455,31 +486,6 @@ assembleMatrix( EpetraMatrix<double>& M,
 {
     return assembleMatrix( M, elmat, fe, fe, dof, dof,
                            iblock, jblock, ipos, jpos);
-
-    /*
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-
-    int i, j, k;
-    UInt ig, jg;
-
-    UInt eleID = fe.currentLocalId();
-
-//    std::cout << "fe.nbPattern = " << fe.nbPattern << std::endl;
-
-    for ( k = 0 ; k < fe.nbPattern ; k++ )
-    {
-        i = fe.patternFirst ( k );
-        j = fe.patternSecond( k );
-
-        if (mat(i,j) != 0.)
-            {
-                ig = dof.localToGlobal( eleID, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
-                jg = dof.localToGlobal( eleID, j + 1 ) - 1 + jpos ; //jblock*totdof2;  // damned 1-base vs 0-base !
-                M.set_mat_inc( ig, jg, mat( i, j ) );
-            }
-    }
-    */
-
 }
 
 template <typename DOF1, typename DOF2, typename SUBMAT>
@@ -493,66 +499,49 @@ assembleMatrix( EpetraMatrix<double>& M,
                 const DOF1&      dof1,
                 const DOF2&      dof2,
                 int              ipos,
-                int              jpos,
-                bool             /*verbose = false*/)
+                int              jpos)
 
 {
-    int i, j, k1, k2;
+    assembleMatrix(M, eleID1, eleID2, mat, fe1.nbFEDof(), fe2.nbFEDof(),
+                   dof1, dof2, ipos, jpos);
 
-    std::vector<int> ilist(fe1.nbNode);
-    std::vector<int> jlist(fe2.nbNode);
+}
 
-    double* matPtr[fe2.nbNode];
+template <typename DOF1, typename DOF2, typename SUBMAT>
+void
+assembleMatrix( EpetraMatrix<double>& M,
+                UInt const&           eleID1,
+                UInt const&           eleID2,
+                SUBMAT&               mat,
+                const UInt&           fe1NbDof,
+                const UInt&           fe2NbDof,
+                const DOF1&           dof1,
+                const DOF2&           dof2,
+                int                   ipos,
+                int                   jpos )
+
+{
+    std::vector<int> ilist(fe1NbDof);
+    std::vector<int> jlist(fe2NbDof);
+
+    double* matPtr[fe2NbDof];
 
 
-    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+    for ( UInt k1 (0) ; k1 < fe1NbDof ; k1++ )
     {
-        i = k1;//fe1.patternFirst( k1 );
-        ilist[k1] = dof1.localToGlobal( eleID1, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+        ilist[k1] = dof1.localToGlobal( eleID1, k1 + 1 ) - 1 + ipos ;
     }
 
-    for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+    for ( UInt k2 (0) ; k2 < fe2NbDof ; k2++ )
     {
-        j = k2;//fe2.patternFirst( k2 );
-        jlist[k2]  = dof2.localToGlobal( eleID2, j + 1 ) - 1 + jpos ; //iblock*totdof1;  // damned 1-base vs 0-base !
-        matPtr[k2] = &(mat(0,k2));
+        jlist[k2]  = dof2.localToGlobal( eleID2, k2 + 1 ) - 1 + jpos ;
+        matPtr[k2] = &(mat(static_cast<UInt>(0),k2));
     }
 
-    // coded a version to insert the little matrix directly.
-    // This needs that mat has the shape checked by the following line:
     assert(mat.indexij( int (1), int(0) ) == 1);
 
-    M.set_mat_inc( fe1.nbNode, fe2.nbNode, ilist, jlist, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
+    M.set_mat_inc( fe1NbDof, fe2NbDof, ilist, jlist, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
 
-#ifdef ONLY_FOR_DEBUGGING
-
-    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
-    {
-        i = fe1.patternFirst( k1 );
-        for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
-        {
-            j  = fe2.patternSecond( k2 );
-            //            if (mat(i,j) != 0.)
-                {
-//                     ig = dof1.localToGlobal( eleID1, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
-//                     jg = dof2.localToGlobal( eleID2, j + 1 ) - 1 + jpos ; //jblock*totdof2;  // damned 1-base vs 0-base !
-                    matPtr[k2] = &(mat(0,j));
-
-                    assert(matPtr[k2][k1] ==  mat( i, j ));
-
-//                     std::cout << "ig, jg, mat( i, j ) = "
-//                               << ig << " " <<  jg << " "<<  mat( i, j ) << " "
-//                               << matPtr[k1] - mat( i, j )
-//                               << std::endl
-//                               << "                      "
-//                               << ilist[k1] << " " <<  jg << " "<<  matPtr[k1]
-//                               << std::endl;
-
-                    //M.set_mat_inc( ig, jg, mat( i, j ) );
-                }
-        }
-    }
-#endif
 }
 
 template <typename DOF1, typename DOF2>
@@ -566,11 +555,9 @@ assembleMatrix( EpetraMatrix<double>&          M,
                 int              iblock,
                 int              jblock,
                 int              ipos,
-                int              jpos,
-                bool             verbose = false)
+                int              jpos )
 
 {
-//    elmat.showMe();
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
     UInt eleID1 = fe1.currentLocalId();
@@ -578,7 +565,7 @@ assembleMatrix( EpetraMatrix<double>&          M,
 
     assembleMatrix( M, eleID1, eleID2,
                     mat, fe1, fe2,
-                    dof1,  dof2, ipos, jpos, verbose);
+                    dof1,  dof2, ipos, jpos );
 
     return;
 
@@ -1085,21 +1072,12 @@ void
 extract_vec( EpetraVector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
              const UInt feId, int iblock )
 {
-    //  if(elvec.nBlockRow()!=1){
-    //    std::cout << "assemble for vector elem vec not yet implemented\n";
-    //    exit(1);
-    //  }
-
-    UInt totdof = dof.numTotalDof();
+    UInt totdof (dof.numTotalDof());
     typename ElemVec::vector_view vec = elvec.block( iblock );
-    int i;
-    //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;
-    for ( i = 0 ; i < fe.nbLocalDof() ; i++ )
+    for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {
-        ig = dof.localToGlobal( feId, i + 1 ) - 1 + iblock * totdof;
-        //    std::cout << "i= " << i << std::endl;
-        //    std::cout << "ig= " << ig << std::endl;
+        ig = dof.localToGlobal( feId, i + 1 ) + iblock * totdof;
         vec( i ) = V[ ig ];
     }
 }
