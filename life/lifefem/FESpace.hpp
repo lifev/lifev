@@ -393,7 +393,7 @@ public:
     Real L2Norm( const vector_type& vec );
     
     template<typename function>
-    Real L2NormFunction( const function& f);
+    Real L2NormFunction( const function& f, const Real time = 0);
 
     template<typename vector_type>
     Real H1Norm( const vector_type& vec );
@@ -1070,7 +1070,7 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 template <typename Mesh, typename Map>
 template<typename function>
 Real
-FESpace<Mesh, Map>::L2NormFunction( const function& f)
+FESpace<Mesh, Map>::L2NormFunction( const function& f, const Real time)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
@@ -1081,7 +1081,7 @@ FESpace<Mesh, Map>::L2NormFunction( const function& f)
     {
         this->fe().update( this->mesh()->element( ielem ), UPDATE_WDET  );
 	
-        sumExact += elemL22( f, this->fe(), static_cast<Real>(0), M_fieldDim );
+        sumExact += elemL22( f, this->fe(), time, M_fieldDim );
     }
     
     Real sendbuff[1] = {sumExact};
