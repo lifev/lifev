@@ -113,6 +113,9 @@ public:
     //! @name Get Methods
     //@{
 
+    inline const bool isInternal(){return M_isInternal;}
+    inline void setInternal(bool internal){M_isInternal = internal;}
+
     //@}
 
 private:

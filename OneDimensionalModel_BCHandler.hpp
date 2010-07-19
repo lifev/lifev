@@ -94,6 +94,9 @@ public:
 
     //@}
 
+    inline void setBCLeft_internalnode() { M_boundary[OneD_left ]->setInternal(true); }
+    inline void setBCRight_internalnode(){ M_boundary[OneD_right]->setInternal(true); }
+
 
     //! @name Set Methods
     //@{
@@ -106,6 +109,8 @@ public:
                        const Solution_PtrType solution );
 
     //@}
+
+
 
 
     //! @name Get Methods
