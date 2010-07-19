@@ -443,6 +443,156 @@ PhysiologicalFlux::operator()( const Real& t )
       return time*a + b;
 }
 
+//! PressureRamp
+/*!
+ *  @author Lucia Mirabella
+ */
+class PressureRamp
+{
+public:
+    PressureRamp( const Real& startT   = .001,
+                  const Real& duration = 0.7,
+                  const Real& endvalue = 106400 );
+
+    ~PressureRamp() {}
+
+    Real operator()( const Real& time );
+
+private:
+
+    Real M_startT;
+    Real M_duration;
+    Real M_endvalue;
+};
+
+PressureRamp::PressureRamp( const Real& startT,
+                            const Real& duration,
+                            const Real& endvalue ):
+        M_startT    ( startT ),
+        M_duration  ( duration ),
+        M_endvalue  ( endvalue )
+{}
+
+Real
+PressureRamp::operator()( const Real& time )
+{
+    Real t = time;
+
+    Int  numData = 80;
+    Real pressure[81] = { 110170,
+                          109540,
+                          108930,
+                          108320,
+                          107710,
+                          107120,
+                          106530,
+                          111130,
+                          115440,
+                          118690,
+                          121460,
+                          123940,
+                          126350,
+                          128890,
+                          131510,
+                          133980,
+                          136200,
+                          138330,
+                          140350,
+                          142290,
+                          144360,
+                          146130,
+                          147530,
+                          148780,
+                          149740,
+                          150320,
+                          150470,
+                          150250,
+                          149750,
+                          148990,
+                          148220,
+                          147210,
+                          145940,
+                          144960,
+                          143750,
+                          141980,
+                          139900,
+                          137260,
+                          133970,
+                          131670,
+                          131320,
+                          133150,
+                          132710,
+                          131570,
+                          130280,
+                          129750,
+                          129330,
+                          128910,
+                          128360,
+                          127680,
+                          127000,
+                          126410,
+                          125920,
+                          125480,
+                          125040,
+                          124560,
+                          124050,
+                          123530,
+                          123000,
+                          122440,
+                          121840,
+                          121220,
+                          120580,
+                          119950,
+                          119330,
+                          118710,
+                          118100,
+                          117470,
+                          116840,
+                          116200,
+                          115560,
+                          114920,
+                          114280,
+                          113650,
+                          113020,
+                          112400,
+                          111790,
+                          111200,
+                          110620,
+                          110060,
+                          110170
+                        };
+
+    Real P = 0;
+    if (t < 0)
+        P = t/M_startT*pressure[0];
+    else
+    {
+        Real timescale = M_duration/numData;
+
+        for (;;)
+        {
+            if (t < M_duration)
+                break;
+            t -= M_duration;
+        }
+
+        Int  ipos = t/timescale;
+        Real t2   = timescale*(ipos + 1);
+
+        Real a = ( pressure[ipos + 1] - pressure[ipos] ) / timescale;
+        Real b =   pressure[ipos + 1] - a*t2;
+
+        P = t*a + b;
+
+        std::cout << "BC: Pressure = " << P
+                  << " period = " << M_duration << " pos = " << ipos << std::endl;
+    }
+
+    Debug( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << P << "\n";
+
+    return P;
+}
+
 }
 
 #endif
