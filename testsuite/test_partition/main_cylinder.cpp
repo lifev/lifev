@@ -48,6 +48,8 @@
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include "cylinder.hpp"
+#include "EqualSolutions.hpp"
+
 #include <mpi.h>
 
 
@@ -60,16 +62,10 @@ makeAbout()
                             "3D cylinder test case w/ prepartitioned mesh in HDF5",
                             LifeV::AboutData::License_GPL,
                             "Copyright (c) 2010 EPFL");
-
     about.addAuthor("Gilles Fourestey", "developer", "gilles.fourestey@epfl.ch", "");
     about.addAuthor("Radu Popescu", "developer", "radu.popescu@epfl.ch", "");
     return about;
-
 }
-
-
-
-
 
 using namespace LifeV;
 
@@ -92,9 +88,6 @@ std::set<UInt> parseList( const std::string& list )
     return setList;
 }
 
-
-
-
 namespace LifeV
 {
 namespace
@@ -111,6 +104,11 @@ main( int argc, char** argv )
   MPI_Init(&argc, &argv);
 #endif
 
+  int rank;
+  int return_value = EXIT_SUCCESS;
+
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
 //**************** cylinder
 //    MPI_Init(&argc,&argv);
 
@@ -120,11 +118,21 @@ main( int argc, char** argv )
     Cylinder cyl( argc, argv, makeAbout(), desc );
     cyl.run();
 
+// Test validity of solution
+
+    if (rank == 0) {
+        if (equalSolutions("cylinder_ref.h5", "cylinder.h5", 2, 1e-6)) {
+            std::cout << "TEST PARTITION WAS SUCCESSFUL.\n";
+        } else {
+            std::cout << "TEST PARTITION FAILED.\n";
+            return_value = EXIT_FAILURE;
+        }
+    }
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-  return( EXIT_SUCCESS );
+
+  return return_value;
 }
-
-
 

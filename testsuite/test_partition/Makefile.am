@@ -19,7 +19,7 @@ check_HEADERS              = cylinder.hpp
 check_PROGRAMS             = test_partition test_cylinder
 
 test_partition_SOURCES = main_partition.cpp
-test_cylinder_SOURCES = main_cylinder.cpp cylinder.cpp
+test_cylinder_SOURCES = main_cylinder.cpp cylinder.cpp EqualSolutions.cpp
 
 EXTRA_DIST = data_partition data_cylinder
 
@@ -27,6 +27,7 @@ link:
 	test -a data_partition || ln -s $(srcdir)/data_partition
 	test -a data_cylinder || ln -s $(srcdir)/data_cylinder
 	test -a run_test.sh || ln -s $(srcdir)/run_test.sh
+	test -a cylinder_ref.hs || ln -s $(srcdir)/cylinder_ref.h5
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 
 recheck: clean_PROGRAMS check

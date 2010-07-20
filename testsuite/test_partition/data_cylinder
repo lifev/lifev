@@ -31,7 +31,7 @@ save       = 10
 
 	[../space_discretization]
 	mesh_dir        = ./Mesh/
-	mesh_file       = tube.mesh
+	mesh_file       = tube20.mesh
 	mesh_type       = .mesh
 
 	verbose         = 0             # verbose during mesh-reading
