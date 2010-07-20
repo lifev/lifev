@@ -41,6 +41,7 @@
 	Ricardo Ruiz, Paolo Tricerri}
 \date{\today}
 \maketitle
+\tableofcontents
 
 %============================
 % Introduction
@@ -663,7 +664,7 @@ Eithier and Steinman have proposed an exact fully 3D Navier-Stokes solutions in~
 
 % Multiscale models
 \subsection{Multiscale models}
-In the contexte of blood flows simulation, we want to be able to split the cardiovascular system into several pièces. Each of the pieces can be veins, artery or organs. Moreover to be able to compute such system we want to introduce a 1D model for the smallest vessels. So in the end we will make the computation on a general network of 1D or 3D problems where the edges will be the coupling and the nodes the problems. The details about the theory of this section can be found in~\cite{malossi}.
+In the contexte of blood flows simulation, we want to be able to split the cardiovascular system into several pieces. Each of the pieces can be veins, artery or organs. Moreover to be able to compute such system we want to introduce a 1D model for the smallest vessels. So at the end we will make the computation on a general network of 1D or 3D problems where the edges will be the coupling and the nodes the problems. The details about the theory of this section can be found in~\cite{malossi}.
 
 \subsubsection{Equations}
 Currently, only the Oseen equations are available for the models in the network. Concerning the boundary conditions between the models one can choose between the two following possibilities:
@@ -714,7 +715,7 @@ This method only works with simple geometries (no bifurcations) and a very small
 We use an implicit Aitken method (see Section~\ref{sec:aitken}) to solve the system. With this method, there is no limitation for $\Delta t$ due to the network. The evaluation of the residual make this method quite cheap. The method works fine with simple geometries but fails when bifurcations are introduced.
 
 \item Method 3 (implicit)\\
-We use an (implicit) Newton method to solve the system. We need to compute the jacobian, which is more expensive than the residual of Method 2.
+We use a Newton method to solve the system. We need to compute the jacobian, which is more expensive than the residual of Method 2. Nevertheless, this approach works fine also in presence of complex networks.
 
 \end{itemize}
 Generally the solution is expensive, so it is better to reduce the number of iterations.
@@ -758,7 +759,7 @@ Generally the solution is expensive, so it is better to reduce the number of ite
 \end{enumerate}
 
 \subsubsection{Future works}
-Cristiano Malossi is currently working on the implementation of 1D models and their integration into the models network. He will also provide other solvers than Oseen for the models.
+Cristiano Malossi is currently working on the implementation of 1D models and their integration into the models network. He is also collaborating with Paolo Crosetto for the integration of FSI models in the network.
 
 % Aorta with Fluid Structure Interaction (FSI) and delective BC
 \subsection{Aorta with Fluid Structure Interaction (FSI) and delective BC}
