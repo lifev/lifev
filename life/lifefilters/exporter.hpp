@@ -113,13 +113,13 @@ public:
         @param steady       - if  file name for postprocessing has to include time dependency
         @param where        - where is variable located (Node or Cell)
     */
-    ExporterData(const             Type type,
-                 const std::string variableName,
-                 vector_ptrtype&   vec,
-                 UInt              start,
-                 UInt              size,
-                 UInt              steady,
-                 const             Where where = ExporterData::Node);
+    ExporterData(const Type&           type,
+                 const std::string&    variableName,
+                 const vector_ptrtype& vec,
+                 const UInt&           start,
+                 const UInt&           size,
+                 const UInt&           steady,
+                 const Where&          where = ExporterData::Node);
 
     //@}
 
@@ -268,8 +268,8 @@ public:
         @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
         @param size size of the stored array
     */
-  void addVariable(const ExporterData::Type type, const std::string variableName, vector_ptrtype& vector, UInt start, UInt size,
-                   UInt steady = 0, ExporterData::Where where = ExporterData::Node );
+  void addVariable(const ExporterData::Type& type, const std::string& variableName, const vector_ptrtype& vector,
+                   const UInt& start, const UInt& size, const UInt& steady = 0, const ExporterData::Where& where = ExporterData::Node );
 
     //! Post-process the variables added to the list
     /*!
@@ -405,13 +405,13 @@ Exporter<Mesh>::Exporter( const GetPot& dfile, const std::string& prefix ):
 // Methods
 // ===================================================
 template<typename Mesh>
-void Exporter<Mesh>::addVariable(const ExporterData::Type type,
-                                 const std::string variableName,
-                                 vector_ptrtype& vr,
-                                 UInt start,
-                                 UInt size,
-                                 UInt steady,
-                                 ExporterData::Where where)
+void Exporter<Mesh>::addVariable(const ExporterData::Type&  type,
+                                 const std::string&         variableName,
+                                 const vector_ptrtype&      vr,
+                                 const UInt&                start,
+                                 const UInt&                size,
+                                 const UInt&                steady,
+                                 const ExporterData::Where& where)
 {
   M_listData.push_back( ExporterData(type,variableName, vr, start, size, steady, where) );
 }
