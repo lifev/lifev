@@ -29,9 +29,9 @@ timestep		= 0.01
 BDF_order		= 1
 
 [../space_discretization]
-mesh_dir        = ./   # the directory where the mesh file is
-mesh_type	= .msh
-mesh_file       = iliac_volume2.msh          # mesh file
+mesh_dir        = ./Mesh/   # the directory where the mesh file is
+mesh_type	= .mesh
+mesh_file       = cube4x4.mesh          # mesh file
 
 transform = '1.0 1.0 1.0 
              0.0 0.0 0.0
