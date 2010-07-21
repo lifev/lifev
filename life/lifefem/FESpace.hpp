@@ -282,6 +282,34 @@ public:
     vector_type FeToFeInterpolate(const FESpace<mesh_type,map_type>& originalSpace,
     const vector_type& originalVector) const;
 
+    //! This method reconstruct a gradient of a solution in the present FE space.
+    /*!
+      The goal of this method is to build an approximation of the gradient of a given
+      FE function in this FESpace. Typically, when one use P1 elements for approximating 
+      the solution of a given problem, the gradient is only piecewise constant. However, one
+      could need continuous gradient. The solutions to this problem is either to use specific 
+      finite elements (like Hermite FE) or rely on a recovery procedure for the gradient.
+     
+      This method implements a recovery procedure that performs a local average with weights
+      corresponding to the areas of the elements:
+      \f[ Gr(P) = \frac{\sum_{P \in T} |T| \nabla u(P)}{\sum_{P \in T} |T|} \f]
+      See Zienkiewicz and Zhu (1987) for more details.
+
+      @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
+     */
+    template <typename vector_type>
+    vector_type GradientRecovery(const vector_type& solution, const UInt& component);
+
+    //! Reconstruction of the laplacian using GradientRecovery procedures.
+    /*!
+      This method simply uses the FESpace::GradientRecovery method several times so
+      that one can get a continuous approximation of the laplacian of the given solution.
+      
+      @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
+     */
+    template <typename vector_type>
+    vector_type LaplacianRecovery(const vector_type& solution);
+
 
     //@}
 
@@ -1980,6 +2008,89 @@ setQuadRule(const QuadRule& Qr)
     M_Qr = &Qr;
     M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
 };
+
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+GradientRecovery(const vector_type& solution, const UInt& dxi)
+{
+    if (solution.getMaptype() != Repeated)
+    {
+        return GradientRecovery(vector_type(solution,Repeated),dxi);
+    };
+
+    // Define a special quadrature rule for the interpolation
+    QuadRule interpQuad;
+    interpQuad.setDimensionShape(3,M_refFE->shape());
+    Real wQuad(1.0/(M_refFE->nbDof() * 6.0));       //Here use area=1/6 ==> only for tetra
+
+    for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
+    {
+        interpQuad.addPoint(QuadPoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
+    };
+
+    // Initialization of the vectors
+    vector_type patchArea(solution,Repeated);
+    patchArea *= 0.0;
+
+    vector_type gradientSum(solution,Repeated);
+    gradientSum *= 0.0;
+
+
+    UInt totalNumberElements(M_mesh->numElements());
+    UInt numberLocalDof(M_dof->numLocalDof());
+    
+    CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
+
+    // Loop over the cells
+    for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
+    {
+        interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
+        
+        for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+        {
+            for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
+            {
+                ID globalDofID(dof().localToGlobal(iterVolume,iterDof+1) + iDim*dof().numTotalDof());
+
+                patchArea[globalDofID] += interpCFE.measure();
+                for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
+                {
+                    ID globalDofIDGrad(dof().localToGlobal(iterVolume,iterDofGrad+1));
+                    gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
+                }
+            }
+        }
+    }
+
+    // Assembly  
+    return vector_type(gradientSum,Unique,Add)/vector_type(patchArea,Unique,Add);
+}
+
+template<typename Mesh, typename Map>
+template<typename vector_type>
+vector_type
+FESpace<Mesh,Map>::
+LaplacianRecovery(const vector_type& solution)
+{
+    if (solution.getMaptype() != Repeated)
+    {
+        return LaplacianRecovery(vector_type(solution,Repeated));
+    }
+
+    vector_type laplacian(solution);
+    laplacian*=0.0;
+
+    for (UInt iterDim(0); iterDim< 3; ++iterDim)
+    {
+        laplacian+= GradientRecovery(GradientRecovery(solution,iterDim),iterDim);
+    }
+    return laplacian;
+}
+
+
 
 } // end of the namespace
 #endif
