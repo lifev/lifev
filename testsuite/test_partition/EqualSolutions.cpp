@@ -86,18 +86,22 @@ bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance) {
         velocity_ref->Update(-1.0, *velocity, 1.0);
         pressure_ref->Update(-1.0, *pressure, 1.0);
 
-        double norm_velocity[3];
-        double norm_pressure;
+        double error_norm_velocity[3];
+        double error_norm_pressure;
 
-        velocity_ref->NormInf(norm_velocity);
-        pressure_ref->NormInf(&norm_pressure);
+        velocity_ref->NormInf(error_norm_velocity);
+        pressure_ref->NormInf(&error_norm_pressure);
+
+        std::cout << "Velocity error norms: " << error_norm_velocity[0] << " "
+                  << error_norm_velocity[1] << " " << error_norm_velocity[2] << std::endl;
+        std::cout << "Pressure error norm: " << error_norm_pressure << std::endl;
 
         for (int k = 0; k < 3; ++k) {
-            if (norm_velocity[k] > tolerance) {
+            if (error_norm_velocity[k] > tolerance) {
                 correct = false;
             }
         }
-        if (norm_pressure > tolerance) {
+        if (error_norm_pressure > tolerance) {
             correct = false;
         }
 

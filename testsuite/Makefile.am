@@ -36,7 +36,8 @@ SUBDIRS		= data  \
               test_meshReorder \
 	          test_laplacian \
               test_currentFE \
-              test_filters
+              test_filters \
+              test_partition
 	      $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
@@ -46,7 +47,9 @@ TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_fsi/testsuite.at \
            $(srcdir)/test_filters/testsuite.at \
 	   $(srcdir)/test_currentFE/testsuite.at \
-           $(srcdir)/test_meshReorder/testsuite.at
+           $(srcdir)/test_meshReorder/testsuite.at \
+           $(srcdir)/test_partition/testsuite.at
+
 
 
 
