@@ -80,6 +80,9 @@ public:
 //                   *********** BASIS REFERENCE SHAPES ****************
 
 enum ReferenceShapes   {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA};
+
+UInt getReferenceDimension(const ReferenceShapes& shape);
+
 enum ReferenceGeometry {VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3};
 //! \defgroup BasRefSha   Basis Reference Shapes
 

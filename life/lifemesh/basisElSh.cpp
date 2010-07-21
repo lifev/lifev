@@ -22,6 +22,30 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 namespace LifeV
 {
+
+UInt getReferenceDimension(const ReferenceShapes& shape)
+{
+    switch(shape)
+    {
+    case NONE:
+    case POINT:
+        return 0;
+    case LINE:
+        return 1;
+    case TRIANGLE:
+    case QUAD:
+        return 2;
+    case HEXA:
+    case PRISM:
+    case TETRA:
+        return 3;
+    default:
+        ERROR_MSG(" Unknown shape " );
+    }
+    // Avoid warning
+    return 0;
+}
+
 /*******************************************************************
           IMPLEMENTATION
 *******************************************************************/
