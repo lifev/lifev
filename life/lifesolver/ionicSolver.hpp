@@ -73,7 +73,7 @@ public:
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
-    typedef DataIonic<Mesh> data_type;
+    typedef DataIonic data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
@@ -109,6 +109,7 @@ return 0.;
 	  \param Epetra communicator
     */
     IonicSolver( const data_type&          dataType,
+    		const Mesh& mesh,
            FESpace<Mesh, EpetraMap>& uFEspace,
            Epetra_Comm&              comm );
 
@@ -141,6 +142,8 @@ return 0.;
 
     const data_type&               M_data;
 
+    const Mesh&               M_mesh;
+
     // FE space
     FESpace<Mesh, EpetraMap>&      M_uFESpace;
 
@@ -171,9 +174,11 @@ protected:
 template<typename Mesh, typename SolverType>
 IonicSolver<Mesh, SolverType>::
 IonicSolver( const data_type&          dataType,
+		const Mesh& mesh,
        FESpace<Mesh, EpetraMap>& uFEspace,
        Epetra_Comm&              comm ):
     M_data                   ( dataType ),
+    M_mesh                   ( mesh ),
     M_uFESpace               ( uFEspace ),
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
@@ -199,6 +204,7 @@ public:
 	typedef typename IonicSolver<Mesh, SolverType>::fct_TauClose	fct_TauClose;
 
     Mitchell_Schaeffer( const data_type&          dataType,
+    		 const Mesh&          mesh,
            FESpace<Mesh, EpetraMap>& uFEspace,
            Epetra_Comm&              comm );
 
@@ -249,9 +255,10 @@ private:
 template<typename Mesh, typename SolverType>
 Mitchell_Schaeffer<Mesh, SolverType>::
 Mitchell_Schaeffer( const data_type&          dataType,
+		 const Mesh&          mesh,
        FESpace<Mesh, EpetraMap>& uFEspace,
        Epetra_Comm&              comm ):
-    	   IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
+    	   IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     	   M_sol_w                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
     	   M_wVecRep( M_sol_w, Repeated ),
     	   M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
@@ -323,10 +330,10 @@ void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, 
 	{
                 int ig=u.BlockMap().MyGlobalElements()[i];
 		ID 	= ig;
-		ref 	= this->M_data.mesh()->point(ig).marker();//->point(i+1)
-		x 	= this->M_data.mesh()->point(ig).x();//->point(i+1)
-	        y 	= this->M_data.mesh()->point(ig).y();//->point(i+1)
-        	z 	= this->M_data.mesh()->point(ig).z();//->point(i+1)
+		ref 	= this->M_mesh->point(ig).marker();//->point(i+1)
+		x 	= this->M_mesh->point(ig).x();//->point(i+1)
+	        y 	= this->M_mesh->point(ig).y();//->point(i+1)
+        	z 	= this->M_mesh->point(ig).z();//->point(i+1)
    		if (u[ig] < this->M_data.vcrit)
 				M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
    			else if (this->M_data.has_HeteroTauClose)
@@ -375,6 +382,7 @@ public:
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
     Rogers_McCulloch( const data_type&          dataType,
+    		const Mesh&          mesh,
            FESpace<Mesh, EpetraMap>& uFEspace,
            Epetra_Comm&              comm );
     virtual ~Rogers_McCulloch();
@@ -416,9 +424,10 @@ private:
 template<typename Mesh, typename SolverType>
 Rogers_McCulloch<Mesh, SolverType>::
 Rogers_McCulloch( const data_type&          dataType,
+		const Mesh&          mesh,
        FESpace<Mesh, EpetraMap>& uFEspace,
        Epetra_Comm&              comm ):
-    	   IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
+    	   IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     	   M_sol_w                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
     	   M_wVecRep( M_sol_w, Repeated ),
     	   M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 )
@@ -518,6 +527,7 @@ public:
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
     Luo_Rudy( const data_type&          dataType,
+    		const Mesh&          mesh,
            FESpace<Mesh, EpetraMap>& uFEspace,
            Epetra_Comm&              comm );
     virtual ~Luo_Rudy();
@@ -639,9 +649,10 @@ private:
 template<typename Mesh, typename SolverType>
 Luo_Rudy<Mesh, SolverType>::
 Luo_Rudy( const data_type&          dataType,
+		const Mesh&          mesh,
 		FESpace<Mesh, EpetraMap>& uFEspace,
 		Epetra_Comm&              comm ):
-			IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
+			IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
 			M_sol_h                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_sol_j                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_sol_m                  ( IonicSolver<Mesh, SolverType>::M_localMap ),

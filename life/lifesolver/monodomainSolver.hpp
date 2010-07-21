@@ -69,7 +69,7 @@ class MonodomainSolver
 
 public:
 
-    typedef DataMonodomain<Mesh> data_type;
+    typedef DataMonodomain data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );

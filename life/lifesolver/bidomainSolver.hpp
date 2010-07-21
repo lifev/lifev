@@ -71,7 +71,7 @@ class BidomainSolver
 
 public:
 
-    typedef DataBidomain<Mesh> data_type;
+    typedef DataBidomain data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
             const Real&, const ID& );

@@ -36,7 +36,7 @@ DataBidomain( boost::shared_ptr<HeartCaseBase> B_fct ) :
 //template <typename Mesh>
 DataBidomain::
 DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct ) :
-    DataMesh<Mesh>( heart_fct->_dataFile, "electric/space_discretization" ),
+    DataMesh( heart_fct->_dataFile, "electric/space_discretization" ),
     DataTime( heart_fct->_dataFile, "electric/time_discretization" ),
     red_sigma_sphere(heart_fct->get_reduced_sigma_sphere() ),
     red_sigma_cyl(heart_fct->get_reduced_sigma_cylinder() ),
