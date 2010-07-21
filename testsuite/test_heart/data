@@ -7,6 +7,7 @@
 multimesh  = false
 save       = 1
 post_dir = ./
+type = hdf5
 
 [electric]
 

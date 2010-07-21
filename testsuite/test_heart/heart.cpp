@@ -74,7 +74,6 @@ Heart::Heart( int argc,
     //! Pointer to access functors
     M_heart_fct.reset(new HeartFunctors( dataFile));
     ion_model=dataFile("electric/physics/ion_model",1);
-    std::cout << "mpi initialization ... " << std::endl;
     M_heart_fct->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
 
     if (!M_heart_fct->comm->MyPID()) {
@@ -94,11 +93,17 @@ Heart::run()
     //! Construction of data classes
 
 #ifdef MONODOMAIN
-    DataMonodomain<RegionMesh3D<LinearTetra> > _data(M_heart_fct);
+    DataMonodomain _data(M_heart_fct);
 #else
-    DataBidomain<RegionMesh3D<LinearTetra> > _data(M_heart_fct);
+    DataBidomain _data(M_heart_fct);
 #endif
-    DataIonic<RegionMesh3D<LinearTetra> > _dataIonic(M_heart_fct->_dataFile);
+    DataIonic _dataIonic(M_heart_fct->_dataFile);
+
+    DataMesh dataMesh;
+    dataMesh.setup(M_heart_fct->_dataFile, "electric/space_discretization");
+
+    RegionMesh3D<LinearTetra> mesh;
+    readMesh(mesh, dataMesh);
 
     bool verbose = (M_heart_fct->comm->MyPID() == 0);
 
@@ -119,7 +124,7 @@ Heart::run()
 
 
     //! Construction of the partitioned mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*_data.mesh(), *M_heart_fct->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *M_heart_fct->comm);
     std::string uOrder =  M_heart_fct->_dataFile( "electric/space_discretization/u_order", "P1");
 
     //! Initialization of the FE type and quadrature rules for both the variables
@@ -136,7 +141,6 @@ Heart::run()
         exit(1);
     }
 
-    Dof uDof(*_data.mesh(), *refFE_u);
     std::string wOrder =  M_heart_fct->_dataFile( "electric/space_discretization/w_order", "P1");
     if ( wOrder.compare("P1") == 0 )
     {
@@ -150,8 +154,6 @@ Heart::run()
         cout<<"\n "<<wOrder<<" finite element not implemented yet \n";
         exit(1);
     }
-
-    _data.setMesh(meshPart.mesh());
 
     //! Construction of the FE spaces
     if (verbose)
@@ -198,12 +200,12 @@ Heart::run()
     boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel;
     if(ion_model==1)
     {
-    	std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
-    	ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *M_heart_fct->comm));
+    	if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
+    	ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic, *meshPart.mesh(), uFESpace, *M_heart_fct->comm));
     }else if(ion_model==2)
     {
-    	std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
-    	ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic, uFESpace, *M_heart_fct->comm));
+    	if (verbose) std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
+    	ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic, *meshPart.mesh(), uFESpace, *M_heart_fct->comm));
     }
 #ifdef MONODOMAIN
     electricModel.initialize( M_heart_fct->get_initial_scalar());
@@ -229,23 +231,48 @@ Heart::run()
     if (verbose) std::cout << " ok "<< std::endl;
 
     //! Setting Ensight postprocessing
-    Ensight<RegionMesh3D<LinearTetra> > ensight( M_heart_fct->_dataFile, meshPart.mesh(), "heart", M_heart_fct->comm->MyPID());
+    //Ensight<RegionMesh3D<LinearTetra> > ensight( M_heart_fct->_dataFile, _data.mesh(), "heart", M_heart_fct->comm->MyPID());
+
+    //! Setting generic Exporter postprocessing
+    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+
+    std::string const exporterType =  M_heart_fct->_dataFile( "exporter/type", "ensight");
+
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+    {
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile, "heart" ) );
+        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId( meshPart.mesh(), M_heart_fct->comm->MyPID() );
+    }
+    else
+#endif
+    {
+        if (exporterType.compare("none") == 0)
+        {
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile, meshPart.mesh(), "heart", M_heart_fct->comm->MyPID()) );
+        } else {
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile, meshPart.mesh(), "heart", M_heart_fct->comm->MyPID()) );
+        }
+    }
+
+
     vector_ptrtype Uptr( new vector_type(electricModel.solution_u(), Repeated ) );
 
-    ensight.addVariable( ExporterData::Scalar,  "potential", Uptr,
+    exporter->addVariable( ExporterData::Scalar,  "potential", Uptr,
                          UInt(0), uFESpace.dof().numTotalDof() );
 
 #ifdef BIDOMAIN
     vector_ptrtype Ueptr( new vector_type(electricModel.solution_ue(), Repeated ) );
-    ensight.addVariable( ExporterData::Scalar,  "potential_e", Ueptr,
+    exporter->addVariable( ExporterData::Scalar,  "potential_e", Ueptr,
                          UInt(0), uFESpace.dof().numTotalDof() );
 #endif
 
     vector_ptrtype Fptr( new vector_type(electricModel.fiber_vector(), Repeated ) );
 
     if(_data.has_fibers() )
-        ensight.addVariable( ExporterData::Vector, "fibers", Fptr, UInt(0), uFESpace.dof().numTotalDof(), 1 );
-    ensight.postProcess( 0 );
+        exporter->addVariable( ExporterData::Vector, "fibers", Fptr, UInt(0), uFESpace.dof().numTotalDof(), 1 );
+    exporter->postProcess( 0 );
 
     MPI_Barrier(MPI_COMM_WORLD);
     chronoinitialsettings.stop();
@@ -286,13 +313,13 @@ Heart::run()
             std::cout << "max u " << minu << std::endl<<std::flush;
         }
 
-        //! Ensight postprocess
+        //! exporter postprocess
         *Uptr = electricModel.solution_u();
 #ifdef BIDOMAIN
         *Ueptr = electricModel.solution_ue();
 #endif
 
-        ensight.postProcess( time );
+        exporter->postProcess( time );
         MPI_Barrier(MPI_COMM_WORLD);
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
@@ -306,7 +333,7 @@ Heart::run()
 
 #ifdef MONODOMAIN
 void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-                        boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, DataMonodomain< RegionMesh3D<LinearTetra> >& data )
+                        boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, DataMonodomain& data )
 {
     bool verbose = (M_heart_fct->comm->MyPID() == 0);
     Real lambda = data.lambda();
@@ -363,7 +390,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
 }
 #else
 void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-                        boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, DataBidomain< RegionMesh3D<LinearTetra> >& data )
+                        boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, DataBidomain& data )
 {
     bool verbose = (M_heart_fct->comm->MyPID() == 0);
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;

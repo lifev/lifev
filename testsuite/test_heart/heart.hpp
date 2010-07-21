@@ -33,19 +33,23 @@
 #ifndef __HEART_H
 #define __HEART_H
 
-#define MONODOMAIN
+#define BIDOMAIN
 
 #include <life/lifecore/application.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
 #ifdef MONODOMAIN
 	#include <life/lifesolver/monodomainSolver.hpp>
 #else
 	#include <life/lifesolver/bidomainSolver.hpp>
 #endif
 #include <life/lifesolver/ionicSolver.hpp>
+#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/noexport.hpp>
+
 //#include <life/lifesolver/heartFunctors.hpp>
 
 
@@ -108,12 +112,12 @@ public:
     void computeRhs( vector_type& rhs,
     		MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
     		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
-    		DataMonodomain<RegionMesh3D<LinearTetra> >& dataMonodomain );
+    		DataMonodomain& dataMonodomain );
 #else
     void computeRhs( vector_type& rhs,
     		BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
     		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
-    		DataBidomain<RegionMesh3D<LinearTetra> >& dataBidomain );
+    		DataBidomain& dataBidomain );
 #endif
     //@}
 
