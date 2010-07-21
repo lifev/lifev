@@ -498,13 +498,13 @@ Cylinder::run()
         importer.setMeshProcId(uFESpace.mesh(), d->comm->MyPID());
 
         importer.addVariable( ExporterData::Vector,
-                              "Velocity",
+                              "velocity",
                               velAndPressure,
                               UInt ( 0 ),
                               uFESpace.dof().numTotalDof() );
 
         importer.addVariable( ExporterData::Scalar,
-                              "Pressure",
+                              "pressure",
                               velAndPressure,
                               3*uFESpace.dof().numTotalDof(),
                               pFESpace.dof().numTotalDof());
