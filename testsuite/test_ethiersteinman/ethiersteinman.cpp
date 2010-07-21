@@ -930,8 +930,8 @@ Ethiersteinman::check()
                 h1 = 1.0/meshDiscretization[jDiscretization-1];
                 h2 = 1.0/meshDiscretization[jDiscretization];
 
-                uBound = convTol*pow(h1/h2,uConvergenceOrder[iElem]);
-                pBound = convTol*pow(h1/h2,pConvergenceOrder[iElem]);
+                uBound = convTol*pow(h1/h2,int(uConvergenceOrder[iElem]));
+                pBound = convTol*pow(h1/h2,int(pConvergenceOrder[iElem]));
 
                 uErrRatio = uL2Error[iElem][jDiscretization-1]/uL2Error[iElem][jDiscretization]; // E1/E2
                 pErrRatio = pL2Error[iElem][jDiscretization-1]/pL2Error[iElem][jDiscretization];
