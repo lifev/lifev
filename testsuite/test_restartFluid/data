@@ -3,10 +3,21 @@
 #      Data file for cylinder test with Navier-Stokes
 #----------------------------------------------------------------
 
+#  --------------------------------------------------------------------------------
+#                          Comment by Matteo Pozzoli
+#
+#  When you run this test the first time, you must choose initial_sol "none" or "stokes".
+#  The test saves the solution in cylinder (filename of exporter).
+#  To restart the simulation,  you must select:
+#   - name of hdf5 file to read  (filename of import),
+#   - start time  ( start of import ).
+#
+# ---------------------------------------------------------------------------------
+
         [exporter]
         multimesh  = false
         save       = 10
-        filename   = cylinder2
+        filename   = cylinder
 
 
 [fluid]
@@ -17,7 +28,7 @@
     	D               = 1.
     	H               = 2.
     	centered        = 1
-    	initial_sol     = restart          # stokes, none
+    	initial_sol     = none        # stokes, none, restart
 
      	[../importer]
 	start      = 00000
