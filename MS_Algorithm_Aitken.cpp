@@ -120,7 +120,10 @@ MS_Algorithm_Aitken::SubIterate()
 
     // Verify tolerance
     if ( ToleranceSatisfied() )
+    {
+        Save( 0, M_couplingResiduals->Norm2() );
         return;
+    }
 
     M_multiscale->ExportCouplingVariables( *M_couplingVariables );
 
@@ -178,8 +181,13 @@ MS_Algorithm_Aitken::SubIterate()
 
         // Verify tolerance
         if ( ToleranceSatisfied() )
+        {
+            Save( subIT, M_couplingResiduals->Norm2() );
             return;
+        }
     }
+
+    Save( M_SubiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
     MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
                                  " (required: " + number2string( M_Tolerance ) + ")\n" );
