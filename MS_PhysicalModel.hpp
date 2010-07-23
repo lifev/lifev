@@ -97,11 +97,12 @@ public:
 
     //! Setup the data of the model.
     /*!
-     * In particular it does the following operations:
+     * This method is called only once at the beginning of the simulation.
+     * It is designed for the following operations:
      * <ol>
      *     <li> read data from files;
      *     <li> set global parameter for the MS simulation (viscosity, time, ...);
-     *     <li> perform preliminary operations which don't depend on the couplings.
+     *     <li> perform preliminary operations which do not depend on the couplings.
      * </ol>
      *
      * @param FileName Name of data file.
@@ -119,24 +120,31 @@ public:
      */
     virtual void SetupModel() = 0;
 
-    //! Build the initial system (matrix and vectors).
+    //! Build the initial system.
     /*!
-     * Matrix and vectors built here are for the first time step. If they are time independent could be reused later.
-     * More generally, this method initialize all the objects which are not defined at the first time step.
-     *
-     * <b>This method should be called only once at the first time step!</b>
+     * This method is alternative to UpdateSystem and should be called only once at the fist timestep.
+     * This method is reserved for the construction of:
+     * <ol>
+     *     <li> objects that are constant (with respect to the time);
+     *     <li> objects that are required for the first time step and should not be updated during subiterations.
+     * </ol>
      */
     virtual void BuildSystem() = 0;
 
-    //! Update the system for (matrix and vectors)
+    //! Update the system.
     /*!
-     * Only time dependent objects are updated here.
+     * This method is alternative to BuildSystem and should be called from the second timestep.
+     * This method is reserved for the update of:
+     * <ol>
+     *     <li> objects that are not constant with respect to the time but should not be updated during subiterations.
+     * </ol>
      */
     virtual void UpdateSystem() = 0;
 
-    //! Solve the problem.
+    //! Solve the System.
     /*!
-     * This method solve the problem.
+     * This method is called once for each subiteration (in the case of implicit coupling).
+     * It computes the solution at time t_n+1.
      */
     virtual void SolveSystem() = 0;
 
