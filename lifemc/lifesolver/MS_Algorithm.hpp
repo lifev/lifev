@@ -101,6 +101,19 @@ public:
     //@}
 
 
+    //! @name Methods
+    //@{
+
+    //! Save on a Matlab file the information about the convergence of the algorithm.
+    /*!
+     * @param SubiterationsNumber Number of subiterations performed.
+     * @param residual Residual.
+     */
+    void Save( const UInt& SubiterationsNumber, const Real& residual );
+
+    //@}
+
+
     //! @name Set Methods
     //@{
 

@@ -126,6 +126,35 @@ MS_Algorithm::SubIterate()
 }
 
 void
+MS_Algorithm::Save( const UInt& SubiterationsNumber, const Real& residual )
+{
+    std::ofstream output;
+    output << std::scientific << std::setprecision( 15 );
+
+    if ( M_comm->MyPID() == 0 )
+    {
+        std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Algorithm.mfile";
+
+        if ( M_multiscale->GetGlobalData()->GetDataTime()->isFirstTimeStep() )
+        {
+            output.open( filename.c_str(), std::ios::trunc );
+            output << "% Algorithm Type: " << Enum2String( M_type, MS_algorithmsMap ) << std::endl;
+            output << "% Subiteration maximum number: " << M_SubiterationsMaximumNumber << std::endl;
+            output << "% Tolerance: " << M_Tolerance << std::endl << std::endl;
+            output << "% TIME                     Subiterations      Residual" << std::endl;
+        }
+        else
+            output.open( filename.c_str(), std::ios::app );
+
+        output << M_multiscale->GetGlobalData()->GetDataTime()->getTime()
+               << "      "<< SubiterationsNumber
+               << "                  "<< residual << std::endl;
+
+        output.close();
+    }
+}
+
+void
 MS_Algorithm::ShowMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
