@@ -282,4 +282,10 @@ MS_PhysicalModel::GetCoupling( const UInt& LocalID ) const
     return M_couplings[LocalID];
 }
 
+const MS_GlobalDataContainer_PtrType&
+MS_PhysicalModel::GetGlobalData() const
+{
+    return M_globalData;
+}
+
 } // Namespace LifeV
