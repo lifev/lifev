@@ -36,7 +36,7 @@
 
 namespace LifeV {
 
-std::string MS_ProblemFolder = "";
+std::string MS_ProblemFolder = "./";
 UInt        MS_ProblemStep   = 0;
 bool        MS_ExitFlag      = EXIT_SUCCESS;
 
