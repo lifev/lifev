@@ -271,6 +271,12 @@ public:
      */
     MS_Coupling_PtrType GetCoupling( const UInt& LocalID ) const;
 
+    //! Get the global data of the model.
+    /*!
+     * @return Global data container.
+     */
+    const MS_GlobalDataContainer_PtrType& GetGlobalData() const;
+
     //@}
 
 protected:
