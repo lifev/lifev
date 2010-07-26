@@ -3463,6 +3463,21 @@ Real fct4_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
     return 6.;
 }
 
+// Transformation functions
+
+std::vector<Real> lagrangianTransform(const std::vector<Real>& values)
+{
+    return values;
+}
+
+std::vector<Real> P1Bubble3DTransform(const std::vector<Real>& nodalValues)
+{
+    std::vector<Real> FEValues(nodalValues);
+    FEValues[4]=256*nodalValues[4] - 64*(nodalValues[0]+nodalValues[1]+nodalValues[2]+nodalValues[3]);
+    return FEValues;
+}
+
+
 //======================================================================
 //
 //                            P0  (0D)
@@ -3486,7 +3501,8 @@ const RefFEScalar fePointP0( "Lagrange P0 on a point",
                              der2fct_P0_0D,
                              refcoor_P0_0D,
                              STANDARD_PATTERN,
-                             ( RefFE* ) NULL );
+                             ( RefFE* ) NULL,
+                             &lagrangianTransform );
 
 //======================================================================
 //
@@ -3499,7 +3515,7 @@ const RefFEScalar fePointP0( "Lagrange P0 on a point",
 
 const RefFEScalar feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
                            fct_P1_1D, derfct_P1_1D, der2fct_P1_1D, refcoor_P1_1D,
-                           STANDARD_PATTERN, &fePointP0 );
+                           STANDARD_PATTERN, &fePointP0,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3512,7 +3528,7 @@ const RefFEScalar feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 
 
 const RefFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
                            fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D,
-                           STANDARD_PATTERN, &fePointP0 );
+                           STANDARD_PATTERN, &fePointP0,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3529,7 +3545,7 @@ const RefFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 
 
 const RefFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
                             fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D,
-                            STANDARD_PATTERN, ( RefFE* ) NULL );
+                            STANDARD_PATTERN, ( RefFE* ) NULL,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3546,7 +3562,7 @@ const RefFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 
 
 const RefFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D,
-                            STANDARD_PATTERN, &feSegP1 );
+                            STANDARD_PATTERN, &feSegP1,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3563,7 +3579,7 @@ const RefFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 
 
 const RefFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
                             fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D,
-                            STANDARD_PATTERN, &feSegP2 );
+                            STANDARD_PATTERN, &feSegP2,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3580,7 +3596,7 @@ const RefFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 
 
 const RefFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
                             fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D,
-                            STANDARD_PATTERN, ( RefFE* ) NULL );
+                            STANDARD_PATTERN, ( RefFE* ) NULL,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3597,7 +3613,7 @@ const RefFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0,
 
 const RefFEScalar feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0, 4, 2,
                             fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D, refcoor_Q1_2D,
-                            STANDARD_PATTERN, &feSegP1 );
+                            STANDARD_PATTERN, &feSegP1,&lagrangianTransform );
 
 
 //======================================================================
@@ -3615,7 +3631,7 @@ const RefFEScalar feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0,
 
 const RefFEScalar feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0, 9, 2,
                             fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D, refcoor_Q2_2D,
-                            STANDARD_PATTERN, &feSegP2 );
+                            STANDARD_PATTERN, &feSegP2,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3633,7 +3649,7 @@ const RefFEScalar feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1,
 */
 const RefFEScalar feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
                              fct_P0_3D, derfct_P0_3D, der2fct_P0_3D, refcoor_P0_3D,
-                             STANDARD_PATTERN, &feTriaP0 );
+                             STANDARD_PATTERN, &feTriaP0,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3651,7 +3667,7 @@ const RefFEScalar feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0
 */
 const RefFEScalar feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0, 4, 3,
                              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D,
-                             STANDARD_PATTERN, &feTriaP1 );
+                             STANDARD_PATTERN, &feTriaP1,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3669,7 +3685,7 @@ const RefFEScalar feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0
 */
 const RefFEScalar feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D, TETRA, 1, 0, 0, 1, 5, 3,
                                    fct_P1bubble_3D, derfct_P1bubble_3D, der2fct_P1bubble_3D, refcoor_P1bubble_3D,
-                                   STANDARD_PATTERN, &feTriaP1 );
+                                   STANDARD_PATTERN, &feTriaP1, &P1Bubble3DTransform );
 
 
 //======================================================================
@@ -3688,7 +3704,7 @@ const RefFEScalar feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubb
 */
 const RefFEScalar feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0, 10, 3,
                              fct_P2_3D, derfct_P2_3D, der2fct_P2_3D, refcoor_P2_3D,
-                             STANDARD_PATTERN, &feTriaP2 );
+                             STANDARD_PATTERN, &feTriaP2,&lagrangianTransform );
 //======================================================================
 //
 //                            P2tilde  (3D)
@@ -3708,7 +3724,7 @@ const RefFEScalar feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_
                                   derfct_P2tilde_3D,
                                   der2fct_P2tilde_3D,
                                   refcoor_P2tilde_3D,
-                                  STANDARD_PATTERN, &feTriaP2 );
+                                  STANDARD_PATTERN, &feTriaP2,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3728,7 +3744,7 @@ const RefFEScalar feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_
 */
 const RefFEScalar feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1, 3,
                             fct_Q0_3D, derfct_Q0_3D, der2fct_Q0_3D, refcoor_Q0_3D,
-                            STANDARD_PATTERN, &feQuadQ0 );
+                            STANDARD_PATTERN, &feQuadQ0,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3748,7 +3764,7 @@ const RefFEScalar feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0
 */
 const RefFEScalar feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8, 3,
                             fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D, refcoor_Q1_3D,
-                            STANDARD_PATTERN, &feQuadQ1 );
+                            STANDARD_PATTERN, &feQuadQ1,&lagrangianTransform );
 
 //======================================================================
 //
