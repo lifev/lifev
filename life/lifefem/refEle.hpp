@@ -32,6 +32,8 @@
 #ifndef REFELE_H
 #define REFELE_H 1
 
+#include <life/lifearray/tab.hpp>
+
 #include <life/lifecore/life.hpp>
 
 #include <life/lifemesh/basisElSh.hpp>
@@ -52,7 +54,9 @@ typedef Real ( * Fct ) ( cRRef, cRRef , cRRef );
 
   Implemented orginially by J.-F. Gerbeau (04/2002) but totally modified by S.Quinodoz (samuel.quinodoz@epfl.ch , 04/2010)
 
-  This class contains all the basis functions, their derivatives and the reference coordinates. It is the basis class for the geometric map (LifeV::GeoMap) and the reference finite element (LifeV::RefFE). 
+  This class contains all the basis functions, their derivatives and the reference coordinates. It is the basis class for the geometric map (LifeV::GeoMap) and the reference finite element (LifeV::RefFE).
+  
+  \todo Add Volume
 */
 class RefEle
 {
@@ -110,6 +114,9 @@ public:
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
         return M_refCoor[ 3 * i + icoor ];
     }
+    //! return the coordinates of the reference element
+    std::vector<GeoVector> refCoor() const;
+
     //! return the value of the i-th basis function on point (x,y,z)
     inline Real phi( UInt i, cRRef x, cRRef y, cRRef z ) const
     {
@@ -163,6 +170,33 @@ public:
         return ( M_divPhi != static_cast<Fct*>(NULL) );
     }
 
+    //! Method for transforming nodal values into FE values
+    /*!
+      This method can be used to retrieve the FE coefficients corresponding
+      to the values given in the nodes (important for the interpolation 
+      procedures). For lagrangian elements (like P1 or P2),
+      this method is just giving back the same values. However, for nodal but
+      non-lagrangian finite elements (like P1Bubble), the values returned are
+      different from the output.
+      
+      For example, using P1Bubble finite element, if one gives as input values
+      that are all 1 (the finite element function is constant), this
+      function will return 1 for the P1 nodes but 0 for the bubble. Indeed, by
+      suming the P1 function, we already get the constant function over the 
+      whole element and there is no need for the bubble.
+
+      Of course, this method is accessible only for nodal finite elements.
+      If one tries to use this method with a non nodal finite element, an
+      error will be displayed and the program will stop running.
+     */
+    inline virtual std::vector<Real> nodalToFEValues(const std::vector<Real>& /*nodalValues*/) const
+    {
+        //By default, it is not possible to use it.
+        std::cerr << " Trying to access nodal values via nodalToFEValues function. " << std::endl;
+        std::cerr << " This FE is not nodal, impossible operation! " << std::endl;
+        abort();
+    }
+
     //@}
 
 
@@ -186,20 +220,19 @@ public:
     inline const UInt& nbCoor() const
     {
         return M_nbCoor;
-    };
+    }
 
     //! Return the dimension of the FE (scalar vs vectorial FE)
     inline const UInt& FEDim() const
     {
         return M_FEDim;
-    };
+    }
     
-
     //! Return the shape of the element
     inline const ReferenceShapes& shape() const
     {
         return M_shape;
-    };
+    }
     
     //@}
 

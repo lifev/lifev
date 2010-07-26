@@ -50,7 +50,10 @@ class RefFEScalar
     : public RefFE
 {
 public:
-        //! Constructor of a reference Lagrangian finite element.
+
+    typedef std::vector<Real> (ValuesToValuesFct) (const std::vector<Real>&);
+   
+    //! Constructor of a reference Lagrangian finite element.
     /*!
       Constructor of a reference finite element. The arguments are:
       @param name  the name of the f.e.
@@ -79,26 +82,42 @@ public:
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
     RefFEScalar( std::string          name,
-               FE_TYPE              type,
-               ReferenceShapes      shape,
-               int                  nbDofPerVertex,
-               int                  nbDofPerEdge,
-               int                  nbDofPerFace,
-               int                  nbDofPerVolume,
-               int                  nbDof,
-               int                  nbCoor,
-               const Fct*           phi,
-               const Fct*           dPhi,
-               const Fct*           d2Phi,
-               const Real*          refCoor,
-               DofPatternType       patternType,
-               const RefFE*         bdRefFE );
+                 FE_TYPE              type,
+                 ReferenceShapes      shape,
+                 int                  nbDofPerVertex,
+                 int                  nbDofPerEdge,
+                 int                  nbDofPerFace,
+                 int                  nbDofPerVolume,
+                 int                  nbDof,
+                 int                  nbCoor,
+                 const Fct*           phi,
+                 const Fct*           dPhi,
+                 const Fct*           d2Phi,
+                 const Real*          refCoor,
+                 DofPatternType       patternType,
+                 const RefFE*         bdRefFE,
+                 const ValuesToValuesFct* nodalToFE);
 
     ~RefFEScalar()
     {
         DESTRUCTOR( "RefFEScalar" );
     };
-  
+
+    //! @name Methods
+    //@{
+
+    inline std::vector<Real> nodalToFEValues(const std::vector<Real>& nodalValues) const
+    {
+        ASSERT( nodalValues.size() == nbDof() ,"Number of nodal values does not match with the number of degrees of freedom");
+        return M_nodalToFEValues(nodalValues);
+    }
+
+    //@}
+
+private:
+    
+    const ValuesToValuesFct* M_nodalToFEValues;
+
 };
 
 //--------------------------------------------------

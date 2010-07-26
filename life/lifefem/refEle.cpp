@@ -34,14 +34,14 @@
 namespace LifeV
 {
 
-    RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt FEDim,
+RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt FEDim,
                 const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi, const Real* refCoor ) :
     M_phi( phi ),
     M_dPhi( dPhi ),
     M_d2Phi( d2Phi ),
     M_divPhi( divPhi),
     M_refCoor( refCoor ), 
-
+    
     M_name( name ),
     M_shape( shape ),
     M_nbDof( nbDof ),
@@ -55,5 +55,19 @@ RefEle::~RefEle()
 {
     DESTRUCTOR( "RefEle" );
 }
+    
+std::vector<GeoVector> 
+RefEle::refCoor() const
+{
+    std::vector<GeoVector> coordinates(M_nbDof, GeoVector(3,0));
+    for (UInt i(0); i<M_nbDof; ++i)
+    {
+        coordinates[i][0]=M_refCoor[3*i];
+        coordinates[i][1]=M_refCoor[3*i+1];
+        coordinates[i][2]=M_refCoor[3*i+2];
+    }
+    return coordinates;
+}
+
 
 } // Namespace LifeV
