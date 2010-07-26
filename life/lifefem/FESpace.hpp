@@ -775,123 +775,53 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                                  vector_type&    vect,
                                  const Real      time)
 {
-    typedef typename mesh_type::ElementShape GeoShape ; // Element shape
+    // First, we build a "quadrature" that consists in the nodes (0 weight)
+    QuadRule interpQuad;
+    interpQuad.setDimensionShape(3,M_refFE->shape());
+    interpQuad.setPoints(M_refFE->refCoor(),std::vector<Real>(M_refFE->nbDof(),0));
+    
+    // Then, we define a currentFE with nodes on the reference nodes
+    CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
+    
+    // Some constants
+    UInt totalNumberElements(M_mesh->numElements());
+    UInt numberLocalDof(M_dof->numLocalDof());
+    
+    // Storage for the values
+    std::vector<Real> nodalValues(numberLocalDof,0);
+    std::vector<Real> FEValues(numberLocalDof,0);
 
-    UInt nDofpV    = refFE().nbDofPerVertex(); // number of Dof per vertex
-    UInt nDofpE    = refFE().nbDofPerEdge();   // number of Dof per edge
-    UInt nDofpF    = refFE().nbDofPerFace();   // number of Dof per face
-    //UInt nDofpEl   = refFE().nbDofPerVolume(); // number of Dof per Volume
-
-    UInt nElemV    = GeoShape::numVertices; // Number of element's vertices
-    UInt nElemE    = GeoShape::numEdges;    // Number of element's edges
-    UInt nElemF    = GeoShape::numFaces;    // Number of element's faces
-
-    UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
-    UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-    //UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
-
-    ID nbComp = M_fieldDim; // Number of components of the mesh velocity
-
-    Real x, y, z;
-
-    ID lDof;
-
-    // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= mesh()->numElements(); ++iElem )
+    // Do the loop over the cells
+    for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
     {
-
-        fe().updateJac( mesh()->element( iElem ) );
-        ID elemId = mesh()->element( iElem ).localId();
-
-        // Vertex based Dof
-        if ( nDofpV )
+        // We update the CurrentFE so that we get the coordinates of the nodes
+        interpCFE.update(M_mesh->element(iterVolume), UPDATE_QUAD_NODES);
+        
+        // Loop over the dimension of the field
+        for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
         {
-            // loop on element vertices
-            for ( ID iVe = 1; iVe <= nElemV; ++iVe )
+            // Loop over the degrees of freedom (= quadrature nodes)
+            for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
             {
-                // Loop number of Dof per vertex
-                for ( ID l = 1; l <= nDofpV; ++l )
-                {
-                    lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
-
-                    // Nodal coordinates
-                    fe().coorMap( x, y, z, refFE().xi( lDof - 1 ), refFE().eta( lDof - 1 ), refFE().zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                    {
-                        UInt iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
-                        vect.checkAndSet( iDof, fct( time, x, y, z, icmp + 1 ));
-                    }
-                }
+                // Store the nodal value
+                nodalValues[iterDof] =  fct(time,interpCFE.quadNode(iterDof,0),interpCFE.quadNode(iterDof,1)
+                                            ,interpCFE.quadNode(iterDof,2),iDim+1);
+            }
+            
+            // Transform the nodal values in FE values
+            FEValues = M_refFE->nodalToFEValues(nodalValues);
+            
+            // Then on the dimension of the FESpace (scalar field vs vectorial field)
+            for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+            {
+                // Find the ID of the considered DOF
+                ID globalDofID(M_dof->localToGlobal(iterVolume,iterDof+1) + iDim*M_dim);
+                
+                // Compute the value of the function and set it
+                vect.checkAndSet(globalDofID,FEValues[iterDof]);
+                
             }
         }
-        // Edge based Dof
-        if ( nDofpE )
-        {
-
-            // loop on element edges
-            for ( ID iEd = 1; iEd <= nElemE; ++iEd )
-            {
-
-                // Loop number of Dof per edge
-                for ( ID l = 1; l <= nDofpE; ++l )
-                {
-                    lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
-
-                    // Nodal coordinates
-                    fe().coorMap( x, y, z, refFE().xi( lDof - 1 ), refFE().eta( lDof - 1 ), refFE().zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                    {
-                        UInt iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
-                        vect.checkAndSet( iDof, fct( time, x, y, z, icmp + 1 ));
-                    }
-                }
-            }
-        }
-
-        // Face based Dof
-        if ( nDofpF )
-        {
-
-            // loop on element faces
-            for ( ID iFa = 1; iFa <= nElemF; ++iFa )
-            {
-
-                // Loop on number of Dof per face
-                for ( ID l = 1; l <= nDofpF; ++l )
-                {
-
-                    lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
-
-                    // Nodal coordinates
-                    fe().coorMap( x, y, z, refFE().xi( lDof - 1 ), refFE().eta( lDof - 1 ), refFE().zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                    {
-                        vect( icmp * dim() + dof().localToGlobal( elemId, lDof ) - 0 ) = fct( time, x, y, z, icmp + 1 );
-                    }
-                }
-            }
-        }
-//         // Element based Dof
-//         // Loop on number of Dof per Element
-/*         for ( ID l = 1; l <= nDofpEl; ++l )
-         {
-             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
-
-             // Nodal coordinates
-             fe().coorMap( x, y, z, refFE().xi( lDof - 1 ), refFE().eta( lDof - 1 ), refFE().zeta( lDof - 1 ) );
-
-             // Loop on data vector components
-             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-             {
-                vect( icmp * dim() + dof().localToGlobal( elemId, lDof ) - 0 ) = fct( time, x, y, z, icmp + 1 );
-             }
-	     }*/
     }
 }
 
