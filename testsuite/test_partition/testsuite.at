@@ -110,7 +110,6 @@ overlap                = 0
 local_parts            = 1
 root_node              = 0
 use_symmetric_graph    = true
-number                 = 4
 
 [../amesos]
 solvertype             = Amesos_KLU

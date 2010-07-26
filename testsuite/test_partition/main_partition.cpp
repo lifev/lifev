@@ -96,13 +96,14 @@ int main( int argc, char** argv )
     readMesh(mesh, dataMesh);
 
     partitionMesh<RegionMesh3D<LinearTetra> > meshPart;
-    meshPart.setup(dataFile, comm);
+    meshPart.setup(4, comm);
 
     meshPart.attachUnpartitionedMesh(mesh);
     meshPart.doPartitionGraph();
     meshPart.doPartitionMesh();
 
-    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, "cylinderPart");
+    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.mesh(), "cylinderPart",
+                                                            comm.MyPID());
     HDF5Output.addPartitionGraph(meshPart.graph(), &comm);
     HDF5Output.addMeshPartitionAll(meshPart.meshAllPartitions(), &comm);
     HDF5Output.postProcess(0);
