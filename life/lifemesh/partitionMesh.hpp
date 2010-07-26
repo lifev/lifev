@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <life/lifecore/GetPot.hpp>
 #include <EpetraExt_HDF5.h>
 
 
@@ -103,7 +102,7 @@ public:
       \param dataFile - GetPot - the data file containing all simulation options
       \param _comm - Epetra_Comm& - reference of the Epetra communicator used
     */
-    void setup(GetPot dataFile, Epetra_Comm &_comm);
+    void setup(UInt partitionNumber, Epetra_Comm &_comm);
     //! Call update() method after loading the graph, to rebuild all data structures
     /*!
       This method is to be called after the partitioned graph is LOADED from a HDF5 file.
@@ -316,15 +315,14 @@ partitionMesh<Mesh>::partitionMesh(Mesh &_mesh, Epetra_Comm &_comm,
 }
 
 template<typename Mesh>
-void partitionMesh<Mesh>::setup(GetPot dataFile, Epetra_Comm &_comm)
+void partitionMesh<Mesh>::setup(UInt partitionNumber, Epetra_Comm &_comm)
 {
     M_serialMode = true;
     M_comm = &_comm;
     M_me = M_comm->MyPID();
     setElementParameters();
 
-    dataFile.set_prefix("fluid/prec/ifpack/partitioner/");
-    M_nPartitions = dataFile("number", 1);
+    M_nPartitions = partitionNumber;
 
     M_mesh.reset(new partmesh_type);
     mesh_ptrtype newMesh;
