@@ -47,12 +47,10 @@ namespace LifeV {
 // ===================================================
 OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const Flux_PtrType     flux,
                                                                                 const Source_PtrType   source,
-                                                                                const Solution_PtrType solution,
                                                                                 const OneD_BCSide&     side,
                                                                                 const OneD_BC&         bcType ):
     M_Flux                          ( flux ),
     M_Source                        ( source ),
-    M_Solution                      ( solution ),
     M_boundaryDof                   (),
     M_bcType                        ( bcType )
 {
@@ -63,9 +61,18 @@ OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( 
         break;
 
         case OneD_right:
-            M_boundaryDof = M_Flux->Physics()->Data()->nbElem() + 1;
+            M_boundaryDof = M_Flux->Physics()->Data()->NumberOfElements() + 1;
         break;
     }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType solution )
+{
+    M_Solution = solution;
 }
 
 
@@ -75,10 +82,9 @@ OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( 
 // ===================================================
 OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType     flux,
                                                                                 const Source_PtrType   source,
-                                                                                const Solution_PtrType solution,
                                                                                 const OneD_BCSide&     side,
                                                                                 const OneD_BC&         bcType ):
-    super                           ( flux, source, solution, side, bcType ),
+    super                           ( flux, source, side, bcType ),
     M_U_boundary                    (),
     M_W_boundary                    ()
 {}
@@ -100,10 +106,10 @@ OneDimensionalModel_BCFunction_Riemann::operator()( const Real& /*time*/, const 
 void
 OneDimensionalModel_BCFunction_Riemann::update_U_boundary()
 {
-    M_U_boundary[0] = (*this->M_Solution)[0](M_boundaryDof);
-    M_U_boundary[1] = (*this->M_Solution)[1](M_boundaryDof);
-    M_W_boundary[0] = (*this->M_Solution)[2](M_boundaryDof);
-    M_W_boundary[1] = (*this->M_Solution)[3](M_boundaryDof);
+    M_U_boundary[0] = (*(*this->M_Solution)["A"])(M_boundaryDof);
+    M_U_boundary[1] = (*(*this->M_Solution)["Q"])(M_boundaryDof);
+    M_W_boundary[0] = (*(*this->M_Solution)["W1"])(M_boundaryDof);
+    M_W_boundary[1] = (*(*this->M_Solution)["W2"])(M_boundaryDof);
 }
 
 
@@ -113,10 +119,9 @@ OneDimensionalModel_BCFunction_Riemann::update_U_boundary()
 // ===================================================
 OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType     flux,
                                                                                             const Source_PtrType   source,
-                                                                                            const Solution_PtrType solution,
                                                                                             const OneD_BCSide&     side,
                                                                                             const OneD_BC&         bcType ):
-    super                           ( flux, source, solution, side, bcType ),
+    super                           ( flux, source, side, bcType ),
     M_internalBoundaryDof           (),
     M_boundaryPoint                 (),
     M_internalBdPoint               (),
@@ -207,8 +212,8 @@ OneDimensionalModel_BCFunction_Compatibility::extrapolate_W( const OneD_BC& W, c
 void
 OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 {
-    this->M_Flux->jacobian_EigenValues_Vectors( (*this->M_Solution)[0](this->M_boundaryDof),
-                                                (*this->M_Solution)[1](this->M_boundaryDof),
+    this->M_Flux->jacobian_EigenValues_Vectors( (*(*this->M_Solution)["A"])(this->M_boundaryDof),
+                                                (*(*this->M_Solution)["Q"])(this->M_boundaryDof),
                                                 M_eigval1, M_eigval2,
                                                 M_left_eigvec1[0], M_left_eigvec1[1],
                                                 M_left_eigvec2[0], M_left_eigvec2[1],
@@ -261,7 +266,7 @@ OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& eigen
                   << "), deltaT " << timeStep << ", deltaX " << deltaX
                   << ", eigenvalue " << eigenvalue
                   << ", A boundary " << U_bound[0] << ", Q boundary " << U_bound[1]
-                  << ", A internal " << (*this->M_Solution)[0](M_internalBoundaryDof) << ", Q internal " << (*this->M_Solution)[1](M_internalBoundaryDof)
+                  << ", A internal " << (*(*this->M_Solution)["A"])(M_internalBoundaryDof) << ", Q internal " << (*(*this->M_Solution)["Q"])(M_internalBoundaryDof)
                   << ", cfl " << cfl << "\n";
 
     if ( M_internalBoundaryDof == 2 ) //! the edge is on the left of the domain
@@ -282,8 +287,9 @@ OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& eigen
     }
 
     Container2D_Type u_interp;
-    for( UInt i=0; i<2; ++i )
-        u_interp[i] = ( 1 - weight ) * U_bound[i]  + weight * (*this->M_Solution)[i](M_internalBoundaryDof);
+
+    u_interp[0] = ( 1 - weight ) * U_bound[0]  + weight * (*(*this->M_Solution)["A"])(M_internalBoundaryDof);
+    u_interp[1] = ( 1 - weight ) * U_bound[1]  + weight * (*(*this->M_Solution)["Q"])(M_internalBoundaryDof);
 
     return u_interp;
 }
@@ -295,10 +301,9 @@ OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& eigen
 // ===================================================
 OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType     flux,
                                                                                     const Source_PtrType   source,
-                                                                                    const Solution_PtrType solution,
                                                                                     const OneD_BCSide&     side,
                                                                                     const OneD_BC&         bcType ):
-    super                           ( flux, source, solution, side, bcType )
+    super                           ( flux, source, side, bcType )
 {}
 
 // ===================================================
@@ -313,7 +318,7 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( Real const& /*time*/, cons
     this->update_U_boundary();
 
     Debug( 6030 ) << "[Absorbing::Absorbing] at node " << this->M_boundaryDof
-                  << ", A  = " << this->M_U_boundary[0] << "( " << (*this->M_Solution)[0][1] << " ) "
+                  << ", A  = " << this->M_U_boundary[0] << "( " << (*(*this->M_Solution)["A"])[1] << " ) "
                   << ", Q  = " << this->M_U_boundary[1]
                   << ", W1 = " << this->M_W_boundary[0]
                   << ", W2 = " << this->M_W_boundary[1]
@@ -321,7 +326,7 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( Real const& /*time*/, cons
 
     this->computeEigenValuesVectors();
 
-    a1 = M_Flux->Physics()->pressure(this->M_U_boundary[0], this->M_boundaryDof - 1); // pressure at previous time step
+    a1 = M_Flux->Physics()->elasticPressure(this->M_U_boundary[0], this->M_boundaryDof - 1); // elastic pressure at previous time step
 
     a2 = this->M_U_boundary[1]; // flux at previous time step
 
@@ -389,11 +394,10 @@ OneDimensionalModel_BCFunction_Absorbing::resistance( Real& /*resistance*/ )
 // ===================================================
 OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType     flux,
                                                                                       const Source_PtrType   source,
-                                                                                      const Solution_PtrType solution,
                                                                                       const OneD_BCSide&     side,
                                                                                       const OneD_BC&         bcType,
                                                                                       const Real&            resistance ):
-    super                           ( flux, source, solution, side, bcType ),
+    super                           ( flux, source, side, bcType ),
     M_resistance                    ( resistance )
 {}
 

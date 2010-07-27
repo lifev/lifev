@@ -60,23 +60,24 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_BCFunction     BCFunction_Type;
-    typedef boost::shared_ptr<BCFunction_Type> BCFunction_PtrType;
+    typedef OneDimensionalModel_BCFunction          BCFunction_Type;
+    typedef boost::shared_ptr<BCFunction_Type>      BCFunction_PtrType;
 
-    typedef OneDimensionalModel_Flux           Flux_Type;
-    typedef boost::shared_ptr< Flux_Type >     Flux_PtrType;
+    typedef OneDimensionalModel_Flux                Flux_Type;
+    typedef boost::shared_ptr< Flux_Type >          Flux_PtrType;
 
-    typedef OneDimensionalModel_Source         Source_Type;
-    typedef boost::shared_ptr< Source_Type >   Source_PtrType;
+    typedef OneDimensionalModel_Source              Source_Type;
+    typedef boost::shared_ptr< Source_Type >        Source_PtrType;
 
-    typedef OneDimensionalModel_Data           Data_Type;
-    typedef Data_Type::Mesh_Type               Mesh_Type;
+    typedef OneDimensionalModel_Data                Data_Type;
+    typedef Data_Type::Mesh_Type                    Mesh_Type;
 
-    typedef SolverAmesos                       LinearSolver_Type;
-    typedef LinearSolver_Type::vector_type     Vector_Type;
+    typedef SolverAmesos                            LinearSolver_Type;
+    typedef LinearSolver_Type::vector_type          Vector_Type;
+    typedef boost::shared_ptr< Vector_Type >        Vector_PtrType;
 
-    typedef std::vector<Vector_Type>           Solution_Type;
-    typedef boost::shared_ptr< Solution_Type > Solution_PtrType;
+    typedef std::map< std::string, Vector_PtrType > Solution_Type;
+    typedef boost::shared_ptr< Solution_Type >      Solution_PtrType;
 
     //@}
 
@@ -85,7 +86,6 @@ public:
     //@{
 
     OneDimensionalModel_BCFunction_Default( const Flux_PtrType flux, const Source_PtrType source,
-                                            const Solution_PtrType solution,
                                             const OneD_BCSide& side, const OneD_BC& bcType );
 
     virtual ~OneDimensionalModel_BCFunction_Default() {}
@@ -97,6 +97,13 @@ public:
     //@{
 
     virtual Real operator() ( const Real& /*time*/, const Real& /*timeStep*/ ) = 0;
+
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    void setSolution( const Solution_PtrType solution );
 
     //@}
 
@@ -126,7 +133,6 @@ public:
     //@{
 
     OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType flux, const Source_PtrType source,
-                                            const Solution_PtrType solution,
                                             const OneD_BCSide& side, const OneD_BC& bcType );
 
     virtual ~OneDimensionalModel_BCFunction_Riemann() {}
@@ -185,7 +191,6 @@ public:
     //@{
 
     OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType flux, const Source_PtrType source,
-                                                  const Solution_PtrType solution,
                                                   const OneD_BCSide& side, const OneD_BC& bcType );
 
     virtual ~OneDimensionalModel_BCFunction_Compatibility() {}
@@ -259,7 +264,6 @@ public:
     //@{
 
     OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType flux, const Source_PtrType source,
-                                              const Solution_PtrType solution,
                                               const OneD_BCSide& side, const OneD_BC& bcType );
 
     virtual ~OneDimensionalModel_BCFunction_Absorbing() {}
@@ -306,7 +310,6 @@ public:
     //@{
 
     OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType flux, const Source_PtrType source,
-                                               const Solution_PtrType solution,
                                                const OneD_BCSide& side, const OneD_BC& bcType,
                                                const Real& resistance );
 
