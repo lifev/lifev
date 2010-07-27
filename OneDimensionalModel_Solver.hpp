@@ -180,24 +180,9 @@ public:
     typedef LinearSolver_Type::matrix_type          Matrix_Type;
     typedef boost::shared_ptr<Matrix_Type>          Matrix_PtrType;
 
-    typedef std::vector<Vector_Type>                Solution_Type;
-    typedef boost::shared_ptr<Solution_Type>        Solution_PtrType;
-
-    typedef boost::function<Real ( const Real&, const Real&, const Real&,
-                                   const Real&, const ID& )> Function;
-
-    //! member function pointer: to "automagically" manage postprocess
-    typedef void (LifeV::OneDimensionalModel_Solver::*postproc_funptr)( std::string, Real, const Vector_Type& U, std::string );
-
-    typedef std::map< std::string, UInt>::iterator              M_variable_index_iter;
-    typedef std::map< std::string, postproc_funptr >::iterator  M_variable_filter_iter;
-    typedef std::map< std::string, std::string>::iterator       M_variable_string_iter;
-
-    enum OneDInitializeVar { OneDInitPressure,
-                             OneDInitArea,
-                             OneDInitFlux,
-                             OneDInitRiemann1,
-                             OneDInitRiemann2 };
+    typedef std::map< std::string, Vector_PtrType > Solution_Type;
+    typedef boost::shared_ptr< Solution_Type >      Solution_PtrType;
+    typedef Solution_Type::const_iterator           Solution_ConstIterator;
 
     //@}
 
@@ -212,7 +197,7 @@ public:
     OneDimensionalModel_Solver();
 
     //! Destructor
-    ~OneDimensionalModel_Solver(){}
+    ~OneDimensionalModel_Solver() {}
 
     //@}
 
@@ -220,8 +205,11 @@ public:
     //! @name Methods
     //@{
 
+    //! Build constant matrices (mass and grad)
+    void buildConstantMatrices();
+
     //! setup
-    void setup();
+    void setupSolution( Solution_Type& solution );
 
     //! Sets initial condition for the unknowns
     /*!
@@ -237,26 +225,32 @@ public:
      *  X = rest_value ( 1 + multiplier * exp( - ( z - node ) / ( 2 * width^2 ) ) )
      *  where node is alternatively firstnode or lastnode
      */
-    void initialize();
+    void initialize( Solution_Type& solution );
 
     //! Sets initial condition for the unknowns
     /*!
      * @param var if var == "physical" then A  = u10 and Q  = u20
      *            if var == "Riemann"  then W1 = u10 and W2 = u20
      */
-    void initialize( const Real& u10, const Real& u20, const std::string& var = "physical" );
+    void initialize( Solution_Type& solution, const Real& u10, const Real& u20, const std::string& var = "physical" );
 
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize with vectors containing all the nodal values
      */
-    void initialize( const Vector_Type& u10, const Vector_Type& u20 );
+    void initialize( Solution_Type& solution, const Vector_Type& u10, const Vector_Type& u20 );
 
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize only Flux ( Area read from OneDNonLinParam )
      */
-    void initialize( const Real& u20 );
+    void initialize( Solution_Type& solution, const Real& u20 );
+
+    //! Compute the right hand side
+    /*!
+     *  @param TimeStep The time step.
+     */
+    void updateRHS( const Solution_Type& solution, const Real& TimeStep );
 
     //! Update convective term and BC. Then solve the linearized NS system
     /*!
@@ -264,53 +258,41 @@ public:
      * @param Time the time
      * @param TimeStep the time step
      */
-    void iterate( OneDimensionalModel_BCHandler& bcH, const Real& Time, const Real& TimeStep );
+    void iterate( OneDimensionalModel_BCHandler& bcH, Solution_Type& solution, const Real& Time, const Real& TimeStep );
 
     //! CFL computation (correct for constant mesh)
     /*!
      * @param TimeStep the time step
      * @return CFL
      */
-    Real ComputeCFL( const Real& timeStep ) const;
+    Real ComputeCFL( const Solution_Type& solution, const Real& timeStep ) const;
 
     //! Save the solution for the next timestep
-    void savesol();
+    //void savesol();
 
     //! Recover the solution at previous timestep (keep unaltered the boundary values)
-    void loadsol();
+    //void loadsol();
 
     //! Save results on file
-    void postProcess( const Real& time );
-
-    //! Store solutions on matlab readable files
-    void output_to_matlab( std::string fname,
-                           Real time_val,
-                           const Vector_Type& U,
-                           std::string vname );
+    void postProcess( const Solution_Type& solution, const Real& time );
 
     //! Create matlab file for postprocessing
-    void create_movie_file();
+    //void create_movie_file();
 
     //! Prepare ostringstream buffer to receive the solution before sending it to file stream
-    void openFileBuffers();
-
-    //! Write the solution on ostringstream buffers
-    void output2FileBuffers( const Real& time_val );
+    //void openFileBuffers( const Solution_Type& solution );
 
     //! Empty the buffers
-    void resetFileBuffers();
+    //void resetFileBuffers( const Solution_Type& solution );
 
     //! Move the pointer to the stored position in the ostringstream
-    void seekpFileBuffers();
+    //void seekpFileBuffers();
 
     //! Store in private variable a desired stream position
-    void tellpFileBuffers();
+    //void tellpFileBuffers();
 
     //! Close the buffers
-    void closeFileBuffers();
-
-    //! Print to screen informations on the solver class
-    void showMe( std::ostream& output = std::cout ) const;
+    //void closeFileBuffers();
 
     //@}
 
@@ -344,24 +326,6 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Return the solution at current time step (U)
-    const Solution_PtrType U_thistime() const;
-
-    //! Return the solution at current time step (Area)
-    const Vector_Type& U1_thistime() const;
-
-    //! Return the solution at current time step (Flux)
-    const Vector_Type& U2_thistime() const;
-
-    //! Return the Riemann invariant W1 at current time step
-    const Vector_Type& W1_thistime() const;
-
-    //! Return the Riemann invarant W2 at current time step
-    const Vector_Type& W2_thistime() const;
-
-    //! Return the solution at current time step (Pressure)
-    const Vector_Type& P_thistime() const;
-
     //! Get the Physics function
     const Physics_PtrType& Physics() const;
 
@@ -384,19 +348,16 @@ public:
     const UInt& RightInternalNodeId() const;
 
     //! Get the Dirichlet boundary conditions (left)
-    Container2D_Type BCValuesLeft() const;
+    Container2D_Type BCValuesLeft( const Solution_Type& solution ) const;
 
     //! Get the value at neighboring node (left)
-    Container2D_Type BCValuesInternalLeft() const;
+    Container2D_Type BCValuesInternalLeft( const Solution_Type& solution ) const;
 
     //! Get the Dirichlet boundary conditions (right)
-    Container2D_Type BCValuesRight() const;
+    Container2D_Type BCValuesRight( const Solution_Type& solution ) const;
 
     //! Get the value at neighboring node (right)
-    Container2D_Type BCValuesInternalRight() const;
-
-    //! Return the selection solution (P, A, Q, W1, W2)
-    Real value(std::string var, UInt pos) const;
+    Container2D_Type BCValuesInternalRight( const Solution_Type& solution ) const;
 
     //! Return the value of a quantity (P, A, Q, W1, W2) on a specified boundary.
     /*!
@@ -405,7 +366,7 @@ public:
      *  @param bcSide Side of the boundary.
      *  @return value of the quantity on the specified side.
      */
-    Real BoundaryValue( const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
+    Real BoundaryValue( const Solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
 
     //@}
 
@@ -414,17 +375,17 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Update the pressure
-    void _updatePressure( const Real& TimeStep );
-
-    //! Update the right hand side and the matrices
+    //! Update the pressure.
     /*!
-     *  @param TimeStep The time step.
+     *  This method compute the value of the pressure (elastic and if necessary also viscoelastic)
+     *  adding it to the solution.
+     *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
+     *  @param TimeStep time step
      */
-    void _updateSystem( const Real& TimeStep );
+    void _updatePressure( Solution_Type& solution, const Real& TimeStep );
 
     //! Update the P1 flux vector from U: M_Fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
-    void _updateFlux();
+    void _updateFlux( const Solution_Type& solution );
 
     //! Call _updateFlux and update the P0 derivative of flux vector from U:
     /*!
@@ -434,10 +395,10 @@ private:
      *  (mean value of the two extremal values of dF/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void _updateFluxDer();
+    void _updateFluxDer( const Solution_Type& solution );
 
     //! Update the P1 source vector from U: M_Sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
-    void _updateSource();
+    void _updateSource( const Solution_Type& solution );
 
     //! Call _updateSource and update the P0 derivative of source vector from U:
     /*!
@@ -447,7 +408,7 @@ private:
      *  (mean value of the two extremal values of dS/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void _updateSourceDer();
+    void _updateSourceDer( const Solution_Type& solution );
 
     //! Update the matrices
     /*!
@@ -469,7 +430,7 @@ private:
     void _updateElemMatrices();
 
     //! Assemble the matrices
-    int _assemble_matrices(const UInt& ii, const UInt& jj );
+    void _assemble_matrices( const UInt& ii, const UInt& jj );
 
     //! Update the vectors to take into account Dirichlet BC.
     /*!
@@ -549,15 +510,6 @@ private:
     boost::shared_ptr< ElemMat >       M_elmatGrad;  //!< element gradient matrix
     boost::shared_ptr< ElemMat >       M_elmatDiv;   //!< element divergence matrix
 
-    //! Unknowns at present time step
-    /*!
-      U is a vector of ScalVec:
-      U[0] = A, U[1] = Q
-      U[2] = W1, U[3] = W2
-      Other components of U may contain additional variables such as the pressure
-    */
-    Solution_PtrType                   M_U_thistime;
-
     //! Unknowns at previous time step (see savesol() )
     Solution_Type                      M_U_prevtime;
     Solution_Type                      M_U_2prevtime;
@@ -596,23 +548,10 @@ private:
     std::vector<Matrix_PtrType >       M_divMatrixDiffSrc;
 
     //! The linear solver
-    boost::shared_ptr<LinearSolver_Type>     M_linearSolver;
+    boost::shared_ptr<LinearSolver_Type> M_linearSolver;
 
-    //! ostringstream buffers to store the solution before writing it to file
-    std::map<std::string, boost::shared_ptr<std::ostringstream> > M_post_process_buffer;
-
-    //! position of the put pointer to ostringstream buffers
-    std::map<std::string, long>  M_post_process_buffer_offset;
-
-    //! Trick to use strings in C++ "switch" construct
-    std::map<std::string, OneDInitializeVar> M_oneDstring2initializeVarMap;
-
-    Container2D_Type                        M_bcDirLeft;  //! first -> U1, second ->U2
-    Container2D_Type                        M_bcDirRight; //
-
-    // maps associating each unknown to a string, a numeric index, a function pointer
-    std::map< std::string, UInt>                                        M_variable_index_map;
-    std::map< std::string, postproc_funptr>                             M_variable_filter_map;
+    Container2D_Type                     M_bcDirLeft;  //! first -> U1, second ->U2
+    Container2D_Type                     M_bcDirRight; //
 };
 
 }
