@@ -65,74 +65,56 @@ OneDimensionalModel_Physics::Celerity0( const UInt& i ) const
     return std::sqrt( M_Data->Beta0(i) * M_Data->Beta1(i) / M_Data->DensityRho() );
 }
 
-ScalVec
-OneDimensionalModel_Physics::pressure( const Real& _A,
-                                       const Real& _A_n,
-                                       const Real& _A_nm1,
-                                       const UInt& indz,
-                                       const Real& timeStep ) const
+Real
+OneDimensionalModel_Physics::elasticPressure( const Real& A, const UInt& i ) const
 {
-    ScalVec _a(2), _b(2), _c(2), area(2), result(4);
-
-    _a(0) =  1.;
-    _b(0) = -1.;
-    _c(0) =  0.;
-
-    _a(1) =  3./2.;
-    _b(1) = -2.;
-    _c(1) =  1./2.;
-
-    area(0) = _A;
-    area(1) = M_Data->Area0(indz);
-
-    Real _pi( 4*std::atan(1) );
-
-    result(3) = ( _a(M_Data->DPdtSteps()) * _A + _b(M_Data->DPdtSteps()) * _A_n + _c(M_Data->DPdtSteps()) * _A_nm1 ) / timeStep; //> dA/dt
-
-    result(2) = M_Data->InertialModulus() * result(3) / ( 2*sqrt(_pi*area(M_Data->linearizeStringModel())) );               //> visc_component
-
-    result(1) = pressure( _A, indz );                                                  //> elast_component
-
-    result(0) = result(1) + M_Data->viscoelasticWall() * result(2);
-
-    return result;
+    return ( M_Data->Beta0(i) * ( std::pow( A/M_Data->Area0(i), M_Data->Beta1(i) ) - 1 ) );
 }
 
 Real
-OneDimensionalModel_Physics::pressure( const Real& _A, const UInt& indz ) const
+OneDimensionalModel_Physics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const
 {
-    return ( M_Data->Beta0(indz) * ( std::pow( _A/M_Data->Area0(indz), M_Data->Beta1(indz) ) - 1 ) );
+    Real area(Anp1);
+    if ( M_Data->linearizeStringModel() )
+        area = M_Data->Area0(i);
+
+    return M_Data->ViscoelasticModulus() / ( 2*sqrt( Pi*area ) ) * dAdt(Anp1, An, Anm1, timeStep);
 }
 
 Real
-OneDimensionalModel_Physics::pressureDiff( const Real& _A, const UInt& indz ) const
+OneDimensionalModel_Physics::dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const
 {
-    //Real AoverA0POWbeta1( std::pow( _A / M_Area0[indz], M_PressBeta1[indz] ) );
-    //std::cout << indz << " -> " <<  M_PressBeta0[indz] << " " <<  M_PressBeta1[indz] << " " <<  AoverA0POWbeta1 << " " << _A << std::endl;
-    return M_Data->Beta0(indz) * M_Data->Beta1(indz) * std::pow( _A / M_Data->Area0(indz), M_Data->Beta1(indz) ) / _A;
+    if ( M_Data->DPdtSteps() == 0 )
+        return ( Anp1 - An ) / timeStep;
+    else
+        return ( 3/2*Anp1 - 2*An + 1/2*Anm1 ) / timeStep;
 }
 
 Real
-OneDimensionalModel_Physics::totalPressure( const Real& _A, const Real& _Q, const UInt& indz ) const
+OneDimensionalModel_Physics::dPdA( const Real& A, const UInt& i ) const
 {
-    return ( pressure( _A, indz ) + (M_Data->DensityRho()/2) * _Q * _Q / ( _A * _A ) );
+    return M_Data->Beta0(i) * M_Data->Beta1(i) * std::pow( A / M_Data->Area0(i), M_Data->Beta1(i) ) / A;
 }
 
 Real
-OneDimensionalModel_Physics::totalPressureDiff( const Real& _A, const Real& _Q, const ID& i, const UInt& indz) const
+OneDimensionalModel_Physics::totalPressure( const Real& A, const Real& Q, const UInt& i ) const
 {
-    Real vel( _Q / _A );
+    return elasticPressure( A, i ) + M_Data->DensityRho() / 2 * Q * Q / ( A * A );
+}
 
-    if( i == 1 ) //! dPt/dA
+Real
+OneDimensionalModel_Physics::totalPressureDiff( const Real& A, const Real& Q, const ID& id, const UInt& i) const
+{
+    Real vel( Q / A );
+
+    if( id == 1 ) //! dPt/dA
     {
-        Real dPtdA( pressureDiff( _A, indz ) - M_Data->DensityRho() * vel * vel / _A );
-
-        return dPtdA;
+        return dPdA( A, i ) - M_Data->DensityRho() * vel * vel / A;
     }
 
-    if( i == 2 ) //! dPt/dQ
+    if( id == 2 ) //! dPt/dQ
     {
-        return ( M_Data->DensityRho() * vel / _A );
+        return ( M_Data->DensityRho() * vel / A );
     }
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");
@@ -140,9 +122,9 @@ OneDimensionalModel_Physics::totalPressureDiff( const Real& _A, const Real& _Q, 
 }
 
 Real
-OneDimensionalModel_Physics::A_from_P( const Real& _P, const UInt& indz ) const
+OneDimensionalModel_Physics::A_from_P( const Real& P, const UInt& i ) const
 {
-    return ( M_Data->Area0(indz) * std::pow( _P / M_Data->Beta0(indz) + 1, 1/M_Data->Beta1(indz) )  );
+    return ( M_Data->Area0(i) * std::pow( P / M_Data->Beta0(i) + 1, 1/M_Data->Beta1(i) )  );
 }
 
 void
@@ -164,25 +146,23 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
 
         UInt iz=0, alpha_iz;
 
-        //      alpha_iz = static_cast<UInt>( alpha / (xr-xl) * static_cast<Real>( M_Data->nbElem()-1 ) );
+        //      alpha_iz = static_cast<UInt>( alpha / (xr-xl) * static_cast<Real>( M_Data->NumberOfElements()-1 ) );
         alpha_iz = static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) +
-            ( (M_Data->nbElem() - 1) -
+            ( (M_Data->NumberOfElements() - 1) -
               static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) ) -
               static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) ) / 2;
 
-        //      n_elem_r = static_cast<Real>( (M_Data->nbElem()-1) - alpha_iz );
-        n_elem_r = ( (M_Data->nbElem()-1) - alpha_iz ) -
+        //      n_elem_r = static_cast<Real>( (M_Data->NumberOfElements()-1) - alpha_iz );
+        n_elem_r = ( (M_Data->NumberOfElements()-1) - alpha_iz ) -
             static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) );
 
         //      n_elem_l = static_cast<Real>( alpha_iz );
         n_elem_l = alpha_iz -
             static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) );
 
-        n_elem_delta = static_cast<Real>(M_Data->nbElem() - 1) / (xr - xl) * delta;
+        n_elem_delta = static_cast<Real>(M_Data->NumberOfElements() - 1) / (xr - xl) * delta;
 
         //      n_elem_delta = n_elem_r + n_elem_l;
-
-
         Real x_current,deltax,deltax_adaptive,deltax_uniform;
 
         x_current = alpha;
@@ -247,16 +227,16 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
 
         Real ratio, x_current=xl, deltax;
 
-        deltax=(xr-xl)/static_cast<Real>(M_Data->nbElem()-1);
+        deltax=(xr-xl)/static_cast<Real>(M_Data->NumberOfElements()-1);
 
-        while ( (x_current < (alpha - delta/2)) && (iz < M_Data->nbElem()) )
+        while ( (x_current < (alpha - delta/2)) && (iz < M_Data->NumberOfElements()) )
         {
             M_Data->setBeta0( M_Data->Beta0(iz) * ( 1 + factor ), iz );
             iz++;
             x_current+=deltax;
         }
 
-        while ( (x_current < alpha) && (iz < M_Data->nbElem()) )
+        while ( (x_current < alpha) && (iz < M_Data->NumberOfElements()) )
         {
             ratio=(( x_current - (alpha-delta/2) ) / delta);
 
@@ -267,7 +247,7 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
             x_current+=deltax;
         }
 
-        while ( (x_current < (alpha+delta/2)) && (iz < M_Data->nbElem()) )
+        while ( (x_current < (alpha+delta/2)) && (iz < M_Data->NumberOfElements()) )
         {
             ratio=(( (alpha+delta/2) - x_current ) / delta);
 
@@ -301,16 +281,16 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
 
         UInt iz=0, alpha_iz;
 
-        //      alpha_iz = static_cast<UInt>( alpha / (xr-xl) * ( static_cast<Real>( M_Data->nbElem()-1 ) ) );
+        //      alpha_iz = static_cast<UInt>( alpha / (xr-xl) * ( static_cast<Real>( M_Data->NumberOfElements()-1 ) ) );
         alpha_iz = static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) +
-            ( (M_Data->nbElem() - 1) -
+            ( (M_Data->NumberOfElements() - 1) -
               static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) ) -
               static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) ) / 2;
 
-        n_elem_delta = static_cast<Real>(M_Data->nbElem() - 1) / (xr - xl) * delta;
+        n_elem_delta = static_cast<Real>(M_Data->NumberOfElements() - 1) / (xr - xl) * delta;
 
-        //      n_elem_r = static_cast<Real>( (M_Data->nbElem()-1) - alpha_iz );
-        n_elem_r = ( (M_Data->nbElem()-1) - alpha_iz ) -
+        //      n_elem_r = static_cast<Real>( (M_Data->NumberOfElements()-1) - alpha_iz );
+        n_elem_r = ( (M_Data->NumberOfElements()-1) - alpha_iz ) -
             static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) );
 
         //      n_elem_l = static_cast<Real>( alpha_iz );
@@ -366,14 +346,14 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
         }
         while ( x_current < ( alpha + delta/2 ) && ( (alpha_iz - (iz - 1)) > 0) );
 
-        if ( ( alpha_iz + iz ) <= (M_Data->nbElem() -1) )
+        if ( ( alpha_iz + iz ) <= (M_Data->NumberOfElements() -1) )
         {
             do
             {
                 M_Data->setBeta0( M_Data->Beta0(alpha_iz+iz) * ( 1 + factor ), alpha_iz+iz );
                 iz++;
             }
-            while ( (alpha_iz + iz - 1) < (M_Data->nbElem() -1) );
+            while ( (alpha_iz + iz - 1) < (M_Data->NumberOfElements() -1) );
 
             //      M_PressBeta0[0] = M_PressBeta0[0] *
             //  ( 1 + factor );
@@ -383,11 +363,11 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
     }
     else
     {
-        UInt iz=M_Data->nbElem()-1;
+        UInt iz=M_Data->NumberOfElements()-1;
 
         Real ratio, x_current=xr, deltax;
 
-        deltax=(xr-xl)/static_cast<Real>(M_Data->nbElem()-1);
+        deltax=(xr-xl)/static_cast<Real>(M_Data->NumberOfElements()-1);
 
         while ( (x_current > (alpha+delta/2)) && ((iz+1) > 0) )
         {
