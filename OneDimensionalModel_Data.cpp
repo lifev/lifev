@@ -50,8 +50,8 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_SourceType                (),
     M_Time                      (),
     M_Mesh                      ( new Mesh_Type() ),
-    M_post_dir                  (),
-    M_post_file                 (),
+    M_postprocessingDirectory   (),
+    M_postprocessingFile        (),
     M_verbose                   (),
     M_UW                        (),
     M_inertial_wall             (),
@@ -129,8 +129,8 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     //std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
 
     // Miscellaneous
-    M_post_dir               = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
-    M_post_file              = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
+    M_postprocessingDirectory= dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
+    M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
     M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
     M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
@@ -146,7 +146,14 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
     // Initialize
-    M_initialVariable        = dataFile( ( section + "/initialize/variable"                          ).data(), "P" );
+    std::map< std::string, OneD_Initialize > initializeMap;
+    initializeMap["A"]       = OneD_InitializeArea;
+    initializeMap["Q"]       = OneD_InitializeFlux;
+    initializeMap["W1"]      = OneD_InitializeRiemann1;
+    initializeMap["W2"]      = OneD_InitializeRiemann2;
+    initializeMap["P"]       = OneD_InitializePressure;
+
+    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "P" ) ];
     M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
     M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
     M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
@@ -167,6 +174,8 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_ViscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
     M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_RobertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
+
+    M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
 
     M_Area0.resize( M_Mesh->numPoints() );
     M_dArea0dz.resize( M_Mesh->numPoints() );
@@ -209,6 +218,145 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
         M_FrictionKr[i]                = dataFile( ( section + "/PhysicalParameters/Kr"              ).data(), 1. );
 
         M_AlphaCoriolis[i]             = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection );
+        M_dAlphaCoriolisdz[i]          = 0.;
+
+        // Linear Parameters
+        M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1. );
+        M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0. );
+        M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0. );
+        M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1. );
+        M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1. );
+        M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1. );
+        M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1. );
+        M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0. );
+        M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0. );
+        M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1. );
+        M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0. );
+        M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0. );
+        M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0. );
+        M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0. );
+        M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0. );
+        M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0. );
+    }
+
+    UpdateCoefficients();
+}
+
+void
+OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::string& section )
+{
+    // Model Type
+    M_PhysicsType = OneDimensionalModel_PhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_FluxType    = OneDimensionalModel_FluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_SourceType  = OneDimensionalModel_SourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+
+    // If data time has not been set
+    if ( !M_Time.get() )
+        M_Time.reset( new Time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+
+    // Mesh setup - Space Discretization
+    Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
+                  dataFile( ( section + "/discretization/x_left"  ).data(), 0. );
+
+    M_Mesh->setup( length,
+                   dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
+
+    //std::cout << " 1D- Mesh nodes:                               " << M_Mesh->numPoints() << std::endl;
+    //std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
+
+    // Miscellaneous
+    M_postprocessingDirectory= dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
+    M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
+    M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
+    M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
+    M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
+    M_viscoelastic_wall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
+    M_linearize_string_model = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
+    M_linearize_equations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
+    M_longitudinal_wall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
+    M_flux_second_der        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
+    M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
+    M_CFLmax                 = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+
+    if ( M_CFLmax > std::sqrt(3)/3. )
+        std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
+
+    // Initialize
+    std::map< std::string, OneD_Initialize > initializeMap;
+    initializeMap["A"]       = OneD_InitializeArea;
+    initializeMap["Q"]       = OneD_InitializeFlux;
+    initializeMap["W1"]      = OneD_InitializeRiemann1;
+    initializeMap["W2"]      = OneD_InitializeRiemann2;
+    initializeMap["P"]       = OneD_InitializePressure;
+
+    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "P" ) ];
+    M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
+    M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
+    M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
+
+    // Physical Parameters
+    M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
+    M_PowerlawCoefficient    = dataFile( ( section + "/PhysicalParameters/PowerlawCoefficient"       ).data(), 2 );
+
+    M_Density                = dataFile( ( section + "/1d_physics/density"                           ).data(), 1. );
+    M_Viscosity              = dataFile( ( section + "/1d_physics/viscosity"                         ).data(), 0.035 );
+
+    M_DensityWall            = dataFile( ( section + "/PhysicalParameters/densityWall"               ).data(), 1. );
+    M_ThickVessel            = dataFile( ( section + "/PhysicalParameters/thickVessel"               ).data(), false );
+    M_Thickness              = dataFile( ( section + "/1d_physics/thickness"                         ).data(), 0. );
+    M_Young                  = dataFile( ( section + "/1d_physics/young"                             ).data(), 4.0E6 );
+    M_Poisson                = dataFile( ( section + "/1d_physics/ksi"                               ).data(), 0.5 );
+
+    M_ViscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
+    M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
+    M_RobertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
+
+    M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
+
+    M_Area0.resize( M_Mesh->numPoints() );
+    M_dArea0dz.resize( M_Mesh->numPoints() );
+    M_PressBeta0.resize( M_Mesh->numPoints() );
+    M_dPressBeta0dz.resize( M_Mesh->numPoints() );
+    M_PressBeta1.resize( M_Mesh->numPoints() );
+    M_dPressBeta1dz.resize( M_Mesh->numPoints() );
+    M_FrictionKr.resize( M_Mesh->numPoints() );
+
+    M_AlphaCoriolis.resize( M_Mesh->numPoints() );
+    M_dAlphaCoriolisdz.resize( M_Mesh->numPoints() );
+
+    M_Flux11.resize( M_Mesh->numPoints() );
+    M_Flux12.resize( M_Mesh->numPoints() );
+    M_Flux21.resize( M_Mesh->numPoints() );
+    M_Flux22.resize( M_Mesh->numPoints() );
+    M_Celerity1.resize( M_Mesh->numPoints() );
+    M_Celerity2.resize( M_Mesh->numPoints() );
+    M_Celerity1LeftEigenvector1.resize( M_Mesh->numPoints() );
+    M_Celerity1LeftEigenvector2.resize( M_Mesh->numPoints() );
+    M_Celerity2LeftEigenvector1.resize( M_Mesh->numPoints() );
+    M_Celerity2LeftEigenvector2.resize( M_Mesh->numPoints() );
+    M_Source10.resize( M_Mesh->numPoints() );
+    M_Source20.resize( M_Mesh->numPoints() );
+    M_Source11.resize( M_Mesh->numPoints() );
+    M_Source12.resize( M_Mesh->numPoints() );
+    M_Source21.resize( M_Mesh->numPoints() );
+    M_Source22.resize( M_Mesh->numPoints() );
+
+    // Linear Parameters
+    for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
+    {
+        // Physical Parameters
+        if ( M_ComputeCoefficients )
+            M_Area0[i]                 = std::pow( dataFile( ( section + "/1d_physics/radius"                  ).data(), 0.5 ), 2 ) * M_PI;
+        else
+            M_Area0[i]                 = dataFile( ( section + "/parameters/Area0"                   ).data(), M_PI );
+        M_dArea0dz[i]                  = 0;
+        M_PressBeta0[i]                = dataFile( ( section + "/parameters/beta0"                   ).data(), 1.e6 );
+        M_dPressBeta0dz[i]             = 0.;
+        M_PressBeta1[i]                = dataFile( ( section + "/parameters/beta1"                   ).data(), 0.5 );
+        M_dPressBeta1dz[i]             = 0.;
+        M_FrictionKr[i]                = dataFile( ( section + "/parameters/Kr"                      ).data(), 1. );
+
+        M_AlphaCoriolis[i]             = dataFile( ( section + "/parameters/alphaCor"                ).data(), 1. / M_RobertsonCorrection );
         M_dAlphaCoriolisdz[i]          = 0.;
 
         // Linear Parameters
@@ -329,8 +477,8 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
 
     // Miscellaneous
     output << "\n*** Values for data [miscellaneous]\n\n";
-    output << "post_dir               = " << M_post_dir << std::endl;
-    output << "post_file              = " << M_post_file << std::endl;
+    output << "Postprocessing Dir.    = " << M_postprocessingDirectory << std::endl;
+    output << "Postprocessing File    = " << M_postprocessingFile << std::endl;
     output << "verbose                = " << M_verbose << std::endl;
     output << "UW                     = " << M_UW << std::endl;
     output << "Use Inertial Wall      = " << M_inertial_wall << std::endl;
@@ -399,6 +547,18 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
 // ===================================================
 // Set Methods
 // ===================================================
+void
+OneDimensionalModel_Data::setPostprocessingDirectory( const std::string& directory )
+{
+    M_postprocessingDirectory = directory;
+}
+
+void
+OneDimensionalModel_Data::setPostprocessingFile( const std::string& file )
+{
+    M_postprocessingFile = file;
+}
+
 void
 OneDimensionalModel_Data::setDataTime( const Time_PtrType DataTime )
 {
@@ -499,7 +659,7 @@ OneDimensionalModel_Data::Length() const
 }
 
 UInt
-OneDimensionalModel_Data::nbElem() const
+OneDimensionalModel_Data::NumberOfElements() const
 {
     return M_Mesh->numElements();
 }
@@ -511,15 +671,15 @@ OneDimensionalModel_Data::NumberOfNodes() const
 }
 
 const std::string&
-OneDimensionalModel_Data::PostDirectory() const
+OneDimensionalModel_Data::postprocessingDirectory() const
 {
-    return M_post_dir;
+    return M_postprocessingDirectory;
 }
 
 const std::string&
-OneDimensionalModel_Data::PostFile() const
+OneDimensionalModel_Data::postprocessingFile() const
 {
-    return M_post_file;
+    return M_postprocessingFile;
 }
 
 const int&
@@ -582,7 +742,7 @@ OneDimensionalModel_Data::CFLmax() const
     return M_CFLmax;
 }
 
-const std::string&
+const OneD_Initialize&
 OneDimensionalModel_Data::initialVariable() const
 {
     return M_initialVariable;
