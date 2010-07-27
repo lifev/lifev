@@ -119,14 +119,19 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_BaseList                                                       BCBaseList_Type;
+    typedef BCInterface1D_BaseList                                                         BCBaseList_Type;
 
-    typedef singleton< factory< BCInterface1D_Function< Operator > , BCBaseList_Type > > FactoryBCInterface_Function;
+    typedef singleton< factory< BCInterface1D_Function< Operator > , BCBaseList_Type > >   FactoryBCInterface_Function;
 
-    typedef OneDimensionalModel_BCHandler                                                BCHandler_Type;
-    typedef boost::shared_ptr< BCHandler_Type >                                          BCHandler_PtrType;
+    typedef OneDimensionalModel_BCHandler                                                  BCHandler_Type;
+    typedef boost::shared_ptr< BCHandler_Type >                                            BCHandler_PtrType;
 
-    typedef BCInterface1D_Data< Operator >                                               Data_Type;
+    typedef BCHandler_Type::Solution_PtrType                                               Solution_PtrType;
+
+    typedef BCInterface1D_Data< Operator >                                                 Data_Type;
+
+    typedef std::vector< boost::shared_ptr< BCInterface1D_Function< Operator > > >         VectorFunction_Type;
+    typedef std::vector< boost::shared_ptr< BCInterface1D_DefaultFunctions< Operator > > > VectorDefaultFunction_Type;
 
     //@}
 
@@ -222,6 +227,12 @@ public:
      */
     void SetOperator( const boost::shared_ptr< Operator >& Oper );
 
+    //! Set the solution for the members that need it
+    /*!
+     * @param solution solution
+     */
+    void SetSolution( const Solution_PtrType solution );
+
     //! Set an Handler
     /*!
      * @param handler BCHandler
@@ -268,16 +279,16 @@ private:
     //@}
 
     // Handler and parameters
-    BCHandler_PtrType                                                      M_handler;
+    BCHandler_PtrType                        M_handler;
 
     // Data
-    Data_Type                                                              M_data;
+    Data_Type                                M_data;
 
     // Functions
-    std::vector< boost::shared_ptr< BCInterface1D_Function< Operator > > > M_vectorFunction;
+    VectorFunction_Type                      M_vectorFunction;
 
     // Default Functions
-    std::vector< boost::shared_ptr< BCInterface1D_DefaultFunctions< Operator > > >     M_vectorDefault1D;
+    VectorDefaultFunction_Type               M_vectorDefaultFunction1D;
 };
 
 // ===================================================
@@ -288,7 +299,7 @@ BCInterface1D< Operator >::BCInterface1D( ) :
     M_handler                 (),
     M_data                    (),
     M_vectorFunction          (),
-    M_vectorDefault1D         ()
+    M_vectorDefaultFunction1D ()
 {
 
 #ifdef DEBUG
@@ -307,7 +318,7 @@ BCInterface1D< Operator >::BCInterface1D( const BCInterface1D& interface ) :
     M_handler                 ( interface.M_handler ),
     M_data                    ( interface.M_data ),
     M_vectorFunction          ( interface.M_vectorFunction ),
-    M_vectorDefault1D         ( interface.M_vectorDefault1D )
+    M_vectorDefaultFunction1D ( interface.M_vectorDefaultFunction1D )
 {
 }
 
@@ -323,7 +334,7 @@ BCInterface1D< Operator >::operator=( const BCInterface1D& interface )
         M_handler                 = interface.M_handler;
         M_data                    = interface.M_data;
         M_vectorFunction          = interface.M_vectorFunction;
-        M_vectorDefault1D         = interface.M_vectorDefault1D;
+        M_vectorDefaultFunction1D = interface.M_vectorDefaultFunction1D;
     }
 
     return *this;
@@ -436,6 +447,25 @@ void BCInterface1D< Operator >::SetOperator( const boost::shared_ptr< Operator >
 }
 
 template< class Operator >
+void BCInterface1D< Operator >::SetSolution( const Solution_PtrType solution )
+{
+    //for ( typename VectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
+    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    {
+        BCInterface1D_OperatorFunction< Operator > *Oper =
+                dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
+
+        if ( Oper != 0 )
+            Oper->SetSolution( solution );
+    }
+
+    for ( typename VectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
+        ( *i )->SetSolution( solution );
+
+    M_handler->setSolution( solution );
+}
+
+template< class Operator >
 void BCInterface1D< Operator >::SetHandler( const BCHandler_PtrType& handler )
 {
     M_handler = handler;
@@ -487,9 +517,9 @@ BCInterface1D< Operator >::BuildBase()
 
         case BCInterface1D_Default:
 
-            AddBase( M_vectorDefault1D );
+            AddBase( M_vectorDefaultFunction1D );
 
-            AddBCManager( M_vectorDefault1D.back()->GetBase() );
+            AddBCManager( M_vectorDefaultFunction1D.back()->GetBase() );
 
             break;
     }

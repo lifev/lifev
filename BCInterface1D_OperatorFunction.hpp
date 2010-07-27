@@ -79,6 +79,7 @@ public:
 
     typedef BCInterface1D_Function< Operator >                      super;
     typedef typename super::Data_Type                               Data_Type;
+    typedef OneDimensionalModel_Solver::Solution_PtrType            Solution_PtrType;
 
     //@}
 
@@ -123,6 +124,12 @@ public:
      */
     virtual void SetData( const Data_Type& data );
 
+    //! Set solution
+    /*!
+     * @param solution The solution container of the 1D problem
+     */
+    inline void SetSolution( const Solution_PtrType solution );
+
     //! Set variable function
     /*!
      * @param name name of the variable
@@ -159,6 +166,8 @@ protected:
     };
 
     boost::shared_ptr< Operator >         M_operator;
+    Solution_PtrType                      M_solution;
+
     OneD_BCSide                           M_side;
     std::set< operatorList >              M_list;
 
@@ -191,6 +200,7 @@ template< class Operator >
 BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction() :
     super                            (),
     M_operator                       (),
+    M_solution                       (),
     M_side                           (),
     M_list                           ()
 {
@@ -205,6 +215,7 @@ template< class Operator >
 BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction( const Data_Type& data ) :
     super                            (),
     M_operator                       (),
+    M_solution                       (),
     M_side                           (),
     M_list                           ()
 {
@@ -220,6 +231,7 @@ template< class Operator >
 BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction( const BCInterface1D_OperatorFunction& function ) :
     super                            ( function ),
     M_operator                       ( function.M_operator ),
+    M_solution                       ( function.M_solution ),
     M_side                           ( function.M_side ),
     M_list                           ( function.M_list )
 {
@@ -237,6 +249,7 @@ BCInterface1D_OperatorFunction< Operator >::operator=( const BCInterface1D_Opera
         super::operator=( function );
 
         M_operator = function.M_operator;
+        M_solution = function.M_solution;
         M_side     = function.M_side;
         M_list     = function.M_list;
     }
@@ -259,6 +272,13 @@ BCInterface1D_OperatorFunction< Operator >::SetData( const Data_Type& data )
     super::SetData( data );
 
     CreateAccessList( data );
+}
+
+template< class Operator >
+inline void
+BCInterface1D_OperatorFunction< Operator >::SetSolution(  const Solution_PtrType solution )
+{
+    M_solution = solution;
 }
 
 template< class Operator >
@@ -287,7 +307,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 #ifdef DEBUG
                 Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_A, M_side ) << "\n";
 #endif
-                SetVariable( "f_area", M_operator->BoundaryValue( OneD_A, M_side ) );
+                SetVariable( "f_area", M_operator->BoundaryValue( *M_solution, OneD_A, M_side ) );
 
                 break;
 
@@ -306,7 +326,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
                 Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_Q, M_side ) << "\n";
 #endif
 
-                SetVariable( "f_flux", M_operator->BoundaryValue( OneD_Q, M_side ) );
+                SetVariable( "f_flux", M_operator->BoundaryValue( *M_solution, OneD_Q, M_side ) );
 
                 break;
 
@@ -316,7 +336,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
                 Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_P, M_side ) << "\n";
 #endif
 
-                SetVariable( "f_pressure", M_operator->BoundaryValue( OneD_P, M_side ) );
+                SetVariable( "f_pressure", M_operator->BoundaryValue( *M_solution, OneD_P, M_side ) );
 
                 break;
 
