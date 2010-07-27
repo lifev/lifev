@@ -28,16 +28,59 @@
    \date
  */
 
-/* ========================================================
-
-Simple 3D Darcy test with Dirichlet, Neumann and Robin Boundary condition
-
-Solve the problem in a mixed form
-
-               div u - f = 0            in \Omega
-
-               K^{-1} u + \nabla p = 0  in \Omega
-
+/*!
+  Simple 3D Darcy test with Dirichlet, Neumann and Robin Boundary condition.
+  <br>
+  Solve the problem in dual-mixed form
+  \f[
+  \left\{
+  \begin{array}{l l l }
+  \Lambda^{-1} \sigma + \nabla p = 0 & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
+  \nabla \cdot \sigma - f = 0        & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
+  p = g_D                            & \mathrm{on} & \Gamma_D\,,\vspace{0.2cm} \\
+  \sigma \cdot n + h p = g_R         & \mathrm{on} & \Gamma_R\,, \vspace{0.2cm} \\
+  \sigma \cdot n = g_n               & \mathrm{on} & \Gamma_N\,.
+  \end{array}
+  \right\.
+  \f]
+where \f$ \Omega \f$ is the unit cube with
+  \f[
+  \begin{array}{l}
+  \Gamma_R = \left\{ y = 1 \right\}\,, \vspace{0.2cm} \\
+  \Gamma_N = \left\{ x = 1 \right\} \cup \left\{ x = 0 \right\}\,, \vspace{0.2cm} \\
+  \Gamma_D = \partial [0,1]^3 \setminus \left( \Gamma_R \cup \Gamma_D \right)\,,
+  \end{array}
+  \f]
+and the data are
+  \f[
+  \left\{
+  \begin{array}{l}
+  f(x,y,z) = -2x^2 - 4y^2 - 8xy\,, \vspace{0.2cm} \\
+  g_D(x,y,z) = x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
+  h(x,y,z) = 1\,, \vspace{0.2cm} \\
+  g_R(x,y,z) = -2yx^2 - 2xy^2 - 6 + x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
+  g_N(x,y,z) = \pm (4xy^2 + 2x^2y + 12)\,, \vspace{0.2cm} \\
+  K(x,y,z) = \left\[
+  \begin{array}{c c c}
+  2 & 1 & 0 \\
+  1 & 1 & 0 \\
+  0 & 0 & 1
+  \end{array}
+  \right\]
+  \end{array}
+  \right\.
+  \f]
+The analytical solutions are
+  \f[
+  p(x,y,z) = x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
+  \sigma(x,y,z) = \left(
+  \begin{array}{l}
+  - 4xy^2 - 12 - 2x^2y \\
+  -2xy^2 - 6 - 2x^2y \\
+  - 5
+  \end{array}
+  \right)\,.
+  \f]
 */
 
 // ===================================================
@@ -71,10 +114,10 @@ enum BCNAME
 Real analyticalSolution( const Real&/*t*/,
                          const Real& x,
                          const Real& y,
-                         const Real& /*z*/,
+                         const Real& z,
                          const ID& /*ic*/)
 {
-    return x*x*y*y;
+    return x*x*y*y + 6.*x + 5.*z;
 }
 
 // Gradient of the analytical solution
@@ -82,23 +125,28 @@ Real gradientAnalyticalSolution( const UInt& icoor,
                                  const Real& /*t*/,
                                  const Real& x,
                                  const Real& y,
-                                 const Real& /*z*/,
+                                 const Real& z,
                                  const ID& /*ic*/)
 {
     switch(icoor)
     {
     case 1: // \frac{\partial }{\partial x}
-        return 2.*x*y*y;
+        return 2.*x*y*y + 6.;
     case 2: // \frac{\partial }{\partial y}
         return 2.*y*x*x;
     case 3: // \frac{\partial }{\partial z}
-        return 0.;
+        return 5.;
     default:
         return 0.;
     }
 }
 
 // Inverse of permeability matrix
+/* In this case the permeability matrix is
+K = [2 1 0
+     1 1 0
+     0 0 1]
+*/
 Matrix inversePermeability( const Real& /*t*/,
                             const Real& x,
                             const Real& y,
@@ -107,16 +155,16 @@ Matrix inversePermeability( const Real& /*t*/,
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
     // First row
-    Real Entry00 = 1;
-    Real Entry01 = -1;
-    Real Entry02 = 0;
+    Real Entry00 = 1.;
+    Real Entry01 = -1.;
+    Real Entry02 = 0.;
 
     // Second row
-    Real Entry11 = 2;
-    Real Entry12 = 0;
+    Real Entry11 = 2.;
+    Real Entry12 = 0.;
 
     // Third row
-    Real Entry22 = 1;
+    Real Entry22 = 1.;
 
     // Fill in of the inversePermeabilityMatrix
     inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
@@ -136,25 +184,45 @@ Matrix inversePermeability( const Real& /*t*/,
 Real dirichlet( const Real& /* t */,
                 const Real& x,
                 const Real& y,
-                const Real& /*z*/,
+                const Real& z,
                 const ID&   /*icomp*/)
 {
-    return x*x*y*y;
+    return x*x*y*y + 6.*x + 5.*z;;
 }
 
 // Boundary condition of Neumann
-Real neumann( const Real& /* t */,
+Real neumann1( const Real& /* t */,
               const Real& x,
               const Real& y,
-              const Real& /*z*/,
+              const Real& z,
               const ID&   icomp)
 {
 	switch(icomp){
   		case 1:   //! Dx
-            return 4.*x*y*y+2*x*x*y;
+            return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
 		break;
 		case 2:   //! Dy
-            return 2.*y*x*x+2*x*y*y;
+            return 0.;
+	 	break;
+  		case 3:   //! Dz
+    		return 0.;
+    	break;
+  	}
+	return 0.;
+}
+
+Real neumann2( const Real& /* t */,
+              const Real& x,
+              const Real& y,
+              const Real& z,
+              const ID&   icomp)
+{
+	switch(icomp){
+  		case 1:   //! Dx
+            return  4.*x*y*y + 2.*x*x*y + 12.;
+		break;
+		case 2:   //! Dy
+            return 0.;
 	 	break;
   		case 3:   //! Dz
     		return 0.;
@@ -167,10 +235,10 @@ Real neumann( const Real& /* t */,
 Real mixte( const Real& /* t */,
             const Real& x,
             const Real& y,
-            const Real& /*z*/,
+            const Real& z,
             const ID&   /*icomp*/)
 {
-    return 2.*y*x*x + 2*x*y*y+ x*x*y*y;
+    return -2.*y*x*x - 2*x*y*y - 6. + x*x*y*y + 6.*x + 5.*z;
 }
 
 // Source term
@@ -180,7 +248,7 @@ Real source_in( const Real& /*t*/,
                 const Real& /*z*/,
                 const ID&  /*icomp*/)
 {
-    return 2*x*x+4*y*y+8*x*y;
+    return -2.*x*x - 4.*y*y - 8.*x*y;
 }
 
 // Standard functions
@@ -299,7 +367,7 @@ darcy::run()
     Chrono chronoFiniteElementSpace;
     Chrono chronoProblem;
     Chrono chronoProcess;
-    Chrono chronoPostProcess;
+    Chrono chronoError;
 
     // Start chronoTotal for measure the total time for the computation
     chronoTotal.start();
@@ -354,25 +422,26 @@ darcy::run()
     // Start chronoBoundaryCondition for measure the total time for create the boundary conditions
     chronoBoundaryCondition.start();
 
-    BCFunctionBase dirichletBDfun, neumannBDfun;
+    BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
    	BCFunctionMixte mixteBDfun;
 
     dirichletBDfun.setFunction( dirichlet );
-	neumannBDfun.setFunction( neumann );
+	neumannBDfun1.setFunction( neumann1 );
+	neumannBDfun2.setFunction( neumann2 );
 	// dp/dn = first_parameter + second_parameter * p
 	mixteBDfun.setFunctions_Mixte( mixte, Members->getUOne() );
 
 	BCHandler bcDarcy( 6 );
 
-    bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun, 1 );
-    //bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun      );
+    bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
+    bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun      );
     //bcDarcy.addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
+    //bcDarcy.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
     bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun  );
     bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichletBDfun  );
     bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichletBDfun  );
     //bcDarcy.addBC(  "Back",   BACK,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy.addBC( "Back",    BACK,    Natural,    Full,    neumannBDfun, 1 );
+    bcDarcy.addBC( "Back",    BACK,    Natural,    Full,    neumannBDfun2, 1 );
 
     // Stop chronoBoundaryCondition
     chronoBoundaryCondition.stop();
@@ -509,14 +578,8 @@ darcy::run()
     if ( isLeader )
     	std::cout << "Number of unknowns : " << hybrid_FESpace.map().getMap(Unique)->NumGlobalElements() << std::endl << std::flush;
 
-	// Build the linear system and the right hand side
-    darcySolver.buildSystem();
-
-    // Solve the linear system
-    darcySolver.solve();
-
-	// Posto process of the primal and dual variables
-	darcySolver.computePrimalAndDual();
+	// Solve the problem.
+    darcySolver.run();
 
     // Stop chronoProcess
     chronoProcess.stop();
@@ -525,22 +588,18 @@ darcy::run()
     if ( isLeader )
     	std::cout << "Time for process " << chronoProcess.diff() << std::endl << std::flush;
 
-    // Start chronoPostProcess for measure the total time for the post processing
-    chronoPostProcess.start();
-
-    // Save the solution
-	darcySolver.postProcess();
-
+    // Start chronoError for measure the total time for computing the errors.
+    chronoError.start();
 
     // Compute the error L2 norms
     darcySolver.printErrors( Members->getAnalyticalSolution(), Members->getUOne() );
 
     // Stop chronoPostProcess
-    chronoPostProcess.stop();
+    chronoError.stop();
 
-    // The leader process print chronoPostProcess
+    // The leader process print chronoError
     if ( isLeader )
-        std::cout << "Time for post process " << chronoPostProcess.diff() << std::endl << std::flush;
+        std::cout << "Time for compute errors " << chronoError.diff() << std::endl << std::flush;
 
     // Stop chronoTotal
     chronoTotal.stop();
