@@ -88,6 +88,7 @@ public:
     typedef Solver_Type::Vector_PtrType                            Vector_PtrType;
     typedef Solver_Type::Solution_Type                             Solution_Type;
     typedef Solver_Type::Solution_PtrType                          Solution_PtrType;
+    typedef Solver_Type::Solution_ConstIterator                    Solution_ConstIterator;
     typedef Solver_Type::LinearSolver_Type                         LinearSolver_Type;
 
     typedef Solver_Type::FESpace_Type                              FESpace_Type;
@@ -334,13 +335,20 @@ public:
     /*!
      * @return 1D model solver.
      */
-    Solver_PtrType  GetSolver() const;
+    Solver_PtrType GetSolver() const;
 
-    //! Get the solution of the 1D model.
+    //! Get the solution container of the 1D model.
     /*!
      * @return 1D model solution.
      */
-    const Solution_PtrType  GetSolution() const;
+    const Solution_PtrType& GetSolution() const;
+
+    //! Get a specific quantity of the solution container of the 1D model.
+    /*!
+     * @param quantity solution quantity.
+     * @return 1D model solution.
+     */
+    const Vector_PtrType& GetSolution( const std::string& quantity) const;
 
     //@}
 
@@ -361,6 +369,9 @@ private:
     //! Setup the FE space for pressure and velocity
     void SetupFESpace();
 
+    //! Update the solution (Solution_tn = Solution)
+    void UpdateSolution( const Solution_Type& solution1, Solution_Type& solution2 );
+
     //@}
 
 #ifdef HAVE_HDF5
@@ -375,7 +386,9 @@ private:
     Source_PtrType                         M_Source;
     Solver_PtrType                         M_Solver;
     boost::shared_ptr< BCInterface_Type >  M_BC;
-    std::vector < Vector_PtrType >         M_Solution;
+
+    Solution_PtrType                       M_Solution_tn; // Solution at time t_n
+    Solution_PtrType                       M_Solution;    // Solution at time t_n+1
 
     // FE spaces
     boost::shared_ptr< FESpace_Type >      M_FESpace;
