@@ -74,22 +74,22 @@ public :
     //@{
 
     //! Compute U from W
-    virtual void U_from_W( Real& _U1, Real& _U2, const Real& _W1, const Real& _W2, const UInt& indz ) const = 0;
+    virtual void U_from_W( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const = 0;
 
     //! Compute W from U
-    virtual void W_from_U( Real& _W1, Real& _W2, const Real& _U1, const Real& _U2, const UInt& indz ) const = 0;
+    virtual void W_from_U( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const = 0;
 
     //! Compute the pressure as a function of W1, W2:
-    virtual Real pressure_W( const Real& _W1, const Real& _W2, const UInt& indz = 0 ) const = 0;
+    virtual Real pressure_W( const Real& W1, const Real& W2, const UInt& indz = 0 ) const = 0;
 
     //! Compute the derivative of pressure with respect to W1 and W2
-    virtual Real pressure_WDiff( const Real& _W1, const Real& _W2, const ID& i, const UInt& indz = 0 ) const = 0;
+    virtual Real pressure_WDiff( const Real& W1, const Real& W2, const ID& i, const UInt& indz = 0 ) const = 0;
 
     //! Compute W1 or W2 given the pressure:
-    virtual Real W_from_P( const Real& _P, const Real& _W, const ID& i, const UInt& indz ) const = 0;
+    virtual Real W_from_P( const Real& P, const Real& W, const ID& i, const UInt& indz ) const = 0;
 
     //! Compute W1 or W2 given the flux
-    virtual Real W_from_Q( const Real& _Q, const Real& _W_n, const Real& _W, const ID& i, const UInt& indz ) const = 0;
+    virtual Real W_from_Q( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const = 0;
 
     //@}
 
@@ -99,42 +99,49 @@ public :
 
     Real Celerity0( const UInt& i ) const;
 
-    //! Compute the pressure (with viscoelastic term)
+    //! Compute the elastic pressure.
     /*!
-     * @return P = beta0 * ( ( _A / Area0 )^beta1 - 1 ) + 1/(2*sqrt(pi*A)) * gamma * dA / dt
+     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 )
      */
-    ScalVec pressure( const Real& _A,   const Real& _A_n,    const Real& _A_nm1, 
-                      const UInt& indz, const Real& timeStep ) const;
+    Real elasticPressure( const Real& A, const UInt& indz = 0 ) const;
 
-    //! compute the pressure : beta0 * ( ( _A / Area0 )^beta1 - 1 )
-    Real pressure( const Real& _A, const UInt& indz = 0 ) const;
-
-    //! compute the derivative of the pressure with respect to A
+    //! Compute the viscoelastic pressure.
     /*!
-     * @return dP(A)/dA = beta1 * beta0 * ( _A / Area0 )^beta1 / A
+     * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
      */
-    Real pressureDiff( const Real& _A, const UInt& indz = 0 ) const;
+    Real viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const;
 
-    //! Compute the total pressure
+    //! Compute the derivative of the area with respect to the time.
+    /*!
+     * @return dA(t)/dt
+     */
+    Real dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const;
+
+    //! Compute the derivative of the elastic pressure with respect to A
+    /*!
+     * @return dP(A)/dA = beta1 * beta0 * ( A / Area0 )^beta1 / A
+     */
+    Real dPdA( const Real& A, const UInt& i = 0 ) const;
+
+    //! Compute the total pressure (P is the elastic pressure)
     /*!
      * @return Pt = P + rho/2 * (Q/A)^2
      */
-    Real totalPressure( const Real& _A, const Real& _Q, const UInt& indz = 0 ) const;
+    Real totalPressure( const Real& A, const Real& Q, const UInt& i = 0 ) const;
 
-    //! Compute the derivative of total pressure with respect to A and Q (used for interface conditions)
+    //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
     /*!
      * @return dPt/dU_ii = dP/dU_ii + rho/2 * d(Q/A)^2/dU_ii
      */
-    Real totalPressureDiff( const Real& _A, const Real& _Q,
-                            const ID& i,
-                            const UInt& indz = 0 ) const;
+    Real totalPressureDiff( const Real& A, const Real& Q,
+                            const ID& id,  const UInt& i = 0 ) const;
 
-    //! Compute area given the pressure: A = A0 * ( P / beta0 + 1 )^(1/beta1)
+    //! Compute area given the elastic pressure.
     /*!
      *  To be used in initialization! when time derivative of A is supposed null
      *  @return A = A0 * ( P / beta0 + 1 )^(1/beta1)
      */
-    Real A_from_P( const Real& P, const UInt& indz=0 ) const;
+    Real A_from_P( const Real& P, const UInt& i=0 ) const;
 
     //! Make the vessel stiffer on the left side of interval [xl, xr]
     /*!
@@ -150,17 +157,18 @@ public :
      *  where the spatial derivative of the parameter will be maximum.
      *  However, the grid size is not allowed to be smaller than min_deltax
      */
-    void stiffenVesselLeft( const Real& xl, const Real& xr,
-                            const Real& factor, const Real& alpha,
-                            const Real& delta, const Real& n,
+    void stiffenVesselLeft( const Real& xl,           const Real& xr,
+                            const Real& factor,       const Real& alpha,
+                            const Real& delta,        const Real& n,
                             const Real& min_deltax=1, const UInt& yesAdaptive=0 );
+
     //! Make the vessel stiffer on the right side of interval [xl, xr]
     /*!
      * \sa stiffenVesselLeft
      */
-    void stiffenVesselRight( const Real& xl, const Real& xr,
-                             const Real& factor, const Real& alpha,
-                             const Real& delta, const Real& n,
+    void stiffenVesselRight( const Real& xl,           const Real& xr,
+                             const Real& factor,       const Real& alpha,
+                             const Real& delta,        const Real& n,
                              const Real& min_deltax=1, const UInt& yesAdaptive=0  );
 
     //@}
