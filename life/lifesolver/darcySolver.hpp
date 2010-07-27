@@ -43,8 +43,9 @@
 #include <life/lifesolver/dataDarcy.hpp>
 //
 
-#include <life/lifefilters/ensight.hpp>
+#ifdef HAVE_HDF5
 #include <life/lifefilters/hdf5exporter.hpp>
+#endif
 #include <life/lifefilters/noexport.hpp>
 
 
@@ -93,8 +94,8 @@ namespace LifeV
   @class DarcySolver
 
   This class implements a Darcy solver.
-  <BR>
-  <BR>
+  <br>
+  <br>
   The classical formulation of this problem is a couple of differential equations of first order with two
   unknowns: \f$ p \in C^1 (\Omega ) \f$, being the pressure or the primal unknown,
   and \f$ \sigma \in (C^1( \Omega ) )^n \f$, being the Darcy velocity or the total flux or the dual unknown,
@@ -115,7 +116,7 @@ namespace LifeV
   \f$ \Gamma_R \f$ that is the part of the boundary of \f$ \Omega \f$ with Robin, or Neumann, boundary conditions
   with data \f$ h \f$ and \f$ g_R \f$. We suppose that \f$ \partial \Omega = \Gamma_D \cup \Gamma_R \f$ and
   \f$ \Gamma_D \cap \Gamma_R = \emptyset \f$.
-  <BR>
+  <br>
   Using the hybridization procedure, and introducing a new variable, we may split the problem from
   the entire domain to problems in each elements of the triangulation \f$ \mathcal{T}_h \f$, then we may write
   the weak formulation for the dual problem.
@@ -148,8 +149,8 @@ namespace LifeV
   \left\{
   \begin{array}{l l}
   a(\sigma, \tau) + b(p, \tau) + c(\lambda, \tau) = 0\,,  & \forall \tau \in Z \,,\vspace{0.2cm}\\
-  -b(v, \sigma) = F(v)\,,                                  & \forall v \in V \,,\vspace{0.2cm}\\
-  -c(\mu, \sigma) - h(\lambda, \mu) = - G(\mu) \,,           & \forall \mu \in \Lambda\,.
+  b(v, \sigma) = - F(v)\,,                                  & \forall v \in V \,,\vspace{0.2cm}\\
+  c(\mu, \sigma) + h(\lambda, \mu) = G(\mu) \,,           & \forall \mu \in \Lambda\,.
   \end{array}
   \right.
   \f]
@@ -171,8 +172,8 @@ namespace LifeV
   \left\{
   \begin{array}{l l}
   a(\sigma_h, \tau_h) + b(p_h, \tau_h) + c(\lambda_h, \tau_h) = 0\,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
-  -b(v_h, \sigma_h) = F(v_h)\,,                                  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
-  -c(\mu_h, \sigma_h) - h(\lambda_h, \mu_h) = - G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
+  b(v_h, \sigma_h) = -F(v_h)\,,                                  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
+  c(\mu_h, \sigma_h) + h(\lambda_h, \mu_h) = G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
   \end{array}
   \right.
   \f]
@@ -195,8 +196,8 @@ namespace LifeV
   \left\{
   \begin{array}{l}
   A \sigma_K + B p_K + C \lambda_K = 0\,, \vspace{0.2cm} \\
-  -B^T \sigma_K = F \,,                    \vspace{0.2cm}\\
-  -C^T \sigma_K - H \lambda_K = - G\,.
+  B^T \sigma_K = -F \,,                    \vspace{0.2cm}\\
+  C^T \sigma_K + H \lambda_K = G\,.
   \end{array}
   \right.
   \f]
@@ -205,9 +206,9 @@ namespace LifeV
   \begin{array}{l l l}
   \left[
   \begin{array}{c c c}
-  A    & B &  C \vspace{0.2cm} \\
-  -B^T & 0 &  0 \vspace{0.2cm} \\
-  -C^T & 0 & -H
+  A   & B &  C \vspace{0.2cm} \\
+  B^T & 0 &  0 \vspace{0.2cm} \\
+  C^T & 0 & H
   \end{array}
   \right] \, \cdot &
   \left[
@@ -221,8 +222,8 @@ namespace LifeV
   \left[
   \begin{array}{c}
   0 \vspace{0.2cm}\\
-  F \vspace{0.2cm}\\
-  -G
+  -F \vspace{0.2cm}\\
+  G
   \end{array}
   \right]\,.
   \end{array}
@@ -230,8 +231,8 @@ namespace LifeV
   Introducing the local hybrid matrix and local hybrid right hand side
   \f[
   \begin{array}{l}
-  L_K =  C^T A^{-1} C - C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} B^T A^{-1} C - H \,, \vspace{0.2cm} \\
-  r_K = - G - C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} F\,,
+  L_K = - C^T A^{-1} C + C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} B^T A^{-1} C + H \,, \vspace{0.2cm} \\
+  r_K = G + C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} F\,,
   \end{array}
   \f]
   Imposing that at each edge or face the hybrid unknown is single value we obtain a linear system for the hybrid unknown
@@ -248,8 +249,8 @@ namespace LifeV
   @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
   conditions are imposed via BCHandler class.
   @todo Insert any scientific publications that use this solver.
-  @todo Complete the save method.
   @todo Post process for the dual variable.
+  @bug If the save flag for the exporter is setted to 0 the program fails.
 */
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
@@ -286,6 +287,8 @@ public:
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
 
+    typedef boost::shared_ptr< Exporter<Mesh> >   exporter_ptrtype;
+
     //@}
 
     // Constructors and destructor.
@@ -302,13 +305,13 @@ public:
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
-    DarcySolver( const data_type&          dataFile,
-                 FESpace<Mesh, EpetraMap>& primal_FESpace,
-                 FESpace<Mesh, EpetraMap>& dual_FESpace,
-                 FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                 FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                 BCHandler&                bcHandler,
-                 Epetra_Comm&              comm );
+    DarcySolver ( const data_type&          dataFile,
+                  FESpace<Mesh, EpetraMap>& primal_FESpace,
+                  FESpace<Mesh, EpetraMap>& dual_FESpace,
+                  FESpace<Mesh, EpetraMap>& hybrid_FESpace,
+                  FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                  bchandler_raw_type&       bcHandler,
+                  Epetra_Comm&              comm );
 
     /*!
       Constructor for the class without the definition of the boundary handler.
@@ -320,15 +323,15 @@ public:
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
-    DarcySolver( const data_type&          dataFile,
-                 FESpace<Mesh, EpetraMap>& primal_FESpace,
-                 FESpace<Mesh, EpetraMap>& dual_FESpace,
-                 FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                 FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                 Epetra_Comm&              comm );
+    DarcySolver ( const data_type&          dataFile,
+                  FESpace<Mesh, EpetraMap>& primal_FESpace,
+                  FESpace<Mesh, EpetraMap>& dual_FESpace,
+                  FESpace<Mesh, EpetraMap>& hybrid_FESpace,
+                  FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                  Epetra_Comm&              comm );
 
     //! Virtual destructor.
-    virtual ~DarcySolver();
+    virtual ~DarcySolver ( void );
 
     //@}
 
@@ -337,15 +340,16 @@ public:
     //@{
 
     /*!
-      Set up the linear solver and the preconditioner for the linear system.
+      Set up the linear solver, the preconditioner for the linear system
+      and the exporter to save the solution.
     */
-    virtual void setup ();
+    virtual void setup ( void );
 
     /*!
       Set the boundary conditions.
       @param bcHandler Boundary condition handler for the problem.
     */
-    inline void setBC( bchandler_raw_type& bcHandler )
+    inline void setBC ( bchandler_raw_type& bcHandler )
     {
         M_BCh   = &bcHandler;
         M_setBC = true;
@@ -355,7 +359,7 @@ public:
       Set the source term, the default setted source term is the zero function.
       @param source Source term for the problem.
     */
-    inline void setSourceTerm( const Function& source )
+    inline void setSourceTerm ( const Function& source )
     {
         M_source = source;
     }
@@ -364,7 +368,7 @@ public:
       Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
       @param invPermeability Inverse of the permeability tensor for the problem.
     */
-    inline void setInversePermeability( const permeability_type& inversePermeability )
+    inline void setInversePermeability ( const permeability_type& inversePermeability )
     {
         M_inversePermeability = inversePermeability;
     }
@@ -379,7 +383,7 @@ public:
       Returns the local hybrid solution vector.
       @return Constant vector_type reference of the hybrid vector.
      */
-    inline const vector_type& hybrid_solution() const
+    inline const vector_type& hybrid_solution ( void ) const
     {
         return *M_hybrid;
     }
@@ -388,7 +392,7 @@ public:
       Returns the local primal solution vector.
       @return Constant vector_type reference of the primal solution.
     */
-    inline const vector_type& primal_solution() const
+    inline const vector_type& primal_solution ( void ) const
     {
         return *M_primal;
     }
@@ -397,7 +401,7 @@ public:
       Returns the local dual solution vector.
       @return Constant vector_type reference of the dual solution.
     */
-    inline const vector_type& dual_solution() const
+    inline const vector_type& dual_solution ( void ) const
     {
         return *M_dual;
     }
@@ -406,7 +410,7 @@ public:
       Returns the local residual vector.
       @return Constant vector_type reference of the residual.
     */
-    inline const vector_type& residual() const
+    inline const vector_type& residual ( void ) const
     {
         return *M_residual;
     }
@@ -416,7 +420,7 @@ public:
       @return Constant boolean with value true if the boundary condition is setted,
       false otherwise
     */
-    inline const bool BCset() const
+    inline const bool BCset ( void ) const
     {
         return M_setBC;
     }
@@ -425,7 +429,7 @@ public:
       Return the boundary conditions handler.
       @return Reference of boundary conditions handler.
     */
-    inline bchandler_type& bcHandler()
+    inline bchandler_type& bcHandler ( void )
     {
         return M_BCh;
     }
@@ -434,7 +438,7 @@ public:
       Return the Epetra local map.
       @return Constant EpetraMap reference of the problem.
     */
-    inline EpetraMap const& getMap() const
+    inline EpetraMap const& getMap ( void ) const
     {
         return M_localMap;
     }
@@ -443,7 +447,7 @@ public:
       Return the Epetra communicator.
       @return Constant Epetra_Comm reference of the problem.
     */
-    inline const Epetra_Comm& comm() const
+    inline const Epetra_Comm& comm ( void ) const
     {
         return *M_comm;
     }
@@ -454,19 +458,8 @@ public:
     //! @name Solve functions
     //@{
 
-    //! Build the global hybrid system, the right hand and apply the boundary conditions.
-    void buildSystem();
-
-    //! Solve the global hybrid system.
-    void solve();
-
-    //! Compute primal and dual variables from the hybrid variable as a post process.
-    void computePrimalAndDual();
-
-    /*!
-      Save primal and dual variable.
-    */
-    virtual void postProcess() const;
+    //! Solve the problem.
+    virtual void run( void );
 
     //@}
 
@@ -479,7 +472,7 @@ public:
       @return Constant boolean with value true if che current process is the leader process,
       false otherwise.
     */
-    inline const bool isLeader() const
+    inline const bool isLeader ( void ) const
     {
         assert( M_comm != 0);
         return comm().MyPID() == 0;
@@ -490,20 +483,20 @@ public:
       @param message The message printed by the leader process.
       @param number The number printed by the leader process.
     */
-    void leaderPrint( const string message, const Real number ) const;
+    void leaderPrint ( const string message, const Real number ) const;
 
     /*!
       The leader print a string.
       @param message The message printed by the leader process.
     */
-    void leaderPrint( const string message ) const;
+    void leaderPrint ( const string message ) const;
 
     /*!
       The leader print a string and a number, being the max in all process or the input value.
       @param message The message printed by the leader process.
       @param number The input number.
     */
-    void leaderPrintMax( const string message, const Real number) const;
+    void leaderPrintMax ( const string message, const Real number) const;
 
     //@}
 
@@ -516,10 +509,10 @@ public:
       @param primalExact Primal exact solution of the problem.
       @param time Current time of the simulation.
     */
-    void printErrors( const Function& primalExact, const Function& weightFunction, const Real time = 0 ) const;
+    void printErrors ( const Function& primalExact, const Function& weightFunction, const Real time = 0 ) const;
 
     //! \f$ L^2 \f$ norm for the numerical primal solution
-    inline const Real primalL2Norm() const
+    inline const Real primalL2Norm ( void ) const
     {
         return M_primal_FESpace.L2Norm( *M_primal );
     }
@@ -530,7 +523,7 @@ public:
       @param time Current time of the simulation.
       @return The \f$ L^2 \f$ norm for the exact primal solution as constant Real.
     */
-    inline const Real exactPrimalL2Norm( const Function& primalExact, const Real time = 0 ) const
+    inline const Real exactPrimalL2Norm ( const Function& primalExact, const Real time = 0 ) const
     {
         return M_primal_FESpace.L2NormFunction( primalExact, time );
     }
@@ -542,7 +535,7 @@ public:
       @param time Current time of the simulation.
       @return The \f$ L^2 \f$ error norm for the primal solution as a constant Real.
     */
-    inline const Real primalL2Error(const Function& primalExact, const Function& weightFunction, const Real time = 0 ) const
+    inline const Real primalL2Error (const Function& primalExact, const Function& weightFunction, const Real time = 0 ) const
     {
         return M_primal_FESpace.L2ErrorWeighted( primalExact, *M_primal, weightFunction, time );
     }
@@ -551,11 +544,26 @@ public:
 
 protected:
 
+    // Protected solve functions.
+    //! @name Protected solve functions
+    //@{
+
+    //! Build the global hybrid system, the right hand and apply the boundary conditions.
+    void buildSystem ( void );
+
+    //! Solve the global hybrid system.
+    void solve ( void );
+
+    //! Compute primal and dual variables from the hybrid variable as a post process.
+    void computePrimalAndDual ( void );
+
+    //@}
+
     /*!
       Return the number of total degrees of freem of the problem.
       @return The number of total degrees of freedom as a constant UInt.
     */
-    inline const UInt dim() const
+    inline const UInt dim ( void ) const
     {
         return M_hybrid_FESpace.dim();
     }
@@ -564,7 +572,7 @@ protected:
       Apply the boundary condition to the hybrid global matrix and
       to the hybrid global right hand side.
     */
-    void applyBoundaryConditions();
+    void applyBoundaryConditions ( void );
 
     /*!
       Locally update the current finite element for the primal
@@ -572,22 +580,22 @@ protected:
       matrix.
       @param iElem Id of the current geometrical element.
     */
-    virtual void localElementComputation( const UInt & iElem );
+    virtual void localElementComputation ( const UInt & iElem );
 
     /*!
       Compute all the local matrices that are inipendent
       from the geometrical element.
     */
-    virtual void computeConstantMatrices( );
+    virtual void computeConstantMatrices ( void );
 
     /*!
       Perform the static condensation of the problem, i.e. create the local
       hybrid matrix and local hybrid right hand side.
     */
-    virtual void staticCondensation();
+    virtual void staticCondensation ( void );
 
     //! Compute locally, as a post process, the primal and dual variable.
-    virtual void localComputePrimalAndDual();
+    virtual void localComputePrimalAndDual ( void );
 
     /*!
       Update all the variables of the problem before the construction of
@@ -595,7 +603,7 @@ protected:
       It is principally used for a time dependent derived class, in fact we
       want to clear each time step all the variables.
     */
-    virtual void updateVariables();
+    virtual void updateVariables ( void );
 
     /*!
       Transform a symmetric matrix that is stored only in the lower or upper
@@ -606,7 +614,7 @@ protected:
       @param A The matrix to be reorder.
     */
     template<typename matrix>
-    void symmetrizeMatrix( char* UPLO, int* N, matrix& A  );
+    void symmetrizeMatrix ( char* UPLO, int* N, matrix& A  );
 
     // Parallel stuff.
     //! @name Parallel stuff
@@ -637,7 +645,7 @@ protected:
     permeability_type    M_inversePermeability;
 
     //! Bondary conditions handler.
-    BCHandler*           M_BCh;
+    bchandler_raw_type*  M_BCh;
 
     //! Flag if the boundary conditions are setted or not.
     bool                 M_setBC;
@@ -719,7 +727,7 @@ protected:
     */
     ElemMat M_elmatMix;
 
-    //! Element hybrid matrix,
+    //! Element hybrid matrix.
     ElemMat M_elmatHyb;
 
     //! Temporary array of size the square of the number of degrees of freedom of the primal variable.
@@ -735,6 +743,18 @@ protected:
 
     //@}
 
+    // Exporter stuff.
+    //! @name Exporter stuff.
+    //@{
+
+    //! The exporter shared pointer.
+    exporter_ptrtype M_exporter;
+
+    //! The exporter primal pointer.
+    vector_ptrtype   M_primalExporter;
+
+    //@}
+
 }; // class DarcySolver
 
 //
@@ -744,13 +764,13 @@ protected:
 // Complete constructor.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-DarcySolver( const data_type&           dataFile,
-             FESpace<Mesh, EpetraMap>&  primal_FESpace,
-             FESpace<Mesh, EpetraMap>&  dual_FESpace,
-             FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
-             FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-             BCHandler&                 BCh,
-             Epetra_Comm&               comm ):
+DarcySolver ( const data_type&           dataFile,
+              FESpace<Mesh, EpetraMap>&  primal_FESpace,
+              FESpace<Mesh, EpetraMap>&  dual_FESpace,
+              FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
+              FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+              bchandler_raw_type&        BCh,
+              Epetra_Comm&               comm ):
     // Parallel stuff.
     M_comm                 	 ( &comm ),
     M_me                     ( M_comm->MyPID() ),
@@ -767,12 +787,12 @@ DarcySolver( const data_type&           dataFile,
     M_hybrid_FESpace         ( hybrid_FESpace ),
     M_VdotN_FESpace          ( VdotN_FESpace ),
     // Algebraic stuff.
-    M_matrHybrid             ( new matrix_type( M_localMap ) ),
-    M_rhs                    ( new vector_type( M_localMap ) ),
-    M_primal    			 ( new vector_type( M_primal_FESpace.map() ) ),
-    M_dual					 ( new vector_type( M_dual_FESpace.map() ) ),
-    M_hybrid                 ( new vector_type( M_hybrid_FESpace.map() ) ),
-    M_residual               ( new vector_type( M_localMap ) ),
+    M_matrHybrid             ( new matrix_type ( M_localMap ) ),
+    M_rhs                    ( new vector_type ( M_localMap ) ),
+    M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
+    M_dual					 ( new vector_type ( M_dual_FESpace.map() ) ),
+    M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
+    M_residual               ( new vector_type ( M_localMap ) ),
     M_linearSolver           ( ),
     M_prec                   ( ),
     // Elementary matrices and vectors used for the static condensation.
@@ -784,7 +804,9 @@ DarcySolver( const data_type&           dataFile,
     M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
     M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
     M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
+    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
+    // Exporter.
+    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "Pressure" ) )
 {
 
 	CONSTRUCTOR( "DarcySolver" );
@@ -795,12 +817,12 @@ DarcySolver( const data_type&           dataFile,
 // Constructor without boundary condition handler.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-DarcySolver( const data_type&           dataFile,
-             FESpace<Mesh, EpetraMap>&  primal_FESpace,
-             FESpace<Mesh, EpetraMap>&  dual_FESpace,
-             FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
-             FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-             Epetra_Comm&               comm ):
+DarcySolver ( const data_type&           dataFile,
+              FESpace<Mesh, EpetraMap>&  primal_FESpace,
+              FESpace<Mesh, EpetraMap>&  dual_FESpace,
+              FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
+              FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+              Epetra_Comm&               comm ):
     // Parallel stuff.
     M_comm                 	 ( &comm ),
     M_me                     ( M_comm->MyPID() ),
@@ -816,12 +838,12 @@ DarcySolver( const data_type&           dataFile,
     M_hybrid_FESpace         ( hybrid_FESpace ),
     M_VdotN_FESpace          ( VdotN_FESpace ),
     // Algebraic stuff.
-    M_matrHybrid             ( new matrix_type( M_localMap ) ),
-    M_rhs                    ( new vector_type( M_localMap ) ),
-    M_primal    			 ( new vector_type( M_primal_FESpace.map() ) ),
-    M_dual					 ( new vector_type( M_dual_FESpace.map() ) ),
-    M_hybrid                 ( new vector_type( M_hybrid_FESpace.map() ) ),
-    M_residual               ( new vector_type( M_localMap ) ),
+    M_matrHybrid             ( new matrix_type ( M_localMap ) ),
+    M_rhs                    ( new vector_type ( M_localMap ) ),
+    M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
+    M_dual					 ( new vector_type ( M_dual_FESpace.map() ) ),
+    M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
+    M_residual               ( new vector_type ( M_localMap ) ),
     M_linearSolver           ( ),
     M_prec                   ( ),
     // Local matrices and vectors.
@@ -833,7 +855,14 @@ DarcySolver( const data_type&           dataFile,
     M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
     M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
     M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
+    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
+    // Exporter.
+#ifdef HAVE_HDF5
+    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "Pressure" ) )
+#else
+    M_exporter               ( new NoExport<Mesh> ( *(M_data.dataFile()), "Pressure" ) )
+#endif
+
 {
 
 	CONSTRUCTOR( "DarcySolver" );
@@ -843,7 +872,7 @@ DarcySolver( const data_type&           dataFile,
 // Virtual destructor.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-~DarcySolver()
+~DarcySolver ( void )
 {
 
 	DESTRUCTOR( "DarcySolver" );
@@ -854,7 +883,7 @@ DarcySolver<Mesh, SolverType>::
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-leaderPrint( string const message, Real const number ) const
+leaderPrint ( string const message, Real const number ) const
 {
 
     if ( isLeader() )
@@ -866,7 +895,7 @@ leaderPrint( string const message, Real const number ) const
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-leaderPrint( string const message ) const
+leaderPrint ( string const message ) const
 {
 
     if ( isLeader() )
@@ -878,10 +907,10 @@ leaderPrint( string const message ) const
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-leaderPrintMax( string const message, Real const number ) const
+leaderPrintMax ( string const message, Real const number ) const
 {
 
-    Real num(number);
+    Real num( number );
     Real globalMax;
     M_comm->MaxAll( &num, &globalMax, 1 );
 
@@ -889,12 +918,13 @@ leaderPrintMax( string const message, Real const number ) const
 
 } // leaderPrintMax
 
-// Set up the linear solver and the preconditioner.
+// Set up the linear solver, the preconditioner and the exporter.
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-setup()
+setup ( void )
 {
+
     GetPot dataFile( *(M_data.dataFile()) );
 
     // Set up data for the linear solver and the preconditioner.
@@ -908,6 +938,24 @@ setup()
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolver : Preconditioner not set" );
 
+    // Set the folder where to save the solution.
+    M_exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+
+    // Set the mesh and the processor Id.
+    M_exporter->setMeshProcId( M_primal_FESpace.mesh(), M_comm->MyPID() );
+
+    // Set the exporter primal pointer.
+    M_primalExporter.reset( new vector_type (*M_primal, M_exporter->mapType() ) );
+
+    // Add the variable to the exporter.
+    M_exporter->addVariable( ExporterData::Scalar,
+                             "Pressure",
+                             M_primalExporter,
+                             static_cast<UInt>( 0 ),
+                             static_cast<UInt>( M_primal_FESpace.dof().numTotalDof() ),
+                             static_cast<UInt>( 0 ),
+                             ExporterData::Cell );
+
 } // setup
 
 // Reorder a non full stored symmetric matrix.
@@ -915,7 +963,7 @@ template<typename Mesh, typename SolverType>
 template<typename matrix>
 void
 DarcySolver<Mesh, SolverType>::
-symmetrizeMatrix( char* UPLO, int* N, matrix& A  )
+symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
 {
 
     // If the matrix is stored in the lower part
@@ -947,7 +995,7 @@ symmetrizeMatrix( char* UPLO, int* N, matrix& A  )
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-computeConstantMatrices()
+computeConstantMatrices ( void )
 {
 
     /* Update the divergence matrix, it is independant of the current element
@@ -975,7 +1023,7 @@ computeConstantMatrices()
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-localElementComputation( const UInt & iElem )
+localElementComputation ( const UInt & iElem )
 {
 
     // Update the current element of ID iElem only for the dual variable.
@@ -1008,7 +1056,7 @@ localElementComputation( const UInt & iElem )
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-staticCondensation()
+staticCondensation ( void )
 {
 
     // Flags for the BLAS and LAPACK routine.
@@ -1085,11 +1133,11 @@ staticCondensation()
     dtrtrs_( _param_L, _param_N, _param_N, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
 
-    /* Put in M_CtC the matrix M_CtC - M_BtC^T * M_BtC
+    /* Put in M_CtC the matrix -M_CtC + M_BtC^T * M_BtC
        Result stored only on lower part, the matrix M_CtC stores
-       M_CtC = C^T * A^{-1} * C - C^T * A^{-t} * B * ( B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C.
+       M_CtC = -C^T * A^{-1} * C + C^T * A^{-t} * B * ( B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C.
        For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
-    dsyrk_( _param_L, _param_T, NBL, NBP, MINUSONE_, M_BtC, NBP, ONE_, M_CtC, NBL );
+    dsyrk_( _param_L, _param_T, NBL, NBP, ONE_, M_BtC, NBP, MINUSONE_, M_CtC, NBL );
 
     //...................................
     //      END OF MATRIX OPERATIONS
@@ -1101,7 +1149,7 @@ staticCondensation()
        C stores L^{-1} * C
        B^T stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
        M_BtC stores LB^{-1} * B^T * A^{-1} * C
-       M_CtC stores C^T * A^{-1} * C - C^T * A^{-t} * B * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C */
+       M_CtC stores -C^T * A^{-1} * C + C^T * A^{-t} * B * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C */
 
     //..........................
     //     VECTOR OPERATIONS
@@ -1145,7 +1193,7 @@ staticCondensation()
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-updateVariables()
+updateVariables ( void )
 {
 
     // Reset the global hybrid matrix.
@@ -1172,7 +1220,7 @@ updateVariables()
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-buildSystem()
+buildSystem ( void )
 {
 
 	// Chronos.
@@ -1288,7 +1336,7 @@ buildSystem()
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-applyBoundaryConditions( )
+applyBoundaryConditions ( void )
 {
     // Chrono.
     Chrono chronoBC;
@@ -1337,7 +1385,7 @@ applyBoundaryConditions( )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-solve()
+solve ( void )
 {
 
 	// Set the matrix.
@@ -1354,7 +1402,7 @@ solve()
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-localComputePrimalAndDual()
+localComputePrimalAndDual ( void )
 {
     // Flags for the BLAS and LAPACK routine.
 
@@ -1516,7 +1564,7 @@ localComputePrimalAndDual()
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-computePrimalAndDual()
+computePrimalAndDual ( void )
 {
 
 	// Chrono.
@@ -1586,52 +1634,37 @@ computePrimalAndDual()
 
 } // computePrimalAndDual
 
-// Postprocessing.
+// Solve the problem.
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-postProcess() const
+run ( void )
 {
-    GetPot& dataFile( *(M_data.dataFile()) );
+    // Build the linear system and the right hand side.
+    buildSystem();
 
-    // Create the Exporter
-    boost::shared_ptr< Exporter<Mesh> > exporter;
+    // Solve the linear system.
+    solve();
 
-    // Set the Export to the HDF5 exporter
-    exporter.reset( new Hdf5exporter<Mesh> ( dataFile,
-                                             "Pressure" ) );
+    // Post process of the primal and dual variables.
+    computePrimalAndDual();
 
-    // Set the folder where to save the solution
-    exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+    // Sincronize the processes.
+  	MPI_Barrier( MPI_COMM_WORLD );
 
-    // Set the mesh and the processor Id
-    exporter->setMeshProcId( M_primal_FESpace.mesh(), M_comm->MyPID() );
+    // Copy the solution to the exporter.
+    *M_primalExporter = *M_primal;
 
-    // Create the vector for saving the solution
-    vector_ptrtype pressure;
+    // Save the solution into the exporter.
+    M_exporter->postProcess( M_data.dataTime()->getTime() );
 
-    // Fill the vector with the solution
-    pressure.reset( new vector_type(*M_primal, exporter->mapType() ) );
-
-    // Add the solution to the exporter
-    exporter->addVariable( ExporterData::Scalar,
-                           "Pressure",
-                           pressure,
-                           static_cast<UInt>(0),
-                           static_cast<UInt>(M_primal_FESpace.dof().numTotalDof()),
-                           static_cast<UInt>(0),
-                           ExporterData::Cell);
-
-    // Finalize the process
-    exporter->postProcess( 0. );
-
-} //postProcess
+} // run
 
 // Print norms and errors.
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-printErrors( const Function& primalExact, const Function& weightFunction, const Real time ) const
+printErrors ( const Function& primalExact, const Function& weightFunction, const Real time ) const
 {
 
 	std::ostringstream os("");
