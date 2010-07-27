@@ -52,7 +52,8 @@ MS_Model_1D::MS_Model_1D() :
     M_Source                       (),
     M_Solver                       ( new Solver_Type() ),
     M_BC                           ( new BCInterface_Type() ),
-    M_Solution                     (),
+    M_Solution_tn                  ( new Solution_Type() ),
+    M_Solution                     ( new Solution_Type() ),
     M_FESpace                      (),
     M_LinearSolver                 ()
 {
@@ -89,6 +90,7 @@ MS_Model_1D::MS_Model_1D( const MS_Model_1D& OneDimensionalModel ) :
     M_Source                       ( OneDimensionalModel.M_Source ),
     M_Solver                       ( OneDimensionalModel.M_Solver ),
     M_BC                           ( OneDimensionalModel.M_BC ),
+    M_Solution_tn                  ( OneDimensionalModel.M_Solution_tn ),
     M_Solution                     ( OneDimensionalModel.M_Solution ),
     M_FESpace                      ( OneDimensionalModel.M_FESpace ),
     M_LinearSolver                 ( OneDimensionalModel.M_LinearSolver )
@@ -114,6 +116,7 @@ MS_Model_1D::operator=( const MS_Model_1D& OneDimensionalModel )
         M_Source                       = OneDimensionalModel.M_Source;
         M_Solver                       = OneDimensionalModel.M_Solver;
         M_BC                           = OneDimensionalModel.M_BC;
+        M_Solution_tn                  = OneDimensionalModel.M_Solution_tn;
         M_Solution                     = OneDimensionalModel.M_Solution;
         M_FESpace                      = OneDimensionalModel.M_FESpace;
         M_LinearSolver                 = OneDimensionalModel.M_LinearSolver;
@@ -177,13 +180,16 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_BC->CreateHandler();
     //M_BC->FillHandler( FileName, "1D_Model" );
 
+    //Exporters
+    M_Data->setPostprocessingDirectory( MS_ProblemFolder );
+    M_Data->setPostprocessingFile( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
+
 #ifdef HAVE_HDF5
-    //Exporter
     M_Exporter->setDataFromGetPot( DataFile );
     M_Exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
     M_Exporter->setDirectory( MS_ProblemFolder );
 
-    M_ExporterMesh->setup( M_Data->Length(), M_Data->nbElem() );
+    M_ExporterMesh->setup( M_Data->Length(), M_Data->NumberOfElements() );
 #endif
 
 }
@@ -199,28 +205,23 @@ MS_Model_1D::SetupModel()
     //FEspace
     SetupFESpace();
 
-    //1D Model Solver setup
-    M_Solver->setup();
+    //Setup solution
+    M_Solver->setupSolution( *M_Solution );
+    M_Solver->setupSolution( *M_Solution_tn );
 
     //Set default BC (has to be called after setting other BC)
-    M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source, M_Solver->U_thistime() );
+    M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source );
+    M_BC->SetSolution( M_Solution );
 
 #ifdef HAVE_HDF5
     //Post-processing
     M_Exporter->setMeshProcId( M_ExporterMesh, M_comm->MyPID() );
-    M_Solution.resize( 5 );
-    for ( UInt i(0) ; i < static_cast <UInt> ( M_Solution.size() ) ; ++i)
-    {
-        M_Solution[i].reset( new Vector_Type( (*M_Solver->U_thistime())[i], M_Exporter->mapType() ) );
-        if ( M_Exporter->mapType() == Unique )
-            M_Solution[i]->setCombineMode( Zero );
-    }
 
-    M_Exporter->addVariable( ExporterData::Scalar, "Solid Area",      M_Solution[0], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", M_Solution[1], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "W1",              M_Solution[2], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "W2",              M_Solution[3], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  M_Solution[4], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_Solution)["A"],  static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_Solution)["Q"],  static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "W1",              (*M_Solution)["W1"], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "W2",              (*M_Solution)["W2"], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_Solution)["P"],  static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
 #endif
 
 }
@@ -234,7 +235,10 @@ MS_Model_1D::BuildSystem()
 #endif
 
     //M_Data->showMe();
-    M_Solver->initialize();
+    M_Solver->buildConstantMatrices();
+
+    M_Solver->initialize( *M_Solution );
+    UpdateSolution( *M_Solution, *M_Solution_tn );
 }
 
 void
@@ -245,6 +249,8 @@ MS_Model_1D::UpdateSystem()
     Debug( 8130 ) << "MS_Model_1D::UpdateSystem() \n";
 #endif
 
+    // Update previous solution
+    UpdateSolution( *M_Solution, *M_Solution_tn );
 }
 
 void
@@ -255,11 +261,14 @@ MS_Model_1D::SolveSystem()
     Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
 #endif
 
+    // Re-initialize solution
+    UpdateSolution( *M_Solution_tn, *M_Solution );
+
     // Subiterate to respect CFL
     UInt SubiterationNumber(1);
     Real timeStep = M_Data->dataTime()->getTimeStep();
 
-    Real CFL = M_Solver->ComputeCFL( M_Data->dataTime()->getTimeStep() );
+    Real CFL = M_Solver->ComputeCFL( *M_Solution, M_Data->dataTime()->getTimeStep() );
     if ( CFL > M_Data->CFLmax() )
     {
         SubiterationNumber = std::ceil( CFL / M_Data->CFLmax() );
@@ -275,7 +284,9 @@ MS_Model_1D::SolveSystem()
             std::cout << " 1D-  Subiteration                             " << (i+1) << "/" << SubiterationNumber << std::endl;
 
         M_BC->UpdateOperatorVariables();
-        M_Solver->iterate( *M_BC->GetHandler(), M_Data->dataTime()->getTime() + i*timeStep, timeStep );
+
+        M_Solver->updateRHS( *M_Solution, timeStep );
+        M_Solver->iterate( *M_BC->GetHandler(), *M_Solution, M_Data->dataTime()->getTime() + i*timeStep, timeStep );
     }
 }
 
@@ -288,10 +299,6 @@ MS_Model_1D::SaveSolution()
 #endif
 
 #ifdef HAVE_HDF5
-    //Post-processing
-    for ( UInt i(0) ; i < static_cast <UInt> ( M_Solution.size() ) ; ++i)
-        *(M_Solution[i]) = (*M_Solver->U_thistime())[i];
-
     M_Exporter->postProcess( M_Data->dataTime()->getTime() );
 
     if ( M_Data->dataTime()->isLastTimeStep() )
@@ -299,7 +306,7 @@ MS_Model_1D::SaveSolution()
 #endif
 
     //Matlab post-processing
-    //M_Solver->postProcess( M_Data->dataTime()->getTime() );
+    M_Solver->postProcess( *M_Solution, M_Data->dataTime()->getTime() );
 }
 
 void
@@ -374,19 +381,19 @@ MS_Model_1D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 Real
 MS_Model_1D::GetBoundaryArea( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( OneD_A, (Flag == 0) ? OneD_left : OneD_right );
+    return M_Solver->BoundaryValue( *M_Solution, OneD_A, (Flag == 0) ? OneD_left : OneD_right );
 }
 
 Real
 MS_Model_1D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( OneD_Q, (Flag == 0) ? OneD_left : OneD_right );;
+    return M_Solver->BoundaryValue( *M_Solution, OneD_Q, (Flag == 0) ? OneD_left : OneD_right );;
 }
 
 Real
 MS_Model_1D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( OneD_P, (Flag == 0) ? OneD_left : OneD_right );
+    return M_Solver->BoundaryValue( *M_Solution, OneD_P, (Flag == 0) ? OneD_left : OneD_right );
 }
 
 Real
@@ -527,10 +534,16 @@ MS_Model_1D::GetSolver() const
     return M_Solver;
 }
 
-const MS_Model_1D::Solution_PtrType
+const MS_Model_1D::Solution_PtrType&
 MS_Model_1D::GetSolution() const
 {
-    return M_Solver->U_thistime();
+    return M_Solution;
+}
+
+const MS_Model_1D::Vector_PtrType&
+MS_Model_1D::GetSolution( const std::string& quantity) const
+{
+    return (*M_Solution)[quantity];
 }
 
 // ===================================================
@@ -570,7 +583,7 @@ MS_Model_1D::SetupFESpace()
 {
 
 #ifdef DEBUG
-    Debug( 8130 ) << "MS_Model_1D::setupFEspace() \n";
+    Debug( 8130 ) << "MS_Model_1D::SetupFEspace() \n";
 #endif
 
     //Transform mesh
@@ -598,6 +611,19 @@ MS_Model_1D::SetupFESpace()
 
     M_FESpace.reset( new FESpace_Type( M_Data->mesh(), *refFE, *qR, *bdQr, 1, *M_comm ) );
     M_Solver->setFESpace( M_FESpace );
+}
+
+void
+MS_Model_1D::UpdateSolution( const Solution_Type& solution1, Solution_Type& solution2 )
+{
+
+#ifdef DEBUG
+    Debug( 8130 ) << "MS_Model_1D::UpdateSolution( solution1, solution2 ) \n";
+#endif
+
+    // Here we make a true copy (not a copy of the shared_ptr, but a copy of its content)
+    for ( Solution_ConstIterator i = solution1.begin() ; i != solution1.end() ; ++i )
+        *solution2[i->first]= *i->second;
 }
 
 } // Namespace LifeV
