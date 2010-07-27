@@ -63,7 +63,7 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
 void
 OneDimensionalModel_BC::applyBC( const Real&             time,
                                  const Real&             timeStep,
-                                 const Solution_PtrType& solution,
+                                 const Solution_Type&    solution,
                                  const Flux_PtrType&     flux,
                                        Container2D_Type& BC_dir )
 {
@@ -112,12 +112,27 @@ OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D
 }
 
 // ===================================================
+// Get Methods
+// ===================================================
+OneDimensionalModel_BC::BCFunction_Type&
+OneDimensionalModel_BC::RHS( const OneD_BCLine& line )
+{
+    return M_rhs_at_line[line]; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
+}
+
+const bool&
+OneDimensionalModel_BC::isInternal()
+{
+    return M_isInternal;
+}
+
+// ===================================================
 // Protected Methods
 // ===================================================
 void
 OneDimensionalModel_BC::compute_resBC( const Real&             time,
                                        const Real&             timeStep,
-                                       const Solution_PtrType& solution,
+                                       const Solution_Type&    solution,
                                        const Flux_PtrType&     flux )
 {
     Container2D_Type rhsBC;
@@ -136,20 +151,16 @@ OneDimensionalModel_BC::compute_resBC( const Real&             time,
     left_eigvec2[1] = 0.;
 
     UInt dof;
-    ( M_boundarySide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->nbElem() + 1;
+    ( M_boundarySide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->NumberOfElements() + 1;
 
     Container2D_Type U_boundary, W_boundary;
-    for( UInt i = 0; i < 2; ++i )
-    {
-        U_boundary[i] = (*solution)[i    ](dof);
-        W_boundary[i] = (*solution)[2 + i](dof) ;
-        //std::cout << "bdof " << M_boundaryDof << " : " << M_U_thistime[2 + i](M_boundaryDof) << std::endl;
-    }
 
-    Real Aboundary = U_boundary[0];
-    Real Qboundary = U_boundary[1];
+    U_boundary[0] = (*solution.find("A")->second)(dof);
+    U_boundary[1] = (*solution.find("Q")->second)(dof);
+    W_boundary[0] = (*solution.find("W1")->second)(dof);
+    W_boundary[1] = (*solution.find("W2")->second)(dof);
 
-    flux->jacobian_EigenValues_Vectors( Aboundary, Qboundary,
+    flux->jacobian_EigenValues_Vectors( U_boundary[0], U_boundary[1],
                                         eigval1, eigval2,
                                         left_eigvec1[0], left_eigvec1[1],
                                         left_eigvec2[0], left_eigvec2[1],
