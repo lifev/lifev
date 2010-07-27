@@ -59,7 +59,7 @@ RefEle::~RefEle()
 std::vector<GeoVector> 
 RefEle::refCoor() const
 {
-    std::vector<GeoVector> coordinates(M_nbDof, GeoVector(3,0));
+    std::vector<GeoVector> coordinates(M_nbDof, GeoVector(3));
     for (UInt i(0); i<M_nbDof; ++i)
     {
         coordinates[i][0]=M_refCoor[3*i];
