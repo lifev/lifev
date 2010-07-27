@@ -50,6 +50,12 @@
 
 namespace LifeV {
 
+enum OneD_Initialize { OneD_InitializeArea,
+                       OneD_InitializeFlux,
+                       OneD_InitializeRiemann1,
+                       OneD_InitializeRiemann2,
+                       OneD_InitializePressure };
+
 //! OneDimensionalModel_Data - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
@@ -130,7 +136,23 @@ public:
     //! @name Methods
     //@{
 
+    //! Setup method.
+    /*!
+     * @param dataFile GetPot dataFile
+     * @return section section in the dataFile
+     */
     void setup( const GetPot& dataFile, const std::string& section = "1D_Model" );
+
+    //! Deprecated setup method.
+    /*!
+     * This method has been implemented for compatibility reason with some old applications.
+     * Please, for any new application use the setup method in place of this one. Future
+     * compatibility for this method is not guaranteed.
+     *
+     * @param dataFile GetPot dataFile
+     * @return section section in the dataFile
+     */
+    void oldStyleSetup( const GetPot& dataFile, const std::string& section = "1dnetwork" );
 
     void UpdateCoefficients();
 
@@ -143,6 +165,10 @@ public:
 
     //! @name Set Methods
     //@{
+
+    void setPostprocessingDirectory( const std::string& directory );
+
+    void setPostprocessingFile( const std::string& file );
 
     //! Set data time container
     /*!
@@ -199,12 +225,12 @@ public:
     Time_PtrType       dataTime() const;
 
     Mesh_PtrType       mesh() const;
-          Real         Length() const;
-          UInt         nbElem() const;
-          UInt         NumberOfNodes() const;
+    Real               Length() const;
+    UInt               NumberOfElements() const;
+    UInt               NumberOfNodes() const;
 
-    const std::string& PostDirectory() const;
-    const std::string& PostFile() const;
+    const std::string& postprocessingDirectory() const;
+    const std::string& postprocessingFile() const;
 
     const int&         verbose() const;
 
@@ -220,7 +246,7 @@ public:
     const int&         DPdtSteps() const;
     const Real&        CFLmax() const;
 
-    const std::string& initialVariable() const;
+    const OneD_Initialize& initialVariable() const;
     const Real&        initialValue() const;
     const Real&        restValue() const;
     const Real&        multiplier() const;
@@ -285,8 +311,8 @@ protected:
     Mesh_PtrType      M_Mesh;
 
     //! Miscellaneous
-    std::string       M_post_dir; //! full directory name (including path)
-    std::string       M_post_file; //! output file name
+    std::string       M_postprocessingDirectory; //! full directory name (including path)
+    std::string       M_postprocessingFile;      //! output file name
     int               M_verbose;
     bool              M_UW;
     //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
@@ -302,7 +328,7 @@ protected:
     Real              M_CFLmax;
 
     //! initialize
-    std::string       M_initialVariable;
+    OneD_Initialize   M_initialVariable;
     Real              M_initialValue;
     Real              M_restValue;
     Real              M_multiplier;
