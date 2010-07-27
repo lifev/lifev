@@ -161,8 +161,9 @@ int main(int argc, char** argv)
     // Absorbing
     BC_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDModel.GetFlux(),
                                                                                                   OneDModel.GetSource(),
-                                                                                                  OneDModel.GetSolver()->U_thistime(),
                                                                                                   OneD_right, OneD_W2 ) );
+    absorbing->setSolution( OneDModel.GetSolution() );
+
     BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
                                         dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
@@ -231,16 +232,15 @@ int main(int argc, char** argv)
         bool ok = true;
         int rightnodeid = OneDModel.GetSolver()->RightNodeId();
 
+        ok = ok && checkValue( 0.999998  , (*OneDModel.GetSolution("A"))[rightnodeid - 0]);
+        ok = ok && checkValue(-0.00138076, (*OneDModel.GetSolution("Q"))[rightnodeid - 0]);
+        ok = ok && checkValue(-0.00276153, (*OneDModel.GetSolution("W1"))[rightnodeid - 0]);
+        ok = ok && checkValue( 0.00000000, (*OneDModel.GetSolution("W2"))[rightnodeid - 0]);
 
-        ok = ok && checkValue( 0.999998  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 0]);
-        ok = ok && checkValue(-0.00138076, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 0]);
-        ok = ok && checkValue(-0.00276153, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 0]);
-        ok = ok && checkValue( 0.00000000, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 0]);
-
-        ok = ok && checkValue( 0.999999  , OneDModel.GetSolver()->U1_thistime()[rightnodeid - 1]);
-        ok = ok && checkValue(-0.00040393, OneDModel.GetSolver()->U2_thistime()[rightnodeid - 1]);
-        ok = ok && checkValue(-0.00080833, OneDModel.GetSolver()->W1_thistime()[rightnodeid - 1]);
-        ok = ok && checkValue( 0.00000045, OneDModel.GetSolver()->W2_thistime()[rightnodeid - 1]);
+        ok = ok && checkValue( 0.999999  , (*OneDModel.GetSolution("A"))[rightnodeid - 1]);
+        ok = ok && checkValue(-0.00040393, (*OneDModel.GetSolution("Q"))[rightnodeid - 1]);
+        ok = ok && checkValue(-0.00080833, (*OneDModel.GetSolution("W1"))[rightnodeid - 1]);
+        ok = ok && checkValue( 0.00000045, (*OneDModel.GetSolution("W2"))[rightnodeid - 1]);
 
         if (ok)
         {
