@@ -64,6 +64,7 @@ public:
 
     typedef OneDimensionalModel_BC::Flux_PtrType               Flux_PtrType;
     typedef OneDimensionalModel_BC::Source_PtrType             Source_PtrType;
+    typedef OneDimensionalModel_BC::Solution_Type              Solution_Type;
     typedef OneDimensionalModel_BC::Solution_PtrType           Solution_PtrType;
 
     //@}
@@ -87,15 +88,12 @@ public:
     //! Apply boundary conditions
     void applyBC ( const Real&             time,
                    const Real&             timeStep,
-                   const Solution_PtrType& solution,
+                   const Solution_Type&    solution,
                    const Flux_PtrType&     flux,
                          Container2D_Type& left_BC_dir,
                          Container2D_Type& right_BC_dir );
 
     //@}
-
-    inline void setBCLeft_internalnode() { M_boundary[OneD_left ]->setInternal(true); }
-    inline void setBCRight_internalnode(){ M_boundary[OneD_right]->setInternal(true); }
 
 
     //! @name Set Methods
@@ -104,13 +102,13 @@ public:
     void setBC( const OneD_BCSide& side, const OneD_BCLine& line,
                 const OneD_BC& bcType,   const BCFunction_Type& BCfunction );
 
-    void setDefaultBC( const Flux_PtrType     fluxFun,
-                       const Source_PtrType   sourceFun,
-                       const Solution_PtrType solution );
+    void setDefaultBC( const Flux_PtrType flux, const Source_PtrType source );
+
+    void setSolution( const Solution_PtrType solution );
+
+    void setInternalNode( const OneD_BCSide& side );
 
     //@}
-
-
 
 
     //! @name Get Methods
@@ -127,7 +125,7 @@ private:
     std::map< OneD_BCSide, boost::shared_ptr< OneDimensionalModel_BC > > M_boundary;
     std::map< OneD_BCSide, std::map< OneD_BCLine, bool > >               M_boundarySet;
 
-    std::vector < BCFunction_Default_PtrType >                           M_defaultBC;
+    std::vector < BCFunction_Default_PtrType >                           M_defaultFunctions;
 };
 
 }
