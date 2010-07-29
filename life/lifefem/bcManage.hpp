@@ -2115,7 +2115,7 @@ void bcFluxManageMatrix( MatrixType&     A,
                    const Dof&      dof,
                    const BCBase&   BCb,
                    CurrentBdFE&    bdfem,
-                   const DataType& t,
+                   const DataType& /*t*/,
                    UInt            offset )
 
 {
