@@ -502,12 +502,12 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 
     vector_type zSolid(dim);
 
-    for (int ii = 0; ii < (int) dim; ++ii)
+    for (UInt ii = 0; ii < dim; ++ii)
         {
             zSolid[ii] = z[ii];
         }
     if ( xnorm == 0.0 )
-        for (int i=0; i <(int) dim; ++i)
+        for (UInt i=0; i < dim; ++i)
             {
                 Jz[i]     = 0.0;
             }
@@ -558,7 +558,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
         }
         my_data->M_pFS->computeResidualFSI();
 
-        for (int i = 0; i < (int) dim; ++i)
+        for (UInt i = 0; i < dim; ++i)
         {
             Jz[i] =  my_data->M_pFS->residual()[i];
         }

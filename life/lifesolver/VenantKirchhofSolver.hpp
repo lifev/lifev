@@ -780,7 +780,7 @@ VenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_type & sol, int i
             _elmatK.zero();
 
             // _dk_loc contains the displacement in the nodes
-            for ( UInt j = 0 ; j < ( UInt ) M_FESpace.fe().nbNode ; ++j )
+            for ( UInt j = 0 ; j < M_FESpace.fe().nbNode ; ++j )
             {
                 for ( UInt ic = 0; ic < nc; ++ic )
                 {
@@ -938,7 +938,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
     }
 
-    for (int ii = 1; ii <= (int)M_FESpace.dim(); ++ii)
+    for (UInt ii = 1; ii <= M_FESpace.dim(); ++ii)
     {
         (*M_sxx)[ii] /= count[ii];
         (*M_syy)[ii] /= count[ii];
