@@ -37,6 +37,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_2Cylinders_Str
         Omega                      = 0.5           # omega starting value
         fixedOmega                 = false         # use fixed omega (if omega = 1 -> fixed point)
         method                     = Vectorial     # Scalar, Vectorial
+        #range                      = '0.1 1.5'     # Range coefficient: OmegaMin < Omega < OmegaMax
         inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1
 
         [../Newton_method]

@@ -65,6 +65,7 @@ diagonalBlockPrec   = false
     SubITMax        = 0                # Maximum number of iterations 
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.001            # Relaxation parameter
+    #range           = '0.1 1.5'        # Range coefficient: OmegaMin < Omega < OmegaMax
     fixedOmega      = false            # Use fixed relaxation
     inverseOmega    = true             # Use inverse minimization
     

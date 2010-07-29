@@ -5,7 +5,7 @@
 #                                 Copyright (C) 2010 EPFL
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2010-05-17
 #  License Terms: GNU GPL
 #
 ###################################################################################################
@@ -14,34 +14,34 @@
 
 [Problem] #########################################################################################
 ProblemType = MultiScale
-ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_Stress_tube60.dat
+ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_3Cylinders_FluxStress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
     [./Restart]
-    Restart                    = true
+    Restart                    = false
     RestartFromStepNumber      = 0
-
+    
     [../time_discretization]
-    initialtime                = 0.0                # [s]
-    endtime                    = 29.6088132032681   # [s]
-    timestep                   = 0.115659426575266  # [s]
-
+    initialtime                = .00000   # [s]
+    endtime                    = .04999   # [s]
+    timestep                   = 5e-5     # [s]
+    
     [../Algorithm]
-    AlgorithmType              = Newton            # Aitken, Explicit, Newton
-    subITMax                   = 1                 # Maximum number for coupling subiterations
+    AlgorithmType              = Aitken            # Aitken, Explicit, Newton
+    subITMax                   = 2000              # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
-
+    
         [./Aitken_method]
         Omega                      = 0.5           # omega starting value
-        fixedOmega                 = false         # use fixed omega (if omega = 1 -> fixed point)
+        fixedOmega                 = true          # use fixed omega (if omega = 1 -> fixed point)
         method                     = Vectorial     # Scalar, Vectorial
         #range                      = '0.1 1.5'     # Range coefficient: OmegaMin < Omega < OmegaMax
         inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1
-
+        
         [../Newton_method]
-
+        
             [./AztecOO]
             solver                     = gmres
             scaling                    = none
@@ -52,11 +52,11 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_St
             max_iter_reuse             = 100
             kspace                     = 100
             tol                        = 1.e-14
-
+            
             [../Preconditioner]
             prectype                   = Ifpack #Ifpack
             displayList                = false
-
+    
                 [./AztecOO]
                 precond                    = 'dom_decomp'
                 prec_calc                  = calc
@@ -66,7 +66,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_St
                 subdomain_solve            = ILUT
                 ilut_fill                  = 4
                 drop                       = 1.e-5
-
+                
                 [../ifpack]
                 overlap                    = 3 #ok
                 prectype                   = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
@@ -77,7 +77,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_St
                     damping_factor         = 1.
                     min_diagonal_value     = 0
                     zero_starting_solution = true
-
+            
                     [../partitioner]
                     type                   = metis
                     overlap                = 2
@@ -87,7 +87,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_St
 
                     [../amesos]
                     solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-
+                           
                     [../fact]
                     level-of-fill          = 4
                     ilut_level-of-fill     = 4
@@ -101,7 +101,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_St
                     compute_condest        = true
                     reordering_type        = none       #none, metis, rcm
                     filter_singletons      = true
-
+    
                     [../]
                 [../]
             [../]
@@ -111,9 +111,9 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Womersley_3DFluid_5Cylinders_St
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 2.79658816105093      # density        [g/cm^3]
-FluidViscosity              = 0.00593454445511297   # viscosity      [g/cm/s]
-StructureDensity            = 0                     # density        [g/cm^3]
-StructurePoissonCoefficient = 0                     # Poisson coeff. []
-StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
+FluidDensity                = 1.0           # density        [g/cm^3]
+FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+StructureDensity            = 1.2           # density        [g/cm^3]
+StructurePoissonCoefficient = 0.48          # Poisson coeff. []
+StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################
