@@ -3,7 +3,7 @@
   This file is part of the LifeV Applications.
 
   Author(s):  A. Fumagalli  <alessio.fumagalli@mail.polimi.it>
-       Date: 2010-03-24
+       Date: 2010-07-29
 
   Copyright (C) 2010 EPFL, Politecnico di Milano
 
@@ -25,7 +25,7 @@
 /**
    \file darcy.cpp
    \author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   \date
+   \date 2010-07-29
  */
 
 /*!
@@ -352,7 +352,7 @@ darcy::darcy( int argc,
 //! Methods
 // ===================================================
 
-void
+Real
 darcy::run()
 {
     typedef RegionMesh3D<LinearTetra>                   RegionMesh;
@@ -607,5 +607,8 @@ darcy::run()
     // The leader process print chronoTotal
     if ( isLeader )
         std::cout << "Total time for the computation " << chronoTotal.diff() << std::endl << std::flush;
+
+    // Return the error, needed for the succes/failure of the test
+    return darcySolver.primalL2Error( Members->getAnalyticalSolution(), Members->getUOne() );
 
 }

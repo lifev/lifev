@@ -3,7 +3,7 @@
   This file is part of the LifeV Applications.
 
   Author(s):  A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-       Date: 2010-05-24
+       Date: 2010-07-29
 
   Copyright (C) 2010 EPFL, Politecnico di Milano
 
@@ -25,7 +25,7 @@
 /**
    @file darcy.hpp
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2009-03-24
+   @date 2010-07-29
  */
 
 
@@ -85,7 +85,7 @@ public:
      */
     //@{
 
-    void run();
+    LifeV::Real run();
 
     //@}
 

@@ -3,7 +3,7 @@
   This file is part of the LifeV Applications.
 
   Author(s):  A. Fumagalli  <alessio.fumagalli@mail.polimi.it>
-       Date: 2010-05-24
+       Date: 2010-07-29
 
   Copyright (C) 2010 EPFL, Politecnico di Milano
 
@@ -24,7 +24,7 @@
 */
 /* ========================================================
 
-Simple Darcy test with mixed boundary condition
+Simple Darcy test with Dirichlet, Neumann and Robin boundary conditions
 
 Solve the problem
 
@@ -32,16 +32,14 @@ Solve the problem
 
                K^{-1} u + \nabla p = 0  in \Omega
 
- 3D: with the source term f = 2(x^2+y^2) on an unite cube and the matrix K is the identity matrix.
-
 */
 
 
 /**
    @file main.hpp
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2010-05-24
- */
+   @date 2010-07-29
+*/
 
 
 // ===================================================
@@ -102,24 +100,34 @@ namespace
 int main(int argc, char** argv)
 {
 
-	#ifdef HAVE_MPI
-		MPI_Init(&argc, &argv);
-		std::cout << "MPI Initialization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
 
 
     LifeV::po::options_description desc("Specific options");
     desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
 
+    // Error of the problem
+    LifeV::Real error(0);
+    // Error known
+    const LifeV::Real errorKnown( 0.200340988220163 );
+    // Tollerance between the error and the errorKnown
+    const LifeV::Real tollerance( 1e-8 );
+
     darcy Darcy( argc, argv, makeAbout(), desc );
-    Darcy.run();
+    error = Darcy.run();
 
 
-	#ifdef HAVE_MPI
-		MPI_Finalize();
-		std::cout << "MPI Finalization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
 
-    return( EXIT_SUCCESS );
+    if ( abs( error - errorKnown ) > tollerance )
+        return ( EXIT_FAILURE );
+    else
+        return ( EXIT_SUCCESS );
 }
 

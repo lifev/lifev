@@ -36,4 +36,4 @@ link:
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
 
 clean-results:
-	-rm *.vct *.scl *.case *.geo
+	-rm *.vct *.scl *.case *.geo *.h5 *.xmf
