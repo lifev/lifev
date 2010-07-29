@@ -424,7 +424,7 @@ iterate( const Real& time )
         UInt eleID = this->_fe_u.currentId();
         // Non linear term, Semi-implicit approach
         // ULoc contains the velocity values in the nodes
-        for ( UInt k = 0 ; k < ( UInt ) this->_fe_u.nbNode ; k++ )
+        for ( UInt k = 0 ; k < this->_fe_u.nbNode ; k++ )
         {
             UInt iloc = this->_fe_u.patternFirst( k );
             for ( UInt ic = 0; ic < nc_u; ++ic )
@@ -695,7 +695,7 @@ void NavierStokesSolverPC<Mesh>::ShearStressCompute( std::string filename_stress
 {
     Vector residual( this->residual() );
     UInt ss = residual.size() / NDIM;
-    Vector sstress( this->_ns_post_proc.compute_sstress( residual, ( UInt ) NDIM ) );
+    Vector sstress( this->_ns_post_proc.compute_sstress( residual, NDIM ) );
     // just a stupid way for writing the shear stress in OpenDx or Medit formats,
     // exploting the existent subroutines
     UInt s = sstress.size() / NDIM;

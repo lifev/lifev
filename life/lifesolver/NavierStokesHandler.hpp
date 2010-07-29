@@ -1481,7 +1481,7 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
         Int i_quadr = 0; //! check only at the 1rst quad point
         //(assuming that the element is not too distorted)
         Real n_dot_ref = 0.;
-        for ( int ic = 0; ic < (int)nc_u; ++ic ) { //! dot product
+        for ( UInt ic = 0; ic < nc_u; ++ic ) { //! dot product
             n_dot_ref =_feBd_u.normal( ic, i_quadr ) * __reference_normal( ic );
         }
         if ( __modify_sign_normal && n_dot_ref < 0 ) {
