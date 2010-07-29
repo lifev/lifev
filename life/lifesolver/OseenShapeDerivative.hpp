@@ -410,7 +410,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
                     M_elvec_du.zero();
                     M_elvec_dp.zero();
 
-                    for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
+                    for ( UInt k = 0 ; k < this->M_uFESpace.fe().nbNode ; k++ )
                         {
                             UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
 
@@ -434,7 +434,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
                       std::cout << M_dw_loc.vec() << std::endl;
                       std::cout << M_u_loc.vec() << std::endl;
                     */
-                    for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
+                    for ( UInt k = 0 ; k < this->M_pFESpace.fe().nbNode ; k++ )
                         {
                             UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
                             UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 ) + nbCompU*this->dim_u();
@@ -592,7 +592,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                     elmat_du->zero();
 
 
-                    for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
+                    for ( UInt k = 0 ; k < this->M_uFESpace.fe().nbNode ; k++ )
                         {
                             UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
 
@@ -619,7 +619,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                     std::cout << M_dw_loc.vec() << std::endl;
                     std::cout << M_u_loc.vec() << std::endl;
                     */
-                    for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
+                    for ( UInt k = 0 ; k < this->M_pFESpace.fe().nbNode ; k++ )
                         {
                             UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
                             UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 ) + nbCompU*this->dim_u();

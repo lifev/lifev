@@ -974,7 +974,7 @@ updateSystem(const double       alpha,
             UInt eleID = M_uFESpace.fe().currentLocalId();
             // Non linear term, Semi-implicit approach
             // M_elvec contains the velocity values in the nodes
-            for ( UInt iNode = 0 ; iNode < ( UInt ) M_uFESpace.fe().nbNode ; iNode++ )
+            for ( UInt iNode = 0 ; iNode < M_uFESpace.fe().nbNode ; iNode++ )
             {
                 UInt  iloc = M_uFESpace.fe().patternFirst( iNode );
                 for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
