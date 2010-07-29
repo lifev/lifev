@@ -1,3 +1,4 @@
+
 /* -*- mode: c++ -*-
 
  This file is part of the LifeV library
@@ -331,7 +332,7 @@ public:
                   Epetra_Comm&              comm );
 
     //! Virtual destructor.
-    virtual ~DarcySolver ( void );
+    virtual ~DarcySolver ();
 
     //@}
 
@@ -343,7 +344,7 @@ public:
       Set up the linear solver, the preconditioner for the linear system
       and the exporter to save the solution.
     */
-    virtual void setup ( void );
+    virtual void setup ();
 
     /*!
       Set the boundary conditions.
@@ -383,7 +384,7 @@ public:
       Returns the local hybrid solution vector.
       @return Constant vector_type reference of the hybrid vector.
      */
-    inline const vector_type& hybrid_solution ( void ) const
+    inline const vector_type& hybrid_solution () const
     {
         return *M_hybrid;
     }
@@ -392,7 +393,7 @@ public:
       Returns the local primal solution vector.
       @return Constant vector_type reference of the primal solution.
     */
-    inline const vector_type& primal_solution ( void ) const
+    inline const vector_type& primal_solution () const
     {
         return *M_primal;
     }
@@ -401,7 +402,7 @@ public:
       Returns the local dual solution vector.
       @return Constant vector_type reference of the dual solution.
     */
-    inline const vector_type& dual_solution ( void ) const
+    inline const vector_type& dual_solution () const
     {
         return *M_dual;
     }
@@ -410,7 +411,7 @@ public:
       Returns the local residual vector.
       @return Constant vector_type reference of the residual.
     */
-    inline const vector_type& residual ( void ) const
+    inline const vector_type& residual () const
     {
         return *M_residual;
     }
@@ -420,7 +421,7 @@ public:
       @return Constant boolean with value true if the boundary condition is setted,
       false otherwise
     */
-    inline const bool BCset ( void ) const
+    inline const bool BCset () const
     {
         return M_setBC;
     }
@@ -429,7 +430,7 @@ public:
       Return the boundary conditions handler.
       @return Reference of boundary conditions handler.
     */
-    inline bchandler_type& bcHandler ( void )
+    inline bchandler_type& bcHandler ()
     {
         return M_BCh;
     }
@@ -438,7 +439,7 @@ public:
       Return the Epetra local map.
       @return Constant EpetraMap reference of the problem.
     */
-    inline EpetraMap const& getMap ( void ) const
+    inline EpetraMap const& getMap () const
     {
         return M_localMap;
     }
@@ -447,7 +448,7 @@ public:
       Return the Epetra communicator.
       @return Constant Epetra_Comm reference of the problem.
     */
-    inline const Epetra_Comm& comm ( void ) const
+    inline const Epetra_Comm& comm () const
     {
         return *M_comm;
     }
@@ -459,7 +460,7 @@ public:
     //@{
 
     //! Solve the problem.
-    virtual void run( void );
+    virtual void run();
 
     //@}
 
@@ -472,7 +473,7 @@ public:
       @return Constant boolean with value true if che current process is the leader process,
       false otherwise.
     */
-    inline const bool isLeader ( void ) const
+    inline const bool isLeader () const
     {
         assert( M_comm != 0);
         return comm().MyPID() == 0;
@@ -549,13 +550,13 @@ protected:
     //@{
 
     //! Build the global hybrid system, the right hand and apply the boundary conditions.
-    void buildSystem ( void );
+    void buildSystem ();
 
     //! Solve the global hybrid system.
-    void solve ( void );
+    void solve ();
 
     //! Compute primal and dual variables from the hybrid variable as a post process.
-    void computePrimalAndDual ( void );
+    void computePrimalAndDual ();
 
     //@}
 
@@ -563,7 +564,7 @@ protected:
       Return the number of total degrees of freem of the problem.
       @return The number of total degrees of freedom as a constant UInt.
     */
-    inline const UInt dim ( void ) const
+    inline const UInt dim () const
     {
         return M_hybrid_FESpace.dim();
     }
@@ -572,7 +573,7 @@ protected:
       Apply the boundary condition to the hybrid global matrix and
       to the hybrid global right hand side.
     */
-    void applyBoundaryConditions ( void );
+    void applyBoundaryConditions ();
 
     /*!
       Locally update the current finite element for the primal
@@ -586,16 +587,16 @@ protected:
       Compute all the local matrices that are inipendent
       from the geometrical element.
     */
-    virtual void computeConstantMatrices ( void );
+    virtual void computeConstantMatrices ();
 
     /*!
       Perform the static condensation of the problem, i.e. create the local
       hybrid matrix and local hybrid right hand side.
     */
-    virtual void staticCondensation ( void );
+    virtual void staticCondensation ();
 
     //! Compute locally, as a post process, the primal and dual variable.
-    virtual void localComputePrimalAndDual ( void );
+    virtual void localComputePrimalAndDual ();
 
     /*!
       Update all the variables of the problem before the construction of
@@ -603,7 +604,7 @@ protected:
       It is principally used for a time dependent derived class, in fact we
       want to clear each time step all the variables.
     */
-    virtual void updateVariables ( void );
+    virtual void updateVariables ();
 
     /*!
       Transform a symmetric matrix that is stored only in the lower or upper
@@ -922,7 +923,7 @@ leaderPrintMax ( string const message, Real const number ) const
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-setup ( void )
+setup ()
 {
 
     GetPot dataFile( *(M_data.dataFile()) );
@@ -995,7 +996,7 @@ symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-computeConstantMatrices ( void )
+computeConstantMatrices ()
 {
 
     /* Update the divergence matrix, it is independant of the current element
@@ -1056,7 +1057,7 @@ localElementComputation ( const UInt & iElem )
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-staticCondensation ( void )
+staticCondensation ()
 {
 
     // Flags for the BLAS and LAPACK routine.
@@ -1193,7 +1194,7 @@ staticCondensation ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-updateVariables ( void )
+updateVariables ()
 {
 
     // Reset the global hybrid matrix.
@@ -1220,7 +1221,7 @@ updateVariables ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-buildSystem ( void )
+buildSystem ()
 {
 
 	// Chronos.
@@ -1336,7 +1337,7 @@ buildSystem ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-applyBoundaryConditions ( void )
+applyBoundaryConditions ()
 {
     // Chrono.
     Chrono chronoBC;
@@ -1385,7 +1386,7 @@ applyBoundaryConditions ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-solve ( void )
+solve ()
 {
 
 	// Set the matrix.
@@ -1402,7 +1403,7 @@ solve ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-localComputePrimalAndDual ( void )
+localComputePrimalAndDual ()
 {
     // Flags for the BLAS and LAPACK routine.
 
@@ -1564,7 +1565,7 @@ localComputePrimalAndDual ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-computePrimalAndDual ( void )
+computePrimalAndDual ()
 {
 
 	// Chrono.
@@ -1638,7 +1639,7 @@ computePrimalAndDual ( void )
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-run ( void )
+run ()
 {
     // Build the linear system and the right hand side.
     buildSystem();

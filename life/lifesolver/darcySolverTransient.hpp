@@ -315,7 +315,7 @@ public:
                            Epetra_Comm&              comm );
 
     //! Virtual destructor.
-    virtual ~DarcySolverTransient ( void );
+    virtual ~DarcySolverTransient ();
 
     //@}
 
@@ -326,7 +326,7 @@ public:
     /*!
       Set up the linear solver and the preconditioner for the linear system.
     */
-    virtual void setup ( void );
+    virtual void setup ();
 
     /*!
       Set the initial value function for the primal variable and compute the primal
@@ -354,7 +354,7 @@ public:
       Returns the value of the current time of the simulation.
       @return Current time as a constant Real.
     */
-    const Real getTime ( void ) const
+    const Real getTime () const
     {
         return this->M_data.dataTime()->getTime();
     }
@@ -366,7 +366,7 @@ public:
     //@{
 
     //! Simulate the time dependent problem.
-    virtual void run ( void );
+    virtual void run ();
 
     //@}
 
@@ -384,16 +384,16 @@ protected:
       Perform the static condensation of the problem, i.e. create the local
       hybrid matrix and local hybrid right hand side.
     */
-    virtual void staticCondensation ( void );
+    virtual void staticCondensation ();
 
     //! Compute locally, as a post process, the primal and dual variable.
-    virtual void localComputePrimalAndDual ( void );
+    virtual void localComputePrimalAndDual ();
 
     /*!
       Update all the variables of the problem before the construction of
       the global hybrid matrix, e.g. reset the global hybrid matrix.
     */
-    virtual void updateVariables ( void );
+    virtual void updateVariables ();
 
     // Data of the problem.
     //! @name Data of the problem
@@ -520,7 +520,7 @@ DarcySolverTransient<Mesh, SolverType>::
 template<typename Mesh, typename SolverType>
 void
 DarcySolverTransient<Mesh, SolverType>::
-setup ( void )
+setup ()
 {
 
     GetPot dataFile( *(this->M_data.dataFile()) );
@@ -566,7 +566,7 @@ localElementComputation ( const UInt & iElem )
 template <typename Mesh, typename SolverType>
 void
 DarcySolverTransient<Mesh, SolverType>::
-staticCondensation ( void )
+staticCondensation ()
 {
 
     // Flags for the BLAS and LAPACK routine.
@@ -726,7 +726,7 @@ staticCondensation ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolverTransient<Mesh, SolverType>::
-updateVariables ( void )
+updateVariables ()
 {
     // Reset the primal old vector
     M_primalOld.reset( new vector_type ( this->M_primal_FESpace.map() ) );
@@ -743,7 +743,7 @@ updateVariables ( void )
 template<typename Mesh, typename SolverType>
 void
 DarcySolverTransient<Mesh, SolverType>::
-localComputePrimalAndDual ( void )
+localComputePrimalAndDual ()
 {
 
     // Flags for the BLAS and LAPACK routine.
@@ -926,7 +926,7 @@ localComputePrimalAndDual ( void )
 template <typename Mesh, typename SolverType>
 void
 DarcySolverTransient<Mesh, SolverType>::
-run ( void )
+run ()
 {
 
     // Copy the initial solution to the exporter.
