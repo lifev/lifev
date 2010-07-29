@@ -449,8 +449,8 @@ ADRSolver( const data_type&          dataType,
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatMass              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
     M_elmatAdv               ( M_FESpace.fe().nbFEDof(), 1, 1 ),
+    M_elmatMass              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
     M_elmatStab              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
     M_elvec_u                ( M_betaFESpace.fe().nbFEDof(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
 {
@@ -546,12 +546,12 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
     Chrono chronoZero;
 
     // Number of velocity components
-    UInt nbCompU = 1;
+    // UInt nbCompU = 1;
 
     // Elementary computation and matrix assembling
     // Loop on elements
 
-    UInt velTotalDof   = M_FESpace.dof().numTotalDof();
+    // UInt velTotalDof   = M_FESpace.dof().numTotalDof();
 
 
     chrono.start();
@@ -680,7 +680,7 @@ updateSystem( Real       alpha,
 
     chrono.start();
 
-    UInt velTotalDof   = M_FESpace.dof().numTotalDof();
+    // UInt velTotalDof   = M_FESpace.dof().numTotalDof();
 
     // Right hand side for the velocity at time
 
@@ -750,7 +750,7 @@ updateSystem( Real       alpha,
             UInt eleID = M_betaFESpace.fe().currentLocalId();
             // Non linear term, Semi-implicit approach
             // M_elvec contains the velocity values in the nodes
-            for ( UInt iNode = 0 ; iNode < ( UInt ) M_betaFESpace.fe().nbFEDof() ; iNode++ )
+            for ( UInt iNode = 0 ; iNode < M_betaFESpace.fe().nbFEDof() ; iNode++ )
             {
 	         UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
                 for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
@@ -789,7 +789,7 @@ updateSystem( Real       alpha,
                 Real VLoc_mean  = 0.;
                 Real VLoc_c     = 0.;
 
-                for ( UInt ih_c = 0 ; ih_c < ( UInt ) this->M_betaFESpace.fe().nbFEDof() ; ih_c++ )
+                for ( UInt ih_c = 0 ; ih_c < this->M_betaFESpace.fe().nbFEDof() ; ih_c++ )
                 {
                     UInt iloc = this->M_betaFESpace.fe().patternFirst( ih_c );
                     for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
@@ -808,7 +808,7 @@ updateSystem( Real       alpha,
 
                 VLoc_mean = VLoc_mean / this->M_betaFESpace.fe().nbFEDof();
 
-                Real coef_stab, Pe_loc = 0;
+                Real coef_stab = 0;
                 coef_stab=M_gammaBeta*this->M_betaFESpace.fe().diameter()*VLoc_infty; // Alessandro - method
 
                 stiff_sd( coef_stab / ( VLoc_mean*VLoc_mean ), M_elvec_u, M_elmatStab, this->M_FESpace.fe(), this->M_betaFESpace.fe() );
@@ -982,10 +982,10 @@ updateSystem( Real       alpha,
 		    // See elemOper.cpp for justification of this usage
                     ElemVec beta( M_betaFESpace.fe().nbFEDof(), nDimensions);
 
-                    for ( int iNode = 0; iNode < M_betaFESpace.fe().nbFEDof(); ++iNode )
+                    for ( UInt iNode = 0; iNode < M_betaFESpace.fe().nbFEDof(); ++iNode )
                     {
 		        UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
-                        for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
+                        for ( UInt iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
                         {
                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) + iCoor*nDof;
 			    beta.vec()[ iloc + iCoor*M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ig]; // BASEINDEX + 1
@@ -1004,11 +1004,11 @@ updateSystem( Real       alpha,
                      for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbNode; ++iNode )
                      {
                          UInt iloc = fToP( iFaEl, iNode + 1 );
-                         for ( int iCoor = 0; iCoor < nDimensions; ++iCoor )
+                         for ( UInt iCoor = 0; iCoor < nDimensions; ++iCoor )
                          {
                              UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 + iCoor*nDof;
                              if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-                                 bn += normal(iNode, iCoor)*betaVecRep( ig + 1 );
+                                 bn += normal(iNode, (int)iCoor)*betaVecRep( ig + 1 );
                          }
                      }
 
@@ -1123,7 +1123,7 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_linearSolver.setMatrix(*matrFull);
 
     M_linearSolver.setReusePreconditioner( M_reusePrec );
-    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
+    // int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
 
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
