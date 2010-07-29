@@ -70,7 +70,7 @@ public:
 
 private:
 
-    generalizedAitken<vector_type, Real> M_aitkFS;
+    generalizedAitken<vector_type> M_aitkFS;
 
 //     boost::shared_ptr<vector_type>       M_displacement;
 //     boost::shared_ptr<vector_type>       M_stress;

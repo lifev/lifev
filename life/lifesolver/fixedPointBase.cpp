@@ -47,9 +47,11 @@ fixedPoint::setDataFile( GetPot const& dataFile )
 {
     super::setDataFile( dataFile );
 
-    M_aitkFS.setDefault(M_data->defaultOmega(), 0.001);
+    M_aitkFS.setDefaultOmega(M_data->defaultOmega(), 0.001);
+    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+
     if( M_data->algorithm() == "RobinNeumann" )
-        M_aitkFS.setDefault(-1, 1);
+        M_aitkFS.setDefaultOmega(-1, 1);
 
 }
 

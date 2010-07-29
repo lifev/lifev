@@ -142,7 +142,7 @@ private:
     boost::shared_ptr<vector_type>       M_rhsNew;
     boost::shared_ptr<vector_type>       M_beta;
 
-    generalizedAitken<vector_type, Real> M_aitkFS;
+    generalizedAitken<vector_type> M_aitkFS;
 
 
 //     bc_vector_interface     M_bcvFluidLoadToStructure;
