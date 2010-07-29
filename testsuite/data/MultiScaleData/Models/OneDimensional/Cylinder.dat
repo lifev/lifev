@@ -62,7 +62,7 @@ multiplier           = 1
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name
 verbose              = 1
-CFLmax               = 0.1          # Maximum admissible value of the CFL 
+CFLmax               = 0.5          # Maximum admissible value of the CFL 
 
 [../solver]
 
