@@ -297,7 +297,7 @@ void BCNormalManager<MeshType,MatrixType>::M_createRotationMatrix(MatrixType& A,
     M_idMap->getMap(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
-	for ( UInt i(0);i<NumMyElements;++i )
+	for ( int i(0);i<NumMyElements;++i )
     {
         id = MyGlobalElements[i];
 
@@ -399,7 +399,7 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
             //Writing the points
             file << "DATASET POLYDATA" << std::endl;
             file << "POINTS " << M_numImposedDof << " float" << std::endl;
-            for ( UInt i(0);i<NumMyElements;++i )
+            for ( int i(0);i<NumMyElements;++i )
             {
                 idof = MyGlobalElements[i];
 
@@ -418,7 +418,7 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 
             //Writing t1
             file << "VECTORS cell_tangent_1 float" << std::endl;
-            for ( UInt i(0);i<NumMyElements;++i )
+            for ( int i(0);i<NumMyElements;++i )
             {
                 idof = MyGlobalElements[i];
 
@@ -434,7 +434,7 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 
             //Writing t2
             file << "VECTORS cell_tangent_2 float" << std::endl;
-            for ( UInt i(0);i<NumMyElements;++i )
+            for ( int i(0);i<NumMyElements;++i )
             {
                 idof = MyGlobalElements[i];
 
@@ -450,7 +450,7 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 
             //Writing n
             file << "VECTORS cell_normals float" << std::endl;
-            for ( UInt i(0);i<NumMyElements;++i )
+            for ( int i(0);i<NumMyElements;++i )
             {
                 idof = MyGlobalElements[i];
 
@@ -483,7 +483,7 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateCoordinates()
     M_idMap->getMap(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
-	for ( UInt i(0);i<NumMyElements;++i )
+	for ( int i(0);i<NumMyElements;++i )
     {
         id = MyGlobalElements[i];
 
@@ -552,7 +552,7 @@ void BCNormalManager<MeshType,MatrixType>::M_saveImposedNormals()
     //We normalize the normal
     Real norm;
     UInt id;
-	for ( UInt i(0);i<NumMyElements;++i )
+	for ( int i(0);i<NumMyElements;++i )
     {
         id = MyGlobalElements[i];
 
@@ -605,9 +605,9 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
     // STEP 2: Calculation of the tangential vectors
     //-----------------------------------------------------
 
-    Real norm;
+    // Real norm;
     UInt id;
-	for ( UInt i(0);i<NumMyElements;++i )
+	for ( int i(0);i<NumMyElements;++i )
     {
         id = MyGlobalElements[i];
 
@@ -834,7 +834,7 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
     Real norm;
     UInt id;
 
-	for ( UInt i(0); i<NumMyElements; ++i )
+	for ( int i(0); i<NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
 
