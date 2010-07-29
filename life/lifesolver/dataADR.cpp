@@ -53,7 +53,7 @@ DataADR::DataADR( const DataADR& dataADR ) :
 
 
 void
-DataADR::setup(  const GetPot& dfile,  const std::string& section )
+DataADR::setup(  const GetPot& dfile,  const std::string& /*section*/ )
 {
     M_stabilization_list.add( "ip",  ADR_IP_STABILIZATION, "interior penalty " );
     M_stabilization_list.add( "sd",  ADR_SD_STABILIZATION, "stream-line difussion" );

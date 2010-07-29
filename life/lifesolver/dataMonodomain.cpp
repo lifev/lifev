@@ -49,6 +49,7 @@ DataMonodomain::
 DataMonodomain( const DataMonodomain& dataMonodomain ) :
     DataMesh               ( dataMonodomain ),
     DataTime                     ( dataMonodomain ),
+    M_uOrder(dataMonodomain.M_uOrder),
     M_fibers_file(dataMonodomain.M_fibers_file),
     M_Chi(dataMonodomain.M_Chi),
     M_Cm(dataMonodomain.M_Cm),
@@ -58,7 +59,6 @@ DataMonodomain( const DataMonodomain& dataMonodomain ) :
     M_lambda(dataMonodomain.M_lambda),
     M_heart_diff_fct(dataMonodomain.M_heart_diff_fct),
     M_post_dir(dataMonodomain.M_post_dir),
-    M_uOrder(dataMonodomain.M_uOrder),
     M_has_fibers(dataMonodomain.M_has_fibers)
 {
 }

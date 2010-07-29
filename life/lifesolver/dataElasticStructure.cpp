@@ -120,6 +120,7 @@ DataElasticStructure::DataElasticStructure() :
 
 
 DataElasticStructure::DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
+    DataTime                           ( dataElasticStructure ),
     M_time                             ( dataElasticStructure.M_time ),
     M_density                          ( dataElasticStructure.M_density ),
     M_thickness                        ( dataElasticStructure.M_thickness ),

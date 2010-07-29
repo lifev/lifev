@@ -60,13 +60,13 @@ DataIonic( const DataIonic& dataIonic ) :
     winit(dataIonic.winit),
 	// Mitchell & Schaeffer
     tau_in(dataIonic.tau_in),
-    v_min(dataIonic.v_min),
-    v_max(dataIonic.v_max),
-    reac_amp(dataIonic.reac_amp),
     tau_out(dataIonic.tau_out),
     tau_open(dataIonic.tau_open),
     tau_close(dataIonic.tau_close),
     vcrit(dataIonic.vcrit),
+    v_min(dataIonic.v_min),
+    v_max(dataIonic.v_max),
+    reac_amp(dataIonic.reac_amp),
     tinit(dataIonic.tinit),
     tend(dataIonic.tend),
     order_bdf(dataIonic.order_bdf),
@@ -105,7 +105,7 @@ setup(  const GetPot& dfile )
 
 // Output
 void DataIonic::
-showMe( std::ostream& c )
+showMe( std::ostream& /*c*/ )
 {
 
 }

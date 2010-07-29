@@ -51,6 +51,7 @@ DataBidomain::
 DataBidomain( const DataBidomain& dataBidomain ) :
     DataMesh                     ( dataBidomain ),
     DataTime                     ( dataBidomain ),
+    M_uOrder(dataBidomain.M_uOrder),
     M_fibers_file(dataBidomain.M_fibers_file),
     M_Chi(dataBidomain.M_Chi),
     M_Cm(dataBidomain.M_Cm),
@@ -63,7 +64,6 @@ DataBidomain( const DataBidomain& dataBidomain ) :
     M_heart_diff_fct(dataBidomain.M_heart_diff_fct),
     M_verbose(dataBidomain.M_verbose),
     M_post_dir(dataBidomain.M_post_dir),
-    M_uOrder(dataBidomain.M_uOrder),
     M_has_fibers(dataBidomain.M_has_fibers),
     M_fibers_format(dataBidomain.M_fibers_format),
     M_order_bdf(dataBidomain.M_order_bdf)
