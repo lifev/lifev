@@ -41,6 +41,8 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifesolver/dataElasticStructure.hpp>
 
+#include <boost/array.hpp>
+
 namespace LifeV {
 
 enum Preconditioner
@@ -72,10 +74,10 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef DataNavierStokes                  dataFluid_Type;
+    typedef DataNavierStokes                        dataFluid_Type;
     typedef boost::shared_ptr< dataFluid_Type >     dataFluid_PtrType;
 
-    typedef DataElasticStructure              dataSolid_Type;
+    typedef DataElasticStructure                    dataSolid_Type;
     typedef boost::shared_ptr< dataSolid_Type >     dataSolid_PtrType;
 
     //@}
@@ -230,6 +232,12 @@ public:
      */
     inline Real defaultOmega() const { return M_defaultOmega; }
 
+    //! Get the range of omega for Aitken iterations
+    /*!
+     * @return range of omega for Aitken iterations
+     */
+    inline boost::array< Real, 2 > OmegaRange() const { return M_rangeOmega; }
+
     //! Get update every
     /*!
      * If M_updateEvery == 1, normal fixedPoint algorithm
@@ -313,6 +321,7 @@ private:
 
     // Problem - FixPoint / EJ
     Real                          M_defaultOmega;
+    boost::array< Real, 2 >       M_rangeOmega;
     int                           M_updateEvery;
 
     // Interface

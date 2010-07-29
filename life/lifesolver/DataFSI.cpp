@@ -1,26 +1,47 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+************************************************************************
 
-  <short description here>
+ This file is part of the LifeV Applications.
+ Copyright (C) 2009-2010 EPFL, Politecnico di Milano
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-/** \file DataFSI.cpp
+//@HEADER
 
-*/
-
+/*!
+ *  @file
+ *  @brief DataFSI - File containing a data container for FSI problems
+ *
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 10-06-2010
+ *
+ *  version 1 + rand(0,1), 3 months earlier
+ *  @author Gilles fourestey <gilles.fourestey@epfl.ch>
+ */
 
 #include <life/lifesolver/DataFSI.hpp>
 
-
-namespace LifeV
-{
-
+namespace LifeV {
 
 // ===================================================
 // Constructors
 // ===================================================
-
 DataFSI::DataFSI( ) :
     M_dataFluid                     ( new dataFluid_Type() ),
     M_dataSolid                     ( new dataSolid_Type() ),
@@ -35,6 +56,7 @@ DataFSI::DataFSI( ) :
     M_method                        (),
     M_algorithm                     (),
     M_defaultOmega                  (),
+    M_rangeOmega                    (),
     M_updateEvery                   (),
     M_fluidInterfaceFlag            (),
     M_solidInterfaceFlag            (),
@@ -46,7 +68,6 @@ DataFSI::DataFSI( ) :
     M_RobinNeumannSolidCoefficient  ()
 {
 }
-
 
 DataFSI::DataFSI( const DataFSI& DataFSI ) :
     M_dataFluid                     ( DataFSI.M_dataFluid ),
@@ -62,6 +83,7 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
     M_method                        ( DataFSI.M_method ),
     M_algorithm                     ( DataFSI.M_algorithm ),
     M_defaultOmega                  ( DataFSI.M_defaultOmega ),
+    M_rangeOmega                    ( DataFSI.M_rangeOmega ),
     M_updateEvery                   ( DataFSI.M_updateEvery ),
     M_fluidInterfaceFlag            ( DataFSI.M_fluidInterfaceFlag ),
     M_solidInterfaceFlag            ( DataFSI.M_solidInterfaceFlag ),
@@ -78,8 +100,6 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
 // ===================================================
 // Methods
 // ===================================================
-
-
 DataFSI&
 DataFSI::operator=( const DataFSI& DataFSI )
 {
@@ -98,6 +118,7 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_method                        = DataFSI.M_method;
         M_algorithm                     = DataFSI.M_algorithm;
         M_defaultOmega                  = DataFSI.M_defaultOmega;
+        M_rangeOmega                    = DataFSI.M_rangeOmega;
         M_updateEvery                   = DataFSI.M_updateEvery;
         M_fluidInterfaceFlag            = DataFSI.M_fluidInterfaceFlag;
         M_solidInterfaceFlag            = DataFSI.M_solidInterfaceFlag;
@@ -111,7 +132,6 @@ DataFSI::operator=( const DataFSI& DataFSI )
 
 	return *this;
 }
-
 
 void
 DataFSI::setup( const GetPot& dataFile, const std::string& section )
@@ -136,6 +156,8 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
 
     // Problem - FixPoint / EJ
     M_defaultOmega = dataFile( ( section + "/defOmega" ).data(), 0.001);
+    M_rangeOmega[0] = dataFile( ( section + "/defOmega" ).data(), std::abs( M_defaultOmega )*1024, 0);
+    M_rangeOmega[1] = dataFile( ( section + "/defOmega" ).data(), std::abs( M_defaultOmega )/1024, 1);
     M_updateEvery = dataFile( ( section + "/updateEvery" ).data(), 1);
 
     // Interface
@@ -152,13 +174,11 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
     M_RobinNeumannSolidCoefficient = dataFile( "interface/alphas", 0.5 );
 }
 
-
 bool
 DataFSI::isMonolithic()
 {
     return !( M_method.compare( "monolithic" ) && M_method.compare( "fullMonolithic" ) );
 }
-
 
 void
 DataFSI::showMe( std::ostream& output )
@@ -184,6 +204,7 @@ DataFSI::showMe( std::ostream& output )
     output << "Algorithm                        = " << M_algorithm << std::endl;
 
     output << "Default Omega                    = " << M_defaultOmega << std::endl;
+    output << "Omega range                      = " << "(" << M_rangeOmega[0] << " " << M_rangeOmega[1] << ")" << std::endl;
     output << "Update every                     = " << M_updateEvery << std::endl;
 
     output << "\n*** Values for interface\n\n";
