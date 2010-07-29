@@ -191,7 +191,7 @@ template <typename UsrFct>
 Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
     Real s(0), x, y, z;
-    for ( int ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
         for ( UInt ic = 0;ic < nbcomp;ic++ )
@@ -236,7 +236,7 @@ template <typename VectorType>
 Real elem_L2_diff_2( VectorType & u,
                      boost::function<Real( Real, Real, Real, Real, UInt )> fct,
                      const CurrentFE& fe,
-                     const Dof& dof, const Real t, const int nbcomp )
+                     const Dof& dof, const Real t, const UInt nbcomp )
 {
     // returns the square of the L2 norm of (u-fct) on the current element
     UInt eleID = fe.currentLocalId();
