@@ -1024,7 +1024,7 @@ updateSystem(const double       alpha,
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
-        if ( M_stab && (M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) ) )
+        if ( M_stab && (M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) || M_recomputeMatrix ) )
         {
             M_Displayer.leaderPrint("  F-  Updating the stabilization terms ...     ");
             chrono.start();
