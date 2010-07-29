@@ -55,10 +55,10 @@ namespace LifeV
   void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 	     int iblock = 0, int jblock = 0 );
   void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
-	     int iblock, int jblock, int nb );
+	     int iblock, int jblock, UInt nb );
   //! Mass term with coefficients given for each quadrature point
   void mass( const std::vector<Real>& qpt_coef, ElemMat& elmat, const CurrentFE& fe,
-	     int iblock, int jblock, int nb );
+	     int iblock, int jblock, UInt nb );
 
   void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 	      int iblock = 0, int jblock = 0 );
@@ -414,11 +414,11 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   */
 
   void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
-		  int iblock, int jblock, int nb );
+		  int iblock, int jblock, UInt nb );
 
   //! Idem \c mass_divw \c, but with coefficient given by quadrature node
   void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
-		  int iblock, int jblock, int nb );
+		  int iblock, int jblock, UInt nb );
 
 
   void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const CurrentFE& fe );
