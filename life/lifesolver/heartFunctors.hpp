@@ -202,10 +202,10 @@ public:
         return f;
     }
 
-    Real stim( const Real& x,
+    Real stim( const Real& t,
+               const Real& x,
                const Real& y,
                const Real& z,
-               const Real& t,
                const ID&   id) const
     {
 		Real returnvalue1;
