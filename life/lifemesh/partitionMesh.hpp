@@ -287,13 +287,13 @@ template<typename Mesh>
 partitionMesh<Mesh>::partitionMesh(Mesh &_mesh, Epetra_Comm &_comm,
                                    Epetra_Map* interfaceMap,
                                    Epetra_Map* interfaceMapRep):
-    M_serialMode (false),
     M_nPartitions (1),
-    M_originalMesh (&_mesh),
-    M_locProc (new graph_type),
     M_comm (&_comm),
+    M_originalMesh (&_mesh),
     M_interfaceMap (interfaceMap),
-    M_interfaceMapRep (interfaceMapRep)
+    M_interfaceMapRep (interfaceMapRep),
+    M_locProc (new graph_type),
+    M_serialMode (false)
 {
     mesh_ptrtype newMesh (new Mesh);
     M_mesh.reset(new partmesh_type(M_nPartitions, newMesh));
@@ -795,8 +795,8 @@ void partitionMesh<Mesh>::redistributeElements()
     MPI_Status status;
     int size;
 
-    MPI_Status  recv_status;
-    MPI_Request send_request;
+    // MPI_Status  recv_status;
+    // MPI_Request send_request;
 
     for (int iproc = 0; iproc < nProc; ++iproc)
     {
