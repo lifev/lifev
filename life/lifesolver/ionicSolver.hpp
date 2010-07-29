@@ -289,7 +289,7 @@ void Mitchell_Schaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
 	M_elvec.zero();
 	UInt ig;
 		//! Filling local elvec_w with recovery variable values in the nodes
-		for ( UInt iNode = 0 ; iNode < ( UInt ) IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elvec.vec()[ iNode ] = M_wVecRep[ig];
@@ -458,7 +458,7 @@ void Rogers_McCulloch<Mesh, SolverType>::updateElvec( UInt eleID )
 	M_elvec.zero();
 	UInt ig;
 		//! Filling local elvec_w with recovery variable values in the nodes
-		for ( UInt iNode = 0 ; iNode < ( UInt ) IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elvec.vec()[ iNode ] = M_wVecRep[ig];
@@ -716,7 +716,7 @@ void Luo_Rudy<Mesh, SolverType>::updateElvec( UInt eleID)
 	M_elvec_Iion.zero();
 	UInt ig;
 		//! Filling local elvec with recovery variable values in the nodes
-		for ( UInt iNode = 0 ; iNode < ( UInt ) IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elvec_Iion.vec()[ iNode ] = M_Iion_VecRep[ig];

@@ -476,7 +476,7 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 	//is the interface map between HE (first) and solid (second)
 	if( this->isFluid() )
 	{
-		for (int dim = 0; dim < (int)nDimensions; ++dim)
+		for (UInt dim = 0; dim < nDimensions; ++dim)
 			for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
 				dofInterfaceFluid.push_back(i->second + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
 	}
@@ -503,7 +503,7 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 	if (this->isSolid())
 	{
 		//std::cout << "solid" << std::endl;
-		for (int dim = 0; dim < (int)nDimensions; ++dim)
+		for (UInt dim = 0; dim < nDimensions; ++dim)
 			for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
 					dofInterfaceSolid.push_back(i->second + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
 	}
@@ -760,7 +760,7 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1, vector_type &_ve
 
     typedef std::map<ID, ID>::const_iterator Iterator;
 
-    for (int dim = 0; dim < (int)nDimensions; ++dim)
+    for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
 		{
 //                 std::cout <<  it->second + dim*numTotalDofFluid << " to "
@@ -888,7 +888,7 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1, vector_type& _ve
 
     typedef std::map<ID, ID>::const_iterator Iterator;
 
-    for (int dim = 0; dim < (int)nDimensions; ++dim)
+    for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
 		{
 			_vec2.checkAndSet( it->second + dim*numTotalDofSolid,
@@ -1439,7 +1439,7 @@ FSIOperator::transferMeshMotionOnFluid( const vector_type& _vec1, vector_type& _
 
     typedef std::map<ID, ID>::iterator Iterator;
 
-    for (int dim = 0; dim < (int)nDimensions; ++dim)
+    for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
 //                 std::cout << " doing: for " << it->second << " to " << it->second

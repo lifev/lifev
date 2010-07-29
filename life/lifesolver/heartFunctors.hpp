@@ -282,10 +282,10 @@ public:
                     const double& x,
                     const double& y,
                     const double& z,
-                    const ID& i,
+                    const ID& /*i*/,
                     const EntityFlag& ref)
 	{
-        double pi = acos(-1.0);
+        // double pi = acos(-1.0);
     	Real iapp=0.0;
      	Real x_0= 3.316424,y_0 =  31.496351,z_0 = 5.799850;//APEX, node number: 80185 : 3.316424 31.496351 5.799850
      	if (fmod(t,G_Time_period)<=25)
