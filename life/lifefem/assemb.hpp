@@ -589,7 +589,8 @@ assembleTransposeMatrix( EpetraMatrix<double>& M,
     ElemMat::matrix_type mat(elmat.block( jblock, iblock ));
     mat *= val;
 
-    int i, j, k1, k2;
+    int i, j;
+    UInt k1, k2;
 
     UInt eleID1 = fe1.currentLocalId();
     UInt eleID2 = fe2.currentLocalId();
