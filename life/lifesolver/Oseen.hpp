@@ -1044,7 +1044,7 @@ updateSystem(const double       alpha,
                     M_Displayer.leaderPrint("  F-  Updating the stabilization terms ...     ");
                     chrono.start();
 
-                    if ( M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) )
+                    if ( M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) || M_recomputeMatrix  )
                         {
                             M_matrStab.reset  ( new matrix_type(M_localMap) );
                             M_ipStab.apply( *M_matrStab, betaVec, false );
