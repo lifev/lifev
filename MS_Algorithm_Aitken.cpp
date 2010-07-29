@@ -102,8 +102,10 @@ MS_Algorithm_Aitken::SetupData( const std::string& FileName )
 
     GetPot DataFile( FileName );
 
-    M_generalizedAitken.setDefault( DataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
+    M_generalizedAitken.setDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
     M_generalizedAitken.UseDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
+    M_generalizedAitken.setOmegaMin( DataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.GetDefaultOmegaS()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax( DataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.GetDefaultOmegaS()*1024, 1 ) );
     M_generalizedAitken.setMinimizationType( DataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
     M_method = M_methodMap[ DataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
 }
@@ -127,7 +129,7 @@ MS_Algorithm_Aitken::SubIterate()
 
     M_multiscale->ExportCouplingVariables( *M_couplingVariables );
 
-    M_generalizedAitken.restart( true );
+    M_generalizedAitken.restart();
 
     // Temporary Computation of a Block Vector - Testing purpose
     //VectorType blocksVector( M_couplingVariables ); blocksVector = 0.0;

@@ -161,8 +161,10 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_subiterationsMaximumNumber = DataFile( "fluid/miscellaneous/SubITMax", 0 );
     M_tolerance                  = DataFile( "fluid/miscellaneous/Tolerance", 1.e-6 );
 
-    M_generalizedAitken.setDefault(          DataFile( "fluid/miscellaneous/Omega",         1.e-3 ) );
-    M_generalizedAitken.UseDefaultOmega(     DataFile( "fluid/miscellaneous/fixedOmega",    false ) );
+    M_generalizedAitken.setDefaultOmega(     DataFile( "fluid/miscellaneous/Omega",        1.e-3 ) );
+    M_generalizedAitken.setOmegaMin(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.GetDefaultOmegaS()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.GetDefaultOmegaS()*1024, 1 ) );
+    M_generalizedAitken.UseDefaultOmega(     DataFile( "fluid/miscellaneous/fixedOmega",   false ) );
     M_generalizedAitken.setMinimizationType( DataFile( "fluid/miscellaneous/inverseOmega", true ) );
 
     //Boundary Conditions for the problem
@@ -303,7 +305,7 @@ MS_Model_Fluid3D::SolveSystem()
         if ( M_displayer->isLeader() )
             std::cout << "  F-  Residual:                                " << residual << std::endl;
 
-        M_generalizedAitken.restart( true );
+        M_generalizedAitken.restart();
         for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
         {
             *M_beta += M_generalizedAitken.computeDeltaLambdaScalar( *M_beta, *M_beta - *M_fluid->solution() );
@@ -382,7 +384,7 @@ MS_Model_Fluid3D::SetupLinearData( const std::string& FileName )
 {
 
 #ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearData( ) \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearData( FileName ) \n";
 #endif
 
     // Boundary Conditions for the linear problem
