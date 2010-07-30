@@ -437,7 +437,7 @@ Oseen( const data_type&          dataType,
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
-    M_reuseStab              ( true ),
+    M_reuseStab              ( false ),
     M_resetStab              ( false ),
     M_iterReuseStab          ( -1 ),
     M_ipStab                 ( M_uFESpace.mesh(),
@@ -494,7 +494,7 @@ Oseen( const data_type&          dataType,
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
-    M_reuseStab              ( true ),
+    M_reuseStab              ( false ),
     M_resetStab              ( false ),
     M_iterReuseStab          ( -1 ),
     M_ipStab                 ( M_uFESpace.mesh(),
@@ -550,7 +550,7 @@ Oseen( const data_type&          dataType,
                                                   &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                                   &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap )),
     M_stab                   ( false ),
-    M_reuseStab              ( true ),
+    M_reuseStab              ( false ),
     M_resetStab              ( false ),
     M_iterReuseStab          ( -1 ),
     M_ipStab                 ( M_uFESpace.mesh(),
@@ -601,7 +601,7 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_gammaBeta     = dataFile( "fluid/ipstab/gammaBeta",            0. );
     M_gammaDiv      = dataFile( "fluid/ipstab/gammaDiv",             0. );
     M_gammaPress    = dataFile( "fluid/ipstab/gammaPress",           0. );
-    M_reuseStab     = dataFile( "fluid/ipstab/reuse",               true);
+    M_reuseStab     = dataFile( "fluid/ipstab/reuse",               false);
     M_iterReuseStab = dataFile( "fluid/ipstab/max_iter_reuse", static_cast<int> ( M_linearSolver.MaxIter() * 8./10. ) );
 
     M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v",false); // Energetic stabilization term
@@ -1024,7 +1024,7 @@ updateSystem(const double       alpha,
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
-        if ( M_stab && (M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) || M_recomputeMatrix ) )
+        if ( M_stab && (M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) ) )
         {
             M_Displayer.leaderPrint("  F-  Updating the stabilization terms ...     ");
             chrono.start();
@@ -1044,7 +1044,7 @@ updateSystem(const double       alpha,
                     M_Displayer.leaderPrint("  F-  Updating the stabilization terms ...     ");
                     chrono.start();
 
-                    if ( M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) || M_recomputeMatrix  )
+                    if ( M_resetStab || !M_reuseStab || (M_matrStab.get() == 0) )
                         {
                             M_matrStab.reset  ( new matrix_type(M_localMap) );
                             M_ipStab.apply( *M_matrStab, betaVec, false );
