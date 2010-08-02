@@ -39,9 +39,9 @@ namespace LifeV
 {
 
 /*! \page bc_page Boundary Conditions
-  
+
   \section bc_identifier Conventions
-  
+
   Here we explain what is the convention for the boundary conditions is LifeV.
 
   The main issue is to understand what is the flag that are attributed to the degrees of freedom not located on a vertex. In that case, the flag of the smallest entity including the degree of freedom is used.
@@ -53,13 +53,13 @@ namespace LifeV
   <li> A degree of freedom based on a face (but not on a vertex or an edge) will use the flag of that face.
   <li> ...
   </ol>
-  
+
   The user of the library has then the responsability to define the good flags for each mesh entity. There is no priority for any of the boundary conditions. This is an important issue has it can create buggy behaviours that are difficult to trace back. We provide here an example.
 
   Suppose that we want to keep a fluid inside a cube.
 
   \image html cube.png "The domain"
-  
+
   Then, no penetration boundary conditions have to be imposed on all the sides, otherwise the fluid will escape from the container. No penetration boundary conditions are different depending on the face/edge/vertex that we are considering, as shown on the next picture (for a corner of the cube).
 
    \image html bc_cube_types.png "Boundary conditions to be imposed"
@@ -77,14 +77,14 @@ namespace LifeV
    \image html bc_cube_flags_II_P1.png "A better choice for the flags ..."
 
    \image html bc_cube_flags_II_P2.png "... and the resulting flags for the P2 degrees of freedom"
- 
+
    However, we see on the last picture that there are still two degrees of freedom with the wrong boundary conditions, near the corner. On the front face, we would like the upper "3" to be "1" as the boundary condition for the face should apply. The library cannot guess that it has to take the flag "1"! This is why in this situation, the user has to provide a flag for this edge in the mesh file.
 
    \image html bc_cube_flags_III_P2.png "The correct flag repartition"
 
    <b>Remark</b>: The mesh shown in the previous examples should be avoided, not only because it makes "complicated" boundary conditions for the P2 elements, but also because the tetrahedron in the corner is "locked" if the P1 elements are choosen.
-  
-  
+
+
  */
 
 
@@ -377,11 +377,17 @@ public:
     //! specific BC offset
     void setOffset( std::string const& name, int offset );
 
+    //! merges two different BCHandler (with their offsets) into one
+    void merge( BCHandler& bch );
+
+
     //@}
 
 private:
-    //! number of BC to be stored
 
+    void sumOffsets();
+
+    //! number of BC to be stored
     //! true if the bdUpdate has been done
     bool M_bdUpdateDone;
 

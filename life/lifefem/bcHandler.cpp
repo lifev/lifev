@@ -480,4 +480,21 @@ bool BCHandler::listHasOnlyEssential() const
     return listOnlyEssential;
 }
 
+void BCHandler::merge( BCHandler& bch )
+{
+    sumOffsets();
+    bch.sumOffsets();
+    M_bcList.insert(M_bcList.end(), bch.M_bcList.begin(), bch.M_bcList.end());
+    M_bdUpdateDone = M_bdUpdateDone && bch.M_bdUpdateDone;
+    M_offset = 0;
+}
+
+void BCHandler::sumOffsets()
+{
+    for (std::vector<BCBase>::iterator it = M_bcList.begin(); it != M_bcList.end(); ++it)
+    {
+        it->setOffset(it->offset()+M_offset);
+    }
+}
+
 } // namespace LifeV
