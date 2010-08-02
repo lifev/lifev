@@ -345,7 +345,7 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms).
-
+    matrFull->GlobalAssemble();
     this->M_linearSolver.setMatrix(*matrFull);
     this->M_linearSolver.setReusePreconditioner( M_reusePrecLin );
     this->M_linearSolver.solveSystem( rhsFull, M_linSol, matrFull );
@@ -652,6 +652,10 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                     //source_mass2( this->M_data.density(), M_uk_loc, *M_elmat_du_convective, this->M_uFESpace.fe(), alpha );
 
                     source_press( 1.0, M_uk_loc,*elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe(), (ID) mmFESpace.fe().nbNode);
+
+
+                    if(convectiveTermDerivative)//derivative of the convective term
+                        mass_gradu(this->M_data.density(), M_uk_loc, *elmat_du_convective, this->M_uFESpace.fe());
                       /*
                         std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
                     M_elvec_dp.showMe(std::cout);
@@ -679,7 +683,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
                                                 icomp, jcomp,
                                                 icomp*velTotalDof, offset+jcomp*velTotalDof
                                                 );
-                                if(wImplicit && elmat_du_convective.get())//assembling the derivative of the convective term
+                                if(convectiveTermDerivative)//assembling the derivative of the convective term
                                     assembleMatrix( M_matr,
                                                     *elmat_du_convective,
                                                     this->M_uFESpace.fe(),
