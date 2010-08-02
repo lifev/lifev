@@ -2117,16 +2117,13 @@ void bcFluxManageMatrix( MatrixType&     A,
                    CurrentBdFE&    bdfem,
                    const DataType& /*t*/,
                    UInt            offset )
-
 {
+    if( A.getMatrixPtr()->Filled() )
+        A.openCrsMatrix();
 
-    bool replace=A.getMatrixPtr()->Filled();
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
-    ////offset += BCb.fluxFlag();
-    //    if(!offset)//tricky way to understand if I am in the monolithic case or not.
-    //        offset += BCb.offset();
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
 
@@ -2172,15 +2169,8 @@ void bcFluxManageMatrix( MatrixType&     A,
 
 //                                     std::cout << jdDof + 1 << " " << idDof << " " << sum
 //                                               << " " << b.checkLID(jdDof+1) << std::endl;
-                                    if(replace)
-                                    {
-                                        A.set_mat( idDof - 1, jdDof    , sum );
-                                        A.set_mat( jdDof    , idDof - 1, sum );
-
-                                    }else{
-                                        A.set_mat_inc( idDof - 1, jdDof    , sum );
-                                        A.set_mat_inc( jdDof    , idDof - 1, sum );
-                                    }
+                                    A.set_mat_inc( idDof - 1, jdDof    , sum );
+                                    A.set_mat_inc( jdDof    , idDof - 1, sum );
                                 }
                         }
                 }
