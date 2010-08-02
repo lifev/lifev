@@ -391,12 +391,12 @@ public:
 
 //     void setBC( fluid_bchandler_type& bc_u, solid_bchandler_type& bc_d, fluid_bchandler_type& bc_m );
 
-    void setFluidBC             ( const fluid_bchandler_type& bc_fluid );
+    virtual void setFluidBC     ( const fluid_bchandler_type& bc_fluid );
     void setLinFluidBC          ( const fluid_bchandler_type& bc_dfluid )     { M_BCh_du     = bc_dfluid; }
     void setInvLinFluidBC       ( const fluid_bchandler_type& bc_dfluid_inv ) { M_BCh_du_inv = bc_dfluid_inv; }
     void setHarmonicExtensionBC ( const fluid_bchandler_type& bc_he );
 
-    void setSolidBC             ( const solid_bchandler_type& bc_solid );
+    virtual void setSolidBC     ( const solid_bchandler_type& bc_solid );
     void setLinSolidBC          ( const solid_bchandler_type& bc_dsolid )     { M_BCh_dz     = bc_dsolid; }
     void setInvLinSolidBC       ( const solid_bchandler_type& bc_dsolid_inv ) { M_BCh_dz_inv = bc_dsolid_inv; }
 

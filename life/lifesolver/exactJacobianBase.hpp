@@ -211,7 +211,7 @@ private:
     const Epetra_Map                     M_operatorDomainMap;
     const Epetra_Map                     M_operatorRangeMap;
 
-    Epetra_Comm* M_comm;
+    Epetra_Comm*                         M_comm;
 
 };
 

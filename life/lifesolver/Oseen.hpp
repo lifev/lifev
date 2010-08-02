@@ -384,7 +384,6 @@ protected:
 
     bool                           M_recomputeMatrix;
 
-    //    int                           M_monolithic;
     bool                          M_isDiagonalBlockPrec;
 
   //private:

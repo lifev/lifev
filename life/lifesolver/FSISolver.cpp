@@ -61,7 +61,7 @@ FSISolver::FSISolver( const std::string& method ):
     int  fluidLeader(0);
     int  solidLeader(0);
 
-    if( ( method.compare("monolithic") && method.compare("fullMonolithic") ) )
+    if( ( method.compare("monolithicGE") && method.compare("monolithicGI") ) )
 	{
 		MPI_Group  originGroup, newGroup;
 		MPI_Comm   newComm;

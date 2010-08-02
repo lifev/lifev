@@ -316,7 +316,6 @@ private:
     int                            M_count;
 
     UInt                           M_offset;
-    bool                           M_monolithic;
     Real                            M_rescaleFactor;
 
     //
@@ -476,7 +475,6 @@ VenantKirchhofSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setUpPrec(dataFile, "solid/prec");
 
-    M_monolithic = dataFile("problem/monolithic"   , false );
 }
 
 template <typename Mesh, typename SolverType>
