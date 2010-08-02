@@ -77,6 +77,10 @@ public:
     //! Copies _matrix to a matrix which resides only on the processor "reduceToProc"
     EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc);
 
+    /*! Constructs an EpetraMatrix view of an Epetra_FECrsMatrix. This constructor can be used
+     *  when we need to modify an Epetra_FECrsMatrix using a method of the class EpetraMatrix.
+     */
+    EpetraMatrix( matrix_ptrtype CRSMatrixPtr );
 
     ~EpetraMatrix() {};
 
@@ -189,6 +193,21 @@ public:
     */
     void insertZeroDiagonal(int from = -1, int to = -2);
 
+    //! insert the given value into the diagonal
+    /*! Pay intention that this will add values to the diagonal,
+        so for later added values with set_mat_inc, the one
+        will be added
+        Inserts Value on the local diagonal for diagonal elements specified by the input EpetraMap;
+        This methods works only if matrix is not closed.
+
+        \param entry: the entry that is inserted in the diagonal
+        \param Map: the EpetraMap
+        \param offset: an offset for the insertion of the diagonal entries
+        \param replace: if the matrix is filled and the diagonal entries are present this bool should be set to true.
+        Otherwise is the matrix is not filled it should be set to false.
+    */
+    void insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset = 0 );
+
     //! Compute the norm 1 of the global matrix
     /*!
      * @return norm 1
@@ -201,7 +220,6 @@ public:
      */
     double NormInf() const;
 
-private:
     //! insert the given value into the diagonal
     /*! Pay intention that this will add values to the diagonal,
         so for later added values with set_mat_inc, the one
@@ -212,6 +230,9 @@ private:
 	This methods works only if matrix is not closed.
     */
     void insertValueDiagonal(const DataType& value, int from = -1, int to = -2);
+
+private:
+
 
     //! Shared pointer on an EpetraMap
     boost::shared_ptr< EpetraMap > M_epetraMap;
@@ -275,6 +296,15 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt re
     Epetra_Export reducedExport(M_epetraCrs->Map(), _matrix.M_epetraCrs->Map());
     M_epetraCrs->Import(*_matrix.M_epetraCrs, reducedExport, Add);
 }
+
+template <typename DataType>
+EpetraMatrix<DataType>::EpetraMatrix( matrix_ptrtype CRSMatrixPtr ):
+    M_epetraMap(),
+    M_indexBase(CRSMatrixPtr->Map().IndexBase())
+{
+    M_epetraCrs=CRSMatrixPtr;
+}
+
 
 template <typename DataType>
 EpetraMatrix<DataType>&
@@ -401,6 +431,21 @@ int EpetraMatrix<DataType>::GlobalAssemble()
     return  M_epetraCrs->GlobalAssemble();
 }
 
+//! insert the given value into the diagonal according to a specified EpetraMap
+//! Pay intention that this will add values to the diagonal,
+//! so for later added values with set_mat_inc, the value
+//! will be added
+template <typename DataType>
+void
+EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset )
+{
+    for(UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)//num from 1
+    {
+        set_mat_inc(  offset + Map.getMap(Unique)->GID(i)-1 ,   offset + Map.getMap(Unique)->GID(i)-1, entry);
+    }
+}
+
+
 //! insert the given value into the diagonal
 //! Pay intention that this will add values to the diagonal,
 //! so for later added values with set_mat_inc, the value
@@ -445,6 +490,8 @@ void EpetraMatrix<DataType>::insertOneDiagonal()
 {
     insertValueDiagonal(1.0);
 }
+
+
 
 // Adds zeros into the diagonal to ensure the matrix' graph has a entry there
 // This method does not remove non zero entries in the diagonal.
@@ -507,7 +554,7 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
 
 }
 
-//! set entry (r,r) to coeff and rest of row r to zero
+//! set entry (r,r) to coeff and rest of row r to zero. NB: index r starts from 0
 template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize( UInt const r,
                                           DataType const coeff,
@@ -544,8 +591,6 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 
         DataType coeff_(coeff);
         M_epetraCrs->ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
-
-
     }
 
 }
