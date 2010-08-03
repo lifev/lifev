@@ -180,6 +180,13 @@ public:
 
       void reset();
 
+      void swap(UInt first, UInt second);
+
+      void setComm(const Epetra_Comm& comm);
+
+      const Displayer& displayer(){return M_displayer;}
+
+      void resetP(){M_P.clear();}
 
 protected:
 
@@ -416,19 +423,28 @@ Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
           Z=Y;
       }
   }
-
+  Y.Scale(0.);
   for(UInt k=0; k<M_Summed.size(); ++k)
   {
       if(M_Inverse[M_Summed[k]])
+      {
+          useTranspose = M_P[M_Summed[k]]->UseTranspose (); // storing original status
+          assert (M_P[M_Summed[k]]->SetUseTranspose(M_Transpose[M_Summed[k]]) != -1);
           M_P[M_Summed[k]]->Apply(X,Y);
+          M_P[M_Summed[k]]->SetUseTranspose(useTranspose); // put back to original status
+      }
       else
+      {
+          useTranspose = M_P[M_Summed[k]]->UseTranspose (); // storing original status
+          assert (M_P[M_Summed[k]]->SetUseTranspose(M_Transpose[M_Summed[k]]) != -1);
           M_P[M_Summed[k]]->ApplyInverse(X,Y);
+          M_P[M_Summed[k]]->SetUseTranspose(useTranspose); // put back to original status
+      }
       Z.Update(1., Y, 1.);
   }
 
   Y=Z;
   return(EXIT_SUCCESS);
-
 }
 
 
@@ -532,6 +548,22 @@ double ComposedPreconditioner<Operator>::Condest()  const
     {
       M_P[q].reset();
     }
+  }
+
+template <typename Operator>
+void ComposedPreconditioner<Operator>::swap(UInt first, UInt second)
+{
+    prec_type tmpPrec;
+    tmpPrec = M_P[first];
+    M_P[first] = M_P[second];
+    M_P[second] = tmpPrec;
+}
+
+  template <typename Operator> void
+  ComposedPreconditioner<Operator>::setComm(const Epetra_Comm& comm)
+  {
+      //this->M_comm=comm;//copy of the communicator
+      M_displayer.SetCommunicator(comm);
   }
 
 } // namespace LifeV
