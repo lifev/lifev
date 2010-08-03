@@ -23,8 +23,8 @@ assign is vectorial and the boundary condition is of type \c Full \c.
 #include "life/lifefem/bcHandler.hpp"
 #include "life/lifefem/bcFunction.hpp"
 
-#include "lifemc/lifesolver/Monolithic.hpp"
-#include "lifemc/lifesolver/fullMonolithic.hpp"
+#include "lifemc/lifesolver/MonolithicGE.hpp"
+#include "lifemc/lifesolver/MonolithicGI.hpp"
 
 
 
@@ -58,19 +58,17 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
     BCh_he->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
 
-    if (_oper.data().method() == "monolithic")
+    if (_oper.data().method() == "monolithicGE")
     {
         Debug(10000) << "Monolithic GCE harmonic extension\n";
-        Monolithic *MOper = dynamic_cast<Monolithic *>(&_oper);
+        MonolithicGE *MOper = dynamic_cast<MonolithicGE *>(&_oper);
         MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
                       *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
-    else if (_oper.data().method() == "fullMonolithic")
+    else if (_oper.data().method() == "monolithicGI")
     {
 
-        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
-                      bcf, 3);
     }
 
     return BCh_he;
@@ -81,8 +79,8 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux(bool isOpen=true)
 {
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
-  BCFunctionBase flow_3 (fluxFunction);
-  BCFunctionBase bcf      (fZero);
+    BCFunctionBase flow_3 (fluxFunction);
+    BCFunctionBase bcf      (fZero);
      //uncomment  to use fluxes
 
   //  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
@@ -106,7 +104,7 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, bool c
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
     BCFunctionBase bcf      (fZero);
-    BCFunctionBase in_flow  (/*uInterpolated*/u2/*aortaPhisPress*/);
+    BCFunctionBase in_flow  (/*uInterpolated*/u2normal/*aortaPhisPress*/);
     //    BCFunctionBase out_flow (fZero);
     //BCFunctionBase in_flow  (LumpedHeart::outPressure);
 
@@ -114,7 +112,7 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, bool c
 
 
 //     if(isOpen)
-    BCh_fluid->addBC("InFlow" , INLET,  Natural,   Normal, in_flow);
+    //BCh_fluid->addBC("InFlow" , INLET,  Natural,   Normal, in_flow);
 
     BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
     return BCh_fluid;

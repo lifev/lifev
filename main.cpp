@@ -46,7 +46,7 @@
  *
  * \b Features:
  * This test by default solves the FSI probem discretized in time using the GCE or CE methods, implemented respectively
- in the files Monolithic.hpp and fullMonolithic.hpp . The geometry is that of a tube (benchmark test introduced in \ref GV03).
+ in the files monolithicGE.hpp and monolithicGI.hpp . The geometry is that of a tube (benchmark test introduced in \ref GV03).
  In this test the boundary conditions assigned are of type:
  - flux (defective b.c.) at the inlet
  - absorbing (see \ref BNV08) at the outlet
@@ -69,6 +69,7 @@
 #include <boost/timer.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
+#include <lifemc/lifesolver/MonolithicGI.hpp>
 
 #include <life/lifesolver/DataFSI.hpp>
 
@@ -94,14 +95,10 @@
 #include "flowConditions.hpp"
 #include "lumpedHeart.hpp"
 
-
-
-LifeV::FSIOperator* createFM(){ return new LifeV::fullMonolithic(); }
-LifeV::FSIOperator* createM(){ return new LifeV::Monolithic(); }
-
 class Problem
 {
 public:
+
     typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
     typedef LifeV::FSIOperator::data_Type                          data_Type;
@@ -136,9 +133,6 @@ public:
         M_data->setup( data_file );
         M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
         M_data->showMe();
-
-        FSIFactory::instance().registerProduct( "monolithic", &createM );
-        FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
 
 #ifdef DEBUG
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
@@ -267,10 +261,10 @@ public:
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), ++_i)
         {
             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
-            std::cout<<"flux : "<<flux<<std::endl;
+            //std::cout<<"flux : "<<flux<<std::endl;
             if ( valveIsOpen)
             {
-                if (flux > 0.5)
+                if (false && flux > 0.5)
                 {
                     valveIsOpen=false;
                     M_fsi->setFluxBC(LifeV::BCh_monolithicFlux(valveIsOpen));
@@ -329,10 +323,10 @@ public:
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             try{
-            if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
-                checkCEResult(M_data->dataFluid()->dataTime()->getTime());
-            else
-                checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
+                if(!M_data->method().compare("monolithicGI"))
+                 checkCEResult(M_data->dataFluid()->dataTime()->getTime());
+             else
+                 checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
             }catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
@@ -578,13 +572,12 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
 
-    if(dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->isFullMonolithic())
+    if(!M_data->method().compare("monolithicGI"))
     {
         UniqueVFD.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
-        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, dynamic_cast<LifeV::fullMonolithic*>(M_fsi->FSIOper().get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
+        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
         *initSol+=*UniqueVFD;
     }
-
 
     initSolSVel.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
     initSolSVel->subset(*M_solidVel,M_solidVel->getMap(), (UInt)0, offset);
