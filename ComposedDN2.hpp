@@ -101,7 +101,6 @@ public:
 private:
 
     void replace_precs( matrix_ptrtype& oper, UInt position);
-    //    static bool                                      reg;
 
 };
 
