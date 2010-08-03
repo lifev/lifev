@@ -28,7 +28,17 @@ lib_LTLIBRARIES	= liblifemcsolver.la
 
 liblifemcsolver_la_SOURCES   = BCInterface_FSI.cpp \
                                Monolithic.cpp \
-                               fullMonolithic.cpp \
+                               MonolithicGI.cpp \
+                               MonolithicGE.cpp \
+                               RobinInterface.cpp \
+                               BlockMatrix.cpp \
+                               BlockMatrixRN.cpp \
+                               BlockInterface.cpp \
+                               ComposedBlockOper.cpp \
+                               ComposedDN.cpp \
+                               ComposedDN2.cpp \
+                               ComposedNN.cpp \
+                               ComposedDNND.cpp \
                                MS_Solver.cpp \
                                MS_Algorithm.cpp \
                                MS_Algorithm_Aitken.cpp \
