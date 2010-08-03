@@ -17,14 +17,21 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /**
- * \file Monolithic.hpp
+ * \file monolithic.hpp
  * \author Paolo Crosetto
  * \date 13-09-2008
- * Class handling the monolithic solver for FSI problems. The block structure of the matrix is
- *$\left(\begin{array}{cc}
- *C&B
- *D&N
- *\end{array}\right)$
+ * Class handling the monolithic solver for FSI problems. The block structure of the matrix can be
+ \f$\left(\begin{array}{cc}
+ C&B\\
+ D&N
+ \end{array}\right)\f$
+ if the time discretization at hand is the Geometry-Explicit one (implemented in monolithicGE.hpp), or
+ \f$\left(\begin{array}{ccc}
+ C&B&D\\
+ D&N&0\\
+ 0&I&H
+ \end{array}\right)\f$
+ if the time discretization at hand is the Geometry-Implicit one (implemented in monolithicGI.hpp)
  */
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
@@ -33,11 +40,15 @@
 
 #include <life/lifesolver/FSIOperator.hpp>
 
+#include <life/lifefem/FESpace.hpp>
+
 #include <lifemc/lifealg/IfpackComposedPrec.hpp>
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #ifdef HAVE_TRILINOS_ANASAZI
 #include <lifemc/lifealg/eigenSolver.hpp>
 #endif
+
+#include <lifemc/lifesolver/BlockMatrix.hpp>
 
 #include <EpetraExt_MatrixMatrix.h>
 
@@ -47,22 +58,32 @@
 
 #include <EpetraExt_Reindex_CrsMatrix.h>
 
+
+
+
 //#include <Epetra_IntVector.h>
 
 namespace LifeV
 {
 /**
- * Class handling the monolithic solver for FSI problems. The block structure of the matrix is
- *\f$\left(\begin{array}{cc}
+ * Class handling the monolithic solver for FSI problems. The block structure of the matrix can be
+ \f$\left(\begin{array}{cc}
  C&B\\
  D&N
  \end{array}\right)\f$
- * where \f$N\f$ represents the solid block, \f$C\f$ the fluid block, while the extra
+ if the time discretization at hand is the Geometry-Explicit one (implemented in monolithicGE.hpp), or
+ \f$\left(\begin{array}{ccc}
+ C&B&D\\
+ D&N&0\\
+ 0&I&H
+ \end{array}\right)\f$
+ if the time discretization at hand is the Geometry-Implicit one (implemented in monolithicGI.hpp),
+ * where \f$N\f$ represents the solid block, \f$C\f$ the fluid block, \f$H\f$ the harmonic extension block, while the extra
  * diagonal blocks represent the coupling. The implementation of the stress continuity coupling condition
  * is obtained by means of an augmented formulation.
  * Different possible preconditioners are implemented.
  * The flag semiImplicit in the data file is used to distinguish between the GCE and CE (with quasi Newton) time discretizations.
- * Exact Newton method and fullImplicit time discretization are implemented in the fullMonolithic class.
+ * Exact Newton method and full implicit time discretization are implemented in the MonolithicGI class.
  */
 
 class WRONG_PREC_EXCEPTION;
@@ -72,12 +93,11 @@ class Monolithic : public FSIOperator
 public:
 
 
-    typedef FSIOperator                            super;
+    typedef FSIOperator                                        super;
     typedef FSIOperator::fluid_type::value_type::matrix_type   matrix_type;
-    //typedef IfpackComposedPrec                               prec_raw_type;
-    typedef EpetraPreconditioner                               prec_raw_type;
     typedef boost::shared_ptr<matrix_type>                     matrix_ptrtype;
-    typedef boost::shared_ptr<prec_raw_type>                   prec_type;
+    typedef BlockInterface                                     prec_raw_type;
+    typedef boost::shared_ptr<prec_raw_type>                   prec_ptrtype;
     typedef SolverTrilinos                                     solver_type;
 
 
@@ -204,13 +224,13 @@ public:
 
     //! Returns the wall stress
     //!@note still not fixed in parallel
-    vector_ptrtype getWS( )
-    {
-        return M_wss;
-    }
+//     vector_ptrtype getWS( )
+//     {
+//         return M_wss;
+//     }
 
     //! returns a boost shared pointer to the preconditioner
-    prec_raw_type & getPrec(){return *M_precPtr;}
+    //prec_raw_type & getPrec(){return M_prec.getPrec();}
 
 #ifdef OBSOLETE
     /** get the shape derivatives vector*/
@@ -219,14 +239,15 @@ public:
     //    const boost::shared_ptr<EpetraMap>& monolithicMap() {return M_monolithicMap;}
 
     //!get the total dimension of the FS interface
-    const UInt getDimInterface() const {return nDimensions*M_interface ;}
+    const UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->getInterface();}
 
     //! Returns the solution at the previous time step
     vector_ptrtype const&       un(){return M_un;}
 
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
-    bool const isFullMonolithic(){return M_fullMonolithic;}
+    //bool const isFullMonolithic(){return M_fullMonolithic;}
 
+    //! Returns the offset assigned to the solid block
     UInt const getOffset(){return M_offset;}
 
     //!@}
@@ -256,28 +277,20 @@ public:
        \small The preconditioner type is usually an algebraic additive Schwarz. The following values
        assigned to the field DDBlockPrec in the data file correspond to different variants:
 
-       - DDBlockPrec = 0 is AAS on a the system matrix. Can give problem in parallel, we suggest to use DDBlockPrec = 2 instead
-       - DDBlockPrec = 2 is AAS on a the system matrix, where the system is left-premultiplied times a preconditioner
-       that mix the interface boundary conditions
-       - DDBlockPrec = 3 only for testing purposes
-       - DDBlockPrec = 4 only for testing purposes
-       - DDBlockPrec = 5 no preconditioner is set (if you use the native Aztecoo preconditioners set this option)
+       - DDBlockPrec = AdditiveSchwarz is AAS on a the system matrix
+      Only for the Monolithic Geometry Explicit:
+       - DDBlockPrec = ComposedDN is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = ComposedDN2 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = ComposedNN is AAS on a Neumann-Neumann preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = ComposedDNND is AAS on a Dirichler-Neumamm -- Neumann-Dirichlet preconditioner using the ComposedPreconditioner strategy
 
-       Only for the Monolithic Geometry-Convective Explicit:
-       - DDBlockPrec = 1 is AAS on a Dirichlet-Neumann preconditioner
-       - DDBlockPrec = 7 is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy (buggy when a flux is imposed)
-       - DDBlockPrec = 8 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy (buggy when a flux is imposed)
-
-       Only for the fullMonolithic Convective Explicit (buggy when a flux is imposed):
-       - DDBlockPrec = 6 is AAS on the quasi-newton matrix
+       Only for the Geometry Implicit:
        - DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy
        - DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy
        - DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy, composing
        3 preconditioners
        - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, composing
        3 preconditioners
-       - DDBlockPrec = 13-14 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, In particular these cases correspond to a
-Robin-Neumann preconditioned algorithm. These types of preconditioner are still under testing.
     */
     virtual void   solveJac(vector_type&       _muk,
                             const vector_type& _res,
@@ -299,21 +312,65 @@ Robin-Neumann preconditioned algorithm. These types of preconditioner are still 
                              FSIOperator::solid_type::value_type::Function const& w0,
                              FSIOperator::solid_type::value_type::Function const& df0);
 
-
+    /**
+       \small initialize the mesh displacement
+    */
     virtual void initializeMesh(vector_ptrtype fluid_dispOld);
-    //!@}
-    virtual int  setupBlockPrec(vector_type& rhs);
 
+    /**
+       \small sets the fluid BCHandler and merges it with the flux BCHandler
+    */
+    virtual void setFluidBC     ( const fluid_bchandler_type& bc_fluid )
+    {
+        super::setFluidBC(bc_fluid);
+        bc_fluid->merge(*M_BCh_flux);
+    }
+
+    /**
+       \small sets the solid BCHandler and merges it with the Robin BCHandler
+    */
+    virtual void setSolidBC     ( const fluid_bchandler_type& bc_solid )
+    {
+        super::setSolidBC(bc_solid);
+        bc_solid->merge(*M_BCh_Robin);
+    }
+
+    //!@}
+
+    //! get the solution vector
+    /*!
+      puts the solution vector into the vector sol
+      \param sol: solution vector
+    */
     void getSolution                  (vector_ptrtype& sol){sol = M_un;}
+
+    //! initializes the solution by reference (through a shared_ptr)
+    /*!
+      \param sol: input pointer
+    */
     void setSolutionPtr                     (const vector_ptrtype& sol){initialize(sol);}
+
+    //! initializes the solution by copy
+    /*!
+      \param sol: input vector
+    */
     void setSolution                     (const vector_type& sol){*M_un=sol;}
 
+    //!initializes the solid displacement
+    /*!
+      \param soliddisp: input vector
+    */
     void getSolidDisp(vector_type& soliddisp)
     {
         soliddisp.subset(*un(), M_offset);
         soliddisp *= dataFluid().dataTime()->getTimeStep()*M_solid->rescaleFactor();
     }
 
+    //! get the solid velocity
+    /*!
+      the solid velocity is plaecd in the vector solidvel
+      \param solidvel: output solid velocity
+     */
     void getSolidVel(vector_type& solidvel)
     {
         solidvel.subset(M_solid->vel(), M_offset);
@@ -327,33 +384,17 @@ Robin-Neumann preconditioned algorithm. These types of preconditioner are still 
 
 protected:
 
+
     //!@name Protected methods
     //!@{
-    //!@name Templated methods
-    //!@{
-    template <typename SolverType, typename PrecOperatorPtr>
+
+    //! pure virtual: creates the operator (either of type MonolithicGI or MonolithicGE)
+    virtual void createOperator( std::string& operType )=0;
+
     /**
        \small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
     */
-    void iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
-    //!@}
-
-    /**
-       \small adds a constant scalar entry to a diagonal block of a matrix
-       \param entry: entry
-       \param matrix: matrix
-       \param Map: standard map specifying the location where to add diagonal entries
-       \param offset: offset from which starts the insertion
-       \param replace=false: flag stating wether the diagonal elements already exist or have to be inserted in the map
-    */
-    void addDiagonalEntries(Real entry, matrix_ptrtype matrix, std::map<ID, ID> const& Map, UInt offset=0, bool replace=false);
-
-    /**
-       \small builds the coupling matrix.
-       \param bigMatrix: the coupling matrix to be built
-       \param couplingSolid: if false the solid coupling part is neglected in the matrix
-    */
-    virtual void couplingMatrix(matrix_ptrtype & bigMatrix, int couplingSolid = 31);
+    void iterateMonolithic(const vector_type& rhs, vector_type& step);
 
     /**
        \small adds the part due to coupling to the rhs
@@ -362,30 +403,6 @@ protected:
     */
     void couplingRhs( vector_ptrtype rhs , vector_ptrtype un );
 
-    /**
-       \small builds the matrix [1,0,0,0;0,1,0,alphaf;0,0,1,0;0,alphas,0,1] to IdentityMatrix. This matrix is intended to be a preconditioner and has not been tested yet.
-       \param IdentityMatrix: a matrix, if it is an identity the method builds the Robin-Robin linear combination of boundary conditions
-       \param alphaf: coefficient
-       \param alphas: coefficient
-       \param inverse if true the inverse of the linear combination is computed. the output matrix is [];
-    */
-    void robinCoupling(matrix_ptrtype& IdentityMatrix, const Real& alphaf, const Real& alphas, int coupling = 4);
-
-
-    /**
-       \small Method to replace a block in the matrix with a zero block. It is inefficient and works only serially. It is implemented only for testing different preconditioners.
-    */
-    void zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration , const std::map<ID, ID>& map, UInt rowOffset=0, UInt colOffset=0);
-
-    /**\small evaluates the nonlinear residual
-       \param bcFluid: fluid BCHandler
-       \param bcSolid: solid BCHandler
-       \param sol: solution vector
-       \param rhs: right-hand side
-       \param res: the output residual
-       \param diagonalScaling: flag stating wether to perform diagonal scaling
-    */
-    void evalResidual(fluid_bchandler_raw_type & bcFluid, solid_bchandler_raw_type & bcSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling=false);
 
     /**\small evaluates the linear residual
        \param sol: solution vector
@@ -395,27 +412,11 @@ protected:
     */
     void evalResidual( const vector_type& sol, const vector_ptrtype& rhs,  vector_type& res, bool diagonalScaling=false);
 
-    /**\small evaluates the nonlinear residual
-       \param bcFluid: fluid BCHandler
-       \param bcSolid: solid BCHandler
-       \param sol: solution vector
-       \param rhs: right-hand side
-       \param res: the output residual
-       \param diagonalScaling: flag stating wether to perform diagonal scaling
-       \param prec: preconditioner P, the final residual will be r=PAx-Pb
-    */
-    void evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling, matrix_ptrtype preconditioner);
-
     //!\small says if the preconditioner will be recomputed
     bool recomputePrec(){return(!M_reusePrec || M_resetPrec);}
+
     //!\small left-multiply both the monolithic matrix and the rhs times a preconditioner matrix
     void applyPreconditioner(matrix_ptrtype robinCoupling, vector_type& rhs);
-    //!\small left-multiply the monolithic matrix, the rhs and the preconditioner times a preconditioner matrix
-    void applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype& prec );
-    //void setAztecooPreconditioner(const GetPot& dataFile, const std::string& section){M_linearSolver->setAztecooPreconditioner( dataFile, section);}
-
-    //!\small adds the constant part to the monolithic matrix
-    void updateMatrix(matrix_type & bigMatrixStokes);
 
     //!\small updates the rhs of the solid block.
     void updateSolidSystem(vector_ptrtype& rhsFluidCoupling);
@@ -429,69 +430,60 @@ protected:
 
     void couplingVariableExtrap(vector_ptrtype& /*lambda*/, vector_ptrtype& /*lambdaDot*/, bool& /*firstIter*/)
     { }
-    //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
-    void solidInit(std::string const& dOrder);
 
-	//void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
+    void solidInit(std::string const& dOrder);
 
     void variablesInit(std::string const& dOrder);
 
-    //!@}
+        //!@}
     //!@name protected setters
     //!@{
 #ifdef OBSOLETE
     void setOperator(Epetra_Operator& epetraOperator){M_linearSolver->setOperator(epetraOperator);}
 #endif
 
-    //!\small inserts the input matrix in the linear solver
-    void setMatrix(matrix_type& matr){M_linearSolver->setMatrix(matr);}
-
     void setFluxBC             (fluid_bchandler_type bc_fluid);
 
     void setRobinBC             (fluid_bchandler_type bc_solid);
+
+    void fillFactorDiagonal();
     //!@}
 
     //!@name protected getters
     //!@{
     const fluid_bchandler_type& BCh_flux()                      const { return M_BCh_flux; }
+
+    virtual void assembleFluidBlock(UInt iter);
     //!@}
 
 
     //!@name Protected attributes
     //@{
     boost::shared_ptr<EpetraMap>                      M_monolithicMap;
-    matrix_ptrtype                                    M_couplingMatrix;
-    UInt                                              M_interface;
-    EpetraMap                                         M_interfaceMap;///the solid interface map
-    EpetraMap                                         M_monolithicInterfaceMap;
+    boost::shared_ptr< EpetraMap >                    M_interfaceMap;///the solid interface map
     boost::shared_ptr<vector_type>                    M_beta;
-    matrix_ptrtype                                    M_monolithicMatrix;
-    matrix_ptrtype                                    M_precMatrPtr;
-    prec_type                                         M_precPtr;
+    boost::shared_ptr<BlockMatrix >                   M_monolithicMatrix;
+    //matrix_ptrtype                                    M_precMatrPtr;
+    prec_ptrtype                                      M_precPtr;
     boost::shared_ptr<vector_type>                    M_rhsFull;
 
     fluid_bchandler_type                              M_BCh_flux;
     solid_bchandler_type                              M_BCh_Robin;
     UInt                                              M_fluxes;
     solid_bchandler_type                              M_BChWSS;
-    matrix_ptrtype                                    M_bdMass;
     BCFunctionMixte                                   M_bcfWss;
-    matrix_ptrtype                                    M_robinCoupling;
-    //    matrix_ptrtype                                    M_robinCouplingInv;
+    //    matrix_ptrtype                                    M_robinCoupling;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
-    IfpackComposedPrec::operator_type                 M_solidOper;
-    IfpackComposedPrec::operator_type                 M_fluidOper;
-    IfpackComposedPrec::operator_type                 M_meshOper;
     matrix_ptrtype                                    M_fluidBlock;
     matrix_ptrtype                                    M_solidBlock;
     matrix_ptrtype                                    M_solidBlockPrec;
-    matrix_ptrtype                                    M_meshBlock;
+    matrix_ptrtype                                    M_robinCoupling; //uninitialized if not needed
     boost::shared_ptr<solver_type>                    M_linearSolver;
-    vector_ptrtype                                    M_wss;
-    Teuchos::ParameterList                            M_listFluid;
-    Teuchos::ParameterList                            M_listSolid;
-    //!}
+    boost::shared_ptr<vector_type>                    M_numerationInterface;
+    std::vector<fluid_bchandler_type>                 M_BChs;
+    std::vector<boost::shared_ptr<FESpace<mesh_type, EpetraMap> > >          M_FESpaces;
+
 private:
     //!@name Private methods
     //!@{
@@ -500,64 +492,26 @@ private:
     //!@name Private attributes
     //!@{
     boost::shared_ptr<ComposedPreconditioner<Epetra_Operator> > M_PAAP;
-    //UInt                                              M_updateEvery;
-    boost::shared_ptr<vector_type>                    M_numerationInterface;
 #ifdef OBSOLETE
     boost::shared_ptr<vector_type>                    M_rhsShapeDerivatives;
 #endif
-    boost::shared_ptr<vector_type>                    M_rhsNew;
-    bool                                              M_fullMonolithic;
-    //! perturbation value added to a diagonal zero block in the preconditioner
-    Real                                              M_entry;
     bool                                              M_diagonalScale;
-    bool                                              M_reusePrec;
-    bool                                              M_resetPrec;
-    UInt                                              M_maxIterSolver;
+protected:
+    //!}
+    bool                                              M_reusePrec;// to move to private
+    bool                                              M_resetPrec;// to move to private
+    UInt                                              M_maxIterSolver;// to move to private
+
+private:
     bool                                              M_restarts;
-    matrix_ptrtype                                    M_RNcoupling;//used only when robinNeumannCoupling==true
-    matrix_ptrtype                                    M_couplingSolid1;//used only when DDBlockPrec==14
-    matrix_ptrtype                                    M_couplingFluid1;//used only when DDBlockPrec==14
-    matrix_ptrtype                                    M_couplingSolid2;//used only when DDBlockPrec==14
-    matrix_ptrtype                                    M_couplingFluid2;//used only when DDBlockPrec==14
-    boost::shared_ptr<ComposedPreconditioner<Epetra_Operator> > M_CompPrec;
-    //!@}
+    static bool                                       reg;
 };
-
-
-template <typename SolverType, typename PrecOperatorPtr>
-void Monolithic::
-iterateMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
-{
-    M_solid->getDisplayer().leaderPrint("  M-  Preconditioner type:                     ", M_data->DDBlockPreconditioner(), "\n" );
-    Chrono chrono;
-
-    M_monolithicMatrix->GlobalAssemble();
-    //necessary if we did not imposed Dirichlet b.c.
-    M_linearSolver->setMatrix(*M_monolithicMatrix);
-
-    M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
-    int numIter = M_linearSolver->solveSystem( rhs, step, boost::static_pointer_cast< Epetra_Operator >(prec) );
-    //int numIter = M_linearSolver->solveSystem( *const_cast<const vector_type*>(&rhs), step,  );
-
-    if (numIter < 0)
-        {
-            chrono.start();
-
-            M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
-
-            if (numIter <= -M_maxIterSolver)
-                M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
-        }
-
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian system solved                   \n");
-}
 
 class WRONG_PREC_EXCEPTION{
 public:
     WRONG_PREC_EXCEPTION(){}
     virtual ~WRONG_PREC_EXCEPTION(){}
 };
-
 
 }
 #endif
