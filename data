@@ -1,16 +1,28 @@
-# -*- getpot -*- (GetPot mode activation for emacs)
+1# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for CE FSI Solver
 #-------------------------------------------------
 
 [problem]
 
-method     = monolithic # monolithic, fullMonolithic
-precond    = 0 #for Steklov-Poincare:
-               #     0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
-               #for Monolithic:
-               #     0: full matrix passed to IFPACK, 1: block-diagonal passed to IFPACK
-DDNprecond = 1 # precond for DD-newton, 0 = lin fluid, 1 lin structure, 2 = both
+blockOper   = AdditiveSchwarz
+# OPTIONS:
+#AdditiveSchwarz
+#AdditiveSchwarzRN
+
+DDBlockPrec = ComposedDN
+# OPTIONS:
+#AdditiveSchwarz: monolithic A-S preconditioner,
+#ComposedDN
+#ComposedDN2
+#ComposedNN
+#ComposedDNND
+
+#initSol     = 00002
+#initSolPrev = 00001
+#Tstart      = 0.002;
+
+method     = monolithicGE # monolithicGE, monolithicGI
 
 reducedFluid = 0 # 0 = exact, 1 = inexact
 defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
@@ -31,31 +43,37 @@ restart    = 0
 maxSubIter = 20
 
 
+
 [exporter]
 multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
 type       = hdf5
 nRestart   = 0
+
 [./fluid]
 filename   = fluid
 [../solid]
 filename   = solid
-[../]
+[../] # fluid
+[../] # exporter
 
-[importer]
+[./importer]
 type       = hdf5
 [./fluid]
 filename   = fluid
 [../solid]
 filename   = solid
-[../]
+[../] # solid
+# [../] # importer
+
 
 [fluid]
+
 useShapeDerivatives           = false
+semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 
 [./physics]
 density   = 1.0               # density
@@ -85,30 +103,20 @@ gammaBeta  = 1
 gammaDiv   = 0.2
 gammaPress = 0.05
 reuse = true
+[../] # physics
+[../] # fluid
 
-
-[interface] # mesh dependent flags for the interface.
-DDBlockPrec = 7
-#0: monolithic D-N system,
-#1: segregated D-N , works only in the semiImplicit case
-#2: monolithic  R-N system (equivalent to 0)
-#3: segregated R-N (not working well)
-#4: segregated R-N (not working well)
-#5: AztecOO preconditioner (or direct parallel solver, in the future updates)
-#6: Preconditioner J_QN (block G-S) for the Newton system. It works only with fullMonolithic.
-#7: Preconditioner for the Monolithic case (not fullMonolithic): modular block G-S + A.S.
-#8: Preconditioner for the Monolithic case (not fullMonolithic): modular block G-S + A.S.
+[./interface] # mesh dependent flags for the interface.
+DDBlockPrec = 11
+#6: Preconditioner for the fullMonolithic (not Monolithic): blockG-S
 #9: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
 #10: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
 #11: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
 #12: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
-#13: Preconditioner for the Monolithic case (not fullMonolithic): sum of 2 modular block G-S + A.S preconditioners.
-#14: Preconditioner for the Monolithic case (not fullMonolithic): sum of 2 modular block G-S + A.S preconditioners.
 
 fluid_flag      =  1 # default: 1
-alphaf = 0.
-alphas = 0.1 # parameters for Robin-Robin DDBlock preconditioner
 tolerance       =  0 # how far points are to be considered the same on the interface
+[../] # interface
 
 [solid]
 
@@ -140,7 +148,10 @@ abstol  = 1.e-8
 linesearch = 0
 
 
-[../solver]
+
+[linear_system]
+
+[./solver]
 output          = all # none
 max_iter        = 200
 poly_ord        = 5
@@ -162,7 +173,7 @@ rthresh            = 1.e-3
 reuse              = 1
 displayList        = false
 
-[../]
+[../] # aztecoo
 
 [../prec]
 reuse           = false
@@ -171,10 +182,14 @@ rescale_factor = 1. # solid matrix rescale factor
 displayList     = false
 entry           = 0.
 
-[./ifpack] # if Ifpack
+[./robin]
+alphaf = 0.
+alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+
+
+[../ifpack] # if Ifpack
 prectype        = Amesos
 overlap         = 2
-
 
 [./fact]
 level-of-fill                 = 10
@@ -192,7 +207,7 @@ overlap = 2
 reordering_type = none #metis, rcm, none
 flter_singletons = true
 
-[../]
+[../] # ifpack
 
 [../ML] #if ML
 default_parameter_list = DD    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
@@ -203,7 +218,7 @@ displayList		= false
 type = IFPACK
 
 [../] # end if ML
-
+[../] # prec
 # end of preconditioner part
 
 [mesh_motion]
@@ -237,6 +252,8 @@ relax_value                   = 0
 [../amesos]
 solvertype = Amesos_Umfpack
 
+[../] # ifpack
+[../] # prec
 
 [jacobian]
 
