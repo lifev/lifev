@@ -65,8 +65,8 @@ public:
     typedef ComposedPreconditioner<Ifpack_Preconditioner>    prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>      prec_type;
 
-    typedef super::operator_raw_type             operator_raw_type;
-    typedef super::operator_type                 operator_type;
+    typedef super::operator_raw_type              operator_raw_type;
+    typedef boost::shared_ptr<operator_raw_type>  operator_type;
     //@}
 
 
@@ -99,6 +99,8 @@ public:
 
     super::prec_raw_type*  getPrec();
 
+    UInt getNumber() const {return M_Prec->getNumber();}
+
     boost::shared_ptr<Epetra_Operator>  getPrecPtr(){return M_Prec;}
 
     std::string            precType(){return M_precType;}
@@ -114,7 +116,7 @@ public:
 
     //! Build a preconditioner based on A and replace it in the composedPreconditioner.
     int                    replace            (operator_type& A,
-                                               UInt const& index,
+                                               const UInt index,
                                                const bool useInverse=false,
                                                const bool useTranspose=false);
 

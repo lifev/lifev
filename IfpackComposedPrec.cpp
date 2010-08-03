@@ -38,7 +38,7 @@ namespace LifeV
 
 IfpackComposedPrec::IfpackComposedPrec(const Epetra_Comm* comm):
   super (comm),
-  M_Prec(),
+  M_Prec(new prec_raw_type()),
   M_OperVector(0),
   M_precType()
 {
@@ -50,7 +50,7 @@ IfpackComposedPrec::IfpackComposedPrec(IfpackComposedPrec& P):
     M_OperVector(P.getOperVector()),
     M_precType(P.precType())
 {
-    //    *M_Prec=*P.getPrecPrec();
+    //    *M_Prec=*P.getPrec();
 }
 IfpackComposedPrec::~IfpackComposedPrec()
 {}
@@ -58,12 +58,11 @@ IfpackComposedPrec::~IfpackComposedPrec()
 
 void
 IfpackComposedPrec::setDataFromGetPot( const GetPot& dataFile,
-                                         const std::string& section )
+                                       const std::string& section )
 {
 
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
-
     createIfpackList(dataFile, section, this->M_List);
 
     M_overlapLevel = this->M_List.get("overlap level", -1);
@@ -118,6 +117,8 @@ IfpackComposedPrec::push_back(operator_type& oper,
                               const bool useInverse,
                               const bool useTranspose)
 {
+    if(!M_Prec.get())
+        M_Prec.reset(new prec_raw_type());
     M_OperVector.push_back(oper);
     Chrono chrono;
     prec_raw_type::prec_type prec;
@@ -134,7 +135,7 @@ IfpackComposedPrec::push_back(operator_type& oper,
 
 int
 IfpackComposedPrec::replace(operator_type& oper,
-                            UInt const& index,
+                            const UInt index,
                             const bool useInverse,
                             const bool useTranspose)
 {
