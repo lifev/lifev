@@ -73,10 +73,11 @@ public:
         super(),
         M_globalMatrix(),
         M_coupling(),
+        M_interfaceMap(),
+        M_interface(0),
         M_couplingFlag(coupling),
         M_recompute(),
-        M_numerationInterface(),
-        M_interface(0)
+        M_numerationInterface()
     {}
 
     ~BlockMatrix(){}

@@ -109,7 +109,7 @@ public:
     //! sets the data relative to Robin (e.g. the coefficients \f$\alpha_f\f$ and \f$\alpha_s\f$).
     void setDataFromGetPot( const GetPot& data, const std::string& section );
 
-    //! sets the matrix where the Robin contribution will be assembled (which have to passed from outside) and the \
+    //! sets the matrix where the Robin contribution will be assembled (which have to passed from outside) and the
     /*! right hand side vector of the linear system, which will be updated with the Robin part.
      */
     void setRobin( matrix_ptrtype& matrix, vector_ptrtype& vec ){setRobinMatrix( matrix ); setRobinRhs( vec );}
