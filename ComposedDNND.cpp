@@ -65,22 +65,17 @@ void ComposedDNND::coupler(map_shared_ptrtype map,
         M_FESpace.push_back(M_FESpace[k]);
         M_offset.push_back(M_offset[k]);
         M_recompute.push_back(M_recompute[k]);
-        //M_FESpace[k+2]=M_FESpace[k];
     }
 
 
 
     matrix_ptrtype coupling(new matrix_type(*map));
     UInt one(1.);
-//     EpetraMap fluidPressureMap(*M_uMap);
-//     fluidPressureMap += *M_pMap;
-//     if(M_multipliers)
-//         fluidPressureMap += M_multipliers;
 
     coupling.reset(new matrix_type(*map, 0));
     coupling->insertValueDiagonal( one, tmpFESpace[0]->map() , M_offset[0] );
     coupling->insertValueDiagonal(one, fluidSolid, totalDofs);
-    couplingMatrix(coupling, 4, tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 4.);
+    couplingMatrix(coupling, 4, tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 1./**/);
     couplingMatrix(coupling, 2, tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
     coupling->GlobalAssemble();
     M_coupling.push_back(coupling);
@@ -103,7 +98,7 @@ void ComposedDNND::coupler(map_shared_ptrtype map,
     coupling->insertValueDiagonal( one,  M_offset[1]+1, M_offset[0]+1 );
     coupling->insertValueDiagonal( -1, fluidSolid, totalDofs );
     couplingMatrix( coupling, 8,  tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 2. );
-    couplingMatrix( coupling, 1,  tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 4. );
+    couplingMatrix( coupling, 1,  tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 1./**/ );
     coupling->GlobalAssemble();
     M_coupling.push_back( coupling );
 

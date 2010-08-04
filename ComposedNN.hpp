@@ -49,6 +49,8 @@ namespace LifeV {
     given the matrix \f$A=A_1A_2+A_3A_4\approx P_1P_2+P_3P_4\f$ then we compute the preconditioner
     \f$P^1=P_4^{-1}P_3^{-1}+P_2^{-1}P_1^{-1}\f$.
     In particular in this case we use for \f$A_1\f$ and \f$A_2\f$ Dirichlet problems, for \f$A_3\f$ and \f$A_4\f$ Neumann problems.
+
+    Notice that if \f$P^{-1}=(2A)^{-1}+(2A)^{-1}=A^{-1}\f$. Thus the factors that we push_back in the preconditioners should be as close as possible to \f$2A\f$
  */
 class ComposedNN: public ComposedBlockOper
 {
@@ -86,6 +88,16 @@ public:
      */
     virtual int   solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver);
 
+
+
+    //!Applies the correspondent boundary conditions to every block
+    /*!
+      note that this method must be called after blockAssembling(), that sums the coupling conditions to the blocks. For
+      this type of preconditioners this method is overloaded. In fact in the diagonalization for the essential boundary
+      conditions the value replaced on the diagonal must be 2 instead of 1.
+      \param time: time
+     */
+    void applyBoundaryConditions(const Real& time, const UInt i);
 
     //! Computes the coupling
     /*!

@@ -32,8 +32,8 @@
     @date 02 Jul 2010
 
      File containing a calss for composed preconditioner of the following type:
-    given the matrix \f$A=2A_12A_2+2A_32A_4\approx 2P_12P_2+2P_32P_4\f$ then we compute the preconditioner
-    \f$P^{-1}=\frac12P_4^{-1}\frac12P_3^{-1}+\frac12P_2^{-1}\frac12P_1^{-1}\f$.
+    given the matrix \f$A=A_1A_2+A_3A_4f$, \f$A^{-1}\approxA_1^{-1}A_2^{-1}+A_3^{-1}A_4^{-1}\approx P_1^{-1}P_2^{-1}+P_3^{-1}P_4^{-1}\f$ then we compute the preconditioner
+    \f$P^{-1}=_4^{-1}P_3^{-1}+P_2^{-1}P_1^{-1}\f$.
  */
 
 #ifndef COMPOSEDDNND_H
@@ -49,8 +49,8 @@ namespace LifeV {
     @author Paolo Crosetto
 
     Class implementing a composed preconditioner of the following type:
-    given the matrix \f$A= \frac12A_1 \frac12A_2+ \frac12A_3 \frac12A_4\approx  \frac12P_1 \frac12P_2+ \frac12P_3 \frac12P_4\f$ then we compute the preconditioner
-    \f$P^1=2P_4^{-1}2P_3^{-1}+2P_2^{-1}2P_1^{-1}\f$.
+    given the matrix \f$A= A_1 A_2+ A_3 A_4\approx  P_1 P_2+ P_3 P_4\f$ then we compute the preconditioner
+    \f$P^{-1}=P_4^{-1}P_3^{-1}+P_2^{-1}P_1^{-1}\f$.
     In particular in this case we use for \f$A_1\f$ and \f$A_4\f$ Dirichlet problems, for \f$A_2\f$ and \f$A_3\f$ Neumann problems. The form of the decomposition is the following:
 \f$
 A=A_{(1)}+A_{(2)}
@@ -66,7 +66,7 @@ A=A_{(1)}+A_{(2)}
 \left(
 \begin{array}{ccc}
 2C& 0 & 0\\
-0 &\frac12N&0\\
+0 &2N&0\\
 \tilde\Delta_1&\tilde\Delta_2&-I
 \end{array}
 \right).
@@ -78,15 +78,15 @@ A_{(1)}
 =
 \left(
 \begin{array}{ccc}
- \frac12C& 0 & \mathcal I\\
+ 2C& 0 & \mathcal I\\
 0 &I&0\\
-\frac12\tilde\Delta_1&0&0
+2\tilde\Delta_1&0&0
 \end{array}
 \right)
 \left(
 \begin{array}{ccc}
 I& 0 & 0 \\
-0 &\frac12 N&\frac12\mathcal I\\
+0 &2 N&2\mathcal I\\
 0&0&I
 \end{array}
 \right)
@@ -97,15 +97,15 @@ A_{(2)}
 =
 \left(
 \begin{array}{ccc}
- \frac12C& 0 & 0\\
+ 2C& 0 & 0\\
 0 &I&0\\
-\frac12\tilde\Delta_1&0&I
+2\tilde\Delta_1&0&I
 \end{array}
 \right)
 \left(
 \begin{array}{ccc}
 I& 0 & 0 \\
-0 &\frac12 N&\frac12\mathcal I\\
+0 &2 N&2\mathcal I\\
 0&\tilde\Delta_2&0
 \end{array}
 \right).
