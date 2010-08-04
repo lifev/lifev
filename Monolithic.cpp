@@ -331,7 +331,7 @@ Monolithic::evalResidual( vector_type&       res,
         M_monolithicMatrix->applyBoundaryConditions(dataFluid().dataTime()->getTime(), M_rhsFull);
 
         M_monolithicMatrix->GlobalAssemble();
-        M_monolithicMatrix->getMatrix()->spy("M");
+        //M_monolithicMatrix->getMatrix()->spy("M");
 
         //NOTE: M_monolithic->GlobalAssemble has to be called before M_precPtr->blockAssembling(), because they hold
         //shared pointers to the same blocks
