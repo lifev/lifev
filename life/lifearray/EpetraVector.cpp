@@ -425,6 +425,38 @@ EpetraVector::Dot( const EpetraVector& vector, data_type& scalarProduct )
     M_epetraVector->Dot( vector.getEpetraVector(), &scalarProduct );
 }
 
+
+
+void EpetraVector::matrixMarket( std::string const &filename, const bool headers ) const
+{
+    // Purpose: Matlab dumping and spy
+    std::string nome = filename;
+    std::string desc = "Created by LifeV";
+
+    int  me    = M_epetraVector->Comm().MyPID();
+
+    if (M_maptype == Repeated)
+    {
+        EpetraVector unique(*this, Unique, Zero);
+        unique.spy(filename);
+        return;
+    }
+
+    // check on the file name
+    // std::ostringstream myStream;
+    // myStream << me;
+
+    nome = filename + ".mtx";
+
+    EpetraExt::MultiVectorToMatrixMarketFile(nome.c_str(),
+                                             *M_epetraVector,
+                                             nome.c_str(),
+                                             desc.c_str(),
+                                             headers
+                                             );
+}
+
+
 void EpetraVector::spy( std::string const &filename ) const
 {
     // Purpose: Matlab dumping and spy
@@ -446,6 +478,7 @@ void EpetraVector::spy( std::string const &filename ) const
 
     EpetraExt::MultiVectorToMatlabFile(nome.c_str(), *M_epetraVector);
 }
+
 
 void EpetraVector::ShowMe( std::ostream& output ) const
 {

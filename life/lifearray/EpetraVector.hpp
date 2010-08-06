@@ -213,6 +213,8 @@ public:
      *
      * To read the file in Matlab type load filename;
      */
+    void matrixMarket( std::string const &filename, const bool headers = true ) const;
+
     void spy( std::string const &filename ) const;
 
     void ShowMe( std::ostream& output = std::cout ) const;

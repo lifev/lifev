@@ -161,6 +161,15 @@ public:
 
     void set_mat_inc( UInt row, UInt col, DataType loc_val );
 
+
+
+    /*! Save the matrix into a MatrixMarket (.mtx) file
+     *  @param filename file where the matrix will be saved
+     *  @param headers boolean to write the MM headers or not
+     */
+
+    void matrixMarket( std::string const &filename, const bool headers = true );
+
     /*! Save the matrix into a Matlab (.m) file
      *  @param filename file where the matrix will be saved
      */
@@ -909,6 +918,33 @@ int EpetraMatrix<DataType>::getMeanNumEntries() const
     if ( meanNumEntries < minEntries || meanNumEntries > 2*minEntries )
         return minEntries;
     return meanNumEntries;
+}
+
+
+template <typename DataType>
+void EpetraMatrix<DataType>::matrixMarket( std::string const &filename, const bool headers)
+{
+    // Purpose: Matlab dumping and spy
+    std::string nome = filename;
+    std::string desc = "Created by LifeV";
+
+    //int  me    = M_epetraCrs->Comm().MyPID();
+
+    //
+    // check on the file name
+    //
+
+    // std::ostringstream myStream;
+    // myStream << me;
+
+    nome = filename + ".mtx";
+
+    EpetraExt::RowMatrixToMatrixMarketFile( nome.c_str(),
+                                            *M_epetraCrs,
+                                            nome.c_str(),
+                                            desc.c_str(),
+                                            headers
+                                            );
 }
 
 template <typename DataType>
