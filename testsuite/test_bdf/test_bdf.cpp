@@ -169,8 +169,10 @@ void test_bdf::run() {
 	//=============================================================================
 	//Mesh stuff
 	Members->comm->Barrier();
-	DataMesh<RegionMesh> dataMesh(dataFile, ("bdf/" + discretization_section).c_str());
-	partitionMesh<RegionMesh> meshPart(*dataMesh.mesh().get(), *Members->comm);
+	DataMesh dataMesh(dataFile, ("bdf/" + discretization_section).c_str());
+	RegionMesh mesh;
+	readMesh(mesh,dataMesh);
+	partitionMesh<RegionMesh> meshPart(mesh, *Members->comm);
 
 	//=============================================================================
 	//finite element space of the solution
