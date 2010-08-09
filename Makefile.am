@@ -57,17 +57,16 @@ apidox-all:
 	make apidox
 
 all-local:
-	make apidox-all
 	@echo ""
 	@echo "************************************************************"
 	@echo "* LifeV compilation has ended."
 	@echo "*"
-	@echo "* LifeV API documentation has been generated in doc/api/"
-	@echo "* Open your browser at doc/api/html/index.html."
-	@echo "*"
+	@echo "* To generate LifeV API documentation type make apidox"
+	@echo "* To install LifeV API documentation type make install-apidox"
 	@echo "* Enjoy!"
 	@echo "*  The LifeV Developing Team"
 	@echo "************************************************************"
+	@echo ""
 
 upload-api:
 	-cd doc/ && rsync -avz api/ `whoami`@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(LIFEV_MAJOR_VERSION).$(LIFEV_MINOR_VERSION).$(LIFEV_MICRO_VERSION)
