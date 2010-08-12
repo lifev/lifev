@@ -49,7 +49,8 @@ namespace LifeV {
     This class derives both from BlockInterface, which is the base class for the block operators, and from RobinInterface,
     which is a class holding some general methods and attributes for the robin coupling.
 
-    NOTE: this class has been tested only for the GE time discretization (method = monolithicGE)
+    NOTE: this class has been tested for both the GE and GI time discretizations
+    (method = monolithicGE and method = monolithicGI).
     NOTE: as the same block matrices are shared between the system matrix and the preconditioner, the preconditioner
     choices available are in principle automatically adapted to the RN case. The preconditioners tested for this case
     are the modular composedDN and the algebraic additive Schwarz AdditiveSchwarz.
