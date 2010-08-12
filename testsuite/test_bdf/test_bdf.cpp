@@ -97,7 +97,7 @@ struct test_bdf::Private {
 			Real const&, ID const&)> fct_type;
 
 	std::string data_file_name;
-	Epetra_MpiComm* comm;
+	boost::shared_ptr<Epetra_MpiComm> comm;
 
 };
 
@@ -116,9 +116,9 @@ test_bdf::test_bdf(int argc, char** argv, LifeV::AboutData const& /*ad*/,
 
 #ifdef EPETRA_MPI
 	std::cout << "Epetra Initialization" << std::endl;
-	Members->comm = new Epetra_MpiComm(MPI_COMM_WORLD);
+	Members->comm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
 #else
-	Members->comm = new Epetra_SerialComm();
+	Members->comm.reset(new Epetra_SerialComm() );
 #endif
 }
 
@@ -172,7 +172,7 @@ void test_bdf::run() {
 	DataMesh dataMesh(dataFile, ("bdf/" + discretization_section).c_str());
 	RegionMesh mesh;
 	readMesh(mesh,dataMesh);
-	partitionMesh<RegionMesh> meshPart(mesh, *Members->comm);
+	partitionMesh<RegionMesh> meshPart(mesh, Members->comm);
 
 	//=============================================================================
 	//finite element space of the solution
@@ -246,7 +246,7 @@ void test_bdf::run() {
 
 	//===================================================
 	//Definition of the linear solver
-	SolverTrilinos az_A(*Members->comm);
+	SolverTrilinos az_A(Members->comm);
 	az_A.setDataFromGetPot(dataFile, "bdf/solver");
 	az_A.setUpPrec(dataFile, "bdf/prec");
 
