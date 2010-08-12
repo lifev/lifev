@@ -210,7 +210,6 @@ public:
     //     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
     virtual const vector_ptrtype& un(){ return M_un; }
-    virtual void initialize( vector_ptrtype /*u0*/){ assert(false); }
     virtual void setupBDF( const vector_type& /*u0*/ ){ }
 
     //@}
@@ -259,7 +258,7 @@ public:
     vector_type&       Alphaf()                                   const { return *M_Alphaf;}
     const UInt&        nbEval()                                   const { return M_nbEval; }
 
-    Epetra_Comm &       worldComm()                                const { return *M_epetraWorldComm; }
+    boost::shared_ptr<Epetra_Comm>       worldComm()                                const { return M_epetraWorldComm; }
 
     bool isFluid()                                                const { return M_isFluid; }
     bool isSolid()                                                const { return M_isSolid; }
@@ -341,14 +340,6 @@ public:
     const solid_bchandler_type& BCh_solid()                       const { return M_BCh_d; }
     const solid_bchandler_type& BCh_dz()                          const { return M_BCh_dz; }
     const solid_bchandler_type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
-    virtual const fluid_bchandler_type& BCh_flux()                const
-    {
-        assert(false);
-
-        // Return fluid BCHandler to avoid warning
-        fluid_bchandler_type bch ( new fluid_bchandler_raw_type() );
-        return bch;
-    }
 
     //! gets the solution vector by reference
     virtual void getSolution( vector_ptrtype& lambda )                  { lambda = M_lambda; }
@@ -440,10 +431,12 @@ public:
     void setMixteOuterWall                   ( const function_type& dload, const function_type& E);
 
     //! sets the solution vector by reference
-    void setSolutionPtr                      ( const vector_ptrtype& sol )      { M_lambda = sol; }
+    virtual void setSolutionPtr                      ( vector_ptrtype sol )      { M_lambda = sol; }
 
     //! sets the solution vector by copy
-    void setSolution                         ( const vector_type& sol )         { M_lambda.reset( new vector_type( sol ) ); }
+    virtual void setSolution                 ( const vector_type& sol )         { M_lambda.reset( new vector_type( sol ) ); }
+    virtual void initialize                  ( vector_ptrtype u0)               { setSolution(*u0); }
+
 
     //! sets the solution time derivative vector by copy
     virtual void setSolutionDerivative       ( const vector_ptrtype& lambdaDot ){ M_lambdaDot=lambdaDot; }

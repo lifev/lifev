@@ -34,15 +34,15 @@ FSIOperator::FSIOperator():
         M_solidMesh                          ( ),
         M_fluidMeshPart                      ( ),
         M_solidMeshPart                      ( ),
-        M_BCh_u                              ( new fluid_bchandler_raw_type ),
-        M_BCh_d                              ( new solid_bchandler_raw_type ),
-        M_BCh_mesh                           ( new fluid_bchandler_raw_type ),
-        M_BCh_du                             ( new fluid_bchandler_raw_type ),
-        M_BCh_du_inv                         ( new fluid_bchandler_raw_type ),
-        M_BCh_dz                             ( new solid_bchandler_raw_type ),
-        M_BCh_dz_inv                         ( new solid_bchandler_raw_type ),
-        M_BCh_dp                             ( new BCHandler ),
-        M_BCh_dp_inv                         ( new BCHandler ),
+        M_BCh_u                              ( ),
+        M_BCh_d                              ( ),
+        M_BCh_mesh                           ( ),
+        M_BCh_du                             ( ),
+        M_BCh_du_inv                         ( ),
+        M_BCh_dz                             ( ),
+        M_BCh_dz_inv                         ( ),
+        M_BCh_dp                             ( ),
+        M_BCh_dp_inv                         ( ),
         M_fluid                              ( ),
         M_solid                              ( ),
         M_meshMotion                         ( ),
@@ -56,37 +56,27 @@ FSIOperator::FSIOperator():
         M_solidInterfaceMap                  ( ),
         M_fluidInterfaceMapOnZero            ( ),
         M_solidInterfaceMapOnZero            ( ),
-        //     M_dofInterfaceFluid                  ( ),
-        //     M_dofInterfaceSolid                  ( ),
-        M_dofFluidToStructure                ( new DofInterface3Dto3D ),
-        //     M_dofFluidToSolid                    ( new DofInterface3Dto3D ),
-        //     M_dofSolidToFluid                    ( new DofInterface3Dto3D ),
-        M_dofStructureToFluid                ( new DofInterface3Dto3D ),
-        M_dofStructureToSolid                ( new DofInterface3Dto3D ),
-        M_dofStructureToHarmonicExtension    ( new DofInterface3Dto3D ),
-        M_dofHarmonicExtensionToFluid        ( new DofInterface3Dto3D ),
-        //     M_dofStructureToReducedFluid         ( new DofInterface3Dto3D ),
-        //     M_dofReducedFluidToStructure         ( new DofInterface3Dto3D ),
-        M_dofFluid                           ( new DofInterface3Dto2D ),
-        M_dofSolid                           ( new DofInterface3Dto2D ),
-        M_dofFluidInv                        ( new DofInterface3Dto2D ),
-        M_dofSolidInv                        ( new DofInterface3Dto2D ),
-        M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
-        M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
-        M_bcvSolidLoadToStructure            ( new  BCVectorInterface ),
-        M_bcvStructureToFluid                ( new  BCVectorInterface ),
-        M_bcvStructureDispToFluid            ( new  BCVectorInterface ),
-        M_bcvStructureDispToSolid            ( new  BCVectorInterface ),
-        M_bcvStructureDispToHarmonicExtension( new  BCVectorInterface ),
-        M_bcvHarmonicExtensionVelToFluid     ( new  BCVectorInterface ),
-        //     M_bcvStructureToReducedFluid         ( new  BCVectorInterface ),
-        //     M_bcvReducedFluidToStructure         ( new  BCVectorInterface ),
-        M_bcvDerHarmonicExtensionVelToFluid  ( new  BCVectorInterface ),
-        M_bcvDerFluidLoadToStructure         ( new  BCVectorInterface ),
-        M_bcvDerFluidLoadToFluid             ( new  BCVectorInterface ),
-        M_bcvDerStructureDispToSolid         ( new  BCVectorInterface ),
-        //     M_bcvDerReducedFluidLoadToStructure  ( new  BCVectorInterface ),
-        //     M_bcvDerStructureAccToReducedFluid   ( new  BCVectorInterface ),
+        M_dofFluidToStructure                ( ),
+        M_dofStructureToFluid                ( ),
+        M_dofStructureToSolid                ( ),
+        M_dofStructureToHarmonicExtension    ( ),
+        M_dofHarmonicExtensionToFluid        ( ),
+        M_dofFluid                           ( ),
+        M_dofSolid                           ( ),
+        M_dofFluidInv                        ( ),
+        M_dofSolidInv                        ( ),
+        M_bcvFluidInterfaceDisp              ( ),
+        M_bcvFluidLoadToStructure            ( ),
+        M_bcvSolidLoadToStructure            ( ),
+        M_bcvStructureToFluid                ( ),
+        M_bcvStructureDispToFluid            ( ),
+        M_bcvStructureDispToSolid            ( ),
+        M_bcvStructureDispToHarmonicExtension( ),
+        M_bcvHarmonicExtensionVelToFluid     ( ),
+        M_bcvDerHarmonicExtensionVelToFluid  ( ),
+        M_bcvDerFluidLoadToStructure         ( ),
+        M_bcvDerFluidLoadToFluid             ( ),
+        M_bcvDerStructureDispToSolid         ( ),
         M_lambdaFluid                        ( ),
         M_lambdaFluidRepeated                ( ),
         M_lambdaSolid                        ( ),
@@ -118,99 +108,6 @@ FSIOperator::FSIOperator():
         M_linearSolid                        ( ),
         M_fluidLeader                        ( ),
         M_solidLeader                        ( )
-/*
-    M_uFESpace                           ( ),
-    M_pFESpace                           ( ),
-    M_dFESpace                           ( ),
-    M_mmFESpace                          ( ),
-    M_fluidMeshPart                      ( ),
-    M_solidMeshPart                      ( ),
-    M_BCh_u                              ( new fluid_bchandler_raw_type ),
-    M_BCh_d                              ( new solid_bchandler_raw_type ),
-    M_BCh_mesh                           ( new fluid_bchandler_raw_type ),
-    M_BCh_du                             ( new fluid_bchandler_raw_type ),
-    M_BCh_du_inv                         ( new fluid_bchandler_raw_type ),
-    M_BCh_dz                             ( new solid_bchandler_raw_type ),
-    M_BCh_dz_inv                         ( new solid_bchandler_raw_type ),
-    M_BCh_dp                             ( new BCHandler ),
-    M_BCh_dp_inv                         ( new BCHandler ),
-    M_fluid                              ( ),
-    M_solid                              ( ),
-    M_meshMotion                         ( ),
-//     M_fluidLin                           ( ),
-//     M_solidLin                           ( ),
-    M_bdf                                ( ),
-    M_dataFile                           ( ),
-    M_data                               ( ),
-    M_fluidInterfaceMap                  ( ),
-    M_solidInterfaceMap                  ( ),
-    M_fluidInterfaceMapOnZero            ( ),
-    M_solidInterfaceMapOnZero            ( ),
-//     M_dofInterfaceFluid                  ( ),
-//     M_dofInterfaceSolid                  ( ),
-    M_dofFluidToStructure                ( new DofInterface3Dto3D ),
-//     M_dofFluidToSolid                    ( new DofInterface3Dto3D ),
-//     M_dofSolidToFluid                    ( new DofInterface3Dto3D ),
-    M_dofStructureToFluid                ( new DofInterface3Dto3D ),
-    M_dofStructureToSolid                ( new DofInterface3Dto3D ),
-    M_dofStructureToHarmonicExtension    ( new DofInterface3Dto3D ),
-    M_dofHarmonicExtensionToFluid        ( new DofInterface3Dto3D ),
-//     M_dofStructureToReducedFluid         ( new DofInterface3Dto3D ),
-//     M_dofReducedFluidToStructure         ( new DofInterface3Dto3D ),
-    M_dofFluid                           ( new DofInterface3Dto2D ),
-    M_dofSolid                           ( new DofInterface3Dto2D ),
-    M_dofFluidInv                        ( new DofInterface3Dto2D ),
-    M_dofSolidInv                        ( new DofInterface3Dto2D ),
-    M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
-    M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
-    M_bcvSolidLoadToStructure            ( new  BCVectorInterface ),
-    M_bcvStructureToFluid                ( new  BCVectorInterface ),
-    M_bcvStructureDispToFluid            ( new  BCVectorInterface ),
-    M_bcvStructureDispToSolid            ( new  BCVectorInterface ),
-    M_bcvStructureDispToHarmonicExtension( new  BCVectorInterface ),
-    M_bcvHarmonicExtensionVelToFluid     ( new  BCVectorInterface ),
-//     M_bcvStructureToReducedFluid         ( new  BCVectorInterface ),
-//     M_bcvReducedFluidToStructure         ( new  BCVectorInterface ),
-    M_bcvDerHarmonicExtensionVelToFluid  ( new  BCVectorInterface ),
-    M_bcvDerFluidLoadToStructure         ( new  BCVectorInterface ),
-    M_bcvDerFluidLoadToFluid             ( new  BCVectorInterface ),
-    M_bcvDerStructureDispToSolid         ( new  BCVectorInterface ),
-//     M_bcvDerReducedFluidLoadToStructure  ( new  BCVectorInterface ),
-//     M_bcvDerStructureAccToReducedFluid   ( new  BCVectorInterface ),
-    M_lambdaFluid                        ( ),
-    M_lambdaFluidRepeated                ( ),
-    M_lambda                             ( ),
-    M_lambdaDot                             ( ),
-    M_lambdaSolid                        ( ),
-    M_lambdaSolidRepeated                ( ),
-    M_lambdaSolidOld                     ( ),
-    M_lambdaDotSolid                     ( ),
-    M_lambdaDotSolidRepeated             ( ),
-    M_sigmaFluid                         ( ),
-    M_sigmaSolid                         ( ),
-    M_sigmaFluidRepeated                 ( ),
-    M_sigmaSolidRepeated                 ( ),
-    M_minusSigmaFluid                    ( ), //sigmafluid: auxiliary variable for Robin.
-    M_minusSigmaFluidRepeated            ( ), //sigmafluid: auxiliary variable for Robin.
-    M_dispFluidMeshOld                   ( ),
-    M_veloFluidMesh                      ( ),
-    M_derVeloFluidMesh                   ( ),
-    M_un                                 ( ),
-    M_rhs                                ( ),
-    M_Alphaf                             ( ), //vector_type, for alphaf robin
-    M_AlphafCoef                         ( 0 ),
-    M_betamedio                          ( ),
-    M_nbEval                             ( 0 ),
-    M_epetraComm                         ( ),
-    M_epetraWorldComm                    ( ),
-    M_mpi                                ( true ),
-    M_isFluid                            ( false ),
-    M_isSolid                            ( false ),
-    M_linearFluid                        ( ),
-    M_linearSolid                        ( ),
-    M_fluidLeader                        ( ),
-    M_solidLeader                        ( )
-*/
 {
 }
 
@@ -244,7 +141,7 @@ FSIOperator::setDataFile( const GetPot& dataFile )
 void
 FSIOperator::setupFEspace()
 {
-    Displayer disp(M_epetraComm.get());
+    Displayer disp(M_epetraComm);
     disp.leaderPrint("FSI-  Setting RefFE and QuadRule ...           ");
 
 	std::string uOrder = M_data->dataFluid()->uOrder();
@@ -329,7 +226,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building fluid FESpace ...               \n");
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_fluidMesh, *M_epetraComm));
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_fluidMesh, M_epetraComm));
 
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
 															//dOrder,
@@ -386,7 +283,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-    	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( *M_solidMesh, *M_epetraComm ) );
+    	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( *M_solidMesh, M_epetraComm ) );
     	M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( *M_solidMeshPart,
     															 dOrder,
     	                                                         //*refFE_struct,
@@ -416,8 +313,29 @@ FSIOperator::setupDOF( void )
     Displayer disp(M_epetraWorldComm.get());
     disp.leaderPrint("FSIOperator: setting DOF ... " );
     Dof uDof(*M_fluidMesh, M_uFESpace->refFE());
-//     Dof pDof(*M_dataFluid->mesh(), M_pFESpace->refFE());
     Dof dDof(*M_solidMesh, M_dFESpace->refFE());
+
+    M_dofFluidToStructure                .reset( new DofInterface3Dto3D );
+    M_dofStructureToFluid                .reset( new DofInterface3Dto3D );
+    M_dofStructureToSolid                .reset( new DofInterface3Dto3D );
+    M_dofStructureToHarmonicExtension    .reset( new DofInterface3Dto3D );
+    M_dofHarmonicExtensionToFluid        .reset( new DofInterface3Dto3D );
+    M_dofFluid                           .reset( new DofInterface3Dto2D );
+    M_dofSolid                           .reset( new DofInterface3Dto2D );
+    M_dofFluidInv                        .reset( new DofInterface3Dto2D );
+    M_dofSolidInv                        .reset( new DofInterface3Dto2D );
+    M_bcvFluidInterfaceDisp              .reset( new  BCVectorInterface );
+    M_bcvFluidLoadToStructure            .reset( new  BCVectorInterface );
+    M_bcvSolidLoadToStructure            .reset( new  BCVectorInterface );
+    M_bcvStructureToFluid                .reset( new  BCVectorInterface );
+    M_bcvStructureDispToFluid            .reset( new  BCVectorInterface );
+    M_bcvStructureDispToSolid            .reset( new  BCVectorInterface );
+    M_bcvStructureDispToHarmonicExtension.reset( new  BCVectorInterface );
+    M_bcvHarmonicExtensionVelToFluid     .reset( new  BCVectorInterface );
+    M_bcvDerHarmonicExtensionVelToFluid  .reset( new  BCVectorInterface );
+    M_bcvDerFluidLoadToStructure         .reset( new  BCVectorInterface );
+    M_bcvDerFluidLoadToFluid             .reset( new  BCVectorInterface );
+    M_bcvDerStructureDispToSolid         .reset( new  BCVectorInterface );
 
 	M_dofFluidToStructure->setup(   M_dFESpace->refFE(), dDof, //M_dFESpace->dof(),
 			                        M_uFESpace->refFE(), M_uFESpace->dof() );
@@ -471,7 +389,7 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 	std::map<ID, ID> const& locDofMap = dofStructureToHarmonicExtension->locDofMap();
 
 	std::vector<int> dofInterfaceFluid;
-	dofInterfaceFluid.reserve( M_dofHarmonicExtensionToFluid->locDofMap().size() );
+	dofInterfaceFluid.reserve( locDofMap.size() );
 
 	//is the interface map between HE (first) and solid (second)
 	if( this->isFluid() )
@@ -498,7 +416,7 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 	disp.leaderPrint("FSI-  Building solid variables ...             ");
 
 	std::vector<int> dofInterfaceSolid;
-	dofInterfaceSolid.reserve(M_dofStructureToSolid->locDofMap().size());
+	dofInterfaceSolid.reserve(locDofMap.size());
 
 	if (this->isSolid())
 	{
@@ -556,9 +474,9 @@ FSIOperator::setupFluidSolid( void )
     {
         UInt numLM = imposeFlux();
 
-        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             *M_epetraComm ) );
-        M_fluid.reset(      new fluid_raw_type(      *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm, numLM ) );
-        M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,              *M_epetraComm ) );
+        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
+        M_fluid.reset(      new fluid_raw_type(      *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, numLM ) );
+        M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,              M_epetraComm ) );
 
 //         if ( M_linearFluid )
 //             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm ) );
@@ -573,8 +491,8 @@ FSIOperator::setupFluidSolid( void )
     if ( this->isSolid() )
     {
 //         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm ) );
-    	M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, *M_epetraComm ) );
-        M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,  *M_epetraComm ) );
+    	M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
+        M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,  M_epetraComm ) );
 
 //         if ( M_linearFluid )
 //             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm ) );
