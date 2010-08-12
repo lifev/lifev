@@ -206,7 +206,7 @@ HDF5Filter3DMesh<Mesh>::HDF5Filter3DMesh(const GetPot& dfile, const std::string&
 // ===================================================
 
 template<typename Mesh>
-void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, Epetra_Comm *comm)
+void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, boost::shared_ptr<Epetra_Comm> comm)
 {
     if (this->M_HDF5.get() == 0)
     {
@@ -245,7 +245,7 @@ void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, Epetra_Comm *comm)
 }
 
 template<typename Mesh>
-void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, Epetra_Comm* comm)
+void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, boost::shared_ptr<Epetra_Comm> comm)
 {
     UInt elementNodes, faceNodes;
     switch (Mesh::ElementShape::Shape)

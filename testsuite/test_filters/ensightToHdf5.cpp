@@ -78,7 +78,7 @@ struct EnsightToHdf5::Private
 
     std::string    data_file_name;
 
-    Epetra_Comm*   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
 };
 
 EnsightToHdf5::EnsightToHdf5( int argc,
@@ -98,11 +98,11 @@ EnsightToHdf5::EnsightToHdf5( int argc,
     std::cout << "mpi initialization ... " << std::endl;
 
     // MPI_Init(&argc,&argv);
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
-    d->comm = new Epetra_SerialComm();
+    d->comm.reset( new Epetra_SerialComm() );
 #endif
 
     if (!d->comm->MyPID())
@@ -150,7 +150,7 @@ EnsightToHdf5::run()
 
     mesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -191,7 +191,7 @@ EnsightToHdf5::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm);
+                                              d->comm);
     EpetraMap fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;

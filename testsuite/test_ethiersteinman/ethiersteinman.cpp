@@ -120,8 +120,8 @@ struct Ethiersteinman::Private
     double         nu;  /**< viscosity (in m^2/s) */
     //const double rho; /**< density is constant (in kg/m^3) */
 
-    bool           steady;
-    Epetra_Comm*   comm;
+    bool                             steady;
+    boost::shared_ptr<Epetra_Comm>   comm;
 };
 
 
@@ -146,11 +146,11 @@ Ethiersteinman::Ethiersteinman( int argc,
 
     //    MPI_Init(&argc,&argv);
 
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
-    d->comm = new Epetra_SerialComm();
+    d->comm.reset( new Epetra_SerialComm() );
 #endif
 
     if (!d->comm->MyPID())
@@ -221,7 +221,7 @@ Ethiersteinman::run()
     RegionMesh3D<LinearTetra> mesh;
     readMesh(mesh, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -261,7 +261,7 @@ Ethiersteinman::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm);
+                                              d->comm);
     EpetraMap fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -600,7 +600,7 @@ Ethiersteinman::check()
             // exportMesh3D(mesh,"cube4x4",MESH_FORMAT);
             // exportMesh3D(mesh,"cube4x4",MATLAB_FORMAT);
 
-            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
+            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
 
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
@@ -642,7 +642,7 @@ Ethiersteinman::check()
             Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                                       uFESpace,
                                                       pFESpace,
-                                                      *d->comm);
+                                                      d->comm);
             EpetraMap fullMap(fluid.getMap());
 
             if (verbose) std::cout << "ok." << std::endl;

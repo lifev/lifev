@@ -217,7 +217,7 @@ public:
 
     bool isLeader() const
     {
-        assert( M_comm != 0);
+        assert( M_comm.get() != 0);
         return comm()->MyPID() == 0;
     }
 
@@ -263,7 +263,7 @@ protected:
     FESpace<Mesh, EpetraMap>&      M_betaFESpace;
 
     //! MPI communicator
-    Epetra_Comm*                   M_comm;
+    boost::shared_ptr<Epetra_Comm>                   M_comm;
     int                            M_me;
 
     //! Bondary Conditions Handler
@@ -377,11 +377,11 @@ ADRSolver( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& adrFESpace,
            FESpace<Mesh, EpetraMap>& betaFESpace,
            BCHandler&                BCh,
-           Epetra_Comm&              comm ):
+           boost::shared_ptr<Epetra_Comm> comm ):
     M_data                   ( dataType ),
     M_FESpace                ( adrFESpace ),
     M_betaFESpace            ( betaFESpace ),
-    M_comm                   ( &comm ),
+    M_comm                   ( comm ),
     M_me                     ( M_comm->MyPID() ),
     M_BCh                    ( &BCh ),
     M_setBC                  ( true ),
@@ -424,11 +424,11 @@ ADRSolver<Mesh, SolverType>::
 ADRSolver( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& adrFESpace,
            FESpace<Mesh, EpetraMap>& betaFESpace,
-           Epetra_Comm&              comm ):
+           boost::shared_ptr<Epetra_Comm> comm ):
     M_data                   ( dataType ),
     M_FESpace                ( adrFESpace ),
     M_betaFESpace            ( betaFESpace ),
-    M_comm                   ( &comm ),
+    M_comm                   ( comm ),
     M_me                     ( M_comm->MyPID() ),
     M_setBC                  ( false ),
     M_localMap               ( M_FESpace.map() ),
