@@ -47,6 +47,7 @@
 #endif
 
 #include <life/lifecore/life.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {
@@ -60,7 +61,7 @@ namespace LifeV
 class Displayer
 {
 public:
-    Displayer( const Epetra_Comm* comm=0 );
+    Displayer( const boost::shared_ptr<Epetra_Comm> comm=boost::shared_ptr<Epetra_Comm>() );
     Displayer( const Displayer& displayer );
 	Displayer( const bool verbose);
     virtual ~Displayer() {}
@@ -104,17 +105,17 @@ public:
   }
 
     //Set the communicator
-    void SetCommunicator( const Epetra_Comm& comm );
+    void SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm );
 
     /*!
       Return the communicator
     */
-    const Epetra_Comm& comm() const { return *M_comm; }
+    const boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
 
 protected:
 
-  const Epetra_Comm*					    M_comm;
-  bool										M_verbose;
+    boost::shared_ptr<Epetra_Comm>					    M_comm;
+    bool	           									M_verbose;
 
 };
 
@@ -152,7 +153,7 @@ template <typename T1>
 void Displayer::
 leaderPrintMax( const T1& message1, const Real& localMax ) const
 {
-	if ( M_comm )
+	if ( M_comm.get() )
     {
         Real num( localMax );
         Real globalMax;

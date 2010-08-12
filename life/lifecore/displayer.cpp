@@ -32,13 +32,13 @@ namespace LifeV
 {
 
 Displayer::Displayer( const bool verbose ):
-	M_comm					( 0 ),
+	M_comm					( ),
 	M_verbose				( verbose )
 {
 }
 
 
-Displayer::Displayer( const Epetra_Comm* comm ):
+Displayer::Displayer( const boost::shared_ptr<Epetra_Comm> comm ):
   M_comm                   ( comm ),
   M_verbose                ( true )
 {
@@ -53,10 +53,10 @@ Displayer::Displayer( const Displayer& displayer ):
 }
 
 void
-Displayer::SetCommunicator( const Epetra_Comm& comm )
+Displayer::SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm )
 {
-    M_comm = &comm;
-    if ( M_comm )
+    M_comm = comm;
+    if ( M_comm.get() )
         M_verbose = M_comm->MyPID()==0;
 }
 
