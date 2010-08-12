@@ -92,7 +92,7 @@ EigenSolver
 {
     Anasazi::Eigensolution<DataType,Vector> sol = MyProblem->getSolution();
     std::vector<Anasazi::Value<DataType> > evals = sol.Evals;
-    for(int i=0; i<evals.size(); ++i)
+    for(UInt i=0; i<evals.size(); ++i)
         {
             realPart.push_back(evals[i].realpart);
             imgPart.push_back(evals[i].imagpart);
