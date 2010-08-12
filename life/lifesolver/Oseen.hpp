@@ -115,13 +115,13 @@ public:
     Oseen( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
-           Epetra_Comm&              comm,
+           boost::shared_ptr<Epetra_Comm> comm,
            const int                 lagrangeMultiplier = 0);
 
     Oseen( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
-           Epetra_Comm&              comm,
+           boost::shared_ptr<Epetra_Comm> comm,
            const EpetraMap           monolithicMap,
            const UInt                offset=0);
 
@@ -136,7 +136,7 @@ public:
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
            std::vector<int> const&   lagrangeMultipliers,
-           Epetra_Comm&              comm );
+           boost::shared_ptr<Epetra_Comm> comm );
 
 
     //! virtual destructor
@@ -266,7 +266,7 @@ public:
 
     EpetraMap   const& getMap()       const { return M_localMap; }
 
-    Epetra_Comm const& comm()         const {return *M_comm;}
+    boost::shared_ptr<Epetra_Comm> const comm()      const {return M_Displayer.comm();}
 
     Displayer   const& getDisplayer() const { return M_Displayer; }
 
@@ -311,7 +311,6 @@ protected:
     FESpace<Mesh, EpetraMap>&      M_pFESpace;
 
     //! MPI communicator
-    Epetra_Comm*                   M_comm;
     Displayer                      M_Displayer;
 
     EpetraMap                      M_localMap;
@@ -413,13 +412,12 @@ Oseen<Mesh, SolverType>::
 Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
-       Epetra_Comm&              comm,
+       boost::shared_ptr<Epetra_Comm>              comm,
        const int                 lagrangeMultiplier):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
-    M_comm                   ( &comm ),
-    M_Displayer              ( &comm ),
+    M_Displayer              ( comm ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultiplier),
     M_matrMass               ( ),
     M_matrMassPr             ( ),
@@ -470,14 +468,13 @@ Oseen<Mesh, SolverType>::
 Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
-       Epetra_Comm&              comm ,
+       boost::shared_ptr<Epetra_Comm>              comm ,
        EpetraMap                 monolithicMap,
        UInt                      /*offset*/):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
-    M_comm                   ( &comm ),
-    M_Displayer              ( &comm ),
+    M_Displayer              ( comm ),
     M_localMap               ( monolithicMap ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -528,12 +525,11 @@ Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
        std::vector<int> const&   lagrangeMultipliers,
-       Epetra_Comm&              comm ):
+       boost::shared_ptr<Epetra_Comm>              comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
-    M_comm                   ( &comm ),
-    M_Displayer              ( &comm ),
+    M_Displayer              ( comm ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultipliers ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -627,8 +623,6 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
     M_matrMass.reset  ( new matrix_type(M_localMap) );
     M_matrStokes.reset( new matrix_type(M_localMap) );
-
-//    M_comm->Barrier();
 
     M_Displayer.leaderPrint("  F-  Computing constant matrices ...          ");
 
@@ -800,7 +794,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
             M_blockPrec->GlobalAssemble();
             *M_matrStokes += *M_blockPrec;
         }
-    M_comm->Barrier();
+    comm()->Barrier();
 
     chrono.stop();
     M_Displayer.leaderPrintMax( "done in " , chrono.diff());
@@ -1133,7 +1127,6 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
-    //M_comm->Barrier();
     M_Displayer.leaderPrint("  F-  Applying boundary conditions ...         ");
 
     chrono.start();
@@ -1412,7 +1405,7 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
     std::string me;
 
 
-    indexMe << M_Displayer.comm().MyPID();
+    indexMe << M_Displayer.comm()->MyPID();
 
     switch ( indexMe.str().size() )
     {

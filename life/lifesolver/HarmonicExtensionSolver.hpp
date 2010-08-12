@@ -91,16 +91,11 @@ public:
 
     */
 
-    /*HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                             BCHandler&                mesh_BCh,
-                             Epetra_Comm&              comm
-                             );*/
+    HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
+                             boost::shared_ptr<Epetra_Comm>              comm);
 
     HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                             Epetra_Comm&              comm);
-
-    HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                             Epetra_Comm&              comm,
+                             boost::shared_ptr<Epetra_Comm>              comm,
                              EpetraMap&                locMap  ,
                              UInt                      offset =0
                              );
@@ -155,7 +150,7 @@ public:
     EpetraMap const& getMap() const { return M_localMap; }
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
-    const Epetra_Comm& comm() const {return *M_comm;}
+    const boost::shared_ptr<Epetra_Comm> comm() const {return M_Displayer.comm();}
 
     bool isLeader() const
     {
@@ -184,7 +179,6 @@ private:
     //! The matrix holding the values
     matrix_ptrtype                 M_matrHE;
 
-    Epetra_Comm*                   M_comm;
     Displayer                      M_Displayer;
     int                            M_me;
     bool                           M_verbose;
@@ -226,13 +220,12 @@ private:
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                         Epetra_Comm&    comm ):
+                         boost::shared_ptr<Epetra_Comm>    comm ):
     M_FESpace               ( mmFESpace ),
     M_localMap              ( M_FESpace.map() ),
     M_matrHE                ( new matrix_type (M_localMap ) ),
-    M_comm                  ( &comm ),
-    M_Displayer              ( &comm ),
-    M_me                    ( M_comm->MyPID() ),
+    M_Displayer              ( comm ),
+    M_me                    ( comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_disp                  ( M_localMap ),
@@ -248,15 +241,14 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                         Epetra_Comm&              comm ,
+                         boost::shared_ptr<Epetra_Comm>              comm ,
                          EpetraMap& localMap,
                          UInt offset):
     M_FESpace               ( mmFESpace ),
     M_localMap              ( localMap),
     M_matrHE                ( new matrix_type (M_localMap ) ),
-    M_comm                  ( &comm ),
-    M_Displayer              ( &comm ),
-    M_me                    ( M_comm->MyPID() ),
+    M_Displayer              ( comm ),
+    M_me                    ( comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_disp                  ( mmFESpace.map() ),

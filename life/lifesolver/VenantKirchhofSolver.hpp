@@ -106,7 +106,7 @@ public:
     VenantKirchhofSolver( const data_type& data,
                           FESpace<Mesh, EpetraMap>&   FESpace,
                           BCHandler&       BCh,
-                          Epetra_Comm&     comm,
+                          boost::shared_ptr<Epetra_Comm>     comm,
                           UInt             offset=0);
 
     /*!
@@ -118,12 +118,12 @@ public:
 
     VenantKirchhofSolver( const data_type& data,
                           FESpace<Mesh, EpetraMap>&   FESpace,
-                          Epetra_Comm&     comm,
+                          boost::shared_ptr<Epetra_Comm>     comm,
                           UInt       offset=0);
 
     VenantKirchhofSolver( const data_type& data,
                           FESpace<Mesh, EpetraMap>&   dFESpace,
-                          Epetra_Comm&     comm,
+                          boost::shared_ptr<Epetra_Comm>     comm,
                           EpetraMap&       monolithicMap,
                           UInt       offset=0
                           //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace=0
@@ -219,7 +219,7 @@ public:
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
-    Epetra_Comm const& comm()         const {return *M_comm;}
+    boost::shared_ptr<Epetra_Comm> const comm()         const {return M_Displayer.comm();}
 
     void rescaleMatrices(); // used for monolithic
     //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
@@ -242,7 +242,6 @@ private:
 
     FESpace<Mesh, EpetraMap>&      M_FESpace;
 
-    Epetra_Comm*                   M_comm;
     Displayer                      M_Displayer;
 
     int                            M_me;
@@ -340,15 +339,14 @@ template <typename Mesh, typename SolverType>
 VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type&          data,
                                                               FESpace<Mesh, EpetraMap>& dFESpace,
                                                               BCHandler&                BCh,
-                                                              Epetra_Comm&              comm,
+                                                              boost::shared_ptr<Epetra_Comm>              comm,
                                                               UInt                      offset
                                                             ) :
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
     M_BCh                        ( &BCh ),
-    M_comm                       ( &comm ),
-    M_Displayer                  ( &comm ),
-    M_me                         ( comm.MyPID() ),
+    M_Displayer                  ( comm ),
+    M_me                         ( comm->MyPID() ),
     M_linearSolver               ( new SolverType( comm ) ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
@@ -384,14 +382,13 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type&  
 template <typename Mesh, typename SolverType>
 VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& data,
                                                               FESpace<Mesh, EpetraMap>&   dFESpace,
-                                                              Epetra_Comm&     comm,
+                                                              boost::shared_ptr<Epetra_Comm>     comm,
                                                               UInt             /*offset*/
                                                              ) :
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
-    M_comm                       ( &comm ),
-    M_Displayer                  ( &comm ),
-    M_me                         ( comm.MyPID() ),
+    M_Displayer                  ( comm ),
+    M_me                         ( comm->MyPID() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
     M_linearStiff                ( new matrix_type(M_localMap) ),
@@ -427,16 +424,15 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& d
 template <typename Mesh, typename SolverType>
 VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& data,
                                                               FESpace<Mesh, EpetraMap>&   dFESpace,
-                                                              Epetra_Comm&     comm,
+                                                              boost::shared_ptr<Epetra_Comm>     comm,
                                                               EpetraMap&      monolithicMap,
                                                               UInt             offset
                                                               //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace
                                                             ):
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
-    M_comm                       ( &comm ),
-    M_Displayer                  ( &comm ),
-    M_me                         ( comm.MyPID() ),
+    M_Displayer                  ( comm ),
+    M_me                         ( comm->MyPID() ),
     M_linearSolver               ( ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -551,7 +547,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff)
         }
     }
 
-    M_comm->Barrier();
+    comm()->Barrier();
 
     M_linearStiff->GlobalAssemble();
     //massStiff->GlobalAssemble();
@@ -1101,7 +1097,7 @@ VenantKirchhofSolver<Mesh, SolverType>::reduceSolution( Vector& disp, Vector& ve
     vector_type displacement(M_disp, 0);
     vector_type velocity    (M_vel , 0);
 
-    if ( M_comm->MyPID() == 0 )
+    if ( comm()->MyPID() == 0 )
     {
         for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
         {

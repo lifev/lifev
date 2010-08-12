@@ -107,11 +107,11 @@ public:
       \param pressure FE space
       \param bcHandler boundary conditions for the velocity
     */
-    ADRSolver( const data_type&          dataType,
-               FESpace<Mesh, EpetraMap>& adrFESpace,
-               FESpace<Mesh, EpetraMap>& betaFESpace,
-               BCHandler&                bcHandler,
-               Epetra_Comm&              comm );
+    ADRSolver( const data_type&               dataType,
+               FESpace<Mesh, EpetraMap>&      adrFESpace,
+               FESpace<Mesh, EpetraMap>&      betaFESpace,
+               BCHandler&                     bcHandler,
+               boost::shared_ptr<Epetra_Comm> comm );
 
     /*!
       \param dataType
@@ -119,10 +119,10 @@ public:
       \param velocity FE space
       \param pressure FE space
     */
-    ADRSolver( const data_type&      dataType,
-               FESpace<Mesh, EpetraMap>& adrFESpace,
-               FESpace<Mesh, EpetraMap>& betaFESpace,
-               Epetra_Comm&              comm );
+    ADRSolver( const data_type&               dataType,
+               FESpace<Mesh, EpetraMap>&      adrFESpace,
+               FESpace<Mesh, EpetraMap>&      betaFESpace,
+               boost::shared_ptr<Epetra_Comm> comm );
 
     //! virtual destructor
 
@@ -213,12 +213,12 @@ public:
 
     EpetraMap const& getMap() const { return M_localMap; }
 
-    const Epetra_Comm& comm() const {return *M_comm;}
+    const boost::shared_ptr<Epetra_Comm> comm() const {return M_comm;}
 
     bool isLeader() const
     {
         assert( M_comm != 0);
-        return comm().MyPID() == 0;
+        return comm()->MyPID() == 0;
     }
 
     void leaderPrint   (string const message, Real const number) const;

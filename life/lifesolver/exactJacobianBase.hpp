@@ -175,7 +175,7 @@ public:
         M_ej               (ej),
         M_operatorDomainMap(*M_ej->solidInterfaceMap()->getMap(Repeated)),
         M_operatorRangeMap (*M_ej->solidInterfaceMap()->getMap(Repeated)),
-        M_comm             (&M_ej->worldComm())
+        M_comm             (M_ej->worldComm())
         {
 //             std::cout << ej << std::endl;
 //             std::cout << M_ej->fluidInterfaceMap().getEpetra_Map() << std::endl;
@@ -211,7 +211,7 @@ private:
     const Epetra_Map                     M_operatorDomainMap;
     const Epetra_Map                     M_operatorRangeMap;
 
-    Epetra_Comm*                         M_comm;
+    boost::shared_ptr<Epetra_Comm>       M_comm;
 
 };
 
