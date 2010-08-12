@@ -35,17 +35,24 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 [problem]
 
 blockOper   = AdditiveSchwarz
-#AdditiveSchwarzGI
+# OPTIONS:
 #AdditiveSchwarz
 #AdditiveSchwarzRN
+#AdditiveSchwarzGI
+#AdditiveSchwarzRNGI
 
 DDBlockPrec = ComposedDN
+# OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
-#ComposedDN  segregated DN-AS
-#ComposedDN2 segregated DN-AS
-#ComposedNN  segregated NN
-#ComposedDNND  segregated DNND
-
+#AdditiveSchwarzGI: monolithic A-S preconditioner,
+#ComposedDN: modular Dirichlet-Neumann preconditioner
+#ComposedDN2: modular Dirichlet-Neumann preconditioner
+#ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+#ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+#ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDNDGI: under testing, do not use
+#ComposedDN2DGI: under testing, do not use
 
 method     = monolithicGE # monolithicGE, monolithicGI
 
@@ -73,6 +80,7 @@ multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
 type       = hdf5
+nRestart   = 0
 
 [./fluid]
 filename   = fluid
@@ -88,13 +96,13 @@ filename   = fluid
 [../solid]
 filename   = solid
 [../] # solid
-[../] # importer
+# [../] # importer
 
 [fluid]
 useShapeDerivatives           = false
+semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 
 [./physics]
 density   = 1.0               # density
@@ -126,16 +134,6 @@ gammaPress = 0.05
 reuse = true
 [../] # physics
 [../] # fluid
-
-
-[interface] # mesh dependent flags for the interface.
-#DDBlockPrec = 7
-
-#6: Preconditioner J_QN (block G-S) for the Newton system. It works only with fullMonolithic.
-#9: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
-#10: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
-#11: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
-#12: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
 
 fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
@@ -214,7 +212,6 @@ alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 prectype        = Amesos
 overlap         = 2
 
-
 [./fact]
 level-of-fill                 = 10
 ilut_level-of-fill            = 4
@@ -275,7 +272,6 @@ relax_value                   = 0
 
 [../amesos]
 solvertype = Amesos_Umfpack
-
 
 [../] # ifpack
 [../] # prec

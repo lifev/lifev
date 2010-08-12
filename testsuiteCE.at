@@ -34,18 +34,29 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 [problem]
 
-blockOper   = AdditiveSchwarz
-#AdditiveSchwarzGI
+blockOper   = AdditiveSchwarzGI
+# OPTIONS:
 #AdditiveSchwarz
 #AdditiveSchwarzRN
+#AdditiveSchwarzGI
+#AdditiveSchwarzRNGI
 
-DDBlockPrec = ComposedDN
+DDBlockPrec = ComposedDNGI
+# OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
-#ComposedDN
-#ComposedDN2
-#ComposedNN
-#ComposedDNND
+#AdditiveSchwarzGI: monolithic A-S preconditioner,
+#ComposedDN: modular Dirichlet-Neumann preconditioner
+#ComposedDN2: modular Dirichlet-Neumann preconditioner
+#ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+#ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+#ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDNDGI: under testing, do not use
+#ComposedDN2DGI: under testing, do not use
 
+#initSol     = 00002
+#initSolPrev = 00001
+#Tstart      = 0.002;
 
 method     = monolithicGI # monolithicGE, monolithicGI
 
@@ -88,7 +99,7 @@ filename   = fluid
 [../solid]
 filename   = solid
 [../] # solid
-[../] # importer
+# [../] # importer
 
 [fluid]
 useShapeDerivatives           = true
@@ -128,16 +139,6 @@ gammaPress = 0.05
 reuse = true
 [../] # physics
 [../] # fluid
-
-
-[interface] # mesh dependent flags for the interface.
-DDBlockPrec = 6
-
-#6: Preconditioner for the fullMonolithic (not Monolithic): blockG-S
-#9: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
-#10: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
-#11: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
-#12: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
 
 fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
@@ -216,7 +217,6 @@ alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 prectype        = Amesos
 overlap         = 2
 
-
 [./fact]
 level-of-fill                 = 10
 ilut_level-of-fill            = 4
@@ -277,7 +277,6 @@ relax_value                   = 0
 
 [../amesos]
 solvertype = Amesos_Umfpack
-
 
 [../] # ifpack
 [../] # prec
