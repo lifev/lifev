@@ -1,4 +1,4 @@
-1# -*- getpot -*- (GetPot mode activation for emacs)
+# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for CE FSI Solver
 #-------------------------------------------------
@@ -9,18 +9,21 @@ blockOper   = AdditiveSchwarz
 # OPTIONS:
 #AdditiveSchwarz
 #AdditiveSchwarzRN
+#AdditiveSchwarzGI
+#AdditiveSchwarzRNGI
 
 DDBlockPrec = ComposedDN
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
-#ComposedDN
-#ComposedDN2
-#ComposedNN
-#ComposedDNND
-
-#initSol     = 00002
-#initSolPrev = 00001
-#Tstart      = 0.002;
+#AdditiveSchwarzGI: monolithic A-S preconditioner,
+#ComposedDN: modular Dirichlet-Neumann preconditioner
+#ComposedDN2: modular Dirichlet-Neumann preconditioner
+#ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+#ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+#ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDNDGI: under testing, do not use
+#ComposedDN2DGI: under testing, do not use
 
 method     = monolithicGE # monolithicGE, monolithicGI
 
@@ -43,7 +46,6 @@ restart    = 0
 maxSubIter = 20
 
 
-
 [exporter]
 multimesh  = false   # actually we export also the displacement
 start      = 0
@@ -55,7 +57,7 @@ nRestart   = 0
 filename   = fluid
 [../solid]
 filename   = solid
-[../] # fluid
+[../] # solid
 [../] # exporter
 
 [./importer]
@@ -67,9 +69,7 @@ filename   = solid
 [../] # solid
 # [../] # importer
 
-
 [fluid]
-
 useShapeDerivatives           = false
 semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
@@ -105,14 +105,6 @@ gammaPress = 0.05
 reuse = true
 [../] # physics
 [../] # fluid
-
-[./interface] # mesh dependent flags for the interface.
-DDBlockPrec = 11
-#6: Preconditioner for the fullMonolithic (not Monolithic): blockG-S
-#9: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
-#10: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, is like case 6 but modular
-#11: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
-#12: Preconditioner for the fullMonolithic (not Monolithic): modular blockG-S, split into 3 factors
 
 fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface

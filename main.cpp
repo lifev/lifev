@@ -156,9 +156,11 @@ public:
 #ifdef DEBUG
         Debug( 10000 ) << "Setting up the BC \n";
 #endif
-	    M_fsi->setFluxBC(BCh_monolithicFlux());
+	    M_fsi->setFluidBC(BCh_monolithicFlux());
+	    M_fsi->setSolidBC(BCh_monolithicRobin(*M_fsi->FSIOper()));
+
 	    M_fsi->setup(/*data_file*/);
-	    M_fsi->setRobinBC(BCh_monolithicRobin(*M_fsi->FSIOper()));
+
 	    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper()));
         M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->FSIOper()));
         M_fsi->setSolidBC(BCh_monolithicSolid(*M_fsi->FSIOper()));
@@ -361,8 +363,6 @@ private:
     fsi_solver_ptr M_fsi;
     data_PtrType   M_data;
 
-    MPI_Comm*      M_comm;
-
     filter_ptrtype M_exporterSolid;
     filter_ptrtype M_exporterFluid;
     filter_ptrtype M_importerSolid;
@@ -545,7 +545,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFDOld;
 
 
-    UInt offset=3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof() +M_fsi->FSIOper()->BCh_flux()->size();
+    UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
     Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);

@@ -114,7 +114,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
         fluidQuantities(1) = oper->fluid().area(outflowFlag);
     }
 
-    oper->worldComm().Broadcast( fluidQuantities.Values(), fluidQuantities.Length(),
+    oper->worldComm()->Broadcast( fluidQuantities.Values(), fluidQuantities.Length(),
                                  oper->getFluidLeaderId() );
 
 
