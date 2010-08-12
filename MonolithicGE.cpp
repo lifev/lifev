@@ -47,12 +47,12 @@ void MonolithicGE::setupFluidSolid()
 {
     super::setupFluidSolid( );
     M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
 
     M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
                                                   *M_uFESpace,
                                                   *M_pFESpace,
-                                                  *M_epetraComm,
+                                                  M_epetraComm,
                                                   *M_monolithicMap));
 
     //             if (isLinearFluid())// to be implemented
@@ -67,7 +67,7 @@ void MonolithicGE::setupFluidSolid()
 
     M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
                                                   *M_dFESpace,
-                                                  *M_epetraComm,
+                                                  M_epetraComm,
                                                   *M_monolithicMap,
                                                   M_offset
                                                   ));
@@ -77,6 +77,19 @@ void MonolithicGE::setupFluidSolid()
     //                                                                    *M_dFESpace,
     //
     //                                                      *M_epetraComm));
+}
+
+void MonolithicGE::setupDOF()
+{
+    M_bcvStructureDispToHarmonicExtension.reset( new  BCVectorInterface );
+    super::setupDOF();
+}
+
+void
+MonolithicGE::setupSystem( )
+{
+    super::setupSystem();
+    M_meshMotion->setUp( M_dataFile );
 }
 
 
@@ -92,10 +105,9 @@ FSIOperator* createM(){ return new MonolithicGE(); }
 }
 
 bool MonolithicGE::reg = FSIFactory::instance().registerProduct( "monolithicGE", &createM ) &&
-    BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &createComposedDNND )&&
-    BlockPrecFactory::instance().registerProduct("ComposedNN"  , &createComposedNN ) &&
-    BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &createAdditiveSchwarz ) &&
-    BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &createAdditiveSchwarz) &&
+    BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &createComposedDNND) &&
+    BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &createAdditiveSchwarz) &&
+    BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &createAdditiveSchwarz ) &&
     BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &createAdditiveSchwarzRN ) &&
     BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &createAdditiveSchwarzRN ) &&
     BlockPrecFactory::instance().registerProduct("ComposedDN"  , &createComposedDN ) &&

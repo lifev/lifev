@@ -102,6 +102,11 @@ public:
 
     void setupFluidSolid();
 
+    void setupDOF( void );
+
+    void setupSystem( );
+
+    void getSolution                  (vector_ptrtype& sol){sol = M_un;}
     //@}
 
 private:
