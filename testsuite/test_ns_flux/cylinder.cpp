@@ -124,7 +124,7 @@ struct Cylinder::Private
 
     void setLambda(boost::shared_ptr< std::vector<Real> >& lam) { lambda = lam;}
 
-    Epetra_Comm*   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
     /**
      * get the characteristic velocity
      *
@@ -223,11 +223,11 @@ Cylinder::Cylinder( int argc,
 #ifdef EPETRA_MPI
     std::cout << "mpi initialization ... " << std::endl;
 
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
-    d->comm = new Epetra_SerialComm();
+    d->comm.reset( new Epetra_SerialComm() );
 #endif
 
     if (!d->comm->MyPID())
@@ -296,7 +296,7 @@ Cylinder::run()
 
     RegionMesh3D<LinearTetra> mesh;
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
@@ -364,13 +364,13 @@ Cylinder::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm,
+                                              d->comm,
                                               lagrangeMultipliers.size());
 #else
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm);
+                                              d->comm);
 #endif
 
     if (verbose) std::cout << "ok." << std::endl;

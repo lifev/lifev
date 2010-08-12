@@ -172,7 +172,7 @@ struct Cylinder::Private
 
     std::string initial_sol;
 
-    Epetra_Comm*   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
     /**
      * get the characteristic velocity
      *
@@ -336,7 +336,7 @@ Cylinder::Cylinder( int argc,
     //    MPI_Init(&argc,&argv);
 
     int ntasks = 0;
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     if (!d->comm->MyPID()) {
         std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
         std::cout << "Re = " << d->Re << std::endl
@@ -346,7 +346,7 @@ Cylinder::Cylinder( int argc,
     }
 //    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
-    d->comm = new Epetra_SerialComm();
+    d->comm.reset( new Epetra_SerialComm() );
 #endif
 
 }
@@ -393,7 +393,7 @@ Cylinder::run()
     dataNavierStokes.setup( dataFile );
 
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart;
-    meshPart.setup(4, *(d->comm));
+    meshPart.setup(4, (d->comm));
 
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
     HDF5Input.loadGraph(meshPart.graph(), d->comm);
@@ -439,7 +439,7 @@ Cylinder::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm, numLM);
+                                              d->comm, numLM);
     EpetraMap fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;

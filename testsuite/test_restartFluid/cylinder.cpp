@@ -160,7 +160,7 @@ struct Cylinder::Private
 
     std::string initial_sol;
 
-    Epetra_Comm*   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
     /**
      * get the characteristic velocity
      *
@@ -324,7 +324,7 @@ Cylinder::Cylinder( int argc,
     //    MPI_Init(&argc,&argv);
 
     int ntasks = 0;
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     if (!d->comm->MyPID()) {
         std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
         std::cout << "Re = " << d->Re << std::endl
@@ -334,7 +334,7 @@ Cylinder::Cylinder( int argc,
     }
 //    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
-    d->comm = new Epetra_SerialComm();
+    d->comm.reset( new Epetra_SerialComm() );
 #endif
 
 }
@@ -382,7 +382,7 @@ Cylinder::run()
     Mesh mesh;
     readMesh(mesh, dataMesh);
 
-    partitionMesh< Mesh >   meshPart(mesh, *d->comm);
+    partitionMesh< Mesh >   meshPart(mesh, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
@@ -423,7 +423,7 @@ Cylinder::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm, numLM);
+                                              d->comm, numLM);
     EpetraMap fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;

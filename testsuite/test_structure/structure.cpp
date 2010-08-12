@@ -121,14 +121,14 @@ struct Structure::Private
 
     std::string data_file_name;
 
-    Epetra_Comm*     comm;
+    boost::shared_ptr<Epetra_Comm>     comm;
 
 
 };
 
 Structure::Structure( int                                   argc,
                       char**                                argv,
-                      Epetra_Comm &                         structComm,
+                      boost::shared_ptr<Epetra_Comm>        structComm,
                       LifeV::AboutData const&               ad,
                       LifeV::po::options_description const& od ):
     parameters( new Private() )
@@ -146,7 +146,7 @@ Structure::Structure( int                                   argc,
               << "young   = " << parameters->young << std::endl
               << "poisson = " << parameters->poisson << std::endl;
 
-    parameters->comm = &structComm;
+    parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
     if (!parameters->comm->MyPID()) std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
@@ -187,7 +187,7 @@ Structure::run3d()
     readMesh(mesh, dataMesh);
 
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( mesh, *parameters->comm );
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( mesh, parameters->comm );
 
 //    meshPart.rebuildMesh();
 
@@ -210,7 +210,7 @@ Structure::run3d()
 
     VenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid( dataStructure,
                                                              dFESpace,
-                                                             *parameters->comm);
+                                                             parameters->comm);
     solid.setUp(dataFile);
     solid.buildSystem();
     //

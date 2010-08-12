@@ -75,10 +75,10 @@ int main( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
-    Epetra_MpiComm comm(MPI_COMM_WORLD);
+    boost::shared_ptr<Epetra_MpiComm> comm(new Epetra_MpiComm(MPI_COMM_WORLD) );
     std::cout << "% using MPI version" << std::endl;
 #else
-    Epetra_SerialComm comm;
+    boost::shared_ptr<Epetra_SerialComm> comm( new Epetra_SerialComm() );
     std::cout << "% using serial version" << std::end;
 #endif
 
@@ -103,9 +103,9 @@ int main( int argc, char** argv )
     meshPart.doPartitionMesh();
 
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.mesh(), "cylinderPart",
-                                                            comm.MyPID());
-    HDF5Output.addPartitionGraph(meshPart.graph(), &comm);
-    HDF5Output.addMeshPartitionAll(meshPart.meshAllPartitions(), &comm);
+                                                            comm->MyPID());
+    HDF5Output.addPartitionGraph(meshPart.graph(), comm);
+    HDF5Output.addMeshPartitionAll(meshPart.meshAllPartitions(), comm);
     HDF5Output.postProcess(0);
     HDF5Output.CloseFile();
 

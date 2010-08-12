@@ -273,8 +273,8 @@ struct laplacian::Private
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
-    std::string    data_file_name;
-    Epetra_MpiComm*   comm;
+    std::string                         data_file_name;
+    boost::shared_ptr<Epetra_MpiComm>   comm;
 
     /**
      *
@@ -317,9 +317,9 @@ laplacian::laplacian( int argc,
 
 	#ifdef EPETRA_MPI
 		std::cout << "Epetra Initialization" << std::endl;
-		Members->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 	#else
-		Members->comm = new Epetra_SerialComm();
+		Members->comm.reset( new Epetra_SerialComm() );
 	#endif
 }
 
@@ -387,7 +387,7 @@ laplacian::run()
     RegionMesh3D<LinearTetra> mesh;
 
     //dataADR.mesh()->orderMesh( Members->comm->Comm() );
-    partitionMesh< RegionMesh>   meshPart(mesh, *Members->comm);
+    partitionMesh< RegionMesh>   meshPart(mesh, Members->comm);
     //dataADR.setMesh(meshPart.mesh());
 
     if(verbose) dataADR.showMe();
@@ -468,7 +468,7 @@ laplacian::run()
     adr laplacian (dataADR,
                    adrFESpace,
                    betaFESpace,
-                   *Members->comm);
+                   Members->comm);
 
     Chrono chrono;
 

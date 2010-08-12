@@ -71,7 +71,7 @@ public:
 
     Structure( int                                   argc,
                char**                                argv,
-               Epetra_Comm &                         structComm,
+               boost::shared_ptr<Epetra_Comm>        structComm,
                LifeV::AboutData const&               ad,
                LifeV::po::options_description const& od );
 
