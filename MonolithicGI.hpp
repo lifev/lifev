@@ -55,11 +55,11 @@ class Epetra_FullMonolithic;
 
 
  Important parameters to set properly in the data file:
- - useShapeDerivatives: MUST be false, because in the GE approach the geometry is explicit;
- - domainVelImplicit: MUST be false, because in the GE approach the geometry is explicit;
+ - useShapeDerivatives: if true the shape derivatives block is added to the Jacobian matrix;
+ - domainVelImplicit: if true the domain velocity w in the convective term is considered an unknown (at the time n+1);
  - convectiveTermDer: false if the convective term is linearized (\f$u^{n+1}\nabla(u^n-w^n)\f$),
  otherwise it can be either true (if we use the Newton method to solve the convective term nonlinearity) or false
- (fixed-point method). For the GCE must be false;
+ (fixed-point method);
  - semiImplicit:  if true only one iteration of the nonlinear solver is performed. Otherwise
  the nonlinear iterations continue up to the specified tolerance. Set it to true for the GCE;
  - method: can be either monolithicGE, monolithicGI if the geometry is treated respectively explicitly or implicitly,
@@ -103,21 +103,6 @@ public:
     */
     void                        updateSystem();
 
-    //! temporary methods (to be re-implemented whithin the BlockInterface framework):
-    //@{
-    /**
-       builds the coupling
-    */
-    void                      couplingMatrix(matrix_ptrtype & matrix, const std::map<ID, ID>& locDofMap,
-                                             int coupling=31);
-
-    /**
-       builds the coupling
-    */
-    void                      couplingMatrix2(matrix_ptrtype & matrix, const std::map<ID, ID>& locDofMap,
-                                             int coupling=31);
-
-
     //!sets the block preconditioner
     int                        setupBlockPrec(vector_type& rhs);
 
@@ -150,7 +135,7 @@ public:
                                          const Real       _linearRelTol);
 
     //! @getters
-    //!{
+    //@{
     //! getter for the map of fluid-structure-interface (without the mesh motion)
     const EpetraMap&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
 
@@ -158,7 +143,7 @@ public:
     const matrix_ptrtype        getMatrixPtr() const {return this->M_monolithicMatrix->getMatrix();}
 
     //! getter for the current iteration solution
-    const vector_ptrtype        uk()      const {return M_uk;}
+    const vector_ptrtype  uk()  const      {return M_uk;}
 
     //! getter for the domain displacement at the previous time step (to correctly visualize the solition of both GE
     //! and GI)
@@ -167,9 +152,13 @@ public:
         return this->M_meshMotion->dispOld();
     }
 
-//     //! getter for the current iteration solution
-//     void getSolution                  (vector_ptrtype& sol){sol = M_uk;}
-    //}
+    //! getter for the current iteration solution.
+    /*!NOTE: this method can be dangerous because it returns a reference to
+    the current solution, which can be modified outside.
+    The vector sol is the one used in nonlinearRichardson
+    */
+    void getSolution                  (vector_ptrtype& sol){sol = M_uk;}
+    //@}
 
     //! initialize the system with functions
     void                        initialize( FSIOperator::fluid_type::value_type::Function const& u0,
@@ -180,13 +169,22 @@ public:
 
 private:
 
-    //! creates the
+    //! @name Private Methods
+    //@{
+//     //! creates the
     void createOperator( std::string& operType )
     {
         M_monolithicMatrix.reset(BlockMatrix::Factory::instance().createObject( operType ));
     }
 
-    void                        initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
+    //! initializes the solution vectors needed for the time discrtization of every problem
+    /*!
+      \param u0: initial fluid velocity
+      \param p0: initial pressure (not used in general)
+      \param d0: initial solid displacement
+      \param fd0: initial fluid domain displacement
+     */
+    void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
 
     /**
        calculates the terms due to the shape derivatives on the rhs of the monolithic system rhsShapeDerivatives
@@ -194,76 +192,31 @@ private:
        \param rhsShapeDerivatives: output. Shape derivative terms.
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
-    void                        shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
+    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
 
-    void applyPreconditioner( const matrix_ptrtype prec, matrix_ptrtype& oper );
-
-    void updateMatrix(matrix_type & bigMatrixStokes);
-
-    template <typename SolverType, typename PrecOperatorPtr>
-    void iterateFullMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver);
-
+    //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
+    /*
+      \param iter: current iteration: used as flag to distinguish the first nonlinear iteration from the others
+     */
     void assembleFluidBlock(UInt iter);
 
+    //! assembles the mesh motion matrix.
+    /*!In Particular it diagonalize the part of the matrix corresponding to the
+      Dirichlet condition expressing the coupling
+      \param iter: current iteration: used as flag to distinguish the first nonlinear iteration from the others
+     */
     void assembleMeshBlock(UInt iter);
-
-
-
-    /**
-       \small builds the matrix [1,0,0,0;0,1,0,alphaf;0,0,1,0;0,alphas,0,1] to IdentityMatrix. This matrix is intended to be a preconditioner and has not been tested yet.
-       \param IdentityMatrix: a matrix, if it is an identity the method builds the Robin-Robin linear combination of boundary conditions
-       \param alphaf: coefficient
-       \param alphas: coefficient
-       \param inverse if true the inverse of the linear combination is computed. the output matrix is [];
-    */
-    void robinCoupling(matrix_ptrtype& IdentityMatrix, const Real& alphaf, const Real& alphas, int coupling = 4);
-
-    void setMatrix(matrix_type& matr){M_linearSolver->setMatrix(matr);}
+    //@}
 
     boost::shared_ptr<EpetraMap>         M_mapWithoutMesh;
     vector_ptrtype                       M_uk;
-    vector_ptrtype                       M_meshVel;
     bool                                 M_domainVelImplicit;
     bool                                 M_convectiveTermDer;
-    IfpackComposedPrec::operator_type    M_solidOper;
-    IfpackComposedPrec::operator_type    M_fluidOper;
-    IfpackComposedPrec::operator_type    M_meshOper;
     UInt                                 M_interface;
-    prec_type                            M_compPrecPtr;
-    matrix_ptrtype                       M_precMatrPtr;
     matrix_ptrtype                       M_meshBlock;
-    boost::shared_ptr<EpetraMap>         M_monolithicInterfaceMap;
-    static bool reg;
+    matrix_ptrtype                       M_shapeDerivativesBlock;
+    static bool                          reg;
 };
-
-template <typename SolverType, typename PrecOperatorPtr>
-void MonolithicGI::
-iterateFullMonolithic(const vector_type& rhs, vector_type& step, PrecOperatorPtr prec, SolverType linearSolver)
-{
-    M_solid->getDisplayer().leaderPrint("  M-  Preconditioner type:                     ", M_data->DDBlockPreconditioner(), "\n" );
-    Chrono chrono;
-
-    M_monolithicMatrix->getMatrix()->GlobalAssemble();
-    //necessary if we did not imposed Dirichlet b.c.
-    M_linearSolver->setMatrix(*M_monolithicMatrix->getMatrix());
-
-    M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
-    int numIter = M_linearSolver->solveSystem( rhs, step, boost::static_pointer_cast< Epetra_Operator >(prec) );
-    //int numIter = M_linearSolver->solveSystem( *const_cast<const vector_type*>(&rhs), step,  );
-
-    if (numIter < 0)
-        {
-            chrono.start();
-
-            M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
-
-            if (numIter <= -M_maxIterSolver)
-                M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
-        }
-
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian system solved                   \n");
-}
-
 
 }
 #endif
