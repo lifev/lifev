@@ -207,7 +207,6 @@ MonolithicGI::evalResidual( vector_type&       res,
         M_BCh_mesh->bdUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
 
-
     M_monolithicMatrix->applyBoundaryConditions(dataFluid().dataTime()->getTime(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
     //M_monolithicMatrix->getMatrix()->spy("FM");
@@ -229,9 +228,9 @@ int MonolithicGI::setupBlockPrec(vector_type& rhs)
     {
         M_shapeDerivativesBlock.reset(new matrix_type(*M_monolithicMap));
         shapeDerivatives(M_shapeDerivativesBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
-        *M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
+        //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
         M_shapeDerivativesBlock->GlobalAssemble();
-        M_monolithicMatrix->push_back_coupling( M_shapeDerivativesBlock );
+        M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
     }
 
     if(M_precPtr->getBlockVector().size()<3)

@@ -252,9 +252,19 @@ public:
     //! adds a block to the coupling matrix
     void addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/);
 
+    //! adds a block to the coupling matrix
+    void addToGlobalMatrix( const matrix_ptrtype& Mat)
+    {
+        matrix_ptrtype tmp(new matrix_type(M_globalMatrix->getMap()));
+        *tmp += *M_globalMatrix;
+        *tmp += *Mat;
+        tmp->GlobalAssemble();
+        M_globalMatrix = tmp;
+    }
+
     void push_back_coupling( matrix_ptrtype coupling)
     {
-        *M_coupling += *coupling;
+        addToCoupling(coupling, 0);
     }
 
     //@}

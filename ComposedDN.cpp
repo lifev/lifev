@@ -60,6 +60,7 @@ void ComposedDN::coupler(map_shared_ptrtype map,
     coupling.reset(new matrix_type(*map));
     couplingMatrix( coupling,  M_couplingFlag, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
     coupling->insertValueDiagonal( 1. , M_offset[0], solidAndFluid );
+    coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->getMap().getMap(Unique)->NumGlobalElements(), totalDofs +1 );
 
     M_coupling.push_back(coupling);
 }
