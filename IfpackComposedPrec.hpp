@@ -74,7 +74,7 @@ public:
      */
     //@{
     //! default constructor.
-    IfpackComposedPrec(const Epetra_Comm* comm = 0);
+    IfpackComposedPrec( const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
     IfpackComposedPrec( IfpackComposedPrec& P );
 
@@ -101,7 +101,7 @@ public:
 
     UInt getNumber() const {return M_Prec->getNumber();}
 
-    boost::shared_ptr<Epetra_Operator>  getPrecPtr(){return M_Prec;}
+    super::prec_type              getPrecPtr(){return M_Prec;}
 
     std::string            precType(){return M_precType;}
 

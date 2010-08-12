@@ -35,17 +35,16 @@
 namespace LifeV
 {
 
-
-IfpackComposedPrec::IfpackComposedPrec(const Epetra_Comm* comm):
+IfpackComposedPrec::IfpackComposedPrec(const boost::shared_ptr<Epetra_Comm> comm):
   super (comm),
-  M_Prec(new prec_raw_type()),
+  M_Prec(new prec_raw_type(comm)),
   M_OperVector(0),
   M_precType()
 {
 }
 
 IfpackComposedPrec::IfpackComposedPrec(IfpackComposedPrec& P):
-    super(P, &P.getPrec()->Comm()),
+    super(P, boost::dynamic_pointer_cast<ComposedPreconditioner<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
     M_Prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
     M_OperVector(P.getOperVector()),
     M_precType(P.precType())
@@ -73,7 +72,7 @@ IfpackComposedPrec::setDataFromGetPot( const GetPot& dataFile,
 int
 IfpackComposedPrec::buildPreconditioner(operator_type& oper)
 {
-    M_Prec.reset(new prec_raw_type());
+    M_Prec.reset(new prec_raw_type(M_displayer.comm()));
     return push_back(oper);
 }
 
@@ -82,7 +81,7 @@ IfpackComposedPrec::buildPreconditioner(operator_type& oper,
                                         const bool useInverse,
                                         const bool useTranspose)
 {
-    M_Prec.reset(new prec_raw_type());
+    M_Prec.reset(new prec_raw_type(M_displayer.comm()));
     return push_back(oper, useInverse, useTranspose);
 }
 
@@ -118,7 +117,7 @@ IfpackComposedPrec::push_back(operator_type& oper,
                               const bool useTranspose)
 {
     if(!M_Prec.get())
-        M_Prec.reset(new prec_raw_type());
+        M_Prec.reset(new prec_raw_type(M_displayer.comm()));
     M_OperVector.push_back(oper);
     Chrono chrono;
     prec_raw_type::prec_type prec;
