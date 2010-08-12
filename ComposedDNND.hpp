@@ -117,8 +117,8 @@ public:
 
     typedef ComposedNN super;
 
-    ComposedDNND():
-        super()
+    ComposedDNND( ):
+        super( )
     {
     }
 

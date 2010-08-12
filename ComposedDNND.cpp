@@ -26,12 +26,9 @@
 
 /*!
     @file
-    @brief A short description of the file content
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 02 Jul 2010
-
-    A more detailed description of the file (if necessary)
  */
 
 #include <ComposedDNND.hpp>
@@ -77,21 +74,18 @@ void ComposedDNND::coupler(map_shared_ptrtype map,
     coupling->insertValueDiagonal(one, fluidSolid, totalDofs);
     couplingMatrix(coupling, 4, tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 1./**/);
     couplingMatrix(coupling, 2, tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
-    coupling->GlobalAssemble();
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_type(*map, 0));
     coupling->insertValueDiagonal(one, M_offset[1]+1, M_offset[0]+1 );
     coupling->insertValueDiagonal(one, fluidSolid, totalDofs);
     couplingMatrix(coupling, 8,  tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
-    coupling->GlobalAssemble();
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_type( *map, 0 ));
     coupling->insertValueDiagonal( one, tmpFESpace[0]->map(), M_offset[0] );
     coupling->insertValueDiagonal( one, fluidSolid, totalDofs );
     couplingMatrix( coupling, 2, tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 2. );
-    coupling->GlobalAssemble();
     M_coupling.push_back( coupling );
 
     coupling.reset( new matrix_type( *map, 0 ) );
@@ -99,11 +93,10 @@ void ComposedDNND::coupler(map_shared_ptrtype map,
     coupling->insertValueDiagonal( -1, fluidSolid, totalDofs );
     couplingMatrix( coupling, 8,  tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 2. );
     couplingMatrix( coupling, 1,  tmpFESpace, M_offset, locDofMap, numerationInterface, timeStep, 1./**/ );
-    coupling->GlobalAssemble();
     M_coupling.push_back( coupling );
 
     M_prec.resize(M_blocks.size());
-    M_blockPrecs.reset(new ComposedPreconditioner<Epetra_Operator>(&M_blocks[0]->getMatrixPtr()->Comm()));
+    //M_blockPrecs.reset(new ComposedPreconditioner<ComposedPreconditioner<Ifpack_Preconditioner> >(&M_blocks[0]->getMatrixPtr()->Comm()));
 }
 
 } // Namespace LifeV
