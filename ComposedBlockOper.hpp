@@ -61,16 +61,28 @@ namespace LifeV {
 class ComposedBlockOper            : public BlockInterface
 {
 public:
+
+    //! @name Public Types
+    //@{
     typedef BlockInterface                           super;
     typedef super::fespace_shared_ptrtype            fespace_ptrtype;
     typedef ComposedPreconditioner<Epetra_Operator>  operator_type;
+    //@}
 
+    //! @name Constructor and Destructor
+    //@{
     ComposedBlockOper():
         super(),
         M_coupling()
     {}
 
+    ComposedBlockOper(Int couplingFlag):
+        super(couplingFlag),
+        M_coupling()
+    {}
+
     ~ComposedBlockOper(){}
+    //@}
 
     //! @name Pure virtual methods
     //@{
@@ -91,11 +103,6 @@ public:
      */
     virtual void  setDataFromGetPot(const GetPot& data, const std::string& section)=0;
 
-//     //! sets up a vector of raw pointers to the EpetraMaps of each block
-//     /*!
-//       The number of maps in this vector is not set a-priori. It will be specified in the children classes.
-//      */
-//     virtual void setBlockMaps(const UInt multipliers, ...)=0;
     //@}
 
     //! pushes a block at the end of the vector
@@ -124,13 +131,44 @@ public:
     /*!
       returns the length of the vector M_blocks
     */
-    virtual bool set(){return (bool) M_blocks.size();}
+    virtual bool set()=0;
 
     //!sums the coupling matrices with the corresponding blocks
     /*!
       Everything (but the boundary conditions assembling) must have been set before calling this
     */
     virtual void blockAssembling();
+
+    //! pushes a block at the end of the vector
+    /*!
+      adds a new block
+        @param Mat block matrix to push
+        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+     */
+    virtual void addToCoupling( const matrix_ptrtype& Mat, UInt position);
+
+    virtual void push_back_oper( ComposedBlockOper& Oper);
+    //@}
+
+    //!@name Getters
+    //@{
+    //! returns the vector of flags (by const reference).
+    const std::vector<bool>& getRecompute(){return M_recompute;}
+
+    //! returns the vector of pointers to the coupling blocks (by const reference).
+    const std::vector<matrix_ptrtype> getCouplingVector(){return M_coupling;}
+
+    //! adds a coupling matrix of the following form:
+    void coupler(map_shared_ptrtype map,
+                 const std::map<ID, ID>& locDofMap,
+                 const vector_ptrtype numerationInterface,
+                 const Real& timeStep,
+                 UInt couplingBlock
+                 );
+
+    virtual void push_back_coupling( matrix_ptrtype coupling);
+
+    //@}
 
 protected:
 
@@ -155,7 +193,8 @@ protected:
     std::vector<matrix_ptrtype>                                 M_coupling;
 
 private:
-    //    static bool                                                 reg;
+
+
 };
 
 } // Namespace LifeV

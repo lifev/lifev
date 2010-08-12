@@ -48,14 +48,14 @@ void ComposedBlockOper::blockAssembling()
 
 void ComposedBlockOper::blockAssembling(const UInt k)
 {
-        if(M_blocks[k]->getMatrixPtr()->Filled())
-        {
-            matrix_ptrtype tmp(new matrix_type(M_blocks[0]->getMap(), 1));
-            *tmp += *M_blocks[k];
-            M_blocks[k]=tmp;
-        }
-        M_coupling[k]->GlobalAssemble();
-        *M_blocks[k] += *M_coupling[k];
+    if(M_blocks[k]->getMatrixPtr()->Filled())
+    {
+        matrix_ptrtype tmp(new matrix_type(M_blocks[0]->getMap(), 1));
+        *tmp += *M_blocks[k];
+        M_blocks[k]=tmp;
+    }
+    M_coupling[k]->GlobalAssemble();
+    *M_blocks[k] += *M_coupling[k];
 }
 
 void ComposedBlockOper::GlobalAssemble()
@@ -64,10 +64,10 @@ void ComposedBlockOper::GlobalAssemble()
     {
         M_blocks[k]->GlobalAssemble();
     }
-//     M_blocks[0]->spy("first");
-//     M_blocks[1]->spy("second");
-//     M_blocks[2]->spy("third");
-//     M_blocks[3]->spy("fourth");
+//        M_blocks[0]->spy("first");
+//        M_blocks[1]->spy("second");
+//        M_blocks[2]->spy("third");
+//        M_blocks[3]->spy("fourth");
 }
 
 void ComposedBlockOper::push_back_matrix(const matrix_ptrtype& Mat, const  bool recompute)
@@ -79,7 +79,6 @@ void ComposedBlockOper::push_back_matrix(const matrix_ptrtype& Mat, const  bool 
 void ComposedBlockOper::replace_matrix( const matrix_ptrtype& Mat, UInt position )
 {
     M_blocks[position]=Mat;
-    blockAssembling(position);
 }
 
 void ComposedBlockOper::swap(const UInt i, const UInt j)
@@ -96,7 +95,41 @@ void ComposedBlockOper::swap(const UInt i, const UInt j)
     UInt tmpOffset = this->M_offset[i];
     this->M_offset[i] = this->M_offset[j];
     this->M_offset[j] = tmpOffset;
+}
 
+void ComposedBlockOper::addToCoupling( const matrix_ptrtype& Mat, UInt position)
+{
+    *Mat += *M_coupling[position];
+    M_coupling[position] = Mat;
+}
+
+void ComposedBlockOper::push_back_oper( ComposedBlockOper& Oper)
+{
+    super::push_back_oper( Oper );
+    M_coupling.insert(M_coupling.end(), Oper.getCouplingVector().begin(), Oper.getCouplingVector().end());
+}
+
+void ComposedBlockOper::coupler( map_shared_ptrtype map,
+                                 const std::map<ID, ID>& locDofMap,
+                                 const vector_ptrtype numerationInterface,
+                                 const Real& timeStep,
+                                 UInt couplingBlock )
+{
+    matrix_ptrtype coupling(new matrix_type(*map));
+    couplingMatrix( coupling,  super::M_superCouplingFlag, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
+
+    coupling->insertValueDiagonal( 1., 1 , M_offset[couplingBlock]+1 );
+    coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().getMap(Unique)->NumGlobalElements()+1, totalDofs+1 );
+
+    M_coupling.push_back(coupling);
+
+}
+
+void
+ComposedBlockOper::push_back_coupling( matrix_ptrtype coupling)
+{
+    M_coupling.push_back(coupling);
 }
 
 } // Namespace LifeV
