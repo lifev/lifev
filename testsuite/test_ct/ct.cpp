@@ -59,7 +59,7 @@ void
 CT::run()
 {
 	Chrono chrono_exec;
-	chrono_exec.start();	
+	chrono_exec.start();
 	std::cout << "\n\t t-  Begin execution time " << std::endl;
     typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
@@ -89,7 +89,7 @@ CT::run()
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.dataMesh()->mesh(), *M_comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.dataMesh()->mesh(), M_comm);
 
     // fill in the space and time discretization orders
 
@@ -141,13 +141,13 @@ CT::run()
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
     ChorinTemam< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
-                                              uFESpace,
-                                              pFESpace,
-                                              uBdfOrder,
-                                              pBdfOrder,
-                                              *bcHu,
-                      		              *bcHp,
-                                              *M_comm);
+                                                    uFESpace,
+                                                    pFESpace,
+                                                    uBdfOrder,
+                                                    pBdfOrder,
+                                                    *bcHu,
+                                                    *bcHp,
+                                                    *M_comm);
 
     EpetraMap fullMap_u(fluid.getMap_u());
     EpetraMap fullMap_p(fluid.getMap_p());
