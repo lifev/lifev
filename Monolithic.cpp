@@ -32,8 +32,8 @@ Monolithic::Monolithic():
     M_monolithicMatrix(),
     M_precPtr(),
     M_rhsFull(),
-    M_BCh_flux(new fluid_bchandler_raw_type),
-    M_BCh_Robin(new fluid_bchandler_raw_type),
+    M_BCh_flux(),
+    M_BCh_Robin(),
     M_fluxes(0),
     M_BChWSS(),
     M_offset(0),
@@ -80,6 +80,9 @@ Monolithic::setupFEspace()
 void
 Monolithic::setupDOF( void )
 {
+
+    M_dofStructureToHarmonicExtension    .reset( new DofInterface3Dto3D );
+
 	M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
 											    M_dFESpace->refFE(), M_dFESpace->dof() );
 	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->structureInterfaceFlag(),
@@ -104,19 +107,19 @@ Monolithic::setupFluidSolid()
     std::map<ID, ID>::const_iterator ITrow;
 
     M_monolithicMap.reset(new EpetraMap(M_uFESpace->map()));
+    M_BCh_flux = M_BCh_u; // For the moment M_BCh_u contains only the fluxes.
     M_fluxes=M_BCh_flux->size( );
 
     std::string opertype = M_dataFile("problem/blockOper", "AdditiveSchwarz");
 
-    createOperator( opertype );
-
+    createOperator( opertype);
 
     *M_monolithicMap+= M_pFESpace->map();
     *M_monolithicMap+= M_fluxes;
     *M_monolithicMap+= M_dFESpace->map();
+
     M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->locDofMap(), M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
     *M_monolithicMap += *M_monolithicMatrix->getInterfaceMap();
-
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
     M_monolithicMatrix->getNumerationInterface(M_numerationInterface);
@@ -129,6 +132,8 @@ Monolithic::setupFluidSolid()
     std::vector<BCBase>::iterator fluxIt = M_BCh_flux->begin( );
     for ( UInt i = 0; i < M_fluxes; ++i, ++fluxIt )
         fluxIt->setOffset( i );
+
+    M_BCh_Robin = M_BCh_d;// For the moment M_BCh_d contains only the Robin b.c..
     M_BCh_Robin->setOffset(M_offset);
 
 }//end setup
@@ -264,7 +269,6 @@ Monolithic::evalResidual( vector_type&       res,
     if((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
         setDispSolid(disp);
-
         vector_type lambdaFluid(*M_interfaceMap, Unique);
 
         monolithicToInterface(lambdaFluid, disp);
@@ -285,10 +289,10 @@ Monolithic::evalResidual( vector_type&       res,
         double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
 
         *this->M_beta *= -alpha;
+
         vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
-
 
         //M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
 
@@ -296,7 +300,6 @@ Monolithic::evalResidual( vector_type&       res,
 
         M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solidBlock;
-
 
         if ( !M_BCh_u->bdUpdateDone() )
             M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
@@ -331,14 +334,26 @@ Monolithic::evalResidual( vector_type&       res,
         M_monolithicMatrix->applyBoundaryConditions(dataFluid().dataTime()->getTime(), M_rhsFull);
 
         M_monolithicMatrix->GlobalAssemble();
-        //M_monolithicMatrix->getMatrix()->spy("M");
+        //monolithicMatrix->getMatrix()->spy("M");
 
         //NOTE: M_monolithic->GlobalAssemble has to be called before M_precPtr->blockAssembling(), because they hold
         //shared pointers to the same blocks
 
         M_nbEval++ ;
-        M_precPtr->resetPrec();
+        //M_precPtr->reset();
+        //M_precPtr->resetBlocks();
+        setupBlockPrec( *M_rhsFull );
 
+        M_precPtr->blockAssembling();
+        M_precPtr->applyBoundaryConditions(dataFluid().dataTime()->getTime());
+        M_precPtr->GlobalAssemble();
+
+    }
+    evalResidual( disp,  M_rhsFull, res, M_diagonalScale);
+}
+
+int Monolithic::setupBlockPrec(vector_type& /*rhs*/)
+{
      if(!(M_precPtr->set()))
      {
         M_precPtr->push_back_matrix(M_solidBlockPrec, false);
@@ -350,18 +365,10 @@ Monolithic::evalResidual( vector_type&       res,
      }
      else
      {
-        M_precPtr->replace_matrix(M_fluidBlock, 1);
-        M_precPtr->replace_matrix(M_solidBlockPrec, 0);
+         M_precPtr->replace_matrix(M_fluidBlock, 1);
+         M_precPtr->replace_matrix(M_solidBlockPrec, 0);
      }
-
-     M_precPtr->blockAssembling();
-     M_precPtr->applyBoundaryConditions(dataFluid().dataTime()->getTime());
-     M_precPtr->GlobalAssemble();
-    }
-    evalResidual( disp,  M_rhsFull, res, M_diagonalScale);
 }
-
-
 
 void
 Monolithic::
@@ -380,8 +387,8 @@ evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res
 
 void
 Monolithic::solveJac(vector_type         &_step,
-                           const vector_type   &_res,
-                           const Real         /*_linearRelTol*/)
+                     const vector_type   &_res,
+                     const Real         /*_linearRelTol*/)
 {
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.NormInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
@@ -439,7 +446,6 @@ void
 Monolithic::setupSystem( )
 {
     M_fluid->setUp( M_dataFile );
-    M_meshMotion->setUp( M_dataFile );
     setUp( M_dataFile );
 }
 
@@ -448,9 +454,7 @@ void
 Monolithic::setUp( const GetPot& dataFile )
 {
 
-    M_linearSolver.reset(new solver_type(*M_epetraComm));
-    M_reusePrec     = dataFile( "linear_system/prec/reuse", true);
-    //M_maxIterSolver = dataFile( "solid/solver/mx_iter", -1);
+    M_linearSolver.reset(new solver_type(M_epetraComm));
 
     M_linearSolver->setDataFromGetPot( dataFile, "linear_system/solver" );
     M_linearSolver->setUpPrec(dataFile, "linear_system/prec");//to avoid if we have already a prec.
@@ -460,9 +464,10 @@ Monolithic::setUp( const GetPot& dataFile )
     M_precPtr.reset(BlockPrecFactory::instance().createObject( prectype ));
 
     std::string section("linear_system/prec");
+    M_precPtr->setComm(M_epetraComm);
     M_precPtr->setDataFromGetPot(dataFile, section);//to avoid if we build the prec from a matrix.
+    M_monolithicMatrix->setComm(M_epetraComm);
     M_monolithicMatrix->setDataFromGetPot(dataFile, section);//to avoid if we build the prec from a matrix.
-
     M_reusePrec     = dataFile( "linear_system/prec/reuse", true);
     M_maxIterSolver = dataFile( "linear_system/solver/max_iter", -1);
 }
@@ -494,25 +499,6 @@ Monolithic::solidInit(std::string const& dOrder)
 
 
 
-void
-Monolithic::setFluxBC             (fluid_bchandler_type bc_flux)
-{
-    if (isFluid())
-    {
-        M_BCh_flux = bc_flux;
-    }
-}
-
-
-
-void
-Monolithic::setRobinBC             (fluid_bchandler_type bc_Robin)
-{
-    if (isFluid())
-    {
-        M_BCh_Robin = bc_Robin;
-    }
-}
 
 
 
@@ -542,9 +528,6 @@ Monolithic::initialize( const vector_type& u0, const vector_type& p0, const vect
     *M_un=u0;
     M_un->add(p0, nDimensions*M_uFESpace->dof().numTotalDof());
     M_un->add(d0, M_offset);
-
-    M_BCh_u->merge(*M_BCh_flux);
-    M_BCh_d->merge(*M_BCh_Robin);
 }
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -554,7 +537,7 @@ Monolithic::computeMaxSingularValue( )
 {
     typedef Epetra_Operator                                                operator_type;
 
-    M_PAAP.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm.get()));
+    M_PAAP.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm));
 
     boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
