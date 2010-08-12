@@ -39,7 +39,7 @@ namespace LifeV {
 
 
 void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
-                                    ID coupling,
+                                    Int flag,
                                     const std::vector<fespace_ptrtype> problem,
                                     const std::vector<UInt> offset,
                                     const std::map<ID, ID>& locDofMap,
@@ -47,13 +47,20 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
                                     const Real& timeStep,
                                     const Real& value) // not working with non-matching grids
 {// coupling from 1 to 31, working as chmod
-    //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    if( flag-31 > 0 )//recursive call
+    {
+        Int subFlag(flag);
+        subFlag -= 31;
+        std::vector<fespace_ptrtype> newProblem(problem.begin()+3, problem.end());
+        std::vector<UInt> newOffset(offset.begin()+3, offset.end());
+
+        couplingMatrix( bigMatrix, subFlag, newProblem, newOffset, locDofMap, numerationInterface, timeStep, value);
+    }
     std::map<ID, ID>::const_iterator ITrow;
-    int flag(coupling);
     UInt interface(numerationInterface->getMap().getMap(Unique)->NumGlobalElements());
     UInt totalSize(offset[0]+problem[0]->map().getMap(Unique)->NumGlobalElements());
 
-    if(flag-16>=0)
+    if(flag-16>=0)//coupling the mesh in FSI
     {
         UInt interface( numerationInterface->getMap().getMap( Unique )->NumGlobalElements() );
         UInt solidFluidInterface( offset[2] );
@@ -68,32 +75,33 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
                 }
             }
         }
-        flag-=16;
+        flag -= 16;
     }
 
-    for(UInt dim = 0; dim < nDimensions; ++dim)
+    Int newFlag;
+
+    for(UInt dim = 0; dim < nDimensions; ++dim)//coupling F-S in FSI
     {
-        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, flag=coupling)
+        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, newFlag = flag )
         {
             if(numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
-
-                if(flag-8>=0)//right low
+                if(newFlag-8>=0)//right low
                 {
                     bigMatrix->set_mat_inc( offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(),(int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, value );//right low
-                    flag -= 8;
+                    newFlag -= 8;
                 }
-                if(flag-4>=0)// right up
+                if(newFlag-4>=0)// right up
                 {
                     bigMatrix->set_mat_inc( offset[1] + ITrow->first-1 + dim* problem[1]->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, -value );//right up
-                    flag -= 4;
+                    newFlag -= 4;
                 }
-                if(flag-2>=0)//low left
+                if(newFlag-2>=0)//low left
                 {
                     bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* problem[1]->dof().numTotalDof(), value);//low left
-                    flag -= 2;
+                    newFlag -= 2;
                 }
-                if(flag-1>=0)//low right
+                if(newFlag-1>=0)//low right
                     bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (offset[0] + ITrow->second)-1 + dim* problem[0]->dof().numTotalDof(), -value);//low right
 
                 bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, 0.0);
@@ -207,6 +215,23 @@ BlockInterface::robinCoupling( matrix_ptrtype matrix,
     }
 }
 
+void BlockInterface::addToBlock( const matrix_ptrtype& Mat, UInt position)
+{
+    *Mat += *M_blocks[position];
+    M_blocks[position] = Mat;
+}
 
+void BlockInterface::push_back_oper( BlockInterface& Oper)
+{
+//     M_blocks.reserve(M_blocks.size()+Oper.getBlockVector().size());
+//     M_bch.reserve(M_bch.size()+Oper.getBChVector().size());
+//     M_FESpace.reserve(M_FESpace.size()+Oper.getFESpaceVector().size());
+//     M_offset.reserve(M_offset.size()+Oper.getOffestVector().size());
+
+    M_blocks.insert(M_blocks.end(), Oper.getBlockVector().begin(), Oper.getBlockVector().end());
+    M_bch.insert(M_bch.end(), Oper.getBChVector().begin(), Oper.getBChVector().end());
+    M_FESpace.insert(M_FESpace.end(), Oper.getFESpaceVector().begin(), Oper.getFESpaceVector().end());
+    M_offset.insert(M_offset.end(), Oper.getOffsetVector().begin(), Oper.getOffsetVector().end());
+}
 
 } // Namespace LifeV

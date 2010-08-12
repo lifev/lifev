@@ -67,9 +67,6 @@ public:
     //! @name Public Types
     //@{
 
-    /*! @enum listOfTemplatesOptions
-        Description of the purpose of the enumerator list.
-     */
     typedef EpetraVector                                               vector_type;
     typedef boost::shared_ptr< vector_type >                           vector_ptrtype;
     typedef EpetraMatrix< Real >                                       matrix_type;
@@ -95,8 +92,19 @@ public:
     BlockInterface():
         M_bch(),
         M_blocks(),
-        M_FESpace()
+        M_FESpace(),
+        M_comm(),
+        M_superCouplingFlag(0)
     {}
+
+    BlockInterface( Int flag ):
+        M_bch(),
+        M_blocks(),
+        M_FESpace(),
+        M_comm(),
+        M_superCouplingFlag(flag)
+    {}
+
     //! Destructor
     ~BlockInterface()
 {
@@ -126,21 +134,31 @@ public:
      */
     virtual void setDataFromGetPot(const GetPot& data, const std::string& section)=0;
 
-//     //! sets up a vector of raw pointers to the EpetraMaps of each block
-//     /*!
-//       The number of maps in this vector is not ser a-priori.
-//      */
-//     virtual void setBlockMaps(const UInt multipliers, ...)=0;
-
-    //! @name Pure virtual methods
-    //@{
     //! pushes a block at the end of the vector
     /*!
       adds a new block
         @param Mat block matrix to push
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void push_back_matrix( const matrix_ptrtype& Mat, const bool recompute) =0;
+    virtual void push_back_matrix( const matrix_ptrtype& Mat, const bool recompute ) =0;
+
+
+    //!
+    /*!
+      adds a new block
+        @param Mat block matrix to push
+        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+     */
+    virtual void addToCoupling( const matrix_ptrtype& Mat, UInt position ) =0;
+
+
+    //!
+    /*!
+      adds a new block
+        @param Mat block matrix to push
+        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+     */
+    virtual void addToBlock( const matrix_ptrtype& Mat, UInt position );
 
     //! replaces a block
     /*!
@@ -174,6 +192,14 @@ public:
                          const vector_ptrtype numerationInterface,
                          const Real& timeStep)=0;
 
+
+
+    virtual void coupler(map_shared_ptrtype map,
+                          const std::map<ID, ID>& locDofMap,
+                          const vector_ptrtype numerationInterface,
+                          const Real& timeStep,
+                          UInt couplingBlock
+                          )=0;
 
     //! returns true if the operator is set
     /*!
@@ -227,10 +253,27 @@ public:
      */
     virtual void blockAssembling(){}
 
+
+    //!resets the blocks (frees the shared pointers)
+    /*!
+     */
+    virtual void resetBlocks()
+    {
+        M_blocks.clear();
+    }
+
+    //!sets the communicator
+    /*!
+     */
+    virtual void setComm(boost::shared_ptr<Epetra_Comm> comm )
+    {
+        M_comm = comm;
+    }
+
     //!resets the blocks, boundary conditions, FE spaces.
     /*!
      */
-    virtual void resetPrec()
+    virtual void reset()
     {
         M_blocks.clear();
         M_bch.clear();
@@ -262,11 +305,9 @@ public:
        \param value value to insert in the coupling blocks
      */
     void couplingMatrix(matrix_ptrtype & bigMatrix,
-                        ID coupling,
+                        Int coupling,
                         const std::vector<fespace_ptrtype> problem,
-                        //fespace_ptrtype* problem,
                         const std::vector<UInt> offset,
-                        //UInt* offset,
                         const std::map<ID, ID>& locDofMap,
                         const vector_ptrtype& numerationInterface,
                         const Real& timeStep=1.e-3,
@@ -309,7 +350,9 @@ public:
 
     //!computes the Robin coupling matrix
     /*!
-      Computes a matrix (to be summed to the preconditioner) that mixes the  coupling conditions between the blocks.
+      Computes a matrix that mixes the  coupling conditions between the blocks:
+       [0,0,0,0;0,0,0,alphaf;0,0,0,0;0,alphas,0,0].
+
       If the coupling
       conditions are of Dirichlet and Neumann type (e.g. continuity of velocity and stress) then the preconditioned
       system will have two Robin conditions instead.
@@ -336,6 +379,26 @@ public:
                         const std::map<ID, ID>& locDofMap,
                         const BlockInterface::vector_ptrtype& numerationInterface );
 
+    virtual void push_back_oper( BlockInterface& Oper);
+
+    virtual void push_back_coupling( matrix_ptrtype coupling)=0;
+    //@}
+
+    //!@name Getters
+    //@{
+    //! returns the vector of pointers to the blocks (by const reference).
+    const std::vector<matrix_ptrtype>&    getBlockVector(){return M_blocks;}
+
+    //! returns the vector of pointers to the BCHandlers (by const reference).
+    const std::vector<bchandler_ptrtype>& getBChVector(){return M_bch;}
+
+    //! returns the vector of pointers to the FE spaces (by const reference).
+    const std::vector<fespace_ptrtype>&   getFESpaceVector(){return M_FESpace;}
+
+    //! returns the vector of the offsets (by const reference).
+    const std::vector<UInt>&              getOffsetVector(){return M_offset;}
+    //@}
+
 protected:
 
 
@@ -354,12 +417,23 @@ protected:
     void
     swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& OperTo);
 
+    //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
+    /*!
+      \param operFrom shared_ptr to be swapped
+      \param operTo shared_ptr to be swapped
+     */
+    template <typename Operator>
+    void
+    insert(std::vector<Operator>& operFrom, std::vector<Operator>& OperTo);
+
     //ComposedPreconditioner<Epetra_Operator>                      M_blocks;
     std::vector<matrix_ptrtype>                                  M_blocks;
     std::vector<bchandler_ptrtype>                               M_bch;
     std::vector<fespace_ptrtype>                                 M_FESpace;
     std::vector<UInt>                                            M_offset;
     vector_ptrtype                                               M_numerationInterface;
+    boost::shared_ptr<Epetra_Comm>                               M_comm;
+    Int                                                          M_superCouplingFlag;
 
     //boost::shared_ptr<OperatorPtr>                M_blockPrec;
 private:
@@ -384,6 +458,15 @@ typedef singleton<factory<BlockInterface,  std::string> >     BlockPrecFactory;
         operFrom = operTo;
         operTo = tmp;
     }
+
+
+    template <typename Operator>
+    void
+    BlockInterface::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
+    {
+        vectorTo.insert(vectorTo.end(), vectorFrom.begin(), vectorFrom.end());
+    }
+
 
 } // Namespace LifeV
 
