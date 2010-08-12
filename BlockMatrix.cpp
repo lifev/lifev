@@ -43,7 +43,6 @@ namespace LifeV {
 
 int BlockMatrix::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver)
 {
-    linearSolver->setReusePreconditioner(!M_recompute);
     return linearSolver->solveSystem(rhs, step, M_globalMatrix);
 }
 
@@ -62,13 +61,21 @@ void BlockMatrix::coupler(map_shared_ptrtype map,
     ASSERT(!M_coupling.get(), "coupler must not be called twice \n");
     M_coupling.reset(new matrix_type(*map));
     super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
-    M_coupling->GlobalAssemble();
+}
+
+void BlockMatrix::coupler(map_shared_ptrtype map,
+                          const std::map<ID, ID>& locDofMap,
+                          const vector_ptrtype numerationInterface,
+                          const Real& timeStep,
+                          UInt /*flag1*/
+                            )
+{
+    super::couplingMatrix( M_coupling,  M_superCouplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
 
-void BlockMatrix::push_back_matrix( const matrix_ptrtype& Mat, bool recompute)
+void BlockMatrix::push_back_matrix( const matrix_ptrtype& Mat, bool /*recompute*/)
 {
-    M_recompute=recompute;
     super::M_blocks.push_back(Mat);
 }
 
@@ -87,12 +94,13 @@ void BlockMatrix::replace_precs( const epetra_operator_ptrtype& Mat, UInt index)
 
 void BlockMatrix::blockAssembling()
 {
+    M_coupling->GlobalAssemble();
     M_globalMatrix.reset(new matrix_type(M_coupling->getMap()));
     *M_globalMatrix += *M_coupling;
-    for(UInt k=0; k<super::M_blocks.size(); ++k)
+    for(UInt k=0; k<M_blocks.size(); ++k)
     {
-        super::M_blocks[k]->GlobalAssemble();
-        *M_globalMatrix += *super::M_blocks[k];
+        M_blocks[k]->GlobalAssemble();
+        *M_globalMatrix += *M_blocks[k];
     }
 }
 
@@ -100,6 +108,7 @@ void BlockMatrix::blockAssembling()
 void BlockMatrix::GlobalAssemble()
 {
     M_globalMatrix->GlobalAssemble();
+    //    M_globalMatrix->spy("Prec");
 }
 
 
@@ -207,6 +216,12 @@ void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs)
 {
     for( UInt i = 0; i < super::M_blocks.size(); ++i )
         bcManage( *M_globalMatrix, *rhs , *super::M_FESpace[i]->mesh(), super::M_FESpace[i]->dof(), *super::M_bch[i], super::M_FESpace[i]->feBd(), 1., time);
+}
+
+
+void BlockMatrix::addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/)
+{
+    *M_coupling += *Mat;
 }
 
 } // Namespace LifeV

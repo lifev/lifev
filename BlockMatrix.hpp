@@ -76,14 +76,13 @@ public:
         M_interfaceMap(),
         M_interface(0),
         M_couplingFlag(coupling),
-        M_recompute(),
         M_numerationInterface()
     {}
 
     ~BlockMatrix(){}
     //@}
 
-    //! @Virtual methods
+    //! @name Virtual methods
     //@{
     //! Sets the parameters needed by the class from data file
     /*!
@@ -120,6 +119,11 @@ public:
                          const vector_ptrtype numerationInterface,
                          const Real& timeStep);
 
+    void coupler(map_shared_ptrtype map,
+                 const std::map<ID, ID>& locDofMap,
+                 const vector_ptrtype numerationInterface,
+                 const Real& timeStep,
+                 UInt /*flag*/ );
 
     //! returns true if the operator has at least one block
     /*!
@@ -127,7 +131,7 @@ public:
     virtual bool  set(){return (bool) super::M_blocks.size();}
 
     //@}
-    //! @Public methods
+    //! @name Public methods
     //@{
 
     //! Solves the preconditioned linear system (used only when blockMatrix is used as a preconditioner)
@@ -145,9 +149,11 @@ public:
     /*!
       adds a new block
         @param Mat block matrix to push
-        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step.
+        In this case it is not used since it is equal to the boolean specifying wether the whole preconditioner must be
+        recomputed or not.
      */
-    void  push_back_matrix( const matrix_ptrtype& Mat, bool recompute);
+    void  push_back_matrix( const matrix_ptrtype& Mat, bool /*recompute*/);
 
     //! replaces a block
     /*!
@@ -242,6 +248,15 @@ public:
 
     //! applies the b.c. to the i-th block
     void applyBoundaryConditions(const Real& time, vector_ptrtype& rhs);
+
+    //! adds a block to the coupling matrix
+    void addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/);
+
+    void push_back_coupling( matrix_ptrtype coupling)
+    {
+        *M_coupling += *coupling;
+    }
+
     //@}
 
 protected:
@@ -254,7 +269,6 @@ protected:
 private:
 
     const UInt                                  M_couplingFlag;
-    bool                                        M_recompute;
     vector_ptrtype                              M_numerationInterface;
 
 };
