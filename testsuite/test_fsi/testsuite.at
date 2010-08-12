@@ -258,7 +258,7 @@ precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
 tol             = 1.e-10
-
+reuse           = true
 
 [../prec]
 prectype        = Ifpack

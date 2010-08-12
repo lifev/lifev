@@ -49,11 +49,16 @@ multimesh  = false  # actually we export also the displacement
 start      = 0
 #start      = 4
 save       = 1
+type       = ensight
+[./fluid]
+name = fluid
+[../solid]
+name = solid
 
 [fluid]
 
 useShapeDerivatives = true
-absorbing_bc		= false
+absorbing_bc		= true
 
 [./physics]
 density   = 1.0               # density
@@ -79,7 +84,7 @@ mesh_dir  = ./Mesh/ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
 
-vel_order		= P1Bubble		# P1, P1Bubble, P2
+vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
 
 [../miscellaneous]
@@ -229,7 +234,7 @@ precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
 tol             = 1.e-10
-
+reuse           = true
 
 [../prec]
 prectype        = Ifpack
