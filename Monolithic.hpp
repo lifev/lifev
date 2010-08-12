@@ -17,9 +17,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /**
- * \file monolithic.hpp
- * \author Paolo Crosetto
- * \date 13-09-2008
+ * @file monolithic.hpp
+ * @author Paolo Crosetto
+ * @date 13-09-2008
  * Class handling the monolithic solver for FSI problems. The block structure of the matrix can be
  \f$\left(\begin{array}{cc}
  C&B\\
@@ -65,7 +65,8 @@
 
 namespace LifeV
 {
-/**
+//! Monolithic.hpp pure virtual class containing the core methods of the monolithic FSI solver
+/*!
  * Class handling the monolithic solver for FSI problems. The block structure of the matrix can be
  \f$\left(\begin{array}{cc}
  C&B\\
@@ -120,7 +121,7 @@ public:
     /**
        sets the interface map between the fluid and solid meshes
     */
-    void setupDOF( void );
+    virtual void setupDOF( void );
 
     //!@}
 
@@ -176,7 +177,7 @@ public:
 
     //! getters
 
-    void setupSystem( );
+    virtual void setupSystem( );
 
     /**
        \small adds a constant scalar entry to a diagonal block of a matrix
@@ -195,7 +196,15 @@ public:
        of bdf!
     */
     void initialize( vector_ptrtype u0)
-    {M_un=u0;}
+    {
+        M_un=u0;
+
+        M_BCh_u->merge(*M_BCh_flux);
+        M_BCh_flux.reset();
+        M_BCh_d->merge(*M_BCh_Robin);
+        M_BCh_Robin.reset();
+
+    }
 
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -323,7 +332,7 @@ public:
     virtual void setFluidBC     ( const fluid_bchandler_type& bc_fluid )
     {
         super::setFluidBC(bc_fluid);
-        bc_fluid->merge(*M_BCh_flux);
+        //bc_fluid->merge(*M_BCh_flux);
     }
 
     /**
@@ -332,7 +341,7 @@ public:
     virtual void setSolidBC     ( const fluid_bchandler_type& bc_solid )
     {
         super::setSolidBC(bc_solid);
-        bc_solid->merge(*M_BCh_Robin);
+        //bc_solid->merge(*M_BCh_Robin);
     }
 
     //!@}
@@ -342,19 +351,29 @@ public:
       puts the solution vector into the vector sol
       \param sol: solution vector
     */
-    void getSolution                  (vector_ptrtype& sol){sol = M_un;}
+    virtual void getSolution                  (vector_ptrtype& sol)=0;
 
     //! initializes the solution by reference (through a shared_ptr)
     /*!
       \param sol: input pointer
     */
-    void setSolutionPtr                     (const vector_ptrtype& sol){initialize(sol);}
+    void setSolutionPtr                     ( vector_ptrtype sol){initialize(sol);}
 
     //! initializes the solution by copy
     /*!
       \param sol: input vector
     */
-    void setSolution                     (const vector_type& sol){*M_un=sol;}
+    //void setSolution                  ( const vector_type& sol ){ initialize(sol); }
+    void setSolution                     (const vector_type& sol)
+    {
+        *M_un=sol;
+
+        M_BCh_u->merge(*M_BCh_flux);
+        M_BCh_flux.reset();
+        M_BCh_d->merge(*M_BCh_Robin);
+        M_BCh_Robin.reset();
+
+    }
 
     //!initializes the solid displacement
     /*!
@@ -435,6 +454,7 @@ protected:
 
     void variablesInit(std::string const& dOrder);
 
+    int  setupBlockPrec(vector_type& /*rhs*/);
         //!@}
     //!@name protected setters
     //!@{
@@ -442,16 +462,11 @@ protected:
     void setOperator(Epetra_Operator& epetraOperator){M_linearSolver->setOperator(epetraOperator);}
 #endif
 
-    void setFluxBC             (fluid_bchandler_type bc_fluid);
-
-    void setRobinBC             (fluid_bchandler_type bc_solid);
-
     void fillFactorDiagonal();
     //!@}
 
     //!@name protected getters
     //!@{
-    const fluid_bchandler_type& BCh_flux()                      const { return M_BCh_flux; }
 
     virtual void assembleFluidBlock(UInt iter);
     //!@}
