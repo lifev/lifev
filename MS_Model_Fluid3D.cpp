@@ -198,7 +198,7 @@ MS_Model_Fluid3D::SetupModel()
     SetupBCOffset( M_BC->GetHandler() );
 
     //Fluid
-    M_fluid.reset( new Fluid_Type( *M_data, *M_uFESpace, *M_pFESpace, *M_comm, M_lmDOF ) );
+    M_fluid.reset( new Fluid_Type( *M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
     GetPot DataFile( M_fileName );
     M_fluid->setUp( DataFile ); //Remove Preconditioner and Solver if possible!
 
@@ -692,7 +692,7 @@ MS_Model_Fluid3D::SetupMesh()
     fluidMesh.transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_mesh.reset( new PartitionMesh_Type( fluidMesh, *M_comm ) );
+    M_mesh.reset( new PartitionMesh_Type( fluidMesh, M_comm ) );
 }
 
 void
