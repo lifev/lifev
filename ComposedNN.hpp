@@ -140,12 +140,14 @@ public:
       \param oper: input matrix
       \param position: position
      */
-    void replace_matrix( matrix_ptrtype& oper, UInt position );
+    void replace_matrix( const matrix_ptrtype& oper, UInt position );
+
+    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
     //@}
 
 protected:
 
-    boost::shared_ptr<ComposedPreconditioner<Epetra_Operator> >            M_blockPrecs;
+    boost::shared_ptr<ComposedPreconditioner<ComposedPreconditioner<Ifpack_Preconditioner> > >            M_blockPrecs;
     Teuchos::ParameterList                                                 M_list;
     std::vector<boost::shared_ptr<Ifpack_Preconditioner> >                 M_prec;
 
