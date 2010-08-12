@@ -110,8 +110,8 @@ public:
 	  \param Epetra communicator
     */
     IonicSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& uFEspace,
-           Epetra_Comm&              comm );
+                 FESpace<Mesh, EpetraMap>& uFEspace,
+                 boost::shared_ptr<Epetra_Comm> comm );
 
 
     //! virtual destructor
@@ -146,7 +146,7 @@ public:
     FESpace<Mesh, EpetraMap>&      M_uFESpace;
 
     //! MPI communicator
-    Epetra_Comm*                   M_comm;
+    boost::shared_ptr<Epetra_Comm> M_comm;
 
     int                            M_me;
 
@@ -172,11 +172,11 @@ protected:
 template<typename Mesh, typename SolverType>
 IonicSolver<Mesh, SolverType>::
 IonicSolver( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& uFEspace,
-       Epetra_Comm&              comm ):
+             FESpace<Mesh, EpetraMap>& uFEspace,
+             boost::shared_ptr<Epetra_Comm> comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFEspace ),
-    M_comm                   ( &comm ),
+    M_comm                   ( comm ),
     M_me                     ( M_comm->MyPID() ),
     M_localMap               ( M_uFESpace.map() ),
     M_verbose                ( M_me == 0)
@@ -202,8 +202,8 @@ public:
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
     Rogers_McCulloch( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& uFEspace,
-           Epetra_Comm&              comm );
+                      FESpace<Mesh, EpetraMap>& uFEspace,
+                      boost::shared_ptr<Epetra_Comm> comm );
     virtual ~Rogers_McCulloch();
 
     //! Update the ionic model elvecs
@@ -245,8 +245,8 @@ private:
 template<typename Mesh, typename SolverType>
 Rogers_McCulloch<Mesh, SolverType>::
 Rogers_McCulloch( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& uFEspace,
-       Epetra_Comm&              comm ):
+                  FESpace<Mesh, EpetraMap>& uFEspace,
+                  boost::shared_ptr<Epetra_Comm> comm ):
     	   IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
     	   M_sol_w                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
     	   M_wVecRep( M_sol_w, Repeated ),
@@ -375,8 +375,8 @@ public:
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
     Luo_Rudy( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& uFEspace,
-           Epetra_Comm&              comm );
+              FESpace<Mesh, EpetraMap>& uFEspace,
+              boost::shared_ptr<Epetra_Comm> comm );
     virtual ~Luo_Rudy();
 
     void updateRepeated( );
@@ -497,7 +497,7 @@ template<typename Mesh, typename SolverType>
 Luo_Rudy<Mesh, SolverType>::
 Luo_Rudy( const data_type&          dataType,
 		FESpace<Mesh, EpetraMap>& uFEspace,
-		Epetra_Comm&              comm ):
+          boost::shared_ptr<Epetra_Comm> comm ):
 			IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
 			M_sol_h                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_sol_j                  ( IonicSolver<Mesh, SolverType>::M_localMap ),

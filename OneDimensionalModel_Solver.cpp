@@ -808,7 +808,7 @@ void
 OneDimensionalModel_Solver::setCommunicator( const Comm_PtrType Comm )
 {
     M_Comm = Comm;
-    M_Displayer.SetCommunicator( *Comm );
+    M_Displayer.SetCommunicator( Comm );
 }
 
 void

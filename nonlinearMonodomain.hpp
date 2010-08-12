@@ -101,9 +101,9 @@ public:
       \param Epetra communicator
     */
     Nonlinearmonodomain( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& uFESpace,
-           BCHandler&                bcHandler,
-           Epetra_Comm&              comm );
+                         FESpace<Mesh, EpetraMap>& uFESpace,
+                         BCHandler&                bcHandler,
+                         boost::shared_ptr<Epetra_Comm> comm );
 
     /*!
       \param dataType
@@ -111,8 +111,8 @@ public:
       \param Epetra communicator
     */
     Nonlinearmonodomain( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& uFESpace,
-           Epetra_Comm&              comm );
+                         FESpace<Mesh, EpetraMap>& uFESpace,
+                         boost::shared_ptr<Epetra_Comm> comm );
 
     //! virtual destructor
     virtual ~Nonlinearmonodomain();
@@ -204,7 +204,7 @@ protected:
     FESpace<Mesh, EpetraMap>&      M_uFESpace;
 
     //! MPI communicator
-    Epetra_Comm*                   M_comm;
+    boost::shared_ptr<Epetra_Comm> M_comm;
     int                            M_me;
 
     //! Monodomain BC
@@ -287,12 +287,12 @@ Nonlinearmonodomain<Mesh, SolverType>::
 Nonlinearmonodomain( const data_type&          dataType,
 		     FESpace<Mesh, EpetraMap>& uFESpace,
 		     BCHandler&                BCh_u,
-		     Epetra_Comm&              comm ):
+		     boost::shared_ptr<Epetra_Comm>       comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_BCh_electric           ( &BCh_u ),
     M_setBC                  ( true ),
-    M_comm                   ( &comm ),
+    M_comm                   ( comm ),
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver           ( ),
     M_prec                   ( ),
@@ -344,11 +344,11 @@ template<typename Mesh, typename SolverType>
 Nonlinearmonodomain<Mesh, SolverType>::
 Nonlinearmonodomain( const data_type&          dataType,
 		     FESpace<Mesh, EpetraMap>& uFESpace,
-		     Epetra_Comm&              comm ):
+		     boost::shared_ptr<Epetra_Comm>       comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_setBC                  ( false ),
-    M_comm                   ( &comm ),
+    M_comm                   ( comm ),
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver           ( ),
     M_prec                   ( new prec_raw_type() ),
