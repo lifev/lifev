@@ -50,13 +50,11 @@ void ComposedDN2::coupler(map_shared_ptrtype map,
     couplingMatrix( coupling2, 8, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep );
     coupling2->insertValueDiagonal( one, 1 ,M_offset[0]+1);
     coupling2->insertValueDiagonal( one, M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements(), map->getMap(Unique)->NumGlobalElements()+1);
-    coupling2->GlobalAssemble();
     M_coupling.push_back(coupling2);
 
     matrix_ptrtype coupling(new matrix_type(*map));
     couplingMatrix( coupling,  6, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
     coupling->insertValueDiagonal( one, M_FESpace[0]->map() , M_offset[0]);/*dFESpace*/
-    coupling->GlobalAssemble();
     M_coupling.push_back(coupling);
     //blockView->insertValueDiagonal( one, *M_interfaceMap, offset2+M_dMap->getMap(Unique)->NumGlobalElements());
     //super::super::blockAssembling();

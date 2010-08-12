@@ -31,7 +31,7 @@
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 08 Jun 2010
 
-    We call the nobolithic GCE matrix (with the fluid snd structure blocks C and N, couplings B and D):
+    We call the monolithic GCE matrix (with the fluid snd structure blocks C and N, couplings B and D):
     \f$
     A=\left(\begin{array}{cc}
     C&B\\
@@ -56,6 +56,9 @@
     0&I
     \end{array}\right)\f$ and applying a preconditioning strategy (algebraic additive Schwarz \f$P_{AS}\f$)
     to each factor, so that \f$ P^{-1}=(P_{AS}(P_2))^{-1}(P_{AS}(P_1))^{-1}\f$.
+
+    NOTE: this class is also the base class for other types of preconditioners, like ComposedDN2, ComposedDND. In fact for
+    instance it is used as F-S block in the preconditioners for the GI matrix in MonolithicGI
  */
 
 #ifndef COMPOSEDDN_H
@@ -84,7 +87,7 @@ public:
     ComposedDN():
         super(),
         M_couplingFlag(7),
-        M_blockPrecs(new IfpackComposedPrec()),
+        M_blockPrecs(),
         M_uMap(),
         M_pMap(),
         M_dMap(),
@@ -94,10 +97,10 @@ public:
         //M_bch.resize(2);
     }
 
-    ComposedDN(UInt flag):
-        super(),
-        M_couplingFlag(flag),
-        M_blockPrecs(new IfpackComposedPrec()),
+    ComposedDN( Int flag, Int superFlag = 16 ):
+        super( superFlag ),
+        M_couplingFlag( flag ),
+        M_blockPrecs(),
         M_uMap(),
         M_pMap(),
         M_dMap(),
@@ -172,6 +175,13 @@ public:
     void setDataFromGetPot( const GetPot& dataFile,
                             const std::string& section );
 
+    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
+
+    void setComm( boost::shared_ptr<Epetra_Comm> comm )
+    {
+        M_comm = comm;
+        M_blockPrecs.reset( new IfpackComposedPrec(M_comm));
+    }
 
 protected:
 

@@ -49,17 +49,18 @@ void ComposedDN::coupler(map_shared_ptrtype map,
                          const vector_ptrtype numerationInterface,
                          const Real& timeStep)
 {
-    UInt one(1.);
+    UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
+    UInt solidAndFluid(M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements());
+
     matrix_ptrtype coupling(new matrix_type(*map));
-    coupling->insertValueDiagonal( one, M_offset[1]+1, M_offset[0]+1);
-    coupling->insertValueDiagonal( one, M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements(),  map->getMap(Unique)->NumGlobalElements()+1);
-    coupling->GlobalAssemble();
+    coupling->insertValueDiagonal( 1., M_offset[1]+1, M_offset[0]+1 );
+    coupling->insertValueDiagonal( 1., solidAndFluid, totalDofs+1 );
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_type(*map));
-    couplingMatrix( coupling,  M_couplingFlag, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep) ;
-    coupling->insertValueDiagonal( one, M_FESpace[0]->map()/*dFESpace*/ , M_offset[0] );
-    coupling->GlobalAssemble();
+    couplingMatrix( coupling,  M_couplingFlag, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    coupling->insertValueDiagonal( 1. , M_offset[0], solidAndFluid );
+
     M_coupling.push_back(coupling);
 }
 
@@ -78,6 +79,8 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
         {
             if(M_recompute[k])
                 replace_precs(M_blocks[k], k);
+            else
+                linearSolver->displayer()->leaderPrint("\n  M-  reusing prec. factor ", k);
         }
     }
     return linearSolver->solveSystem(rhs, step, boost::static_pointer_cast<EpetraPreconditioner>(M_blockPrecs));

@@ -84,8 +84,14 @@ class ComposedDN2 : public ComposedDN
 public:
     typedef ComposedDN super;
 
-    ComposedDN2():
-        super(11)
+    ComposedDN2( Int couplingFlag = 11 ):
+        super( couplingFlag )
+    {
+    }
+
+
+    ComposedDN2( Int couplingFlag , Int superCouplingFlag  ):
+        super( couplingFlag, superCouplingFlag )
     {
     }
 
