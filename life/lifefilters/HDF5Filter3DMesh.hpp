@@ -122,7 +122,7 @@ public:
       (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addPartitionGraph(const graph_ptrtype& graph, Epetra_Comm* comm)
+    void addPartitionGraph(const graph_ptrtype& graph, boost::shared_ptr<Epetra_Comm> comm)
     {M_graph = graph; M_comm = comm;}
 
     //! Add all of the mesh partitions to the post processing data file (serial operation)
@@ -132,7 +132,7 @@ public:
       pointers to the mesh partitions (as returned by partitionMesh::meshAllPartitions() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMeshPartitionAll(const serial_mesh_ptrtype& meshPointer, Epetra_Comm* comm)
+    void addMeshPartitionAll(const serial_mesh_ptrtype& meshPointer, boost::shared_ptr<Epetra_Comm> comm)
     {M_serialMesh = meshPointer; M_parallelMesh.reset(); M_comm = comm;}
 
     //! Add to HDF5 file the mesh partition that belongs to the current process (parallel operation)
@@ -144,7 +144,7 @@ public:
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMyMeshPartition(const mesh_ptrtype& meshPointer, Epetra_Comm* comm)
+    void addMyMeshPartition(const mesh_ptrtype& meshPointer, boost::shared_ptr<Epetra_Comm> comm)
     {/*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/}
 
     //! Load the partitioned graph from a HDF5 file into a partitionMesh object
@@ -153,7 +153,7 @@ public:
       partitionMesh object (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - a raw pointer to the Epetra communicator to be used
     */
-    void loadGraph(graph_ptrtype graph, Epetra_Comm* comm);
+    void loadGraph(graph_ptrtype graph, boost::shared_ptr<Epetra_Comm> comm);
 
     //! Load a mesh partition according to the MPI PID
     /*!
@@ -164,7 +164,7 @@ public:
       \param meshPartition - shared_ptr<Mesh> - shared pointer to mesh partition object
       \param comm -Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void loadMyPartition(mesh_ptrtype meshPartition, Epetra_Comm* comm);
+    void loadMyPartition(mesh_ptrtype meshPartition, boost::shared_ptr<Epetra_Comm> comm);
 
 private:
 
@@ -177,10 +177,10 @@ private:
 
     //@}
 
-    serial_mesh_ptrtype   M_serialMesh;
-    mesh_ptrtype          M_parallelMesh;
-    graph_ptrtype         M_graph;
-    Epetra_Comm*          M_comm;
+    serial_mesh_ptrtype                    M_serialMesh;
+    mesh_ptrtype                           M_parallelMesh;
+    graph_ptrtype                          M_graph;
+    boost::shared_ptr<Epetra_Comm>         M_comm;
 
 };
 

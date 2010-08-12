@@ -63,7 +63,7 @@ public:
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    partitionMesh(Mesh &_mesh, Epetra_Comm &_comm, Epetra_Map* interfaceMap = 0,
+    partitionMesh(Mesh &_mesh, boost::shared_ptr<Epetra_Comm> _comm, Epetra_Map* interfaceMap = 0,
                   Epetra_Map* interfaceMapRep = 0);
     //! Empty destructor
     ~partitionMesh() {}
@@ -102,7 +102,7 @@ public:
       \param dataFile - GetPot - the data file containing all simulation options
       \param _comm - Epetra_Comm& - reference of the Epetra communicator used
     */
-    void setup(UInt partitionNumber, Epetra_Comm &_comm);
+    void setup(UInt partitionNumber, boost::shared_ptr<Epetra_Comm> _comm);
     //! Call update() method after loading the graph, to rebuild all data structures
     /*!
       This method is to be called after the partitioned graph is LOADED from a HDF5 file.
@@ -234,13 +234,13 @@ private:
     //@}
     //! Private Data Members
     //@{
-    UInt                    M_nPartitions;
-    partmesh_ptrtype        M_mesh;
-    std::vector<int>        M_vertexDist;
-    std::vector<int>        M_iadj;
-    std::vector<int>        M_jadj;
-    Epetra_Comm*            M_comm;
-    UInt                    M_me;
+    UInt                                 M_nPartitions;
+    partmesh_ptrtype                     M_mesh;
+    std::vector<int>                     M_vertexDist;
+    std::vector<int>                     M_iadj;
+    std::vector<int>                     M_jadj;
+    boost::shared_ptr<Epetra_Comm>       M_comm;
+    UInt                                 M_me;
 
     std::vector<std::vector<int> >       M_localNodes;
     std::vector<std::set<int> >          M_localEdges;
@@ -284,11 +284,11 @@ partitionMesh<Mesh>::partitionMesh()
 }
 
 template<typename Mesh>
-partitionMesh<Mesh>::partitionMesh(Mesh &_mesh, Epetra_Comm &_comm,
+partitionMesh<Mesh>::partitionMesh(Mesh &_mesh, boost::shared_ptr<Epetra_Comm> _comm,
                                    Epetra_Map* interfaceMap,
                                    Epetra_Map* interfaceMapRep):
     M_nPartitions (1),
-    M_comm (&_comm),
+    M_comm (_comm),
     M_originalMesh (&_mesh),
     M_interfaceMap (interfaceMap),
     M_interfaceMapRep (interfaceMapRep),
@@ -315,10 +315,10 @@ partitionMesh<Mesh>::partitionMesh(Mesh &_mesh, Epetra_Comm &_comm,
 }
 
 template<typename Mesh>
-void partitionMesh<Mesh>::setup(UInt partitionNumber, Epetra_Comm &_comm)
+void partitionMesh<Mesh>::setup(UInt partitionNumber, boost::shared_ptr<Epetra_Comm> _comm)
 {
     M_serialMode = true;
-    M_comm = &_comm;
+    M_comm = _comm;
     M_me = M_comm->MyPID();
     setElementParameters();
 
@@ -629,7 +629,7 @@ void partitionMesh<Mesh>::partitionConnectivityGraph(UInt nParts)
     // imbalance tolerance for each vertex weight
     std::vector<float> ubvec(ncon, 1.05);
 
-    Epetra_MpiComm* mpiComm = dynamic_cast <Epetra_MpiComm*> (M_comm);
+    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
 
     int nprocs;
@@ -673,7 +673,7 @@ void partitionMesh<Mesh>::partitionConnectivityGraph(UInt nParts)
 template<typename Mesh>
 void partitionMesh<Mesh>::matchFluidPartitionsFSI()
 {
-    Epetra_MpiComm* mpiComm = dynamic_cast <Epetra_MpiComm*> (M_comm);
+    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
     int nprocs;
     MPI_Comm_size(MPIcomm, &nprocs);
@@ -781,7 +781,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
 template<typename Mesh>
 void partitionMesh<Mesh>::redistributeElements()
 {
-    Epetra_MpiComm* mpiComm = dynamic_cast <Epetra_MpiComm*> (M_comm);
+    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
     int nProc;
     MPI_Comm_size(MPIcomm, &nProc);
