@@ -40,7 +40,7 @@ SolverTrilinos::SolverTrilinos() :
     M_prec                 (),
     M_solver               (),
     M_TrilinosParameterList(),
-    M_Displayer            (),
+    M_displayer            (new Displayer()),
     M_tol                  ( 0. ),
     M_maxIter              ( 0 ),
     M_maxIterForReuse      ( 0 ),
@@ -48,11 +48,11 @@ SolverTrilinos::SolverTrilinos() :
 {
 }
 
-SolverTrilinos::SolverTrilinos( const Epetra_Comm& comm ) :
+SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm> comm ) :
     M_prec                 (),
     M_solver               (),
     M_TrilinosParameterList(),
-    M_Displayer            ( &comm ),
+    M_displayer            ( new Displayer(comm) ),
     M_tol                  ( 0. ),
     M_maxIter              ( 0 ),
     M_maxIterForReuse      ( 0 ),
@@ -110,9 +110,9 @@ SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
 // Set Methods
 // ===================================================
 void
-SolverTrilinos::SetCommunicator( const Epetra_Comm& comm )
+SolverTrilinos::SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm )
 {
-    M_Displayer.SetCommunicator( comm );
+    M_displayer->SetCommunicator( comm );
 }
 
 void SolverTrilinos::setMatrix( matrix_type& m)
@@ -235,10 +235,10 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
 
 #ifdef DEBUG
 
-     M_Displayer.comm().Barrier();
-     M_Displayer.leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
-     M_Displayer.leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
-     M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+     M_displayer->comm().Barrier();
+     M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
+     M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
+     M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
 
      /* try to solve again (reason may be:
@@ -254,10 +254,10 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
          status = M_solver.Iterate(maxiter, mytol);
 
 #ifdef DEBUG
-         M_Displayer.comm().Barrier();
-         M_Displayer.leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
-         M_Displayer.leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
-         M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+         M_displayer->comm().Barrier();
+         M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
+         M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
+         M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
          return(M_solver.NumIters() + olditer);
      }
@@ -319,15 +319,15 @@ void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
 
     chrono.start();
 
-    M_Displayer.leaderPrint("      Computing the precond ...                ");
+    M_displayer->leaderPrint("      Computing the precond ...                ");
 
     M_prec->buildPreconditioner(prec);
 
     condest = M_prec->Condest();
     chrono.stop();
 
-    M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-    M_Displayer.leaderPrint("      Estimated condition number = " , condest );
+    M_displayer->leaderPrintMax( "done in " , chrono.diff() );
+    M_displayer->leaderPrint("      Estimated condition number = " , condest );
 }
 
 void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)
@@ -351,10 +351,10 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
 
     Chrono chrono;
 
-    M_Displayer.leaderPrint("      Setting up the solver ...                \n");
+    M_displayer->leaderPrint("      Setting up the solver ...                \n");
 
     if (baseMatrixForPreconditioner.get() == 0)
-        M_Displayer.leaderPrint("      Warning: baseMatrixForPreconditioner is empty     \n");
+        M_displayer->leaderPrint("      Warning: baseMatrixForPreconditioner is empty     \n");
 
     if ( !isPrecSet() || !M_reusePreconditioner  )
     {
@@ -364,7 +364,7 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
     }
     else
     {
-        M_Displayer.leaderPrint("      Reusing  precond ...                 \n");
+        M_displayer->leaderPrint("      Reusing  precond ...                 \n");
     }
 
     int numIter = solveSystem(rhsFull, sol, M_prec);
@@ -375,19 +375,19 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
     {
         chrono.start();
 
-        M_Displayer.leaderPrint("     Iterative solver failed, numiter = " , - numIter);
-        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIter );
-        M_Displayer.leaderPrint("     retrying:          ");
+        M_displayer->leaderPrint("     Iterative solver failed, numiter = " , - numIter);
+        M_displayer->leaderPrint("     maxIterSolver = " , M_maxIter );
+        M_displayer->leaderPrint("     retrying:          ");
 
         buildPreconditioner(baseMatrixForPreconditioner);
 
         chrono.stop();
-        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+        M_displayer->leaderPrintMax( "done in " , chrono.diff() );
         // Solving again, but only once (retry = false)
         numIter = solveSystem(rhsFull, sol, M_prec);
 
         if (numIter < 0)
-            M_Displayer.leaderPrint(" ERROR: Iterative solver failed again.\n");
+            M_displayer->leaderPrint(" ERROR: Iterative solver failed again.\n");
     }
 
     if ( abs(numIter) > M_maxIterForReuse)

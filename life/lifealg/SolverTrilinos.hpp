@@ -95,7 +95,7 @@ public:
     //@{
 
     SolverTrilinos();
-    SolverTrilinos( const Epetra_Comm& );
+    SolverTrilinos( const boost::shared_ptr<Epetra_Comm> );
 
     //@}
 
@@ -128,7 +128,7 @@ public:
     //@{
 
     //! Method to set communicator for Displayer (for empty constructor)
-    void SetCommunicator( const Epetra_Comm& comm);
+    void SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm);
 
     //! Method to set matrix from EpetraMatrix
     void setMatrix(matrix_type& m);
@@ -151,6 +151,7 @@ public:
     //! if set to true,  do not recompute the preconditioner
     void setReusePreconditioner( const bool reuse );
 
+    boost::shared_ptr<Displayer> displayer(){return M_displayer;}
     //@}
 
 
@@ -224,7 +225,7 @@ private:
     AztecOO                     M_solver;
 
     Teuchos::ParameterList      M_TrilinosParameterList;
-    Displayer                   M_Displayer;
+    boost::shared_ptr<Displayer> M_displayer;
 
     double                      M_tol;
     int                         M_maxIter;
@@ -238,7 +239,7 @@ int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
                                  PrecPtrOperator          prec )
 
 {
-    M_Displayer.leaderPrint("      Solving system ...                   \n");
+    M_displayer->leaderPrint("      Solving system ...                   \n");
 
     setPreconditioner(prec);
 
@@ -246,7 +247,7 @@ int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
     chrono.start();
     int numIter = solve( sol, rhsFull );
     chrono.stop();
-    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
+    M_displayer->leaderPrintMax( "       ... done in " , chrono.diff() );
 
     if (numIter >= M_maxIter)
         numIter = -numIter;

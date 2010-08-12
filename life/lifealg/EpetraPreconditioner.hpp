@@ -75,10 +75,10 @@ public:
      */
     //@{
     //! default constructor.
-    EpetraPreconditioner(const Epetra_Comm* comm=0);
+    EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    EpetraPreconditioner(EpetraPreconditioner& P, const Epetra_Comm* comm=0);
+    EpetraPreconditioner(EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~EpetraPreconditioner();
@@ -99,7 +99,7 @@ public:
 
     /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
      it must derive from the Epetra_Operator object*/
-    virtual prec_type  getPrecPtr()=0;
+    virtual prec_type       getPrecPtr()=0;
 
     //! Return the type name of the preconditioner.
     /*!
