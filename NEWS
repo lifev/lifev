@@ -1,5 +1,11 @@
 # -*- readme-debian -*-
 
+LifeV  1.2.3:
+=============
+
+heart modeling has some errors that are fixed on the head.
+It is now removed from 1.2.3 and will be in release 1.4.X
+
 LifeV  1.2.2:
 =============
 
@@ -9,7 +15,6 @@ Recent new features includes:
 * better doxygen documentation (although a lot of work is still needed in this direction)
 * gcc 4.4.2 compatibility
 * fixed distribution files
-
 
 
 LifeV  1.1.1:
