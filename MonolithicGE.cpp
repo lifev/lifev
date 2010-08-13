@@ -61,6 +61,7 @@ void MonolithicGE::setupFluidSolid()
     //                                                                    *M_pFESpace,
     //                                                                    *M_epetraComm));
 
+    M_un.reset (new vector_type(*this->M_monolithicMap));
     M_rhs.reset(new vector_type(*this->M_monolithicMap));
     M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
     M_beta.reset  (new vector_type(M_uFESpace->map()));
