@@ -12,7 +12,7 @@ blockOper   = AdditiveSchwarz
 #AdditiveSchwarzGI
 #AdditiveSchwarzRNGI
 
-DDBlockPrec = ComposedDN
+DDBlockPrec = ComposedDNND
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -90,6 +90,7 @@ mesh_dir  = ./Mesh/
 mesh_file = tube20.mesh
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
+stiff_strain    = true
 
 [../miscellaneous]
 verbose   = 1
@@ -106,6 +107,7 @@ reuse = true
 [../] # physics
 [../] # fluid
 
+[interface]
 fluid_flag      =  1 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
 [../] # interface
