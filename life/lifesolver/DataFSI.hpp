@@ -208,12 +208,6 @@ public:
      */
     inline DDNPreconditioner DDNpreconditioner() const { return M_DDNpreconditioner; }
 
-    //! Get DDBlockPreconditioner type
-    /*!
-     * @return DDBlockPreconditioner type
-     */
-    inline UInt DDBlockPreconditioner() const { return M_DDBlockPreconditioner; }
-
     //! Get method type
     /*!
      * @return method type
@@ -278,24 +272,6 @@ public:
      */
     inline Real interfaceTolerance() const { return M_interfaceTolerance; }
 
-    //! Get Robin-Neumann coupling flag
-    /*!
-     * @return Robin-Neumann coupling flag
-     */
-    inline bool RobinNeumannCoupling() const { return M_RobinNeumannCoupling; }
-
-    //! Get Robin-Neumann fluid coefficient
-    /*!
-     * @return Robin-Neumann fluid coefficient
-     */
-    const Real& RobinNeumannFluidCoefficient() const { return M_RobinNeumannFluidCoefficient; }
-
-    //! Get Robin-Neumann solid coefficient
-    /*!
-     * @return Robin-Neumann solid coefficient
-     */
-    const Real& RobinNeumannSolidCoefficient() const { return M_RobinNeumannSolidCoefficient; }
-
     //@}
 
 private:
@@ -330,10 +306,6 @@ private:
     int                           M_structureInterfaceFlag;
     int                           M_harmonicInterfaceFlag;
     Real                          M_interfaceTolerance;
-
-    bool                          M_RobinNeumannCoupling;
-    Real                          M_RobinNeumannFluidCoefficient;
-    Real                          M_RobinNeumannSolidCoefficient;
 };
 
 

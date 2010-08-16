@@ -52,7 +52,6 @@ DataFSI::DataFSI( ) :
     M_linesearch                    (),
     M_preconditioner                (),
     M_DDNpreconditioner             (),
-    M_DDBlockPreconditioner         (),
     M_method                        (),
     M_algorithm                     (),
     M_defaultOmega                  (),
@@ -62,10 +61,7 @@ DataFSI::DataFSI( ) :
     M_solidInterfaceFlag            (),
     M_structureInterfaceFlag        (),
     M_harmonicInterfaceFlag         (),
-    M_interfaceTolerance            (),
-    M_RobinNeumannCoupling          (),
-    M_RobinNeumannFluidCoefficient  (),
-    M_RobinNeumannSolidCoefficient  ()
+    M_interfaceTolerance            ()
 {
 }
 
@@ -79,7 +75,6 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
     M_linesearch                    ( DataFSI.M_linesearch ),
     M_preconditioner                ( DataFSI.M_preconditioner ),
     M_DDNpreconditioner             ( DataFSI.M_DDNpreconditioner ),
-    M_DDBlockPreconditioner         ( DataFSI.M_DDBlockPreconditioner ),
     M_method                        ( DataFSI.M_method ),
     M_algorithm                     ( DataFSI.M_algorithm ),
     M_defaultOmega                  ( DataFSI.M_defaultOmega ),
@@ -89,10 +84,7 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
     M_solidInterfaceFlag            ( DataFSI.M_solidInterfaceFlag ),
     M_structureInterfaceFlag        ( DataFSI.M_structureInterfaceFlag ),
     M_harmonicInterfaceFlag         ( DataFSI.M_harmonicInterfaceFlag ),
-    M_interfaceTolerance            ( DataFSI.M_interfaceTolerance ),
-    M_RobinNeumannCoupling          ( DataFSI.M_RobinNeumannCoupling ),
-    M_RobinNeumannFluidCoefficient  ( DataFSI.M_RobinNeumannFluidCoefficient ),
-    M_RobinNeumannSolidCoefficient  ( DataFSI.M_RobinNeumannSolidCoefficient )
+    M_interfaceTolerance            ( DataFSI.M_interfaceTolerance )
 {
 }
 
@@ -114,7 +106,6 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_linesearch                    = DataFSI.M_linesearch;
         M_preconditioner                = DataFSI.M_preconditioner;
         M_DDNpreconditioner             = DataFSI.M_DDNpreconditioner;
-        M_DDBlockPreconditioner         = DataFSI.M_DDBlockPreconditioner;
         M_method                        = DataFSI.M_method;
         M_algorithm                     = DataFSI.M_algorithm;
         M_defaultOmega                  = DataFSI.M_defaultOmega;
@@ -125,9 +116,6 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_structureInterfaceFlag        = DataFSI.M_structureInterfaceFlag;
         M_harmonicInterfaceFlag         = DataFSI.M_harmonicInterfaceFlag;
         M_interfaceTolerance            = DataFSI.M_interfaceTolerance;
-        M_RobinNeumannCoupling          = DataFSI.M_RobinNeumannCoupling;
-        M_RobinNeumannFluidCoefficient  = DataFSI.M_RobinNeumannFluidCoefficient;
-        M_RobinNeumannSolidCoefficient  = DataFSI.M_RobinNeumannSolidCoefficient;
     }
 
 	return *this;
@@ -166,12 +154,6 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
     M_structureInterfaceFlag = dataFile( "interface/structure_flag", M_fluidInterfaceFlag );
     M_harmonicInterfaceFlag = dataFile( "interface/harmonic_flag",  M_fluidInterfaceFlag );
     M_interfaceTolerance = dataFile( "interface/tolerance",      0. );
-
-    // Interface - Monolithic
-    M_DDBlockPreconditioner = dataFile( "interface/DDBlockPrec", 0 );
-    M_RobinNeumannCoupling  = dataFile( "interface/robinNeumannCoupling", false );
-    M_RobinNeumannFluidCoefficient = dataFile( "interface/alphaf", 0.5 );
-    M_RobinNeumannSolidCoefficient = dataFile( "interface/alphas", 0.5 );
 }
 
 bool
@@ -198,7 +180,6 @@ DataFSI::showMe( std::ostream& output )
 
     output << "Preconditioner                   = " << M_preconditioner << std::endl;
     output << "DDNPreconditioner                = " << M_DDNpreconditioner << std::endl;
-    output << "DDBlockPreconditioner            = " << M_DDBlockPreconditioner << std::endl;
 
     output << "Method                           = " << M_method << std::endl;
     output << "Algorithm                        = " << M_algorithm << std::endl;
@@ -214,9 +195,6 @@ DataFSI::showMe( std::ostream& output )
     output << "Interface harmonic               = " << M_harmonicInterfaceFlag << std::endl;
     output << "Interface tolerance              = " << M_interfaceTolerance << std::endl;
 
-    output << "Robin-Neumann coupling           = " << M_RobinNeumannCoupling << std::endl;
-    output << "Robin-Neumann fluid coefficient  = " << M_RobinNeumannFluidCoefficient << std::endl;
-    output << "Robin-Neumann solid coefficient  = " << M_RobinNeumannSolidCoefficient << std::endl;
 }
 
 }
