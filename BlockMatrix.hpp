@@ -52,6 +52,9 @@ namespace LifeV {
 class BlockMatrix            : public BlockInterface
 {
 public:
+
+    //! @name Public Types
+    //@{
     typedef  BlockInterface                 super;
     typedef  super::fespace_shared_ptrtype  fespace_ptrtype;
     typedef  super::vector_type             vector_type;
@@ -61,9 +64,8 @@ public:
     typedef  super::matrix_ptrtype          matrix_ptrtype;
     typedef  super::epetra_operator_ptrtype epetra_operator_ptrtype;
     typedef  super::map_shared_ptrtype      map_shared_ptrtype;
-
     typedef singleton<factory<BlockMatrix,  std::string> >     Factory;
-
+    //@}
 
 
     //! @name Constructor & Destructor
@@ -114,14 +116,32 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(map_shared_ptrtype map,
+    virtual void coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype numerationInterface,
+                         const vector_ptrtype& numerationInterface,
                          const Real& timeStep);
 
-    void coupler(map_shared_ptrtype map,
+
+    //! Adds a coupling part to the already existing coupling matrix
+    /*!
+      The coupling is handled
+      through an augmented formulation, introducing new variables (multipliers). Needs as input: the global map of the problem,
+      the two FESpaces of the subproblems to be coupled with their offsets, a std::map holding the two numerations of the
+      interface between the two subproblems (the numeration can be different but the nodes must be matching in each
+      subdomain), an EpetraVector defined on the multipliers map containing the corresponding dof at the interface (NB: the multipliers map should be constructed from the second numeration in the std::map)
+      @param map the map of the global problem
+      @param FESpace1 FESpace of the first problem
+      @param offset1  offset for the first block in the global matrix
+      @param FESpace2 FESpace of the second problem
+      @param offset2  offset for the second block in the global matrix
+      @param locDofMap std::map with the correspondence between the interface dofs for the two different maps in
+      the subproblems
+      @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
+      @param  unused flag kept for compliance with the base class
+     */
+    void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype numerationInterface,
+                 const vector_ptrtype& numerationInterface,
                  const Real& timeStep,
                  UInt /*flag*/ );
 
@@ -250,9 +270,18 @@ public:
     void applyBoundaryConditions(const Real& time, vector_ptrtype& rhs);
 
     //! adds a block to the coupling matrix
+    /*!
+      @param Mat: block added
+      @param position of the block, unused here because there is only one coupling matrix
+     */
     void addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/);
 
     //! adds a block to the coupling matrix
+    /*!
+      This method is specific for the BlockMatrix class, it is used e.g. to add the shape derivatives block in FSI
+      to the global matrix
+      @param Mat: block matrix to be added.
+     */
     void addToGlobalMatrix( const matrix_ptrtype& Mat)
     {
         matrix_ptrtype tmp(new matrix_type(M_globalMatrix->getMap()));
@@ -262,25 +291,33 @@ public:
         M_globalMatrix = tmp;
     }
 
-    void push_back_coupling( matrix_ptrtype coupling)
+    //! adds a coupling block to the coupling matrix
+    /*!
+      This method is kept for compatibility with the base class. It calls the method addToCoupling.
+     */
+    void push_back_coupling( matrix_ptrtype& coupling)
     {
         addToCoupling(coupling, 0);
     }
-
     //@}
 
 protected:
 
+    //! @name Protected Members
+    //@{
     matrix_ptrtype                              M_globalMatrix;
     matrix_ptrtype                              M_coupling;
     map_shared_ptrtype                          M_interfaceMap;
     UInt                                        M_interface;
+    //@}
 
 private:
 
+    //! @name Private Members
+    //@{
     const UInt                                  M_couplingFlag;
     vector_ptrtype                              M_numerationInterface;
-
+    //@}
 };
 
 

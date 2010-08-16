@@ -93,17 +93,16 @@ public:
         M_bch(),
         M_blocks(),
         M_FESpace(),
-        M_comm(),
-        M_superCouplingFlag(0)
+        M_comm()
     {}
 
-    BlockInterface( Int flag ):
-        M_bch(),
-        M_blocks(),
-        M_FESpace(),
-        M_comm(),
-        M_superCouplingFlag(flag)
-    {}
+//     BlockInterface( Int flag ):
+//         M_bch(),
+//         M_blocks(),
+//         M_FESpace(),
+//         M_comm(),
+//         M_superCouplingFlag(flag)
+//     {}
 
     //! Destructor
     ~BlockInterface()
@@ -141,7 +140,6 @@ public:
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
     virtual void push_back_matrix( const matrix_ptrtype& Mat, const bool recompute ) =0;
-
 
     //!
     /*!
@@ -187,16 +185,33 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(map_shared_ptrtype map,
+    virtual void coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype numerationInterface,
+                         const vector_ptrtype& numerationInterface,
                          const Real& timeStep)=0;
 
 
 
-    virtual void coupler(map_shared_ptrtype map,
+    //! Adds a default coupling block at a specified position
+    /*!
+      The coupling is handled
+      through an augmented formulation, introducing new variables (multipliers). Needs as input: the global map of the problem,
+      the two FESpaces of the subproblems to be coupled with their offsets, a std::map holding the two numerations of the
+      interface between the two subproblems (the numeration can be different but the nodes must be matching in each
+      subdomain), an EpetraVector defined on the multipliers map containing the corresponding dof at the interface (NB: the multipliers map should be constructed from the second numeration in the std::map)
+      @param map the map of the global problem
+      @param FESpace1 FESpace of the first problem
+      @param offset1  offset for the first block in the global matrix
+      @param FESpace2 FESpace of the second problem
+      @param offset2  offset for the second block in the global matrix
+      @param locDofMap std::map with the correspondence between the interface dofs for the two different maps in
+      the subproblems
+      @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
+      @param couplingBlock: flag specifying the block associated with the coupling
+     */
+    virtual void coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype numerationInterface,
+                          const vector_ptrtype& numerationInterface,
                           const Real& timeStep,
                           UInt couplingBlock
                           )=0;
@@ -304,10 +319,10 @@ public:
        \param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
        \param value value to insert in the coupling blocks
      */
-    void couplingMatrix(matrix_ptrtype & bigMatrix,
+    void couplingMatrix(matrix_ptrtype& bigMatrix,
                         Int coupling,
-                        const std::vector<fespace_ptrtype> problem,
-                        const std::vector<UInt> offset,
+                        const std::vector<fespace_ptrtype>& problem,
+                        const std::vector<UInt>& offset,
                         const std::map<ID, ID>& locDofMap,
                         const vector_ptrtype& numerationInterface,
                         const Real& timeStep=1.e-3,
@@ -368,20 +383,20 @@ public:
       \param locDofMap: std::map with the correspondance between the numeration of the interface in the 2 FE spaces.
       \param numerationInterface:  vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    void robinCoupling( BlockInterface::matrix_ptrtype matrix,
-                        Real alphaf,
-                        Real alphas,
+    void robinCoupling( BlockInterface::matrix_ptrtype& matrix,
+                        Real& alphaf,
+                        Real& alphas,
                         UInt coupling,
-                        const BlockInterface::fespace_ptrtype FESpace1,
+                        const BlockInterface::fespace_ptrtype& FESpace1,
                         const UInt& offset1,
-                        const BlockInterface::fespace_ptrtype FESpace2,
+                        const BlockInterface::fespace_ptrtype& FESpace2,
                         const UInt& offset2,
                         const std::map<ID, ID>& locDofMap,
                         const BlockInterface::vector_ptrtype& numerationInterface );
 
     virtual void push_back_oper( BlockInterface& Oper);
 
-    virtual void push_back_coupling( matrix_ptrtype coupling)=0;
+    virtual void push_back_coupling( matrix_ptrtype& coupling)=0;
     //@}
 
     //!@name Getters
@@ -433,7 +448,7 @@ protected:
     std::vector<UInt>                                            M_offset;
     vector_ptrtype                                               M_numerationInterface;
     boost::shared_ptr<Epetra_Comm>                               M_comm;
-    Int                                                          M_superCouplingFlag;
+    //Int                                                          M_superCouplingFlag;
 
     //boost::shared_ptr<OperatorPtr>                M_blockPrec;
 private:

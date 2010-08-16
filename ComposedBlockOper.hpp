@@ -41,6 +41,8 @@
 #include <life/lifecore/life.hpp>
 #include <lifemc/lifesolver/BlockInterface.hpp>
 
+#include <boost/scoped_ptr.hpp>
+
 namespace LifeV {
 
 //! ComposedBlockOper - Short description of the class
@@ -62,6 +64,8 @@ class ComposedBlockOper            : public BlockInterface
 {
 public:
 
+    enum Block { solid, fluid, mesh };
+
     //! @name Public Types
     //@{
     typedef BlockInterface                           super;
@@ -71,15 +75,14 @@ public:
 
     //! @name Constructor and Destructor
     //@{
-    ComposedBlockOper():
+    ComposedBlockOper(const std::vector<Int>& flags):
         super(),
-        M_coupling()
+        M_recompute(),
+        M_coupling(),
+        M_blockReordering(),
+        M_couplingFlags(new std::vector<Int>(flags))// here I copy, so that the input param can be destroyed
     {}
 
-    ComposedBlockOper(Int couplingFlag):
-        super(couplingFlag),
-        M_coupling()
-    {}
 
     ~ComposedBlockOper(){}
     //@}
@@ -158,15 +161,25 @@ public:
     //! returns the vector of pointers to the coupling blocks (by const reference).
     const std::vector<matrix_ptrtype> getCouplingVector(){return M_coupling;}
 
-    //! adds a coupling matrix of the following form:
-    void coupler(map_shared_ptrtype map,
+    //! adds a default coupling matrix for a specified block.
+    /*!
+      The default coupling matrix it is an identity matrix with zeros on the diagonal corresponding to the specified block.
+      The couplings are specified through the vector M_couplingFlags, as usual. If the coupling block is not the last one
+      in the M_coupling vector then it is inserted at the specified position.
+      @param map: global EpetraMap of the problem
+      @param locDofMap: std::map holding the connections between the coupling interface dofs
+      @param numerationInterface: the numeration of the interface dofs
+      @param timeStep: time step
+      @param couplingBlock: UInt specifying the position of the coupling block to be added.
+     */
+    void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype numerationInterface,
+                 const vector_ptrtype& numerationInterface,
                  const Real& timeStep,
                  UInt couplingBlock
                  );
 
-    virtual void push_back_coupling( matrix_ptrtype coupling);
+    virtual void push_back_coupling( matrix_ptrtype& coupling);
 
     //@}
 
@@ -191,6 +204,21 @@ protected:
     std::vector<bool>                                           M_recompute;
     //! vector of coupling matrices
     std::vector<matrix_ptrtype>                                 M_coupling;
+    //! vector of reordering for the different blocks.
+    /*!the order in which the factors are allpied is specified by this
+    vector. e.g. the fisrt block to be applied corresponds to the number M_blockReordering[0] in the vector
+    M_blocks of blocks. This vector is assigned in the coupler method of each class.
+    */
+    std::vector<UInt>                                           M_blockReordering;
+
+    //! vector of flags specifying the coupling strategy for each block.
+    /*!
+      In particular for each block the method couplingMatrix is called with the corresponding flag in this vector.
+      The coupling vector is passed to the constructor when the preconditioner is registered in the factory. So
+      each coupling vector defines a new preconditioner type. It is created statically before the registration, then it
+      is copied into this scoped_ptr.
+     */
+    boost::scoped_ptr<std::vector<Int> >                        M_couplingFlags;
 
 private:
 

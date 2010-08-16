@@ -57,12 +57,15 @@ class ComposedNN: public ComposedBlockOper
 public:
 
     typedef ComposedBlockOper          super;
+    typedef  ComposedPreconditioner<Ifpack_Preconditioner> composed_prec;
+
+
     //! @name Constructor & Destructor
     //@{
 
     //! Empty Constructor
-    ComposedNN():
-        super(),
+    ComposedNN(const std::vector<Int>& flag):
+        super( flag ),
         M_blockPrecs(),
         M_prec()
     {}
@@ -112,9 +115,9 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler( map_shared_ptrtype map,
+    virtual void coupler( map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype numerationInterface,
+                          const vector_ptrtype& numerationInterface,
                           const Real& timeStep);
     //@}
 
@@ -152,6 +155,10 @@ protected:
     std::vector<boost::shared_ptr<Ifpack_Preconditioner> >                 M_prec;
 
 private:
+
+    boost::shared_ptr< composed_prec > M_firstCompPrec ;
+    boost::shared_ptr< composed_prec > M_secondCompPrec;
+
 };
 
 } // Namespace LifeV

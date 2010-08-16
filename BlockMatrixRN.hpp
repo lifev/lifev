@@ -102,9 +102,9 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    void coupler(map_shared_ptrtype map,
+    void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype numerationInterface,
+                 const vector_ptrtype& numerationInterface,
                  const Real& timeStep);
 
     //! sets the data relative to Robin (e.g. the coefficients \f$\alpha_f\f$ and \f$\alpha_s\f$).

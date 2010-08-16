@@ -25,13 +25,13 @@
 //@HEADER
 
 /*!
+  \include ../../testsuite/test_monolithic/fluidstructure.dox
     @file
-    @brief A short description of the file content
+    @ This file contains the implementation of a composed preconditioner for FSI
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 08 Jun 2010
 
-    A more detailed description of the file (if necessary)
  */
 
 #ifndef COMPOSEDDN2_H
@@ -41,72 +41,38 @@
 
 namespace LifeV {
 
-//! ComposedDN - Short description of the class
+//! ComposedDN2 - Class handling a composed preconditioner for FSI with two or three factors.
 /*!
     @author Paolo Crosetto
-    @see Reference to papers (if available)
+    @see  \ref CDFQ
 
-    Here write a long and detailed description of the class.
-
-    For this purpose you can use a lot of standard HTML code.
-    Here there is a list with some useful examples:
-
-    For bold text use: <b>BOLD TEXT</b>
-
-    For empatyze a word type @e followed by the word
-
-    For verbatim a word type @c followed by the word
-
-    For vertical space (empty lines) use: <br>
-
-    For creating list type:
-    <ol>
-        <li> First element of the enumerated list
-        <ul>
-             <li> First element of the dotted sublist.
-             <li> Second element of the dotted sublist
-        </ul>
-        <li> Second element of the enumerated list
-        <li> Third element of the enumerated list
-    </ol>
-
-    For writing a warning type: @warning followed by the description
-    of the warning
-
-    It is possible to use a lot of other standard HTML commands.
-    Visit http://www.stack.nl/~dimitri/doxygen/htmlcmds.html for
-    a detailed list.
-
-    For any other kind of information visit www.doxygen.org.
+    The preconditioner implemented here is a variant of the one in ComposedDN. See \ref CDFQ for a complete explanation.
+    The only peculiarity of this class with respect to ComposedDN is the different reordering of the factor. For this
+    reason probably they will be merged together in the future.
  */
 class ComposedDN2 : public ComposedDN
 {
 public:
     typedef ComposedDN super;
 
-    ComposedDN2( Int couplingFlag = 11 ):
-        super( couplingFlag )
+    //! @name Constructor
+    //@{
+    ComposedDN2( const std::vector<Int>& flags ):
+        super( flags )
     {
     }
+    //@}
 
+    //! @name Public Methods
+    //@{
 
-    ComposedDN2( Int couplingFlag , Int superCouplingFlag  ):
-        super( couplingFlag, superCouplingFlag )
-    {
-    }
-
-    void coupler(map_shared_ptrtype map,
+    void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype numerationInterface,
+                 const vector_ptrtype& numerationInterface,
                  const Real& timeStep);
-
-    virtual void replace_matrix( const matrix_ptrtype& oper, UInt position);
-    virtual void replace_bch(bchandler_ptrtype& oper, UInt position){M_bch[1-position]=oper;}
-    void blockAssembling();
+    //@}
 
 private:
-
-    void replace_precs( matrix_ptrtype& oper, UInt position);
 
 };
 

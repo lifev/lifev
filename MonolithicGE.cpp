@@ -96,12 +96,23 @@ MonolithicGE::setupSystem( )
 
 namespace
 {
-BlockInterface* createComposedDNND(){ return new ComposedDNND(); }
-BlockInterface* createComposedNN(){ return new ComposedNN(); }
+const Int couplingsDN[] = { 0, 7};
+const Int couplingsDN2[] = { 8, 6};
+const Int couplingsNN[] = { 8, 4, 1, 2};
+const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
+
+const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
+const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
+const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
+const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
+
+
+BlockInterface* createComposedDNND(){ return new ComposedDNND(couplingVectorDNND); }
+BlockInterface* createComposedNN(){ return new ComposedNN(couplingVectorNN); }
 BlockMatrix*    createAdditiveSchwarz(){ return new BlockMatrix(15); }
 BlockMatrix*    createAdditiveSchwarzRN(){ return new BlockMatrixRN(15); }
-BlockInterface* createComposedDN(){ return new ComposedDN(); }
-BlockInterface* createComposedDN2(){ return new ComposedDN2(); }
+BlockInterface* createComposedDN(){ return new ComposedDN(couplingVectorDN); }
+BlockInterface* createComposedDN2(){ return new ComposedDN2(couplingVectorDN2); }
 FSIOperator* createM(){ return new MonolithicGE(); }
 }
 

@@ -34,8 +34,8 @@
     A more detailed description of the file (if necessary)
  */
 
-#ifndef COMPOSEDDNN_H
-#define COMPOSEDDNN_H 1
+#ifndef COMPOSEDDND_H
+#define COMPOSEDDND_H 1
 
 #include <life/lifecore/life.hpp>
 #include <lifemc/lifesolver/ComposedDN.hpp>
@@ -58,13 +58,9 @@ public:
     //! @name Constructors and destructor
     //@{
 
-    ComposedDND():
-        super(),
+    ComposedDND( const std::vector<Int>& flag ):
+        super(flag),
         M_swapped(false)
-    {}
-
-    ComposedDND( Int flag, Int superFlag ):
-        super(flag, superFlag)
     {
     }
 
@@ -75,7 +71,10 @@ public:
 
     void blockAssembling( );
 
-    void replace_matrix( const matrix_ptrtype& Mat, UInt position );
+    void coupler(map_shared_ptrtype& map,
+                 const std::map<ID, ID>& locDofMap,
+                 const vector_ptrtype& numerationInterface,
+                 const Real& timeStep);
 
 private:
 

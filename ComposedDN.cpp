@@ -44,25 +44,30 @@ void ComposedDN::setDataFromGetPot( const GetPot& dataFile,
 }
 
 
-void ComposedDN::coupler(map_shared_ptrtype map,
+void ComposedDN::coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype numerationInterface,
+                         const vector_ptrtype& numerationInterface,
                          const Real& timeStep)
 {
     UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
-    UInt solidAndFluid(M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements());
+    UInt solidAndFluid(M_offset[solid]+1+M_FESpace[solid]->map().getMap(Unique)->NumGlobalElements());
 
     matrix_ptrtype coupling(new matrix_type(*map));
-    coupling->insertValueDiagonal( 1., M_offset[1]+1, M_offset[0]+1 );
+    couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    coupling->insertValueDiagonal( 1., M_offset[fluid]+1, M_offset[solid]+1 );
     coupling->insertValueDiagonal( 1., solidAndFluid, totalDofs+1 );
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_type(*map));
-    couplingMatrix( coupling,  M_couplingFlag, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    coupling->insertValueDiagonal( 1. , M_offset[0], solidAndFluid );
+    couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    coupling->insertValueDiagonal( 1. , M_offset[solid], solidAndFluid );
     coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->getMap().getMap(Unique)->NumGlobalElements(), totalDofs +1 );
-
     M_coupling.push_back(coupling);
+
+    M_blockReordering.resize(3);
+    M_blockReordering[0] = solid;
+    M_blockReordering[1] = fluid;
+    M_blockReordering[2] = mesh;
 }
 
 int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver )
@@ -72,14 +77,14 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     if(!M_blockPrecs->getNumber())
     {
         for(UInt k=0; k < M_blocks.size(); ++k)
-            push_back_precs(M_blocks[k]);
+            push_back_precs(M_blocks[M_blockReordering[k]]);
     }
     else
     {
         for(UInt k=0; k < M_blocks.size(); ++k)
         {
-            if(M_recompute[k])
-                replace_precs(M_blocks[k], k);
+            if(M_recompute[M_blockReordering[k]])
+                replace_precs(M_blocks[M_blockReordering[k]], k);
             else
                 linearSolver->displayer()->leaderPrint("\n  M-  reusing prec. factor ", k);
         }

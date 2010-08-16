@@ -99,8 +99,8 @@ void ComposedBlockOper::swap(const UInt i, const UInt j)
 
 void ComposedBlockOper::addToCoupling( const matrix_ptrtype& Mat, UInt position)
 {
-    *Mat += *M_coupling[position];
-    M_coupling[position] = Mat;
+     Mat->GlobalAssemble();
+    *M_coupling[position] += *Mat;
 }
 
 void ComposedBlockOper::push_back_oper( ComposedBlockOper& Oper)
@@ -109,25 +109,29 @@ void ComposedBlockOper::push_back_oper( ComposedBlockOper& Oper)
     M_coupling.insert(M_coupling.end(), Oper.getCouplingVector().begin(), Oper.getCouplingVector().end());
 }
 
-void ComposedBlockOper::coupler( map_shared_ptrtype map,
+void ComposedBlockOper::coupler( map_shared_ptrtype& map,
                                  const std::map<ID, ID>& locDofMap,
-                                 const vector_ptrtype numerationInterface,
+                                 const vector_ptrtype& numerationInterface,
                                  const Real& timeStep,
                                  UInt couplingBlock )
 {
     matrix_ptrtype coupling(new matrix_type(*map));
-    couplingMatrix( coupling,  super::M_superCouplingFlag, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
     UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
 
     coupling->insertValueDiagonal( 1., 1 , M_offset[couplingBlock]+1 );
     coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().getMap(Unique)->NumGlobalElements()+1, totalDofs+1 );
 
-    M_coupling.push_back(coupling);
-
+    if(couplingBlock != M_coupling.size()+1)
+    {
+        M_coupling.insert(M_coupling.begin()+couplingBlock, coupling);
+    }
+    else
+        M_coupling.push_back(coupling);
 }
 
 void
-ComposedBlockOper::push_back_coupling( matrix_ptrtype coupling)
+ComposedBlockOper::push_back_coupling( matrix_ptrtype& coupling )
 {
     M_coupling.push_back(coupling);
 }

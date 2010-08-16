@@ -38,9 +38,9 @@
 
 namespace LifeV {
 
-void BlockMatrixRN::coupler(map_shared_ptrtype map,
+void BlockMatrixRN::coupler(map_shared_ptrtype& map,
                             const std::map<ID, ID>& locDofMap,
-                            const vector_ptrtype numerationInterface,
+                            const vector_ptrtype& numerationInterface,
                             const Real& timeStep)
 {
     super::coupler( map,/* M_FESpace[0], M_offset[0], M_FESpace[1], M_offset[1],*/ locDofMap, numerationInterface, timeStep );

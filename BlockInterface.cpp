@@ -40,8 +40,8 @@ namespace LifeV {
 
 void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
                                     Int flag,
-                                    const std::vector<fespace_ptrtype> problem,
-                                    const std::vector<UInt> offset,
+                                    const std::vector<fespace_ptrtype>& problem,
+                                    const std::vector<UInt>& offset,
                                     const std::map<ID, ID>& locDofMap,
                                     const vector_ptrtype& numerationInterface,
                                     const Real& timeStep,
@@ -78,7 +78,7 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
         flag -= 16;
     }
 
-    Int newFlag;
+    Int newFlag(flag);
 
     for(UInt dim = 0; dim < nDimensions; ++dim)//coupling F-S in FSI
     {
@@ -156,13 +156,13 @@ BlockInterface::setOffsets(UInt blocks, ...)
 
 
 void
-BlockInterface::robinCoupling( matrix_ptrtype matrix,
-                            Real  alphaf,
-                            Real  alphas,
+BlockInterface::robinCoupling( matrix_ptrtype& matrix,
+                            Real&  alphaf,
+                            Real&  alphas,
                             UInt  coupling,
-                            const BlockInterface::fespace_ptrtype FESpace1,
+                            const BlockInterface::fespace_ptrtype& FESpace1,
                             const UInt& offset1,
-                            const BlockInterface::fespace_ptrtype FESpace2,
+                            const BlockInterface::fespace_ptrtype& FESpace2,
                             const UInt& offset2,
                             const std::map<ID, ID>& locDofMap,
                             const BlockInterface::vector_ptrtype& numerationInterface ) // not working with non-matching grids

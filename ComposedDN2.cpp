@@ -26,56 +26,25 @@
 
 /*!
     @file
-    @brief A short description of the file content
-
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 14 Jun 2010
-
-    A more detailed description of the file (if necessary)
  */
 
 #include <ComposedDN2.hpp>
 
 namespace LifeV {
 
-void ComposedDN2::coupler(map_shared_ptrtype map,
+void ComposedDN2::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype numerationInterface,
+                          const vector_ptrtype& numerationInterface,
                           const Real& timeStep)
 {
-    UInt one(1.);
+    super::coupler( map, locDofMap, numerationInterface, timeStep );
+    M_blockReordering.resize(3);
+    M_blockReordering[0] = fluid;
+    M_blockReordering[1] = solid;
+    M_blockReordering[2] = mesh;
 
-    matrix_ptrtype coupling2(new matrix_type(*map));
-    //coupling.reset(new matrix_type(*map));
-    couplingMatrix( coupling2, 8, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep );
-    coupling2->insertValueDiagonal( one, 1 ,M_offset[0]+1);
-    coupling2->insertValueDiagonal( one, M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements(), map->getMap(Unique)->NumGlobalElements()+1);
-    M_coupling.push_back(coupling2);
-
-    matrix_ptrtype coupling(new matrix_type(*map));
-    couplingMatrix( coupling,  6, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    coupling->insertValueDiagonal( one, M_FESpace[0]->map() , M_offset[0]);/*dFESpace*/
-    M_coupling.push_back(coupling);
-    //blockView->insertValueDiagonal( one, *M_interfaceMap, offset2+M_dMap->getMap(Unique)->NumGlobalElements());
-    //super::super::blockAssembling();
 }
-
-void ComposedDN2::blockAssembling()
-{
-    swap(0,1);
-    super::blockAssembling();
-}
-
-void ComposedDN2::replace_matrix( const matrix_ptrtype& oper, UInt position)
-{
-    super::replace_matrix(oper, position);
-}
-
-
-void ComposedDN2::replace_precs( matrix_ptrtype& oper, UInt position)
-{
-    super::replace_precs(oper, position);
-}
-
 
 } // Namespace LifeV

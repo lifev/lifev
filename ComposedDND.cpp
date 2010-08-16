@@ -37,20 +37,27 @@ namespace LifeV {
 
 void ComposedDND::blockAssembling( )
 {
-    super::blockAssembling();
-    M_coupling[3]->GlobalAssemble();//shape derivatives matrix
-    addToCoupling(M_coupling[3], 2);
     if(!M_swapped)
     {
-        swap(2, 0);
-        swap(2, 1);
+        super::super::super::swap(M_coupling[2], M_coupling[3]);
         M_swapped = true;
     }
+
+    addToCoupling(M_coupling[3], 2);
+
+    super::blockAssembling();
 }
 
-void ComposedDND::replace_matrix( const matrix_ptrtype& Mat, UInt position )
+
+void ComposedDND::coupler(map_shared_ptrtype& map,
+                         const std::map<ID, ID>& locDofMap,
+                         const vector_ptrtype& numerationInterface,
+                         const Real& timeStep)
 {
-    M_blocks[(position+1)%3] = Mat;
+    super::coupler( map, locDofMap, numerationInterface, timeStep );
+    M_blockReordering[0] = mesh;
+    M_blockReordering[1] = solid;
+    M_blockReordering[2] = fluid;
 }
 
 } // Namespace LifeV

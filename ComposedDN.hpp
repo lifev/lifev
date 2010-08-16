@@ -57,7 +57,10 @@
     \end{array}\right)\f$ and applying a preconditioning strategy (algebraic additive Schwarz \f$P_{AS}\f$)
     to each factor, so that \f$ P^{-1}=(P_{AS}(P_2))^{-1}(P_{AS}(P_1))^{-1}\f$.
 
-    NOTE: this class is also the base class for other types of preconditioners, like ComposedDN2, ComposedDND. In fact for
+    NOTE: this class is used also in the geometry implicit case, with an additional factor for the mesh motion, which is
+    coupled to the solid block using the default coupling method ComposedBlockOper::coupler. In that case the
+    preconditioner is decomposed in three factors, the fluid and structure ones being the same as for the GCE case.
+    NOTE2: this class is also the base class for other types of preconditioners, like ComposedDN2, ComposedDND. In fact for
     instance it is used as F-S block in the preconditioners for the GI matrix in MonolithicGI
  */
 
@@ -84,22 +87,8 @@ class ComposedDN : public ComposedBlockOper
 public:
     typedef ComposedBlockOper super;
 
-    ComposedDN():
-        super(),
-        M_couplingFlag(7),
-        M_blockPrecs(),
-        M_uMap(),
-        M_pMap(),
-        M_dMap(),
-        M_interfaceMap(),
-        M_multipliers(0)
-    {
-        //M_bch.resize(2);
-    }
-
-    ComposedDN( Int flag, Int superFlag = 16 ):
-        super( superFlag ),
-        M_couplingFlag( flag ),
+    ComposedDN( const std::vector<Int>& flag):
+        super( flag ),
         M_blockPrecs(),
         M_uMap(),
         M_pMap(),
@@ -154,9 +143,9 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(map_shared_ptrtype map,
+    virtual void coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype numerationInterface,
+                         const vector_ptrtype& numerationInterface,
                          const Real& timeStep);
 
     //!pushes back the preconditioner for a block
@@ -175,8 +164,12 @@ public:
     void setDataFromGetPot( const GetPot& dataFile,
                             const std::string& section );
 
+    //! returns the true if the preconditioner has at leas one factor computed
     bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
 
+    /*! copies the shared_ptr to the communicator in the member M_comm and builds the empty IfpackComposedPreconditioner
+    M_blockPrecs
+    */
     void setComm( boost::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
@@ -185,9 +178,15 @@ public:
 
 protected:
 
+    /*!
+      Replaces the preconditioner in M_blockPrecs with another one that is already constructed
+    */
     virtual void    replace_precs( matrix_ptrtype& Mat, UInt position);
+
+    /*!
+      Pointer to an IfpackComposedPrec object containing the preconditioners for each block
+    */
     boost::shared_ptr<IfpackComposedPrec>            M_blockPrecs;
-    const UInt                                       M_couplingFlag;
     map_ptrtype                                      M_uMap;
     map_ptrtype                                      M_pMap;
     map_ptrtype                                      M_dMap;

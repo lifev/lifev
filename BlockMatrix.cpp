@@ -52,9 +52,9 @@ void BlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& secti
 }
 
 
-void BlockMatrix::coupler(map_shared_ptrtype map,
+void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype numerationInterface,
+                          const vector_ptrtype& numerationInterface,
                           const Real& timeStep
                             )
 {
@@ -63,14 +63,14 @@ void BlockMatrix::coupler(map_shared_ptrtype map,
     super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
-void BlockMatrix::coupler(map_shared_ptrtype map,
+void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype numerationInterface,
+                          const vector_ptrtype& numerationInterface,
                           const Real& timeStep,
                           UInt /*flag1*/
                             )
 {
-    super::couplingMatrix( M_coupling,  M_superCouplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
+    super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
 
@@ -221,7 +221,15 @@ void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs)
 
 void BlockMatrix::addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/)
 {
-    *M_coupling += *Mat;
+    if(!M_coupling->getMatrixPtr()->Filled())
+        *M_coupling += *Mat;
+    else
+    {
+        matrix_ptrtype tmp(new matrix_type(M_coupling->getMap()));
+        *tmp += *M_coupling;
+        *tmp += *Mat;
+        M_coupling = tmp;
+    }
 }
 
 } // Namespace LifeV

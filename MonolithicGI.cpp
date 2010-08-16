@@ -69,6 +69,8 @@ MonolithicGI::setupFluidSolid()
     M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
+    if(M_data->dataFluid()->useShapeDerivatives())
+        M_shapeDerivativesBlock.reset(new matrix_type(*M_monolithicMap));
     M_uk.reset (new vector_type(*this->M_monolithicMap));
     M_un.reset (new vector_type(*this->M_monolithicMap));
 
@@ -226,7 +228,8 @@ int MonolithicGI::setupBlockPrec(vector_type& rhs)
 
     if(M_data->dataFluid()->useShapeDerivatives())
     {
-        M_shapeDerivativesBlock.reset(new matrix_type(*M_monolithicMap));
+        *M_shapeDerivativesBlock *= 0.;
+        M_shapeDerivativesBlock->openCrsMatrix();
         shapeDerivatives(M_shapeDerivativesBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
         //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
         M_shapeDerivativesBlock->GlobalAssemble();
@@ -240,7 +243,7 @@ int MonolithicGI::setupBlockPrec(vector_type& rhs)
         M_precPtr->setSpaces(M_FESpaces);
         M_precPtr->setOffsets(3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface);
         M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2);
-        M_precPtr->push_back_coupling(M_shapeDerivativesBlock);
+        M_precPtr->push_back_coupling( M_shapeDerivativesBlock );
     }
     else
     {
@@ -395,12 +398,21 @@ MonolithicGI::assembleMeshBlock(UInt iter)
 
 namespace
 {
+const Int couplingsDNGI[] = { 0, 7, 16 };
+const Int couplingsDN2GI[] = { 8, 6, 16 };
+const Int couplingsDNGI2[] = { 0, 7, 0 };
+const Int couplingsDN2GI2[] = { 8, 6, 0 };
+const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
+const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
+const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
+const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
+
 BlockMatrix*    createAdditiveSchwarzGI(){ return new BlockMatrix(31); }
 BlockMatrix*    createAdditiveSchwarzRNGI(){ return new BlockMatrixRN(31); }
-BlockInterface*    createComposedDNGI(){ return new ComposedDN(7, 16); }
-BlockInterface*    createComposedDN2GI(){ return new ComposedDN2(11, 16); }
-BlockInterface*    createComposedDND2GI(){ return new ComposedDND(11, 0); }
-BlockInterface*    createComposedDNDGI(){ return new ComposedDND(7, 0); }
+BlockInterface*    createComposedDNGI(){ return new ComposedDN( couplingVectorDNGI ); }
+BlockInterface*    createComposedDN2GI(){ return new ComposedDN2( couplingVectorDN2GI ); }
+BlockInterface*    createComposedDNDGI(){ return new ComposedDND( couplingVectorDNGI2 ); }
+BlockInterface*    createComposedDND2GI(){ return new ComposedDND(couplingVectorDN2GI2); }
 FSIOperator*    createFM(){ return new MonolithicGI(); }
 }
 

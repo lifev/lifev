@@ -117,8 +117,8 @@ public:
 
     typedef ComposedNN super;
 
-    ComposedDNND( ):
-        super( )
+    ComposedDNND( const std::vector<Int>& flag ):
+        super( flag )
     {
     }
 
@@ -140,10 +140,10 @@ public:
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param timestep the timestep chosen
      */
-    void coupler(map_shared_ptrtype      map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype    numerationInterface,
-                         const Real& timeStep);
+    void coupler(map_shared_ptrtype&      map,
+                 const std::map<ID, ID>& locDofMap,
+                 const vector_ptrtype&    numerationInterface,
+                 const Real& timeStep);
 
 
     //! Sets the parameters needed by the preconditioner from data file
