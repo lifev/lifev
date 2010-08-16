@@ -73,12 +73,13 @@ using namespace LifeV;
 int main( int argc, char** argv )
 {
 
+    boost::shared_ptr<Epetra_Comm> comm;
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> comm(new Epetra_MpiComm(MPI_COMM_WORLD) );
+    comm.reset(new Epetra_MpiComm(MPI_COMM_WORLD) );
     std::cout << "% using MPI version" << std::endl;
 #else
-    boost::shared_ptr<Epetra_SerialComm> comm( new Epetra_SerialComm() );
+    comm.reset( new Epetra_SerialComm() );
     std::cout << "% using serial version" << std::end;
 #endif
 

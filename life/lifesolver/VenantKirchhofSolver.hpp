@@ -106,7 +106,7 @@ public:
     VenantKirchhofSolver( const data_type& data,
                           FESpace<Mesh, EpetraMap>&   FESpace,
                           BCHandler&       BCh,
-                          boost::shared_ptr<Epetra_Comm>     comm,
+                          boost::shared_ptr<Epetra_Comm>&     comm,
                           UInt             offset=0);
 
     /*!
@@ -118,12 +118,12 @@ public:
 
     VenantKirchhofSolver( const data_type& data,
                           FESpace<Mesh, EpetraMap>&   FESpace,
-                          boost::shared_ptr<Epetra_Comm>     comm,
+                          boost::shared_ptr<Epetra_Comm>&     comm,
                           UInt       offset=0);
 
     VenantKirchhofSolver( const data_type& data,
                           FESpace<Mesh, EpetraMap>&   dFESpace,
-                          boost::shared_ptr<Epetra_Comm>     comm,
+                          boost::shared_ptr<Epetra_Comm>&     comm,
                           EpetraMap&       monolithicMap,
                           UInt       offset=0
                           //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace=0
@@ -219,7 +219,7 @@ public:
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
-    boost::shared_ptr<Epetra_Comm> const comm()         const {return M_Displayer.comm();}
+    boost::shared_ptr<Epetra_Comm> const& comm()         const {return M_Displayer.comm();}
 
     void rescaleMatrices(); // used for monolithic
     //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
@@ -339,7 +339,7 @@ template <typename Mesh, typename SolverType>
 VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type&          data,
                                                               FESpace<Mesh, EpetraMap>& dFESpace,
                                                               BCHandler&                BCh,
-                                                              boost::shared_ptr<Epetra_Comm>              comm,
+                                                              boost::shared_ptr<Epetra_Comm>&              comm,
                                                               UInt                      offset
                                                             ) :
     M_data                       ( data ),
@@ -382,7 +382,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type&  
 template <typename Mesh, typename SolverType>
 VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& data,
                                                               FESpace<Mesh, EpetraMap>&   dFESpace,
-                                                              boost::shared_ptr<Epetra_Comm>     comm,
+                                                              boost::shared_ptr<Epetra_Comm>&     comm,
                                                               UInt             /*offset*/
                                                              ) :
     M_data                       ( data ),
@@ -424,7 +424,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& d
 template <typename Mesh, typename SolverType>
 VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& data,
                                                               FESpace<Mesh, EpetraMap>&   dFESpace,
-                                                              boost::shared_ptr<Epetra_Comm>     comm,
+                                                              boost::shared_ptr<Epetra_Comm>&     comm,
                                                               EpetraMap&      monolithicMap,
                                                               UInt             offset
                                                               //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace

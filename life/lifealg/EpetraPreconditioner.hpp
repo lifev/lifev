@@ -75,10 +75,10 @@ public:
      */
     //@{
     //! default constructor.
-    EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    EpetraPreconditioner(EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    EpetraPreconditioner(EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~EpetraPreconditioner();

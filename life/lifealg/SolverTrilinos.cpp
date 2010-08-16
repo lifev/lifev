@@ -48,7 +48,7 @@ SolverTrilinos::SolverTrilinos() :
 {
 }
 
-SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm> comm ) :
+SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
     M_prec                 (),
     M_solver               (),
     M_TrilinosParameterList(),
@@ -110,7 +110,7 @@ SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
 // Set Methods
 // ===================================================
 void
-SolverTrilinos::SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm )
+SolverTrilinos::SetCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 {
     M_displayer->SetCommunicator( comm );
 }

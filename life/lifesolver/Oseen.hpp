@@ -115,13 +115,13 @@ public:
     Oseen( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
-           boost::shared_ptr<Epetra_Comm> comm,
+           boost::shared_ptr<Epetra_Comm>& comm,
            const int                 lagrangeMultiplier = 0);
 
     Oseen( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
-           boost::shared_ptr<Epetra_Comm> comm,
+           boost::shared_ptr<Epetra_Comm>& comm,
            const EpetraMap           monolithicMap,
            const UInt                offset=0);
 
@@ -136,7 +136,7 @@ public:
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
            std::vector<int> const&   lagrangeMultipliers,
-           boost::shared_ptr<Epetra_Comm> comm );
+           boost::shared_ptr<Epetra_Comm>& comm );
 
 
     //! virtual destructor
@@ -266,7 +266,7 @@ public:
 
     EpetraMap   const& getMap()       const { return M_localMap; }
 
-    boost::shared_ptr<Epetra_Comm> const comm()      const {return M_Displayer.comm();}
+    boost::shared_ptr<Epetra_Comm> const& comm()      const {return M_Displayer.comm();}
 
     Displayer   const& getDisplayer() const { return M_Displayer; }
 
@@ -412,7 +412,7 @@ Oseen<Mesh, SolverType>::
 Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
-       boost::shared_ptr<Epetra_Comm>              comm,
+       boost::shared_ptr<Epetra_Comm>&              comm,
        const int                 lagrangeMultiplier):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
@@ -468,7 +468,7 @@ Oseen<Mesh, SolverType>::
 Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
-       boost::shared_ptr<Epetra_Comm>              comm ,
+       boost::shared_ptr<Epetra_Comm>&              comm ,
        EpetraMap                 monolithicMap,
        UInt                      /*offset*/):
     M_data                   ( dataType ),
@@ -525,7 +525,7 @@ Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
        std::vector<int> const&   lagrangeMultipliers,
-       boost::shared_ptr<Epetra_Comm>              comm ):
+       boost::shared_ptr<Epetra_Comm>& comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),

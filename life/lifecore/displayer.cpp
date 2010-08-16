@@ -38,7 +38,7 @@ Displayer::Displayer( const bool verbose ):
 }
 
 
-Displayer::Displayer( const boost::shared_ptr<Epetra_Comm> comm ):
+Displayer::Displayer( const boost::shared_ptr<Epetra_Comm>& comm ):
   M_comm                   ( comm ),
   M_verbose                ( true )
 {
@@ -53,7 +53,7 @@ Displayer::Displayer( const Displayer& displayer ):
 }
 
 void
-Displayer::SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm )
+Displayer::SetCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 {
     M_comm = comm;
     if ( M_comm.get() )

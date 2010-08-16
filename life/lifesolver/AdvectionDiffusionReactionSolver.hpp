@@ -111,7 +111,7 @@ public:
                FESpace<Mesh, EpetraMap>&      adrFESpace,
                FESpace<Mesh, EpetraMap>&      betaFESpace,
                BCHandler&                     bcHandler,
-               boost::shared_ptr<Epetra_Comm> comm );
+               boost::shared_ptr<Epetra_Comm>& comm );
 
     /*!
       \param dataType
@@ -122,7 +122,7 @@ public:
     ADRSolver( const data_type&               dataType,
                FESpace<Mesh, EpetraMap>&      adrFESpace,
                FESpace<Mesh, EpetraMap>&      betaFESpace,
-               boost::shared_ptr<Epetra_Comm> comm );
+               boost::shared_ptr<Epetra_Comm>& comm );
 
     //! virtual destructor
 
@@ -213,7 +213,7 @@ public:
 
     EpetraMap const& getMap() const { return M_localMap; }
 
-    const boost::shared_ptr<Epetra_Comm> comm() const {return M_comm;}
+    const boost::shared_ptr<Epetra_Comm>& comm() const {return M_comm;}
 
     bool isLeader() const
     {
@@ -377,7 +377,7 @@ ADRSolver( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& adrFESpace,
            FESpace<Mesh, EpetraMap>& betaFESpace,
            BCHandler&                BCh,
-           boost::shared_ptr<Epetra_Comm> comm ):
+           boost::shared_ptr<Epetra_Comm>& comm ):
     M_data                   ( dataType ),
     M_FESpace                ( adrFESpace ),
     M_betaFESpace            ( betaFESpace ),
@@ -424,7 +424,7 @@ ADRSolver<Mesh, SolverType>::
 ADRSolver( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& adrFESpace,
            FESpace<Mesh, EpetraMap>& betaFESpace,
-           boost::shared_ptr<Epetra_Comm> comm ):
+           boost::shared_ptr<Epetra_Comm>& comm ):
     M_data                   ( dataType ),
     M_FESpace                ( adrFESpace ),
     M_betaFESpace            ( betaFESpace ),

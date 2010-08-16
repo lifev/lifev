@@ -61,7 +61,7 @@ namespace LifeV
 class Displayer
 {
 public:
-    Displayer( const boost::shared_ptr<Epetra_Comm> comm=boost::shared_ptr<Epetra_Comm>() );
+    Displayer( const boost::shared_ptr<Epetra_Comm>& comm=boost::shared_ptr<Epetra_Comm>() );
     Displayer( const Displayer& displayer );
 	Displayer( const bool verbose);
     virtual ~Displayer() {}
@@ -105,12 +105,12 @@ public:
   }
 
     //Set the communicator
-    void SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm );
+    void SetCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
 
     /*!
       Return the communicator
     */
-    const boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
+    const boost::shared_ptr<Epetra_Comm>& comm() const { return M_comm; }
 
 protected:
 

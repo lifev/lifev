@@ -150,7 +150,7 @@ public:
     EpetraMap const& getMap() const { return M_localMap; }
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
-    const boost::shared_ptr<Epetra_Comm> comm() const {return M_Displayer.comm();}
+    const boost::shared_ptr<Epetra_Comm>& comm() const {return M_Displayer.comm();}
 
     bool isLeader() const
     {

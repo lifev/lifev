@@ -62,13 +62,13 @@ public:
     OseenShapeDerivative( const data_type&          dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
-                          boost::shared_ptr<Epetra_Comm> comm,
+                          boost::shared_ptr<Epetra_Comm>& comm,
                           const int                 lagrangeMultiplier = 0);
 
     OseenShapeDerivative( const data_type&          dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
-                          boost::shared_ptr<Epetra_Comm> comm,
+                          boost::shared_ptr<Epetra_Comm>& comm,
                           const EpetraMap           bigMap,
                           const UInt                offset=0);
 
@@ -76,7 +76,7 @@ public:
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
                           FESpace<Mesh, EpetraMap>& mmFESpace,
-                          boost::shared_ptr<Epetra_Comm> comm,
+                          boost::shared_ptr<Epetra_Comm>& comm,
                           const EpetraMap           bigMap,
                           const UInt                offset=0);
 
@@ -163,7 +163,7 @@ OseenShapeDerivative<Mesh, SolverType>::
 OseenShapeDerivative( const data_type&          dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
-                      boost::shared_ptr<Epetra_Comm> comm,
+                      boost::shared_ptr<Epetra_Comm>& comm,
                       const int                 lagrangeMultiplier):
     super            (dataType,
                       uFESpace,
@@ -195,7 +195,7 @@ OseenShapeDerivative<Mesh, SolverType>::
 OseenShapeDerivative( const data_type&          dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
-                      boost::shared_ptr<Epetra_Comm> comm,
+                      boost::shared_ptr<Epetra_Comm>& comm,
                       const EpetraMap           bigMap,
                       const UInt                offset):
     super            (dataType,
@@ -230,7 +230,7 @@ OseenShapeDerivative( const data_type&          dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
                       FESpace<Mesh, EpetraMap>& mmFESpace,
-                      boost::shared_ptr<Epetra_Comm> comm,
+                      boost::shared_ptr<Epetra_Comm>& comm,
                       const EpetraMap           bigMap,
                       const UInt                offset):
     super            (dataType,

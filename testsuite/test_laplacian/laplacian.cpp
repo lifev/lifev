@@ -274,7 +274,7 @@ struct laplacian::Private
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
     std::string                         data_file_name;
-    boost::shared_ptr<Epetra_MpiComm>   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
 
     /**
      *

@@ -95,7 +95,7 @@ public:
     //@{
 
     SolverTrilinos();
-    SolverTrilinos( const boost::shared_ptr<Epetra_Comm> );
+    SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm );
 
     //@}
 
@@ -128,7 +128,7 @@ public:
     //@{
 
     //! Method to set communicator for Displayer (for empty constructor)
-    void SetCommunicator( const boost::shared_ptr<Epetra_Comm> comm);
+    void SetCommunicator( const boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Method to set matrix from EpetraMatrix
     void setMatrix(matrix_type& m);
