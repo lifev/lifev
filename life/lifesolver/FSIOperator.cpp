@@ -310,7 +310,7 @@ FSIOperator::setupFEspace()
 void
 FSIOperator::setupDOF( void )
 {
-    Displayer disp(M_epetraWorldComm.get());
+    Displayer disp(M_epetraWorldComm);
     disp.leaderPrint("FSIOperator: setting DOF ... " );
     Dof uDof(*M_fluidMesh, M_uFESpace->refFE());
     Dof dDof(*M_solidMesh, M_dFESpace->refFE());
@@ -382,7 +382,7 @@ FSIOperator::setupDOF( void )
 
 void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension)
 {
-    Displayer disp(M_epetraWorldComm.get());
+    Displayer disp(M_epetraWorldComm);
 	disp.leaderPrint("FSI-  Building fluid variables ...             ");
 
 	// now we build the sigma and lambda variables on each proc
