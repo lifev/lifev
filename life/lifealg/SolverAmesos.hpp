@@ -43,6 +43,8 @@ public:
 
     typedef double                           value_type;
 
+    typedef Displayer::comm_PtrType          comm_PtrType;
+
     typedef SolverAmesos                     solver_type;
 
     typedef EpetraMatrix<double>             matrix_type;
@@ -61,9 +63,10 @@ public:
     //@{
 
     //! default constructor
-    //! @param filename GetPot data file containing options for solver in
-    //!        section "aztec"
-    SolverAmesos(Epetra_Comm&);
+    /*!
+     * @param comm the communicator.
+     */
+    SolverAmesos( const comm_PtrType& comm);
 
     //SolverAmesos();
     //@}
@@ -189,8 +192,7 @@ private:
     int                    M_maxIterSolver;
     int                    M_maxIterForReuse;
 
-    Displayer              M_Displayer;
-    Epetra_Comm&           M_comm;
+    Displayer              M_displayer;
 
 
 

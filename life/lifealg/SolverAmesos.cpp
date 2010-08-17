@@ -56,7 +56,7 @@ namespace LifeV
 // {
 
 
-SolverAmesos::SolverAmesos(Epetra_Comm& comm)
+SolverAmesos::SolverAmesos( const comm_PtrType& comm )
     :
     M_matrix               (),
     M_factory              (),
@@ -65,8 +65,7 @@ SolverAmesos::SolverAmesos(Epetra_Comm& comm)
     M_redistribute         (true),
     M_printTiming          (false),
     M_printStatus          (false),
-    M_Displayer            (&comm),
-    M_comm                 (comm)
+    M_displayer            (comm)
 {
 }
 
@@ -74,7 +73,7 @@ SolverAmesos::SolverAmesos(Epetra_Comm& comm)
 //     M_prec                 (),
 //     M_factory              (),
 //     M_TrilinosParameterList(),
-//     M_Displayer            (),
+//     M_displayer            (),
 
 // {
 //     assert(false);
@@ -206,7 +205,7 @@ int SolverAmesos::solveSystem(  vector_type&      rhsFull,
                                 matrix_ptrtype&   /*basePrecMatrix*/)
 {
 
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
          std::cout << "       Solving the system ... " << std::endl;
 
     Amesos_BaseSolver* Solver;
@@ -234,25 +233,25 @@ int SolverAmesos::solveSystem(  vector_type&      rhsFull,
 
     Solver->SetParameters(List);
 
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
         std::cout << "          Starting symbolic factorization  ..." << std::flush;
     Solver->SymbolicFactorization();
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
         std::cout << " ok." << std::endl;
 
     //std::cout << "m shape = " << Solver->MatrixShapeOK() << std::endl;
   // you can change the matrix values here
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
         std::cout << "          Starting numeric factorization   ..." << std::flush;
     Solver->NumericFactorization();
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
         std::cout << " ok." << std::endl;
 
     // you can change LHS and RHS here
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
         std::cout << "          Starting solution phase          ..." << std::flush;
     Solver->Solve();
-    if (M_comm.MyPID() == 0)
+    if ( M_displayer.isLeader() )
         std::cout << " ok." << std::endl;
 
     // you can get the timings here
