@@ -224,7 +224,7 @@ MS_PhysicalModel::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm 
 #endif
 
     M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm.get() ) );
+    M_displayer.reset( new Displayer( M_comm ) );
 }
 
 // ===================================================
