@@ -396,10 +396,10 @@ Cylinder::run()
     DataMesh dataMesh;
     dataMesh.setup(dataFile, "fluid/space_discretization");
 
-    RegionMesh3D<LinearTetra> mesh;
-    readMesh(mesh, dataMesh);
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;

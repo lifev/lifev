@@ -384,10 +384,11 @@ laplacian::run()
     dataMesh.setup(dataFile, discretization_section);
 
 
-    RegionMesh3D<LinearTetra> mesh;
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
 
     //dataADR.mesh()->orderMesh( Members->comm->Comm() );
-    partitionMesh< RegionMesh>   meshPart(mesh, Members->comm);
+    partitionMesh< RegionMesh>   meshPart(fullMeshPtr, Members->comm);
     //dataADR.setMesh(meshPart.mesh());
 
     if(verbose) dataADR.showMe();

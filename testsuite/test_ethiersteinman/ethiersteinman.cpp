@@ -218,10 +218,10 @@ Ethiersteinman::run()
     DataMesh dataMesh;
     dataMesh.setup(dataFile, "fluid/space_discretization");
 
-    RegionMesh3D<LinearTetra> mesh;
-    readMesh(mesh, dataMesh);
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -581,10 +581,10 @@ Ethiersteinman::check()
             //DataMesh dataMesh;
             //dataMesh.setup(dataFile, "fluid/space_discratization");
 
-            RegionMesh3D<LinearTetra> mesh;
+            boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
             // Call the function to build a mesh
-            regularMesh3D( mesh,
+            regularMesh3D( *fullMeshPtr,
                            1,
                            mElem, mElem, mElem,
                            verbose,
@@ -594,13 +594,13 @@ Ethiersteinman::check()
             if (d->comm->MyPID()==0)
             {
                 std::string fname = "cube-" + number2string(mElem) + ".mesh";
-                writeMesh(fname, mesh);
+                writeMesh(fname, *fullMeshPtr);
             }
 
             // exportMesh3D(mesh,"cube4x4",MESH_FORMAT);
             // exportMesh3D(mesh,"cube4x4",MATLAB_FORMAT);
 
-            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
+            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];

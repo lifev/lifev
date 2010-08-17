@@ -183,11 +183,11 @@ Structure::run3d()
     DataMesh             dataMesh;
     dataMesh.setup(dataFile, "solid/space_discretization");
 
-    RegionMesh3D<LinearTetra> mesh;
-    readMesh(mesh, dataMesh);
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
 
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( mesh, parameters->comm );
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
 
 //    meshPart.rebuildMesh();
 

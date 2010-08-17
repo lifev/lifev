@@ -127,10 +127,10 @@ EnsightToHdf5::run()
     DataMesh dataMesh;
     dataMesh.setup(dataFile, "fluid/space_discretization");
 
-    RegionMesh3D<LinearTetra> mesh;
-    readMesh(mesh, dataMesh);
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
 
-    writeMesh("test.mesh", mesh);
+    writeMesh("test.mesh", *fullMeshPtr);
     // Scale, Rotate, Translate (if necessary)
     boost::array< Real, NDIM >    geometryScale;
     boost::array< Real, NDIM >    geometryRotate;
@@ -148,9 +148,9 @@ EnsightToHdf5::run()
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
     geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
 
-    mesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
+    fullMeshPtr->transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(mesh, d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
