@@ -226,7 +226,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building fluid FESpace ...               \n");
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_fluidMesh, M_epetraComm));
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (M_fluidMesh, M_epetraComm));
 
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
 															//dOrder,
@@ -283,7 +283,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-    	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( *M_solidMesh, M_epetraComm ) );
+    	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( M_solidMesh, M_epetraComm ) );
     	M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( *M_solidMeshPart,
     															 dOrder,
     	                                                         //*refFE_struct,
