@@ -685,11 +685,11 @@ void
 MS_Model_Fluid3D::SetupMesh()
 {
     //Read fluid mesh from file
-    Mesh_Type fluidMesh;
-    readMesh( fluidMesh, *M_dataMesh);
+    boost::shared_ptr<Mesh_Type> fluidMesh(new Mesh_Type);
+    readMesh( *fluidMesh, *M_dataMesh);
 
     //Transform mesh
-    fluidMesh.transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    fluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
     M_mesh.reset( new PartitionMesh_Type( fluidMesh, M_comm ) );
