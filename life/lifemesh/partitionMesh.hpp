@@ -63,7 +63,7 @@ public:
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    partitionMesh(Mesh &_mesh, boost::shared_ptr<Epetra_Comm> _comm, Epetra_Map* interfaceMap = 0,
+    partitionMesh(mesh_ptrtype &_mesh, boost::shared_ptr<Epetra_Comm> _comm, Epetra_Map* interfaceMap = 0,
                   Epetra_Map* interfaceMapRep = 0);
     //! Empty destructor
     ~partitionMesh() {}
@@ -117,8 +117,14 @@ public:
       \param interfaceMap - Epetra_Map* - pointer to the interface map (default value 0)
       \param interfaceMapRep - Epetra_Map* - pointer to the repeated interface map (default value 0)
     */
-    void attachUnpartitionedMesh(Mesh &_mesh, Epetra_Map* interfaceMap = 0,
+    void attachUnpartitionedMesh(mesh_ptrtype &_mesh, Epetra_Map* interfaceMap = 0,
                                  Epetra_Map* interfaceMapRep = 0);
+    //! Releases the original unpartitioned mesh
+    /*!
+      Releases the unpartitioned mesh so that it can be deleted, freein A LOT of memory
+      in some cases.
+    */
+    void releaseUnpartitionedMesh();
     //! Executes the ParMETIS graph partitioning
     /*!
       Executes the ParMETIS graph partitioning
@@ -257,7 +263,7 @@ private:
     std::vector<UInt>                    M_nBoundaryFaces;
     // The following are utility variables used throughout the partitioning
     // process
-    Mesh* /* Just an observer */         M_originalMesh;
+    mesh_ptrtype                         M_originalMesh;
     Epetra_Map*                          M_interfaceMap;
     Epetra_Map*                          M_interfaceMapRep;
     //! Number of partitions handled. 1 for parallel (old way), != 1 for serial
@@ -284,12 +290,12 @@ partitionMesh<Mesh>::partitionMesh()
 }
 
 template<typename Mesh>
-partitionMesh<Mesh>::partitionMesh(Mesh &_mesh, boost::shared_ptr<Epetra_Comm> _comm,
+partitionMesh<Mesh>::partitionMesh(mesh_ptrtype &_mesh, boost::shared_ptr<Epetra_Comm> _comm,
                                    Epetra_Map* interfaceMap,
                                    Epetra_Map* interfaceMapRep):
     M_nPartitions (1),
     M_comm (_comm),
-    M_originalMesh (&_mesh),
+    M_originalMesh (_mesh),
     M_interfaceMap (interfaceMap),
     M_interfaceMapRep (interfaceMapRep),
     M_locProc (new graph_type),
@@ -375,13 +381,21 @@ void partitionMesh<Mesh>::update()
 }
 
 template<typename Mesh>
-void partitionMesh<Mesh>::attachUnpartitionedMesh(Mesh &_mesh,
+void partitionMesh<Mesh>::attachUnpartitionedMesh(mesh_ptrtype &_mesh,
                                                   Epetra_Map* interfaceMap,
                                                   Epetra_Map* interfaceMapRep)
 {
-    M_originalMesh = &_mesh;
+    M_originalMesh = _mesh;
     M_interfaceMap = interfaceMap;
     M_interfaceMapRep = interfaceMapRep;
+}
+
+template<typename Mesh>
+void partitionMesh<Mesh>::releaseUnpartitionedMesh()
+{
+    M_originalMesh.reset();
+    M_interfaceMap = 0;
+    M_interfaceMapRep = 0;
 }
 
 template<typename Mesh>
