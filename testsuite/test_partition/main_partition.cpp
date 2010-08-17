@@ -93,15 +93,19 @@ int main( int argc, char** argv )
     DataMesh dataMesh;
     dataMesh.setup(dataFile, "fluid/space_discretization");
 
-    RegionMesh3D<LinearTetra> mesh;
-    readMesh(mesh, dataMesh);
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
 
     partitionMesh<RegionMesh3D<LinearTetra> > meshPart;
     meshPart.setup(4, comm);
 
-    meshPart.attachUnpartitionedMesh(mesh);
+    meshPart.attachUnpartitionedMesh(fullMeshPtr);
     meshPart.doPartitionGraph();
     meshPart.doPartitionMesh();
+
+    // Release the original mesh from the partitionMesh object and delete the RegionMesh3D object
+    meshPart.releaseUnpartitionedMesh();
+    fullMeshPtr.reset();
 
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.mesh(), "cylinderPart",
                                                             comm->MyPID());
