@@ -393,7 +393,7 @@ Cylinder::run()
     dataNavierStokes.setup( dataFile );
 
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart;
-    meshPart.setup(4, (d->comm));
+    meshPart.setup(1, (d->comm));
 
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
     HDF5Input.loadGraph(meshPart.graph(), d->comm);
