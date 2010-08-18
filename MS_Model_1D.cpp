@@ -166,7 +166,7 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_Source->SetPhysics( M_Physics );
 
     //Linear Solver
-    M_LinearSolver.reset( new LinearSolver_Type( *M_comm ) );
+    M_LinearSolver.reset( new LinearSolver_Type( M_comm ) );
     M_LinearSolver->setUpPrec        ( DataFile, "1D_Model/prec" );
     M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver");
 
