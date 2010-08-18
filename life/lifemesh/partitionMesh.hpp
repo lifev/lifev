@@ -301,8 +301,12 @@ partitionMesh<Mesh>::partitionMesh(mesh_ptrtype &_mesh, boost::shared_ptr<Epetra
     M_locProc (new graph_type),
     M_serialMode (false)
 {
+    M_me = M_comm->MyPID();
+
     mesh_ptrtype newMesh (new Mesh);
     M_mesh.reset(new partmesh_type(M_nPartitions, newMesh));
+    newMesh.reset();
+
     M_localNodes.resize(1);
     M_localEdges.resize(1);
     M_localFaces.resize(1);
@@ -337,6 +341,7 @@ void partitionMesh<Mesh>::setup(UInt partitionNumber, boost::shared_ptr<Epetra_C
         newMesh.reset(new Mesh);
         M_mesh->push_back(newMesh);
     }
+    newMesh.reset();
 
     M_locProc.reset(new graph_type);
 
@@ -1275,7 +1280,14 @@ void partitionMesh<Mesh>::finalSetup()
 
         (*M_mesh)[i]->updateElementFaces();
 
-        std::cout << i + 1 << " done" << std::endl;
+        if (M_serialMode)
+        {
+            std::cout << "Created local mesh number " << i + 1 << std::endl;
+        }
+        else
+        {
+            std::cout << "Rank " << M_me << " created local mesh." << std::endl;
+        }
     }
 }
 
@@ -1286,17 +1298,11 @@ void partitionMesh<Mesh>::createRepeatedMap()
     std::set<int>    repeatedEdgeList;
     std::set<int>    repeatedFaceList;
 
-    if (M_serialMode)
+    if (! M_me)
     {
         std::cout << "Building repeated map... " << std::endl;
     }
-    else
-    {
-        if (! M_me)
-        {
-            std::cout << "Building repeated map... " << std::endl;
-        }
-    }
+
     for (UInt i = 0; i < M_nPartitions; ++i)
     {
         std::set<int>::iterator is;
@@ -1359,7 +1365,14 @@ void partitionMesh<Mesh>::createRepeatedMap()
             M_repeatedFaceVector[i].push_back(*is);
         }
 
-        std::cout << i + 1<< " done" << std::endl;
+        if (M_serialMode)
+        {
+            std::cout <<  "Created repeated map number " << i + 1 << std::endl;
+        }
+        else
+        {
+            std::cout << "Rank " << M_me << " created repeated map." << std::endl;
+        }
     }
 }
 
@@ -1425,9 +1438,9 @@ void partitionMesh<Mesh>::execute()
     // ******************
     constructNodes();
 
-    // ******************
+    // ********************
     // volumes construction
-    // ******************
+    // ********************
     constructVolumes();
 
     // ******************
@@ -1449,6 +1462,12 @@ void partitionMesh<Mesh>::execute()
     // repeated map creation
     // *********************
     createRepeatedMap();
+
+    // ***************************************
+    // release the original unpartitioned mesh
+    // allowing it to be deleted
+    // ***************************************
+    releaseUnpartitionedMesh();
 }
 
 }
