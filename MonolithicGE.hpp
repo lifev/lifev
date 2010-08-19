@@ -40,8 +40,6 @@
 #include <lifemc/lifesolver/BlockMatrix.hpp>
 #include <lifemc/lifesolver/BlockMatrixRN.hpp>
 #include <lifemc/lifesolver/ComposedDN.hpp>
-//#include <lifemc/lifesolver/ComposedRN.hpp>
-#include <lifemc/lifesolver/ComposedDN2.hpp>
 #include <lifemc/lifesolver/ComposedNN.hpp>
 #include <lifemc/lifesolver/ComposedDNND.hpp>
 

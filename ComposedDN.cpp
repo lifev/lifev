@@ -64,10 +64,6 @@ void ComposedDN::coupler(map_shared_ptrtype& map,
     coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->getMap().getMap(Unique)->NumGlobalElements(), totalDofs +1 );
     M_coupling.push_back(coupling);
 
-    M_blockReordering.resize(3);
-    M_blockReordering[0] = solid;
-    M_blockReordering[1] = fluid;
-    M_blockReordering[2] = mesh;
 }
 
 int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver )
@@ -77,14 +73,14 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     if(!M_blockPrecs->getNumber())
     {
         for(UInt k=0; k < M_blocks.size(); ++k)
-            push_back_precs(M_blocks[M_blockReordering[k]]);
+            push_back_precs(M_blocks[(*M_blockReordering)[k]]);
     }
     else
     {
         for(UInt k=0; k < M_blocks.size(); ++k)
         {
-            if(M_recompute[M_blockReordering[k]])
-                replace_precs(M_blocks[M_blockReordering[k]], k);
+            if(M_recompute[(*M_blockReordering)[k]])
+                replace_precs(M_blocks[(*M_blockReordering)[k]], k);
             else
                 linearSolver->displayer()->leaderPrint("\n  M-  reusing prec. factor ", k);
         }

@@ -96,23 +96,52 @@ MonolithicGE::setupSystem( )
 
 namespace
 {
-const Int couplingsDN[] = { 0, 7};
-const Int couplingsDN2[] = { 8, 6};
-const Int couplingsNN[] = { 8, 4, 1, 2};
-const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
 
-const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
-const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
-const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
-const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
+BlockInterface* createComposedDNND(){
+    const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
+    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+    const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+6);
+    return new ComposedDNND(couplingVectorDNND, orderVector);
+}
 
+BlockInterface* createComposedNN()
+{
+    const ComposedBlockOper::Block order[] = {  ComposedBlockOper::fluid, ComposedBlockOper::solid};
+    const Int couplingsNN[] = { 8, 4, 1, 2};
+    const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+4);
+    return new ComposedNN( couplingVectorNN, orderVector );
+}
 
-BlockInterface* createComposedDNND(){ return new ComposedDNND(couplingVectorDNND); }
-BlockInterface* createComposedNN(){ return new ComposedNN(couplingVectorNN); }
-BlockMatrix*    createAdditiveSchwarz(){ return new BlockMatrix(15); }
-BlockMatrix*    createAdditiveSchwarzRN(){ return new BlockMatrixRN(15); }
-BlockInterface* createComposedDN(){ return new ComposedDN(couplingVectorDN); }
-BlockInterface* createComposedDN2(){ return new ComposedDN2(couplingVectorDN2); }
+BlockMatrix*    createAdditiveSchwarz()
+{
+return new BlockMatrix(15);
+}
+
+BlockMatrix*    createAdditiveSchwarzRN()
+{
+return new BlockMatrixRN(15);
+}
+
+BlockInterface* createComposedDN()
+{
+    const ComposedBlockOper::Block order[] = { ComposedBlockOper::solid, ComposedBlockOper::fluid};
+    const Int couplingsDN[] = { 0, 7};
+    const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
+    return new ComposedDN(couplingVectorDN, orderVector);
+}
+
+BlockInterface* createComposedDN2()
+{
+    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+    const Int couplingsDN2[] = { 8, 6};
+    const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
+    return new ComposedDN(couplingVectorDN2, orderVector);
+}
+
 FSIOperator* createM(){ return new MonolithicGE(); }
 }
 

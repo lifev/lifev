@@ -64,8 +64,8 @@ public:
     //@{
 
     //! Empty Constructor
-    ComposedNN(const std::vector<Int>& flag):
-        super( flag ),
+    ComposedNN(const std::vector<Int>& flag, const std::vector<Block>& order):
+        super( flag, order ),
         M_blockPrecs(),
         M_prec()
     {}

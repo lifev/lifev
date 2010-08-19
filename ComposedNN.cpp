@@ -56,7 +56,7 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
         {
             M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
             chrono.start();
-            M_prec[k].reset(factory.Create(precType, M_blocks[M_blockReordering[k]]->getMatrixPtr().get(), overlapLevel));
+            M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->getMatrixPtr().get(), overlapLevel));
             if ( !M_prec[k].get() )
             {
                 ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
@@ -72,11 +72,11 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     {
         for(ID k(0); k < M_blocks.size(); ++k)
         {
-            if(M_recompute[M_blockReordering[k]])
+            if(M_recompute[(*M_blockReordering)[k]])
             {
                 M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
                 chrono.start();
-                M_prec[k].reset(factory.Create(precType, M_blocks[M_blockReordering[k]]->getMatrixPtr().get(), overlapLevel));
+                M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->getMatrixPtr().get(), overlapLevel));
                 if ( !M_prec[k].get() )
                 {
                     ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
@@ -131,10 +131,6 @@ void ComposedNN::coupler(map_shared_ptrtype& map,
 {
     UInt totalDofs=map->getMap(Unique)->NumGlobalElements()+1;
     UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements();
-
-    M_blockReordering.resize(2);
-    M_blockReordering[0] = fluid;
-    M_blockReordering[1] = solid;
 
     for(ID k=0; k<2; ++k)
     {
@@ -195,8 +191,8 @@ void ComposedNN::replace_matrix( const matrix_ptrtype& oper, UInt position )
 {
     oper->GlobalAssemble();
     *oper *= 2.;
-    M_blocks[1-position]=oper;
-    M_blocks[3-position]=oper;
+    M_blocks[position]=oper;
+    M_blocks[position]=oper;
 }
 
 } // Namespace LifeV

@@ -75,12 +75,12 @@ public:
 
     //! @name Constructor and Destructor
     //@{
-    ComposedBlockOper(const std::vector<Int>& flags):
+    ComposedBlockOper(const std::vector<Int>& flags, const std::vector<Block>& order):
         super(),
         M_recompute(),
         M_coupling(),
-        M_blockReordering(),
-        M_couplingFlags(new std::vector<Int>(flags))// here I copy, so that the input param can be destroyed
+        M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
+        M_blockReordering(new std::vector<Block>(order))
     {}
 
 
@@ -204,12 +204,6 @@ protected:
     std::vector<bool>                                           M_recompute;
     //! vector of coupling matrices
     std::vector<matrix_ptrtype>                                 M_coupling;
-    //! vector of reordering for the different blocks.
-    /*!the order in which the factors are allpied is specified by this
-    vector. e.g. the fisrt block to be applied corresponds to the number M_blockReordering[0] in the vector
-    M_blocks of blocks. This vector is assigned in the coupler method of each class.
-    */
-    std::vector<UInt>                                           M_blockReordering;
 
     //! vector of flags specifying the coupling strategy for each block.
     /*!
@@ -219,6 +213,13 @@ protected:
       is copied into this scoped_ptr.
      */
     boost::scoped_ptr<std::vector<Int> >                        M_couplingFlags;
+
+    //! vector of reordering for the different blocks.
+    /*!the order in which the factors are allpied is specified by this
+    vector. e.g. the fisrt block to be applied corresponds to the number M_blockReordering[0] in the vector
+    M_blocks of blocks. This vector is assigned in the coupler method of each class.
+    */
+    boost::scoped_ptr<std::vector<Block> >                      M_blockReordering;
 
 private:
 

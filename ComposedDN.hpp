@@ -87,8 +87,8 @@ class ComposedDN : public ComposedBlockOper
 public:
     typedef ComposedBlockOper super;
 
-    ComposedDN( const std::vector<Int>& flag):
-        super( flag ),
+    ComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
+        super( flag, order ),
         M_blockPrecs(),
         M_uMap(),
         M_pMap(),

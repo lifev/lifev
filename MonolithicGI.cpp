@@ -29,7 +29,6 @@
 
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 #include <lifemc/lifesolver/ComposedDN.hpp>
-#include <lifemc/lifesolver/ComposedDN2.hpp>
 #include <lifemc/lifesolver/ComposedDND.hpp>
 #include <lifemc/lifesolver/BlockMatrixRN.hpp>
 
@@ -398,21 +397,46 @@ MonolithicGI::assembleMeshBlock(UInt iter)
 
 namespace
 {
-const Int couplingsDNGI[] = { 0, 7, 16 };
-const Int couplingsDN2GI[] = { 8, 6, 16 };
-const Int couplingsDNGI2[] = { 0, 7, 0 };
-const Int couplingsDN2GI2[] = { 8, 6, 0 };
-const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
-const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
-const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
-const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
 
-BlockMatrix*    createAdditiveSchwarzGI(){ return new BlockMatrix(31); }
-BlockMatrix*    createAdditiveSchwarzRNGI(){ return new BlockMatrixRN(31); }
-BlockInterface*    createComposedDNGI(){ return new ComposedDN( couplingVectorDNGI ); }
-BlockInterface*    createComposedDN2GI(){ return new ComposedDN2( couplingVectorDN2GI ); }
-BlockInterface*    createComposedDNDGI(){ return new ComposedDND( couplingVectorDNGI2 ); }
-BlockInterface*    createComposedDND2GI(){ return new ComposedDND(couplingVectorDN2GI2); }
+BlockMatrix*    createAdditiveSchwarzGI(){
+return new BlockMatrix(31);
+}
+
+BlockMatrix*    createAdditiveSchwarzRNGI(){
+return new BlockMatrixRN(31);
+}
+
+BlockInterface*    createComposedDNGI(){
+    const ComposedBlockOper::Block order[] = {  ComposedBlockOper::solid, ComposedBlockOper::fluid, ComposedBlockOper::mesh };
+    const Int couplingsDNGI[] = { 0, 7, 16 };
+    const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+3);
+    return new ComposedDN( couplingVectorDNGI, orderVector );
+}
+
+BlockInterface*    createComposedDN2GI(){
+    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid, ComposedBlockOper::mesh };
+    const Int couplingsDN2GI[] = { 8, 6, 16 };
+    const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+3);
+    return new ComposedDN( couplingVectorDN2GI, orderVector );
+}
+
+BlockInterface*    createComposedDNDGI(){
+    const ComposedBlockOper::Block order[] = {  ComposedBlockOper::mesh, ComposedBlockOper::solid, ComposedBlockOper::fluid };
+    const Int couplingsDNGI2[] = { 0, 7, 0 };
+    const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+3);
+    return new ComposedDND( couplingVectorDNGI2, orderVector );
+}
+
+BlockInterface*    createComposedDND2GI(){
+    const ComposedBlockOper::Block order[] = { ComposedBlockOper::mesh, ComposedBlockOper::fluid , ComposedBlockOper::solid};
+const Int couplingsDN2GI2[] = { 8, 6, 0 };
+const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
+const std::vector<ComposedBlockOper::Block> orderVector(order, order+3);
+return new ComposedDND( couplingVectorDN2GI2, orderVector );
+}
 FSIOperator*    createFM(){ return new MonolithicGI(); }
 }
 

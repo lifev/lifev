@@ -37,7 +37,6 @@ liblifemcsolver_la_SOURCES   = BCInterface_FSI.cpp \
                                ComposedBlockOper.cpp \
                                ComposedDN.cpp \
                                ComposedDND.cpp \
-                               ComposedDN2.cpp \
                                ComposedNN.cpp \
                                ComposedDNND.cpp \
                                MS_Solver.cpp \

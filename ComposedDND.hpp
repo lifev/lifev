@@ -58,8 +58,8 @@ public:
     //! @name Constructors and destructor
     //@{
 
-    ComposedDND( const std::vector<Int>& flag ):
-        super(flag),
+    ComposedDND( const std::vector<Int>& flag, const std::vector<Block>& order ):
+        super(flag, order),
         M_swapped(false)
     {
     }
@@ -70,11 +70,6 @@ public:
 
 
     void blockAssembling( );
-
-    void coupler(map_shared_ptrtype& map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype& numerationInterface,
-                 const Real& timeStep);
 
 private:
 

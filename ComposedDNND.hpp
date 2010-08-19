@@ -117,8 +117,8 @@ public:
 
     typedef ComposedNN super;
 
-    ComposedDNND( const std::vector<Int>& flag ):
-        super( flag )
+    ComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
+        super( flag, order )
     {
     }
 

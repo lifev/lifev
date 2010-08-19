@@ -43,10 +43,6 @@ void ComposedDNND::coupler(map_shared_ptrtype& map,
     UInt totalDofs=map->getMap(Unique)->NumGlobalElements()+1;
     UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements();
 
-    M_blockReordering.resize(2);
-    M_blockReordering[0]=fluid;
-    M_blockReordering[1]=solid;
-
     for(ID k=0; k<2; ++k)
     {
         M_blocks[k]->GlobalAssemble();
@@ -56,7 +52,7 @@ void ComposedDNND::coupler(map_shared_ptrtype& map,
         M_FESpace.push_back(M_FESpace[k]);
         M_offset.push_back(M_offset[k]);
         M_recompute.push_back(M_recompute[k]);
-        M_blockReordering.push_back(M_blockReordering[k]);
+        M_blockReordering->push_back((*M_blockReordering)[k]);
     }
 
 

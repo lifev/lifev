@@ -48,16 +48,4 @@ void ComposedDND::blockAssembling( )
     super::blockAssembling();
 }
 
-
-void ComposedDND::coupler(map_shared_ptrtype& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype& numerationInterface,
-                         const Real& timeStep)
-{
-    super::coupler( map, locDofMap, numerationInterface, timeStep );
-    M_blockReordering[0] = mesh;
-    M_blockReordering[1] = solid;
-    M_blockReordering[2] = fluid;
-}
-
 } // Namespace LifeV
