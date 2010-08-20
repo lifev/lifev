@@ -169,6 +169,18 @@ public:
      */
     Real getTime()			 const { return M_time; }
 
+    //! Get the previous time
+    /*!
+     * @return previous time value
+     */
+    Real getPreviousTime()   const { return M_time - M_timeStep; }
+
+    //! Get the next time
+    /*!
+     * @return next time value
+     */
+    Real getNextTime()   const { return M_time + M_timeStep; }
+
     //! Get the time step used for advancing
     /*!
      * @return time step value
