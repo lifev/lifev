@@ -115,7 +115,7 @@ postProcessFluxesPressures( Oseen< RegionMesh3D<LinearTetra> >& nssolver,
   LifeV::Real Q, P;
   UInt flag;
 
-  for( BCHandler::Iterator it = bcHandler.begin();
+  for( BCHandler::BCBase_Iterator it = bcHandler.begin();
   it != bcHandler.end(); ++it )
     {
       flag = it->flag();
