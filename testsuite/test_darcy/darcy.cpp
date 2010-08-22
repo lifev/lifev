@@ -290,7 +290,7 @@ struct darcy::Private
     std::string    data_file_name;
     std::string    discretization_section;
 
-    Epetra_MpiComm*   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
 
     // Function Types
 
@@ -342,9 +342,9 @@ darcy::darcy( int argc,
 
 	#ifdef EPETRA_MPI
 		std::cout << "Epetra Initialization" << std::endl;
-		Members->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 	#else
-		Members->comm = new Epetra_SerialComm();
+		Members->comm.reset( new Epetra_SerialComm() );
 	#endif
 }
 
@@ -401,13 +401,13 @@ darcy::run()
     dataMesh.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh
-    RegionMesh mesh;
+    boost::shared_ptr<RegionMesh> fullMeshPtr(new RegionMesh);
 
     // Set up the mesh
-    readMesh( mesh, dataMesh );
+    readMesh( *fullMeshPtr, dataMesh );
 
     // Partition the mesh using ParMetis
-    partitionMesh< RegionMesh >  meshPart( mesh, *Members->comm );
+    partitionMesh< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
