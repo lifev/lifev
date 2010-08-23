@@ -760,8 +760,8 @@ MS_Model_Fluid3D::SetupFEspace()
             exit( EXIT_FAILURE );
         }
 
-    M_uFESpace.reset( new FESpace_Type( *M_mesh, *u_refFE, *u_qR, *u_bdQr, 3, *M_comm ) );
-    M_pFESpace.reset( new FESpace_Type( *M_mesh, *p_refFE, *p_qR, *p_bdQr, 1, *M_comm ) );
+    M_uFESpace.reset( new FESpace_Type( *M_mesh, *u_refFE, *u_qR, *u_bdQr, 3, M_comm ) );
+    M_pFESpace.reset( new FESpace_Type( *M_mesh, *p_refFE, *p_qR, *p_bdQr, 1, M_comm ) );
 }
 
 void
