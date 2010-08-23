@@ -74,7 +74,7 @@ Displayer::isLeader() const
 // Set Methods
 // ===================================================
 void
-Displayer::SetCommunicator( const comm_PtrType& comm )
+Displayer::setCommunicator( const comm_PtrType& comm )
 {
     M_comm = comm;
     if ( M_comm.get() )

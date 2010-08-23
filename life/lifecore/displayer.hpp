@@ -145,7 +145,7 @@ public:
     /*!
      * @param comm the communicator
      */
-    void SetCommunicator( const comm_PtrType& comm );
+    void setCommunicator( const comm_PtrType& comm );
 
     //! @name Get Methods
     //@{
