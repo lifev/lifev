@@ -49,13 +49,13 @@ namespace LifeV
 // For the moment, the selection of the components of the differential operators to be computed is carried out
 // inside the differential operator. This is simpler, but not the best: indeed an "if" is processed
 // for every integral computation. It would be better to set up a table of simple operators
-// and then to plug the correct diff oper component in the by-components loop
+// and then to plug the correct diff _oper component in the by-components loop
 // in "assemble". It will be done (I have to understand "how") **** AV January 2002
 
 template <typename Oper, typename DOF, typename RegionMesh,
 typename UsrSourceFct>
 void
-assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe,
+assemble( Oper _oper, const RegionMesh& mesh, CurrentFE& fe,
           const DOF& dof, const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector& b )
 {
     UInt i, ic, jc;
@@ -74,8 +74,8 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe,
         {
             for ( jc = 0; jc < nc; ++jc )
             {
-                compute_mat( elmat, oper, fe, ic, jc ); // compute local matrix
-                // the previous line would become:  compute_mat(elmat,oper.comp(ic,jc),fe); ****
+                compute_mat( elmat, _oper, fe, ic, jc ); // compute local matrix
+                // the previous line would become:  compute_mat(elmat,_oper.comp(ic,jc),fe); ****
                 assemb_mat( A, elmat, fe, dof, ic, jc ); // assemble local matrix into global one
             }
 #ifdef STABILIZED
@@ -93,7 +93,7 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe,
 template <typename Oper, typename DOF, typename RegionMesh,
 typename UsrSourceFct>
 void
-assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
+assemble( Oper _oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
           const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector& b, Real const t )
 {
     UInt i, ic, jc;
@@ -112,8 +112,8 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
         {
             for ( jc = 0; jc < nc; ++jc )
             {
-                compute_mat( elmat, oper, fe, ic, jc ); // compute local matrix
-                // the previous line would become:  compute_mat(elmat,oper.comp(ic,jc),fe); ****
+                compute_mat( elmat, _oper, fe, ic, jc ); // compute local matrix
+                // the previous line would become:  compute_mat(elmat,_oper.comp(ic,jc),fe); ****
                 assemb_mat( A, elmat, fe, dof, ic, jc ); // assemble local matrix into global one
             }
 #ifdef STABILIZED
@@ -138,7 +138,7 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
 template <typename Oper, typename DOF1, typename DOF2, typename RegionMesh,
 typename UsrSourceFct>
 void
-assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
+assemble_mixed( Oper _oper, const RegionMesh& mesh, CurrentFE& fe1,
                 CurrentFE& fe2, const DOF1& dof1, const DOF2& dof2,
                 UInt const nc1, UInt const nc2, const UsrSourceFct& source_fct,
                 EpetraMatrix<double>& A, EpetraVector& b )
@@ -160,7 +160,7 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
             for ( jc = 0; jc < nc2; ++jc )
             {
 
-                compute_mat_mixed( elmat, oper, fe1, fe2, ic, jc ); // compute local matrix
+                compute_mat_mixed( elmat, _oper, fe1, fe2, ic, jc ); // compute local matrix
 
                 assemb_mat_mixed( A, elmat, fe1, fe2, dof1, dof2, ic, jc ); // assemble local matrix into global one
             }
@@ -174,7 +174,7 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
 template <typename Oper, typename DOF1, typename DOF2, typename RegionMesh,
 typename UsrSourceFct>
 void
-assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
+assemble_mixed( Oper _oper, const RegionMesh& mesh, CurrentFE& fe1,
                 CurrentFE& fe2, const DOF1& dof1, const DOF2& dof2,
                 UInt const nc1, UInt const nc2, const UsrSourceFct& source_fct,
                 EpetraMatrix<double>& A, EpetraVector& b, Real const t )
@@ -196,7 +196,7 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
             for ( jc = 0; jc < nc2; ++jc )
             {
 
-                compute_mat_mixed( elmat, oper, fe1, fe2, ic, jc ); // compute local matrix
+                compute_mat_mixed( elmat, _oper, fe1, fe2, ic, jc ); // compute local matrix
 
                 assemb_mat_mixed( A, elmat, fe1, fe2, dof1, dof2, ic, jc ); // assemble local matrix into global one
             }
@@ -211,7 +211,7 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
 template <typename Oper, typename DOF, typename RegionMesh,
 typename UsrSourceFct>
 void
-assemble_symm( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
+assemble_symm( Oper _oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
                const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector& b, Real const t )
 {
     UInt i, ic, jc;
@@ -230,8 +230,8 @@ assemble_symm( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
         {
             for ( jc = 0; jc < nc; ++jc )
             {
-                compute_mat_symm( elmat, oper, fe, ic, jc ); // compute local matrix expoiting symmetry of the operator
-                // the previous line would become:  compute_mat(elmat,oper.comp(ic,jc),fe); ****
+                compute_mat_symm( elmat, _oper, fe, ic, jc ); // compute local matrix expoiting symmetry of the operator
+                // the previous line would become:  compute_mat(elmat,_oper.comp(ic,jc),fe); ****
                 assemb_mat( A, elmat, fe, dof, ic, jc ); // assemble local matrix into global one
             }
             compute_vec( source_fct, elvec, fe, t, ic ); // compute local vector
@@ -248,7 +248,7 @@ assemble_symm( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
 template <typename Oper, typename DOF, typename RegionMesh,
 typename UsrSourceFct>
 void
-assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
+assemble_symm_block_diagonal( Oper _oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
                               const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector& b, Real const t )
 {
     UInt i, ic = 0;
@@ -263,7 +263,7 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
         elmat.zero();
         //
         elvec.zero();
-        compute_mat_symm( elmat, oper, fe ); // compute local matrix expoiting symmetry of the operator
+        compute_mat_symm( elmat, _oper, fe ); // compute local matrix expoiting symmetry of the operator
 
         ic = 0;
         assemb_mat( A, elmat, fe, dof, ic, ic ); // assemble local matrix into global one
@@ -288,7 +288,7 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
 //////////////////////////////////
 //
 template <typename Oper>
-void compute_mat( ElemMat& elmat, Oper& oper,
+void compute_mat( ElemMat& elmat, Oper& _oper,
                   const CurrentFE& fe, int iblock = 0, int jblock = 0 )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
@@ -307,8 +307,8 @@ void compute_mat( ElemMat& elmat, Oper& oper,
                 fe.coorQuadPt( x, y, z, ig );
 #endif
 
-                s += oper( i, j, ig, x, y, z, iblock, jblock ) * fe.weightDet( ig );
-                // the previous line would become:  oper(i,j,ig,x,y,z)*fe.weightDet(ig); ****
+                s += _oper( i, j, ig, x, y, z, iblock, jblock ) * fe.weightDet( ig );
+                // the previous line would become:  _oper(i,j,ig,x,y,z)*fe.weightDet(ig); ****
             }
             mat( ( int ) i, ( int ) j ) += s;
         }
@@ -322,7 +322,7 @@ void compute_mat( ElemMat& elmat, Oper& oper,
 //! compute local matrix element for mixed FE
 //Alain 1/02/02.
 template <typename Oper>
-void compute_mat_mixed( ElemMat& elmat, Oper& oper,
+void compute_mat_mixed( ElemMat& elmat, Oper& _oper,
                         const CurrentFE& fe1, const CurrentFE& fe2, int iblock = 0, int jblock = 0 )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
@@ -344,7 +344,7 @@ void compute_mat_mixed( ElemMat& elmat, Oper& oper,
             for ( ig = 0;ig < fe1.nbQuadPt();ig++ )
             {
                 fe1.coorQuadPt( x, y, z, ig );
-                s += oper( i, j, ig, x, y, z, iblock, jblock ) * fe1.weightDet( ig );
+                s += _oper( i, j, ig, x, y, z, iblock, jblock ) * fe1.weightDet( ig );
             }
             mat( ( int ) i, ( int ) j ) += s;
         }
@@ -352,7 +352,7 @@ void compute_mat_mixed( ElemMat& elmat, Oper& oper,
 }
 //
 template <typename Oper>
-void compute_mat_symm( ElemMat& elmat, Oper& oper,
+void compute_mat_symm( ElemMat& elmat, Oper& _oper,
                        const CurrentFE& fe, int iblock = 0, int jblock = 0 )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
@@ -373,7 +373,7 @@ void compute_mat_symm( ElemMat& elmat, Oper& oper,
             fe.coorQuadPt( x, y, z, ig );
 #endif
 
-            s += oper( iloc, iloc, ig, x, y, z, iblock, jblock ) * fe.weightDet( ig );
+            s += _oper( iloc, iloc, ig, x, y, z, iblock, jblock ) * fe.weightDet( ig );
         }
         mat( ( int ) iloc, ( int ) iloc ) += s;
     }
@@ -391,7 +391,7 @@ void compute_mat_symm( ElemMat& elmat, Oper& oper,
             fe.coorQuadPt( x, y, z, ig );
 #endif
 
-            s += oper( iloc, jloc, ig, x, y, z, iblock, jblock ) * fe.weightDet( ig );
+            s += _oper( iloc, jloc, ig, x, y, z, iblock, jblock ) * fe.weightDet( ig );
         }
 
         mat( ( int ) iloc, ( int ) jloc ) += s;
@@ -974,10 +974,10 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe,
 template <typename UsrFct>
 void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, const Real& t, int iblock = 0 )
 {
-    int i, ig;
+    UInt i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
-    for ( i = 0;i < fe.nbNode;i++ )
+    for ( i = 0;i < fe.nbFEDof();i++ )
     {
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt();ig++ )
@@ -1020,10 +1020,10 @@ assemb_vec( EpetraVector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof
 {
     UInt totdof = dof.numTotalDof();
     typename ElemVec::vector_view vec = elvec.block( iblock );
-    int i;
+    UInt i;
     UInt ig;
     UInt eleId = fe.currentId();
-    for ( i = 0 ; i < fe.nbNode ; i++ )
+    for ( i = 0 ; i < fe.nbFEDof() ; i++ )
     {
         ig = dof.localToGlobal( eleId, i + 1 ) - 1 + iblock * totdof;
         V[ ig ] += vec( i );
