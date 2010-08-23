@@ -85,11 +85,12 @@ Monolithic::setupDOF( void )
 
 	M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
 											    M_dFESpace->refFE(), M_dFESpace->dof() );
-	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->structureInterfaceFlag(),
-											   *M_dFESpace->mesh(),  M_data->harmonicInterfaceFlag(),
-											    M_data->interfaceTolerance() );
+	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+											   *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
+                                               M_data->interfaceTolerance(),
+                                               M_data->fluidInterfaceVertexFlag() );
 
-                                               createInterfaceMaps(M_dofStructureToHarmonicExtension);
+    createInterfaceMaps(M_dofStructureToHarmonicExtension);
 }
 
 
@@ -418,9 +419,6 @@ Monolithic::iterateMesh(const vector_type& disp)
 void
 Monolithic::variablesInit(const std::string& dOrder)
 {
-    //    EpetraMap interfaceMap(*M_solidInterfaceMap);
-    //M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_solidMesh, *M_epetraComm/*, M_solidInterfaceMap->getMap(Unique).get(), M_solidInterfaceMap->getMap(Repeated).get()*/));
-
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
                                                        dOrder,
                                                        3,
