@@ -65,6 +65,8 @@ DataMesh::setup( const GetPot& dataFile, const std::string& section )
 
 void DataMesh::showMe( std::ostream& output ) const
 {
+    output << "\n*** DataMesh: values for user-defined data\n\n";
+
     output << "mesh_dir   = " << M_mesh_dir << std::endl;
     output << "mesh_file  = " << M_mesh_file << std::endl;
     output << "mesh_type  = " << M_mesh_type << std::endl;
