@@ -46,16 +46,13 @@
 #include <life/lifecore/GetPot.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifecore/life.hpp>
-//#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifecore/util_string.hpp>
 #include <life/lifefem/dataTime.hpp>
-
 
 namespace LifeV {
 
 //! DataElasticStructure - Data container for solid problems with elastic structure
-//template <typename Mesh>
-class DataElasticStructure:
-            public DataTime
+class DataElasticStructure: public DataTime
 {
 public:
 
@@ -192,14 +189,14 @@ public:
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-     const Real lambda( const UInt& material = 1 ) const;
+     Real lambda( const UInt& material = 1 ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-     const Real mu( const UInt& material = 1 ) const;
+     Real mu( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
@@ -240,8 +237,6 @@ private:
     Real                   M_factor;  // amplification factor for deformed mesh
     UInt                   M_verbose; // temporal output verbose
 };
-
-
 
 } // end namespace LifeV
 

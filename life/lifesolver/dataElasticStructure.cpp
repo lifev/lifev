@@ -1,110 +1,48 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+************************************************************************
 
-  <short description here>
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-/** \file dataElasticStructure.cpp
-*/
+//@HEADER
 
-#include <string>
-#include <iostream>
-//#include <>
-#include <map>
-#include <list>
-#include <life/lifecore/util_string.hpp>
-#include <life/lifecore/life.hpp>
+/*!
+ *  @file
+ *  @brief DataElasticStructure - File containing a data container for solid problems with elastic structure
+ *
+ *  @version 1.0
+ *  @author M.A. Fernandez
+ *  @date 01-10-2003
+ *
+ *  @version 1.18
+ *  @author Cristiano Malossi
+ *  @date 10-06-2010
+ *
+ *  @version 1.19
+ *  @author Gilles Fourestey
+ */
+
 #include <life/lifesolver/dataElasticStructure.hpp>
 
-namespace LifeV
-{
-
-
-//
-// IMPLEMENTATION
-//
-
-// ===================================================
-// Constructors
-// ===================================================
-
-
-// DataElasticStructure::
-// DataElasticStructure( const GetPot& dfile ) :
-//         //DataMesh<Mesh>( dfile, "solid/space_discretization" ),
-//         DataTime( dfile, "solid/time_discretization" )
-// {
-//     // physics
-//     _rho     = dfile( "solid/physics/density", 1. );
-// //     _E       = dfile( "solid/physics/young" , 1. );
-// //     _nu      = dfile( "solid/physics/poisson" , 0.25 );
-
-//     // miscellaneous
-//     _factor  = dfile( "solid/miscellaneous/factor", 1.0 );
-// //    std::cout << "factor " << _factor << std::endl;
-//     _verbose = dfile( "solid/miscellaneous/verbose", 1 );
-
-//     M_order  = dfile( "solid/space_discretization/order", "P1");
-
-//     M_thickness = dfile("solid/physics/thickness", 0.1);
-
-//     // Lame coefficients
-// //     _lambda  = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
-// //     _mu      = _E / ( 2.0 * ( 1.0 + _nu ) );
-
-//     std::string flagList;
-//     flagList = dfile("solid/physics/material_flag", "0");
-//     std::list<int> fList;
-//     parseList(flagList, fList);
-
-//     std::string youngList;
-//     youngList =  dfile("solid/physics/young", "0.");
-//     std::list<double> yList;
-//     parseList(youngList, yList);
-
-//     std::string poissonList;
-//     poissonList = dfile("solid/physics/poisson", "0.");
-//     std::list<double> pList;
-//     parseList(poissonList, pList);
-
-// //    if ((fList.size() != yList.size()) || (flist.size() != pList.size()))
-//     ASSERT((fList.size() == yList.size()) && (fList.size() == pList.size()),"problem with the young modulus and poisson coef definiton : inconsistant sizes");
-
-//     std::list<int>::iterator    fit;
-//     std::list<double>::iterator yit = yList.begin();
-//     std::list<double>::iterator pit = pList.begin();
-
-
-
-//     for (fit = fList.begin(); fit != fList.end(); ++fit, ++yit, ++pit)
-//     {
-//         double young   = *yit;
-//         double poisson = *pit;
-
-//         M_young.insert(std::make_pair(*fit, young));
-//         M_poisson.insert(std::make_pair(*fit, poisson));
-
-//         double lambda = young*poisson/( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
-//         M_lambda.insert(std::make_pair(*fit, lambda));
-
-//         double mu = young/( 2.0 * ( 1.0 + poisson ) );
-//         M_mu.insert(std::make_pair(*fit, mu));
-
-//         if (fList.size() == 1)
-//             {
-//                 _E      = young;
-//                 _nu     = poisson;
-
-//                 _lambda = lambda;
-//                 _mu     = mu;
-//             }
-//     }
-
-// }
-
-
-
+namespace LifeV {
 
 DataElasticStructure::DataElasticStructure() :
         M_time                             ( ),
@@ -117,7 +55,6 @@ DataElasticStructure::DataElasticStructure() :
         M_verbose                          ( )
 {
 }
-
 
 DataElasticStructure::DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
     DataTime                           ( dataElasticStructure ),
@@ -132,14 +69,9 @@ DataElasticStructure::DataElasticStructure( const DataElasticStructure& dataElas
 {
 }
 
-
-
 // ===================================================
 // Operators
 // ===================================================
-
-
-
 DataElasticStructure&
 DataElasticStructure::operator=( const DataElasticStructure& dataElasticStructure )
 {
@@ -158,13 +90,9 @@ DataElasticStructure::operator=( const DataElasticStructure& dataElasticStructur
     return *this;
 }
 
-
-
-
 // ===================================================
 // Methods
 // ===================================================
-
 void
 DataElasticStructure::setup( const GetPot& dataFile, const std::string& section )
 {
@@ -204,7 +132,6 @@ DataElasticStructure::setup( const GetPot& dataFile, const std::string& section 
     M_verbose = dataFile( "solid/miscellaneous/verbose", 1 );
 }
 
-
 void
 DataElasticStructure::showMe( std::ostream& output ) const
 {
@@ -237,37 +164,31 @@ DataElasticStructure::showMe( std::ostream& output ) const
 // ===================================================
 // Set Method
 // ===================================================
-
- void
+void
 DataElasticStructure::setDataTime( const Time_ptrType DataTime )
 {
     M_time = DataTime;
 }
 
-
-
- void
+void
 DataElasticStructure::setDensity( const Real& density )
 {
     M_density = density;
 }
 
-
- void
+void
 DataElasticStructure::setThickness( const Real& thickness )
 {
     M_thickness = thickness;
 }
 
-
- void
+void
 DataElasticStructure::setPoisson( const Real& poisson, const UInt& material )
 {
     M_poisson[material] = poisson;
 }
 
-
- void
+void
 DataElasticStructure::setYoung( const Real& young, const UInt& material )
 {
     M_young[material] = young;
@@ -276,77 +197,65 @@ DataElasticStructure::setYoung( const Real& young, const UInt& material )
 // ===================================================
 // Get Method
 // ===================================================
-
 DataElasticStructure::Time_ptrType
 DataElasticStructure::dataTime() const
 {
     return M_time;
 }
 
-
- const Real&
+const Real&
 DataElasticStructure::rho() const
 {
     return M_density;
 }
 
-
- const Real&
+const Real&
 DataElasticStructure::thickness() const
 {
     return M_thickness;
 }
 
-
- const Real&
+const Real&
 DataElasticStructure::poisson( const UInt& material ) const
 {
     return M_poisson.find( material )->second;
 }
 
-
- const Real&
+const Real&
 DataElasticStructure::young( const UInt& material ) const
 {
     return M_young.find( material )->second;
 }
 
-
- const Real
+Real
 DataElasticStructure::lambda( const UInt& material ) const
 {
     return M_young.find( material )->second * M_poisson.find( material )->second /
            ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
 }
 
-
- const Real
+Real
 DataElasticStructure::mu( const UInt& material ) const
 {
     return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );
 }
 
-
- const std::string&
+const std::string&
 DataElasticStructure::order() const
 {
     return M_order;
 }
 
-
- const Real&
+const Real&
 DataElasticStructure::factor() const
 {
     return M_factor;
 }
 
-
- const UInt&
+const UInt&
 DataElasticStructure::verbose() const
 {
     return M_verbose;
 }
-
-
 
 }
