@@ -1279,6 +1279,14 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 UInt surfnr, bcnr, domin, domout, np, p1, p2, p3;
 
                 getline(fstreamf, line);
+                if( line.empty() )
+                {
+                    // newer version of netgen inserts a blank line
+                    // after each line in "surface elements" section
+                    // make sure we ignore it
+//                    std::cout << "\nfound empty line in netgen file!" << std::endl;
+                    getline(fstreamf, line);
+                }
                 std::stringstream parseline(line);
 
                 parseline >> surfnr >> bcnr >> domin >> domout >> np >> p1 >> p2 >> p3;
