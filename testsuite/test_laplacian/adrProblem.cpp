@@ -280,6 +280,7 @@ ADRProblem::run()
 
     BCHandler::BCHints hint(BCHandler::HINT_BC_NONE);
     if( !neumannMarkers.size() )
+    {
         if( dirichletMarkers.size() ){
             if(verbose)
                 std::cout << "  problem - Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
@@ -288,6 +289,7 @@ ADRProblem::run()
         else
             if(verbose)
                 std::cout << "  problem - Warning: NO boundary conditions have been imposed!" << std::endl;
+    }
 
     BCHandler bcH( 0, hint );
     BCFunctionBase uDirichlet( solution_type::u_ex );
