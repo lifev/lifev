@@ -98,12 +98,17 @@ public:
 	typedef boost::shared_ptr<FeVector> FeVector_ptr;
 	typedef std::vector<FeVector_ptr>   BdfContainer;
 
+    //! Empty constructor
+    BdfVS();
+
     /*! Constructor
      *  @param n order of the BDF
      */
     BdfVS( const UInt n );
 
     ~BdfVS();
+
+    void setup( const UInt n );
 
     //! Initialize
     //@{
@@ -245,25 +250,21 @@ private:
 };
 
 //============================================================================
-// Constructor
+// Empty constructor
+template<typename FeVector>
+BdfVS<FeVector>::BdfVS()
+    :
+    _M_order( 0 ),
+    _M_alpha( _M_order + 1 ),
+    _M_beta( _M_order ),
+    _M_deltat(ScalarVector(_M_order, 1.))
+{}
+
+
 template<typename FeVector>
 BdfVS<FeVector>::BdfVS( const UInt n )
-    :
-    _M_order( n ),
-    _M_alpha( n + 1 ),
-    _M_beta( n ),
-    _M_deltat(ScalarVector(n, 1.))
 {
-    if ( n <= 0 || n > BDF_MAX_ORDER )
-    {
-        std::ostringstream __ex;
-        __ex << "Error: wrong BDF order\n"
-        << " you want to use BDF order " << n << "\n"
-        << " we support BDF order from 1 to " << BDF_MAX_ORDER << "\n";
-        throw std::invalid_argument( __ex.str() );
-    }
-    comput_coeff();
-    _M_unknowns.reserve( n );
+    setup( n );
 }
 
 
@@ -279,7 +280,8 @@ void BdfVS<FeVector>::initialize_unk( FeVector u0, Real const dt, bool startup )
     _M_unknowns.resize(0);
     for(UInt i=0; i<_M_order; i++)
     {
-    	_M_unknowns.push_back(new FeVector(u0));
+        FeVector_ptr feVectorPtr(new FeVector(u0));
+    	_M_unknowns.push_back(feVectorPtr);
     	_M_deltat[i] = dt;
     }
 
@@ -343,6 +345,27 @@ void BdfVS<FeVector>::initialize_unk(  const FunctClass& u0, const FeVector& u_d
 
 //==============================================================================================
 // Core Methods
+
+template<typename FeVector>
+void BdfVS<FeVector>::setup( const UInt n )
+{
+    _M_order = n;
+    _M_alpha.resize( _M_order + 1 );
+    _M_beta.resize( _M_order );
+    _M_deltat = ScalarVector(_M_order, 1.);
+
+    if ( n <= 0 || n > BDF_MAX_ORDER )
+    {
+        std::ostringstream __ex;
+        __ex << "Error: wrong BDF order\n"
+        << " you want to use BDF order " << n << "\n"
+        << " we support BDF order from 1 to " << BDF_MAX_ORDER << "\n";
+        throw std::invalid_argument( __ex.str() );
+    }
+    comput_coeff();
+    _M_unknowns.reserve( n );
+}
+
 
 template<typename FeVector>
 FeVector
