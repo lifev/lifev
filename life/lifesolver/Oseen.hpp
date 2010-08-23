@@ -383,7 +383,7 @@ protected:
 
     bool                           M_recomputeMatrix;
 
-    bool                          M_isDiagonalBlockPrec;
+    bool                           M_isDiagonalBlockPrec;
 
   //private:
 
@@ -992,13 +992,16 @@ updateSystem(const double       alpha,
             if ( M_divBetaUv )
                 mass_divw( 0.5*M_data.density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
 
+            // compute local convective terms
+            advection( M_data.density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
+
             // loop on components
             for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
             {
                 // compute local convective term and assembling
-                grad( 0, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
-                grad( 1, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
-                grad( 2, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
+                // grad( 0, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
+                // grad( 1, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
+                // grad( 2, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
 
                 assembleMatrix( *matrNoBC,
                                 M_elmatStiff,
