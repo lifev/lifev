@@ -110,9 +110,9 @@ SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
 // Set Methods
 // ===================================================
 void
-SolverTrilinos::SetCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
+SolverTrilinos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 {
-    M_displayer->SetCommunicator( comm );
+    M_displayer->setCommunicator( comm );
 }
 
 void SolverTrilinos::setMatrix( matrix_type& m)
@@ -180,11 +180,11 @@ SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& secti
 
 
     // SET PARAMETERS
-    SetParameters( false );
+    setParameters( false );
 }
 
 void
-SolverTrilinos::SetParameters(bool cerr_warning_if_unused)
+SolverTrilinos::setParameters(bool cerr_warning_if_unused)
 {
     M_solver.SetParameters(M_TrilinosParameterList,cerr_warning_if_unused);
 }
@@ -327,7 +327,7 @@ void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
     chrono.stop();
 
     M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-    M_displayer->leaderPrint("      Estimated condition number = " , condest );
+    M_displayer->leaderPrint("      Estimated condition number = " , condest, "\n" );
 }
 
 void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)

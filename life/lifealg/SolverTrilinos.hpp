@@ -128,7 +128,7 @@ public:
     //@{
 
     //! Method to set communicator for Displayer (for empty constructor)
-    void SetCommunicator( const boost::shared_ptr<Epetra_Comm>& comm);
+    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Method to set matrix from EpetraMatrix
     void setMatrix(matrix_type& m);
@@ -144,7 +144,7 @@ public:
 
     void setDataFromGetPot( const GetPot& dfile, const std::string& section );
 
-    void SetParameters( bool cerr_warning_if_unused = false );
+    void setParameters( bool cerr_warning_if_unused = false );
 
     void setTolMaxiter( const double tol, const int maxiter = -1 );
 
