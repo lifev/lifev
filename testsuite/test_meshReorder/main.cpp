@@ -72,7 +72,7 @@ int main(int argc, char** argv)
             {
                 UInt FluidInterfaceFlag           = data_file("interface/fluidInterfaceFlag",      2 );
                 UInt SolidInterfaceFlag           = data_file("interface/solidInterfaceFlag",      2 );
-                EntityFlag edgeFlag               = data_file("interface/edgeFlag",      2 );
+                int const edgeFlag                 (data_file("interface/edgeFlag",      2 ) );
 
                 boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
                 DataMesh mesh_data2;
