@@ -159,20 +159,20 @@ EnsightToHdf5::run()
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,d->comm);
 
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,d->comm);
 
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the P0 pressure FE space ... " << std::flush;
 
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > p0FESpace(meshPart, feTetraP0, quadRuleTetra1pt,
-							      quadRuleTria1pt, 1,*d->comm);
+							      quadRuleTria1pt, 1,d->comm);
 
     if (verbose) std::cout << "ok." << std::endl;
 

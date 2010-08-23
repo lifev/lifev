@@ -97,7 +97,7 @@ struct test_bdf::Private {
 			Real const&, ID const&)> fct_type;
 
 	std::string data_file_name;
-	boost::shared_ptr<Epetra_MpiComm> comm;
+	boost::shared_ptr<Epetra_Comm> comm;
 
 };
 
@@ -170,14 +170,14 @@ void test_bdf::run() {
 	//Mesh stuff
 	Members->comm->Barrier();
 	DataMesh dataMesh(dataFile, ("bdf/" + discretization_section).c_str());
-	RegionMesh mesh;
-	readMesh(mesh,dataMesh);
-	partitionMesh<RegionMesh> meshPart(mesh, Members->comm);
+	boost::shared_ptr<RegionMesh> meshPtr( new RegionMesh() );
+	readMesh(*meshPtr,dataMesh);
+	partitionMesh<RegionMesh> meshPart(meshPtr, Members->comm);
 
 	//=============================================================================
 	//finite element space of the solution
 	FESpace<RegionMesh, EpetraMap> FeSpace(meshPart,
-			dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, *Members->comm);
+			dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm);
 
 	if (verbose)
 		std::cout << "  Number of unknowns : "

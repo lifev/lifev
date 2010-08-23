@@ -393,7 +393,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< Mesh, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
+    FESpace< Mesh, EpetraMap > uFESpace(meshPart,uOrder,3,d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -404,7 +404,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< Mesh, EpetraMap > pFESpace(meshPart, pOrder, 1, *d->comm);
+    FESpace< Mesh, EpetraMap > pFESpace(meshPart, pOrder, 1, d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;

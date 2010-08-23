@@ -196,10 +196,10 @@ Structure::run3d()
 
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,*parameters->comm);
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,parameters->comm);
     if (verbose) std::cout << std::endl;
 
-    EpetraMap structMap(dFESpace.refFE(), meshPart, *parameters->comm);
+    EpetraMap structMap(dFESpace.refFE(), meshPart, parameters->comm);
 
     EpetraMap fullMap;
 
