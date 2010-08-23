@@ -24,10 +24,12 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = laplacian.hpp
-check_PROGRAMS = test_laplacian
+check_HEADERS = laplacian.hpp adrProblem.hpp
+check_PROGRAMS = test_laplacian test_adr
 
 test_laplacian_SOURCES = main.cpp laplacian.cpp
+
+test_adr_SOURCES = mainADR.cpp adrProblem.cpp
 
 EXTRA_DIST = data
 
@@ -35,5 +37,7 @@ link:
 	test -a data || ln -s $(srcdir)/data
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
 
+CLEANRESULTS = *.case *.geo *.scl *.vct
+
 clean-results:
-	-rm *.vct *.scl *.case *.geo
+	test -z "$(CLEANRESULTS)" || rm -f $(CLEANRESULTS)

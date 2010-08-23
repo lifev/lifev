@@ -9,6 +9,18 @@
 	[./physics]
 	diffusivity     = 1.0           # diffusivity
 
+	[../problem]
+	xMin = -1
+	xMax = 1
+	yMin = -1
+	yMax = 1
+	zMin = -1
+	zMax = 1
+	dirichletList = '1, 2, 3, 4, 5, 6'
+	# neumannList = '1, 4, 5, 6'
+	# robinList = '5, 6'
+	solutionType = steadyPolynomial # steadyPolynomial, unsteadyPolynomial
+
 	[../space_discretization2D]
 	order     = P1
 	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
@@ -16,7 +28,7 @@
 	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
 
 
-	[../discretization3D]
+	[../space_discretization3D]
 	order     = P1
 	mesh_dir  = ./Mesh/  # the directory where the mesh file is
 	#mesh_file = cube4x4.mesh        # mesh file
