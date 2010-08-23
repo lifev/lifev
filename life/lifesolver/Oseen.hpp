@@ -973,7 +973,7 @@ updateSystem(const double       alpha,
                 for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
                 {
                     UInt ig = M_uFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*dim_u();
-                    M_elvec.vec()[ iloc + iComp*M_uFESpace.fe().nbNode ] = M_data.density() * betaVecRep[ig]; // BASEINDEX + 1
+                    M_elvec.vec()[ iloc + iComp*M_uFESpace.fe().nbNode ] = betaVecRep[ig]; // BASEINDEX + 1
 
                     M_uLoc.vec() [ iloc + iComp * M_uFESpace.fe().nbNode ] = (unRep)(ig);
                     M_wLoc.vec() [ iloc + iComp * M_uFESpace.fe().nbNode ] = (unRep)(ig)-betaVecRep(ig);
