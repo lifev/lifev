@@ -428,7 +428,9 @@ public:
 
     int size() const
     {
-        return M_epetraVector->GlobalLength();
+        if( M_epetraVector.get() )
+            return M_epetraVector->GlobalLength();
+        return 0;
     }
 
     //@}
