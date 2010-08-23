@@ -2915,54 +2915,64 @@ void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
     }
 }
 
-void advection( Real /*coef*/, ElemVec& vel,
-                ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, UInt nb )
+/*
+ * Fixed by Umberto Villa,  Jan 2010
+ */
+void advection( Real coef, ElemVec& vel,
+                ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb )
 {
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "advection (vect) matrix needs at least the first derivatives" );
+
     Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     Real v_grad, s;
-    Real v[ nDimensions ];
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    Tab2d v( fe.nbQuadPt(), nDimensions );
+
+    //Evaluate the advective field at the quadrature nodes
+    for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
     {
-        for ( UInt icoor = 0;icoor < nDimensions;icoor++ )
+        ElemVec::vector_view velicoor = vel.block( icoor );
+        for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
         {
-            ElemVec::vector_view velicoor = vel.block( icoor );
-            v[ icoor ] = 0.;
-            for ( UInt k = 0;k < fe.nbFEDof();k++ )
-            {
-                v[ icoor ] += velicoor( k ) * fe.phi( k, ig ); // velocity on the intgt point
-            }
-        }
-        for ( UInt i = 0;i < fe.nbFEDof();i++ )
-        {
-            for ( UInt j = 0;j < fe.nbFEDof();j++ )
-            {
-                s = 0.;
-                for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
-                {
-                    v_grad = 0.;
-                    for ( UInt icoor = 0;icoor < nDimensions;icoor++ )
-                    {
-                        v_grad += v[ icoor ] * fe.phiDer( j, icoor, ig );
-                    }
-                    s += v_grad * fe.phi( i, ig ) * fe.weightDet( ig );
-                }
-                mat_tmp( i, j ) = s;
-            }
+            s = 0.;
+            for ( UInt k = 0; k < fe.nbFEDof(); k++ )
+                s += velicoor( k ) * fe.phi( k, iq ); // velocity on the intgt point
+            v(iq, icoor) = s;
         }
     }
+
+    //Assemble the local matrix
+    for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); j++ )
+        {
+            s = 0.;
+            for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
+            {
+                v_grad = 0.;
+                for ( int icoor = 0;icoor < ( int ) nDimensions;icoor++ )
+                        v_grad += v(iq, icoor) * fe.phiDer( j, icoor, iq );
+
+                s += v_grad * fe.phi( i, iq ) * fe.weightDet( iq );
+             }
+             mat_tmp( i, j ) = s*coef;
+        }
+    }
+
     // copy on the components
-    for ( UInt icomp = 0;icomp < nb;icomp++ )
+    for ( int icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( UInt i = 0;i < fe.nbDiag();i++ )
+        for ( UInt i = 0; i < fe.nbDiag(); i++ )
         {
-            for ( UInt j = 0;j < fe.nbDiag();j++ )
+            for ( UInt j = 0; j < fe.nbDiag(); j++ )
             {
                 mat_icomp( i, j ) += mat_tmp( i, j );
             }
         }
     }
 }
+
 
 void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
            const CurrentFE& fe1, const CurrentFE& fe2,

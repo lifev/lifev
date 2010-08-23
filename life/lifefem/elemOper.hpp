@@ -145,6 +145,60 @@ namespace LifeV
 		 const CurrentFE& fe_u, const CurrentFE& fe_p,
 		 int block_pres );
 
+  template<typename UsrFct>
+  void advection( Real coef, const UsrFct & beta,
+                  ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb, Real t=0. )
+  {
+      ASSERT_PRE( fe.hasFirstDeriv(),
+                  "advection (vect) matrix needs at least the first derivatives" );
+      //ASSERT_PRE(nb>1,"if nb = 1, use the other advection function");
+
+      Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+      Real v, s;
+      Real x,y,z;
+      Tab2d v_grad(ZeroMatrix(fe.nbFEDof(), fe.nbQuadPt()));
+
+      //Evaluate the velocity field at the quadrature nodes
+        for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
+        {
+            fe.coorQuadPt(x,y,z,iq);
+            for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
+            {
+                v = beta(t,x,y,z,icoor+1);
+                for( UInt j = 0; j<fe.nbFEDof(); ++j)
+                    v_grad(j, iq) += v*fe.phiDer(j, icoor, iq );
+            }
+          }
+
+
+      //Assemble the local matrix
+      for ( UInt i = 0;i < fe.nbFEDof();i++ )
+      {
+        for ( UInt j = 0;j < fe.nbFEDof();j++ )
+          {
+            s = 0.;
+              for ( UInt iq = 0;iq < fe.nbQuadPt();iq++ )
+              {
+                  s += v_grad(j, iq) * fe.phi( i, iq ) * fe.weightDet( iq );
+               }
+               mat_tmp( i, j ) = s*coef;
+          }
+      }
+
+      // copy on the components
+      for ( int icomp = 0;icomp < nb;icomp++ )
+      {
+          ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+          for ( UInt i = 0;i < fe.nbDiag();i++ )
+          {
+              for ( UInt j = 0;j < fe.nbDiag();j++ )
+              {
+                  mat_icomp( i, j ) += mat_tmp( i, j );
+              }
+          }
+      }
+  }
+
   void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
 		    const CurrentFE& fe, int block_pres );
   void advection( Real coef, ElemVec& vel, ElemMat& elmat,
