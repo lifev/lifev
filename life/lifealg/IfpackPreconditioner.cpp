@@ -54,9 +54,9 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
 }
 
 int
-IfpackPreconditioner::buildPreconditioner(operator_type& oper)
+IfpackPreconditioner::buildPreconditioner(operator_type& _oper)
 {
-    M_Oper = oper->getMatrixPtr();
+    M_Oper = _oper->getMatrixPtr();
 
     M_overlapLevel = this->M_List.get("overlap level", -1);
     M_precType     = this->M_List.get("prectype", "Amesos");
