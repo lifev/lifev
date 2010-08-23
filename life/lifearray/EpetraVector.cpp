@@ -282,7 +282,7 @@ EpetraVector::subset( const Epetra_MultiVector& vector,
     {
         lid1 = vector.Map().LID(gids[i]+offset1);
         lid2 = BlockMap().LID(gids[i]+offset2);
-        ASSERT( lid2 >= 0 & lid1 >= 0, "EpetraVector::subset ERROR : !! lid < 0\n" );
+        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "EpetraVector::subset ERROR : !! lid < 0\n" );
         //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
         (*M_epetraVector)[0][lid2] = vector[column][lid1];
     }
