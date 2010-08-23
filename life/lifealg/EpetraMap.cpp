@@ -30,7 +30,7 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
                      int                NumMyElements,
                      int*               MyGlobalElements,
                      int                IndexBase,
-                     comm_ptrtype&      CommPtr):
+                     const comm_ptrtype&  CommPtr):
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
@@ -77,7 +77,7 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
 
 EpetraMap::EpetraMap( const int          NumGlobalElements,
                       const int          IndexBase,
-                      comm_ptrtype&      CommPtr ) :
+                      const comm_ptrtype& CommPtr ) :
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
@@ -94,7 +94,7 @@ EpetraMap::EpetraMap( const int          NumGlobalElements,
 }
 
 EpetraMap::EpetraMap(const int          size,
-                     comm_ptrtype&      CommPtr):
+                     const comm_ptrtype& CommPtr):
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
@@ -394,7 +394,7 @@ EpetraMap::bubbleSort(Epetra_IntSerialDenseVector& Elements)
 
 void
 EpetraMap::setUp(const RefFE&               refFE,
-                 comm_ptrtype&              _commPtr,
+                 const comm_ptrtype&       _commPtr,
                  std::vector<int>& repeatedNodeVector,
                  std::vector<int>& repeatedEdgeVector,
                  std::vector<int>& repeatedFaceVector,

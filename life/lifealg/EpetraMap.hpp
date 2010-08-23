@@ -81,7 +81,7 @@ public:
               int                NumMyElements,
               int*               MyGlobalElements,
               int                IndexBase,
-              comm_ptrtype&      CommPtr);
+              const comm_ptrtype&  CommPtr);
 
     //! construct a map with entries lagrangeMultipliers.
     //! Repeated lagrange multipliers will be repeated on the repeatedmap
@@ -99,22 +99,22 @@ public:
      *  @param indexBase - Starting index base (typically 0 or 1)
      *  @param CommPtr - a pointer to the Epetra communicator
      */
-    EpetraMap( const int NumGlobalElements, const int IndexBase, comm_ptrtype& CommPtr );
+    EpetraMap( const int NumGlobalElements, const int IndexBase, const comm_ptrtype& CommPtr );
     //!
     EpetraMap(const int               size,
-              comm_ptrtype&           CommPtr);
+              const comm_ptrtype&     CommPtr);
 
     // Calls createImportExport from setUp()
     template<typename Mesh>
     EpetraMap(const RefFE&               refFE,
               const partitionMesh<Mesh>& meshPart,
-              comm_ptrtype&              _commPtr);
+              const comm_ptrtype&       _commPtr);
 
     // Calls createImportExport from setUp()
     template<typename Mesh>
     EpetraMap(const RefFE&         refFE,
               const Mesh&          mesh,
-              comm_ptrtype&        _commPtr);
+              const comm_ptrtype& _commPtr);
 
     EpetraMap(const EpetraMap& _epetraMap);
 
@@ -229,7 +229,7 @@ private:
 
     // Calls createImportExport
     void setUp(const RefFE&               refFE,
-               comm_ptrtype&              _commPtr,
+               const comm_ptrtype&       _commPtr,
                std::vector<int>& repeatedNodeVector,
                std::vector<int>& repeatedEdgeVector,
                std::vector<int>& repeatedFaceVector,
@@ -247,7 +247,7 @@ template<typename Mesh>
 EpetraMap::
 EpetraMap(const RefFE&               refFE,
           const partitionMesh<Mesh>& meshPart,
-          comm_ptrtype&              _commPtr):
+          const comm_ptrtype&        _commPtr):
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
@@ -272,7 +272,7 @@ template<typename Mesh>
 EpetraMap::
 EpetraMap(const RefFE&               refFE,
           const Mesh&                mesh,
-          comm_ptrtype&              _commPtr):
+          const comm_ptrtype&        _commPtr):
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
