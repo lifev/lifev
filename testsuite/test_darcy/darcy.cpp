@@ -503,7 +503,7 @@ darcy::run()
                                                 *qR_primal,
                                                 *bdQr_primal,
                                                 1,
-                                                *Members->comm );
+                                                Members->comm );
 
     // Finite element space of the dual variable
     FESpace< RegionMesh, EpetraMap > u_FESpace( meshPart,
@@ -511,7 +511,7 @@ darcy::run()
                                                 *qR_dual,
                                                 *bdQr_dual,
                                                 1,
-                                                *Members->comm );
+                                                Members->comm );
 
     // Finite element space of the hybrid variable
     FESpace< RegionMesh, EpetraMap > hybrid_FESpace( meshPart,
@@ -519,7 +519,7 @@ darcy::run()
                                                     *qR_hybrid,
                                                     *bdQr_hybrid,
                                                     1,
-                                                    *Members->comm );
+                                                    Members->comm );
 
     // Finite element space of the  outward unit normal variable
     FESpace< RegionMesh, EpetraMap > VdotN_FESpace( meshPart,
@@ -527,7 +527,7 @@ darcy::run()
                                                     *qR_VdotN,
                                                     *bdQr_VdotN,
                                                     1,
-                                                    *Members->comm );
+                                                    Members->comm );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
