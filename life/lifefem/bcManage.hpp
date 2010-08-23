@@ -36,7 +36,7 @@
 
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/dof.hpp>
-#include "life/lifefem/FESpace.hpp"
+#include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCNormalManager.hpp>
 
 
@@ -225,7 +225,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
         A.GlobalAssemble();
 
     //Build the internal structure
-    normalConditions.build(dof,bdfem,A,BCh.offset(),b.Comm());
+    normalConditions.build(dof,bdfem,A,BCh.offset(),b.getMap_ptr()->CommPtr());
     normalConditions.exportToParaview("normalAndTangents");
 
     //Applying the basis changement
@@ -1215,7 +1215,7 @@ void bcNaturalManage( VectorType& b,
       }
     */
     else
-        {  //! If BC is given under a functionnal form
+        {  //! If BC is given under a functional form
 
             //std::cout << "BC Natural manage w/ function" << std::endl;
             DataType x, y, z;
@@ -1224,7 +1224,7 @@ void bcNaturalManage( VectorType& b,
             // Loop on BC identifiers
             for ( ID i = 1; i <= BCb.list_size(); ++i )
                 {
-                    // Pointer to the i-th itdentifier in the list
+                    // Pointer to the i-th identifier in the list
                     pId = static_cast< const IdentifierNatural* >( BCb( i ) );
                     // Number of the current boundary face
                     ibF = pId->id();

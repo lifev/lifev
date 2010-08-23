@@ -67,7 +67,7 @@ public:
     void init(const BCBase& BCb,const DataType& t);
     void addBoundaryPoint(const ID& idof,const ID& flag);
     void addNormalPoint(const ID& idof,const Real& vx,const Real& vy, const Real& vz);
-    void build(const Dof& dof,CurrentBdFE& bdfem,MatrixType& A, UInt offset,const Epetra_Comm& comm);
+    void build(const Dof& dof,CurrentBdFE& bdfem,MatrixType& A, UInt offset,EpetraMap::comm_ptrtype& commPtr);
 
     //Exporting the data
     void exportToParaview(std::string fileName) const;
@@ -208,7 +208,7 @@ void BCNormalManager<MeshType,MatrixType>::addNormalPoint(const ID& idof,const R
     @param comm Epetra_Comm object
  */
 template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::build(const Dof& dof,CurrentBdFE& bdfem,MatrixType& A, UInt offset,const Epetra_Comm& comm)
+void BCNormalManager<MeshType,MatrixType>::build(const Dof& dof,CurrentBdFE& bdfem,MatrixType& A, UInt offset,EpetraMap::comm_ptrtype& commPtr)
 {
     if(M_dataBuilt)
     {
@@ -244,7 +244,7 @@ void BCNormalManager<MeshType,MatrixType>::build(const Dof& dof,CurrentBdFE& bdf
             ++i;
         }
 
-        M_idMap = new EpetraMap(-1,3*nbPoints,idList,1,comm);
+        M_idMap = new EpetraMap(-1,3*nbPoints,idList,1,commPtr);
 
         //-----------------------------------------------------
         // STEP 2: Compute normals and tangents
