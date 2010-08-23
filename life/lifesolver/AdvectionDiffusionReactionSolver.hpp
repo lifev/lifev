@@ -4,9 +4,9 @@
 
  Author(s): Miguel A. Fernandez <miguel.fernandez@inria.fr>
             Christoph Winkelmann <christoph.winkelmann@epfl.ch>
-      Date: 2003-06-09
+            Tiziano Passerini <tiziano@mathcs.emory.edu>
 
- Copyright (C) 2004 EPFL
+ Copyright (C) 2010 EPFL, Emory University
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -21,346 +21,373 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ */
 /**
-  \file Oseen.hpp
-  \author G. Fourestey
-  \date 2/2007
+  \file AdvectionDiffusionReactionSolver.hpp
+  \date 08/2010
 
-  \brief This file contains a Advection Diffusion Reaction equation solver class
-*/
-#ifndef _ADR_H_
-#define _ADR_H_
+  \brief This file contains a solver class for
+         Advection-Diffusion-Reaction problems
+ */
+#ifndef _ADRSOLVER_H_
+#define _ADRSOLVER_H_
 
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifecore/chrono.hpp>
+
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
-#include <life/lifefilters/medit_wrtrs.hpp>
+#include <life/lifefem/bdfVariableStep.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
-#include <life/lifealg/EpetraMap.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
-//
-#include <life/lifefem/bcHandler.hpp>
-#include <life/lifecore/chrono.hpp>
-#include <life/lifefem/sobolevNorms.hpp>
-#include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/nsipterms.hpp>
-#include <life/lifesolver/dataADR.hpp>
-//
-#include <boost/shared_ptr.hpp>
 
-#include <life/lifefem/FESpace.hpp>
+#include <life/lifesolver/dataADR.hpp>
 
 #include <list>
+#include <sstream>
+
+#include <boost/scoped_ptr.hpp>
 
 namespace LifeV
 {
 /*!
+  \typedef What constant matrices should be constructed?
+ */
+enum ADRConstantMatrices
+{
+    ADR_NO_CONST_MATRICES, //!< No constant matrices
+    ADR_ONLY_MASS,         //!< No diffusion terms
+    ADR_ONLY_STIFF,        //!< No reaction terms and steady problem
+    ADR_MASS_STIFF         //!< Diffusion and (reaction or unsteady)
+};
+
+
+//! default function for source and advection terms
+Real ADRfZero( const Real&, const Real&, const Real&, const Real&, const ID& )
+{
+    return 0.;
+}
+
+
+/*!
   \class ADRSolver
 
-  This class implements a NavierStokes solver.
-  The resulting linear systems are solved by GMRES on the full
-  matrix ( u and p coupled ).
+  This class implements a solver for Advection-Diffusion-Reaction problems.
 
-*/
+  The reference PDE problem has the form
 
+  \f$ \frac{ \partial u }{ \partial t } -
+   - \mu \triangle u + \beta \cdot \nabla u + \sigma u =
+   f \f$,
 
+  where \f$\mu\$ is the diffusion coefficient, \f$\beta\$ is the advection field
+  and \f$\sigma\$ is the reaction coefficient. The function \f$\f\f$ is also referred
+  to as the source term.
 
+  The parameters \f$\mu\f$ and \f$\sigma\f$ are assumed to be constant in space and time,
+  while the vector field \f$\beta\f$ can vary in time and space.
+
+  The advection field and the source term can be specified by the user as functions of type
+  ADRSolver::function_type or as vectors of type ADRSolver::vector_type. In the former case,
+  the function is evaluated on the quadrature nodes when assemblying respectively the (elementary)
+  matrix associated to the advection terms and the (elementary) vector associated to the source
+  term in the weak formulation of the problem.
+
+  In the latter case, the vector must contain respectively the right hand side of the system
+  (both the source term already assembled and the time advancing terms, if this applies);
+  and the advection field, as the vector of coefficients of the expansion wrt the basis of a
+  given finite element space. If necessary, i. e. if the finite element space of the advection
+  field does not coincide with the finite element space of the solution, the solver will compute
+  the interpolant function belonging to the finite element space of the unknown field.
+ */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class ADRSolver
-//     :
-//     public NavierStokesHandler<Mesh>, EpetraHandler
 {
-
 public:
 
-    typedef DataADR                               data_type;
+    //! @name Type definitions
+    //@{
+    typedef Mesh                                  mesh_type;
 
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&,const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> source_type;
-
-    typedef Mesh mesh_type;
-
-    typedef BCHandler                             bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
-
-//    typedef SolverType                    solver_type;
     typedef typename SolverType::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
+    typedef boost::shared_ptr<matrix_type>        matrix_ptr_type;
     typedef typename SolverType::vector_type      vector_type;
 
-    typedef typename SolverType::prec_raw_type    prec_raw_type;
-    typedef typename SolverType::prec_type        prec_type;
+    typedef FESpace<Mesh, EpetraMap>              fespace_type;
+    typedef fespace_type*                         fespace_rawptr_type;
+    typedef boost::shared_ptr<fespace_type>       fespace_ptr_type;
+
+    typedef DataADR                               data_type;
+    typedef data_type*                            data_rawptr_type;
+    typedef boost::shared_ptr<data_type>          data_ptr_type;
+
+    typedef BdfVS<vector_type>                    timeIntegrator_type;
+    typedef boost::shared_ptr<timeIntegrator_type> timeIntegrator_ptr_type;
+
+    typedef boost::function<Real ( Real const&, Real const&, Real const&,
+                                   Real const&, ID const& )> function_type;
+
+    typedef BCHandler                             bchandler_type;
+    typedef boost::shared_ptr<bchandler_type>     bchandler_ptr_type;
+
+    typedef boost::scoped_ptr<ElemMat>            elmat_ptr_type;
+    typedef boost::scoped_ptr<ElemVec>            elvec_ptr_type;
+    //@}
 
 
-    //! Constructor
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Default constructor
+    ADRSolver();
+
+    //! Copy constructor
     /*!
-      \param dataType
-      \param localMap
-      \param velocity FE space
-      \param pressure FE space
-      \param bcHandler boundary conditions for the velocity
-    */
-    ADRSolver( const data_type&               dataType,
-               FESpace<Mesh, EpetraMap>&      adrFESpace,
-               FESpace<Mesh, EpetraMap>&      betaFESpace,
-               BCHandler&                     bcHandler,
-               boost::shared_ptr<Epetra_Comm>& comm );
+      \param adrsolver the solver to be copied
 
+      not working yet (requires copy constructors for members)
+     */
+    // ADRSolver( const ADRSolver& adrsolver );
+
+    //! destructor
+    ~ADRSolver();
+    //@}
+
+
+    //! @name Operators
+    //@{
+    //! Operator=
     /*!
-      \param dataType
-      \param localMap
-      \param velocity FE space
-      \param pressure FE space
-    */
-    ADRSolver( const data_type&               dataType,
-               FESpace<Mesh, EpetraMap>&      adrFESpace,
-               FESpace<Mesh, EpetraMap>&      betaFESpace,
-               boost::shared_ptr<Epetra_Comm>& comm );
+     * @param adrsolver an object of type ADRSolver
+     *
+     * BEWARE this won't work until we have copy constructors
+     * for ElemMat & ElemVec!
+     */
+    // ADRSolver& operator=( const ADRSolver& adrsolver );
 
-    //! virtual destructor
+    //@}
 
-    virtual ~ADRSolver();
 
-    //! Update convective term, bc treatment and solve the linearized ns system
+    //! @name Methods
+    //@{
 
-    virtual void iterate( bchandler_raw_type& bch );
+    //! Sets the user-defined parameters
+    /*!
+     * @param dataFile the GetPot container
+     * @section prefix for accessing GetPot container
+     */
+    virtual void setup( const GetPot& dataFile,
+                        const std::string& section = "adr" );
 
-    virtual void setUp        ( const GetPot& dataFile );
+    //! Initializes the solver data structures
+    /*!
+     * @param dataADRPtr a pointer to the problem descriptor
+     * @param solutionFESpace a pointer to the FE space descriptor for the unknown
+     */
+    void setup( data_ptr_type& dataADRPtr,
+                fespace_ptr_type& solutionFESpace );
 
-    virtual void buildSystem();
+    //! Assembles the constant matrices
+    virtual void computeConstantMatrices( ADRConstantMatrices whichMatrices = ADR_MASS_STIFF );
 
-    virtual void updateRHS(vector_type const& sourceVec)
-    {
-        M_rhsNoBC = sourceVec;
-        M_rhsNoBC.GlobalAssemble();
-    }
-
-  // Warning! betaVec has to be UNIQUE
-    virtual void updateSystem(Real       alpha,
-                              vector_type& betaVec,
-                              vector_type& sourceVec
-                              );
-
-//     void updateLinearSystem(Real       alpha,
-//                             vector_type& betaVec,
-//                             vector_type& sourceVec
-//                             );
-
-    void initialize( const Function& );
+    //! Sets the initial condition
+    /*!
+     * @param the initial value of the unknown field
+     */
+    void initialize( const function_type& );
     void initialize( const vector_type& );
 
-    //! returns the local solution vector
+    //! Fills the right hand side of the linear system
+    /*!
+     * @param rhsVec the term on the right hand side of the system
+     */
+    void updateRHS( vector_type const& rhsVec );
 
-    const vector_type& solution() const {return M_sol;}
+    //! Fills the right hand side of the linear system (use the internally stored sourceTerm)
+    /*!
+     * This method is alternative to updateRHS( rhsVec ). It assembles the source term
+     * using its functional form, and manages the time advance if this applies.
+     *
+     * @param timeIntegratorPtr a pointer to the manager for the time integration
+     */
+    void updateRHS( timeIntegrator_ptr_type timeIntegratorPtr = timeIntegrator_ptr_type() );
+
+    //! Assembles the time-varying matrices
+    /*!
+     * @param timeIntegratorPtr a pointer to the manager for the time integration
+     */
+    void updateMatrix( timeIntegrator_ptr_type timeIntegratorPtr = timeIntegrator_ptr_type() );
+
+    //! Solves the linear system
+    /*!
+     * @param bch the data structure holding the boundary conditions
+     */
+    void iterate( bchandler_type& bch );
+
+    //@}
+
+
+    //! @name Set methods
+    //@{
+    //! Sets the source term
+    /*!
+     * @param the source term in functional form
+     */
+    void setSourceTerm( const function_type& sourceTerm ) { M_sourceTerm = sourceTerm; }
+
+    //! Sets the advection field
+    /*!
+     * @param the advection term in functional form
+     */
+    void setAdvectionField( const function_type& advectionField ) { M_advectionField = advectionField; }
+
+    //! Sets the advection field
+    /*!
+     * @param the advection term in vector form
+     */
+    void setAdvectionField( const vector_type& advectionVector = vector_type(),
+                            fespace_ptr_type advectionFieldFESpacePtr = fespace_ptr_type() );
+
+    //! set the pointer to the data object
+    /*!
+     * @param dataPtr a pointer to the data object
+     */
+    // void setDataPtr( data_ptr_type dataPtr ) { M_dataPtr = dataPtr; }
+
+    //! set the pointer to the FE space descriptor for the unknown
+    /*!
+     * @param uFESpacePtr a pointer to the FE space descriptor for the unknown
+     */
+    // void setUFESpacePtr( fespace_ptr_type uFESpacePtr ) { M_uFESpacePtr = uFESpacePtr; }
+
+    //! set the pointer to the FE space descriptor for the advection field
+    /*!
+     * @param betaFESpacePtr a pointer to the FE space descriptor for the advection field
+     */
+    // void setBetaFESpacePtr( fespace_ptr_type betaFESpacePtr ) { M_advectionFieldFESpacePtr = betaFESpacePtr; }
+
+    //! set the bool for recomputing the matrix
+    /*!
+     * @param recomp true if the matrix should be recomputed
+     */
+    // void setRecomputeMatrix( bool const recomp ){ M_recomputeConstantMatrix = recomp; }
+
+    //@}
+
+
+    //! @name Get methods
+    //@{
+    //! get the displayer
+    // const Displayer& displayer() const { return M_displayer; }
+
+    //! returns a pointer to the data object
+    data_ptr_type dataPtr() const { return M_dataPtr; }
+
+    //! returns a pointer to the FE space descriptor for the unknown
+    // fespace_ptr_type uFESpacePtr() const { return M_uFESpacePtr; }
+
+    //! returns a pointer to the FE space descriptor for the advection field
+    // fespace_ptr_type betaFESpacePtr() const { return M_advectionFieldFESpacePtr; }
+
+    //! get the pointers to the matrices
+    // matrix_ptr_type matrMassPtr() const { return M_matrMassPtr; }
+    // matrix_ptr_type matrNoBCPtr() const { return M_matrNoBCPtr; }
+
+    //! returns the local solution vector
+    const vector_type& solution() const { return M_sol; }
 
     //! returns the local residual vector
-
-    const vector_type& residual() const {return M_residual;}
-
-    //! reduce the local solution solution in global vectors
-
-    void reduceSolution( Vector& u,
-                         Vector& p );
-
-    void reduceResidual( Vector& res);
-
-
-    FESpace<Mesh, EpetraMap>& velFESpace()   {return M_FESpace;}
-
-
-    //! Bounday Conditions
-    /*const*/ bool BCset() const {return M_setBC;}
-    //! set the BCs
-    void setBC(BCHandler &BCh)
-        {
-            M_BCh = &BCh; M_setBC = true;
-        }
-
-//     BCHandler& bcHandler()
-//         {
-//             return *M_BCh;
-//         }
-
-    //! set the source term functor
-    void setSourceTerm( source_type __s )
-        {
-            M_source = __s;
-        }
+    const vector_type& residual() const { return M_residual; }
 
     //! get the source term functor
-    source_type sourceTerm() const
-        {
-            return M_source;
-        }
+    // const source_type& sourceTerm() const { return M_sourceTerm; }
 
-    // compute area on a face with given flag
-    Real area(const EntityFlag& flag);
-
-    // compute flux on a face with given flag
-    Real flux(const EntityFlag& flag);
-
-    //! Postprocessing
-    void postProcess(bool _writeMesh = false);
-
-    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
-
-    EpetraMap const& getMap() const { return M_localMap; }
-
-    const boost::shared_ptr<Epetra_Comm>& comm() const {return M_comm;}
-
-    bool isLeader() const
-    {
-        assert( M_comm.get() != 0);
-        return comm()->MyPID() == 0;
-    }
-
-    void leaderPrint   (string const message, Real const number) const;
-    void leaderPrint   (string const message) const;
-    void leaderPrintMax(string const message, Real const number) const;
-
-
-    void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
-
-    matrix_type& matrNoBC()
-        {
-            return *M_matrNoBC;
-        }
-    matrix_type& matrMass()
-        {
-            return *M_matrMass;
-        }
+    //@}
 
 
 protected:
 
-    UInt dim() const           { return M_FESpace.dim(); }
+    void initializeMatrix();
 
-    void applyBoundaryConditions(  matrix_type&        matrix,
-                                   vector_type&        rhs,
-                                   bchandler_raw_type& BCh);
+    void addDiffusionTerms();
 
-    void echo(std::string message);
+    void addReactionTerms();
 
-    //! removes mean of component comp of vector x
-    Real removeMean( vector_type& x );
+    void addAdvectionTerms();
 
-    //private members
+    void addStabilizationTerms();
 
-    //! data for NS solvers
-    const data_type&               M_data;
+    void addMatrixTimeTerm( timeIntegrator_ptr_type timeIntegratorPtr );
 
-    // FE spaces
-    FESpace<Mesh, EpetraMap>&      M_FESpace;
+    void applyBoundaryConditions(   matrix_type&        matrix,
+                                    vector_type&        rhs,
+                                    bchandler_type&     BCh );
 
-    // beta FE spaces
-    FESpace<Mesh, EpetraMap>&      M_betaFESpace;
+    void assembleSourceTerm();
 
-    //! MPI communicator
-    boost::shared_ptr<Epetra_Comm>                   M_comm;
-    int                            M_me;
+    void addRHSTimeTerm( timeIntegrator_ptr_type timeIntegratorPtr );
 
-    //! Bondary Conditions Handler
-    BCHandler*                     M_BCh;
-    bool                           M_setBC;
+    //! Manager for output communications
+    Displayer                       M_displayer;
 
-    EpetraMap                      M_localMap;
+    //! Map for building matrices and vectors
+    // EpetraMap                       M_localMap;
 
-    //! mass matrix
+    //! data for ADR solver
+    data_ptr_type                   M_dataPtr;
 
-    matrix_ptrtype                 M_matrMass;
+    // FE space for the unknown
+    fespace_ptr_type                M_uFESpacePtr;
 
-    //! Stiffness Matrix mu*stiff
-    matrix_ptrtype                 M_matrStiff;
-
-    //! Advection Matrix
-    matrix_ptrtype                 M_matrAdv;
-
-    //! matrix to be solved
-//    matrix_ptrtype                 M_matrFull;
-
-    //! matrix without boundary conditions
-
-    matrix_ptrtype                 M_matrNoBC;
-
-    //! stabilization matrix
-    matrix_ptrtype                 M_matrStab;
-
-    //! source term for NS
-    source_type                    M_source;
-
-
-    //! Right hand side for the velocity
-    vector_type                    M_rhsNoBC;
-
-    //! Right hand side global
-    vector_type                    M_rhsFull;
-
-    //! Global solution _u and _p
-    vector_type                    M_sol;
-
-    //! residual
-
-    vector_type                    M_residual;
-
-    SolverType                     M_linearSolver;
-
-     boost::shared_ptr<EpetraPreconditioner> M_prec;
-
-    bool                           M_steady;
-
-    //! Stabilization
-    std::string                    M_stab;
-    Real                           M_gammaBeta;
-
-//     details::
-//    IPStabilization<Mesh, Dof>     M_ipStab;
-
-    const Function*                M_betaFct;
-
-    bool                           M_divBetaUv;
-
-    //
-    Real                         M_diagonalize;
-
-    UInt                           M_count;
-
-    //! boolean that indicates if output is sent to cout
-
-    bool                           M_verbose;
-
-    //! boolean that indicates if the matrix is updated for the current iteration
-
-    bool                           M_updated;
-
-    //! boolean that indicates if le precond has to be recomputed
-
-    bool                           M_reusePrec;
-
-    //! interger storing the max number of solver iteration with prec recomputing
-
-    int                            M_maxIterSolver;
-
-    //!
-
-    bool                           M_recomputeMatrix;
-
-private:
+    // FE space for the advection field
+    fespace_ptr_type                M_advectionFieldFESpacePtr;
 
     //! Elementary matrices and vectors
-    ElemMat                        M_elmatStiff;      // stiffness
-    ElemMat                        M_elmatAdv;        // advection
-    ElemMat                        M_elmatMass;       // mass
-    ElemMat                        M_elmatStab;
-//    ElemVec                        M_elvec;           // Elementary right hand side
-    ElemVec                        M_elvec_u;         // Elementary right hand side
+    elmat_ptr_type                  M_elmatMassPtr;       // mass
+    elmat_ptr_type                  M_elmatStiffPtr;      // stiffness
+    elmat_ptr_type                  M_elmatAdvPtr;        // advection
+    elvec_ptr_type                  M_elvecBetaPtr;        // Elementary right hand side
+    elmat_ptr_type                  M_elmatStabPtr;
+    elvec_ptr_type                  M_elvecRhsPtr;        // Elementary right hand side
 
+    //! mass matrix
+    matrix_ptr_type                 M_matrMassPtr;
+
+    //! Stiffness Matrix
+    matrix_ptr_type                 M_matrStiffPtr;
+
+    //! Advection Matrix
+    matrix_ptr_type                 M_matrAdvPtr;
+
+    //! matrix without boundary conditions
+    matrix_ptr_type                 M_matrNoBCPtr;
+
+    //! stabilization matrix
+    matrix_ptr_type                 M_matrStabPtr;
+
+    //! Right hand side for the system
+    vector_type                     M_rhsNoBC;
+
+    //! Global solution
+    vector_type                     M_sol;
+
+    //! Residual
+    vector_type                     M_residual;
+
+    //! Source term
+    function_type                   M_sourceTerm;
+
+    //! Advection field
+    function_type                   M_advectionField;
+    vector_type                     M_advectionVector;
+
+    //! The linear solver
+    SolverType                      M_linearSolver;
+
+    ADRConstantMatrices             M_whichMatrices;
+
+    bool                            M_recomputeConstantMatrix;
 
 }; // class ADRSolver
 
@@ -370,292 +397,290 @@ private:
 // IMPLEMENTATION
 //
 
-
 template<typename Mesh, typename SolverType>
 ADRSolver<Mesh, SolverType>::
-ADRSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& adrFESpace,
-           FESpace<Mesh, EpetraMap>& betaFESpace,
-           BCHandler&                BCh,
-           boost::shared_ptr<Epetra_Comm>& comm ):
-    M_data                   ( dataType ),
-    M_FESpace                ( adrFESpace ),
-    M_betaFESpace            ( betaFESpace ),
-    M_comm                   ( comm ),
-    M_me                     ( M_comm->MyPID() ),
-    M_BCh                    ( &BCh ),
-    M_setBC                  ( true ),
-    M_localMap               ( M_FESpace.map() ),
-    M_matrMass               ( ),
-    M_matrStiff              ( ),
-//    M_matrFull               ( ),
-    M_matrNoBC               ( ),
-    M_rhsNoBC                ( M_localMap ),
-    M_rhsFull                ( M_localMap ),
-    M_sol                    ( M_localMap ),
-    M_residual               ( M_localMap ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
-//     M_ipStab                 ( M_FESpace.mesh(),
-//                                M_FESpace.dof(), M_FESpace.refFE(),
-//                                M_FESpace.feBd(), M_FESpace.qr(),
-//                                0., 0., 0.,
-//                                M_data.diffusivity() ),
-    M_betaFct                ( 0 ),
-    M_count                  ( 0 ),
-    M_verbose                ( M_me == 0),
-    M_updated                ( false ),
-    M_reusePrec              ( true ),
-    M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false ),
-    M_elmatStiff             ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatMass              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatAdv               ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatStab              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-//    M_elvec                  ( M_FESpace.fe().nbFEDof(), nDimensions ),
-    M_elvec_u                ( M_betaFESpace.fe().nbFEDof(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
+ADRSolver() :
+M_displayer              (),
+M_dataPtr                ( new data_type() ),
+M_whichMatrices          ( ADR_NO_CONST_MATRICES ),
+M_recomputeConstantMatrix( false )
 {
+    this->M_sourceTerm = boost::bind(&ADRfZero, _1, _2, _3, _4, _5);
+    this->M_advectionField = boost::bind(&ADRfZero, _1, _2, _3, _4, _5);
 }
 
 
-
+/* BEWARE this won't work until we have copy constructors
+ * for ElemMat & ElemVec!
 template<typename Mesh, typename SolverType>
 ADRSolver<Mesh, SolverType>::
-ADRSolver( const data_type&          dataType,
-           FESpace<Mesh, EpetraMap>& adrFESpace,
-           FESpace<Mesh, EpetraMap>& betaFESpace,
-           boost::shared_ptr<Epetra_Comm>& comm ):
-    M_data                   ( dataType ),
-    M_FESpace                ( adrFESpace ),
-    M_betaFESpace            ( betaFESpace ),
-    M_comm                   ( comm ),
-    M_me                     ( M_comm->MyPID() ),
-    M_setBC                  ( false ),
-    M_localMap               ( M_FESpace.map() ),
-    M_matrMass               ( ),
-    M_matrStiff              ( ),
-    M_matrNoBC               ( ),
-    M_rhsNoBC                ( M_localMap ),
-    M_rhsFull                ( M_localMap ),
-    M_sol                    ( M_localMap ),
-    M_residual               ( M_localMap ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
-    M_betaFct                ( 0 ),
-    M_count                  ( 0 ),
-    M_verbose                ( M_me == 0),
-    M_updated                ( false ),
-    M_reusePrec              ( true ),
-    M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false ),
-    M_elmatStiff             ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatAdv               ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatMass              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elmatStab              ( M_FESpace.fe().nbFEDof(), 1, 1 ),
-    M_elvec_u                ( M_betaFESpace.fe().nbFEDof(), nDimensions ) //SQ: from M_FESpace to M_betaFESpace
+ADRSolver( const ADRSolver& adrsolver ):
+M_displayer              ( adrsolver.M_displayer ),
+M_dataPtr                ( adrsolver.M_dataPtr ),
+M_uFESpacePtr            ( adrsolver.M_uFESpacePtr ),
+M_advectionFieldFESpacePtr         ( adrsolver.M_advectionFieldFESpacePtr ),
+M_rhsNoBC                ( adrsolver.M_rhsNoBC ),
+M_sol                    ( adrsolver.M_sol ),
+M_residual               ( adrsolver.M_residual ),
+M_linearSolver           ( adrsolver.M_linearSolver ),
+M_steady                 ( adrsolver.M_steady ),
+M_stab                   ( adrsolver.M_stab ),
+M_dataPtr->stabilizationCoefficient()              ( adrsolver.M_dataPtr->stabilizationCoefficient() ),
+M_recomputeMatrix        ( adrsolver.M_recomputeMatrix )
 {
-}
+    if( adrsolver.*M_elmatMassPtr )
+        M_elmatMassPtr.reset( new ElemMat( *adrsolver.*M_elmatMassPtr ) );
+    if( adrsolver.*M_elmatStiffPtr )
+        M_elmatStiffPtr.reset( new ElemMat( *adrsolver.*M_elmatStiffPtr ) );
+    if( adrsolver.*M_elmatAdvPtr )
+        M_elmatAdvPtr.reset( new ElemMat( *adrsolver.*M_elmatAdvPtr ) );
+    if( adrsolver.M_elvecBeta )
+        M_elvecBetaPtr.reset( new ElemMat( *adrsolver.M_elvecBeta ) );
+    if( adrsolver.*M_elmatStabPtr )
+        M_elmatStabPtr.reset( new ElemMat( *adrsolver.*M_elmatStabPtr ) );
 
+    if( adrsolver.M_matrMassPtr )
+            M_matrMassPtr.reset( new matrix_type( *adrsolver.M_matrMassPtr ) );
+    if( adrsolver.M_matrStiffPtr )
+            M_matrStiffPtr.reset( new matrix_type( *adrsolver.M_matrStiffPtr ) );
+    if( adrsolver.M_matrAdvPtr )
+            M_matrAdvPtr.reset( new matrix_type( *adrsolver.M_matrAdvPtr ) );
+    if( adrsolver.M_matrNoBCPtr )
+            M_matrNoBCPtr.reset( new matrix_type( *adrsolver.M_matrNoBCPtr ) );
+    if( adrsolver.M_matrStabPtr )
+            M_matrStabPtr.reset( new matrix_type( *adrsolver.M_matrStabPtr ) );
+}
+ */
 
 
 template<typename Mesh, typename SolverType>
 ADRSolver<Mesh, SolverType>::
 ~ADRSolver()
 {
-
-}
-
-template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::
-leaderPrint(string const message, Real const number) const
-{
-  if ( isLeader() )
-    std::cout << message << number << std::endl;
-
-}
-
-template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::
-leaderPrint(string const message) const
-{
-  if ( isLeader() )
-    std::cout << message << std::flush;
-
-}
-
-template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::
-leaderPrintMax(string const message, Real const number) const
-{
-  Real num(number);
-  Real globalMax;
-  M_comm->MaxAll(&num, &globalMax, 1);
-
-  leaderPrint( message , globalMax );
-
 }
 
 
-
 template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
+void ADRSolver<Mesh, SolverType>::setup( const GetPot& dataFile, const std::string& section )
 {
-    M_steady      = dataFile( "adr/miscellaneous/steady",        0  );
-    M_stab        = dataFile( "adr/stab/type",                   "ip");
-    M_gammaBeta   = dataFile( "adr/stab/gammaBeta",              0. );
-    M_diagonalize = dataFile( "adr/space_discretization/diagonalize",  0. );
+    // We want a slash dividing the data file section from the variable name but only
+    // when not provided by the user or when not looking in the root of the data file
+    std::string corrected_section( section );
+    if( ( ! section.empty() ) && ( section[section.length()-1] != '/' ) )
+        corrected_section = section + '/';
 
-
-    M_linearSolver.setDataFromGetPot( dataFile, "adr/solver" );
-    M_linearSolver.setUpPrec( dataFile, "adr/prec" );
-
-    M_maxIterSolver   = dataFile( "adr/solver/max_iter", -1);
-    M_reusePrec       = dataFile( "adr/prec/reuse", true);
-
-    std::string precType = dataFile( "adr/prec/prectype", "Ifpack");
-
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "AdvectionDiffusionSolver : Preconditioner not set");
-
+    M_linearSolver.setDataFromGetPot( dataFile, (corrected_section+"solver").data() );
+    M_linearSolver.setUpPrec( dataFile, (corrected_section+"prec").data() );
 }
 
+
 template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::buildSystem()
+void ADRSolver<Mesh, SolverType>::setup( data_ptr_type& dataADRPtr,
+                                         fespace_ptr_type& solutionFESpacePtr )
 {
+    M_dataPtr = dataADRPtr;
+
+    M_uFESpacePtr = solutionFESpacePtr;
+
+    M_advectionFieldFESpacePtr.reset( new fespace_type( solutionFESpacePtr->mesh(),
+                                                        dataADRPtr->solFEType(),
+                                                        nDimensions,
+                                                        solutionFESpacePtr->map().CommPtr() ) );
+
+    // if ( M_dataPtr->reactionCoefficient() || ( !M_dataPtr->steady() ) )
+    M_elmatMassPtr.reset( new ElemMat( M_uFESpacePtr->fe().nbFEDof(),
+                                       M_uFESpacePtr->fieldDim(),
+                                       M_uFESpacePtr->fieldDim() ) );
+
+    // if ( M_dataPtr->diffusionCoefficient() )
+    M_elmatStiffPtr.reset( new ElemMat( M_uFESpacePtr->fe().nbFEDof(),
+                                        M_uFESpacePtr->fieldDim(),
+                                        M_uFESpacePtr->fieldDim() ) );
+
+    // TODO how to filter out these, when not needed?
+    M_elmatAdvPtr.reset( new ElemMat( M_uFESpacePtr->fe().nbFEDof(),
+                                      M_uFESpacePtr->fieldDim(),
+                                      M_uFESpacePtr->fieldDim() ) );
+
+    M_elvecBetaPtr.reset( new ElemVec( M_uFESpacePtr->fe().nbFEDof(),
+                                       nDimensions ) );
+
+    // if( M_dataPtr->stabilizationMethod() != ADR_NO_STABILIZATION )
+    M_elmatStabPtr.reset( new ElemMat( M_uFESpacePtr->fe().nbFEDof(),
+                                       M_uFESpacePtr->fieldDim(),
+                                       M_uFESpacePtr->fieldDim() ) );
+
+    M_elvecRhsPtr.reset( new ElemVec( M_uFESpacePtr->fe().nbFEDof(),
+                                      M_uFESpacePtr->fieldDim() ) );
+
+    M_rhsNoBC.setMap( this->M_uFESpacePtr->map() );
+    M_rhsNoBC = EpetraVector( M_uFESpacePtr->map() );
+    M_sol.setMap( this->M_uFESpacePtr->map() );
+    M_sol = EpetraVector( M_uFESpacePtr->map() );
+    M_residual.setMap( this->M_uFESpacePtr->map() );
+    M_residual = EpetraVector( M_uFESpacePtr->map() );
+
+    M_advectionVector.setMap( this->M_advectionFieldFESpacePtr->map() );
+    // M_advectionVector = EpetraVector( M_uFESpacePtr->map() );
+
+    M_displayer.setCommunicator( M_uFESpacePtr->map().CommPtr() );
+    M_linearSolver.setCommunicator( M_uFESpacePtr->map().CommPtr() );
+                                         }
 
 
-    M_matrMass.reset  ( new matrix_type(M_localMap) );
-    M_matrStiff.reset( new matrix_type(M_localMap) );
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::computeConstantMatrices( ADRConstantMatrices whichMatrices )
+{
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the unknown is undefined!\n" );
 
-//    M_comm->Barrier();
+    // initialize the mass matrix
+    if ( whichMatrices!=ADR_ONLY_STIFF )
+    {
+        ASSERT( M_elmatMassPtr.get(), "\nThe elementary matrix for the mass assembly is undefined!\n" );
+        M_matrMassPtr.reset( new matrix_type( M_uFESpacePtr->map() ) );
+    }
+    // initialize the stiffness matrix
+    if ( whichMatrices!=ADR_ONLY_MASS )
+    {
+        ASSERT( M_elmatStiffPtr.get(), "\nThe elementary matrix for the stiff assembly is undefined!\n" );
+        M_matrStiffPtr.reset( new matrix_type( M_uFESpacePtr->map() ) );
+    }
 
-    leaderPrint("  adr-  Computing constant matrices ...          ");
+    M_displayer.leaderPrint("  adr-  Computing constant matrices ...");
 
     Chrono chrono;
 
     Chrono chronoDer;
-    Chrono chronoStiff;
-    Chrono chronoMass;
-    Chrono chronoGrad;
-
-    Chrono chronoStiffAssemble;
-    Chrono chronoMassAssemble;
-    Chrono chronoGradAssemble;
-    Chrono chronoDivAssemble;
-    Chrono chronoStab;
     Chrono chronoZero;
 
-    // Number of velocity components
-    // UInt nbCompU = 1;
+    Chrono chronoMass;
+    Chrono chronoStiff;
 
-    // Elementary computation and matrix assembling
-    // Loop on elements
-
-    // UInt velTotalDof   = M_FESpace.dof().numTotalDof();
-
+    Chrono chronoMassAssemble;
+    Chrono chronoStiffAssemble;
 
     chrono.start();
 
-    for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numElements(); iVol++ )
+    if ( whichMatrices!=ADR_NO_CONST_MATRICES )
     {
-        chronoDer.start();
-        M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) );
-
-        chronoDer.stop();
-
-        chronoZero.start();
-        M_elmatStiff.zero();
-        M_elmatMass.zero();
-        chronoZero.stop();
-
-
-        // stiffness strain
-        chronoStiff.start();
-        //stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_FESpace.fe() );
-        stiff( M_data.diffusivity(), M_elmatStiff,  M_FESpace.fe(), 0, 0 );
-        //stiff_div( 0.5*M_FESpace.fe().diameter(), M_elmatStiff, M_FESpace.fe() );
-        chronoStiff.stop();
-
-        // mass
-        if ( !M_steady )
+        // Elementary computation and matrix assembling
+        // Loop on elements
+        for ( UInt iEl = 1; iEl <= M_uFESpacePtr->mesh()->numElements(); iEl++ )
         {
-            chronoMass.start();
-            mass( 1., M_elmatMass, M_FESpace.fe(), 0, 0);
-            chronoMass.stop();
-        }
+            // update current FE info
+            chronoDer.start();
+            M_uFESpacePtr->fe().updateFirstDeriv( M_uFESpacePtr->mesh()->element( iEl ) );
+            chronoDer.stop();
 
-        // stiffness
+            // stiffness matrix
+            if ( whichMatrices!=ADR_ONLY_MASS )
+            {
+                // clear data structures
+                chronoZero.start();
+                M_elmatStiffPtr->zero();
+                chronoZero.stop();
 
-        chronoStiffAssemble.start();
-        assembleMatrix( *M_matrStiff,
-                        M_elmatStiff,
-                        M_FESpace.fe(),
-                        M_FESpace.fe(),
-                        M_FESpace.dof(),
-                        M_FESpace.dof(),
-                        0, 0,
-                        0, 0);
-        chronoStiffAssemble.stop();
+                // elementary matrix
+                chronoStiff.start();
+                stiff( 1., *M_elmatStiffPtr,  M_uFESpacePtr->fe(), 0, 0, M_uFESpacePtr->fieldDim() );
+                chronoStiff.stop();
 
-        if ( !M_steady )
-        {
-            chronoMassAssemble.start();
-            assembleMatrix( *M_matrMass,
-                            M_elmatMass,
-                            M_FESpace.fe(),
-                            M_FESpace.fe(),
-                            M_FESpace.dof(),
-                            M_FESpace.dof(),
-                            0, 0, 0, 0);
-            chronoMassAssemble.stop();
-        }
+                // assembly
+                for ( UInt iComp = 0; iComp < M_uFESpacePtr->fieldDim(); iComp++ )
+                {
+                    chronoStiffAssemble.start();
+                    assembleMatrix( *M_matrStiffPtr,
+                                    *M_elmatStiffPtr,
+                                    M_uFESpacePtr->fe(),
+                                    M_uFESpacePtr->fe(),
+                                    M_uFESpacePtr->dof(),
+                                    M_uFESpacePtr->dof(),
+                                    iComp, iComp,
+                                    iComp*M_uFESpacePtr->dim(), iComp*M_uFESpacePtr->dim() );
+                    chronoStiffAssemble.stop();
+                }
+            } // if (build the mass matrix)
 
-    }
+            // mass matrix
+            if ( whichMatrices!=ADR_ONLY_STIFF )
+            {
+                // clear data structures
+                chronoZero.start();
+                M_elmatMassPtr->zero();
+                chronoZero.stop();
 
+                // elementary matrix
+                chronoMass.start();
+                mass( 1., *M_elmatMassPtr, M_uFESpacePtr->fe(), 0, 0, M_uFESpacePtr->fieldDim());
+                chronoMass.stop();
 
+                // assembly
+                for ( UInt iComp = 0; iComp < M_uFESpacePtr->fieldDim(); iComp++ )
+                {
+                    chronoMassAssemble.start();
+                    assembleMatrix( *M_matrMassPtr,
+                                    *M_elmatMassPtr,
+                                    M_uFESpacePtr->fe(),
+                                    M_uFESpacePtr->fe(),
+                                    M_uFESpacePtr->dof(),
+                                    M_uFESpacePtr->dof(),
+                                    iComp, iComp,
+                                    iComp*M_uFESpacePtr->dim(), iComp*M_uFESpacePtr->dim() );
+                    chronoMassAssemble.stop();
+                }
 
-    M_comm->Barrier();
+            } // if (build the stiff matrix)
+
+        } // loop over mesh elements
+
+    } // if (build const matrices)
+
+    // synchronize the processes
+    M_uFESpacePtr->map().Comm().Barrier();
 
     chrono.stop();
-    leaderPrintMax( "done in " , chrono.diff());
+    M_displayer.leaderPrintMax( "\n\t... done in " , chrono.diff());
 
 
-    leaderPrint( "  adr-  Finalizing the matrices ...              ");
+    M_displayer.leaderPrint( "  adr-  Finalizing the constant matrices ...");
     chrono.start();
 
-    M_matrStiff->GlobalAssemble();
-    M_matrMass->GlobalAssemble();
+    if ( whichMatrices!=ADR_ONLY_STIFF )
+        M_matrMassPtr->GlobalAssemble();
+    if ( whichMatrices!=ADR_ONLY_MASS )
+        M_matrStiffPtr->GlobalAssemble();
 
-//     M_matrStiff->spy("stiff");
-//     M_matrMass->spy("mass");
+    //     M_matrStiffPtr->spy("stiff");
+    //     M_matrMassPtr->spy("mass");
 
     chrono.stop();
-    leaderPrintMax("done in " , chrono.diff() );;
+    M_displayer.leaderPrintMax("\n\t... done in " , chrono.diff() );;
+
+    // record here the result of the matrices creation method
+    M_whichMatrices = whichMatrices;
 
     if (false)
         std::cout << "partial times:  \n"
-                  << " Der            " << chronoDer.diff_cumul() << " s.\n"
-                  << " Zero           " << chronoZero.diff_cumul() << " s.\n"
-                  << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
-                  << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
-                  << " Mass           " << chronoMass.diff_cumul() << " s.\n"
-                  << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
-                  << " Grad           " << chronoGrad.diff_cumul() << " s.\n"
-                  << " Grad Assemble  " << chronoGradAssemble.diff_cumul() << " s.\n"
-                  << " Div Assemble   " << chronoDivAssemble.diff_cumul() << " s.\n"
-                  << std::endl;
+        << " Der            " << chronoDer.diff_cumul() << " s.\n"
+        << " Zero           " << chronoZero.diff_cumul() << " s.\n"
+        << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
+        << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
+        << " Mass           " << chronoMass.diff_cumul() << " s.\n"
+        << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
+        << std::endl;
 
 }
 
 
 template<typename Mesh, typename SolverType>
 void ADRSolver<Mesh, SolverType>::
-initialize( const Function& u0 )
+initialize( const function_type& u0 )
 {
-     vector_type u(M_FESpace.map());
-     M_FESpace.interpolate(u0, u, 0.0);
-     M_sol = u;
-
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the unknown is undefined!\n" );
+    vector_type u(M_uFESpacePtr->map());
+    M_uFESpacePtr->interpolate(u0, u, M_dataPtr->dataTimePtr()->getInitialTime());
+    initialize( u );
 }
 
 
@@ -666,848 +691,755 @@ initialize( const vector_type& u0 )
     M_sol = u0;
 }
 
+
 template<typename Mesh, typename SolverType>
 void ADRSolver<Mesh, SolverType>::
-updateSystem( Real       alpha,
-              vector_type& betaVec,
-              vector_type& sourceVec
-              )
+addMatrixTimeTerm( timeIntegrator_ptr_type timeIntegratorPtr )
 {
+    ASSERT( M_matrMassPtr.get(), "\nThe mass matrix is undefined!\n" );
+
+    // update the matrix for time dependent problems
+    M_displayer.leaderPrint( "  adr-  Adding the solution time derivative to the matrix ... ");
+    *M_matrNoBCPtr += *M_matrMassPtr * timeIntegratorPtr->coeff_der_dt(0);
+    M_displayer.leaderPrint( "done\n");
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+updateMatrix( timeIntegrator_ptr_type timeIntegratorPtr )
+{
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
 
     Chrono chrono;
-
-    leaderPrint("  adr-  Updating mass term on right hand side... ");
-
     chrono.start();
 
-    // UInt velTotalDof   = M_FESpace.dof().numTotalDof();
+    // recompute constant matrices, if needed
+    if (M_recomputeConstantMatrix)
+        computeConstantMatrices(M_whichMatrices);
 
-    // Right hand side for the velocity at time
+    M_displayer.leaderPrint( "  adr-  Updating the full matrix ...\n");
 
-    updateRHS(sourceVec);
+    initializeMatrix();
 
-    chrono.stop();
-
-    leaderPrintMax("done in ", chrono.diff());
-
-
-    M_updated = false;
-
-//
-
-    if (M_recomputeMatrix)
-        buildSystem();
-
-    leaderPrint( "  adr-  Copying the matrices ...                 ");
-
-    chrono.start();
-
-     if (M_matrNoBC)
-         M_matrNoBC.reset(new matrix_type(M_localMap, M_matrNoBC->getMeanNumEntries() ));
-     else
-         M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
-
-     M_matrStab.reset( new matrix_type(M_localMap) );
-
-    if ( M_data.diffusivity() != 0. )
-        *M_matrNoBC += *M_matrStiff;
-
-    if (alpha != 0. )
+    if( ( M_dataPtr->diffusionCoefficient() ) &&
+            ( ( M_whichMatrices != ADR_ONLY_MASS ) || ( M_whichMatrices != ADR_NO_CONST_MATRICES ) ) )
     {
-        *M_matrNoBC += *M_matrMass*alpha;
+        M_displayer.leaderPrint( "\t");
+        addDiffusionTerms();
     }
 
-
-    chrono.stop();
-    leaderPrintMax( "done in " , chrono.diff() );
-
-//    UInt nbCompU       = nDimensions;
-
-    //! managing the convective term
-
-    Real normInf;
-    betaVec.NormInf(&normInf);
-
-    if (normInf != 0.)
+    if( ( M_dataPtr->reactionCoefficient() ) &&
+            ( ( M_whichMatrices != ADR_ONLY_STIFF ) || ( M_whichMatrices != ADR_NO_CONST_MATRICES ) ) )
     {
-
-        leaderPrint("  adr-  Updating the convective terms ...        ");
-
-        // vector with repeated nodes over the processors
-
-        vector_type betaVecRep(betaVec, Repeated );
-        int uDim = betaVec.size()/nDimensions;
-        chrono.start();
-
-        for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numElements(); ++iVol )
-        {
-
-            M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) ); //as updateFirstDer
-            M_betaFESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) ); //as updateFirstDer
-
-            M_elmatAdv.zero();
-
-            UInt eleID = M_betaFESpace.fe().currentLocalId();
-            // Non linear term, Semi-implicit approach
-            // M_elvec contains the velocity values in the nodes
-            for ( UInt iNode = 0 ; iNode < M_betaFESpace.fe().nbFEDof() ; iNode++ )
-            {
-	         UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
-                for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-                {
-		    UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
-                    M_elvec_u.vec()[ iloc + iComp*M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ig]; // BASEINDEX + 1
-                }
-            }
-
-
-            // compute local convective term and assembling
-            for(UInt iComp=0; iComp<nDimensions; iComp++)
-            	grad( iComp, M_elvec_u, M_elmatAdv, M_FESpace.fe(), M_FESpace.fe(), M_betaFESpace.fe());
-
-
-
-
-            assembleMatrix( *M_matrNoBC,
-                            M_elmatAdv,
-                            M_FESpace.fe(),
-                            M_FESpace.fe(),
-                            M_FESpace.dof(),
-                            M_FESpace.dof(),
-                            0, 0,
-                            0, 0
-                            );
-
-
-            // Streamline Diffusion ( only stab for now )
-
-
-            if (M_stab == "sd")
-            {
-                M_elmatStab.zero();
-                Real VLoc_infty = 0.;
-                Real VLoc_mean  = 0.;
-                Real VLoc_c     = 0.;
-
-                for ( UInt ih_c = 0 ; ih_c < this->M_betaFESpace.fe().nbFEDof() ; ih_c++ )
-                {
-                    UInt iloc = this->M_betaFESpace.fe().patternFirst( ih_c );
-                    for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
-                    {
-                        UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
-                        M_elvec_u.vec()[ iloc + iComp * this->M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ ig ];
-                        VLoc_c += betaVecRep[ ig ] * betaVecRep[ ig ];
-                    }
-
-                    VLoc_c     = sqrt( VLoc_c );
-                    VLoc_mean += VLoc_c;
-
-                    if ( VLoc_c > VLoc_infty )
-                        VLoc_infty = VLoc_c;
-                }
-
-                VLoc_mean = VLoc_mean / this->M_betaFESpace.fe().nbFEDof();
-
-                Real coef_stab = 0;
-                coef_stab=M_gammaBeta*this->M_betaFESpace.fe().diameter()*VLoc_infty; // Alessandro - method
-
-                stiff_sd( coef_stab / ( VLoc_mean*VLoc_mean ), M_elvec_u, M_elmatStab, this->M_FESpace.fe(), this->M_betaFESpace.fe() );
-
-                assembleMatrix( *M_matrStab,
-                                M_elmatStab,
-                                M_FESpace.fe(),
-                                M_FESpace.fe(),
-                                M_FESpace.dof(),
-                                M_FESpace.dof(),
-                                0, 0, 0, 0 );
-				}
-        }
-
-//TODO: check both the 2D and 3D implementation of ip-stabilization (on the Laplacian test doesn't work properly)
-
-
-        if (M_stab == "ip")
-        {
-//	      leaderPrint("   adr- IP stab");
-//            if ( M_resetStab )
-            {
-                const UInt nDof = M_betaFESpace.dof().numTotalDof();
-
-                CurrentFE fe1(M_FESpace.refFE(),
-                              getGeoMap(*M_FESpace.mesh()),
-                              M_FESpace.qr());
-                CurrentFE fe2(M_FESpace.refFE(),
-                              getGeoMap(*M_FESpace.mesh()),
-                              M_FESpace.qr());
-                CurrentFE fe3(M_betaFESpace.refFE(),
-                              getGeoMap(*M_betaFESpace.mesh()),
-                              M_betaFESpace.qr());
-
-
-#ifdef TWODIM
-                typedef ID ( *ETOP )( ID const localFace, ID const point );
-                ETOP  eToP;
-                switch( M_FESpace.fe().refFE.type )
-                {
-                    case FE_P1_2D:
-                    	eToP = LinearTriangle::eToP;
-                        break;
-                    case FE_P2_2D:
-                    	eToP = QuadraticTriangle::eToP;
-                        break;
-                    case FE_Q1_2D:
-                        eToP = LinearQuad::eToP;
-                        break;
-                    case FE_Q2_2D:
-                        eToP = QuadraticQuad::eToP;
-                        break;
-                    default:
-                    	eToP=0;
-                        ERROR_MSG( "This refFE is not allowed with IP stabilization" );
-                        break;
-                }
-                for ( UInt iEdge = M_FESpace.mesh()->numBEdges() + 1; iEdge <= M_FESpace.mesh()->numEdges();
-                      ++iEdge )
-                {
-                    const UInt iElAd1 = M_FESpace.mesh()->edge( iEdge ).ad_first();
-                    const UInt iElAd2 = M_FESpace.mesh()->edge( iEdge ).ad_second();
-
-                    if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
-                    {
-                        continue;
-                    }
-
-                    M_elmatStab.zero();
-
-                    M_betaFESpace.feBd().updateMeas( M_betaFESpace.mesh()->edge( iEdge ) );
-                    const Real hK2  = std::pow(M_betaFESpace.feBd().measure(), 2.);
-
-                    M_betaFESpace.feBd().updateMeasNormal( M_betaFESpace.mesh()->edge( iEdge ) );
-                    KNM<Real>& normal = M_betaFESpace.feBd().normal;
-
-                    fe1.updateFirstDeriv( M_FESpace.mesh()->element( iElAd1 ) );
-                    fe2.updateFirstDeriv( M_FESpace.mesh()->element( iElAd2 ) );
-
-                   ElemVec beta(M_betaFESpace.feBd().nbFEDof(), nDimensions);
-
-                    // first, get the local trace of the velocity into beta
-                    // local id of the face in its adjacent element
-
-                    UInt iEdEl = M_betaFESpace.mesh()->edge( iEdge ).pos_first();
-                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbFEDof(); ++iNode )
-                    {
-                        UInt iloc = eToP( iEdEl, iNode+1 );
-                        for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
-                        {
-                            UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
-                            if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbFEDof() + iNode ] = betaVecRep( ig + 1); // BASEINDEX + 1
-                        }
-                    }
-
-#elif defined THREEDIM
-                typedef ID ( *FTOP )( ID const localFace, ID const point );
-                 FTOP  fToP;
-                 switch( M_FESpace.fe().refFE().type() )
-                {
-                case FE_P1_3D:
-                case FE_P1bubble_3D:
-                	fToP = LinearTetra::fToP;
-                	break;
-                case FE_P2_3D:
-                	fToP = QuadraticTetra::fToP;
-                	break;
-                case FE_Q1_3D:
-					fToP = LinearHexa::fToP;
-					break;
-                case FE_Q2_3D:
-                	fToP = QuadraticHexa::fToP;
-                	break;
-				default:
-					fToP = 0;
-					ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
-					break;
-                }
-
-
-                for ( UInt iFace = M_FESpace.mesh()->numBFaces() + 1; iFace <= M_FESpace.mesh()->numFaces();
-                      ++iFace )
-                {
-
-                    const UInt iElAd1 = M_FESpace.mesh()->face( iFace ).ad_first();
-                    const UInt iElAd2 = M_FESpace.mesh()->face( iFace ).ad_second();
-
-                    if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
-                    {
-                        continue;
-                    }
-
-                    M_elmatStab.zero();
-
-                    M_betaFESpace.feBd().updateMeas( M_betaFESpace.mesh()->face( iFace ) );
-                    const Real hK2  = std::pow(M_betaFESpace.feBd().measure(), 2.);
-
-                    M_betaFESpace.feBd().updateMeasNormal( M_betaFESpace.mesh()->face( iFace ) );
-                    KNM<Real>& normal = M_betaFESpace.feBd().normal;
-
-                    fe1.updateFirstDeriv( M_FESpace.mesh()->element( iElAd1 ) );
-                    fe2.updateFirstDeriv( M_FESpace.mesh()->element( iElAd2 ) );
-
-                    Real bn   = 0;
-                    Real bmax = 0;
-
-		    // Old version, removed by SQ
-		    /*
-                    ElemVec beta( M_betaFESpace.feBd().nbFEDof(), nDimensions);
-
-                    // first, get the local trace of the velocity into beta
-                    // local id of the face in its adjacent element
-
-                    UInt iFaEl = M_betaFESpace.mesh()->face( iFace ).pos_first();
-                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbFEDof(); ++iNode )
-                    {
-                        UInt iloc = fToP( iFaEl, iNode+1 );
-                        for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
-                        {
-                            UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
-                            if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-			      {
-				Real value( betaVecRep( ig + 1) );
-                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbFEDof() + iNode ] = value; // BASEINDEX + 1
-			      };
-                        }
-		    }*/
-
-		    // New version, added by SQ : beta on the domain, not the boundary!
-		    // See elemOper.cpp for justification of this usage
-                    ElemVec beta( M_betaFESpace.fe().nbFEDof(), nDimensions);
-
-                    for ( UInt iNode = 0; iNode < M_betaFESpace.fe().nbFEDof(); ++iNode )
-                    {
-		        UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
-                        for ( UInt iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
-                        {
-                            UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) + iCoor*nDof;
-			    beta.vec()[ iloc + iCoor*M_betaFESpace.fe().nbFEDof() ] = betaVecRep[ig]; // BASEINDEX + 1
-
-                        }
-		    }
-
-                    // second, calculate its max norm
-                    for ( int l = 0; l < int( M_betaFESpace.fe().nbCoor()*M_betaFESpace.fe().nbFEDof() ); ++l ) // SQ: feBd->fe
-                    {
-		      if ( bmax < fabs( beta.vec()[ l ] ) )
-			bmax = fabs( beta.vec()[ l ] );
-                    }
-
-                     UInt iFaEl = M_betaFESpace.mesh()->face( iFace ).pos_first();
-                     for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbNode; ++iNode )
-                     {
-                         UInt iloc = fToP( iFaEl, iNode + 1 );
-                         for ( UInt iCoor = 0; iCoor < nDimensions; ++iCoor )
-                         {
-                             UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 + iCoor*nDof;
-                             if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
-                                 bn += normal(iNode, (int)iCoor)*betaVecRep( ig + 1 );
-                         }
-                     }
-
-                    Real coeffBeta = hK2*M_gammaBeta*abs(bn);
-
-
-#endif
-		    //                    Real coeffBeta = M_gammaBeta;
-		    //                     std::cout << coeffBeta << std::endl;
-
-                    ipstab_bagrad( coeffBeta,
-                                   M_elmatStab,
-                                   fe1,
-                                   fe2,
-                                   fe3,
-                                   beta,
-                                   M_FESpace.feBd(),
-                                   0, 0);
-
-                    assembleMatrix( *M_matrStab,
-                                    M_elmatStab,
-                                    fe1,
-                                    fe2,
-                                    M_FESpace.dof(),
-                                    M_FESpace.dof(),
-                                    0, 0, 0, 0 );
-
-                }
-            }
-        }
-
-        chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
+        M_displayer.leaderPrint( "\t");
+        addReactionTerms();
     }
 
+    // managing the convective term
+        M_displayer.leaderPrint( "\t");
+        addAdvectionTerms();
 
-    M_updated = true;
+    if( ( M_dataPtr->stabilizationMethod() != ADR_NO_STABILIZATION ) &&
+            M_advectionVector.size() )
+    {
+        M_displayer.leaderPrint( "\t");
+        addStabilizationTerms();
+    }
+
+    if( timeIntegratorPtr.get() )
+    {
+        M_displayer.leaderPrint( "\t");
+        addMatrixTimeTerm( timeIntegratorPtr );
+    }
+
+    M_displayer.leaderPrintMax( "\t... done in " , chrono.diff() );
 
 }
 
 
 template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
+void ADRSolver<Mesh, SolverType>::
+addRHSTimeTerm( timeIntegrator_ptr_type timeIntegratorPtr )
 {
+    ASSERT( M_matrMassPtr.get(), "\nThe mass matrix is undefined!\n" );
+
+    M_displayer.leaderPrint( "  adr-  Adding the solution time derivative to rhs ... ");
+    // update the RHS for time dependent problems
+    M_rhsNoBC += *M_matrMassPtr * timeIntegratorPtr->time_der_dt();
+    M_displayer.leaderPrint( "done\n");
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+updateRHS( timeIntegrator_ptr_type timeIntegratorPtr )
+{
+    Chrono chrono;
+
+    M_displayer.leaderPrint("  adr-  Updating the source term on right hand side ...\n");
+
+    chrono.start();
+    // Right hand side for the system
+    M_displayer.leaderPrint( "\t" );
+    assembleSourceTerm();
+    //updateRHS(sourceVec);
+
+    if( timeIntegratorPtr.get() )
+    {
+        M_displayer.leaderPrint( "\t" );
+        addRHSTimeTerm( timeIntegratorPtr );
+    }
+
+    chrono.stop();
+    M_displayer.leaderPrintMax("\t... done in ", chrono.diff());
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+updateRHS( vector_type const& rhsVec )
+{
+    ASSERT( M_matrMassPtr.get(), "\nThe mass matrix is undefined!\n" );
 
     Chrono chrono;
 
-
-    // matrix and vector assembling communication
-
-    leaderPrint("  adr-  Finalizing the matrix and vectors ...    ");
+    M_displayer.leaderPrint("  adr-  Updating the source term on right hand side ...\n");
 
     chrono.start();
+    // Right hand side for the system
+    M_displayer.leaderPrint( "\t" );
 
-    M_matrNoBC->GlobalAssemble();
-    M_matrStab->GlobalAssemble();
+    M_rhsNoBC = *M_matrMassPtr * rhsVec;
 
     chrono.stop();
-    leaderPrintMax("done in ", chrono.diff() );
+    M_displayer.leaderPrintMax("\t... done in ", chrono.diff());
+}
 
-    //
 
-    leaderPrint("  adr-  setting up the full matrix        ...    ");
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::iterate( bchandler_type& bch )
+{
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_matrNoBCPtr.get(), "\nThe full matrix is undefined!\n" );
 
+    Chrono chrono;
+
+    M_displayer.leaderPrint("  adr-  Finalizing the full matrix and rhs ... ");
     chrono.start();
 
-    matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
-
-    *matrFull += *M_matrNoBC;
-    *matrFull += *M_matrStab;
+    M_matrNoBCPtr->GlobalAssemble();
+    if( M_dataPtr->stabilizationMethod() != ADR_NO_STABILIZATION )
+    {
+        ASSERT( M_matrStabPtr.get(), "\nThe stabilization matrix is undefined!\n" );
+        M_matrStabPtr->GlobalAssemble();
+    }
+    M_rhsNoBC.GlobalAssemble();
 
     chrono.stop();
-    leaderPrintMax("done in ", chrono.diff() );
+    M_displayer.leaderPrintMax("\n\t... done in ", chrono.diff() );
 
-    //
-    leaderPrint("  adr-  setting up the full rhs           ...    ");
+    M_matrNoBCPtr->spy("matrNoBC");
 
+    // we need an empty matrix over which to copy the various terms
+    M_displayer.leaderPrint("  adr-  Creating a new full matrix and rhs for BC prescription ...");
     chrono.start();
 
+    matrix_ptr_type matrFull( new matrix_type( M_uFESpacePtr->map(), M_matrNoBCPtr->getMeanNumEntries()));
 
-//    M_matrStab->spy("stab");
-    vector_type    rhsFull = M_rhsNoBC;
+    *matrFull += *M_matrNoBCPtr;
+    if( M_dataPtr->stabilizationMethod() != ADR_NO_STABILIZATION )
+        *matrFull += *M_matrStabPtr;
+
+    // the vector to be passed to BCManage is required to have a Unique map
+    vector_type rhsFull(M_rhsNoBC, Unique);
 
     chrono.stop();
-    leaderPrintMax("done in ", chrono.diff() );
+    M_displayer.leaderPrintMax("\n\t... done in ", chrono.diff() );
 
     // boundary conditions update
-
-    leaderPrint("  adr-  Applying boundary conditions ...         ");
+    M_displayer.leaderPrint("  adr-  Applying boundary conditions ...         ");
     chrono.start();
 
-    applyBoundaryConditions( *matrFull, rhsFull, bch);
+    M_displayer.leaderPrint("\n\t");
+    applyBoundaryConditions( *matrFull, rhsFull, bch );
 
-    M_comm->Barrier();
-    leaderPrintMax("done in " , chrono.diff());
+    M_displayer.leaderPrintMax("\t... done in " , chrono.diff());
 
-    //
+    matrFull->spy("matrBC");
 
-    leaderPrint("  adr-  Finalizing the full matrix    ...        ");
+    M_displayer.leaderPrint("  adr-  Finalizing the new full matrix and rhs ...");
     chrono.start();
-
 
     matrFull->GlobalAssemble();
+    rhsFull.GlobalAssemble();
 
     chrono.stop();
+    M_displayer.leaderPrintMax("\n\t... done in " , chrono.diff());
 
-    M_comm->Barrier();
-
-    leaderPrintMax("done in " , chrono.diff());
-
+    M_displayer.leaderPrint("  adr-  Invoking the linear solver ...\n");
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
 
-    M_linearSolver.setReusePreconditioner( M_reusePrec );
-    // int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
+    // M_linearSolver.setReusePreconditioner( M_reusePrec );
+    /*int numIter =*/ M_linearSolver.solveSystem( rhsFull, M_sol, matrFull );
 
     M_residual  = M_rhsNoBC;
-    M_residual -= *M_matrNoBC*M_sol;
+    M_residual -= *M_matrNoBCPtr*M_sol;
 
 } // iterate()
 
 
-
-
-
-template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::reduceSolution( Vector& u,
-                                              Vector& p )
-{
-    vector_type vel(M_sol, 0);
-
-    if (M_verbose)
-    {
-        for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
-        {
-            u[ iDof ] = vel[ iDof + 1 ]; // BASEINDEX + 1
-        }
-    }
-
-}
-
-template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::reduceResidual( Vector& res )
-{
-    vector_type vel(M_residual, 0);
-
-    if (M_verbose)
-    {
-        for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
-        {
-            res[ iDof ] = vel[ iDof + 1 ]; // BASEINDEX + 1
-        }
-
-    }
-}
-
-
 template<typename Mesh, typename SolverType>
 void ADRSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
-                                                       vector_type&        rhs,
-                                                       bchandler_raw_type& BCh )
+                                                           vector_type&        rhs,
+                                                           bchandler_type& BCh )
 {
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the unknown is undefined!\n" );
 
-    // M_rhsFull = M_rhsNoBC;
-
-    // BC manage for the velocity
+    // BC manage
     Chrono chrono;
 
     if ( !BCh.bdUpdateDone() )
     {
-
-        leaderPrint( "\n     - Updating the BC ... ");
+        M_displayer.leaderPrint( "  adr-  Updating the BC ... ");
         chrono.start();
-        BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        BCh.bdUpdate( *M_uFESpacePtr->mesh(), M_uFESpacePtr->feBd(), M_uFESpacePtr->dof() );
         chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
-        leaderPrint( "\n");
+        M_displayer.leaderPrintMax( "done in " , chrono.diff() );
+        M_displayer.leaderPrint( "\t");
     }
 
     //    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
-    vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
+    // vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
 
-    leaderPrint( "\n     - Managing the BC ... ");
+    M_displayer.leaderPrint( "  adr-  Managing the BC ... ");
     chrono.start();
-    bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
-              M_data.getTime() );
+    bcManage( matrix, rhs, *M_uFESpacePtr->mesh(), M_uFESpacePtr->dof(), BCh, M_uFESpacePtr->feBd(), 1.,
+              M_dataPtr->dataTimePtr()->getTime() );
     chrono.stop();
-    leaderPrintMax( "done in " , chrono.diff() );
+    M_displayer.leaderPrintMax( "done in " , chrono.diff() );
 
 
-    rhs = rhsFull;
+    // rhs = rhsFull;
 
 
 } // applyBoundaryCondition
 
 
-//! Computes the flux on a given part of the boundary
-template<typename Mesh, typename SolverType> Real
-ADRSolver<Mesh, SolverType>::flux(const EntityFlag& flag) {
 
-    //! WARNING  THIS PROCEDURE IS DEPRECATED
-
-    return 0.;
-
-//   Real flux = 0.0;
-
-//   PhysVectUnknown<Vector> u(nDimensions*dim());
-
-//   reduceSolution(u);
-
-//   if (M_verbose)
-//   {
-// 	  typedef  typename Mesh::ElementShape GeoShape;
-// 	  typedef typename GeoShape::GeoBShape GeoBShape;
-
-// 	  // Some useful local variables, to save some typing
-// 	  UInt nDofPerVert = M_FESpace.refFE().nbDofPerVertex; // number of Dof per vertices
-// 	  UInt nDofPerEdge = M_FESpace.refFE().nbDofPerEdge;   // number of Dof per edges
-// 	  UInt nDofPerFace = M_FESpace.refFE().nbDofPerFace;   // number of Dof per faces
-
-// 	  UInt nBElementV = GeoBShape::numVertices; // Number of face's vertices
-// 	  UInt nBElementE = GeoBShape::numEdges;    // Number of face's edges
-
-// 	  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
-// 	  UInt nElemE = GeoShape::numEdges;    // Number of element's edges
-
-// 	  UInt nDofBElV = nDofPerVert * nBElementV; // number of vertex's Dof on a face
-// 	  UInt nDofBElE = nDofPerEdge * nBElementE; // number of edge's Dof on a face
-
-// #ifdef TWODIM
-//     UInt nDofBEl = nDofBElV + nDofBElE; // number of total Dof on a boundary element
-// #elif defined THREEDIM
-//     UInt nDofBEl = nDofBElV + nDofBElE + nDofPerFace; // number of total Dof on a boundary element
-// #endif
-
-// 	  UInt nDofElemV = nElemV*nDofPerVert; // number of vertex's Dof on a Element
-// 	  UInt nDofElemE = nElemE*nDofPerEdge; // number of edge's Dof on a Element
-
-// 	  UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
-
-// 	  std::list<std::pair<ID, SimpleVect<ID> > > faces;
-// 	  ID ibF;
-// 	  UInt iElAd, iVeEl, iBElEl, iEdEl;
-// 	  ID lDof, gDof, numTotalDof=M_FESpace.dof().numTotalDof();
-
-// 	  EntityFlag marker;
-// 	  typedef std::list<pair<ID, SimpleVect<ID> > >::iterator Iterator;
-
-// 	  //
-// 	  // Loop on boundary faces: List of boundary faces
-// 	  // with marker = flag
-// 	  //
-// 	  for (ID i=1 ; i<=bdnF; ++i) {
-// 	    marker = M_data.mesh()->bElement(i).marker();
-// 	    if ( marker == flag  ) {
-// 	      faces.push_front(make_pair(i,SimpleVect<ID>(nDofBEl)));
-// 	    }
-// 	  }
-
-// 	  //
-// 	  // Loop on faces: building the local to global vector
-// 	  // for these boundary faces
-// 	  //
-// 	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
-
-// 	    ibF = j->first;
-
-// 	    iElAd = M_data.mesh()->bElement(ibF).ad_first();  // id of the element adjacent to the face
-// 	    iBElEl = M_data.mesh()->bElement(ibF).pos_first(); // local id of the boundary Element in its adjacent element
-
-// 	    // Vertex based Dof
-// 	    if ( nDofPerVert ) {
-
-// 	      // loop on face vertices
-// 	      for (ID iVeBEl=1; iVeBEl<=nBElementV; ++iVeBEl){
-
-
-// #ifdef TWODIM
-// 				iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
-// #elif defined THREEDIM
-//                 iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
-// #endif
-
-// 	      	// Loop number of Dof per vertex
-// 	      	for (ID l=1; l<=nDofPerVert; ++l) {
-// 	      		lDof =   (iVeBEl-1) * nDofPerVert + l ; // local Dof j-esimo grado di liberta' su una faccia
-// 	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, (iVeEl-1)*nDofPerVert + l); // global Dof
-// 	      		j->second( lDof ) =  gDof; // local to global on this face
-// 	      	}
-// 	      }
-// 	    }
-
-// 	    // Edge based Dof
-// 	    if (nDofPerEdge) {
-
-// 	      // loop on boundary element edges
-// 	      for (ID iEdBEl=1; iEdBEl<=nBElementE; ++iEdBEl) {
-// #ifdef TWODIM
-//               iEdEl = iBElEl; // local edge number (in element)
-// #elif defined THREEDIM
-//                 iEdEl = GeoShape::fToE( iBElEl, iEdBEl ).first; // local edge number (in element)
-// #endif
-// 	      		// Loop number of Dof per edge
-// 	      	for (ID l=1; l<=nDofPerEdge; ++l) {
-
-// 	      		lDof =  nDofBElV + (iEdBEl-1) * nDofPerEdge + l ; // local Dof sono messi dopo gli lDof dei vertici
-// 	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofPerEdge + l); // global Dof
-// 	      		j->second( lDof ) =  gDof; // local to global on this face
-// 	      	}
-// 	      }
-// 	    }
-// #ifndef TWODIM
-// 	    // Face based Dof
-// 	    if (nDofPerFace) {
-
-// 	      // Loop on number of Dof per face
-// 	      for (ID l=1; l<=nDofPerFace; ++l) {
-// 	      	lDof = nDofBElE + nDofBElV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
-// 	      	gDof = M_FESpace.dof().localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
-// 	      	j->second( lDof ) =  gDof; // local to global on this face
-// 	      }
-// 	    }
-// #endif
-// 	  }
-
-// 	  // Number of velocity components
-// 	  UInt nc_u=nDimensions;
-
-// 	  // Nodal values of the velocity in the current face
-// 	  std::vector<Real> u_local(nc_u*nDofBEl);
-
-// 	  // Loop on faces
-// 	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
-
-// 	    // Extracting nodal values of the velocity in the current face
-// 	    for (UInt ic =0; ic<nc_u; ++ic) {
-// 	      for (ID l=1; l<=nDofBEl; ++l) {
-// 	      	gDof = j->second(l);
-// 	      	u_local[ic*nDofBEl+l-1] = u(ic*numTotalDof+gDof-1);
-// 	      }
-// 	    }
-
-// 	    // Updating quadrature data on the current face
-// 	    M_FESpace.feBd().updateMeasNormalQuadPt(M_data.mesh()->bElement(j->first));
-
-// 	    // Quadrature formula
-// 	    // Loop on quadrature points
-// 	    for(int iq=0; iq< M_FESpace.feBd().nbQuadPt; ++iq) {
-
-// 	      // Dot product
-// 	      // Loop on components
-// 	      for (UInt ic =0; ic<nc_u; ++ic) {
-
-// 	      	// Interpolation
-// 	      	// Loop on local dof
-// 	      	for (ID l=1; l<=nDofBEl; ++l)
-// 	      		flux += M_FESpace.feBd().weightMeas(iq)
-// 	      							* u_local[ic*nDofBEl+l-1]
-// 	      		          * M_FESpace.feBd().phi(int(l-1),iq)
-// 	      		          * M_FESpace.feBd().normal(int(ic),iq);
-// 	      	}
-// 	    	}
-// 	  	}
-//   }
-
-//   return flux;
-}
-
-
-
-//! Computes the area on a given part of the boundary
-template<typename Mesh, typename SolverType> Real
-ADRSolver<Mesh, SolverType>::area(const EntityFlag& flag)
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+assembleSourceTerm()
 {
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the unknown is undefined!\n" );
+    ASSERT( M_elvecRhsPtr.get(), "\nThe elementary vector for the rhs is undefined!\n" );
 
+    Chrono chrono;
 
-    //! WARNING  THIS PROCEDURE IS DEPRECATED
+    M_displayer.leaderPrint( "  adr-  Assemblying the source term on the rhs ... ");
 
-    return 0.;
+    chrono.start();
 
-//   EpetraVector area( EpetraMap( M_comm->NumProc(), 1, &M_me, 0, *M_comm) );
-//   area *= 0.0;
+    // Number of solution components
+    UInt nc_u = this->M_uFESpacePtr->fieldDim();
 
-//   UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
+    // Right hand side for the problem at time
+    M_rhsNoBC *= 0.;
+    // std::cout << "\nM_rhsNoBC.size = " << M_rhsNoBC.size() << std::endl;
 
-//   std::list<ID> faces;
-//   typedef std::list<ID>::iterator Iterator;
-
-//   EntityFlag marker;
-//   //
-//   // Loop on boundary faces: List of boundary faces
-//   // with marker = flag
-//   //
-//   for (ID i=1 ; i<=bdnF; ++i) {
-//     marker = M_data.mesh()->bElement(i).marker();
-//     if ( marker == flag  ) {
-//       faces.push_front(i);
-//     }
-//   }
-
-//   //
-//   // Loop on processor faces
-//   //
-//   for (Iterator j=faces.begin(); j != faces.end(); ++j) {
-
-//     M_FESpace.feBd().updateMeas( M_data.mesh()->bElement( *j ) );  // updating finite element information
-
-//     area[M_me] += M_FESpace.feBd().measure();
-
-//   }
-
-//   Real total_area(0.);
-//   EpetraVector local_area( area, M_me );
-//   for( int i=0; i<M_comm->NumProc(); ++i )
-//   	total_area += local_area[i];
-
-// //  area.MeanValue( &total_area );
-
-// 	return total_area;
-}
-
-
-
-// Postprocessing
-template <typename Mesh, typename SolverType>
-void
-ADRSolver<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
-{
-    std::ostringstream index;
-    std::ostringstream indexMe;
-    std::string name;
-    std::string me;
-
-
-    indexMe << M_me;
-
-    switch ( indexMe.str().size() )
+    // loop on volumes: assembling source term
+    for ( UInt iEl = 1; iEl <= M_uFESpacePtr->mesh()->numElements(); iEl++ )
     {
-        case 1:
-            me = "00" + indexMe.str();
-            break;
-        case 2:
-            me = "0" + indexMe.str();
-            break;
-        case 3:
-            me = indexMe.str();
-            break;
+        this->M_uFESpacePtr->fe().updateJacQuadPt( this->M_uFESpacePtr->mesh()->element( iEl ) );
+
+        for ( UInt ic = 0; ic < nc_u; ++ic )
+        {
+            M_elvecRhsPtr->zero();
+            compute_vec( M_sourceTerm, *M_elvecRhsPtr, this->M_uFESpacePtr->fe(),
+                         M_dataPtr->dataTimePtr()->getTime(), ic ); // compute local vector
+            //            assemb_vec( M_rhsNoBC, *M_elvecRhsPtr, this->M_uFESpacePtr->fe(), this->M_uFESpacePtr->dof(), ic ); // assemble local vector into global one
+            assembleVector( M_rhsNoBC,
+                            this->M_uFESpacePtr->fe().currentLocalId(),
+                            *M_elvecRhsPtr,
+                            this->M_uFESpacePtr->refFE().nbDof(),
+                            this->M_uFESpacePtr->dof(), ic );
+        }
     }
 
-
-
-    vector_type concentration(M_sol, Repeated);
-
-
-//         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
-//         {
-    if (M_me == 0)
-        std::cout << "  ADR-  Post-processing " << std::flush;
-
-    index << std::setfill('0') << std::setw(3);
-    index << ( M_count / M_data.verbose() );
-    name = index.str();
-
-//     PhysVectUnknown<Vector> cc(dim());
-
-//     reduceSolution(cc);
-
-//     if (M_me == 0)
-//     {
-        // postprocess data file for medit
-//         wr_medit_ascii_scalar( "vel_x." + name + ".bb", u.giveVec(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "vel_y." + name + ".bb", u.giveVec() + this->dim(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "vel_z." + name + ".bb", u.giveVec()+2*this->dim(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
-//                                p.size() );
-
-    	// Real dt = M_data.getTimeStep();
-
-
-    writeMesh("cc." + me + "." + name + ".mesh", *M_FESpace.mesh());
-
-    meditSolutionWriter( "cc." + me + "." + name + ".bb",
-                         *M_FESpace.mesh(), concentration, 0);
-
-//     }
-//    }
-
-    M_count++;
-
+    chrono.stop();
+    M_displayer.leaderPrintMax( "done in " , chrono.diff() );
 
 }
 
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+initializeMatrix()
+{
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the unknown is undefined!\n" );
+
+    // initialize the system matrices
+    if (M_matrNoBCPtr.get())
+        M_matrNoBCPtr.reset(new matrix_type(M_uFESpacePtr->map(), M_matrNoBCPtr->getMeanNumEntries() ));
+    else
+//        M_matrNoBCPtr.reset(new matrix_type(M_uFESpacePtr->map(), M_matrStiffPtr->getMeanNumEntries() ));
+        M_matrNoBCPtr.reset(new matrix_type(M_uFESpacePtr->map()));
+
+    if( M_dataPtr->stabilizationMethod() != ADR_NO_STABILIZATION )
+        M_matrStabPtr.reset( new matrix_type(M_uFESpacePtr->map()) );
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+addDiffusionTerms()
+{
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_matrNoBCPtr.get(), "\nThe full matrix is undefined!\n" );
+    ASSERT( M_matrStiffPtr.get(), "\nThe stiff matrix is undefined!\n" );
+
+    Chrono chrono;
+
+    M_displayer.leaderPrint( "  adr-  Adding diffusion terms ... ");
+    chrono.start();
+    *M_matrNoBCPtr += *M_matrStiffPtr*M_dataPtr->diffusionCoefficient();
+    chrono.stop();
+    M_displayer.leaderPrintMax( "done in ", chrono.diff() );
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+addReactionTerms()
+{
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_matrNoBCPtr.get(), "\nThe full matrix is undefined!\n" );
+    ASSERT( M_matrMassPtr.get(), "\nThe mass matrix is undefined!\n" );
+
+    Chrono chrono;
+
+    M_displayer.leaderPrint( "  adr-  Adding reaction terms ... ");
+    chrono.start();
+    *M_matrNoBCPtr += *M_matrMassPtr*M_dataPtr->reactionCoefficient();
+    chrono.stop();
+    M_displayer.leaderPrintMax( "done in ", chrono.diff() );
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+addAdvectionTerms()
+{
+    ASSERT( M_advectionFieldFESpacePtr.get(), "\nThe FE space for the advection field is undefined!\n" );
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the solution is undefined!\n" );
+    ASSERT( M_elmatAdvPtr.get(), "\nThe elementary matrix for the advection terms is undefined!\n" );
+    ASSERT( M_matrNoBCPtr.get(), "\nThe full matrix is undefined!\n" );
+
+    Chrono chrono;
+
+    M_displayer.leaderPrint("  adr-  Updating the convective terms ... ");
+
+    // vector with repeated nodes over the processors
+    vector_type advectionVecRep( this->M_advectionFieldFESpacePtr->map(), Repeated );
+    if( M_advectionVector.size() )
+    {
+        advectionVecRep = M_advectionVector;
+    }
+
+    chrono.start();
+
+    for ( UInt iEl = 1; iEl <= M_uFESpacePtr->mesh()->numElements(); ++iEl )
+    {
+
+        M_elmatAdvPtr->zero();
+
+        if( M_advectionVector.size() )
+        {
+            ASSERT( M_elvecBetaPtr.get(), "\nThe elementary vector for the advection terms is undefined!\n" );
+
+            M_uFESpacePtr->fe().updateFirstDeriv( M_uFESpacePtr->mesh()->element( iEl ) ); //as updateFirstDer
+
+            UInt eleID = M_uFESpacePtr->fe().currentLocalId();
+            // Non linear term, Semi-implicit approach
+            // M_elvec contains the velocity values in the nodes
+            for ( UInt iNode = 0 ; iNode < M_uFESpacePtr->fe().nbFEDof() ; iNode++ )
+            {
+                // UInt  iloc = betaFESpacePtr->fe().patternFirst( iNode );
+                for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+                {
+                    UInt ig = M_uFESpacePtr->dof().localToGlobal( eleID, iNode + 1 ) + iComp*nDimensions;
+                    M_elvecBetaPtr->vec()[ iNode + iComp*M_uFESpacePtr->fe().nbFEDof() ] = advectionVecRep[ig]; // BASEINDEX + 1
+                }
+            }
+
+            // compute local convective terms
+            advection( 1., *M_elvecBetaPtr, *M_elmatAdvPtr, M_uFESpacePtr->fe(), 0, 0, M_uFESpacePtr->fieldDim() );
+        }
+        else
+        {
+            // Update geometrical info on the current FE
+            this->M_uFESpacePtr->fe().updateFirstDerivQuadPt( this->M_uFESpacePtr->mesh()->element( iEl ) );
+
+            // compute local convective terms
+            advection( 1., M_advectionField, *M_elmatAdvPtr, this->M_uFESpacePtr->fe(), 0, 0,
+                       M_uFESpacePtr->fieldDim(), M_dataPtr->dataTimePtr()->getTime() );
+        }
+
+        // assembly: loop on components
+        for ( UInt iComp = 0; iComp < M_uFESpacePtr->fieldDim(); ++iComp )
+        {
+            assembleMatrix( *M_matrNoBCPtr,
+                            *M_elmatAdvPtr,
+                            M_uFESpacePtr->fe(),
+                            M_uFESpacePtr->fe(),
+                            M_uFESpacePtr->dof(),
+                            M_uFESpacePtr->dof(),
+                            iComp, iComp,
+                            iComp*M_uFESpacePtr->dim(), iComp*M_uFESpacePtr->dim() );
+        }
+
+    }
+    chrono.stop();
+    M_displayer.leaderPrintMax( "done in " , chrono.diff() );
+}
+
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+addStabilizationTerms()
+{
+    ASSERT( M_advectionFieldFESpacePtr.get(), "\nThe FE space for the advection field is undefined!\n" );
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the solution is undefined!\n" );
+    ASSERT( M_elmatStabPtr.get(), "\nThe elementary matrix for the stabilization terms is undefined!\n" );
+    ASSERT( M_matrNoBCPtr.get(), "\nThe full matrix is undefined!\n" );
+
+    Chrono chrono;
+
+    M_displayer.leaderPrint("  adr-  Updating the stabilization terms ...        ");
+
+    // vector with repeated nodes over the processors
+    vector_type advectionVecRep( this->M_advectionFieldFESpacePtr->map(), Repeated );
+    if( M_advectionVector.size() )
+    {
+        advectionVecRep = M_advectionVector;
+    }
+
+    chrono.start();
+
+    for ( UInt iEl = 1; iEl <= M_uFESpacePtr->mesh()->numElements(); ++iEl )
+    {
+
+        UInt eleID = M_uFESpacePtr->fe().currentLocalId();
+
+        if( !M_advectionVector.size() )
+            this->M_uFESpacePtr->fe().update( M_uFESpacePtr->mesh()->element( iEl ),
+                                              UPDATE_ONLY_CELL_NODES );
+
+        // Streamline Diffusion ( only stab for now )
+        if( M_dataPtr->stabilizationMethod() == ADR_SD_STABILIZATION )
+        {
+            M_elmatStabPtr->zero();
+
+            Real advectionFieldValue = 0.;
+            Real VLoc_infty = 0.;
+            Real VLoc_mean  = 0.;
+            Real VLoc_c     = 0.;
+
+            for ( UInt ih_c = 0 ; ih_c < this->M_uFESpacePtr->fe().nbFEDof() ; ih_c++ )
+            {
+                UInt iloc = this->M_uFESpacePtr->fe().patternFirst( ih_c );
+
+                for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
+                {
+                    if( M_advectionVector.size() )
+                    {
+                        UInt ig = M_uFESpacePtr->dof().localToGlobal( eleID, iloc + 1 ) + iComp*M_uFESpacePtr->dim();
+                        advectionFieldValue = advectionVecRep[ ig ];
+                    }
+                    else
+                    {
+                        Real x( this->M_uFESpacePtr->fe().cellNode( ih_c, 0 ) );
+                        Real y( this->M_uFESpacePtr->fe().cellNode( ih_c, 1 ) );
+                        Real z( this->M_uFESpacePtr->fe().cellNode( ih_c, 2 ) );
+                        advectionFieldValue = M_advectionField( M_dataPtr->dataTimePtr()->getTime(), x, y, z, iComp );
+                    }
+                    M_elvecBetaPtr->vec()[ iloc + iComp * this->M_uFESpacePtr->fe().nbFEDof() ] = advectionFieldValue;
+                    VLoc_c += advectionFieldValue * advectionFieldValue;
+                }
+
+                VLoc_c     = sqrt( VLoc_c );
+                VLoc_mean += VLoc_c;
+
+                if ( VLoc_c > VLoc_infty )
+                    VLoc_infty = VLoc_c;
+            }
+
+            VLoc_mean = VLoc_mean / this->M_uFESpacePtr->fe().nbFEDof();
+
+            Real coef_stab = 0;
+            coef_stab=M_dataPtr->stabilizationCoefficient()*this->M_uFESpacePtr->fe().diameter()*VLoc_infty; // Alessandro - method
+
+            stiff_sd( coef_stab / ( VLoc_mean*VLoc_mean ), *M_elvecBetaPtr, *M_elmatStabPtr, this->M_uFESpacePtr->fe(), this->M_uFESpacePtr->fe() );
+
+            assembleMatrix( *M_matrStabPtr,
+                            *M_elmatStabPtr,
+                            M_uFESpacePtr->fe(),
+                            M_uFESpacePtr->fe(),
+                            M_uFESpacePtr->dof(),
+                            M_uFESpacePtr->dof(),
+                            0, 0, 0, 0 );
+        }
+
+
+        /*
+
+         //TODO: check both the 2D and 3D implementation of ip-stabilization (on the Laplacian test doesn't work properly)
+        if( M_dataPtr->stabilizationMethod() != ADR_IP_STABILIZATION )
+        {
+            //        M_displayer.leaderPrint("   adr- IP stab");
+            //            if ( M_resetStab )
+            // {
+            const UInt nDof = M_advectionFieldFESpacePtr->dof().numTotalDof();
+
+            CurrentFE fe1(M_uFESpacePtr->refFE(),
+                          getGeoMap(*M_uFESpacePtr->mesh()),
+                          M_uFESpacePtr->qr());
+            CurrentFE fe2(M_uFESpacePtr->refFE(),
+                          getGeoMap(*M_uFESpacePtr->mesh()),
+                          M_uFESpacePtr->qr());
+            CurrentFE fe3(M_advectionFieldFESpacePtr->refFE(),
+                          getGeoMap(*M_advectionFieldFESpacePtr->mesh()),
+                          M_advectionFieldFESpacePtr->qr());
+
+
+#ifdef TWODIM
+            typedef ID ( *ETOP )( ID const localFace, ID const point );
+            ETOP  eToP;
+            switch( M_uFESpacePtr->fe().refFE.type )
+            {
+            case FE_P1_2D:
+                eToP = LinearTriangle::eToP;
+                break;
+            case FE_P2_2D:
+                eToP = QuadraticTriangle::eToP;
+                break;
+            case FE_Q1_2D:
+                eToP = LinearQuad::eToP;
+                break;
+            case FE_Q2_2D:
+                eToP = QuadraticQuad::eToP;
+                break;
+            default:
+                eToP=0;
+                ERROR_MSG( "This refFE is not allowed with IP stabilization" );
+                break;
+            }
+            for ( UInt iEdge = M_uFESpacePtr->mesh()->numBEdges() + 1; iEdge <= M_uFESpacePtr->mesh()->numEdges();
+                    ++iEdge )
+            {
+                const UInt iElAd1 = M_uFESpacePtr->mesh()->edge( iEdge ).ad_first();
+                const UInt iElAd2 = M_uFESpacePtr->mesh()->edge( iEdge ).ad_second();
+
+                if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+                {
+                    continue;
+                }
+
+         *M_elmatStabPtr.zero();
+
+                M_advectionFieldFESpacePtr->feBd().updateMeas( M_advectionFieldFESpacePtr->mesh()->edge( iEdge ) );
+                const Real hK2  = std::pow(M_advectionFieldFESpacePtr->feBd().measure(), 2.);
+
+                M_advectionFieldFESpacePtr->feBd().updateMeasNormal( M_advectionFieldFESpacePtr->mesh()->edge( iEdge ) );
+                KNM<Real>& normal = M_advectionFieldFESpacePtr->feBd().normal;
+
+                fe1.updateFirstDeriv( M_uFESpacePtr->mesh()->element( iElAd1 ) );
+                fe2.updateFirstDeriv( M_uFESpacePtr->mesh()->element( iElAd2 ) );
+
+                ElemVec beta(M_advectionFieldFESpacePtr->feBd().nbFEDof(), nDimensions);
+
+                // first, get the local trace of the velocity into beta
+                // local id of the face in its adjacent element
+
+                UInt iEdEl = M_advectionFieldFESpacePtr->mesh()->edge( iEdge ).pos_first();
+                for ( int iNode = 0; iNode < M_advectionFieldFESpacePtr->feBd().nbFEDof(); ++iNode )
+                {
+                    UInt iloc = eToP( iEdEl, iNode+1 );
+                    for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
+                    {
+                        UInt ig = M_advectionFieldFESpacePtr->dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
+                        if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
+                            beta.vec()[ iCoor*M_advectionFieldFESpacePtr->feBd().nbFEDof() + iNode ] = betaVecRep( ig + 1); // BASEINDEX + 1
+                    }
+                }
+            }
+#elif defined THREEDIM
+            typedef ID ( *FTOP )( ID const localFace, ID const point );
+            FTOP  fToP;
+            switch( M_uFESpacePtr->fe().refFE().type() )
+            {
+            case FE_P1_3D:
+            case FE_P1bubble_3D:
+                fToP = LinearTetra::fToP;
+                break;
+            case FE_P2_3D:
+                fToP = QuadraticTetra::fToP;
+                break;
+            case FE_Q1_3D:
+                fToP = LinearHexa::fToP;
+                break;
+            case FE_Q2_3D:
+                fToP = QuadraticHexa::fToP;
+                break;
+            default:
+                fToP = 0;
+                ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
+                break;
+            }
+
+
+            for ( UInt iFace = M_uFESpacePtr->mesh()->numBFaces() + 1; iFace <= M_uFESpacePtr->mesh()->numFaces();
+                    ++iFace )
+            {
+
+                const UInt iElAd1 = M_uFESpacePtr->mesh()->face( iFace ).ad_first();
+                const UInt iElAd2 = M_uFESpacePtr->mesh()->face( iFace ).ad_second();
+
+                if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+                {
+                    continue;
+                }
+
+                M_elmatStabPtr->zero();
+
+                M_advectionFieldFESpacePtr->feBd().updateMeas( M_advectionFieldFESpacePtr->mesh()->face( iFace ) );
+                const Real hK2  = std::pow(M_advectionFieldFESpacePtr->feBd().measure(), 2.);
+
+                M_advectionFieldFESpacePtr->feBd().updateMeasNormal( M_advectionFieldFESpacePtr->mesh()->face( iFace ) );
+                KNM<Real>& normal = M_advectionFieldFESpacePtr->feBd().normal;
+
+                fe1.updateFirstDeriv( M_uFESpacePtr->mesh()->element( iElAd1 ) );
+                fe2.updateFirstDeriv( M_uFESpacePtr->mesh()->element( iElAd2 ) );
+
+                Real bn   = 0;
+                Real bmax = 0;
+         */
+        // Old version, removed by SQ
+        /*
+                    ElemVec beta( M_advectionFieldFESpacePtr->feBd().nbFEDof(), nDimensions);
+
+                    // first, get the local trace of the velocity into beta
+                    // local id of the face in its adjacent element
+
+                    UInt iFaEl = M_advectionFieldFESpacePtr->mesh()->face( iFace ).pos_first();
+                    for ( int iNode = 0; iNode < M_advectionFieldFESpacePtr->feBd().nbFEDof(); ++iNode )
+                    {
+                        UInt iloc = fToP( iFaEl, iNode+1 );
+                        for ( int iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
+                        {
+                            UInt ig = M_advectionFieldFESpacePtr->dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
+                            if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
+                  {
+                Real value( betaVecRep( ig + 1) );
+                                beta.vec()[ iCoor*M_advectionFieldFESpacePtr->feBd().nbFEDof() + iNode ] = value; // BASEINDEX + 1
+                  };
+                        }
+            }*/
+        /*
+                // New version, added by SQ : beta on the domain, not the boundary!
+                // See elemOper.cpp for justification of this usage
+                ElemVec beta( M_advectionFieldFESpacePtr->fe().nbFEDof(), nDimensions);
+
+                for ( UInt iNode = 0; iNode < M_advectionFieldFESpacePtr->fe().nbFEDof(); ++iNode )
+                {
+                    UInt  iloc = M_advectionFieldFESpacePtr->fe().patternFirst( iNode );
+                    for ( UInt iCoor = 0; iCoor < fe1.nbCoor(); ++iCoor )
+                    {
+                        UInt ig = M_advectionFieldFESpacePtr->dof().localToGlobal( iElAd1, iloc + 1 ) + iCoor*nDof;
+                        beta.vec()[ iloc + iCoor*M_advectionFieldFESpacePtr->fe().nbFEDof() ] = betaVecRep[ig]; // BASEINDEX + 1
+
+                    }
+                }
+
+                // second, calculate its max norm
+                for ( int l = 0; l < int( M_advectionFieldFESpacePtr->fe().nbCoor()*M_advectionFieldFESpacePtr->fe().nbFEDof() ); ++l ) // SQ: feBd->fe
+                {
+                    if ( bmax < fabs( beta.vec()[ l ] ) )
+                        bmax = fabs( beta.vec()[ l ] );
+                }
+
+                UInt iFaEl = M_advectionFieldFESpacePtr->mesh()->face( iFace ).pos_first();
+                for ( int iNode = 0; iNode < M_advectionFieldFESpacePtr->feBd().nbNode; ++iNode )
+                {
+                    UInt iloc = fToP( iFaEl, iNode + 1 );
+                    for ( UInt iCoor = 0; iCoor < nDimensions; ++iCoor )
+                    {
+                        UInt ig = M_advectionFieldFESpacePtr->dof().localToGlobal( iElAd1, iloc + 1 ) - 1 + iCoor*nDof;
+                        if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
+                            bn += normal(iNode, (int)iCoor)*betaVecRep( ig + 1 );
+                    }
+                }
+
+                Real coeffBeta = hK2*M_dataPtr->stabilizationCoefficient()*abs(bn);
+
+
+#endif
+                //                    Real coeffBeta = M_dataPtr->stabilizationCoefficient();
+                //                     std::cout << coeffBeta << std::endl;
+
+                ipstab_bagrad( coeffBeta,
+         *M_elmatStabPtr,
+                               fe1,
+                               fe2,
+                               fe3,
+                               beta,
+                               M_uFESpacePtr->feBd(),
+                               0, 0);
+
+                assembleMatrix( *M_matrStabPtr,
+         *M_elmatStabPtr,
+                                fe1,
+                                fe2,
+                                M_uFESpacePtr->dof(),
+                                M_uFESpacePtr->dof(),
+                                0, 0, 0, 0 );
+
+            }
+        }
+
+         */
+        chrono.stop();
+        M_displayer.leaderPrintMax( "done in " , chrono.diff() );
+    }
+
+}
+
+template<typename Mesh, typename SolverType>
+void ADRSolver<Mesh, SolverType>::
+setAdvectionField( const vector_type& betaVec,
+                   fespace_ptr_type advectionFieldFESpacePtr )
+{
+    ASSERT( M_advectionFieldFESpacePtr.get(), "\nThe FE space for the advection field is undefined!\n" );
+
+    // if needed, interpolate over the solution FE space
+    vector_type betaVecInterpolated( this->M_advectionFieldFESpacePtr->map(), Unique );
+
+    // interpolate over the solution FE
+    if( advectionFieldFESpacePtr )
+    {
+        betaVecInterpolated = M_advectionFieldFESpacePtr->FeToFeInterpolate( *advectionFieldFESpacePtr, betaVec );
+        M_advectionVector = betaVecInterpolated;
+    }
+    else
+        M_advectionVector = betaVec;
+}
 
 
 } // namespace LifeV
 
 
-#endif //_OSEEN_H_
+#endif //_ADR_H_
