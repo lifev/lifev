@@ -105,6 +105,7 @@ public:
     typedef Mesh                         mesh_type;
     typedef boost::shared_ptr<mesh_type> mesh_ptrtype;
     typedef Map                          map_type;
+    typedef typename Map::comm_ptrtype   comm_ptrtype;
 
     /** @name Constructors, Destructor
      */
@@ -127,13 +128,13 @@ public:
 				const QuadRule&			Qr,
 				const QuadRule&			bdQr,
 				const Int				fDim,
-				Epetra_Comm&			comm
+				comm_ptrtype&			commptr
 			);
 
     FESpace(	partitionMesh<Mesh>&	mesh,
 				const std::string&		space,
 				const Int				fDim,
-				Epetra_Comm&			comm
+				comm_ptrtype&			commptr
 			);
 
     FESpace(	mesh_ptrtype			mesh,
@@ -141,13 +142,13 @@ public:
 				const QuadRule&			Qr,
 				const QuadRule&			bdQr,
 				const Int				fDim,
-				Epetra_Comm&			comm
+				comm_ptrtype&			commptr
 			);
 
     FESpace(	mesh_ptrtype			mesh,
 				const std::string&		space,
 				const Int				fDim,
-				Epetra_Comm&			comm
+				comm_ptrtype&			commptr
 			);
 
     //! Do nothing destructor
@@ -368,7 +369,7 @@ public:
     //@}
 
 
-	void initMap( const Int fDim, Epetra_Comm& comm );
+	void initMap( const Int fDim, comm_ptrtype& commptr );
 
     //! Interpolate a given velocity function nodally onto a velocity vector
     template<typename vector_type>
@@ -523,7 +524,7 @@ private:
     //! Quadrature rule for surface elementary computations
     const QuadRule* 					M_bdQr;
 
-    //! dimention of the field variable ( scalar/vector field)
+    //! dimension of the field variable ( scalar/vector field)
     UInt								M_fieldDim;
 
     //! A shared pointer to the Dof object
@@ -554,7 +555,7 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
 			const QuadRule&      	Qr,
 			const QuadRule&      	bdQr,
 			const Int            	fDim,
-			Epetra_Comm&         	comm
+			comm_ptrtype&         	commptr
 		) :
         M_mesh			( mesh.mesh() ),
         M_refFE			( &refFE ),
@@ -571,7 +572,7 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
     {
         M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
-    Map map( *M_refFE, *M_mesh, comm );
+    Map map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         M_map += map;
 }
@@ -581,7 +582,7 @@ FESpace<Mesh, Map>::
 FESpace(	partitionMesh<Mesh>&	mesh,
 			const std::string&		space,
 			const Int				fDim,
-			Epetra_Comm&			comm
+			comm_ptrtype&			commptr
 		) :
 	M_mesh			( mesh.mesh() ),
     M_fieldDim		( fDim ),
@@ -611,7 +612,7 @@ FESpace(	partitionMesh<Mesh>&	mesh,
         }
 
 	// Build Map
-	Map map( *M_refFE, *M_mesh, comm );
+	Map map( *M_refFE, *M_mesh, commptr );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
 		M_map += map;
 }
@@ -623,7 +624,7 @@ FESpace(	mesh_ptrtype			mesh,
 			const QuadRule&			Qr,
 			const QuadRule&			bdQr,
 			const Int				fDim,
-			Epetra_Comm&			comm
+			comm_ptrtype&			commptr
 		) :
     M_mesh			( mesh ),
     M_refFE			( &refFE ),
@@ -636,7 +637,7 @@ FESpace(	mesh_ptrtype			mesh,
     M_feBd			( ),
     M_map			( )
 {
-	Map map( *M_refFE, *M_mesh, comm );
+	Map map( *M_refFE, *M_mesh, commptr );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
 		M_map += map;
         
@@ -651,7 +652,7 @@ FESpace<Mesh, Map>::
 FESpace(	mesh_ptrtype			mesh,
 			const std::string&		space,
 			const Int				fDim,
-			Epetra_Comm&			comm
+			comm_ptrtype&			commptr
 		) :
 	M_mesh			( mesh ),
     M_fieldDim		( fDim ),
@@ -681,7 +682,7 @@ FESpace(	mesh_ptrtype			mesh,
         };
 
 	// Build Map
-	Map map( *M_refFE, *M_mesh, comm );
+	Map map( *M_refFE, *M_mesh, commptr );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         M_map += map;
 }
