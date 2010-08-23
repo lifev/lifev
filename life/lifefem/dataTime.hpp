@@ -82,6 +82,13 @@ public:
     //! @name Methods
     //@{
 
+    //! Read the dataFile and set all the internal quantities
+    /*!
+     * @param dataFile data file
+     * @param section section of the file
+     */
+    void setup( const GetPot& dfile, const std::string& section = "time_discretization" );
+
     //! Update the time by a timestep.
     void updateTime()       { M_time += M_timeStep; }
 
