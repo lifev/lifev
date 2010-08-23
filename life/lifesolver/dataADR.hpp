@@ -1,6 +1,6 @@
 /*
   This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+  Copyright (C) 2010 EPFL, INRIA, Politecnico di Milano and Emory University
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,30 +17,30 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
-  \file dataNavierStokes.h
-  \author M.A. Fernandez
-  \date 01/2003
-  \version 1.0
+  \file dataADR.hpp
+  \date 08/2010
+  \version 2.0
 
-  \brief File containing a class for handling NavierStokes data with GetPot
+  \brief File containing a class for handling data and parameters
+         for advection-diffusion-reaction problems
 
 */
-#ifndef _DATANADR_H_
-#define _DATANADR_H_
-#include <string>
-#include <iostream>
+#ifndef _DATAADR_H_
+#define _DATAADR_H_
+
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
-//#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifecore/dataString.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {
 
-
 /*!
-  \typedef enum
+  \typedef The kind of stabilization (if any) applied
+           to the numerical scheme
 */
 enum ADRStabilization
 {
@@ -52,97 +52,151 @@ enum ADRStabilization
 /*!
   \class DataADR
 
-  Base class which holds usual data for the NavierStokes equations solvers
+  Base class which holds usual data for the ADR equations solvers
 
 */
-
-
-//template <typename Mesh>
-class DataADR:
-        //        public DataMesh<Mesh>,
-        public DataTime
+class DataADR
 {
 public:
 
-    //! Constructor
+    //! @name Type definitions
+    //@{
+    //! The time data handler
+    /*!
+       The class DataADR "has a" time handler object, to manage time dependent
+       problems.
+     */
+    typedef DataTime                              dataTime_type;
+    typedef dataTime_type*                        dataTime_rawptr_type;
+    typedef boost::shared_ptr<dataTime_type>      dataTime_ptr_type;
 
+    //@}
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Empty Constructor
     DataADR();
 
-    DataADR( const DataADR& dataNavierStokes );
+    //! Copy constructor
+    /*!
+     * @param dataADR an object of type DataADR
+     */
+    DataADR( const DataADR& dataADR );
 
-    //! Ouptut
-    void showMe( std::ostream& c = std::cout );
+    //@}
 
+    //! @name Operators
+    //@{
 
-    //! external setup
+    //! Operator=
+    /*!
+     * @param dataADR an object of type DataADR
+     */
+    DataADR& operator=( const DataADR& dataADR );
 
-    void setup( const GetPot& dfile, const std::string& section = "adr" );
+    //@}
 
-    //! End time
-    Real density()     const;
-    Real diffusivity() const;
-    Real reaction()    const;
+    //! @name Methods
+    //@{
 
-    UInt verbose()     const;
-    Real dump_init()   const;
-    UInt dump_period() const;
-    Real factor()      const;
+    //! Read the dataFile and set all the internal quantities
+    /*!
+     * @param dataFile data file
+     * @param section section of the file
+     */
+    void setup( const GetPot& dataFile, const std::string& section = "adr" );
 
-    std::string order() const;
+    //! Display the internal values
+    void showMe( std::ostream& output = std::cout ) const;
 
-    ADRStabilization stabilization() const;
+    //@}
 
-    //! a way to obtain the Mean Flux, Mean Pressure and
-    //! Mean Area at a section defined by z=z_data.
-    // UInt computeMeanValuesPerSection() const;
-    // UInt NbZSections() const;
-    // Real ToleranceSection() const;
-    // Real XSectionFrontier() const;
-    // Real ZSectionInit() const;
-    // Real ZSectionFinal() const;
-    // UInt NbPolygonEdges() const;
-    // int  semiImplicit() const;
-    // void setSemiImplicit(const int& SI);
+    //! @name Set methods
+    //@{
+
+    inline void setDiffusionCoefficient( const Real& diffusionCoefficient )
+    {
+        M_diffusionCoefficient = diffusionCoefficient;
+    }
+
+    inline void setReactionCoefficient( const Real& reactionCoefficient )
+    {
+        M_reactionCoefficient = reactionCoefficient;
+    }
+
+    inline void setSteady( const Real& steady )
+    {
+        M_steady = steady;
+    }
+
+    //! Set data time container
+    /*!
+     * @param DataTime shared_ptr to dataTime container
+     */
+    inline void setDataTimePtr( const dataTime_ptr_type dataTimePtr ) { M_dataTimePtr = dataTimePtr; }
+
+    inline void setFieldDimension( const UInt& fieldDim ) { M_solutionFieldDimension = fieldDim; }
+
+    inline void setStabilizationMethod( const ADRStabilization& stabMethod ) { M_stabilizationMethod = stabMethod; }
+
+    inline void setStabilizationCoefficient( const Real& stabCoeff ) { M_stabilizationCoefficient = stabCoeff; }
+    //@}
+
+    //! @name Get methods
+    //@{
+
+    inline const Real& diffusionCoefficient() const { return M_diffusionCoefficient; }
+
+    inline const Real& reactionCoefficient() const { return M_reactionCoefficient; }
+
+    inline const Real& steady() const { return M_steady; }
+
+    //! Get data time container
+    inline dataTime_ptr_type dataTimePtr( void ) const { return M_dataTimePtr; }
+
+    inline const UInt& solutionFieldDimension() const { return M_solutionFieldDimension; }
+
+    inline const UInt& verbose() const { return M_verbose; }
+
+    inline const std::string& solFEType() const { return M_solFEType; }
+
+    // inline const std::string& advectionFieldFEType() const { return M_advectionFieldFEType; }
+
+    inline const ADRStabilization& stabilizationMethod() const { return M_stabilizationMethod; }
+
+    inline const Real& stabilizationCoefficient() const { return M_stabilizationCoefficient; }
+
+    //@}
 
 private:
+
     //! Physics
+    Real M_diffusionCoefficient;     // Diffusion coefficient
+    Real M_reactionCoefficient;      // Reaction coefficient
+    Real M_steady;                   // is the problem constant in time?
+    UInt M_solutionFieldDimension;   // number of components of the unknown field
 
-    Real M_diffusivity; // Diffusivity
-    Real M_react; // Reaction coefficient
+    //! Data container for time parameters
+    dataTime_ptr_type               M_dataTimePtr;
 
-    //! Miscellaneous
-    UInt M_verbose; // temporal output verbose
+    //! Miscellaneous parameters
+    UInt M_verbose;                  // Class output verbose
 
-    // Real _dump_init; // time for starting the dumping of the results (Alex December 2003)
-    // UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003
-    //    )
-    Real M_factor; // amplification factor for moving domains
-
-    std::string  M_order;
+    //! Type of finite element (P1, P2, ...) for the solution
+    std::string  M_solFEType;
+    //! Type of finite element (P1, P2, ...) for the advection field
+    // std::string  M_advectionFieldFEType;
 
     //! Discretization
-    ADRStabilization M_stab_method;
-    int M_semiImplicit;
-
-//private:
-
-    //! To extract Mean Values at a given section z
-    // UInt M_computeMeanValuesPerSection; //! switch: 0 don't compute it, 1 compute
-    // UInt M_NbZSections;
-    // Real M_ToleranceSection;
-    // Real M_XSectionFrontier;
-    // Real M_ZSectionInit;
-    // Real M_ZSectionFinal;
-    // UInt M_NbPolygonEdges; //! number of edges of the polygon (in mesh) describing the circle
-
     DataStringList M_stabilization_list;
+    ADRStabilization M_stabilizationMethod;
+    // stabilization coefficient for the advection field
+    Real M_stabilizationCoefficient;
+
 };
 
 
 }
 #endif
-
-
-
-
 

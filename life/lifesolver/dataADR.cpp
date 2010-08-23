@@ -1,113 +1,121 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+/*
+  This file is part of the LifeV library
+  Copyright (C) 2010 EPFL, INRIA, Politecnico di Milano and Emory University
 
-  <short description here>
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/** \file dataADR.cpp
+/*!
+  \file dataADR.cpp
+  \date 08/2010
+  \version 2.0
+
+  \brief Implementation of DataADR
 
 */
 
 #include <life/lifesolver/dataADR.hpp>
-#include <life/lifecore/dataString.hpp>
 
-
-//
-// IMPLEMENTATION
-//
-
-
-// Constructor
 namespace LifeV{
 
 
+// Empty constructor
 DataADR::DataADR():
-    DataTime                     ( ),
-    M_diffusivity                ( 0. ),
-    M_react                      ( 0. ),
-    M_verbose                    ( false ),
-    M_factor                     ( 0. ),
-    M_order                      ( 0 ),
-    M_stab_method                ( ),
-    M_stabilization_list         ( "Stab. list" )
-{
-}
-
-
-
-
-DataADR::DataADR( const DataADR& dataADR ) :
-    DataTime                     ( dataADR ),
-    M_diffusivity                ( dataADR.M_diffusivity),
-    M_react                      ( dataADR.M_react),
-    M_verbose                    ( dataADR.M_verbose),
-    M_factor                     ( dataADR.M_factor),
-    M_order                      ( dataADR.M_order),
-    M_stab_method                ( dataADR.M_stab_method),
-    M_stabilization_list         ( dataADR.M_stabilization_list)
-{
-}
-
-
-
-
-void
-DataADR::setup(  const GetPot& dfile,  const std::string& /*section*/ )
+                  M_diffusionCoefficient      ( 0. ),
+                  M_reactionCoefficient       ( 0. ),
+                  M_steady                    ( 1 ),
+                  M_solutionFieldDimension            ( 1 ),
+                  M_dataTimePtr               ( new dataTime_type() ),
+                  M_verbose                   ( false ),
+                  M_solFEType                 ( "P1" ),
+//                  M_advectionFieldFEType      ( "P1" ),
+                  M_stabilization_list        ( "Stab. list" ),
+                  M_stabilizationMethod       ( ADR_NO_STABILIZATION ),
+                  M_stabilizationCoefficient  ( 0. )
 {
     M_stabilization_list.add( "ip",  ADR_IP_STABILIZATION, "interior penalty " );
     M_stabilization_list.add( "sd",  ADR_SD_STABILIZATION, "stream-line difussion" );
     M_stabilization_list.add( "none", ADR_NO_STABILIZATION,  "none (default)" );
-
-    // physics
-    M_diffusivity = dfile( "adr/physics/diffusivity", 1. );
-    M_react = dfile( "adr/physics/react", 1. );
-
-    //miscellaneous
-    M_verbose = dfile( "adr/miscellaneous/verbose", 1 );
-    // _dump_init = dfile( "adr/miscellaneous/dump_init", getInitialTime() );
-    // _dump_period = dfile( "adr/miscellaneous/dump_period", 1 );
-    M_factor = dfile( "adr/miscellaneous/factor", 0. );
-
-    M_order = dfile( "adr/space_discretization/order", "P1");
-
-    M_stab_method = ADRStabilization ( M_stabilization_list.value( dfile( "adr/space_discretization/stabilization", "none") ) );
-
-    //mean values per section
-    // M_computeMeanValuesPerSection =
-    //     dfile( "adr/valuespersection/computeMeanValuesPerSection", 0 );
-    // M_NbZSections =
-    //     dfile( "adr/valuespersection/nb_z_section", 2 );
-    // M_ToleranceSection =
-    //     dfile( "adr/valuespersection/tol_section", 2e-2 );
-    // M_XSectionFrontier =
-    //     dfile( "adr/valuespersection/x_section_frontier", 0. );
-    // M_ZSectionInit =
-    //     dfile( "adr/valuespersection/z_section_init", -1. );
-    // M_ZSectionFinal =
-    //     dfile( "adr/valuespersection/z_section_final", 0. );
-    // M_NbPolygonEdges =
-    //     dfile( "adr/valuespersection/nb_polygon_edges", 10 );
 }
+
+
+// Copy constructor
+DataADR::DataADR( const DataADR& dataADR ) :
+                  M_diffusionCoefficient      ( dataADR.M_diffusionCoefficient ),
+                  M_reactionCoefficient       ( dataADR.M_reactionCoefficient ),
+                  M_steady                    ( dataADR.M_steady ),
+                  M_solutionFieldDimension            ( dataADR.M_solutionFieldDimension ),
+                  M_dataTimePtr               ( dataADR.M_dataTimePtr ),
+                  M_verbose                   ( dataADR.M_verbose ),
+                  M_solFEType                 ( dataADR.M_solFEType ),
+//                  M_advectionFieldFEType      ( dataADR.M_advectionFieldFEType ),
+                  M_stabilization_list        ( dataADR.M_stabilization_list ),
+                  M_stabilizationMethod       ( dataADR.M_stabilizationMethod ),
+                  M_stabilizationCoefficient  ( dataADR.M_stabilizationCoefficient )
+{
+}
+
+
+// Set up the class reading from data file
+void
+DataADR::setup( const GetPot& dfile, const std::string& section )
+{
+    // We want a slash dividing the data file section from the variable name but only
+    // when not provided by the user or when not looking in the root of the data file
+    std::string corrected_section( section );
+    if( ( ! section.empty() ) && ( section[section.length()-1] != '/' ) )
+            corrected_section = section + '/';
+    // physics
+    M_diffusionCoefficient = dfile( (corrected_section+"physics/diffusionCoefficient").data(), 1. );
+    M_reactionCoefficient  = dfile( (corrected_section+"physics/reactionCoefficient").data(), 1. );
+    M_steady               = dfile( (corrected_section+"physics/steady").data(), 1  );
+    M_solutionFieldDimension       = dfile( (corrected_section+"physics/solutionFieldDimension").data(), 1  );
+
+    // miscellaneous
+    M_verbose = dfile( (corrected_section+"miscellaneous/verbose").data(), 1 );
+
+    // type of finite element (P1, P2, ...)
+    M_solFEType = dfile( (corrected_section+"space_discretization/sol_FEtype").data(), "P1");
+//    M_advectionFieldFEType = dfile( (corrected_section+"space_discretization/advectionField_FEtype").data(), "P1");
+
+    // stabilization
+    M_stabilizationMethod = ADRStabilization ( M_stabilization_list.value( dfile( (corrected_section+"space_discretization/stabilization").data(), "none") ) );
+    M_stabilizationCoefficient = dfile( (corrected_section+"space_discretization/stabilizationCoefficient").data(), 0. );
+}
+
 
 // Output
 void
-DataADR::showMe( std::ostream& c )
+DataADR::showMe( std::ostream& c ) const
 {
-    // physics
-    c << "\n*** Values for data [adr/miscellaneous]\n\n";
-    c << "verbose     = " << M_verbose << std::endl;
-    //    c << "initial time for writing solution  = " << _dump_init << std::endl;
-    //c << "number of time steps between two consecutive dumps of the solution = " << _dump_period << std::endl;
-    c << "amplification factor = " << M_factor << std::endl;
+    c << "\n*** DataADR: values for user-defined data\n";
 
+    c << "\n[/physics]" << std::endl;
+    c << "diffusionCoefficient\t\t= " << M_diffusionCoefficient << std::endl;
+    c << "reactionCoefficient\t\t= " << M_reactionCoefficient << std::endl;
+    c << "steady\t\t= " << M_steady << std::endl;
+    c << "solutionFieldDimension\t\t= " << M_solutionFieldDimension << std::endl;
 
-    //c << "\n*** Values for data [adr/space_discretization]\n\n";
-    //DataMesh::showMe( c );
-    c << "\n*** Values for data [adr/time_discretization]\n\n";
-    DataTime::showMe( c );
-    c << "stabilization = ";
-    switch( M_stab_method )
+    c << "\n[/miscellaneous]" << std::endl;
+    c << "verbose\t\t= " << M_verbose << std::endl;
+
+    c << "\n[/space_discretization]" << std::endl;
+    c << "sol_FEtype\t\t= " << M_solFEType << std::endl;
+//    c << "advectionField_FEtype\t\t= " << M_advectionFieldFEType << std::endl;
+
+    c << "stabilization\t\t= ";
+    switch( M_stabilizationMethod )
     {
         case ADR_NO_STABILIZATION:
             c << "none" ;
@@ -120,122 +128,8 @@ DataADR::showMe( std::ostream& c )
             break;
     }
     c << std::endl;
-
-
-    // c << "\n*** Values for data [adr/valuespersection]\n\n";
-    // c << "computeMeanValuesPerSection (switch 0: don't compute, 1: compute)  = "
-    //   << M_computeMeanValuesPerSection << std::endl;
-    // c << "nb_z_section        = " << M_NbZSections << std::endl;
-    // c << "tol_section         = " << M_ToleranceSection << std::endl;
-    // c << "x_section_frontier  = " << M_XSectionFrontier << std::endl;
-    // c << "z_section_init      = " << M_ZSectionInit << std::endl;
-    // c << "z_section_final     = " << M_ZSectionFinal << std::endl;
-    // c << "nb_polygon_edges    = " << M_NbPolygonEdges << std::endl;
-
+    c << "stabilizationCoefficient\t\t= " << M_stabilizationCoefficient << std::endl;
+    c << std::endl;
 }
-
-////////////////////
-// The viscosity
-
-Real
-DataADR::diffusivity() const
-{
-    return M_diffusivity;
-}
-
-Real
-DataADR::reaction() const
-{
-    return M_react;
-}
-////////////////
-
-// verbose variable
-UInt
-DataADR::verbose() const
-{
-    return M_verbose;
-}
-
-// Amplification factor
-Real
-DataADR::factor() const
-{
-    return M_factor;
-}
-
-std::string
-DataADR::order() const
-{
-    return M_order;
-}
-
-
-// Stabilization method
-ADRStabilization DataADR::stabilization() const
-{
-    return M_stab_method;
-}
-
-
-//! Mean Values per Sections
-//! compute (0) or not (1) the mean values per sections
-
-// UInt
-// DataADR::computeMeanValuesPerSection() const
-// {
-//     return M_computeMeanValuesPerSection;
-// }
-
-// //! number of sections
-// UInt
-// DataADR::NbZSections() const
-// {
-//     return M_NbZSections;
-// }
-
-// //! tolerance for point proximity
-// Real
-// DataADR::ToleranceSection() const
-// {
-//     return M_ToleranceSection;
-// }
-// //! x (see NSHandler): point at the frontier for computation of the area
-// //! with a polygonal formula (x -> displacement of the boundary)
-// Real
-// DataADR::XSectionFrontier() const
-// {
-//     return M_XSectionFrontier;
-// }
-// //! lower section
-// Real
-// DataADR::ZSectionInit() const
-// {
-//     return M_ZSectionInit;
-// }
-// //! upper section
-// Real
-// DataADR::ZSectionFinal() const
-// {
-//     return M_ZSectionFinal;
-// }
-
-
-// //! number of edges of the polygon (in mesh) describing the circle
-
-// UInt
-// DataADR::NbPolygonEdges() const
-// {
-//     return M_NbPolygonEdges;
-// }
-
-// void
-// DataADR::setSemiImplicit(const int& SI)
-// { M_semiImplicit = SI; }
-
-// int
-// DataADR::semiImplicit() const
-//  { return M_semiImplicit; }
-
 
 }
