@@ -14,7 +14,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifefem/dof.hpp>
-#include "Epetra_MpiComm.h"
+#include <Epetra_MpiComm.h>
 #include <parmetis.h>
 #include <boost/shared_ptr.hpp>
 #include <sstream>
