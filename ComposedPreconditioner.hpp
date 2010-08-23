@@ -570,7 +570,7 @@ template <typename Operator> void
 ComposedPreconditioner<Operator>::setComm(const boost::shared_ptr<Epetra_Comm> comm)
 {
     //this->M_comm=comm;//copy of the communicator
-    M_displayer.SetCommunicator(comm);
+    M_displayer.setCommunicator(comm);
 }
 
 } // namespace LifeV

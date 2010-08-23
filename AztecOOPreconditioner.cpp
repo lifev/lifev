@@ -107,7 +107,7 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
 
     // SET PARAMETERS
-    M_solver->SetParameters( true );
+    M_solver->setParameters( true );
 
     // DISPLAY LIST
     if ( dataFile( (section + "/displayList").data(), false ) )
