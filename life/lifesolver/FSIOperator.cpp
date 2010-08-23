@@ -234,7 +234,7 @@ FSIOperator::setupFEspace()
                                                             *qR_struct,
                                                             *bdQr_struct,
                                                             3,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
 															//uOrder,
@@ -242,7 +242,7 @@ FSIOperator::setupFEspace()
                                                             *qR_vel,
                                                             *bdQr_vel,
                                                             3,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
 
         M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
 															//pOrder,
@@ -250,7 +250,7 @@ FSIOperator::setupFEspace()
                                                             *qR_press,
                                                             *bdQr_press,
                                                             1,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
     }
     else
     {
@@ -260,7 +260,7 @@ FSIOperator::setupFEspace()
                                                             *qR_struct,
                                                             *bdQr_struct,
                                                             3,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_fluidMesh,
 							    //uOrder,
@@ -268,7 +268,7 @@ FSIOperator::setupFEspace()
                                                             *qR_vel,
                                                             *bdQr_vel,
                                                             3,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
 
         M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_fluidMesh,
 															//pOrder,
@@ -276,7 +276,7 @@ FSIOperator::setupFEspace()
                                                             *qR_press,
                                                             *bdQr_press,
                                                             1,
-                                                            *M_epetraComm));
+                                                            M_epetraComm));
     }
     M_epetraWorldComm->Barrier();
 
@@ -290,7 +290,7 @@ FSIOperator::setupFEspace()
     	                                                         //*qR_struct,
     	                                                         //*bdQr_struct,
     	                                                         3,
-    	                                                         *M_epetraComm));
+    	                                                         M_epetraComm));
     }
     else
     {
@@ -300,7 +300,7 @@ FSIOperator::setupFEspace()
                                                            *qR_struct,
                                                            *bdQr_struct,
                                                            3,
-                                                           *M_epetraComm));
+                                                           M_epetraComm));
     }
     M_epetraWorldComm->Barrier();
 }
@@ -407,7 +407,7 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 											  static_cast<int>(dofInterfaceFluid.size()),
 											  pointerToDofs,
 											  1,
-											  *M_epetraWorldComm ));
+											  M_epetraWorldComm ));
 	disp.leaderPrint("done\n");
 	M_epetraWorldComm->Barrier();
 
@@ -435,7 +435,7 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 											  static_cast<int>(dofInterfaceSolid.size()),
 										      pointerToDofs,
 											  1,
-											  *M_epetraWorldComm ));
+											  M_epetraWorldComm ));
 
 	M_epetraWorldComm->Barrier();
 	disp.leaderPrint("done\n");
@@ -479,10 +479,10 @@ FSIOperator::setupFluidSolid( void )
         M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,              M_epetraComm ) );
 
 //         if ( M_linearFluid )
-//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm ) );
+//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
 
 //         if ( M_linearSolid )
-//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, *M_epetraComm ) );
+//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
 
         //Vector initialization
     	M_rhs.reset( new vector_type( M_fluid->getMap() ) );
@@ -490,15 +490,15 @@ FSIOperator::setupFluidSolid( void )
 
     if ( this->isSolid() )
     {
-//         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm ) );
+//         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
     	M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
         M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,  M_epetraComm ) );
 
 //         if ( M_linearFluid )
-//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, *M_epetraComm ) );
+//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
 
 //         if ( M_linearSolid )
-//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, *M_epetraComm ) );
+//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
     }
 
 	M_epetraWorldComm->Barrier();
