@@ -376,7 +376,7 @@ MS_PhysicalCoupling::CreateLocalVectors()
         MyGlobalElements[i] = i;
 
     // Build a repeated map for the couplings
-    EpetraMap map( -1, static_cast< int > ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
+    EpetraMap map( -1, static_cast< int > ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, M_comm );
 
     // Create local repeated vectors
     M_LocalCouplingVariables.reset     ( new EpetraVector( map, Repeated ) );

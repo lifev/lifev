@@ -73,7 +73,7 @@ Monolithic::setupFEspace()
     M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( M_solidMesh,
                                                          M_data->dataSolid()->order(),
                                                          nDimensions,
-                                                         *M_epetraComm));
+                                                         M_epetraComm));
 }
 
 
@@ -424,7 +424,7 @@ Monolithic::variablesInit(const std::string& dOrder)
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
                                                        dOrder,
                                                        3,
-                                                       *M_epetraComm));
+                                                       M_epetraComm));
 
     // INITIALIZATION OF THE VARIABLES
     M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
@@ -494,7 +494,7 @@ Monolithic::solidInit(std::string const& dOrder)
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_solidMesh,
                                                        dOrder,
                                                        nDimensions,
-                                                       *M_epetraComm));
+                                                       M_epetraComm));
 }
 
 

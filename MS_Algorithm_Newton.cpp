@@ -94,7 +94,7 @@ MS_Algorithm_Newton::SetupData( const std::string& FileName )
 
     GetPot DataFile( FileName );
 
-    M_solver.SetCommunicator( M_comm );
+    M_solver.setCommunicator( M_comm );
     M_solver.setDataFromGetPot( DataFile, "Solver/Algorithm/Newton_method/AztecOO" );
     //M_solver.setUpPrec( DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
 }

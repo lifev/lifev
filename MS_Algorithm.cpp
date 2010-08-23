@@ -192,7 +192,7 @@ MS_Algorithm::SetModel( const MS_Model_PtrType model )
 
     // Build coupling variables and residuals vectors
     std::vector<int> MyGlobalElements(0);
-    EpetraMap couplingMap( -1, static_cast<int> ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, *M_comm );
+    EpetraMap couplingMap( -1, static_cast<int> ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, M_comm );
     M_multiscale->CreateCouplingMap( couplingMap );
 
     M_couplingVariables.reset( new EpetraVector( couplingMap, Unique ) );
