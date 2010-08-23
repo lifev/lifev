@@ -679,7 +679,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
       {
         const RefFE & refFEP1 = feTetraP1;
         EpetraMap tmpMapP1(refFEP1, *this->M_mesh,
-		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
+		       this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
         subMap = tmpMapP1;
         break;
       }
@@ -687,7 +687,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
       {
         const RefFE & refFEQ1 = feHexaQ1;
         EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh,
-		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
+		       this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
         subMap = tmpMapQ1;
         break;
       }
@@ -695,7 +695,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
       {
         const RefFE & refFEP11D = feSegP1;
         EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh,
-		       const_cast<Epetra_Comm&>(this->M_listData.begin()->storedArray()->Comm()));
+		       this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
         subMap = tmpMapQ11D;
         break;
       }
