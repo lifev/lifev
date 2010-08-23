@@ -98,7 +98,7 @@ using namespace LifeV;
 
     typedef RegionMesh2D<LinearTriangle> RegionMesh;
 
-    const std::string discretization_section="adr/discretization2D";
+    const std::string discretization_section="adr/space_discretization2D";
 
 #elif defined THREEDIM
 
@@ -111,7 +111,7 @@ using namespace LifeV;
 
     typedef RegionMesh3D<LinearTetra> RegionMesh;
 
-    const std::string discretization_section="adr/discretization3D";
+    const std::string discretization_section="adr/space_discretization3D";
 
 
 #endif
@@ -377,8 +377,8 @@ laplacian::run()
     bcADR.addBC( "Back",    BACK,   Essential, Full,      uZero, 1 );
 #endif
 
-    DataADR dataADR;
-    dataADR.setup( dataFile );
+    boost::shared_ptr<DataADR> dataADRPtr( new DataADR() );
+    dataADRPtr->setup( dataFile );
 
     DataMesh dataMesh;
     dataMesh.setup(dataFile, discretization_section);
@@ -387,11 +387,11 @@ laplacian::run()
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    //dataADR.mesh()->orderMesh( Members->comm->Comm() );
+    //dataADRPtr->mesh()->orderMesh( Members->comm->Comm() );
     partitionMesh< RegionMesh>   meshPart(fullMeshPtr, Members->comm);
-    //dataADR.setMesh(meshPart.mesh());
+    //dataADRPtr->setMesh(meshPart.mesh());
 
-    if(verbose) dataADR.showMe();
+    if(verbose) dataADRPtr->showMe();
 
     // Advection coefficient Space: P1 interpolation
 
@@ -448,34 +448,34 @@ laplacian::run()
 
     //finite element space of the solution
 
-    FESpace< RegionMesh, EpetraMap > adrFESpace(meshPart,
-												*refFE_adr,
-                                                *qR_adr,
-                                                *bdQr_adr,
-                                                1,
-                                                *Members->comm);
+    boost::shared_ptr< FESpace< RegionMesh, EpetraMap > > adrFESpacePtr(
+            new FESpace< RegionMesh, EpetraMap >( meshPart,
+                                                  *refFE_adr,
+                                                  *qR_adr,
+                                                  *bdQr_adr,
+                                                  1,
+                                                  Members->comm) );
 
     //finite element space of the advection term
 
-    FESpace< RegionMesh, EpetraMap > betaFESpace(meshPart,
-                                                *refFE_beta,
-                                                *qR_beta,
-                                                *bdQr_beta,
-                                                nDimensions,
-                                                *Members->comm);
+    boost::shared_ptr< FESpace< RegionMesh, EpetraMap > > betaFESpacePtr(
+            new FESpace< RegionMesh, EpetraMap > (meshPart,
+                                                  *refFE_beta,
+                                                  *qR_beta,
+                                                  *bdQr_beta,
+                                                  nDimensions,
+                                                  Members->comm) );
 
     //instantiation of the AdvectionDiffusionReactionSolver class
 
-    adr laplacian (dataADR,
-                   adrFESpace,
-                   betaFESpace,
-                   Members->comm);
+    adr laplacian;
 
     Chrono chrono;
 
     chrono.start();
-    laplacian.setUp(dataFile);
-    laplacian.buildSystem();
+    laplacian.setup(dataFile);
+    laplacian.setup(dataADRPtr, adrFESpacePtr);
+    laplacian.computeConstantMatrices();
 
     // Laplacian Solver
 
@@ -484,26 +484,28 @@ laplacian::run()
     exporter.reset( new Ensight<RegionMesh> ( dataFile, meshPart.mesh(), "u", Members->comm->MyPID()) );
 #endif
 
-    dataADR.setTime(0);
+    // dataADRPtr->setTime(0);
 
-    EpetraMap fullAdrMap(laplacian.getMap());
+    EpetraMap fullAdrMap(adrFESpacePtr->map());
 
-    if (verbose) std::cout << "  Number of unknowns : " << adrFESpace.map().getMap(Unique)->NumGlobalElements() << std::endl;
+    if (verbose) std::cout << "  Number of unknowns : " << adrFESpacePtr->map().getMap(Unique)->NumGlobalElements() << std::endl;
     //computing the iterpolation of the advection vector
 
-    vector_type betaFluid( betaFESpace.map() );
-    betaFESpace.interpolate(beta, betaFluid);
+    vector_type betaFluid( betaFESpacePtr->map() );
+    betaFESpacePtr->interpolate(beta, betaFluid);
+    laplacian.setAdvectionField( betaFluid, betaFESpacePtr );
 
     //computing the rhs
     vector_type rhsADR ( fullAdrMap );
-    adrFESpace.interpolate(source_in, rhsADR);
-    rhsADR = laplacian.matrMass()*rhsADR;
+    adrFESpacePtr->interpolate(source_in, rhsADR);
+    laplacian.updateRHS( rhsADR );
 
 
     //updating the system with the reaction and advection terms and the rhs
     //(including the treatment of the boundary conditions)
     Real sigma = dataFile( "adr/physics/sigma", 0);
-    laplacian.updateSystem(sigma, betaFluid, rhsADR);
+    dataADRPtr->setReactionCoefficient( sigma );
+    laplacian.updateMatrix();
 
     //solve the linear system
     laplacian.iterate(bcADR);
@@ -517,7 +519,7 @@ laplacian::run()
 #if POSTPROCESS
     vector_ptrtype temperature  ( new vector_type(laplacian.solution(), Repeated ) );
     exporter->addVariable( ExporterData::Scalar, "temperature", temperature,
-                           UInt(0), UInt(adrFESpace.dof().numTotalDof()));
+                           UInt(0), UInt(adrFESpacePtr->dof().numTotalDof()));
     exporter->postProcess( 0 );
 #endif
 
@@ -528,8 +530,8 @@ laplacian::run()
 
     Real H1_Error, H1_RelError, L2_Error, L2_RelError;
 
-    L2_Error = adrFESpace.L2Error(uExact, uComputed, 0 ,&L2_RelError);
-    H1_Error = adrFESpace.H1Error(uExact, uComputed, 0 ,&H1_RelError);
+    L2_Error = adrFESpacePtr->L2Error(uExact, uComputed, 0 ,&L2_RelError);
+    H1_Error = adrFESpacePtr->H1Error(uExact, uComputed, 0 ,&H1_RelError);
 
     if (verbose)
     	std::cout << "Error Norm L2: " << L2_Error <<
