@@ -302,18 +302,14 @@ public:
     virtual       vector_type& veloFluidMesh()                          { return *M_veloFluidMesh; }
                   vector_type& derVeloFluidMesh()                       { return *M_derVeloFluidMesh; }
 
-    //const dof_interface_type3D& dofStructureToFluid()             const { return M_dofSolidToFluid; }
     const dof_interface_type3D& dofFluidToStructure()             const { return M_dofFluidToStructure; }
-//     const dof_interface_type3D& dofStructureToFluid()             const { return M_dofStructureToFluid; }
     const dof_interface_type3D& dofStructureToSolid()             const { return M_dofStructureToSolid; }
     const dof_interface_type3D& dofStructureToHarmonicExtension() const { return M_dofStructureToHarmonicExtension; }
     const dof_interface_type3D& dofHarmonicExtensionToFluid()     const { return M_dofHarmonicExtensionToFluid; }
 
-//     std::vector<int>& dofInterfaceFluid()                               { return M_dofInterfaceFluid; }
-//     std::vector<int>& dofInterfaceSolid()                               { return M_dofInterfaceSolid; }
+    boost::shared_ptr<EpetraMap>& fluidInterfaceMap()           { return M_fluidInterfaceMap; }
+    boost::shared_ptr<EpetraMap>& solidInterfaceMap()           { return M_solidInterfaceMap; }
 
-            boost::shared_ptr<EpetraMap>& fluidInterfaceMap()           { return M_fluidInterfaceMap; }
-            boost::shared_ptr<EpetraMap>& solidInterfaceMap()           { return M_solidInterfaceMap; }
     virtual boost::shared_ptr<EpetraMap>& getCouplingVariableMap()      { return M_solidInterfaceMap; }
 
     BCFunctionMixte& bcfMixteOuterWall()                                { return M_bcfMixteOuterWall; }
@@ -529,15 +525,12 @@ protected:
     boost::shared_ptr<EpetraMap>                      M_fluidInterfaceMapOnZero;
     boost::shared_ptr<EpetraMap>                      M_solidInterfaceMapOnZero;
 
-//     std::vector<int>                                  M_dofInterfaceFluid;
-//     std::vector<int>                                  M_dofInterfaceSolid;
-
-    dof_interface_type3D                              M_dofFluidToStructure;
+    dof_interface_type3D                              M_dofFluidToStructure; // Needed
 //     dof_interface_type3D                              M_dofSolidToFluid;
-    dof_interface_type3D                              M_dofStructureToFluid;
-    dof_interface_type3D                              M_dofStructureToSolid;
-    dof_interface_type3D                              M_dofStructureToHarmonicExtension;
-    dof_interface_type3D                              M_dofHarmonicExtensionToFluid;
+    dof_interface_type3D                              M_dofStructureToFluid; // Needed
+    dof_interface_type3D                              M_dofStructureToSolid; // Needed to construct M_bcvStructureDispToSolid
+    dof_interface_type3D                              M_dofStructureToHarmonicExtension; // Needed to construct interface maps
+    dof_interface_type3D                              M_dofHarmonicExtensionToFluid; // Needed to construct M_bcvStructureToFluid
 //     dof_interface_type3D                              M_dofStructureToReducedFluid;
 //     dof_interface_type3D                              M_dofReducedFluidToStructure;
 

@@ -335,7 +335,6 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     this->M_Displayer.leaderPrint(" LF-  Applying boundary conditions ...         ");
     chrono.start();
 
-    bch.bdUpdate( *this->M_uFESpace.mesh(), this->M_uFESpace.feBd(), this->M_uFESpace.dof() );
     applyBoundaryConditions( *matrFull, rhsFull, bch );
 
     chrono.stop();
@@ -349,7 +348,6 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     this->M_linearSolver.setMatrix(*matrFull);
     this->M_linearSolver.setReusePreconditioner( M_reusePrecLin );
     this->M_linearSolver.solveSystem( rhsFull, M_linSol, matrFull );
-
 
     this->M_residual  = M_rhsLinNoBC;
     this->M_residual -= *this->M_matrNoBC*this->M_linSol;

@@ -105,7 +105,7 @@ public:
      */
 
     template <typename Mesh>
-    void update( Mesh& mesh1, const EntityFlag& flag1, Mesh& mesh2, const EntityFlag& flag2, const Real& tol, const EntityFlag* flag3 = 0 );
+    void update( Mesh& mesh1, const EntityFlag& flag1, Mesh& mesh2, const EntityFlag& flag2, const Real& tol, int const* const flag3 = 0 );
 
 
     //! This method interpolate data when using different FE
@@ -181,7 +181,7 @@ private:
     template <typename Mesh>
     void _updateDofConnections( const Mesh& mesh1, const Dof& dof1,
                                 const Mesh& mesh2, const Dof& dof2, const Real& tol,
-                                const EntityFlag* flag1 = 0 );
+                                int const* const flag1 = 0 );
 };
 
 
@@ -296,7 +296,7 @@ void DofInterface3Dto3D::_updateFaceConnections( const Mesh& mesh1, const Entity
 */
 template <typename Mesh>
 void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& dof1,
-        const Mesh& mesh2, const Dof& dof2, const Real& tol, const EntityFlag* flag1)
+        const Mesh& mesh2, const Dof& dof2, const Real& tol, int const* const flag1)
 {
 
     typedef typename Mesh::VolumeShape GeoShape;
@@ -500,7 +500,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
 template <typename Mesh>
 void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
                                  Mesh& mesh2, const EntityFlag& flag2,
-                                 const Real& tol, const EntityFlag* flag3 )
+                                 const Real& tol, int const* const flag3 )
 {
 
     // Updating face connections at the interface

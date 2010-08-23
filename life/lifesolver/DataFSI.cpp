@@ -58,9 +58,9 @@ DataFSI::DataFSI( ) :
     M_rangeOmega                    (),
     M_updateEvery                   (),
     M_fluidInterfaceFlag            (),
-    M_solidInterfaceFlag            (),
     M_structureInterfaceFlag        (),
-    M_harmonicInterfaceFlag         (),
+    M_fluidInterfaceVertexFlag      (),
+    M_structureInterfaceVertexFlag  (),
     M_interfaceTolerance            ()
 {
 }
@@ -81,9 +81,9 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
     M_rangeOmega                    ( DataFSI.M_rangeOmega ),
     M_updateEvery                   ( DataFSI.M_updateEvery ),
     M_fluidInterfaceFlag            ( DataFSI.M_fluidInterfaceFlag ),
-    M_solidInterfaceFlag            ( DataFSI.M_solidInterfaceFlag ),
     M_structureInterfaceFlag        ( DataFSI.M_structureInterfaceFlag ),
-    M_harmonicInterfaceFlag         ( DataFSI.M_harmonicInterfaceFlag ),
+    M_fluidInterfaceVertexFlag      ( new int const ( *DataFSI.M_fluidInterfaceVertexFlag ) ),
+    M_structureInterfaceVertexFlag  ( new int const ( *DataFSI.M_structureInterfaceVertexFlag ) ),
     M_interfaceTolerance            ( DataFSI.M_interfaceTolerance )
 {
 }
@@ -112,9 +112,11 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_rangeOmega                    = DataFSI.M_rangeOmega;
         M_updateEvery                   = DataFSI.M_updateEvery;
         M_fluidInterfaceFlag            = DataFSI.M_fluidInterfaceFlag;
-        M_solidInterfaceFlag            = DataFSI.M_solidInterfaceFlag;
         M_structureInterfaceFlag        = DataFSI.M_structureInterfaceFlag;
-        M_harmonicInterfaceFlag         = DataFSI.M_harmonicInterfaceFlag;
+
+        M_fluidInterfaceVertexFlag.reset    ( new int const ( *DataFSI.M_fluidInterfaceVertexFlag ) );
+        M_structureInterfaceVertexFlag.reset( new int const ( *DataFSI.M_structureInterfaceVertexFlag ) );
+
         M_interfaceTolerance            = DataFSI.M_interfaceTolerance;
     }
 
@@ -149,10 +151,20 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
     M_updateEvery = dataFile( ( section + "/updateEvery" ).data(), 1);
 
     // Interface
-    M_fluidInterfaceFlag = dataFile( "interface/fluid_flag",     1 );
-    M_solidInterfaceFlag = dataFile( "interface/solid_flag",     M_fluidInterfaceFlag );
+    M_fluidInterfaceFlag     = dataFile( "interface/fluid_flag",     1 );
     M_structureInterfaceFlag = dataFile( "interface/structure_flag", M_fluidInterfaceFlag );
-    M_harmonicInterfaceFlag = dataFile( "interface/harmonic_flag",  M_fluidInterfaceFlag );
+
+    int vertexFlag;
+    vertexFlag               = dataFile( "interface/edgeFlag",      -1 );
+    vertexFlag               = dataFile( "interface/fluid_vertex_flag", vertexFlag );
+
+    if (vertexFlag >= 0)
+        M_fluidInterfaceVertexFlag.reset    ( new int const ( vertexFlag ) );
+
+    vertexFlag               = dataFile( "interface/structure_vertex_flag", -1 );
+    if (vertexFlag >= 0)
+        M_structureInterfaceVertexFlag.reset( new int const ( vertexFlag ) );
+
     M_interfaceTolerance = dataFile( "interface/tolerance",      0. );
 }
 
@@ -190,9 +202,11 @@ DataFSI::showMe( std::ostream& output )
 
     output << "\n*** Values for interface\n\n";
     output << "Interface fluid                  = " << M_fluidInterfaceFlag << std::endl;
-    output << "Interface solid                  = " << M_solidInterfaceFlag << std::endl;
     output << "Interface structure              = " << M_structureInterfaceFlag << std::endl;
-    output << "Interface harmonic               = " << M_harmonicInterfaceFlag << std::endl;
+    if (M_fluidInterfaceVertexFlag.get() != 0)
+        output << "Interface fluid vertices         = " << *M_fluidInterfaceVertexFlag << std::endl;
+    if (M_structureInterfaceVertexFlag.get() != 0)
+        output << "Interface structure vertices     = " << *M_structureInterfaceVertexFlag << std::endl;
     output << "Interface tolerance              = " << M_interfaceTolerance << std::endl;
 
 }

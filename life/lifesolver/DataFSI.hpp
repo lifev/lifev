@@ -42,6 +42,7 @@
 #include <life/lifesolver/dataElasticStructure.hpp>
 
 #include <boost/array.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace LifeV {
 
@@ -242,33 +243,33 @@ public:
      */
     inline int updateEvery() const { return M_updateEvery; }
 
-    //! Get algorithm type
+    //! Get the fluid Interface Flag
     /*!
-     * @return algorithm type
+     * @return Flag of the interface  on the fluid boundary side
      */
     inline int fluidInterfaceFlag() const { return M_fluidInterfaceFlag; }
 
-    //! Get algorithm type
+    //! Get the structure Interface Flag
     /*!
-     * @return algorithm type
-     */
-    inline int solidInterfaceFlag() const { return M_solidInterfaceFlag; }
-
-    //! Get algorithm type
-    /*!
-     * @return algorithm type
+     * @return Flag of the interface  on the structure boundary side
      */
     inline int structureInterfaceFlag() const { return M_structureInterfaceFlag; }
 
-    //! Get algorithm type
+    //! Get the fluid Interface Flag (for Vertices)
     /*!
-     * @return algorithm type
+     * @return Flag of the vertex on the interface on the fluid boundary side
      */
-    inline int harmonicInterfaceFlag() const { return M_harmonicInterfaceFlag; }
+    inline int const* const fluidInterfaceVertexFlag() const { return M_fluidInterfaceVertexFlag.get(); }
 
-    //! Get algorithm type
+    //! Get the fluid Interface Flag (for Vertices)
     /*!
-     * @return algorithm type
+     * @return Flag of the vertex on the interface on the structure boundary side
+     */
+    inline int const* const structureInterfaceVertexFlag() const { return M_structureInterfaceVertexFlag.get(); }
+
+    //! Get the tolerance for the Interface identification
+    /*!
+     * @return the tolerance for the Interface identification
      */
     inline Real interfaceTolerance() const { return M_interfaceTolerance; }
 
@@ -302,9 +303,11 @@ private:
 
     // Interface
     int                           M_fluidInterfaceFlag;
-    int                           M_solidInterfaceFlag;
     int                           M_structureInterfaceFlag;
-    int                           M_harmonicInterfaceFlag;
+
+    boost::scoped_ptr<int const>  M_fluidInterfaceVertexFlag;
+    boost::scoped_ptr<int const>  M_structureInterfaceVertexFlag;
+
     Real                          M_interfaceTolerance;
 };
 
