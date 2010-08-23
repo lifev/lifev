@@ -149,10 +149,6 @@ namespace LifeV
   void advection( Real coef, const UsrFct & beta,
                   ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb, Real t=0. )
   {
-      ASSERT_PRE( fe.hasFirstDeriv(),
-                  "advection (vect) matrix needs at least the first derivatives" );
-      //ASSERT_PRE(nb>1,"if nb = 1, use the other advection function");
-
       Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
       Real v, s;
       Real x,y,z;
@@ -495,10 +491,10 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 //!@name Operators for H(div) finite elements
 //!@{
   //-------------Operators for H(div) finite elements------------
-  
+
   // Gradient matrix.
-  /*! 
-  Compute the gradient of an element in \f$ H(div, K ) \f$ space, i.e. the opposite of the transpose divergence 
+  /*!
+  Compute the gradient of an element in \f$ H(div, K ) \f$ space, i.e. the opposite of the transpose divergence
   matrix, with \f$ K \f$ the current element. In formula
   \f[
   \mathrm{coef}  < \nabla q, w > \equiv - \mathrm{coef} < q, \nabla \cdot w > \,,
@@ -511,17 +507,17 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   @param iblock Subarray index where to store the integral just computed.
   @param jblock Subarray index where to store the integral just computed.
   */
-  void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, 
+  void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE,
   				  int iblock = 0, int jblock = 0 );
 
   // Divergence matrix.
   /*!
-  Compute the divergence of an element in \f$ H(div,K ) \f$, with \f$ K \f$ the current element. 
+  Compute the divergence of an element in \f$ H(div,K ) \f$, with \f$ K \f$ the current element.
   In formula
   \f[
   \mathrm{coef} < q, \nabla \cdot w > \,,
   \f]
-  for \f$ q \in L^2(K) \f$, \f$ w \in H(div, K) \f$ and \f$ \mathrm{coef} \f$ a real scalar.  
+  for \f$ q \in L^2(K) \f$, \f$ w \in H(div, K) \f$ and \f$ \mathrm{coef} \f$ a real scalar.
   @param coef Constant real coefficient.
   @param elmat Mixed element matrix.
   @param dualFE Current dual finite element in \f$ H(div, K) \f$.
@@ -529,26 +525,26 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   @param iblock Subarray index where to store the integral just computed.
   @param jblock Subarray index where to store the integral just computed.
   */
-  void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, 
+  void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE,
   				 int iblock = 0, int jblock = 0 );
 
   // Hybrid variable times dual dot product outward unit normal.
   /*!
-  Compute the product between an hybrid variable and a dual variable dot product outward unit 
+  Compute the product between an hybrid variable and a dual variable dot product outward unit
   normal, in the current element \f$ K \f$. In formula
   \f[
   \mathrm{coef} < \lambda, v \cdot n >\,,
-  \f] 
-  for \f$ \lambda \in H^{1/2}(\partial K) \f$, \f$ v \in H(div, K) \f$, \f$ coef \f$ a real scalar and \f$ n \f$ 
+  \f]
+  for \f$ \lambda \in H^{1/2}(\partial K) \f$, \f$ v \in H(div, K) \f$, \f$ coef \f$ a real scalar and \f$ n \f$
   the normal unit vector oriented outward of the current element \f$ K \f$.
-  <BR> 
-  The \f$ \lambda \f$ are the Lagrange multiplier basis functions that enforce continuity 
+  <BR>
+  The \f$ \lambda \f$ are the Lagrange multiplier basis functions that enforce continuity
   of the normal component of the vectorial functions across two neighbouring elements.
-  They can be interprated as trace of primal variable. 
+  They can be interprated as trace of primal variable.
   <BR>
   See Hybridization for Mixed Hybrid Finite Element Method.
   <BR>
-  Thanks to the Piola transform, the computation is performed on the boundary of the reference element. 
+  Thanks to the Piola transform, the computation is performed on the boundary of the reference element.
   But in general, the boundary of a 3D reference element is not a 2D reference element.
   <BR>
   Example:
@@ -562,12 +558,12 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   @param dualDotNFE Reference dual dot product outward unit normal finite element.
   @param iblock Subarray index where to store the integral just computed.
   @param jblock Subarray index where to store the integral just computed.
-  @note The previous way of construction, worked only for RTO hexa, calls 
+  @note The previous way of construction, worked only for RTO hexa, calls
   \code
   TP_TP_Hdiv(coef, elmat, hybridFE, iblock, jblock);
   \endcode
   */
-  void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, 
+  void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
   					  const RefFEHybrid& dualDotNFE, int iblock = 0, int jblock = 0 );
 
   // Mass matrix for the hybrid variable.
@@ -576,16 +572,16 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   In formula
   \f[
   \mathrm{coef} < \lambda, \mu > \,,
-  \f] 
+  \f]
   for \f$ \lambda, \mu \in H^{1/2}(\partial K) \f$ and \f$ coef \f$ a real scalar.
-  <BR>  
-  The \f$ \lambda \f$ and \f$ \mu \f$ are the Lagrange multiplier basis functions that enforce continuity 
+  <BR>
+  The \f$ \lambda \f$ and \f$ \mu \f$ are the Lagrange multiplier basis functions that enforce continuity
   of the normal component of the vectorial functions across two neighbouring elements.
-  They can be interprated as trace of primal variable. 
+  They can be interprated as trace of primal variable.
   <BR>
   See Hybridization for Mixed Hybrid Finite Element Method.
   <BR>
-  Thanks to the Piola transform, the computation is performed on the boundary of the reference element. 
+  Thanks to the Piola transform, the computation is performed on the boundary of the reference element.
   But in general, the boundary of a 3D Reference element is not a 2D reference element.
   <BR>
   Example:
@@ -597,20 +593,20 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
   @param hybridFE Reference hybrid finite element.
   @param iblock Subarray index where to store the integral just computed.
   @param jblock Subarray index where to store the integral just computed.
-  @note This is an obsolete function, call TP_VdotN_Hdiv instead.  
+  @note This is an obsolete function, call TP_VdotN_Hdiv instead.
   */
   void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int iblock = 0, int jblock = 0);
 
   // Mass matrix for dual variable with constant real permeability.
   /*!
-  Compute the mass matrix in \f$ H(div, K ) \f$ with constant real permeability, with \f$ K \f$ the 
+  Compute the mass matrix in \f$ H(div, K ) \f$ with constant real permeability, with \f$ K \f$ the
   current element. In formula
-  \f[ 
+  \f[
   \mathrm{coef} < u, w > \,,
   \f]
   for \f$ u, w \in H(div, K) \f$ and \f$ coef \f$ a real scalar.
   <BR>
-  Weighted Mass matrix with a permeability tensor which is a constant scalar matrix, i.e. 
+  Weighted Mass matrix with a permeability tensor which is a constant scalar matrix, i.e.
   \f$ K^{-1} = \mathrm{coef} \, I \f$, \f$ \mathrm{coef} \f$ being the inverse of the permeability.
   \attention It is \f$ \mathrm{coef} \f$ that is used, and not its inverse.
   @param coef Constant real coefficient.
@@ -624,11 +620,11 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 
   // Mass matrix for dual variable with constant matrix permeability.
   /*!
-  Compute the mass matrix in \f$ H(div, K ) \f$ with constant matrix permeability, with \f$ K \f$ the 
+  Compute the mass matrix in \f$ H(div, K ) \f$ with constant matrix permeability, with \f$ K \f$ the
   current element. In formula
   \f[
   < \mathrm{Invperm}\, u, w > \,,
-  \f] 
+  \f]
   for \f$ u, w \in H(div, K) \f$ and \f$ \mathrm{Invperm} \f$ a real constant matrix.
   <BR>
   Weighted mass matrix in \f$ H(div, K) \f$ with permeability matrix which is a constant
@@ -646,27 +642,27 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 
   // Mass matrix for dual variable with real function permeability.
   /*!
-  Compute the mass matrix in \f$ H(div, K ) \f$ with real function permeability, with \f$ K \f$ the 
+  Compute the mass matrix in \f$ H(div, K ) \f$ with real function permeability, with \f$ K \f$ the
   current element. In formula
   \f[
   < \mathrm{InvpermFun}\, u, w > \,,
-  \f] 
+  \f]
   for \f$ u, w \in H(div, K) \f$ and \f$ \mathrm{InvpermFun} \f$ a real function.
-  <BR>  
-  Weighted mass matrix with a permeability that is a scalar function. The inverse function 
-  of the permeability should be provided. We note again that it is the inverse of the 
+  <BR>
+  Weighted mass matrix with a permeability that is a scalar function. The inverse function
+  of the permeability should be provided. We note again that it is the inverse of the
   permeability that is provided directly \f$ \mathrm{InvpermFun} = K^{-1} \f$.
   @param InvpermFun Scalar function inverse of the permeability.
   @param elmat Mixed element matrix.
   @param dualFE Current dual finite element in \f$ H(div, K) \f$.
   @param iblock Subarray index where to store the integral just computed.
   @param jblock Subarray index where to store the integral just computed.
-  @note \f$ \mathrm{InvpermFun} \f$ is the inverse of the permeability function.  
+  @note \f$ \mathrm{InvpermFun} \f$ is the inverse of the permeability function.
   */
   void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
 		          ElemMat& elmat, const CurrentFE& dualFE, int iblock = 0, int jblock = 0 );
 
-//!@}  
+//!@}
 
 }
 #endif
