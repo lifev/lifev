@@ -199,7 +199,7 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
         }
     }// so the map for the coupling part of the matrix is just Unique
 
-    M_interfaceMap.reset(new EpetraMap(-1, couplingVector.size(), &couplingVector[0], interfaceMap.getMap(Repeated)->IndexBase()/*1*/, *epetraWorldComm));
+    M_interfaceMap.reset(new EpetraMap(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.getMap(Repeated)->IndexBase()/*1*/, epetraWorldComm));
 }
 
 
