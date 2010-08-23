@@ -433,7 +433,7 @@ void EpetraVector::matrixMarket( std::string const &filename, const bool headers
     std::string nome = filename;
     std::string desc = "Created by LifeV";
 
-    int  me    = M_epetraVector->Comm().MyPID();
+    // int  me    = M_epetraVector->Comm().MyPID();
 
     if (M_maptype == Repeated)
     {
