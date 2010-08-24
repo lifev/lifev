@@ -51,4 +51,7 @@ m4_include([test_fsi/testsuite.at])
 m4_include([test_meshReorder/testsuite.at])
 m4_include([test_filters/testsuite.at])
 m4_include([test_partition/testsuite.at])
+m4_include([test_resistance/testsuite.at])
+m4_include([test_timeAdvance_orderI/testsuite.at])
+m4_include([test_timeAdvance_orderII/testsuite.at])
 
