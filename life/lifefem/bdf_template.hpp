@@ -127,13 +127,15 @@ const UInt BDFT_MAX_ORDER = 4;
 
 template<typename VectorType = EpetraVector >
 class BdfT:  // T means template
-    public  TimeAdvance < >
+    public  TimeAdvance < VectorType >
 {
 public:
   
     /** @name Typedefs
      */
     //@{
+    typedef TimeAdvance < VectorType > super;
+
    typedef VectorType                      vector_raw_type;
    typedef std::vector< vector_raw_type* > vector_type;
    typedef typename vector_type::iterator  vector_type_iterator;
@@ -243,8 +245,7 @@ public:
 
 template<typename VectorType>
 BdfT <VectorType> :: BdfT() :
-//:  TimeAdvance()
-  TimeAdvance<>::TimeAdvance( )
+  super()
 {
     CONSTRUCTOR( "BDF" );
 }
@@ -254,7 +255,7 @@ template<typename VectorType>
 BdfT<VectorType>::
 BdfT( const UInt order )
   :
-  TimeAdvance<> ::TimeAdvance()
+  super()
 {
     if ( order <= 0 || order > BDFT_MAX_ORDER )
     {
@@ -264,47 +265,51 @@ BdfT( const UInt order )
         << " we support BDF order from 1 to " << BDFT_MAX_ORDER << "\n";
         throw std::invalid_argument( __ex.str() );
     }
-    _M_alpha.resize( order +1 );
-    _M_beta.resize( order );
-    _M_size = order ;
-    _M_sizeTimeDer = order;
-   _M_sizeTimeDer2 = order ;
-   _M_sizeCoefficients = order +1 ;
+
+    this->_M_order = order;
+
+    this->_M_alpha.resize( order +1 );
+    this->_M_beta.resize( order );
+    this->_M_size = order ;
+    this->_M_sizeTimeDer = order;
+   this->_M_sizeTimeDer2 = order ;
+   this->_M_sizeCoefficients = order +1 ;
     switch ( order )
     {
     case 1:
-        _M_alpha[ 0 ] = 1.; // Backward Euler
-        _M_alpha[ 1 ] = 1.;
-        _M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
+        this->_M_alpha[ 0 ] = 1.; // Backward Euler
+        this->_M_alpha[ 1 ] = 1.;
+        this->_M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
         break;
     case 2:
-        _M_alpha[ 0 ] = 3. / 2.;
-        _M_alpha[ 1 ] = 2.;
-        _M_alpha[ 2 ] = -1. / 2.;
-        _M_beta[ 0 ] = 2.;
-        _M_beta[ 1 ] = -1.;
+        this->_M_alpha[ 0 ] = 3. / 2.;
+        this->_M_alpha[ 1 ] = 2.;
+        this->_M_alpha[ 2 ] = -1. / 2.;
+        this->_M_beta[ 0 ] = 2.;
+        this->_M_beta[ 1 ] = -1.;
         break;
     case 3:
-        _M_alpha[ 0 ] = 11. / 6.;
-        _M_alpha[ 1 ] = 3.;
-        _M_alpha[ 2 ] = -3. / 2.;
-        _M_alpha[ 3 ] = 1. / 3.;
-        _M_beta[ 0 ] = 3.;
-        _M_beta[ 1 ] = -3.;
-        _M_beta[ 2 ] = 1.;
+        this->_M_alpha[ 0 ] = 11. / 6.;
+        this->_M_alpha[ 1 ] = 3.;
+        this->_M_alpha[ 2 ] = -3. / 2.;
+        this->_M_alpha[ 3 ] = 1. / 3.;
+        this->_M_beta[ 0 ] = 3.;
+        this->_M_beta[ 1 ] = -3.;
+        this->_M_beta[ 2 ] = 1.;
         break;
  case 4:
-        _M_alpha[ 0 ] = 25. / 12.;
-        _M_alpha[ 1 ] = 4.;
-        _M_alpha[ 2 ] = -3. ;
-        _M_alpha[ 3 ] = 4. / 3.;
-	_M_alpha[ 4 ] = - 1 / 4.;
-        _M_beta[ 0 ] = 4.;
-        _M_beta[ 1 ] = -6.;
-        _M_beta[ 2 ] = 4.;
-	_M_beta[ 3 ] = 4.;
+        this->_M_alpha[ 0 ] = 25. / 12.;
+        this->_M_alpha[ 1 ] = 4.;
+        this->_M_alpha[ 2 ] = -3. ;
+        this->_M_alpha[ 3 ] = 4. / 3.;
+	this->_M_alpha[ 4 ] = - 1 / 4.;
+        this->_M_beta[ 0 ] = 4.;
+        this->_M_beta[ 1 ] = -6.;
+        this->_M_beta[ 2 ] = 4.;
+	this->_M_beta[ 3 ] = 4.;
     }
-    _M_unknowns.reserve(_M_size );
+    this->_M_unknowns.reserve(this->_M_size );
+    this->_M_rhs.reserve(2);
  }
 
 template<typename VectorType>
@@ -313,53 +318,60 @@ BdfT(const  UInt order, const UInt orderDev )
   :
   BdfT( order )
 {
-  _M_sizeCoefficients = order +orderDev ;
-  if(_M_orderDev ==2)
+  
+  this->_M_orderDev = orderDev ;
+  this->_M_sizeCoefficients = order +orderDev ;
+
+  if(this->_M_orderDev == 2)
     {
-      _M_xi.resize( order + 2 );
-      _M_beta2.resize( order + 1 );
+      this->_M_xi.resize( order + 2 );
+      this->_M_beta2.resize( order + 1 );
     
       switch ( order )
 	{
 	case 1:
-	  _M_xi[ 0 ] = 1.0;
-	  _M_xi[ 1 ] = 2.0;
-	  _M_xi[ 2 ] = -1.0;
-	  _M_beta2[0]=2.0;
-	  _M_beta2[1]=-1.0;
+	  this->_M_xi[ 0 ] = 1.0;
+	  this->_M_xi[ 1 ] = 2.0;
+	  this->_M_xi[ 2 ] = -1.0;
+	  this->_M_beta2[0]=2.0;
+	  this->_M_beta2[1]=-1.0;
 	  break;
 	case 2:
-	  _M_xi[ 0 ] =  2.0;
-	  _M_xi[ 1 ] = 5.0;
-	  _M_xi[ 2 ] = -4.0;
-	  _M_xi[ 3 ] = 1.0;
-	  _M_beta2[0] = 3.0;
-	  _M_beta2[ 1 ] = -3.;
-	  _M_beta2[ 2 ] = 1.;
+	  this->_M_xi[ 0 ] =  2.0;
+	  this->_M_xi[ 1 ] = 5.0;
+	  this->_M_xi[ 2 ] = -4.0;
+	  this->_M_xi[ 3 ] = 1.0;
+	  this->_M_beta2[0] = 3.0;
+	  this->_M_beta2[ 1 ] = -3.;
+	  this->_M_beta2[ 2 ] = 1.;
 	  break;
 	case 3:
-	  _M_beta[ 0 ] = 3.;
-	  _M_beta[ 1 ] = -3.;
-	  _M_beta[ 2 ] = 1.;
-	  _M_xi[ 0 ] =  35./12.;
-	  _M_xi[ 1 ] =  26./3.;
-	  _M_xi[ 2 ] =  -19./2;
-	  _M_xi[ 3 ] =  14./3.;
-	  _M_xi[ 4 ] =  -11./12.;
-	  _M_beta2[ 0 ] = 4.;
-	  _M_beta2[ 1 ] = -6.;
-	  _M_beta2[ 2 ] = 4.;
-	  _M_beta2[ 3 ] = -1;
+	  this->_M_beta[ 0 ] = 3.;
+	  this->_M_beta[ 1 ] = -3.;
+	  this->_M_beta[ 2 ] = 1.;
+	  this->_M_xi[ 0 ] =  35./12.;
+	  this->_M_xi[ 1 ] =  26./3.;
+	  this->_M_xi[ 2 ] =  -19./2;
+	  this->_M_xi[ 3 ] =  14./3.;
+	  this->_M_xi[ 4 ] =  -11./12.;
+	  this->_M_beta2[ 0 ] = 4.;
+	  this->_M_beta2[ 1 ] = -6.;
+	  this->_M_beta2[ 2 ] = 4.;
+	  this->_M_beta2[ 3 ] = -1;
 	  break;
 	}
+
+      this->_M_size++;  
+      this->_M_unknowns.reserve( this->_M_size);
+
     }
-  _M_unknowns.reserve(_M_size);
+
 } 
   
 
 template<typename VectorType>
 void
-BdfT<VectorType>::setup( const UInt order, const UInt orderDev)
+BdfT<VectorType>::setupDUPLICATA( const UInt order, const UInt orderDev)
 {
   if ( order <= 0 || order > BDFT_MAX_ORDER )
     {
@@ -370,76 +382,76 @@ BdfT<VectorType>::setup( const UInt order, const UInt orderDev)
         throw std::invalid_argument( __ex.str() );
     }
 
-  _M_order = order ;
-  _M_orderDev = orderDev ;
-  _M_size = order ;
-  _M_alpha.resize( order + 1 );
-  _M_xi.resize( order + 2 );
-  _M_beta.resize( order );
-  _M_beta2.resize( order + 1 );
-  _M_sizeCoefficients = order + orderDev ; 
+  this->_M_order = order ;
+  this->_M_orderDev = orderDev ;
+  this->_M_size = order ;
+  this->_M_alpha.resize( order + 1 );
+  this->_M_xi.resize( order + 2 );
+  this->_M_beta.resize( order );
+  this->_M_beta2.resize( order + 1 );
+  this->_M_sizeCoefficients = order + orderDev ; 
 
     switch ( order )
       {  
       case 1:
-	_M_alpha[ 0 ] = 1.; // Backward Euler
-	_M_alpha[ 1 ] = 1.;
-	_M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
-	_M_xi[ 0 ] = 1.;
-	_M_xi[ 1 ] = 2;
-	_M_xi[ 2 ] = -1;
-	_M_beta2[0]=2.;
-	_M_beta2[1]=-1;
+	this->_M_alpha[ 0 ] = 1.; // Backward Euler
+	this->_M_alpha[ 1 ] = 1.;
+	this->_M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
+	this->_M_xi[ 0 ] = 1.;
+	this->_M_xi[ 1 ] = 2;
+	this->_M_xi[ 2 ] = -1;
+	this->_M_beta2[0]=2.;
+	this->_M_beta2[1]=-1;
 	break;
       case 2:
-	_M_alpha[ 0 ] = 3. / 2.;
-	_M_alpha[ 1 ] = 2.;
-	_M_alpha[ 2 ] = -1. / 2.;
-	_M_beta[ 0 ] = 2.;
-	_M_beta[ 1 ] = -1.;
-	_M_xi[ 0 ] =  2.;
-	_M_xi[ 1 ] = 5.;
-	_M_xi[ 2 ] =  -4.;
-	_M_xi[ 3 ] = 1.;
-	_M_beta2[0]=3.;
-	_M_beta2[ 1 ] = -3.;
-	_M_beta2[ 2 ] = 1.;
+	this->_M_alpha[ 0 ] = 3. / 2.;
+	this->_M_alpha[ 1 ] = 2.;
+	this->_M_alpha[ 2 ] = -1. / 2.;
+	this->_M_beta[ 0 ] = 2.;
+	this->_M_beta[ 1 ] = -1.;
+	this->_M_xi[ 0 ] =  2.;
+	this->_M_xi[ 1 ] = 5.;
+	this->_M_xi[ 2 ] =  -4.;
+	this->_M_xi[ 3 ] = 1.;
+	this->_M_beta2[0]=3.;
+	this->_M_beta2[ 1 ] = -3.;
+	this->_M_beta2[ 2 ] = 1.;
 	break;
       case 3:
-	_M_alpha[ 0 ] = 11. / 6.;
-	_M_alpha[ 1 ] = 3.;
-	_M_alpha[ 2 ] = -3. / 2.;
-	_M_alpha[ 3 ] = 1. / 3.;
-	_M_beta[ 0 ] = 3.;
-	_M_beta[ 1 ] = -3.;
-	_M_beta[ 2 ] = 1.;
-	_M_xi[ 0 ] =  35./12.;
-	_M_xi[ 1 ] =  26./3.;
-	_M_xi[ 2 ] =  -19./2;
-	_M_xi[ 3 ] =  14./3.;
-	_M_xi[ 4 ] =  -11./12.;
-	_M_beta2[ 0 ] = 4.;
-	_M_beta2[ 1 ] = -6.;
-	_M_beta2[ 2 ] = 4.;
-	_M_beta2[ 3 ] = -1;
+	this->_M_alpha[ 0 ] = 11. / 6.;
+	this->_M_alpha[ 1 ] = 3.;
+	this->_M_alpha[ 2 ] = -3. / 2.;
+	this->_M_alpha[ 3 ] = 1. / 3.;
+	this->_M_beta[ 0 ] = 3.;
+	this->_M_beta[ 1 ] = -3.;
+	this->_M_beta[ 2 ] = 1.;
+	this->_M_xi[ 0 ] =  35./12.;
+	this->_M_xi[ 1 ] =  26./3.;
+	this->_M_xi[ 2 ] =  -19./2;
+	this->_M_xi[ 3 ] =  14./3.;
+	this->_M_xi[ 4 ] =  -11./12.;
+	this->_M_beta2[ 0 ] = 4.;
+	this->_M_beta2[ 1 ] = -6.;
+	this->_M_beta2[ 2 ] = 4.;
+	this->_M_beta2[ 3 ] = -1;
 	break;
       case 4:
-	_M_alpha[ 0 ] = 25. / 12.;
-	_M_alpha[ 1 ] = 4.;
-	_M_alpha[ 2 ] = -3. ;
-	_M_alpha[ 3 ] = 4. / 3.;
-	_M_alpha[ 4 ] = - 1 / 4.;
-	_M_beta[ 0 ] = 4.;
-	_M_beta[ 1 ] = -6.;
-	_M_beta[ 2 ] = 4.;
-	_M_beta[ 3 ] = -1;
+	this->_M_alpha[ 0 ] = 25. / 12.;
+	this->_M_alpha[ 1 ] = 4.;
+	this->_M_alpha[ 2 ] = -3. ;
+	this->_M_alpha[ 3 ] = 4. / 3.;
+	this->_M_alpha[ 4 ] = - 1 / 4.;
+	this->_M_beta[ 0 ] = 4.;
+	this->_M_beta[ 1 ] = -6.;
+	this->_M_beta[ 2 ] = 4.;
+	this->_M_beta[ 3 ] = -1;
 	break;
       }
   
-    if( _M_orderDev == 2 )  
-      _M_size++;  
-    _M_unknowns.reserve( _M_size);
-    _M_rhs.reserve(2);
+    if( this->_M_orderDev == 2 )  
+      this->_M_size++;  
+    this->_M_unknowns.reserve( this->_M_size);
+    this->_M_rhs.reserve(2);
 }
 
 template<typename VectorType>
@@ -452,8 +464,8 @@ BdfT<VectorType>:: setup ( const  std::vector<double>  /*coefficients*/,  const 
 template<typename VectorType>
 void BdfT<VectorType>::initialize_unk( VectorType u0 )
 {
-    vector_type_iterator iter     = _M_unknowns.begin();
-    vector_type_iterator iter_end = _M_unknowns.end();
+    vector_type_iterator iter     = this->_M_unknowns.begin();
+    vector_type_iterator iter_end = this->_M_unknowns.end();
 
     for ( ; iter != iter_end; iter++ )
       {
@@ -461,15 +473,15 @@ void BdfT<VectorType>::initialize_unk( VectorType u0 )
 	*iter = new VectorType(u0);
       }
 
-    for ( UInt i(_M_unknowns.size()) ; i < _M_order; i++ )
-        _M_unknowns.push_back(new VectorType(u0));
+    for ( UInt i(this->_M_unknowns.size()) ; i < this->_M_order; i++ )
+        this->_M_unknowns.push_back(new VectorType(u0));
 
     for (UInt i=0; i<2; i++ ) 
       {
-	_M_rhs.push_back(new VectorType(u0.getMap(), Unique));
-	*_M_rhs[i] *=0;
+	this->_M_rhs.push_back(new VectorType(u0.getMap(), Unique));
+	*this->_M_rhs[i] *=0;
       }	
-    ASSERT ( _M_unknowns.size() == _M_order,
+    ASSERT ( this->_M_unknowns.size() == this->_M_order,
 	     "_M_unknowns.size() and  _M_order must be equal" );
 
     return ;
@@ -496,8 +508,8 @@ void BdfT<VectorType>::initialize_unk(const  std::vector<VectorType> uv0 )
 
     ASSERT( n0 != 0, "Initial data are not enough for the selected BDF" );
 
-    vector_type_iterator iter     = _M_unknowns.begin();
-    vector_type_iterator iter_end = _M_unknowns.end();
+    vector_type_iterator iter     = this->_M_unknowns.begin();
+    vector_type_iterator iter_end = this->_M_unknowns.end();
 
     UInt i(0);
 
@@ -507,30 +519,30 @@ void BdfT<VectorType>::initialize_unk(const  std::vector<VectorType> uv0 )
     *iter = new VectorType(uv0[i]);
     }
 
-    for ( i = _M_unknowns.size() ; i < _M_order && i< n0; ++i )
-       _M_unknowns.push_back(new VectorType(uv0[i]));
+    for ( i = this->_M_unknowns.size() ; i < this->_M_order && i< n0; ++i )
+       this->_M_unknowns.push_back(new VectorType(uv0[i]));
 
-    if(_M_orderDev==1)
+    if(this->_M_orderDev==1)
 	{
-	for ( i = _M_unknowns.size() ; i < _M_order; i++ )
-	  _M_unknowns.push_back(new VectorType(uv0[n0-1]));
+	for ( i = this->_M_unknowns.size() ; i < this->_M_order; i++ )
+	  this->_M_unknowns.push_back(new VectorType(uv0[n0-1]));
 
-	ASSERT ( _M_unknowns.size() == _M_order,
+	ASSERT ( this->_M_unknowns.size() == this->_M_order,
 		 "_M_unknowns.size() and  _M_order must be equal" );
       }
-    if(_M_orderDev==2)
+    if(this->_M_orderDev==2)
       {
-	for ( i = _M_unknowns.size() ; i < _M_order+1; i++ )
-	  _M_unknowns.push_back(new VectorType(uv0[n0-1]));
+	for ( i = this->_M_unknowns.size() ; i < this->_M_order+1; i++ )
+	  this->_M_unknowns.push_back(new VectorType(uv0[n0-1]));
 	
-	ASSERT ( _M_unknowns.size() == _M_order+1,
+	ASSERT ( this->_M_unknowns.size() == this->_M_order+1,
 		 "_M_unknowns.size() and  _M_order must be equal" );
       }
     
     for (UInt i=0; i<2; i++ ) 
       {
-	_M_rhs.push_back(new VectorType(uv0[0].getMap(), Unique));
-	*_M_rhs[i] *=0;
+	this->_M_rhs.push_back(new VectorType(uv0[0].getMap(), Unique));
+	*this->_M_rhs[i] *=0;
       }
     return ;
 }
@@ -544,15 +556,15 @@ template<typename VectorType>
 const
 typename BdfT<VectorType>::vector_type& BdfT<VectorType>::unk() const
 {
-    return _M_unknowns;
+    return this->_M_unknowns;
 }
 
 template<typename VectorType>
 VectorType
 BdfT<VectorType>::vnk()  const
 {
-  VectorType v(*_M_unknowns[0]);
-   v  *= _M_alpha[ 0 ] / _M_dt;
+  VectorType v(*this->_M_unknowns[0]);
+   v  *= this->_M_alpha[ 0 ] / this->_M_dt;
    v  -= (*this->_M_rhs[0]);
    return v;
 }
@@ -561,8 +573,8 @@ template<typename VectorType>
 VectorType
 BdfT<VectorType>::wnk()  const
 {
-  VectorType w(*_M_unknowns[0]);
-  w  *= _M_xi[ 0 ]  /  (_M_dt*_M_dt);
+  VectorType w(*this->_M_unknowns[0]);
+  w  *= this->_M_xi[ 0 ]  /  (this->_M_dt*this->_M_dt);
    w  -=  ( *this->_M_rhs[1] );
    return w;
 }
@@ -584,9 +596,9 @@ double
 BdfT<VectorType>::coeff_ext( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < _M_order,
+    ASSERT( i >= 0 & i < this->_M_order,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return _M_beta[ i ];
+    return this->_M_beta[ i ];
 }
   
 template<typename VectorType>
@@ -594,9 +606,9 @@ double
 BdfT<VectorType>::coeff_extVelocity( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < _M_order + 1,
+    ASSERT( i >= 0 & i < this->_M_order + 1,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return _M_beta2[ i+1 ];
+    return this->_M_beta2[ i+1 ];
 }
 
 
@@ -604,24 +616,24 @@ template<typename VectorType>
 void
 BdfT<VectorType>::showMe() const
 {
-  std::cout << "*** BDF Time discretization of order " << _M_order << " maximum order of derivate "<< _M_orderDev << " ***"
+  std::cout << "*** BDF Time discretization of order " << this->_M_order << " maximum order of derivate "<< this->_M_orderDev << " ***"
               << std::endl;
     std::cout << "    Coefficients: " << std::endl;
-    for ( UInt i = 0;i < _M_order + 1;++i )
-        std::cout << "       alpha(" << i << ") = " << _M_alpha[ i ]
+    for ( UInt i = 0;i < this->_M_order + 1;++i )
+        std::cout << "       alpha(" << i << ") = " << this->_M_alpha[ i ]
                   << std::endl;
-    for ( UInt i = 0;i < _M_order;++i )
-        std::cout << "       beta (" << i << ") = " << _M_beta[ i ]
+    for ( UInt i = 0;i < this->_M_order;++i )
+        std::cout << "       beta (" << i << ") = " << this->_M_beta[ i ]
                   << std::endl;
-    if (_M_orderDev ==2)
+    if (this->_M_orderDev ==2)
       {
-	for ( UInt i = 0;i < _M_order + _M_orderDev; ++i )
-	  std::cout << "     xi(" << i << ") = " << _M_xi[ i ]  << std::endl;
-	for ( UInt i = 0;  i < _M_order+1; ++i  )
-	  std::cout << "       beta2 (" << i << ") = " << _M_beta2[ i ]
+	for ( UInt i = 0;i < this->_M_order + this->_M_orderDev; ++i )
+	  std::cout << "     xi(" << i << ") = " << this->_M_xi[ i ]  << std::endl;
+	for ( UInt i = 0;  i < this->_M_order+1; ++i  )
+	  std::cout << "       beta2 (" << i << ") = " << this->_M_beta2[ i ]
 		    << std::endl;
       }
-    std::cout <<"Delta T :"<<_M_dt<<"\n";
+    std::cout <<"Delta T :"<<this->_M_dt<<"\n";
     std::cout <<"*************************************\n";
     return ;
 }
@@ -630,12 +642,12 @@ template<typename VectorType>
 void
 BdfT<VectorType>::shift_right( VectorType const& unk_curr )
 {
-    ASSERT ( _M_unknowns.size() == _M_size,
+    ASSERT ( this->_M_unknowns.size() == this->_M_size,
 	     "_M_unknowns.size() and  _M_size must be equal" );
 
-    vector_type_iterator it   = _M_unknowns.end() - 1;
-    vector_type_iterator itm1 = _M_unknowns.end() - 1;
-    vector_type_iterator itb  = _M_unknowns.begin();
+    vector_type_iterator it   = this->_M_unknowns.end() - 1;
+    vector_type_iterator itm1 = this->_M_unknowns.end() - 1;
+    vector_type_iterator itb  = this->_M_unknowns.begin();
 
     delete *itm1;
 
@@ -654,17 +666,17 @@ template<typename VectorType>
 VectorType
 BdfT<VectorType>::time_der( Real dt ) const
 {
-   * _M_rhs[0] *=0;
-   VectorType ut(*_M_unknowns[ 0 ]);
+   * this->_M_rhs[0] *=0;
+   VectorType ut(*this->_M_unknowns[ 0 ]);
 
-   ut *= _M_alpha[ 1 ] / dt;
+   ut *= this->_M_alpha[ 1 ] / dt;
    
-    for ( UInt i = 1; i < _M_order; ++i )
+    for ( UInt i = 1; i < this->_M_order; ++i )
       {
-	ut += (_M_alpha[ i + 1 ] / dt) * *_M_unknowns[ i ];
+	ut += (this->_M_alpha[ i + 1 ] / dt) * *this->_M_unknowns[ i ];
       }
 
-    *_M_rhs[ 0 ]  = ut; 
+    *this->_M_rhs[ 0 ]  = ut; 
     return ut;
 }
   
@@ -688,19 +700,19 @@ template<typename VectorType>
 VectorType
 BdfT<VectorType>::time_derOrder2( Real dt )  const
 {
-  ASSERT ( _M_orderDev == 2 ,
+  ASSERT ( this->_M_orderDev == 2 ,
 	     " _M_orderDev must be equal two" );
   
-  *_M_rhs[1] *=0;
+  *this->_M_rhs[1] *=0;
   
-  VectorType ut(*_M_unknowns[ 0 ]);
+  VectorType ut(*this->_M_unknowns[ 0 ]);
   
-  ut *= _M_xi[ 1 ] / (dt*dt);
+  ut *= this->_M_xi[ 1 ] / (dt*dt);
   
-  for ( UInt i = 1; i < _M_order + 1; ++i )
-    ut += ( _M_xi[ i + 1 ] / (dt*dt) ) * *_M_unknowns[ i ];
+  for ( UInt i = 1; i < this->_M_order + 1; ++i )
+    ut += ( this->_M_xi[ i + 1 ] / (dt*dt) ) * *this->_M_unknowns[ i ];
   
-  *_M_rhs[1] = ut ;
+  *this->_M_rhs[1] = ut ;
 
   return ut;
 }
@@ -711,12 +723,12 @@ template<typename VectorType>
 VectorType
 BdfT<VectorType>::extrap() const
 {
-    VectorType ue(*_M_unknowns[ 0 ]);
-    ue *= _M_beta[ 0 ];
+    VectorType ue(*this->_M_unknowns[ 0 ]);
+    ue *= this->_M_beta[ 0 ];
 
-    for ( UInt i = 1;i < _M_order;++i )
+    for ( UInt i = 1;i < this->_M_order;++i )
     {
-            ue += _M_beta[ i ] * *_M_unknowns[ i ];
+            ue += this->_M_beta[ i ] * *this->_M_unknowns[ i ];
     }
 
     return ue;
@@ -726,17 +738,17 @@ template<typename VectorType>
 VectorType
 BdfT<VectorType>::extrapVelocity() const
 {
-    VectorType ve(*_M_unknowns[ 0 ]);
-    ve *= _M_beta2[ 0 ];
+    VectorType ve(*this->_M_unknowns[ 0 ]);
+    ve *= this->_M_beta2[ 0 ];
 
-    for ( UInt i = 1; i < _M_order+1; ++i )
-              ve += _M_beta2[ i ] * *_M_unknowns[ i ];
+    for ( UInt i = 1; i < this->_M_order+1; ++i )
+              ve += this->_M_beta2[ i ] * *this->_M_unknowns[ i ];
 
     return ve;
 }
 
 inline
-TimeAdvance<>* createBDF() { return new BdfT<>(); }
+TimeAdvance<EpetraVector>* createBDF() { return new BdfT<EpetraVector>(); }
   namespace
   {
     static bool registerBDF = TimeAdvanceFactory::instance().registerProduct( "BDF",  &createBDF );
