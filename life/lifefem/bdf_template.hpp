@@ -148,7 +148,7 @@ public:
 
     BdfT( const UInt order, const  UInt orderDev );
 
-    ~BdfT();
+    ~BdfT() {} 
 
     //! Initialize all the entries of the unknown vector to be derived with the
     //! vector u0 (duplicated)
@@ -444,7 +444,7 @@ BdfT<VectorType>::setup( const UInt order, const UInt orderDev)
 
 template<typename VectorType>
 void
-BdfT<VectorType>:: setup ( const  std::vector<double>  coefficients,  const  UInt orderDev)
+BdfT<VectorType>:: setup ( const  std::vector<double>  /*coefficients*/,  const  UInt /*orderDev*/)
 {
   ERROR_MSG("use setup for Newmark but the time advance scheme is BDF");
 }
@@ -476,14 +476,14 @@ void BdfT<VectorType>::initialize_unk( VectorType u0 )
 }
 
 template<typename VectorType>
-void  BdfT<VectorType>::initialize_unk( VectorType u0, VectorType v0 )
+void  BdfT<VectorType>::initialize_unk( VectorType /*u0*/, VectorType /*v0*/ )
 {
   ERROR_MSG( "this method  is not yet implemented" );
   return;
 }
 
 template<typename VectorType>
-void BdfT<VectorType>::initialize_unk( VectorType u0, VectorType v0, VectorType const & w0 )
+void BdfT<VectorType>::initialize_unk( VectorType /*u0*/, VectorType /*v0*/, VectorType const & /*w0*/ )
 {
   ERROR_MSG( "this method  is not yet implemented" );
   return;
@@ -499,7 +499,7 @@ void BdfT<VectorType>::initialize_unk(const  std::vector<VectorType> uv0 )
     vector_type_iterator iter     = _M_unknowns.begin();
     vector_type_iterator iter_end = _M_unknowns.end();
 
-    int i(0);
+    UInt i(0);
 
     for ( ; iter != iter_end && i< n0 ; ++iter, ++i )
     {
