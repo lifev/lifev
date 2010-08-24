@@ -37,9 +37,6 @@
  *  \author Cristiano Malossi<cristiano.malossi@epfl.ch>
  */
 
-
-
-
 #ifndef _DATAMESH_H_
 #define _DATAMESH_H_
 
@@ -69,13 +66,7 @@ class DataMesh
 {
 public:
 
-    // Typedef
-    //    typedef Mesh                                Mesh_Type;
-    //typedef boost::shared_ptr<Mesh_Type>        Mesh_ptrType;
-
-
-    /** @name Constructors, Destructor
-     */
+    //! @name Constructors, Destructor
     //@{
 
     //! Empty Constructor
@@ -83,7 +74,7 @@ public:
 
     //! Constructor
     /*!
-      \param section the section in the data file
+      @param section the section in the data file
     */
     DataMesh( const GetPot& dataFile, const std::string& section = "space_discretization" );
 
@@ -95,44 +86,40 @@ public:
     //@}
 
 
-    /** @name Methods
-     */
+    //! @name Methods
     //@{
 
+    //! Read the dataFile and set all the quantities
+    /*!
+     * @param dataFile data file
+     * @param section file section
+     */
     void setup( const GetPot& dataFile, const std::string& section );
 
-    //void readMesh(const GetPot& dataFile );
-
+    //! Display the values
     virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
 
-    /** @name Set Methods
-     */
+    //! @name Set Methods
     //@{
-
-    //void  setMesh( const Mesh_ptrType& mesh ) { M_mesh = mesh; }
 
     //@}
 
 
-    /** @name Get Methods
-     */
+    //! @name Get Methods
     //@{
 
-    //const Mesh_ptrType   mesh()      const { return M_mesh; }
+    const std::string&   meshDir()   const { return M_mesh_dir; }
+    const std::string&   meshFile()  const { return M_mesh_file; }
+    const std::string&   meshType()  const { return M_mesh_type; }
 
-    const std::string    meshDir()   const { return M_mesh_dir; }
-    const std::string    meshFile()  const { return M_mesh_file; }
-    const std::string    meshType()  const { return M_mesh_type; }
+    const bool&          verbose()   const { return M_verbose; }
 
-    const bool           verbose()   const { return M_verbose; }
     //@}
 
 private:
-
-    //Mesh_ptrType    M_mesh;         // the mesh
 
     std::string     M_mesh_dir;     // mesh dir
     std::string     M_mesh_file;    // mesh file
@@ -141,10 +128,8 @@ private:
     bool            M_verbose;
 };
 
-
-
 template <typename Mesh>
-void readMesh(Mesh& mesh, const DataMesh data )
+void readMesh( Mesh& mesh, const DataMesh& data )
 {
     if ( data.verbose() )
         std::cout << "\nBuilding mesh ... ";
@@ -205,8 +190,6 @@ void readMesh(Mesh& mesh, const DataMesh data )
     if ( data.verbose() )
         std::cout << "ok.\n" << std::endl;
 }
-
-
 
 } // namespace LifeV
 
