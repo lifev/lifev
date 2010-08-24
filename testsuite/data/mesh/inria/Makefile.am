@@ -31,7 +31,11 @@ dist_pkgdata_DATA = cube4x4.mesh cube8x8.mesh cube16x16.mesh cube32x32.mesh\
             tube20.mesh vessel20.mesh \
             piece-of-tube.mesh piece-of-tube-wall.mesh hexa1x1.mesh tube.mesh vessel.mesh \
             cyl2D.mesh \
-            vessel7x2_h002.mesh tube7x2_h002.mesh lid16.mesh
+            vessel7x2_h002.mesh tube7x2_h002.mesh lid16.mesh\
+	    StructuredCube4.mesh StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh
+
+
+
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
