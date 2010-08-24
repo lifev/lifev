@@ -259,13 +259,13 @@ public:
     /*!
      * @return Flag of the vertex on the interface on the fluid boundary side
      */
-    inline int const* const fluidInterfaceVertexFlag() const { return M_fluidInterfaceVertexFlag.get(); }
+    inline int const* fluidInterfaceVertexFlag() const { return M_fluidInterfaceVertexFlag.get(); }
 
     //! Get the fluid Interface Flag (for Vertices)
     /*!
      * @return Flag of the vertex on the interface on the structure boundary side
      */
-    inline int const* const structureInterfaceVertexFlag() const { return M_structureInterfaceVertexFlag.get(); }
+    inline int const* structureInterfaceVertexFlag() const { return M_structureInterfaceVertexFlag.get(); }
 
     //! Get the tolerance for the Interface identification
     /*!
