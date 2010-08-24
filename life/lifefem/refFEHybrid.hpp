@@ -159,7 +159,7 @@ public:
 	}
 
     //! Return the number of boundary elements of the reference element.
-    inline const UInt numberBoundaryFE() const
+    inline const UInt& numberBoundaryFE() const
     {
         return M_numberBoundaryFE;
     }
