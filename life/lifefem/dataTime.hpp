@@ -110,6 +110,15 @@ public:
      */
     bool isLastTimeStep()   { return round( M_time + M_timeStep ) > round( M_endTime ); }
 
+    //! Return theta parameter of Newmark scheme
+    Real theta()		const { return M_theta; }
+
+   //! Return zeta  of Newmark scheme
+    Real zeta()		const { return M_zeta; }
+
+    //! Return Newmark parameters (theta, zeta and timestep)
+   std::vector<double> getNewmark_parameters();
+
     //! Display general information about the content of the class
     /*!
         @param output - specify the output format (std::cout by default)
@@ -152,7 +161,15 @@ public:
      */
     void setBDF_order   ( const UInt& BDF_order )   { M_BDF_order = BDF_order; }
 
-    //@}
+     //! Set the theta of Newmark scheme
+    
+     void setTheta ( const  Real& theta ) { M_theta = theta; }
+
+     //! Set the theta of Newmark scheme
+    
+     void setZeta ( const  Real& zeta ) { M_zeta = zeta; }
+
+      //@}
 
 
     //! @name Get Methods
@@ -212,12 +229,13 @@ private:
 
     Real round( const Real n, const Int decimal=10 ) const;
 
-	Real					M_initialTime;	// initial time
+    Real					M_initialTime;	// initial time
     Real					M_endTime;		// end time
     Real					M_time;			// time
     Real					M_timeStep; 	// time step
     UInt					M_BDF_order; 	// order of the time discretization formula
-
+    Real                                    M_theta;       // Nemark parametres
+    Real                                    M_zeta;        // Nemark parametres
 };
 
 } // namespace LifeV
