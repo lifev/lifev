@@ -235,37 +235,6 @@ public:
 
     void showMe() const;
 
-  /*
-    private:
-    //! Order of the BDF derivative/extrapolation: the time-derivative
-    //! coefficients vector has size n+1, the extrapolation vector has size n
-    UInt _M_order;
-
-    //! Order of temporal derivate: the time-derivative
-    //! coefficients vector has size n+1, the extrapolation vector has size n
-    UInt _M_orderDev;
-
-    // Size of the unknown vector
-     UInt _M_size;
-
-    //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
-    Vector _M_alpha;
-
-    //! Coefficients \f$ \xi_i \f$ of the time bdf discretization
-    Vector _M_xi;
-
-    //! Coefficients \f$ \beta_i \f$ of the extrapolation
-    Vector _M_beta;
-
-    //! Coefficients \f$ \betaV_i \f$ of the extrapolation 
-    Vector _M_beta2;
-
-    //! Last n state vectors
-    vector_type _M_unknowns;
-
-    //! rhs vectors (rhs[0]= rhs_V and rhs[1] =rhs_W)
-    vector_type _M_rhs;
-  */
 };
 
 ///
@@ -387,16 +356,6 @@ BdfT(const  UInt order, const UInt orderDev )
   _M_unknowns.reserve(_M_size);
 } 
   
-
-template<typename VectorType>
-BdfT<VectorType>::~BdfT()
-{
-    vector_type_iterator iter     = _M_unknowns.begin();
-    vector_type_iterator iter_end = _M_unknowns.end();
-
-    for ( ; iter != iter_end; iter++ )
-        delete *iter;
-}
 
 template<typename VectorType>
 void
