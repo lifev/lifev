@@ -1,0 +1,182 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+<<<<<<< data
+#----------------------------------------------------------------
+#      Data file for cube with SecondOrderSolver
+#----------------------------------------------------------------
+=======
+#-------------------------------------------------
+#      Data file for Laplacian Solver
+#-------------------------------------------------
+
+
+[adr]
+
+	[./physics]
+	diffusivity     = 1.0           # diffusivity
+
+	[../problem]
+	xMin = -1
+	xMax = 1
+	yMin = -1
+	yMax = 1
+	zMin = -1
+	zMax = 1
+	dirichletList = '1, 2, 3, 4, 5, 6'
+	# neumannList = '1, 4, 5, 6'
+	# robinList = '5, 6'
+	solutionType = steadyPolynomial # steadyPolynomial, unsteadyPolynomial
+
+	[../space_discretization2D]
+	order     = P1
+	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
+	mesh_type = .msh
+	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
+
+
+	[../space_discretization3D]
+	order     = P1
+	mesh_dir  = ./Mesh/  # the directory where the mesh file is
+	#mesh_file = cube4x4.mesh        # mesh file
+	#mesh_file = cube8x8.mesh        # mesh file
+	#mesh_file = cube16x16-reord.mesh      # mesh file
+	#mesh_file = cube16x16.mesh      # mesh file
+	mesh_file = cube32x32.mesh      # mesh file
+
+	[../prec]
+	prectype                = ML # ML or Ifpack
+	reuse                   = false
+	displayList             = true
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+        max_levels              = 2
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = both
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 1024
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+# ifpack
+        [../ifpack]
+        #prectype        = Amesos
+		overlap		= 3
+
+          	[./fact]
+          	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+          	[../amesos]
+           	solvertype = Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+
+		[../]
+
+   [../solver]
+   solver          = gmres
+   scaling         = none
+   output          = all # none
+   conv            = rhs
+   max_iter        = 100
+   kspace          = 100
+   tol             = 1.e-10    # AztecOO tolerance
+
+   [./amesos]
+   solvertype	= Umfpack
+   redistribute	= true
+   print_status = true
+   print_timing	= true
+
+>>>>>>> 1.12
+
+[exporter]
+type       = hdf5 # ensight # hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
+
+[problem]
+
+[./physics]
+density   = 1.               # density
+
+
+[../time_discretization]
+initialtime		= 0.
+endtime			= 2
+timestep		= 0.0625
+method                  =  BDF  #BDF
+# Newmark parameters:
+theta                   = 0.5  #0.5
+zeta                    = 1 #1
+
+#BDF parameters: order of scheme:
+BDF_order               = 2
+
+[../space_discretization]
+mesh_dir  = ./Mesh/     # the directory where the mesh file is
+mesh_file = StructuredCube8.mesh  #StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh  # mesh file
+order     = P1
+
+
+[../miscellaneous]
+factor    = 1
+verbose   = 1
+
+
+[../newton]
+maxiter = 1
+reltol  = 1.e-15
+
+
+[../solver]
+output          = none
+max_iter        = 100
+poly_ord        = 5
+drop            = 1.00e-4
+ilut_fill       = 4
+tol             = 1.e-15
+
+[../precond]
+
+precond         = Amesos
+
+reuse           = true
+overlap         = 10
+droptol         = 1.e-5
+fill 		= 2
+
