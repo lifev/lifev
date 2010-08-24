@@ -1,0 +1,63 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver
+#-------------------------------------------------
+
+
+[exporter]
+type       = hdf5 # ensight # hdf5 (if library compiled with hdf5 support) or ensightn
+multimesh  = false
+start      = 0
+save       = 1
+
+[problem]
+
+   [./physics]
+   density   = 1.               # density
+  
+   [../time_discretization]
+   initialtime		= 0.
+   endtime		= 1
+   timestep		= 0.05
+   method               = Newmark #Newmark  #BDF
+  
+   # Newmark parameters:
+   theta                   = 0.25  #0.5
+   zeta                    = 0.5 #1
+
+   #BDF parameters: order of scheme:
+   BDF_order               = 2  
+
+   	[../space_discretization]	
+	mesh_dir  = ./Mesh/     # the directory where the mesh file is
+	mesh_file = tube20.mesh  #StructuredCube8.mesh  #StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh  # mesh file
+	order     = P1
+	mesh_type       = .mesh
+
+	[../miscellaneous]
+	factor    = 1
+	verbose   = 1
+
+
+	[../newton]
+	maxiter = 1
+	reltol  = 1.e-15
+
+
+	[../solver]
+	output          = none
+	max_iter        = 100
+	poly_ord        = 5
+	drop            = 1.00e-4
+	ilut_fill       = 4
+	tol             = 1.e-15
+
+	[../precond]
+
+	precond         = Amesos
+
+	reuse           = true
+	overlap         = 10
+	droptol         = 1.e-5
+	fill 		= 2
+
