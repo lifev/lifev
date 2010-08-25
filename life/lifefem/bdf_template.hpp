@@ -596,7 +596,7 @@ double
 BdfT<VectorType>::coeff_ext( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < this->_M_order,
+    ASSERT( i < this->_M_order,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return this->_M_beta[ i ];
 }
@@ -606,7 +606,7 @@ double
 BdfT<VectorType>::coeff_extVelocity( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < this->_M_order + 1,
+    ASSERT(  i < this->_M_order + 1,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return this->_M_beta2[ i+1 ];
 }
