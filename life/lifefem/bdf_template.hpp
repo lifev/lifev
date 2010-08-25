@@ -195,11 +195,11 @@ public:
 
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula
-    VectorType time_der( Real dt = 1 ) const;
+    VectorType time_der( Real dt = 1 ) /*const*/;
 
     //! Returns the right hand side \f_v$ \bar{p} \f$ of the time derivative
     //! formula
-    VectorType time_derOrder2( Real dt = 1 ) const ;
+    VectorType time_derOrder2( Real dt = 1 ) /* const*/ ;
 
     //! Returns the right hand side \f$ \bar{p} \Delta t \f$ of the time
     //! derivative formula. The timestep is taken into account elsewhere,
@@ -371,7 +371,7 @@ BdfT(const  UInt order, const UInt orderDev )
 
 template<typename VectorType>
 void
-BdfT<VectorType>::setupDUPLICATA( const UInt order, const UInt orderDev)
+BdfT<VectorType>::setup( const UInt order, const UInt orderDev)
 {
   if ( order <= 0 || order > BDFT_MAX_ORDER )
     {
@@ -664,9 +664,10 @@ BdfT<VectorType>::shift_right( VectorType const& unk_curr )
  
 template<typename VectorType>
 VectorType
-BdfT<VectorType>::time_der( Real dt ) const
+BdfT<VectorType>::time_der( Real dt ) /*const*/
 {
-   * this->_M_rhs[0] *=0;
+   vector_type_iterator it  = this->_M_rhs.begin();
+  
    VectorType ut(*this->_M_unknowns[ 0 ]);
 
    ut *= this->_M_alpha[ 1 ] / dt;
@@ -676,34 +677,18 @@ BdfT<VectorType>::time_der( Real dt ) const
 	ut += (this->_M_alpha[ i + 1 ] / dt) * *this->_M_unknowns[ i ];
       }
 
-    *this->_M_rhs[ 0 ]  = ut; 
+    *it = new VectorType(ut); 
     return ut;
 }
-  
-// template<typename VectorType>
-// VectorType
-// BdfT<VectorType>::time_der( Real dt = 1.) const
-// {
-//     VectorType ut(_M_unknowns[ 0 ]);
-//     ut *= _M_alpha[ 1 ];
-
-//     for ( UInt i = 1;i < _M_order;++i )
-//     {
-//             ut += _M_alpha[ i + 1 ] * _M_unknowns[ i ];
-//     }
-
-//     return ut;
-
-// }
 
 template<typename VectorType>
 VectorType
-BdfT<VectorType>::time_derOrder2( Real dt )  const
+BdfT<VectorType>::time_derOrder2( Real dt ) /* const*/
 {
   ASSERT ( this->_M_orderDev == 2 ,
 	     " _M_orderDev must be equal two" );
   
-  *this->_M_rhs[1] *=0;
+  vector_type_iterator it  = this->_M_rhs.end()-1;
   
   VectorType ut(*this->_M_unknowns[ 0 ]);
   
@@ -712,7 +697,7 @@ BdfT<VectorType>::time_derOrder2( Real dt )  const
   for ( UInt i = 1; i < this->_M_order + 1; ++i )
     ut += ( this->_M_xi[ i + 1 ] / (dt*dt) ) * *this->_M_unknowns[ i ];
   
-  *this->_M_rhs[1] = ut ;
+   *it = new VectorType(ut);
 
   return ut;
 }

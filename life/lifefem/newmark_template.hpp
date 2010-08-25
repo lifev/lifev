@@ -131,7 +131,7 @@ public:
 
   // Newmark( const UInt orderDev,  std::vector<double> coefficients);
   
-  ~Newmark();
+  ~Newmark() {}
 
   //! Initialize all the entries of the unknown vector to be derived with the
   //! vector u0 (duplicated)
@@ -159,7 +159,7 @@ public:
   void shift_right(const VectorType & u_curr );
   
   //! Returns the right hand side \f$ f_V \f$ associated to the discretitation      of the first derivative
-   VectorType time_der( Real dt = 1 ) const ;
+   VectorType time_der( Real dt = 1 ) /*const*/ ;
   
   //! Returns the right hand side \f$ f_W \f$ associated to the discretitation      of the second derivative
   VectorType time_derOrder2( Real dt = 1 ) const ;
@@ -193,122 +193,30 @@ public:
 
   void showMe() const;
 
-  //void w0 ( MatrixType M, MatrixType A, VectorType rhs ) ;
- 
-private:
+  private:
   
   //Coefficients of Newmark
   Real _M_theta;
 
   Real _M_gamma;
 
-  /*
-  //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
-  Vector _M_alpha;
-  
-  //! Coefficients \f$ \beta_i \f$ of the extrapolation
-  Vector _M_beta;
-  
-  //! Coefficients \f$ \betaV_i \f$ of the extrapolation of V
-  Vector _M_beta2;
-
-  //! Coefficients \f$ \alpha_i \f$ of the coefficients of the second order time derivate
-  Vector _M_xi;
-  
-  
-  Real _M_dt;
-  Real _M_OrderDev;
-  
-  //Dimension of  unknown vector;
-  UInt _M_size;
-  
-  //! Last n state vectors
-  vector_type _M_unknowns;
-
-  //public:
-  vector_type _M_rhs;
-*/
 };
   
 
 ///
 // template implementations
 //
+
 template<typename VectorType>
-Newmark<VectorType>::
-Newmark() : 
-  TimeAdvance<> ::TimeAdvance()
+Newmark<VectorType>::Newmark() : 
+  super()
 {
   CONSTRUCTOR("Newmark");
 }
 
-// template<typename VectorType>
-// Newmark<VectorType>::
-// Newmark(const UInt orderDev, const vector<double> coefficients)  : 
-//   TimeAdvance<>::TimeAdvance(),
-//   _M_theta (coefficients[0] ),
-//   _M_gamma(coefficients[1]) 
-//  {
-//    _M_alpha.resize(4);
-//    _M_beta.resize(4);
-//    _M_xi.resize(4);
-//    _M_beta.resize(3);
-//    _M_beta2.resize(3);
-//    _M_dt = coefficients[2];
-
-//    if (_M_theta==0)
-//      {
-//        ASSERT (_M_orderDev==2,  "theta is 0 must be different from 0 in Newmark");
-//        _M_size = 4;
-//        _M_alpha[ 0 ] =  1;
-//        _M_alpha[ 1 ] =  1;
-//        _M_alpha[ 2 ] =  1;  
-//      }
-//    else
-//     {
-//       if (_M_orderDev == 1 )  /* Theta method*/
-// 	{ 
-// 	  _M_gamma = 1; 
-// 	  _M_size = 4;
-// 	}
-//       else 
-// 	{
-// 	  _M_size = 6 ;   /* Newmark  method*/
-// 	  _M_alpha[ 3 ] = _M_gamma/(2.0 * _M_theta) -1.0;
-// 	  _M_xi[ 0 ] =  1. /_M_theta;
-// 	  _M_xi[ 1 ] =  1. /_M_theta;
-// 	  _M_xi[ 2 ] =  1. /_M_theta; 
-// 	  _M_xi[ 3 ] =  1. / (2.*_M_theta)-1.0; 
-// 	}
-//       _M_alpha[ 0 ] =  _M_gamma/_M_theta;
-//       _M_alpha[ 1 ] =  _M_gamma/_M_theta;
-//       _M_alpha[ 2 ] =  _M_gamma/_M_theta - 1.0;  
-//     }
-//   _M_unknowns.reserve(_M_size);
-//   _M_rhs.reserve(2);
-//   _M_sizeTimeDer = _M_size / 2.0;
-//   _M_sizeTimeDer2 =_M_size / 2.0;
- 
-//   // check order of scheme
-//   if(_M_alpha[0] == 0.5) 
-//     _M_order = 2;
-//   else
-//     _M_order = 1;
-// }
-
-template<typename VectorType>
-Newmark<VectorType>::~Newmark()
-{
-    vector_type_iterator iter     = _M_unknowns.begin();
-    vector_type_iterator iter_end = _M_unknowns.end();
-
-    for ( ; iter != iter_end; iter++ )
-        delete *iter;
-}
-
 template<typename VectorType>
 void
-Newmark<VectorType>::setup (const UInt order, const  UInt orderDev) 
+Newmark<VectorType>::setup (const UInt /*order*/, const  UInt /*orderDev*/) 
 {
  ERROR_MSG("use setup for BDF but the time advance scheme is Newmark or theta-method");
 }
@@ -322,80 +230,80 @@ Newmark<VectorType>:: setup (const   std::vector<double> coefficients, const  UI
   //initilialize gamma
   _M_gamma = coefficients[1];
   //initialize Order Derivate
-  _M_orderDev = orderDev;
+  this->_M_orderDev = orderDev;
   
   // If theta equal 0, explicit meta method
   if (_M_theta == 0)
     {
-      ASSERT (_M_orderDev==2,  "theta is 0 must be different from 0 in Newmark");
-      _M_size = 4;
-      _M_alpha[ 0 ] =  1;
-      _M_alpha[ 1 ] =  1;
-      _M_alpha[ 2 ] =  1;  
-      _M_order  = 1;
+      ASSERT (this->_M_orderDev==2,  "theta is 0 must be different from 0 in Newmark");
+      this->_M_size = 4;
+      this->_M_alpha[ 0 ] =  1;
+      this->_M_alpha[ 1 ] =  1;
+      this->_M_alpha[ 2 ] =  1;  
+      this->_M_order  = 1;
     }
   else
     {  
-      if (_M_orderDev == 1 )  // Theta method
+      if (this->_M_orderDev == 1 )  // Theta method
 	{ 
-	  _M_gamma = 1; 
+	  this->_M_gamma = 1; 
 	  //  unknown vector's  dimension;
-	  _M_size = 4;
-	  _M_alpha.resize(3);
-	  _M_xi.resize(3);
-	  _M_beta.resize(3);
-	  _M_alpha[ 0 ] =  _M_gamma/_M_theta;
-	  _M_alpha[ 1 ] =  _M_gamma/_M_theta;
-	  _M_alpha[ 2 ] =  _M_gamma/_M_theta - 1.0;  
-	  _M_beta[0] =1;
-	  _M_beta[1]=1;
-	  _M_beta[2]=0.5;
-	  _M_xi[0] =0;
-	  _M_xi[1]=0;
-	  _M_xi[2]=0;
-	  _M_sizeCoefficients=3;
+	  this->_M_size = 4;
+	  this->_M_alpha.resize(3);
+	  this->_M_xi.resize(3);
+	  this->_M_beta.resize(3);
+	  this->_M_alpha[ 0 ] =  _M_gamma/ _M_theta;
+	  this->_M_alpha[ 1 ] =   _M_gamma/ _M_theta;
+	  this->_M_alpha[ 2 ] =   _M_gamma/_M_theta - 1.0;  
+	  this->_M_beta[0] =1;
+	  this->_M_beta[1]=1;
+	  this->_M_beta[2]=0.5;
+	  this->_M_xi[0] =0;
+	  this->_M_xi[1]=0;
+	  this->_M_xi[2]=0;
+	  this->_M_sizeCoefficients=3;
 	}
       else     //Newmark Method
 	{
 	  //unknown vector's dimension
-	  _M_size = 6 ;
-	  _M_alpha.resize(4);
-	  _M_xi.resize(4);
-	   _M_beta.resize(3);
-	  _M_beta2.resize(3);
+	  this->_M_size = 6 ;
+	  this->_M_alpha.resize(4);
+	  this->_M_xi.resize(4);
+	  this->_M_beta.resize(3);
+	  this->_M_beta2.resize(3);
 	  //initialitation alpha coefficients
-	  _M_alpha[ 0 ] =  _M_gamma/_M_theta;
-	  _M_alpha[ 1 ] =  _M_gamma/_M_theta;
-	  _M_alpha[ 2 ] =  _M_gamma/_M_theta - 1.0; 
-	  _M_alpha[ 3 ] = _M_gamma/(2.0 * _M_theta) -1.0;
-	  
-	  //initialitation xi coefficients
-	  _M_xi[ 0 ] =  1. /_M_theta;
-	  _M_xi[ 1 ] =  1. /_M_theta;
-	  _M_xi[ 2 ] =  1. /_M_theta; 
-	  _M_xi[ 3 ] =  1. / (2.*_M_theta)-1.0; 
-
+	 this->_M_alpha[ 0 ] =  _M_gamma/_M_theta;
+	 this->_M_alpha[ 1 ] =  _M_gamma/_M_theta;
+	 this->_M_alpha[ 2 ] =  _M_gamma/_M_theta - 1.0; 
+	 this->_M_alpha[ 3 ] = _M_gamma/(2.0 * _M_theta) -1.0;
+	 
+	 //initialitation xi coefficients
+	 this->_M_xi[ 0 ] =  1. /_M_theta;
+	 this->_M_xi[ 1 ] =  1. /_M_theta;
+	 this->_M_xi[ 2 ] =  1. /_M_theta; 
+	 this->_M_xi[ 3 ] =  1. / (2.*_M_theta)-1.0; 
+	 
 
 	  //initialitation extrapolation coefficients
-	  _M_beta[0] =1;
-	  _M_beta[1]=1;
-	  _M_beta[2]=0.5;
-	  _M_beta2[0]=0;
-	  _M_beta2[1]=1;
-	  _M_beta2[2]=1;
+	  this->_M_beta[0] =1;
+	  this->_M_beta[1]=1;
+	  this->_M_beta[2]=0.5;
+	  this->_M_beta2[0]=0;
+	  this->_M_beta2[1]=1;
+	  this->_M_beta2[2]=1;
 	  
-	  _M_sizeCoefficients=4;
+	 this->_M_sizeCoefficients=4;
 	}  
-      _M_unknowns.reserve(_M_size);
-      _M_rhs.reserve(2);
+      this->_M_unknowns.reserve(this->_M_size);
+      this-> _M_rhs.reserve(2);
       // check order  scheme
-      if(_M_alpha[0] == 0.5) 
-	_M_order = 2;
+      if(this->_M_alpha[0] == 0.5) 
+	this->_M_order = 2;
       else
-	_M_order = 1;
+	this->_M_order = 1;
 
-      _M_sizeTimeDer=_M_size / 2.0;
-      _M_sizeTimeDer2=_M_size / 2.0;
+      this->_M_sizeTimeDer=this->_M_size / 2.0;
+      this->_M_sizeTimeDer2=this->_M_size / 2.0;
 
     }
 }
@@ -403,8 +311,8 @@ Newmark<VectorType>:: setup (const   std::vector<double> coefficients, const  UI
 template<typename VectorType>
 void Newmark<VectorType>::initialize_unk( VectorType u0 )
 {
-    vector_type_iterator iter     = _M_unknowns.begin();
-    vector_type_iterator iter_end = _M_unknowns.end();
+    vector_type_iterator iter     = this->_M_unknowns.begin();
+    vector_type_iterator iter_end = this->_M_unknowns.end();
 
     for ( ; iter != iter_end; iter++ )
       {
@@ -412,11 +320,11 @@ void Newmark<VectorType>::initialize_unk( VectorType u0 )
 	*iter = new VectorType(u0.getMap(), Unique);
       }
 
-    for ( UInt i(_M_unknowns.size()) ; i < _M_size; i++ )
-        _M_unknowns.push_back(new VectorType(u0));
+    for ( UInt i(this->_M_unknowns.size()) ; i < _M_size; i++ )
+        this->_M_unknowns.push_back(new VectorType(u0));
 
-    vector_type_iterator iterR     = _M_rhs.begin();
-    vector_type_iterator iterR_end = _M_rhs.end();
+    vector_type_iterator iterR     = this->_M_rhs.begin();
+    vector_type_iterator iterR_end = this->_M_rhs.end();
     
     for ( ; iterR !=iterR_end ; iterR++ )
       {
@@ -439,28 +347,28 @@ void Newmark<VectorType>::initialize_unk( VectorType u0, VectorType v0 )
       *iter = new VectorType(u0.getMap(), Unique);
     }
   
-  _M_unknowns.push_back(new VectorType(u0));
-  _M_unknowns.push_back(new VectorType(v0));
+  this->_M_unknowns.push_back(new VectorType(u0));
+  this->_M_unknowns.push_back(new VectorType(v0));
   
   for (UInt ii=0; ii<4; ii++ )
     {    
-    _M_unknowns.push_back(new VectorType(u0.getMap(), Unique));
-    *_M_unknowns[ii+2]  *=0;
+      this->_M_unknowns.push_back(new VectorType(u0.getMap(), Unique));
+      *this->_M_unknowns[ii+2]  *=0;
     }
   for (UInt i=0; i<2; i++ ) 
     {
-      _M_rhs.push_back(new VectorType(u0.getMap(), Unique));
-     *_M_rhs[i]  *=0; 
+      this->_M_rhs.push_back(new VectorType(u0.getMap(), Unique));
+      *this->_M_rhs[i]  *=0; 
     }
-   return ;
+  return ;
 }
 
 
 template<typename VectorType>
 void Newmark<VectorType>::initialize_unk( VectorType u0, VectorType v0, VectorType const & w0 )
 {
-  vector_type_iterator iter       = _M_unknowns.begin();
-  vector_type_iterator iter_end   = _M_unknowns.end();
+  vector_type_iterator iter       = this->_M_unknowns.begin();
+  vector_type_iterator iter_end   = this->_M_unknowns.end();
   
   for ( ; iter != iter_end; iter++ )
     {
@@ -468,19 +376,19 @@ void Newmark<VectorType>::initialize_unk( VectorType u0, VectorType v0, VectorTy
       *iter = new VectorType(u0.getMap(), Unique);
     }
   
-  _M_unknowns.push_back(new VectorType(u0));
-  _M_unknowns.push_back(new VectorType(v0));
-  _M_unknowns.push_back(new VectorType(w0));
+  this->_M_unknowns.push_back(new VectorType(u0));
+  this->_M_unknowns.push_back(new VectorType(v0));
+  this->_M_unknowns.push_back(new VectorType(w0));
 
   for (UInt ii=0; ii<3; ii++ )
     {
-     _M_unknowns.push_back(new VectorType(u0.getMap(), Unique));
-     *_M_unknowns[ii+3] *=0;
+      this->_M_unknowns.push_back(new VectorType(u0.getMap(), Unique));
+     *this->_M_unknowns[ii+3] *=0;
     }
   for (UInt i=0; i<2; i++ ) 
     {
-      _M_rhs.push_back(new VectorType(u0.getMap(), Unique));
-      *_M_rhs[i] *=0; 
+      this->_M_rhs.push_back(new VectorType(u0.getMap(), Unique));
+      *this->_M_rhs[i] *=0; 
     }
   
   return ;
@@ -493,8 +401,8 @@ void Newmark<VectorType>::initialize_unk(const  std::vector<VectorType> uv0 )
   
   ASSERT( n0 != 0, "vector null " );
   
-  vector_type_iterator iter     = _M_unknowns.begin();
-  vector_type_iterator iter_end = _M_unknowns.end();
+  vector_type_iterator iter     = this->_M_unknowns.begin();
+  vector_type_iterator iter_end =this->_M_unknowns.end();
   
   int i(0);
     
@@ -504,62 +412,43 @@ void Newmark<VectorType>::initialize_unk(const  std::vector<VectorType> uv0 )
       *iter = new VectorType(uv0[i]);
     }
     
-  for ( i = _M_unknowns.size() ; i < _M_size && i< n0; ++i )
-    _M_unknowns.push_back(new VectorType(uv0[i]));
+  for ( i = this->_M_unknowns.size() ; i < this->_M_size && i< n0; ++i )
+    this->_M_unknowns.push_back(new VectorType(uv0[i]));
   
-  for ( i = _M_unknowns.size() ; i < _M_size; i++ )
-    _M_unknowns.push_back(new VectorType(uv0[n0-1]));
+  for ( i = this->_M_unknowns.size() ; i < this->_M_size; i++ )
+    this->_M_unknowns.push_back(new VectorType(uv0[n0-1]));
 
    for (UInt i=0; i<2; i++ ) 
     {
-      _M_rhs.push_back(new VectorType(uv0[0].getMap(), Unique));
-      *_M_rhs[i] *=0; 
+      this->_M_rhs.push_back(new VectorType(uv0[0].getMap(), Unique));
+      *this->_M_rhs[i] *=0; 
     }
   
 
 return ;
 }
-  /*
-template<typename VectorType>
-double
-Newmark<VectorType>::coeff_der( UInt i ) 
-{
-  ASSERT( i < 4,
-	  "Error in specification of the time derivative coefficient for the Newmark formula (out of range error)" );  
-  return _M_alpha[ i ];
-}
 
-template<typename VectorType>
-double
-Newmark<VectorType>::coeff_der2( UInt i ) 
-{
-  ASSERT( i < 4,
-	  "Error in specification of the time derivative coefficient for the Newmark formula (out of range error)" );  
-  
-  return _M_xi[ i ];
-}
-  */
 template<typename VectorType>
 void
 Newmark<VectorType>::showMe()  const
 {
-  std::cout << "*** Newmark Time discretization maximum order of derivate "<< _M_orderDev << " ***"<< std::endl;
+  std::cout << "*** Newmark Time discretization maximum order of derivate "<< this->_M_orderDev << " ***"<< std::endl;
   std::cout <<" Coefficients : "  << std::endl;
   std::cout <<" theta :        " <<_M_theta<<"\n"
 	    <<" gamma :        " <<_M_gamma<<"\n"
-	    <<" size unknowns :" <<_M_size<<"\n";
+	    <<" size unknowns :" << this->_M_size<<"\n";
   
-    for ( UInt i = 0; i < _M_alpha.size(); ++i )
-       	 std::cout << "       alpha(" << i << ") = " << _M_alpha[ i ]
+    for ( UInt i = 0; i <  this->_M_alpha.size(); ++i )
+       	 std::cout << "       alpha(" << i << ") = " <<  this->_M_alpha[ i ]
 		   << std::endl;
 
 	 if (_M_orderDev==2)
 	   {
-	     for ( UInt i = 0; i < _M_xi.size(); ++i )
-	       std::cout << "       xi(" << i << ") = " << _M_xi[ i ] << std::endl;
+	     for ( UInt i = 0; i <  this->_M_xi.size(); ++i )
+	       std::cout << "       xi(" << i << ") = " <<  this->_M_xi[ i ] << std::endl;
 	   }
 
-  std::cout <<"Delta T :"<<_M_dt<<"\n";
+  std::cout <<"Delta T :"<< this->_M_dt<<"\n";
   std::cout <<"*************************************\n";
 
 	 return ;
@@ -572,16 +461,16 @@ shift_right(const VectorType & unk_curr)
 {
   ASSERT ( _M_dt != 0 ,  "_M_dt must be different to 0");
   
-   vector_type_iterator it   = _M_unknowns.end();
-  vector_type_iterator itb1 = _M_unknowns.begin() + _M_size/2;
-  vector_type_iterator itb  = _M_unknowns.begin();
+   vector_type_iterator it   =  this->_M_unknowns.end();
+  vector_type_iterator itb1 =  this->_M_unknowns.begin() +  this->_M_size/2;
+  vector_type_iterator itb  =  this->_M_unknowns.begin();
  
   VectorType u_temp(unk_curr);
  
   for ( ; itb1 != it; itb1++, itb++ )
     *itb1 = *itb;  
   
-  itb  = _M_unknowns.begin();
+  itb  =  this->_M_unknowns.begin();
  
   // insert unk_curr in unknows[0];
   *itb = new VectorType( unk_curr);
@@ -598,15 +487,15 @@ shift_right(const VectorType & unk_curr)
    // where u_temp is current velocity
   *itb = new VectorType(v_temp);
   
-  if (_M_orderDev == 2 ) 
+  if ( this->_M_orderDev == 2 ) 
     {
       itb++;
       u_temp *= 0;
       u_temp += unk_curr;
       
       //update wt;
-      u_temp *= _M_xi[0] / (_M_dt*_M_dt);
-      u_temp -= *_M_rhs[1];   
+      u_temp *= _M_xi[0] / ( this->_M_dt* this->_M_dt);
+      u_temp -= * this->_M_rhs[1];   
 
       *itb = new VectorType(u_temp);
     }
@@ -615,36 +504,38 @@ shift_right(const VectorType & unk_curr)
 
 template<typename VectorType>
 VectorType
-Newmark<VectorType>::time_der( Real dt ) const
+Newmark<VectorType>::time_der( Real dt ) /*const*/
 {
-  *_M_rhs[0]  *= 0;
+  vector_type_iterator itb  =  this->_M_rhs.begin();
 
-  VectorType fv(*_M_unknowns[0]);
+  VectorType fv(* this->_M_unknowns[0]);
 
-  fv *= _M_alpha[ 1 ] / dt ;
+  fv *=  this->_M_alpha[ 1 ] / dt ;
   
-  for (int i= 1; i <_M_size / 2.0 ; i++ )
-      fv += (_M_alpha[ i+1 ] * pow( dt, i - 1 )) *  (*_M_unknowns[ i ]);
+  for (int i= 1; i  < this->_M_size / 2.0 ; i++ )
+      fv += ( this->_M_alpha[ i+1 ] * pow( dt, i - 1 )) *  (* this->_M_unknowns[ i ]);
    
-  *_M_rhs[0] = fv;
+  *it = new VectorType(fv);
 
    return fv;
 }
 
 template<typename VectorType>
 VectorType
-Newmark<VectorType>::time_derOrder2( Real dt )  const
+Newmark<VectorType>::time_derOrder2( Real dt )  /*const*/
 {
-   *_M_rhs[1] *=0;
-  VectorType fw(*_M_unknowns[0]);
+  
+  vector_type_iterator it  =  this->_M_rhs.end()-1;
+
+  VectorType fw(* this->_M_unknowns[0]);
  
-  fw *= _M_xi[ 1 ] /(dt * dt) ;
+  fw *=  this->_M_xi[ 1 ] /(dt * dt) ;
   
   for ( int i = 1;  i < _M_size / 2.0; ++i )
     
-      fw += (_M_xi[ i+1 ] * pow(dt, i - 2 ) ) * (*_M_unknowns[ i ]);
+      fw += ( this->_M_xi[ i+1 ] * pow(dt, i - 2 ) ) * ( *this->_M_unknowns[ i ]);
     
-  *_M_rhs[ 1 ]  = fw; 
+   *it = new VectorType(fw);
   
   return fw;
 }
@@ -671,9 +562,9 @@ VectorType
 Newmark<VectorType>::extrap()  const
 {
   VectorType ue(*_M_unknowns[0]);
-    ue +=_M_dt * (*_M_unknowns[ 1 ]);
-    if (_M_orderDev ==2 )
-      ue += (_M_dt*_M_dt) *(*_M_unknowns[2]);
+    ue += this->_M_dt * (* this->_M_unknowns[ 1 ]);
+    if ( this->_M_orderDev ==2 )
+      ue += ( this->_M_dt* this->_M_dt) *(* this->_M_unknowns[2]);
   return ue;
 }
 
@@ -681,8 +572,8 @@ template<typename VectorType>
 VectorType 
 Newmark<VectorType>::extrapVelocity()  const
 {
-  VectorType ve(*_M_unknowns[1]);
-    ve +=_M_dt * (*_M_unknowns[ 2 ]);
+  VectorType ve(* this->_M_unknowns[1]);
+    ve += this->_M_dt * (* this->_M_unknowns[ 2 ]);
 }
 
 template<typename VectorType>
@@ -690,7 +581,7 @@ double
 Newmark<VectorType>::coeff_ext(UInt i) const
 {
   ASSERT ( i <  3 ,  "coeff_der i must equal 0 or 1 because U^*= U^n + dt*V^n + dt^2 / 2 W^n");
-  return _M_beta(i)*pow(_M_dt, (double) i);
+  return  this->_M_beta(i)*pow( this->_M_dt, (double) i);
 }
 
 template<typename VectorType>
@@ -698,7 +589,7 @@ double
 Newmark<VectorType>::coeff_extVelocity(UInt i)  const
 {
 ASSERT (i < 3,  "coeff_der i must equal 0 or 1 because V^* =  V^n + dt W^n");
- return _M_beta2(i)*pow(_M_dt, (double) i);
+ return  this->_M_beta2(i)*pow( this->_M_dt, (double) i);
 }
 
 inline

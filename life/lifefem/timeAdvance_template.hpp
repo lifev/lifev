@@ -169,11 +169,11 @@ public:
 
   //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
   //! formula
- virtual  VectorType time_der( Real dt = 1 )  const = 0;
+ virtual  VectorType time_der( Real dt = 1 ) /* const */= 0;
   
   //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
   //! formula
-  virtual VectorType time_derOrder2( Real dt = 1 ) const = 0;
+  virtual VectorType time_derOrder2( Real dt = 1 ) /*const*/ = 0;
   
   //! Compute the polynomial extrapolation approximation of order n-1 of
   //! u^{n+1} defined by the n stored state vectors
