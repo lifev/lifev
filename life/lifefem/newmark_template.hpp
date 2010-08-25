@@ -105,13 +105,14 @@ The coefficients \xi, \alpha, \beta, \beta2 depend on theta and \gamma.
 
 template<typename VectorType = EpetraVector >
 class Newmark :
- public TimeAdvance< > 
+ public TimeAdvance< VectorType > 
 {
 public: 
   
   /** @name Typedefs
    */
   //@{
+  typedef TimeAdvance < VectorType > super;
   typedef VectorType                      vector_raw_type;
   typedef std::vector< vector_raw_type* > vector_type;
   typedef typename vector_type::iterator  vector_type_iterator;
@@ -162,7 +163,7 @@ public:
    VectorType time_der( Real dt = 1 ) /*const*/ ;
   
   //! Returns the right hand side \f$ f_W \f$ associated to the discretitation      of the second derivative
-  VectorType time_derOrder2( Real dt = 1 ) const ;
+  VectorType time_derOrder2( Real dt = 1 ) /*const*/ ;
   
   //! Compute the polynomial extrapolation approximation of order n-1 of
   //! u^{n+1} defined by the n stored state vectors
@@ -320,7 +321,7 @@ void Newmark<VectorType>::initialize_unk( VectorType u0 )
 	*iter = new VectorType(u0.getMap(), Unique);
       }
 
-    for ( UInt i(this->_M_unknowns.size()) ; i < _M_size; i++ )
+    for ( UInt i(this->_M_unknowns.size()) ; i < this->_M_size; i++ )
         this->_M_unknowns.push_back(new VectorType(u0));
 
     vector_type_iterator iterR     = this->_M_rhs.begin();
@@ -338,8 +339,8 @@ void Newmark<VectorType>::initialize_unk( VectorType u0 )
 template<typename VectorType>
 void Newmark<VectorType>::initialize_unk( VectorType u0, VectorType v0 )
 {
-  vector_type_iterator iter       = _M_unknowns.begin();
-  vector_type_iterator iter_end   = _M_unknowns.end();
+  vector_type_iterator iter       = this->_M_unknowns.begin();
+  vector_type_iterator iter_end   = this->_M_unknowns.end();
   
   for ( ; iter != iter_end; iter++ )
     {
@@ -442,7 +443,7 @@ Newmark<VectorType>::showMe()  const
        	 std::cout << "       alpha(" << i << ") = " <<  this->_M_alpha[ i ]
 		   << std::endl;
 
-	 if (_M_orderDev==2)
+	 if (this->_M_orderDev==2)
 	   {
 	     for ( UInt i = 0; i <  this->_M_xi.size(); ++i )
 	       std::cout << "       xi(" << i << ") = " <<  this->_M_xi[ i ] << std::endl;
@@ -459,7 +460,7 @@ void
 Newmark<VectorType>::
 shift_right(const VectorType & unk_curr) 
 {
-  ASSERT ( _M_dt != 0 ,  "_M_dt must be different to 0");
+  ASSERT (  this->_M_dt != 0 ,  "_M_dt must be different to 0");
   
    vector_type_iterator it   =  this->_M_unknowns.end();
   vector_type_iterator itb1 =  this->_M_unknowns.begin() +  this->_M_size/2;
@@ -480,8 +481,8 @@ shift_right(const VectorType & unk_curr)
   //update vt;
    
    VectorType v_temp(unk_curr);
-   v_temp *= _M_alpha[0] / _M_dt;
-   v_temp -= *_M_rhs[0];
+   v_temp *=  this->_M_alpha[0] / this-> _M_dt;
+   v_temp -= * this->_M_rhs[0];
 
    // update unknows[1] with u_temp 
    // where u_temp is current velocity
@@ -494,7 +495,7 @@ shift_right(const VectorType & unk_curr)
       u_temp += unk_curr;
       
       //update wt;
-      u_temp *= _M_xi[0] / ( this->_M_dt* this->_M_dt);
+      u_temp *= this->_M_xi[0] / ( this->_M_dt* this->_M_dt);
       u_temp -= * this->_M_rhs[1];   
 
       *itb = new VectorType(u_temp);
@@ -506,7 +507,7 @@ template<typename VectorType>
 VectorType
 Newmark<VectorType>::time_der( Real dt ) /*const*/
 {
-  vector_type_iterator itb  =  this->_M_rhs.begin();
+  vector_type_iterator it  =  this->_M_rhs.begin();
 
   VectorType fv(* this->_M_unknowns[0]);
 
@@ -531,7 +532,7 @@ Newmark<VectorType>::time_derOrder2( Real dt )  /*const*/
  
   fw *=  this->_M_xi[ 1 ] /(dt * dt) ;
   
-  for ( int i = 1;  i < _M_size / 2.0; ++i )
+  for ( int i = 1;  i < this->_M_size / 2.0; ++i )
     
       fw += ( this->_M_xi[ i+1 ] * pow(dt, i - 2 ) ) * ( *this->_M_unknowns[ i ]);
     
@@ -544,7 +545,7 @@ template<typename VectorType>
 VectorType 
 Newmark<VectorType>::vnk()  const
 {
-  VectorType v(*_M_unknowns[1]);
+  VectorType v(* this->_M_unknowns[1]);
   return v;
 }
 
@@ -552,7 +553,7 @@ template<typename VectorType>
 VectorType 
 Newmark<VectorType>::wnk()  const
 {
-  VectorType w(*_M_unknowns[2]);
+  VectorType w(* this->_M_unknowns[2]);
   return w;
 }
 
@@ -561,7 +562,7 @@ template<typename VectorType>
 VectorType 
 Newmark<VectorType>::extrap()  const
 {
-  VectorType ue(*_M_unknowns[0]);
+  VectorType ue(* this->_M_unknowns[0]);
     ue += this->_M_dt * (* this->_M_unknowns[ 1 ]);
     if ( this->_M_orderDev ==2 )
       ue += ( this->_M_dt* this->_M_dt) *(* this->_M_unknowns[2]);
@@ -593,7 +594,7 @@ ASSERT (i < 3,  "coeff_der i must equal 0 or 1 because V^* =  V^n + dt W^n");
 }
 
 inline
-TimeAdvance< >* createNewmark() { return new Newmark <>(); }
+TimeAdvance< EpetraVector >* createNewmark() { return new Newmark <EpetraVector>(); }
   namespace
   {
     static bool registerNewmark = TimeAdvanceFactory::instance().registerProduct( "Newmark",  &createNewmark );
