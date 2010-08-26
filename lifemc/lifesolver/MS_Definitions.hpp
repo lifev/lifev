@@ -142,6 +142,8 @@ class MS_PhysicalData;
 // Type definitions
 typedef EntityFlag                                                 BCFlag;
 
+typedef Displayer::comm_PtrType                                    MS_Comm_PtrType;
+
 typedef EpetraVector                                               MS_Vector_Type;
 typedef boost::shared_ptr< MS_Vector_Type >                        MS_Vector_PtrType;
 

@@ -57,7 +57,7 @@ MS_PhysicalModel::MS_PhysicalModel() :
     M_displayer         ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MS_PhysicalModel::MS_PhysicalModel() \n";
 #endif
 
@@ -86,7 +86,7 @@ MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
     M_displayer         ( model.M_displayer )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MS_PhysicalModel::MS_PhysicalModel( model ) \n";
 #endif
 
@@ -123,7 +123,7 @@ void
 MS_PhysicalModel::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MS_PhysicalModel::SetupData( FileName ) \n";
 #endif
 
@@ -206,7 +206,7 @@ MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
                                const boost::array< Real, NDIM >& translate )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MS_PhysicalModel::SetGeometry( scale, rotate, translate ) \n";
 #endif
 
@@ -216,10 +216,10 @@ MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
 }
 
 void
-MS_PhysicalModel::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
+MS_PhysicalModel::SetCommunicator( const MS_Comm_PtrType& comm )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MS_PhysicalModel::SetCommunicator( comm ) \n";
 #endif
 

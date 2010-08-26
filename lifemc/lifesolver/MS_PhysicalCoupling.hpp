@@ -104,34 +104,6 @@ public:
      */
     virtual void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals ) = 0;
 
-    //! Build the list of models affected by the perturbation of a local coupling variable
-    /*!
-     * @param LocalCouplingVariableID local coupling variable (perturbed)
-     * @return list of models affected by the perturbation
-     */
-    virtual MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID ) = 0;
-
-    //! Insert constant coefficients into the Jacobian matrix
-    /*!
-     * @param Jacobian the Jacobian matrix
-     */
-    virtual void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian ) = 0;
-
-    //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
-    /*!
-     * @param Jacobian the Jacobian matrix
-     * @param Column the column related to the perturbed variable
-     * @param ID the global ID of the model which is perturbed by the variable
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
-     */
-    virtual void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& LinearSystemSolved ) = 0;
-
-    //! Display some information about the coupling
-    /*!
-     * @param output specify the output stream
-     */
-    virtual void DisplayCouplingValues( std::ostream& output ) = 0;
-
     //! Display some information about the coupling
     virtual void ShowMe();
 
@@ -158,6 +130,15 @@ public:
      * @param CouplingVariables Global vector of coupling variables
      */
     void ExportCouplingVariables( MS_Vector_Type& CouplingVariables );
+
+    //! Extrapolate the values of the coupling variables for the next time step
+    void ExtrapolateCouplingVariables();
+
+    //! Find if a perturbation is imposed on the coupling.
+    /*!
+     * @return true if a perturbation is imposed
+     */
+    bool IsPerturbed() const;
 
     //! Export the Jacobian matrix
     /*!
@@ -225,7 +206,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
+    void SetCommunicator( const MS_Comm_PtrType& comm );
 
     //@}
 
@@ -263,10 +244,17 @@ public:
 
     //! Get the model connected by the coupling through local ID
     /*!
-     * @param ID local ID of the model
+     * @param LocalID local ID of the model
      * @return Pointer to the model
      */
     MS_Model_PtrType GetModel( const UInt& LocalID ) const;
+
+    //! Get the model connected by the coupling through local ID
+    /*!
+     * @param LocalID local ID of the model
+     * @return Coupling flag of the model
+     */
+    const BCFlag& GetFlag( const UInt& LocalID ) const;
 
     //! Get the number of the coupling variables
     /*!
@@ -274,9 +262,57 @@ public:
      */
     const UInt& GetCouplingVariablesNumber() const;
 
+    //! Get the perturbed coupling.
+    /*!
+     * If it is unperturbed it returns -1.
+     * @return the localID of the perturbed coupling
+     */
+    const Int& GetPerturbedCoupling() const;
+
+    //! Get the local residual.
+    /*!
+     * @return the local residual of the coupling
+     */
+    const MS_Vector_Type& GetResidual() const;
+
+
     //@}
 
 protected:
+
+    //! @name Protected MultiScale PhysicalCoupling Virtual Methods
+    //@{
+
+    //! Build the list of models affected by the perturbation of a local coupling variable
+    /*!
+     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @return list of models affected by the perturbation
+     */
+    virtual MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID ) = 0;
+
+    //! Insert constant coefficients into the Jacobian matrix
+    /*!
+     * @param Jacobian the Jacobian matrix
+     */
+    virtual void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian ) = 0;
+
+    //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
+    /*!
+     * @param Jacobian the Jacobian matrix
+     * @param Column the column related to the perturbed variable
+     * @param ID the global ID of the model which is perturbed by the variable
+     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     */
+    virtual void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& LinearSystemSolved ) = 0;
+
+    //! Display some information about the coupling
+    /*!
+     * @param output specify the output stream
+     */
+    virtual void DisplayCouplingValues( std::ostream& output ) = 0;
+
+    //@}
+
 
     //! @name Protected Methods
     //@{
@@ -298,6 +334,22 @@ protected:
      * @param globalVector the global vector
      */
     void ExportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector );
+
+    //! Linear interpolation/extrapolation of the coupling variables
+    /*!
+     * @param coupling1 coupling variable at time t1
+     * @param coupling2 coupling variable at time t2
+     * @param t interpolation time
+     * @param t1 first coupling vector time
+     * @param t2 second coupling vector time
+     * @return coupling variable interpolated/extrapolated at time t
+     */
+    template < class CouplingType >
+    CouplingType InterpolateCouplingVariable( const CouplingType& coupling1,
+                                              const CouplingType& coupling2,
+                                              const Real& t,
+                                              const Real& t1,
+                                              const Real& t2 );
 
     //! Display and error message for the specific model
     /*!
@@ -321,12 +373,28 @@ protected:
     std::pair< UInt, UInt >              M_couplingIndex;
 
     MS_Vector_PtrType                    M_LocalCouplingVariables;
+    MS_Vector_PtrType                    M_LocalCouplingVariables_tn;
     MS_Vector_PtrType                    M_LocalCouplingResiduals;
-    MS_Vector_PtrType                    M_LocalDeltaCouplingVariables;
 
-    boost::shared_ptr< Epetra_Comm >     M_comm;
+    Int                                  M_perturbedCoupling;
+
+    MS_Comm_PtrType                      M_comm;
     boost::shared_ptr< Displayer >       M_displayer;
 };
+
+// ===================================================
+// Template implementation
+// ===================================================
+template < class CouplingType >
+CouplingType
+MS_PhysicalCoupling::InterpolateCouplingVariable( const CouplingType& coupling1,
+                                                  const CouplingType& coupling2,
+                                                  const Real& t,
+                                                  const Real& t1,
+                                                  const Real& t2 )
+{
+    return coupling1 + (coupling2 - coupling1) * ( (t - t1) / (t2 - t1) );
+}
 
 } // Namespace LifeV
 

@@ -45,7 +45,7 @@ MS_Algorithm_Newton::MS_Algorithm_Newton() :
     M_Jacobian          ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8013 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton() \n";
 #endif
 
@@ -58,7 +58,7 @@ MS_Algorithm_Newton::MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm )
     M_Jacobian          ( algorithm.M_Jacobian )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8013 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton( algorithm ) \n";
 #endif
 
@@ -86,7 +86,7 @@ void
 MS_Algorithm_Newton::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8013 ) << "MS_Algorithm_Newton::SetupData( DataFile ) \n";
 #endif
 
@@ -103,7 +103,7 @@ void
 MS_Algorithm_Newton::SubIterate()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8013 ) << "MS_Algorithm_Newton::SubIterate( tolerance, subITMax ) \n";
 #endif
 
@@ -123,16 +123,13 @@ MS_Algorithm_Newton::SubIterate()
 
     for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
     {
-        // Compute the Jacobian
-        if ( subIT == 1 )
-        {
-            M_Jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
-            M_multiscale->ExportJacobian( *M_Jacobian );
-            M_Jacobian->GlobalAssemble();
-            M_solver.setMatrix( *M_Jacobian );
+        // Compute the Jacobian (we completery delete the previous matrix)
+        M_Jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
+        M_multiscale->ExportJacobian( *M_Jacobian );
+        M_Jacobian->GlobalAssemble();
+        M_solver.setMatrix( *M_Jacobian );
 
-            //M_Jacobian->spy( "Jacobian" );
-        }
+        //M_Jacobian->spy( "Jacobian" );
 
         // To be moved in a post-processing class
         //std::cout << " MS-  CouplingVariables:\n" << std::endl;

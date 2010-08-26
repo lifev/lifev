@@ -142,12 +142,6 @@ public:
      */
     BCInterface_Type& GetBCInterface();
 
-    //! Get the BCInterface container of the boundary conditions of the linear model
-    /*!
-     * @return BCInterface container
-     */
-    BCInterface_Type& GetLinearBCInterface();
-
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
@@ -205,13 +199,13 @@ public:
      */
     Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
 
-    //! Get the variation of the flux (on a specific boundary face) using the linear model
+    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
      * @param Flag flag of the boundary face on which quantity should be computed
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the flux
+     * @return variation of the flow rate
      */
-    Real GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!

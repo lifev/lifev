@@ -52,13 +52,14 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
     M_globalData                  (),
     M_couplingIndex               (),
     M_LocalCouplingVariables      (),
+    M_LocalCouplingVariables_tn   (),
     M_LocalCouplingResiduals      (),
-    M_LocalDeltaCouplingVariables (),
+    M_perturbedCoupling           ( false ),
     M_comm                        (),
     M_displayer                   ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::MS_PhysicalCoupling() \n";
 #endif
 
@@ -74,14 +75,15 @@ MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) 
     M_globalData                  ( coupling.M_globalData ),
     M_couplingIndex               ( coupling.M_couplingIndex ),
     M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
+    M_LocalCouplingVariables_tn   ( coupling.M_LocalCouplingVariables_tn ),
     M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
-    M_LocalDeltaCouplingVariables ( coupling.M_LocalDeltaCouplingVariables ),
+    M_perturbedCoupling           ( coupling.M_perturbedCoupling ),
     M_comm                        ( coupling.M_comm ),
     M_displayer                   ( coupling.M_displayer )
 
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::MS_PhysicalCoupling( coupling ) \n";
 #endif
 
@@ -104,8 +106,9 @@ MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
         M_globalData                  = coupling.M_globalData;
         M_couplingIndex               = coupling.M_couplingIndex;
         M_LocalCouplingVariables      = coupling.M_LocalCouplingVariables;
+        M_LocalCouplingVariables_tn   = coupling.M_LocalCouplingVariables_tn;
         M_LocalCouplingResiduals      = coupling.M_LocalCouplingResiduals;
-        M_LocalDeltaCouplingVariables = coupling.M_LocalDeltaCouplingVariables;
+        M_perturbedCoupling           = coupling.M_perturbedCoupling;
         M_comm                        = coupling.M_comm;
         M_displayer                   = coupling.M_displayer;
     }
@@ -119,7 +122,7 @@ void
 MS_PhysicalCoupling::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( FileName ) \n";
 #endif
 
@@ -160,7 +163,7 @@ void
 MS_PhysicalCoupling::CreateCouplingMap( EpetraMap& couplingMap )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::CreateCouplingMap( couplingMap ) \n";
 #endif
 
@@ -173,7 +176,7 @@ void
 MS_PhysicalCoupling::ImportCouplingVariables( const MS_Vector_Type& CouplingVariables )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::ImportCouplingVariables( CouplingVariables ) \n";
 #endif
 
@@ -184,7 +187,7 @@ void
 MS_PhysicalCoupling::ExportCouplingVariables( MS_Vector_Type& CouplingVariables )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::ExportCouplingVariables( CouplingVariables ) \n";
 #endif
 
@@ -192,27 +195,59 @@ MS_PhysicalCoupling::ExportCouplingVariables( MS_Vector_Type& CouplingVariables 
 }
 
 void
+MS_PhysicalCoupling::ExtrapolateCouplingVariables()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8200 ) << "MS_PhysicalCoupling::ExtrapolateCouplingVariables() \n";
+#endif
+
+    MS_Vector_Type ExtrapolatedCouplingVariables( *M_LocalCouplingVariables );
+
+    ExtrapolatedCouplingVariables = InterpolateCouplingVariable( *M_LocalCouplingVariables_tn, *M_LocalCouplingVariables,
+                                                                  M_globalData->GetDataTime()->getNextTime(),
+                                                                  M_globalData->GetDataTime()->getPreviousTime(),
+                                                                  M_globalData->GetDataTime()->getTime() );
+
+    *M_LocalCouplingVariables_tn = *M_LocalCouplingVariables;
+    *M_LocalCouplingVariables    = ExtrapolatedCouplingVariables;
+
+#ifdef HAVE_LIFEV_DEBUG
+    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
+        Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingVariables )[i]  << "\n";
+#endif
+
+}
+
+bool
+MS_PhysicalCoupling::IsPerturbed() const
+{
+    return M_perturbedCoupling == -1 ? false : true;
+}
+
+void
 MS_PhysicalCoupling::ExportJacobian( MS_Matrix_Type& Jacobian )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::ExportJacobian( Jacobian ) \n";
 #endif
 
     // Definitions
-    bool SolveLinearSystem;                  // Flag to avoid multiple solution of the same linear system
+    bool SolveLinearSystem;                     // Flag to avoid multiple solution of the same linear system
     MS_ModelsVector_Type ListOfPerturbedModels; // List of perturbed model
 
     // Insert constant values in the Jacobian (due to this coupling condition)
     InsertJacobianConstantCoefficients( Jacobian );
 
-    // Loop on all the local coupling variables that should be perturbed
-    for ( UInt i(0), column(M_couplingIndex.second) ; i < M_couplingIndex.first ; ++i, ++column )
-    {
-        ( *M_LocalDeltaCouplingVariables )[i] = 1.;
+    // Set as perturbed
+    M_perturbedCoupling = 0;
 
+    // Loop on all the local coupling variables that should be perturbed
+    for ( UInt column(M_couplingIndex.second) ; M_perturbedCoupling < static_cast< Int > ( M_couplingIndex.first ); ++M_perturbedCoupling, ++column )
+    {
         // Build the list of models affected by the perturbation
-        ListOfPerturbedModels = GetListOfPerturbedModels( i );
+        ListOfPerturbedModels = GetListOfPerturbedModels( M_perturbedCoupling );
 
         // Loop on all the models, that could be influenced by the perturbation of the coupling variable
         for ( MS_ModelsVector_Iterator j = ListOfPerturbedModels.begin() ; j < ListOfPerturbedModels.end() ; ++j )
@@ -223,16 +258,17 @@ MS_PhysicalCoupling::ExportJacobian( MS_Matrix_Type& Jacobian )
             for ( UInt k(0) ; k < ( *j )->GetCouplingsNumber() ; ++k )
                 ( *j )->GetCoupling( k )->InsertJacobianDeltaCoefficients( Jacobian, column, ( *j )->GetID(), SolveLinearSystem );
         }
-
-        ( *M_LocalDeltaCouplingVariables )[i] = 0.;
     }
+
+    // Set as unperturbed
+    M_perturbedCoupling = -1;
 }
 
 void
 MS_PhysicalCoupling::SaveSolution()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::SaveSolution() \n";
 #endif
 
@@ -296,7 +332,7 @@ void
 MS_PhysicalCoupling::SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( globalData ) \n";
 #endif
 
@@ -304,10 +340,10 @@ MS_PhysicalCoupling::SetGlobalData( const MS_GlobalDataContainer_PtrType& global
 }
 
 void
-MS_PhysicalCoupling::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
+MS_PhysicalCoupling::SetCommunicator( const MS_Comm_PtrType& comm )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8200 ) << "MS_PhysicalCoupling::SetCommunicator( comm ) \n";
 #endif
 
@@ -358,10 +394,28 @@ MS_PhysicalCoupling::GetModel( const UInt& LocalID ) const
     return M_models[LocalID];
 }
 
+const BCFlag&
+MS_PhysicalCoupling::GetFlag( const UInt& LocalID ) const
+{
+    return M_flags[LocalID];
+}
+
 const UInt&
 MS_PhysicalCoupling::GetCouplingVariablesNumber() const
 {
     return M_couplingIndex.first;
+}
+
+const Int&
+MS_PhysicalCoupling::GetPerturbedCoupling() const
+{
+    return M_perturbedCoupling;
+}
+
+const MS_Vector_Type&
+MS_PhysicalCoupling::GetResidual() const
+{
+    return *M_LocalCouplingResiduals;
 }
 
 // ===================================================
@@ -380,8 +434,8 @@ MS_PhysicalCoupling::CreateLocalVectors()
 
     // Create local repeated vectors
     M_LocalCouplingVariables.reset     ( new EpetraVector( map, Repeated ) );
+    M_LocalCouplingVariables_tn.reset  ( new EpetraVector( map, Repeated ) );
     M_LocalCouplingResiduals.reset     ( new EpetraVector( map, Repeated ) );
-    M_LocalDeltaCouplingVariables.reset( new EpetraVector( map, Repeated ) );
 }
 
 void

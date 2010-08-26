@@ -212,7 +212,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
+    void SetCommunicator( const MS_Comm_PtrType& comm );
 
     //@}
 
@@ -281,11 +281,6 @@ public:
 
 protected:
 
-    //! @name Protected Methods
-    //@{
-
-    //@}
-
     static UInt                          M_modelsNumber;       // Total number of models
 
     UInt                                 M_ID;                 // Global ID of the model
@@ -301,7 +296,7 @@ protected:
     boost::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation
     boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
-    boost::shared_ptr< Epetra_Comm >     M_comm;               // Communicator
+    MS_Comm_PtrType                      M_comm;               // Communicator
     boost::shared_ptr< Displayer >       M_displayer;          // Displayer
 };
 

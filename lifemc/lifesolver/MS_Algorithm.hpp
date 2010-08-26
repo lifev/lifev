@@ -95,6 +95,9 @@ public:
     //! Perform sub-iteration on the coupling variables
     virtual void SubIterate();
 
+    //! Update coupling variables for the next time step.
+    virtual void UpdateCouplingVariables();
+
     //! Display some information about the algorithm
     virtual void ShowMe();
 
@@ -104,12 +107,8 @@ public:
     //! @name Methods
     //@{
 
-    //! Save on a Matlab file the information about the convergence of the algorithm.
-    /*!
-     * @param SubiterationsNumber Number of subiterations performed.
-     * @param residual Residual.
-     */
-    void Save( const UInt& SubiterationsNumber, const Real& residual );
+    //! Initialize coupling variables for the first time step.
+    void InitializeCouplingVariables();
 
     //@}
 
@@ -121,7 +120,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
+    void SetCommunicator( const MS_Comm_PtrType& comm );
 
     //! Set the main MultiScale model
     /*!
@@ -163,7 +162,7 @@ public:
     /*!
      * @return pointer to the communicator
      */
-    const boost::shared_ptr< Epetra_Comm > GetCommunicator() const;
+    const MS_Comm_PtrType GetCommunicator() const;
 
     //! Get the subiterations maximum number
     /*!
@@ -184,6 +183,13 @@ protected:
     //! @name Protected Methods
     //@{
 
+    //! Save on a Matlab file the information about the convergence of the algorithm.
+    /*!
+     * @param SubiterationsNumber Number of subiterations performed.
+     * @param residual Residual.
+     */
+    void Save( const UInt& SubiterationsNumber, const Real& residual );
+
     //! Check if the tolerance has been satisfied
     /*!
      * @return true if the tolerance is satisfied
@@ -199,7 +205,7 @@ protected:
     MS_Vector_PtrType                        M_couplingVariables;
     MS_Vector_PtrType                        M_couplingResiduals;
 
-    boost::shared_ptr< Epetra_Comm >         M_comm;
+    MS_Comm_PtrType                          M_comm;
     boost::shared_ptr< Displayer >           M_displayer;
 
     UInt                                     M_SubiterationsMaximumNumber;

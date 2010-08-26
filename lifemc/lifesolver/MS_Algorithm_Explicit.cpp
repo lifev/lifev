@@ -43,7 +43,7 @@ MS_Algorithm_Explicit::MS_Algorithm_Explicit() :
     super               ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Explicit::MS_Algorithm_Explicit() \n";
 #endif
 
@@ -54,7 +54,7 @@ MS_Algorithm_Explicit::MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algor
     super               ( algorithm )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Explicit::MS_Algorithm_Explicit( algorithm ) \n";
 #endif
 
@@ -80,7 +80,7 @@ void
 MS_Algorithm_Explicit::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8012 ) << "MS_Algorithm_Explicit::SetupData( DataFile ) \n";
 #endif
 
@@ -91,13 +91,17 @@ void
 MS_Algorithm_Explicit::SubIterate()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8012 ) << "MS_Algorithm_Explicit::SubIterate( tolerance, subITMax ) \n";
 #endif
 
     ToleranceSatisfied();
+}
 
-    // Update coupling variables
+void
+MS_Algorithm_Explicit::UpdateCouplingVariables()
+{
+    // We use the initialize method for updating the coupling
     M_multiscale->InitializeCouplingVariables();
 }
 

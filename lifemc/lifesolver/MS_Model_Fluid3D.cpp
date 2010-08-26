@@ -52,7 +52,7 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_mesh                         (),
     M_map                          (),
     M_solution                     (),
-    M_linearBC                     ( new BCInterface_Type() ),
+    M_linearBC                     ( new BC_Type() ),
     M_updateLinearModel            ( true ),
     M_uFESpace                     (),
     M_pFESpace                     (),
@@ -65,7 +65,7 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_generalizedAitken            ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::MS_Model_Fluid3D() \n";
 #endif
 
@@ -141,7 +141,7 @@ void
 MS_Model_Fluid3D::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupData( ) \n";
 #endif
 
@@ -172,9 +172,6 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_BC->FillHandler( FileName, "fluid" );
     M_BC->UpdateOperatorVariables(); //MUST BE MOVED INSIDE THE UPDATE !!!
 
-    //Setup linear problem
-    SetupLinearData( FileName );
-
     //Setup Exporter & Importer
     SetupExporterImporter( FileName );
 }
@@ -183,7 +180,7 @@ void
 MS_Model_Fluid3D::SetupModel()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupProblem() \n";
 #endif
 
@@ -233,7 +230,7 @@ void
 MS_Model_Fluid3D::BuildSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::BuildSystem() \n";
 #endif
 
@@ -265,7 +262,7 @@ void
 MS_Model_Fluid3D::UpdateSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::UpdateSystem() \n";
 #endif
 
@@ -280,18 +277,18 @@ MS_Model_Fluid3D::UpdateSystem()
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
-    //Linear system need to be updated
-    M_updateLinearModel = true;
-
     //Recompute preconditioner
     M_fluid->resetPrec( true );
+
+    //Linear system need to be updated
+    M_updateLinearModel = true;
 }
 
 void
 MS_Model_Fluid3D::SolveSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SolveSystem() \n";
 #endif
 
@@ -308,6 +305,10 @@ MS_Model_Fluid3D::SolveSystem()
         M_generalizedAitken.restart();
         for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
         {
+            // Verify tolerance
+            if ( residual <= M_tolerance )
+                break;
+
             *M_beta += M_generalizedAitken.computeDeltaLambdaScalar( *M_beta, *M_beta - *M_fluid->solution() );
 
             //Linear model need to be updated!
@@ -326,10 +327,6 @@ MS_Model_Fluid3D::SolveSystem()
                 std::cout << "  F-  Sub-iteration n.:                        " << subIT << std::endl;
                 std::cout << "  F-  Residual:                                " << residual << std::endl;
             }
-
-            // Verify tolerance
-            if ( residual <= M_tolerance )
-                break;
         }
     }
 }
@@ -338,7 +335,7 @@ void
 MS_Model_Fluid3D::SaveSolution()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SaveSolution() \n";
 #endif
 
@@ -380,34 +377,31 @@ MS_Model_Fluid3D::ShowMe()
 // Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetupLinearData( const std::string& FileName )
-{
-
-#ifdef DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearData( FileName ) \n";
-#endif
-
-    // Boundary Conditions for the linear problem
-    M_linearBC->SetOperator( M_fluid );
-    M_linearBC->FillHandler( FileName, "linear_fluid" );
-}
-
-void
 MS_Model_Fluid3D::SetupLinearModel()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupLinearModel( ) \n";
 #endif
 
-    SetupBCOffset( M_linearBC->GetHandler() );
+    // Define BCFunctions for tangent problem
+    M_BCBaseDelta_Zero.setFunction( boost::bind( &MS_Model_Fluid3D::BCFunctionDelta_Zero, this, _1, _2, _3, _4, _5 ) );
+    M_BCBaseDelta_One.setFunction(  boost::bind( &MS_Model_Fluid3D::BCFunctionDelta_One,  this, _1, _2, _3, _4, _5 ) );
+
+    // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
+    BC_PtrType LinearBCHandler ( new BC_Type( *M_BC->GetHandler() ) );
+    M_linearBC = LinearBCHandler;
+
+    // Set all te BCFunctions to zero
+    for ( BC_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+            i->setBCFunction( M_BCBaseDelta_Zero );
 }
 
 void
 MS_Model_Fluid3D::UpdateLinearModel()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::UpdateLinearModel() \n";
 #endif
 
@@ -424,9 +418,6 @@ MS_Model_Fluid3D::UpdateLinearModel()
                                  VectorZero,
                                  VectorZero );
 
-    //Update Properties of BC
-    M_linearBC->UpdateOperatorVariables();
-
     //Linear System Updated
     M_updateLinearModel = false;
 }
@@ -435,18 +426,22 @@ void
 MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SolveLinearModel() \n";
 #endif
 
     if ( !SolveLinearSystem )
         return;
 
+    ImposePerturbation();
+
     if ( M_updateLinearModel )
         UpdateLinearModel();
 
     //Solve the linear problem
-    M_fluid->iterateLin( *M_linearBC->GetHandler() );
+    M_fluid->iterateLin( *M_linearBC );
+
+    ResetPerturbation();
 
     //This flag avoid recomputation of the same system
     SolveLinearSystem = false;
@@ -456,7 +451,7 @@ MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
 // Set Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetSolution( const boost::shared_ptr< FluidVector_Type >& Solution )
+MS_Model_Fluid3D::SetSolution( const FluidVector_PtrType& Solution )
 {
     M_solution = Solution;
 
@@ -470,12 +465,6 @@ MS_Model_Fluid3D::BCInterface_Type&
 MS_Model_Fluid3D::GetBCInterface()
 {
     return *M_BC;
-}
-
-MS_Model_Fluid3D::BCInterface_Type&
-MS_Model_Fluid3D::GetLinearBCInterface()
-{
-    return *M_linearBC;
 }
 
 Real
@@ -550,7 +539,7 @@ MS_Model_Fluid3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& Stre
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
 {
     SolveLinearModel( SolveLinearSystem );
 
@@ -568,9 +557,7 @@ MS_Model_Fluid3D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinea
 Real
 MS_Model_Fluid3D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
-
-    return GetBoundaryDensity( Flag ) * M_fluid->GetLinearFlux( Flag ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    return GetBoundaryDensity( Flag ) * GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
 }
 
 Real
@@ -578,7 +565,7 @@ MS_Model_Fluid3D::GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& 
 {
     SolveLinearModel( SolveLinearSystem );
 
-    return M_fluid->LinearLagrangeMultiplier(Flag, *M_linearBC->GetHandler() );
+    return M_fluid->LinearLagrangeMultiplier(Flag, *M_linearBC );
 }
 
 Real
@@ -631,7 +618,7 @@ void
 MS_Model_Fluid3D::SetupGlobalData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupGlobalData( FileName ) \n";
 #endif
 
@@ -699,7 +686,7 @@ void
 MS_Model_Fluid3D::SetupFEspace()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupFEspace() \n";
 #endif
 
@@ -768,7 +755,7 @@ void
 MS_Model_Fluid3D::SetupDOF()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupDOF \n";
 #endif
 
@@ -782,7 +769,7 @@ void
 MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< BC_Type >& BC )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupBCOffset( BC ) \n";
 #endif
 
@@ -797,7 +784,7 @@ void
 MS_Model_Fluid3D::SetupSolution()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupSolution() \n";
 #endif
 
@@ -815,6 +802,52 @@ MS_Model_Fluid3D::SetupSolution()
         *M_solution = 0.0;
 
     M_fluid->initialize( *M_solution );
+}
+
+void
+MS_Model_Fluid3D::ImposePerturbation()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::ImposePerturbation() \n";
+#endif
+
+    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+        if ( ( *i )->IsPerturbed() )
+        {
+            M_linearBC->GetBCWithFlag( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) ).setBCFunction( M_BCBaseDelta_One );
+
+            break;
+        }
+}
+
+void
+MS_Model_Fluid3D::ResetPerturbation()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MS_Model_Fluid3D::ResetPerturbation() \n";
+#endif
+
+    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+        if ( ( *i )->IsPerturbed() )
+        {
+            M_linearBC->GetBCWithFlag( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) ).setBCFunction( M_BCBaseDelta_Zero );
+
+            break;
+        }
+}
+
+Real
+MS_Model_Fluid3D::BCFunctionDelta_Zero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+{
+    return 0.;
+}
+
+Real
+MS_Model_Fluid3D::BCFunctionDelta_One( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+{
+    return 1.;
 }
 
 } // Namespace LifeV

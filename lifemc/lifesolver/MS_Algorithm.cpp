@@ -52,7 +52,7 @@ MS_Algorithm::MS_Algorithm() :
     M_Tolerance                  ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8010 ) << "MS_Algorithm::MS_Algorithm() \n";
 #endif
 
@@ -69,7 +69,7 @@ MS_Algorithm::MS_Algorithm( const MS_Algorithm& algorithm ) :
     M_Tolerance                  ( algorithm.M_Tolerance )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8010 ) << "MS_Algorithm::MS_Algorithm( algorithm ) \n";
 #endif
 
@@ -102,7 +102,7 @@ void
 MS_Algorithm::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8010 ) << "MS_Algorithm::SetupData( DataFile ) \n";
 #endif
 
@@ -116,7 +116,7 @@ void
 MS_Algorithm::SubIterate()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8010 ) << "MS_Algorithm::SubIterate( tolerance, subITMax ) \n";
 #endif
 
@@ -126,32 +126,10 @@ MS_Algorithm::SubIterate()
 }
 
 void
-MS_Algorithm::Save( const UInt& SubiterationsNumber, const Real& residual )
+MS_Algorithm::UpdateCouplingVariables()
 {
-    std::ofstream output;
-    output << std::scientific << std::setprecision( 15 );
-
-    if ( M_comm->MyPID() == 0 )
-    {
-        std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Algorithm.mfile";
-
-        if ( M_multiscale->GetGlobalData()->GetDataTime()->isFirstTimeStep() )
-        {
-            output.open( filename.c_str(), std::ios::trunc );
-            output << "% Algorithm Type: " << Enum2String( M_type, MS_algorithmsMap ) << std::endl;
-            output << "% Subiteration maximum number: " << M_SubiterationsMaximumNumber << std::endl;
-            output << "% Tolerance: " << M_Tolerance << std::endl << std::endl;
-            output << "% TIME                     Subiterations      Residual" << std::endl;
-        }
-        else
-            output.open( filename.c_str(), std::ios::app );
-
-        output << M_multiscale->GetGlobalData()->GetDataTime()->getTime()
-               << "      "<< SubiterationsNumber
-               << "                  "<< residual << std::endl;
-
-        output.close();
-    }
+    // The default approach is to extrapolate the next coupling variables
+    M_multiscale->ExtrapolateCouplingVariables();
 }
 
 void
@@ -166,13 +144,22 @@ MS_Algorithm::ShowMe()
 }
 
 // ===================================================
+// Methods
+// ===================================================
+void
+MS_Algorithm::InitializeCouplingVariables()
+{
+    M_multiscale->InitializeCouplingVariables();
+}
+
+// ===================================================
 // Set Methods
 // ===================================================
 void
-MS_Algorithm::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
+MS_Algorithm::SetCommunicator( const MS_Comm_PtrType& comm )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MS_Algorithm::SetCommunicator( comm ) \n";
 #endif
 
@@ -184,7 +171,7 @@ void
 MS_Algorithm::SetModel( const MS_Model_PtrType model )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8010 ) << "MS_Algorithm::SetMultiScaleProblem( multiscale ) \n";
 #endif
 
@@ -226,7 +213,7 @@ MS_Algorithm::GetCouplingResiduals() const
     return M_couplingResiduals;
 }
 
-const boost::shared_ptr< Epetra_Comm >
+const MS_Comm_PtrType
 MS_Algorithm::GetCommunicator() const
 {
     return M_comm;
@@ -247,6 +234,35 @@ MS_Algorithm::GetTolerance() const
 // ===================================================
 // Protected Methods
 // ===================================================
+void
+MS_Algorithm::Save( const UInt& SubiterationsNumber, const Real& residual )
+{
+    std::ofstream output;
+    output << std::scientific << std::setprecision( 15 );
+
+    if ( M_comm->MyPID() == 0 )
+    {
+        std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Algorithm.mfile";
+
+        if ( M_multiscale->GetGlobalData()->GetDataTime()->isFirstTimeStep() )
+        {
+            output.open( filename.c_str(), std::ios::trunc );
+            output << "% Algorithm Type: " << Enum2String( M_type, MS_algorithmsMap ) << std::endl;
+            output << "% Subiteration maximum number: " << M_SubiterationsMaximumNumber << std::endl;
+            output << "% Tolerance: " << M_Tolerance << std::endl << std::endl;
+            output << "% TIME                     Subiterations      Residual" << std::endl;
+        }
+        else
+            output.open( filename.c_str(), std::ios::app );
+
+        output << M_multiscale->GetGlobalData()->GetDataTime()->getTime()
+               << "      "<< SubiterationsNumber
+               << "                  "<< residual << std::endl;
+
+        output.close();
+    }
+}
+
 bool
 MS_Algorithm::ToleranceSatisfied()
 {

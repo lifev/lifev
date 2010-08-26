@@ -57,7 +57,7 @@ MS_Model_FSI3D::MS_Model_FSI3D() :
     M_linearizedSolidBC            ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8140 ) << "MS_Model_FSI3D::MS_Model_FSI3D() \n";
 #endif
 
@@ -258,12 +258,6 @@ MS_Model_FSI3D::GetBCInterface()
     return *M_fluidBC;
 }
 
-MS_Model_FSI3D::BCInterface_Type&
-MS_Model_FSI3D::GetLinearBCInterface()
-{
-    //return *M_LinearFluidBC;
-}
-
 Real
 MS_Model_FSI3D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
 {
@@ -336,7 +330,7 @@ MS_Model_FSI3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& Stress
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_FSI3D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
 {
     //SolveLinearModel( SolveLinearSystem );
 
