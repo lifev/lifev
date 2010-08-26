@@ -187,40 +187,41 @@ int main(int argc, char** argv)
     // *********************************
     printf("\nTemporal loop:\n");
 
-    Chrono chronota;
-    Chrono chronoit;
-    Chrono chrono;
+    Chrono chronoTotal;
+    Chrono chronoSystem;
+    Chrono chronoIteration;
 
     int count = 0;
-
+    chronoTotal.start();
     for ( ; OneDModel.GetData().dataTime()->canAdvance() ; OneDModel.GetData().dataTime()->updateTime(), ++count )
     {
         std::cout << std::endl << "--------- Iteration " << count << " time = " << OneDModel.GetData().dataTime()->getTime() << std::endl;
 
-        chrono.start();
-        Debug(6030) << "[main] 1d model time advance\n";
-        chronota.start();
+        chronoIteration.start();
+
         if ( OneDModel.GetData().dataTime()->isFirstTimeStep() )
             OneDModel.BuildSystem();
         else
             OneDModel.UpdateSystem();
-        chronota.stop();
 
-        Debug(6030) << "[main] 1d model iterate\n";
-        chronoit.start();
+        chronoSystem.start();
+
         OneDModel.SolveSystem();
-        chronoit.stop();
+
+        chronoSystem.stop();
 
 		//Save solution
         OneDModel.SaveSolution();
 
-        chrono.stop();
+        chronoIteration.stop();
 
-        std::cout << " time adv. computed in " << chronota.diff() << " iter computed in " << chronoit.diff()
-                  << " total " << chrono.diff() << " s." << std::endl;
+        std::cout << " System solved in " << chronoSystem.diff()
+                  << " s, (total time " << chronoIteration.diff() << " s)." << std::endl;
     }
 
-    printf("\nSimulation ended successfully.\n");
+    chronoTotal.stop();
+    std::cout << std::endl << " Simulation ended successfully in " << chronoTotal.diff()
+                      << " s" << std::endl;
 
     #ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;
