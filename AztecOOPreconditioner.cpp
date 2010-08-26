@@ -41,7 +41,7 @@ AztecOOPreconditioner::AztecOOPreconditioner():
         M_solver                ( )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::AztecOOPreconditioner() \n";
 #endif
 
@@ -52,7 +52,7 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                           const std::string& section )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::setDataFromGetPot(dataFile, section) \n";
 #endif
 
@@ -118,7 +118,7 @@ int
 AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::buildPreconditioner( Operator ) \n";
 #endif
 
@@ -142,7 +142,7 @@ Real
 AztecOOPreconditioner::Condest()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::Condest() \n";
 #endif
 
@@ -153,7 +153,7 @@ EpetraPreconditioner::prec_raw_type*
 AztecOOPreconditioner::getPrec()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::getPrec() \n";
 #endif
 
@@ -167,7 +167,7 @@ EpetraPreconditioner::prec_type
 AztecOOPreconditioner::getPrecPtr()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::getPrec() \n";
 #endif
 
@@ -184,7 +184,7 @@ void
 AztecOOPreconditioner::precReset()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::precReset() \n";
 #endif
 
