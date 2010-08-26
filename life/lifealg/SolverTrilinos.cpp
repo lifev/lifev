@@ -327,7 +327,7 @@ void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
     chrono.stop();
 
     M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-    M_displayer->leaderPrint("      Estimated condition number = " , condest, "\n" );
+    M_displayer->leaderPrint("      Estimated condition number               " , condest, "\n" );
 }
 
 void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)
@@ -364,7 +364,7 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
     }
     else
     {
-        M_displayer->leaderPrint("      Reusing  precond ...                 \n");
+        M_displayer->leaderPrint("      Reusing precond ...                 \n");
     }
 
     int numIter = solveSystem(rhsFull, sol, M_prec);

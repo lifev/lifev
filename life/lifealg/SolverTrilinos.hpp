@@ -239,15 +239,21 @@ int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
                                  PrecPtrOperator          prec )
 
 {
-    M_displayer->leaderPrint("      Solving system ...                   \n");
-
+    M_displayer->leaderPrint("      AztecOO solving system ...         ");
     setPreconditioner(prec);
 
     Chrono chrono;
     chrono.start();
     int numIter = solve( sol, rhsFull );
     chrono.stop();
-    M_displayer->leaderPrintMax( "       ... done in " , chrono.diff() );
+    M_displayer->leaderPrintMax( "      done in " , chrono.diff() );
+
+    // If we use the "none" as output setting, we display just a summary
+    if ( M_TrilinosParameterList.get( "output", "all" ) == "none" )
+    {
+        M_displayer->leaderPrint("      Iterations number:                       ", M_solver.NumIters(), "\n");
+        M_displayer->leaderPrint("      Scaled residual:                         ", M_solver.ScaledResidual(), "\n");
+    }
 
     if (numIter >= M_maxIter)
         numIter = -numIter;
