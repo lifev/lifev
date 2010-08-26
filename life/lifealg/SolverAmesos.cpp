@@ -1,182 +1,102 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+************************************************************************
 
-  <short description here>
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
+               2006-2010 EPFL, Politecnico di Milano
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-*/
-/** \file SolverAmesos.cpp
-
-*/
-
-
-
-
-/* -*- mode: c++ -*-
-
- This file is part of the LifeV library
-
- Author(s): Gilles Fourestey <christophe.prudhomme@epfl.ch>
-      Date: 2009-06-09
-
- Copyright (C) 2004 EPFL
-
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-/**
-   \file SolverAmesos.cpp
-   \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-   \date 2004-08-29
-*/
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-#include <life/lifecore/debug.hpp>
+************************************************************************
+*/
+//@HEADER
 
-#include <life/lifecore/GetPot.hpp>
+/*!
+ *  @file
+ *  @brief Solver Amesos
+ *
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @date 29-08-2004
+ */
 
 #include <life/lifealg/SolverAmesos.hpp>
+
+#include <life/lifecore/debug.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/GetPot.hpp>
+
 #include <Epetra_Comm.h>
 
-#include <iomanip>
+namespace LifeV {
 
-namespace LifeV
-{
-// namespace Epetra
-// {
-
-
-SolverAmesos::SolverAmesos( const comm_PtrType& comm )
-    :
+// ===================================================
+// Constructors
+// ===================================================
+SolverAmesos::SolverAmesos( const comm_PtrType& comm ) :
     M_matrix               (),
-    M_factory              (),
     M_problem              (),
+    M_solver               (),
     M_TrilinosParameterList(),
-    M_redistribute         (true),
-    M_printTiming          (false),
-    M_printStatus          (false),
-    M_displayer            (comm)
+    M_displayer            ( comm )
 {
 }
 
-// SolverAmesos::SolverAmesos():
-//     M_prec                 (),
-//     M_factory              (),
-//     M_TrilinosParameterList(),
-//     M_displayer            (),
-
-// {
-//     assert(false);
-// }
-
-
-int
-SolverAmesos::NumIters()
-{
-    return 1;
-}
-
-
-double
-SolverAmesos::TrueResidual()
-{
-    return 0.;//M_factory.TrueResidual();
-}
-
-void SolverAmesos::setMatrix(matrix_type& m)
-{
-    M_matrix = m.getMatrixPtr();
-    M_problem.SetOperator(M_matrix.get());
-}
-
-void SolverAmesos::setOperator( Epetra_Operator& /*op*/)
-{
-    ASSERT(false,"SolverAmesos::setOperator: not coded");
-}
-
-
-void SolverAmesos::SetParameters()
-{
-}
-
-
-
-void SolverAmesos::setDataFromGetPot( const GetPot& dfile, const std::string& section )
-{
-    M_solverType       = dfile(( section + "/amesos/solvertype").data(), "Klu");
-    M_redistribute     = dfile(( section + "/amesos/redistribute").data(), true);
-    M_printTiming      = dfile(( section + "/amesos/print_timing").data(), false);
-    M_printStatus      = dfile(( section + "/amesos/print_status").data(), false);
-}
-
-
-void SolverAmesos::setTolMaxiter(const double tol, const int maxiter)
-{
-    if (tol > 0)
-        {
-            M_tol = tol;
-            M_TrilinosParameterList.set("tol", M_tol);
-        }
-
-    if (maxiter >= 0)
-        {
-            M_maxIter = maxiter;
-            M_TrilinosParameterList.set("max_iter", M_maxIter);
-        }
-
-}
-
-void  SolverAmesos::SetVerbose(const VerboseLevel verb)
-{
-    switch (verb) {
-    case NONE:
-        M_TrilinosParameterList.set("output", "none");
-        return;
-    case SUMMARY:
-        M_TrilinosParameterList.set("output", "summary");
-        return;
-    case LAST:
-    default:
-        M_TrilinosParameterList.set("output", "last");
-        return;
-    }
-
-
-}
-
-
-double
-SolverAmesos::computeResidual( vector_type& x, vector_type& b )
+// ===================================================
+// Methods
+// ===================================================
+Real
+SolverAmesos::computeResidual( const vector_type& x, const vector_type& rhs )
 {
     vector_type Ax(x.getMap());
-    vector_type res(b);
+    vector_type res(rhs);
 
     res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
 
-    double residual;
+    Real residual;
 
     res.Norm2(&residual);
 
     return residual;
 }
 
+Int
+SolverAmesos::solveSystem( vector_type&    rhsFull,
+                           vector_type&    sol,
+                           matrix_ptrtype& /*basePrecMatrix*/)
+{
+    M_displayer.leaderPrint("      Amesos solving system ...                ");
+    Chrono chrono;
+    chrono.start();
 
+    M_problem.SetLHS( &sol.getEpetraVector() );
+    M_problem.SetRHS( &rhsFull.getEpetraVector() );
+
+    M_solver->Solve();
+
+    chrono.stop();
+    M_displayer.leaderPrintMax( "done in " , chrono.diff() );
+
+    return 0;
+}
 
 void
 SolverAmesos::printStatus()
 {
-
-
+    /*
     // 1) The symbolic factorization
     //    (parameter doesn't always exist)
     std::cout << "  Amesos: Total symbolic factorization time " << M_sfact_time << std::endl;
@@ -197,83 +117,113 @@ SolverAmesos::printStatus()
 
     // 6) Redistributing the vector for each solve to the accepted format for the solver
     std::cout << "  Amesos: Total vector redistribution time  " << M_vec_redist_time << std::endl;
+    */
+
+    if ( M_TrilinosParameterList.get( "PrintTiming", false ) )
+        M_solver->PrintTiming();
+
+    if ( M_TrilinosParameterList.get( "PrintStatus", false ) )
+        M_solver->PrintStatus();
 }
 
-
-int SolverAmesos::solveSystem(  vector_type&      rhsFull,
-                                vector_type&      sol,
-                                matrix_ptrtype&   /*basePrecMatrix*/)
+bool SolverAmesos::isPrecSet() const
 {
+    return true;
+}
 
-    if ( M_displayer.isLeader() )
-         std::cout << "       Solving the system ... " << std::endl;
+void SolverAmesos::precReset()
+{}
 
-    Amesos_BaseSolver* Solver;
+void SolverAmesos::setUpPrec( const GetPot& /*dataFile*/, const std::string& /*section*/ )
+{}
 
-    M_problem.SetLHS(&sol.getEpetraVector());
-    M_problem.SetRHS(&rhsFull.getEpetraVector());
+void SolverAmesos::setReusePreconditioner( const bool& /*reuse*/ )
+{}
 
-    Solver = M_factory.Create(M_solverType, M_problem);
+// ===================================================
+// Set Methods
+// ===================================================
+void SolverAmesos::setMatrix( const matrix_type& matrix )
+{
+    M_matrix = matrix.getMatrixPtr();
+    M_problem.SetOperator( M_matrix.get() );
 
-    if (Solver == 0) {
-        std::cerr << std::endl  << std::endl;
-        std::cerr << "SolverAmesos: Selected solver << " << M_solverType << " is not available. Bailing out." << std::endl;
+    // After setting the matrix we can perform symbolic & numeric factorization
+    M_solver->SymbolicFactorization();
+    M_solver->NumericFactorization();
+}
+
+void SolverAmesos::setOperator( const Epetra_Operator& /*op*/ )
+{
+    ASSERT(false, "SolverAmesos::setOperator: not coded");
+}
+
+void SolverAmesos::setParameters()
+{
+    M_solver->SetParameters( M_TrilinosParameterList );
+}
+
+void SolverAmesos::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+{
+    // Status parameters
+    M_TrilinosParameterList.set( "OutputLevel",  dataFile(( section + "/amesos/outputlevel").data(), 0) );
+    M_TrilinosParameterList.set( "PrintStatus",  dataFile(( section + "/amesos/print_status").data(), false) );
+    M_TrilinosParameterList.set( "PrintTiming",  dataFile(( section + "/amesos/print_timing").data(), false) );
+    M_TrilinosParameterList.set( "ComputeVectorNorms", dataFile(( section + "/amesos/computevectornorms").data(), false) );
+    M_TrilinosParameterList.set( "ComputeTrueResidual", dataFile(( section + "/amesos/computeresidual").data(), false) );
+
+    // Control parameters
+    M_TrilinosParameterList.set( "AddZeroToDiag",  dataFile(( section + "/amesos/addzerotodiag").data(), false) );
+    M_TrilinosParameterList.set( "Refactorize", dataFile(( section + "/amesos/refactorize").data(), false) );
+    M_TrilinosParameterList.set( "RcondThreshold", dataFile(( section + "/amesos/rcondthreshold").data(), 1.e-2) );
+    M_TrilinosParameterList.set( "Redistribute", dataFile(( section + "/amesos/redistribute").data(), true) ); // SuperLU
+    M_TrilinosParameterList.set( "MaxProcs", dataFile(( section + "/amesos/maxprocs").data(), -1) ); // ScalaPack
+    M_TrilinosParameterList.set( "ScaleMethod", dataFile(( section + "/amesos/scalemethod").data(), 1) );
+
+    // Type of the matrix: symmetric, SDP, general
+    M_TrilinosParameterList.set( "MatrixProperty", dataFile(( section + "/amesos/matrixproperty").data(), "general") );
+
+    // Create the solver
+    createSolver( dataFile(( section + "/amesos/solvertype"  ).data(), "Klu") );
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+Int
+SolverAmesos::NumIters()
+{
+    return 1;
+}
+
+Real
+SolverAmesos::TrueResidual()
+{
+    return 0.;
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+void SolverAmesos::createSolver( const std::string& solverType )
+{
+    Amesos factory;
+    M_solver = factory.Create( solverType, M_problem );
+
+    if ( M_solver == 0 )
+    {
+        if ( M_displayer.isLeader() )
+        {
+            std::cerr << std::endl  << std::endl;
+            std::cerr << "SolverAmesos: Selected solver << " << solverType << " is not available. Bailing out." << std::endl;
+        }
+
         // return ok not to break the test harness
 #ifdef HAVE_MPI
         MPI_Finalize();
 #endif
-        exit(EXIT_SUCCESS);
+        exit( EXIT_SUCCESS );
     }
-
-    Teuchos::ParameterList List;
-
-    List.set("PrintTiming",  M_printTiming);
-    List.set("PrintStatus",  M_printStatus);
-    List.set("Redistribute", M_redistribute);
-
-    Solver->SetParameters(List);
-
-    if ( M_displayer.isLeader() )
-        std::cout << "          Starting symbolic factorization  ..." << std::flush;
-    Solver->SymbolicFactorization();
-    if ( M_displayer.isLeader() )
-        std::cout << " ok." << std::endl;
-
-    //std::cout << "m shape = " << Solver->MatrixShapeOK() << std::endl;
-  // you can change the matrix values here
-    if ( M_displayer.isLeader() )
-        std::cout << "          Starting numeric factorization   ..." << std::flush;
-    Solver->NumericFactorization();
-    if ( M_displayer.isLeader() )
-        std::cout << " ok." << std::endl;
-
-    // you can change LHS and RHS here
-    if ( M_displayer.isLeader() )
-        std::cout << "          Starting solution phase          ..." << std::flush;
-    Solver->Solve();
-    if ( M_displayer.isLeader() )
-        std::cout << " ok." << std::endl;
-
-    // you can get the timings here
-    Teuchos::ParameterList TimingsList;
-    Solver->GetTiming( TimingsList );
-
-    if (M_printTiming) Solver->PrintTiming();
-    if (M_printStatus) Solver->PrintStatus();
-    //printStatus();
-
-    return 0;
-}
-
-void SolverAmesos::setUpPrec(const GetPot& /*dataFile*/,  const std::string& /*section*/)
-{
-    return;
-}
-
-
-void SolverAmesos::setReusePreconditioner(const bool& /*reuse*/)
-{
-     return;
 }
 
 } // namespace LifeV

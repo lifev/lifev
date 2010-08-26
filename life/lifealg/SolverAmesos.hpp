@@ -1,15 +1,37 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+************************************************************************
 
-  <short description here>
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
+               2006-2010 EPFL, Politecnico di Milano
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
-/** \file SolverAmesos.hpp
+//@HEADER
 
-*/
-
-
+/*!
+ *  @file
+ *  @brief Solver Amesos
+ *
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @date 29-08-2004
+ */
 
 #ifndef _SolverAmesos_H
 #define _SolverAmesos_H
@@ -17,127 +39,59 @@
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
 
-
 #include <Teuchos_ParameterList.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 
-#include <life/lifecore/chrono.hpp>
 #include <life/lifecore/displayer.hpp>
-
-
-
 
 class GetPot;
 
-namespace LifeV
-{
+namespace LifeV {
+
 class SolverAmesos
 {
 public:
 
-
-        /** @name Typedefs
-     */
+    //! @name Typedefs
     //@{
 
-    typedef double                           value_type;
+    typedef Real                             value_type;
 
     typedef Displayer::comm_PtrType          comm_PtrType;
 
     typedef SolverAmesos                     solver_type;
 
-    typedef EpetraMatrix<double>             matrix_type;
+    typedef EpetraMatrix<Real>               matrix_type;
     typedef EpetraVector                     vector_type;
 
     typedef void                             prec_raw_type;
-    //typedef EpetraPreconditioner             prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
     typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
     typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
 
     //@}
 
-    /** @name Constructors, destructor
-     */
+
+    //! @name Constructors & Destructor
     //@{
 
-    //! default constructor
+    //! Default constructor
     /*!
      * @param comm the communicator.
      */
-    SolverAmesos( const comm_PtrType& comm);
+    SolverAmesos( const comm_PtrType& comm );
 
-    //SolverAmesos();
+    //! Destructor
+    ~SolverAmesos() {}
+
     //@}
 
-    /** @name Accessors
-     */
+
+    //! @name Methods
     //@{
 
-    //! Total number of iterations
-    int    NumIters();
-
-    //! True Residual
-    double TrueResidual();
-
-    //@}
-
-    /** @name  Mutators
-     */
-    //@{
-
-    //! set matrix from EpetraMatrix
-    void setMatrix(matrix_type& m);
-
-    void setOperator(Epetra_Operator& op);
-
-    void setReusePreconditioner( const bool& /*reuse*/ );
-
-    void setDataFromGetPot( const GetPot& dfile, const std::string& section );
-    void SetParameters();
-
-    void setTolMaxiter(const double tol, const int maxiter=-1);
-
-
-    //! describes the verobisty level
-    enum VerboseLevel { NONE, SUMMARY, LAST };
-    //! sets verbosity level
-    void SetVerbose(const VerboseLevel verb=NONE);
-
-
-    //@}
-
-
-    /** @name  Methods
-     */
-    //@{
-
-    /*
-      solve the problem \f$ A x = b \f$
-
-      \c A has been entered via \c setMatrix .
-
-      return the number of iterations, M_maxIter+1 if solve failed
-
-    */
-    //int solve( vector_type& x, vector_type& b );
-
-    double computeResidual( vector_type& __X, vector_type& __B );
-
-    bool isPrecSet() const {return true;}
-    void precReset() { return; }
-
-
-    // return the Aztec status
-
-
-    void printStatus();
-
-//     void getStatus( double status[AZ_STATUS_SIZE])
-//     { M_solver.GetAllAztecStatus( status );}
-
-    //@}
+    Real computeResidual( const vector_type& x, const vector_type& rhs );
 
     /** Solves the system and returns the number of iterations.
         @param  matrFull,
@@ -147,57 +101,71 @@ public:
         returns number of iterations. If negative, the solver did not converge,
         the preconditionar has been recomputed, and a second solution is tried
     */
-    int solveSystem(  vector_type&     rhsFull,
-                      vector_type&     sol,
-                      matrix_ptrtype&  /* unused */);
+    Int solveSystem( vector_type&    rhsFull,
+                     vector_type&    sol,
+                     matrix_ptrtype& /* unused */);
 
-    void setUpPrec    (const GetPot& dataFile,  const std::string& section);
+    //Display status
+    void printStatus();
 
-    //prec_type& getPrec(){return 0;}
+    bool isPrecSet() const;
+
+    void precReset();
+
+    void setUpPrec( const GetPot& dataFile,  const std::string& section );
+
+    void setReusePreconditioner( const bool& /*reuse*/ );
+
+    //@}
+
+
+    //! @name  Set Methods
+    //@{
+
+    //! Set matrix from EpetraMatrix
+    void setMatrix( const matrix_type& matrix );
+
+    void setOperator( const Epetra_Operator& op );
+
+    void setDataFromGetPot( const GetPot& dfile, const std::string& section );
+    void setParameters();
+
+    void setTolMaxiter( const Real tol, const Int maxiter = -1 );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Total number of iterations
+    Int NumIters();
+
+    //! True Residual
+    Real TrueResidual();
+
+    //@}
 
 private:
 
-    matrix_type::matrix_ptrtype  M_matrix;
+    //! @name Private Methods
+    //@{
 
-    Amesos                 M_factory;
+    void createSolver( const std::string& solverType );
 
-    Epetra_LinearProblem   M_problem;
+    //@}
 
-    std::string            M_solverType;
-    Teuchos::ParameterList M_TrilinosParameterList;
+    matrix_type::matrix_ptrtype M_matrix;
 
-    // Teuchos::ParameterList M_timingsList;
-    // timing variable
+    Epetra_LinearProblem        M_problem;
 
-    double                 M_sfact_time;
-    double                 M_nfact_time;
-    double                 M_solve_time;
+    Amesos_BaseSolver*          M_solver;
 
-    //
+    Teuchos::ParameterList      M_TrilinosParameterList;
 
-    double                 M_mtx_conv_time;
-    double                 M_mtx_redist_time;
-    double                 M_vec_redist_time;
-
-    //
-
-    bool                   M_redistribute;
-    bool                   M_printTiming;
-    bool                   M_printStatus;
-
-    //
-
-    int                    M_maxIter;
-    double                 M_tol;
-    int                    M_maxIterSolver;
-    int                    M_maxIterForReuse;
-
-    Displayer              M_displayer;
-
-
-
+    Displayer                   M_displayer;
 };
 
 } // namespace LifeV
 
-#endif /* __SolverAmesos_H */
+#endif /* _SolverAmesos_H */
