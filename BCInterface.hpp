@@ -269,7 +269,7 @@ public:
     /*!
      * @return the pointer to the BCHandler
      */
-    const BCHandler_PtrType& GetHandler() const;
+    const BCHandler_PtrType& GetHandler();
 
     //! Get the data container
     /*!
@@ -333,7 +333,7 @@ BCInterface< Operator >::BCInterface( ) :
     M_vectorFSI               ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::BCInterface------------------------------" << "\n";
 #endif
 
@@ -385,7 +385,7 @@ void
 BCInterface< Operator >::CreateHandler()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::CreateHandler\n";
 #endif
 
@@ -398,7 +398,7 @@ BCInterface< Operator >::FillHandler( const std::string& FileName,
                                       const std::string& dataSection )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::buildHandler\n";
 #endif
 
@@ -421,7 +421,7 @@ BCInterface< Operator >::ReadBC( const std::string& FileName,
                                  const BCName&      name )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::ReadBC\n";
 #endif
 
@@ -433,7 +433,7 @@ void
 BCInterface< Operator >::InsertBC()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::InsertBC\n";
 #endif
 
@@ -445,7 +445,7 @@ void
 BCInterface< Operator >::UpdateOperatorVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::UpdateOperatorVariables\n";
 #endif
 
@@ -468,7 +468,7 @@ BCInterface< Operator >::addBC( const BCName& name,
                                       BCBase& base )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::addBC (without component)" << "\n\n";
 #endif
 
@@ -485,7 +485,7 @@ BCInterface< Operator >::addBC( const BCName& name,
                                 const BCComp& comp )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::addBC (with component)" << "\n\n";
 #endif
 
@@ -514,7 +514,7 @@ void BCInterface< Operator >::SetHandlerParameters( const ID& bcNumber,
     M_bcNumber = bcNumber;
     M_hint     = hint;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::setHandlerParameters          M_bcNumber: " << M_bcNumber << "\n";
     Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n";
 #endif
@@ -526,7 +526,7 @@ void BCInterface< Operator >::SetHandlerParameters( const ID& bcNumber,
 // ===================================================
 template< class Operator >
 const typename BCInterface< Operator >::BCHandler_PtrType&
-BCInterface< Operator >::GetHandler() const
+BCInterface< Operator >::GetHandler()
 {
     return M_handler;
 }
@@ -546,7 +546,7 @@ inline void
 BCInterface< Operator >::BuildBase()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface::BuildBase\n";
 #endif
 
@@ -610,7 +610,7 @@ BCInterface< Operator >::AddBCManager( BCVectorInterface& base )
         case Directional:
         case Component:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface::AddBCManager                              others" << "\n\n";
 #endif
 
@@ -619,7 +619,7 @@ BCInterface< Operator >::AddBCManager( BCVectorInterface& base )
 
         case Full:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
 #endif
 
@@ -642,7 +642,7 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
         case Normal:
         case Tangential:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface::AddBCManager                              Scalar, Normal, Tangential" << "\n\n";
 #endif
 
@@ -652,7 +652,7 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
         case Directional:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface::AddBCManager                              Directional" << "\n\n";
 #endif
         {
@@ -675,7 +675,7 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
         case Full:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
 #endif
 
@@ -685,7 +685,7 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
         case Component:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface::AddBCManager                              Component" << "\n\n";
 #endif
 

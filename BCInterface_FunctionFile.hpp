@@ -177,7 +177,7 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile() :
     M_dataIterator                   ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "BCInterface_FunctionFile::BCInterface_FunctionFile()" << "\n";
 #endif
 
@@ -192,7 +192,7 @@ BCInterface_FunctionFile< Operator >::BCInterface_FunctionFile( const Data_Type&
     M_dataIterator                   ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "BCInterface_FunctionFile::BCInterface_FunctionFile( data )" << "\n";
 #endif
 
@@ -243,7 +243,7 @@ inline void
 BCInterface_FunctionFile< Operator >::LoadData( Data_Type data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "BCInterface_FunctionFile::setData             fileName: " << data.GetBaseString() << "\n";
 #endif
 
@@ -268,7 +268,7 @@ BCInterface_FunctionFile< Operator >::LoadData( Data_Type data )
         scale.push_back( dataFile( "scale", 1.0, j ) );
     }
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     std::stringstream output;
     output << "BCInterface_FunctionFile::loadData           variables: ";
     for ( UInt j(0); j < variablesNumber; ++j )
@@ -296,7 +296,7 @@ BCInterface_FunctionFile< Operator >::LoadData( Data_Type data )
             M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i
                     * variablesNumber + j ) );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     output.str("");
     output << "                                                 loop: " << M_loop << "\n";
     output << "                                                 data:";
@@ -327,7 +327,7 @@ BCInterface_FunctionFile< Operator >::LoadData( Data_Type data )
     // Now data contains the real base string
     super::SetData( data );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "                                             function: " << data.GetBaseString() << "\n";
 #endif
 
@@ -344,7 +344,7 @@ BCInterface_FunctionFile< Operator >::DataInterpolation()
     if ( M_loop )
         X -= ( std::ceil( X / M_data[M_variables[0]].back() ) - 1 ) * M_data[M_variables[0]].back();
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "                                                    variable: " << X << "\n";
 #endif
 
@@ -352,7 +352,7 @@ BCInterface_FunctionFile< Operator >::DataInterpolation()
     for ( ;; )
     {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
         Debug( 5022 ) << "                                       iterator  position   : " << static_cast<Real> ( M_dataIterator - M_data[ M_variables[0] ].begin() ) << "\n";
         Debug( 5022 ) << "                                       variable (position)  : " << *M_dataIterator << "\n";
         Debug( 5022 ) << "                                       variable (position+1): " << *(M_dataIterator+1) << "\n";
@@ -389,7 +389,7 @@ BCInterface_FunctionFile< Operator >::DataInterpolation()
 
         super::M_parser->SetVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
         Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
 #endif
     }

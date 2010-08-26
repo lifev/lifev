@@ -163,7 +163,7 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions() :
     M_defaultFunction   ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface1D_DefaultFunctions::BCInterface1D_DefaultFunctions()" << "\n";
 #endif
 
@@ -175,7 +175,7 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( cons
     M_defaultFunction   ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface1D_DefaultFunctions::BCInterface1D_DefaultFunctions( data )" << "\n";
 #endif
 
@@ -208,7 +208,7 @@ template< class Operator >
 void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface1D_DefaultFunctions::setData" << "\n";
 #endif
 
@@ -249,7 +249,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 
         case Absorbing:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface1D_DefaultFunctions::checkFunction                          Absorbing" << "\n";
 #endif
 

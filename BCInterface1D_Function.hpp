@@ -178,7 +178,7 @@ BCInterface1D_Function< Operator >::BCInterface1D_Function() :
     M_base      ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface1D_Function::BCInterface1D_Function()" << "\n";
 #endif
 
@@ -190,7 +190,7 @@ BCInterface1D_Function< Operator >::BCInterface1D_Function( const Data_Type& dat
     M_base      ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface1D_Function::BCInterface1D_Function( data )" << "\n";
 #endif
 
@@ -225,7 +225,7 @@ void
 BCInterface1D_Function< Operator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "BCInterface1D_Function::setData" << "\n";
 #endif
 
@@ -255,7 +255,7 @@ inline void
 BCInterface1D_Function< Operator >::SetFunction()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface1D_Function::setFunction\n";
 #endif
 
@@ -267,7 +267,7 @@ Real
 BCInterface1D_Function< Operator >::Function( const Real& t )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface1D_Function::Function: " << "\n";
     Debug( 5021 ) << "                                                           t: " << t << "\n";
 #endif
@@ -276,7 +276,7 @@ BCInterface1D_Function< Operator >::Function( const Real& t )
 
     this->DataInterpolation();
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->Evaluate( 1 ) << "\n";
 #endif
 

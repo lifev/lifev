@@ -205,7 +205,7 @@ BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction() :
     M_list                           ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface1D_OperatorFunction::BCInterface1D_OperatorFunction()" << "\n";
 #endif
 
@@ -220,7 +220,7 @@ BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction( cons
     M_list                           ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface1D_OperatorFunction::BCInterface1D_OperatorFunction( data )" << "\n";
 #endif
 
@@ -262,7 +262,7 @@ void
 BCInterface1D_OperatorFunction< Operator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface1D_OperatorFunction::setData" << "\n";
 #endif
 
@@ -293,7 +293,7 @@ inline void
 BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface1D_OperatorFunction<FSIOperator>::UpdateOperatorVariables  " << "\n";
 #endif
 
@@ -304,7 +304,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
             // f_ -> FLUID
             case f_area:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_A, M_side ) << "\n";
 #endif
                 SetVariable( "f_area", M_operator->BoundaryValue( *M_solution, OneD_A, M_side ) );
@@ -313,7 +313,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case f_density:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                  f_density: " << M_operator->Physics()->Data()->DensityRho() << "\n";
 #endif
                 SetVariable( "f_density", M_operator->Physics()->Data()->DensityRho() );
@@ -322,7 +322,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case f_flux:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_Q, M_side ) << "\n";
 #endif
 
@@ -332,7 +332,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case f_pressure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_P, M_side ) << "\n";
 #endif
 
@@ -342,7 +342,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case f_viscosity:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
 #endif
                 SetVariable( "f_viscosity", M_operator->Physics()->Data()->Viscosity() );
@@ -352,7 +352,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
                 // s_ -> SOLID
             case s_density:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho() << "\n";
 #endif
 
@@ -362,7 +362,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case s_poisson:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson() << "\n";
 #endif
 
@@ -372,7 +372,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case s_thickness:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness() << "\n";
 #endif
 
@@ -382,7 +382,7 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
 
             case s_young:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young() << "\n";
 #endif
 
@@ -403,7 +403,7 @@ inline void
 BCInterface1D_OperatorFunction< Operator >::CreateAccessList( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface1D_OperatorFunction<FSIOperator>::createAccessList" << "\n";
 #endif
 

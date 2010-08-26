@@ -44,7 +44,7 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
     M_base          ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface_FSI::BCInterface_FSI()" << "\n";
 #endif
 
@@ -55,7 +55,7 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI( const Data_Type& data ) :
     M_base          ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface_FSI::BCInterface_FSI( data )" << "\n";
 #endif
 
@@ -87,7 +87,7 @@ void
 BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface_FSIFunctionFile::setData" << "\n";
 #endif
 
@@ -105,7 +105,7 @@ BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
     {
         case EXACTJACOBIAN:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
@@ -115,7 +115,7 @@ BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
 
         case FIXEDPOINT:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
@@ -125,7 +125,7 @@ BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
 
         case MONOLITHIC:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithic" << "\n";
 #endif
 
@@ -135,7 +135,7 @@ BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
 
         case STEKLOVPOINCARE:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
