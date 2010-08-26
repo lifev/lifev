@@ -433,7 +433,7 @@ ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors():
     M_container()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::ContainerOfVectors()" << "\n";
 #endif
 
@@ -444,7 +444,7 @@ ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors( const Conta
     M_container()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::ContainerOfVectors( containerOfVectors )" << "\n";
 #endif
 
@@ -459,7 +459,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator=( vector_ptr )" << "\n";
 #endif
 
@@ -482,7 +482,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator=( scalar )" << "\n";
 #endif
 
@@ -497,7 +497,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator&=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator&=( vector_ptr )" << "\n";
 #endif
 
@@ -514,7 +514,7 @@ Real&
 ContainerOfVectors< VectorType, ContainerType >::operator[]( const UInt& ID ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator[]( ID )" << "\n";
 #endif
 
@@ -536,7 +536,7 @@ boost::shared_ptr< VectorType >&
 ContainerOfVectors< VectorType, ContainerType >::operator()( const UInt& ID )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator()( ID )" << "\n";
 #endif
 
@@ -548,7 +548,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator+=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator+=( containerOfVectors )" << "\n";
 #endif
 
@@ -563,7 +563,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator-=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator-=( containerOfVectors )" << "\n";
 #endif
 
@@ -578,7 +578,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator*=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator*=( containerOfVectors )" << "\n";
 #endif
 
@@ -593,7 +593,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator/=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator/=( containerOfVectors )" << "\n";
 #endif
 
@@ -608,7 +608,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator+( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator+( containerOfVectors )" << "\n";
 #endif
 
@@ -624,7 +624,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator-( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator-( containerOfVectors )" << "\n";
 #endif
 
@@ -640,7 +640,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator*( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator*( containerOfVectors )" << "\n";
 #endif
 
@@ -656,7 +656,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator/( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator/( containerOfVectors )" << "\n";
 #endif
 
@@ -672,7 +672,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator+=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator+=( scalar )" << "\n";
 #endif
 
@@ -687,7 +687,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator-=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator-=( scalar )" << "\n";
 #endif
 
@@ -702,7 +702,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator*=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator*=( scalar )" << "\n";
 #endif
 
@@ -717,7 +717,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::operator/=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator/=( scalar )" << "\n";
 #endif
 
@@ -731,7 +731,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator+( const Real& scalar ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator+( scalar )" << "\n";
 #endif
 
@@ -747,7 +747,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator-( const Real& scalar ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator-( scalar )" << "\n";
 #endif
 
@@ -763,7 +763,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator*( const Real& scalar ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator*( scalar )" << "\n";
 #endif
 
@@ -779,7 +779,7 @@ const ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator/( const Real& scalar ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator/( scalar )" << "\n";
 #endif
 
@@ -797,7 +797,7 @@ operator*( const ScalarType& scalar,
            const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator*( scalar, containerOfVectors )" << "\n";
 #endif
 
@@ -811,7 +811,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator==( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator==( scalar )" << "\n";
 #endif
 
@@ -832,7 +832,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator!=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator!=( scalar )" << "\n";
 #endif
 
@@ -853,7 +853,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator>( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator>( scalar )" << "\n";
 #endif
 
@@ -874,7 +874,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator<( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator<( scalar )" << "\n";
 #endif
 
@@ -895,7 +895,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator>=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator>=( scalar )" << "\n";
 #endif
 
@@ -916,7 +916,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator<=( const Real& scalar )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator<=( scalar )" << "\n";
 #endif
 
@@ -937,7 +937,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator&&( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator&&( containerOfVectors )" << "\n";
 #endif
 
@@ -959,7 +959,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator||( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator||( containerOfVectors )" << "\n";
 #endif
 
@@ -981,7 +981,7 @@ ContainerOfVectors< VectorType, ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::operator!()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator!()" << "\n";
 #endif
 
@@ -1006,7 +1006,7 @@ Real
 ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::Dot( containerOfVectors )" << "\n";
 #endif
 
@@ -1024,7 +1024,7 @@ ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< 
                                                             Real& scalarProduct )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::Dot( containerOfVectors, scalarProduct )" << "\n";
 #endif
 
@@ -1037,7 +1037,7 @@ void
 ContainerOfVectors< VectorType, ContainerType >::Abs()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::Abs()" << "\n";
 #endif
 
@@ -1051,7 +1051,7 @@ ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< Vector
         ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::Abs( containerOfVectors )" << "\n";
 #endif
 
@@ -1065,7 +1065,7 @@ Real
 ContainerOfVectors< VectorType, ContainerType >::WeightNorm2()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::WeightNorm2()" << "\n";
 #endif
 
@@ -1085,7 +1085,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::push_back( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::push_back( vector_ptr )" << "\n";
 #endif
 
@@ -1100,7 +1100,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::push_back( const boost::shared_ptr< VectorType >& vector_ptr )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::push_back( vector_ptr )" << "\n";
 #endif
 
@@ -1114,7 +1114,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::push_front( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::push_front( vector_ptr )" << "\n";
 #endif
 
@@ -1129,7 +1129,7 @@ ContainerOfVectors< VectorType, ContainerType >&
 ContainerOfVectors< VectorType, ContainerType >::push_front( const boost::shared_ptr< VectorType >& vector_ptr )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::push_front( vector_ptr )" << "\n";
 #endif
 
@@ -1144,7 +1144,7 @@ ContainerOfVectors< VectorType, ContainerType >::Replace( const boost::shared_pt
                                                           const UInt& ID )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::Replace( vector_ptr, ID )" << "\n";
 #endif
 
@@ -1156,7 +1156,7 @@ void
 ContainerOfVectors< VectorType, ContainerType >::resize( const UInt& size )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::resize( size )" << "\n";
 #endif
 
@@ -1168,7 +1168,7 @@ void
 ContainerOfVectors< VectorType, ContainerType >::clear()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::clear()" << "\n";
 #endif
 
@@ -1180,7 +1180,7 @@ void
 ContainerOfVectors< VectorType, ContainerType >::ShowMe( std::ostream& output ) const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::ShowMe()" << "\n";
 #endif
 
@@ -1203,7 +1203,7 @@ UInt
 ContainerOfVectors< VectorType, ContainerType >::size() const
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::size()" << "\n";
 #endif
 
