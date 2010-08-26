@@ -66,9 +66,20 @@ CFLmax               = 0.5774       # Maximum admissible value of the CFL
 
     [./amesos]
     solvertype            = Umfpack
-    redistribute          = true
+    
+    outputlevel           = 0
     print_status          = false
     print_timing          = false
+    computevectornorms    = false
+    computeresidual       = false
+    
+    addzerotodiag         = false
+    refactorize           = false
+    rcondthreshold        = 1e-2
+    redistribute          = true
+    maxprocs              = -1
+    matrixproperty        = general
+    scalemethod           = 1
     
     [../]
     
