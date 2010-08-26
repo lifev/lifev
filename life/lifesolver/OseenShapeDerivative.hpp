@@ -370,22 +370,20 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
                                                             const vector_type& dw,           //Mesh deltaVelocity
                                                             const vector_type& sourceVec)    //RHS (usually 0 )
 {
+    this->M_Displayer.leaderPrint(" LF-  Updating the right hand side ...         ");
     Chrono chrono;
+    chrono.start();
 
     int nbCompU = nDimensions;
-
     M_rhsLinNoBC = sourceVec;//which is usually zero
 
     if(this->M_data.useShapeDerivatives())
         {
-            this->M_Displayer.leaderPrint(" LF-  Updating the right hand side ...         ");
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
             //
-            chrono.start();
 
             // Loop on elements
-
             vector_type unRep  ( un  , Repeated );
             vector_type ukRep  ( uk  , Repeated );
             vector_type dispRep( disp, Repeated );
@@ -509,10 +507,8 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
 
         }
 
-
     chrono.stop();
     this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
-
 }
 
 
