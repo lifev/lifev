@@ -47,7 +47,7 @@ Parser::Parser() :
     M_evaluate      ( true )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5030 ) << "Parser::Parser"<< "\n";
 #endif
 
@@ -61,7 +61,7 @@ Parser::Parser( const std::string& String ) :
     M_evaluate      ( true )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5030 ) << "Parser::Parser( string, applyRules )"<< "\n";
 #endif
 
@@ -123,7 +123,7 @@ Parser::Evaluate( const UInt& ID )
         M_evaluate = false;
     }
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5030 ) << "Parser::evaluate          results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
 #endif
 
@@ -164,8 +164,8 @@ void
 Parser::SetString( const std::string& String, const std::string& StringSeparator )
 {
 
-#ifdef DEBUG
-    Debug( 5030 ) << "Parser::setString:          strings: " << string << "\n";
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5030 ) << "Parser::setString:          strings: " << String << "\n";
 #endif
 
     M_strings.clear();
@@ -186,7 +186,7 @@ void
 Parser::SetVariable( const std::string& Name, const Real& Value )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5030 ) << "Parser_Utility::SetVariable    variables[" << Name << "]: " << Value << "\n";
 #endif
 
@@ -202,7 +202,7 @@ const Real&
 Parser::GetVariable( const std::string& Name )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5030 ) << "Parser_Utility::GetVariable    variables[" << Name << "]: " << M_calculator.GetVariable( Name ) << "\n";
 #endif
 
