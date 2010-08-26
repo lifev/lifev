@@ -952,7 +952,7 @@ OneDimensionalModel_Solver::BoundaryValue( const Solution_Type& solution, const 
 {
     UInt boundaryDof;
 
-    switch( static_cast<OneD_BCSide> (bcSide) )
+    switch( bcSide )
     {
         case OneD_left:
             boundaryDof = 1;

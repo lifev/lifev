@@ -138,7 +138,7 @@ public :
 
     //! Compute area given the elastic pressure.
     /*!
-     *  To be used in initialization! when time derivative of A is supposed null
+     *  To be used in initialization, when time derivative of A is supposed null
      *  @return A = A0 * ( P / beta0 + 1 )^(1/beta1)
      */
     Real A_from_P( const Real& P, const UInt& i=0 ) const;
