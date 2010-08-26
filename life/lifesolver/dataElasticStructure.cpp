@@ -119,8 +119,8 @@ DataElasticStructure::setup( const GetPot& dataFile, const std::string& section 
         for ( UInt i(0) ; i < materialsNumber ; ++i )
         {
             material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
-            M_young[material]   = dataFile( ( section + "/physics/young" ).data(), 0. );
-            M_poisson[material] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+            M_young[material]   = dataFile( ( section + "/physics/young" ).data(), 0., i );
+            M_poisson[material] = dataFile( ( section + "/physics/poisson" ).data(), 0., i );
         }
     }
 
