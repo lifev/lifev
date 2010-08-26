@@ -196,7 +196,7 @@ BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction() :
     M_list                           ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction::BCInterface_OperatorFunction()" << "\n";
 #endif
 
@@ -210,7 +210,7 @@ BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const Da
     M_list                           ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction::BCInterface_OperatorFunction( data )" << "\n";
 #endif
 
@@ -250,7 +250,7 @@ void
 BCInterface_OperatorFunction< Operator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction::setData" << "\n";
 #endif
 
@@ -274,7 +274,7 @@ inline void
 BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<FSIOperator>::UpdateOperatorVariables  " << "\n";
 #endif
 
@@ -285,7 +285,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
             // f_ -> FLUID
             case f_area:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().area( M_flag ) << "\n";
 #endif
                 SetVariable( "f_area", M_operator->fluid().area( M_flag ) );
@@ -294,7 +294,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case f_density:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                  f_density: " << M_operator->fluid().density() << "\n";
 #endif
                 SetVariable( "f_density", M_operator->fluid().density() );
@@ -303,7 +303,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case f_flux:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().flux( M_flag ) << "\n";
 #endif
 
@@ -313,7 +313,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case f_pressure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().pressure( M_flag ) << "\n";
 #endif
 
@@ -323,7 +323,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case f_viscosity:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
 #endif
                 SetVariable( "f_viscosity", M_operator->fluid().viscosity() );
@@ -333,7 +333,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
                 // s_ -> SOLID
             case s_density:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho() << "\n";
 #endif
 
@@ -343,7 +343,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case s_poisson:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson() << "\n";
 #endif
 
@@ -353,7 +353,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case s_thickness:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness() << "\n";
 #endif
 
@@ -363,7 +363,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
 
             case s_young:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young() << "\n";
 #endif
 
@@ -381,7 +381,7 @@ inline void
 BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<Oseen>::UpdateOperatorVariables  " << "\n";
 #endif
 
@@ -392,7 +392,7 @@ BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOper
             // f_ -> FLUID
             case f_area:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
 #endif
                 SetVariable( "f_area", M_operator->area( M_flag ) );
@@ -401,7 +401,7 @@ BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOper
 
             case f_density:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                  f_density: " << M_operator->density() << "\n";
 #endif
                 SetVariable( "f_density", M_operator->density() );
@@ -410,7 +410,7 @@ BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOper
 
             case f_flux:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
 #endif
 
@@ -420,7 +420,7 @@ BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOper
 
             case f_pressure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
 #endif
 
@@ -430,7 +430,7 @@ BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOper
 
             case f_viscosity:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                f_viscosity: " << M_operator->viscosity() << "\n";
 #endif
                 SetVariable( "f_viscosity", M_operator->viscosity() );
@@ -448,7 +448,7 @@ inline void
 BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::UpdateOperatorVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<OseenShapeDerivative>::UpdateOperatorVariables  " << "\n";
 #endif
 
@@ -459,7 +459,7 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
             // f_ -> FLUID
             case f_area:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
 #endif
                 SetVariable( "f_area", M_operator->area( M_flag ) );
@@ -468,7 +468,7 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
 
             case f_density:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                f_density(): " << M_operator->density() << "\n";
 #endif
                 SetVariable( "f_density", M_operator->density() );
@@ -477,7 +477,7 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
 
             case f_flux:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
 #endif
 
@@ -487,7 +487,7 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
 
             case f_pressure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
 #endif
 
@@ -497,7 +497,7 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
 
             case f_viscosity:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
                 Debug( 5023 ) << "                                              f_viscosity(): " << M_operator->viscosity() << "\n";
 #endif
                 SetVariable( "f_viscosity", M_operator->viscosity() );
@@ -518,7 +518,7 @@ inline void
 BCInterface_OperatorFunction< FSIOperator >::CreateAccessList( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<FSIOperator>::createAccessList" << "\n";
 #endif
 
@@ -537,7 +537,7 @@ inline void
 BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::CreateAccessList( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<Oseen>::createAccessList" << "\n";
 #endif
 
@@ -555,7 +555,7 @@ inline void
 BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::CreateAccessList( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterface_OperatorFunction<OseenShapeDerivative>::createAccessList" << "\n";
 #endif
 

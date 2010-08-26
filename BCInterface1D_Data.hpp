@@ -385,7 +385,7 @@ inline void BCInterface1D_Data< Operator >::ReadSide( const std::string& FileNam
     GetPot DataFile( FileName );
     M_side = M_mapSide[DataFile( side, "left" )];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D_Data::ReadSide                        side: " << static_cast<Real>( M_side ) << "\n";
 #endif
 }
@@ -396,7 +396,7 @@ inline void BCInterface1D_Data< Operator >::ReadQuantity( const std::string& Fil
     GetPot DataFile( FileName );
     M_quantity = M_mapQuantity[DataFile( quantity, "A" )];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D_Data::ReadQuantity                quantity: " << M_quantity << " (" << DataFile(quantity, "A") << ")\n";
 #endif
 }
@@ -407,7 +407,7 @@ inline void BCInterface1D_Data< Operator >::ReadLine( const std::string& FileNam
     GetPot DataFile( FileName );
     M_line = M_mapLine[DataFile( line, "first" )];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D_Data::ReadLine                        line: " << M_line << " (" << DataFile(line, "first") << ")\n";
 #endif
 }
@@ -422,7 +422,7 @@ inline void BCInterface1D_Data< Operator >::ReadBase( const std::string& FileNam
             M_base.first = j->first;
             M_base.second = M_mapBase[j->first];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface1D_Data::ReadBase                     base: " << M_base.second << " (" << j->first << ")\n";
             Debug( 5020 ) << "                                           baseString: " << M_baseString << "\n";
 #endif

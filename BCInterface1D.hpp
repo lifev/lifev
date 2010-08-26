@@ -249,7 +249,7 @@ public:
     /*!
      * @return the pointer to the BCHandler
      */
-    const BCHandler_PtrType& GetHandler() const;
+    const BCHandler_PtrType& GetHandler();
 
     //! Get the data container
     /*!
@@ -302,7 +302,7 @@ BCInterface1D< Operator >::BCInterface1D( ) :
     M_vectorDefaultFunction1D ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::BCInterface1D------------------------------" << "\n";
 #endif
 
@@ -348,7 +348,7 @@ void
 BCInterface1D< Operator >::CreateHandler()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::CreateHandler\n";
 #endif
 
@@ -361,7 +361,7 @@ BCInterface1D< Operator >::FillHandler( const std::string& FileName,
                                         const std::string& dataSection )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::buildHandler\n";
 #endif
 
@@ -384,7 +384,7 @@ BCInterface1D< Operator >::ReadBC( const std::string& FileName,
                                  const BCName&      name )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::ReadBC\n";
 #endif
 
@@ -396,7 +396,7 @@ void
 BCInterface1D< Operator >::InsertBC()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::InsertBC\n";
 #endif
 
@@ -408,7 +408,7 @@ void
 BCInterface1D< Operator >::UpdateOperatorVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::UpdateOperatorVariables\n";
 #endif
 
@@ -430,7 +430,7 @@ BCInterface1D< Operator >::setBC( const OneD_BCSide& bcSide,
                                   const BCBase&      base )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::setBC" << "\n\n";
 #endif
 
@@ -476,7 +476,7 @@ void BCInterface1D< Operator >::SetHandler( const BCHandler_PtrType& handler )
 // ===================================================
 template< class Operator >
 const typename BCInterface1D< Operator >::BCHandler_PtrType&
-BCInterface1D< Operator >::GetHandler() const
+BCInterface1D< Operator >::GetHandler()
 {
     return M_handler;
 }
@@ -496,7 +496,7 @@ inline void
 BCInterface1D< Operator >::BuildBase()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface1D::BuildBase\n";
 #endif
 

@@ -259,7 +259,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
     {
         case DerFluidLoadToFluid:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
@@ -267,7 +267,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case DerFluidLoadToStructure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
             if ( !M_operator->isSolid() )
@@ -281,7 +281,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case DerHarmonicExtensionVelToFluid:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
@@ -296,7 +296,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case DerStructureDispToSolid:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
@@ -304,7 +304,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case FluidInterfaceDisp:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
@@ -316,7 +316,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case FluidLoadToStructure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
@@ -331,7 +331,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case HarmonicExtensionVelToFluid:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
@@ -346,7 +346,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case SolidLoadToStructure:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
             if ( !M_operator->isFluid() )
@@ -360,7 +360,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case StructureDispToHarmonicExtension:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
@@ -375,7 +375,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case StructureDispToSolid:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
@@ -383,7 +383,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 
         case StructureToFluid:
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 

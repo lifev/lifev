@@ -193,7 +193,7 @@ BCInterface_Function< Operator >::BCInterface_Function() :
     M_mapID     ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface_Function::BCInterface_Function()" << "\n";
 #endif
 
@@ -206,7 +206,7 @@ BCInterface_Function< Operator >::BCInterface_Function( const Data_Type& data ) 
     M_mapID     ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface_Function::BCInterface_Function( data )" << "\n";
 #endif
 
@@ -243,7 +243,7 @@ void
 BCInterface_Function< Operator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "BCInterface_Function::setData" << "\n";
 #endif
 
@@ -266,7 +266,7 @@ BCInterface_Function< Operator >::SetData( const Data_Type& data )
 
     UInt arguments = M_parser->CountSubstring( "," ) + 1;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface_Function::setFunction            arguments: " << arguments << "\n";
 #endif
 
@@ -306,7 +306,7 @@ BCInterface_Function< Operator >::Function( const Real& t,
                                             const ID& /*id*/)
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface_Function::Function: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
@@ -321,7 +321,7 @@ BCInterface_Function< Operator >::Function( const Real& t,
 
     this->DataInterpolation();
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->Evaluate( 1 ) << "\n";
 #endif
 
@@ -337,7 +337,7 @@ BCInterface_Function< Operator >::FunctionID( const Real& t,
                                               const ID& id )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface_Function::Function: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
@@ -353,7 +353,7 @@ BCInterface_Function< Operator >::FunctionID( const Real& t,
 
     this->DataInterpolation();
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->Evaluate( M_mapID[id] ) << "\n";
 #endif
 

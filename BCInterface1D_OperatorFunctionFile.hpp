@@ -129,7 +129,7 @@ BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFi
     super2      ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::BCInterface1D_OperatorFunctionFile()" << "\n";
 #endif
 
@@ -142,7 +142,7 @@ BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFi
     super2      ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::BCInterface1D_OperatorFunctionFile( data )" << "\n";
 #endif
 
@@ -178,7 +178,7 @@ void
 BCInterface1D_OperatorFunctionFile< Operator >::SetData( const Data_Type& data )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::setData" << "\n";
 #endif
     super1::SetData( data );

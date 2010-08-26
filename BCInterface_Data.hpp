@@ -502,7 +502,7 @@ inline void BCInterface_Data< Operator >::ReadFlag( const std::string& FileName,
     GetPot DataFile( FileName );
     M_flag = DataFile( flag, 0 );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface_Data::ReadFlag                        flag: " << static_cast<Real>( M_flag ) << "\n";
 #endif
 }
@@ -513,7 +513,7 @@ inline void BCInterface_Data< Operator >::ReadType( const std::string& FileName,
     GetPot DataFile( FileName );
     M_type = M_mapType[DataFile( type, "Essential" )];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface_Data::ReadType                        type: " << M_type << " (" << DataFile(type, "Essential") << ")\n";
 #endif
 }
@@ -524,7 +524,7 @@ inline void BCInterface_Data< Operator >::ReadMode( const std::string& FileName,
     GetPot DataFile( FileName );
     M_mode = M_mapMode[DataFile( mode, "Full" )];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface_Data::ReadMode                        mode: " << M_mode << " (" << DataFile(mode, "Full") << ")\n";
 #endif
 }
@@ -541,7 +541,7 @@ inline void BCInterface_Data< Operator >::ReadComV( const std::string& FileName,
     for ( UInt j( 0 ); j < componentSize; ++j )
         M_comV.push_back( DataFile( component, 0, j ) );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     std::stringstream output;
     output << "BCInterface_Data::ReadComV                        comV: ";
     for ( UInt i(0); i < static_cast<UInt>( M_comV.size() ); ++i )
@@ -557,7 +557,7 @@ inline void BCInterface_Data< Operator >::ReadDirection( const std::string& File
     GetPot DataFile( FileName );
     M_direction = DataFile( direction, " " );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 5020 ) << "BCInterface_Data::ReadDirection              direction: " << M_direction << "\n";
 #endif
 }
@@ -572,7 +572,7 @@ inline void BCInterface_Data< Operator >::ReadBase( const std::string& FileName,
             M_base.first = j->first;
             M_base.second = M_mapBase[j->first];
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug( 5020 ) << "BCInterface_Data::ReadBase                        base: " << M_base.second << " (" << j->first << ")\n";
             Debug( 5020 ) << "                                           baseString: " << M_baseString << "\n";
 #endif
