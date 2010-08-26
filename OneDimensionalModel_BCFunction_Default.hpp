@@ -85,9 +85,17 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor
     OneDimensionalModel_BCFunction_Default( const Flux_PtrType flux, const Source_PtrType source,
                                             const OneD_BCSide& side, const OneD_BC& bcType );
 
+    //! Copy constructor
+    /*!
+     * @param BCF_Default OneDimensionalModel_BCFunction_Default
+     */
+    OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& BCF_Default );
+
+    //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Default() {}
 
     //@}
@@ -96,7 +104,7 @@ public:
     //! @name Methods
     //@{
 
-    virtual Real operator() ( const Real& /*time*/, const Real& /*timeStep*/ ) = 0;
+    virtual Real operator() ( const Real& /*time*/, const Real& /*timeStep*/ );
 
     //@}
 
@@ -132,9 +140,17 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor
     OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType flux, const Source_PtrType source,
                                             const OneD_BCSide& side, const OneD_BC& bcType );
 
+    //! Copy constructor
+    /*!
+     * @param BCF_Riemann OneDimensionalModel_BCFunction_Riemann
+     */
+    OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& BCF_Riemann );
+
+    //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Riemann() {}
 
     //@}
@@ -190,9 +206,17 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor
     OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType flux, const Source_PtrType source,
                                                   const OneD_BCSide& side, const OneD_BC& bcType );
 
+    //! Copy constructor
+    /*!
+     * @param BCF_Compatibility OneDimensionalModel_BCFunction_Compatibility
+     */
+    OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& BCF_Compatibility );
+
+    //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Compatibility() {}
 
     //@}
@@ -263,9 +287,17 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor
     OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType flux, const Source_PtrType source,
                                               const OneD_BCSide& side, const OneD_BC& bcType );
 
+    //! Copy constructor
+    /*!
+     * @param BCF_Absorbing OneDimensionalModel_BCFunction_Absorbing
+     */
+    OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing );
+
+    //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Absorbing() {}
 
     //@}
@@ -309,10 +341,18 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor
     OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType flux, const Source_PtrType source,
                                                const OneD_BCSide& side, const OneD_BC& bcType,
                                                const Real& resistance );
 
+    //! Copy constructor
+    /*!
+     * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
+     */
+    OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& BCF_Resistance );
+
+    //! Destructor
     ~OneDimensionalModel_BCFunction_Resistance() {}
 
     //@}

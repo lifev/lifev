@@ -46,16 +46,25 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
+    M_bcType                    (),
+    M_bcSide                    ( side ),
+    M_bcFunction                (),
     M_isInternal                ( false ),
-    M_variable_at_line          (),
     M_matrixrow_at_line         (),
-    M_rhs_at_line               (),
-    M_resBC                     (),
-    M_boundarySide              ( side )
+    M_resBC                     ()
 {
     M_matrixrow_at_line[ OneD_first ]  = Container2D_Type();
     M_matrixrow_at_line[ OneD_second ] = Container2D_Type();
 }
+
+OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& BC ) :
+    M_bcType                    ( BC.M_bcType ),
+    M_bcSide                    ( BC.M_bcSide ),
+    M_bcFunction                ( BC.M_bcFunction ),
+    M_isInternal                ( BC.M_isInternal ),
+    M_matrixrow_at_line         ( BC.M_matrixrow_at_line ),
+    M_resBC                     ( BC.M_resBC )
+{}
 
 // ===================================================
 // Methods
@@ -80,7 +89,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
             BC_dir[i]=M_resBC[i];
     }
 
-    Debug(6311) << "[OneDimensionalModel_BC::applyBC] on side " << M_boundarySide
+    Debug(6311) << "[OneDimensionalModel_BC::applyBC] on side " << M_bcSide
                 << " imposing [ A, Q ] = [ " << BC_dir[0] << ", " << BC_dir[1] << " ]\n";
 }
 
@@ -88,21 +97,21 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BC::setVariable( const OneD_BCLine& line, const OneD_BC& bc )
+OneDimensionalModel_BC::setType( const OneD_BCLine& line, const OneD_BC& bc )
 {
-    M_variable_at_line[line] = bc;
+    M_bcType[line] = bc;
+}
+
+void
+OneDimensionalModel_BC::setBCFunction( const OneD_BCLine& line, const BCFunction_Type& BCFunction )
+{
+    M_bcFunction[line] = BCFunction; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &BCFunction );
 }
 
 void
 OneDimensionalModel_BC::setInternalFlag( const bool& flag )
 {
     M_isInternal = flag;
-}
-
-void
-OneDimensionalModel_BC::setRHS( const OneD_BCLine& line, const BCFunction_Type& rhs )
-{
-    M_rhs_at_line[line] = rhs; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
 }
 
 void
@@ -114,10 +123,16 @@ OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D
 // ===================================================
 // Get Methods
 // ===================================================
-OneDimensionalModel_BC::BCFunction_Type&
-OneDimensionalModel_BC::RHS( const OneD_BCLine& line )
+const OneD_BC&
+OneDimensionalModel_BC::type( const OneD_BCLine& line )
 {
-    return M_rhs_at_line[line]; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
+    return M_bcType[line];
+}
+
+OneDimensionalModel_BC::BCFunction_Type&
+OneDimensionalModel_BC::BCFunction( const OneD_BCLine& line )
+{
+    return M_bcFunction[line]; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
 }
 
 const bool&
@@ -127,7 +142,7 @@ OneDimensionalModel_BC::isInternal()
 }
 
 // ===================================================
-// Protected Methods
+// Private Methods
 // ===================================================
 void
 OneDimensionalModel_BC::compute_resBC( const Real&             time,
@@ -151,7 +166,7 @@ OneDimensionalModel_BC::compute_resBC( const Real&             time,
     left_eigvec2[1] = 0.;
 
     UInt dof;
-    ( M_boundarySide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->NumberOfElements() + 1;
+    ( M_bcSide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->NumberOfElements() + 1;
 
     Container2D_Type U_boundary, W_boundary;
 
@@ -169,28 +184,28 @@ OneDimensionalModel_BC::compute_resBC( const Real&             time,
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 1\n";
 
     // Compute RHS
-    rhsBC[0] = M_rhs_at_line[OneD_first](time, timeStep);
-    rhsBC[1] = M_rhs_at_line[OneD_second](time, timeStep);
-
-    // If is a pressure BC, convert it into an area
-    if ( M_variable_at_line[OneD_first] == OneD_P )
-        rhsBC[0] = flux->Physics()->A_from_P( rhsBC[0], dof - 1 ); // Index start from 0
-
-    if ( M_variable_at_line[OneD_second] == OneD_P )
-        rhsBC[1] = flux->Physics()->A_from_P( rhsBC[1], dof - 1 ); // Index start from 0
+    rhsBC[0] = M_bcFunction[OneD_first](time, timeStep);
+    rhsBC[1] = M_bcFunction[OneD_second](time, timeStep);
 
     // The flow rate  and the pressure are given positive with respect to
     // the normal direction: (left) <=  --------  => (right)
-    if ( M_boundarySide == OneD_left )
+    if ( M_bcSide == OneD_left )
     {
-        if ( M_variable_at_line[OneD_first] == OneD_Q || M_variable_at_line[OneD_first] == OneD_P )
+        if ( M_bcType[OneD_first] == OneD_Q || M_bcType[OneD_first] == OneD_P )
             rhsBC[0] *= -1;
-        if ( M_variable_at_line[OneD_second] == OneD_Q || M_variable_at_line[OneD_second] == OneD_P )
+        if ( M_bcType[OneD_second] == OneD_Q || M_bcType[OneD_second] == OneD_P )
             rhsBC[1] *= -1;
     }
 
-    Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[0] = " << rhsBC[0] << "\n";;
-    Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[1] = " << rhsBC[1] << "\n";;
+    // If is a pressure BC, convert it into an area
+    if ( M_bcType[OneD_first] == OneD_P )
+        rhsBC[0] = flux->Physics()->A_from_P( rhsBC[0], dof - 1 ); // Index start from 0
+
+    if ( M_bcType[OneD_second] == OneD_P )
+        rhsBC[1] = flux->Physics()->A_from_P( rhsBC[1], dof - 1 ); // Index start from 0
+
+    Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[0] = " << rhsBC[0] << "\n";
+    Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] rhsBC[1] = " << rhsBC[1] << "\n";
 
     // this is not general
     // PRECONDITION (typical situation):
@@ -202,12 +217,12 @@ OneDimensionalModel_BC::compute_resBC( const Real&             time,
     // the same variable on both lines!)
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 2\n";
-    M_variable_at_line[OneD_first] == OneD_W1 ? //"W1"
+    M_bcType[OneD_first] == OneD_W1 ? //"W1"
         left_eigvec_first = left_eigvec1 :
         left_eigvec_first = left_eigvec2;
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] 3\n";
-    M_variable_at_line[OneD_second] == OneD_W1 ? //"W1"
+    M_bcType[OneD_second] == OneD_W1 ? //"W1"
         left_eigvec_second = left_eigvec1 :
         left_eigvec_second = left_eigvec2;
 
@@ -242,7 +257,7 @@ OneDimensionalModel_BC::compute_resBC_line( OneD_BCLine line, Container2D_Type l
 
     Real LnUn, add;
 
-    switch( M_variable_at_line[line] )
+    switch( M_bcType[line] )
     {
         case OneD_W1: //"W1"
             //       ASSERT(eigval1<0. && eigval2<0.,
@@ -267,11 +282,11 @@ OneDimensionalModel_BC::compute_resBC_line( OneD_BCLine line, Container2D_Type l
             M_matrixrow_at_line[line][0] = 0.; M_matrixrow_at_line[line][1] = 1.;
         break;
         default: std::cout << "\n[OneDimensionalModel_BC::compute_resBC] Wrong boundary variable as " << line
-                           << " condition on side " << M_boundarySide;
+                           << " condition on side " << M_bcSide;
     }
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_resBC_line] to impose variable "
-                << M_variable_at_line[line]
+                << M_bcType[line]
                 << ", " << line << " line = "
                 << M_matrixrow_at_line[line][0] << ", "
                 << M_matrixrow_at_line[line][1] << "\n";

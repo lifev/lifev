@@ -58,14 +58,18 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BC::BCFunction_Type            BCFunction_Type;
-    typedef OneDimensionalModel_BC::BCFunction_PtrType         BCFunction_PtrType;
-    typedef OneDimensionalModel_BC::BCFunction_Default_PtrType BCFunction_Default_PtrType;
+    typedef OneDimensionalModel_BC              BC_Type;
+    typedef boost::shared_ptr< BC_Type >        BC_PtrType;
 
-    typedef OneDimensionalModel_BC::Flux_PtrType               Flux_PtrType;
-    typedef OneDimensionalModel_BC::Source_PtrType             Source_PtrType;
-    typedef OneDimensionalModel_BC::Solution_Type              Solution_Type;
-    typedef OneDimensionalModel_BC::Solution_PtrType           Solution_PtrType;
+    typedef BC_Type::BCFunction_Type            BCFunction_Type;
+    typedef BC_Type::BCFunction_PtrType         BCFunction_PtrType;
+    typedef BC_Type::BCFunction_Default_Type    BCFunction_Default_Type;
+    typedef BC_Type::BCFunction_Default_PtrType BCFunction_Default_PtrType;
+
+    typedef BC_Type::Flux_PtrType               Flux_PtrType;
+    typedef BC_Type::Source_PtrType             Source_PtrType;
+    typedef BC_Type::Solution_Type              Solution_Type;
+    typedef BC_Type::Solution_PtrType           Solution_PtrType;
 
     //@}
 
@@ -75,6 +79,12 @@ public:
 
     //! Constructor
     OneDimensionalModel_BCHandler();
+
+    //! Copy constructor
+    /*!
+     * @param BCH OneDimensionalModel_BCHandler
+     */
+    OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH );
 
     //! Destructor
     ~OneDimensionalModel_BCHandler() {}
@@ -114,7 +124,7 @@ public:
     //! @name Get Methods
     //@{
 
-    const OneDimensionalModel_BC& BC( const OneD_BCSide& side );
+    const BC_PtrType& BC( const OneD_BCSide& side );
 
     const bool& BCReady( const OneD_BCSide& side, const OneD_BCLine& line );
 
@@ -122,10 +132,10 @@ public:
 
 private:
 
-    std::map< OneD_BCSide, boost::shared_ptr< OneDimensionalModel_BC > > M_boundary;
-    std::map< OneD_BCSide, std::map< OneD_BCLine, bool > >               M_boundarySet;
+    std::map< OneD_BCSide, BC_PtrType >                      M_boundary;
+    std::map< OneD_BCSide, std::map< OneD_BCLine, bool > >   M_boundarySet;
 
-    std::vector < BCFunction_Default_PtrType >                           M_defaultFunctions;
+    std::vector < BCFunction_Default_PtrType >               M_defaultFunctions;
 };
 
 }

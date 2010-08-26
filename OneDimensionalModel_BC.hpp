@@ -78,6 +78,12 @@ public:
     //! Constructor
     OneDimensionalModel_BC( const OneD_BCSide& side );
 
+    //! Copy constructor
+    /*!
+     * @param BC OneDimensionalModel_BC
+     */
+    OneDimensionalModel_BC( const OneDimensionalModel_BC& BC );
+
     //! Destructor
     ~OneDimensionalModel_BC() {}
 
@@ -100,11 +106,11 @@ public:
     //! @name Set Methods
     //@{
 
-    void setVariable( const OneD_BCLine& line, const OneD_BC& bc );
+    void setType( const OneD_BCLine& line, const OneD_BC& bc );
+
+    void setBCFunction( const OneD_BCLine& line, const BCFunction_Type& rhs );
 
     void setInternalFlag( const bool& flag );
-
-    void setRHS( const OneD_BCLine& line, const BCFunction_Type& rhs );
 
     void setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow );
 
@@ -114,7 +120,9 @@ public:
     //! @name Get Methods
     //@{
 
-    BCFunction_Type& RHS( const OneD_BCLine& line );
+    const OneD_BC& type( const OneD_BCLine& line );
+
+    BCFunction_Type& BCFunction( const OneD_BCLine& line );
 
     const bool& isInternal();
 
@@ -145,18 +153,18 @@ private:
 
     //@}
 
-    bool                                          M_isInternal;
+    std::map<OneD_BCLine, OneD_BC>                M_bcType;
 
-    std::map<OneD_BCLine, OneD_BC>                M_variable_at_line;
+    OneD_BCSide                                   M_bcSide;
+
+    std::map<OneD_BCLine, BCFunction_Type>        M_bcFunction;
+
+    bool                                          M_isInternal;
 
     std::map<OneD_BCLine, Container2D_Type>       M_matrixrow_at_line;
 
-    std::map<OneD_BCLine, BCFunction_Type>        M_rhs_at_line;
-
     //! Result of the 2x2 linear system to be solved at each side
     Container2D_Type                              M_resBC;
-
-    OneD_BCSide                                   M_boundarySide;
 };
 
 }

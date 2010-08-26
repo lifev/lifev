@@ -66,6 +66,23 @@ OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( 
     }
 }
 
+OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& BCF_Default ) :
+    M_Flux                          ( BCF_Default.M_Flux ),        // Ptr copy
+    M_Source                        ( BCF_Default.M_Source ),      // Ptr copy
+    M_Solution                      ( BCF_Default.M_Solution ),    // Ptr copy
+    M_boundaryDof                   ( BCF_Default.M_boundaryDof ),
+    M_bcType                        ( BCF_Default.M_bcType )
+{}
+
+// ===================================================
+// Methods
+// ===================================================
+Real
+OneDimensionalModel_BCFunction_Default::operator() ( const Real& /*time*/, const Real& /*timeStep*/ )
+{
+    assert(false); return 0.;
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -83,10 +100,16 @@ OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType solu
 OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType     flux,
                                                                                 const Source_PtrType   source,
                                                                                 const OneD_BCSide&     side,
-                                                                                const OneD_BC&         bcType ):
+                                                                                const OneD_BC&         bcType ) :
     super                           ( flux, source, side, bcType ),
     M_U_boundary                    (),
     M_W_boundary                    ()
+{}
+
+OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& BCF_Riemann ) :
+    super                           ( BCF_Riemann ),
+    M_U_boundary                    ( BCF_Riemann.M_U_boundary ),
+    M_W_boundary                    ( BCF_Riemann.M_W_boundary )
 {}
 
 // ===================================================
@@ -158,6 +181,18 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
         default:
             std::cout << "\n[Compatibility::Compatibility] incorrect boundary identifier: " << side << std::endl;
     }
+}
+
+OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& BCF_Compatibility ) :
+super                           ( BCF_Compatibility ),
+M_internalBoundaryDof           ( BCF_Compatibility.M_internalBoundaryDof ),
+M_boundaryPoint                 ( BCF_Compatibility.M_boundaryPoint ),
+M_internalBdPoint               ( BCF_Compatibility.M_internalBdPoint ),
+M_eigval1                       ( BCF_Compatibility.M_eigval1 ),
+M_eigval2                       ( BCF_Compatibility.M_eigval2 ),
+M_left_eigvec1                  ( BCF_Compatibility.M_left_eigvec1 ),
+M_left_eigvec2                  ( BCF_Compatibility.M_left_eigvec2 )
+{
 }
 
 // ===================================================
@@ -306,6 +341,10 @@ OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbi
     super                           ( flux, source, side, bcType )
 {}
 
+OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing ) :
+    super                           ( BCF_Absorbing )
+{}
+
 // ===================================================
 // Methods
 // ===================================================
@@ -384,7 +423,7 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( Real const& /*time*/, cons
 void
 OneDimensionalModel_BCFunction_Absorbing::resistance( Real& /*resistance*/ )
 {
-    //Do nothing = absorbing!
+    //Do nothing => absorbing!
 }
 
 
@@ -399,6 +438,11 @@ OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resist
                                                                                       const Real&            resistance ):
     super                           ( flux, source, side, bcType ),
     M_resistance                    ( resistance )
+{}
+
+OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& BCF_Resistance ) :
+    super                           ( BCF_Resistance ),
+    M_resistance                    ( BCF_Resistance.M_resistance )
 {}
 
 // ===================================================

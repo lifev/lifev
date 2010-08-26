@@ -52,13 +52,29 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler() :
 {
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler] Creating OneDimensionalModel_BC classes.\n";
 
-    M_boundary[ OneD_left ].reset(  new OneDimensionalModel_BC( OneD_left ) );
-    M_boundary[ OneD_right ].reset( new OneDimensionalModel_BC( OneD_right ) );
+    M_boundary[ OneD_left ].reset(  new BC_Type( OneD_left ) );
+    M_boundary[ OneD_right ].reset( new BC_Type( OneD_right ) );
 
     M_boundarySet[ OneD_left ].insert(  make_pair( OneD_first,  false ) );
     M_boundarySet[ OneD_left ].insert(  make_pair( OneD_second, false ) );
     M_boundarySet[ OneD_right ].insert( make_pair( OneD_first,  false ) );
     M_boundarySet[ OneD_right ].insert( make_pair( OneD_second, false ) );
+}
+
+OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH ) :
+    M_boundary          (),
+    M_boundarySet       ( BCH.M_boundarySet ),
+    M_defaultFunctions  ()
+{
+    M_boundary[ OneD_left ].reset(  new BC_Type( *BCH.M_boundary.find( OneD_left )->second ) );
+    M_boundary[ OneD_right ].reset( new BC_Type( *BCH.M_boundary.find( OneD_right )->second ) );
+
+    for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = BCH.M_defaultFunctions.begin();
+          i != BCH.M_defaultFunctions.end() ; ++i )
+    {
+        BCFunction_Default_PtrType BCDefaultFunction( new BCFunction_Default_Type( *i->get() ) );
+        M_defaultFunctions.push_back( BCDefaultFunction );
+    }
 }
 
 // ===================================================
@@ -162,8 +178,8 @@ OneDimensionalModel_BCHandler::setBC( const OneD_BCSide&     side,
                                       const BCFunction_Type& BCfunction )
 {
     M_boundarySet[side][line] = true;
-    M_boundary[side]->setVariable( line, bcType );
-    M_boundary[side]->setRHS( line, BCfunction );
+    M_boundary[side]->setType( line, bcType );
+    M_boundary[side]->setBCFunction( line, BCfunction );
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setBC] imposing function at "
                   << side << " boundary ("
                   << line << " line), variable "
@@ -186,10 +202,10 @@ OneDimensionalModel_BCHandler::setInternalNode( const OneD_BCSide& side )
 // ===================================================
 // Get Methods
 // ===================================================
-const OneDimensionalModel_BC&
+const OneDimensionalModel_BCHandler::BC_PtrType&
 OneDimensionalModel_BCHandler::BC( const OneD_BCSide& side )
 {
-    return *(M_boundary[side]);
+    return M_boundary[side];
 }
 
 const bool&
