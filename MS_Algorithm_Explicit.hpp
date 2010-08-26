@@ -100,6 +100,9 @@ public:
     //! Perform sub-iteration on the coupling variables
     void SubIterate();
 
+    //! Update coupling variables for the next time step.
+    void UpdateCouplingVariables();
+
     //! Display some information about the algorithm
     void ShowMe();
 

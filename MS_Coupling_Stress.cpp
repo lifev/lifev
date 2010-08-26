@@ -44,13 +44,11 @@ std::map< std::string, stressTypes > MS_stressesMap;
 MS_Coupling_Stress::MS_Coupling_Stress() :
     super                (),
     M_baseStress3D       (),
-    M_baseDeltaStress3D  (),
     M_baseStress1D       (),
-    M_baseDeltaStress1D  (),
     M_stressType         ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::MS_Coupling_Stress() \n";
 #endif
 
@@ -60,13 +58,11 @@ MS_Coupling_Stress::MS_Coupling_Stress() :
 MS_Coupling_Stress::MS_Coupling_Stress( const MS_Coupling_Stress& Stress ) :
     super               ( Stress ),
     M_baseStress3D      ( Stress.M_baseStress3D ),
-    M_baseDeltaStress3D ( Stress.M_baseDeltaStress3D ),
     M_baseStress1D      ( Stress.M_baseStress1D ),
-    M_baseDeltaStress1D ( Stress.M_baseDeltaStress1D ),
     M_stressType        ( Stress.M_stressType )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::MS_Coupling_Stress( Stress ) \n";
 #endif
 
@@ -82,9 +78,7 @@ MS_Coupling_Stress::operator=( const MS_Coupling_Stress& Stress )
     {
         super::operator=( Stress );
         M_baseStress3D      = Stress.M_baseStress3D;
-        M_baseDeltaStress3D = Stress.M_baseDeltaStress3D;
         M_baseStress1D      = Stress.M_baseStress1D;
-        M_baseDeltaStress1D = Stress.M_baseDeltaStress1D;
         M_stressType        = Stress.M_stressType;
     }
     return *this;
@@ -97,7 +91,7 @@ void
 MS_Coupling_Stress::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::SetupData() \n";
 #endif
 
@@ -113,7 +107,7 @@ void
 MS_Coupling_Stress::SetupCoupling()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::SetupCoupling() \n";
 #endif
 
@@ -124,13 +118,9 @@ MS_Coupling_Stress::SetupCoupling()
     CreateLocalVectors();
 
     //Set Functions
-    M_baseStress3D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress3D, this, _1, _2, _3, _4, _5 ) );
+    M_baseStress3D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress, this, _1, _2, _3, _4, _5 ) );
 
-    M_baseDeltaStress3D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionDeltaStress3D, this, _1, _2, _3, _4, _5 ) );
-
-    M_baseStress1D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress1D, this, _1 ) );
-
-    M_baseDeltaStress1D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionDeltaStress1D, this, _1 ) );
+    M_baseStress1D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress, this, _1, _1, _1, _1, _1 ) );
 
     // Impose stress
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
@@ -139,21 +129,18 @@ MS_Coupling_Stress::SetupCoupling()
             case Fluid3D:
 
                 ImposeStress3D< MS_Model_Fluid3D > ( i );
-                ImposeDeltaStress3D< MS_Model_Fluid3D > ( i );
 
                 break;
 
             case FSI3D:
 
                 ImposeStress3D< MS_Model_FSI3D > ( i );
-                //ImposeDeltaStress3D< MS_Model_FSI3D > ( i );
 
                 break;
 
             case OneDimensional:
 
                 ImposeStress1D< MS_Model_1D > ( i );
-                //ImposeDeltaStress1D< MS_Model_1D > ( i );
 
                 break;
 
@@ -168,12 +155,11 @@ void
 MS_Coupling_Stress::InitializeCouplingVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::InitializeCouplingVariables() \n";
 #endif
 
     *M_LocalCouplingVariables      = 0.;
-    *M_LocalDeltaCouplingVariables = 0.;
 
     // Compute the Stress coupling variable as an average of all the stresses
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
@@ -240,12 +226,22 @@ MS_Coupling_Stress::InitializeCouplingVariables()
                 if ( M_displayer->isLeader() )
                     switchErrorMessage( M_models[i] );
         }
+
+    //Initialize coupling variables at time n
+    *M_LocalCouplingVariables_tn = *M_LocalCouplingVariables;
+
+#ifdef HAVE_LIFEV_DEBUG
+    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
+        Debug( 8220 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingVariables )[i]  << "\n";
+#endif
+
 }
 
 void
 MS_Coupling_Stress::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
 {
-#ifdef DEBUG
+
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::ExportCouplingResiduals()  \n";
 #endif
 
@@ -283,13 +279,35 @@ MS_Coupling_Stress::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
     }
 
     ExportCouplingVector( *M_LocalCouplingResiduals, CouplingResiduals );
+
+#ifdef HAVE_LIFEV_DEBUG
+    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
+        Debug( 8220 ) << "R(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingResiduals )[i]  << "\n";
+#endif
+
 }
 
+void
+MS_Coupling_Stress::ShowMe()
+{
+    if ( M_displayer->isLeader() )
+    {
+        super::ShowMe();
+
+        std::cout << "Stress Type         = " << Enum2String( M_stressType, MS_stressesMap ) << std::endl;
+        std::cout << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[0] << std::endl << std::endl;
+        std::cout << std::endl << std::endl;
+    }
+}
+
+// ===================================================
+// Private MultiScale PhysicalCoupling Implementation
+// ===================================================
 MS_ModelsVector_Type
 MS_Coupling_Stress::GetListOfPerturbedModels( const UInt& LocalCouplingVariableID )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::GetListOfPerturbedModels( LocalCouplingVariableID ) \n";
 #endif
 
@@ -310,7 +328,7 @@ void
 MS_Coupling_Stress::InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::InsertJacobianConstantCoefficients( Jacobian )  \n";
 #endif
 
@@ -329,7 +347,7 @@ void
 MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::InsertJacobianDeltaCoefficients( Jacobian, Column, ID, LinearSystemSolved )  \n";
 #endif
 
@@ -342,19 +360,19 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, c
     {
         case Fluid3D:
 
-            Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux( M_flags[ModelLocalID], SolveLinearSystem );
+            Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
 
         case FSI3D:
 
-            Coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux( M_flags[ModelLocalID], SolveLinearSystem );
+            Coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
 
         case OneDimensional:
 
-            Coefficient = MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlux( M_flags[ModelLocalID], SolveLinearSystem );
+            Coefficient = MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
 
@@ -369,7 +387,7 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, c
     if ( M_comm->MyPID() == 0 )
         Jacobian.set_mat_inc( Row, Column, Coefficient );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "J(" << Row << "," << Column << ") = " << Coefficient  << "\n";
 #endif
 
@@ -429,44 +447,14 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
     }
 }
 
-void
-MS_Coupling_Stress::ShowMe()
-{
-    if ( M_displayer->isLeader() )
-    {
-        super::ShowMe();
-
-        std::cout << "Stress Type         = " << Enum2String( M_stressType, MS_stressesMap ) << std::endl;
-        std::cout << "Coupling Stress     = " << ( *M_LocalCouplingVariables )[0] << std::endl << std::endl;
-        std::cout << std::endl << std::endl;
-    }
-}
-
 // ===================================================
 // Private Methods
 // ===================================================
 Real
-MS_Coupling_Stress::FunctionStress3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+MS_Coupling_Stress::FunctionStress( const Real& t, const Real&, const Real&, const Real&, const ID& )
 {
-    return ( *M_LocalCouplingVariables )[0];
-}
-
-Real
-MS_Coupling_Stress::FunctionDeltaStress3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
-{
-    return ( *M_LocalDeltaCouplingVariables )[0];
-}
-
-Real
-MS_Coupling_Stress::FunctionStress1D( const Real& /*t*/ )
-{
-    return ( *M_LocalCouplingVariables )[1];
-}
-
-Real
-MS_Coupling_Stress::FunctionDeltaStress1D( const Real& /*t*/ )
-{
-    return ( *M_LocalDeltaCouplingVariables )[1];
+    return InterpolateCouplingVariable( ( *M_LocalCouplingVariables_tn )[0], ( *M_LocalCouplingVariables )[0],
+                                        t, M_globalData->GetDataTime()->getPreviousTime(), M_globalData->GetDataTime()->getTime() );
 }
 
 } // Namespace LifeV

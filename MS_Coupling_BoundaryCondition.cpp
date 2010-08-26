@@ -46,7 +46,7 @@ MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
     M_listSize  ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() \n";
 #endif
 
@@ -60,7 +60,7 @@ MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition( const MS_Coupling_
     M_listSize  ( BoundaryCondition.M_listSize )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition( BoundaryCondition ) \n";
 #endif
 
@@ -89,7 +89,7 @@ void
 MS_Coupling_BoundaryCondition::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::SetupData() \n";
 #endif
 
@@ -110,7 +110,7 @@ void
 MS_Coupling_BoundaryCondition::SetupCoupling()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8210 ) << "MS_Coupling_BoundaryCondition::SetupCoupling() \n";
 #endif
 
@@ -126,7 +126,7 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
             case Fluid3D:
 
                 ApplyBoundaryConditions3D< MS_Model_Fluid3D > ( i );
-                ApplyDeltaBoundaryConditions3D< MS_Model_Fluid3D > ( i );
+                //ApplyDeltaBoundaryConditions3D< MS_Model_Fluid3D > ( i );
 
                 break;
 
@@ -151,19 +151,6 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
         }
 }
 
-MS_ModelsVector_Type
-MS_Coupling_BoundaryCondition::GetListOfPerturbedModels( const UInt& /*LocalCouplingVariableID*/ )
-{
-
-#ifdef DEBUG
-    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::GetListOfPerturbedModels() \n";
-#endif
-
-    MS_ModelsVector_Type emptyList;
-
-    return emptyList;
-}
-
 void
 MS_Coupling_BoundaryCondition::ShowMe()
 {
@@ -177,6 +164,22 @@ MS_Coupling_BoundaryCondition::ShowMe()
             std::cout << M_list[i] << " ";
         std::cout << std::endl << std::endl << std::endl << std::endl;
     }
+}
+
+// ===================================================
+// Private MultiScale PhysicalCoupling Implementation
+// ===================================================
+MS_ModelsVector_Type
+MS_Coupling_BoundaryCondition::GetListOfPerturbedModels( const UInt& /*LocalCouplingVariableID*/ )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::GetListOfPerturbedModels() \n";
+#endif
+
+    MS_ModelsVector_Type emptyList;
+
+    return emptyList;
 }
 
 void

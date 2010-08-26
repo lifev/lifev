@@ -52,7 +52,7 @@ MS_Solver::MS_Solver() :
     M_chrono            ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MS_Solver::MS_Solver() \n";
 #endif
 
@@ -83,7 +83,7 @@ MS_Solver::MS_Solver( const MS_Solver& solver ) :
     M_chrono            ( solver.M_chrono )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MS_Solver::MS_Solver( solver ) \n";
 #endif
 
@@ -96,7 +96,7 @@ MS_Solver&
 MS_Solver::operator=( const MS_Solver& solver )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MS_Solver::operator=( solver ) \n";
 #endif
 
@@ -117,10 +117,10 @@ MS_Solver::operator=( const MS_Solver& solver )
 // Methods
 // ===================================================
 void
-MS_Solver::SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm )
+MS_Solver::SetCommunicator( const MS_Comm_PtrType& comm )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MS_Solver::SetCommunicator( comm ) \n";
 #endif
 
@@ -132,7 +132,7 @@ void
 MS_Solver::SetupProblem( const std::string& FileName, const std::string& problemFolder )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MS_Solver::SetupData( FileName, problemFolder ) \n";
 #endif
 
@@ -165,6 +165,7 @@ MS_Solver::SetupProblem( const std::string& FileName, const std::string& problem
         M_algorithm->SetCommunicator( M_comm );
         M_algorithm->SetModel( M_model );
         M_algorithm->SetupData( FileName );
+        M_algorithm->InitializeCouplingVariables();
     }
 }
 
@@ -172,7 +173,7 @@ bool
 MS_Solver::SolveProblem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MS_Solver::SolveProblem() \n";
 #endif
 
@@ -209,7 +210,10 @@ MS_Solver::SolveProblem()
 
         // If it is a MultiScale model, call algorithms for subiterations
         if ( M_model->GetType() == MultiScale )
+        {
             M_algorithm->SubIterate();
+            M_algorithm->UpdateCouplingVariables();
+        }
 
         // SaveSolution
         M_model->SaveSolution();

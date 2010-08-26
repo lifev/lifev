@@ -130,8 +130,11 @@ public:
      */
     void CreateCouplingMap( EpetraMap& couplingMap );
 
-    //! Setup parameters for the implicit coupling
+    //! Initialize coupling variables for the first time step
     void InitializeCouplingVariables();
+
+    //! Extrapolate coupling variables for the next time step
+    void ExtrapolateCouplingVariables();
 
     //! Import the values of the coupling variables
     void ImportCouplingVariables( const MS_Vector_Type& CouplingVariables );

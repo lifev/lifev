@@ -95,7 +95,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const boost::shared_ptr< Epetra_Comm >& comm );
+    void SetCommunicator( const MS_Comm_PtrType& comm );
 
     //! Setup the problem
     /*!
@@ -133,7 +133,7 @@ private:
     MS_GlobalDataContainer_PtrType           M_globalData;
 
     // Communicator
-    boost::shared_ptr< Epetra_Comm >         M_comm;
+    MS_Comm_PtrType                          M_comm;
 
     // Displayer tool for MPI processes
     boost::shared_ptr< Displayer >           M_displayer;

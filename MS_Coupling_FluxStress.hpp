@@ -112,6 +112,16 @@ public:
      */
     void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals );
 
+    //! Display some information about the coupling
+    void ShowMe();
+
+    //@}
+
+private:
+
+    //! @name Private MultiScale PhysicalCoupling Implementation
+    //@{
+
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
      * @param LocalCouplingVariableID local coupling variable (perturbed)
@@ -140,12 +150,8 @@ public:
      */
     void DisplayCouplingValues( std::ostream& output );
 
-    //! Display some information about the coupling
-    void ShowMe();
-
     //@}
 
-private:
 
     //! @name Private Methods
     //@{
@@ -156,51 +162,22 @@ private:
     template< class model >
     inline void ImposeStress3D( const UInt& i );
 
-    Real FunctionFlux3D  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-    Real FunctionStress3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-
-    template< class model >
-    inline void ImposeDeltaFlux3D( const UInt& i );
-
-    template< class model >
-    inline void ImposeDeltaStress3D( const UInt& i );
-
-    Real FunctionDeltaFlux3D  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-    Real FunctionDeltaStress3D( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
-
-
-
     template< class model >
     inline void ImposeFlux1D( const UInt& i);
 
     template< class model >
     inline void ImposeStress1D( const UInt& i );
 
-    Real FunctionFlux1D  ( const Real& /*t*/ );
-    Real FunctionStress1D( const Real& /*t*/ );
-
-    template< class model >
-    inline void ImposeDeltaFlux1D( const UInt& i );
-
-    template< class model >
-    inline void ImposeDeltaStress1D( const UInt& i );
-
-    Real FunctionDeltaFlux1D  ( const Real& /*t*/ );
-    Real FunctionDeltaStress1D( const Real& /*t*/ );
+    Real FunctionFlux  ( const Real& t, const Real&, const Real&, const Real&, const ID& );
+    Real FunctionStress( const Real& t, const Real&, const Real&, const Real&, const ID& );
 
     //@}
 
     BCFunctionBase M_baseFlux3D;
     BCFunctionBase M_baseStress3D;
 
-    BCFunctionBase M_baseDeltaFlux3D;
-    BCFunctionBase M_baseDeltaStress3D;
-
     OneDimensionalModel_BCFunction M_baseFlux1D;
     OneDimensionalModel_BCFunction M_baseStress1D;
-
-    OneDimensionalModel_BCFunction M_baseDeltaFlux1D;
-    OneDimensionalModel_BCFunction M_baseDeltaStress1D;
 
     stressTypes    M_stressType;
 };
@@ -220,7 +197,7 @@ MS_Coupling_FluxStress::ImposeFlux3D( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetBCInterface().addBC( "imposeFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlux3D, 3 );
+    Model->GetBCInterface().addBC( "CouplingFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlux3D, 3 );
 }
 
 template< class model >
@@ -229,25 +206,7 @@ MS_Coupling_FluxStress::ImposeStress3D( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
-    Model->GetBCInterface().addBC( "imposeStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress3D );
-}
-
-template< class model >
-inline void
-MS_Coupling_FluxStress::ImposeDeltaFlux3D( const UInt& i )
-{
-    model *Model = MS_DynamicCast< model >( M_models[i] );
-
-    Model->GetLinearBCInterface().addBC( "imposeDeltaFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseDeltaFlux3D, 3 );
-}
-
-template< class model >
-inline void
-MS_Coupling_FluxStress::ImposeDeltaStress3D( const UInt& i )
-{
-    model *Model = MS_DynamicCast< model >( M_models[i] );
-
-    Model->GetLinearBCInterface().addBC( "imposeDeltaStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseDeltaStress3D );
+    Model->GetBCInterface().addBC( "CouplingStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress3D );
 }
 
 template< class model >
@@ -266,24 +225,6 @@ MS_Coupling_FluxStress::ImposeStress1D( const UInt& i )
     model *Model = MS_DynamicCast< model >( M_models[i] );
 
     Model->GetBCInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
-}
-
-template< class model >
-inline void
-MS_Coupling_FluxStress::ImposeDeltaFlux1D( const UInt& i )
-{
-    model *Model = MS_DynamicCast< model >( M_models[i] );
-
-    Model->GetLinearBCInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_Q, M_baseDeltaFlux1D );
-}
-
-template< class model >
-inline void
-MS_Coupling_FluxStress::ImposeDeltaStress1D( const UInt& i )
-{
-    model *Model = MS_DynamicCast< model >( M_models[i] );
-
-    Model->GetLinearBCInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseDeltaStress1D );
 }
 
 } // Namespace LifeV

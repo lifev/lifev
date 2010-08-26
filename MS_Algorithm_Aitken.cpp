@@ -46,7 +46,7 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
     M_generalizedAitken ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::MS_Algorithm_Aitken() \n";
 #endif
 
@@ -65,7 +65,7 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm )
     M_generalizedAitken ( algorithm.M_generalizedAitken )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::MS_Algorithm_Aitken( algorithm ) \n";
 #endif
 
@@ -94,7 +94,7 @@ void
 MS_Algorithm_Aitken::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::SetupData( algorithm ) \n";
 #endif
 
@@ -114,7 +114,7 @@ void
 MS_Algorithm_Aitken::SubIterate()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::SubIterate( tolerance, subITMax ) \n";
 #endif
 

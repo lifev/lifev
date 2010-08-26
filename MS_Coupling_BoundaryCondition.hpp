@@ -110,6 +110,16 @@ public:
      */
     void ExportCouplingResiduals( MS_Vector_Type& /*CouplingResiduals*/ ) {}
 
+    //! Display some information about the coupling
+    void ShowMe();
+
+    //@}
+
+private:
+
+    //! @name Private MultiScale PhysicalCoupling Implementation
+    //@{
+
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
      * @param LocalCouplingVariableID local coupling variable (perturbed)
@@ -138,12 +148,8 @@ public:
      */
     void DisplayCouplingValues( std::ostream& output );
 
-    //! Display some information about the coupling
-    void ShowMe();
-
     //@}
 
-private:
 
     //! @name Private Methods
     //@{
@@ -152,17 +158,9 @@ private:
     template< class model >
     inline void ApplyBoundaryConditions1D( const UInt& i );
 
-    //! Apply the boundary condition to linear version of the specific 1D model
-    template< class model >
-    inline void ApplyDeltaBoundaryConditions1D( const UInt& i );
-
     //! Apply the boundary condition to the specific 3D model
     template< class model >
     inline void ApplyBoundaryConditions3D( const UInt& i );
-
-    //! Apply the boundary condition to linear version of the specific 3D model
-    template< class model >
-    inline void ApplyDeltaBoundaryConditions3D( const UInt& i );
 
     //@}
 
@@ -199,25 +197,6 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions1D( const UInt& i )
 
 template< class model >
 inline void
-MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions1D( const UInt& i )
-{
-    model *Model = MS_DynamicCast< model >( M_models[i] );
-
-    for ( UInt j( 0 ); j < M_listSize; ++j )
-    {
-        Model->GetLinearBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
-
-        Model->GetLinearBCInterface().GetDataContainer().SetSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
-
-        Model->GetLinearBCInterface().GetDataContainer().SetBase( make_pair( "function", BCInterface1D_function ) );
-        Model->GetLinearBCInterface().GetDataContainer().SetBaseString( "0" );
-
-        Model->GetLinearBCInterface().InsertBC();
-    }
-}
-
-template< class model >
-inline void
 MS_Coupling_BoundaryCondition::ApplyBoundaryConditions3D( const UInt& i )
 {
     model *Model = MS_DynamicCast< model >( M_models[i] );
@@ -226,30 +205,10 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions3D( const UInt& i )
     {
         Model->GetBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetBCInterface().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
+        Model->GetBCInterface().GetDataContainer().SetName( "CouplingBC_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
         Model->GetBCInterface().GetDataContainer().SetFlag( M_flags[i] );
 
         Model->GetBCInterface().InsertBC();
-    }
-}
-
-template< class model >
-inline void
-MS_Coupling_BoundaryCondition::ApplyDeltaBoundaryConditions3D( const UInt& i )
-{
-    model *Model = MS_DynamicCast< model >( M_models[i] );
-
-    for ( UInt j( 0 ); j < M_listSize; ++j )
-    {
-        Model->GetLinearBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
-
-        Model->GetLinearBCInterface().GetDataContainer().SetName( "BC_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
-        Model->GetLinearBCInterface().GetDataContainer().SetFlag( M_flags[i] );
-
-        Model->GetLinearBCInterface().GetDataContainer().SetBase( make_pair( "function", BCInterface_function ) );
-        Model->GetLinearBCInterface().GetDataContainer().SetBaseString( "0" );
-
-        Model->GetLinearBCInterface().InsertBC();
     }
 }
 

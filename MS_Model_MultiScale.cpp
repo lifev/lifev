@@ -44,7 +44,7 @@ MS_Model_MultiScale::MS_Model_MultiScale() :
     M_couplingsList     ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::MS_Model_MultiScale() \n";
 #endif
 
@@ -57,7 +57,7 @@ MS_Model_MultiScale::MS_Model_MultiScale( const MS_Model_MultiScale& multiscale 
     M_couplingsList     ( multiscale.M_couplingsList )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::MS_Model_MultiScale( multiscale ) \n";
 #endif
 
@@ -66,7 +66,7 @@ MS_Model_MultiScale::MS_Model_MultiScale( const MS_Model_MultiScale& multiscale 
 MS_Model_MultiScale::~MS_Model_MultiScale()
 {
 
-    #ifdef DEBUG
+    #ifdef HAVE_LIFEV_DEBUG
         Debug( 8110 ) << "MS_Model_MultiScale::~MS_Model_MultiScale( ) \n";
     #endif
 
@@ -85,7 +85,7 @@ MS_Model_MultiScale&
 MS_Model_MultiScale::operator=( const MS_Model_MultiScale& multiscale )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::operator=( multiscale ) \n";
 #endif
 
@@ -105,7 +105,7 @@ void
 MS_Model_MultiScale::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::SetupData( FileName ) \n";
 #endif
 
@@ -122,7 +122,7 @@ void
 MS_Model_MultiScale::SetupModel()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::SetupModel() \n";
 #endif
 
@@ -137,7 +137,7 @@ void
 MS_Model_MultiScale::BuildSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::BuildSystem() \n";
 #endif
 
@@ -152,7 +152,7 @@ void
 MS_Model_MultiScale::UpdateSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::UpdateSystem() \n";
 #endif
 
@@ -164,7 +164,7 @@ void
 MS_Model_MultiScale::SolveSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::SolveSystem() \n";
 #endif
 
@@ -176,7 +176,7 @@ void
 MS_Model_MultiScale::SaveSolution()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::SaveSolution() \n";
 #endif
 
@@ -216,7 +216,7 @@ void
 MS_Model_MultiScale::CreateCouplingMap( EpetraMap& couplingMap )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::CreateCouplingMap( couplingMap ) \n";
 #endif
 
@@ -232,7 +232,7 @@ void
 MS_Model_MultiScale::InitializeCouplingVariables()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::InitializeCouplingVariables() \n";
 #endif
 
@@ -245,10 +245,26 @@ MS_Model_MultiScale::InitializeCouplingVariables()
 }
 
 void
+MS_Model_MultiScale::ExtrapolateCouplingVariables()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8110 ) << "MS_Model_MultiScale::ExtrapolateCouplingVariables() \n";
+#endif
+
+    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i < M_modelsList.end(); ++i )
+        if ( ( *i )->GetType() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->ExtrapolateCouplingVariables();
+
+    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i < M_couplingsList.end(); ++i )
+        ( *i )->ExtrapolateCouplingVariables();
+}
+
+void
 MS_Model_MultiScale::ImportCouplingVariables( const MS_Vector_Type& CouplingVariables )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::ImportCouplingVariables( CouplingVariables ) \n";
 #endif
 
@@ -264,7 +280,7 @@ void
 MS_Model_MultiScale::ExportCouplingVariables( MS_Vector_Type& CouplingVariables )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::ExportCouplingVariables( CouplingVariables ) \n";
 #endif
 
@@ -280,7 +296,7 @@ void
 MS_Model_MultiScale::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::ExportCouplingResiduals( CouplingResiduals ) \n";
 #endif
 
@@ -296,7 +312,7 @@ void
 MS_Model_MultiScale::ExportJacobian( MS_Matrix_Type& Jacobian )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::ExportJacobian() \n";
 #endif
 
@@ -315,7 +331,7 @@ UInt
 MS_Model_MultiScale::GetCouplingVariablesNumber()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::GetCouplingVariablesNumber() \n";
 #endif
 
