@@ -52,13 +52,17 @@ MS_Model_1D::MS_Model_1D() :
     M_Source                       (),
     M_Solver                       ( new Solver_Type() ),
     M_BC                           ( new BCInterface_Type() ),
+    M_LinearBC                     (),
     M_Solution_tn                  ( new Solution_Type() ),
     M_Solution                     ( new Solution_Type() ),
+    M_LinearSolution               ( new Solution_Type() ),
     M_FESpace                      (),
-    M_LinearSolver                 ()
+    M_LinearSolver                 (),
+    M_BCBaseDelta                  (),
+    M_BCDelta                      ()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::MS_Model_1D() \n";
 #endif
 
@@ -90,10 +94,14 @@ MS_Model_1D::MS_Model_1D( const MS_Model_1D& OneDimensionalModel ) :
     M_Source                       ( OneDimensionalModel.M_Source ),
     M_Solver                       ( OneDimensionalModel.M_Solver ),
     M_BC                           ( OneDimensionalModel.M_BC ),
+    M_LinearBC                     ( OneDimensionalModel.M_LinearBC ),
     M_Solution_tn                  ( OneDimensionalModel.M_Solution_tn ),
     M_Solution                     ( OneDimensionalModel.M_Solution ),
+    M_LinearSolution               ( OneDimensionalModel.M_LinearSolution ),
     M_FESpace                      ( OneDimensionalModel.M_FESpace ),
-    M_LinearSolver                 ( OneDimensionalModel.M_LinearSolver )
+    M_LinearSolver                 ( OneDimensionalModel.M_LinearSolver ),
+    M_BCBaseDelta                  ( OneDimensionalModel.M_BCBaseDelta ),
+    M_BCDelta                      ( OneDimensionalModel.M_BCDelta )
 {
 }
 
@@ -116,10 +124,14 @@ MS_Model_1D::operator=( const MS_Model_1D& OneDimensionalModel )
         M_Source                       = OneDimensionalModel.M_Source;
         M_Solver                       = OneDimensionalModel.M_Solver;
         M_BC                           = OneDimensionalModel.M_BC;
+        M_LinearBC                     = OneDimensionalModel.M_LinearBC;
         M_Solution_tn                  = OneDimensionalModel.M_Solution_tn;
         M_Solution                     = OneDimensionalModel.M_Solution;
+        M_LinearSolution               = OneDimensionalModel.M_LinearSolution;
         M_FESpace                      = OneDimensionalModel.M_FESpace;
         M_LinearSolver                 = OneDimensionalModel.M_LinearSolver;
+        M_BCBaseDelta                  = OneDimensionalModel.M_BCBaseDelta;
+        M_BCDelta                      = OneDimensionalModel.M_BCDelta;
     }
 
     return *this;
@@ -132,7 +144,7 @@ void
 MS_Model_1D::SetupData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SetupData( ) \n";
 #endif
 
@@ -168,7 +180,8 @@ MS_Model_1D::SetupData( const std::string& FileName )
     //Linear Solver
     M_LinearSolver.reset( new LinearSolver_Type( M_comm ) );
     M_LinearSolver->setUpPrec        ( DataFile, "1D_Model/prec" );
-    M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver");
+    M_LinearSolver->setDataFromGetPot( DataFile, "1D_Model/solver" );
+    M_LinearSolver->setParameters();
 
     //1D Model Solver
     M_Solver->setCommunicator( M_comm );
@@ -198,7 +211,7 @@ void
 MS_Model_1D::SetupModel()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SetupProblem() \n";
 #endif
 
@@ -212,6 +225,8 @@ MS_Model_1D::SetupModel()
     //Set default BC (has to be called after setting other BC)
     M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source );
     M_BC->SetSolution( M_Solution );
+
+    SetupLinearModel();
 
 #ifdef HAVE_HDF5
     //Post-processing
@@ -230,7 +245,7 @@ void
 MS_Model_1D::BuildSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::BuildSystem() \n";
 #endif
 
@@ -245,7 +260,7 @@ void
 MS_Model_1D::UpdateSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::UpdateSystem() \n";
 #endif
 
@@ -257,44 +272,18 @@ void
 MS_Model_1D::SolveSystem()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
 #endif
 
-    // Re-initialize solution
-    UpdateSolution( *M_Solution_tn, *M_Solution );
-
-    // Subiterate to respect CFL
-    UInt SubiterationNumber(1);
-    Real timeStep = M_Data->dataTime()->getTimeStep();
-
-    Real CFL = M_Solver->ComputeCFL( *M_Solution, M_Data->dataTime()->getTimeStep() );
-    if ( CFL > M_Data->CFLmax() )
-    {
-        SubiterationNumber = std::ceil( CFL / M_Data->CFLmax() );
-        timeStep /= SubiterationNumber;
-    }
-
-    if ( M_displayer->isLeader() )
-        std::cout << " 1D-  CFL                                      " << CFL*timeStep/M_Data->dataTime()->getTimeStep() << std::endl;
-
-    for ( UInt i(0) ; i < SubiterationNumber ; ++i )
-    {
-        if ( M_displayer->isLeader() )
-            std::cout << " 1D-  Subiteration                             " << (i+1) << "/" << SubiterationNumber << std::endl;
-
-        M_BC->UpdateOperatorVariables();
-
-        M_Solver->updateRHS( *M_Solution, timeStep );
-        M_Solver->iterate( *M_BC->GetHandler(), *M_Solution, M_Data->dataTime()->getTime() + i*timeStep, timeStep );
-    }
+    Solve( *M_BC->GetHandler(), *M_Solution );
 }
 
 void
 MS_Model_1D::SaveSolution()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SaveSolution() \n";
 #endif
 
@@ -328,18 +317,22 @@ MS_Model_1D::ShowMe()
 // Methods
 // ===================================================
 void
-MS_Model_1D::SetupLinearData( const std::string& /*FileName*/ )
-{
-
-}
-
-void
 MS_Model_1D::SetupLinearModel()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SetupLinearModel( ) \n";
 #endif
+
+    // Solution for the linear problem (this does not change anything in the solver)
+    M_Solver->setupSolution( *M_LinearSolution );
+
+    // Define BCFunctions for tangent problem
+    M_BCBaseDelta.setFunction( boost::bind( &MS_Model_1D::BCFunctionDelta, this, _1 ) );
+
+    // The linear BCHandler is a copy of the original BCHandler with the LinearSolution instead of the true solution
+    M_LinearBC.reset( new BC_Type( *M_BC->GetHandler() ) );
+    M_LinearBC->setSolution( M_LinearSolution );
 }
 
 void
@@ -348,13 +341,24 @@ MS_Model_1D::UpdateLinearModel()
 }
 
 void
-MS_Model_1D::SolveLinearModel( bool& /*SolveLinearSystem*/ )
+MS_Model_1D::SolveLinearModel( bool& SolveLinearSystem )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SolveLinearModel() \n";
 #endif
 
+    if ( !SolveLinearSystem )
+        return;
+
+    ImposePerturbation();
+
+    Solve( *M_LinearBC, *M_LinearSolution, "L1D-" );
+
+    ResetPerturbation();
+
+    //This flag avoid recomputation of the same system
+    SolveLinearSystem = false;
 }
 
 // ===================================================
@@ -381,19 +385,19 @@ MS_Model_1D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 Real
 MS_Model_1D::GetBoundaryArea( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( *M_Solution, OneD_A, (Flag == 0) ? OneD_left : OneD_right );
+    return M_Solver->BoundaryValue( *M_Solution, OneD_A, FlagConverter( Flag ) );
 }
 
 Real
 MS_Model_1D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( *M_Solution, OneD_Q, (Flag == 0) ? OneD_left : OneD_right );;
+    return M_Solver->BoundaryValue( *M_Solution, OneD_Q, FlagConverter( Flag ) );
 }
 
 Real
 MS_Model_1D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( *M_Solution, OneD_P, (Flag == 0) ? OneD_left : OneD_right );
+    return M_Solver->BoundaryValue( *M_Solution, OneD_P, FlagConverter( Flag ) );
 }
 
 Real
@@ -426,42 +430,65 @@ MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressTyp
     }
 }
 
-MS_Model_1D::BCInterface_Type&
-MS_Model_1D::GetLinearBCInterface()
+Real
+MS_Model_1D::GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-    //return *M_LinearFluidBC;
+    Real A = M_Solver->BoundaryValue( *M_Solution, OneD_A, FlagConverter( Flag ) );
+
+    SolveLinearModel( SolveLinearSystem );
+
+    Real Adelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_A, FlagConverter( Flag ) );
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaArea( Flag, SolveLinearSystem ) \n";
+    Debug( 8130 ) << "A:          " << A <<  "\n";
+    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
+#endif
+
+    return (Adelta - A) / M_BCDelta[2];
 }
 
 Real
-MS_Model_1D::GetBoundaryDeltaFlux( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-    //SolveLinearModel( SolveLinearSystem );
+    Real Q = M_Solver->BoundaryValue( *M_Solution, OneD_Q, FlagConverter( Flag ) );
 
-    //return M_Fluid->GetLinearFlux( Flag );
+    SolveLinearModel( SolveLinearSystem );
+
+    Real Qdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_Q, FlagConverter( Flag ) );
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) \n";
+    Debug( 8130 ) << "Q:          " << Q <<  "\n";
+    Debug( 8130 ) << "Qdelta:     " << Qdelta <<  "\n";
+#endif
+
+    return (Qdelta - Q) / M_BCDelta[2];
 }
 
 Real
-MS_Model_1D::GetBoundaryDeltaArea( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-    //SolveLinearModel( SolveLinearSystem );
+    Real P = M_Solver->BoundaryValue( *M_Solution, OneD_P, FlagConverter( Flag ) );
 
-    //return M_Solver->BoundaryValue( OneD_A, (Flag == 0) ? OneD_left : OneD_right );
+    SolveLinearModel( SolveLinearSystem );
+
+    Real Pdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_P, FlagConverter( Flag ) );
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) \n";
+    Debug( 8130 ) << "P:          " << P <<  "\n";
+    Debug( 8130 ) << "Pdelta:     " << Pdelta <<  "\n";
+#endif
+
+    return (Pdelta - P) / M_BCDelta[2];
 }
 
 Real
-MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
+MS_Model_1D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-    //SolveLinearModel( SolveLinearSystem );
-
-    //return M_Fluid->GetLinearPressure( Flag );
-}
-
-Real
-MS_Model_1D::GetBoundaryDeltaDynamicPressure( const BCFlag& /*Flag*/, bool& /*SolveLinearSystem*/ )
-{
-    //SolveLinearModel( SolveLinearSystem );
-
-    //return GetBoundaryDensity( Flag ) * M_Fluid->GetLinearFlux( Flag ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    // Untested
+    return GetBoundaryDensity( Flag ) * GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
 }
 
 Real
@@ -553,7 +580,7 @@ void
 MS_Model_1D::SetupGlobalData( const std::string& FileName )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SetupGlobalData( FileName ) \n";
 #endif
 
@@ -582,7 +609,7 @@ void
 MS_Model_1D::SetupFESpace()
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::SetupFEspace() \n";
 #endif
 
@@ -591,10 +618,10 @@ MS_Model_1D::SetupFESpace()
     NullTransformation[0] = 0.; NullTransformation[1] = 0.; NullTransformation[2] = 0.;
 
     //The real mesh can be only scaled due to OneDimensionalModel_Solver conventions
-    M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x-dimension
+    M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
 
     for ( UInt i(0); i < M_Data->NumberOfNodes() ; ++i )
-        M_Data->setArea0( M_Data->Area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area
+        M_Data->setArea0( M_Data->Area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area (y-z dimensions)
 
     //After changing some parameters we need to update the coefficients
     M_Data->UpdateCoefficients();
@@ -617,13 +644,124 @@ void
 MS_Model_1D::UpdateSolution( const Solution_Type& solution1, Solution_Type& solution2 )
 {
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::UpdateSolution( solution1, solution2 ) \n";
 #endif
 
     // Here we make a true copy (not a copy of the shared_ptr, but a copy of its content)
     for ( Solution_ConstIterator i = solution1.begin() ; i != solution1.end() ; ++i )
         *solution2[i->first]= *i->second;
+}
+
+void
+MS_Model_1D::Solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::Solve() \n";
+#endif
+
+    // Re-initialize solution
+    UpdateSolution( *M_Solution_tn, solution );
+
+    // Subiterate to respect CFL
+    UInt SubiterationNumber(1);
+    Real timeStep = M_Data->dataTime()->getTimeStep();
+
+    Real CFL = M_Solver->ComputeCFL( solution, M_Data->dataTime()->getTimeStep() );
+    if ( CFL > M_Data->CFLmax() )
+    {
+        SubiterationNumber = std::ceil( CFL / M_Data->CFLmax() );
+        timeStep /= SubiterationNumber;
+    }
+
+    if ( M_displayer->isLeader() )
+        std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_Data->dataTime()->getTimeStep() << std::endl;
+
+    for ( UInt i(0) ; i < SubiterationNumber ; ++i )
+    {
+        if ( M_displayer->isLeader() )
+            std::cout << solverType << "  Subiteration                             " << (i+1) << "/" << SubiterationNumber << std::endl;
+
+        //bc.UpdateOperatorVariables();
+
+        M_Solver->updateRHS( solution, timeStep );
+        M_Solver->iterate( bc, solution, M_Data->dataTime()->getTime() + i*timeStep, timeStep );
+    }
+}
+
+OneD_BCSide
+MS_Model_1D::FlagConverter( const BCFlag& flag ) const
+{
+    return (flag == 0) ? OneD_left : OneD_right;
+}
+
+void
+MS_Model_1D::ImposePerturbation()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::ImposePerturbation() \n";
+#endif
+
+    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+        if ( ( *i )->IsPerturbed() )
+        {
+            // Find the side to perturb and apply the perturbation
+            OneD_BCSide bcFlag = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
+            M_LinearBC->BC( bcFlag )->setBCFunction( OneD_first, M_BCBaseDelta );
+
+            // Compute the range
+            OneD_BC bcType = M_LinearBC->BC( bcFlag )->type( OneD_first );
+            M_BCDelta[0] = M_Solver->BoundaryValue( *M_Solution_tn, bcType, bcFlag );
+            M_BCDelta[1] = M_Solver->BoundaryValue( *M_Solution,    bcType, bcFlag );
+
+            // Compute the perturbation (work in progress)
+            M_BCDelta[2] = ( M_BCDelta[1] - M_BCDelta[0] ) * 100;
+            if ( std::abs( M_BCDelta[2] ) < 1e-6)
+                M_BCDelta[2] = ( *i )->GetResidual()[( *i )->GetPerturbedCoupling()];
+            if ( std::abs( M_BCDelta[2] ) < 1e-6)
+                M_BCDelta[2] = 1;
+
+            std::cout << "Way1: " << ( M_BCDelta[1] - M_BCDelta[0] ) * 100 << std::endl;
+            std::cout << "Way2: " << ( *i )->GetResidual()[( *i )->GetPerturbedCoupling()] << std::endl;
+            std::cout << "Used: " << M_BCDelta[2] << std::endl;
+
+            break;
+        }
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "BCDelta[0]: " << M_BCDelta[0] << "\n";
+    Debug( 8130 ) << "BCDelta[1]: " << M_BCDelta[1] << "\n";
+    Debug( 8130 ) << "BCDelta[2]: " << M_BCDelta[2] << "\n";
+#endif
+
+}
+
+void
+MS_Model_1D::ResetPerturbation()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::ResetPerturbation() \n";
+#endif
+
+    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+        if ( ( *i )->IsPerturbed() )
+        {
+            OneD_BCSide bcFlag = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
+            M_LinearBC->BC( bcFlag )->setBCFunction( OneD_first, M_BC->GetHandler()->BC( bcFlag )->BCFunction( OneD_first ) );
+
+            break;
+        }
+}
+
+Real
+MS_Model_1D::BCFunctionDelta( const Real& t )
+{
+    return M_BCDelta[0] + ( M_BCDelta[1] + M_BCDelta[2] - M_BCDelta[0] )
+                        / ( M_Data->dataTime()->getTime() - M_Data->dataTime()->getPreviousTime() )
+                        * ( t - M_Data->dataTime()->getPreviousTime() );
 }
 
 } // Namespace LifeV
