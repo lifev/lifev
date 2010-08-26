@@ -5,7 +5,7 @@
 #                                 Copyright (C) 2010 EPFL
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-05-17
+#           Date: 2010-04-26
 #  License Terms: GNU GPL
 #
 ###################################################################################################
@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = MultiScale
-ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_3Cylinders_FluxStress.dat
+ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_3DFluid-1D_2Cylinders_FluxStress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################

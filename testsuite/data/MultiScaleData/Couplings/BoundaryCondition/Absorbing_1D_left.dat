@@ -9,7 +9,7 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Absorbing (1D) ##################################################
+### COUPLING: BoundaryCondition - Absorbing (1D - left) ###########################################
 ###################################################################################################
 
 [MultiScale]
@@ -19,7 +19,7 @@ couplingName	= BoundaryCondition_Absorbing_1D
 list = 'OutFlow_absorbing'
 	
 	[./OutFlow_absorbing]
-    quantity        = W2
+    quantity        = W1
     line            = first
     Default         = Absorbing
 	

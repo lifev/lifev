@@ -88,7 +88,7 @@ diagonalBlockPrec   = false
     [../solver]                        # Solver Parameters
     solver          = gmres
     scaling         = none
-    output          = all # all none
+    output          = none # all summary last none
     conv            = rhs
     max_iter        = 500
     reuse           = true
@@ -189,51 +189,6 @@ diagonalBlockPrec   = false
         component  = '1 2'
         function   = 0
         
-        [../]
-        
-    [../]
-    
-[linear_fluid]
-
-    [./boundary_conditions]
-    list = 'Wall InletRing OutletRing'
-    #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
-
-        [./Wall]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../InletRing]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-        
-        [../OutletRing]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
-        
-        [../Inlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '1 2'
-        function   = 0
-
-        [../Outlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '1 2'
-        function   = 0
-
         [../]
         
     [../]

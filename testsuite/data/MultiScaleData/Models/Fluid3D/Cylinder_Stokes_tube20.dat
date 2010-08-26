@@ -50,7 +50,7 @@ diagonalBlockPrec   = false
     #mesh_file       = tube80.mesh      # 71820 Vertex
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
-    
+
     vel_order       = P1               # P1, P1Bubble, P2
     #vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
@@ -59,7 +59,7 @@ diagonalBlockPrec   = false
     div_beta_u_v    = false                # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
-    
+
     [../miscellaneous]
     Stokes          = true             # Solve a Stokes problem
     SubITMax        = 0                # Maximum number of iterations 
@@ -68,7 +68,7 @@ diagonalBlockPrec   = false
     #range           = '0.1 1.5'        # Range coefficient: OmegaMin < Omega < OmegaMax
     fixedOmega      = false            # Use fixed relaxation
     inverseOmega    = true             # Use inverse minimization
-    
+
     [../ipstab]
     gammaBeta       = 0.02
     gammaDiv        = 0.2
@@ -88,19 +88,19 @@ diagonalBlockPrec   = false
     [../solver]                        # Solver Parameters
     solver          = gmres
     scaling         = none
-    output          = all # all none
+    output          = none # all summary last none
     conv            = rhs
     max_iter        = 500
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
     tol             = 1.e-13
-    
+
     [../prec]
     #prectype                = AztecOO 
     prectype                = Ifpack 
     displayList             = false
-        
+
         [./AztecOO]
         precond             = 'dom_decomp'
         prec_calc           = calc
@@ -110,7 +110,7 @@ diagonalBlockPrec   = false
         subdomain_solve     = ILUT
         ilut_fill           = 4
         drop                = 1.e-5
-        
+
         [../ifpack]
         overlap             = 2
         prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
@@ -121,7 +121,7 @@ diagonalBlockPrec   = false
             damping_factor         = 1.
             min_diagonal_value     = 0
             zero_starting_solution = true
-            
+
             [../partitioner]
             type                   = metis
             overlap                = 2
@@ -131,7 +131,7 @@ diagonalBlockPrec   = false
 
             [../amesos]
             solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-               
+
             [../fact]
             level-of-fill          = 4
             ilut_level-of-fill     = 10
@@ -149,7 +149,7 @@ diagonalBlockPrec   = false
             [../]
 
         [../]
-    
+
     [../boundary_conditions]
     list = 'Wall InletRing OutletRing'
     #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
@@ -167,59 +167,14 @@ diagonalBlockPrec   = false
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../OutletRing]
         type       = Essential
         flag       = 30
         mode       = Full
         component  = 3
         function   = 0
-        
-        [../Inlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '1 2'
-        function   = 0
 
-        [../Outlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '1 2'
-        function   = 0
-        
-        [../]
-        
-    [../]
-    
-[linear_fluid]
-
-    [./boundary_conditions]
-    list = 'Wall InletRing OutletRing'
-    #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
-
-        [./Wall]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../InletRing]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-        
-        [../OutletRing]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
-        
         [../Inlet_NoVelocityOnXY]
         type       = Essential
         flag       = 2
@@ -235,5 +190,5 @@ diagonalBlockPrec   = false
         function   = 0
 
         [../]
-        
+
     [../]

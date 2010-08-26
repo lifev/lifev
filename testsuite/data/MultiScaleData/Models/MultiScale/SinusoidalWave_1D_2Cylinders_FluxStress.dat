@@ -36,7 +36,7 @@ models = '
 couplings = '    
             0       BoundaryCondition   SinusoidalFluxWave              0               0
             1       FluxStress          StaticPressure                  1,0             0,1
-            2       BoundaryCondition   Absorbing_1D                    1               1
+            2       BoundaryCondition   Absorbing_1D_right              1               1
             '
 ###################################################################################################
 

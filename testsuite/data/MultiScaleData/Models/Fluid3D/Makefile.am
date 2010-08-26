@@ -31,7 +31,8 @@ dist_pkgdata_DATA = Carotid.dat \
 					Cylinder_Stokes_tube20.dat \
 					Cylinder_Stokes_tube40.dat \
 					Cylinder_Stokes_tube60.dat \
-					Cylinder_Stokes_tube80.dat
+					Cylinder_Stokes_tube80.dat \
+					Template.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

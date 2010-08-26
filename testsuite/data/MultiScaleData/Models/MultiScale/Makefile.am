@@ -57,7 +57,8 @@ dist_pkgdata_DATA = CarotidBifurcation_1D-3DFluid_FluxStress.dat \
                     Womersley_3DFluid_5Cylinders_Stress_tube20.dat \
                     Womersley_3DFluid_5Cylinders_Stress_tube40.dat \
                     Womersley_3DFluid_5Cylinders_Stress_tube60.dat \
-                    Womersley_3DFluid_5Cylinders_Stress_tube80.dat
+                    Womersley_3DFluid_5Cylinders_Stress_tube80.dat \
+                    Template.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

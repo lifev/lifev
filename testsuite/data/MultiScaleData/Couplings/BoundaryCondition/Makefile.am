@@ -22,7 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Absorbing_1D.dat \
+dist_pkgdata_DATA = Absorbing_1D_left.dat \
+					Absorbing_1D_right.dat \
 					Absorbing_NobileVergara.dat \
                     SinusoidalFlux.dat \
                     SinusoidalFluxWave.dat \

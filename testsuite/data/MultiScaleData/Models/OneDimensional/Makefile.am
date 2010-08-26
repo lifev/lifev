@@ -22,7 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Cylinder.dat 
+dist_pkgdata_DATA = Cylinder.dat \
+                    Template.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

@@ -34,7 +34,7 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   SinusoidalFluxWave              0               0
-            1       BoundaryCondition   Absorbing_1D                    0               1
+            1       BoundaryCondition   Absorbing_1D_right              0               1
             '
 ###################################################################################################
 

@@ -1,0 +1,26 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-05-19
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Absorbing (1D -right) ###########################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_Absorbing_1D
+
+[boundary_conditions]
+list = 'OutFlow_absorbing'
+	
+	[./OutFlow_absorbing]
+    quantity        = W2
+    line            = first
+    Default         = Absorbing
+	
+	[../]

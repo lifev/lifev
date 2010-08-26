@@ -5,17 +5,17 @@
 #                                 Copyright (C) 2010 EPFL          
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-04-23
+#           Date: 2010-08-20
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: Fluid1D ################################################################################
+### MODEL: 1D - Template ##########################################################################
 ###################################################################################################
 
 [MultiScale]
-modelName        = '1D Cylinder'
+modelName        = '1D_Template'
 modelType        = OneDimensional
-couplingFlags    = '0 1'
+couplingFlags    = ''
 
 
 
@@ -23,7 +23,10 @@ couplingFlags    = '0 1'
 start                = 0             # start index for filenames
 save                 = 1             # how many time steps per posptrocessing
 multimesh            = false         # true if the mesh has to be saved at each post-processing step
+type             = hdf5
 
+[importer]
+type             = hdf5
 
 
 [1D_Model]
