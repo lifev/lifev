@@ -110,15 +110,6 @@ public:
      */
     bool isLastTimeStep()   { return round( M_time + M_timeStep ) > round( M_endTime ); }
 
-    //! Return theta parameter of Newmark scheme
-    Real theta()		const { return M_theta; }
-
-   //! Return zeta  of Newmark scheme
-    Real zeta()		const { return M_zeta; }
-
-    //! Return Newmark parameters (theta, zeta and timestep)
-   std::vector<double> getNewmark_parameters();
-
     //! Display general information about the content of the class
     /*!
         @param output - specify the output format (std::cout by default)
@@ -161,15 +152,19 @@ public:
      */
     void setBDF_order   ( const UInt& BDF_order )   { M_BDF_order = BDF_order; }
 
-     //! Set the theta of Newmark scheme
-    
-     void setTheta ( const  Real& theta ) { M_theta = theta; }
+    //! Set the theta of Newmark scheme
+    /*!
+     * @param theta theta Newmark value
+     */
+    void setTheta ( const Real& theta )             { M_theta = theta; }
 
-     //! Set the theta of Newmark scheme
-    
-     void setZeta ( const  Real& zeta ) { M_zeta = zeta; }
+    //! Set the theta of Newmark scheme
+    /*!
+     * @param zeta zeta Newmark value
+     */
+    void setZeta ( const Real& zeta )               { M_zeta = zeta; }
 
-      //@}
+    //@}
 
 
     //! @name Get Methods
@@ -203,7 +198,7 @@ public:
     /*!
      * @return next time value
      */
-    Real getNextTime()   const { return M_time + M_timeStep; }
+    Real getNextTime()       const { return M_time + M_timeStep; }
 
     //! Get the time step used for advancing
     /*!
@@ -223,6 +218,21 @@ public:
      */
     UInt getBDF_order()		 const { return M_BDF_order; }
 
+    //! Return theta parameter of Newmark scheme
+    /*!
+     * @return theta value
+     */
+    Real theta()             const { return M_theta; }
+
+    //! Return zeta of Newmark scheme
+    /*!
+     * @return zeta value
+     */
+    Real zeta()              const { return M_zeta; }
+
+    //! Return Newmark parameters (theta, zeta and timestep)
+    std::vector<Real> getNewmark_parameters();
+
     //@}
 
 private:
@@ -234,8 +244,8 @@ private:
     Real					M_time;			// time
     Real					M_timeStep; 	// time step
     UInt					M_BDF_order; 	// order of the time discretization formula
-    Real                                    M_theta;       // Nemark parametres
-    Real                                    M_zeta;        // Nemark parametres
+    Real                    M_theta;        // Newmark parameter
+    Real                    M_zeta;         // Newmark parameter
 };
 
 } // namespace LifeV
