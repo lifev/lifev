@@ -95,7 +95,9 @@ public:
     typedef Solver_Type::FESpace_PtrType                           FESpace_PtrType;
 
     typedef BCInterface1D< Solver_Type >                           BCInterface_Type;
+    typedef boost::shared_ptr< BCInterface_Type >                  BCInterface_PtrType;
     typedef OneDimensionalModel_BCHandler                          BC_Type;
+    typedef boost::shared_ptr< BC_Type >                           BC_PtrType;
 
 #ifdef HAVE_HDF5
     typedef Hdf5exporter< Mesh_Type >                              IOFile_Type;
@@ -164,12 +166,6 @@ public:
 
     //! @name Methods
     //@{
-
-    //! Setup the data of the linear model
-    /*!
-     * @param FileName Name of data file.
-     */
-    void SetupLinearData( const std::string& FileName );
 
     //! Setup the linear model
     void SetupLinearModel();
@@ -242,12 +238,6 @@ public:
      */
     Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
 
-    //! Get the BCInterface container of the boundary conditions of the linear model
-    /*!
-     * @return BCInterface container
-     */
-    BCInterface_Type& GetLinearBCInterface();
-
     //! Get the variation of the area (on a specific boundary face) using the linear model
     /*!
      * @param Flag flag of the boundary face on which quantity should be computed
@@ -256,13 +246,13 @@ public:
      */
     Real GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem );
 
-    //! Get the variation of the flux (on a specific boundary face) using the linear model
+    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
      * @param Flag flag of the boundary face on which quantity should be computed
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the flux
+     * @return variation of the flow rate
      */
-    Real GetBoundaryDeltaFlux( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!
@@ -369,8 +359,30 @@ private:
     //! Setup the FE space for pressure and velocity
     void SetupFESpace();
 
-    //! Update the solution (Solution_tn = Solution)
+    //! Update the solution (solution2 = solution1)
+    /*!
+     * @param solution1 solution to be copied.
+     * @param solution2 copy of solution1.
+     */
     void UpdateSolution( const Solution_Type& solution1, Solution_Type& solution2 );
+
+    //! Solve the 1D hyperbolic problem
+    /*!
+     * @param bc BCInterface container.
+     * @param solution solution container.
+     * @param solverType string containing the prefix ID to display when solving the system.
+     */
+    void Solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType = " 1D-" );
+
+    OneD_BCSide FlagConverter( const BCFlag& flag ) const;
+
+    //! Impose the coupling perturbation on the correct BC inside the BCHandler
+    void ImposePerturbation();
+
+    //! Reset all the coupling perturbations imposed on the BCHandler
+    void ResetPerturbation();
+
+    Real BCFunctionDelta( const Real& t );
 
     //@}
 
@@ -385,16 +397,24 @@ private:
     Flux_PtrType                           M_Flux;
     Source_PtrType                         M_Source;
     Solver_PtrType                         M_Solver;
-    boost::shared_ptr< BCInterface_Type >  M_BC;
+    BCInterface_PtrType                    M_BC;
+    BC_PtrType                             M_LinearBC;
 
-    Solution_PtrType                       M_Solution_tn; // Solution at time t_n
-    Solution_PtrType                       M_Solution;    // Solution at time t_n+1
+    Solution_PtrType                       M_Solution_tn;    // Solution at time t_n
+    Solution_PtrType                       M_Solution;       // Solution at time t_n+1
+    Solution_PtrType                       M_LinearSolution; // Solution of the perturbed problem
 
     // FE spaces
     boost::shared_ptr< FESpace_Type >      M_FESpace;
 
     // Linear solver
     boost::shared_ptr< LinearSolver_Type > M_LinearSolver;
+
+    // BC Functions for tangent problem
+    OneDimensionalModel_BCFunction         M_BCBaseDelta;
+
+    // BC perturbation
+    boost::array< Real, 3 >                M_BCDelta;
 };
 
 //! Factory create function
