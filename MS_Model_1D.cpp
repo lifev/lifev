@@ -226,7 +226,9 @@ MS_Model_1D::SetupModel()
     M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source );
     M_BC->SetSolution( M_Solution );
 
+#ifdef PERTURBATION
     SetupLinearModel();
+#endif
 
 #ifdef HAVE_HDF5
     //Post-processing
@@ -433,6 +435,8 @@ MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressTyp
 Real
 MS_Model_1D::GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem )
 {
+
+#ifdef PERTURBATION
     Real A = M_Solver->BoundaryValue( *M_Solution, OneD_A, FlagConverter( Flag ) );
 
     SolveLinearModel( SolveLinearSystem );
@@ -446,11 +450,17 @@ MS_Model_1D::GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem )
 #endif
 
     return (Adelta - A) / M_BCDelta[2];
+#else
+    return TangentProblem( FlagConverter( Flag ), OneD_A );
+#endif
+
 }
 
 Real
 MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
 {
+
+#ifdef PERTURBATION
     Real Q = M_Solver->BoundaryValue( *M_Solution, OneD_Q, FlagConverter( Flag ) );
 
     SolveLinearModel( SolveLinearSystem );
@@ -464,11 +474,17 @@ MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSyst
 #endif
 
     return (Qdelta - Q) / M_BCDelta[2];
+#else
+    return TangentProblem( FlagConverter( Flag ), OneD_Q );
+#endif
+
 }
 
 Real
 MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
+
+#ifdef PERTURBATION
     Real P = M_Solver->BoundaryValue( *M_Solution, OneD_P, FlagConverter( Flag ) );
 
     SolveLinearModel( SolveLinearSystem );
@@ -482,6 +498,10 @@ MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSyst
 #endif
 
     return (Pdelta - P) / M_BCDelta[2];
+#else
+    return TangentProblem( FlagConverter( Flag ), OneD_P );
+#endif
+
 }
 
 Real
@@ -762,6 +782,97 @@ MS_Model_1D::BCFunctionDelta( const Real& t )
     return M_BCDelta[0] + ( M_BCDelta[1] + M_BCDelta[2] - M_BCDelta[0] )
                         / ( M_Data->dataTime()->getTime() - M_Data->dataTime()->getPreviousTime() )
                         * ( t - M_Data->dataTime()->getPreviousTime() );
+}
+
+Real
+MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::TangentProblem( bcOutputSide, bcOutputType ) \n";
+#endif
+
+    Real JacobianCoefficient(0);
+
+    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+        if ( ( *i )->IsPerturbed() )
+        {
+            // Find the perturbed side
+            OneD_BCSide bcSide = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
+
+            // Perturbation has no effect on the other site.
+            if ( bcSide != bcOutputSide )
+                break;
+
+            // Compute the eigenvectors
+            Container2D_Type eigenvalues, leftEigenvector1, leftEigenvector2;
+            M_Solver->BoundaryEigenValuesEigenVectors( bcSide, *M_Solution_tn, eigenvalues, leftEigenvector1, leftEigenvector2 );
+
+            switch( bcSide )
+            {
+                case OneD_left:
+                    switch( bcOutputType )
+                    {
+                        case OneD_Q:
+                            JacobianCoefficient = -leftEigenvector2[0] / leftEigenvector2[1]
+                                                * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), 0 );
+                            break;
+                        case OneD_A:
+                            JacobianCoefficient = -leftEigenvector2[1] / leftEigenvector2[0];
+                            break;
+                        case OneD_P:
+                            JacobianCoefficient = -leftEigenvector2[1] / leftEigenvector2[0]
+                                                * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), 0 );
+                            break;
+                        default:
+                            std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
+                    }
+                    break;
+                case OneD_right:
+                    switch( bcOutputType )
+                    {
+                        case OneD_Q:
+                            JacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
+                                                * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), M_Data->NumberOfElements() );
+                            break;
+                        case OneD_A:
+                            JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0];
+                            break;
+                        case OneD_P:
+                            JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
+                                                * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), M_Data->NumberOfElements() );
+                            break;
+                        default:
+                            std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
+                    }
+                    break;
+                default:
+                    std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
+            }
+
+//#ifdef HAVE_LIFEV_DEBUG
+            std::cout << "bcSide:              " << bcSide << "\n";
+            std::cout << "bcOutputSide:        " << bcOutputSide << "\n";
+            std::cout << "bcType:              " << bcOutputType << "\n";
+
+            std::cout << "JacobianCoefficient: " << JacobianCoefficient << "\n";
+
+            std::cout << "L11:                 " << leftEigenvector1[0] << "\n";
+            std::cout << "L12:                 " << leftEigenvector1[1] << "\n";
+            std::cout << "L21:                 " << leftEigenvector2[0] << "\n";
+            std::cout << "L22:                 " << leftEigenvector2[1] << "\n";
+
+            std::cout << "dAdP(1):             " << M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), 0 ) << "\n";
+            std::cout << "dAdP(end):           " << M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), M_Data->NumberOfElements() ) << "\n";
+
+            std::cout << "dPdA(1):             " << M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), 0 ) << "\n";
+            std::cout << "dPdA(end):           " << M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), M_Data->NumberOfElements() ) << "\n";
+//#endif
+
+            break;
+        }
+
+    return JacobianCoefficient;
 }
 
 } // Namespace LifeV
