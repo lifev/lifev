@@ -36,6 +36,8 @@
 #ifndef MS_Model_1D_H
 #define MS_Model_1D_H 1
 
+//#define PERTURBATION
+
 // Mathcard includes
 #include <lifemc/lifesolver/BCInterface1D.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
@@ -383,6 +385,14 @@ private:
     void ResetPerturbation();
 
     Real BCFunctionDelta( const Real& t );
+
+    //! Compute Jacobian coefficients using tangent problem formulation
+    /*!
+     * @param bcOutputSide side of the quantity to be computed.
+     * @param bcOutputType type of the quantity to be computed.
+     * @return Jacobian coefficient.
+     */
+    Real TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType );
 
     //@}
 
