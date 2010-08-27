@@ -77,13 +77,13 @@ MonolithicGI::setupFluidSolid()
                                                M_epetraComm,
                                                *M_monolithicMap,
                                                offset));
-    M_fluid.reset     (new fluid_raw_type(dataFluid(),
+    M_fluid.reset     (new fluid_raw_type(M_data->dataFluid(),
                                           *M_uFESpace,
                                           *M_pFESpace,
                                           *M_mmFESpace,
                                           M_epetraComm,
                                           *M_monolithicMap));
-    M_solid.reset     (new solid_raw_type(dataSolid(),
+    M_solid.reset     (new solid_raw_type(M_data->dataSolid(),
                                           *M_dFESpace,
                                           M_epetraComm,
                                           *M_monolithicMap,

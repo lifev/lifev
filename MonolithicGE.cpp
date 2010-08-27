@@ -49,7 +49,7 @@ void MonolithicGE::setupFluidSolid()
     M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
                                                             M_epetraComm));
 
-    M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
+    M_fluid.reset(new FSIOperator::fluid_raw_type(M_data->dataFluid(),
                                                   *M_uFESpace,
                                                   *M_pFESpace,
                                                   M_epetraComm,
@@ -66,7 +66,7 @@ void MonolithicGE::setupFluidSolid()
     M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
     M_beta.reset  (new vector_type(M_uFESpace->map()));
 
-    M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
+    M_solid.reset(new FSIOperator::solid_raw_type(M_data->dataSolid(),
                                                   *M_dFESpace,
                                                   M_epetraComm,
                                                   *M_monolithicMap,
