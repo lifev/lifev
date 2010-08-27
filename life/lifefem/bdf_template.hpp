@@ -46,7 +46,7 @@ const UInt BDFT_MAX_ORDER = 4;
 
 /*!
   \class BdfT (templated)
-  \brief Backward differencing formula time discretization for the first 
+  \brief Backward differencing formula time discretization for the first
     and the second order problem in time.
 
  1) First order problem
@@ -92,8 +92,8 @@ const UInt BDFT_MAX_ORDER = 4;
 
   \f$ M W_{k+1} = A(U^*) U_{k+1} +D(U^*, V^*) V_{k+1} + f_{k+1} \f$
 
-  where W and V denotes the polynomial of order n+1 and order n, 
-  while U^* and V^* are suitable extrapolations.  
+  where W and V denotes the polynomial of order n+1 and order n,
+  while U^* and V^* are suitable extrapolations.
 
   The velocity vector, as for first order  problem, is:
 
@@ -102,7 +102,7 @@ const UInt BDFT_MAX_ORDER = 4;
   while the acceleration vector W^{n+1} is:
 
   \f$ W_{k+1} = \frac{1}{\Delta t^2} (\xi_0 U_{k+1} - \sum_{i=0}^{n+1} \xi_i U_{k+1-i} )\f$
- 
+
   Thus we have
 
   \f$ \frac{\xi_0}{\Delta t^2} M U_{k+1} + \frac{\alpha_0}{\Delta t } D U_{k+1} + A U_{k+1} + f + M f_W + D f_V $
@@ -113,7 +113,7 @@ const UInt BDFT_MAX_ORDER = 4;
 
   and
 
-  \f$  f_W =\frac{1}{\Delta t^2} \sum_{i=1}^{n+1} \xi_i U_{ k+1 - i}  \f$ 
+  \f$  f_W =\frac{1}{\Delta t^2} \sum_{i=1}^{n+1} \xi_i U_{ k+1 - i}  \f$
 
   It also provides alpha_i  and can extrapolate the the new state from the n last states with a
   polynomial of order n-1:
@@ -130,7 +130,7 @@ class BdfT:  // T means template
     public  TimeAdvance < VectorType >
 {
 public:
-  
+
     /** @name Typedefs
      */
     //@{
@@ -145,12 +145,12 @@ public:
      *  @param n order of the BDF
      */
     BdfT();
-   
+
     BdfT( const UInt order);
 
     BdfT( const UInt order, const  UInt orderDev );
 
-    ~BdfT() {} 
+    ~BdfT() {}
 
     //! Initialize all the entries of the unknown vector to be derived with the
     //! vector u0 (duplicated)
@@ -162,7 +162,7 @@ public:
     void initialize_unk( std::vector<VectorType> uv0 );
 
     void initialize_unk( VectorType u0, VectorType v0 );
-  
+
     void initialize_unk( VectorType u0, VectorType v0, VectorType const & w0 );
 
     /* Initialize all the entries of the unknonwn vectors with a given function
@@ -213,13 +213,13 @@ public:
     //! Compute the polynomial extrapolation approximation of order n-1 of
     //! v^{n+1} defined by the n stored state vectors
     VectorType extrapVelocity() const;
-  
+
     //! Return the i-th coefficient of the time derivative alpha_i
   // double coeff_der( UInt i ) const;
 
     //! Return the i-th coefficient of the time derivative xi_i
     //double coeff_derOrder2( UInt i ) const;
-    
+
   //! Return the i-th coefficient of the time extrapolation beta_i
     double coeff_ext( UInt i ) const;
 
@@ -229,10 +229,10 @@ public:
     //! Return a vector with the last n state vectors
     const vector_type& unk() const;
 
-    //! Return a last velocity 
+    //! Return a last velocity
     VectorType vnk() const;
-  
-    //! Return a last acceleration 
+
+    //! Return a last acceleration
     VectorType wnk() const;
 
     void showMe() const;
@@ -250,7 +250,7 @@ BdfT <VectorType> :: BdfT() :
     CONSTRUCTOR( "BDF" );
 }
 
- 
+
 template<typename VectorType>
 BdfT<VectorType>::
 BdfT( const UInt order )
@@ -310,6 +310,7 @@ BdfT( const UInt order )
     }
     this->_M_unknowns.reserve(this->_M_size );
     this->_M_rhs.reserve(2);
+    //    this->_M_rhs.resize(2);
  }
 
 template<typename VectorType>
@@ -318,7 +319,7 @@ BdfT(const  UInt order, const UInt orderDev )
   :
   BdfT( order )
 {
-  
+
   this->_M_orderDev = orderDev ;
   this->_M_sizeCoefficients = order +orderDev ;
 
@@ -326,7 +327,7 @@ BdfT(const  UInt order, const UInt orderDev )
     {
       this->_M_xi.resize( order + 2 );
       this->_M_beta2.resize( order + 1 );
-    
+
       switch ( order )
 	{
 	case 1:
@@ -361,13 +362,13 @@ BdfT(const  UInt order, const UInt orderDev )
 	  break;
 	}
 
-      this->_M_size++;  
+      this->_M_size++;
       this->_M_unknowns.reserve( this->_M_size);
 
     }
 
-} 
-  
+}
+
 
 template<typename VectorType>
 void
@@ -389,10 +390,10 @@ BdfT<VectorType>::setup( const UInt order, const UInt orderDev)
   this->_M_xi.resize( order + 2 );
   this->_M_beta.resize( order );
   this->_M_beta2.resize( order + 1 );
-  this->_M_sizeCoefficients = order + orderDev ; 
+  this->_M_sizeCoefficients = order + orderDev ;
 
     switch ( order )
-      {  
+      {
       case 1:
 	this->_M_alpha[ 0 ] = 1.; // Backward Euler
 	this->_M_alpha[ 1 ] = 1.;
@@ -447,11 +448,12 @@ BdfT<VectorType>::setup( const UInt order, const UInt orderDev)
 	this->_M_beta[ 3 ] = -1;
 	break;
       }
-  
-    if( this->_M_orderDev == 2 )  
-      this->_M_size++;  
+
+    if( this->_M_orderDev == 2 )
+      this->_M_size++;
     this->_M_unknowns.reserve( this->_M_size);
     this->_M_rhs.reserve(2);
+    //    this->_M_rhs.resize(2);
 }
 
 template<typename VectorType>
@@ -476,11 +478,12 @@ void BdfT<VectorType>::initialize_unk( VectorType u0 )
     for ( UInt i(this->_M_unknowns.size()) ; i < this->_M_order; i++ )
         this->_M_unknowns.push_back(new VectorType(u0));
 
-    for (UInt i=0; i<2; i++ ) 
+    for (UInt i=0; i<2; i++ )
       {
-	this->_M_rhs.push_back(new VectorType(u0.getMap(), Unique));
+ 	this->_M_rhs.push_back(new VectorType(u0));
+//     *this->_M_rhs[ this->_M_rhs.size()-1 ] *= 0.;
 	*this->_M_rhs[i] *=0;
-      }	
+      }
     ASSERT ( this->_M_unknowns.size() == this->_M_order,
 	     "_M_unknowns.size() and  _M_order must be equal" );
 
@@ -534,14 +537,15 @@ void BdfT<VectorType>::initialize_unk(const  std::vector<VectorType> uv0 )
       {
 	for ( i = this->_M_unknowns.size() ; i < this->_M_order+1; i++ )
 	  this->_M_unknowns.push_back(new VectorType(uv0[n0-1]));
-	
+
 	ASSERT ( this->_M_unknowns.size() == this->_M_order+1,
 		 "_M_unknowns.size() and  _M_order must be equal" );
       }
-    
-    for (UInt i=0; i<2; i++ ) 
+
+    for (UInt i=0; i<2; i++ )
       {
-	this->_M_rhs.push_back(new VectorType(uv0[0].getMap(), Unique));
+ 	this->_M_rhs.push_back(new VectorType(uv0[0]));
+//     *this->_M_rhs[ this->_M_rhs.size()-1 ] *= 0.;
 	*this->_M_rhs[i] *=0;
       }
     return ;
@@ -568,7 +572,7 @@ BdfT<VectorType>::vnk()  const
    v  -= (*this->_M_rhs[0]);
    return v;
 }
- 
+
 template<typename VectorType>
 VectorType
 BdfT<VectorType>::wnk()  const
@@ -590,7 +594,7 @@ BdfT<VectorType>::coeff_der( UInt i ) const
     return _M_alpha[ i ];
 }
 */
- 
+
 template<typename VectorType>
 double
 BdfT<VectorType>::coeff_ext( UInt i ) const
@@ -600,7 +604,7 @@ BdfT<VectorType>::coeff_ext( UInt i ) const
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return this->_M_beta[ i ];
 }
-  
+
 template<typename VectorType>
 double
 BdfT<VectorType>::coeff_extVelocity( UInt i ) const
@@ -661,23 +665,23 @@ BdfT<VectorType>::shift_right( VectorType const& unk_curr )
 
 }
 
- 
+
 template<typename VectorType>
 VectorType
 BdfT<VectorType>::time_der( Real dt ) /*const*/
 {
    vector_type_iterator it  = this->_M_rhs.begin();
-  
+
    VectorType ut(*this->_M_unknowns[ 0 ]);
 
    ut *= this->_M_alpha[ 1 ] / dt;
-   
+
     for ( UInt i = 1; i < this->_M_order; ++i )
       {
 	ut += (this->_M_alpha[ i + 1 ] / dt) * *this->_M_unknowns[ i ];
       }
 
-    *it = new VectorType(ut); 
+    *it = new VectorType(ut);
     return ut;
 }
 
@@ -687,16 +691,16 @@ BdfT<VectorType>::time_derOrder2( Real dt ) /* const*/
 {
   ASSERT ( this->_M_orderDev == 2 ,
 	     " _M_orderDev must be equal two" );
-  
+
   vector_type_iterator it  = this->_M_rhs.end()-1;
-  
+
   VectorType ut(*this->_M_unknowns[ 0 ]);
-  
+
   ut *= this->_M_xi[ 1 ] / (dt*dt);
-  
+
   for ( UInt i = 1; i < this->_M_order + 1; ++i )
     ut += ( this->_M_xi[ i + 1 ] / (dt*dt) ) * *this->_M_unknowns[ i ];
-  
+
    *it = new VectorType(ut);
 
   return ut;
@@ -738,7 +742,7 @@ TimeAdvance<EpetraVector>* createBDF() { return new BdfT<EpetraVector>(); }
   {
     static bool registerBDF = TimeAdvanceFactory::instance().registerProduct( "BDF",  &createBDF );
   }
-  
+
 }
 
 #endif
