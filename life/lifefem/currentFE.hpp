@@ -319,6 +319,12 @@ public:
     */
     void coorMap( Real& x, Real& y, Real& z, const Real & xi, const Real & eta, const Real & zeta ) const;
 
+    /*!
+      return the coordinates in the current element of the point
+      P given in the reference frame.
+    */
+    GeoVector coorMap(const GeoVector& P) const;
+
     //! Export the quadrature rule on the current FE
     /*!
       This method can be used to position of the quadrature nodes in the

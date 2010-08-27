@@ -75,8 +75,6 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
 {
     CONSTRUCTOR( "CurrentFE" );
 
-    ASSERT( M_nbCoor < 4, "M_nbCoor must be smaller than 4");
-
     for ( UInt iterQuad(0); iterQuad < M_nbQuadPt; ++iterQuad )
     {
         for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
@@ -88,9 +86,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
                 {
                     
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
-                                                                        M_quadRule->quadPointCoor(iterQuad,0),
-                                                                        M_quadRule->quadPointCoor(iterQuad,1),
-                                                                        M_quadRule->quadPointCoor(iterQuad,2));
+                                                                        M_quadRule->quadPointCoor(iterQuad));
                 }
                 M_phiUpdated=true;
             }
@@ -99,9 +95,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
             if (M_refFE->hasDivPhi())
             {
                 M_divPhiRef[iterNode][iterQuad] = M_refFE->divPhi(iterNode,
-                                                                 M_quadRule->quadPointCoor(iterQuad,0),
-                                                                 M_quadRule->quadPointCoor(iterQuad,1),
-                                                                 M_quadRule->quadPointCoor(iterQuad,2));
+                                                                 M_quadRule->quadPointCoor(iterQuad));
                 M_divPhiRefUpdated=true;
             };
             
@@ -112,10 +106,8 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
                 if (M_refFE->hasDPhi())
                 {
                     M_dphiRef[iterNode][icoor][iterQuad] = M_refFE->dPhi( iterNode,
-                                                                         icoor,
-                                                                         M_quadRule->quadPointCoor(iterQuad,0),
-                                                                         M_quadRule->quadPointCoor(iterQuad,1),
-                                                                         M_quadRule->quadPointCoor(iterQuad,2));
+                                                                          icoor,
+                                                                          M_quadRule->quadPointCoor(iterQuad));
                     M_dphiRefUpdated=true;
                 };
                 
@@ -126,9 +118,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
                     {
                         M_d2phiRef[iterNode][icoor][jcoor][iterQuad] = M_refFE->d2Phi( iterNode,
                                                                                       icoor, jcoor,
-                                                                                      M_quadRule->quadPointCoor(iterQuad,0),
-                                                                                      M_quadRule->quadPointCoor(iterQuad,1),
-                                                                                      M_quadRule->quadPointCoor(iterQuad,2) );
+                                                                                      M_quadRule->quadPointCoor(iterQuad));
                     }
                     M_d2phiRefUpdated=true;
                 }
@@ -139,9 +129,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
             for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {
                 M_dphiGeoMap[k][icoor][iterQuad] = M_geoMap->dPhi( k, icoor,
-                                                                  M_quadRule->quadPointCoor(iterQuad,0),
-                                                                  M_quadRule->quadPointCoor(iterQuad,1),
-                                                                  M_quadRule->quadPointCoor(iterQuad,2) );
+                                                                  M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
@@ -302,10 +290,12 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
 			      int comp_x, int comp_zeta) const
 {
   Real jac(0);
+  GeoVector P(3);
+  P[0]=hat_x; P[1]=hat_y; P[2]=hat_z;
 
   for ( UInt i = 0; i < M_nbGeoNode;i++ )
   {
-    jac += M_cellNodes[i][comp_x] * M_geoMap->dPhi( i , comp_zeta , hat_x, hat_y, hat_z );
+    jac += M_cellNodes[i][comp_x] * M_geoMap->dPhi( i , comp_zeta , P );
   };
 
   return jac;
@@ -595,6 +585,24 @@ void CurrentFE::coorMap( Real& x, Real& y, Real& z,
     }
 }
 
+GeoVector CurrentFE::coorMap(const GeoVector& P) const
+{
+    ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+
+    GeoVector Pcurrent(M_nbCoor);
+    Pcurrent*=0.0;
+
+    for ( UInt i(0); i < M_nbGeoNode; ++i )
+    {
+        for (UInt j(0); j<M_nbCoor; ++j)
+        {
+            Pcurrent[j] += M_cellNodes[i][j]* M_geoMap->phi(i,P);
+        }
+    }
+    
+    return Pcurrent;
+}
+
 
 void CurrentFE::QuadRuleVTKexport( const std::string& filename) const
 {
@@ -686,9 +694,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
                 for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
                 {
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
-                                                                        M_quadRule->quadPointCoor(iterQuad,0),
-                                                                        M_quadRule->quadPointCoor(iterQuad,1),
-                                                                        M_quadRule->quadPointCoor(iterQuad,2));
+                                                                        M_quadRule->quadPointCoor(iterQuad));
                 }
                 M_phiUpdated=true;
             }
@@ -697,9 +703,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
             if (M_refFE->hasDivPhi())
             {
                 M_divPhiRef[iterNode][iterQuad] = M_refFE->divPhi(iterNode,
-                                                                 M_quadRule->quadPointCoor(iterQuad,0),
-                                                                 M_quadRule->quadPointCoor(iterQuad,1),
-                                                                 M_quadRule->quadPointCoor(iterQuad,2));
+                                                                  M_quadRule->quadPointCoor(iterQuad));
                 M_divPhiRefUpdated=true;
             }
 
@@ -710,9 +714,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
                 {
                     M_dphiRef[iterNode][icoor][iterQuad] = M_refFE->dPhi( iterNode,
                                                                          icoor,
-                                                                         M_quadRule->quadPointCoor(iterQuad,0),
-                                                                         M_quadRule->quadPointCoor(iterQuad,1),
-                                                                         M_quadRule->quadPointCoor(iterQuad,2));
+                                                                         M_quadRule->quadPointCoor(iterQuad));
                      M_dphiRefUpdated=true;
                 }
                 
@@ -723,9 +725,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
                     {
                         M_d2phiRef[iterNode][icoor][jcoor][iterQuad] = M_refFE->d2Phi( iterNode,
                                                                                       icoor, jcoor,
-                                                                                      M_quadRule->quadPointCoor(iterQuad,0),
-                                                                                      M_quadRule->quadPointCoor(iterQuad,1),
-                                                                                      M_quadRule->quadPointCoor(iterQuad,2) );
+                                                                                      M_quadRule->quadPointCoor(iterQuad));
                     }
                     M_d2phiRefUpdated=true;
                 }
@@ -736,9 +736,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
             for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {
                 M_dphiGeoMap[k][icoor][iterQuad] = M_geoMap->dPhi( k, icoor,
-                                                                  M_quadRule->quadPointCoor(iterQuad,0),
-                                                                  M_quadRule->quadPointCoor(iterQuad,1),
-                                                                  M_quadRule->quadPointCoor(iterQuad,2) );
+                                                                  M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
@@ -785,9 +783,7 @@ void CurrentFE::computePhi()
             for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
             {
                 M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
-                                                     M_quadRule->quadPointCoor(iterQuad,0),
-                                                     M_quadRule->quadPointCoor(iterQuad,1),
-                                                     M_quadRule->quadPointCoor(iterQuad,2));
+                                                     M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
@@ -802,9 +798,7 @@ void CurrentFE::computeDphiGeoMap()
             for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
                 M_dphiGeoMap[iterNode][iterCoor][iterQuad] = M_geoMap->dPhi(iterNode,iterCoor,
-                                                                           M_quadRule->quadPointCoor(iterQuad,0),
-                                                                           M_quadRule->quadPointCoor(iterQuad,1),
-                                                                           M_quadRule->quadPointCoor(iterQuad,2));
+                                                                           M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
@@ -990,9 +984,7 @@ void CurrentFE::computeDphiRef()
             for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
                 M_dphiRef[iterNode][iterCoor][iterQuad] = M_refFE->dPhi(iterNode,iterCoor,
-                                                                       M_quadRule->quadPointCoor(iterQuad,0),
-                                                                       M_quadRule->quadPointCoor(iterQuad,1),
-                                                                       M_quadRule->quadPointCoor(iterQuad,2));
+                                                                       M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
@@ -1036,9 +1028,7 @@ void CurrentFE::computeD2phiRef()
                 for (UInt iterCoor2(0); iterCoor2 < M_nbCoor; ++iterCoor2)
                 {
                     M_d2phiRef[iterNode][iterCoor][iterCoor2][iterQuad] = M_refFE->d2Phi(iterNode,iterCoor,iterCoor2,
-                                                                                        M_quadRule->quadPointCoor(iterQuad,0),
-                                                                                        M_quadRule->quadPointCoor(iterQuad,1),
-                                                                                        M_quadRule->quadPointCoor(iterQuad,2));
+                                                                                         M_quadRule->quadPointCoor(iterQuad));
                 }
             }
         }
