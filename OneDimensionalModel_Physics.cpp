@@ -97,6 +97,12 @@ OneDimensionalModel_Physics::dPdA( const Real& A, const UInt& i ) const
 }
 
 Real
+OneDimensionalModel_Physics::dAdP( const Real& P, const UInt& i ) const
+{
+    return M_Data->Area0(i) / ( M_Data->Beta0(i) * M_Data->Beta1(i) ) * std::pow( 1 + P / M_Data->Beta0(i), 1 / M_Data->Beta1(i) - 1 );
+}
+
+Real
 OneDimensionalModel_Physics::totalPressure( const Real& A, const Real& Q, const UInt& i ) const
 {
     return elasticPressure( A, i ) + M_Data->DensityRho() / 2 * Q * Q / ( A * A );
