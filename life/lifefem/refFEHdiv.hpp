@@ -47,6 +47,9 @@ class RefFEHdiv
     : public RefFE
 {
 public:
+    
+    typedef RefFE::Fct Fct;
+
         //! Constructor of a reference Lagrangian finite element.
     /*!
       Constructor of a reference finite element. The arguments are:

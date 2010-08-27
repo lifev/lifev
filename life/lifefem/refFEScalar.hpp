@@ -51,6 +51,7 @@ class RefFEScalar
 {
 public:
 
+    typedef RefFE::Fct Fct;
     typedef std::vector<Real> (ValuesToValuesFct) (const std::vector<Real>&);
    
     //! Constructor of a reference Lagrangian finite element.

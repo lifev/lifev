@@ -98,6 +98,9 @@ class RefFE:
 {
 
 public:
+    
+    typedef RefEle::Fct Fct;
+
     //! Constructor of a reference Lagrangian finite element.
     /*!
       Constructor of a reference finite element. The arguments are:

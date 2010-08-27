@@ -109,6 +109,8 @@ class RefFEHybrid:
 {   
 public:
 
+    typedef RefFE::Fct Fct;
+
     //! @name Constructor & Destructor
     //@{
     
