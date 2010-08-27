@@ -195,7 +195,7 @@ MS_Model_Fluid3D::SetupModel()
     SetupBCOffset( M_BC->GetHandler() );
 
     //Fluid
-    M_fluid.reset( new Fluid_Type( *M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
+    M_fluid.reset( new Fluid_Type( M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
     GetPot DataFile( M_fileName );
     M_fluid->setUp( DataFile ); //Remove Preconditioner and Solver if possible!
 
