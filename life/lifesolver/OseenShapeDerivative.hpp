@@ -59,20 +59,20 @@ public:
     typedef typename super::bchandler_raw_type bchandler_raw_type;
 
 
-    OseenShapeDerivative( const data_type&          dataType,
+    OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
                           boost::shared_ptr<Epetra_Comm>& comm,
                           const int                 lagrangeMultiplier = 0);
 
-    OseenShapeDerivative( const data_type&          dataType,
+    OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
                           boost::shared_ptr<Epetra_Comm>& comm,
                           const EpetraMap           bigMap,
                           const UInt                offset=0);
 
-    OseenShapeDerivative( const data_type&          dataType,
+    OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
                           FESpace<Mesh, EpetraMap>& mmFESpace,
@@ -160,7 +160,7 @@ private:
 
 template<typename Mesh, typename SolverType>
 OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( const data_type&          dataType,
+OseenShapeDerivative( boost::shared_ptr<data_type>          dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
                       boost::shared_ptr<Epetra_Comm>& comm,
@@ -192,7 +192,7 @@ OseenShapeDerivative( const data_type&          dataType,
 
 template<typename Mesh, typename SolverType>
 OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( const data_type&          dataType,
+OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
                       boost::shared_ptr<Epetra_Comm>& comm,
@@ -226,7 +226,7 @@ OseenShapeDerivative( const data_type&          dataType,
 
 template<typename Mesh, typename SolverType>
 OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( const data_type&          dataType,
+OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
                       FESpace<Mesh, EpetraMap>& mmFESpace,
@@ -377,7 +377,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
     int nbCompU = nDimensions;
     M_rhsLinNoBC = sourceVec;//which is usually zero
 
-    if(this->M_data.useShapeDerivatives())
+    if(this->M_data->useShapeDerivatives())
         {
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -444,31 +444,31 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /
                     //commented the code to print out the elementary data. Useful for debugging.
 
                     //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-                    source_mass1( - this->M_data.density(), M_uk_loc, M_w_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    source_mass1( - this->M_data->density(), M_uk_loc, M_w_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
                     /*
                     std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
                     M_elvec_du.showMe(std::cout);
                     */
                     //  + \rho * ( \grad u^k dw, v  )
-                    source_mass2( this->M_data.density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    source_mass2( this->M_data->density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace.fe() );
                     /*
                     std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
                     M_elvec_du.showMe(std::cout);
                     */
                     //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
-                    source_mass3( - 0.5*this->M_data.density(), M_u_loc, M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    source_mass3( - 0.5*this->M_data->density(), M_u_loc, M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
                     /*
                     std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
                     M_elvec_du.showMe(std::cout);
                     */
                     //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-                    source_stress( - 1.0, this->M_data.viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    source_stress( - 1.0, this->M_data->viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
                     /*
                     std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
                     M_elvec_du.showMe(std::cout);
                     */
                     // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-                    source_stress2( this->M_data.viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    source_stress2( this->M_data->viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
                     /*
                     std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
                     M_elvec_du.showMe(std::cout);
@@ -533,7 +533,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
     //    M_rhsLinNoBC = sourceVec;//which is usually zero
 
-    if(this->M_data.useShapeDerivatives())
+    if(this->M_data->useShapeDerivatives())
         {
             this->M_Displayer.leaderPrint(" LF-  Updating shape derivative blocks ...     ");
 
@@ -623,8 +623,8 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
                     shape_terms(
                                 //M_d_loc,
-                                this->M_data.density(),
-                                this->M_data.viscosity(),
+                                this->M_data->density(),
+                                this->M_data->viscosity(),
                                 M_u_loc,
                                 M_uk_loc,
                                 M_w_loc,
@@ -643,13 +643,13 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
                     //elmat_du->showMe(std::cout);
 
-                    //source_mass2( this->M_data.density(), M_uk_loc, *M_elmat_du_convective, this->M_uFESpace.fe(), alpha );
+                    //source_mass2( this->M_data->density(), M_uk_loc, *M_elmat_du_convective, this->M_uFESpace.fe(), alpha );
 
                     source_press( 1.0, M_uk_loc,*elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe(), (ID) mmFESpace.fe().nbNode);
 
 
                     if(convectiveTermDerivative)//derivative of the convective term
-                        mass_gradu(this->M_data.density(), M_uk_loc, *elmat_du_convective, this->M_uFESpace.fe());
+                        mass_gradu(this->M_data->density(), M_uk_loc, *elmat_du_convective, this->M_uFESpace.fe());
                       /*
                         std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
                     M_elvec_dp.showMe(std::cout);

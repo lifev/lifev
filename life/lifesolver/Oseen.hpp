@@ -112,13 +112,13 @@ public:
       \param pressure FE space
       \param communicator
     */
-    Oseen( const data_type&          dataType,
+    Oseen( boost::shared_ptr<data_type> dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
            boost::shared_ptr<Epetra_Comm>& comm,
            const int                 lagrangeMultiplier = 0);
 
-    Oseen( const data_type&          dataType,
+    Oseen( boost::shared_ptr<data_type> dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
            boost::shared_ptr<Epetra_Comm>& comm,
@@ -132,7 +132,7 @@ public:
       \param pressure FE space
       \param communicator
     */
-    Oseen( const data_type&          dataType,
+    Oseen( boost::shared_ptr<data_type> dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
            std::vector<int> const&   lagrangeMultipliers,
@@ -253,8 +253,8 @@ public:
     Real LagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC, const vector_type& Solution );
 
     // return the density and the viscosity of the fluid
-    Real density()   const { return M_data.density(); }
-    Real viscosity() const { return M_data.viscosity(); }
+    Real density()   const { return M_data->density(); }
+    Real viscosity() const { return M_data->viscosity(); }
 
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
@@ -304,7 +304,7 @@ protected:
     //private members
 
     //! data for NS solvers
-    const data_type&               M_data;
+    boost::shared_ptr<data_type>   M_data;
 
     // FE spaces
     FESpace<Mesh, EpetraMap>&      M_uFESpace;
@@ -409,7 +409,7 @@ protected:
 
 template<typename Mesh, typename SolverType>
 Oseen<Mesh, SolverType>::
-Oseen( const data_type&          dataType,
+Oseen( boost::shared_ptr<data_type>          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
        boost::shared_ptr<Epetra_Comm>&              comm,
@@ -441,7 +441,7 @@ Oseen( const data_type&          dataType,
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
                                0., 0., 0.,
-                               M_data.viscosity() ),
+                               M_data->viscosity() ),
     M_betaFct                ( 0 ),
     M_divBetaUv              ( false ),
     M_stiffStrain            ( false ),
@@ -465,7 +465,7 @@ Oseen( const data_type&          dataType,
 
 template<typename Mesh, typename SolverType>
 Oseen<Mesh, SolverType>::
-Oseen( const data_type&          dataType,
+Oseen( boost::shared_ptr<data_type>          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
        boost::shared_ptr<Epetra_Comm>&              comm ,
@@ -497,7 +497,7 @@ Oseen( const data_type&          dataType,
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
                                0., 0., 0.,
-                               M_data.viscosity() ),
+                               M_data->viscosity() ),
     M_betaFct                ( 0 ),
     M_divBetaUv              ( false ),
     M_stiffStrain            ( false ),
@@ -521,7 +521,7 @@ Oseen( const data_type&          dataType,
 
 template<typename Mesh, typename SolverType>
 Oseen<Mesh, SolverType>::
-Oseen( const data_type&          dataType,
+Oseen( boost::shared_ptr<data_type>          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
        std::vector<int> const&   lagrangeMultipliers,
@@ -552,7 +552,7 @@ Oseen( const data_type&          dataType,
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
                                0., 0., 0.,
-                               M_data.viscosity() ),
+                               M_data->viscosity() ),
     M_betaFct                ( 0 ),
     M_divBetaUv              ( false ),
     M_stiffStrain            ( false ),
@@ -675,9 +675,9 @@ void Oseen<Mesh, SolverType>::buildSystem()
         // stiffness
         chronoStiff.start();
         if ( M_stiffStrain )
-            stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_uFESpace.fe() );
+            stiff_strain( 2.0*M_data->viscosity(), M_elmatStiff, M_uFESpace.fe() );
         else
-            stiff( M_data.viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
+            stiff( M_data->viscosity(), M_elmatStiff,  M_uFESpace.fe(), 0, 0, nDimensions );
         //stiff_div( 0.5*M_uFESpace.fe().diameter(), M_elmatStiff, M_uFESpace.fe() );
         chronoStiff.stop();
 
@@ -685,7 +685,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
         if ( !M_steady )
         {
             chronoMass.start();
-            mass( M_data.density(), M_elmatMass, M_uFESpace.fe(), 0, 0, nDimensions );
+            mass( M_data->density(), M_elmatMass, M_uFESpace.fe(), 0, 0, nDimensions );
             chronoMass.stop();
         }
 
@@ -831,10 +831,10 @@ void Oseen<Mesh, SolverType>::
 initialize( const Function& u0, const Function& p0 )
 {
      vector_type u(M_uFESpace.map());
-     M_uFESpace.interpolate(u0, u, M_data.dataTime()->getTime());
+     M_uFESpace.interpolate(u0, u, M_data->dataTime()->getTime());
 
      vector_type p(M_pFESpace.map());
-     M_pFESpace.interpolate(p0, p, M_data.dataTime()->getTime());
+     M_pFESpace.interpolate(p0, p, M_data->dataTime()->getTime());
 
      initialize(u, p);
 }
@@ -982,18 +982,18 @@ updateSystem(const double       alpha,
 
 
             // ALE term: - rho div w u v
-            mass_divw( -M_data.density(), M_wLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
+            mass_divw( -M_data->density(), M_wLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
 
             // ALE stab implicit: 0.5 rho div u w v
-            mass_divw( 0.5*M_data.density(), M_uLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
+            mass_divw( 0.5*M_data->density(), M_uLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
 
 
             // Stabilising term: div u^n u v
             if ( M_divBetaUv )
-                mass_divw( 0.5*M_data.density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
+                mass_divw( 0.5*M_data->density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
 
             // compute local convective terms
-            advection( M_data.density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
+            advection( M_data->density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
 
             // loop on components
             for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
@@ -1270,7 +1270,7 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
     vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
-              M_data.dataTime()->getTime() );
+              M_data->dataTime()->getTime() );
 
     rhs = rhsFull;
 
@@ -1436,7 +1436,7 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
     M_Displayer.leaderPrint( "  F-  Post-processing " );
 
     index << std::setfill('0') << std::setw(3);
-    index << ( M_count / M_data.verbose() );
+    index << ( M_count / M_data->verbose() );
     name = index.str();
 
     PhysVectUnknown<Vector> u(nDimensions*dim_u());

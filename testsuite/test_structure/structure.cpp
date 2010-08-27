@@ -177,8 +177,8 @@ Structure::run3d()
 
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    DataElasticStructure dataStructure;
-    dataStructure.setup(dataFile);
+    boost::shared_ptr<DataElasticStructure> dataStructure(new DataElasticStructure( ));
+    dataStructure->setup(dataFile);
 
     DataMesh             dataMesh;
     dataMesh.setup(dataFile, "solid/space_discretization");
@@ -224,8 +224,8 @@ Structure::run3d()
     //
     // Temporal data and initial conditions
     //
-    Real dt = dataStructure.dataTime()->getTimeStep();
-    Real T  = dataStructure.dataTime()->getEndTime();
+    Real dt = dataStructure->dataTime()->getTimeStep();
+    Real T  = dataStructure->dataTime()->getEndTime();
 
     vector_ptrtype disp(new vector_type(solid.disp(), Unique));
     vector_ptrtype vel(new vector_type(solid.vel(), Unique));
@@ -288,12 +288,12 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 
-      dataStructure.dataTime()->setTime(time);
+      dataStructure->dataTime()->setTime(time);
 
         if (verbose)
             {
                 std::cout << std::endl;
-                std::cout << "S- Now we are at time " << dataStructure.dataTime()->getTime() << " s." << std::endl;
+                std::cout << "S- Now we are at time " << dataStructure->dataTime()->getTime() << " s." << std::endl;
             }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side

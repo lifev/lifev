@@ -103,7 +103,7 @@ public:
       \param BCh boundary conditions for the displacement
     */
 
-    VenantKirchhofSolver( const data_type& data,
+    VenantKirchhofSolver( boost::shared_ptr<data_type> data,
                           FESpace<Mesh, EpetraMap>&   FESpace,
                           BCHandler&       BCh,
                           boost::shared_ptr<Epetra_Comm>&     comm,
@@ -116,12 +116,12 @@ public:
       \param bdQr surface quadrature rule
     */
 
-    VenantKirchhofSolver( const data_type& data,
+    VenantKirchhofSolver( boost::shared_ptr<data_type> data,
                           FESpace<Mesh, EpetraMap>&   FESpace,
                           boost::shared_ptr<Epetra_Comm>&     comm,
                           UInt       offset=0);
 
-    VenantKirchhofSolver( const data_type& data,
+    VenantKirchhofSolver( boost::shared_ptr<data_type> data,
                           FESpace<Mesh, EpetraMap>&   dFESpace,
                           boost::shared_ptr<Epetra_Comm>&     comm,
                           EpetraMap&       monolithicMap,
@@ -230,15 +230,15 @@ public:
 
 
     // Physic constant
-    const Real& thickness() const { return M_data.thickness(); }
-    const Real& density()   const { return M_data.rho(); }
-    const Real& young()     const { return M_data.young(); }
-    const Real& poisson()   const { return M_data.poisson(); }
-    const Real& rho()       const { return M_data.rho(); }
+    const Real& thickness() const { return M_data->thickness(); }
+    const Real& density()   const { return M_data->rho(); }
+    const Real& young()     const { return M_data->young(); }
+    const Real& poisson()   const { return M_data->poisson(); }
+    const Real& rho()       const { return M_data->rho(); }
 
 private:
 
-    const data_type&               M_data;
+    boost::shared_ptr<data_type>   M_data;
 
     FESpace<Mesh, EpetraMap>&      M_FESpace;
 
@@ -336,7 +336,7 @@ private:
 //                                         IMPLEMENTATION
 //
 template <typename Mesh, typename SolverType>
-VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type&          data,
+VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( boost::shared_ptr<data_type>          data,
                                                               FESpace<Mesh, EpetraMap>& dFESpace,
                                                               BCHandler&                BCh,
                                                               boost::shared_ptr<Epetra_Comm>&              comm,
@@ -380,7 +380,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type&  
 }
 
 template <typename Mesh, typename SolverType>
-VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& data,
+VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( boost::shared_ptr<data_type> data,
                                                               FESpace<Mesh, EpetraMap>&   dFESpace,
                                                               boost::shared_ptr<Epetra_Comm>&     comm,
                                                               UInt             /*offset*/
@@ -422,7 +422,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& d
 }
 
 template <typename Mesh, typename SolverType>
-VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( const data_type& data,
+VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( boost::shared_ptr<data_type> data,
                                                               FESpace<Mesh, EpetraMap>&   dFESpace,
                                                               boost::shared_ptr<Epetra_Comm>&     comm,
                                                               EpetraMap&      monolithicMap,
@@ -471,14 +471,19 @@ VenantKirchhofSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setUpPrec(dataFile, "solid/prec");
 
+    UInt marker = M_FESpace.mesh()->volumeList( 1 ).marker();
+    if(!M_data->young(marker))
+        M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
+    if(!M_data->poisson(marker))
+        M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::rescaleMatrices()
 {
-    *M_mass *=(M_data.dataTime()->getTimeStep()*M_rescaleFactor);
-    *M_linearStiff *= (M_data.dataTime()->getTimeStep()*M_rescaleFactor);
+    *M_mass *=(M_data->dataTime()->getTimeStep()*M_rescaleFactor);
+    *M_linearStiff *= (M_data->dataTime()->getTimeStep()*M_rescaleFactor);
 }
 
 template <typename Mesh, typename SolverType>
@@ -507,7 +512,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff)
     UInt nc = nDimensions;
 
     //inverse of dt:
-    Real dti2 = 2.0 / ( M_data.dataTime()->getTimeStep() * M_data.dataTime()->getTimeStep() );
+    Real dti2 = 2.0 / ( M_data->dataTime()->getTimeStep() * M_data->dataTime()->getTimeStep() );
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -522,13 +527,13 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff)
 
         // stiffness
         UInt marker = M_FESpace.mesh()->volumeList( i ).marker();
-        stiff_strain(     M_data.mu(marker), M_elmatK, M_FESpace.fe() );
-        stiff_div   ( 0.5*M_data.lambda(marker), M_elmatK, M_FESpace.fe() );
+        stiff_strain(     M_data->mu(marker), M_elmatK, M_FESpace.fe() );
+        stiff_div   ( 0.5*M_data->lambda(marker), M_elmatK, M_FESpace.fe() );
 
         M_elmatC.mat() = M_elmatK.mat();
 
         // mass
-        mass( dti2 * M_data.rho(), M_elmatM, M_FESpace.fe(), 0, 0, nDimensions );
+        mass( dti2 * M_data->rho(), M_elmatM, M_FESpace.fe(), 0, 0, nDimensions );
 
         M_elmatC.mat() += M_elmatM.mat();
 
@@ -593,7 +598,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( )
 
     Real coef;
 
-    coef = (Real) M_data.dataTime()->getTimeStep();
+    coef = (Real) M_data->dataTime()->getTimeStep();
 
     vector_type _z = M_disp;
     _z            += coef*M_vel;
@@ -601,7 +606,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( )
     *M_rhsNoBC  = *M_mass*_z;
     *M_rhsNoBC -= *M_linearStiff*(M_disp);
 
-    coef = 2.0/M_data.dataTime()->getTimeStep();
+    coef = 2.0/M_data->dataTime()->getTimeStep();
 
     M_rhsW  = coef*(M_disp);
     M_rhsW += M_vel;
@@ -646,7 +651,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     M_disp.spy( "sol.dat" );
 
-    M_vel  = ( 2.0 / M_data.dataTime()->getTimeStep() ) * (M_disp);
+    M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
 
     *M_residual_d =  *M_massStiff * (M_disp);
@@ -658,7 +663,7 @@ template <typename Mesh, typename SolverType> // for monolithic
 void
 VenantKirchhofSolver<Mesh, SolverType>::updateVel()
 {
-    M_vel  = ( 2.0 / M_data.dataTime()->getTimeStep() ) * (M_disp);
+    M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
 }
 
@@ -707,7 +712,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_type &_sol)
 
     vector_type sol(M_localMap);
 
-    M_vel  = ( 2.0 / M_data.dataTime()->getTimeStep() ) * (M_disp);
+    M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
 
     //M_Displayer.leaderPrint("sol norm = ", norm(this->sol));
@@ -736,7 +741,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type &res, const ve
 
     *M_rhs = *M_rhsNoBC;
 
-    bcManageVector( *M_rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), M_data.dataTime()->getTime(), 1.0 );
+    bcManageVector( *M_rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), M_data->dataTime()->getTime(), 1.0 );
 
     res  = M_stiff * sol;
 //    res -= M_rhs;
@@ -828,17 +833,17 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
                 int i    = M_FESpace.fe().patternFirst(k);
                 int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
 
-                s+= (2*M_data.mu() + M_data.lambda())*
+                s+= (2*M_data->mu() + M_data->lambda())*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 0 , ig )*
                     (M_disp)[idof + 0*M_FESpace.dim()];
 
-                s+= M_data.lambda()*
+                s+= M_data->lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 1 , ig )*
                     (M_disp)[idof + 1*M_FESpace.dim()];
 
-                s+= M_data.lambda()*
+                s+= M_data->lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 2 , ig )*
                     (M_disp)[idof + 2*M_FESpace.dim()];
@@ -864,17 +869,17 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
                 int i    = M_FESpace.fe().patternFirst(k);
                 int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
 
-                s += M_data.lambda()*
+                s += M_data->lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 0 , ig )*
                     (M_disp)[idof + 0*M_FESpace.dim()];
 
-                s += (2*M_data.mu() + M_data.lambda())*
+                s += (2*M_data->mu() + M_data->lambda())*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 1 , ig )*
                     (M_disp)[idof + 1*M_FESpace.dim()];
 
-                s += M_data.lambda()*
+                s += M_data->lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 2 , ig )*
                     (M_disp)[idof + 2*M_FESpace.dim()];
@@ -902,17 +907,17 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
                 int i    = M_FESpace.fe().patternFirst(k);
                 int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
 
-                s += M_data.lambda()*
+                s += M_data->lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 0 , ig )*
                     (M_disp)[idof + 0*M_FESpace.dim()];
 
-                s += M_data.lambda()*
+                s += M_data->lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 1 , ig )*
                     (M_disp)[idof + 1*M_FESpace.dim()];
 
-                s += (2*M_data.mu() + M_data.lambda())*
+                s += (2*M_data->mu() + M_data->lambda())*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 2 , ig )*
                     (M_disp)[idof + 2*M_FESpace.dim()];
@@ -1020,7 +1025,7 @@ VenantKirchhofSolver<Mesh, SolverType>::solveJacobian( Real /*time*/ )
     M_linearSolver->solve( M_disp , *M_f );
 
 
-    this->_w = ( 2.0 / M_data.dataTime()->getTimeStep() ) * (M_disp) - M_rhsW;
+    this->_w = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (M_disp) - M_rhsW;
 
     *M_residual_d = M_massStiff*(M_disp);
 }
@@ -1060,7 +1065,7 @@ VenantKirchhofSolver<Mesh, SolverType>::solveJacobian( const Real /*time*/ , bch
 
 //    M_linearSolver.solve( M_disp , _f );
 
-    this->_w = ( 2.0 / M_data.dataTime()->getTimeStep() ) * (M_disp) - M_rhsW;
+    this->_w = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (M_disp) - M_rhsW;
 
     *M_residual_d = M_massStiff*(M_disp);
 }
@@ -1082,7 +1087,7 @@ VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&   
     vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
-              M_data.dataTime()->getTime() );
+              M_data->dataTime()->getTime() );
 
     // matrix should be GlobalAssembled by  bcManage
 

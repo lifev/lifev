@@ -463,8 +463,8 @@ FSIOperator::setupFluidSolid( void )
         UInt numLM = imposeFlux();
 
         M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
-        M_fluid.reset(      new fluid_raw_type(      *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, numLM ) );
-        M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,              M_epetraComm ) );
+        M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, numLM ) );
+        M_solid.reset(      new solid_raw_type(      M_data->dataSolid(), *M_dFESpace,              M_epetraComm ) );
 
 //         if ( M_linearFluid )
 //             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
@@ -480,7 +480,7 @@ FSIOperator::setupFluidSolid( void )
     {
 //         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
     	M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset(      new solid_raw_type(      *M_data->dataSolid(), *M_dFESpace,  M_epetraComm ) );
+        M_solid.reset(      new solid_raw_type(      M_data->dataSolid(), *M_dFESpace,  M_epetraComm ) );
 
 //         if ( M_linearFluid )
 //             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
