@@ -368,6 +368,19 @@ public:
      */
     Real BoundaryValue( const Solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
 
+    //! Return the value of the eigenvalues and eigenvectors on a specified boundary.
+    /*!
+     *  @param bcSide Side of the boundary.
+     *  @param solution solution container.
+     *  @param eigenvalues output eigenvalues.
+     *  @param leftEigenvector1 output left eigenvector associated to the first eigenvalue.
+     *  @param leftEigenvector1 output left eigenvector associated to the second eigenvalue.
+     */
+    void BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const Solution_Type& solution,
+                                                Container2D_Type& eigenvalues,
+                                                Container2D_Type& leftEigenvector1,
+                                                Container2D_Type& leftEigenvector2 );
+
     //@}
 
 private:
