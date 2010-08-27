@@ -107,8 +107,10 @@ DataElasticStructure::setup( const GetPot& dataFile, const std::string& section 
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
     if ( materialsNumber == 0 )
     {
-        M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
-        M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+
+        //WARNING("The material flag was not set from data file. Its value will be dedced from the first volume marker.");
+//         M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
+//         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
     }
     else
     {
@@ -218,13 +220,27 @@ DataElasticStructure::thickness() const
 const Real&
 DataElasticStructure::poisson( const UInt& material ) const
 {
-    return M_poisson.find( material )->second;
+    MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
+    if(IT != M_poisson.end())
+        return M_poisson.find( material )->second;
+    else
+    {
+        //WARNING("the Poisson modulus has not been set");
+        return 0;
+    }
 }
 
 const Real&
 DataElasticStructure::young( const UInt& material ) const
 {
-    return M_young.find( material )->second;
+    MaterialContainer_Type::const_iterator IT = M_young.find( material );
+    if(IT != M_young.end())
+        return IT->second;
+    else
+    {
+        //WARNING("the Young modulus has not been set");
+        return 0;
+    }
 }
 
 Real
