@@ -607,15 +607,15 @@ const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
 /*
                            1
 */
-Real fct1_P0_0D( cRRef , cRRef, cRRef )
+Real fct1_P0_0D( const GeoVector& )
 {
     return 1.;
 }
-Real derfct1_P0_0D( cRRef, cRRef, cRRef )
+Real derfct1_P0_0D( const GeoVector& )
 {
     return 0.;
 }
-Real der2fct1_P0_0D( cRRef, cRRef, cRRef )
+Real der2fct1_P0_0D( const GeoVector& )
 {
     return 0.;
 }
@@ -627,25 +627,25 @@ Real der2fct1_P0_0D( cRRef, cRRef, cRRef )
 /*
                            1-----2
 */
-Real fct1_P1_1D( cRRef x, cRRef, cRRef )
+Real fct1_P1_1D( const GeoVector& v )
 {
-    return 1 - x;
+    return 1 - v[0];
 }
-Real fct2_P1_1D( cRRef x, cRRef, cRRef )
+Real fct2_P1_1D( const GeoVector& v )
 {
-    return x;
+    return v[0];
 }
 
-Real derfct1_1_P1_1D( cRRef, cRRef, cRRef )
+Real derfct1_1_P1_1D( const GeoVector& )
 {
     return -1;
 }
-Real derfct2_1_P1_1D( cRRef, cRRef, cRRef )
+Real derfct2_1_P1_1D( const GeoVector& )
 {
     return 1;
 }
 
-Real der2fct1_P1_1D( cRRef, cRRef, cRRef )
+Real der2fct1_P1_1D( const GeoVector& )
 {
     return 0;
 }
@@ -658,41 +658,41 @@ Real der2fct1_P1_1D( cRRef, cRRef, cRRef )
 /*
                            1--3--2
 */
-Real fct1_P2_1D( cRRef x, cRRef, cRRef )
+Real fct1_P2_1D( const GeoVector& v )
 {
-    return 2. * ( x - 1. ) * ( x - 0.5 );
+    return 2. * ( v[0] - 1. ) * ( v[0] - 0.5 );
 }
-Real fct3_P2_1D( cRRef x, cRRef, cRRef )
+Real fct3_P2_1D( const GeoVector& v )
 {
-    return 4. * x * ( 1. - x );
+    return 4. * v[0] * ( 1. - v[0] );
 }
-Real fct2_P2_1D( cRRef x, cRRef, cRRef )
+Real fct2_P2_1D( const GeoVector& v )
 {
-    return 2. * x * ( x - 0.5 );
-}
-
-Real derfct1_1_P2_1D( cRRef x, cRRef, cRRef )
-{
-    return 4. * x - 3.;
-}
-Real derfct3_1_P2_1D( cRRef x, cRRef, cRRef )
-{
-    return -8. * x + 4.;
-}
-Real derfct2_1_P2_1D( cRRef x, cRRef, cRRef )
-{
-    return 4. * x - 1.;
+    return 2. * v[0] * ( v[0] - 0.5 );
 }
 
-Real der2fct1_11_P2_1D( cRRef, cRRef, cRRef )
+Real derfct1_1_P2_1D( const GeoVector& v )
+{
+    return 4. * v[0] - 3.;
+}
+Real derfct3_1_P2_1D( const GeoVector& v )
+{
+    return -8. * v[0] + 4.;
+}
+Real derfct2_1_P2_1D( const GeoVector& v )
+{
+    return 4. * v[0] - 1.;
+}
+
+Real der2fct1_11_P2_1D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct3_11_P2_1D( cRRef, cRRef, cRRef )
+Real der2fct3_11_P2_1D(  const GeoVector& )
 {
     return -8;
 }
-Real der2fct2_11_P2_1D( cRRef, cRRef, cRRef )
+Real der2fct2_11_P2_1D(  const GeoVector& )
 {
     return 4;
 }
@@ -710,16 +710,16 @@ Real der2fct2_11_P2_1D( cRRef, cRRef, cRRef )
                            | 1\
                             ---
 */
-Real fct1_P0_2D( cRRef, cRRef, cRRef )
+Real fct1_P0_2D( const GeoVector& )
 {
     return 1. ;
 }   //check this : 1. or 2. (\int fct1 = 0.5 or 1.)  ???
 // First and Second derivatives are both equal (to 0).
-Real derfct1_P0_2D( cRRef, cRRef, cRRef )
+Real derfct1_P0_2D( const GeoVector& )
 {
     return 0. ;
 }
-Real der2fct1_P0_2D( cRRef, cRRef, cRRef )
+Real der2fct1_P0_2D( const GeoVector& )
 {
     return 0. ;
 }
@@ -736,46 +736,46 @@ Real der2fct1_P0_2D( cRRef, cRRef, cRRef )
                            |  \
                            1---2
 */
-Real fct1_P1_2D( cRRef x, cRRef y, cRRef )
+Real fct1_P1_2D( const GeoVector& v )
 {
-    return ( 1. - x - y );
+    return ( 1. - v[0] - v[1] );
 }
-Real fct2_P1_2D( cRRef x, cRRef, cRRef )
+Real fct2_P1_2D( const GeoVector& v )
 {
-    return x ;
+    return v[0] ;
 }
-Real fct3_P1_2D( cRRef, cRRef y, cRRef )
+Real fct3_P1_2D( const GeoVector& v )
 {
-    return y ;
+    return v[1] ;
 }
 
-Real derfct1_1_P1_2D( cRRef, cRRef, cRRef )
+Real derfct1_1_P1_2D( const GeoVector& )
 {
     return -1 ;
 }
-Real derfct1_2_P1_2D( cRRef, cRRef, cRRef )
+Real derfct1_2_P1_2D( const GeoVector& )
 {
     return -1 ;
 }
-Real derfct2_1_P1_2D( cRRef, cRRef, cRRef )
+Real derfct2_1_P1_2D( const GeoVector& )
 {
     return 1 ;
 }
-Real derfct2_2_P1_2D( cRRef, cRRef, cRRef )
+Real derfct2_2_P1_2D( const GeoVector& )
 {
     return 0 ;
 }
-Real derfct3_1_P1_2D( cRRef, cRRef, cRRef )
+Real derfct3_1_P1_2D( const GeoVector& )
 {
     return 0 ;
 }
-Real derfct3_2_P1_2D( cRRef, cRRef, cRRef )
+Real derfct3_2_P1_2D( const GeoVector& )
 {
     return 1 ;
 }
 
 // Second derivatives
-Real der2fctx_xx_P1_2D( cRRef, cRRef, cRRef )
+Real der2fctx_xx_P1_2D( const GeoVector& )
 {
     return 0;
 }
@@ -794,178 +794,178 @@ Real der2fctx_xx_P1_2D( cRRef, cRRef, cRRef )
                            |  \
                            1-4-2
 */
-Real fct1_P2_2D( cRRef x, cRRef y, cRRef )
+Real fct1_P2_2D( const GeoVector& v )
 {
-    return ( 1 -x - y ) * ( 1 - x - x - y - y );
+    return ( 1 -v[0] - v[1] ) * ( 1 - v[0] - v[0] - v[1] - v[1] );
 }
-Real fct2_P2_2D( cRRef x, cRRef, cRRef )
+Real fct2_P2_2D( const GeoVector& v )
 {
-    return -x * ( 1 - x - x );
+    return -v[0] * ( 1 - v[0] - v[0] );
 }
-Real fct3_P2_2D( cRRef, cRRef y, cRRef )
+Real fct3_P2_2D( const GeoVector& v )
 {
-    return -y * ( 1 - y - y );
+    return -v[1] * ( 1 - v[1] - v[1] );
 }
-Real fct4_P2_2D( cRRef x, cRRef y, cRRef )
+Real fct4_P2_2D( const GeoVector& v )
 {
-    return 4 * x * ( 1 - x - y );
+    return 4 * v[0] * ( 1 - v[0] - v[1] );
 }
-Real fct5_P2_2D( cRRef x, cRRef y, cRRef )
+Real fct5_P2_2D( const GeoVector& v )
 {
-    return 4 * x * y;
+    return 4 * v[0] * v[1];
 }
-Real fct6_P2_2D( cRRef x, cRRef y, cRRef )
+Real fct6_P2_2D( const GeoVector& v )
 {
-    return 4 * y * ( 1 - x - y );
-}
-
-Real derfct1_1_P2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 4 * ( x + y ) - 3;
-}
-Real derfct1_2_P2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 4 * ( x + y ) - 3;
-}
-Real derfct2_1_P2_2D( cRRef x, cRRef, cRRef )
-{
-    return 4 * x - 1;
-}
-Real derfct2_2_P2_2D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real derfct3_1_P2_2D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real derfct3_2_P2_2D( cRRef, cRRef y, cRRef )
-{
-    return 4 * y - 1;
-}
-Real derfct4_1_P2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 4 * ( 1 - x - x - y );
-}
-Real derfct4_2_P2_2D( cRRef x, cRRef, cRRef )
-{
-    return -4 * x;
-}
-Real derfct5_1_P2_2D( cRRef, cRRef y, cRRef )
-{
-    return 4 * y;
-}
-Real derfct5_2_P2_2D( cRRef x, cRRef, cRRef )
-{
-    return 4 * x;
-}
-Real derfct6_1_P2_2D( cRRef, cRRef y, cRRef )
-{
-    return -4 * y;
-}
-Real derfct6_2_P2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 4 * ( 1 - x - y - y );
+    return 4 * v[1] * ( 1 - v[0] - v[1] );
 }
 
-Real der2fct1_11_P2_2D( cRRef, cRRef, cRRef )
+Real derfct1_1_P2_2D( const GeoVector& v )
 {
-    return 4;
+    return 4 * ( v[0] + v[1] ) - 3;
 }
-Real der2fct1_12_P2_2D( cRRef, cRRef, cRRef )
+Real derfct1_2_P2_2D( const GeoVector& v )
 {
-    return 4;
+    return 4 * ( v[0] + v[1] ) - 3;
 }
-Real der2fct1_21_P2_2D( cRRef, cRRef, cRRef )
+Real derfct2_1_P2_2D( const GeoVector& v )
 {
-    return 4;
+    return 4 * v[0] - 1;
 }
-Real der2fct1_22_P2_2D( cRRef, cRRef, cRRef )
+Real derfct2_2_P2_2D( const GeoVector& )
 {
-    return 4;
+    return 0;
+}
+Real derfct3_1_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+Real derfct3_2_P2_2D( const GeoVector& v )
+{
+    return 4 * v[1] - 1;
+}
+Real derfct4_1_P2_2D( const GeoVector& v )
+{
+    return 4 * ( 1 - v[0] - v[0] - v[1] );
+}
+Real derfct4_2_P2_2D( const GeoVector& v )
+{
+    return -4 * v[0];
+}
+Real derfct5_1_P2_2D( const GeoVector& v )
+{
+    return 4 * v[1];
+}
+Real derfct5_2_P2_2D( const GeoVector& v )
+{
+    return 4 * v[0];
+}
+Real derfct6_1_P2_2D( const GeoVector& v )
+{
+    return -4 * v[1];
+}
+Real derfct6_2_P2_2D( const GeoVector& v )
+{
+    return 4 * ( 1 - v[0] - v[1] - v[1] );
 }
 
-Real der2fct2_11_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct1_11_P2_2D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct2_12_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct1_12_P2_2D( const GeoVector& )
 {
-    return 0;
+    return 4;
 }
-Real der2fct2_21_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct1_21_P2_2D( const GeoVector& )
 {
-    return 0;
+    return 4;
 }
-Real der2fct2_22_P2_2D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-
-Real der2fct3_11_P2_2D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_12_P2_2D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_21_P2_2D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_22_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct1_22_P2_2D( const GeoVector& )
 {
     return 4;
 }
 
-Real der2fct4_11_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct2_11_P2_2D( const GeoVector& )
+{
+    return 4;
+}
+Real der2fct2_12_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_21_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_22_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct3_11_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_12_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_21_P2_2D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_22_P2_2D( const GeoVector& )
+{
+    return 4;
+}
+
+Real der2fct4_11_P2_2D( const GeoVector& )
 {
     return -8;
 }
-Real der2fct4_12_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct4_12_P2_2D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct4_21_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct4_21_P2_2D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct4_22_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct4_22_P2_2D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct5_11_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct5_11_P2_2D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct5_12_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct5_12_P2_2D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct5_21_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct5_21_P2_2D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct5_22_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct5_22_P2_2D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct6_11_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct6_11_P2_2D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_12_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct6_12_P2_2D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct6_21_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct6_21_P2_2D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct6_22_P2_2D( cRRef, cRRef, cRRef )
+Real der2fct6_22_P2_2D( const GeoVector& )
 {
     return -8;
 }
@@ -981,16 +981,16 @@ Real der2fct6_22_P2_2D( cRRef, cRRef, cRRef )
                            |       |
                             -------
 */
-Real fct1_Q0_2D( cRRef, cRRef, cRRef )
+Real fct1_Q0_2D( const GeoVector& )
 {
     return 1. ;
 }
-Real derfct1_Q0_2D( cRRef, cRRef, cRRef )
+Real derfct1_Q0_2D( const GeoVector& v )
 {
     return 0. ;
 }
 // The second derivative is equal to the first : both are equal to 0.
-Real der2fct1_Q0_2D( cRRef, cRRef, cRRef )
+Real der2fct1_Q0_2D( const GeoVector& v )
 {
     return 0. ;
 }
@@ -1007,58 +1007,58 @@ Real der2fct1_Q0_2D( cRRef, cRRef, cRRef )
                            |       |
                            1-------2
 */
-Real fct1_Q1_2D( cRRef x, cRRef y, cRRef )
+Real fct1_Q1_2D( const GeoVector& v )
 {
-    return ( 1. - x ) * ( 1. - y );
+    return ( 1. - v[0] ) * ( 1. - v[1] );
 }
-Real fct2_Q1_2D( cRRef x, cRRef y, cRRef )
+Real fct2_Q1_2D( const GeoVector& v )
 {
-    return ( 1. - y ) * x;
+    return ( 1. - v[1] ) * v[0];
 }
-Real fct3_Q1_2D( cRRef x, cRRef y, cRRef )
+Real fct3_Q1_2D( const GeoVector& v )
 {
-    return x * y;
+    return v[0] * v[1];
 }
-Real fct4_Q1_2D( cRRef x, cRRef y, cRRef )
+Real fct4_Q1_2D( const GeoVector& v )
 {
-    return y * ( 1. - x );
+    return v[1] * ( 1. - v[0] );
 }
 
-Real derfct1_1_Q1_2D( cRRef, cRRef y, cRRef )
+Real derfct1_1_Q1_2D( const GeoVector& v )
 {
-    return -( 1. - y );
+    return -( 1. - v[1] );
 }
-Real derfct1_2_Q1_2D( cRRef x, cRRef, cRRef )
+Real derfct1_2_Q1_2D( const GeoVector& v )
 {
-    return -( 1. - x );
+    return -( 1. - v[0] );
 }
-Real derfct2_1_Q1_2D( cRRef, cRRef y, cRRef )
+Real derfct2_1_Q1_2D( const GeoVector& v )
 {
-    return ( 1. - y );
+    return ( 1. - v[1] );
 }
-Real derfct2_2_Q1_2D( cRRef x, cRRef, cRRef )
+Real derfct2_2_Q1_2D( const GeoVector& v )
 {
-    return -x;
+    return -v[0];
 }
-Real derfct3_1_Q1_2D( cRRef, cRRef y, cRRef )
+Real derfct3_1_Q1_2D( const GeoVector& v )
 {
-    return y;
+    return v[1];
 }
-Real derfct3_2_Q1_2D( cRRef x, cRRef, cRRef )
+Real derfct3_2_Q1_2D( const GeoVector& v )
 {
-    return x;
+    return v[0];
 }
-Real derfct4_1_Q1_2D( cRRef, cRRef y, cRRef )
+Real derfct4_1_Q1_2D( const GeoVector& v )
 {
-    return -y;
+    return -v[1];
 }
-Real derfct4_2_Q1_2D( cRRef x, cRRef, cRRef )
+Real derfct4_2_Q1_2D( const GeoVector& v )
 {
-    return ( 1. - x );
+    return ( 1. - v[0] );
 }
 
 // Second derivatives
-Real der2fctx_xx_Q1_2D( cRRef, cRRef, cRRef )
+Real der2fctx_xx_Q1_2D( const GeoVector& )
 {
     return 0;
 }
@@ -1074,268 +1074,268 @@ Real der2fctx_xx_Q1_2D( cRRef, cRRef, cRRef )
                            |       |
                            1---5---2
 */
-Real fct1_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct1_Q2_2D( const GeoVector& v )
 {
-    return 4. * ( 1 - x ) * ( 0.5 - x ) * ( 1 - y ) * ( 0.5 - y );
+    return 4. * ( 1 - v[0] ) * ( 0.5 - v[0] ) * ( 1 - v[1] ) * ( 0.5 - v[1] );
 }
-Real fct5_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct5_Q2_2D( const GeoVector& v )
 {
-    return 8. * x * ( 1 - x ) * ( 1 - y ) * ( 0.5 - y );
+    return 8. * v[0] * ( 1 - v[0] ) * ( 1 - v[1] ) * ( 0.5 - v[1] );
 }
-Real fct2_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct2_Q2_2D( const GeoVector& v )
 {
-    return 4. * x * ( x - 0.5 ) * ( 1 - y ) * ( 0.5 - y );
+    return 4. * v[0] * ( v[0] - 0.5 ) * ( 1 - v[1] ) * ( 0.5 - v[1] );
 }
-Real fct6_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct6_Q2_2D( const GeoVector& v )
 {
-    return 8. * x * ( x - 0.5 ) * y * ( 1 - y );
+    return 8. * v[0] * ( v[0] - 0.5 ) * v[1] * ( 1 - v[1] );
 }
-Real fct3_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct3_Q2_2D( const GeoVector& v )
 {
-    return 4. * x * ( x - 0.5 ) * y * ( y - 0.5 );
+    return 4. * v[0] * ( v[0] - 0.5 ) * v[1] * ( v[1] - 0.5 );
 }
-Real fct7_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct7_Q2_2D( const GeoVector& v )
 {
-    return 8. * x * ( 1 - x ) * y * ( y - 0.5 );
+    return 8. * v[0] * ( 1 - v[0] ) * v[1] * ( v[1] - 0.5 );
 }
-Real fct4_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct4_Q2_2D( const GeoVector& v )
 {
-    return 4. * ( 1 - x ) * ( 0.5 - x ) * y * ( y - 0.5 );
+    return 4. * ( 1 - v[0] ) * ( 0.5 - v[0] ) * v[1] * ( v[1] - 0.5 );
 }
-Real fct8_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct8_Q2_2D( const GeoVector& v )
 {
-    return 8. * ( 0.5 - x ) * ( 1 - x ) * y * ( 1 - y );
+    return 8. * ( 0.5 - v[0] ) * ( 1 - v[0] ) * v[1] * ( 1 - v[1] );
 }
-Real fct9_Q2_2D( cRRef x, cRRef y, cRRef )
+Real fct9_Q2_2D( const GeoVector& v )
 {
-    return 16. * x * ( 1 - x ) * y * ( 1 - y );
-}
-
-Real derfct1_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return ( 2. * y - 1. ) * ( y - 1. ) * ( 4. * x - 3. );
-}
-Real derfct1_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return ( 2. * x - 1. ) * ( x - 1. ) * ( 4. * y - 3. );
-}
-Real derfct5_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 2. * y - 1. ) * ( y - 1. ) * ( 2. * x - 1. );
-}
-Real derfct5_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * x * ( x - 1. ) * ( 4. * y - 3. );
-}
-Real derfct2_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return ( 2. * y - 1. ) * ( y - 1. ) * ( 4. * x - 1. );
-}
-Real derfct2_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return x * ( 2. * x - 1. ) * ( 4. * y - 3. );
-}
-Real derfct6_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * y * ( 4. * x - 1. ) * ( y - 1. );
-}
-Real derfct6_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * x * ( 2. * x - 1. ) * ( 2. * y - 1. );
-}
-Real derfct3_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return y * ( 4. * x - 1. ) * ( 2. * y - 1. );
-}
-Real derfct3_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return x * ( 2. * x - 1. ) * ( 4. * y - 1. );
-}
-Real derfct7_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * y * ( 2. * x - 1. ) * ( 2. * y - 1. );
-}
-Real derfct7_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * x * ( x - 1. ) * ( 4. * y - 1. );
-}
-Real derfct4_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return y * ( 4. * x - 3. ) * ( 2. * y - 1. );
-}
-Real derfct4_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return ( 2. * x - 1. ) * ( x - 1. ) * ( 4. * y - 1. );
-}
-Real derfct8_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * y * ( 4. * x - 3. ) * ( y - 1. );
-}
-Real derfct8_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 2. * x - 1. ) * ( x - 1. ) * ( 2. * y - 1. );
-}
-Real derfct9_1_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 16. * y * ( 2. * x - 1. ) * ( y - 1. );
-}
-Real derfct9_2_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 16. * x * ( x - 1. ) * ( 2. * y - 1. );
+    return 16. * v[0] * ( 1 - v[0] ) * v[1] * ( 1 - v[1] );
 }
 
-Real der2fct1_11_Q2_2D( cRRef, cRRef y, cRRef )
+Real derfct1_1_Q2_2D( const GeoVector& v )
 {
-    return ( 2. * y - 1. ) * ( y - 1. ) * 4.;
+    return ( 2. * v[1] - 1. ) * ( v[1] - 1. ) * ( 4. * v[0] - 3. );
 }
-Real der2fct1_12_Q2_2D( cRRef x, cRRef y, cRRef )
+Real derfct1_2_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * y - 3. ) * ( 4. * x - 3. );
+    return ( 2. * v[0] - 1. ) * ( v[0] - 1. ) * ( 4. * v[1] - 3. );
 }
-Real der2fct1_21_Q2_2D( cRRef x, cRRef y, cRRef )
+Real derfct5_1_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * y - 3. ) * ( 4. * x - 3. );
+    return -4. * ( 2. * v[1] - 1. ) * ( v[1] - 1. ) * ( 2. * v[0] - 1. );
 }
-Real der2fct1_22_Q2_2D( cRRef x, cRRef, cRRef )
+Real derfct5_2_Q2_2D( const GeoVector& v )
 {
-    return ( 2. * x - 1. ) * ( x - 1. ) * 4.;
+    return -4. * v[0] * ( v[0] - 1. ) * ( 4. * v[1] - 3. );
+}
+Real derfct2_1_Q2_2D( const GeoVector& v )
+{
+    return ( 2. * v[1] - 1. ) * ( v[1] - 1. ) * ( 4. * v[0] - 1. );
+}
+Real derfct2_2_Q2_2D( const GeoVector& v )
+{
+    return v[0] * ( 2. * v[0] - 1. ) * ( 4. * v[1] - 3. );
+}
+Real derfct6_1_Q2_2D( const GeoVector& v )
+{
+    return -4. * v[1] * ( 4. * v[0] - 1. ) * ( v[1] - 1. );
+}
+Real derfct6_2_Q2_2D( const GeoVector& v )
+{
+    return -4. * v[0] * ( 2. * v[0] - 1. ) * ( 2. * v[1] - 1. );
+}
+Real derfct3_1_Q2_2D( const GeoVector& v )
+{
+    return v[1] * ( 4. * v[0] - 1. ) * ( 2. * v[1] - 1. );
+}
+Real derfct3_2_Q2_2D( const GeoVector& v )
+{
+    return v[0] * ( 2. * v[0] - 1. ) * ( 4. * v[1] - 1. );
+}
+Real derfct7_1_Q2_2D( const GeoVector& v )
+{
+    return -4. * v[1] * ( 2. * v[0] - 1. ) * ( 2. * v[1] - 1. );
+}
+Real derfct7_2_Q2_2D( const GeoVector& v )
+{
+    return -4. * v[0] * ( v[0] - 1. ) * ( 4. * v[1] - 1. );
+}
+Real derfct4_1_Q2_2D( const GeoVector& v )
+{
+    return v[1] * ( 4. * v[0] - 3. ) * ( 2. * v[1] - 1. );
+}
+Real derfct4_2_Q2_2D( const GeoVector& v )
+{
+    return ( 2. * v[0] - 1. ) * ( v[0] - 1. ) * ( 4. * v[1] - 1. );
+}
+Real derfct8_1_Q2_2D( const GeoVector& v )
+{
+    return -4. * v[1] * ( 4. * v[0] - 3. ) * ( v[1] - 1. );
+}
+Real derfct8_2_Q2_2D( const GeoVector& v )
+{
+    return -4. * ( 2. * v[0] - 1. ) * ( v[0] - 1. ) * ( 2. * v[1] - 1. );
+}
+Real derfct9_1_Q2_2D( const GeoVector& v )
+{
+    return 16. * v[1] * ( 2. * v[0] - 1. ) * ( v[1] - 1. );
+}
+Real derfct9_2_Q2_2D( const GeoVector& v )
+{
+    return 16. * v[0] * ( v[0] - 1. ) * ( 2. * v[1] - 1. );
 }
 
-Real der2fct5_11_Q2_2D( cRRef, cRRef y, cRRef )
+Real der2fct1_11_Q2_2D( const GeoVector& v )
 {
-    return -8. * ( 2. * y - 1. ) * ( y - 1. );
+    return ( 2. * v[1] - 1. ) * ( v[1] - 1. ) * 4.;
 }
-Real der2fct5_12_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_12_Q2_2D( const GeoVector& v )
 {
-    return -4. * ( 2. * x - 1 ) * ( 4. * y - 3 );
+    return ( 4. * v[1] - 3. ) * ( 4. * v[0] - 3. );
 }
-Real der2fct5_21_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_21_Q2_2D( const GeoVector& v )
 {
-    return -4. * ( 2. * x - 1 ) * ( 4. * y - 3 );
+    return ( 4. * v[1] - 3. ) * ( 4. * v[0] - 3. );
+}
+Real der2fct1_22_Q2_2D( const GeoVector& v )
+{
+    return ( 2. * v[0] - 1. ) * ( v[0] - 1. ) * 4.;
+}
+
+Real der2fct5_11_Q2_2D( const GeoVector& v )
+{
+    return -8. * ( 2. * v[1] - 1. ) * ( v[1] - 1. );
+}
+Real der2fct5_12_Q2_2D( const GeoVector& v )
+{
+    return -4. * ( 2. * v[0] - 1 ) * ( 4. * v[1] - 3 );
+}
+Real der2fct5_21_Q2_2D( const GeoVector& v )
+{
+    return -4. * ( 2. * v[0] - 1 ) * ( 4. * v[1] - 3 );
     ;
 }
-Real der2fct5_22_Q2_2D( cRRef x, cRRef, cRRef )
+Real der2fct5_22_Q2_2D( const GeoVector& v )
 {
-    return -16. * x * ( x - 1. );
+    return -16. * v[0] * ( v[0] - 1. );
 }
 
-Real der2fct2_11_Q2_2D( cRRef, cRRef y, cRRef )
+Real der2fct2_11_Q2_2D( const GeoVector& v )
 {
-    return ( 2. * y - 1. ) * ( y - 1. ) * 4.;
+    return ( 2. * v[1] - 1. ) * ( v[1] - 1. ) * 4.;
 }
-Real der2fct2_12_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct2_12_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * x - 1 ) * ( 4. * y - 3. );
+    return ( 4. * v[0] - 1 ) * ( 4. * v[1] - 3. );
 }
-Real der2fct2_21_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct2_21_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * y - 3. ) * ( 4. * x - 1. );
+    return ( 4. * v[1] - 3. ) * ( 4. * v[0] - 1. );
 }
-Real der2fct2_22_Q2_2D( cRRef x, cRRef, cRRef )
+Real der2fct2_22_Q2_2D( const GeoVector& v )
 {
-    return x * ( 2. * x - 1. ) * 4.;
-}
-
-Real der2fct6_11_Q2_2D( cRRef, cRRef y, cRRef )
-{
-    return -16. * y * ( y - 1. );
-}
-Real der2fct6_12_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 4. * x - 1. ) * ( 2. * y - 1. );
-}
-Real der2fct6_21_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 4. * x - 1. ) * ( 2. * y - 1. );
-}
-Real der2fct6_22_Q2_2D( cRRef x, cRRef, cRRef )
-{
-    return -8. * x * ( 2. * x - 1. );
+    return v[0] * ( 2. * v[0] - 1. ) * 4.;
 }
 
-Real der2fct3_11_Q2_2D( cRRef, cRRef y, cRRef )
+Real der2fct6_11_Q2_2D( const GeoVector& v )
 {
-    return 4. * y * ( 2. * y - 1. );
+    return -16. * v[1] * ( v[1] - 1. );
 }
-Real der2fct3_12_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct6_12_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * x - 1. ) * ( 4. * y - 1. );
+    return -4. * ( 4. * v[0] - 1. ) * ( 2. * v[1] - 1. );
 }
-Real der2fct3_21_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct6_21_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * x - 1. ) * ( 4. * y - 1. );
+    return -4. * ( 4. * v[0] - 1. ) * ( 2. * v[1] - 1. );
 }
-Real der2fct3_22_Q2_2D( cRRef x, cRRef, cRRef )
+Real der2fct6_22_Q2_2D( const GeoVector& v )
 {
-    return 4. * x * ( 2. * x - 1. );
-}
-
-Real der2fct7_11_Q2_2D( cRRef, cRRef y, cRRef )
-{
-    return -8. * y * ( 2. * y - 1. );
-}
-Real der2fct7_12_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 2. * x - 1. ) * ( 4. * y - 1. );
-}
-Real der2fct7_21_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 2. * x - 1. ) * ( 4. * y - 1. );
-}
-Real der2fct7_22_Q2_2D( cRRef x, cRRef, cRRef )
-{
-    return -16. * x * ( x - 1. );
+    return -8. * v[0] * ( 2. * v[0] - 1. );
 }
 
-Real der2fct4_11_Q2_2D( cRRef, cRRef y, cRRef )
+Real der2fct3_11_Q2_2D( const GeoVector& v )
 {
-    return 4. * y * ( 2. * y - 1. );
+    return 4. * v[1] * ( 2. * v[1] - 1. );
 }
-Real der2fct4_12_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct3_12_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * x - 3. ) * ( 4. * y - 1. );
+    return ( 4. * v[0] - 1. ) * ( 4. * v[1] - 1. );
 }
-Real der2fct4_21_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct3_21_Q2_2D( const GeoVector& v )
 {
-    return ( 4. * x - 3. ) * ( 4. * y - 1. );
+    return ( 4. * v[0] - 1. ) * ( 4. * v[1] - 1. );
 }
-Real der2fct4_22_Q2_2D( cRRef x, cRRef, cRRef )
+Real der2fct3_22_Q2_2D( const GeoVector& v )
 {
-    return 4. * ( 2. * x - 1. ) * ( x - 1. );
-}
-
-Real der2fct8_11_Q2_2D( cRRef, cRRef y, cRRef )
-{
-    return -16. * y * ( y - 1. );
-}
-Real der2fct8_12_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 4. * x - 3. ) * ( 2. * y - 1. );
-}
-Real der2fct8_21_Q2_2D( cRRef x, cRRef y, cRRef )
-{
-    return -4. * ( 4. * x - 3. ) * ( 2. * y - 1. );
-}
-Real der2fct8_22_Q2_2D( cRRef x, cRRef, cRRef )
-{
-    return -8. * ( 2. * x - 1. ) * ( x - 1. );
+    return 4. * v[0] * ( 2. * v[0] - 1. );
 }
 
-Real der2fct9_11_Q2_2D( cRRef, cRRef y, cRRef )
+Real der2fct7_11_Q2_2D( const GeoVector& v )
 {
-    return 32. * y * ( y - 1. );
+    return -8. * v[1] * ( 2. * v[1] - 1. );
 }
-Real der2fct9_12_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct7_12_Q2_2D( const GeoVector& v )
 {
-    return 16. * ( 2. * x - 1. ) * ( 2. * y - 1. );
+    return -4. * ( 2. * v[0] - 1. ) * ( 4. * v[1] - 1. );
 }
-Real der2fct9_21_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct7_21_Q2_2D( const GeoVector& v )
 {
-    return 16. * ( 2. * x - 1. ) * ( 2. * y - 1. );
+    return -4. * ( 2. * v[0] - 1. ) * ( 4. * v[1] - 1. );
 }
-Real der2fct9_22_Q2_2D( cRRef x, cRRef, cRRef )
+Real der2fct7_22_Q2_2D( const GeoVector& v )
 {
-    return 32. * x * ( x - 1. );
+    return -16. * v[0] * ( v[0] - 1. );
+}
+
+Real der2fct4_11_Q2_2D( const GeoVector& v )
+{
+    return 4. * v[1] * ( 2. * v[1] - 1. );
+}
+Real der2fct4_12_Q2_2D( const GeoVector& v )
+{
+    return ( 4. * v[0] - 3. ) * ( 4. * v[1] - 1. );
+}
+Real der2fct4_21_Q2_2D( const GeoVector& v )
+{
+    return ( 4. * v[0] - 3. ) * ( 4. * v[1] - 1. );
+}
+Real der2fct4_22_Q2_2D( const GeoVector& v )
+{
+    return 4. * ( 2. * v[0] - 1. ) * ( v[0] - 1. );
+}
+
+Real der2fct8_11_Q2_2D( const GeoVector& v )
+{
+    return -16. * v[1] * ( v[1] - 1. );
+}
+Real der2fct8_12_Q2_2D( const GeoVector& v )
+{
+    return -4. * ( 4. * v[0] - 3. ) * ( 2. * v[1] - 1. );
+}
+Real der2fct8_21_Q2_2D( const GeoVector& v )
+{
+    return -4. * ( 4. * v[0] - 3. ) * ( 2. * v[1] - 1. );
+}
+Real der2fct8_22_Q2_2D( const GeoVector& v )
+{
+    return -8. * ( 2. * v[0] - 1. ) * ( v[0] - 1. );
+}
+
+Real der2fct9_11_Q2_2D( const GeoVector& v )
+{
+    return 32. * v[1] * ( v[1] - 1. );
+}
+Real der2fct9_12_Q2_2D( const GeoVector& v )
+{
+    return 16. * ( 2. * v[0] - 1. ) * ( 2. * v[1] - 1. );
+}
+Real der2fct9_21_Q2_2D( const GeoVector& v )
+{
+    return 16. * ( 2. * v[0] - 1. ) * ( 2. * v[1] - 1. );
+}
+Real der2fct9_22_Q2_2D( const GeoVector& v )
+{
+    return 32. * v[0] * ( v[0] - 1. );
 }
 
 //======================================================================
@@ -1352,18 +1352,18 @@ Real der2fct9_22_Q2_2D( cRRef x, cRRef, cRRef )
            /.       \!
          1 ----------2
 */
-Real fct1_P0_3D( cRRef, cRRef, cRRef )
+Real fct1_P0_3D( const GeoVector& )
 {
     return 1.;
 }
 
-Real derfct1_P0_3D( cRRef, cRRef, cRRef )
+Real derfct1_P0_3D( const GeoVector& )
 {
     return 0.;
 }
 
 // Second derivatives
-Real der2fct1_P0_3D( cRRef, cRRef, cRRef )
+Real der2fct1_P0_3D( const GeoVector& )
 {
     return 0;
 }
@@ -1383,74 +1383,74 @@ Real der2fct1_P0_3D( cRRef, cRRef, cRRef )
            /.       \!
          1 ----------2
 */
-Real fct1_P1_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_P1_3D( const GeoVector& v )
 {
-    return 1 -x - y - z;
+    return 1 -v[0] - v[1] - v[2];
 }
-Real fct2_P1_3D( cRRef x, cRRef, cRRef )
+Real fct2_P1_3D( const GeoVector& v )
 {
-    return x;
+    return v[0];
 }
-Real fct3_P1_3D( cRRef, cRRef y, cRRef )
+Real fct3_P1_3D( const GeoVector& v )
 {
-    return y;
+    return v[1];
 }
-Real fct4_P1_3D( cRRef, cRRef, cRRef z )
+Real fct4_P1_3D( const GeoVector& v )
 {
-    return z;
+    return v[2];
 }
 
-Real derfct1_1_P1_3D( cRRef, cRRef, cRRef )
+Real derfct1_1_P1_3D( const GeoVector& )
 {
     return -1;
 }
-Real derfct1_2_P1_3D( cRRef, cRRef, cRRef )
+Real derfct1_2_P1_3D( const GeoVector& )
 {
     return -1;
 }
-Real derfct1_3_P1_3D( cRRef, cRRef, cRRef )
+Real derfct1_3_P1_3D( const GeoVector& )
 {
     return -1;
 }
-Real derfct2_1_P1_3D( cRRef, cRRef, cRRef )
+Real derfct2_1_P1_3D( const GeoVector& )
 {
     return 1;
 }
-Real derfct2_2_P1_3D( cRRef, cRRef, cRRef )
+Real derfct2_2_P1_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct2_3_P1_3D( cRRef, cRRef, cRRef )
+Real derfct2_3_P1_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct3_1_P1_3D( cRRef, cRRef, cRRef )
+Real derfct3_1_P1_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct3_2_P1_3D( cRRef, cRRef, cRRef )
+Real derfct3_2_P1_3D( const GeoVector& )
 {
     return 1;
 }
-Real derfct3_3_P1_3D( cRRef, cRRef, cRRef )
+Real derfct3_3_P1_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct4_1_P1_3D( cRRef, cRRef, cRRef )
+Real derfct4_1_P1_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct4_2_P1_3D( cRRef, cRRef, cRRef )
+Real derfct4_2_P1_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct4_3_P1_3D( cRRef, cRRef, cRRef )
+Real derfct4_3_P1_3D( const GeoVector& )
 {
     return 1;
 }
 
 // Second derivatives
-Real der2fctx_xx_P1_3D( cRRef, cRRef, cRRef )
+Real der2fctx_xx_P1_3D( const GeoVector& )
 {
     return 0;
 }
@@ -1469,128 +1469,128 @@ Real der2fctx_xx_P1_3D( cRRef, cRRef, cRRef )
            /.       \!
          1 ----------2
 */
-Real fct1_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_P1bubble_3D( const GeoVector& v )
 {
-    return 1 -x - y - z;
+    return 1 -v[0] - v[1] - v[2];
 }
-Real fct2_P1bubble_3D( cRRef x, cRRef, cRRef )
+Real fct2_P1bubble_3D( const GeoVector& v )
 {
-    return x;
+    return v[0];
 }
-Real fct3_P1bubble_3D( cRRef, cRRef y, cRRef )
+Real fct3_P1bubble_3D( const GeoVector& v )
 {
-    return y;
+    return v[1];
 }
-Real fct4_P1bubble_3D( cRRef, cRRef, cRRef z )
+Real fct4_P1bubble_3D( const GeoVector& v )
 {
-    return z;
+    return v[2];
 }
-Real fct5_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -x - y - z ) * x * y * z;
+    return ( 1 -v[0] - v[1] - v[2] ) * v[0] * v[1] * v[2];
 }
 
-Real derfct1_1_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct1_1_P1bubble_3D( const GeoVector& )
 {
     return -1;
 }
-Real derfct1_2_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct1_2_P1bubble_3D( const GeoVector& )
 {
     return -1;
 }
-Real derfct1_3_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct1_3_P1bubble_3D( const GeoVector& )
 {
     return -1;
 }
-Real derfct2_1_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct2_1_P1bubble_3D( const GeoVector& )
 {
     return 1;
 }
-Real derfct2_2_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct2_2_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct2_3_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct2_3_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct3_1_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct3_1_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct3_2_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct3_2_P1bubble_3D( const GeoVector& )
 {
     return 1;
 }
-Real derfct3_3_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct3_3_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct4_1_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct4_1_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct4_2_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct4_2_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real derfct4_3_P1bubble_3D( cRRef, cRRef, cRRef )
+Real derfct4_3_P1bubble_3D( const GeoVector& )
 {
     return 1;
 }
-Real derfct5_1_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_1_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -2 * x - y - z ) * y * z;
+    return ( 1 -2 * v[0] - v[1] - v[2] ) * v[1] * v[2];
 }
-Real derfct5_2_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_2_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -x - 2 * y - z ) * x * z;
+    return ( 1 -v[0] - 2 * v[1] - v[2] ) * v[0] * v[2];
 }
-Real derfct5_3_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_3_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -x - y - 2 * z ) * x * y;
+    return ( 1 -v[0] - v[1] - 2 * v[2] ) * v[0] * v[1];
 }
 
 // Second derivatives
-Real der2fctx_xx_P1bubble_3D( cRRef, cRRef, cRRef )
+Real der2fctx_xx_P1bubble_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct5_11_P1bubble_3D( cRRef, cRRef y, cRRef z )
+Real der2fct5_11_P1bubble_3D( const GeoVector& v )
 {
-    return -2 * y * z;
+    return -2 * v[1] * v[2];
 }
-Real der2fct5_12_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_12_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -2 * x - 2 * y - z ) * z;
+    return ( 1 -2 * v[0] - 2 * v[1] - v[2] ) * v[2];
 }
-Real der2fct5_13_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_13_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -2 * x - y - 2 * z ) * y;
+    return ( 1 -2 * v[0] - v[1] - 2 * v[2] ) * v[1];
 }
-Real der2fct5_21_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_21_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -2 * x - 2 * y - z ) * z;
+    return ( 1 -2 * v[0] - 2 * v[1] - v[2] ) * v[2];
 }
-Real der2fct5_22_P1bubble_3D( cRRef x, cRRef, cRRef z )
+Real der2fct5_22_P1bubble_3D( const GeoVector& v )
 {
-    return -2 * x * z;
+    return -2 * v[0] * v[2];
 }
-Real der2fct5_23_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_23_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -x - 2 * y - 2 * z ) * x;
+    return ( 1 -v[0] - 2 * v[1] - 2 * v[2] ) * v[0];
 }
-Real der2fct5_31_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_31_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -2 * x - y - 2 * z ) * y;
+    return ( 1 -2 * v[0] - v[1] - 2 * v[2] ) * v[1];
 }
-Real der2fct5_32_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_32_P1bubble_3D( const GeoVector& v )
 {
-    return ( 1 -x - 2 * y - 2 * z ) * x;
+    return ( 1 -v[0] - 2 * v[1] - 2 * v[2] ) * v[0];
 }
-Real der2fct5_33_P1bubble_3D( cRRef x, cRRef y, cRRef )
+Real der2fct5_33_P1bubble_3D( const GeoVector& v )
 {
-    return -2 * x * y;
+    return -2 * v[0] * v[1];
 }
 
 //======================================================================
@@ -1607,545 +1607,545 @@ Real der2fct5_33_P1bubble_3D( cRRef x, cRRef y, cRRef )
            /.       \!
          1 -----5----2
 */
-Real fct1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_P2_3D( const GeoVector& v )
 {
-    return -( 1 - x - y - z ) * ( 1 - 2 * ( 1 - x - y - z ) );
+    return -( 1 - v[0] - v[1] - v[2] ) * ( 1 - 2 * ( 1 - v[0] - v[1] - v[2] ) );
 }
-Real fct2_P2_3D( cRRef x, cRRef, cRRef )
+Real fct2_P2_3D( const GeoVector& v )
 {
-    return -x * ( 1 - 2 * x );
+    return -v[0] * ( 1 - 2 * v[0] );
 }
-Real fct3_P2_3D( cRRef, cRRef y, cRRef )
+Real fct3_P2_3D( const GeoVector& v )
 {
-    return -y * ( 1 - 2 * y );
+    return -v[1] * ( 1 - 2 * v[1] );
 }
-Real fct4_P2_3D( cRRef, cRRef, cRRef z )
+Real fct4_P2_3D( const GeoVector& v )
 {
-    return -z * ( 1 - 2 * z );
+    return -v[2] * ( 1 - 2 * v[2] );
 }
-Real fct5_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_P2_3D( const GeoVector& v )
 {
-    return 4 * x * ( 1 - x - y - z );
+    return 4 * v[0] * ( 1 - v[0] - v[1] - v[2] );
 }
-Real fct6_P2_3D( cRRef x, cRRef y, cRRef )
+Real fct6_P2_3D( const GeoVector& v )
 {
-    return 4 * x * y;
+    return 4 * v[0] * v[1];
 }
-Real fct7_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct7_P2_3D( const GeoVector& v )
 {
-    return 4 * y * ( 1 - x - y - z );
+    return 4 * v[1] * ( 1 - v[0] - v[1] - v[2] );
 }
-Real fct8_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct8_P2_3D( const GeoVector& v )
 {
-    return 4 * z * ( 1 - x - y - z );
+    return 4 * v[2] * ( 1 - v[0] - v[1] - v[2] );
 }
-Real fct9_P2_3D( cRRef x, cRRef, cRRef z )
+Real fct9_P2_3D( const GeoVector& v )
 {
-    return 4 * x * z;
+    return 4 * v[0] * v[2];
 }
-Real fct10_P2_3D( cRRef, cRRef y, cRRef z )
+Real fct10_P2_3D( const GeoVector& v )
 {
-    return 4 * y * z;
-}
-
-
-Real derfct1_1_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -3 + 4 * x + 4 * y + 4 * z;
-}
-Real derfct1_2_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -3 + 4 * x + 4 * y + 4 * z;
-}
-Real derfct1_3_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -3 + 4 * x + 4 * y + 4 * z;
+    return 4 * v[1] * v[2];
 }
 
-Real derfct2_1_P2_3D( cRRef x, cRRef, cRRef )
+
+Real derfct1_1_P2_3D( const GeoVector& v )
 {
-    return -1 + 4 * x;
+    return -3 + 4 * v[0] + 4 * v[1] + 4 * v[2];
 }
-Real derfct2_2_P2_3D( cRRef, cRRef, cRRef )
+Real derfct1_2_P2_3D( const GeoVector& v )
+{
+    return -3 + 4 * v[0] + 4 * v[1] + 4 * v[2];
+}
+Real derfct1_3_P2_3D( const GeoVector& v )
+{
+    return -3 + 4 * v[0] + 4 * v[1] + 4 * v[2];
+}
+
+Real derfct2_1_P2_3D( const GeoVector& v )
+{
+    return -1 + 4 * v[0];
+}
+Real derfct2_2_P2_3D( const GeoVector& )
 {
     return 0.;
 }
-Real derfct2_3_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0.;
-}
-
-Real derfct3_1_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0.;
-}
-Real derfct3_2_P2_3D( cRRef, cRRef y, cRRef )
-{
-    return -1 + 4 * y;
-}
-Real derfct3_3_P2_3D( cRRef, cRRef, cRRef )
+Real derfct2_3_P2_3D( const GeoVector& )
 {
     return 0.;
 }
 
-Real derfct4_1_P2_3D( cRRef, cRRef, cRRef )
+Real derfct3_1_P2_3D( const GeoVector& )
 {
     return 0.;
 }
-Real derfct4_2_P2_3D( cRRef, cRRef, cRRef )
+Real derfct3_2_P2_3D( const GeoVector& v )
 {
-    return 0.;
+    return -1 + 4 * v[1];
 }
-Real derfct4_3_P2_3D( cRRef, cRRef, cRRef z )
-{
-    return -1 + 4 * z;
-}
-
-Real derfct5_1_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 - 8 * x - 4 * y - 4 * z;
-}
-Real derfct5_2_P2_3D( cRRef x, cRRef, cRRef )
-{
-    return -4 * x;
-}
-Real derfct5_3_P2_3D( cRRef x, cRRef, cRRef )
-{
-    return -4 * x;
-}
-
-Real derfct6_1_P2_3D( cRRef, cRRef y, cRRef )
-{
-    return 4 * y;
-}
-Real derfct6_2_P2_3D( cRRef x, cRRef, cRRef )
-{
-    return 4 * x;
-}
-Real derfct6_3_P2_3D( cRRef, cRRef, cRRef )
+Real derfct3_3_P2_3D( const GeoVector& )
 {
     return 0.;
 }
 
-Real derfct7_1_P2_3D( cRRef, cRRef y, cRRef )
-{
-    return -4 * y;
-}
-Real derfct7_2_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 - 4 * x - 8 * y - 4 * z;
-}
-Real derfct7_3_P2_3D( cRRef, cRRef y, cRRef )
-{
-    return -4 * y;
-}
-
-Real derfct8_1_P2_3D( cRRef, cRRef, cRRef z )
-{
-    return -4 * z;
-}
-Real derfct8_2_P2_3D( cRRef, cRRef, cRRef z )
-{
-    return -4 * z;
-}
-Real derfct8_3_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 - 4 * x - 4 * y - 8 * z;
-}
-
-Real derfct9_1_P2_3D( cRRef, cRRef, cRRef z )
-{
-    return 4 * z;
-}
-Real derfct9_2_P2_3D( cRRef, cRRef, cRRef )
+Real derfct4_1_P2_3D( const GeoVector& )
 {
     return 0.;
 }
-Real derfct9_3_P2_3D( cRRef x, cRRef, cRRef )
-{
-    return 4 * x;
-}
-
-Real derfct10_1_P2_3D( cRRef, cRRef, cRRef )
+Real derfct4_2_P2_3D( const GeoVector& )
 {
     return 0.;
 }
-Real derfct10_2_P2_3D( cRRef, cRRef, cRRef z )
+Real derfct4_3_P2_3D( const GeoVector& v )
 {
-    return 4 * z;
+    return -1 + 4 * v[2];
 }
-Real derfct10_3_P2_3D( cRRef, cRRef y, cRRef )
+
+Real derfct5_1_P2_3D( const GeoVector& v )
 {
-    return 4 * y;
+    return 4 - 8 * v[0] - 4 * v[1] - 4 * v[2];
+}
+Real derfct5_2_P2_3D( const GeoVector& v )
+{
+    return -4 * v[0];
+}
+Real derfct5_3_P2_3D( const GeoVector& v )
+{
+    return -4 * v[0];
+}
+
+Real derfct6_1_P2_3D( const GeoVector& v )
+{
+    return 4 * v[1];
+}
+Real derfct6_2_P2_3D( const GeoVector& v )
+{
+    return 4 * v[0];
+}
+Real derfct6_3_P2_3D( const GeoVector& )
+{
+    return 0.;
+}
+
+Real derfct7_1_P2_3D( const GeoVector& v )
+{
+    return -4 * v[1];
+}
+Real derfct7_2_P2_3D( const GeoVector& v )
+{
+    return 4 - 4 * v[0] - 8 * v[1] - 4 * v[2];
+}
+Real derfct7_3_P2_3D( const GeoVector& v )
+{
+    return -4 * v[1];
+}
+
+Real derfct8_1_P2_3D( const GeoVector& v )
+{
+    return -4 * v[2];
+}
+Real derfct8_2_P2_3D( const GeoVector& v )
+{
+    return -4 * v[2];
+}
+Real derfct8_3_P2_3D( const GeoVector& v )
+{
+    return 4 - 4 * v[0] - 4 * v[1] - 8 * v[2];
+}
+
+Real derfct9_1_P2_3D( const GeoVector& v )
+{
+    return 4 * v[2];
+}
+Real derfct9_2_P2_3D( const GeoVector& )
+{
+    return 0.;
+}
+Real derfct9_3_P2_3D( const GeoVector& v )
+{
+    return 4 * v[0];
+}
+
+Real derfct10_1_P2_3D( const GeoVector& )
+{
+    return 0.;
+}
+Real derfct10_2_P2_3D( const GeoVector& v )
+{
+    return 4 * v[2];
+}
+Real derfct10_3_P2_3D( const GeoVector& v )
+{
+    return 4 * v[1];
 }
 
 
-Real der2fct1_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_11_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_12_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_13_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_21_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_22_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_23_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_31_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_32_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct1_33_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 4;
-}
-
-Real der2fct2_11_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 4;
-}
-Real der2fct2_12_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_13_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_21_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_22_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_23_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_31_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_32_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct2_33_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-
-Real der2fct3_11_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_12_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_13_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_21_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_22_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 4;
-}
-Real der2fct3_23_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_31_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_32_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_33_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-
-Real der2fct4_11_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_12_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_13_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_21_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_22_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_23_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_31_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_32_P2_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct1_33_P2_3D( const GeoVector& )
 {
     return 4;
 }
 
-Real der2fct5_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct2_11_P2_3D( const GeoVector& )
+{
+    return 4;
+}
+Real der2fct2_12_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_13_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_21_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_22_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_23_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_31_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_32_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct2_33_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct3_11_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_12_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_13_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_21_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_22_P2_3D( const GeoVector& )
+{
+    return 4;
+}
+Real der2fct3_23_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_31_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_32_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct3_33_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct4_11_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_12_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_13_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_21_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_22_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_23_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_31_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_32_P2_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct4_33_P2_3D( const GeoVector& )
+{
+    return 4;
+}
+
+Real der2fct5_11_P2_3D( const GeoVector& )
 {
     return -8;
 }
-Real der2fct5_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_12_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct5_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_13_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct5_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_21_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct5_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_22_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct5_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_23_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct5_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_31_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct5_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_32_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct5_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct5_33_P2_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct6_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_11_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_12_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct6_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_13_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_21_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct6_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_22_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_23_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_31_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_32_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct6_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct6_33_P2_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct7_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_11_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct7_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_12_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct7_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_13_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct7_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_21_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct7_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_22_P2_3D( const GeoVector& )
 {
     return -8;
 }
-Real der2fct7_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_23_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct7_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_31_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct7_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_32_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct7_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct7_33_P2_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct8_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_11_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct8_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_12_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct8_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_13_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct8_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_21_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct8_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_22_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct8_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_23_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct8_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_31_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct8_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_32_P2_3D( const GeoVector& )
 {
     return -4;
 }
-Real der2fct8_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct8_33_P2_3D( const GeoVector& )
 {
     return -8;
 }
 
-Real der2fct9_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_11_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct9_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_12_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct9_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_13_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct9_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_21_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct9_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_22_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct9_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_23_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct9_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_31_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct9_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_32_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct9_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct9_33_P2_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct10_11_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_11_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct10_12_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_12_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct10_13_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_13_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct10_21_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_21_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct10_22_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_22_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct10_23_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_23_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct10_31_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_31_P2_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct10_32_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_32_P2_3D( const GeoVector& )
 {
     return 4;
 }
-Real der2fct10_33_P2_3D( cRRef, cRRef, cRRef )
+Real der2fct10_33_P2_3D( const GeoVector& )
 {
     return 0;
 }
@@ -2163,603 +2163,603 @@ Real der2fct10_33_P2_3D( cRRef, cRRef, cRRef )
            /.       \!
          1 -----5----2
 */
-Real fct1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_P2tilde_3D( const GeoVector& v )
 {
-    return -( 1 - x - y - z ) * ( 1 - 2 * ( 1 - x - y - z ) ) + 32 * x * y * z * ( 1 - x - y - z );
+    return -( 1 - v[0] - v[1] - v[2] ) * ( 1 - 2 * ( 1 - v[0] - v[1] - v[2] ) ) + 32 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
 }
-Real fct2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_P2tilde_3D( const GeoVector& v )
 {
-    return -x * ( 1 - 2 * x ) + 32 * x * y * z * ( 1 - x - y - z );
+    return -v[0] * ( 1 - 2 * v[0] ) + 32 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
 }
-Real fct3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_P2tilde_3D( const GeoVector& v )
 {
-    return -y * ( 1 - 2 * y ) + 32 * x * y * z * ( 1 - x - y - z );
+    return -v[1] * ( 1 - 2 * v[1] ) + 32 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
 }
-Real fct4_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_P2tilde_3D( const GeoVector& v )
 {
-    return -z * ( 1 - 2 * z ) + 32 * x * y * z * ( 1 - x - y - z );
-}
-
-Real fct5_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * x * ( 1 - x - y - z ) - 64 * x * y * z * ( 1 - x - y - z );
-}
-Real fct6_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * x * y - 64 * x * y * z * ( 1 - x - y - z );
-}
-Real fct7_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * y * ( 1 - x - y - z ) - 64 * x * y * z * ( 1 - x - y - z );
-}
-Real fct8_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * z * ( 1 - x - y - z ) - 64 * x * y * z * ( 1 - x - y - z );
-}
-Real fct9_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * x * z - 64 * x * y * z * ( 1 - x - y - z );
-}
-Real fct10_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * y * z - 64 * x * y * z * ( 1 - x - y - z );
+    return -v[2] * ( 1 - 2 * v[2] ) + 32 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
 }
 
-Real fct11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * x * y * z * ( 1 - x - y - z );
+    return 4 * v[0] * ( 1 - v[0] - v[1] - v[2] ) - 64 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
+}
+Real fct6_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[0] * v[1] - 64 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
+}
+Real fct7_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[1] * ( 1 - v[0] - v[1] - v[2] ) - 64 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
+}
+Real fct8_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[2] * ( 1 - v[0] - v[1] - v[2] ) - 64 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
+}
+Real fct9_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[0] * v[2] - 64 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
+}
+Real fct10_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[1] * v[2] - 64 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
+}
+
+Real fct11_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[0] * v[1] * v[2] * ( 1 - v[0] - v[1] - v[2] );
 }
 
 
-Real derfct1_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_1_P2tilde_3D( const GeoVector& v )
 {
-    return -3 + 4 * x + 4 * y + 4 * z + 32 * y * z * ( 1 - 2 * x - y - z );
+    return -3 + 4 * v[0] + 4 * v[1] + 4 * v[2] + 32 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real derfct1_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_2_P2tilde_3D( const GeoVector& v )
 {
-    return -3 + 4 * x + 4 * y + 4 * z + 32 * x * z * ( 1 - x - 2 * y - z );
+    return -3 + 4 * v[0] + 4 * v[1] + 4 * v[2] + 32 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real derfct1_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_3_P2tilde_3D( const GeoVector& v )
 {
-    return -3 + 4 * x + 4 * y + 4 * z + 32 * x * y * ( 1 - x - y - 2 * z );
-}
-
-Real derfct2_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -1 + 4 * x + 32 * y * z * ( 1 - 2 * x - y - z );
-}
-Real derfct2_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * x * z * ( 1 - x - 2 * y - z );
-}
-Real derfct2_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * x * y * ( 1 - x - y - 2 * z );
+    return -3 + 4 * v[0] + 4 * v[1] + 4 * v[2] + 32 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
 
-Real derfct3_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_1_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * y * z * ( 1 - 2 * x - y - z );
+    return -1 + 4 * v[0] + 32 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real derfct3_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_2_P2tilde_3D( const GeoVector& v )
 {
-    return -1 + 4 * y + 32 * x * z * ( 1 - x - 2 * y - z );
+    return 32 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real derfct3_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_3_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * x * y * ( 1 - x - y - 2 * z );
-}
-
-Real derfct4_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * y * z * ( 1 - 2 * x - y - z );
-}
-Real derfct4_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * x * z * ( 1 - x - 2 * y - z );
-}
-Real derfct4_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -1 + 4 * z + 32 * x * y * ( 1 - x - y - 2 * z );
+    return 32 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
 
-Real derfct5_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_1_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 8 * x - 4 * y - 4 * z - 64 * y * z * ( 1 - 2 * x - y - z );
+    return 32 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real derfct5_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_2_P2tilde_3D( const GeoVector& v )
 {
-    return -4 * x - 64 * x * z * ( 1 - x - 2 * y - z );
+    return -1 + 4 * v[1] + 32 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real derfct5_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_3_P2tilde_3D( const GeoVector& v )
 {
-    return -4 * x - 64 * x * y * ( 1 - x - y - 2 * z );
-}
-
-Real derfct6_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * y - 64 * y * z * ( 1 - 2 * x - y - z );
-}
-Real derfct6_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * x - 64 * x * z * ( 1 - x - 2 * y - z );
-}
-Real derfct6_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 64 * x * y * ( 1 - x - y - 2 * z );
+    return 32 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
 
-Real derfct7_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_1_P2tilde_3D( const GeoVector& v )
 {
-    return -4 * y - 64 * y * z * ( 1 - 2 * x - y - z );
+    return 32 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real derfct7_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_2_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 4 * x - 8 * y - 4 * z - 64 * x * z * ( 1 - x - 2 * y - z );
+    return 32 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real derfct7_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_3_P2tilde_3D( const GeoVector& v )
 {
-    return -4 * y - 64 * x * y * ( 1 - x - y - 2 * z );
-}
-
-Real derfct8_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 * z - 64 * y * z * ( 1 - 2 * x - y - z );
-}
-Real derfct8_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 * z - 64 * x * z * ( 1 - x - 2 * y - z );
-}
-Real derfct8_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 - 4 * x - 4 * y - 8 * z - 64 * x * y * ( 1 - x - y - 2 * z );
+    return -1 + 4 * v[2] + 32 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
 
-Real derfct9_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_1_P2tilde_3D( const GeoVector& v )
 {
-    return 4 * z - 64 * y * z * ( 1 - 2 * x - y - z );
+    return 4 - 8 * v[0] - 4 * v[1] - 4 * v[2] - 64 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real derfct9_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_2_P2tilde_3D( const GeoVector& v )
 {
-    return - 64 * x * z * ( 1 - x - 2 * y - z );
+    return -4 * v[0] - 64 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real derfct9_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_3_P2tilde_3D( const GeoVector& v )
 {
-    return 4 * x - 64 * x * y * ( 1 - x - y - 2 * z );
-}
-
-Real derfct10_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 64 * y * z * ( 1 - 2 * x - y - z );
-}
-Real derfct10_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * z - 64 * x * z * ( 1 - x - 2 * y - z );
-}
-Real derfct10_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 * y - 64 * x * y * ( 1 - x - y - 2 * z );
+    return -4 * v[0] - 64 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
 
-Real derfct11_1_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_1_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * y * z * ( 1 - 2 * x - y - z );
+    return 4 * v[1] - 64 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real derfct11_2_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_2_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * x * z * ( 1 - x - 2 * y - z );
+    return 4 * v[0] - 64 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real derfct11_3_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_3_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * x * y * ( 1 - x - y - 2 * z );
+    return - 64 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
 
-Real der2fct1_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_1_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 64 * x * y * z;
+    return -4 * v[1] - 64 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real der2fct1_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_2_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 32 * z * ( 1 - 2 * x - 2 * y - z );
+    return 4 - 4 * v[0] - 8 * v[1] - 4 * v[2] - 64 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct1_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_3_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 32 * y * ( 1 - 2 * x - y - 2 * z );
+    return -4 * v[1] - 64 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct1_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+
+Real derfct8_1_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 32 * z * ( 1 - 2 * x - 2 * y - z );
+    return -4 * v[2] - 64 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real der2fct1_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_2_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 64 * x * y * z;
+    return -4 * v[2] - 64 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct1_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_3_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 32 * x * ( 1 - x - 2 * y - 2 * z );
+    return 4 - 4 * v[0] - 4 * v[1] - 8 * v[2] - 64 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct1_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+
+Real derfct9_1_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 32 * y * ( 1 - 2 * x - y - 2 * z );
+    return 4 * v[2] - 64 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
 }
-Real der2fct1_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real derfct9_2_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 32 * x * ( 1 - x - 2 * y - 2 * z );
+    return - 64 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
+}
+Real derfct9_3_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[0] - 64 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
+}
+
+Real derfct10_1_P2tilde_3D( const GeoVector& v )
+{
+    return - 64 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
+}
+Real derfct10_2_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[2] - 64 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
+}
+Real derfct10_3_P2tilde_3D( const GeoVector& v )
+{
+    return 4 * v[1] - 64 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
+}
+
+Real derfct11_1_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[1] * v[2] * ( 1 - 2 * v[0] - v[1] - v[2] );
+}
+Real derfct11_2_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[0] * v[2] * ( 1 - v[0] - 2 * v[1] - v[2] );
+}
+Real derfct11_3_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[0] * v[1] * ( 1 - v[0] - v[1] - 2 * v[2] );
+}
+
+Real der2fct1_11_P2tilde_3D( const GeoVector& v )
+{
+    return 4 - 64 * v[0] * v[1] * v[2];
+}
+Real der2fct1_12_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct1_13_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct1_21_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct1_22_P2tilde_3D( const GeoVector& v )
+{
+    return 4 - 64 * v[0] * v[1] * v[2];
+}
+Real der2fct1_23_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct1_31_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct1_32_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
     ;
 }
-Real der2fct1_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_33_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 64 * x * y * z;
+    return 4 - 64 * v[0] * v[1] * v[2];
 }
 
-Real der2fct2_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_11_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 64 * x * y * z;
+    return 4 - 64 * v[0] * v[1] * v[2];
 }
-Real der2fct2_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_12_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * z * ( 1 - 2 * x - 2 * y - z );
+    return 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct2_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_13_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * y * ( 1 - 2 * x - y - 2 * z );
+    return 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct2_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_21_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * z * ( 1 - 2 * x - 2 * y - z );
+    return 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct2_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_22_P2tilde_3D( const GeoVector& v )
 {
-    return - 64 * x * y * z;
+    return - 64 * v[0] * v[1] * v[2];
 }
-Real der2fct2_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_23_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * x * ( 1 - x - 2 * y - 2 * z );
+    return 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct2_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_31_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * y * ( 1 - 2 * x - y - 2 * z );
+    return 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct2_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_32_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * x * ( 1 - x - 2 * y - 2 * z );
+    return 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct2_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_33_P2tilde_3D( const GeoVector& v )
 {
-    return - 64 * x * y * z;
-}
-
-Real der2fct3_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 64 * x * y * z;
-}
-Real der2fct3_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct3_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct3_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct3_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 - 64 * x * y * z;
-}
-Real der2fct3_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct3_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct3_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 32 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct3_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 64 * x * y * z;
+    return - 64 * v[0] * v[1] * v[2];
 }
 
-Real der2fct4_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_11_P2tilde_3D( const GeoVector& v )
 {
-    return -64 * x * y * z;
+    return - 64 * v[0] * v[1] * v[2];
 }
-Real der2fct4_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_12_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * z * ( 1 - 2 * x - 2 * y - z );
+    return 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct4_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_13_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * y * ( 1 - 2 * x - y - 2 * z );
+    return 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct4_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_21_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * z * ( 1 - 2 * x - 2 * y - z );
+    return 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct4_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_22_P2tilde_3D( const GeoVector& v )
 {
-    return - 64 * x * y * z;
+    return 4 - 64 * v[0] * v[1] * v[2];
 }
-Real der2fct4_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_23_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * x * ( 1 - x - 2 * y - 2 * z );
+    return 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct4_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_31_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * y * ( 1 - 2 * x - y - 2 * z );
+    return 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct4_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_32_P2tilde_3D( const GeoVector& v )
 {
-    return 32 * x * ( 1 - x - 2 * y - 2 * z );
+    return 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct4_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_33_P2tilde_3D( const GeoVector& v )
 {
-    return 4 - 64 * x * y * z;
-}
-
-Real der2fct5_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -8 - 128 * x * y * z;
-}
-Real der2fct5_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct5_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct5_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct5_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 128 * x * y * z;
-}
-Real der2fct5_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct5_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct5_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct5_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 128 * x * y * z;
+    return - 64 * v[0] * v[1] * v[2];
 }
 
-Real der2fct6_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_11_P2tilde_3D( const GeoVector& v )
 {
-    return -128 * x * y * z;
+    return -64 * v[0] * v[1] * v[2];
 }
-Real der2fct6_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_12_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 64 * z * ( 1 - 2 * x - 2 * y - z );
+    return 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct6_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_13_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * y * ( 1 - 2 * x - y - 2 * z );
+    return 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct6_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_21_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 64 * z * ( 1 - 2 * x - 2 * y - z );
+    return 32 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct6_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_22_P2tilde_3D( const GeoVector& v )
 {
-    return - 128 * x * y * z;
+    return - 64 * v[0] * v[1] * v[2];
 }
-Real der2fct6_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_23_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * x * ( 1 - x - 2 * y - 2 * z );
+    return 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct6_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_31_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * y * ( 1 - 2 * x - y - 2 * z );
+    return 32 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct6_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_32_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * x * ( 1 - x - 2 * y - 2 * z );
+    return 32 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct6_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_33_P2tilde_3D( const GeoVector& v )
 {
-    return - 128 * x * y * z;
-}
-
-Real der2fct7_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -128 * x * y * z;
-}
-Real der2fct7_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct7_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct7_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct7_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -8 - 128 * x * y * z;
-}
-Real der2fct7_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct7_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct7_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -4 + 64 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct7_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 128 * x * y * z;
+    return 4 - 64 * v[0] * v[1] * v[2];
 }
 
-Real der2fct8_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_11_P2tilde_3D( const GeoVector& v )
 {
-    return -128 * x * y * z;
+    return -8 - 128 * v[0] * v[1] * v[2];
 }
-Real der2fct8_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_12_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * z * ( 1 - 2 * x - 2 * y - z );
+    return -4 + 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct8_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_13_P2tilde_3D( const GeoVector& v )
 {
-    return -4 + 64 * y * ( 1 - 2 * x - y - 2 * z );
+    return -4 + 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct8_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_21_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * z * ( 1 - 2 * x - 2 * y - z );
+    return -4 + 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct8_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_22_P2tilde_3D( const GeoVector& v )
 {
-    return - 128 * x * y * z;
+    return - 128 * v[0] * v[1] * v[2];
 }
-Real der2fct8_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_23_P2tilde_3D( const GeoVector& v )
 {
-    return -4 + 64 * x * ( 1 - x - 2 * y - 2 * z );
+    return 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct8_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_31_P2tilde_3D( const GeoVector& v )
 {
-    return -4 + 64 * y * ( 1 - 2 * x - y - 2 * z );
+    return -4 + 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct8_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_32_P2tilde_3D( const GeoVector& v )
 {
-    return -4 + 64 * x * ( 1 - x - 2 * y - 2 * z );
+    return 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct8_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_33_P2tilde_3D( const GeoVector& v )
 {
-    return -8 - 128 * x * y * z;
-}
-
-Real der2fct9_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return -128 * x * y * z;
-}
-Real der2fct9_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct9_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 + 64 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct9_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * z * ( 1 - 2 * x - 2 * y - z );
-}
-Real der2fct9_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 128 * x * y * z;
-}
-Real der2fct9_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct9_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4 + 64 * y * ( 1 - 2 * x - y - 2 * z );
-}
-Real der2fct9_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 64 * x * ( 1 - x - 2 * y - 2 * z );
-}
-Real der2fct9_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
-{
-    return - 128 * x * y * z;
+    return - 128 * v[0] * v[1] * v[2];
 }
 
-Real der2fct10_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_11_P2tilde_3D( const GeoVector& v )
 {
-    return -128 * x * y * z;
+    return -128 * v[0] * v[1] * v[2];
 }
-Real der2fct10_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_12_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * z * ( 1 - 2 * x - 2 * y - z );
+    return 4 + 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct10_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_13_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * y * ( 1 - 2 * x - y - 2 * z );
+    return 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct10_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_21_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * z * ( 1 - 2 * x - 2 * y - z );
+    return 4 + 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct10_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_22_P2tilde_3D( const GeoVector& v )
 {
-    return - 128 * x * y * z;
+    return - 128 * v[0] * v[1] * v[2];
 }
-Real der2fct10_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_23_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 64 * x * ( 1 - x - 2 * y - 2 * z );
+    return 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct10_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_31_P2tilde_3D( const GeoVector& v )
 {
-    return 64 * y * ( 1 - 2 * x - y - 2 * z );
+    return 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct10_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_32_P2tilde_3D( const GeoVector& v )
 {
-    return 4 + 64 * x * ( 1 - x - 2 * y - 2 * z );
+    return 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct10_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_33_P2tilde_3D( const GeoVector& v )
 {
-    return - 128 * x * y * z;
+    return - 128 * v[0] * v[1] * v[2];
 }
 
-Real der2fct11_11_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_11_P2tilde_3D( const GeoVector& v )
 {
-    return -512 * x * y * z;
+    return -128 * v[0] * v[1] * v[2];
 }
-Real der2fct11_12_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_12_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * z * ( 1 - 2 * x - 2 * y - z );
+    return -4 + 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct11_13_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_13_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * y * ( 1 - 2 * x - y - 2 * z );
+    return 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct11_21_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_21_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * z * ( 1 - 2 * x - 2 * y - z );
+    return -4 + 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
 }
-Real der2fct11_22_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_22_P2tilde_3D( const GeoVector& v )
 {
-    return -512 * x * y * z;
+    return -8 - 128 * v[0] * v[1] * v[2];
 }
-Real der2fct11_23_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_23_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * x * ( 1 - x - 2 * y - 2 * z );
+    return -4 + 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct11_31_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_31_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * y * ( 1 - 2 * x - y - 2 * z );
+    return 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
 }
-Real der2fct11_32_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_32_P2tilde_3D( const GeoVector& v )
 {
-    return 256 * x * ( 1 - x - 2 * y - 2 * z );
+    return -4 + 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
 }
-Real der2fct11_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_33_P2tilde_3D( const GeoVector& v )
 {
-    return -512 * x * y * z;
+    return - 128 * v[0] * v[1] * v[2];
+}
+
+Real der2fct8_11_P2tilde_3D( const GeoVector& v )
+{
+    return -128 * v[0] * v[1] * v[2];
+}
+Real der2fct8_12_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct8_13_P2tilde_3D( const GeoVector& v )
+{
+    return -4 + 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct8_21_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct8_22_P2tilde_3D( const GeoVector& v )
+{
+    return - 128 * v[0] * v[1] * v[2];
+}
+Real der2fct8_23_P2tilde_3D( const GeoVector& v )
+{
+    return -4 + 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct8_31_P2tilde_3D( const GeoVector& v )
+{
+    return -4 + 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct8_32_P2tilde_3D( const GeoVector& v )
+{
+    return -4 + 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct8_33_P2tilde_3D( const GeoVector& v )
+{
+    return -8 - 128 * v[0] * v[1] * v[2];
+}
+
+Real der2fct9_11_P2tilde_3D( const GeoVector& v )
+{
+    return -128 * v[0] * v[1] * v[2];
+}
+Real der2fct9_12_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct9_13_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct9_21_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct9_22_P2tilde_3D( const GeoVector& v )
+{
+    return - 128 * v[0] * v[1] * v[2];
+}
+Real der2fct9_23_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct9_31_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct9_32_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct9_33_P2tilde_3D( const GeoVector& v )
+{
+    return - 128 * v[0] * v[1] * v[2];
+}
+
+Real der2fct10_11_P2tilde_3D( const GeoVector& v )
+{
+    return -128 * v[0] * v[1] * v[2];
+}
+Real der2fct10_12_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct10_13_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct10_21_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct10_22_P2tilde_3D( const GeoVector& v )
+{
+    return - 128 * v[0] * v[1] * v[2];
+}
+Real der2fct10_23_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct10_31_P2tilde_3D( const GeoVector& v )
+{
+    return 64 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct10_32_P2tilde_3D( const GeoVector& v )
+{
+    return 4 + 64 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct10_33_P2tilde_3D( const GeoVector& v )
+{
+    return - 128 * v[0] * v[1] * v[2];
+}
+
+Real der2fct11_11_P2tilde_3D( const GeoVector& v )
+{
+    return -512 * v[0] * v[1] * v[2];
+}
+Real der2fct11_12_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct11_13_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct11_21_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[2] * ( 1 - 2 * v[0] - 2 * v[1] - v[2] );
+}
+Real der2fct11_22_P2tilde_3D( const GeoVector& v )
+{
+    return -512 * v[0] * v[1] * v[2];
+}
+Real der2fct11_23_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct11_31_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[1] * ( 1 - 2 * v[0] - v[1] - 2 * v[2] );
+}
+Real der2fct11_32_P2tilde_3D( const GeoVector& v )
+{
+    return 256 * v[0] * ( 1 - v[0] - 2 * v[1] - 2 * v[2] );
+}
+Real der2fct11_33_P2tilde_3D( const GeoVector& v )
+{
+    return -512 * v[0] * v[1] * v[2];
 }
 
 //======================================================================
@@ -2779,16 +2779,16 @@ Real der2fct11_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
      |_______|
 
 */
-Real fct1_Q0_3D( cRRef, cRRef, cRRef )
+Real fct1_Q0_3D( const GeoVector& )
 {
     return 1.;
 }
-Real derfct1_Q0_3D( cRRef, cRRef, cRRef )
+Real derfct1_Q0_3D( const GeoVector& )
 {
     return 0.;
 }
 // The second derivative is equal to the first : both are equal to 0.
-Real der2fct1_Q0_3D( cRRef, cRRef, cRRef )
+Real der2fct1_Q0_3D( const GeoVector& )
 {
     return 0.;
 }
@@ -2809,428 +2809,428 @@ Real der2fct1_Q0_3D( cRRef, cRRef, cRRef )
      |.      |/
      1_______2
 */
-Real fct1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_Q1_3D( const GeoVector& v )
 {
-    return ( 1. - x ) * ( 1. - y ) * ( 1. - z );
+    return ( 1. - v[0] ) * ( 1. - v[1] ) * ( 1. - v[2] );
 }
-Real fct2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_Q1_3D( const GeoVector& v )
 {
-    return x * ( 1. - y ) * ( 1. - z );
+    return v[0] * ( 1. - v[1] ) * ( 1. - v[2] );
 }
-Real fct3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_Q1_3D( const GeoVector& v )
 {
-    return x * y * ( 1. - z );
+    return v[0] * v[1] * ( 1. - v[2] );
 }
-Real fct4_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_Q1_3D( const GeoVector& v )
 {
-    return ( 1. - x ) * y * ( 1. - z );
+    return ( 1. - v[0] ) * v[1] * ( 1. - v[2] );
 }
-Real fct5_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_Q1_3D( const GeoVector& v )
 {
-    return ( 1. - x ) * ( 1. - y ) * z;
+    return ( 1. - v[0] ) * ( 1. - v[1] ) * v[2];
 }
-Real fct6_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct6_Q1_3D( const GeoVector& v )
 {
-    return x * ( 1. - y ) * z;
+    return v[0] * ( 1. - v[1] ) * v[2];
 }
-Real fct7_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct7_Q1_3D( const GeoVector& v )
 {
-    return x * y * z;
+    return v[0] * v[1] * v[2];
 }
-Real fct8_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real fct8_Q1_3D( const GeoVector& v )
 {
-    return ( 1. - x ) * y * z;
-}
-
-Real derfct1_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return -( 1. - y ) * ( 1. - z );
-}
-Real derfct1_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return -( 1. - x ) * ( 1. - z );
-}
-Real derfct1_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return -( 1. - x ) * ( 1. - y );
-}
-Real derfct2_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return ( 1. - y ) * ( 1. - z );
-}
-Real derfct2_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return -x * ( 1. - z ) ;
-}
-Real derfct2_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return -x * ( 1. - y );
-}
-Real derfct3_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return y * ( 1. - z );
-}
-Real derfct3_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return x * ( 1. - z );
-}
-Real derfct3_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return -x * y ;
-}
-Real derfct4_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return -y * ( 1. - z );
-}
-Real derfct4_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return ( 1. - x ) * ( 1. - z );
-}
-Real derfct4_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return -( 1. - x ) * y;
-}
-Real derfct5_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return -( 1. - y ) * z;
-}
-Real derfct5_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return -( 1. - x ) * z;
-}
-Real derfct5_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return ( 1. - x ) * ( 1. - y );
-}
-Real derfct6_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return ( 1. - y ) * z ;
-}
-Real derfct6_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return -x * z;
-}
-Real derfct6_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return x * ( 1. - y );
-}
-Real derfct7_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return y * z;
-}
-Real derfct7_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return x * z;
-}
-Real derfct7_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return x * y;
-}
-Real derfct8_1_Q1_3D( cRRef, cRRef y, cRRef z )
-{
-    return -y * z;
-}
-Real derfct8_2_Q1_3D( cRRef x, cRRef, cRRef z )
-{
-    return ( 1. - x ) * z;
-}
-Real derfct8_3_Q1_3D( cRRef x, cRRef y, cRRef )
-{
-    return ( 1. - x ) * y;
+    return ( 1. - v[0] ) * v[1] * v[2];
 }
 
-Real der2fct1_11_Q1_3D( cRRef, cRRef, cRRef )
+Real derfct1_1_Q1_3D( const GeoVector& v )
 {
-    return 0;
+    return -( 1. - v[1] ) * ( 1. - v[2] );
 }
-Real der2fct1_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real derfct1_2_Q1_3D( const GeoVector& v )
 {
-    return 1. - z;
+    return -( 1. - v[0] ) * ( 1. - v[2] );
 }
-Real der2fct1_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real derfct1_3_Q1_3D( const GeoVector& v )
 {
-    return 1. - y;
+    return -( 1. - v[0] ) * ( 1. - v[1] );
 }
-Real der2fct1_21_Q1_3D( cRRef, cRRef, cRRef z )
+Real derfct2_1_Q1_3D( const GeoVector& v )
 {
-    return 1. - z;
+    return ( 1. - v[1] ) * ( 1. - v[2] );
 }
-Real der2fct1_22_Q1_3D( cRRef, cRRef, cRRef )
+Real derfct2_2_Q1_3D( const GeoVector& v )
 {
-    return 0;
+    return -v[0] * ( 1. - v[2] ) ;
 }
-Real der2fct1_23_Q1_3D( cRRef x, cRRef, cRRef )
+Real derfct2_3_Q1_3D( const GeoVector& v )
 {
-    return 1. - x;
+    return -v[0] * ( 1. - v[1] );
 }
-Real der2fct1_31_Q1_3D( cRRef, cRRef y, cRRef )
+Real derfct3_1_Q1_3D( const GeoVector& v )
 {
-    return 1. - y;
+    return v[1] * ( 1. - v[2] );
 }
-Real der2fct1_32_Q1_3D( cRRef x, cRRef, cRRef )
+Real derfct3_2_Q1_3D( const GeoVector& v )
 {
-    return 1. - x;
+    return v[0] * ( 1. - v[2] );
 }
-Real der2fct1_33_Q1_3D( cRRef, cRRef, cRRef )
+Real derfct3_3_Q1_3D( const GeoVector& v )
 {
-    return 0;
+    return -v[0] * v[1] ;
+}
+Real derfct4_1_Q1_3D( const GeoVector& v )
+{
+    return -v[1] * ( 1. - v[2] );
+}
+Real derfct4_2_Q1_3D( const GeoVector& v )
+{
+    return ( 1. - v[0] ) * ( 1. - v[2] );
+}
+Real derfct4_3_Q1_3D( const GeoVector& v )
+{
+    return -( 1. - v[0] ) * v[1];
+}
+Real derfct5_1_Q1_3D( const GeoVector& v )
+{
+    return -( 1. - v[1] ) * v[2];
+}
+Real derfct5_2_Q1_3D( const GeoVector& v )
+{
+    return -( 1. - v[0] ) * v[2];
+}
+Real derfct5_3_Q1_3D( const GeoVector& v )
+{
+    return ( 1. - v[0] ) * ( 1. - v[1] );
+}
+Real derfct6_1_Q1_3D( const GeoVector& v )
+{
+    return ( 1. - v[1] ) * v[2] ;
+}
+Real derfct6_2_Q1_3D( const GeoVector& v )
+{
+    return -v[0] * v[2];
+}
+Real derfct6_3_Q1_3D( const GeoVector& v )
+{
+    return v[0] * ( 1. - v[1] );
+}
+Real derfct7_1_Q1_3D( const GeoVector& v )
+{
+    return v[1] * v[2];
+}
+Real derfct7_2_Q1_3D( const GeoVector& v )
+{
+    return v[0] * v[2];
+}
+Real derfct7_3_Q1_3D( const GeoVector& v )
+{
+    return v[0] * v[1];
+}
+Real derfct8_1_Q1_3D( const GeoVector& v )
+{
+    return -v[1] * v[2];
+}
+Real derfct8_2_Q1_3D( const GeoVector& v )
+{
+    return ( 1. - v[0] ) * v[2];
+}
+Real derfct8_3_Q1_3D( const GeoVector& v )
+{
+    return ( 1. - v[0] ) * v[1];
 }
 
-Real der2fct2_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct1_11_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct2_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct1_12_Q1_3D( const GeoVector& v )
 {
-    return -( 1. - z );
+    return 1. - v[2];
 }
-Real der2fct2_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct1_13_Q1_3D( const GeoVector& v )
 {
-    return -( 1. - y );
+    return 1. - v[1];
 }
-Real der2fct2_21_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct1_21_Q1_3D( const GeoVector& v )
 {
-    return -( 1. - z );
+    return 1. - v[2];
 }
-Real der2fct2_22_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct1_22_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct2_23_Q1_3D( cRRef x, cRRef, cRRef )
+Real der2fct1_23_Q1_3D( const GeoVector& v )
 {
-    return x;
+    return 1. - v[0];
 }
-Real der2fct2_31_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct1_31_Q1_3D( const GeoVector& v )
 {
-    return -( 1. - y );
+    return 1. - v[1];
 }
-Real der2fct2_32_Q1_3D( cRRef x, cRRef, cRRef )
+Real der2fct1_32_Q1_3D( const GeoVector& v )
 {
-    return x;
+    return 1. - v[0];
 }
-Real der2fct2_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct1_33_Q1_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct3_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct2_11_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct3_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct2_12_Q1_3D( const GeoVector& v )
 {
-    return ( 1. - z );
+    return -( 1. - v[2] );
 }
-Real der2fct3_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct2_13_Q1_3D( const GeoVector& v )
 {
-    return -y;
+    return -( 1. - v[1] );
 }
-Real der2fct3_21_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct2_21_Q1_3D( const GeoVector& v )
 {
-    return ( 1. - z );
+    return -( 1. - v[2] );
 }
-Real der2fct3_22_Q1_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct3_23_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -x;
-}
-Real der2fct3_31_Q1_3D( cRRef, cRRef y, cRRef )
-{
-    return -y;
-}
-Real der2fct3_32_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -x;
-}
-Real der2fct3_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct2_22_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-
-Real der2fct4_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct2_23_Q1_3D( const GeoVector& v )
 {
-    return 0;
+    return v[0];
 }
-Real der2fct4_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct2_31_Q1_3D( const GeoVector& v )
 {
-    return -( 1. - z );
+    return -( 1. - v[1] );
 }
-Real der2fct4_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct2_32_Q1_3D( const GeoVector& v )
 {
-    return y;
+    return v[0];
 }
-Real der2fct4_21_Q1_3D( cRRef, cRRef, cRRef z )
-{
-    return -( 1. - z );
-}
-Real der2fct4_22_Q1_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct4_23_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -( 1. - x );
-}
-Real der2fct4_31_Q1_3D( cRRef, cRRef y, cRRef )
-{
-    return y;
-}
-Real der2fct4_32_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -( 1. - x );
-}
-Real der2fct4_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct2_33_Q1_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct5_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct3_11_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct5_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct3_12_Q1_3D( const GeoVector& v )
 {
-    return z;
+    return ( 1. - v[2] );
 }
-Real der2fct5_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct3_13_Q1_3D( const GeoVector& v )
 {
-    return -( 1. - y );
+    return -v[1];
 }
-Real der2fct5_21_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct3_21_Q1_3D( const GeoVector& v )
 {
-    return z;
+    return ( 1. - v[2] );
 }
-Real der2fct5_22_Q1_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct5_23_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -( 1. - x );
-}
-Real der2fct5_31_Q1_3D( cRRef, cRRef y, cRRef )
-{
-    return -( 1. - y );
-}
-Real der2fct5_32_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -( 1. - x );
-}
-Real der2fct5_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct3_22_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-
-Real der2fct6_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct3_23_Q1_3D( const GeoVector& v )
 {
-    return 0;
+    return -v[0];
 }
-Real der2fct6_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct3_31_Q1_3D( const GeoVector& v )
 {
-    return -z;
+    return -v[1];
 }
-Real der2fct6_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct3_32_Q1_3D( const GeoVector& v )
 {
-    return 1. - y;
+    return -v[0];
 }
-Real der2fct6_21_Q1_3D( cRRef, cRRef, cRRef z )
-{
-    return -z;
-}
-Real der2fct6_22_Q1_3D( cRRef, cRRef, cRRef )
-{
-    return 0;
-}
-Real der2fct6_23_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -x;
-}
-Real der2fct6_31_Q1_3D( cRRef, cRRef y, cRRef )
-{
-    return 1. - y;
-}
-Real der2fct6_32_Q1_3D( cRRef x, cRRef, cRRef )
-{
-    return -x;
-}
-Real der2fct6_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct3_33_Q1_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct7_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct4_11_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct7_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct4_12_Q1_3D( const GeoVector& v )
 {
-    return z;
+    return -( 1. - v[2] );
 }
-Real der2fct7_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct4_13_Q1_3D( const GeoVector& v )
 {
-    return y;
+    return v[1];
 }
-Real der2fct7_21_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct4_21_Q1_3D( const GeoVector& v )
 {
-    return z;
+    return -( 1. - v[2] );
 }
-Real der2fct7_22_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct4_22_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct7_23_Q1_3D( cRRef x, cRRef, cRRef )
+Real der2fct4_23_Q1_3D( const GeoVector& v )
 {
-    return x;
+    return -( 1. - v[0] );
 }
-Real der2fct7_31_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct4_31_Q1_3D( const GeoVector& v )
 {
-    return y;
+    return v[1];
 }
-Real der2fct7_32_Q1_3D( cRRef x, cRRef, cRRef )
+Real der2fct4_32_Q1_3D( const GeoVector& v )
 {
-    return x;
+    return -( 1. - v[0] );
 }
-Real der2fct7_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct4_33_Q1_3D( const GeoVector& )
 {
     return 0;
 }
 
-Real der2fct8_11_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct5_11_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct8_12_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct5_12_Q1_3D( const GeoVector& v )
 {
-    return -z;
+    return v[2];
 }
-Real der2fct8_13_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct5_13_Q1_3D( const GeoVector& v )
 {
-    return -y;
+    return -( 1. - v[1] );
 }
-Real der2fct8_21_Q1_3D( cRRef, cRRef, cRRef z )
+Real der2fct5_21_Q1_3D( const GeoVector& v )
 {
-    return -z;
+    return v[2];
 }
-Real der2fct8_22_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct5_22_Q1_3D( const GeoVector& )
 {
     return 0;
 }
-Real der2fct8_23_Q1_3D( cRRef x, cRRef, cRRef )
+Real der2fct5_23_Q1_3D( const GeoVector& v )
 {
-    return 1. - x;
+    return -( 1. - v[0] );
 }
-Real der2fct8_31_Q1_3D( cRRef, cRRef y, cRRef )
+Real der2fct5_31_Q1_3D( const GeoVector& v )
 {
-    return -y;
+    return -( 1. - v[1] );
 }
-Real der2fct8_32_Q1_3D( cRRef x, cRRef, cRRef )
+Real der2fct5_32_Q1_3D( const GeoVector& v )
 {
-    return 1 -x;
+    return -( 1. - v[0] );
 }
-Real der2fct8_33_Q1_3D( cRRef, cRRef, cRRef )
+Real der2fct5_33_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct6_11_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct6_12_Q1_3D( const GeoVector& v )
+{
+    return -v[2];
+}
+Real der2fct6_13_Q1_3D( const GeoVector& v )
+{
+    return 1. - v[1];
+}
+Real der2fct6_21_Q1_3D( const GeoVector& v )
+{
+    return -v[2];
+}
+Real der2fct6_22_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct6_23_Q1_3D( const GeoVector& v )
+{
+    return -v[0];
+}
+Real der2fct6_31_Q1_3D( const GeoVector& v )
+{
+    return 1. - v[1];
+}
+Real der2fct6_32_Q1_3D( const GeoVector& v )
+{
+    return -v[0];
+}
+Real der2fct6_33_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct7_11_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct7_12_Q1_3D( const GeoVector& v )
+{
+    return v[2];
+}
+Real der2fct7_13_Q1_3D( const GeoVector& v )
+{
+    return v[1];
+}
+Real der2fct7_21_Q1_3D( const GeoVector& v )
+{
+    return v[2];
+}
+Real der2fct7_22_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct7_23_Q1_3D( const GeoVector& v )
+{
+    return v[0];
+}
+Real der2fct7_31_Q1_3D( const GeoVector& v )
+{
+    return v[1];
+}
+Real der2fct7_32_Q1_3D( const GeoVector& v )
+{
+    return v[0];
+}
+Real der2fct7_33_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct8_11_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct8_12_Q1_3D( const GeoVector& v )
+{
+    return -v[2];
+}
+Real der2fct8_13_Q1_3D( const GeoVector& v )
+{
+    return -v[1];
+}
+Real der2fct8_21_Q1_3D( const GeoVector& v )
+{
+    return -v[2];
+}
+Real der2fct8_22_Q1_3D( const GeoVector& )
+{
+    return 0;
+}
+Real der2fct8_23_Q1_3D( const GeoVector& v )
+{
+    return 1. - v[0];
+}
+Real der2fct8_31_Q1_3D( const GeoVector& v )
+{
+    return -v[1];
+}
+Real der2fct8_32_Q1_3D( const GeoVector& v )
+{
+    return 1 -v[0];
+}
+Real der2fct8_33_Q1_3D( const GeoVector& )
 {
     return 0;
 }
@@ -3261,105 +3261,105 @@ Real der2fct8_33_Q1_3D( cRRef, cRRef, cRRef )
 
 */
 
-Real fct1_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct1_RT0_1_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
-Real fct1_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct1_RT0_2_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
-Real fct1_RT0_3_HEXA_3D( cRRef, cRRef, cRRef z )
+Real fct1_RT0_3_HEXA_3D( const GeoVector& v )
 {
-    return z - 1.;
+    return v[2] - 1.;
 }
 
-Real fct2_RT0_1_HEXA_3D( cRRef x, cRRef, cRRef )
+Real fct2_RT0_1_HEXA_3D( const GeoVector& v )
 {
-    return x - 1.;
+    return v[0] - 1.;
 }
-Real fct2_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
-{
-    return 0.;
-}
-Real fct2_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct2_RT0_2_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
-
-Real fct3_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
-{
-    return 0.;
-}
-Real fct3_RT0_2_HEXA_3D( cRRef, cRRef y, cRRef )
-{
-    return y - 1.;
-}
-Real fct3_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct2_RT0_3_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
 
-Real fct4_RT0_1_HEXA_3D( cRRef x, cRRef, cRRef )
-{
-    return x;
-}
-Real fct4_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct3_RT0_1_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
-Real fct4_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct3_RT0_2_HEXA_3D( const GeoVector& v )
 {
-    return 0.;
+    return v[1] - 1.;
 }
-
-Real fct5_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
-{
-    return 0.;
-}
-Real fct5_RT0_2_HEXA_3D( cRRef, cRRef y, cRRef )
-{
-    return y;
-}
-Real fct5_RT0_3_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct3_RT0_3_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
 
-Real fct6_RT0_1_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct4_RT0_1_HEXA_3D( const GeoVector& v )
+{
+    return v[0];
+}
+Real fct4_RT0_2_HEXA_3D( const GeoVector& )
 {
     return 0.;
 }
-Real fct6_RT0_2_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct4_RT0_3_HEXA_3D( const GeoVector& )
 {
     return 0.;
-}
-Real fct6_RT0_3_HEXA_3D( cRRef, cRRef, cRRef z )
-{
-    return z;
 }
 
-Real fct1_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct5_RT0_1_HEXA_3D( const GeoVector& )
+{
+    return 0.;
+}
+Real fct5_RT0_2_HEXA_3D( const GeoVector& v )
+{
+    return v[1];
+}
+Real fct5_RT0_3_HEXA_3D( const GeoVector& )
+{
+    return 0.;
+}
+
+Real fct6_RT0_1_HEXA_3D( const GeoVector& )
+{
+    return 0.;
+}
+Real fct6_RT0_2_HEXA_3D( const GeoVector& )
+{
+    return 0.;
+}
+Real fct6_RT0_3_HEXA_3D( const GeoVector& v )
+{
+    return v[2];
+}
+
+Real fct1_DIV_RT0_HEXA_3D( const GeoVector& )
 {
     return 1.;
 }
-Real fct2_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct2_DIV_RT0_HEXA_3D( const GeoVector& )
 {
     return 1.;
 }
-Real fct3_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct3_DIV_RT0_HEXA_3D( const GeoVector& )
 {
     return 1.;
 }
-Real fct4_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct4_DIV_RT0_HEXA_3D( const GeoVector& )
 {
     return 1.;
 }
-Real fct5_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct5_DIV_RT0_HEXA_3D( const GeoVector& )
 {
     return 1.;
 }
-Real fct6_DIV_RT0_HEXA_3D( cRRef, cRRef, cRRef )
+Real fct6_DIV_RT0_HEXA_3D( const GeoVector& )
 {
     return 1.;
 }
@@ -3394,71 +3394,71 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 
 */
 
-Real fct3_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
+Real fct3_RT0_1_TETRA_3D( const GeoVector& v )
 {
-    return 2. * x;
+    return 2. * v[0];
 }
-Real fct3_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
+Real fct3_RT0_2_TETRA_3D( const GeoVector& v )
 {
-    return 2. * y;
+    return 2. * v[1];
 }
-Real fct3_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
+Real fct3_RT0_3_TETRA_3D( const GeoVector& v )
 {
-    return 2. * z;
-}
-
-Real fct4_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
-{
-    return 2. * x - 2.;
-}
-Real fct4_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
-{
-    return 2. * y;
-}
-Real fct4_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
-{
-    return 2. * z;
+    return 2. * v[2];
 }
 
-Real fct2_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
+Real fct4_RT0_1_TETRA_3D( const GeoVector& v )
 {
-    return 2. * x;
+    return 2. * v[0] - 2.;
 }
-Real fct2_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
+Real fct4_RT0_2_TETRA_3D( const GeoVector& v )
 {
-    return 2. * y - 2.;
+    return 2. * v[1];
 }
-Real fct2_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
+Real fct4_RT0_3_TETRA_3D( const GeoVector& v )
 {
-    return 2. * z;
-}
-
-Real fct1_RT0_1_TETRA_3D( cRRef x, cRRef, cRRef )
-{
-    return 2. * x;
-}
-Real fct1_RT0_2_TETRA_3D( cRRef, cRRef y, cRRef )
-{
-    return 2. * y;
-}
-Real fct1_RT0_3_TETRA_3D( cRRef, cRRef, cRRef z )
-{
-    return 2. * z - 2.;
+    return 2. * v[2];
 }
 
-Real fct1_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+Real fct2_RT0_1_TETRA_3D( const GeoVector& v )
+{
+    return 2. * v[0];
+}
+Real fct2_RT0_2_TETRA_3D( const GeoVector& v )
+{
+    return 2. * v[1] - 2.;
+}
+Real fct2_RT0_3_TETRA_3D( const GeoVector& v )
+{
+    return 2. * v[2];
+}
+
+Real fct1_RT0_1_TETRA_3D( const GeoVector& v )
+{
+    return 2. * v[0];
+}
+Real fct1_RT0_2_TETRA_3D( const GeoVector& v )
+{
+    return 2. * v[1];
+}
+Real fct1_RT0_3_TETRA_3D( const GeoVector& v )
+{
+    return 2. * v[2] - 2.;
+}
+
+Real fct1_DIV_RT0_TETRA_3D( const GeoVector& )
 {
     return 6.;
 }
-Real fct2_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+Real fct2_DIV_RT0_TETRA_3D( const GeoVector& )
 {
     return 6.;
 }
-Real fct3_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+Real fct3_DIV_RT0_TETRA_3D( const GeoVector& )
 {
     return 6.;
 }
-Real fct4_DIV_RT0_TETRA_3D( cRRef, cRRef, cRRef )
+Real fct4_DIV_RT0_TETRA_3D( const GeoVector& )
 {
     return 6.;
 }
