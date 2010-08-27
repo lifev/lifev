@@ -986,6 +986,36 @@ OneDimensionalModel_Solver::BoundaryValue( const Solution_Type& solution, const 
     }
 }
 
+void
+OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide,
+                                                             const Solution_Type& solution,
+                                                             Container2D_Type& eigenvalues,
+                                                             Container2D_Type& leftEigenvector1,
+                                                             Container2D_Type& leftEigenvector2 )
+{
+    UInt boundaryDof;
+
+    switch( bcSide )
+    {
+        case OneD_left:
+            boundaryDof = 1;
+        break;
+        case OneD_right:
+            boundaryDof = M_Flux->Physics()->Data()->NumberOfElements() + 1;
+        break;
+        default:
+            std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
+        return;
+    }
+
+    M_Flux->jacobian_EigenValues_Vectors( (*solution.find("A")->second)( boundaryDof ),
+                                          (*solution.find("Q")->second)( boundaryDof ),
+                                          eigenvalues[0],      eigenvalues[1],
+                                          leftEigenvector1[0], leftEigenvector1[1],
+                                          leftEigenvector2[0], leftEigenvector2[1],
+                                          boundaryDof );
+}
+
 // ===================================================
 // Private Methods
 // ===================================================
