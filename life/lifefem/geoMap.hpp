@@ -53,7 +53,9 @@ class GeoMap:
         public RefEle
 {
 public:
-    
+
+     typedef RefEle::Fct Fct;
+
     //! @name Constructor & Destructor
     //@{
     
