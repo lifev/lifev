@@ -85,20 +85,20 @@ OneDimensionalModel_BCHandler::applyBC( const Real&              time,
                                         const Real&              timeStep,
                                         const Solution_Type&     solution,
                                         const Flux_PtrType&      flux,
-                                              Container2D_Type&  left_BC_dir,
-                                              Container2D_Type&  right_BC_dir )
+                                              Container2D_Type&  leftBC,
+                                              Container2D_Type&  rightBC )
 {
     ASSERT_PRE( left_BC_dir.size() == 2 && right_BC_dir.size() == 2, "applyBC works only for 2D vectors" );
 
-    M_boundary[ OneD_left  ]->applyBC( time, timeStep, solution, flux, left_BC_dir  );
-    M_boundary[ OneD_right ]->applyBC( time, timeStep, solution, flux, right_BC_dir );
+    M_boundary[ OneD_left  ]->applyBC( time, timeStep, solution, flux, leftBC  );
+    M_boundary[ OneD_right ]->applyBC( time, timeStep, solution, flux, rightBC );
 
     Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at left "
-                << " imposing [ A, Q ] = [ " << left_BC_dir[0]
-                << ", " << left_BC_dir[1] << " ]\n";
+                << " imposing [ A, Q ] = [ " << leftBC[0]
+                << ", " << leftBC[1] << " ]\n";
     Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at right "
-                << " imposing [ A, Q ] = [ " << right_BC_dir[0]
-                << ", " << right_BC_dir[1] << " ]\n";
+                << " imposing [ A, Q ] = [ " << rightBC[0]
+                << ", " << rightBC[1] << " ]\n";
 }
 
 // ===================================================

@@ -98,7 +98,7 @@ public:
 
     //! Apply boundary conditions
     void applyBC( const Real& time, const Real& timeStep, const Solution_Type& solution,
-                  const Flux_PtrType& flux, Container2D_Type& BC_dir );
+                  const Flux_PtrType& flux, Container2D_Type& BC );
 
     //@}
 
@@ -112,7 +112,7 @@ public:
 
     void setInternalFlag( const bool& flag );
 
-    void setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow );
+    //void setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow );
 
     //@}
 
@@ -133,12 +133,10 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Impose the chosen boundary condition
-    void compute_resBC( const Real& time,              const Real& timeStep,
-                        const Solution_Type& solution, const Flux_PtrType& flux );
-
-    void compute_resBC_line( OneD_BCLine line, Container2D_Type left_eigvec,
-                             Container2D_Type U, Container2D_Type W, Real& rhs );
+    //! Compute the matrix and the RHS for the BC 2x2 linear system
+    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
+                              const Container2D_Type& leftEigenvector1, const Container2D_Type& leftEigenvector2,
+                              const Container2D_Type& U, const Container2D_Type& W, const UInt& dof, Real& rhs );
 
     //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
     /*!
@@ -147,9 +145,9 @@ private:
      *       M_matrixrow_at_line["second"] ]
      * @return A^{-1} * rhs2d
      */
-    Container2D_Type _solveLinearSyst2x2( const Container2D_Type& line1,
-                                          const Container2D_Type& line2,
-                                          const Container2D_Type& rhs2d ) const;
+    Container2D_Type solveLinearSystem( const Container2D_Type& line1,
+                                        const Container2D_Type& line2,
+                                        const Container2D_Type& rhs ) const;
 
     //@}
 
@@ -161,10 +159,9 @@ private:
 
     bool                                          M_isInternal;
 
-    std::map<OneD_BCLine, Container2D_Type>       M_matrixrow_at_line;
+    std::map<OneD_BCLine, Container2D_Type>       M_bcMatrix;
 
-    //! Result of the 2x2 linear system to be solved at each side
-    Container2D_Type                              M_resBC;
+    Container2D_Type                              M_bcRHS;
 };
 
 }

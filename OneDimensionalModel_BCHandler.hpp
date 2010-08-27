@@ -100,8 +100,8 @@ public:
                    const Real&             timeStep,
                    const Solution_Type&    solution,
                    const Flux_PtrType&     flux,
-                         Container2D_Type& left_BC_dir,
-                         Container2D_Type& right_BC_dir );
+                         Container2D_Type& leftBC,
+                         Container2D_Type& rightBC );
 
     //@}
 
