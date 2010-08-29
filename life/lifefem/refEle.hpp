@@ -251,7 +251,7 @@ public:
     inline Real phi( UInt i, const Real& x, const Real& y, const Real& z ) const
     {
         ASSERT_BD( i < M_nbDof )
-        GeoVector v(3,0.0);
+        GeoVector v(3);
         v[0]=x; v[1]=y; v[2]=z;
         return M_phi[ i ] ( v );
     }
@@ -260,7 +260,7 @@ public:
     inline Real phi( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_FEDim )
-        GeoVector v(3,0.0);
+        GeoVector v(3);
         v[0]=x; v[1]=y; v[2]=z;
         return M_phi[ i * M_FEDim + icoor ] ( v );
     }
@@ -269,7 +269,7 @@ public:
     inline Real dPhi( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
-        GeoVector v(3,0.0);
+        GeoVector v(3);
         v[0]=x; v[1]=y; v[2]=z;
         return M_dPhi[ i * M_nbCoor + icoor ] ( v );
         }
@@ -277,7 +277,7 @@ public:
     inline Real d2Phi( UInt i, UInt icoor, UInt jcoor, const Real& x, const Real& y, const Real& z ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
-        GeoVector v(3,0.0);
+        GeoVector v(3);
         v[0]=x; v[1]=y; v[2]=z;
         return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( v );
     }
@@ -285,7 +285,7 @@ public:
     inline Real divPhi( UInt i, const Real& x, const Real& y, const Real& z ) const
     {
         ASSERT_BD( i < M_nbDof )
-        GeoVector v(3,0.0);
+        GeoVector v(3);
         v[0]=x; v[1]=y; v[2]=z;
         return M_divPhi[ i ] ( v );
     }
