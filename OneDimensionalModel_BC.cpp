@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) o2001-2010 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
