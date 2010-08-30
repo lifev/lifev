@@ -72,25 +72,27 @@ public:
     //! \name Get Methods
     //@{
     //! Return a reference to M_vertexDist
-    const std::vector<int>& vertexDist()           const {return M_vertexDist;};
+    const std::vector<int>&  vertexDist()           const {return M_vertexDist;};
     //! Return a const pointer to M_mesh[0] - for parallel
-    const mesh_ptrtype      mesh()                 const {return (*M_mesh)[0];}
+    const mesh_ptrtype&      mesh()                 const {return (*M_mesh)[0];}
     //! Return a pointer to M_mesh[0] - for parallel
-    mesh_ptrtype            mesh()                 {return (*M_mesh)[0];}
+    mesh_ptrtype&            mesh()                 {return (*M_mesh)[0];}
+    //! Return a pointer to the mesh partition with rank k
+    const mesh_ptrtype&      mesh(int k)            const {return (*M_mesh)[k];}
     //! Return a pointer to M_mesh
-    const partmesh_ptrtype  meshAllPartitions()    const {return M_mesh;}
+    const partmesh_ptrtype&  meshAllPartitions()    const {return M_mesh;}
     //! Return a pointer to M_part
-    const std::vector<int>& part()                 const {return M_part;}
+    const std::vector<int>&  part()                 const {return M_part;}
     //! Return a pointer to M_locProc
-    const graph_ptrtype     graph()                const {return M_locProc;}
+    const graph_ptrtype&     graph()                const {return M_locProc;}
     //! Return a reference to M_repeatedNodeVector
-    const std::vector<int>& repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
+    const std::vector<int>&  repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
     //! Return a reference to M_repeatedEdgeVector
-    const std::vector<int>& repeatedEdgeVector()   const {return M_repeatedEdgeVector[0];}
+    const std::vector<int>&  repeatedEdgeVector()   const {return M_repeatedEdgeVector[0];}
     //! Return a reference to M_repeatedFaceVector
-    const std::vector<int>& repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
+    const std::vector<int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
     //! Return a reference to M_repeatedVolumeVector
-    const std::vector<int>& repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
+    const std::vector<int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
     //@}
     //! \name Public Methods
     //@{
