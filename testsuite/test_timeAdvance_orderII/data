@@ -1,6 +1,6 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for Fluid Structure Solver
+#      Data file for SecondOrder Solver
 #-------------------------------------------------
 
 
@@ -30,7 +30,7 @@ save       = 1
 
    	[../space_discretization]	
 	mesh_dir  = ./Mesh/     # the directory where the mesh file is
-	mesh_file = tube20.mesh  #StructuredCube8.mesh  #StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh  # mesh file
+	mesh_file = StructuredCube4.mesh #StructuredCube8.mesh  #StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh  # mesh file
 	order     = P1
 	mesh_type       = .mesh
 
