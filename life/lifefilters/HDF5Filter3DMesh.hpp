@@ -36,6 +36,7 @@
 #define HDF5FILTER3DMESH_H 1
 
 #include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefem/dofInterface3Dto3D.hpp>
 
 namespace LifeV {
 
@@ -74,9 +75,17 @@ public:
 
     typedef EpetraExt::HDF5 hdf5_type;
     typedef boost::shared_ptr<hdf5_type> hdf5_ptrtype;
-    typedef std::vector<std::vector<int> > graph_type;
+    typedef std::vector<std::vector<Int> > graph_type;
     typedef boost::shared_ptr<graph_type> graph_ptrtype;
     typedef boost::shared_ptr<std::vector<mesh_ptrtype> > serial_mesh_ptrtype;
+
+    typedef DofInterface3Dto3D interface_Type;
+    typedef boost::shared_ptr<interface_Type> interface_ptrType;
+    typedef std::vector<interface_ptrType> interface_vector_Type;
+    // The vector contains pointers to each fluid partition's interface with
+    // the solid.
+    typedef boost::shared_ptr<interface_vector_Type> interface_vector_ptrType;
+
 
     //! @name Constructor & Destructor
     //@{
@@ -147,6 +156,19 @@ public:
     void addMyMeshPartition(const mesh_ptrtype& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
     {/*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/}
 
+    //! Add a DOF interface for writing to file
+    /*!
+      Add a DOF interface to the member vector M_interfaceData, for writing to the HDF5
+      file. Call once for each interface that is to be written.
+    */
+    void addDOFInterfaces(const interface_vector_ptrType& interfaces,
+                          const std::string& type,
+                          const Int& firstInterfaceFlag,
+                          const Int& secondInterfaceFlag,
+                          const boost::shared_ptr<Epetra_Comm>& comm);
+
+    // TODO: Write a replacement methods that returns the graph vector directly,
+    //       like with getMeshPartition and getStoredInterface
     //! Load the partitioned graph from a HDF5 file into a partitionMesh object
     /*!
       \param graph - shared_ptr<vector<vector<int> > > - a shared pointer to the graph data structure in the
@@ -166,6 +188,24 @@ public:
     */
     void loadMyPartition(mesh_ptrtype meshPartition, boost::shared_ptr<Epetra_Comm>& comm);
 
+    //! Get the number of stored DOF interfaces
+    int queryStoredInterfaceNumber();
+
+    //! Get the types of the stored DOF interfaces
+    std::vector<std::string>& queryStoredInterfaceTypes();
+
+    //! Return a pointer to the mesh partition that corresponds to the current MPI rank
+    boost::shared_ptr<Mesh>& getMeshPartition();
+
+    //! Return a pointer to the k-th interface stored inside the file
+    boost::shared_ptr<std::map<UInt, UInt> >& getStoredInterface(int k);
+
+    // When reading back partitions and interfaces, the comm member must be set explicitly.
+    // This is intended for use with getMeshPartition and getStoredInterface
+    //! Set the M_comm data member.
+    void setComm(boost::shared_ptr<Epetra_Comm>& comm) {M_comm = comm;}
+
+
 private:
 
     // The following private methods are for writing the partitioned graph
@@ -174,12 +214,18 @@ private:
     void writePartition(mesh_ptrtype partition, std::string& suffix);
     void writeParallelMesh();
     void writeSerialMesh();
+    void writeInterfaces();
 
     //@}
 
     serial_mesh_ptrtype                    M_serialMesh;
     mesh_ptrtype                           M_parallelMesh;
     graph_ptrtype                          M_graph;
+    // Use a vector to store the data of all interfaces we wish to write to disk
+    std::vector<interface_vector_ptrType>  M_DOFInterfaces;
+    std::vector<std::string>               M_interfaceTypes;
+    std::vector<Int>                       M_firstInterfaceFlags;
+    std::vector<Int>                       M_secondInterfaceFlags;
     boost::shared_ptr<Epetra_Comm>         M_comm;
 
 };
@@ -206,6 +252,21 @@ HDF5Filter3DMesh<Mesh>::HDF5Filter3DMesh(const GetPot& dfile, const std::string&
 // ===================================================
 
 template<typename Mesh>
+void HDF5Filter3DMesh<Mesh>::addDOFInterfaces(const interface_vector_ptrType& interfaces,
+                                              const std::string& type,
+                                              const Int& firstInterfaceFlag,
+                                              const Int& secondInterfaceFlag,
+                                              const boost::shared_ptr<Epetra_Comm>& comm)
+{
+    M_DOFInterfaces.push_back(interfaces);
+    M_interfaceTypes.push_back(type);
+    M_firstInterfaceFlags.push_back(firstInterfaceFlag);
+    M_secondInterfaceFlags.push_back(secondInterfaceFlag);
+
+    M_comm = comm;
+}
+
+template<typename Mesh>
 void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, boost::shared_ptr<Epetra_Comm>& comm)
 {
     if (this->M_HDF5.get() == 0)
@@ -217,18 +278,18 @@ void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, boost::shared_ptr<Ep
         this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
-    int nPartitions;
+    Int nPartitions;
 
     this->M_HDF5->Read("Graph", "number_partitions", nPartitions);
 
-    std::vector<int> partitionSizes(nPartitions);
+    std::vector<Int> partitionSizes(nPartitions);
     this->M_HDF5->Read("Graph", "partition_sizes", H5T_NATIVE_INT, nPartitions,
                  &partitionSizes[0]);
 
     graph->resize(0);
     graph->reserve(nPartitions);
 
-    std::vector<int> partBuffer;
+    std::vector<Int> partBuffer;
     std::stringstream index;
 
     for (UInt i = 0; i < nPartitions; ++i)
@@ -275,53 +336,53 @@ void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, boost::
     // Read counters from file and set them in the mesh
 
     // Points
-    int numPoints;
+    Int numPoints;
     this->M_HDF5->Read("Mesh", "Counters.NumPoints" + suffix, numPoints);
     meshPartition->setMaxNumPoints(numPoints, true);
-    int numBPoints;
+    Int numBPoints;
     this->M_HDF5->Read("Mesh", "Counters.NumBPoints" + suffix, numBPoints);
     meshPartition->setNumBPoints(numBPoints);
 
     // Vertices
-    int numVertices;
+    Int numVertices;
     this->M_HDF5->Read("Mesh", "Counters.NumVertices" + suffix, numVertices);
     meshPartition->setNumVertices(numVertices);
-    int numBVertices;
+    Int numBVertices;
     this->M_HDF5->Read("Mesh", "Counters.NumBVertices" + suffix, numBVertices);
     meshPartition->setNumBVertices(numBVertices);
-    int numGlobalVertices;
+    Int numGlobalVertices;
     this->M_HDF5->Read("Mesh", "Counters.NumGlobalVertices" + suffix, numGlobalVertices);
     meshPartition->setNumGlobalVertices(numGlobalVertices);
 
     // Edges
-    int numEdges;
+    Int numEdges;
     this->M_HDF5->Read("Mesh", "Counters.NumEdges" + suffix, numEdges);
     meshPartition->setNumEdges(numEdges);
     meshPartition->setMaxNumEdges(numEdges);
-    int numBEdges;
+    Int numBEdges;
     this->M_HDF5->Read("Mesh", "Counters.NumBEdges" + suffix, numBEdges);
     meshPartition->setNumBEdges(numBEdges);
-    int numGlobalEdges;
+    Int numGlobalEdges;
     this->M_HDF5->Read("Mesh", "Counters.NumGlobalEdges" + suffix, numGlobalEdges);
     meshPartition->setMaxNumGlobalEdges(numGlobalEdges);
 
     // Faces
-    int numFaces;
+    Int numFaces;
     this->M_HDF5->Read("Mesh", "Counters.NumFaces" + suffix, numFaces);
     meshPartition->setNumFaces(numFaces);
     meshPartition->setMaxNumFaces(numFaces);
-    int numBFaces;
+    Int numBFaces;
     this->M_HDF5->Read("Mesh", "Counters.NumBFaces" + suffix, numBFaces);
     meshPartition->setNumBFaces(numBFaces);
-    int numGlobalFaces;
+    Int numGlobalFaces;
     this->M_HDF5->Read("Mesh", "Counters.NumGlobalFaces" + suffix, numGlobalFaces);
     meshPartition->setMaxNumGlobalFaces(numGlobalFaces);
 
     // Volumes
-    int numVolumes;
+    Int numVolumes;
     this->M_HDF5->Read("Mesh", "Counters.NumVolumes" + suffix, numVolumes);
     meshPartition->setMaxNumVolumes(numVolumes, true);
-    int numGlobalVolumes;
+    Int numGlobalVolumes;
     this->M_HDF5->Read("Mesh", "Counters.NumGlobalVolumes" + suffix, numGlobalVolumes);
     meshPartition->setMaxNumGlobalVolumes(numGlobalVolumes);
 
@@ -329,9 +390,9 @@ void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, boost::
     std::vector<double> tmpVectorDouble(numPoints);
     std::vector<std::vector<double> > pointCoordinates(3, tmpVectorDouble);
 
-    std::vector<int> pointMarkers(numPoints);
-    std::vector<int> pointBoundaryFlags(numPoints);
-    std::vector<int> pointGlobalId(numPoints);
+    std::vector<Int> pointMarkers(numPoints);
+    std::vector<Int> pointBoundaryFlags(numPoints);
+    std::vector<Int> pointGlobalId(numPoints);
 
     this->M_HDF5->Read("Mesh", "Points.x" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[0][0]);
     this->M_HDF5->Read("Mesh", "Points.y" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[1][0]);
@@ -365,12 +426,12 @@ void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, boost::
     pointGlobalId.clear();
 
     // Read the list of edges
-    std::vector<int> tmpVectorInt(numEdges);
-    std::vector<std::vector<int> > edgePoints(2, tmpVectorInt);
+    std::vector<Int> tmpVectorInt(numEdges);
+    std::vector<std::vector<Int> > edgePoints(2, tmpVectorInt);
 
-    std::vector<int> edgeMarkers(numEdges);
-    std::vector<int> edgeGlobalId(numEdges);
-    std::vector<int> edgeBoundaryFlags(numEdges);
+    std::vector<Int> edgeMarkers(numEdges);
+    std::vector<Int> edgeGlobalId(numEdges);
+    std::vector<Int> edgeBoundaryFlags(numEdges);
 
     this->M_HDF5->Read("Mesh", "Edges.p1" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[0][0]);
     this->M_HDF5->Read("Mesh", "Edges.p2" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[1][0]);
@@ -399,14 +460,14 @@ void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, boost::
 
     // Read the list of faces
     tmpVectorInt.resize(numFaces);
-    std::vector<std::vector<int> > facePoints(faceNodes, tmpVectorInt);
+    std::vector<std::vector<Int> > facePoints(faceNodes, tmpVectorInt);
 
-    std::vector<int> faceMarkers(numFaces);
-    std::vector<int> faceGlobalId(numFaces);
-    std::vector<int> faceBoundaryFlags(numFaces);
+    std::vector<Int> faceMarkers(numFaces);
+    std::vector<Int> faceGlobalId(numFaces);
+    std::vector<Int> faceBoundaryFlags(numFaces);
 
-    std::vector<std::vector<int> > faceNeighbourId(2, tmpVectorInt);
-    std::vector<std::vector<int> > faceNeighbourPos(2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourId(2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourPos(2, tmpVectorInt);
 
     std::stringstream idx;
     for (UInt k = 0; k < faceNodes; ++k)
@@ -460,10 +521,10 @@ void HDF5Filter3DMesh<Mesh>::loadMyPartition(mesh_ptrtype meshPartition, boost::
 
     // Read the list of volumes
     tmpVectorInt.resize(numVolumes);
-    std::vector<std::vector<int> > volumePoints(elementNodes, tmpVectorInt);
+    std::vector<std::vector<Int> > volumePoints(elementNodes, tmpVectorInt);
 
-    std::vector<int> volumeMarkers(numVolumes);
-    std::vector<int> volumeGlobalId(numVolumes);
+    std::vector<Int> volumeMarkers(numVolumes);
+    std::vector<Int> volumeGlobalId(numVolumes);
 
     for (UInt k = 0; k < elementNodes; ++k)
     {
@@ -544,7 +605,10 @@ void HDF5Filter3DMesh<Mesh>::postProcess(const Real& time)
                 // Write mesh partition that belongs to you (parallel op)
                 writeParallelMesh();
             }
-
+            if (M_DOFInterfaces.size() != 0)
+            {
+                writeInterfaces();
+            }
             this->M_HDF5->Flush();
         }
     }
@@ -581,15 +645,107 @@ void HDF5Filter3DMesh<Mesh>::postProcess(const Real& time)
 }
 
 template <typename Mesh>
+int HDF5Filter3DMesh<Mesh>::queryStoredInterfaceNumber()
+{
+    if (this->M_HDF5.get() == 0)
+    {
+        this->M_HDF5.reset(new hdf5_type(*M_comm));
+    }
+    if (! this->M_HDF5->IsOpen())
+    {
+        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+    }
+
+    int storedInterfaceNumber;
+    this->M_HDF5->Read("Interfaces", "Number", storedInterfaceNumber);
+
+    return storedInterfaceNumber;
+}
+
+template <typename Mesh>
+std::vector<std::string>& HDF5Filter3DMesh<Mesh>::queryStoredInterfaceTypes()
+{
+    if (this->M_HDF5.get() == 0)
+    {
+        this->M_HDF5.reset(new hdf5_type(*M_comm));
+    }
+    if (! this->M_HDF5->IsOpen())
+    {
+        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+    }
+
+    int storedInterfaceNumber;
+    this->M_HDF5->Read("Interfaces", "Number", storedInterfaceNumber);
+
+    std::vector<std::string> storedInterfaceTypes(storedInterfaceNumber);
+    for (int k = 0; k < storedInterfaceNumber; ++k)
+    {
+        std::stringstream idx;
+        idx << k;
+        this->M_HDF5->Read("Interfaces", "Type." + idx.str(), storedInterfaceTypes[k]);
+    }
+
+    return storedInterfaceTypes;
+}
+
+template <typename Mesh>
+boost::shared_ptr<Mesh>& HDF5Filter3DMesh<Mesh>::getMeshPartition()
+{
+    // TODO:: put body of loadMyPartition here. Remove loadMyPartition
+    boost::shared_ptr<Mesh> tempMesh(new Mesh);
+    this->loadMyPartition(tempMesh, M_comm);
+
+    return tempMesh;
+}
+
+template <typename Mesh>
+boost::shared_ptr<std::map<UInt, UInt> >& HDF5Filter3DMesh<Mesh>::getStoredInterface(int k)
+{
+    if (this->M_HDF5.get() == 0)
+    {
+        this->M_HDF5.reset(new hdf5_type(*M_comm));
+    }
+    if (! this->M_HDF5->IsOpen())
+    {
+        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+    }
+
+    int myRank = M_comm->MyPID();
+
+    std::stringstream idx;
+    idx << k << "." << myRank;
+
+    boost::shared_ptr<std::map<UInt, UInt> > interface(new std::map<UInt, UInt>);
+
+    int size;
+    this->M_HDF5->Read("Interfaces", "Size." + idx.str(), size);
+
+    std::vector<UInt> keyVector(size);
+    std::vector<UInt> valueVector(size);
+
+    this->M_HDF5->Read("Interfaces", "Key." + idx.str(), H5T_NATIVE_INT, size,
+                       &keyVector[0]);
+    this->M_HDF5->Read("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size,
+                       &valueVector[0]);
+
+    for (UInt i = 0; i < size; ++i)
+    {
+        interface->insert(make_pair(keyVector[i], valueVector[i]));
+    }
+
+    return interface;
+}
+
+template <typename Mesh>
 void HDF5Filter3DMesh<Mesh>::writeGraph()
 {
-    std::vector<int> partitionSizes;
-    int size, maxSize = 0;
+    std::vector<Int> partitionSizes;
+    Int size, maxSize = 0;
 
     // Calculate the maximum size of the partitions and store partition
     // sizes
     partitionSizes.reserve(M_graph->size());
-    for (std::vector<std::vector<int> >::iterator it = M_graph->begin();
+    for (std::vector<std::vector<Int> >::iterator it = M_graph->begin();
          it != M_graph->end(); ++it)
     {
         size = it->size();
@@ -604,7 +760,7 @@ void HDF5Filter3DMesh<Mesh>::writeGraph()
                   M_graph->size(), &partitionSizes[0]);
 
     // Write partition array size
-    this->M_HDF5->Write("Graph", "number_partitions", int(M_graph->size()));
+    this->M_HDF5->Write("Graph", "number_partitions", static_cast<int>((M_graph->size())));
 
     // Write partition array
     std::stringstream index;
@@ -634,33 +790,33 @@ void HDF5Filter3DMesh<Mesh>::writePartition(mesh_ptrtype mesh, std::string& suff
         faceNodes    = 3;
     }
 
-    this->M_HDF5->Write("Mesh", "Counters.NumPoints" + suffix, (int) mesh->numPoints());
-    this->M_HDF5->Write("Mesh", "Counters.NumBPoints" + suffix, (int) mesh->numBPoints());
+    this->M_HDF5->Write("Mesh", "Counters.NumPoints" + suffix, static_cast<int>(mesh->numPoints()));
+    this->M_HDF5->Write("Mesh", "Counters.NumBPoints" + suffix, static_cast<int>(mesh->numBPoints()));
 
-    this->M_HDF5->Write("Mesh", "Counters.NumVertices" + suffix, (int) mesh->numVertices());
-    this->M_HDF5->Write("Mesh", "Counters.NumBVertices" + suffix, (int) mesh->numBVertices());
-    this->M_HDF5->Write("Mesh", "Counters.NumGlobalVertices" + suffix, (int) mesh->numGlobalVertices());
+    this->M_HDF5->Write("Mesh", "Counters.NumVertices" + suffix, static_cast<int>(mesh->numVertices()));
+    this->M_HDF5->Write("Mesh", "Counters.NumBVertices" + suffix, static_cast<int>(mesh->numBVertices()));
+    this->M_HDF5->Write("Mesh", "Counters.NumGlobalVertices" + suffix, static_cast<int>(mesh->numGlobalVertices()));
 
-    this->M_HDF5->Write("Mesh", "Counters.NumEdges" + suffix, (int) mesh->numEdges());
-    this->M_HDF5->Write("Mesh", "Counters.NumBEdges" + suffix, (int) mesh->numBEdges());
-    this->M_HDF5->Write("Mesh", "Counters.NumGlobalEdges" + suffix, (int) mesh->numGlobalEdges());
+    this->M_HDF5->Write("Mesh", "Counters.NumEdges" + suffix, static_cast<int>(mesh->numEdges()));
+    this->M_HDF5->Write("Mesh", "Counters.NumBEdges" + suffix, static_cast<int>(mesh->numBEdges()));
+    this->M_HDF5->Write("Mesh", "Counters.NumGlobalEdges" + suffix, static_cast<int>(mesh->numGlobalEdges()));
 
-    this->M_HDF5->Write("Mesh", "Counters.NumFaces" + suffix, (int) mesh->numFaces());
-    this->M_HDF5->Write("Mesh", "Counters.NumBFaces" + suffix, (int) mesh->numBFaces());
-    this->M_HDF5->Write("Mesh", "Counters.NumGlobalFaces" + suffix, (int) mesh->numGlobalFaces());
+    this->M_HDF5->Write("Mesh", "Counters.NumFaces" + suffix, static_cast<int>(mesh->numFaces()));
+    this->M_HDF5->Write("Mesh", "Counters.NumBFaces" + suffix, static_cast<int>(mesh->numBFaces()));
+    this->M_HDF5->Write("Mesh", "Counters.NumGlobalFaces" + suffix, static_cast<int>(mesh->numGlobalFaces()));
 
-    this->M_HDF5->Write("Mesh", "Counters.NumVolumes" + suffix, (int) mesh->numVolumes());
-    this->M_HDF5->Write("Mesh", "Counters.NumGlobalVolumes" + suffix, (int) mesh->numGlobalVolumes());
+    this->M_HDF5->Write("Mesh", "Counters.NumVolumes" + suffix, static_cast<int>(mesh->numVolumes()));
+    this->M_HDF5->Write("Mesh", "Counters.NumGlobalVolumes" + suffix, static_cast<int>(mesh->numGlobalVolumes()));
 
-    int numPoints = mesh->numPoints();
+    Int numPoints = mesh->numPoints();
     std::vector<double> tmpVectorDouble(numPoints);
     std::vector<std::vector<double> > pointCoordinates(3, tmpVectorDouble);
 
-    std::vector<int> pointMarkers(numPoints);
-    std::vector<int> pointGlobalId(numPoints);
-    std::vector<int> pointBoundaryFlags(numPoints);
+    std::vector<Int> pointMarkers(numPoints);
+    std::vector<Int> pointGlobalId(numPoints);
+    std::vector<Int> pointBoundaryFlags(numPoints);
 
-    std::map<int, int>::iterator it = mesh->localToGlobalNode().begin();
+    std::map<Int, Int>::iterator it = mesh->localToGlobalNode().begin();
     for (UInt j = 0; it != mesh->localToGlobalNode().end(); ++it, ++j)
     {
         pointCoordinates[0][j] = mesh->pointList[j].x();
@@ -686,15 +842,15 @@ void HDF5Filter3DMesh<Mesh>::writePartition(mesh_ptrtype mesh, std::string& suff
     pointBoundaryFlags.clear();
     pointGlobalId.clear();
 
-    int numEdges = mesh->numEdges();
-    std::vector<int> tmpVectorInt(numEdges);
-    std::vector<std::vector<int> > edgePoints(2,tmpVectorInt);
+    Int numEdges = mesh->numEdges();
+    std::vector<Int> tmpVectorInt(numEdges);
+    std::vector<std::vector<Int> > edgePoints(2,tmpVectorInt);
 
-    std::vector<int> edgeMarkers(numEdges);
-    std::vector<int> edgeGlobalId(numEdges);
-    std::vector<int> edgeBoundaryFlags(numEdges);
+    std::vector<Int> edgeMarkers(numEdges);
+    std::vector<Int> edgeGlobalId(numEdges);
+    std::vector<Int> edgeBoundaryFlags(numEdges);
 
-    for (UInt j = 0; j < numEdges; ++j)
+    for (Int j = 0; j < numEdges; ++j)
     {
         edgePoints[0][j] = mesh->edgeList[j].point(1).localId();
         edgePoints[1][j] = mesh->edgeList[j].point(2).localId();
@@ -718,18 +874,18 @@ void HDF5Filter3DMesh<Mesh>::writePartition(mesh_ptrtype mesh, std::string& suff
     edgeGlobalId.clear();
     edgeBoundaryFlags.clear();
 
-    int numFaces = mesh->numFaces();
+    Int numFaces = mesh->numFaces();
     tmpVectorInt.resize(numFaces);
-    std::vector<std::vector<int> > facePoints(faceNodes, tmpVectorInt);
+    std::vector<std::vector<Int> > facePoints(faceNodes, tmpVectorInt);
 
-    std::vector<int> faceMarkers(numFaces);
-    std::vector<int> faceGlobalId(numFaces);
-    std::vector<int> faceBoundaryFlags(numFaces);
+    std::vector<Int> faceMarkers(numFaces);
+    std::vector<Int> faceGlobalId(numFaces);
+    std::vector<Int> faceBoundaryFlags(numFaces);
 
-    std::vector<std::vector<int> > faceNeighbourId(2, tmpVectorInt);
-    std::vector<std::vector<int> > faceNeighbourPos(2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourId(2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourPos(2, tmpVectorInt);
 
-    for (UInt j = 0; j < numFaces; ++j)
+    for (Int j = 0; j < numFaces; ++j)
     {
         for (UInt k = 0; k < faceNodes; ++k)
         {
@@ -773,14 +929,14 @@ void HDF5Filter3DMesh<Mesh>::writePartition(mesh_ptrtype mesh, std::string& suff
     faceNeighbourId.clear();
     faceNeighbourPos.clear();
 
-    int numVolumes = mesh->numVolumes();
+    Int numVolumes = mesh->numVolumes();
     tmpVectorInt.resize(numVolumes);
-    std::vector<std::vector<int> > volumePoints(elementNodes, tmpVectorInt);
+    std::vector<std::vector<Int> > volumePoints(elementNodes, tmpVectorInt);
 
-    std::vector<int> volumeMarkers(numVolumes);
-    std::vector<int> volumeGlobalId(numVolumes);
+    std::vector<Int> volumeMarkers(numVolumes);
+    std::vector<Int> volumeGlobalId(numVolumes);
 
-    for (UInt j = 0; j < numVolumes; ++j)
+    for (Int j = 0; j < numVolumes; ++j)
     {
         for (UInt k = 0; k < elementNodes; ++k)
         {
@@ -835,6 +991,66 @@ void HDF5Filter3DMesh<Mesh>::writeParallelMesh()
     writePartition(M_parallelMesh, suffix);
 }
 
+template <typename Mesh>
+void HDF5Filter3DMesh<Mesh>::writeInterfaces()
+{
+    Int interfaceNumber = M_DOFInterfaces.size();
+
+    std::vector<Int> firstDOF;
+    std::vector<Int> secondDOF;
+
+    this->M_HDF5->Write("Interfaces", "Number", interfaceNumber);
+
+    for (Int i = 0; i < interfaceNumber; ++i)
+    {
+        interface_vector_Type& currentInterfaceSet = *(M_DOFInterfaces[i]);
+
+        Int partitionNumber = currentInterfaceSet.size();
+        std::stringstream idx;
+        idx << i;
+        this->M_HDF5->Write("Interfaces", "Partitions." + idx.str(), partitionNumber);
+
+        Int flag1 = M_firstInterfaceFlags[i];
+        Int flag2 = M_secondInterfaceFlags[i];
+        std::string type = M_interfaceTypes[i];
+
+        this->M_HDF5->Write("Interfaces", "Flag1." + idx.str(), flag1);
+        this->M_HDF5->Write("Interfaces", "Flag2." + idx.str(), flag2);
+        this->M_HDF5->Write("Interfaces", "Type." + idx.str(), type);
+
+        for (Int j = 0; j < partitionNumber; ++j)
+        {
+            interface_Type& currentInterface = *(currentInterfaceSet[j]);
+
+            const std::map<UInt, UInt>& locDofMap = currentInterface.locDofMap();
+
+            Int size = locDofMap.size();
+
+            idx.str(std::string());
+            idx.clear();
+            idx << i << "." << j;
+            this->M_HDF5->Write("Interfaces", "Size." + idx.str(), size);
+
+            firstDOF.clear();
+            secondDOF.clear();
+            firstDOF.resize(size);
+            secondDOF.resize(size);
+
+            Int k = 0;
+            for (std::map<UInt, UInt>::const_iterator it = locDofMap.begin();
+                 it != locDofMap.end(); ++it)
+            {
+                firstDOF[k] = it->first;
+                secondDOF[k] = it->second;
+                ++k;
+            }
+            this->M_HDF5->Write("Interfaces", "Key." + idx.str(), H5T_NATIVE_INT, size, &firstDOF[0]);
+            this->M_HDF5->Write("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size, &secondDOF[0]);
+        }
+
+    }
 }
+
+} // Namespace LifeV
 
 #endif // HDF5FILTER3DMESH
