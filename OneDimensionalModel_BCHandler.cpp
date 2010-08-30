@@ -88,7 +88,7 @@ OneDimensionalModel_BCHandler::applyBC( const Real&              time,
                                               Container2D_Type&  leftBC,
                                               Container2D_Type&  rightBC )
 {
-    ASSERT_PRE( left_BC_dir.size() == 2 && right_BC_dir.size() == 2, "applyBC works only for 2D vectors" );
+    ASSERT_PRE( leftBC.size() == 2 && rightBC.size() == 2, "applyBC works only for 2D vectors" );
 
     M_boundary[ OneD_left  ]->applyBC( time, timeStep, solution, flux, leftBC  );
     M_boundary[ OneD_right ]->applyBC( time, timeStep, solution, flux, rightBC );

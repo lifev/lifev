@@ -184,7 +184,7 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
                                              const Container2D_Type& U, const Container2D_Type& W,
                                              const UInt& dof, Real& rhs )
 {
-    ASSERT_PRE( leftEigenvector.size() == 2 && U.size() == 2 && W.size() == 2,
+    ASSERT_PRE( leftEigenvector1.size() == 2 && leftEigenvector2.size() == 2 && U.size() == 2 && W.size() == 2,
                 "compute_resBC_line works only for 2D vectors");
 
     // This is not general (typical situation):
@@ -236,7 +236,7 @@ OneDimensionalModel_BC::solveLinearSystem( const Container2D_Type& line1,
                                            const Container2D_Type& line2,
                                            const Container2D_Type& rhs ) const
 {
-    ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs2d.size() == 2,
+    ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs.size() == 2,
                 "_solveLinearSyst2x2 works only for 2D vectors");
 
     Real determinant = line1[0] * line2[1] - line1[1] * line2[0];
