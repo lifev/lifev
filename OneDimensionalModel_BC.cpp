@@ -3,7 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) o2001-2010 EPFL, Politecnico di Milano, INRIA
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -76,7 +76,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
                                  const Flux_PtrType&     flux,
                                        Container2D_Type& BC )
 {
-    ASSERT_PRE( BC_dir.size() == 2, "applyBC works only for 2D vectors");
+    ASSERT_PRE( BC.size() == 2, "applyBC works only for 2D vectors");
 
     if( M_isInternal )
         Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] found internal boundary\n";
