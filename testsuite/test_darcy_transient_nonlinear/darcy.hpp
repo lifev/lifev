@@ -85,7 +85,7 @@ public:
      */
     //@{
 
-    void run();
+    LifeV::Real run();
 
     //@}
 

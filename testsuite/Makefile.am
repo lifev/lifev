@@ -39,6 +39,7 @@ SUBDIRS		= data  \
               test_filters \
               test_partition \
               test_darcy \
+              test_darcy_transient_nonlinear \
 	      $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
@@ -50,7 +51,8 @@ TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
 	       $(srcdir)/test_currentFE/testsuite.at \
            $(srcdir)/test_meshReorder/testsuite.at \
            $(srcdir)/test_partition/testsuite.at \
-           $(srcdir)/test_darcy/testsuite.at
+           $(srcdir)/test_darcy/testsuite.at \
+           $(srcdir)/test_darcy_transient_nonlinear/testsuite.at
 
 
 

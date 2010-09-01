@@ -24,9 +24,9 @@
 # \file testsuite.at
 # \author Vincent Martin <vincent.martin@mate.polimi.it>
 # \date 2004-10-10
-# 
-AT_SETUP([test_darcy])
-AT_KEYWORDS([])
+#
+AT_SETUP([test_darcy_transient_nonlinear])
+AT_KEYWORDS([test_darcy_transient_nonlinear])
 AT_DATA([data],[[
 
 
@@ -44,22 +44,30 @@ AT_DATA([data],[[
 	mesh_dir      = ./ #../../../lifev-head/testsuite/data/mesh/cartesian_cube/  # the directory where the mesh file is
 	mesh_file     = cartesian_cube8.mesh #hexahexa10x10x10.mesh
 	mesh_type     = .mesh #structured #.mesh
-	verbose       = 1                        # verbose during mesh-reading
+	verbose       = 0                        # verbose during mesh-reading
 	# 0 -> tetra, 1 -> hexa
-	element_shape = 0             
+	element_shape = 0
 	[../]
-	
+
+    [./time_discretization]
+    initialtime   = 0.
+    endtime       = 1.
+    timestep      = 0.125
+    [../]
+
+    [./non-linear]
+    fixed_point_iteration = 200
+    fixed_point_toll      = 1.e-6
+    [../]
+
 	[./miscellaneous]
-	post_dir         = ./             # the directory for postprocessing files
-	test_case        = 1                             # in particular for b.c. condition
 	verbose          = false
-	post_proc_format = medit          # vtk or medit
 	[../]
-	
+
 	[./prec]
 	# ML, Ifpack
-	prectype                = ML 
-	reuse                   = false	 
+	prectype                = Ifpack
+	reuse                   = false
 	displayList             = false
 
 		[./ML]
@@ -79,7 +87,7 @@ AT_DATA([data],[[
 			sweeps                  = 3
 			damping_factor          = 1
 			[../]
-			
+
 			[./coarse]
 			type                    = Amesos-UMFPACK
 			sweeps                  = 1
@@ -112,7 +120,7 @@ AT_DATA([data],[[
 			min_diagonal_value     = 0
 			zero_starting_solution = true
 			[../]
-			
+
 			[./partitioner]
 			# linear, greedy, metis
 			type                   = metis
@@ -121,9 +129,9 @@ AT_DATA([data],[[
 			root_node              = 0
 			use_symmetric_graph    = true
 			[../]
-	
+
 			[./amesos]
-			# Amesos_Lapack, Amesos_Klu (default), Amesos_Umfpack, 
+			# Amesos_Lapack, Amesos_Klu (default), Amesos_Umfpack,
 			# Amesos_Superlu, Amesos_Mumps, Amesos_Dscpack
 			solvertype             = Amesos_Umfpack
 			[../]
@@ -145,34 +153,23 @@ AT_DATA([data],[[
 			[../]
        [../]
    [../]
-   
+
    [./solver]
    solver          = gmres #gmres cg
    scaling         = none
    output          = all # none
    conv            = rhs
    max_iter        = 100
-   reuse           = false
-   max_iter_reuse  = 0
+   reuse           = true
+   max_iter_reuse  = 3
    kspace          = 100
-   tol             = 1.e-12    # AztecOO tolerance
-
-   [./amesos]
-   solvertype	= Umfpack
-   redistribute	= true
-   print_status = true
-   print_timing	= true
-
-	[../aztec]
-	solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
-	precond = dom_decomp
-	subdomain_solve = icc
-	output = warnings    #warnings , none , all, all, last
-	tol = 1e-6
-
+   tol             = 1.e-8    # AztecOO tolerance
+   [../]
+[../]
 
 ]])
-AT_CHECK([ln -sf ../../../data/mesh/inria/cartesian_cube8.mesh && mpirun -np 2 ../../test_darcy/test_darcy -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh;
+          mpirun -np 2 ../../test_darcy_transient_nonlinear/test_darcy_transient_nonlinear -c],[0],[ignore],[ignore])
 AT_CLEANUP
 
 

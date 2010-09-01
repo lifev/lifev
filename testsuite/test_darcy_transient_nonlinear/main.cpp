@@ -24,15 +24,13 @@
 */
 /* ========================================================
 
-Simple transient, non-linear and nearly degenerate Darcy test with mixed boundary condition
+Simple transient and non-linear Darcy test with mixed boundary condition
 
 Solve the problem
 
                \frac{\partial p}{\partial t} + div u - f = 0  in \Omega \times [0, T]
 
-               \tilde{u} + \nabla p = 0                       in \Omega \times [0, T]
-
-               K^{-1} u + \nabla p = 0                        in \Omega \times [0, T]
+              K^{-1} u + \nabla p = 0                        in \Omega \times [0, T]
 
 */
 
@@ -74,7 +72,7 @@ Solve the problem
 LifeV::AboutData
 makeAbout()
 {
-    LifeV::AboutData about( "Test Darcy transient non-linear expanded" ,
+    LifeV::AboutData about( "Test Darcy transient non-linear" ,
                             "LifeV Test Darcy" ,
                             "1.0",
                             "Darcy test case",
@@ -111,15 +109,25 @@ int main(int argc, char** argv)
     LifeV::po::options_description desc("Specific options");
     desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
 
+    // Error of the problem
+    LifeV::Real error(0);
+    // Error known
+    const LifeV::Real errorKnown( 0.305936230204981 );
+    // Tollerance between the error and the errorKnown
+    const LifeV::Real tollerance( 1e-8 );
+
     darcy Darcy( argc, argv, makeAbout(), desc );
-    Darcy.run();
+    error = Darcy.run();
 
 
-	#ifdef HAVE_MPI
-		MPI_Finalize();
-		std::cout << "MPI Finalization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
 
-    return( EXIT_SUCCESS );
+    if ( abs( error - errorKnown ) > tollerance )
+        return ( EXIT_FAILURE );
+    else
+        return ( EXIT_SUCCESS );
 }
 

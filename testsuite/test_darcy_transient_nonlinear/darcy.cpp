@@ -365,7 +365,7 @@ darcy::darcy( int argc,
 //! Methods
 // ===================================================
 
-void
+Real
 darcy::run()
 {
     typedef RegionMesh3D<LinearTetra>                       RegionMesh;
@@ -623,5 +623,8 @@ darcy::run()
     // The leader process print chronoTotal
     if ( isLeader )
         std::cout << "Total time for the computation " << chronoTotal.diff() << std::endl << std::flush;
+
+    // Return the error, needed for the succes/failure of the test
+    return darcySolver.primalL2Error( Members->getAnalyticalSolution(), Members->getUOne(), darcySolver.getTime() );
 
 }
