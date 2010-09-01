@@ -58,7 +58,7 @@ AT_DATA([data],[[
 
 	[./prec]
 	# ML, Ifpack
-	prectype                = ML
+	prectype                = Ifpack
 	reuse                   = false
 	displayList             = false
 
@@ -155,21 +155,9 @@ AT_DATA([data],[[
    reuse           = false
    max_iter_reuse  = 0
    kspace          = 100
-   tol             = 1.e-12    # AztecOO tolerance
-
-   [./amesos]
-   solvertype	= Umfpack
-   redistribute	= true
-   print_status = true
-   print_timing	= true
-
-	[../aztec]
-	solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
-	precond = dom_decomp
-	subdomain_solve = icc
-	output = warnings    #warnings , none , all, all, last
-	tol = 1e-6
-
+   tol             = 1.e-8    # AztecOO tolerance
+   [../]
+[../]
 
 ]])
 AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh;
