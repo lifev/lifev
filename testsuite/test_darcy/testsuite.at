@@ -42,7 +42,7 @@ AT_DATA([data],[[
 
 	[./space_discretization]
 	mesh_dir      = ./  # the directory where the mesh file is
-	mesh_file     = cartesian_cube16.mesh #hexahexa10x10x10.mesh
+	mesh_file     = cartesian_cube8.mesh #hexahexa10x10x10.mesh
 	mesh_type     = .mesh #structured #.mesh
 	verbose       = 1                        # verbose during mesh-reading
 	# 0 -> tetra, 1 -> hexa
@@ -172,7 +172,7 @@ AT_DATA([data],[[
 
 
 ]])
-AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube16.mesh;
+AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh;
           mpirun -np 2 ../../test_darcy/test_darcy -c],[0],[ignore],[ignore])
 AT_CLEANUP
 
