@@ -46,15 +46,22 @@
 #else
 #include <Epetra_SerialComm.h>
 #endif
+
+
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
-#include <life/lifefilters/ensight.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifesolver/Oseen.hpp>
+
+#ifdef HAVE_HDF5
+#include <life/lifefilters/hdf5exporter.hpp>
+#endif
+#include <life/lifefilters/ensight.hpp>
 
 #include <iostream>
 
@@ -121,7 +128,7 @@ struct  ResistanceProblem::Private
    double L;   /**< height and width of the domain (in cm) */
    double R;   /**< radius of the cylinder (in cm) */
    double resistance;
-   Epetra_Comm* comm;
+   boost::shared_ptr<Epetra_Comm>   comm;
 };
 
 
@@ -151,8 +158,8 @@ struct  ResistanceProblem::Private
     std::cout << "mpi initialization ... " << std::endl;
 
     //    MPI_Init(&argc,&argv);
+    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
@@ -204,10 +211,17 @@ ResistanceProblem::run()
     const QuadRule* qR_press;
     const QuadRule* bdQr_press;
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
-    dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+    boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
+    dataNavierStokes->setup( dataFile );
+
+    DataMesh dataMesh;
+    dataMesh.setup(dataFile, "fluid/space_discretization");
+
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, dataMesh);
+
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
 
@@ -235,8 +249,6 @@ ResistanceProblem::run()
                 bdQr_vel  = &quadRuleTria3pt;   // DoE 2
             }
 
-    Dof uDof(*dataNavierStokes.dataMesh()->mesh(), *refFE_vel);
-
     std::string pOrder =  dataFile( "fluid/discretization/press_order", "P1");
     if ( pOrder.compare("P2") == 0 )
     {
@@ -255,9 +267,9 @@ ResistanceProblem::run()
         }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
@@ -266,7 +278,7 @@ ResistanceProblem::run()
                                                              *qR_vel,
                                                              *bdQr_vel,
                                                              3,
-                                                             *d->comm);
+                                                             d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -279,7 +291,7 @@ ResistanceProblem::run()
                                                              *qR_press,
                                                              *bdQr_press,
                                                              1,
-                                                             *d->comm);
+                                                             d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -295,14 +307,19 @@ ResistanceProblem::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              *d->comm);
+                                              d->comm);
     EpetraMap fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "poiseuille", d->comm->MyPID());
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(),Repeated ) );
+#ifdef HAVE_HDF5
+    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "resistance", d->comm->MyPID());
+#else
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "resistance", d->comm->MyPID());
+#endif
+
+    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -311,21 +328,20 @@ ResistanceProblem::run()
                          UInt(3*uFESpace.dof().numTotalDof() ),
                          UInt(  pFESpace.dof().numTotalDof() ) );
 
-
     // Initialization
 
-    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
+    Real dt     = dataNavierStokes->dataTime()->getTimeStep();
+    Real t0     = dataNavierStokes->dataTime()->getInitialTime();
+    Real tFinal = dataNavierStokes->dataTime()->getEndTime();
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
+    BdfTNS<vector_type> bdf(dataNavierStokes->dataTime()->getBDF_order());
 
     // initialization with stokes solution
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.dataTime()->setTime(t0);
+    dataNavierStokes->dataTime()->setTime(t0);
 
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
@@ -363,7 +379,7 @@ ResistanceProblem::run()
     fluid.initialize(velocity, zero_scalar);
     //  fluid.initialize(zero_scalar, zero_scalar);
 
-    bdf.bdf_u().initialize_unk(fluid.solution());
+    bdf.bdf_u().initialize_unk(*fluid.solution());
 
     fluid.setUp(dataFile);
 
@@ -381,20 +397,20 @@ ResistanceProblem::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
-        dataNavierStokes.dataTime()->setTime(time);
+        dataNavierStokes->dataTime()->setTime(time);
 
         chrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
+        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
 
         beta = bdf.bdf_u().extrap();
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( fluid.solution() );
-        *velAndPressure = fluid.solution();
+        bdf.bdf_u().shift_right( *fluid.solution() );
+        *velAndPressure = *fluid.solution();
 
         ensight.postProcess( time );
 

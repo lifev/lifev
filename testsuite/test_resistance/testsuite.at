@@ -56,7 +56,7 @@ timestep		= 0.001
 BDF_order		= 1
 
 [../space_discretization]
-mesh_dir        = ./Mesh/
+mesh_dir        = ./
 mesh_file       = tube20.mesh          # "big file"
 #mesh_file       = tube-test.mesh          # "big file"
 #mesh_file       = tube-r5.mesh          # "big file"

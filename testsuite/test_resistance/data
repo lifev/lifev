@@ -4,6 +4,7 @@
 #----------------------------------------------------------------
 
 [exporter]
+type       = hdf5 # ensight # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
