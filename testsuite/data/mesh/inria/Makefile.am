@@ -33,7 +33,7 @@ dist_pkgdata_DATA = cube4x4.mesh cube8x8.mesh cube16x16.mesh cube32x32.mesh\
             cyl2D.mesh \
             vessel7x2_h002.mesh tube7x2_h002.mesh lid16.mesh\
 	    StructuredCube4.mesh StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh \
-                    cartesian_cube2.mesh cartesian_cube4.mesh cartesian_cube8.mesh \ 
+                    cartesian_cube2.mesh cartesian_cube4.mesh cartesian_cube8.mesh \
                     cartesian_cube16.mesh cartesian_cube32.mesh
 
 
