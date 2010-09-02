@@ -424,7 +424,7 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobia
             if ( ModelLocalID == 0 ) // DeltaSigma coefficient
                 Coefficient =  MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaStress( M_flags[ModelLocalID], SolveLinearSystem, M_stressType );
             else                     // DeltaFlux coefficient
-                Coefficient = -MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate(  M_flags[ModelLocalID], SolveLinearSystem );
+                Coefficient = -MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
         }
@@ -435,7 +435,7 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobia
             if ( ModelLocalID == 0 ) // DeltaSigma coefficient
                 Coefficient =  MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaStress( M_flags[ModelLocalID], SolveLinearSystem, M_stressType );
             else                     // DeltaFlux coefficient
-                Coefficient = -MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate(  M_flags[ModelLocalID], SolveLinearSystem );
+                Coefficient = -MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
         }
@@ -446,7 +446,7 @@ MS_Coupling_FluxStress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobia
             if ( ModelLocalID == 0 ) // DeltaSigma coefficient
                 Coefficient =  MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaStress( M_flags[ModelLocalID], SolveLinearSystem, M_stressType );
             else                     // DeltaFlux coefficient
-                Coefficient = -MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate(  M_flags[ModelLocalID], SolveLinearSystem );
+                Coefficient = -MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
             break;
         }

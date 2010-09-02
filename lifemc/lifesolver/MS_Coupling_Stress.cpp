@@ -159,7 +159,7 @@ MS_Coupling_Stress::InitializeCouplingVariables()
     Debug( 8220 ) << "MS_Coupling_Stress::InitializeCouplingVariables() \n";
 #endif
 
-    *M_LocalCouplingVariables      = 0.;
+    *M_LocalCouplingVariables = 0.;
 
     // Compute the Stress coupling variable as an average of all the stresses
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
