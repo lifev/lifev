@@ -45,8 +45,8 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const Flux_PtrType     flux,
-                                                                                const Source_PtrType   source,
+OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const Flux_PtrType&    flux,
+                                                                                const Source_PtrType&  source,
                                                                                 const OneD_BCSide&     side,
                                                                                 const OneD_BC&         bcType ):
     M_Flux                          ( flux ),
@@ -61,7 +61,7 @@ OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( 
         break;
 
         case OneD_right:
-            M_boundaryDof = M_Flux->Physics()->Data()->NumberOfElements() + 1;
+            M_boundaryDof = M_Flux->Physics()->Data()->NumberOfNodes();
         break;
     }
 }
@@ -87,7 +87,7 @@ OneDimensionalModel_BCFunction_Default::operator() ( const Real& /*time*/, const
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType solution )
+OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType& solution )
 {
     M_Solution = solution;
 }
@@ -97,8 +97,8 @@ OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType solu
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType     flux,
-                                                                                const Source_PtrType   source,
+OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType&    flux,
+                                                                                const Source_PtrType&  source,
                                                                                 const OneD_BCSide&     side,
                                                                                 const OneD_BC&         bcType ) :
     super                           ( flux, source, side, bcType ),
@@ -140,8 +140,8 @@ OneDimensionalModel_BCFunction_Riemann::update_U_boundary()
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType     flux,
-                                                                                            const Source_PtrType   source,
+OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType&    flux,
+                                                                                            const Source_PtrType&  source,
                                                                                             const OneD_BCSide&     side,
                                                                                             const OneD_BC&         bcType ):
     super                           ( flux, source, side, bcType ),
@@ -247,8 +247,7 @@ OneDimensionalModel_BCFunction_Compatibility::extrapolate_W( const OneD_BC& W, c
 void
 OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 {
-    this->M_Flux->jacobian_EigenValues_Vectors( (*(*this->M_Solution)["A"])(this->M_boundaryDof),
-                                                (*(*this->M_Solution)["Q"])(this->M_boundaryDof),
+    this->M_Flux->jacobian_EigenValues_Vectors( M_U_boundary[0], M_U_boundary[1],
                                                 M_eigval1, M_eigval2,
                                                 M_left_eigvec1[0], M_left_eigvec1[1],
                                                 M_left_eigvec2[0], M_left_eigvec2[1],
@@ -334,8 +333,8 @@ OneDimensionalModel_BCFunction_Compatibility::_interpolLinear( const Real& eigen
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType     flux,
-                                                                                    const Source_PtrType   source,
+OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType&    flux,
+                                                                                    const Source_PtrType&  source,
                                                                                     const OneD_BCSide&     side,
                                                                                     const OneD_BC&         bcType ):
     super                           ( flux, source, side, bcType )
@@ -431,8 +430,8 @@ OneDimensionalModel_BCFunction_Absorbing::resistance( Real& /*resistance*/ )
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType     flux,
-                                                                                      const Source_PtrType   source,
+OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType&    flux,
+                                                                                      const Source_PtrType&  source,
                                                                                       const OneD_BCSide&     side,
                                                                                       const OneD_BC&         bcType,
                                                                                       const Real&            resistance ):

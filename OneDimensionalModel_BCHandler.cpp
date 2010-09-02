@@ -75,6 +75,12 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler( const OneDimension
         BCFunction_Default_PtrType BCDefaultFunction( new BCFunction_Default_Type( *i->get() ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
     }
+
+    // NOTE: The copy constructor is not working correctly. All the members of the class are true copy, but
+    // the BCFunctions inside M_boundary are still pointing to the original M_defaultFunction, instead
+    // of to the copy (which remain unused!). This is because the link between M_boundary and M_defaultFunction
+    // is provided by boost::bind and, for now, we have no solution for this.
+    std::cout << "!!! WARNING: COPY CONSTRUCTOR DOES NOT CREATE A TRUE COPY !!!" << std::endl;
 }
 
 // ===================================================
@@ -105,7 +111,7 @@ OneDimensionalModel_BCHandler::applyBC( const Real&              time,
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType flux, const Source_PtrType source )
+OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType& flux, const Source_PtrType& source )
 {
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler] Set Default BC ... \n";
 
@@ -187,7 +193,7 @@ OneDimensionalModel_BCHandler::setBC( const OneD_BCSide&     side,
 }
 
 void
-OneDimensionalModel_BCHandler::setSolution( const Solution_PtrType solution )
+OneDimensionalModel_BCHandler::setSolution( const Solution_PtrType& solution )
 {
     for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setSolution( solution );

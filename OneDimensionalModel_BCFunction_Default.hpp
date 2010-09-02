@@ -86,7 +86,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Default( const Flux_PtrType flux, const Source_PtrType source,
+    OneDimensionalModel_BCFunction_Default( const Flux_PtrType& flux, const Source_PtrType& source,
                                             const OneD_BCSide& side, const OneD_BC& bcType );
 
     //! Copy constructor
@@ -111,7 +111,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setSolution( const Solution_PtrType solution );
+    void setSolution( const Solution_PtrType& solution );
 
     //@}
 
@@ -141,7 +141,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType flux, const Source_PtrType source,
+    OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType& flux, const Source_PtrType& source,
                                             const OneD_BCSide& side, const OneD_BC& bcType );
 
     //! Copy constructor
@@ -207,8 +207,8 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType flux, const Source_PtrType source,
-                                                  const OneD_BCSide& side, const OneD_BC& bcType );
+    OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType& flux, const Source_PtrType& source,
+                                                  const OneD_BCSide& side,  const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
@@ -288,8 +288,8 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType flux, const Source_PtrType source,
-                                              const OneD_BCSide& side, const OneD_BC& bcType );
+    OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType& flux, const Source_PtrType& source,
+                                              const OneD_BCSide& side,  const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
@@ -342,8 +342,8 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType flux, const Source_PtrType source,
-                                               const OneD_BCSide& side, const OneD_BC& bcType,
+    OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType& flux, const Source_PtrType& source,
+                                               const OneD_BCSide& side,  const OneD_BC& bcType,
                                                const Real& resistance );
 
     //! Copy constructor
