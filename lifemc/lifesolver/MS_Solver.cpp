@@ -203,17 +203,18 @@ MS_Solver::SolveProblem()
         if ( M_globalData->GetDataTime()->isFirstTimeStep() )
             M_model->BuildSystem();
         else
+        {
+            if ( M_model->GetType() == MultiScale )
+                M_algorithm->UpdateCouplingVariables();
             M_model->UpdateSystem();
+        }
 
         // SolveSystem
         M_model->SolveSystem();
 
         // If it is a MultiScale model, call algorithms for subiterations
         if ( M_model->GetType() == MultiScale )
-        {
             M_algorithm->SubIterate();
-            M_algorithm->UpdateCouplingVariables();
-        }
 
         // SaveSolution
         M_model->SaveSolution();
