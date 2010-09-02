@@ -978,8 +978,7 @@ OneDimensionalModel_Solver::BoundaryValue( const Solution_Type& solution, const 
         case OneD_W2:
             return (*solution.find("W2")->second)( boundaryDof );
         case OneD_P:
-            // Pressure is positive with respect to the outgoing normal
-            return (*solution.find("P")->second)( boundaryDof ) * ( ( bcSide == OneD_left ) ? -1. : 1. );
+            return (*solution.find("P")->second)( boundaryDof );
         default:
             std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;
             return 0.;
