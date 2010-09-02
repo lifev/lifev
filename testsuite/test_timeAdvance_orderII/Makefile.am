@@ -24,12 +24,12 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = timeAdvance.hpp
+check_HEADERS = timeAdvance.hpp linear_function.hpp nonlinear_function.hpp
 check_PROGRAMS = test_timeAdvance
 
 test_timeAdvance_SOURCES = main.cpp timeAdvance.cpp
 
-EXTRA_DIST = data
+EXTRA_DIST = data testsuite.at
 
 link:
 	test -a data || ln -s $(srcdir)/data
