@@ -125,7 +125,7 @@ public :
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
-     * @return dP(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + P / beta0 )^(1/beta1 - 1)
+     * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + P / beta0 )^(1/beta1 - 1)
      */
     Real dAdP( const Real& P, const UInt& i = 0 ) const;
 
