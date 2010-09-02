@@ -55,7 +55,6 @@ TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_meshReorder/testsuite.at \
            $(srcdir)/test_partition/testsuite.at \
            $(srcdir)/test_darcy/testsuite.at \
-           $(srcdir)/test_darcy_transien \
            $(srcdir)/test_darcy_transient_nonlinear/testsuite.at\
            $(srcdir)/test_resistance/testsuite.at\
 	   $(scrdir)/test_timeAdvance_orderI/testsuite.at  \ 
