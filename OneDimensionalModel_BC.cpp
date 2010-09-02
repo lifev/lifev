@@ -85,7 +85,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         //Container2D_Type leftEigenvector_first, leftEigenvector_second;
 
         UInt dof;
-        ( M_bcSide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->NumberOfElements() + 1;
+        ( M_bcSide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->NumberOfNodes();
 
         Container2D_Type U_boundary;
         U_boundary[0] = (*solution.find("A")->second)(dof);
@@ -210,12 +210,11 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
             M_bcMatrix[line][0] = 1.; M_bcMatrix[line][1] = 0.;
         break;
         case OneD_P:
-            if ( line == OneD_first && M_bcSide == OneD_left )
-                rhs *= -1;
             rhs = flux->Physics()->A_from_P( rhs, dof - 1 ); // Index start from 0
             M_bcMatrix[line][0] = 1.; M_bcMatrix[line][1] = 0.;
         break;
         case OneD_Q:
+            // Flow rate is positive with respect to the outgoing normal
             if ( line == OneD_first && M_bcSide == OneD_left )
                 rhs *= -1;
             M_bcMatrix[line][0] = 0.; M_bcMatrix[line][1] = 1.;
