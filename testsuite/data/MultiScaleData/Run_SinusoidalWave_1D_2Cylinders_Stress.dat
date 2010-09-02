@@ -24,8 +24,8 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_2Cylinders_St
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    initialtime                = .00000   # [s]
-    endtime                    = .04999   # [s]
+    initialtime                = .00      # [s]
+    endtime                    = .05      # [s]
     timestep                   = 5e-5     # [s]
     
     [../Algorithm]

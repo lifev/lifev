@@ -41,6 +41,7 @@ dist_pkgdata_DATA = MultiScale_test.dat \
 					Run_SinusoidalWave_1D_1Cylinder.dat \
 					Run_SinusoidalWave_1D_2Cylinders_Stress.dat \
 					Run_SinusoidalWave_1D_2Cylinders_FluxStress.dat \
+					Run_SinusoidalWave_1D_3Cylinders_Stress.dat \
 					Run_SinusoidalWave_1D_3Cylinders_FluxStress.dat \
 					Run_SinusoidalWave_1D-3DFluid_2Cylinders_FluxStress.dat \
 					Run_SinusoidalWave_1D-3DFluid_2Cylinders_Stress.dat \
