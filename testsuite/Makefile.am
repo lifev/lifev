@@ -31,19 +31,19 @@ SUBDIRS		= data  \
               test_getpot \
               test_structure \
               test_ethiersteinman \
-    	      test_fsi \
+              test_fsi \
               test_ns_flux \
               test_meshReorder \
-	          test_laplacian \
+              test_laplacian \
               test_currentFE \
               test_filters \
               test_partition \
               test_darcy \
               test_darcy_transient_nonlinear \
-	          test_resistance \
+              test_resistance \
               test_timeAdvance_orderI \
-	        test_timeAdvance_orderII \
-	        $(DO_NOT_COMPILE)
+              test_timeAdvance_orderII \
+              $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_cylinder/testsuite.at \
@@ -57,8 +57,8 @@ TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_darcy/testsuite.at \
            $(srcdir)/test_darcy_transient_nonlinear/testsuite.at\
            $(srcdir)/test_resistance/testsuite.at\
-	       $(scrdir)/test_timeAdvance_orderI/testsuite.at  \
-	       $(scrdir)/test_timeAdvance_orderII/testsuite.at
+           $(scrdir)/test_timeAdvance_orderI/testsuite.at  \
+           $(scrdir)/test_timeAdvance_orderII/testsuite.at
 
 
 
