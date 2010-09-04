@@ -333,9 +333,9 @@ const VectorType
 TimeAdvance<VectorType>::unk(const UInt i) const
 {
 // Pay attention: i is c-based indexed
-    ASSERT( i <= _M_size,
+    ASSERT( i < _M_size,
             "Error there isn't unk(i), i must be shorter than M_size" );
-  std::cout<<"i  " << i<<" \n";
+
   VectorType u(*_M_unknowns[i]);
   return u;
 }
