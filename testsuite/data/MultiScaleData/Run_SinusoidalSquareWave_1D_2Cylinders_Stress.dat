@@ -26,7 +26,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalSquareWave_1D_2Cylind
     [../time_discretization]
     initialtime                = .00        # [s]
     endtime                    = 0.15       # [s]
-    timestep                   = 1.5e-5     # [s]
+    timestep                   = 60e-5      # [s]
     
     [../Algorithm]
     AlgorithmType              = Newton            # Aitken, Explicit, Newton
