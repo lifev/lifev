@@ -13,5 +13,6 @@
 ###################################################################################################
 
 [MultiScale]
-couplingName = FluxStess_TotalPressure
-stressType = TotalPressure
+couplingName           = FluxStess_TotalPressure
+stressType             = TotalPressure
+timeInterpolationOrder = 2

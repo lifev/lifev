@@ -27,6 +27,7 @@ dist_pkgdata_DATA = Absorbing_1D_left.dat \
 					Absorbing_NobileVergara.dat \
                     SinusoidalFlux.dat \
                     SinusoidalFluxWave.dat \
+                    SinusoidalSquareFluxWave.dat \
 					SinusoidalPressure.dat \
 					WomersleySinusoidalFlux.dat \
 					WomersleySinusoidalPressure.dat \

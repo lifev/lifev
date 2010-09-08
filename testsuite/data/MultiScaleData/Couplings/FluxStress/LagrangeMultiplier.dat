@@ -13,5 +13,6 @@
 ###################################################################################################
 
 [MultiScale]
-couplingName = FluxStess_LagrangeMultiplier
-stressType = LagrangeMultiplier
+couplingName           = FluxStess_LagrangeMultiplier
+stressType             = LagrangeMultiplier
+timeInterpolationOrder = 2

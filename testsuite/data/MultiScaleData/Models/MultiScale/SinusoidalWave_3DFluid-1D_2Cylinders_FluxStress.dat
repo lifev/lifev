@@ -27,7 +27,7 @@ couplingsPath    = './MultiScaleData/Couplings/'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '    
             0       Fluid3D             Cylinder_tube20
-            1       OneDimensional      Cylinder
+            1       OneDimensional      Cylinder_5x10
          '
 ###################################################################################################
 

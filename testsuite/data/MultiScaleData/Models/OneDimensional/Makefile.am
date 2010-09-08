@@ -22,7 +22,14 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Cylinder.dat \
+dist_pkgdata_DATA = Cylinder_100x40.dat \
+                    Cylinder_80x40.dat \
+                    Cylinder_60x40.dat \
+                    Cylinder_40x40.dat \
+                    Cylinder_20x40.dat \
+                    Cylinder_10x40.dat \
+                    Cylinder_5x40.dat \
+                    Cylinder_5x10.dat \
                     Template.dat
 
 check-local:

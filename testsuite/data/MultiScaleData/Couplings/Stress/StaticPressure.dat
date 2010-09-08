@@ -13,5 +13,6 @@
 ###################################################################################################
 
 [MultiScale]
-couplingName = Stess_StaticPressure
-stressType = StaticPressure
+couplingName           = Stess_StaticPressure
+stressType             = StaticPressure
+timeInterpolationOrder = 2

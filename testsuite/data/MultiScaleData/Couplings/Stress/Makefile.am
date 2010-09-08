@@ -23,8 +23,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = StaticPressure.dat \
-                    TotalPressure.dat \
-                    LagrangeMultiplier.dat
+                    TotalPressure.dat
 					
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

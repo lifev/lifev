@@ -26,10 +26,10 @@ couplingsPath    = './MultiScaleData/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '    
-            0       OneDimensional      Cylinder
+            0       OneDimensional      Cylinder_5x10
             1       FSI3D               Carotid
-            2       OneDimensional      Cylinder
-            3       OneDimensional      Cylinder
+            2       OneDimensional      Cylinder_5x10
+            3       OneDimensional      Cylinder_5x10
          '
 ###################################################################################################
 
