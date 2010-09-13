@@ -581,6 +581,8 @@ namespace LifeV
         PointType & lastPoint(); //!< last mesh point
         PointType const & point( ID const i ) const; //!< ith mesh point
         PointType & point( ID const i ); //!< ith mesh point
+        PointType const & pointInitial ( ID const i ) const; //!< ith mesh point
+        PointType & pointInitial( ID const i ); //!< ith mesh point
         PointType const & boundaryPoint( ID const i ) const; //!< ith b. point.
         PointType & boundaryPoint( ID const i ); //!< ith b. point.
         UInt numBPoints() const; //!< counter of boundary points
@@ -1759,6 +1761,25 @@ namespace LifeV
         return pointList( i );
     }
 
+    template <typename GEOSHAPE, typename MC>
+    INLINE
+    typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
+    RegionMesh3D<GEOSHAPE, MC>::pointInitial( ID const i ) const
+    {
+        ASSERT_BD( i > 0 && i <= pointList.size() ) ;
+
+        return _pointList( i );
+    }
+
+    template <typename GEOSHAPE, typename MC>
+    INLINE
+    typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+    RegionMesh3D<GEOSHAPE, MC>::pointInitial( ID const i )
+    {
+        ASSERT_BD( i > 0 && i <= pointList.size() ) ;
+
+        return _pointList( i );
+    }
 
     template <typename GEOSHAPE, typename MC>
     INLINE
