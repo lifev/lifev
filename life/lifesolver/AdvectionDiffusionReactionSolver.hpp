@@ -177,16 +177,11 @@ public:
      * @param dataFile the GetPot container
      * @section prefix for accessing GetPot container
      */
-    virtual void setup( const GetPot& dataFile,
-                        const std::string& section = "adr" );
+    void setupLinearSolver( const GetPot& dataFile,
+                            const std::string& section = "adr" );
 
     //! Initializes the solver data structures
-    /*!
-     * @param dataADRPtr a pointer to the problem descriptor
-     * @param solutionFESpace a pointer to the FE space descriptor for the unknown
-     */
-    void setup( data_ptr_type& dataADRPtr,
-                fespace_ptr_type& solutionFESpace );
+    virtual void setup();
 
     //! Assembles the constant matrices
     virtual void computeConstantMatrices( ADRConstantMatrices whichMatrices = ADR_MASS_STIFF );
@@ -217,7 +212,7 @@ public:
     /*!
      * @param timeIntegratorPtr a pointer to the manager for the time integration
      */
-    void updateMatrix( timeIntegrator_ptr_type timeIntegratorPtr = timeIntegrator_ptr_type() );
+    virtual void updateMatrix( timeIntegrator_ptr_type timeIntegratorPtr = timeIntegrator_ptr_type() );
 
     //! Solves the linear system
     /*!
@@ -253,13 +248,13 @@ public:
     /*!
      * @param dataPtr a pointer to the data object
      */
-    // void setDataPtr( data_ptr_type dataPtr ) { M_dataPtr = dataPtr; }
+    void setDataPtr( data_ptr_type dataPtr ) { M_dataPtr = dataPtr; }
 
     //! set the pointer to the FE space descriptor for the unknown
     /*!
      * @param uFESpacePtr a pointer to the FE space descriptor for the unknown
      */
-    // void setUFESpacePtr( fespace_ptr_type uFESpacePtr ) { M_uFESpacePtr = uFESpacePtr; }
+    void setUFESpacePtr( fespace_ptr_type uFESpacePtr ) { M_uFESpacePtr = uFESpacePtr; }
 
     //! set the pointer to the FE space descriptor for the advection field
     /*!
@@ -461,7 +456,7 @@ ADRSolver<Mesh, SolverType>::
 
 
 template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::setup( const GetPot& dataFile, const std::string& section )
+void ADRSolver<Mesh, SolverType>::setupLinearSolver( const GetPot& dataFile, const std::string& section )
 {
     // We want a slash dividing the data file section from the variable name but only
     // when not provided by the user or when not looking in the root of the data file
@@ -475,17 +470,15 @@ void ADRSolver<Mesh, SolverType>::setup( const GetPot& dataFile, const std::stri
 
 
 template<typename Mesh, typename SolverType>
-void ADRSolver<Mesh, SolverType>::setup( data_ptr_type& dataADRPtr,
-                                         fespace_ptr_type& solutionFESpacePtr )
+void ADRSolver<Mesh, SolverType>::setup()
 {
-    M_dataPtr = dataADRPtr;
+    ASSERT( M_dataPtr.get(), "\nThe data descriptor for ADR solver is undefined!\n" );
+    ASSERT( M_uFESpacePtr.get(), "\nThe FE space for the unknown is undefined!\n" );
 
-    M_uFESpacePtr = solutionFESpacePtr;
-
-    M_advectionFieldFESpacePtr.reset( new fespace_type( solutionFESpacePtr->mesh(),
-                                                        dataADRPtr->solFEType(),
+    M_advectionFieldFESpacePtr.reset( new fespace_type( M_uFESpacePtr->mesh(),
+                                                        M_dataPtr->solFEType(),
                                                         nDimensions,
-                                                        solutionFESpacePtr->map().CommPtr() ) );
+                                                        M_uFESpacePtr->map().CommPtr() ) );
 
     // if ( M_dataPtr->reactionCoefficient() || ( !M_dataPtr->steady() ) )
     M_elmatMassPtr.reset( new ElemMat( M_uFESpacePtr->fe().nbFEDof(),
@@ -525,7 +518,7 @@ void ADRSolver<Mesh, SolverType>::setup( data_ptr_type& dataADRPtr,
 
     M_displayer.setCommunicator( M_uFESpacePtr->map().CommPtr() );
     M_linearSolver.setCommunicator( M_uFESpacePtr->map().CommPtr() );
-                                         }
+}
 
 
 template<typename Mesh, typename SolverType>
