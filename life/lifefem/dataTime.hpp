@@ -182,11 +182,26 @@ public:
      */
     Real getEndTime()		 const { return M_endTime; }
 
+    //! Get the period
+    /*!
+     * @return period value
+     */
+    Real getPeriodTime()		 const { return M_periodTime; }
+
     //! Get the present time
     /*!
      * @return time value
      */
     Real getTime()			 const { return M_time; }
+
+    //! Get the present time shifted inside the first cycle
+    //! (i.e. in the interval (M_initialTime,M_periodTime)).
+    //! Useful for periodic behavior, e.g. BC.
+    /*!
+     * @return time value in first cycle
+     */
+    Real getInCycleTime()			 const
+		{ return (M_time - static_cast<int>(floor((M_time-M_timeStep/2)/M_periodTime)) * M_periodTime); }
 
     //! Get the previous time
     /*!
@@ -241,6 +256,8 @@ private:
 
     Real					M_initialTime;	// initial time
     Real					M_endTime;		// end time
+    Real					M_periodTime;	// period time
+    Real					M_inCycleTime;	// in cycle time
     Real					M_time;			// time
     Real					M_timeStep; 	// time step
     UInt					M_BDF_order; 	// order of the time discretization formula

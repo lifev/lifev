@@ -43,6 +43,7 @@ namespace LifeV
 DataTime::DataTime( ) :
     M_initialTime   ( 0. ),
     M_endTime       ( 1. ),
+    M_periodTime       ( 1. ),
     M_time          ( M_initialTime ),
     M_timeStep      ( M_endTime ),
     M_BDF_order     ( 1 ),
@@ -60,6 +61,7 @@ DataTime::DataTime( const DataTime& dataTime )
 {
 	M_initialTime	= dataTime.M_initialTime;
 	M_endTime		= dataTime.M_endTime;
+	M_periodTime		= dataTime.M_periodTime;
 	M_time			= dataTime.M_time;
 	M_timeStep		= dataTime.M_timeStep;
 	M_BDF_order		= dataTime.M_BDF_order;
@@ -75,6 +77,7 @@ DataTime::setup( const GetPot& dfile, const std::string& section )
 {
     M_initialTime = dfile(( section + "/initialtime"  ).data(), 0.);
     M_endTime = dfile(( section + "/endtime"      ).data(), 1.);
+    M_periodTime = dfile(( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
     M_timeStep = dfile(( section + "/timestep" ).data(), M_endTime );
     M_BDF_order = dfile(( section + "/BDF_order" ).data(), 1 );
