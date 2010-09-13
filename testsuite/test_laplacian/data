@@ -21,21 +21,21 @@
 	# robinList = '5, 6'
 	solutionType = steadyPolynomial # steadyPolynomial, unsteadyPolynomial
 
+	[../space_discretization]
+	sol_FEtype     = P2
+
 	[../space_discretization2D]
-	order     = P1
 	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
 	mesh_type = .msh
 	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
 
-
 	[../space_discretization3D]
-	order     = P1
 	mesh_dir  = ./Mesh/  # the directory where the mesh file is
 	#mesh_file = cube4x4.mesh        # mesh file
-	#mesh_file = cube8x8.mesh        # mesh file
+	mesh_file = cube8x8.mesh        # mesh file
 	#mesh_file = cube16x16-reord.mesh      # mesh file
 	#mesh_file = cube16x16.mesh      # mesh file
-	mesh_file = cube32x32.mesh      # mesh file
+	#mesh_file = cube32x32.mesh      # mesh file
 
 	[../prec]
 	prectype                = ML # ML or Ifpack
