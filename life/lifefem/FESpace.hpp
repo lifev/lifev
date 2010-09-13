@@ -989,7 +989,7 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 
     for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+        //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
         CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
         newFE.update(this->mesh()->element( iVol ),UPDATE_DPHI | UPDATE_WDET);
