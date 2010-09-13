@@ -34,7 +34,6 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #      Data file for EthierSteinman test case
 #-------------------------------------------------
 
-
 [exporter]
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
@@ -48,22 +47,29 @@ save       = 1
     viscosity       = .01       # viscosity
 
     [../time_discretization]
-    initialtime		= 0.
-    endtime			= 1e-4
-    timestep		= 1e-5
+    initialtime     = 0.0
+    endtime         = 1e-4
+    timestep        = 1e-5
+
     BDF_order		= 1
 
     [../space_discretization]
-	mesh_type        = insideCode            # The mesh is created inside the source code
+	mesh_number     = 3
+    mesh_size       = '4 8 16'
+    mesh_dir		= ./
+    mesh_file       = cube16x16.mesh
 
     verbose         = 0
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    vel_order         = P1
-    press_order       = P1
+    FE_number         = 3
+    vel_order         = 'P1 P1Bubble P2'
+    press_order       = 'P1 P1 P1'
+    vel_conv_order    = '2 2 3'
+    press_conv_order  = '2 2 2'
 
-    initialization  = interp            # initialize using proj: L2 projection
+    initialization  = proj              # initialize using proj: L2 projection
                                         #                  interp: interpolation
 
     [../miscellaneous]
@@ -72,7 +78,7 @@ save       = 1
 
 	[../prec]
 	prectype                = Ifpack # Ifpack or ML
-	displayList             = true
+	displayList             = false
 
 		[./ML]
 		analyze_smoother        = false
@@ -91,8 +97,8 @@ save       = 1
 			damping_factor          = 1
 
 			[../coarse]
-			type                    = Amesos-UMFPACK
-			#type                    = Amesos-KLU
+			#type                    = Amesos-UMFPACK
+			type                    = Amesos-KLU
 			sweeps                  = 1
 			pre_or_post             = both
 			max_size                = 200
@@ -142,21 +148,22 @@ save       = 1
     tol             = 1.e-10    # AztecOO tolerance
 
     [../ipstab]
-    gammaBeta  = 0.02
-    gammaDiv   = 0.2
-    gammaPress = 0.2
+    gammaBeta  = 0.7
+    gammaDiv   = 0.7
+    gammaPress = 0.7
     max_iter_reuse  = 60
 
     [../problem]
     #a = 1.57
     #d = 0.78
     sigma = 0
-    neumannList = 1
-    dirichletList = 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
-    #dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    #neumannList = 1
+    #dirichletList = 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
 
 
 ]])
-AT_CHECK([mpirun -np 3 ../../test_ethiersteinman/test_ethiersteinman -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cube16x16.mesh;
+          mpirun -np 4 ../../test_ethiersteinman/test_ethiersteinman -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 

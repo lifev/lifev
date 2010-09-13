@@ -163,9 +163,8 @@ Ethiersteinman::Ethiersteinman( int argc,
 }
 
 void
-Ethiersteinman::run()
+Ethiersteinman::check()
 {
-
     Chrono chrono;
 
     // Reading from data file
@@ -173,6 +172,7 @@ Ethiersteinman::run()
     GetPot dataFile( d->data_file_name.c_str() );
 
     bool verbose = (d->comm->MyPID() == 0);
+    if(verbose) std::cout << "Test checks the accuracy of the solution" << std::endl;
 
     chrono.start();
 
@@ -212,7 +212,7 @@ Ethiersteinman::run()
 
     // fluid solver
 
-    boost::shared_ptr<DataNavierStokes> dataNavierStokes;
+    boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
     DataMesh dataMesh;
@@ -412,8 +412,8 @@ Ethiersteinman::run()
         beta = bdf.bdf_u().extrap();
 
         rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
-//        rhs *= alpha;
-//        rhs  = bdf.bdf_u().time_der( dataNavierStokes->getTimeStep() );
+        // rhs *= alpha;
+        // rhs  = bdf.bdf_u().time_der( dataNavierStokes->getTimeStep() );
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("\n");
@@ -440,14 +440,41 @@ Ethiersteinman::run()
     chronoGlobal.stop();
     if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
+    // Computation of the error
+    vector_type vel  (uFESpace.map(), Repeated);
+    vector_type press(pFESpace.map(), Repeated);
+    vector_type velpressure ( *fluid.solution(), Repeated );
 
+    velpressure = *fluid.solution();
+    vel.subset(velpressure);
+    press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+
+    double urelerr;
+    double prelerr;
+    double ul2error;
+    double pl2error;
+
+    ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
+    pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
+
+    double testTol(0.02);
+
+    if(verbose) std::cout << "Relative error: E(u)=" << urelerr << ", E(p)=" << prelerr << std::endl
+                          << "Tolerance=" << testTol << std::endl;
+
+    if(urelerr>testTol || prelerr>testTol){
+        if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
+        throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
+    }else{
+        if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
+    }
 
 }
 
 
 
 void
-Ethiersteinman::check()
+Ethiersteinman::run()
 {
     Chrono chrono;
 
@@ -456,6 +483,7 @@ Ethiersteinman::check()
     GetPot dataFile( d->data_file_name.c_str() );
 
     bool verbose = (d->comm->MyPID() == 0);
+    if(verbose) std::cout << "Test checks the convergence in space of the solution" << std::endl;
 
     Problem::setParamsFromGetPot( dataFile );
 
@@ -829,9 +857,9 @@ Ethiersteinman::check()
 
                 double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
 
-                //beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
-                beta *= 0;
-                uFESpace.interpolate(Problem::uexact, beta, time);
+                beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
+                //beta *= 0;
+                //uFESpace.interpolate(Problem::uexact, beta, time);
 
                 rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
@@ -948,9 +976,10 @@ Ethiersteinman::check()
             std::cout << status << std::endl;
 
         }
+
         if(!success){
             if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
-            //throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
+            throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
         }else{
             if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
         }

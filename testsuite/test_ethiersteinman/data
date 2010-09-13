@@ -26,8 +26,8 @@ save       = 1
     [../space_discretization]
 	mesh_number     = 3
     mesh_size       = '4 8 16'
-    mesh_dir		 = Mesh/
-    mesh_file       = cube8x8.mesh
+    mesh_dir		 = ./Mesh/
+    mesh_file       = cube16x16.mesh
 
     verbose         = 0
     linearized      = 0
@@ -39,7 +39,7 @@ save       = 1
     vel_conv_order    = '2 2 3'
     press_conv_order  = '2 2 2'
 
-    initialization  = interp            # initialize using proj: L2 projection
+    initialization  = proj              # initialize using proj: L2 projection
                                         #                  interp: interpolation
 
     [../miscellaneous]
