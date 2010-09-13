@@ -280,7 +280,7 @@ public:
     data_ptr_type dataPtr() const { return M_dataPtr; }
 
     //! returns a pointer to the FE space descriptor for the unknown
-    // fespace_ptr_type uFESpacePtr() const { return M_uFESpacePtr; }
+    fespace_ptr_type uFESpacePtr() const { return M_uFESpacePtr; }
 
     //! returns a pointer to the FE space descriptor for the advection field
     // fespace_ptr_type betaFESpacePtr() const { return M_advectionFieldFESpacePtr; }
@@ -508,10 +508,13 @@ void ADRSolver<Mesh, SolverType>::setup()
 
     M_rhsNoBC.setMap( this->M_uFESpacePtr->map() );
     M_rhsNoBC = EpetraVector( M_uFESpacePtr->map() );
+    M_rhsNoBC *= 0.;
     M_sol.setMap( this->M_uFESpacePtr->map() );
     M_sol = EpetraVector( M_uFESpacePtr->map() );
+    M_sol *= 0.;
     M_residual.setMap( this->M_uFESpacePtr->map() );
     M_residual = EpetraVector( M_uFESpacePtr->map() );
+    M_residual *= 0.;
 
     M_advectionVector.setMap( this->M_advectionFieldFESpacePtr->map() );
     // M_advectionVector = EpetraVector( M_uFESpacePtr->map() );
