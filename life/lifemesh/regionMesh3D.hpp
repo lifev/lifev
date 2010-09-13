@@ -42,6 +42,7 @@
 #include <life/lifearray/SimpleVect.hpp>
 
 #include <life/lifemesh/basisElSh.hpp>
+#include <life/lifemesh/mesh_util_base.hpp>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
