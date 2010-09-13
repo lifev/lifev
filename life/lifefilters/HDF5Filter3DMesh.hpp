@@ -161,11 +161,11 @@ public:
       Add a DOF interface to the member vector M_interfaceData, for writing to the HDF5
       file. Call once for each interface that is to be written.
     */
-    void addDOFInterfaces(const interface_vector_ptrType& interfaces,
-                          const std::string& type,
-                          const Int& firstInterfaceFlag,
-                          const Int& secondInterfaceFlag,
-                          const boost::shared_ptr<Epetra_Comm>& comm);
+    void addDOFInterface(const interface_vector_ptrType& interfaces,
+                         const std::string& type,
+                         const Int& firstInterfaceFlag,
+                         const Int& secondInterfaceFlag,
+                         const boost::shared_ptr<Epetra_Comm>& comm);
 
     // TODO: Write a replacement methods that returns the graph vector directly,
     //       like with getMeshPartition and getStoredInterface
@@ -252,7 +252,7 @@ HDF5Filter3DMesh<Mesh>::HDF5Filter3DMesh(const GetPot& dfile, const std::string&
 // ===================================================
 
 template<typename Mesh>
-void HDF5Filter3DMesh<Mesh>::addDOFInterfaces(const interface_vector_ptrType& interfaces,
+void HDF5Filter3DMesh<Mesh>::addDOFInterface(const interface_vector_ptrType& interfaces,
                                               const std::string& type,
                                               const Int& firstInterfaceFlag,
                                               const Int& secondInterfaceFlag,
