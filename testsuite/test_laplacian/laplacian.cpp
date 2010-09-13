@@ -207,7 +207,7 @@ Real g( const Real& /* t */,
            const Real& x,
            const Real& y,
            const Real& z,
-           const ID&   icomp)
+           const ID&   /*icomp*/)
 {
     return sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
 }
@@ -217,7 +217,7 @@ Real source_in( const Real& /* t */,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&  icomp)
+                const ID&  /*icomp*/)
 {
     return 12*Pi*Pi*sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
 }
@@ -473,8 +473,10 @@ laplacian::run()
     Chrono chrono;
 
     chrono.start();
-    laplacian.setup(dataFile);
-    laplacian.setup(dataADRPtr, adrFESpacePtr);
+    laplacian.setupLinearSolver(dataFile);
+    laplacian.setDataPtr(dataADRPtr);
+    laplacian.setUFESpacePtr(adrFESpacePtr);
+    laplacian.setup();
     laplacian.computeConstantMatrices();
 
     // Laplacian Solver

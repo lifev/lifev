@@ -217,7 +217,7 @@ ADRProblem::run()
     dataMesh.setup( dataFile, discretization_section );
     dataTimePtr->setup( dataFile, "adr/time_discretization" );
     dataADRPtr->setup( dataFile, "adr" );
-    adrSolver.setup( dataFile, "adr" );
+    adrSolver.setupLinearSolver( dataFile, "adr" );
     solution_type::setup( dataFile, "adr" );
 
     ADRProblemSolution solutionType = ADRProblemSolution(
@@ -329,7 +329,9 @@ ADRProblem::run()
 #endif
 
     // Initialize the solver internal data structures
-    adrSolver.setup( dataADRPtr, uFESpacePtr );
+    adrSolver.setDataPtr( dataADRPtr );
+    adrSolver.setUFESpacePtr( uFESpacePtr );
+    adrSolver.setup();
 
     // Initialize the solution
     adrSolver.initialize( solution_type::u_ex );
