@@ -191,7 +191,12 @@ public:
     //! Pay intention that this will add ones to the diagonal,
     //! so for later added values with set_mat_inc, the one
     //! will be added
-    void insertOneDiagonal();
+    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
+	If from > to, process all diagonal entries entries
+	If from = to, do nothing
+	This methods works only if matrix is not closed.
+    */
+    void insertOneDiagonal(int from = -1, int to = -2);
 
     //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
     //! This method does not remove non zero entries in the diagonal.
@@ -495,9 +500,9 @@ void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, int from
 //! so for later added values with set_mat_inc, the one
 //! will be added
 template <typename DataType>
-void EpetraMatrix<DataType>::insertOneDiagonal()
+void EpetraMatrix<DataType>::insertOneDiagonal(int from, int to)
 {
-    insertValueDiagonal(1.0);
+    insertValueDiagonal(1.0, from, to);
 }
 
 
@@ -682,7 +687,6 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
                          &remoteIDs[0],
                          PIDList,
                          LIDList);
-
 
     std::vector< std::vector<int> > procToID  (Comm.NumProc());
     std::vector< std::vector<int> > procToData(Comm.NumProc());
