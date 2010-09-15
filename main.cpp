@@ -69,6 +69,8 @@
 #include <boost/timer.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
+#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
+#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 
 #include <life/lifesolver/DataFSI.hpp>
@@ -94,6 +96,17 @@
 #include "boundaryConditions.hpp"
 #include "flowConditions.hpp"
 #include "lumpedHeart.hpp"
+
+
+namespace LifeV
+{
+namespace
+{
+LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+
+LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+}
+}
 
 class Problem
 {
@@ -129,15 +142,18 @@ public:
     {
         using namespace LifeV;
 
+        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+
         M_data = data_PtrType( new data_Type() );
         M_data->setup( data_file );
         M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
-        M_data->showMe();
+        //M_data->showMe();
 
 #ifdef DEBUG
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
 #endif
-        M_fsi = fsi_solver_ptr( new FSISolver( _oper ) );
+        M_fsi = fsi_solver_ptr( new FSISolver( ) );
         MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
@@ -148,36 +164,56 @@ public:
         MPI_Barrier( MPI_COMM_WORLD );
 
         // Setting FESpace and DOF
+
+        std::string  fluidMeshPartitioned    =  data_file( "problem/fluidMeshPartitioned", "none" );
+        std::string  solidMeshPartitioned    =  data_file( "problem/solidMeshPartitioned", "none" );
+        if( fluidMeshPartitioned.compare( "none" ) )
+        {
+            FSIOperator::mesh_filtertype fluidMeshFilter( data_file, fluidMeshPartitioned );
+            fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
+            FSIOperator::mesh_filtertype solidMeshFilter( data_file, solidMeshPartitioned );
+            solidMeshFilter.setComm( M_fsi->FSIOper( )->worldComm( ) );
+            M_fsi->FSIOper( )->partitionMeshes( fluidMeshFilter, solidMeshFilter );
+            M_fsi->FSIOper( )->setupFEspace( );
+            M_fsi->FSIOper( )->setupDOF( fluidMeshFilter );
+            fluidMeshFilter.CloseFile( );
+            solidMeshFilter.CloseFile( );
+        }
+        else
+        {
+            M_fsi->FSIOper( )->partitionMeshes( );
+            M_fsi->FSIOper( )->setupFEspace( );
+            M_fsi->FSIOper( )->setupDOF( );
+        }
+
         Debug( 10000 ) << "Setting up the FESpace and DOF \n";
-        M_fsi->FSIOper()->setupFEspace();
-        M_fsi->FSIOper()->setupDOF();
+
         MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
         Debug( 10000 ) << "Setting up the BC \n";
 #endif
-	    M_fsi->setFluidBC(BCh_monolithicFlux());
-	    M_fsi->setSolidBC(BCh_monolithicRobin(*M_fsi->FSIOper()));
+	    M_fsi->setFluidBC( BCh_monolithicFlux( ) );
+	    M_fsi->setSolidBC( BCh_monolithicRobin( *M_fsi->FSIOper( ) ) );
 
 	    M_fsi->setup(/*data_file*/);
 
-	    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper()));
-        M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->FSIOper()));
-        M_fsi->setSolidBC(BCh_monolithicSolid(*M_fsi->FSIOper()));
+	    M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ) ) );
+        M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
+        M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
 #ifdef DEBUG
         Debug( 10000 ) << "BC set\n";
 #endif
 
-        std::string const exporterType =  data_file( "exporter/type", "ensight");
-        std::string const fluidName    =  data_file( "exporter/fluid/filename", "fluid");
-        std::string const solidName    =  data_file( "exporter/solid/filename", "solid");
+        std::string const exporterType =  data_file( "exporter/type", "ensight" );
+        std::string const fluidName    =  data_file( "exporter/fluid/filename", "fluid" );
+        std::string const solidName    =  data_file( "exporter/solid/filename", "solid" );
 
 #ifdef HAVE_HDF5
         if (exporterType.compare("hdf5") == 0)
         {
             M_exporterFluid.reset( new  hdf5filter_type( data_file, fluidName) );
             M_exporterSolid.reset( new  hdf5filter_type ( data_file,solidName));
-
         }
         else
 #endif
@@ -231,8 +267,8 @@ public:
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->getTimeStep() );
-        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->getInitialTime() );
+//         M_data->dataFluid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->getInitialTime() + M_data->dataFluid()->dataTime()->getTimeStep() );
+//         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->getInitialTime() + M_data->dataFluid()->dataTime()->getTimeStep());
     }
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
@@ -246,7 +282,7 @@ public:
     run()
     {
         boost::timer _overall_timer;
-        M_Tstart=M_fsi->FSIOper()->dataFluid().dataTime()->getInitialTime();
+        M_Tstart=M_fsi->FSIOper()->dataFluid()->dataTime()->getInitialTime();
         int _i = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
@@ -298,8 +334,8 @@ public:
 
             M_fsi->FSIOper()->getSolidDisp(*M_solidDisp);//    displacement(), M_offset);
             M_fsi->FSIOper()->getSolidVel(*M_solidVel);//    displacement(), M_offset);
-            *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
-            *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
 
             M_fsi->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
 
@@ -332,14 +368,14 @@ public:
             }catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
-        if(!M_fsi->FSIOper()->dataFluid().useShapeDerivatives())
+        if(M_data->method().compare("monolithicGI"))
         {
             M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
 
             M_solidDisp->subset(M_fsi->displacement(), offset);
             M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
-            *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
-            *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
 
 
             *M_velAndPressure = M_fsi->displacement();
@@ -547,7 +583,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 
     UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
-    Real dt= M_fsi->FSIOper()->dataFluid().dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
+    Real dt= M_fsi->FSIOper()->dataFluid()->dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);
 
     M_importerFluid->import(M_Tstart-dt, dt);
