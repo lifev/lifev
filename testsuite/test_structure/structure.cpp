@@ -42,7 +42,7 @@
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataElasticStructure.hpp>
-#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 
 #include <life/lifefilters/ensight.hpp>
@@ -169,7 +169,7 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
     // Number of boundary conditions for the velocity and mesh motion
     //
-    BCHandler BCh(2);
+    boost::shared_ptr<BCHandler> BCh( new BCHandler(2) );
     BCFunctionBase dZero( zero_scalar );
     //
     // dataElasticStructure
@@ -196,10 +196,13 @@ Structure::run3d()
 
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,parameters->comm);
+
+    typedef FESpace< RegionMesh3D<LinearTetra>, EpetraMap > solidFESpace_type;
+    typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
+    solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
-    EpetraMap structMap(dFESpace.refFE(), meshPart, parameters->comm);
+    EpetraMap structMap(dFESpace->refFE(), meshPart, parameters->comm);
 
     EpetraMap fullMap;
 
@@ -208,18 +211,20 @@ Structure::run3d()
          fullMap += structMap;
     }
 
-    VenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid( dataStructure,
-                                                             dFESpace,
-                                                             parameters->comm);
-    solid.setUp(dataFile);
+    LinearVenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid;
+    solid.setup(dataStructure,
+                dFESpace,
+                parameters->comm);
+
+    solid.setDataFromGetPot(dataFile);
     solid.buildSystem();
     //
     // Boundary conditions for the displacement
     //
     BCFunctionBase fixed(dZero);
 
-    BCh.addBC("Base2 ", 2 , Essential, Full, fixed, 3);
-    BCh.addBC("Base3 ", 3 , Essential, Full, fixed, 3);
+    BCh->addBC("Base2 ", 2 , Essential, Full, fixed, 3);
+    BCh->addBC("Base3 ", 3 , Essential, Full, fixed, 3);
 
     //
     // Temporal data and initial conditions
@@ -230,8 +235,8 @@ Structure::run3d()
     vector_ptrtype disp(new vector_type(solid.disp(), Unique));
     vector_ptrtype vel(new vector_type(solid.vel(), Unique));
 
-    dFESpace.interpolate(d0, *disp, 0.0);
-    dFESpace.interpolate(w0, *vel , 0.0);
+    dFESpace->interpolate(d0, *disp, 0.0);
+    dFESpace->interpolate(w0, *vel , 0.0);
 
     if (verbose) std::cout << "S- initialization ... ";
 
@@ -273,10 +278,10 @@ Structure::run3d()
     vector_ptrtype solidVel  ( new vector_type(solid.vel(),  exporter->mapType() ) );
 
     exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
-                           UInt(0), dFESpace.dof().numTotalDof() );
+                           UInt(0), dFESpace->dof().numTotalDof() );
 
     exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
-                           UInt(0), dFESpace.dof().numTotalDof() );
+                           UInt(0), dFESpace->dof().numTotalDof() );
 
     exporter->postProcess( 0 );
 
