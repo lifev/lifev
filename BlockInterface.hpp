@@ -166,6 +166,15 @@ public:
      */
     virtual void replace_matrix( const matrix_ptrtype& Mat, UInt index)=0;
 
+
+    //! replaces a coupling block
+    /*!
+      replaces a block on a specified position in the vector
+        @param Mat block matrix to push
+        @param index position in the vector
+     */
+    virtual void replace_coupling( const matrix_ptrtype& Mat, UInt index)=0;
+
     //! runs GlobalAssemble on the blocks
     /*!
       closes and distributes all the matrices before computing the preconditioner

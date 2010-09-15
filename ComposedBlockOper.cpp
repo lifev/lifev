@@ -64,9 +64,9 @@ void ComposedBlockOper::GlobalAssemble()
     {
         M_blocks[k]->GlobalAssemble();
     }
-//        M_blocks[0]->spy("first");
-//        M_blocks[1]->spy("second");
-//        M_blocks[2]->spy("third");
+//             M_blocks[0]->spy("first");
+//             M_blocks[1]->spy("second");
+//             M_blocks[2]->spy("third");
 //        M_blocks[3]->spy("fourth");
 }
 
@@ -79,6 +79,11 @@ void ComposedBlockOper::push_back_matrix(const matrix_ptrtype& Mat, const  bool 
 void ComposedBlockOper::replace_matrix( const matrix_ptrtype& Mat, UInt position )
 {
     M_blocks[position]=Mat;
+}
+
+void ComposedBlockOper::replace_coupling( const matrix_ptrtype& Mat, UInt position )
+{
+    M_coupling[position]=Mat;
 }
 
 void ComposedBlockOper::swap(const UInt i, const UInt j)

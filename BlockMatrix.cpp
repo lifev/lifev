@@ -202,22 +202,27 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     M_interfaceMap.reset(new EpetraMap(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.getMap(Repeated)->IndexBase()/*1*/, epetraWorldComm));
 }
 
-
-
 void BlockMatrix::applyBoundaryConditions(const Real& time)
 {
-
     for( UInt i = 0; i < super::M_blocks.size(); ++i )
-        bcManageMatrix( *M_globalMatrix , *super::M_FESpace[i]->mesh(), super::M_FESpace[i]->dof(), *super::M_bch[i], super::M_FESpace[i]->feBd(), 1., time);
+        applyBoundaryConditions( time, i );
 }
-
 
 void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs)
 {
     for( UInt i = 0; i < super::M_blocks.size(); ++i )
-        bcManage( *M_globalMatrix, *rhs , *super::M_FESpace[i]->mesh(), super::M_FESpace[i]->dof(), *super::M_bch[i], super::M_FESpace[i]->feBd(), 1., time);
+        applyBoundaryConditions( time, rhs, i );
 }
 
+void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs, const UInt block)
+{
+    bcManage( *M_globalMatrix , *rhs, *super::M_FESpace[block]->mesh(), super::M_FESpace[block]->dof(), *super::M_bch[block], super::M_FESpace[block]->feBd(), 1., time);
+}
+
+void BlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
+{
+    bcManageMatrix( *M_globalMatrix , *super::M_FESpace[block]->mesh(), super::M_FESpace[block]->dof(), *super::M_bch[block], super::M_FESpace[block]->feBd(), 1., time);
+}
 
 void BlockMatrix::addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/)
 {

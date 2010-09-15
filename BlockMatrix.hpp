@@ -183,6 +183,17 @@ public:
      */
     void  replace_matrix( const matrix_ptrtype& Mat, UInt index);
 
+
+    //! replaces the coupling matrix without copies
+    /*!
+      this method is deprecated, it is implemented for compatibility with the base class
+      \param Mat replacing matrix
+     */
+    void replace_coupling( const matrix_ptrtype& Mat, UInt /*index*/)
+    {
+        M_coupling = Mat;
+    }
+
     //! never used within this class
     /*!
       runs assert(false) when called. This method is used only when the preconditioner is a composed operator
@@ -266,8 +277,14 @@ public:
     //! applies the b.c. to every block
     void applyBoundaryConditions(const Real& time);
 
-    //! applies the b.c. to the i-th block
+    //! applies the b.c. to a specific block
+    void applyBoundaryConditions(const Real& time, const UInt block );
+
+    //! applies all the b.c.s to the global matrix, updates the rhs
     void applyBoundaryConditions(const Real& time, vector_ptrtype& rhs);
+
+    //! applies the b.c. to the a specific block, updates the rhs
+    void applyBoundaryConditions(const Real& time, vector_ptrtype& rhs, const UInt block);
 
     //! adds a block to the coupling matrix
     /*!
