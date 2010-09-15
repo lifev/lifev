@@ -105,6 +105,7 @@ public:
     typedef Mesh                         mesh_type;
     typedef boost::shared_ptr<mesh_type> mesh_ptrtype;
     typedef Map                          map_type;
+    typedef boost::shared_ptr<Map>       map_ptrtype;
     typedef typename Map::comm_ptrtype   comm_ptrtype;
 
     /** @name Constructors, Destructor
@@ -286,11 +287,11 @@ public:
     //! This method reconstruct a gradient of a solution in the present FE space.
     /*!
       The goal of this method is to build an approximation of the gradient of a given
-      FE function in this FESpace. Typically, when one use P1 elements for approximating 
+      FE function in this FESpace. Typically, when one use P1 elements for approximating
       the solution of a given problem, the gradient is only piecewise constant. However, one
-      could need continuous gradient. The solutions to this problem is either to use specific 
+      could need continuous gradient. The solutions to this problem is either to use specific
       finite elements (like Hermite FE) or rely on a recovery procedure for the gradient.
-     
+
       This method implements a recovery procedure that performs a local average with weights
       corresponding to the areas of the elements:
       \f[ Gr(P) = \frac{\sum_{P \in T} |T| \nabla u(P)}{\sum_{P \in T} |T|} \f]
@@ -305,7 +306,7 @@ public:
     /*!
       This method simply uses the FESpace::GradientRecovery method several times so
       that one can get a continuous approximation of the laplacian of the given solution.
-      
+
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
@@ -339,8 +340,9 @@ public:
     mesh_ptrtype 		mesh()		  { return M_mesh; }
 
     //! Returns map
-    const map_type&		map()	const { return M_map; }
-    map_type&			map()		  { return M_map; }
+    const map_type&		map()	const { return *M_map; }
+    map_type&			map()		  { return *M_map; }
+    const boost::shared_ptr<const Map>			mapPtr() const  { return M_map; }
 
 	//! Returns the velocity dof
 	const Dof&			dof()	const { return *M_dof; }
@@ -420,7 +422,7 @@ public:
 
     template<typename vector_type>
     Real L2Norm( const vector_type& vec );
-    
+
     template<typename function>
     Real L2NormFunction( const function& f, const Real time = 0);
 
@@ -538,7 +540,7 @@ private:
     boost::shared_ptr<CurrentBdFE>		M_feBd;
 
     //! Map
-    map_type							M_map;
+    map_ptrtype							M_map;
 
 };
 
@@ -566,7 +568,7 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
         M_dim			( M_dof->numTotalDof() ),
         M_fe			( new CurrentFE  ( *M_refFE,              getGeoMap( *M_mesh ),               *M_Qr ) ),
         M_feBd			( ),
-        M_map			( )
+        M_map			( new map_type() )
 {
     if (M_refFE->hasBoundaryFE())
     {
@@ -574,7 +576,7 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
     }
     Map map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-        M_map += map;
+        *M_map += map;
 }
 
 template <typename Mesh, typename Map>
@@ -589,7 +591,7 @@ FESpace(	partitionMesh<Mesh>&	mesh,
     M_dof			( ),
     M_fe			( ),
     M_feBd			( ),
-    M_map			( )
+    M_map			( new map_type() )
 {
 	// Set spaceMap
 	M_spaceMap["P1"]		= P1;
@@ -605,7 +607,7 @@ FESpace(	partitionMesh<Mesh>&	mesh,
 	M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
 	M_dim = M_dof->numTotalDof();
 	M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
-        
+
         if (M_refFE->hasBoundaryFE())
         {
             M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
@@ -614,7 +616,7 @@ FESpace(	partitionMesh<Mesh>&	mesh,
 	// Build Map
 	Map map( *M_refFE, *M_mesh, commptr );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-		M_map += map;
+		*M_map += map;
 }
 
 template <typename Mesh, typename Map>
@@ -635,12 +637,12 @@ FESpace(	mesh_ptrtype			mesh,
     M_dim			( M_dof->numTotalDof() ),
     M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
     M_feBd			( ),
-    M_map			( )
+    M_map			( new map_type() )
 {
 	Map map( *M_refFE, *M_mesh, commptr );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-		M_map += map;
-        
+		*M_map += map;
+
         if (M_refFE->hasBoundaryFE())
         {
             M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
@@ -659,7 +661,7 @@ FESpace(	mesh_ptrtype			mesh,
     M_dof			( ),
     M_fe			( ),
     M_feBd			( ),
-    M_map			( )
+    M_map			( new map_type() )
 {
 	// Set spaceMap
 	M_spaceMap["P1"]		= P1;
@@ -675,7 +677,7 @@ FESpace(	mesh_ptrtype			mesh,
 	M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
 	M_dim = M_dof->numTotalDof();
 	M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
-        
+
         if (M_refFE->hasBoundaryFE())
         {
             M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
@@ -684,7 +686,7 @@ FESpace(	mesh_ptrtype			mesh,
 	// Build Map
 	Map map( *M_refFE, *M_mesh, commptr );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-        M_map += map;
+        *M_map += map;
 }
 
 // Set FE space (default standard parameters)
@@ -780,14 +782,14 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
     QuadRule interpQuad;
     interpQuad.setDimensionShape(3,M_refFE->shape());
     interpQuad.setPoints(M_refFE->refCoor(),std::vector<Real>(M_refFE->nbDof(),0));
-    
+
     // Then, we define a currentFE with nodes on the reference nodes
     CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
-    
+
     // Some constants
     UInt totalNumberElements(M_mesh->numElements());
     UInt numberLocalDof(M_dof->numLocalDof());
-    
+
     // Storage for the values
     std::vector<Real> nodalValues(numberLocalDof,0);
     std::vector<Real> FEValues(numberLocalDof,0);
@@ -797,7 +799,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
     {
         // We update the CurrentFE so that we get the coordinates of the nodes
         interpCFE.update(M_mesh->element(iterVolume), UPDATE_QUAD_NODES);
-        
+
         // Loop over the dimension of the field
         for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
         {
@@ -808,19 +810,19 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                 nodalValues[iterDof] =  fct(time,interpCFE.quadNode(iterDof,0),interpCFE.quadNode(iterDof,1)
                                             ,interpCFE.quadNode(iterDof,2),iDim+1);
             }
-            
+
             // Transform the nodal values in FE values
             FEValues = M_refFE->nodalToFEValues(nodalValues);
-            
+
             // Then on the dimension of the FESpace (scalar field vs vectorial field)
             for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
             {
                 // Find the ID of the considered DOF
                 ID globalDofID(M_dof->localToGlobal(iterVolume,iterDof+1) + iDim*M_dim);
-                
+
                 // Compute the value of the function and set it
                 vect.checkAndSet(globalDofID,FEValues[iterDof]);
-                
+
             }
         }
     }
@@ -1039,15 +1041,15 @@ FESpace<Mesh, Map>::L2NormFunction( const function& f, const Real time)
     for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
     {
         this->fe().update( this->mesh()->element( ielem ), UPDATE_WDET  );
-	
+
         sumExact += elemL22( f, this->fe(), time, M_fieldDim );
     }
-    
+
     Real sendbuff[1] = {sumExact};
     Real recvbuff[1];
-    
+
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
-    
+
     sumExact    = recvbuff[0];
 
     return sqrt( sumExact );
@@ -1972,14 +1974,14 @@ GradientRecovery(const vector_type& solution, const UInt& dxi)
 
     UInt totalNumberElements(M_mesh->numElements());
     UInt numberLocalDof(M_dof->numLocalDof());
-    
+
     CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
 
     // Loop over the cells
     for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
     {
         interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
-        
+
         for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
         {
             for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
@@ -1996,7 +1998,7 @@ GradientRecovery(const vector_type& solution, const UInt& dxi)
         }
     }
 
-    // Assembly  
+    // Assembly
     return vector_type(gradientSum,Unique,Add)/vector_type(patchArea,Unique,Add);
 }
 
