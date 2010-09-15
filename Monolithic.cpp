@@ -63,7 +63,6 @@ Monolithic::~Monolithic()
 {
 }
 
-
 void
 Monolithic::setupFEspace()
 {
@@ -75,7 +74,6 @@ Monolithic::setupFEspace()
                                                          nDimensions,
                                                          M_epetraComm));
 }
-
 
 void
 Monolithic::setupDOF( void )
@@ -90,14 +88,21 @@ Monolithic::setupDOF( void )
                                                M_data->interfaceTolerance(),
                                                M_data->fluidInterfaceVertexFlag() );
 
-    createInterfaceMaps(M_dofStructureToHarmonicExtension);
+    createInterfaceMaps(M_dofStructureToHarmonicExtension->locDofMap());
 }
 
+void
+Monolithic::setupDOF( mesh_filtertype& filterMesh )
+{
+    boost::shared_ptr< std::map<UInt, UInt> > locDofMap;
+    locDofMap = filterMesh.getStoredInterface( 0 );
+    createInterfaceMaps(*locDofMap);
+}
 
 void
-Monolithic::setupFluidSolid()
+Monolithic::setupFluidSolid( )
 {
-    super::setupFluidSolid();
+    super::setupFluidSolid( );
 
     // Note: up to now it works only with matching grids (and poly order) on the interface
     assert(M_fluidInterfaceMap->getMap(Unique)->NumGlobalElements() == M_solidInterfaceMap->getMap(Unique)->NumGlobalElements());
@@ -155,9 +160,8 @@ void
 Monolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock);
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());
     M_solidBlock->GlobalAssemble();
-    *M_solidBlock *= (M_data->dataSolid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());
     M_solid->rescaleMatrices();
 }
 
@@ -298,9 +302,7 @@ Monolithic::evalResidual( vector_type&       res,
         //M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
 
         assembleFluidBlock(iter);
-
-        M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
-        *M_solidBlockPrec += *M_solidBlock;
+        assembleSolidBlock();
 
         if ( !M_BCh_u->bdUpdateDone() )
             M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
@@ -332,7 +334,7 @@ Monolithic::evalResidual( vector_type&       res,
         }
 
         M_monolithicMatrix->blockAssembling();
-        M_monolithicMatrix->applyBoundaryConditions(dataFluid().dataTime()->getTime(), M_rhsFull);
+        M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
 
         M_monolithicMatrix->GlobalAssemble();
         //M_monolithicMatrix->getMatrix()->spy("M");
@@ -343,17 +345,16 @@ Monolithic::evalResidual( vector_type&       res,
         M_nbEval++ ;
         //M_precPtr->reset();
         //M_precPtr->resetBlocks();
-        setupBlockPrec( *M_rhsFull );
+        setupBlockPrec( );
 
         M_precPtr->blockAssembling();
-        M_precPtr->applyBoundaryConditions(dataFluid().dataTime()->getTime());
+        M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
         M_precPtr->GlobalAssemble();
-
     }
     evalResidual( disp,  M_rhsFull, res, M_diagonalScale);
 }
 
-int Monolithic::setupBlockPrec(vector_type& /*rhs*/)
+int Monolithic::setupBlockPrec( )
 {
      if(!(M_precPtr->set()))
      {
@@ -543,7 +544,7 @@ Monolithic::computeMaxSingularValue( )
     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrix()->getMatrixPtr()));
 
     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr));
-    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/),  true);
+    M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/), true);
     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(ComposedPrecPtr/*matrCrsPtr*/), true, true);
     M_PAAP->push_back(boost::dynamic_pointer_cast<operator_type>(/*ComposedPrecPtr*/matrCrsPtr), false, true);
 
@@ -624,38 +625,13 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
     M_solid->getDisplayer().leaderPrint("   system solved.\n ");
 }
 
-
-
 void
-Monolithic::assembleFluidBlock(UInt iter)
+Monolithic::assembleSolidBlock( )
 {
-    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
-    matrix_ptrtype newMatrix(new matrix_type(*M_monolithicMap));
-    M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, newMatrix );
-    this->M_fluid->updateStab(*newMatrix);
-    newMatrix->GlobalAssemble();
-
-    M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
-    *M_fluidBlock += *newMatrix;
-
-
-        if(iter==0)
-        {
-            M_nbEval = 0; // new time step
-            M_resetPrec=true;
-            *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
-            couplingRhs(this->M_rhs, M_un);
-
-            if (!M_restarts)
-            {
-                this->M_solid->updateVel();
-                M_restarts = false;
-            }
-            updateSolidSystem(this->M_rhs);
-        }
-
-        *M_rhsFull = *M_rhs;
-
+    *this->M_rhs += *M_solid->rhsWithoutBC();
+    M_solid->getSolidMatrix(M_solidBlock);
+    M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
+    *M_solidBlockPrec += *M_solidBlock;
 }
 
 }

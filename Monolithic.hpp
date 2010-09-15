@@ -118,10 +118,13 @@ public:
     */
     void setupFEspace();
 
+
     /**
        sets the interface map between the fluid and solid meshes
     */
     virtual void setupDOF( void );
+    void setupDOF( mesh_filtertype& filterMesh );
+
 
     //!@}
 
@@ -382,7 +385,7 @@ public:
     void getSolidDisp(vector_type& soliddisp)
     {
         soliddisp.subset(*un(), M_offset);
-        soliddisp *= dataFluid().dataTime()->getTimeStep()*M_solid->rescaleFactor();
+        soliddisp *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
     }
 
     //! get the solid velocity
@@ -393,7 +396,7 @@ public:
     void getSolidVel(vector_type& solidvel)
     {
         solidvel.subset(M_solid->vel(), M_offset);
-        solidvel *= dataFluid().dataTime()->getTimeStep()*M_solid->rescaleFactor();
+        solidvel *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
     }
 
     void getFluidVelAndPres(vector_type& sol)
@@ -454,7 +457,7 @@ protected:
 
     void variablesInit(std::string const& dOrder);
 
-    int  setupBlockPrec(vector_type& /*rhs*/);
+    int  setupBlockPrec( );
         //!@}
     //!@name protected setters
     //!@{
@@ -467,8 +470,10 @@ protected:
 
     //!@name protected getters
     //!@{
+    virtual void assembleSolidBlock();
 
-    virtual void assembleFluidBlock(UInt iter);
+
+    virtual void assembleFluidBlock(UInt iter)=0;
     //!@}
 
 
@@ -516,9 +521,9 @@ protected:
     bool                                              M_reusePrec;// to move to private
     bool                                              M_resetPrec;// to move to private
     UInt                                              M_maxIterSolver;// to move to private
+    bool                                              M_restarts;
 
 private:
-    bool                                              M_restarts;
     static bool                                       reg;
 };
 
