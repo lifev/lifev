@@ -643,12 +643,12 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_type& bch )
 
     // solving the system
     M_linearSolver->setMatrix(*matrFull);
-    matrFull->spy( "matrix.data" );
-    rhsFull.spy( "rhs.dat" );
+    //matrFull->spy( "matrix.data" );
+    //rhsFull.spy( "rhs.dat" );
 
     M_linearSolver->solveSystem( rhsFull, *M_disp, matrFull);
 
-    M_disp->spy( "sol.dat" );
+    //M_disp.spy( "sol.dat" );
 
     *M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (*M_disp);
     *M_vel -= *M_rhsW;
