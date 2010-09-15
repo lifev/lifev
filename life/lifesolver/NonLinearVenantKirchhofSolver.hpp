@@ -863,9 +863,9 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrix_ptrt
     stiff.reset(new matrix_type(*this->M_localMap));
     *stiff += *this->M_linearStiff;
 
-        Real coef;
-        coef=M_zeta;
-        *stiff *= coef;
+    Real coef;
+    coef=M_zeta;
+    *stiff *= coef;
 
 
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
@@ -939,8 +939,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
 
     jacobian.reset(new matrix_type(*this->M_localMap));
 
-    //*jacobian += *this->M_linearStiff;
-    //*jacobian += *this->M_mass;
+    *jacobian += *this->M_linearStiff;
 
     Real coef;
     coef = this->M_zeta;
@@ -1057,7 +1056,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
 
 #endif
 
-
+    *jacobian += *this->M_mass;
 
     jacobian->GlobalAssemble();
 
@@ -1086,12 +1085,6 @@ solveJacobian( vector_type&           step,
     Chrono chrono;
 
     updateJacobian( *this->M_disp, this->M_jacobian );
-    matrix_ptrtype tmp( new matrix_type( *this->M_localMap, 1 ) );
-    *tmp += *this->M_mass;
-    *tmp += *this->M_linearStiff;
-    *tmp += *this->M_jacobian;
-    tmp->GlobalAssemble( );
-    this->M_jacobian = tmp;
 
     this->M_Displayer->leaderPrint("\tS'-  Solving the linear system ... \n");
 
