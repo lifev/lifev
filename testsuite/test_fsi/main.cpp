@@ -36,6 +36,8 @@
 //#include "life/lifesolver/exactJacobianBase.hpp"
 //#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/DataFSI.hpp>
+#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
+#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
 
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifefilters/ensight.hpp>
@@ -62,6 +64,18 @@ namespace
 }
 }
 */
+
+namespace LifeV
+{
+namespace
+{
+LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+
+//NOTE: the nonlinear structure solver is still in development in the FSI framework
+LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+}
+}
+
 using namespace LifeV;
 
 int returnValue = EXIT_SUCCESS; // For the final check
@@ -161,6 +175,10 @@ public:
     */
     Problem( const std::string& dataFileName, std::string method = "" )
     {
+
+        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+
 		Debug( 10000 ) << "Setting up data from GetPot \n";
 		GetPot dataFile( dataFileName );
         M_data = data_PtrType( new data_Type() );
@@ -170,13 +188,14 @@ public:
     	MPI_Barrier( MPI_COMM_WORLD );
 
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
-        M_fsi = fsi_solver_ptr( new FSISolver( M_data->method() ) );
+        M_fsi = fsi_solver_ptr( new FSISolver( ) );
         M_fsi->setData( M_data );
         M_fsi->FSIOper()->setDataFile( dataFile ); //TO BE REMOVED!
         MPI_Barrier( MPI_COMM_WORLD );
 
         // Setting FESpace and DOF
         Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+        M_fsi->FSIOper( )->partitionMeshes( );
         M_fsi->FSIOper()->setupFEspace();
         M_fsi->FSIOper()->setupDOF();
         MPI_Barrier( MPI_COMM_WORLD );
@@ -201,7 +220,7 @@ public:
     	MPI_Barrier( MPI_COMM_WORLD );
 
         std::string const exporterType =  dataFile( "exporter/type", "hdf5");
-        std::string const exporterName =  dataFile( "exporter/filename", "fixedPt");
+        std::string const exporterName =  dataFile( "exporter/name", "fixedPt");
 
 		Debug( 10000 ) << "Setting up Ensight \n";
     	if ( M_fsi->isFluid() )

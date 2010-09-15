@@ -51,9 +51,9 @@ start      = 0
 save       = 1
 type       = ensight
 [./fluid]
-name = fluid
+filename   = fluid
 [../solid]
-name = solid
+filename = solid
 
 [fluid]
 
@@ -74,7 +74,10 @@ BDF_order		= 1
 [../ipstab]
 gammaBeta  = 1
 gammaDiv   = 0.2
-gammaPress = 0.2
+gammaPress = 0.05
+#gammaBeta  = 1
+#gammaDiv   = 0.2
+#gammaPress = 0.2
 reuse      = true
 max_iter_reuse = 100
 
@@ -197,6 +200,7 @@ filter_singletons      = false
 [solid]
 
 [./physics]
+solidType = linearVenantKirchhof # the nonlinear case is not implemented yet
 material_flag   = 1 # '1 2'
 young           = 3.0E6 #,1.9E9
 poisson         = 0.30 #,0.30
