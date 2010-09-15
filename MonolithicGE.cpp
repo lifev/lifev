@@ -60,18 +60,19 @@ void MonolithicGE::setupFluidSolid()
     //                                                                    *M_uFESpace,
     //                                                                    *M_pFESpace,
     //                                                                    *M_epetraComm));
-
     M_un.reset (new vector_type(*this->M_monolithicMap));
     M_rhs.reset(new vector_type(*this->M_monolithicMap));
     M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
     M_beta.reset  (new vector_type(M_uFESpace->map()));
 
-    M_solid.reset(new FSIOperator::solid_raw_type(M_data->dataSolid(),
-                                                  *M_dFESpace,
-                                                  M_epetraComm,
-                                                  *M_monolithicMap,
-                                                  M_offset
-                                                  ));
+    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType() ));
+
+    M_solid->setup(M_data->dataSolid(),
+                   M_dFESpace,
+                   M_epetraComm,
+                   M_monolithicMap,
+                   M_offset
+                   );
 
     //             if (isLinearSolid())// to be implemented with the offset
     //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
@@ -93,6 +94,39 @@ MonolithicGE::setupSystem( )
     M_meshMotion->setUp( M_dataFile );
 }
 
+
+
+void
+MonolithicGE::assembleFluidBlock(UInt iter)
+{
+    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
+    matrix_ptrtype newMatrix(new matrix_type(*M_monolithicMap));
+    M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, newMatrix );
+    this->M_fluid->updateStab(*newMatrix);
+    newMatrix->GlobalAssemble();
+
+    M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+    *M_fluidBlock += *newMatrix;
+
+
+        if(iter==0)
+        {
+            M_nbEval = 0; // new time step
+            M_resetPrec=true;
+            *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+            couplingRhs(this->M_rhs, M_un);
+
+            if (!M_restarts)
+            {
+                this->M_solid->updateVel();
+                M_restarts = false;
+            }
+            updateSolidSystem(this->M_rhs);
+        }
+
+        *M_rhsFull = *M_rhs;
+
+}
 
 namespace
 {
@@ -153,4 +187,5 @@ bool MonolithicGE::reg = FSIFactory::instance().registerProduct( "monolithicGE",
     BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &createAdditiveSchwarzRN ) &&
     BlockPrecFactory::instance().registerProduct("ComposedDN"  , &createComposedDN ) &&
     BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &createComposedDN2 );
+
 } // Namespace LifeV

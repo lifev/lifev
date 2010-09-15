@@ -27,6 +27,9 @@
    \date (17/09/2008)
 */
 
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
+
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 #include <lifemc/lifesolver/ComposedDN.hpp>
 #include <lifemc/lifesolver/ComposedDND.hpp>
@@ -83,12 +86,13 @@ MonolithicGI::setupFluidSolid()
                                           *M_mmFESpace,
                                           M_epetraComm,
                                           *M_monolithicMap));
-    M_solid.reset     (new solid_raw_type(M_data->dataSolid(),
-                                          *M_dFESpace,
-                                          M_epetraComm,
-                                          *M_monolithicMap,
-                                          M_offset
-                                          ));
+    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ));
+    M_solid->setup(M_data->dataSolid(),
+                    M_dFESpace,
+                    M_epetraComm,
+                    M_monolithicMap,
+                    M_offset
+                   );
 }
 
 void
@@ -114,8 +118,8 @@ MonolithicGI::buildSystem ()
 
 void
 MonolithicGI::evalResidual( vector_type&       res,
-                              const vector_type& disp,
-                              const UInt          iter )
+                            const vector_type& disp,
+                            const UInt          iter )
 {
     if(iter == 0)
     {
@@ -125,12 +129,12 @@ MonolithicGI::evalResidual( vector_type&       res,
     {
         this->M_solid->updateVel();
     }
-    M_uk.reset(new vector_type(disp));
-    this->M_beta.reset(new vector_type(M_uFESpace->map()));
-    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
+    M_uk.reset(new vector_type( disp ));
+    this->M_beta.reset( new vector_type(M_uFESpace->map()) );
+    UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
-    vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
-    vector_ptrtype meshDispOld(new vector_type(M_mmFESpace->map()));
+    vector_ptrtype meshDispDiff( new vector_type(M_mmFESpace->map()) );
+    vector_ptrtype meshDispOld( new vector_type(M_mmFESpace->map()) );
 
     meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
@@ -160,15 +164,21 @@ MonolithicGI::evalResidual( vector_type&       res,
         fluid->subset(disp, 0);
     *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
 
+    if(iter == 0)
+    {
+        M_solid->updateSystem();
+    }
+    else
+    {
+        M_solid->computeMatrix( disp, 1.);
+    }
+
+    assembleSolidBlock();
     assembleFluidBlock(iter);
     assembleMeshBlock(iter);
 
-    M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap));
-    *M_solidBlockPrec += *M_solidBlock;
-
     M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
     M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
-
 
     if(!M_monolithicMatrix->set())
     {
@@ -180,7 +190,7 @@ MonolithicGI::evalResidual( vector_type&       res,
         M_BChs.push_back(M_BCh_mesh);
         M_FESpaces.push_back(M_mmFESpace);
 
-        M_monolithicMatrix->push_back_matrix(M_solidBlock, false);
+        M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
         M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
         M_monolithicMatrix->push_back_matrix(M_meshBlock, false);
         M_monolithicMatrix->setConditions(M_BChs);
@@ -190,7 +200,7 @@ MonolithicGI::evalResidual( vector_type&       res,
     }
     else
     {
-        M_monolithicMatrix->replace_matrix(M_solidBlock, 0);
+        M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
         M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
         M_monolithicMatrix->replace_matrix(M_meshBlock, 2);
     }
@@ -199,7 +209,6 @@ MonolithicGI::evalResidual( vector_type&       res,
 
     if ( !M_BCh_u->bdUpdateDone() )
         M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-
     M_BCh_d->setOffset(M_offset);
     if ( !M_BCh_d->bdUpdateDone() )
         M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
@@ -207,65 +216,91 @@ MonolithicGI::evalResidual( vector_type&       res,
     if ( !M_BCh_mesh->bdUpdateDone() )
         M_BCh_mesh->bdUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
-
-    M_monolithicMatrix->applyBoundaryConditions(dataFluid().dataTime()->getTime(), M_rhsFull);
+    M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
     //M_monolithicMatrix->getMatrix()->spy("FM");
 
     super::evalResidual( disp, M_rhsFull, res, false );
 
-    setupBlockPrec(*M_rhsFull);
+    setupBlockPrec( );
 
-    M_precPtr->blockAssembling();
-    M_precPtr->applyBoundaryConditions(dataFluid().dataTime()->getTime());
-    M_precPtr->GlobalAssemble();
+    M_precPtr->blockAssembling( );
+    M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->getTime() );
+    M_precPtr->GlobalAssemble( );
+
 }
 
-int MonolithicGI::setupBlockPrec(vector_type& rhs)
+int MonolithicGI::setupBlockPrec( )
 {
-    super::setupBlockPrec( rhs );
+    super::setupBlockPrec( );
 
     if(M_data->dataFluid()->useShapeDerivatives())
     {
         *M_shapeDerivativesBlock *= 0.;
-        M_shapeDerivativesBlock->openCrsMatrix();
-        shapeDerivatives(M_shapeDerivativesBlock,*M_uk /*subX*/, M_domainVelImplicit, M_convectiveTermDer);
+        M_shapeDerivativesBlock->openCrsMatrix( );
+        shapeDerivatives( M_shapeDerivativesBlock ,*M_uk/*subX*/, M_domainVelImplicit, M_convectiveTermDer );
         //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
-        M_shapeDerivativesBlock->GlobalAssemble();
+        M_shapeDerivativesBlock->GlobalAssemble( );
         M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
     }
 
-    if(M_precPtr->getBlockVector().size()<3)
+    //M_solidDerBlock = M_solidBlockPrec; // an inexact Newton approximation of the Jacobian
+
+    //The following part accounts for a possibly nonlinear structure model, should not be run when linear
+    //elasticity is used
+    if( M_data->dataSolid()->useExactJacobian() )
     {
-        M_precPtr->push_back_matrix(M_meshBlock, false);
-        M_precPtr->setConditions(M_BChs);
-        M_precPtr->setSpaces(M_FESpaces);
-        M_precPtr->setOffsets(3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface);
-        M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2);
-        M_precPtr->push_back_coupling( M_shapeDerivativesBlock );
-    }
-    else
-    {
-        M_precPtr->replace_matrix(M_solidBlockPrec, 0);
-        M_precPtr->replace_matrix(M_fluidBlock, 1);
-        M_precPtr->replace_matrix(M_meshBlock, 2);
+        M_solid->updateJacobian( *M_uk, M_solidDerBlock ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+        *M_monolithicMatrix->getMatrix() *= 0;
+        // doing nothing if linear
+        M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
+        *M_solidBlockPrec += *M_solidDerBlock;
+        M_solidBlockPrec->GlobalAssemble();
+        M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
+        M_monolithicMatrix->blockAssembling();
+        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->getTime());
+        M_monolithicMatrix->GlobalAssemble();
+        *M_monolithicMatrix->getMatrix() *= M_data->dataFluid()->dataTime()->getTimeStep();
     }
 
+    if( M_precPtr->getBlockVector( ).size( )<3 )
+    {
+        M_precPtr->push_back_matrix( M_meshBlock, false );
+        M_precPtr->setConditions( M_BChs );
+        M_precPtr->setSpaces( M_FESpaces );
+        M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2 );
+
+        if(M_data->dataFluid()->useShapeDerivatives())
+        {
+            M_precPtr->push_back_coupling( M_shapeDerivativesBlock );
+        }
+    }
+     else
+    {
+        M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
+        M_precPtr->replace_matrix( M_fluidBlock, 1 );
+        M_precPtr->replace_matrix( M_meshBlock, 2 );
+
+        if(M_data->dataFluid()->useShapeDerivatives())
+        {
+            M_precPtr->replace_coupling( M_shapeDerivativesBlock, 2 );
+        }
+    }
 }
 
 void MonolithicGI::solveJac(vector_type       &_step,
-                              const vector_type &_res,
-                              const Real       _linearRelTol)
+                            const vector_type &_res,
+                            const Real       _linearRelTol)
 {
 
     //M_monolithicMatrix->getMatrix()->spy("J");
+    //boost::dynamic_pointer_cast<BlockMatrix>(M_precPtr)->getMatrix()->spy("P");
 
     M_linearSolver->setMatrix(*M_monolithicMatrix->getMatrix());
 
-
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.NormInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
-
 
     this->iterateMonolithic(_res, _step);
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.NormInf(), "\n");
@@ -354,7 +389,7 @@ MonolithicGI::assembleFluidBlock(UInt iter)
     {
         *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );// fluid time discr.
         super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
-        super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
+    //        super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
     }
     M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
     M_fluid->getFluidMatrix( *M_fluidBlock);
@@ -371,7 +406,6 @@ MonolithicGI::assembleMeshBlock(UInt iter)
     UInt offset(M_solidAndFluidDim+nDimensions*M_interface);
     std::map<ID, ID>::const_iterator ITrow;
     std::map<ID, ID> locdofmap(M_dofStructureToHarmonicExtension->locDofMap());
-
 
     /******************alternative way************************/
 //     BCFunctionBase bcf(fZero);

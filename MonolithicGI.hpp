@@ -104,7 +104,7 @@ public:
     void                        updateSystem();
 
     //!sets the block preconditioner
-    int                        setupBlockPrec(vector_type& rhs);
+    int                        setupBlockPrec( );
 
     //@}
 
@@ -215,6 +215,8 @@ private:
     UInt                                 M_interface;
     matrix_ptrtype                       M_meshBlock;
     matrix_ptrtype                       M_shapeDerivativesBlock;
+    matrix_ptrtype                       M_solidDerBlock;
+    //std::vector<fluid_bchandler_type>    M_BChsLin;
     static bool                          reg;
 };
 

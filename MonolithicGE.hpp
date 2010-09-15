@@ -104,7 +104,11 @@ public:
 
     void setupSystem( );
 
+    void assembleFluidBlock(UInt iter);
+
     void getSolution                  (vector_ptrtype& sol){sol = M_un;}
+
+
     //@}
 
 private:
