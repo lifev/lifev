@@ -110,9 +110,8 @@ typedef singleton< factory< OneDimensionalModel_Source,
 
 typedef boost::array< Real, 2 >                 Container2D_Type;
 
-// ScalVec SHOULD BE REPLACED EVERYWHERE
-// BY EPETRAVECTOR FOR PARALLEL COMPUTATION
-typedef ublas::vector<Real> ScalVec;
+// ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
+typedef ublas::vector< Real >                   ScalVec;
 
 enum OneD_BC {
                  OneD_W1,
@@ -143,11 +142,11 @@ OneDimensionalModel_MapsDefinition()
     OneDimensionalModel_PhysicsMap["OneD_LinearPhysics"]    = OneD_LinearPhysics;
     OneDimensionalModel_PhysicsMap["OneD_NonLinearPhysics"] = OneD_NonLinearPhysics;
 
-    OneDimensionalModel_FluxMap["OneD_LinearFlux"]       = OneD_LinearFlux;
-    OneDimensionalModel_FluxMap["OneD_NonLinearFlux"]    = OneD_NonLinearFlux;
+    OneDimensionalModel_FluxMap["OneD_LinearFlux"]          = OneD_LinearFlux;
+    OneDimensionalModel_FluxMap["OneD_NonLinearFlux"]       = OneD_NonLinearFlux;
 
-    OneDimensionalModel_SourceMap["OneD_LinearSource"]     = OneD_LinearSource;
-    OneDimensionalModel_SourceMap["OneD_NonLinearSource"]  = OneD_NonLinearSource;
+    OneDimensionalModel_SourceMap["OneD_LinearSource"]      = OneD_LinearSource;
+    OneDimensionalModel_SourceMap["OneD_NonLinearSource"]   = OneD_NonLinearSource;
 }
 
 //! Scalar product between 2D vectors
