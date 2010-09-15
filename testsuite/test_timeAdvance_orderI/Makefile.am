@@ -24,7 +24,7 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = timeAdvance.hpp laplacian.hpp linear_function.hpp nonlinear_function.hpp
+check_HEADERS = timeAdvance.hpp linear_function.hpp nonlinear_function.hpp
 
 check_PROGRAMS = test_timeAdvance
 
