@@ -85,7 +85,7 @@ MS_Model_FSI3D::SetupData( const std::string& fileName )
     if ( M_globalData.get() )
         SetupGlobalData( fileName );
 
-    M_solver.reset( new FSISolver_Type( M_data->method() ) );
+    M_solver.reset( new FSISolver_Type( ) );
     M_solver->setData( M_data );
     M_solver->FSIOper()->setDataFile( dataFile );
 
@@ -232,9 +232,9 @@ MS_Model_FSI3D::ShowMe()
 
         std::cout << "FSI method          = " << M_data->method() << std::endl << std::endl;
 
-        std::cout << "Velocity FE order   = " << M_solver->FSIOper()->dataFluid().uOrder() << std::endl
-                  << "Pressure FE order   = " << M_solver->FSIOper()->dataFluid().pOrder() << std::endl
-                  << "Structure FE order  = " << M_solver->FSIOper()->dataSolid().order() << std::endl<< std::endl;
+        std::cout << "Velocity FE order   = " << M_solver->FSIOper()->dataFluid()->uOrder() << std::endl
+                  << "Pressure FE order   = " << M_solver->FSIOper()->dataFluid()->pOrder() << std::endl
+                  << "Structure FE order  = " << M_solver->FSIOper()->dataSolid()->order() << std::endl<< std::endl;
 
         std::cout << "Velocity DOF        = " << 3 * M_solver->FSIOper()->uFESpace().dof().numTotalDof() << std::endl
                   << "Pressure DOF        = " << M_solver->FSIOper()->pFESpace().dof().numTotalDof() << std::endl
@@ -261,13 +261,13 @@ MS_Model_FSI3D::GetBCInterface()
 Real
 MS_Model_FSI3D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
 {
-    return M_solver->FSIOper()->dataFluid().density();
+    return M_solver->FSIOper()->dataFluid()->density();
 }
 
 Real
 MS_Model_FSI3D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 {
-    return M_solver->FSIOper()->dataFluid().viscosity();
+    return M_solver->FSIOper()->dataFluid()->viscosity();
 }
 
 Real
