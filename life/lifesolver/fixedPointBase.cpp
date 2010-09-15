@@ -205,7 +205,7 @@ void fixedPoint::eval( const vector_type& _disp,
 
     if (this->isSolid())
     {
-        this->M_solid->iterate( *M_BCh_d );
+        this->M_solid->iterate( M_BCh_d );
         this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
         this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);

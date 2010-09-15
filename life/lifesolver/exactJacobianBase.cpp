@@ -223,7 +223,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     if (this->isSolid())
     {
-        this->M_solid->iterate( *M_BCh_d );
+        this->M_solid->iterate( M_BCh_d );
 //         this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
 //         this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
 //         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
@@ -420,7 +420,7 @@ void  exactJacobian::solveLinearFluid()
 
 void  exactJacobian::solveLinearSolid()
 {
-    this->M_solid->iterateLin( *M_BCh_dz );
+    this->M_solid->iterateLin( M_BCh_dz );
 }
 
 
@@ -475,7 +475,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
             {
 
                 //to be used when we correct the other lines
-                if(true || ( !this->M_ej->dataFluid().isSemiImplicit() /*|| this->M_ej->dataFluid().semiImplicit()==-1*/))
+                if(true || ( !this->M_ej->dataFluid()->isSemiImplicit() /*|| this->M_ej->dataFluid().semiImplicit()==-1*/))
                     {
                         M_ej->meshMotion().iterate(*M_ej->BCh_harmonicExtension());
                         //std::cout<<" mesh motion iterated!!!"<<std::endl;
