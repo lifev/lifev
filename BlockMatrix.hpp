@@ -191,7 +191,8 @@ public:
      */
     void replace_coupling( const matrix_ptrtype& Mat, UInt /*index*/)
     {
-        M_coupling = Mat;
+        // not used for matrices (only for preconditioners)
+        /*M_coupling = Mat;*/
     }
 
     //! never used within this class
