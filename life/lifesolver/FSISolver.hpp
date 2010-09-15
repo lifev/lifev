@@ -116,7 +116,7 @@ public:
      *  operator defined in \c data_file
      *  \todo allow to change the FSI operator on the fly
      */
-    FSISolver( const std::string& method = "" );
+    FSISolver( );
 
     //! default/only destructor for the FSI solver
     virtual ~FSISolver() {}
@@ -172,7 +172,7 @@ public:
     /*!
      * \param __op FSI operator name
      */
-    void setFSIOperator          ( const std::string& __op );
+    void setFSIOperator          ( );
 
     void setFluidBC              ( const fluid_bchandler_type& bc_fluid );
     void setLinFluidBC           ( const fluid_bchandler_type& bc_dfluid );
@@ -218,9 +218,6 @@ public:
     void showMe() {}
 
 private:
-
-    //! forbid default constructor
-    FSISolver();
 
     //! forbid copy constructor
     FSISolver( FSISolver const& );

@@ -37,7 +37,7 @@ namespace LifeV {
 // ===================================================
 // Constructors
 // ===================================================
-FSISolver::FSISolver( const std::string& method ):
+FSISolver::FSISolver():
     M_oper              ( ),
     M_data              ( ),
     M_fluidInterfaceMap ( ),
@@ -50,6 +50,17 @@ FSISolver::FSISolver( const std::string& method ):
 #ifdef DEBUG
     Debug( 6220 ) << "FSISolver::FSISolver constructor starts\n";
 #endif
+}
+
+
+
+// ===================================================
+// Methods
+// ===================================================
+void
+FSISolver::setData( const data_PtrType& data )
+{
+    M_data = data;
 
     int rank, numtasks;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -61,7 +72,7 @@ FSISolver::FSISolver( const std::string& method ):
     int  fluidLeader(0);
     int  solidLeader(0);
 
-    if( ( method.compare("monolithicGE") && method.compare("monolithicGI") ) )
+    if( ( data->method().compare("monolithicGE") && data->method().compare("monolithicGI") ) )
 	{
 		MPI_Group  originGroup, newGroup;
 		MPI_Comm   newComm;
@@ -175,7 +186,7 @@ FSISolver::FSISolver( const std::string& method ):
     MPI_Barrier(MPI_COMM_WORLD);
     */
 
-    this->setFSIOperator( method );
+    this->setFSIOperator( );
 
     M_oper->setFluid( fluid );
     M_oper->setSolid( solid );
@@ -206,15 +217,6 @@ FSISolver::FSISolver( const std::string& method ):
 
 //     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
 //     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
-}
-
-// ===================================================
-// Methods
-// ===================================================
-void
-FSISolver::setData( const data_PtrType& data )
-{
-    M_data = data;
 
     M_oper->setData( data );
 }
@@ -349,10 +351,10 @@ FSISolver::setSourceTerms( const fluid_source_type& fluidSource,
 }
 
 void
-FSISolver::setFSIOperator( const std::string& __op )
+FSISolver::setFSIOperator( )
 {
-	Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << __op << "\n";
-	M_oper = oper_fsi_ptr_mpi( FSIFactory::instance().createObject( __op ) );
+	Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
+	M_oper = oper_fsi_ptr_mpi( FSIFactory::instance().createObject( M_data->method() ) );
 }
 
 void
