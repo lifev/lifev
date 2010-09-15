@@ -198,12 +198,12 @@ public:
     boost::shared_ptr<Mesh>& getMeshPartition();
 
     //! Return a pointer to the k-th interface stored inside the file
-    boost::shared_ptr<std::map<UInt, UInt> >& getStoredInterface(int k);
+    boost::shared_ptr< std::map<UInt, UInt> >& getStoredInterface(int k) ;
 
     // When reading back partitions and interfaces, the comm member must be set explicitly.
     // This is intended for use with getMeshPartition and getStoredInterface
     //! Set the M_comm data member.
-    void setComm(boost::shared_ptr<Epetra_Comm>& comm) {M_comm = comm;}
+    void setComm( const boost::shared_ptr<Epetra_Comm>& comm ) {M_comm = comm;}
 
 
 private:
@@ -699,7 +699,7 @@ boost::shared_ptr<Mesh>& HDF5Filter3DMesh<Mesh>::getMeshPartition()
 }
 
 template <typename Mesh>
-boost::shared_ptr<std::map<UInt, UInt> >& HDF5Filter3DMesh<Mesh>::getStoredInterface(int k)
+boost::shared_ptr< std::map<UInt, UInt> >& HDF5Filter3DMesh<Mesh>::getStoredInterface(int k)
 {
     if (this->M_HDF5.get() == 0)
     {
