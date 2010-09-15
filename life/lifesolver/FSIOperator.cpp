@@ -137,6 +137,19 @@ FSIOperator::setDataFile( const GetPot& dataFile )
 }
 
 
+void
+FSIOperator::partitionMeshes()
+{
+    if (this->isFluid())
+    {
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (M_fluidMesh, M_epetraComm));
+    }
+    if (this->isSolid())
+    {
+    	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( M_solidMesh, M_epetraComm ) );
+    }
+
+}
 
 void
 FSIOperator::setupFEspace()
@@ -226,7 +239,6 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building fluid FESpace ...               \n");
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (M_fluidMesh, M_epetraComm));
 
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
 															//dOrder,
@@ -256,7 +268,7 @@ FSIOperator::setupFEspace()
     {
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_fluidMesh,
 															//dOrder,
-							    *refFE_struct,
+                                                            *refFE_struct,
                                                             *qR_struct,
                                                             *bdQr_struct,
                                                             3,
@@ -283,7 +295,6 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-    	M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( M_solidMesh, M_epetraComm ) );
     	M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( *M_solidMeshPart,
     															 dOrder,
     	                                                         //*refFE_struct,
@@ -304,8 +315,6 @@ FSIOperator::setupFEspace()
     }
     M_epetraWorldComm->Barrier();
 }
-
-
 
 void
 FSIOperator::setupDOF( void )
@@ -355,7 +364,6 @@ FSIOperator::setupDOF( void )
 
 	M_dofStructureToSolid->setup(   M_dFESpace->refFE(), M_dFESpace->dof(),
 								    M_dFESpace->refFE(), M_dFESpace->dof() );
-
 	M_dofStructureToSolid->update( *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
 								   *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
                                    M_data->interfaceTolerance(),
@@ -378,18 +386,16 @@ FSIOperator::setupDOF( void )
 	M_epetraWorldComm->Barrier();
 	disp.leaderPrint("done\n");
 
-    createInterfaceMaps(M_dofStructureToHarmonicExtension);
+    createInterfaceMaps( M_dofStructureToHarmonicExtension->locDofMap() );
 }
 
-
-
-void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension)
+void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 {
     Displayer disp(M_epetraWorldComm);
 	disp.leaderPrint("FSI-  Building fluid variables ...             ");
 
 	// now we build the sigma and lambda variables on each proc
-	std::map<ID, ID> const& locDofMap = dofStructureToHarmonicExtension->locDofMap();
+
 
 	std::vector<int> dofInterfaceFluid;
 
@@ -452,6 +458,12 @@ void FSIOperator::createInterfaceMaps(dof_interface_type3D dofStructureToHarmoni
 	M_epetraWorldComm->Barrier();
 }
 
+void
+FSIOperator::partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter )
+{
+    M_fluidMesh = fluidMeshFilter.getMeshPartition();
+    M_solidMesh = fluidMeshFilter.getMeshPartition();
+}
 
 
 
@@ -464,7 +476,8 @@ FSIOperator::setupFluidSolid( void )
 
         M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
         M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, numLM ) );
-        M_solid.reset(      new solid_raw_type(      M_data->dataSolid(), *M_dFESpace,              M_epetraComm ) );
+        M_solid.reset( solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
+        M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
 
 //         if ( M_linearFluid )
 //             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
@@ -480,7 +493,8 @@ FSIOperator::setupFluidSolid( void )
     {
 //         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
     	M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset(      new solid_raw_type(      M_data->dataSolid(), *M_dFESpace,  M_epetraComm ) );
+        M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
+        M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
 
 //         if ( M_linearFluid )
 //             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
@@ -508,7 +522,7 @@ FSIOperator::setupSystem( void )
 
     if ( this->isSolid() )
     {
-        M_solid->setUp( M_dataFile );
+        M_solid->setDataFromGetPot( M_dataFile );
 //         if (M_linearSolid)
 //             M_solidLin->setUp( dataFile );
     }
@@ -1041,9 +1055,9 @@ FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
 
-    M_AlphafCoef  = 2*(this->dataSolid().rho()*h)/this->dataFluid().dataTime()->getTimeStep();
-    M_AlphafCoef += h*this->dataSolid().young(0)*this->dataFluid().dataTime()->getTimeStep() /
-                    (2*pow(R,2) *(1-pow(dataSolid().poisson(0),2)));
+    M_AlphafCoef  = 2*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->getTimeStep();
+    M_AlphafCoef += h*this->dataSolid()->young(0)*this->dataFluid()->dataTime()->getTimeStep() /
+                    (2*pow(R,2) *(1-pow(dataSolid()->poisson(0),2)));
 }
 
 

@@ -27,11 +27,13 @@
 #include <life/lifefem/dofInterface3Dto2D.hpp>
 #include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
+#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifefilters/HDF5Filter3DMesh.hpp>
 
 #include <life/lifealg/generalizedAitken.hpp>
 
@@ -67,16 +69,20 @@ public:
      */
     //@{
 
-//     typedef VenantKirchhofSolver   < RegionMesh3D_ALE<LinearTetra> > solid_raw_type;
-//     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
+    //typedef VenantKirchhofSolver   < RegionMesh3D_ALE<LinearTetra> > solid_raw_type;
+    //typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
 
     typedef RegionMesh3D<LinearTetra>              mesh_type;
 
+    typedef HDF5Filter3DMesh<mesh_type>            mesh_filtertype;
+
     typedef OseenShapeDerivative   <mesh_type>     fluid_raw_type;
+    //typedef NonLinearVenantKirchhofSolver   <mesh_type>     solid_raw_type;
     typedef VenantKirchhofSolver   <mesh_type>     solid_raw_type;
     typedef HarmonicExtensionSolver<mesh_type>     meshmotion_raw_type;
 
     typedef OseenShapeDerivative   <mesh_type>     fluidlin_raw_type;
+    //typedef NonLinearVenantKirchhofSolver   <mesh_type>     solidlin_raw_type;
     typedef VenantKirchhofSolver   <mesh_type>     solidlin_raw_type;
 
     typedef boost::shared_ptr<fluid_raw_type>      fluid_type;
@@ -105,8 +111,8 @@ public:
     typedef fluid_raw_type::bchandler_type         fluid_bchandler_type;
     typedef fluid_raw_type::bchandler_raw_type     fluid_bchandler_raw_type;
 
-    typedef solid_raw_type::bchandler_type         solid_bchandler_type;
-    typedef solid_raw_type::bchandler_raw_type     solid_bchandler_raw_type;
+    typedef BCHandler                              solid_bchandler_raw_type;
+    typedef boost::shared_ptr<solid_bchandler_raw_type>  solid_bchandler_type;
 
     typedef DataFSI                                data_Type;
     typedef boost::shared_ptr<data_Type>           data_PtrType;
@@ -138,7 +144,14 @@ public:
 
     virtual void setupFEspace();
 
+    virtual void partitionMeshes();
+
+    void partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter  );
+
     virtual void setupDOF();
+
+    /*!still not implemented*/
+    virtual void setupDOF( mesh_filtertype& filterMesh ){}
 
     virtual void setupFluidSolid();
 
@@ -168,7 +181,7 @@ public:
     {
         Debug( 6220 ) << "FSIOperator:: solid init \n";
         if (this->isSolid())
-            solid().initialize(d0, w0);
+            solid().initialize(d0, w0, w0);
         Debug( 6220 ) << "FSIOperator:: fluid init \n";
         if (this->isFluid())
             fluid().initialize(u0, p0);
@@ -179,7 +192,7 @@ public:
 
 
 
-    void createInterfaceMaps(dof_interface_type3D dofStructureToHarmonicExtension);
+    void createInterfaceMaps(std::map<ID, ID> const& locDofMap);
 
     void initializeFluid( const vector_type& velAndPressure,
                           const vector_type& displacement );
@@ -280,8 +293,8 @@ public:
 //     solidlin_type::value_type& solidLin()                               { return *M_solidLin; }
 
     const data_Type& data()                                       const { return *M_data; }
-    const data_Type::dataFluid_Type& dataFluid()                  const { return *M_data->dataFluid(); }
-    const data_Type::dataSolid_Type& dataSolid()                  const { return *M_data->dataSolid(); }
+    const data_Type::dataFluid_PtrType& dataFluid()               const { return M_data->dataFluid(); }
+    const data_Type::dataSolid_PtrType& dataSolid()               const { return M_data->dataSolid(); }
 
     mesh_type& fluidMesh()                                        const { return *M_fluidMesh; }
     mesh_type& solidMesh()                                        const { return *M_solidMesh; }
