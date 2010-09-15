@@ -103,6 +103,7 @@ DataElasticStructure::setup( const GetPot& dataFile, const std::string& section 
     // physics
     M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
     M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
+    M_useExactJacobian = dataFile( ( section + "/useExactJacobian" ).data(), false );
 
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
     if ( materialsNumber == 0 )
@@ -132,6 +133,7 @@ DataElasticStructure::setup( const GetPot& dataFile, const std::string& section 
     // miscellaneous
     M_factor  = dataFile( "solid/miscellaneous/factor", 1.0 );
     M_verbose = dataFile( "solid/miscellaneous/verbose", 1 );
+    M_solidType = dataFile( "solid/physics/solidType", "linearVenantKirchhof" );
 }
 
 void

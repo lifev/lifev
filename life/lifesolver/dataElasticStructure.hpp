@@ -216,6 +216,9 @@ public:
      */
      const UInt& verbose()   const;
 
+    std::string& solidType(){return M_solidType; }
+
+    const bool useExactJacobian()   const{return M_useExactJacobian;}
     //@}
 
 private:
@@ -236,6 +239,10 @@ private:
     //! Miscellaneous
     Real                   M_factor;  // amplification factor for deformed mesh
     UInt                   M_verbose; // temporal output verbose
+
+    std::string            M_solidType;
+    bool                   M_useExactJacobian;
+
 };
 
 } // end namespace LifeV
