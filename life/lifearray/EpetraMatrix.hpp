@@ -69,8 +69,12 @@ public:
     typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
     typedef EpetraVector                   vector_type;
 
+    //! Constructor for square matrices
     EpetraMatrix( const EpetraMap&    _map, int numEntries = 50, int indexBase = 1 );
+    //! Constructor for rectangular matrices
+    EpetraMatrix( const EpetraMap&    _rowMap,  const EpetraMap&    _colMap, int numEntries = 50, int indexBase = 1 );
 
+    //! Copy Constructor
     EpetraMatrix( const EpetraMatrix& _matrix);
     //     EpetraMatrix( const EpetraMatrix<DataType> &_epetra );
 
@@ -117,10 +121,15 @@ public:
      */
     int Multiply(bool transposeA, const vector_type& x, vector_type &y) const;
 
+    //! Unary operator+
     EpetraMatrix& operator += (const EpetraMatrix& _matrix);
-
+    //! Assignment operator
+    EpetraMatrix&   operator=   (const EpetraMatrix& _matrix);
+    //! Matrix-Vector multiplication
     vector_type     operator *  (const vector_type& vec) const;
+    //! Unary operator* (it scales the matrix by the factor val)
     EpetraMatrix&   operator *= (const DataType     val);
+    //! const operator* (it returns a rescaled matrix this)
     EpetraMatrix    operator *  (const DataType     val) const;
 
     //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
@@ -178,13 +187,34 @@ public:
     // Calls insertZeroDiagonal and then epetra.globalAssemble;
     int GlobalAssemble();
 
+    //! Global assemble for rectangular matrices.
+    /*! If global GlobalAssemble() is called instead, Epetra will not partition
+     * correctly the matrix among the processors
+     * */
+    int GlobalAssemble(EpetraMap & rangeMap, EpetraMap & domainMap);
+
     int MyPID() { return  M_epetraCrs->Comm().MyPID(); }
 
-    //! Return the internal EpetraMap of the EpetraMatrix
+    //FIXME I left this method for backward compatibility
+    //! Return the internal row EpetraMap of the EpetraMatrix
     const EpetraMap& getMap() const
     {
-        ASSERT( M_epetraMap.get() != 0, "EpetraMatrix::getMap: Error: M_epetraMap pointer is null" );
-        return *M_epetraMap;
+        ASSERT( M_rowMap.get() != 0, "EpetraMatrix::getMap: Error: M_rowMap pointer is null" );
+        return *M_rowMap;
+    }
+
+    //! Return the internal row EpetraMap of the EpetraMatrix
+    const EpetraMap& getRowMap() const
+    {
+        ASSERT( M_rowMap.get() != 0, "EpetraMatrix::getRowMap: Error: M_rowMap pointer is null" );
+        return *M_rowMap;
+    }
+
+    //! Return the internal row EpetraMap of the EpetraMatrix
+    const EpetraMap& getColMap() const
+    {
+        ASSERT( M_colMap.get() != 0, "EpetraMatrix::getColMap: Error: M_colMap pointer is null" );
+        return *M_colMap;
     }
 
     //! insert ones into the diagonal to ensure the matrix' graph has a entry there
@@ -249,7 +279,10 @@ private:
 
 
     //! Shared pointer on an EpetraMap
-    boost::shared_ptr< EpetraMap > M_epetraMap;
+    boost::shared_ptr< EpetraMap > M_rowMap;
+
+    //! Shared pointer on an EpetraMap
+    boost::shared_ptr< EpetraMap > M_colMap;
 
     //!Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
@@ -265,7 +298,8 @@ private:
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
-    M_epetraMap(_matrix.M_epetraMap),
+    M_rowMap(_matrix.M_rowMap),
+    M_colMap(_matrix.M_colMap),
     M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs)),
     M_indexBase(_matrix.M_indexBase )
 {
@@ -273,8 +307,19 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int indexBase ):
-    M_epetraMap   ( new EpetraMap  (_map)),
-    M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries, false)),
+    M_rowMap      ( new EpetraMap  (_map)),
+    M_colMap      ( M_rowMap),
+    M_epetraCrs   ( new matrix_type( Copy, *M_rowMap->getMap(Unique), numEntries, false)),
+    M_indexBase   ( indexBase )
+{
+}
+
+
+template <typename DataType>
+EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _rowMap, const EpetraMap& _colMap, int numEntries, int indexBase ):
+    M_rowMap      ( new EpetraMap  (_rowMap)),
+    M_colMap      ( new EpetraMap  (_colMap)),
+    M_epetraCrs   ( new matrix_type( Copy, *M_rowMap->getMap(Unique), *M_colMap->getMap(Unique), numEntries, false)),
     M_indexBase   ( indexBase )
 {
 }
@@ -283,8 +328,9 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int
 // Copies _matrix to a matrix which resides only on the processor "reduceToProc"
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc):
-    M_epetraMap   (_matrix.getMap().createRootMap(reduceToProc)),
-    M_epetraCrs   ( new matrix_type( Copy, *M_epetraMap->getMap(Unique), numEntries
+    M_rowMap   (_matrix.getRowMap().createRootMap(reduceToProc)),
+    M_colMap   (_matrix.getColMap().createRootMap(reduceToProc) ),
+    M_epetraCrs   ( new matrix_type( Copy, *M_rowMap->getMap(Unique), *M_colMap->getMap(Unique), numEntries
                                      (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20,
                                      false) ),
     M_indexBase   (_matrix.M_indexBase)
@@ -313,7 +359,8 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt re
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( matrix_ptrtype CRSMatrixPtr ):
-    M_epetraMap(),
+    M_rowMap(),
+    M_colMap(),
     M_indexBase(CRSMatrixPtr->Map().IndexBase())
 {
     M_epetraCrs=CRSMatrixPtr;
@@ -336,6 +383,17 @@ EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
 
     return *this;
     //     return matrix;
+}
+
+template<typename DataType>
+EpetraMatrix<DataType>&  EpetraMatrix<DataType>::operator=(const EpetraMatrix& _matrix)
+{
+	M_rowMap = _matrix.M_rowMap;
+    M_colMap = _matrix.M_colMap;
+    *M_epetraCrs = *(_matrix.M_epetraCrs);
+    M_indexBase = _matrix.M_indexBase;
+
+	return *this;
 }
 
 template<typename DataType>
@@ -444,6 +502,20 @@ int EpetraMatrix<DataType>::GlobalAssemble()
     insertZeroDiagonal();
     return  M_epetraCrs->GlobalAssemble();
 }
+
+template <typename DataType>
+int EpetraMatrix<DataType>::GlobalAssemble(EpetraMap & rangeMap, EpetraMap & domainMap)
+{
+    if ( M_epetraCrs->Filled ())
+    {
+        //         if (M_epetraCrs->Comm().MyPID() == 0)
+        //             std::cout << "Matrix is already filled" << std::endl;
+        return -1;
+    }
+
+    return  M_epetraCrs->GlobalAssemble(*domainMap.getMap(Unique), *rangeMap.getMap(Unique));
+}
+
 
 //! insert the given value into the diagonal according to a specified EpetraMap
 //! Pay intention that this will add values to the diagonal,
