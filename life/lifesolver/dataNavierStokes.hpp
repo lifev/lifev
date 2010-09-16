@@ -206,13 +206,13 @@ public:
 
     inline Real density(const UInt& n=0) const
     {
-        ASSERT(n<M_fluid_number,"Undelared fluid");
+        ASSERT(n<M_fluid_number,"Undeclared fluid");
         return M_density[n];
     }
 
     inline Real viscosity(const UInt& n=0) const
     {
-        ASSERT(n<M_fluid_number,"Undelared fluid");
+        ASSERT(n<M_fluid_number,"Undeclared fluid");
         return M_viscosity[n];
     }
 
