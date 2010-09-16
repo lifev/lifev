@@ -50,12 +50,12 @@ namespace LifeV
 /*!
   \class DofInterface3Dto3D
 
-  Base class which holds the conections of the dof in two matching meshes
+  Base class which holds the connections of the dof in two matching meshes
 
-  In order to hold the interface conections the user must give the
+  In order to hold the interface connections the user must give the
   RefFE elements and Dof used in both meshes.  The connections may be
   built by calling the update method. An interpolate method has been
-  provided in order to interpolate data at the interface.Finally
+  provided in order to interpolate data at the interface. Finally
   method getInterfaceDof gives the connections.
 
 */
@@ -77,16 +77,16 @@ public:
     /*!
      \param refFe the reference FE used in both meshes
      \param dof1 the Dof object of the mesh in which we want to make the computations
-     \param dof2 the Dof object of the mesh which provides de data at the interface
+     \param dof2 the Dof object of the mesh which provides the data at the interface
     */
     DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1, const Dof& dof2 );
 
-    //! Constructor for interfacing Dof of diferent type (RefFE)
+    //! Constructor for interfacing Dof of different type (RefFE)
     /*!
       \param refFe1 the reference FE used in the mesh in which we want to make the computations
       \param dof1 the Dof object of the mesh in which we want to make the computations
-      \param refFe2 the reference FE used in the mesh which provides de data at the interface
-      \param dof2 the Dof object of the mesh which provides de data at the interface
+      \param refFe2 the reference FE used in the mesh which provides the data at the interface
+      \param dof2 the Dof object of the mesh which provides the data at the interface
      */
     DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 );
 
@@ -121,14 +121,14 @@ public:
     template <typename Mesh>
     void interpolate( Mesh& mesh2, const UInt nbComp, const Vector& v, Vector& vI );
 
-    //! This method returns the corrresponding dof number of the mesh2 at the interface
+    //! This method returns the corresponding dof number of the mesh2 at the interface
     //! for a specific dof number at the interface in mesh1
     /*!
       \param i a dof number in mesh1
     */
     // ID getInterfaceDof(const ID& i) const;
 
-    //! This method returns the corrresponding dof object when interpolation is used
+    //! This method returns the corresponding dof object when interpolation is used
     UInt numTotalDof() const {return _dof->numTotalDof();}
 
 private:
@@ -139,13 +139,13 @@ private:
     //! Dof object of the mesh in which we want to make the computations
     const Dof* _dof1;
 
-    //! RefFE objet used in the mesh which provides de data at the interface
+    //! RefFE object used in the mesh which provides de data at the interface
     const RefFE* _refFE2;
 
-    //! Dof object of the mesh which provides de data at the interface
+    //! Dof object of the mesh which provides the data at the interface
     const Dof* _dof2;
 
-    //! Auxiliary Dof object of the mesh which provides de local to global table
+    //! Auxiliary Dof object of the mesh which provides the local to global table
     //! when interpolation is used
     boost::shared_ptr<Dof> _dof;
 
@@ -197,7 +197,7 @@ bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, c
 /*!
   \param mesh1 the mesh in which we want to make the computations
   \param flag1 the marker of the interface in the mesh1
-  \param mesh2 the mesh which provides de data at the interface
+  \param mesh2 the mesh which provides the data at the interface
   \param flag2 the marker of the interface in the mesh2
   \param tol tolerance for connecting points of both meshes at the interface
  */
@@ -287,8 +287,8 @@ void DofInterface3Dto3D::_updateFaceConnections( const Mesh& mesh1, const Entity
 /*!
   \param mesh1 the mesh in which we want to make the computations
   \param dof1 the Dof object of the mesh in which we want to make the computations
-  \param mesh2 the mesh which provides de data at the interface
-  \param dof2 the Dof object of the mesh which provides de data at the interface
+  \param mesh2 the mesh which provides the data at the interface
+  \param dof2 the Dof object of the mesh which provides the data at the interface
   \param tol tolerance for connecting points of both meshes at the interface
   \param flag1 the marker of a region of interface in the mesh1
   \brief{The parameter flag1 is used in test_meshReorder to export the part of interface determined by flag1 on mesh2.}
@@ -513,18 +513,18 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
         _updateDofConnections( mesh1, *_dof1, mesh2, *_dof, tol, flag3 ); // Update of the Dof connections
     }
     else
-        // Update of the Dof connections without inperpolation
+        // Update of the Dof connections without interpolation
         _updateDofConnections( mesh1, *_dof1, mesh2, *_dof2, tol, flag3 );
 }
 
 
 //! This method interpolate data when using different FE
 /*!
-  \param mesh2 the mesh which provides de data at the interface
+  \param mesh2 the mesh which provides the data at the interface
   \param v the data vector on mesh2 holding dofs of type refFE1
   \param vI the interpolated data vector on mesh2 holding dofs of type refFE2
 
-  \note We should use this method ONLY when the acuracy of the data is less that
+  \note We should use this method ONLY when the accuracy of the data is less that
   the accuracy of the unknowns on mesh1, i.e., when refFE1 is more accurate
   than refFE2
 */

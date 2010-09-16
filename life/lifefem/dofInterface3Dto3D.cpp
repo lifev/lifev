@@ -26,7 +26,7 @@ namespace LifeV
 /*!
   \param refFe the reference FE used in both meshes
   \param dof1 the Dof object of the mesh in which we want to make the computations
-  \param dof2 the Dof object of the mesh which provides de data at the interface
+  \param dof2 the Dof object of the mesh which provides the data at the interface
 */
 DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
                                         const Dof& dof2 )
@@ -38,12 +38,12 @@ DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
     _dof( new Dof( refFE ) )
 {}
 
-//! Constructor for interfacing Dof of diferent type (RefFE)
+//! Constructor for interfacing Dof of different type (RefFE)
 /*!
   \param refFe1 the reference FE used in the mesh in which we want to make the computations
   \param dof1 the Dof object of the mesh in which we want to make the computations
-  \param refFe2 the reference FE used in the mesh which provides de data at the interface
-  \param dof2 the Dof object of the mesh which provides de data at the interface
+  \param refFe2 the reference FE used in the mesh which provides the data at the interface
+  \param dof2 the Dof object of the mesh which provides the data at the interface
 */
 DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2,
                                         const Dof& dof2 )
