@@ -27,24 +27,24 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
     M_nbDiag( _refFE.nbDiag() ),
     M_nbUpper( _refFE.nbUpper() ) ,
     M_nbPattern( _refFE.nbPattern() ),
-    
+
     M_nbGeoNode( _geoMap.nbDof() ),
     M_nbQuadPt( UInt(_qr.nbQuadPt()) ),
-        
+
     M_refFE( &_refFE ),
     M_geoMap( &_geoMap),
     M_quadRule(new QuadRule(_qr)),
-    
-    
+
+
     M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
     M_quadNodes(boost::extents[M_nbQuadPt][3]),
-    
+
     M_dphiGeoMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
     M_jacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
     M_detJacobian(boost::extents[M_nbQuadPt]),
     M_wDetJacobian(boost::extents[M_nbQuadPt]),
     M_tInverseJacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
-    
+
     M_phi(boost::extents[nbNode][M_refFE->FEDim()][M_nbQuadPt]),
     M_dphi(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]),
     M_d2phi(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
@@ -53,7 +53,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
     M_dphiRef(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]),
     M_d2phiRef(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
     M_divPhiRef(boost::extents[nbNode][M_nbQuadPt]),
-    
+
     M_cellNodesUpdated(false),
     M_quadNodesUpdated(false),
 
@@ -71,7 +71,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
     M_dphiRefUpdated(false),
     M_d2phiRefUpdated(false),
     M_divPhiRefUpdated(false)
-    
+
 {
     CONSTRUCTOR( "CurrentFE" );
 
@@ -84,13 +84,13 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
             {
                 for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
                 {
-                    
+
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
                                                                         M_quadRule->quadPointCoor(iterQuad));
                 }
                 M_phiUpdated=true;
             }
-            
+
             // --- DIV ---
             if (M_refFE->hasDivPhi())
             {
@@ -98,8 +98,8 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
                                                                  M_quadRule->quadPointCoor(iterQuad));
                 M_divPhiRefUpdated=true;
             };
-            
-            
+
+
             for ( UInt icoor(0); icoor<M_nbCoor; ++icoor )
             {
                 // --- DPHI ---
@@ -110,7 +110,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
                                                                           M_quadRule->quadPointCoor(iterQuad));
                     M_dphiRefUpdated=true;
                 };
-                
+
                 // --- D2PHI
                 if (M_refFE->hasD2Phi())
                 {
@@ -135,7 +135,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
     }
 
     M_dphiGeoMapUpdated=true;
-    
+
 
 }
 
@@ -146,15 +146,15 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap )
     M_nbDiag( _refFE.nbDiag() ),
     M_nbUpper( _refFE.nbUpper() ) ,
     M_nbPattern( _refFE.nbPattern() ),
-    
+
     M_nbGeoNode( _geoMap.nbDof() ),
     M_nbQuadPt(0),
-        
+
     M_refFE( & _refFE ),
     M_geoMap( &_geoMap ),
     M_quadRule( 0 ),
-    
-    
+
+
     M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
 
 
@@ -175,7 +175,7 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap )
     M_dphiRefUpdated(false),
     M_d2phiRefUpdated(false),
     M_divPhiRefUpdated(false)
-    
+
 {
     CONSTRUCTOR( "CurrentFE" );
 }
@@ -301,6 +301,62 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
   return jac;
 };
 
+// Compute the determinant of the Jacobian at the given point
+Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z) const
+{
+    Real det(0);
+
+    switch (M_nbCoor)
+    {
+    case 1:
+        {
+            Real a ( pointJacobian(hat_x, hat_y, hat_z, 0, 0) );
+
+            det = a;
+
+            break;
+        }
+        case 2:
+        {
+            Real a ( pointJacobian(hat_x, hat_y, hat_z, 0, 0) );
+            Real b ( pointJacobian(hat_x, hat_y, hat_z, 0, 1) );
+            Real c ( pointJacobian(hat_x, hat_y, hat_z, 0, 2) );
+            Real d ( pointJacobian(hat_x, hat_y, hat_z, 1, 0) );
+
+            det = a * d - b * c;
+
+            break;
+        }
+        case 3:
+        {
+            Real a ( pointJacobian(hat_x, hat_y, hat_z, 0, 0) );
+            Real b ( pointJacobian(hat_x, hat_y, hat_z, 0, 1) );
+            Real c ( pointJacobian(hat_x, hat_y, hat_z, 0, 2) );
+            Real d ( pointJacobian(hat_x, hat_y, hat_z, 1, 0) );
+            Real e ( pointJacobian(hat_x, hat_y, hat_z, 1, 1) );
+            Real f ( pointJacobian(hat_x, hat_y, hat_z, 1, 2) );
+            Real g ( pointJacobian(hat_x, hat_y, hat_z, 2, 0) );
+            Real h ( pointJacobian(hat_x, hat_y, hat_z, 2, 1) );
+            Real i ( pointJacobian(hat_x, hat_y, hat_z, 2, 2) );
+
+            Real ei (e * i);
+            Real fh (f * h);
+            Real bi (b * i);
+            Real ch (c * h);
+            Real bf (b * f);
+            Real ce (c  *e);
+
+            det = a * (ei - fh) + d * (ch - bi) + g * ( bf - ce);
+
+            break;
+        }
+        default:
+            ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        }
+
+    return det;
+}
+
 Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
 				     int comp_x, int comp_zeta) const
 {
@@ -403,7 +459,7 @@ void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Ty
     {
         computeDetJacobian();
     };
-    
+
     M_wDetJacobianUpdated=false;
     if ( (upFlag & UPDATE_ONLY_W_DET_JACOBIAN) != 0)
     {
@@ -432,7 +488,7 @@ void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Ty
 void CurrentFE::update(const std::vector<GeoVector>& pts, const flag_Type& upFlag)
 {
     std::vector< std::vector <Real > > newpts(pts.size(), std::vector<Real> (pts[0].size()));
-    
+
     for (UInt iPt(0); iPt< pts.size(); ++iPt)
     {
         for (UInt iCoord(0); iCoord< pts[iPt].size(); ++iCoord)
@@ -440,7 +496,7 @@ void CurrentFE::update(const std::vector<GeoVector>& pts, const flag_Type& upFla
             newpts[iPt][iCoord]=pts[iPt][iCoord];
         }
     }
-    
+
     update(newpts,upFlag);
 }
 
@@ -599,7 +655,7 @@ GeoVector CurrentFE::coorMap(const GeoVector& P) const
             Pcurrent[j] += M_cellNodes[i][j]* M_geoMap->phi(i,P);
         }
     }
-    
+
     return Pcurrent;
 }
 
@@ -610,21 +666,21 @@ void CurrentFE::QuadRuleVTKexport( const std::string& filename) const
 
     std::ofstream output(filename.c_str());
     ASSERT(!output.fail(), " Unable to open the file for the export of the quadrature ");
-    
+
     // Header
     output << "# vtk DataFile Version 3.0" << std::endl;
     output << "LifeV : Quadrature export" << std::endl;
     output << "ASCII" << std::endl;
     output << "DATASET POLYDATA" << std::endl;
     output << "POINTS " << M_nbQuadPt << " float" << std::endl;
-    
+
     for (UInt i(0); i< M_nbQuadPt; ++i)
     {
         output << M_quadNodes[i][0] << " " <<  M_quadNodes[i][1] << " " <<  M_quadNodes[i][2] << std::endl;
     };
 
     output << "VERTICES " << M_nbQuadPt << " " << 2*M_nbQuadPt << std::endl;
-    
+
     for (UInt i(0); i< M_nbQuadPt; ++i)
     {
         output << 1 << " " << i << std::endl;
@@ -632,7 +688,7 @@ void CurrentFE::QuadRuleVTKexport( const std::string& filename) const
 
     output.close();
 }
-    
+
 
 void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
 {
@@ -642,10 +698,10 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
         delete M_quadRule;
     };
     M_quadRule = new QuadRule(newQuadRule);
-    
+
     // Adjust the constants related to the quadrature
     M_nbQuadPt =  UInt( newQuadRule.nbQuadPt() );
-    
+
     // Resize all the arrays that need it
     M_quadNodes.resize(boost::extents[M_nbQuadPt][3]);
 
@@ -698,7 +754,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
                 }
                 M_phiUpdated=true;
             }
-            
+
             // --- DIV ---
             if (M_refFE->hasDivPhi())
             {
@@ -717,7 +773,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
                                                                          M_quadRule->quadPointCoor(iterQuad));
                      M_dphiRefUpdated=true;
                 }
-                
+
                 // --- D2PHI ---
                 if (M_refFE->hasD2Phi())
                 {
@@ -740,9 +796,9 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
             }
         }
     }
-    
+
     M_dphiGeoMapUpdated=true;
-    
+
 }
 
 
@@ -765,10 +821,10 @@ void CurrentFE::computeQuadNodes()
     for ( UInt iterQuadNode (0); iterQuadNode < M_nbQuadPt; ++iterQuadNode)
     {
         coorMap( M_quadNodes[iterQuadNode][0],
-                 M_quadNodes[iterQuadNode][1], 
+                 M_quadNodes[iterQuadNode][1],
                  M_quadNodes[iterQuadNode][2],
-                 M_quadRule->quadPointCoor( iterQuadNode, 0 ), 
-                 M_quadRule->quadPointCoor( iterQuadNode, 1 ), 
+                 M_quadRule->quadPointCoor( iterQuadNode, 0 ),
+                 M_quadRule->quadPointCoor( iterQuadNode, 1 ),
                  M_quadRule->quadPointCoor( iterQuadNode, 2 ) );
     }
     M_quadNodesUpdated=true;
@@ -841,9 +897,9 @@ void CurrentFE::computeTInverseJacobian()
         case 1:
         {
             Real a ( M_jacobian[0][0][iterQuad] );
-            
+
             M_tInverseJacobian[0][0][iterQuad] = 1.0/ a ;
-            
+
             break;
         }
         case 2:
@@ -852,15 +908,15 @@ void CurrentFE::computeTInverseJacobian()
             Real b ( M_jacobian[0][1][iterQuad] );
             Real c ( M_jacobian[1][0][iterQuad] );
             Real d ( M_jacobian[1][1][iterQuad] );
-            
+
             Real det ( a*d - b*c );
-            
+
             M_tInverseJacobian[0][0][iterQuad] = ( a ) / det ;
             M_tInverseJacobian[0][1][iterQuad] = ( -b ) / det ;
-            
+
             M_tInverseJacobian[1][0][iterQuad] = ( -c ) / det ;
             M_tInverseJacobian[1][1][iterQuad] = ( d ) / det ;
-            
+
             break;
         }
         case 3:
@@ -874,7 +930,7 @@ void CurrentFE::computeTInverseJacobian()
             Real g ( M_jacobian[2][0][iterQuad] );
             Real h ( M_jacobian[2][1][iterQuad] );
             Real i ( M_jacobian[2][2][iterQuad] );
-            
+
             Real ei ( e * i );
             Real fh ( f * h );
             Real bi ( b * i );
@@ -882,25 +938,25 @@ void CurrentFE::computeTInverseJacobian()
             Real bf ( b * f );
             Real ce ( c * e );
             Real det ( a * ( ei - fh ) + d * ( ch - bi ) + g * ( bf - ce ) );
-            
+
             M_tInverseJacobian[0][0][iterQuad] = ( ei - fh ) / det ;
             M_tInverseJacobian[0][1][iterQuad] = ( -d * i + f * g ) / det ;
             M_tInverseJacobian[0][2][iterQuad] = ( d * h - e * g ) / det ;
-            
+
             M_tInverseJacobian[1][0][iterQuad] = ( -bi + ch ) / det ;
             M_tInverseJacobian[1][1][iterQuad] = ( a * i - c * g ) / det ;
             M_tInverseJacobian[1][2][iterQuad] = ( -a * h + b * g ) / det ;
-            
+
             M_tInverseJacobian[2][0][iterQuad] = ( bf - ce ) / det ;
             M_tInverseJacobian[2][1][iterQuad] = ( -a * f + c * d ) / det ;
             M_tInverseJacobian[2][2][iterQuad] = ( a * e - b * d ) / det ;
-            
+
             break;
         }
         default:
             ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
         }
-        
+
     }
 
     M_tInverseJacobianUpdated=true;
@@ -919,7 +975,7 @@ void CurrentFE::computeDetJacobian()
             Real a ( M_jacobian[0][0][iterQuad] );
             Real det( a);
             M_detJacobian[iterQuad]= det;
-            
+
             break;
         }
         case 2:
@@ -928,7 +984,7 @@ void CurrentFE::computeDetJacobian()
             Real b ( M_jacobian[0][1][iterQuad] );
             Real c ( M_jacobian[0][2][iterQuad] );
             Real d ( M_jacobian[1][0][iterQuad] );
-            
+
             Real det( a*d-b*c);
             M_detJacobian[iterQuad]= det;
             break;
@@ -944,14 +1000,14 @@ void CurrentFE::computeDetJacobian()
             Real g ( M_jacobian[2][0][iterQuad] );
             Real h ( M_jacobian[2][1][iterQuad] );
             Real i ( M_jacobian[2][2][iterQuad] );
-            
+
             Real ei (e*i);
             Real fh (f*h);
             Real bi (b*i);
             Real ch (c*h);
             Real bf (b*f);
             Real ce (c*e);
-            
+
             Real det( a*(ei-fh) + d*(ch-bi) + g*( bf-ce));
             M_detJacobian[iterQuad]= det;
             break;

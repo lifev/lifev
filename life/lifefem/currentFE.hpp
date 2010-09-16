@@ -335,7 +335,7 @@ public:
      */
     void QuadRuleVTKexport( const std::string& filename) const;
 
-   
+
     //@}
 
 
@@ -696,6 +696,10 @@ public:
     Real pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
 		  int compx, int compzeta) const;
 
+    /*!
+      compute the determinant of the Jacobian at a given point
+     */
+    Real pointDetJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z) const;
 
     /*!  return (x,y,z) = the global coordinates of the quadrature point ig
       in the current element. \warning this function is almost obsolete since if
