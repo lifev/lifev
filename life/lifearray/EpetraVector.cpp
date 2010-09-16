@@ -228,8 +228,6 @@ EpetraVector::sumIntoGlobalValues ( const int GID, const double value )
 EpetraVector&
 EpetraVector::add( const EpetraVector& vector, const int offset )
 {
-    if ( offset == 0 )
-        return operator+= (vector);
 
     int numMyEntries = vector.M_epetraVector->MyLength ();
     const int*    gids       = vector.BlockMap().MyGlobalElements();
