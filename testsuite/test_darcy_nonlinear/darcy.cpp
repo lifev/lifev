@@ -119,22 +119,21 @@ Real analyticalSolution( const Real& /*t*/,
     return x*x*y*y + 6.*x + 5.*z;
 }
 
-// Gradient of the analytical solution
-Real gradientAnalyticalSolution(const UInt& icoor,
-                                const Real& /*t*/,
-                                const Real& x,
-                                const Real& y,
-                                const Real& /*z*/,
-                                const ID& /*ic*/)
+// Analytical flux
+Real analyticalFlux( const Real& /*t*/,
+                     const Real& x,
+                     const Real& y,
+                     const Real& z,
+                     const ID& icomp)
 {
-    switch(icoor)
+    switch(icomp)
     {
     case 1: // \frac{\partial }{\partial x}
-        return 2.*x*y*y + 6.;
+        return -1.*(((x*x*y*y + 6.*x + 5.*z)*(x*x*y*y + 6.*x + 5.*z) + 1) * (2.*x*y*y + 6.) + 2.*x*x*y);
     case 2: // \frac{\partial }{\partial y}
-        return 2.*y*x*x;
+        return -1.*(2.*x*y*y + 6. + 2.*x*x*y);
     case 3: // \frac{\partial }{\partial z}
-        return 5.;
+        return -10.;
     default:
         return 0.;
     }
@@ -326,6 +325,13 @@ struct darcy::Private
         return f;
     }
 
+    fct_type getAnalyticalFlux()
+    {
+        fct_type f;
+        f = boost::bind( &analyticalFlux, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
     nonLinearMatrix_type getNonLinearInversePermeability()
     {
         nonLinearMatrix_type m;
@@ -488,6 +494,15 @@ darcy::run()
     qR_dual    = &quadRuleTetra15pt;
     bdQr_dual  = &quadRuleTria4pt;
 
+    // Interpolate of dual solution parameters
+	const RefFE*    refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
+    const QuadRule* qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
+    const QuadRule* bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
+
+    refFE_dualInterpolate = &feTetraP0;
+    qR_dualInterpolate    = &quadRuleTetra15pt;
+    bdQr_dualInterpolate  = &quadRuleTria4pt;
+
     // Hybrid solution parameters
     // hybrid
     const RefFE*    refFE_hybrid ( static_cast<RefFE*>(NULL) );
@@ -524,6 +539,14 @@ darcy::run()
                                                 1,
                                                 Members->comm );
 
+    // Finite element space of the interpolation of dual variable
+    FESpace< RegionMesh, EpetraMap > uInterpolate_FESpace( meshPart,
+                                                           *refFE_dualInterpolate,
+                                                           *qR_dualInterpolate,
+                                                           *bdQr_dualInterpolate,
+                                                           3,
+                                                           Members->comm );
+
     // Finite element space of the hybrid variable
     FESpace< RegionMesh, EpetraMap > hybrid_FESpace( meshPart,
                                                     *refFE_hybrid,
@@ -557,6 +580,7 @@ darcy::run()
                      u_FESpace,
                      hybrid_FESpace,
                      VdotN_FESpace,
+                     uInterpolate_FESpace,
                      *Members->comm );
 
     // Stop chronoProblem
@@ -606,7 +630,7 @@ darcy::run()
     chronoError.start();
 
     // Compute the error L2 norms
-    darcySolver.printErrors( Members->getAnalyticalSolution(), Members->getUOne() );
+    darcySolver.printErrors( Members->getAnalyticalSolution(), Members->getAnalyticalFlux(), Members->getUOne() );
 
     // Stop chronoError
     chronoError.stop();
