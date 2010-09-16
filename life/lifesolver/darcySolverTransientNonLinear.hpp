@@ -250,6 +250,7 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -258,6 +259,7 @@ public:
                                     FESpace<Mesh, EpetraMap>& dual_FESpace,
                                     FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                                     FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                                    FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                                     bchandler_raw_type&       bcHandler,
                                     Epetra_Comm&              comm );
 
@@ -268,6 +270,7 @@ public:
       @param dual_FESpace Dual finite element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -276,6 +279,7 @@ public:
                                     FESpace<Mesh, EpetraMap>& dual_FESpace,
                                     FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                                     FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                                    FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                                     Epetra_Comm&              comm );
 
     //! Virtual destructor.
@@ -335,14 +339,15 @@ DarcySolverTransientNonLinear ( const data_type&           dataFile,
                                 FESpace<Mesh, EpetraMap>&  dual_FESpace,
                                 FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                                 FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                                FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                                 bchandler_raw_type&        BCh,
                                 Epetra_Comm&               comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm),
     // Non-linear Darcy solver constructor.
-    DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
+    DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm),
     // Transient Darcy solver contructor.
-    DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm)
+    DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm)
 {
 
 	CONSTRUCTOR( "DarcySolverTransientNonLinear" );
@@ -358,13 +363,14 @@ DarcySolverTransientNonLinear ( const data_type&           dataFile,
                                 FESpace<Mesh, EpetraMap>&  dual_FESpace,
                                 FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                                 FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                                FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                                 Epetra_Comm&               comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm),
     // Non-linear Darcy solver constructor.
-    DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+    DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm),
     // Transient Darcy solver contructor.
-    DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm)
+    DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm)
 {
 
 	CONSTRUCTOR( "DarcySolverTransientNonLinear" );

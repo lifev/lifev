@@ -1,4 +1,3 @@
-
 /* -*- mode: c++ -*-
 
  This file is part of the LifeV library
@@ -46,9 +45,9 @@
 
 #ifdef HAVE_HDF5
 #include <life/lifefilters/hdf5exporter.hpp>
-#endif
+#else
 #include <life/lifefilters/noexport.hpp>
-
+#endif
 
 // Local namespace to store the default source term and the default permeability tensor.
 namespace
@@ -303,6 +302,7 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -311,6 +311,7 @@ public:
                   FESpace<Mesh, EpetraMap>& dual_FESpace,
                   FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                   FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                  FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                   bchandler_raw_type&       bcHandler,
                   Epetra_Comm&              comm );
 
@@ -321,6 +322,7 @@ public:
       @param dual_FESpace Dual finite element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -329,6 +331,7 @@ public:
                   FESpace<Mesh, EpetraMap>& dual_FESpace,
                   FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                   FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                  FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                   Epetra_Comm&              comm );
 
     //! Virtual destructor.
@@ -508,14 +511,23 @@ public:
     /*!
       Print the errors and the norm of the numerical and exact solutions.
       @param primalExact Primal exact solution of the problem.
+      @param dualExact Dual exact solution of the problem.
+      @param weightFunction Weight function in the integrals.
       @param time Current time of the simulation.
     */
-    void printErrors ( const Function& primalExact, const Function& weightFunction, const Real time = 0 ) const;
+    void printErrors ( const Function& primalExact, const Function& dualExact,
+                       const Function& weightFunction, const Real time = 0 ) const;
 
     //! \f$ L^2 \f$ norm for the numerical primal solution
     inline const Real primalL2Norm ( void ) const
     {
         return M_primal_FESpace.L2Norm( *M_primal );
+    }
+
+    //! \f$ L^2 \f$ norm for the numerical dual solution
+    inline const Real dualL2Norm ( void ) const
+    {
+        return M_dualInterpolate_FESpace.L2Norm( *M_dualInterpolate );
     }
 
     /*!
@@ -529,6 +541,17 @@ public:
         return M_primal_FESpace.L2NormFunction( primalExact, time );
     }
 
+   /*!
+      \f$ L^2 \f$ norm for the exact dual solution.
+      @param dualExact Dual exact solution of the problem.
+      @param time Current time of the simulation.
+      @return The \f$ L^2 \f$ norm for the exact dual solution as constant Real.
+    */
+    inline const Real exactDualL2Norm ( const Function& dualExact, const Real time = 0 ) const
+    {
+        return M_dualInterpolate_FESpace.L2NormFunction( dualExact, time );
+    }
+
     /*!
       \f$ L^2 \f$ error norm for the primal solution.
       @param primalExact Primal exact solution of the problem.
@@ -540,6 +563,20 @@ public:
     {
         return M_primal_FESpace.L2ErrorWeighted( primalExact, *M_primal, weightFunction, time );
     }
+
+    /*!
+      \f$ L^2 \f$ error norm for the dual solution.
+      @param dualExact Dual exact solution of the problem.
+      @param weightFunction The weight function for the integrals.
+      @param time Current time of the simulation.
+      @return The \f$ L^2 \f$ error norm for the dual solution as a constant Real.
+    */
+    inline const Real dualL2Error (const Function& dualExact, const Function& weightFunction, const Real time = 0 ) const
+    {
+        //        return M_dualInterpolate_FESpace.L2ErrorWeighted( dualExact, *M_dualInterpolate, weightFunction, time );
+        return M_dualInterpolate_FESpace.L2Error( dualExact, *M_dualInterpolate, time, NULL );
+    }
+
 
     //@}
 
@@ -657,7 +694,7 @@ protected:
     //! @name Finite element spaces
     //@{
 
-    //! Pressure finite element space.
+    //! Primal finite element space.
     FESpace<Mesh, EpetraMap>&  M_primal_FESpace;
 
     //! Dual finite element space.
@@ -668,6 +705,9 @@ protected:
 
     //! Dual function dot outward unit vector finite element space.
     FESpace<Mesh, EpetraMap>&  M_VdotN_FESpace;
+
+    //! Dual interpolation finite element.
+    FESpace<Mesh, EpetraMap>& M_dualInterpolate_FESpace;
 
     //@}
 
@@ -686,6 +726,9 @@ protected:
 
     //! Dual solution.
     vector_ptrtype                          M_dual;
+
+    //! Dual interpolate solution.
+    vector_ptrtype                          M_dualInterpolate;
 
     //! Hybrid solution.
     vector_ptrtype                          M_hybrid;
@@ -754,6 +797,9 @@ protected:
     //! The exporter primal pointer.
     vector_ptrtype   M_primalExporter;
 
+    //! The exporter dual pointer.
+    vector_ptrtype   M_dualExporter;
+
     //@}
 
 }; // class DarcySolver
@@ -770,6 +816,7 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+              FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
               bchandler_raw_type&        BCh,
               Epetra_Comm&               comm ):
     // Parallel stuff.
@@ -787,11 +834,13 @@ DarcySolver ( const data_type&           dataFile,
     M_dual_FESpace           ( dual_FESpace ),
     M_hybrid_FESpace         ( hybrid_FESpace ),
     M_VdotN_FESpace          ( VdotN_FESpace ),
+    M_dualInterpolate_FESpace( dualInterpolate_FESpace ),
     // Algebraic stuff.
     M_matrHybrid             ( new matrix_type ( M_localMap ) ),
     M_rhs                    ( new vector_type ( M_localMap ) ),
     M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
-    M_dual					 ( new vector_type ( M_dual_FESpace.map() ) ),
+    M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
+    M_dualInterpolate        ( new vector_type ( M_dualInterpolate_FESpace.map(), Repeated ) ),
     M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
     M_residual               ( new vector_type ( M_localMap ) ),
     M_linearSolver           ( ),
@@ -807,7 +856,11 @@ DarcySolver ( const data_type&           dataFile,
     M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
     M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
     // Exporter.
-    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "Pressure" ) )
+#ifdef HAVE_HDF5
+    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
+#else
+    M_exporter               ( new NoExport<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
+#endif
 {
 
 	CONSTRUCTOR( "DarcySolver" );
@@ -823,6 +876,7 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+              FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
               Epetra_Comm&               comm ):
     // Parallel stuff.
     M_comm                 	 ( &comm ),
@@ -838,11 +892,13 @@ DarcySolver ( const data_type&           dataFile,
     M_dual_FESpace           ( dual_FESpace ),
     M_hybrid_FESpace         ( hybrid_FESpace ),
     M_VdotN_FESpace          ( VdotN_FESpace ),
+    M_dualInterpolate_FESpace( dualInterpolate_FESpace ),
     // Algebraic stuff.
     M_matrHybrid             ( new matrix_type ( M_localMap ) ),
     M_rhs                    ( new vector_type ( M_localMap ) ),
     M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
-    M_dual					 ( new vector_type ( M_dual_FESpace.map() ) ),
+    M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
+    M_dualInterpolate        ( new vector_type ( M_dualInterpolate_FESpace.map(), Repeated ) ),
     M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
     M_residual               ( new vector_type ( M_localMap ) ),
     M_linearSolver           ( ),
@@ -859,9 +915,9 @@ DarcySolver ( const data_type&           dataFile,
     M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
     // Exporter.
 #ifdef HAVE_HDF5
-    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "Pressure" ) )
+    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
 #else
-    M_exporter               ( new NoExport<Mesh> ( *(M_data.dataFile()), "Pressure" ) )
+    M_exporter               ( new NoExport<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
 #endif
 
 {
@@ -954,6 +1010,18 @@ setup ()
                              M_primalExporter,
                              static_cast<UInt>( 0 ),
                              static_cast<UInt>( M_primal_FESpace.dof().numTotalDof() ),
+                             static_cast<UInt>( 0 ),
+                             ExporterData::Cell );
+
+    // Set the exporter dual pointer.
+    M_dualExporter.reset( new vector_type (*M_dualInterpolate, M_exporter->mapType() ) );
+
+    // Add the variable to the exporter.
+    M_exporter->addVariable( ExporterData::Vector,
+                             "Velocity",
+                             M_dualExporter,
+                             static_cast<UInt>( 0 ),
+                             static_cast<UInt>( M_dualInterpolate_FESpace.dof().numTotalDof() ),
                              static_cast<UInt>( 0 ),
                              ExporterData::Cell );
 
@@ -1207,7 +1275,10 @@ updateVariables ()
     M_primal.reset( new vector_type( M_primal_FESpace.map() ) );
 
     // Reset the global dual vector
-    M_dual.reset( new vector_type( M_dual_FESpace.map() ) );
+    M_dual.reset( new vector_type( M_dual_FESpace.map(), Repeated ) );
+
+    // Reset the global dual interpolated vector
+    M_dualInterpolate.reset( new vector_type( M_dualInterpolate_FESpace.map(), Repeated ) );
 
     // Reset the global hybrid vector
     M_hybrid.reset( new vector_type( M_hybrid_FESpace.map() ) );
@@ -1405,6 +1476,7 @@ void
 DarcySolver<Mesh, SolverType>::
 localComputePrimalAndDual ()
 {
+
     // Flags for the BLAS and LAPACK routine.
 
     int INFO[1]         = {0};
@@ -1483,7 +1555,7 @@ localComputePrimalAndDual ()
        A stores L and L^T where L and L^T is the Cholesky factorization of A
        B stores L^{-1} * B
        C stores L^{-1} * C
-       B^T stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
+       M_BtB stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
        M_BtC stores LB^{-1} * B^T * A^{-1} * C */
 
 
@@ -1527,7 +1599,7 @@ localComputePrimalAndDual ()
     //.....................................
 
     // Clear the element dual vector.
-    //M_elvecFlux.zero();
+    M_elvecFlux.zero();
 
     /* Put in M_elvecFlux the vector B * M_elvecSource = L^{-1} * B * primal_K
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
@@ -1543,21 +1615,6 @@ localComputePrimalAndDual ()
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_(_param_L, _param_T, _param_N, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
     ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
-
-    //---------------------------------------
-    //           BEWARE!!!!
-    // THIS IS WRONG IN THE RTk FOR k >= 1 !!!!
-    //---------------------------------------
-    /*
-      for( UInt ilocface=1 ; ilocface <= this->mesh().element( iElem ).numLocalFaces ; ilocface++ ) {
-      iglobface = this->mesh().localFaceId( iElem , ilocface );
-      if( this->mesh().faceElement( iglobface , 1 ) == iElem ){
-      global_flux[iglobface-1] = flux( ilocface-1 );
-      }
-      }*/
-    //..........................
-    // END OF VECTOR OPERATIONS.
-    //..........................
 
 } // localComputePrimalAndDual
 
@@ -1582,8 +1639,6 @@ computePrimalAndDual ()
       compute the pressure (Qk or Pk / element)
       and the velocity (RTk / element) => 2 (opposite) velocities / face
       ==========================================*/
-
-    //   Vector& global_flux  = globalFlux;
 
 	/* The vector H_hybrid is an unique epetra vector, so it does not share one layer elements.
 	   The reconstruction of the primal and dual variabile need this share, so we create a repeated
@@ -1621,7 +1676,26 @@ computePrimalAndDual ()
        				    M_primal_FESpace.refFE().nbDof(),
        				    M_primal_FESpace.dof(), 0 );
 
+
+        for( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).numLocalFaces; ++iLocalFace )
+        {
+            UInt iGlobalFace( M_dual_FESpace.mesh()->localFaceId( iElem, iLocalFace ) );
+            if( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 1 ) != iElem )
+            {
+                M_elvecFlux[ iLocalFace - 1 ] = 0;
+            }
+        }
+
+        /* Put the dual variable of the current finite element, stored in elvecFlux,
+           in the global vector M_dual. */
+        assembleVector( *M_dual,
+                        M_dual_FESpace.fe().currentLocalId(),
+                        M_elvecFlux,
+                        M_dual_FESpace.refFE().nbDof(),
+                        M_dual_FESpace.dof(), 0);
+
     }
+
 
     //---------------------------------------
     // END OF THE LOOP ON THE VOLUME ELEMENTS
@@ -1630,7 +1704,9 @@ computePrimalAndDual ()
 	// Assemble the primal variable.
     M_primal->GlobalAssemble();
 
-	chronoComputePrimalAndDual.stop();
+    // It is wrong to assemble the dual variable, no communications required.
+
+    chronoComputePrimalAndDual.stop();
     leaderPrintMax( "done in " , chronoComputePrimalAndDual.diff() );
 
 } // computePrimalAndDual
@@ -1653,8 +1729,14 @@ run ()
     // Sincronize the processes.
   	MPI_Barrier( MPI_COMM_WORLD );
 
-    // Copy the solution to the exporter.
+    // Copy the primal solution to the exporter.
     *M_primalExporter = *M_primal;
+
+    // Interpolate the dual vector filed spammed as Raviart-Thomas into a P0 vector field.
+    *M_dualInterpolate = M_dualInterpolate_FESpace.FeToFeInterpolate( M_dual_FESpace, *M_dual );
+
+    // Copy the dual interpolated solution to the exporter.
+    *M_dualExporter = *M_dualInterpolate;
 
     // Save the solution into the exporter.
     M_exporter->postProcess( M_data.dataTime()->getTime() );
@@ -1665,11 +1747,12 @@ run ()
 template <typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-printErrors ( const Function& primalExact, const Function& weightFunction, const Real time ) const
+printErrors ( const Function& primalExact, const Function& dualExact, const Function& weightFunction, const Real time ) const
 {
 
 	std::ostringstream os("");
     Real valPrimalL2Norm(0), valExactPrimalL2Norm(0), valPrimalL2Error(0), valPrimalL2RelativeError(0);
+    Real valDualL2Norm(0), valExactDualL2Norm(0), valDualL2Error(0), valDualL2RelativeError(0);
 
 	leaderPrint("\nPRESSURE ERROR");
 
@@ -1694,6 +1777,32 @@ printErrors ( const Function& primalExact, const Function& weightFunction, const
     // Compute the relative L^2(\Omega) error of the primal variable.
     valPrimalL2RelativeError = valPrimalL2Error / valExactPrimalL2Norm;
     os << " L2 relative error of primal unknown:  " << std::setprecision(15) << valPrimalL2RelativeError << std::endl;
+    leaderPrint( os.str() );
+    os.str("");
+
+    leaderPrint("\n\nINTERPOLATED DARCY VELOCITY ERROR");
+
+    // Compute the L^2(\Omega) norm of the dual variable.
+    valDualL2Norm = dualL2Norm();
+	os << std::endl << " L2 norm of dual unknown:              " << std::setprecision(15) << valDualL2Norm << std::endl;
+	leaderPrint( os.str() );
+	os.str("");
+
+	// Compute the L^2(\Omega) norm of the exact dual variable.
+    valExactDualL2Norm = exactDualL2Norm( dualExact, time );
+    os << " L2 norm of dual exact:                " << std::setprecision(15) << valExactDualL2Norm << std::endl;
+    leaderPrint( os.str() );
+    os.str("");
+
+    // Compute the absolute L^2(\Omega) error of the dual variable.
+    valDualL2Error = dualL2Error( dualExact, weightFunction, time );
+	os << " L2 error of dual unknown:             " << std::setprecision(15) << valDualL2Error << std::endl;
+	leaderPrint( os.str() );
+	os.str("");
+
+    // Compute the relative L^2(\Omega) error of the dual variable.
+    valDualL2RelativeError = valDualL2Error / valExactDualL2Norm;
+    os << " L2 relative error of Dual unknown:    " << std::setprecision(15) << valDualL2RelativeError << std::endl;
     leaderPrint( os.str() );
     os.str("");
 

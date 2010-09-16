@@ -309,6 +309,7 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -317,6 +318,7 @@ public:
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                            bchandler_raw_type&       bcHandler,
                            Epetra_Comm&              comm );
 
@@ -327,6 +329,7 @@ public:
       @param dual_FESpace Dual finite element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -335,6 +338,7 @@ public:
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                            Epetra_Comm&              comm );
 
     //! Virtual destructor.
@@ -483,10 +487,11 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                        bchandler_raw_type&        BCh,
                        Epetra_Comm&               comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm),
     // Data of the problem.
     M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.
@@ -514,9 +519,10 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                        Epetra_Comm&               comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm),
     // Data of the problem.
     M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.
@@ -672,8 +678,17 @@ fixedPointScheme ( void )
     // Check if the fixed point method reach the tollerance.
     ASSERT( M_maxIterationFixedPoint > M_iterationFixedPoint, "Attention the fixed point scheme does not reach the convergence." );
 
+    // Sincronize the processes.
+  	MPI_Barrier( MPI_COMM_WORLD );
+
     // Copy the solution to the exporter.
     *( this->M_primalExporter ) = *( this->M_primal );
+
+    // Interpolate the dual vector filed spammed as Raviart-Thomas into a P0 vector field.
+    *( this->M_dualInterpolate ) = this->M_dualInterpolate_FESpace.FeToFeInterpolate( this->M_dual_FESpace, *( this->M_dual ) );
+
+    // Copy the dual interpolated solution to the exporter.
+    *( this->M_dualExporter ) = *( this->M_dualInterpolate );
 
     // Save the solution into the exporter.
     this->M_exporter->postProcess( this->M_data.dataTime()->getTime() );

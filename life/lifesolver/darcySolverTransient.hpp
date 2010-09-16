@@ -288,6 +288,7 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
       @param comm Epetra communicator.
     */
@@ -296,6 +297,7 @@ public:
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                            bchandler_type&           bcHandler,
                            Epetra_Comm&              comm );
     /*!
@@ -305,6 +307,7 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
+      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param comm Epetra communicator.
     */
     DarcySolverTransient ( const data_type&          dataFile,
@@ -312,6 +315,7 @@ public:
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                            Epetra_Comm&              comm );
 
     //! Virtual destructor.
@@ -449,10 +453,11 @@ DarcySolverTransient ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                        bchandler_type&            BCh,
                        Epetra_Comm&               comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm),
     // Data of the problem
     M_primalInitial          ( DarcyDefaultInitialPrimal() ),
     // Linear solver.
@@ -482,9 +487,10 @@ DarcySolverTransient ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                        Epetra_Comm&               comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm),
     // Data of the problem
     M_primalInitial          ( DarcyDefaultInitialPrimal() ),
     // Linear solver.
@@ -904,21 +910,6 @@ localComputePrimalAndDual ()
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_(_param_L, _param_T, _param_N, NBU, NBRHS, A, NBU, this->M_elvecFlux, NBU, INFO );
     ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
-
-    //---------------------------------------
-    //           BEWARE!!!!
-    // THIS IS WRONG IN THE RTk FOR k >= 1 !!!!
-    //---------------------------------------
-    /*
-      for( UInt ilocface=1 ; ilocface <= this->mesh().element( iElem ).numLocalFaces ; ilocface++ ) {
-      iglobface = this->mesh().localFaceId( iElem , ilocface );
-      if( this->mesh().faceElement( iglobface , 1 ) == iElem ){
-      global_flux[iglobface-1] = flux( ilocface-1 );
-      }
-      }*/
-    //..........................
-    // END OF VECTOR OPERATIONS.
-    //..........................
 
 } // localComputePrimalAndDual
 
