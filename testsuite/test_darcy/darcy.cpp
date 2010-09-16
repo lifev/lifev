@@ -121,21 +121,20 @@ Real analyticalSolution( const Real&/*t*/,
 }
 
 // Gradient of the analytical solution
-Real gradientAnalyticalSolution( const UInt& icoor,
-                                 const Real& /*t*/,
-                                 const Real& x,
-                                 const Real& y,
-                                 const Real& z,
-                                 const ID& /*ic*/)
+Real analyticalFlux( const Real& /*t*/,
+                     const Real& x,
+                     const Real& y,
+                     const Real& z,
+                     const ID& icomp)
 {
-    switch(icoor)
+    switch(icomp)
     {
     case 1: // \frac{\partial }{\partial x}
-        return 2.*x*y*y + 6.;
+        return -1. * (4.*x*y*y + 12. + 2.*x*x*y);
     case 2: // \frac{\partial }{\partial y}
-        return 2.*y*x*x;
+        return -1. * (2.*y*x*x + 2.*x*y*y + 6.);
     case 3: // \frac{\partial }{\partial z}
-        return 5.;
+        return -5.;
     default:
         return 0.;
     }
@@ -187,7 +186,7 @@ Real dirichlet( const Real& /* t */,
                 const Real& z,
                 const ID&   /*icomp*/)
 {
-    return x*x*y*y + 6.*x + 5.*z;;
+    return x*x*y*y + 6.*x + 5.*z;
 }
 
 // Boundary condition of Neumann
@@ -278,10 +277,11 @@ struct darcy::Private
 {
     Private() {}
 
-    // Policy for functions
+    // Policy for scalar functions
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>
                                      fct_type;
+
     // Policy for matrices
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real& )>
@@ -312,6 +312,13 @@ struct darcy::Private
     {
         fct_type f;
         f = boost::bind( &analyticalSolution, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
+    fct_type getAnalyticalFlux()
+    {
+        fct_type f;
+        f = boost::bind( &analyticalFlux, _1, _2, _3, _4, _5 );
         return f;
     }
 
@@ -469,13 +476,22 @@ darcy::run()
     bdQr_primal  = &quadRuleTria4pt;
 
 	// Dual solution parameters
-	const RefFE*    refFE_dual   ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR_dual      ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr_dual    ( static_cast<QuadRule*>(NULL) );
+	const RefFE*    refFE_dual ( static_cast<RefFE*>(NULL) );
+    const QuadRule* qR_dual    ( static_cast<QuadRule*>(NULL) );
+    const QuadRule* bdQr_dual  ( static_cast<QuadRule*>(NULL) );
 
     refFE_dual = &feTetraRT0;
     qR_dual    = &quadRuleTetra15pt;
     bdQr_dual  = &quadRuleTria4pt;
+
+	// Interpolate of dual solution parameters
+	const RefFE*    refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
+    const QuadRule* qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
+    const QuadRule* bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
+
+    refFE_dualInterpolate = &feTetraP0;
+    qR_dualInterpolate    = &quadRuleTetra15pt;
+    bdQr_dualInterpolate  = &quadRuleTria4pt;
 
     // Hybrid solution parameters
     // hybrid
@@ -513,6 +529,14 @@ darcy::run()
                                                 1,
                                                 Members->comm );
 
+    // Finite element space of the interpolation of dual variable
+    FESpace< RegionMesh, EpetraMap > uInterpolate_FESpace( meshPart,
+                                                           *refFE_dualInterpolate,
+                                                           *qR_dualInterpolate,
+                                                           *bdQr_dualInterpolate,
+                                                           3,
+                                                           Members->comm );
+
     // Finite element space of the hybrid variable
     FESpace< RegionMesh, EpetraMap > hybrid_FESpace( meshPart,
                                                     *refFE_hybrid,
@@ -546,6 +570,7 @@ darcy::run()
                      u_FESpace,
                      hybrid_FESpace,
                      VdotN_FESpace,
+                     uInterpolate_FESpace,
                      *Members->comm );
 
     // Stop chronoProblem
@@ -592,7 +617,7 @@ darcy::run()
     chronoError.start();
 
     // Compute the error L2 norms
-    darcySolver.printErrors( Members->getAnalyticalSolution(), Members->getUOne() );
+    darcySolver.printErrors( Members->getAnalyticalSolution(), Members->getAnalyticalFlux(), Members->getUOne() );
 
     // Stop chronoPostProcess
     chronoError.stop();
