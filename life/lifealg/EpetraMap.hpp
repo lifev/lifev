@@ -122,7 +122,7 @@ public:
       the maximum id to consider
       eg: offset = 2, maxid = 6;
       _epetraMap = [ 0 2 5 7 8 10 1]
-      this  =      [   0 3 5 7 ]
+      this  =      [   0 3 5 6 ]
 
       if needed, indexBase may be changed (default values < 0 means "same as original map")
     */

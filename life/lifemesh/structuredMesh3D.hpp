@@ -93,7 +93,7 @@ const int TOPCORNER4    = 26;
   @param l_y width of the mesh
   @param l_z height of the mesh
 
-  The internal points are labelled with 0.
+  The internal points are labeled with 0.
   The labels 1-6 are reserved for the 6 faces.
   The labels 7-18 are reserved for the 12 edges.
   The labels 19-26 are reserved for the 8 corners.
