@@ -323,6 +323,9 @@ public:
     //! specific BC offset
     void setOffset( const std::string& name, Int offset );
 
+    //! specific BC hint
+    void setBCHint(const BCHints& hint) {M_hint = hint;}
+    
     //@}
 
 
