@@ -210,17 +210,15 @@ public:
     //! u^{n+1} defined by the n stored state vectors
     VectorType extrap() const;
 
+    //! Compute the polynomial extrapolation approximation of order k-1 in iterative 
+    //! methods  u^{k+1} defined by the unk and the n  stored state vectors  
+    VectorType extrap( const  VectorType unk );
+
     //! Compute the polynomial extrapolation approximation of order n-1 of
     //! v^{n+1} defined by the n stored state vectors
     VectorType extrapVelocity() const;
 
-    //! Return the i-th coefficient of the time derivative alpha_i
-  // double coeff_der( UInt i ) const;
-
-    //! Return the i-th coefficient of the time derivative xi_i
-    //double coeff_derOrder2( UInt i ) const;
-
-  //! Return the i-th coefficient of the time extrapolation beta_i
+    //! Return the i-th coefficient of the time extrapolation beta_i
     double coeff_ext( UInt i ) const;
 
     //! Return the i-th coefficient of the time derivative xi_i
@@ -720,6 +718,20 @@ BdfT<VectorType>::extrap() const
             ue += this->_M_beta[ i ] * *this->_M_unknowns[ i ];
     }
 
+    return ue;
+}
+
+template<typename VectorType>
+VectorType
+BdfT<VectorType>::extrap(const  VectorType unk) 
+{
+    VectorType ue( unk );
+    ue *= this->_M_beta[ 0 ];
+
+    for ( UInt i = 1;i < this->_M_order;++i )
+    {
+            ue += this->_M_beta[ i ] * *this->_M_unknowns[ i ];
+    }
     return ue;
 }
 

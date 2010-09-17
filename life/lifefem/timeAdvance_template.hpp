@@ -179,6 +179,10 @@ public:
   //! u^{n+1} defined by the n stored state vectors
   virtual VectorType extrap() const  = 0;
   
+  //! Compute the polynomial extrapolation approximation of order k-1 in iterative 
+  //! methods  u^{k+1} defined by the unk and the n  stored state vectors  
+  virtual VectorType extrap(const  VectorType unk ) = 0;
+
   //! Compute the polynomial extrapolation approximation of order n-1 of
   //! u^{n+1} defined by the n stored state vectors
    virtual VectorType extrapVelocity()  const = 0;

@@ -169,7 +169,11 @@ public:
   //! u^{n+1} defined by the n stored state vectors
   VectorType extrap() const;
   
- //! Compute the polynomial extrapolation approximation of order n-1 of
+    //! Compute the polynomial extrapolation approximation of order k-1 in iterative 
+  //! methods  u^{k+1} defined by the unk and the n  stored state vectors  
+  VectorType extrap( const  VectorType unk );
+
+  //! Compute the polynomial extrapolation approximation of order n-1 of
   //! u^{n+1} defined by the n stored state vectors
   VectorType extrapVelocity() const;
 
@@ -568,6 +572,18 @@ Newmark<VectorType>::extrap()  const
       ue += ( this->_M_dt* this->_M_dt) *(* this->_M_unknowns[2]);
   return ue;
 }
+
+template<typename VectorType>
+VectorType 
+Newmark<VectorType>::extrap(const  VectorType unk)
+{
+  VectorType ue( unk );
+    ue += this->_M_dt * (* this->_M_unknowns[ 1 ]);
+    if ( this->_M_orderDev ==2 )
+      ue += ( this->_M_dt* this->_M_dt) *(* this->_M_unknowns[2]);
+  return ue;
+}
+
 
 template<typename VectorType>
 VectorType 
