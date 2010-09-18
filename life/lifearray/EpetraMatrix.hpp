@@ -123,6 +123,8 @@ public:
 
     //! Unary operator+
     EpetraMatrix& operator += (const EpetraMatrix& _matrix);
+    //! Add a multiple of a given matrix:  *this += val*_matrix
+    void add(const DataType val, const EpetraMatrix& _matrix);
     //! Assignment operator
     EpetraMatrix&   operator=   (const EpetraMatrix& _matrix);
     //! Matrix-Vector multiplication
@@ -383,6 +385,17 @@ EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
 
     return *this;
     //     return matrix;
+}
+
+template <typename DataType>
+void EpetraMatrix<DataType>::add (const DataType val, const EpetraMatrix& _matrix)
+{
+    //    EpetraMatrix matrix(Copy, _matrix.RowMap(), _matrix.GlobalMaxNumEntries());
+#if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
+    EpetraExt::MatrixMatrix::Add(*_matrix.getMatrixPtr(), false, val, *this->getMatrixPtr(), 1.);
+#else
+#error error: do not have nor EpetraExt  8+
+#endif
 }
 
 template<typename DataType>
