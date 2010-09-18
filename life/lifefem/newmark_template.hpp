@@ -584,13 +584,16 @@ Newmark<VectorType>::extrap(const  VectorType unk)
   return ue;
 }
 
-
+//FIXME: this method was missing of the return statement.
+//The author of the class should check if the method works properly.
 template<typename VectorType>
 VectorType 
 Newmark<VectorType>::extrapVelocity()  const
 {
   VectorType ve(* this->_M_unknowns[1]);
     ve += this->_M_dt * (* this->_M_unknowns[ 2 ]);
+
+  return ve; //Added by uvilla, please double check!
 }
 
 template<typename VectorType>
