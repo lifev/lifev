@@ -35,6 +35,14 @@ AT_DATA([data],[[
 #          Data file for a Darcy problem
 #-------------------------------------------------
 
+[exporter]
+    type       = hdf5
+    folder     = ./
+    multimesh  = false   # actually we export also the displacement
+    start      = 0
+    save       = 1
+[../]
+
 [darcy]
 
 	[./physics]

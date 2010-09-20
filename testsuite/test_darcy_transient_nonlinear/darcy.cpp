@@ -362,6 +362,8 @@ darcy::darcy( int argc,
 	#ifdef EPETRA_MPI
 		std::cout << "Epetra Initialization" << std::endl;
 		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+        int ntasks;
+        MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 	#else
 		Members->comm.reset( new Epetra_SerialComm() );
 	#endif
@@ -401,7 +403,7 @@ darcy::run()
     // The Darcy Solver
     //
 
-    if ( isLeader)
+    if ( isLeader )
         std::cout << "The Darcy transient solver" << std::endl << std::flush;
 
     // Start chronoReadAndPartitionMesh for measure the total time for the creation of the local meshes
@@ -549,6 +551,9 @@ darcy::run()
                                                            3,
                                                            Members->comm );
 
+    // Vector for the interpolated dual solution
+    vector_ptrtype dualInterpolated( new vector_type ( uInterpolate_FESpace.map(), Repeated ) );
+
     // Finite element space of the hybrid variable
     FESpace< RegionMesh, EpetraMap > hybrid_FESpace( meshPart,
                                                     *refFE_hybrid,
@@ -582,17 +587,14 @@ darcy::run()
                      u_FESpace,
                      hybrid_FESpace,
                      VdotN_FESpace,
-                     uInterpolate_FESpace,
-                     *Members->comm );
+                     Members->comm );
 
     // Stop chronoProblem
     chronoProblem.stop();
 
     // The leader process print chronoProblem
-    if ( isLeader )
-        std::cout << "Time for create the problem " << chronoProblem.diff() <<
-                     std::endl << std::flush;
-
+    darcySolver.getDisplayer().leaderPrint( "Time for create the problem ",
+                                            chronoProblem.diff(), "\n" );
     // Process the problem
 
     // Start chronoProcess for measure the total time for the simulation
@@ -613,13 +615,127 @@ darcy::run()
     // Set the boudary conditions
     darcySolver.setBC( bcDarcy );
 
+    // Set the exporter for the solution
+    boost::shared_ptr< Exporter< RegionMesh > > exporter;
+
+    // Shared pointer used in the exporter for the primal solution
+    vector_ptrtype primalExporter;
+
+    // Shared pointer used in the exporter for the dual solution
+    vector_ptrtype dualExporter;
+
+    // Type of the exporter
+    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+
+    // Choose the exporter
+#ifdef HAVE_HDF5
+    if ( exporterType.compare("hdf5") == 0 )
+    {
+        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, "PressureVelocity" ) );
+
+        // Set directory where to save the solution
+        exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+
+        exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+    }
+    else
+#endif
+    {
+        if ( exporterType.compare("none") == 0 )
+        {
+            exporter.reset( new NoExport< RegionMesh > ( dataFile, "PressureVelocity" ) );
+
+            // Set directory where to save the solution
+            exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+
+            exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+        }
+        else
+        {
+            exporter.reset( new Ensight< RegionMesh > ( dataFile, "PressureVelocity" ) );
+
+            // Set directory where to save the solution
+            exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+
+            exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+        }
+    }
+
+    // Set the exporter primal pointer
+    primalExporter.reset( new vector_type ( *darcySolver.primalSolution(),
+                                            exporter->mapType() ) );
+
+    // Add the primal variable to the exporter
+    exporter->addVariable( ExporterData::Scalar,
+                           "Pressure",
+                           primalExporter,
+                           static_cast<UInt>( 0 ),
+                           static_cast<UInt>( p_FESpace.dof().numTotalDof() ),
+                           static_cast<UInt>( 0 ),
+                           ExporterData::Cell );
+
+    // Set the exporter dual pointer
+    dualExporter.reset( new vector_type ( *dualInterpolated, exporter->mapType() ) );
+
+    // Add the variable to the exporter
+    exporter->addVariable( ExporterData::Vector,
+                           "Velocity",
+                           dualExporter,
+                           static_cast<UInt>( 0 ),
+                           static_cast<UInt>( uInterpolate_FESpace.dof().numTotalDof() ),
+                           static_cast<UInt>( 0 ),
+                           ExporterData::Cell );
+
     // Compute the total number of unknowns
     EpetraMap fullDarcyMap( darcySolver.getMap() );
     if ( isLeader )
     	std::cout << "Number of unknowns : " << hybrid_FESpace.map().getMap(Unique)->NumGlobalElements() << std::endl << std::flush;
 
-    // Start time simulation
-    darcySolver.run();
+    // Solve the problem
+
+    // Save the initial primal
+
+    // Copy the initial primal to the exporter
+    *primalExporter = *darcySolver.primalSolution();
+
+    // Save the initial primal solution into the exporter
+    exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
+
+    // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
+    while( !dataDarcy.dataTime()->isLastTimeStep() )
+    {
+        // Update the primal old solution for the fixed point scheme
+        darcySolver.updatePrimalOldSolution();
+
+        // Advance the current time of \Delta t.
+        dataDarcy.dataTime()->updateTime();
+
+        // The leader process prints the temporal data.
+        if ( darcySolver.getDisplayer().isLeader() )
+        {
+            dataDarcy.dataTime()->showMe();
+        }
+
+        // Start the fixed point simulation
+        darcySolver.fixedPointScheme();
+
+        // Save the solution
+
+        // Copy the primal solution to the exporter
+        *primalExporter = *darcySolver.primalSolution();
+
+        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+        *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+                                                                *darcySolver.dualSolution() );
+
+        // Copy the dual interpolated solution to the exporter
+        *dualExporter = *dualInterpolated;
+
+        // Save the solution into the exporter
+        exporter->postProcess( dataDarcy.dataTime()->getTime() );
+
+    }
+
 
     // Stop chronoProcess
     chronoProcess.stop();
@@ -631,24 +747,104 @@ darcy::run()
     // Start chronoError for measure the total time for computing the errors
     chronoError.start();
 
+    // The leader process print chronoProcess
+    darcySolver.getDisplayer().leaderPrint( "Time for process ",
+                                            chronoProcess.diff(), "\n" );
+
+    // Compute the errors
+
+    // Start chronoError for measure the total time for computing the errors.
+    chronoError.start();
+
     // Compute the error L2 norms
-    darcySolver.printErrors( Members->getAnalyticalSolution(), Members->getAnalyticalFlux(), Members->getUOne(), darcySolver.getTime() );
+    Real primalL2Norm(0), exactPrimalL2Norm(0), primalL2Error(0), primalL2RelativeError(0);
+    Real dualL2Norm(0), exactDualL2Norm(0), dualL2Error(0), dualL2RelativeError(0);
+
+    // Norms and errors for the pressure
+    darcySolver.getDisplayer().leaderPrint( "\nPRESSURE ERROR\n" );
+
+    // Compute the L2 norm for the primal solution
+    primalL2Norm = p_FESpace.L2Norm( *darcySolver.primalSolution() );
+
+    // Display the L2 norm for the primal solution
+    darcySolver.getDisplayer().leaderPrint( " L2 norm of primal unknown:            ",
+                                            primalL2Norm, "\n" );
+
+    // Compute the L2 norm for the analytical primal
+    exactPrimalL2Norm = p_FESpace.L2NormFunction( Members->getAnalyticalSolution(),
+                                                  dataDarcy.dataTime()->getEndTime() );
+
+    // Display the L2 norm for the analytical primal
+    darcySolver.getDisplayer().leaderPrint( " L2 norm of primal exact:              ",
+                                            exactPrimalL2Norm, "\n" );
+
+    // Compute the L2 error for the primal solution
+    primalL2Error = p_FESpace.L2ErrorWeighted( Members->getAnalyticalSolution(),
+                                               *darcySolver.primalSolution(),
+                                               Members->getUOne(),
+                                               dataDarcy.dataTime()->getEndTime() );
+
+    // Display the L2 error for the primal solution
+    darcySolver.getDisplayer().leaderPrint( " L2 error of primal unknown:           ",
+                                            primalL2Error, "\n" );
+
+    // Compute the L2 realative error for the primal solution
+    primalL2RelativeError = primalL2Error / exactPrimalL2Norm;
+
+    // Display the L2 relative error for the primal solution
+    darcySolver.getDisplayer().leaderPrint( " L2 relative error of primal unknown:  ",
+                                            primalL2RelativeError, "\n" );
+
+    // Norms and errors for the interpolated dual
+    darcySolver.getDisplayer().leaderPrint( "\n\nINTERPOLATED DARCY VELOCITY ERROR\n" );
+
+    // Compute the L2 norm for the interpolated dual solution
+    dualL2Norm = uInterpolate_FESpace.L2Norm( *dualInterpolated );
+
+    // Display the L2 norm for the interpolated dual solution
+    darcySolver.getDisplayer().leaderPrint( " L2 norm of dual unknown:              ",
+                                            dualL2Norm, "\n" );
+
+    // Compute the L2 norm for the analytical dual
+    exactDualL2Norm = uInterpolate_FESpace.L2NormFunction( Members->getAnalyticalFlux(),
+                                                           dataDarcy.dataTime()->getEndTime() );
+
+    // Display the L2 norm for the analytical dual
+    darcySolver.getDisplayer().leaderPrint( " L2 norm of dual exact:                ",
+                                            exactDualL2Norm, "\n" );
+
+    // Compute the L2 error for the dual solution
+    dualL2Error = uInterpolate_FESpace.L2Error( Members->getAnalyticalFlux(),
+                                                *dualInterpolated,
+                                                dataDarcy.dataTime()->getEndTime(),
+                                                NULL );
+
+    // Display the L2 error for the dual solution
+    darcySolver.getDisplayer().leaderPrint( " L2 error of dual unknown:             ",
+                                            dualL2Error, "\n" );
+
+    // Compute the L2 relative error for the dual solution
+    dualL2RelativeError = dualL2Error / exactDualL2Norm;
+
+    // Display the L2 relative error for the dual solution
+    darcySolver.getDisplayer().leaderPrint( " L2 relative error of Dual unknown:    ",
+                                            dualL2RelativeError, "\n" );
 
     // Stop chronoError
     chronoError.stop();
 
     // The leader process print chronoError
-    if ( isLeader )
-        std::cout << "Time for computing errors " << chronoError.diff() << std::endl << std::flush;
+    darcySolver.getDisplayer().leaderPrint( "Time for compute errors ",
+                                            chronoError.diff(), "\n" );
 
     // Stop chronoTotal
     chronoTotal.stop();
 
     // The leader process print chronoTotal
-    if ( isLeader )
-        std::cout << "Total time for the computation " << chronoTotal.diff() << std::endl << std::flush;
+    darcySolver.getDisplayer().leaderPrint( "Total time for the computation ",
+                                            chronoTotal.diff(), "\n" );
 
     // Return the error, needed for the succes/failure of the test
-    return darcySolver.primalL2Error( Members->getAnalyticalSolution(), Members->getUOne(), darcySolver.getTime() );
+    return primalL2Error;
 
 }
