@@ -37,23 +37,21 @@
 //! Includes
 // ===================================================
 
-#include <life/lifecore/application.hpp>
-#include <life/lifecore/life.hpp>
+#include <boost/program_options.hpp>
 
-#include <Epetra_ConfigDefs.h>
-#ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
-	#include <mpi.h>
-#else
-	#include <Epetra_SerialComm.h>
-#endif
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/application.hpp>
 
 #include <life/lifemesh/structuredMesh3D.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/darcySolver.hpp>
 
-
+#ifdef HAVE_HDF5
+#include <life/lifefilters/hdf5exporter.hpp>
+#endif
+#include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/ensight.hpp>
 
 /*!
  @class darcy

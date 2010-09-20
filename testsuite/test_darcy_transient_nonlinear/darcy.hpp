@@ -53,7 +53,11 @@
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/darcySolverTransientNonLinear.hpp>
 
-
+#ifdef HAVE_HDF5
+#include <life/lifefilters/hdf5exporter.hpp>
+#endif
+#include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/ensight.hpp>
 
 /*!
  @class darcy
