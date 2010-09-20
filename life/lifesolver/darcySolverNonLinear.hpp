@@ -274,23 +274,19 @@ public:
     typedef typename DarcySolverPolicies::mesh_type          mesh_type;
 
     typedef typename DarcySolverPolicies::bchandler_raw_type bchandler_raw_type;
-
     typedef typename DarcySolverPolicies::bchandler_type     bchandler_type;
 
     typedef typename DarcySolverPolicies::matrix_type        matrix_type;
-
     typedef typename DarcySolverPolicies::matrix_ptrtype     matrix_ptrtype;
 
     typedef typename DarcySolverPolicies::vector_type        vector_type;
-
     typedef typename DarcySolverPolicies::vector_ptrtype     vector_ptrtype;
 
     typedef typename DarcySolverPolicies::prec_raw_type      prec_raw_type;
-
     typedef typename DarcySolverPolicies::prec_type          prec_type;
 
-    typedef typename DarcySolverPolicies::exporter_ptrtype   exporter_ptrtype;
-
+    typedef typename DarcySolverPolicies::comm_type          comm_type;
+    typedef typename DarcySolverPolicies::comm_ptrtype       comm_ptrtype;
 
     typedef boost::function<Matrix ( const Real&, const Real&,const Real&,
                                      const Real&, const Real& )>
@@ -309,18 +305,16 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
-      @param comm Epetra communicator.
+      @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolverNonLinear ( const data_type&          dataFile,
                            FESpace<Mesh, EpetraMap>& primal_FESpace,
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                            bchandler_raw_type&       bcHandler,
-                           Epetra_Comm&              comm );
+                           comm_ptrtype&             comm );
 
     /*!
       Constructor for the class without the definition of the boundary handler.
@@ -329,20 +323,18 @@ public:
       @param dual_FESpace Dual finite element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
-      @param comm Epetra communicator.
+      @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolverNonLinear ( const data_type&          dataFile,
                            FESpace<Mesh, EpetraMap>& primal_FESpace,
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
-                           Epetra_Comm&              comm );
+                           comm_ptrtype&             comm );
 
     //! Virtual destructor.
-    virtual ~DarcySolverNonLinear ( void );
+    virtual ~DarcySolverNonLinear ();
 
     //@}
 
@@ -353,7 +345,7 @@ public:
     /*!
       Set up the linear solver and the preconditioner for the linear system.
     */
-    virtual void setup ( void );
+    virtual void setup ();
 
     /*!
       Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
@@ -390,7 +382,7 @@ public:
       Returns the number of iteration of the fixed point scheme.
       @return Final number of iterations of the fixed point method as a constant UInt.
     */
-    const UInt IterationFixedPoint ( void ) const
+    const UInt IterationFixedPoint () const
     {
         return M_iterationFixedPoint;
     }
@@ -399,7 +391,7 @@ public:
       Returns the residual between two iterations of the fixed point scheme.
       @return Final residual of the fixed point method as a constant Real.
     */
-    const Real residualFixedPoint ( void ) const
+    const Real residualFixedPoint () const
     {
         return M_residualFixedPoint;
     }
@@ -410,11 +402,11 @@ public:
     //! @name Solve functions
     //@{
 
-    //! Simulate the problem using a fixed point scheme for handle the non-linearity.
-    virtual inline void run ( void )
-    {
-        fixedPointScheme();
-    }
+    /*!
+      Perform the fixed point scheme.
+    */
+
+    void fixedPointScheme ();
 
     //@}
 
@@ -433,12 +425,7 @@ protected:
       the global hybrid matrix, e.g. reset the global hybrid matrix.
       It is principally used for a time dependent derived class.
     */
-    virtual void updateVariables ( void );
-
-    /*!
-      Perform the fixed point scheme.
-    */
-    void fixedPointScheme ( void );
+    virtual void updateVariables ();
 
     // Data of the problem.
     //! @name Data of the problem
@@ -487,25 +474,26 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                        bchandler_raw_type&        BCh,
-                       Epetra_Comm&               comm ):
+                       comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
     // Data of the problem.
     M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.
     M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
     M_iterationFixedPoint           ( static_cast<UInt>(0) ),
-    M_tollFixedPoint                ( 1.e-8 ),
-    M_residualFixedPoint            ( M_tollFixedPoint + 1 ),
+    M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
+    M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
     M_primalPreviousIteration       ( new vector_type ( this->M_primal_FESpace.map() ) ),
     M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 
 {
 
     // Interpolate the primal initial value on the default initial value function, for the fixed point scheme.
-    this->M_primal_FESpace.interpolate( M_primalZeroIteration, *(this->M_primal), 0 );
+    this->M_primal_FESpace.interpolate( M_primalZeroIteration,
+                                        *(this->M_primal),
+                                        static_cast<Real>(0) );
 
 	CONSTRUCTOR( "DarcySolverNonLinear" );
 
@@ -519,23 +507,24 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
-                       Epetra_Comm&               comm ):
+                       comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
     // Data of the problem.
     M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.
     M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
     M_iterationFixedPoint           ( static_cast<UInt>(0) ),
-    M_tollFixedPoint                ( 1.e-8 ),
-    M_residualFixedPoint            ( M_tollFixedPoint + 1 ),
+    M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
+    M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
     M_primalPreviousIteration       ( new vector_type ( this->M_primal_FESpace.map() ) ),
     M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 {
 
     // Interpolate the primal initial value on the default initial value function, for the fixed point scheme.
-    this->M_primal_FESpace.interpolate( M_primalZeroIteration, *(this->M_primal), 0 );
+    this->M_primal_FESpace.interpolate( M_primalZeroIteration,
+                                        *(this->M_primal),
+                                        static_cast<Real>(0) );
 
 	CONSTRUCTOR( "DarcySolverNonLinear" );
 
@@ -544,7 +533,7 @@ DarcySolverNonLinear ( const data_type&           dataFile,
 // Virtual destructor.
 template<typename Mesh, typename SolverType>
 DarcySolverNonLinear<Mesh, SolverType>::
-~DarcySolverNonLinear ( void )
+~DarcySolverNonLinear ()
 {
 
 	DESTRUCTOR( "DarcySolverNonLinear" );
@@ -555,7 +544,7 @@ DarcySolverNonLinear<Mesh, SolverType>::
 template<typename Mesh, typename SolverType>
 void
 DarcySolverNonLinear<Mesh, SolverType>::
-setup ( void )
+setup ()
 {
 
     GetPot dataFile( *(this->M_data.dataFile()) );
@@ -618,7 +607,7 @@ localElementComputation ( const UInt & iElem )
 template<typename Mesh, typename SolverType>
 void
 DarcySolverNonLinear<Mesh, SolverType>::
-updateVariables ( void )
+updateVariables ()
 {
     // Reset the primal vector at the previous iteration step.
     M_primalPreviousIteration.reset( new vector_type( this->M_primal_FESpace.map() ) );
@@ -635,7 +624,7 @@ updateVariables ( void )
 template <typename Mesh, typename SolverType>
 void
 DarcySolverNonLinear<Mesh, SolverType>::
-fixedPointScheme ( void )
+fixedPointScheme ()
 {
 
     // Current iteration.
@@ -664,34 +653,28 @@ fixedPointScheme ( void )
         M_residualFixedPoint = ( *(this->M_primal) - *M_primalPreviousIteration ).Norm2() / this->M_primal->Norm2();
 
         // The leader process prints the iteration data.
-        if ( this->isLeader() && this->M_data.verbose() > static_cast<UInt>(1) )
-        {
-            std::cout << "Fixed point scheme           " << std::endl
-                      << "Maximum number of iterations " << M_maxIterationFixedPoint << std::endl
-                      << "Iteration number             " << M_iterationFixedPoint << std::endl
-                      << "Tollerance                   " <<  std::setprecision(15) << M_tollFixedPoint << std::endl
-                      << "Error                        " <<  std::setprecision(15) << M_residualFixedPoint << std::endl << std::flush;
-        }
+        this->M_displayer.leaderPrint( "Fixed point scheme           \n" );
+
+        // Print the maximum number of iterations
+        this->M_displayer.leaderPrint( "Maximum number of iterations ",
+                                       M_maxIterationFixedPoint, "\n" );
+
+        // Print the actual iterations
+        this->M_displayer.leaderPrint( "Iteration number             ",
+                                       M_iterationFixedPoint, "\n" );
+
+        // Print the tollerance
+        this->M_displayer.leaderPrint( "Tollerance                   ",
+                                       M_tollFixedPoint, "\n" );
+
+        // Print the error reached
+        this->M_displayer.leaderPrint( "Error                        ",
+                                       M_residualFixedPoint, "\n" );
 
     }
 
     // Check if the fixed point method reach the tollerance.
     ASSERT( M_maxIterationFixedPoint > M_iterationFixedPoint, "Attention the fixed point scheme does not reach the convergence." );
-
-    // Sincronize the processes.
-  	MPI_Barrier( MPI_COMM_WORLD );
-
-    // Copy the solution to the exporter.
-    *( this->M_primalExporter ) = *( this->M_primal );
-
-    // Interpolate the dual vector filed spammed as Raviart-Thomas into a P0 vector field.
-    *( this->M_dualInterpolate ) = this->M_dualInterpolate_FESpace.FeToFeInterpolate( this->M_dual_FESpace, *( this->M_dual ) );
-
-    // Copy the dual interpolated solution to the exporter.
-    *( this->M_dualExporter ) = *( this->M_dualInterpolate );
-
-    // Save the solution into the exporter.
-    this->M_exporter->postProcess( this->M_data.dataTime()->getTime() );
 
 } // fixedPointScheme
 

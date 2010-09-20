@@ -258,22 +258,19 @@ public:
     typedef typename DarcySolverPolicies::mesh_type          mesh_type;
 
     typedef typename DarcySolverPolicies::bchandler_raw_type bchandler_raw_type;
-
     typedef typename DarcySolverPolicies::bchandler_type     bchandler_type;
 
     typedef typename DarcySolverPolicies::matrix_type        matrix_type;
-
     typedef typename DarcySolverPolicies::matrix_ptrtype     matrix_ptrtype;
 
     typedef typename DarcySolverPolicies::vector_type        vector_type;
-
     typedef typename DarcySolverPolicies::vector_ptrtype     vector_ptrtype;
 
     typedef typename DarcySolverPolicies::prec_raw_type      prec_raw_type;
-
     typedef typename DarcySolverPolicies::prec_type          prec_type;
 
-    typedef typename DarcySolverPolicies::exporter_ptrtype   exporter_ptrtype;
+    typedef typename DarcySolverPolicies::comm_type          comm_type;
+    typedef typename DarcySolverPolicies::comm_ptrtype       comm_ptrtype;
 
     //@}
 
@@ -288,18 +285,16 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
-      @param comm Epetra communicator.
+      @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolverTransient ( const data_type&          dataFile,
                            FESpace<Mesh, EpetraMap>& primal_FESpace,
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                            bchandler_type&           bcHandler,
-                           Epetra_Comm&              comm );
+                           comm_ptrtype&             comm );
     /*!
       Constructor for the class without boundary condition handler.
       @param dataFile Data for the problem.
@@ -307,16 +302,14 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
-      @param comm Epetra communicator.
+      @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolverTransient ( const data_type&          dataFile,
                            FESpace<Mesh, EpetraMap>& primal_FESpace,
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                           FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
-                           Epetra_Comm&              comm );
+                           comm_ptrtype&             comm );
 
     //! Virtual destructor.
     virtual ~DarcySolverTransient ();
@@ -347,30 +340,6 @@ public:
                                             *(this->M_primal),
                                             this->M_data.dataTime()->getInitialTime() );
     }
-
-    //@}
-
-    // Get methods.
-    //! @name Get methods
-    //@{
-
-    /*!
-      Returns the value of the current time of the simulation.
-      @return Current time as a constant Real.
-    */
-    const Real getTime () const
-    {
-        return this->M_data.dataTime()->getTime();
-    }
-
-    //@}
-
-    // Solve functions.
-    //! @name Solve functions
-    //@{
-
-    //! Simulate the time dependent problem.
-    virtual void run ();
 
     //@}
 
@@ -453,11 +422,10 @@ DarcySolverTransient ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
                        bchandler_type&            BCh,
-                       Epetra_Comm&               comm ):
+                       comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, BCh, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
     // Data of the problem
     M_primalInitial          ( DarcyDefaultInitialPrimal() ),
     // Linear solver.
@@ -487,10 +455,9 @@ DarcySolverTransient ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
-                       Epetra_Comm&               comm ):
+                       comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, dualInterpolate_FESpace, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
     // Data of the problem
     M_primalInitial          ( DarcyDefaultInitialPrimal() ),
     // Linear solver.
@@ -912,40 +879,6 @@ localComputePrimalAndDual ()
     ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
 
 } // localComputePrimalAndDual
-
-// Time simulation method.
-template <typename Mesh, typename SolverType>
-void
-DarcySolverTransient<Mesh, SolverType>::
-run ()
-{
-
-    // Copy the initial solution to the exporter.
-    *( this->M_primalExporter ) = *(this->M_primal);
-
-    // Save the initial solution into the exporter.
-    this->M_exporter->postProcess( this->M_data.dataTime()->getInitialTime() );
-
-    // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-    while( !this->M_data.dataTime()->isLastTimeStep() )
-    {
-
-        // Advance the current time of \Delta t.
-        this->M_data.dataTime()->updateTime();
-
-        // The leader process prints the temporal data.
-        if ( this->isLeader() && this->M_data.verbose() > static_cast<UInt>(1) )
-        {
-            this->M_data.dataTime()->showMe();
-        }
-
-        /* Call the run method to build the linear system, solve it, compute the
-           pressure and velocity and save them. */
-        DarcySolver<Mesh, SolverType>::run();
-    }
-
-} // run
-
 
 } // namespace LifeV
 

@@ -42,12 +42,7 @@
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifesolver/dataDarcy.hpp>
 //
-
-#ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
-#else
-#include <life/lifefilters/noexport.hpp>
-#endif
+#include <life/lifecore/displayer.hpp>
 
 // Local namespace to store the default source term and the default permeability tensor.
 namespace
@@ -287,7 +282,8 @@ public:
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
 
-    typedef boost::shared_ptr< Exporter<Mesh> >   exporter_ptrtype;
+    typedef Epetra_Comm                           comm_type;
+    typedef boost::shared_ptr< comm_type >        comm_ptrtype;
 
     //@}
 
@@ -302,18 +298,16 @@ public:
       @param dual_FESpace Dual element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
       @param bcHandler Boundary conditions for the problem.
-      @param comm Epetra communicator.
+      @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolver ( const data_type&          dataFile,
                   FESpace<Mesh, EpetraMap>& primal_FESpace,
                   FESpace<Mesh, EpetraMap>& dual_FESpace,
                   FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                   FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                  FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
                   bchandler_raw_type&       bcHandler,
-                  Epetra_Comm&              comm );
+                  comm_ptrtype&             comm );
 
     /*!
       Constructor for the class without the definition of the boundary handler.
@@ -322,17 +316,14 @@ public:
       @param dual_FESpace Dual finite element space.
       @param hybrid_FESpace Hybrid finite element space.
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param dualInterpolate_FESpace Interpolation element space for the dual variable.
-      @param bcHandler Boundary conditions for the problem.
-      @param comm Epetra communicator.
+      @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolver ( const data_type&          dataFile,
                   FESpace<Mesh, EpetraMap>& primal_FESpace,
                   FESpace<Mesh, EpetraMap>& dual_FESpace,
                   FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                   FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                  FESpace<Mesh, EpetraMap>& dualInterpolate_FESpace,
-                  Epetra_Comm&              comm );
+                  comm_ptrtype&             comm );
 
     //! Virtual destructor.
     virtual ~DarcySolver ();
@@ -344,8 +335,7 @@ public:
     //@{
 
     /*!
-      Set up the linear solver, the preconditioner for the linear system
-      and the exporter to save the solution.
+      Set up the linear solver and the preconditioner for the linear system.
     */
     virtual void setup ();
 
@@ -384,39 +374,39 @@ public:
     //@{
 
     /*!
-      Returns the local hybrid solution vector.
-      @return Constant vector_type reference of the hybrid vector.
+      Returns the pointer of the hybrid solution vector.
+      @return Constant vector_ptrtype reference of the hybrid vector.
      */
-    inline const vector_type& hybrid_solution () const
+    inline const vector_ptrtype& hybridSolution () const
     {
-        return *M_hybrid;
+        return M_hybrid;
     }
 
     /*!
-      Returns the local primal solution vector.
+      Returns the pointer of the primal solution vector.
       @return Constant vector_type reference of the primal solution.
     */
-    inline const vector_type& primal_solution () const
+    inline const vector_ptrtype& primalSolution () const
     {
-        return *M_primal;
+        return M_primal;
     }
 
     /*!
-      Returns the local dual solution vector.
-      @return Constant vector_type reference of the dual solution.
+      Returns the pointer of the dual solution vector.
+      @return Constant vector_ptrtype reference of the dual solution.
     */
-    inline const vector_type& dual_solution () const
+    inline const vector_ptrtype& dualSolution () const
     {
-        return *M_dual;
+        return M_dual;
     }
 
     /*!
-      Returns the local residual vector.
-      @return Constant vector_type reference of the residual.
+      Returns the pointer of the residual vector.
+      @return Constant vector_ptrtype reference of the residual.
     */
-    inline const vector_type& residual () const
+    inline const vector_ptrtype& residual () const
     {
-        return *M_residual;
+        return M_residual;
     }
 
     /*!
@@ -449,141 +439,26 @@ public:
 
     /*!
       Return the Epetra communicator.
-      @return Constant Epetra_Comm reference of the problem.
+      @return Constant reference of the shared pointer of the communicator of the problem.
     */
-    inline const Epetra_Comm& comm () const
+    inline comm_ptrtype const & comm () const
     {
-        return *M_comm;
+        return M_displayer.comm();
+    }
+
+    /*!
+      Return the displayer.
+      @return Constant reference of the displayer of the problem.
+    */
+    inline Displayer const & getDisplayer() const
+    {
+        return M_displayer;
     }
 
     //@}
 
     // Solve functions.
     //! @name Solve functions
-    //@{
-
-    //! Solve the problem.
-    virtual void run();
-
-    //@}
-
-    // Leader print functions.
-    //! @name  Leader print functions
-    //@{
-
-    /*!
-      Check if the current process is the leader (e.g. comm == 0) or not.
-      @return Constant boolean with value true if che current process is the leader process,
-      false otherwise.
-    */
-    inline const bool isLeader () const
-    {
-        assert( M_comm != 0);
-        return comm().MyPID() == 0;
-    }
-
-    /*!
-      The leader print a string and a number.
-      @param message The message printed by the leader process.
-      @param number The number printed by the leader process.
-    */
-    void leaderPrint ( const string message, const Real number ) const;
-
-    /*!
-      The leader print a string.
-      @param message The message printed by the leader process.
-    */
-    void leaderPrint ( const string message ) const;
-
-    /*!
-      The leader print a string and a number, being the max in all process or the input value.
-      @param message The message printed by the leader process.
-      @param number The input number.
-    */
-    void leaderPrintMax ( const string message, const Real number) const;
-
-    //@}
-
-    // Errors and norm functions.
-    //! @name Errors and norm functions
-    //@{
-
-    /*!
-      Print the errors and the norm of the numerical and exact solutions.
-      @param primalExact Primal exact solution of the problem.
-      @param dualExact Dual exact solution of the problem.
-      @param weightFunction Weight function in the integrals.
-      @param time Current time of the simulation.
-    */
-    void printErrors ( const Function& primalExact, const Function& dualExact,
-                       const Function& weightFunction, const Real time = 0 ) const;
-
-    //! \f$ L^2 \f$ norm for the numerical primal solution
-    inline const Real primalL2Norm ( void ) const
-    {
-        return M_primal_FESpace.L2Norm( *M_primal );
-    }
-
-    //! \f$ L^2 \f$ norm for the numerical dual solution
-    inline const Real dualL2Norm ( void ) const
-    {
-        return M_dualInterpolate_FESpace.L2Norm( *M_dualInterpolate );
-    }
-
-    /*!
-      \f$ L^2 \f$ norm for the exact primal solution.
-      @param primalExact Primal exact solution of the problem.
-      @param time Current time of the simulation.
-      @return The \f$ L^2 \f$ norm for the exact primal solution as constant Real.
-    */
-    inline const Real exactPrimalL2Norm ( const Function& primalExact, const Real time = 0 ) const
-    {
-        return M_primal_FESpace.L2NormFunction( primalExact, time );
-    }
-
-   /*!
-      \f$ L^2 \f$ norm for the exact dual solution.
-      @param dualExact Dual exact solution of the problem.
-      @param time Current time of the simulation.
-      @return The \f$ L^2 \f$ norm for the exact dual solution as constant Real.
-    */
-    inline const Real exactDualL2Norm ( const Function& dualExact, const Real time = 0 ) const
-    {
-        return M_dualInterpolate_FESpace.L2NormFunction( dualExact, time );
-    }
-
-    /*!
-      \f$ L^2 \f$ error norm for the primal solution.
-      @param primalExact Primal exact solution of the problem.
-      @param weightFunction The weight function for the integrals.
-      @param time Current time of the simulation.
-      @return The \f$ L^2 \f$ error norm for the primal solution as a constant Real.
-    */
-    inline const Real primalL2Error (const Function& primalExact, const Function& weightFunction, const Real time = 0 ) const
-    {
-        return M_primal_FESpace.L2ErrorWeighted( primalExact, *M_primal, weightFunction, time );
-    }
-
-    /*!
-      \f$ L^2 \f$ error norm for the dual solution.
-      @param dualExact Dual exact solution of the problem.
-      @param weightFunction The weight function for the integrals.
-      @param time Current time of the simulation.
-      @return The \f$ L^2 \f$ error norm for the dual solution as a constant Real.
-    */
-    inline const Real dualL2Error (const Function& dualExact, const Function& weightFunction, const Real time = 0 ) const
-    {
-        //        return M_dualInterpolate_FESpace.L2ErrorWeighted( dualExact, *M_dualInterpolate, weightFunction, time );
-        return M_dualInterpolate_FESpace.L2Error( dualExact, *M_dualInterpolate, time, NULL );
-    }
-
-
-    //@}
-
-protected:
-
-    // Protected solve functions.
-    //! @name Protected solve functions
     //@{
 
     //! Build the global hybrid system, the right hand and apply the boundary conditions.
@@ -596,6 +471,8 @@ protected:
     void computePrimalAndDual ();
 
     //@}
+
+protected:
 
     /*!
       Return the number of total degrees of freem of the problem.
@@ -658,14 +535,14 @@ protected:
     //! @name Parallel stuff
     //@{
 
-    //! MPI communicator.
-    Epetra_Comm*        M_comm;
-
     //! MPI process identifier.
-    UInt                M_me;
+    UInt      M_me;
 
     //! Local map.
-    EpetraMap           M_localMap;
+    EpetraMap M_localMap;
+
+    //! Displayer.
+    Displayer M_displayer;
 
     //@}
 
@@ -706,9 +583,6 @@ protected:
     //! Dual function dot outward unit vector finite element space.
     FESpace<Mesh, EpetraMap>&  M_VdotN_FESpace;
 
-    //! Dual interpolation finite element.
-    FESpace<Mesh, EpetraMap>& M_dualInterpolate_FESpace;
-
     //@}
 
     // Algebraic stuff.
@@ -726,9 +600,6 @@ protected:
 
     //! Dual solution.
     vector_ptrtype                          M_dual;
-
-    //! Dual interpolate solution.
-    vector_ptrtype                          M_dualInterpolate;
 
     //! Hybrid solution.
     vector_ptrtype                          M_hybrid;
@@ -787,21 +658,6 @@ protected:
 
     //@}
 
-    // Exporter stuff.
-    //! @name Exporter stuff.
-    //@{
-
-    //! The exporter shared pointer.
-    exporter_ptrtype M_exporter;
-
-    //! The exporter primal pointer.
-    vector_ptrtype   M_primalExporter;
-
-    //! The exporter dual pointer.
-    vector_ptrtype   M_dualExporter;
-
-    //@}
-
 }; // class DarcySolver
 
 //
@@ -816,13 +672,12 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
               bchandler_raw_type&        BCh,
-              Epetra_Comm&               comm ):
+              comm_ptrtype&              comm ):
     // Parallel stuff.
-    M_comm                 	 ( &comm ),
-    M_me                     ( M_comm->MyPID() ),
+    M_me                     ( comm->MyPID() ),
     M_localMap               ( hybrid_FESpace.map() ),
+    M_displayer              ( comm ),
     // Data of the problem.
     M_data                   ( dataFile ),
 	M_source                 ( DarcyDefaultSource() ),
@@ -834,13 +689,11 @@ DarcySolver ( const data_type&           dataFile,
     M_dual_FESpace           ( dual_FESpace ),
     M_hybrid_FESpace         ( hybrid_FESpace ),
     M_VdotN_FESpace          ( VdotN_FESpace ),
-    M_dualInterpolate_FESpace( dualInterpolate_FESpace ),
     // Algebraic stuff.
     M_matrHybrid             ( new matrix_type ( M_localMap ) ),
     M_rhs                    ( new vector_type ( M_localMap ) ),
     M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
     M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
-    M_dualInterpolate        ( new vector_type ( M_dualInterpolate_FESpace.map(), Repeated ) ),
     M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
     M_residual               ( new vector_type ( M_localMap ) ),
     M_linearSolver           ( ),
@@ -854,13 +707,7 @@ DarcySolver ( const data_type&           dataFile,
     M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
     M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
     M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    // Exporter.
-#ifdef HAVE_HDF5
-    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
-#else
-    M_exporter               ( new NoExport<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
-#endif
+    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
 {
 
 	CONSTRUCTOR( "DarcySolver" );
@@ -876,12 +723,11 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              FESpace<Mesh, EpetraMap>&  dualInterpolate_FESpace,
-              Epetra_Comm&               comm ):
+              comm_ptrtype&              comm ):
     // Parallel stuff.
-    M_comm                 	 ( &comm ),
-    M_me                     ( M_comm->MyPID() ),
+    M_me                     ( comm->MyPID() ),
     M_localMap               ( hybrid_FESpace.map() ),
+    M_displayer              ( comm ),
     // Data of the problem.
     M_data                   ( dataFile ),
 	M_source                 ( DarcyDefaultSource() ),
@@ -892,13 +738,11 @@ DarcySolver ( const data_type&           dataFile,
     M_dual_FESpace           ( dual_FESpace ),
     M_hybrid_FESpace         ( hybrid_FESpace ),
     M_VdotN_FESpace          ( VdotN_FESpace ),
-    M_dualInterpolate_FESpace( dualInterpolate_FESpace ),
     // Algebraic stuff.
     M_matrHybrid             ( new matrix_type ( M_localMap ) ),
     M_rhs                    ( new vector_type ( M_localMap ) ),
     M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
     M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
-    M_dualInterpolate        ( new vector_type ( M_dualInterpolate_FESpace.map(), Repeated ) ),
     M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
     M_residual               ( new vector_type ( M_localMap ) ),
     M_linearSolver           ( ),
@@ -912,14 +756,7 @@ DarcySolver ( const data_type&           dataFile,
     M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
     M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
     M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    // Exporter.
-#ifdef HAVE_HDF5
-    M_exporter               ( new Hdf5exporter<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
-#else
-    M_exporter               ( new NoExport<Mesh> ( *(M_data.dataFile()), "PressureVelocity" ) )
-#endif
-
+    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
 {
 
 	CONSTRUCTOR( "DarcySolver" );
@@ -936,46 +773,7 @@ DarcySolver<Mesh, SolverType>::
 
 } // Destructor
 
-// Leader print function.
-template<typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-leaderPrint ( string const message, Real const number ) const
-{
-
-    if ( isLeader() )
-        std::cout << message << number << std::endl << std::flush;
-
-} // leaderPrint
-
-// Leader print function.
-template<typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-leaderPrint ( string const message ) const
-{
-
-    if ( isLeader() )
-        std::cout << message << std::flush;
-
-} // leaderPrint
-
-// Leader print function.
-template<typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-leaderPrintMax ( string const message, Real const number ) const
-{
-
-    Real num( number );
-    Real globalMax;
-    M_comm->MaxAll( &num, &globalMax, 1 );
-
-    leaderPrint( message , globalMax );
-
-} // leaderPrintMax
-
-// Set up the linear solver, the preconditioner and the exporter.
+// Set up the linear solver and the preconditioner.
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
@@ -994,36 +792,6 @@ setup ()
 	// Create a preconditioner object.
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolver : Preconditioner not set" );
-
-    // Set the folder where to save the solution.
-    M_exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
-
-    // Set the mesh and the processor Id.
-    M_exporter->setMeshProcId( M_primal_FESpace.mesh(), M_comm->MyPID() );
-
-    // Set the exporter primal pointer.
-    M_primalExporter.reset( new vector_type (*M_primal, M_exporter->mapType() ) );
-
-    // Add the variable to the exporter.
-    M_exporter->addVariable( ExporterData::Scalar,
-                             "Pressure",
-                             M_primalExporter,
-                             static_cast<UInt>( 0 ),
-                             static_cast<UInt>( M_primal_FESpace.dof().numTotalDof() ),
-                             static_cast<UInt>( 0 ),
-                             ExporterData::Cell );
-
-    // Set the exporter dual pointer.
-    M_dualExporter.reset( new vector_type (*M_dualInterpolate, M_exporter->mapType() ) );
-
-    // Add the variable to the exporter.
-    M_exporter->addVariable( ExporterData::Vector,
-                             "Velocity",
-                             M_dualExporter,
-                             static_cast<UInt>( 0 ),
-                             static_cast<UInt>( M_dualInterpolate_FESpace.dof().numTotalDof() ),
-                             static_cast<UInt>( 0 ),
-                             ExporterData::Cell );
 
 } // setup
 
@@ -1277,9 +1045,6 @@ updateVariables ()
     // Reset the global dual vector
     M_dual.reset( new vector_type( M_dual_FESpace.map(), Repeated ) );
 
-    // Reset the global dual interpolated vector
-    M_dualInterpolate.reset( new vector_type( M_dualInterpolate_FESpace.map(), Repeated ) );
-
     // Reset the global hybrid vector
     M_hybrid.reset( new vector_type( M_hybrid_FESpace.map() ) );
 
@@ -1304,7 +1069,7 @@ buildSystem ()
     // The total number of elements in the mesh.
     UInt meshNumberOfElements = M_primal_FESpace.mesh()->numElements();
 
-    leaderPrint("  Darcy solver - Computing constant matrices   ...          ");
+    M_displayer.leaderPrint("  Darcy solver - Computing constant matrices   ...          ");
 
     // Clear all the local matrices and vectors.
     M_elvecHyb.zero();
@@ -1320,24 +1085,23 @@ buildSystem ()
 
     chronoConstantLocalMatrix.stop();
 
-    leaderPrintMax( "done in " , chronoConstantLocalMatrix.diff() );
+    M_displayer.leaderPrintMax( "done in " , chronoConstantLocalMatrix.diff() );
 
     // If setted print the constant matrices computed.
-    if( isLeader() &&  M_data.verbose() > static_cast<UInt>(1) )
+    if( M_displayer.isLeader() &&  M_data.verbose() > static_cast<UInt>(1) )
     {
-        Debug( 6100 ) << "elmatHyb :\n\n";
+        M_displayer.leaderPrint( "elmatHyb :\n\n" );
         M_elmatHyb.showMe();
-        Debug( 6100 ) << "elmatMix :\n\n";
+
+        M_displayer.leaderPrint( "elmatMix :\n\n" );
         M_elmatMix.showMe();
     }
 
     // Update all the variables, e.g. reset the hybrid matrix
     updateVariables();
 
-    leaderPrint("                 Perform Static Condensation   ...          ");
+    M_displayer.leaderPrint("                 Perform Static Condensation   ...          ");
   	chronoStaticCondensation.start();
-
-    Debug( 6100 ) << "Number of volumes: " << meshNumberOfElements << "\n";
 
     //---------------------------------------
     //    LOOP ON ALL THE VOLUME ELEMENTS
@@ -1375,12 +1139,12 @@ buildSystem ()
     //-----------------------------------
 
 	chronoStaticCondensation.stop();
-    leaderPrintMax( "done in " , chronoStaticCondensation.diff() );
+    M_displayer.leaderPrintMax( "done in " , chronoStaticCondensation.diff() );
 
     // Apply boundary conditions to the hybrid global matrix and to the hybrid global right hand side.
     applyBoundaryConditions();
 
-    leaderPrint("                 Assemble Global Hybrid Matrix ...          ");
+    M_displayer.leaderPrint("                 Assemble Global Hybrid Matrix ...          ");
 
 	chronoGlobalAssembleMatrix.start();
 
@@ -1389,9 +1153,9 @@ buildSystem ()
 
 	chronoGlobalAssembleMatrix.stop();
 
-    leaderPrintMax( "done in " , chronoGlobalAssembleMatrix.diff() );
+    M_displayer.leaderPrintMax( "done in " , chronoGlobalAssembleMatrix.diff() );
 
-	leaderPrint("                 Assemble Global Hybrid Vector ...          ");
+	M_displayer.leaderPrint("                 Assemble Global Hybrid Vector ...          ");
 
 	chronoGlobalAssembleVector.start();
 
@@ -1400,7 +1164,7 @@ buildSystem ()
 
    	chronoGlobalAssembleVector.stop();
 
-    leaderPrintMax( "done in " , chronoGlobalAssembleVector.diff() );
+    M_displayer.leaderPrintMax( "done in " , chronoGlobalAssembleVector.diff() );
 
 } // buildSystem
 
@@ -1417,7 +1181,7 @@ applyBoundaryConditions ()
     if ( !M_BCh->bdUpdateDone() )
     {
 
-        leaderPrint( "                 Updating the BC               ...          ");
+        M_displayer.leaderPrint( "                 Updating the BC               ...          ");
         chronoBC.start();
 
         // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
@@ -1426,13 +1190,13 @@ applyBoundaryConditions ()
                          M_dual_FESpace.dof() );
 
         chronoBC.stop();
-        leaderPrintMax( "done in " , chronoBC.diff() );
+        M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
     }
 
     // Ignoring non-local entries, otherwise they are summed up lately.
     vector_type rhsFull( *M_rhs, Unique );
 
-    leaderPrint( "                 Managing the BC               ...          ");
+    M_displayer.leaderPrint( "                 Managing the BC               ...          ");
     chronoBC.start();
 
     /* Update the global hybrid matrix and the global hybrid right hand side with the boundary conditions.
@@ -1446,7 +1210,7 @@ applyBoundaryConditions ()
               M_data.dataTime()->getTime() );
 
     chronoBC.stop();
-    leaderPrintMax( "done in " , chronoBC.diff() );
+    M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
 
 	// Save the global hybrid right hand side.
     *M_rhs = rhsFull;
@@ -1466,7 +1230,7 @@ solve ()
 	// Solve the linear system, if used a iterative scheme numIter stores the number of iterations.
     UInt numIter = M_linearSolver.solveSystem( *M_rhs, *M_hybrid, M_matrHybrid );
 
-    leaderPrint( "                 Number of iterations  ", numIter );
+    M_displayer.leaderPrint( "                 Number of iterations  ", numIter, "\n" );
 
 } // solve
 
@@ -1631,7 +1395,7 @@ computePrimalAndDual ()
     // The total number of elements in the mesh.
     UInt meshNumberOfElements = M_primal_FESpace.mesh()->numElements();
 
-	leaderPrint("                 Compute pressure and flux     ...          ");
+	M_displayer.leaderPrint("                 Compute pressure and flux     ...          ");
 	chronoComputePrimalAndDual.start();
 
     /*==========================================
@@ -1707,106 +1471,9 @@ computePrimalAndDual ()
     // It is wrong to assemble the dual variable, no communications required.
 
     chronoComputePrimalAndDual.stop();
-    leaderPrintMax( "done in " , chronoComputePrimalAndDual.diff() );
+    M_displayer.leaderPrintMax( "done in " , chronoComputePrimalAndDual.diff() );
 
 } // computePrimalAndDual
-
-// Solve the problem.
-template <typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-run ()
-{
-    // Build the linear system and the right hand side.
-    buildSystem();
-
-    // Solve the linear system.
-    solve();
-
-    // Post process of the primal and dual variables.
-    computePrimalAndDual();
-
-    // Sincronize the processes.
-  	MPI_Barrier( MPI_COMM_WORLD );
-
-    // Copy the primal solution to the exporter.
-    *M_primalExporter = *M_primal;
-
-    // Interpolate the dual vector filed spammed as Raviart-Thomas into a P0 vector field.
-    *M_dualInterpolate = M_dualInterpolate_FESpace.FeToFeInterpolate( M_dual_FESpace, *M_dual );
-
-    // Copy the dual interpolated solution to the exporter.
-    *M_dualExporter = *M_dualInterpolate;
-
-    // Save the solution into the exporter.
-    M_exporter->postProcess( M_data.dataTime()->getTime() );
-
-} // run
-
-// Print norms and errors.
-template <typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-printErrors ( const Function& primalExact, const Function& dualExact, const Function& weightFunction, const Real time ) const
-{
-
-	std::ostringstream os("");
-    Real valPrimalL2Norm(0), valExactPrimalL2Norm(0), valPrimalL2Error(0), valPrimalL2RelativeError(0);
-    Real valDualL2Norm(0), valExactDualL2Norm(0), valDualL2Error(0), valDualL2RelativeError(0);
-
-	leaderPrint("\nPRESSURE ERROR");
-
-	// Compute the L^2(\Omega) norm of the primal variable.
-    valPrimalL2Norm = primalL2Norm();
-	os << std::endl << " L2 norm of primal unknown:            " << std::setprecision(15) << valPrimalL2Norm << std::endl;
-	leaderPrint( os.str() );
-	os.str("");
-
-	// Compute the L^2(\Omega) norm of the exact primal variable.
-    valExactPrimalL2Norm = exactPrimalL2Norm( primalExact, time );
-    os << " L2 norm of primal exact:              " << std::setprecision(15) << valExactPrimalL2Norm << std::endl;
-    leaderPrint( os.str() );
-    os.str("");
-
-    // Compute the absolute L^2(\Omega) error of the primal variable.
-    valPrimalL2Error = primalL2Error( primalExact, weightFunction, time );
-	os << " L2 error of primal unknown:           " << std::setprecision(15) << valPrimalL2Error << std::endl;
-	leaderPrint( os.str() );
-	os.str("");
-
-    // Compute the relative L^2(\Omega) error of the primal variable.
-    valPrimalL2RelativeError = valPrimalL2Error / valExactPrimalL2Norm;
-    os << " L2 relative error of primal unknown:  " << std::setprecision(15) << valPrimalL2RelativeError << std::endl;
-    leaderPrint( os.str() );
-    os.str("");
-
-    leaderPrint("\n\nINTERPOLATED DARCY VELOCITY ERROR");
-
-    // Compute the L^2(\Omega) norm of the dual variable.
-    valDualL2Norm = dualL2Norm();
-	os << std::endl << " L2 norm of dual unknown:              " << std::setprecision(15) << valDualL2Norm << std::endl;
-	leaderPrint( os.str() );
-	os.str("");
-
-	// Compute the L^2(\Omega) norm of the exact dual variable.
-    valExactDualL2Norm = exactDualL2Norm( dualExact, time );
-    os << " L2 norm of dual exact:                " << std::setprecision(15) << valExactDualL2Norm << std::endl;
-    leaderPrint( os.str() );
-    os.str("");
-
-    // Compute the absolute L^2(\Omega) error of the dual variable.
-    valDualL2Error = dualL2Error( dualExact, weightFunction, time );
-	os << " L2 error of dual unknown:             " << std::setprecision(15) << valDualL2Error << std::endl;
-	leaderPrint( os.str() );
-	os.str("");
-
-    // Compute the relative L^2(\Omega) error of the dual variable.
-    valDualL2RelativeError = valDualL2Error / valExactDualL2Norm;
-    os << " L2 relative error of Dual unknown:    " << std::setprecision(15) << valDualL2RelativeError << std::endl;
-    leaderPrint( os.str() );
-    os.str("");
-
-} // printErrors
 
 } // namespace LifeV
 
