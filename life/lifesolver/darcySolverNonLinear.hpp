@@ -474,10 +474,10 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       bchandler_raw_type&        BCh,
+                       bchandler_raw_type&        bcHandler,
                        comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, BCh, comm),
+    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
     // Data of the problem.
     M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.

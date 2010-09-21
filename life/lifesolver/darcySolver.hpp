@@ -672,7 +672,7 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              bchandler_raw_type&        BCh,
+              bchandler_raw_type&        bcHandler,
               comm_ptrtype&              comm ):
     // Parallel stuff.
     M_me                     ( comm->MyPID() ),
@@ -682,7 +682,7 @@ DarcySolver ( const data_type&           dataFile,
     M_data                   ( dataFile ),
 	M_source                 ( DarcyDefaultSource() ),
     M_inversePermeability    ( DarcyDefaultInversePermeability() ),
-    M_BCh                    ( &BCh ),
+    M_BCh                    ( &bcHandler ),
     M_setBC                  ( true ),
     // Finite element spaces.
     M_primal_FESpace         ( primal_FESpace ),
