@@ -156,16 +156,6 @@ public:
     */
     DataDarcy& operator=( const DataDarcy& dataDarcy );
 
-   	/*! Print all the data
-        @param c the ostream to print the data
-    */
-    void showMe( std::ostream& c = std::cout );
-
-   	/*! Help method, print all data that can be stored in this class
-        @param c the ostream to print the help
-    */
-    void help( std::ostream& c = std::cout );
-
     /*! External setup
         @param dataFile The data file with all the data.
         @param section The global section.
@@ -205,25 +195,6 @@ DataDarcy<Mesh>::DataDarcy( ):
 {
     CONSTRUCTOR( "DataDarcy" );
 }
-
-
-
-
-// Constructor using a data file
-/*template <typename Mesh>
-DataDarcy<Mesh>::DataDarcy( const GetPot& dataFile, const std::string& section ):
-	// Data
-    DataMesh<Mesh>         ( dataFile, section + "/space_discretization" ),
-    DataTime               ( dataFile ),
-    M_dataFile             ( dataFile ),
-    // Miscellaneous
-    M_testCase             ( dataFile( ( section + "/miscellaneous/test_case").data(), 1 ) ),
-    post_dir               ( dataFile( ( section + "/miscellaneous/post_dir").data(), "./" ) ),
-    M_verbose              ( dataFile( ( section + "/miscellaneous/verbose").data(), true ) ),
-    post_proc_format       ( dataFile( ( section + "/miscellaneous/post_proc_format").data(), "medit" ) )
-{
-}
-*/
 
 // Copy constructor
 template < typename Mesh >
@@ -280,33 +251,6 @@ void DataDarcy<Mesh>::setup( const Data_Type& dataFile, const std::string& secti
 
     // Miscellaneous
     M_verbose      = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
-}
-
-
-template <typename Mesh>
-void DataDarcy<Mesh>::showMe( std::ostream& c )
-{/*
-    // Mesh
-    c << std::endl << "*** Values for mesh [space_discretization]" << std::endl << std::endl;
-    DataMesh<Mesh>::showMe( c );
-
-    // miscellaneous
-    c << std::endl << "*** Values for data [miscellaneous]" << std::endl << std::endl
-      << "post_dir         = " << post_dir << std::endl
-      << "test_case        = " << M_testCase << std::endl
-      << "verbose          = " << M_verbose << std::endl
-      << "post_proc_format = " << post_proc_format << std::endl;*/
-}
-
-template <typename Mesh>
-void DataDarcy<Mesh>::help( std::ostream& c )
-{/*
-    // miscellaneous
-    c << std::endl << "*** Help for data [miscellaneous]" << std::endl << std::endl
-      << "test_case: a number indicating the test case" << std::endl
-      << "post_dir         : the full postprocessing directory (including path)" << std::endl
-      << "verbose          : to make the code verbose" << std::endl
-      << "post_proc_format : postprocessing format (medit, vtk, ...)" << std::endl;*/
 }
 
 }
