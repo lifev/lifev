@@ -460,7 +460,7 @@ darcy::run()
     {
         std::cout << "Time for create the boundary conditions handler " <<
                      chronoBoundaryCondition.diff() << std::endl << std::flush;
-        dataDarcy.showMe();
+
     }
 
     // Create the solution spaces
