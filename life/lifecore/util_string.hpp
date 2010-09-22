@@ -28,6 +28,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 # include <list>
 # include <sstream>
 # include <map>
+# include <vector>
+
+#include <boost/algorithm/string.hpp>
+
+#include <life/lifecore/life.hpp>
 
 namespace LifeV {
 /*! \file util_string.h
@@ -122,6 +127,21 @@ Enum2String( const EnumeratorType& Enum, const std::map<std::string, EnumeratorT
             return j->first;
 
     return "NO_TYPE_FOUND";
+}
+
+// @author Cristiano Malossi
+// Convert a string made by numbers separated by commas, to a vector of numbers
+template< typename number >
+void
+string2numbersVector( const std::string& string, std::vector< number >& numberVector )
+{
+    //Split the string
+    std::vector< std::string > stringVector;
+    boost::split( stringVector, string, boost::is_any_of( "," ) );
+
+    //Convert to the right type
+    for ( UInt i( 0 ); i < static_cast< UInt > ( stringVector.size() ); ++i )
+        numberVector.push_back( static_cast< number > ( std::atoi( stringVector[i].c_str() ) ) );
 }
 
 }
