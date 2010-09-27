@@ -25,6 +25,7 @@
 //@HEADER
 
 /*!
+  \include ../../testsuite/test_monolithic/fluidstructure.dox
     @file composedBlockOper.hpp
     @brief this file contains a class which is suited for handling a block-structured matrix that can be written as a
     multiplication of a variable number of factors. It contains a vector of pointers for each factor, BCHandler, FESpace
@@ -45,10 +46,10 @@
 
 namespace LifeV {
 
-//! ComposedBlockOper - Short description of the class
+//! ComposedBlockOper - Class handling block-structured preconditioners
 /*!
     @author Paolo Crosetto
-    see [Crosetto, Deparis, Fourestey, Quarteroni 2009]
+    see \ref CDFQ
 
     Pure virtual class which is suited for handling a block-structured matrix that can be written as a
     multiplication of a variable number of factors. It contains a vector of pointers for each factor, BCHandler, FESpace
@@ -195,6 +196,9 @@ public:
 
 protected:
 
+    //! @name Protected Methods
+    //@{
+
     //!sums the coupling matrix in the specified position with the corresponding block
     /*!
       Everything (but the boundary conditions assembling) must have been set before calling this
@@ -209,6 +213,10 @@ protected:
       \param j: element to swap
      */
     virtual void swap(const UInt i, const UInt j);
+    //@}
+
+    //! @name Protected Members
+    //@{
 
     //! vector of flags saying if the matrix is to be recomputed every time
     std::vector<bool>                                           M_recompute;
@@ -230,6 +238,7 @@ protected:
     M_blocks of blocks. This vector is assigned in the coupler method of each class.
     */
     boost::scoped_ptr<std::vector<Block> >                      M_blockReordering;
+    //@}
 
 private:
 

@@ -178,10 +178,17 @@ public:
 
 protected:
 
+    //! @name Protected Methods
+    //@{
+
     /*!
       Replaces the preconditioner in M_blockPrecs with another one that is already constructed
     */
     virtual void    replace_precs( matrix_ptrtype& Mat, UInt position);
+    //@}
+
+    //! @name Protected Members
+    //@{
 
     /*!
       Pointer to an IfpackComposedPrec object containing the preconditioners for each block
@@ -192,6 +199,8 @@ protected:
     map_ptrtype                                      M_dMap;
     map_ptrtype                                      M_interfaceMap;
     UInt                                             M_multipliers;
+    //@}
+
 private:
     //    static bool                                      reg;
 

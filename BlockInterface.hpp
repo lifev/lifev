@@ -425,6 +425,8 @@ public:
 
 protected:
 
+    //! @name Protected Methods
+    //@{
 
     //!sums the coupling matrix in the specified position with the corresponding block
     /*!
@@ -449,7 +451,10 @@ protected:
     template <typename Operator>
     void
     insert(std::vector<Operator>& operFrom, std::vector<Operator>& OperTo);
+    //@}
 
+    //! @name Protected Members
+    //@{
     //ComposedPreconditioner<Epetra_Operator>                      M_blocks;
     std::vector<matrix_ptrtype>                                  M_blocks;
     std::vector<bchandler_ptrtype>                               M_bch;
@@ -458,9 +463,12 @@ protected:
     vector_ptrtype                                               M_numerationInterface;
     boost::shared_ptr<Epetra_Comm>                               M_comm;
     //Int                                                          M_superCouplingFlag;
-
+    //@}
     //boost::shared_ptr<OperatorPtr>                M_blockPrec;
 private:
+
+    //! @name Private Methods
+    //@{
 
     //!private copy constructor: this class should not be copied.
     /*!
@@ -468,6 +476,7 @@ private:
       the content.
      */
     BlockInterface( matrix_ptrtype& T);
+    //@}
 };
 
 

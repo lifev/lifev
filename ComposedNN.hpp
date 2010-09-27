@@ -150,14 +150,23 @@ public:
 
 protected:
 
+    //! @name Protected Members
+    //@{
+
     boost::shared_ptr<ComposedPreconditioner<ComposedPreconditioner<Ifpack_Preconditioner> > >            M_blockPrecs;
     Teuchos::ParameterList                                                 M_list;
     std::vector<boost::shared_ptr<Ifpack_Preconditioner> >                 M_prec;
 
+    //@}
+
 private:
+
+    //! @name Private Members
+    //@{
 
     boost::shared_ptr< composed_prec > M_firstCompPrec ;
     boost::shared_ptr< composed_prec > M_secondCompPrec;
+    //@}
 
 };
 

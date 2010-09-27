@@ -117,6 +117,9 @@ public:
 
     typedef ComposedNN super;
 
+    //! @name Constructor and Destructor
+    //@{
+
     ComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
         super( flag, order )
     {
@@ -125,6 +128,10 @@ public:
     ~ComposedDNND()
     {}
 
+    //@}
+
+    //! @name Public Methods
+    //@{
 
     //! Computes the coupling
     /*!
@@ -153,7 +160,7 @@ public:
      */
     void setDataFromGetPot( const GetPot&      dataFile,
                             const std::string& section ){}
-
+    //@}
 private:
 
     //static bool reg;

@@ -44,7 +44,7 @@
 
 namespace LifeV {
 
-//! robinInterface - Short description of the class
+//! robinInterface - Class for the Robin coupling of etherogeneaous problems
 /*!
     @author Paolo Crosetto
 
@@ -52,14 +52,18 @@ namespace LifeV {
     can be transformed into a Robin one by inheriting from this class. The allocation of the memory for M_robinCoupling
     has to be done outside.
 
-    The Robin conditions ar obtained through linear combination of the lines corresponding to the Dirichlet and Neumann
-    coupling conditions already present in the matrix. This is obtained by multiplying the matrix times a restriction
+    The Robin conditions are obtained algebraically through linear combination of the lines corresponding to the Dirichlet and Neumann
+    coupling conditions already present in the matrix. This is achieved by multiplying the matrix times a restriction
     matrix (M_robinCoupling) which performs the restriction to the interface and the linear combination. Then the result
     is summed to the original matrix. The update of the rhs vector must be done outside this class.
  */
 class RobinInterface
 {
 public:
+
+
+    //! @name Constructor & Destructor
+    //@{
 
     RobinInterface():
         M_alphaf(),
@@ -68,6 +72,14 @@ public:
         M_robinPart(),
         M_rhsVec()
     {}
+
+    ~RobinInterface(){}
+
+    //@}
+
+
+    //! @name Public Methods
+    //@{
 
     //! method to set the data relative to the Robin coupling from GetPot
     /*!
@@ -96,15 +108,29 @@ public:
      */
     void applyRobinCoupling( std::vector<BlockInterface::matrix_ptrtype> blockVector);
 
+    //@}
+
 protected:
 
+
+    //! @name Protected Methods
+    //@{
+
     void applyRobinCoupling( BlockInterface::matrix_ptrtype firstBlock );
+
+    //@}
+
+
+    //! @name Protected Members
+    //@{
 
     Real                                 M_alphaf;
     Real                                 M_alphas;
     BlockInterface::matrix_ptrtype       M_robinCoupling;
     BlockInterface::matrix_ptrtype       M_robinPart;
     BlockInterface::vector_ptrtype       M_rhsVec;
+    //@}
+
 };
 
 } // Namespace LifeV
