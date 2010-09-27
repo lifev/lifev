@@ -35,7 +35,7 @@
  * so that the operators that define the preconditioner can be general
  * (matrices, other preconditioners, other composed preconditioners, etc.).
  * It is similar to the thyra package in Trilinos although it doesn't depend on it.
- *\end{array}\right)$
+ *
  */
 
 #ifndef COMPOSEDPRECONDITIONER_HPP
@@ -52,6 +52,14 @@
 
 namespace LifeV
 {
+//! ComposedPreconditioner - This is a pure virtual class for the linear operators with a block structure
+/*!    (i.e. block matrices and preconditioners).
+    @author Simone Deparis, Paolo Crosetto
+
+ * Class handling a preconditioner defined as a composition of operators. The class is templated
+ * so that the operators that define the preconditioner can be general
+ * (matrices, other preconditioners, other composed preconditioners, etc.).
+ */
 
 template<typename Operator>
 class  ComposedPreconditioner
@@ -145,6 +153,10 @@ public:
     */
     double NormInf() const;
 
+    //! Returns an estimation of the condition number
+    /**
+       the estimation is devised from an estimation on each factor with the rule \f$ K_{12}\leq K_1K_2 \f$
+     */
     double Condest() const;
 
     const char * Label() const;
