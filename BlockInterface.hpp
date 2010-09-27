@@ -314,9 +314,11 @@ public:
 
     //! builds the coupling matrix.
     /*!
-      Computes the matrix that couples 2 blocks using an augmented formulation (Lagrange multipliers).
+      Computes the matrix that couples 2 (or more) blocks using an augmented formulation (Lagrange multipliers).
       It adds from 1 to 4 coupling blocks, depending on the flag 'coupling'. This flag is an Int, it works as
-      the bash command chmod. It ranges from 1 to 15.
+      the bash command chmod. It ranges from 1 to 15 for two blocks. The values from 15 to 31 account for the presence
+      of a third block: in FSI these three blocks are the fluid block, the structure and the fluid mesh displacement
+      blocks. For 'coupling > 31' the method is called recursively.
        \param bigMatrix: the coupling matrix to be built
        \param coupling: flag specifying what wether to consider all the coupling or to neglect one part
        \param problem1: FESpace of the first block
