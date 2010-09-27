@@ -52,8 +52,8 @@
 
 namespace LifeV
 {
-//! ComposedPreconditioner - This is a pure virtual class for the linear operators with a block structure
-/*!    (i.e. block matrices and preconditioners).
+//! ComposedPreconditioner -
+/*!
     @author Simone Deparis, Paolo Crosetto
 
  * Class handling a preconditioner defined as a composition of operators. The class is templated
@@ -67,16 +67,14 @@ class  ComposedPreconditioner
 
 public:
 
-    /** @name Typedefs
-     */
+    //! @name Typedefs
     //@{
     //typedef Ifpack_Preconditioner                prec_raw_type;
     typedef Operator                    prec_raw_type;
     typedef typename boost::shared_ptr<prec_raw_type>     prec_type;
     //@}
 
-    /** @name Constructors, destructor
-     */
+    //! @name Constructors, destructor
     //@{
     /**
        The constructor builds an empty chain of composed preconditioner.
