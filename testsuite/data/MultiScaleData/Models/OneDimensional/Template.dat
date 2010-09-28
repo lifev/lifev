@@ -23,10 +23,10 @@ couplingFlags    = ''
 start                = 0             # start index for filenames
 save                 = 1             # how many time steps per posptrocessing
 multimesh            = false         # true if the mesh has to be saved at each post-processing step
-type             = hdf5
+type                 = hdf5
 
 [importer]
-type             = hdf5
+type                 = hdf5
 
 
 [1D_Model]
@@ -40,16 +40,11 @@ SourceType           = OneD_NonLinearSource
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
 
+DistributionLaw      = none          # Coefficients distribution law: none, linear, pointwise
 Area0                = 0.785398163397448 # Area of tube series
 
 thickVessel          = false
 thickness            = 0.1
-
-# Use Fixed Coefficients
-#AlphaCoriolis        = 1            # Coriolis Coefficients
-#Beta0                = 1.e6         # pressure law exponent
-#Beta1                = 0.5          # pressure law exponent
-#Kr                   = 2.419026343  # friction parameter (source term)
 
 [../space_discretization]
 Length               = 5.
