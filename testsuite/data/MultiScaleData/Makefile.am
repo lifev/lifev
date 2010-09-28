@@ -34,6 +34,7 @@ dist_pkgdata_DATA = MultiScale_test.dat \
 					Run_CarotidBifurcation_3DFluid_Stress.dat \
 					Run_CarotidBifurcation_3DFluid_Synthetic_FluxStress.dat \
 					Run_CarotidBifurcation_3DFluid_Synthetic_Stress.dat \
+					Run_ReymondStergiopulos2009_1D_ArterialTree_Stress.dat \
 					Run_Stationary_3DFluid_1Cylinder.dat \
 					Run_Stationary_3DFluid_CarotidBifurcation_FluxStress.dat \
 					Run_Stationary_3DFluid_Hexagon_FluxStress.dat \
