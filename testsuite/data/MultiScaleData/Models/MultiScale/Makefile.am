@@ -29,6 +29,10 @@ dist_pkgdata_DATA = CarotidBifurcation_1D-3DFluid_FluxStress.dat \
                     CarotidBifurcation_3DFluid_Stress.dat \
                     CarotidBifurcation_3DFluid_Synthetic_FluxStress.dat \
                     CarotidBifurcation_3DFluid_Synthetic_Stress.dat \
+                    ReymondStergiopulos2009_1D_Aorta_Absorbing_Stress.dat \
+                    ReymondStergiopulos2009_1D_Aorta_Resistance_Stress.dat \
+                    ReymondStergiopulos2009_1D_AortaArmsLegs_Absorbing_Stress.dat \
+                    ReymondStergiopulos2009_1D_AortaArmsLegs_Resistance_Stress.dat \
                     SinusoidalWave_1D_1Cylinder.dat \
                     SinusoidalWave_1D_2Cylinders_Stress.dat \
                     SinusoidalWave_1D_2Cylinders_FluxStress.dat \

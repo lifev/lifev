@@ -1,0 +1,141 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-09-09
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: MultiScale - Reymond Stergiopulos 1D arterial tree #####################################
+###################################################################################################
+
+[MultiScale] ######################################################################################
+###################################################################################################
+modelName        = 'Reymond Stergiopulos 1D Aorta Resistance (OneDimensional, Stress)'
+modelType        = MultiScale
+couplingFlags    = ' '
+
+[Problem] #########################################################################################
+###################################################################################################
+modelsPath       = './MultiScaleData/Models/'
+couplingsPath    = './MultiScaleData/Couplings/'
+
+# List of models ##################################################################################
+########### ID #### Type ############## File (without .dat) #######################################
+models = '    
+            1       OneDimensional      ReymondStergiopulos2009_001
+            2       OneDimensional      ReymondStergiopulos2009_002
+            3       OneDimensional      ReymondStergiopulos2009_003
+           14       OneDimensional      ReymondStergiopulos2009_014
+           15       OneDimensional      ReymondStergiopulos2009_015
+           18       OneDimensional      ReymondStergiopulos2009_018
+           19       OneDimensional      ReymondStergiopulos2009_019
+           26       OneDimensional      ReymondStergiopulos2009_026
+           27       OneDimensional      ReymondStergiopulos2009_027
+           28       OneDimensional      ReymondStergiopulos2009_028
+           29       OneDimensional      ReymondStergiopulos2009_029
+           30       OneDimensional      ReymondStergiopulos2009_030
+           31       OneDimensional      ReymondStergiopulos2009_031
+           32       OneDimensional      ReymondStergiopulos2009_032
+           33       OneDimensional      ReymondStergiopulos2009_033
+           34       OneDimensional      ReymondStergiopulos2009_034
+           35       OneDimensional      ReymondStergiopulos2009_035
+           36       OneDimensional      ReymondStergiopulos2009_036
+           37       OneDimensional      ReymondStergiopulos2009_037
+           38       OneDimensional      ReymondStergiopulos2009_038
+           39       OneDimensional      ReymondStergiopulos2009_039
+           40       OneDimensional      ReymondStergiopulos2009_040
+           41       OneDimensional      ReymondStergiopulos2009_041
+           95       OneDimensional      ReymondStergiopulos2009_095
+         '
+###################################################################################################
+
+# List of couplings ###############################################################################
+########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
+couplings = '    
+            1       BoundaryCondition   HeartFlux                       1               0
+            2       Stress              StaticPressure                  95,1            0,1
+            3       Stress              StaticPressure                  2,3,95          0,0,1
+            4       Stress              StaticPressure                  14,15,2         0,0,1
+            5       Stress              StaticPressure                  18,19,14        0,0,1
+            6       Stress              StaticPressure                  26,27,18        0,0,1
+            7       Stress              StaticPressure                  28,29,27        0,0,1
+            8       Stress              StaticPressure                  30,31,29        0,0,1
+            9       Stress              StaticPressure                  32,33,30        0,0,1
+           10       Stress              StaticPressure                  38,35,28        0,0,1
+           11       Stress              StaticPressure                  36,37,35        0,0,1
+           12       Stress              StaticPressure                  34,39,37        0,0,1
+           13       Stress              StaticPressure                  40,41,39        0,0,1
+           14       BoundaryCondition   ReymondStergiopulos2009_003_R   3               1
+           15       BoundaryCondition   ReymondStergiopulos2009_015_R   15              1
+           16       BoundaryCondition   ReymondStergiopulos2009_019_R   19              1
+           17       BoundaryCondition   ReymondStergiopulos2009_026_R   26              1
+           18       BoundaryCondition   ReymondStergiopulos2009_031_R   31              1
+           19       BoundaryCondition   ReymondStergiopulos2009_032_R   32              1
+           20       BoundaryCondition   ReymondStergiopulos2009_033_R   33              1
+           21       BoundaryCondition   ReymondStergiopulos2009_034_R   34              1
+           22       BoundaryCondition   ReymondStergiopulos2009_036_R   36              1
+           23       BoundaryCondition   ReymondStergiopulos2009_038_R   38              1
+           24       BoundaryCondition   ReymondStergiopulos2009_040_R   40              1
+           25       BoundaryCondition   ReymondStergiopulos2009_041_R   41              1
+            '
+###################################################################################################
+
+# Geometry offset #################################################################################
+########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
+offset = '            
+			1	1	1	1	0	0	125	0	0	0
+			2	1	1	1	0	0	30	-0.894556840009779	3.85640315768722	0
+			3	1	1	1	0	0	120	-0.894556840009779	3.85640315768722	0
+			4	1	1	1	0	0	219.104973277817	-2.59455684000978	6.80088953055432	0
+			5	1	1	1	0	0	120	-2.59455684000978	6.80088953055432	0
+			7	1	1	1	0	0	-140	-5.23292848889669	4.65636276635906	0
+			8	1	1	1	0	0	-115	-37.5600039885176	-22.4692743624129	0
+			9	1	1	1	0	0	-85	-37.5600039885176	-22.4692743624129	0
+			10	1	1	1	0	0	-120	-36.9760605121083	-29.1437788396276	0
+			11	1	1	1	0	0	-105	-36.9760605121083	-29.1437788396276	0
+			14	1	1	1	0	0	-25	0.837493967559098	4.85640315768722	0
+			15	1	1	1	0	0	46.5145018073384	0.837493967559098	4.85640315768722	0
+			18	1	1	1	0	0	-90	4.37209433700203	3.20819193689850	0
+			19	1	1	1	0	0	20.4035558591566	4.37209433700203	3.20819193689850	0
+			21	1	1	1	0	0	-40	7.55877954332266	4.39353467037995	0
+			22	1	1	1	0	0	-65	39.8858550429435	-22.7321024583920	0
+			23	1	1	1	0	0	-95	39.8858550429435	-22.7321024583920	0
+			24	1	1	1	0	0	-55	39.3019115665342	-29.4066069356067	0
+			25	1	1	1	0	0	-75	39.3019115665342	-29.4066069356067	0
+			26	1	1	1	0	0	-20	4.37209433700203	-1.99180806310150	0
+			27	1	1	1	0	0	-115	4.37209433700203	-1.99180806310150	0
+			28	1	1	1	0	0	-80	-0.0231355851012403	-11.4174090482827	0
+			29	1	1	1	0	0	0	-0.0231355851012403	-11.4174090482827	0
+			30	1	1	1	0	0	-10	1.97686441489876	-11.4174090482827	0
+			31	1	1	1	0	0	35	1.97686441489876	-11.4174090482827	0
+			32	1	1	1	0	0	10	3.94647992092318	-11.7647054036165	0
+			33	1	1	1	0	0	-30	3.94647992092318	-11.7647054036165	0
+			34	1	1	1	0	0	210	0.897199756533491	-20.5761211512962	0
+			35	1	1	1	0	0	-100	0.897199756533491	-16.6368901392474	0
+			36	1	1	1	0	0	-30	0.549903401199630	-18.6065056452718	0
+			37	1	1	1	0	0	-80	0.549903401199630	-18.6065056452718	0
+			38	1	1	1	0	0	210	0.897199756533491	-16.6368901392474	0
+			39	1	1	1	0	0	-95	0.897199756533491	-20.5761211512962	0
+			40	1	1	1	0	0	-25	-0.0266511165916861	-31.1357849510687	0
+			41	1	1	1	0	0	-90	-0.0266511165916861	-31.1357849510687	0
+			42	1	1	1	0	0	-150	-0.0266511165916859	-33.1357849510687	0
+			43	1	1	1	0	0	-30	-0.0266511165916859	-33.1357849510687	0
+			44	1	1	1	0	0	-60	5.08289876573650	-36.0857849510687	0
+			45	1	1	1	0	0	-100	5.08289876573650	-36.0857849510687	0
+			46	1	1	1	0	0	-90	12.2828987657365	-48.5565507655646	0
+			47	1	1	1	0	0	-110	12.2828987657365	-48.5565507655646	0
+			48	1	1	1	0	0	-100	12.2828987657365	-92.8565507655646	0
+			49	1	1	1	0	0	-80	12.2828987657365	-92.8565507655646	0
+			50	1	1	1	0	0	-120	-5.13620099891987	-36.0857849510687	0
+			51	1	1	1	0	0	-80	-5.13620099891987	-36.0857849510687	0
+			52	1	1	1	0	0	-90	-12.3362009989199	-48.5565507655646	0
+			53	1	1	1	0	0	-70	-12.3362009989199	-48.5565507655646	0
+			54	1	1	1	0	0	-80	-12.3362009989199	-92.8565507655646	0
+			55	1	1	1	0	0	-100	-12.3362009989199	-92.8565507655646	0
+			95	1	1	1	0	0	100	-0.286788218175523	0.409576022144496	0
+         '
+###################################################################################################
