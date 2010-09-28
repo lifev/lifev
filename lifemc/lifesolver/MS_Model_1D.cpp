@@ -28,9 +28,13 @@
  *  @file
  *  @brief MultiScale Model 1D
  *
- *  @version 1.0
+ *  @version 1.1
  *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- *  @date 02-25-2010
+ *  @date 26-02-2010
+ *
+ *  @version 1.2 and subsequents
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-04-2010
  */
 
 #include "MS_Model_1D.hpp"
@@ -46,20 +50,25 @@ MS_Model_1D::MS_Model_1D() :
     M_Exporter                     ( new IOFile_Type() ),
     M_ExporterMesh                 ( new Mesh_Type() ),
 #endif
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    M_LinearBC                     ( new BC_Type() ),
+    M_LinearSolution               ( new Solution_Type() ),
+    M_BCPreviousTimeSteps          (),
+    M_BCBaseDelta                  (),
+    M_BCDelta                      (),
+    M_BCDeltaType                  (),
+    M_BCDeltaSide                  (),
+#endif
     M_Data                         ( new Data_Type() ),
+    M_BC                           ( new BCInterface_Type() ),
     M_Physics                      (),
     M_Flux                         (),
     M_Source                       (),
     M_Solver                       ( new Solver_Type() ),
-    M_BC                           ( new BCInterface_Type() ),
-    M_LinearBC                     (),
-    M_Solution_tn                  ( new Solution_Type() ),
-    M_Solution                     ( new Solution_Type() ),
-    M_LinearSolution               ( new Solution_Type() ),
-    M_FESpace                      (),
     M_LinearSolver                 (),
-    M_BCBaseDelta                  (),
-    M_BCDelta                      ()
+    M_FESpace                      (),
+    M_Solution_tn                  ( new Solution_Type() ),
+    M_Solution                     ( new Solution_Type() )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -88,20 +97,25 @@ MS_Model_1D::MS_Model_1D( const MS_Model_1D& OneDimensionalModel ) :
     M_Exporter                     ( OneDimensionalModel.M_Exporter ),
     M_ExporterMesh                 ( OneDimensionalModel.M_ExporterMesh ),
 #endif
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    M_LinearBC                     ( OneDimensionalModel.M_LinearBC ),
+    M_LinearSolution               ( OneDimensionalModel.M_LinearSolution ),
+    M_BCPreviousTimeSteps          ( OneDimensionalModel.M_BCPreviousTimeSteps ),
+    M_BCBaseDelta                  ( OneDimensionalModel.M_BCBaseDelta ),
+    M_BCDelta                      ( OneDimensionalModel.M_BCDelta ),
+    M_BCDeltaType                  ( OneDimensionalModel.M_BCDeltaType ),
+    M_BCDeltaSide                  ( OneDimensionalModel.M_BCDeltaSide ),
+#endif
     M_Data                         ( OneDimensionalModel.M_Data ),
+    M_BC                           ( OneDimensionalModel.M_BC ),
     M_Physics                      ( OneDimensionalModel.M_Physics ),
     M_Flux                         ( OneDimensionalModel.M_Flux ),
     M_Source                       ( OneDimensionalModel.M_Source ),
     M_Solver                       ( OneDimensionalModel.M_Solver ),
-    M_BC                           ( OneDimensionalModel.M_BC ),
-    M_LinearBC                     ( OneDimensionalModel.M_LinearBC ),
-    M_Solution_tn                  ( OneDimensionalModel.M_Solution_tn ),
-    M_Solution                     ( OneDimensionalModel.M_Solution ),
-    M_LinearSolution               ( OneDimensionalModel.M_LinearSolution ),
-    M_FESpace                      ( OneDimensionalModel.M_FESpace ),
     M_LinearSolver                 ( OneDimensionalModel.M_LinearSolver ),
-    M_BCBaseDelta                  ( OneDimensionalModel.M_BCBaseDelta ),
-    M_BCDelta                      ( OneDimensionalModel.M_BCDelta )
+    M_FESpace                      ( OneDimensionalModel.M_FESpace ),
+    M_Solution_tn                  ( OneDimensionalModel.M_Solution_tn ),
+    M_Solution                     ( OneDimensionalModel.M_Solution )
 {
 }
 
@@ -118,20 +132,25 @@ MS_Model_1D::operator=( const MS_Model_1D& OneDimensionalModel )
         M_Exporter                     = OneDimensionalModel.M_Exporter;
         M_ExporterMesh                 = OneDimensionalModel.M_ExporterMesh;
 #endif
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+        M_LinearBC                     = OneDimensionalModel.M_LinearBC;
+        M_LinearSolution               = OneDimensionalModel.M_LinearSolution;
+        M_BCPreviousTimeSteps          = OneDimensionalModel.M_BCPreviousTimeSteps;
+        M_BCBaseDelta                  = OneDimensionalModel.M_BCBaseDelta;
+        M_BCDelta                      = OneDimensionalModel.M_BCDelta;
+        M_BCDeltaType                  = OneDimensionalModel.M_BCDeltaType;
+        M_BCDeltaSide                  = OneDimensionalModel.M_BCDeltaSide;
+#endif
         M_Data                         = OneDimensionalModel.M_Data;
+        M_BC                           = OneDimensionalModel.M_BC;
         M_Physics                      = OneDimensionalModel.M_Physics;
         M_Flux                         = OneDimensionalModel.M_Flux;
         M_Source                       = OneDimensionalModel.M_Source;
         M_Solver                       = OneDimensionalModel.M_Solver;
-        M_BC                           = OneDimensionalModel.M_BC;
-        M_LinearBC                     = OneDimensionalModel.M_LinearBC;
+        M_LinearSolver                 = OneDimensionalModel.M_LinearSolver;
+        M_FESpace                      = OneDimensionalModel.M_FESpace;
         M_Solution_tn                  = OneDimensionalModel.M_Solution_tn;
         M_Solution                     = OneDimensionalModel.M_Solution;
-        M_LinearSolution               = OneDimensionalModel.M_LinearSolution;
-        M_FESpace                      = OneDimensionalModel.M_FESpace;
-        M_LinearSolver                 = OneDimensionalModel.M_LinearSolver;
-        M_BCBaseDelta                  = OneDimensionalModel.M_BCBaseDelta;
-        M_BCDelta                      = OneDimensionalModel.M_BCDelta;
     }
 
     return *this;
@@ -222,23 +241,37 @@ MS_Model_1D::SetupModel()
     M_Solver->setupSolution( *M_Solution );
     M_Solver->setupSolution( *M_Solution_tn );
 
+    //Initialize solution
+    M_Solver->initialize( *M_Solution );
+
     //Set default BC (has to be called after setting other BC)
     M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source );
     M_BC->SetSolution( M_Solution );
-
-#ifdef PERTURBATION
-    SetupLinearModel();
-#endif
 
 #ifdef HAVE_HDF5
     //Post-processing
     M_Exporter->setMeshProcId( M_ExporterMesh, M_comm->MyPID() );
 
-    M_Exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_Solution)["A"],  static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_Solution)["Q"],  static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "W1",              (*M_Solution)["W1"], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "W2",              (*M_Solution)["W2"], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
-    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_Solution)["P"],  static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    //M_Exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_Solution)["A"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Area ratio",      (*M_Solution)["A/A0-1"], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_Solution)["Q"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    //M_Exporter->addVariable( ExporterData::Scalar, "W1",              (*M_Solution)["W1"],   static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    //M_Exporter->addVariable( ExporterData::Scalar, "W2",              (*M_Solution)["W2"],   static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+    M_Exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_Solution)["P"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+#endif
+
+#ifdef HAVE_MATLAB_POSTPROCESSING
+    //Matlab post-processing
+    M_Solver->resetOutput( *M_Solution );
+#endif
+
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    if ( M_couplings.size() > 0 )
+    {
+        CreateLinearBC();
+        UpdateLinearBC( *M_Solution );
+        SetupLinearModel();
+    }
 #endif
 
 }
@@ -251,11 +284,17 @@ MS_Model_1D::BuildSystem()
     Debug( 8130 ) << "MS_Model_1D::BuildSystem() \n";
 #endif
 
-    //M_Data->showMe();
+    M_Data->showMe();
     M_Solver->buildConstantMatrices();
 
-    M_Solver->initialize( *M_Solution );
+    // Update previous solution
     UpdateSolution( *M_Solution, *M_Solution_tn );
+
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    if ( M_couplings.size() > 0 )
+        UpdateLinearModel();
+#endif
+
 }
 
 void
@@ -268,6 +307,12 @@ MS_Model_1D::UpdateSystem()
 
     // Update previous solution
     UpdateSolution( *M_Solution, *M_Solution_tn );
+
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    if ( M_couplings.size() > 0 )
+        UpdateLinearModel();
+#endif
+
 }
 
 void
@@ -279,6 +324,12 @@ MS_Model_1D::SolveSystem()
 #endif
 
     Solve( *M_BC->GetHandler(), *M_Solution );
+
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    if ( M_couplings.size() > 0 )
+        UpdateLinearBC( *M_Solution );
+#endif
+
 }
 
 void
@@ -296,8 +347,11 @@ MS_Model_1D::SaveSolution()
         M_Exporter->CloseFile();
 #endif
 
+#ifdef HAVE_MATLAB_POSTPROCESSING
     //Matlab post-processing
-    M_Solver->postProcess( *M_Solution, M_Data->dataTime()->getTime() );
+    M_Solver->postProcess( *M_Solution );
+#endif
+
 }
 
 void
@@ -318,6 +372,8 @@ MS_Model_1D::ShowMe()
 // ===================================================
 // Methods
 // ===================================================
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+
 void
 MS_Model_1D::SetupLinearModel()
 {
@@ -326,20 +382,44 @@ MS_Model_1D::SetupLinearModel()
     Debug( 8130 ) << "MS_Model_1D::SetupLinearModel( ) \n";
 #endif
 
-    // Solution for the linear problem (this does not change anything in the solver)
-    M_Solver->setupSolution( *M_LinearSolution );
-
-    // Define BCFunctions for tangent problem
+    // Define BCFunction for linear problem
     M_BCBaseDelta.setFunction( boost::bind( &MS_Model_1D::BCFunctionDelta, this, _1 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with the LinearSolution instead of the true solution
-    M_LinearBC.reset( new BC_Type( *M_BC->GetHandler() ) );
+    //M_LinearBC.reset( new BC_Type( *M_BC->GetHandler() ) ); // COPY CONSTRUCTOR NOT WORKING
+
+    //Set left and right BC + default BC
+    M_LinearBC->setBC( OneD_left, OneD_first, M_BC->GetHandler()->BC( OneD_left )->type( OneD_first ),
+                                              M_BC->GetHandler()->BC( OneD_left )->BCFunction( OneD_first ) );
+
+    M_LinearBC->setBC( OneD_right, OneD_first, M_BC->GetHandler()->BC( OneD_right )->type( OneD_first ),
+                                               M_BC->GetHandler()->BC( OneD_right )->BCFunction( OneD_first ) );
+
+    M_LinearBC->setDefaultBC( M_Flux, M_Source );
+
+    // Solution for the linear problem (this does not change anything in the solver)
+    M_Solver->setupSolution( *M_LinearSolution );
     M_LinearBC->setSolution( M_LinearSolution );
 }
 
 void
 MS_Model_1D::UpdateLinearModel()
 {
+    // The couplings should use the same value for the time interpolation order
+    UInt timeInterpolationOrder( std::max( M_couplings[0]->GetTimeInterpolationOrder(), M_couplings[1]->GetTimeInterpolationOrder() ) );
+
+    UInt containerSize( M_BCPreviousTimeSteps.size() );
+
+    // If we have not yet enough samples for interpolation, we add a new one
+    if ( containerSize <= timeInterpolationOrder )
+    {
+        ++containerSize;
+        M_BCPreviousTimeSteps.push_back( M_BCPreviousTimeSteps[0] );
+    }
+
+    // Updating database
+    for ( UInt i(1) ; i < containerSize ; ++i )
+        M_BCPreviousTimeSteps[containerSize-i] = M_BCPreviousTimeSteps[containerSize-i-1];
 }
 
 void
@@ -362,6 +442,8 @@ MS_Model_1D::SolveLinearModel( bool& SolveLinearSystem )
     //This flag avoid recomputation of the same system
     SolveLinearSystem = false;
 }
+
+#endif
 
 // ===================================================
 // Get Methods (couplings)
@@ -415,12 +497,12 @@ MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressTyp
     {
         case StaticPressure:
         {
-            return -GetBoundaryPressure( Flag );
+            return GetBoundaryPressure( Flag );
         }
 
         case TotalPressure:
         {
-            return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
+            return GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
         }
 
         default:
@@ -432,50 +514,41 @@ MS_Model_1D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressTyp
     }
 }
 
-Real
-MS_Model_1D::GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem )
-{
-
-#ifdef PERTURBATION
-    Real A = M_Solver->BoundaryValue( *M_Solution, OneD_A, FlagConverter( Flag ) );
-
-    SolveLinearModel( SolveLinearSystem );
-
-    Real Adelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_A, FlagConverter( Flag ) );
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaArea( Flag, SolveLinearSystem ) \n";
-    Debug( 8130 ) << "A:          " << A <<  "\n";
-    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
-#endif
-
-    return (Adelta - A) / M_BCDelta[2];
-#else
-    return TangentProblem( FlagConverter( Flag ), OneD_A );
-#endif
-
-}
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 Real
 MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-
-#ifdef PERTURBATION
-    Real Q = M_Solver->BoundaryValue( *M_Solution, OneD_Q, FlagConverter( Flag ) );
+    OneD_BCSide bcSide = FlagConverter( Flag );
 
     SolveLinearModel( SolveLinearSystem );
 
-    Real Qdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_Q, FlagConverter( Flag ) );
+    Real Q      = M_Solver->BoundaryValue( *M_Solution, OneD_Q, bcSide );
+    Real Qdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) \n";
-    Debug( 8130 ) << "Q:          " << Q <<  "\n";
-    Debug( 8130 ) << "Qdelta:     " << Qdelta <<  "\n";
+    Debug( 8130 ) << "Q:          " << Q << "\n";
+    Debug( 8130 ) << "Qdelta:     " << Qdelta << "\n";
 #endif
 
-    return (Qdelta - Q) / M_BCDelta[2];
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
+
+    if ( M_BCDeltaType == OneD_A )
+    {
+        // dQ/dP
+        return ( (Qdelta - Q) / M_BCDelta ) * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, bcSide ), 0 );
+    }
+    else
+    {
+        // dQ/dQ
+        return (Qdelta - Q) / M_BCDelta;
+    }
+
 #else
-    return TangentProblem( FlagConverter( Flag ), OneD_Q );
+
+    return (Qdelta - Q) / M_BCDelta;
+
 #endif
 
 }
@@ -483,13 +556,37 @@ MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSyst
 Real
 MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
 {
-
-#ifdef PERTURBATION
-    Real P = M_Solver->BoundaryValue( *M_Solution, OneD_P, FlagConverter( Flag ) );
+    OneD_BCSide bcSide = FlagConverter( Flag );
 
     SolveLinearModel( SolveLinearSystem );
 
-    Real Pdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_P, FlagConverter( Flag ) );
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
+
+    Real A      = M_Solver->BoundaryValue( *M_Solution, OneD_A, bcSide );
+    Real Adelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_A, bcSide );
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) \n";
+    Debug( 8130 ) << "A:          " << A <<  "\n";
+    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
+#endif
+
+    if ( M_BCDeltaType == OneD_A )
+    {
+        // dP/dP
+        return ( (Adelta - A) / M_BCDelta ) * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, bcSide ), 0 )
+                                            * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, bcSide ), 0 );
+    }
+    else
+    {
+        // dP/dQ
+        return ( (Adelta - A) / M_BCDelta ) * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, bcSide ), 0 );
+    }
+
+#else
+
+    Real P      = M_Solver->BoundaryValue( *M_Solution, OneD_P, bcSide );
+    Real Pdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_P, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) \n";
@@ -497,12 +594,27 @@ MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSyst
     Debug( 8130 ) << "Pdelta:     " << Pdelta <<  "\n";
 #endif
 
-    return (Pdelta - P) / M_BCDelta[2];
-#else
-    return TangentProblem( FlagConverter( Flag ), OneD_P );
+    return (Pdelta - P) / M_BCDelta;
+
 #endif
 
 }
+
+#else
+
+Real
+MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& /*SolveLinearSystem*/ )
+{
+    return TangentProblem( FlagConverter( Flag ), OneD_Q );
+}
+
+Real
+MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& /*SolveLinearSystem*/ )
+{
+    return TangentProblem( FlagConverter( Flag ), OneD_P );
+}
+
+#endif
 
 Real
 MS_Model_1D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
@@ -518,12 +630,12 @@ MS_Model_1D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem
     {
         case StaticPressure:
         {
-            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
+            return GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
         }
 
         case TotalPressure:
         {
-            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+            return GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
         }
 
         default:
@@ -614,6 +726,8 @@ MS_Model_1D::SetupGlobalData( const std::string& FileName )
         M_Data->setDensity( M_globalData->GetFluidDensity() );
     if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
         M_Data->setViscosity( M_globalData->GetFluidViscosity() );
+    if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/externalPressure" ) )
+        M_Data->setExternalPressure( M_globalData->GetFluidReferencePressure() );
     if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/densityWall" ) )
         M_Data->setDensityWall( M_globalData->GetStructureDensity() );
     if ( !DataFile.checkVariable( "1D_Model/PhysicalParameters/poisson" ) )
@@ -670,7 +784,7 @@ MS_Model_1D::UpdateSolution( const Solution_Type& solution1, Solution_Type& solu
 
     // Here we make a true copy (not a copy of the shared_ptr, but a copy of its content)
     for ( Solution_ConstIterator i = solution1.begin() ; i != solution1.end() ; ++i )
-        *solution2[i->first]= *i->second;
+        *solution2[i->first] = *i->second;
 }
 
 void
@@ -698,15 +812,17 @@ MS_Model_1D::Solve( BC_Type& bc, Solution_Type& solution, const std::string& sol
     if ( M_displayer->isLeader() )
         std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_Data->dataTime()->getTimeStep() << std::endl;
 
-    for ( UInt i(0) ; i < SubiterationNumber ; ++i )
+    for ( UInt i(1) ; i <= SubiterationNumber ; ++i )
     {
         if ( M_displayer->isLeader() )
-            std::cout << solverType << "  Subiteration                             " << (i+1) << "/" << SubiterationNumber << std::endl;
-
+        {
+            std::cout << solverType << "  Subiteration                             " << i << "/" << SubiterationNumber << std::endl;
+            std::cout << solverType << "  Time                                     " <<  M_Data->dataTime()->getPreviousTime() + i*timeStep << std::endl;
+        }
         //bc.UpdateOperatorVariables();
 
         M_Solver->updateRHS( solution, timeStep );
-        M_Solver->iterate( bc, solution, M_Data->dataTime()->getTime() + i*timeStep, timeStep );
+        M_Solver->iterate( bc, solution, M_Data->dataTime()->getPreviousTime() + i*timeStep, timeStep );
     }
 }
 
@@ -716,44 +832,92 @@ MS_Model_1D::FlagConverter( const BCFlag& flag ) const
     return (flag == 0) ? OneD_left : OneD_right;
 }
 
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+
+void
+MS_Model_1D::CreateLinearBC()
+{
+    // Allocating the correct space
+    M_BCPreviousTimeSteps.reserve( std::max( M_couplings[0]->GetTimeInterpolationOrder(), M_couplings[1]->GetTimeInterpolationOrder() ) );
+
+    // Create bcSide map
+    std::map< OneD_BCSide, std::map< OneD_BC, Real > > bcSideMap;
+    M_BCPreviousTimeSteps.push_back( bcSideMap );
+
+    // Create bcType map
+    std::map< OneD_BC, Real > bcTypeMap;
+    M_BCPreviousTimeSteps[0][OneD_left]  = bcTypeMap;
+    M_BCPreviousTimeSteps[0][OneD_right] = bcTypeMap;
+}
+
+void
+MS_Model_1D::UpdateLinearBC( const Solution_Type& solution )
+{
+    M_BCPreviousTimeSteps[0][OneD_left][OneD_A]  = M_Solver->BoundaryValue( solution, OneD_A, OneD_left );
+    M_BCPreviousTimeSteps[0][OneD_left][OneD_P]  = M_Solver->BoundaryValue( solution, OneD_P, OneD_left );
+    M_BCPreviousTimeSteps[0][OneD_left][OneD_Q]  = M_Solver->BoundaryValue( solution, OneD_Q, OneD_left );
+    M_BCPreviousTimeSteps[0][OneD_right][OneD_A] = M_Solver->BoundaryValue( solution, OneD_A, OneD_right );
+    M_BCPreviousTimeSteps[0][OneD_right][OneD_P] = M_Solver->BoundaryValue( solution, OneD_P, OneD_right );
+    M_BCPreviousTimeSteps[0][OneD_right][OneD_Q] = M_Solver->BoundaryValue( solution, OneD_Q, OneD_right );
+}
+
 void
 MS_Model_1D::ImposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::ImposePerturbation() \n";
+    Debug( 8130 ) << "MS_Model_1D::Perturbation() \n";
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->IsPerturbed() )
         {
             // Find the side to perturb and apply the perturbation
-            OneD_BCSide bcFlag = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
-            M_LinearBC->BC( bcFlag )->setBCFunction( OneD_first, M_BCBaseDelta );
+            M_BCDeltaSide = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
+            M_LinearBC->BC( M_BCDeltaSide )->setBCFunction( OneD_first, M_BCBaseDelta );
 
             // Compute the range
-            OneD_BC bcType = M_LinearBC->BC( bcFlag )->type( OneD_first );
-            M_BCDelta[0] = M_Solver->BoundaryValue( *M_Solution_tn, bcType, bcFlag );
-            M_BCDelta[1] = M_Solver->BoundaryValue( *M_Solution,    bcType, bcFlag );
+            M_BCDeltaType = M_LinearBC->BC( M_BCDeltaSide )->type( OneD_first );
 
-            // Compute the perturbation (work in progress)
-            M_BCDelta[2] = ( M_BCDelta[1] - M_BCDelta[0] ) * 100;
-            if ( std::abs( M_BCDelta[2] ) < 1e-6)
-                M_BCDelta[2] = ( *i )->GetResidual()[( *i )->GetPerturbedCoupling()];
-            if ( std::abs( M_BCDelta[2] ) < 1e-6)
-                M_BCDelta[2] = 1;
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
+            // We replace pressure BC with area BC for the perturbed problem
+            if ( M_BCDeltaType == OneD_P )
+            {
+                M_LinearBC->BC( M_BCDeltaSide )->setType( OneD_first, OneD_A );
+                M_BCDeltaType = OneD_A;
+            }
+#endif
 
-            std::cout << "Way1: " << ( M_BCDelta[1] - M_BCDelta[0] ) * 100 << std::endl;
-            std::cout << "Way2: " << ( *i )->GetResidual()[( *i )->GetPerturbedCoupling()] << std::endl;
-            std::cout << "Used: " << M_BCDelta[2] << std::endl;
+            //M_BCDelta = ( *i )->GetResidual()[( *i )->GetPerturbedCoupling()] * 10000;
+            //M_BCDelta = ( M_BCDelta[1] - M_BCDelta[0] ) / 100;
+
+            //if ( std::abs( M_BCDelta ) < 1e-6 || std::abs( M_BCDelta ) > 1e6 )
+            switch( M_BCDeltaType )
+            {
+                case OneD_P:
+
+                    //M_BCDelta = 1;
+                    M_BCDelta = 10;
+
+                    break;
+
+                case OneD_Q:
+                case OneD_A:
+
+                    //M_BCDelta = 0.001;
+                    M_BCDelta = 0.01;
+
+                    break;
+
+                default:
+                    std::cout << "Warning: bcType \"" << M_BCDeltaType << "\"not available!" << std::endl;
+            }
 
             break;
         }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "BCDelta[0]: " << M_BCDelta[0] << "\n";
-    Debug( 8130 ) << "BCDelta[1]: " << M_BCDelta[1] << "\n";
-    Debug( 8130 ) << "BCDelta[2]: " << M_BCDelta[2] << "\n";
+    Debug( 8130 ) << "BCDelta:    " << M_BCDelta << "\n";
 #endif
 
 }
@@ -766,23 +930,45 @@ MS_Model_1D::ResetPerturbation()
     Debug( 8130 ) << "MS_Model_1D::ResetPerturbation() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
-        if ( ( *i )->IsPerturbed() )
-        {
-            OneD_BCSide bcFlag = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
-            M_LinearBC->BC( bcFlag )->setBCFunction( OneD_first, M_BC->GetHandler()->BC( bcFlag )->BCFunction( OneD_first ) );
+    M_LinearBC->BC( M_BCDeltaSide )->setBCFunction( OneD_first, M_BC->GetHandler()->BC( M_BCDeltaSide )->BCFunction( OneD_first ) );
 
-            break;
-        }
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
+    // Restoring the original BC
+    if ( M_BCDeltaType == OneD_A )
+        M_LinearBC->BC( M_BCDeltaSide )->setType( OneD_first, OneD_P );
+#endif
+
 }
 
 Real
 MS_Model_1D::BCFunctionDelta( const Real& t )
 {
-    return M_BCDelta[0] + ( M_BCDelta[1] + M_BCDelta[2] - M_BCDelta[0] )
-                        / ( M_Data->dataTime()->getTime() - M_Data->dataTime()->getPreviousTime() )
-                        * ( t - M_Data->dataTime()->getPreviousTime() );
+    // Lagrange interpolation
+    Real bcValue(0);
+    Real base(1);
+
+    // Time container for interpolation
+    std::vector< Real > timeContainer( M_BCPreviousTimeSteps.size(), 0 );
+    for ( UInt i(0) ; i < M_BCPreviousTimeSteps.size() ; ++i )
+        timeContainer[i] = M_globalData->GetDataTime()->getTime() - i * M_globalData->GetDataTime()->getTimeStep();
+
+    for ( UInt i(0) ; i < M_BCPreviousTimeSteps.size() ; ++i )
+    {
+        base = 1;
+        for ( UInt j(0) ; j < M_BCPreviousTimeSteps.size() ; ++j )
+            if ( j != i )
+                base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
+
+        if ( i == 0 )
+            bcValue += ( M_BCDelta + M_BCPreviousTimeSteps[i][M_BCDeltaSide][M_BCDeltaType] ) * base;
+        else
+            bcValue += M_BCPreviousTimeSteps[i][M_BCDeltaSide][M_BCDeltaType] * base;
+    }
+
+    return bcValue;
 }
+
+#else
 
 Real
 MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType )
@@ -800,7 +986,7 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
             // Find the perturbed side
             OneD_BCSide bcSide = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
 
-            // Perturbation has no effect on the other site.
+            // Perturbation has no effect on the other sides (which also means that dQ/dQ and dP/dP are always zero)
             if ( bcSide != bcOutputSide )
                 break;
 
@@ -813,16 +999,13 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
                 case OneD_left:
                     switch( bcOutputType )
                     {
-                        case OneD_Q:
-                            JacobianCoefficient = -leftEigenvector2[0] / leftEigenvector2[1]
-                                                * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), 0 );
+                        case OneD_Q: // dQ_L/dP_L
+                            JacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
+                                                * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, OneD_left ), 0 );
                             break;
-                        case OneD_A:
-                            JacobianCoefficient = -leftEigenvector2[1] / leftEigenvector2[0];
-                            break;
-                        case OneD_P:
-                            JacobianCoefficient = -leftEigenvector2[1] / leftEigenvector2[0]
-                                                * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), 0 );
+                        case OneD_P: // dP_L/dQ_L
+                            JacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
+                                                * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, OneD_left ), 0 );
                             break;
                         default:
                             std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
@@ -831,16 +1014,13 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
                 case OneD_right:
                     switch( bcOutputType )
                     {
-                        case OneD_Q:
+                        case OneD_Q: // dQ_R/dP_R
                             JacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
-                                                * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), M_Data->NumberOfElements() );
+                                                * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, OneD_right ), M_Data->NumberOfElements() );
                             break;
-                        case OneD_A:
-                            JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0];
-                            break;
-                        case OneD_P:
+                        case OneD_P: // dP_R/dQ_R
                             JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
-                                                * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), M_Data->NumberOfElements() );
+                                                * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, OneD_right ), M_Data->NumberOfElements() );
                             break;
                         default:
                             std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
@@ -850,29 +1030,12 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
                     std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
             }
 
-//#ifdef HAVE_LIFEV_DEBUG
-            std::cout << "bcSide:              " << bcSide << "\n";
-            std::cout << "bcOutputSide:        " << bcOutputSide << "\n";
-            std::cout << "bcType:              " << bcOutputType << "\n";
-
-            std::cout << "JacobianCoefficient: " << JacobianCoefficient << "\n";
-
-            std::cout << "L11:                 " << leftEigenvector1[0] << "\n";
-            std::cout << "L12:                 " << leftEigenvector1[1] << "\n";
-            std::cout << "L21:                 " << leftEigenvector2[0] << "\n";
-            std::cout << "L22:                 " << leftEigenvector2[1] << "\n";
-
-            std::cout << "dAdP(1):             " << M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), 0 ) << "\n";
-            std::cout << "dAdP(end):           " << M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution_tn, OneD_P, bcSide ), M_Data->NumberOfElements() ) << "\n";
-
-            std::cout << "dPdA(1):             " << M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), 0 ) << "\n";
-            std::cout << "dPdA(end):           " << M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution_tn, OneD_A, bcSide ), M_Data->NumberOfElements() ) << "\n";
-//#endif
-
             break;
         }
 
     return JacobianCoefficient;
 }
+
+#endif
 
 } // Namespace LifeV
