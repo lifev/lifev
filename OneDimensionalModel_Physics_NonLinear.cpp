@@ -58,77 +58,66 @@ OneDimensionalModel_Physics_NonLinear::OneDimensionalModel_Physics_NonLinear( co
 // Methods
 // ===================================================
 void
-OneDimensionalModel_Physics_NonLinear::W_from_U(       Real& _W1,       Real& _W2,
-                                                 const Real& _U1, const Real& _U2, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::W_from_U(       Real& W1,       Real& W2,
+                                                 const Real& A,  const Real& Q, const UInt& indz ) const
 {
-    Real QoverA  = _U2 / _U1;
+    Real celerity( Celerity0(indz) * std::sqrt( std::pow( A / M_Data->Area0(indz), M_Data->Beta1(indz) ) ) );
 
-    Real AoverA0  = _U1 / M_Data->Area0(indz);
+    Real add( std::sqrt( M_Data->RobertsonCorrection() ) * ( celerity - Celerity0(indz) ) * 2 / M_Data->Beta1(indz) );
 
-    Real celerity( Celerity0(indz) * std::sqrt( std::pow( AoverA0, M_Data->Beta1(indz) ) ) );
+    Real QoverA  = Q / A;
 
-    Real add( std::sqrt( M_Data->RobertsonCorrection() ) * ( celerity - Celerity0(indz) )
-              * 2 / M_Data->Beta1(indz) );
-
-    _W1 = QoverA + add;
-
-    _W2 = QoverA - add;
+    W1 = QoverA + add;
+    W2 = QoverA - add;
 }
 
 void
-OneDimensionalModel_Physics_NonLinear::U_from_W(       Real& _U1, Real& _U2,
-                                                 const Real& _W1, const Real& _W2, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::U_from_W(       Real& A,        Real& Q,
+                                                 const Real& W1, const Real& W2, const UInt& indz ) const
 {
-    Real rhooverbeta0beta1 ( M_Data->DensityRho()
-                             / ( M_Data->Beta0(indz) * M_Data->Beta1(indz) ) );
+    Real rhooverbeta0beta1 ( M_Data->DensityRho() / ( M_Data->Beta0(indz) * M_Data->Beta1(indz) ) );
 
     Real beta1over4SQRTchi( M_Data->Beta1(indz) / ( std::sqrt(M_Data->RobertsonCorrection()) * 4 ) );
 
-    _U1 = M_Data->Area0(indz)
-        * std::pow( rhooverbeta0beta1,
-                    (1/M_Data->Beta1(indz)) )
-        * std::pow( beta1over4SQRTchi * (_W1 - _W2)
-                    + Celerity0(indz),
-                    (2/M_Data->Beta1(indz)) );
+    A = M_Data->Area0(indz)
+      * std::pow( rhooverbeta0beta1, (1/M_Data->Beta1(indz)) )
+      * std::pow( beta1over4SQRTchi * (W1 - W2) + Celerity0(indz), (2/M_Data->Beta1(indz)) );
 
-    _U2 = _U1 * ( _W1 + _W2 ) / 2;
-
+    Q = A * ( W1 + W2 ) / 2;
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::pressure_W( const Real& _W1, const Real& _W2, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::pressure_W( const Real& W1, const Real& W2, const UInt& indz ) const
 {
-    Real rhooverbeta0beta1 ( M_Data->DensityRho()
-                             / ( M_Data->Beta0(indz) * M_Data->Beta1(indz) ) );
+    Real rhooverbeta0beta1 ( M_Data->DensityRho() / ( M_Data->Beta0(indz) * M_Data->Beta1(indz) ) );
 
     Real beta1over4SQRTchi( M_Data->Beta1(indz) / ( std::sqrt(M_Data->RobertsonCorrection()) * 4 ) );
 
-    return ( M_Data->Beta0(indz)
-             * ( rhooverbeta0beta1
-                 * std::pow( beta1over4SQRTchi * (_W1 - _W2)
-                             + Celerity0(indz), 2 )
-                 - 1 )
-           );
+    return M_Data->Beta0(indz) * ( rhooverbeta0beta1 * std::pow( beta1over4SQRTchi * (W1 - W2) + Celerity0(indz), 2 ) - 1 );
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::pressure_WDiff( const Real& _W1, const Real& _W2,
+OneDimensionalModel_Physics_NonLinear::pressure_WDiff( const Real& W1, const Real& W2,
                                                        const ID& i,     const UInt& indz ) const
 {
     Real rhoover2SQRTchi ( M_Data->DensityRho() / ( std::sqrt(M_Data->RobertsonCorrection()) * 2 ) );
 
     Real beta1over4SQRTchi( M_Data->Beta1(indz) / ( std::sqrt(M_Data->RobertsonCorrection()) * 4 ) );
 
-    Real result( beta1over4SQRTchi * (_W1 - _W2)  );
+    Real result( beta1over4SQRTchi * (W1 - W2)  );
     result += Celerity0(indz);
     result *= rhoover2SQRTchi;
 
-    if( i == 1 ) { //! dP/dW1
+    if( i == 1 ) //! dP/dW1
+    {
         return result;
     }
-    if( i == 2 ) { //! dP/dW2
+
+    if( i == 2 ) //! dP/dW2
+    {
         return -result;
     }
+
     ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");
     return -1.;
 }

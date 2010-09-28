@@ -101,7 +101,8 @@ public :
 
     //! Compute the elastic pressure.
     /*!
-     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 )
+     * It includes the contribution of the external pressure.
+     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 ) + Pext
      */
     Real elasticPressure( const Real& A, const UInt& indz = 0 ) const;
 
@@ -125,9 +126,16 @@ public :
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
-     * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + P / beta0 )^(1/beta1 - 1)
+     * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
      */
     Real dAdP( const Real& P, const UInt& i = 0 ) const;
+
+    //! Compute area given the elastic pressure.
+    /*!
+     *  To be used in initialization, when time derivative of A is supposed null
+     *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
+     */
+    Real A_from_P( const Real& P, const UInt& i=0 ) const;
 
     //! Compute the total pressure (P is the elastic pressure)
     /*!
@@ -141,13 +149,6 @@ public :
      */
     Real totalPressureDiff( const Real& A, const Real& Q,
                             const ID& id,  const UInt& i = 0 ) const;
-
-    //! Compute area given the elastic pressure.
-    /*!
-     *  To be used in initialization, when time derivative of A is supposed null
-     *  @return A = A0 * ( P / beta0 + 1 )^(1/beta1)
-     */
-    Real A_from_P( const Real& P, const UInt& i=0 ) const;
 
     //! Make the vessel stiffer on the left side of interval [xl, xr]
     /*!
@@ -183,7 +184,7 @@ public :
     //! @name Set Methods
     //@{
 
-    void SetData( const Data_PtrType Data );
+    void SetData( const Data_PtrType& Data );
 
     //@}
 
