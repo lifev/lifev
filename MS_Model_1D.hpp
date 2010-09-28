@@ -28,15 +28,26 @@
  *  @file
  *  @brief MultiScale Model 1D
  *
- *  @version 1.0
+ *  @version 1.1
  *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- *  @date 02-26-2010
+ *  @date 26-02-2010
+ *
+ *  @version 1.2 and subsequents
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 23-04-2010
  */
 
 #ifndef MS_Model_1D_H
 #define MS_Model_1D_H 1
 
-//#define PERTURBATION
+// Jacobian coefficient approximation
+//#define JACOBIAN_WITH_FINITEDIFFERENCE
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
+#endif
+
+// Matlab post-processing
+#define HAVE_MATLAB_POSTPROCESSING 1
 
 // Mathcard includes
 #include <lifemc/lifesolver/BCInterface1D.hpp>
@@ -169,6 +180,8 @@ public:
     //! @name Methods
     //@{
 
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+
     //! Setup the linear model
     void SetupLinearModel();
 
@@ -177,6 +190,8 @@ public:
 
     //! Solve the linear problem
     void SolveLinearModel( bool& SolveLinearSystem );
+
+#endif
 
     //@}
 
@@ -239,14 +254,6 @@ public:
      * @return stress value
      */
     Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
-
-    //! Get the variation of the area (on a specific boundary face) using the linear model
-    /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the area
-     */
-    Real GetBoundaryDeltaArea( const BCFlag& Flag, bool& SolveLinearSystem );
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -378,6 +385,15 @@ private:
 
     OneD_BCSide FlagConverter( const BCFlag& flag ) const;
 
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+
+
+    //! Update linear BC
+    void CreateLinearBC();
+
+    //! Update linear BC
+    void UpdateLinearBC( const Solution_Type& solution );
+
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void ImposePerturbation();
 
@@ -385,6 +401,8 @@ private:
     void ResetPerturbation();
 
     Real BCFunctionDelta( const Real& t );
+
+#else
 
     //! Compute Jacobian coefficients using tangent problem formulation
     /*!
@@ -394,6 +412,7 @@ private:
      */
     Real TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType );
 
+#endif
     //@}
 
 #ifdef HAVE_HDF5
@@ -401,30 +420,40 @@ private:
     boost::shared_ptr< Mesh_Type >         M_ExporterMesh;
 #endif
 
-    // 1D problem
-    boost::shared_ptr< Data_Type >         M_Data;
-    Physics_PtrType                        M_Physics;
-    Flux_PtrType                           M_Flux;
-    Source_PtrType                         M_Source;
-    Solver_PtrType                         M_Solver;
-    BCInterface_PtrType                    M_BC;
+#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    // Linear BC
     BC_PtrType                             M_LinearBC;
 
-    Solution_PtrType                       M_Solution_tn;    // Solution at time t_n
-    Solution_PtrType                       M_Solution;       // Solution at time t_n+1
     Solution_PtrType                       M_LinearSolution; // Solution of the perturbed problem
 
-    // FE spaces
-    boost::shared_ptr< FESpace_Type >      M_FESpace;
-
-    // Linear solver
-    boost::shared_ptr< LinearSolver_Type > M_LinearSolver;
+    // BC perturbation
+    std::vector< std::map< OneD_BCSide, std::map< OneD_BC, Real > > > M_BCPreviousTimeSteps;
 
     // BC Functions for tangent problem
     OneDimensionalModel_BCFunction         M_BCBaseDelta;
 
-    // BC perturbation
-    boost::array< Real, 3 >                M_BCDelta;
+    Real                                   M_BCDelta;
+    OneD_BC                                M_BCDeltaType;
+    OneD_BCSide                            M_BCDeltaSide;
+#endif
+
+    // 1D problem
+    boost::shared_ptr< Data_Type >         M_Data;
+    BCInterface_PtrType                    M_BC;
+    Physics_PtrType                        M_Physics;
+    Flux_PtrType                           M_Flux;
+    Source_PtrType                         M_Source;
+    Solver_PtrType                         M_Solver;
+
+    // Linear solver
+    boost::shared_ptr< LinearSolver_Type > M_LinearSolver;
+
+    // FE spaces
+    boost::shared_ptr< FESpace_Type >      M_FESpace;
+
+    Solution_PtrType                       M_Solution_tn;    // Solution at time t_n
+    Solution_PtrType                       M_Solution;       // Solution at time t_n+1
+
 };
 
 //! Factory create function
