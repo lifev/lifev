@@ -26,7 +26,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalSquareWave_1D_2Cylind
     [../time_discretization]
     initialtime                = .00        # [s]
     endtime                    = 0.15       # [s]
-    timestep                   = 60e-5      # [s]
+    timestep                   = 1.5e-5     # [s]
     
     [../Algorithm]
     AlgorithmType              = Newton            # Aitken, Explicit, Newton
@@ -113,6 +113,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalSquareWave_1D_2Cylind
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+FluidReferencePressure      = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 StructureDensity            = 1.2           # density        [g/cm^3]
 StructurePoissonCoefficient = 0.48          # Poisson coeff. []
 StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
