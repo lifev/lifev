@@ -147,6 +147,10 @@ MS_PhysicalModel::ShowMe()
               << "Model type          = " << Enum2String( M_type, MS_modelsMap ) << std::endl;
 
     std::cout << "Couplings number    = " << GetCouplingsNumber() << std::endl;
+    std::cout << "Couplings ID(s)     = ";
+    for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
+        std::cout << M_couplings[i]->GetID() << " ";
+    std::cout << std::endl;
     std::cout << "Couplings type(s)   = ";
     for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
         std::cout << Enum2String( M_couplings[i]->GetType(), MS_couplingsMap ) << " ";
