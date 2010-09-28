@@ -1,0 +1,27 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-09-08
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: Reymond Stergiopulos 1D Arterial Tree ###############################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= '1D ReymondStergiopulos 41 (terminal resistance)'
+
+[boundary_conditions]
+list = 'terminalResistance'
+	
+	[./terminalResistance]
+    quantity        = W2
+    line            = first
+    Default         = Resistance
+    resistance      = 7.481e3      # dyne s / cm^5
+	
+	[../]
