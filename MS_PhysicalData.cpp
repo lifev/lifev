@@ -43,6 +43,7 @@ MS_PhysicalData::MS_PhysicalData() :
     M_DataTime                      (),
     M_FluidDensity                  (),
     M_FluidViscosity                (),
+    M_FluidReferencePressure        (),
     M_StructureDensity              (),
     M_StructurePoissonCoefficient   (),
     //M_StructureThickness            (),
@@ -54,6 +55,7 @@ MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& PhysicalData ) :
     M_DataTime                      ( PhysicalData.M_DataTime ),
     M_FluidDensity                  ( PhysicalData.M_FluidDensity ),
     M_FluidViscosity                ( PhysicalData.M_FluidViscosity ),
+    M_FluidReferencePressure        ( PhysicalData.M_FluidReferencePressure ),
     M_StructureDensity              ( PhysicalData.M_StructureDensity ),
     M_StructurePoissonCoefficient   ( PhysicalData.M_StructurePoissonCoefficient ),
     //M_StructureThickness            ( PhysicalData.M_StructureThickness ),
@@ -72,6 +74,7 @@ MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
         M_DataTime                      = PhysicalData.M_DataTime;
         M_FluidDensity                  = PhysicalData.M_FluidDensity;
         M_FluidViscosity                = PhysicalData.M_FluidViscosity;
+        M_FluidReferencePressure        = PhysicalData.M_FluidReferencePressure;
         M_StructureDensity              = PhysicalData.M_StructureDensity;
         M_StructurePoissonCoefficient   = PhysicalData.M_StructurePoissonCoefficient;
         //M_StructureThickness            = PhysicalData.M_StructureThickness;
@@ -90,6 +93,7 @@ MS_PhysicalData::ReadData( const GetPot& dataFile )
     M_DataTime.reset( new Time_Type( dataFile, "Solver/time_discretization" ) );
     M_FluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
     M_FluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
+    M_FluidReferencePressure        = dataFile( "Physics/FluidReferencePressure", 0. );
     M_StructureDensity              = dataFile( "Physics/StructureDensity", 0. );
     M_StructurePoissonCoefficient   = dataFile( "Physics/StructurePoissonCoefficient", 0. );
     //M_StructureThickness            = dataFile( "Physics/StructureThickness", 0. );
@@ -100,7 +104,8 @@ void
 MS_PhysicalData::ShowMe()
 {
     std::cout << "Fluid density                 = " << M_FluidDensity << std::endl
-              << "Fluid viscosity               = " << M_FluidViscosity << std::endl << std::endl;
+              << "Fluid viscosity               = " << M_FluidViscosity << std::endl
+              << "Fluid reference pressure      = " << M_FluidReferencePressure << std::endl << std::endl;
 
     std::cout << "Structure density coefficient = " << M_StructureDensity << std::endl
               << "Structure Poisson coefficient = " << M_StructurePoissonCoefficient << std::endl
@@ -131,6 +136,12 @@ const Real&
 MS_PhysicalData::GetFluidViscosity() const
 {
     return M_FluidViscosity;
+}
+
+const Real&
+MS_PhysicalData::GetFluidReferencePressure() const
+{
+    return M_FluidReferencePressure;
 }
 
 const Real&
