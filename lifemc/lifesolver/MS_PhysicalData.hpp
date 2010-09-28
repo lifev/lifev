@@ -131,6 +131,12 @@ public:
      */
     const Real& GetFluidViscosity() const;
 
+    //! Get the global fluid reference pressure (used by 1D model).
+    /*!
+     * @return reference pressure of the fluid.
+     */
+    const Real& GetFluidReferencePressure() const;
+
     //! Get the global structural Poisson coefficient.
     /*!
      * @return Poisson coefficient of the structure.
@@ -163,6 +169,7 @@ private:
 
     Real                                M_FluidDensity;
     Real                                M_FluidViscosity;
+    Real                                M_FluidReferencePressure;
 
     Real                                M_StructureDensity;
     Real                                M_StructurePoissonCoefficient;
