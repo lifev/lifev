@@ -15,4 +15,4 @@
 [MultiScale]
 couplingName           = Stess_StaticPressure
 stressType             = StaticPressure
-timeInterpolationOrder = 2
+timeInterpolationOrder = 1

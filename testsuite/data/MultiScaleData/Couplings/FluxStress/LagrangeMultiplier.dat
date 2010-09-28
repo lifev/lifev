@@ -15,4 +15,4 @@
 [MultiScale]
 couplingName           = FluxStess_LagrangeMultiplier
 stressType             = LagrangeMultiplier
-timeInterpolationOrder = 2
+timeInterpolationOrder = 1
