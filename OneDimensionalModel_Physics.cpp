@@ -68,7 +68,7 @@ OneDimensionalModel_Physics::Celerity0( const UInt& i ) const
 Real
 OneDimensionalModel_Physics::elasticPressure( const Real& A, const UInt& i ) const
 {
-    return ( M_Data->Beta0(i) * ( std::pow( A/M_Data->Area0(i), M_Data->Beta1(i) ) - 1 ) );
+    return ( M_Data->Beta0(i) * ( std::pow( A/M_Data->Area0(i), M_Data->Beta1(i) ) - 1 ) ) + M_Data->externalPressure();
 }
 
 Real
@@ -99,7 +99,13 @@ OneDimensionalModel_Physics::dPdA( const Real& A, const UInt& i ) const
 Real
 OneDimensionalModel_Physics::dAdP( const Real& P, const UInt& i ) const
 {
-    return M_Data->Area0(i) / ( M_Data->Beta0(i) * M_Data->Beta1(i) ) * std::pow( 1 + P / M_Data->Beta0(i), 1 / M_Data->Beta1(i) - 1 );
+    return M_Data->Area0(i) / ( M_Data->Beta0(i) * M_Data->Beta1(i) ) * std::pow( 1 + ( P - M_Data->externalPressure() ) / M_Data->Beta0(i), 1 / M_Data->Beta1(i) - 1 );
+}
+
+Real
+OneDimensionalModel_Physics::A_from_P( const Real& P, const UInt& i ) const
+{
+    return ( M_Data->Area0(i) * std::pow( ( P - M_Data->externalPressure() ) / M_Data->Beta0(i) + 1, 1/M_Data->Beta1(i) )  );
 }
 
 Real
@@ -111,26 +117,14 @@ OneDimensionalModel_Physics::totalPressure( const Real& A, const Real& Q, const 
 Real
 OneDimensionalModel_Physics::totalPressureDiff( const Real& A, const Real& Q, const ID& id, const UInt& i) const
 {
-    Real vel( Q / A );
+    if( id == 1 ) // dPt/dA
+        return dPdA( A, i ) - M_Data->DensityRho() * Q * Q / ( A * A * A );
 
-    if( id == 1 ) //! dPt/dA
-    {
-        return dPdA( A, i ) - M_Data->DensityRho() * vel * vel / A;
-    }
-
-    if( id == 2 ) //! dPt/dQ
-    {
-        return ( M_Data->DensityRho() * vel / A );
-    }
+    if( id == 2 ) // dPt/dQ
+        return M_Data->DensityRho() * Q / ( A * A);
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");
     return -1.;
-}
-
-Real
-OneDimensionalModel_Physics::A_from_P( const Real& P, const UInt& i ) const
-{
-    return ( M_Data->Area0(i) * std::pow( P / M_Data->Beta0(i) + 1, 1/M_Data->Beta1(i) )  );
 }
 
 void
@@ -410,7 +404,7 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Physics::SetData( const Data_PtrType Data )
+OneDimensionalModel_Physics::SetData( const Data_PtrType& Data )
 {
     M_Data = Data;
 }
