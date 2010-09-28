@@ -21,6 +21,7 @@ SourceType           = OneD_NonLinearSource
 ComputeCoefficients  = false
 PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
 
+DistributionLaw      = none         # Coefficients distribution law: none, linear, pointwise
 Area0                = 1
 density              = 1
 viscosity            = 0.035
