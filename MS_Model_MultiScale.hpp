@@ -58,7 +58,13 @@ class MS_Model_MultiScale: public virtual MS_PhysicalModel
 {
 public:
 
+    //! @name Constructors & Destructor
+    //@{
+
     typedef MS_PhysicalModel                                            super;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -166,17 +172,6 @@ public:
     //@}
 
 private:
-
-    //! @name Private Methods
-    //@{
-
-    inline void loadModels( const std::string& FileName );
-    inline void loadCouplings( const std::string& FileName );
-
-    template< typename number >
-    inline std::vector< number > string2numVect( const std::string& string );
-
-    //@}
 
     // Models & Couplings
     MS_ModelsVector_Type        M_modelsList;
