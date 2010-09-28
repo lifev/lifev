@@ -1,0 +1,95 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-09-08
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
+###################################################################################################
+
+[MultiScale]
+modelName            = '1D ReymondStergiopulos 19 (subclavian A left)'
+modelType            = OneDimensional
+couplingFlags        = '0 1'
+
+
+
+[exporter]
+start                = 0             # start index for filenames
+save                 = 1             # how many time steps per posptrocessing
+multimesh            = false         # true if the mesh has to be saved at each post-processing step
+
+
+
+[1D_Model]
+
+[./Model]
+PhysicsType          = OneD_NonLinearPhysics
+FluxType             = OneD_NonLinearFlux
+SourceType           = OneD_NonLinearSource
+
+[../PhysicalParameters]
+ComputeCoefficients  = true
+PowerlawCoefficient  = 9            # 2: Parabolic; 9: Typical value
+
+#DistributionLaw      = pointwise              # Coefficients distribution law: none, linear, pointwise
+DistributionLaw      = linear              # Coefficients distribution law: none, linear, pointwise
+
+#Area0                = '0.950332 0.950332 0.950332 0.950332 0.950332 0.950332 0.950332 0.950332 0.950332 0.950332 0.950332 0.939071 0.927809 0.916548 0.905287 0.894026 0.882764 0.871503 0.860242 0.848981 0.83772 0.826458 0.815197 0.803936 0.792675 0.781413 0.770152 0.758891 0.74763 0.736369 0.725107 0.713846 0.702585 0.691324 0.680062 0.668801 0.65754 0.646279 0.635018 0.623756 0.612495 0.601234 0.589973 0.578711 0.56745 0.56745 0.56745 0.56745 0.56745 0.56745 0.56745 0.56745 0.56745 0.56745 0.56745'
+Area0                = '0.9503317777 0.5674501731' # Area of tube
+#Area0                = '0.7466191291 0.7466191291' # Area of tube - averaged
+
+thickVessel          = false
+#thickness            = '0.055 0.055 0.055 0.055 0.055 0.055 0.055 0.055 0.055 0.055 0.055 0.0546324 0.0542647 0.0538971 0.0535294 0.0531618 0.0527941 0.0524265 0.0520588 0.0516912 0.0513235 0.0509559 0.0505882 0.0502206 0.0498529 0.0494853 0.0491176 0.04875 0.0483824 0.0480147 0.0476471 0.0472794 0.0469118 0.0465441 0.0461765 0.0458088 0.0454412 0.0450735 0.0447059 0.0443382 0.0439706 0.0436029 0.0432353 0.0428676 0.0425 0.0425 0.0425 0.0425 0.0425 0.0425 0.0425 0.0425 0.0425 0.0425 0.0425'
+thickness            = '0.0550000000 0.0425000000' # Thickness of tube
+#thickness            = '0.0487500000 0.0487500000' # Thickness of tube - averaged
+
+# Avolio elastin
+young                = 4.0E6 # g/cm/s^2 (dyne/cm^2)
+poisson              = 0.0
+
+[../space_discretization]
+#Length               = 5.4
+#NumberOfElements     = 54          # number of elements
+
+Length               = 3.4
+NumberOfElements     = 34          # number of elements
+
+[../initialize]
+variable             = Q
+initialValue         = 0
+restValue            = 0
+multiplier           = 1
+
+[../miscellaneous]
+post_dir             = ./           # the directory for postprocessing files
+post_file            = sol          # the file name
+verbose              = 1
+CFLmax               = 0.5          # Maximum admissible value of the CFL 
+
+[../solver]
+
+    [./amesos]
+    solvertype            = Umfpack
+    
+    outputlevel           = 0
+    print_status          = false
+    print_timing          = false
+    computevectornorms    = false
+    computeresidual       = false
+    
+    addzerotodiag         = false
+    refactorize           = false
+    rcondthreshold        = 1e-2
+    redistribute          = true
+    maxprocs              = -1
+    matrixproperty        = general
+    scalemethod           = 1
+    
+    [../]
+ 

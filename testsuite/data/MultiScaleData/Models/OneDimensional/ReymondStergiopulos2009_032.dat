@@ -1,0 +1,88 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-09-08
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
+###################################################################################################
+
+[MultiScale]
+modelName            = '1D ReymondStergiopulos 32 (gastric)'
+modelType            = OneDimensional
+couplingFlags        = '0 1'
+
+
+
+[exporter]
+start                = 0             # start index for filenames
+save                 = 1             # how many time steps per posptrocessing
+multimesh            = false         # true if the mesh has to be saved at each post-processing step
+
+
+
+[1D_Model]
+
+[./Model]
+PhysicsType          = OneD_NonLinearPhysics
+FluxType             = OneD_NonLinearFlux
+SourceType           = OneD_NonLinearSource
+
+[../PhysicalParameters]
+ComputeCoefficients  = true
+PowerlawCoefficient  = 9            # 2: Parabolic; 9: Typical value
+
+DistributionLaw      = linear              # Coefficients distribution law: none, linear, pointwise
+Area0                = '0.0804247719 0.0706858347' # Area of tube
+#Area0                = '0.0754767635 0.0754767635' # Area of tube - averaged
+
+thickVessel          = false
+thickness            = '0.0160000000 0.0150000000' # Thickness of tube
+#thickness            = '0.0155000000 0.0155000000' # Thickness of tube - averaged
+
+# Avolio elastin
+young                = 4.0E6 # g/cm/s^2 (dyne/cm^2)
+poisson              = 0.0
+
+[../space_discretization]
+Length               = 7.1
+NumberOfElements     = 71          # number of elements
+
+[../initialize]
+variable             = Q
+initialValue         = 0
+restValue            = 0
+multiplier           = 1
+
+[../miscellaneous]
+post_dir             = ./           # the directory for postprocessing files
+post_file            = sol          # the file name
+verbose              = 1
+CFLmax               = 0.5          # Maximum admissible value of the CFL 
+
+[../solver]
+
+    [./amesos]
+    solvertype            = Umfpack
+    
+    outputlevel           = 0
+    print_status          = false
+    print_timing          = false
+    computevectornorms    = false
+    computeresidual       = false
+    
+    addzerotodiag         = false
+    refactorize           = false
+    rcondthreshold        = 1e-2
+    redistribute          = true
+    maxprocs              = -1
+    matrixproperty        = general
+    scalemethod           = 1
+    
+    [../]
+ 
