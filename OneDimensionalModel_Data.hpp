@@ -76,12 +76,12 @@ enum OneD_Initialize { OneD_InitializeArea,
  *
  *  CONVENTIONS used here:
  *  Parameter homogeneous to a pressure:
- *  P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
+ *  P - P_ext = Beta0 [ ( A / Area0 )^{Beta1} - 1 ]
  *
- *  This PressBeta0 is homogeneous to a pressure.
- *  In most cases PressBeta1 is taken equal to 1/2.
+ *  This Beta0 is homogeneous to a pressure.
+ *  In most cases Beta1 is taken equal to 1/2.
  *
- *  PressBeta0 = ( \sqrt{\pi} h_0 E ) / ( ( 1 - \ksi^2 ) * \sqrt{Area0} )
+ *  Beta0 = ( \sqrt{\pi} h_0 E ) / ( ( 1 - \ksi^2 ) * \sqrt{Area0} )
  *  OTHER CONVENTION not used here:
  *
  *  a) from Formaggia and Veneziani (p. 1.10, MOX report No 21 - june 2003)
@@ -116,11 +116,24 @@ class OneDimensionalModel_Data
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
     typedef DataTime                                                  Time_Type;
     typedef boost::shared_ptr< Time_Type >                            Time_PtrType;
 
     typedef RegionMesh1D< LinearLine >                                Mesh_Type;
     typedef boost::shared_ptr< Mesh_Type >                            Mesh_PtrType;
+
+    enum OneD_distributionLaw
+    {
+        none,
+        linear,
+        pointwise
+    };
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -182,11 +195,13 @@ public:
 
     void setDensityWall( const Real& DensityWall );
 
-    void setThickness( const Real& Thickness );
+    void setThickness( const Real& Thickness, const UInt& i );
 
     void setYoung( const Real& Young );
 
     void setPoisson( const Real& Poisson );
+
+    void setExternalPressure( const Real& externalPressure );
 
     void setArea0( const Real& Area0, const UInt& i );
 
@@ -256,25 +271,27 @@ public:
     const Real& Viscosity() const;
 
     const Real& DensityWall() const;
-    const Real& Thickness() const;
     const Real& Young() const;
     const Real& Poisson() const;
+
+    const Real& externalPressure() const;
 
     const Real& ViscoelasticModulus() const;
     const Real& InertialModulus() const;
     const Real& RobertsonCorrection() const;
 
+    const Real& Thickness( const UInt& i ) const;
+    const Real& FrictionKr( const UInt& i ) const;
+
     const Real& Area0( const UInt& i ) const;
+    const Real& Alpha( const UInt& i ) const;
     const Real& Beta0( const UInt& i ) const;
     const Real& Beta1( const UInt& i ) const;
+
     const Real& dArea0dz( const UInt& i ) const;
+    const Real& dAlphadz( const UInt& i ) const;
     const Real& dBeta0dz( const UInt& i ) const;
     const Real& dBeta1dz( const UInt& i ) const;
-
-    const Real& AlphaCor( const UInt& i ) const;
-    const Real& dAlphaCordz( const UInt& i ) const;
-
-    const Real& FrictionKr( const UInt& i ) const;
 
     // Linear Parameters
     const Real& Flux11( const UInt& i ) const;
@@ -299,7 +316,24 @@ public:
 
     //@}
 
-protected:
+private:
+
+    //! @name Private Methods
+    //@{
+
+    //! Compute the linear interpolation of a quantity.
+    /*!
+     * Useful for tapering.
+     */
+    void linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue );
+
+    //! Compute the derivatives of alpha, area0, beta0, and beta1 using centered differences.
+    /*!
+     * Note: works only for homogeneous discretizations.
+     */
+    void computeDerivatives();
+
+    //@}
 
     //! Model
     OneDimensionalModel_PhysicsTypes M_PhysicsType;
@@ -342,24 +376,28 @@ protected:
 
     Real M_DensityWall;
     bool M_ThickVessel;
-    Real M_Thickness;
     Real M_Young;
     Real M_Poisson;
+
+    Real M_externalPressure;
 
     Real M_ViscoelasticModulus;
     Real M_InertialModulus;
     Real M_RobertsonCorrection;
 
-    ScalVec M_Area0;
+    ScalVec M_Thickness;
+    ScalVec M_FrictionKr; // Friction parameter Kr
+
+    ScalVec M_Area0;      // area
+    ScalVec M_Alpha;      // Coriolis coefficient (often called alpha)
+    ScalVec M_Beta0;      // homogeneous to a pressure
+    ScalVec M_Beta1;      // power coeff (>0, often=1/2)
+
+    //! Derivatives of main coefficients
     ScalVec M_dArea0dz;
-    //! P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
-    ScalVec M_PressBeta0;    // homogeneous to a pressure
-    ScalVec M_dPressBeta0dz; // homogeneous to a pressure
-    ScalVec M_PressBeta1;    // power coeff (>0, often=1/2)
-    ScalVec M_dPressBeta1dz; // power coeff (>0, often=1/2)
-    ScalVec M_AlphaCoriolis; // Coriolis coefficient (often called alpha)
-    ScalVec M_dAlphaCoriolisdz;
-    ScalVec M_FrictionKr;    //! Friction parameter Kr
+    ScalVec M_dAlphadz;
+    ScalVec M_dBeta0dz; // homogeneous to a pressure
+    ScalVec M_dBeta1dz; // power coeff (>0, often=1/2)
 
     //! Flux matrix
     ScalVec M_Flux11;
