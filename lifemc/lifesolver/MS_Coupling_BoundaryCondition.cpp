@@ -126,21 +126,18 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
             case Fluid3D:
 
                 ApplyBoundaryConditions3D< MS_Model_Fluid3D > ( i );
-                //ApplyDeltaBoundaryConditions3D< MS_Model_Fluid3D > ( i );
 
                 break;
 
             case FSI3D:
 
                 ApplyBoundaryConditions3D< MS_Model_FSI3D > ( i );
-                //ApplyDeltaBoundaryConditions3D< MS_Model_FSI3D > ( i );
 
                 break;
 
             case OneDimensional:
 
                 ApplyBoundaryConditions1D< MS_Model_1D > ( i );
-                //ApplyDeltaBoundaryConditions1D< MS_Model_1D > ( i );
 
                 break;
 
