@@ -121,7 +121,7 @@ protected:
     Source_PtrType                           M_Source;
     Solution_PtrType                         M_Solution;
 
-    UInt                                     M_boundaryDof;
+    UInt                                     M_bcNode;
     OneD_BC                                  M_bcType;
 };
 
@@ -168,15 +168,15 @@ protected:
     //! @name Protected Methods
     //@{
 
-    void update_U_boundary();
+    void updateBCVariables();
 
     //@}
 
     //! Value of U at the boundary
-    Container2D_Type                         M_U_boundary;
+    Container2D_Type                         M_bcU;
 
     //! Value of W at the boundary
-    Container2D_Type                         M_W_boundary;
+    Container2D_Type                         M_bcW;
 };
 
 
@@ -234,30 +234,32 @@ protected:
     //! @name Protected Methods
     //@{
 
-    Real extrapolate_W( const OneD_BC& W, const Real& timeStep );
+    Real extrapolateW( const Real& timeStep );
 
     void computeEigenValuesVectors();
 
-    Real extrapolate_L_dot_U( const Real& eigval, const Container2D_Type& eigvec, const Real& timeStep );
+    Real computeDeltaLU( const Real& eigenvalue, const Container2D_Type& eigenvector, const Real& timeStep );
 
-    Container2D_Type _interpolLinear( const Real& eigenvalue, const Container2D_Type& U_bound, const Real& timeStep ) const;
+    Container2D_Type interpolateU( const Real& eigenvalue, const Real& timeStep ) const;
+    Container2D_Type interpolateW( const Real& eigenvalue, const Real& timeStep ) const;
+
+    Real computeCFL( const Real& eigenvalue, const Real& timeStep ) const;
 
     //@}
 
     //! Dof of the internal node adjacent to the boundary
-    UInt                                               M_internalBoundaryDof;
+    UInt                                               M_bcInternalNode;
 
     //! Boundary point and internal boundary point
     boost::array< Real, NDIM >                         M_boundaryPoint;
     boost::array< Real, NDIM >                         M_internalBdPoint;
 
     //! Eigen values of the jacobian diffFlux (= dF/dU = H)
-    Real                                               M_eigval1;
-    Real                                               M_eigval2;
+    Container2D_Type                                   M_eigenvalues;
 
-    //! Left eigen vectors for the eigen values eigval1 and eigval2
-    Container2D_Type                                   M_left_eigvec1;
-    Container2D_Type                                   M_left_eigvec2;
+    //! Left eigen vectors for the two eigen values
+    Container2D_Type                                   M_leftEigenvector1;
+    Container2D_Type                                   M_leftEigenvector2;
 };
 
 
@@ -363,6 +365,99 @@ protected:
 
    Real M_resistance;
 
+};
+
+
+
+//! Windkessel (3 elements)
+/*!
+ *  Q1D -> ---R1------R2---
+ *         ^      |       ^
+ *        P1D     C       Pv
+ *         ^      |       ^
+ *
+ *  The holding equation is:
+ *
+ *  P1D + C R2 dP1D/dt = (R1 + R2 ) * Q1D + R1 R2 C dQ1D/dt + Pv
+ *
+ *  where the "venous" pressure Pv is taken constant and equal to 5mmHg (6666 dyn/cm^2).
+ *
+ *  You can solve this ODE in analytical fashion and obtain:
+ *
+ *  P1D(t) = P1D(0) + [ \int_0^t ( pv + (R1+R2) Q1D(s) + R1*R2*C dQ1D(s)/ds ) exp( s / (R2*C) ) ds ] * exp( - t / (R2*C) )
+ *
+ *  then you just need to exploit numerical integration rules.
+ *  Here a simple trapezoidal rule is used, with a first order approximation of derivative
+ *
+ *  dQ1D(s)/ds = Q1D(t(n+1)) - Q1D(t(n)) * (1/dt)
+ *
+ *  @author Lucia Mirabella
+ */
+class OneDimensionalModel_BCFunction_Windkessel3 : public OneDimensionalModel_BCFunction_Compatibility
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef OneDimensionalModel_BCFunction_Compatibility super;
+
+    typedef super::Flux_PtrType                          Flux_PtrType;
+    typedef super::Source_PtrType                        Source_PtrType;
+    typedef super::Solution_PtrType                      Solution_PtrType;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    OneDimensionalModel_BCFunction_Windkessel3( const Flux_PtrType& flux,        const Source_PtrType& source,
+                                                const OneD_BCSide&  side,        const OneD_BC&        bcType,
+                                                const Real&         resistance1, const Real&           resistance2,
+                                                const Real&         compliance,
+                                                const bool&         absorbing1 = false,
+                                                const Real&         venousPressure = 6666. );
+
+    //! Copy constructor
+    /*!
+     * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
+     */
+    OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& BCF_Windkessel3 );
+
+    //! Destructor
+    ~OneDimensionalModel_BCFunction_Windkessel3() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    Real operator() ( const Real& time, const Real& timeStep );
+
+    //@}
+
+protected:
+
+    Real M_resistance1;
+    Real M_resistance2;
+    Real M_compliance;
+    bool M_absorbing1;
+    Real M_venousPressure;
+
+    // Initial value of the pressure
+    Real M_P0;
+
+    // Q at previous time step
+    Real M_Q_tn;
+
+    // dQdt at the previous time step
+    Real M_dQdt_tn;
+
+    // Integral of the pressure at the previous time step
+    Real M_integral_tn;
 };
 
 }
