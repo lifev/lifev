@@ -272,7 +272,7 @@ OneDimensionalModel_Source_NonLinear::QuasiLinearSource( const Real& _A, const R
         dArea0dz = M_Physics->Data()->dArea0dz(indz);
         dbeta0dz = M_Physics->Data()->dBeta0dz(indz);
         dbeta1dz = M_Physics->Data()->dBeta1dz(indz);
-        dalphadz = M_Physics->Data()->dAlphaCordz(indz);
+        dalphadz = M_Physics->Data()->dAlphadz(indz);
         Kr    = M_Physics->Data()->FrictionKr(indz);
         rho   = M_Physics->Data()->DensityRho();
 

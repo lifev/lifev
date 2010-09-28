@@ -54,7 +54,7 @@ OneDimensionalModel_Source::OneDimensionalModel_Source( const Physics_PtrType Ph
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Source::SetPhysics( const Physics_PtrType Physics )
+OneDimensionalModel_Source::SetPhysics( const Physics_PtrType& Physics )
 {
     M_Physics = Physics;
 }
