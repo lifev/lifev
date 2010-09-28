@@ -55,6 +55,7 @@ public:
     //@{
 
     typedef BCInterface1D_BaseList                                                     BCBaseList_Type;
+    typedef std::vector< Real >                                                        ResistanceContainer_Type;
 
     //@}
 
@@ -165,6 +166,9 @@ public:
     //! Get the base type of the boundary condition
     const std::pair< std::string, BCBaseList_Type >& GetBase() const;
 
+    //! Get the resistance vector {R1, R2, R3 ...}
+    const ResistanceContainer_Type& GetResistance() const;
+
     //@}
 
 private:
@@ -182,6 +186,8 @@ private:
 
     inline bool IsBase( const std::string& FileName, const char* base );
 
+    inline void ReadResistance( const std::string& FileName, const char* resistance );
+
     //@}
 
     boost::shared_ptr< Operator >             M_operator;
@@ -191,6 +197,8 @@ private:
     OneD_BC                                   M_quantity;
     std::string                               M_baseString;
     std::pair< std::string, BCBaseList_Type > M_base;
+
+    ResistanceContainer_Type                  M_resistance;
 
     // Maps
     std::map< std::string, OneD_BCSide >      M_mapSide;
@@ -210,6 +218,7 @@ BCInterface1D_Data< Operator >::BCInterface1D_Data() :
     M_quantity           (),
     M_baseString         (),
     M_base               (),
+    M_resistance         (),
     M_mapSide            (),
     M_mapQuantity        (),
     M_mapLine            (),
@@ -246,6 +255,7 @@ BCInterface1D_Data< Operator >::BCInterface1D_Data( const BCInterface1D_Data& da
     M_quantity          ( data.M_quantity ),
     M_baseString        ( data.M_baseString ),
     M_base              ( data.M_base ),
+    M_resistance        ( data.M_resistance ),
     M_mapSide           ( data.M_mapSide ),
     M_mapQuantity       ( data.M_mapQuantity ),
     M_mapLine           ( data.M_mapLine ),
@@ -268,6 +278,7 @@ BCInterface1D_Data< Operator >::operator=( const BCInterface1D_Data& data )
         M_quantity          = data.M_quantity;
         M_baseString        = data.M_baseString;
         M_base              = data.M_base;
+        M_resistance        = data.M_resistance;
         M_mapSide           = data.M_mapSide;
         M_mapQuantity       = data.M_mapQuantity;
         M_mapLine           = data.M_mapLine;
@@ -289,6 +300,7 @@ inline void BCInterface1D_Data< Operator >::ReadBC( const std::string& FileName,
     ReadQuantity( FileName, ( dataSection + name + "/quantity" ).c_str() );
     ReadLine( FileName, ( dataSection + name + "/line" ).c_str() );
     ReadBase( FileName, dataSection + name + "/" );
+    ReadResistance( FileName, ( dataSection + name + "/resistance" ).c_str() );
 }
 
 // ===================================================
@@ -376,6 +388,13 @@ BCInterface1D_Data< Operator >::GetBase() const
     return M_base;
 }
 
+template< class Operator >
+const typename BCInterface1D_Data< Operator >::ResistanceContainer_Type&
+BCInterface1D_Data< Operator >::GetResistance() const
+{
+    return M_resistance;
+}
+
 // ===================================================
 // Private Methods
 // ===================================================
@@ -438,6 +457,27 @@ inline bool BCInterface1D_Data< Operator >::IsBase( const std::string& FileName,
     M_baseString = DataFile( base, " " );
 
     return DataFile.checkVariable( base );
+}
+
+template< class Operator >
+inline void BCInterface1D_Data< Operator >::ReadResistance( const std::string& FileName, const char* resistance )
+{
+    GetPot DataFile( FileName );
+    UInt resistanceSize = DataFile.vector_variable_size( resistance );
+
+    M_resistance.clear();
+    M_resistance.reserve( resistanceSize );
+
+    for ( UInt j( 0 ); j < resistanceSize; ++j )
+        M_resistance.push_back( DataFile( resistance, 0, j ) );
+
+#ifdef HAVE_LIFEV_DEBUG
+    std::stringstream output;
+    output << "BCInterface1D_Data::ReadResistance                  resistance: ";
+    for ( UInt i(0); i < resistanceSize; ++i )
+        output << M_resistance[i] << " ";
+    Debug( 5020 ) << output.str() << "\n";
+#endif
 }
 
 } // Namespace LifeV
