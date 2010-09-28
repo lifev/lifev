@@ -72,21 +72,22 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_Viscosity                 (),
     M_DensityWall               (),
     M_ThickVessel               (),
-    M_Thickness                 (),
     M_Young                     (),
     M_Poisson                   (),
+    M_externalPressure          (),
     M_ViscoelasticModulus       (),
     M_InertialModulus           (),
     M_RobertsonCorrection       (),
-    M_Area0                     (),
-    M_dArea0dz                  (),
-    M_PressBeta0                (),
-    M_dPressBeta0dz             (),
-    M_PressBeta1                (),
-    M_dPressBeta1dz             (),
-    M_AlphaCoriolis             (),
-    M_dAlphaCoriolisdz          (),
+    M_Thickness                 (),
     M_FrictionKr                (),
+    M_Area0                     (),
+    M_Alpha                     (),
+    M_Beta0                     (),
+    M_Beta1                     (),
+    M_dArea0dz                  (),
+    M_dAlphadz                  (),
+    M_dBeta0dz                  (),
+    M_dBeta1dz                  (),
     M_Flux11                    (),
     M_Flux12                    (),
     M_Flux21                    (),
@@ -167,27 +168,32 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
 
     M_DensityWall            = dataFile( ( section + "/PhysicalParameters/densityWall"               ).data(), 1. );
     M_ThickVessel            = dataFile( ( section + "/PhysicalParameters/thickVessel"               ).data(), false );
-    M_Thickness              = dataFile( ( section + "/PhysicalParameters/thickness"                 ).data(), 0. );
     M_Young                  = dataFile( ( section + "/PhysicalParameters/young"                     ).data(), 4.0E6 );
     M_Poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
+
+    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
 
     M_ViscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
     M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_RobertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
 
-    M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
+    M_ComputeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
 
-    M_Area0.resize( M_Mesh->numPoints() );
-    M_dArea0dz.resize( M_Mesh->numPoints() );
-    M_PressBeta0.resize( M_Mesh->numPoints() );
-    M_dPressBeta0dz.resize( M_Mesh->numPoints() );
-    M_PressBeta1.resize( M_Mesh->numPoints() );
-    M_dPressBeta1dz.resize( M_Mesh->numPoints() );
+    // Physical Parameters defined along the 1D model
+    M_Thickness.resize( M_Mesh->numPoints() );
     M_FrictionKr.resize( M_Mesh->numPoints() );
 
-    M_AlphaCoriolis.resize( M_Mesh->numPoints() );
-    M_dAlphaCoriolisdz.resize( M_Mesh->numPoints() );
+    M_Area0.resize( M_Mesh->numPoints() );
+    M_Beta0.resize( M_Mesh->numPoints() );
+    M_Beta1.resize( M_Mesh->numPoints() );
+    M_Alpha.resize( M_Mesh->numPoints() );
 
+    M_dArea0dz.resize( M_Mesh->numPoints() );
+    M_dBeta0dz.resize( M_Mesh->numPoints() );
+    M_dBeta1dz.resize( M_Mesh->numPoints() );
+    M_dAlphadz.resize( M_Mesh->numPoints() );
+
+    // Linear Parameters defined along the 1D model
     M_Flux11.resize( M_Mesh->numPoints() );
     M_Flux12.resize( M_Mesh->numPoints() );
     M_Flux21.resize( M_Mesh->numPoints() );
@@ -205,38 +211,114 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_Source21.resize( M_Mesh->numPoints() );
     M_Source22.resize( M_Mesh->numPoints() );
 
-    // Linear Parameters
-    for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
+    // Select a law for the coefficients
+    std::map< string, OneD_distributionLaw > distributionLawMap;
+    distributionLawMap["none"]      = none;
+    distributionLawMap["linear"]    = linear;
+    distributionLawMap["pointwise"] = pointwise;
+
+    OneD_distributionLaw distributionLaw = distributionLawMap[ dataFile( ( section + "/PhysicalParameters/DistributionLaw" ).data(), "none" ) ];
+    switch ( distributionLaw )
     {
-        // Physical Parameters
-        M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI );
-        M_dArea0dz[i]                  = 0;
-        M_PressBeta0[i]                = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6 );
-        M_dPressBeta0dz[i]             = 0.;
-        M_PressBeta1[i]                = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5 );
-        M_dPressBeta1dz[i]             = 0.;
-        M_FrictionKr[i]                = dataFile( ( section + "/PhysicalParameters/Kr"              ).data(), 1. );
+        case none:
 
-        M_AlphaCoriolis[i]             = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection );
-        M_dAlphaCoriolisdz[i]          = 0.;
+            for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
+            {
+                // Physical Parameters
+                M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
+                M_FrictionKr[i]                = dataFile( ( section + "/PhysicalParameters/Kr"              ).data(), 1. );
 
-        // Linear Parameters
-        M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1. );
-        M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0. );
-        M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0. );
-        M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1. );
-        M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1. );
-        M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1. );
-        M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1. );
-        M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0. );
-        M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0. );
-        M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1. );
-        M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0. );
-        M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0. );
-        M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0. );
-        M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0. );
-        M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0. );
-        M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0. );
+                M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI );
+                M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection );
+                M_Beta0[i]                     = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6 );
+                M_Beta1[i]                     = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5 );
+
+                // Linear Parameters
+                M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1. );
+                M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0. );
+                M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0. );
+                M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1. );
+                M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1. );
+                M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1. );
+                M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1. );
+                M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0. );
+                M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0. );
+                M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1. );
+                M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0. );
+                M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0. );
+                M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0. );
+                M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0. );
+                M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0. );
+                M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0. );
+            }
+
+            break;
+
+        case linear:
+
+            linearInterpolation( M_Thickness, dataFile, section + "/PhysicalParameters/thickness", 0. );
+            linearInterpolation( M_FrictionKr, dataFile, section + "/PhysicalParameters/Kr", 1. );
+
+            linearInterpolation( M_Area0, dataFile, section + "/PhysicalParameters/Area0", M_PI );
+            linearInterpolation( M_Alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_RobertsonCorrection );
+            linearInterpolation( M_Beta0, dataFile, section + "/PhysicalParameters/Beta0", 1.e6 );
+            linearInterpolation( M_Beta1, dataFile, section + "/PhysicalParameters/Beta1", 0.5 );
+
+            linearInterpolation( M_Flux11, dataFile, section + "/PhysicalParameters/Flux11", 1. );
+            linearInterpolation( M_Flux12, dataFile, section + "/PhysicalParameters/Flux12", 0. );
+            linearInterpolation( M_Flux21, dataFile, section + "/PhysicalParameters/Flux21", 0. );
+            linearInterpolation( M_Flux22, dataFile, section + "/PhysicalParameters/Flux22", 1. );
+            linearInterpolation( M_Celerity1, dataFile, section + "/PhysicalParameters/Celerity1", 1. );
+            linearInterpolation( M_Celerity2, dataFile, section + "/PhysicalParameters/Celerity2", 1. );
+            linearInterpolation( M_Celerity1LeftEigenvector1, dataFile, section + "/PhysicalParameters/LeftEigenvector11", 1. );
+            linearInterpolation( M_Celerity1LeftEigenvector2, dataFile, section + "/PhysicalParameters/LeftEigenvector12", 0. );
+            linearInterpolation( M_Celerity2LeftEigenvector1, dataFile, section + "/PhysicalParameters/LeftEigenvector21", 0. );
+            linearInterpolation( M_Celerity2LeftEigenvector2, dataFile, section + "/PhysicalParameters/LeftEigenvector22", 1. );
+            linearInterpolation( M_Source10, dataFile, section + "/PhysicalParameters/Source10", 0. );
+            linearInterpolation( M_Source20, dataFile, section + "/PhysicalParameters/Source20", 0. );
+            linearInterpolation( M_Source11, dataFile, section + "/PhysicalParameters/Source11", 0. );
+            linearInterpolation( M_Source12, dataFile, section + "/PhysicalParameters/Source12", 0. );
+            linearInterpolation( M_Source21, dataFile, section + "/PhysicalParameters/Source21", 0. );
+            linearInterpolation( M_Source22, dataFile, section + "/PhysicalParameters/Source22", 0. );
+
+            break;
+
+        case pointwise:
+
+            for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
+            {
+                // Physical Parameters
+                M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
+                M_FrictionKr[i]                = dataFile( ( section + "/PhysicalParameters/Kr"              ).data(), 1., i );
+
+                M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI, i );
+                M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection, i );
+                M_Beta0[i]                     = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6, i );
+                M_Beta1[i]                     = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5, i );
+
+                // Linear Parameters
+                M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1., i );
+                M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0., i );
+                M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0., i );
+                M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1., i );
+                M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1., i );
+                M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1., i );
+                M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1., i );
+                M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0., i );
+                M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0., i );
+                M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1., i );
+                M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0., i );
+                M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0., i );
+                M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0., i );
+                M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0., i );
+                M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0., i );
+                M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0., i );
+            }
+
+            break;
+
+        default:
+            std::cout << "Warning: taperLaw \"" << distributionLaw << "\"not available!" << std::endl;
     }
 
     UpdateCoefficients();
@@ -258,8 +340,7 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
                   dataFile( ( section + "/discretization/x_left"  ).data(), 0. );
 
-    M_Mesh->setup( length,
-                   dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
+    M_Mesh->setup( length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
 
     //std::cout << " 1D- Mesh nodes:                               " << M_Mesh->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_Mesh->numElements() << std::endl;
@@ -303,9 +384,10 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
 
     M_DensityWall            = dataFile( ( section + "/PhysicalParameters/densityWall"               ).data(), 1. );
     M_ThickVessel            = dataFile( ( section + "/PhysicalParameters/thickVessel"               ).data(), false );
-    M_Thickness              = dataFile( ( section + "/1d_physics/thickness"                         ).data(), 0. );
     M_Young                  = dataFile( ( section + "/1d_physics/young"                             ).data(), 4.0E6 );
     M_Poisson                = dataFile( ( section + "/1d_physics/ksi"                               ).data(), 0.5 );
+
+    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
 
     M_ViscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
     M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
@@ -313,16 +395,18 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
 
     M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
 
-    M_Area0.resize( M_Mesh->numPoints() );
-    M_dArea0dz.resize( M_Mesh->numPoints() );
-    M_PressBeta0.resize( M_Mesh->numPoints() );
-    M_dPressBeta0dz.resize( M_Mesh->numPoints() );
-    M_PressBeta1.resize( M_Mesh->numPoints() );
-    M_dPressBeta1dz.resize( M_Mesh->numPoints() );
+    M_Thickness.resize( M_Mesh->numPoints() );
     M_FrictionKr.resize( M_Mesh->numPoints() );
 
-    M_AlphaCoriolis.resize( M_Mesh->numPoints() );
-    M_dAlphaCoriolisdz.resize( M_Mesh->numPoints() );
+    M_Area0.resize( M_Mesh->numPoints() );
+    M_Beta0.resize( M_Mesh->numPoints() );
+    M_Beta1.resize( M_Mesh->numPoints() );
+    M_Alpha.resize( M_Mesh->numPoints() );
+
+    M_dArea0dz.resize( M_Mesh->numPoints() );
+    M_dBeta0dz.resize( M_Mesh->numPoints() );
+    M_dBeta1dz.resize( M_Mesh->numPoints() );
+    M_dAlphadz.resize( M_Mesh->numPoints() );
 
     M_Flux11.resize( M_Mesh->numPoints() );
     M_Flux12.resize( M_Mesh->numPoints() );
@@ -346,18 +430,15 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     {
         // Physical Parameters
         if ( M_ComputeCoefficients )
-            M_Area0[i]                 = std::pow( dataFile( ( section + "/1d_physics/radius"                  ).data(), 0.5 ), 2 ) * M_PI;
+            M_Area0[i]                 = std::pow( dataFile( ( section + "/1d_physics/radius"        ).data(), 0.5 ), 2 ) * M_PI;
         else
             M_Area0[i]                 = dataFile( ( section + "/parameters/Area0"                   ).data(), M_PI );
-        M_dArea0dz[i]                  = 0;
-        M_PressBeta0[i]                = dataFile( ( section + "/parameters/beta0"                   ).data(), 1.e6 );
-        M_dPressBeta0dz[i]             = 0.;
-        M_PressBeta1[i]                = dataFile( ( section + "/parameters/beta1"                   ).data(), 0.5 );
-        M_dPressBeta1dz[i]             = 0.;
+        M_Beta0[i]                     = dataFile( ( section + "/parameters/beta0"                   ).data(), 1.e6 );
+        M_Beta1[i]                     = dataFile( ( section + "/parameters/beta1"                   ).data(), 0.5 );
         M_FrictionKr[i]                = dataFile( ( section + "/parameters/Kr"                      ).data(), 1. );
+        M_Thickness[i]                 = dataFile( ( section + "/1d_physics/thickness"               ).data(), 0. );
 
-        M_AlphaCoriolis[i]             = dataFile( ( section + "/parameters/alphaCor"                ).data(), 1. / M_RobertsonCorrection );
-        M_dAlphaCoriolisdz[i]          = 0.;
+        M_Alpha[i]                     = dataFile( ( section + "/parameters/alphaCor"                ).data(), 1. / M_RobertsonCorrection );
 
         // Linear Parameters
         M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1. );
@@ -398,7 +479,7 @@ OneDimensionalModel_Data::UpdateCoefficients()
                                  (   std::pow(radius,2) / 2 +
                                      std::pow(radius,2*M_PowerlawCoefficient+2) / (2*M_PowerlawCoefficient+2) -
                                    2*std::pow(radius,  M_PowerlawCoefficient+2) / (  M_PowerlawCoefficient+2) );
-            M_AlphaCoriolis[i] = 2 / std::pow(radius,2) * profileIntegral;
+            M_Alpha[i] = 2 / std::pow(radius,2) * profileIntegral;
 
             // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
             M_FrictionKr[i]    = 2 * M_PI * M_Viscosity / M_Density * ( M_PowerlawCoefficient + 2 ) * std::pow( radius, M_PowerlawCoefficient - 1 );
@@ -406,17 +487,20 @@ OneDimensionalModel_Data::UpdateCoefficients()
             // Compute Beta0
             if( M_ThickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
             {
-                M_PressBeta0[i] = - M_Thickness * M_Young * std::sqrt(M_PI) / ( std::sqrt( M_Area0[i] ) * ( (1 - M_Poisson * M_Poisson )
-                                  + M_Poisson * ( 1 + M_Poisson ) * ( M_Thickness * std::sqrt(M_PI) / std::sqrt( M_Area0[i] ) ) ) );
-                M_PressBeta1[i] = - 0.5;
+                M_Beta0[i] = - M_Thickness[i] * M_Young * std::sqrt(M_PI) / ( std::sqrt( M_Area0[i] ) * ( (1 - M_Poisson * M_Poisson )
+                             + M_Poisson * ( 1 + M_Poisson ) * ( M_Thickness[i] * std::sqrt(M_PI) / std::sqrt( M_Area0[i] ) ) ) );
+                M_Beta1[i] = - 0.5;
             }
             else
             {
-                M_PressBeta0[i] = M_Thickness * M_Young * std::sqrt( M_PI ) / ( std::sqrt( M_Area0[i] ) * (1 - M_Poisson * M_Poisson) );
-                M_PressBeta1[i] = 0.5;
+                M_Beta0[i] = M_Thickness[i] * std::sqrt( M_PI / M_Area0[i] ) *  M_Young / (1 - M_Poisson * M_Poisson);
+                M_Beta1[i] = 0.5;
             }
         }
     }
+
+    // Compute the derivatives of the coefficients
+    computeDerivatives();
 }
 
 void
@@ -433,7 +517,7 @@ OneDimensionalModel_Data::initLinearParam( const GetPot& /*dataFile*/ )  // CHEC
     */
     for( UInt indz=0; indz < M_Mesh->numPoints(); ++indz )
     {
-        M_Celerity1[indz] = std::sqrt( M_PressBeta0[indz] * M_PressBeta1[indz] / M_Density );
+        M_Celerity1[indz] = std::sqrt( M_Beta0[indz] * M_Beta1[indz] / M_Density );
         M_Flux21[indz]    = std::pow( M_Celerity1[indz], 2 );
         M_Source22[indz]  = M_FrictionKr[indz] / M_Area0(indz);
     }
@@ -505,23 +589,24 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Fluid dyn. viscosity   = " << M_Viscosity << "\n";
     output << "Wall density           = " << M_DensityWall << "\n";
     output << "Thick vessel           = " << M_ThickVessel << "\n";
-    output << "Thickness              = " << M_Thickness << "\n";
     output << "Young modulus          = " << M_Young << "\n";
     output << "Poisson                = " << M_Poisson << "\n";
+    output << "External pressure      = " << M_externalPressure << "\n";
     output << "Viscoelastic modulus   = " << M_ViscoelasticModulus << "\n";
     output << "Inertial modulus       = " << M_InertialModulus << "\n";
     output << "Robertson correction   = " << M_RobertsonCorrection << "\n";
 
     output << "Area0                  = " << M_Area0 << "\n";
     output << "dArea0dz               = " << M_dArea0dz << "\n";
-    output << "Beta0                  = " << M_PressBeta0 << "\n";
-    output << "dBeta0dz               = " << M_dPressBeta0dz << "\n";
-    output << "Beta1                  = " << M_PressBeta1 << "\n";
-    output << "dBeta1dz               = " << M_dPressBeta1dz << "\n";
+    output << "Beta0                  = " << M_Beta0 << "\n";
+    output << "dBeta0dz               = " << M_dBeta0dz << "\n";
+    output << "Beta1                  = " << M_Beta1 << "\n";
+    output << "dBeta1dz               = " << M_dBeta1dz << "\n";
 
-    output << "Alpha (Coriolis)       = " << M_AlphaCoriolis << "\n";
-    output << "dAlpha (Coriolis)      = " << M_dAlphaCoriolisdz << "\n";
+    output << "Alpha (Coriolis)       = " << M_Alpha << "\n";
+    output << "dAlpha (Coriolis)      = " << M_dAlphadz << "\n";
 
+    output << "Thickness              = " << M_Thickness << "\n";
     output << "Friction               = " << M_FrictionKr << "\n";
 
     // Linear Parameters
@@ -584,9 +669,9 @@ OneDimensionalModel_Data::setDensityWall( const Real& DensityWall )
 }
 
 void
-OneDimensionalModel_Data::setThickness( const Real& Thickness )
+OneDimensionalModel_Data::setThickness( const Real& Thickness, const UInt& i )
 {
-    M_Thickness = Thickness;
+    M_Thickness[i] = Thickness;
 }
 
 void
@@ -602,6 +687,12 @@ OneDimensionalModel_Data::setPoisson( const Real& Poisson )
 }
 
 void
+OneDimensionalModel_Data::setExternalPressure( const Real& externalPressure )
+{
+    M_externalPressure = externalPressure;
+}
+
+void
 OneDimensionalModel_Data::setArea0( const Real& Area0, const UInt& i )
 {
     M_Area0[i] = Area0;
@@ -610,13 +701,13 @@ OneDimensionalModel_Data::setArea0( const Real& Area0, const UInt& i )
 void
 OneDimensionalModel_Data::setBeta0( const Real& Beta0, const UInt& i )
 {
-    M_PressBeta0[i] = Beta0;
+    M_Beta0[i] = Beta0;
 }
 
 void
 OneDimensionalModel_Data::setdBeta0dz( const Real& dBeta0dz, const UInt& i )
 {
-    M_dPressBeta0dz[i] = dBeta0dz;
+    M_dBeta0dz[i] = dBeta0dz;
 }
 
 // ===================================================
@@ -788,12 +879,6 @@ OneDimensionalModel_Data::DensityWall() const
 }
 
 const Real&
-OneDimensionalModel_Data::Thickness() const
-{
-    return M_Thickness;
-}
-
-const Real&
 OneDimensionalModel_Data::Young() const
 {
     return M_Young;
@@ -803,6 +888,12 @@ const Real&
 OneDimensionalModel_Data::Poisson() const
 {
     return M_Poisson;
+}
+
+const Real&
+OneDimensionalModel_Data::externalPressure() const
+{
+    return M_externalPressure;
 }
 
 const Real&
@@ -824,21 +915,39 @@ OneDimensionalModel_Data::RobertsonCorrection() const
 }
 
 const Real&
+OneDimensionalModel_Data::Thickness( const UInt& i ) const
+{
+    return M_Thickness[i];
+}
+
+const Real&
+OneDimensionalModel_Data::FrictionKr( const UInt& i ) const
+{
+    return M_FrictionKr[i];
+}
+
+const Real&
 OneDimensionalModel_Data::Area0( const UInt& i ) const
 {
     return M_Area0[i];
 }
 
 const Real&
+OneDimensionalModel_Data::Alpha( const UInt& i ) const
+{
+    return M_Alpha[i];
+}
+
+const Real&
 OneDimensionalModel_Data::Beta0( const UInt& i ) const
 {
-    return M_PressBeta0[i];
+    return M_Beta0[i];
 }
 
 const Real&
 OneDimensionalModel_Data::Beta1( const UInt& i ) const
 {
-    return M_PressBeta1[i];
+    return M_Beta1[i];
 }
 
 const Real&
@@ -848,33 +957,21 @@ OneDimensionalModel_Data::dArea0dz( const UInt& i ) const
 }
 
 const Real&
+OneDimensionalModel_Data::dAlphadz( const UInt& i ) const
+{
+    return M_dAlphadz[i];
+}
+
+const Real&
 OneDimensionalModel_Data::dBeta0dz( const UInt& i ) const
 {
-    return M_dPressBeta0dz[i];
+    return M_dBeta0dz[i];
 }
 
 const Real&
 OneDimensionalModel_Data::dBeta1dz( const UInt& i ) const
 {
-    return M_dPressBeta1dz[i];
-}
-
-const Real&
-OneDimensionalModel_Data::AlphaCor( const UInt& i ) const
-{
-    return M_AlphaCoriolis[i];
-}
-
-const Real&
-OneDimensionalModel_Data::dAlphaCordz( const UInt& i ) const
-{
-    return M_dAlphaCoriolisdz[i];
-}
-
-const Real&
-OneDimensionalModel_Data::FrictionKr( const UInt& i ) const
-{
-    return M_FrictionKr[i];
+    return M_dBeta1dz[i];
 }
 
 // ===================================================
@@ -966,6 +1063,56 @@ const Real&
 OneDimensionalModel_Data::Source22( const UInt& i ) const
 {
     return M_Source22[i];
+}
+
+// ===================================================
+// Private methods
+// ===================================================
+void
+OneDimensionalModel_Data::linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue )
+{
+    Real a  = dataFile( quantity.data(), defaultValue, 0 );
+    Real b  = dataFile( quantity.data(), a, 1 );
+    Real xa =  M_Mesh->firstPoint().x();
+    Real xb =  M_Mesh->lastPoint().x();
+
+    // Note: due to offset numeration start from 1
+    for ( UInt i(1); i <= M_Mesh->numPoints() ; ++i )
+        vector[i-1] = a + ( b - a ) / ( xb - xa ) * ( M_Mesh->point(i).x() - xa );
+
+    // linearInterpolation temporary disabled!
+    //for ( UInt i(1); i <= M_Mesh->numPoints() ; ++i )
+    //    vector[i-1] = (a + b) / 2;
+}
+
+void
+OneDimensionalModel_Data::computeDerivatives()
+{
+    Real nodes = M_Mesh->numPoints();
+
+    // We use 2° order finite differences to compute the derivatives (it is coded only for homogeneous discretizations)
+    for ( UInt i = 1 ; i < nodes-1 ; ++i )
+    {
+        M_dArea0dz[i] = ( M_Area0[i+1] - M_Area0[i-1] ) / 2;
+        M_dBeta0dz[i] = ( M_Beta0[i+1] - M_Beta0[i-1] ) / 2;
+        M_dBeta1dz[i] = ( M_Beta1[i+1] - M_Beta1[i-1] ) / 2;
+        M_dAlphadz[i] = ( M_Alpha[i+1] - M_Alpha[i-1] ) / 2;
+    }
+
+    M_dArea0dz[0] = ( -M_Area0[2] + 4*M_Area0[1] - 3*M_Area0[0] ) / 2;
+    M_dBeta0dz[0] = ( -M_Beta0[2] + 4*M_Beta0[1] - 3*M_Beta0[0] ) / 2;
+    M_dBeta1dz[0] = ( -M_Beta1[2] + 4*M_Beta1[1] - 3*M_Beta1[0] ) / 2;
+    M_dAlphadz[0] = ( -M_Alpha[2] + 4*M_Alpha[1] - 3*M_Alpha[0] ) / 2;
+
+    M_dArea0dz[nodes-1] = ( 3*M_Area0[nodes-1] - 4*M_Area0[nodes-2] + M_Area0[nodes-3] ) / 2;
+    M_dBeta0dz[nodes-1] = ( 3*M_Beta0[nodes-1] - 4*M_Beta0[nodes-2] + M_Beta0[nodes-3] ) / 2;
+    M_dBeta1dz[nodes-1] = ( 3*M_Beta1[nodes-1] - 4*M_Beta1[nodes-2] + M_Beta1[nodes-3] ) / 2;
+    M_dAlphadz[nodes-1] = ( 3*M_Alpha[nodes-1] - 4*M_Alpha[nodes-2] + M_Alpha[nodes-3] ) / 2;
+
+    M_dArea0dz /= M_Mesh->meanH();
+    M_dBeta0dz /= M_Mesh->meanH();
+    M_dBeta1dz /= M_Mesh->meanH();
+    M_dAlphadz /= M_Mesh->meanH();
 }
 
 }
