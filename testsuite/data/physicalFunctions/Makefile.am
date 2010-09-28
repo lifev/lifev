@@ -22,7 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = AortaPhysicalFlux.dat AortaPhysicalPressure.dat CarotidBifurcationPhysicalFlux.dat\
+dist_pkgdata_DATA = AortaPhysicalFlux.dat AortaPhysicalPressure.dat CarotidBifurcationPhysicalFlux.dat HeartPhysicalFlux.dat\
                     SmoothTrapezoidalProfile.dat\
                     test_Flux1.dat test_Flux2.dat
 
