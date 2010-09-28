@@ -270,7 +270,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
                                                                                     data.GetOperator()->Source(),
                                                                                     data.GetSide(),
                                                                                     data.GetQuantity(),
-                                                                                    0. //Resistance value (add)
+                                                                                    data.GetResistance()[0]
                              ) );
 
             M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
