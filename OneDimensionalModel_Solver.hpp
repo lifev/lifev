@@ -273,8 +273,11 @@ public:
     //! Recover the solution at previous timestep (keep unaltered the boundary values)
     //void loadsol();
 
-    //! Save results on file
-    void postProcess( const Solution_Type& solution, const Real& time );
+    //! Reset the output files
+    void resetOutput( const Solution_Type& solution );
+
+    //! Save results on output files
+    void postProcess( const Solution_Type& solution );
 
     //! Create matlab file for postprocessing
     //void create_movie_file();
@@ -395,10 +398,16 @@ private:
      *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
      *  @param TimeStep time step
      */
-    void _updatePressure( Solution_Type& solution, const Real& TimeStep );
+    void updatePressure( Solution_Type& solution, const Real& TimeStep );
+
+    //! Update the ratio between A and A0.
+    /*!
+     *  @param solution the solution container is passed with A^n, is updated with A^n/A0
+     */
+    void updateAreaRatio( Solution_Type& solution );
 
     //! Update the P1 flux vector from U: M_Fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
-    void _updateFlux( const Solution_Type& solution );
+    void updateFlux( const Solution_Type& solution );
 
     //! Call _updateFlux and update the P0 derivative of flux vector from U:
     /*!
@@ -408,10 +417,10 @@ private:
      *  (mean value of the two extremal values of dF/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void _updateFluxDer( const Solution_Type& solution );
+    void updateFluxDer( const Solution_Type& solution );
 
     //! Update the P1 source vector from U: M_Sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
-    void _updateSource( const Solution_Type& solution );
+    void updateSource( const Solution_Type& solution );
 
     //! Call _updateSource and update the P0 derivative of source vector from U:
     /*!
@@ -421,7 +430,7 @@ private:
      *  (mean value of the two extremal values of dS/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void _updateSourceDer( const Solution_Type& solution );
+    void updateSourceDer( const Solution_Type& solution );
 
     //! Update the matrices
     /*!
@@ -434,16 +443,16 @@ private:
      *  call of  _updateMatrixCoefficients,
      *  _updateElemMatrices and _assemble_matrices.
      */
-    void _updateMatrices();
+    void updateMatrices();
 
     //! Update the coefficients (from the flux, source functions and their derivatives)
-    void _updateMatrixCoefficients( const UInt& ii, const UInt& jj, const UInt& iedge);
+    void updateMatrixCoefficients( const UInt& ii, const UInt& jj, const UInt& iedge);
 
     //! Update the element matrices with the current element
-    void _updateElemMatrices();
+    void updateElemMatrices();
 
     //! Assemble the matrices
-    void _assemble_matrices( const UInt& ii, const UInt& jj );
+    void matrixAssemble( const UInt& ii, const UInt& jj );
 
     //! Update the vectors to take into account Dirichlet BC.
     /*!
@@ -451,7 +460,7 @@ private:
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void _updateBCDirichletVector();
+    void updateBCDirichletVector();
 
     //! Update the matrices to take into account Dirichlet BC.
     /*!
@@ -459,7 +468,7 @@ private:
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void _updateBCDirichletMatrix( Matrix_Type& mat );
+    void updateBCDirichletMatrix( Matrix_Type& mat );
 
     //! Apply the inertial Flux correction:
     /*!
@@ -471,7 +480,7 @@ private:
      *
      *  m = rho_w h0 / ( 2 sqrt(pi) sqrt(A0) )
      */
-    Vector_Type                   _correct_flux_inertial    (const Vector_Type &);
+    Vector_Type inertialFluxCorrection( const Vector_Type& );
 
     //! Apply the viscoelastic Flux correction:
     /*!
@@ -483,7 +492,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    Vector_Type                   _correct_flux_viscoelastic(const Vector_Type&, const Real& TimeStep );
+    Vector_Type viscoelasticFluxCorrection( const Vector_Type&, const Real& TimeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -493,7 +502,7 @@ private:
      *  = ( 1/Ah(n+1) Qtildeh(n), phi) +             //! 1/A * massFactor^{-1} * Un+1
      *  + ( a / rho ) *       ( d3Ahath(n+1)/dz3, phi )  //! mass * d3Ahat(U)/dz
      */
-    Vector_Type                   _correct_flux_longitudinal( );
+    Vector_Type longitudinalFluxCorrection();
 
     //! L2 Projection of the second derivative of Q over P1 space.
     //ScalVec                       _compute_d2Q_dx2( const ScalVec& );

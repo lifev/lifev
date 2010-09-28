@@ -129,12 +129,18 @@ OneDimensionalModel_Solver::buildConstantMatrices()
     // Dirichlet boundary conditions set in the mass matrix
     M_massMatrix->GlobalAssemble();
     M_gradMatrix->GlobalAssemble();
+
+    // In the classical case the linear system use a mass matrix (with Dirichlet BC)
+    Matrix_PtrType matrFull( new Matrix_Type( *M_massMatrix ));
+    updateBCDirichletMatrix( *matrFull );
+    M_linearSolver->setMatrix(*matrFull);
 }
 
 void
 OneDimensionalModel_Solver::setupSolution( Solution_Type& solution )
 {
     solution["A"].reset( new Vector_Type( M_FESpace->map() ) );
+    solution["A/A0-1"].reset( new Vector_Type( M_FESpace->map() ) );
     solution["Q"].reset( new Vector_Type( M_FESpace->map() ) );
     solution["W1"].reset( new Vector_Type( M_FESpace->map() ) );
     solution["W2"].reset( new Vector_Type( M_FESpace->map() ) );
@@ -294,8 +300,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
     Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * M_Physics->Data()->multiplier() << "\n";
     Debug( 6310 ) << "[initialize]\t\tvalue2         = " << value2 << "\n";
 
+    // Compute A/A0
+    updateAreaRatio( solution );
+
     // Compute initial pressure (taking into account the viscoelastic wall)
-    _updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -341,8 +350,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
         abort();
     }
 
+    // Compute A/A0
+    updateAreaRatio( solution );
+
     // Compute initial pressure (taking into account the viscoelastic wall)
-    _updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -360,8 +372,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Vector_Ty
                              (*solution["A"])[ielem], (*solution["Q"])[ielem], ielem );
     }
 
+    // Compute A/A0
+    updateAreaRatio( solution );
+
     // Compute initial pressure (taking into account the viscoelastic wall)
-    _updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -380,8 +395,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u20
                              (*solution["A"])[ielem], (*solution["Q"])[ielem], ielem );
     }
 
+    // Compute A/A0
+    updateAreaRatio( solution );
+
     // Compute initial pressure (taking into account the viscoelastic wall)
-    _updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -390,9 +408,9 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u20
 void
 OneDimensionalModel_Solver::updateRHS( const Solution_Type& solution, const Real& TimeStep )
 {
-    _updateFluxDer( solution );   // Update the vector containing the values of the flux at the nodes and its jacobian
-    _updateSourceDer( solution ); // Update the vector containing the values of the source term at the nodes and its jacobian
-    _updateMatrices();            // Update the matrices for the non-linear terms
+    updateFluxDer( solution );   // Update the vector containing the values of the flux at the nodes and its jacobian
+    updateSourceDer( solution ); // Update the vector containing the values of the source term at the nodes and its jacobian
+    updateMatrices();            // Update the matrices for the non-linear terms
 
     // Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T, with U1=A, U2=Q )
     // (Un+1, phi) =          (               Un,     phi     ) ->  massFactor^{-1} * Un+1 = mass * U
@@ -414,13 +432,13 @@ OneDimensionalModel_Solver::updateRHS( const Solution_Type& solution, const Real
         M_rhs[i] += (*M_gradMatrix) * (TimeStep*M_FluxVector[i]);
 
         // rhs = rhs - dt * mass * S(Un)
-        M_rhs[i] += (*M_massMatrix) * (- TimeStep*M_SourceVector[i]);
+        M_rhs[i] += (*M_massMatrix) * (-TimeStep*M_SourceVector[i]);
 
-        for( UInt j(0); j<2; ++j )
+        for( UInt j(0); j < 2; ++j )
         {
             // rhs = rhs - dt^2/2 * gradDiffFlux * S(Un)
             M_gradMatrixDiffFlux[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j]*(- dt2over2*M_SourceVector[j]);
+            M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j]*(-dt2over2*M_SourceVector[j]);
 
             // rhs = rhs + dt^2/2 * divDiffSrc * F(Un)
             M_divMatrixDiffSrc[2*i + j]->GlobalAssemble();
@@ -428,7 +446,7 @@ OneDimensionalModel_Solver::updateRHS( const Solution_Type& solution, const Real
 
             // rhs = rhs - dt^2/2 * stiffDiffFlux * F(Un)
             M_stiffMatrixDiffFlux[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(- dt2over2*M_FluxVector[j]);
+            M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(-dt2over2*M_FluxVector[j]);
 
             // rhs = rhs + dt^2/2 * massDiffSrc * S(Un)
             M_massMatrixDiffSrc[2*i + j]->GlobalAssemble();
@@ -446,19 +464,7 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
 
     // Apply BC to RHS
     Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
-    _updateBCDirichletVector();
-
-    Debug( 6310 ) << "[timeAdvance] \trhs0 norm2 = " << M_rhs[0].Norm2() << "\n";
-    Debug( 6310 ) << "[timeAdvance] \trhs1 norm2 = " << M_rhs[1].Norm2() << "\n";
-
-    Debug( 6310 ) << "[iterate] o-  Solving the system... t = " << Time << " ... \n";
-    Chrono chrono;
-
-    Chrono chrono1;
-    Chrono chrono2;
-    Chrono chrono3;
-    Chrono chrono4;
-    Chrono chrono5;
+    updateBCDirichletVector();
 
     if( M_Physics->Data()->UW() )
     {
@@ -529,64 +535,41 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
     }
     else
     {
-        chrono.start();
-        // cholesky or lapack lu solve
-        // solve the system: rhs1 = massFactor^{-1} * rhs1
+        // Compute A^n+1
+        Vector_Type area( M_rhs[0] );
+        M_linearSolver->solveSystem( M_rhs[0], area, M_massMatrix );
 
-        chrono1.start();
-        Vector_Type sol0(M_rhs[0]);
-
-        Matrix_PtrType matrFull( new Matrix_Type( *M_massMatrix ));
-        _updateBCDirichletMatrix( *matrFull );
-        chrono1.stop();
-
-        chrono2.start();
-        //matrFull->spy("matr");
-        //M_rhs[0].ShowMe();
-        M_linearSolver->setMatrix(*matrFull);
-        M_linearSolver->setReusePreconditioner(false);
-        M_linearSolver->solveSystem( M_rhs[0], sol0, matrFull );
-        chrono2.stop();
-
-        chrono3.start();
-        M_rhs[0] = sol0;
-        Vector_Type sol1(M_rhs[1]);
-
-        M_linearSolver->setReusePreconditioner(false);
-        M_linearSolver->solveSystem( M_rhs[1], sol1, matrFull );
-
-        M_rhs[1] = sol1;
-
-        chrono3.stop();
+        // Compute Q^n+1
+        Vector_Type flowrate( M_rhs[1] );
+        M_linearSolver->solveSystem( M_rhs[1], flowrate, M_massMatrix );
 
         // Correct flux with inertial, viscoelastic and longitudinal terms
         if( M_Physics->Data()->inertialWall() )
         {
-            *solution["Q_inert"] = _correct_flux_inertial( M_rhs[1] );
-            M_rhs[1] += *solution["Q_inert"];
+            *solution["Q_inert"] = inertialFluxCorrection( flowrate );
+            flowrate += *solution["Q_inert"];
         }
 
         if( M_Physics->Data()->viscoelasticWall() )
         {
-            *solution["Q_visc"] = _correct_flux_viscoelastic( M_rhs[1], TimeStep );
-            M_rhs[1] += *solution["Q_visc"];
+            *solution["Q_visc"] = viscoelasticFluxCorrection( flowrate, TimeStep );
+            flowrate += *solution["Q_visc"];
         }
 
         if( M_Physics->Data()->longitudinalWall() )
         {
-            *solution["Q_long"] = _correct_flux_longitudinal();
-            M_rhs[1] += *solution["Q_long"];
+            *solution["Q_long"] = longitudinalFluxCorrection();
+            flowrate += *solution["Q_long"];
         }
 
         // compute L2 projection of d2Q_dx2
         //    if( M_Physics->Data()->fluxSecondDer() )
-        //      M_d2_U2_dx2 = _compute_d2Q_dx2( M_rhs[1] );
+        //      M_d2_U2_dx2 = _compute_d2Q_dx2( flowrate );
 
-        // store solution at previous timesteps & update the solution for the next time step
-        *solution["A"] = M_rhs[0];
-        *solution["Q"] = M_rhs[1];
+        // Update the solution container
+        *solution["A"] = area;
+        *solution["Q"] = flowrate;
 
-        chrono5.start();
         for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
         {
             M_Physics->W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
@@ -594,20 +577,12 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
                                   ielem);
         }
 
+        // Compute A/A0
+        updateAreaRatio( solution );
+
         // Update the pressure (taking into account the viscoelastic wall)
-        _updatePressure( solution, TimeStep );
-
-        chrono5.stop();
-        chrono.stop();
+        updatePressure( solution, TimeStep );
     }
-
-    Debug( 6310 ) << "chrono1 " << chrono1.diff() << "s.\n";
-    Debug( 6310 ) << "chrono2 " << chrono2.diff() << "s.\n";
-    Debug( 6310 ) << "chrono3 " << chrono3.diff() << "s.\n";
-    Debug( 6310 ) << "chrono5 " << chrono5.diff() << "s.\n";
-    Debug( 6310 ) << "chrono  " << chrono.diff() << " s.\n";
-
-    Debug( 6310 ) << "[iterate] \tdone in " << chrono.diff() << " s.\n";
 }
 
 Real
@@ -669,21 +644,25 @@ OneDimensionalModel_Solver::loadsol()
 */
 
 void
-OneDimensionalModel_Solver::postProcess( const Solution_Type& solution, const Real& /*time_val*/ )
+OneDimensionalModel_Solver::resetOutput( const Solution_Type& solution )
 {
-    std::string str;
     std::ofstream outfile;
-
-    Debug( 6310 ) << "[postProcess] o- Dumping solutions on files (1d)!" << "/n";
-
     for ( Solution_ConstIterator i = solution.begin(); i != solution.end(); ++i )
     {
         std::string file = M_Physics->Data()->postprocessingDirectory() + "/" + M_Physics->Data()->postprocessingFile() + "_" + i->first + ".m";
+        outfile.open( file.c_str(), std::ios::trunc );
+        outfile.close();
+    }
+}
 
-        if ( M_Physics->Data()->dataTime()->isFirstTimeStep() )
-            outfile.open( file.c_str(), std::ios::trunc );
-        else
-            outfile.open( file.c_str(), std::ios::app );
+void
+OneDimensionalModel_Solver::postProcess( const Solution_Type& solution )
+{
+    std::ofstream outfile;
+    for ( Solution_ConstIterator i = solution.begin(); i != solution.end(); ++i )
+    {
+        std::string file = M_Physics->Data()->postprocessingDirectory() + "/" + M_Physics->Data()->postprocessingFile() + "_" + i->first + ".m";
+        outfile.open( file.c_str(), std::ios::app );
 
         for ( UInt ii(0); ii < M_FESpace->dim(); ++ii )
             outfile << (*i->second)(ii + 1) << " ";
@@ -691,7 +670,6 @@ OneDimensionalModel_Solver::postProcess( const Solution_Type& solution, const Re
         outfile << std::endl;
         outfile.close();
     }
-    //resetFileBuffers( solution );
 }
 
 /*
@@ -1019,7 +997,7 @@ OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& 
 // Private Methods
 // ===================================================
 void
-OneDimensionalModel_Solver::_updatePressure( Solution_Type& solution, const Real& TimeStep )
+OneDimensionalModel_Solver::updatePressure( Solution_Type& solution, const Real& TimeStep )
 {
     for ( UInt i(0); i < M_FESpace->dim() ; ++i )
     {
@@ -1038,7 +1016,14 @@ OneDimensionalModel_Solver::_updatePressure( Solution_Type& solution, const Real
 }
 
 void
-OneDimensionalModel_Solver::_updateFlux( const Solution_Type& solution )
+OneDimensionalModel_Solver::updateAreaRatio( Solution_Type& solution )
+{
+    for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
+        (*solution["A/A0-1"])[inode] = (*solution["A"])[inode] / M_Physics->Data()->Area0(inode - 1) - 1;
+}
+
+void
+OneDimensionalModel_Solver::updateFlux( const Solution_Type& solution )
 {
     Real Aii, Qii;
 
@@ -1052,10 +1037,10 @@ OneDimensionalModel_Solver::_updateFlux( const Solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::_updateFluxDer( const Solution_Type& solution )
+OneDimensionalModel_Solver::updateFluxDer( const Solution_Type& solution )
 {
     // first update the Flux vector
-    _updateFlux( solution );
+    updateFlux( solution );
 
     // then update the derivative of the Flux vector
     Real tmp;
@@ -1089,7 +1074,7 @@ OneDimensionalModel_Solver::_updateFluxDer( const Solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::_updateSource( const Solution_Type& solution )
+OneDimensionalModel_Solver::updateSource( const Solution_Type& solution )
 {
     Real Aii, Qii;
 
@@ -1103,10 +1088,10 @@ OneDimensionalModel_Solver::_updateSource( const Solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::_updateSourceDer( const Solution_Type& solution )
+OneDimensionalModel_Solver::updateSourceDer( const Solution_Type& solution )
 {
     // first update the Source vector
-    _updateSource( solution );
+    updateSource( solution );
 
     // then update the derivative of the Source vector
     Real tmp;
@@ -1138,7 +1123,7 @@ OneDimensionalModel_Solver::_updateSourceDer( const Solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::_updateMatrices()
+OneDimensionalModel_Solver::updateMatrices()
 {
     // Matrices initialization
     for( UInt i = 0; i < 4; ++i )
@@ -1160,20 +1145,20 @@ OneDimensionalModel_Solver::_updateMatrices()
             for(UInt jj = 1; jj <= 2; jj ++)
             {
                 // update the M_coeff*
-                _updateMatrixCoefficients( ii , jj, iedge);
+                updateMatrixCoefficients( ii , jj, iedge);
 
                 // update the M_elmat*
-                _updateElemMatrices();
+                updateElemMatrices();
 
                 // assemble the global matrices
-                _assemble_matrices( ii, jj );
+                matrixAssemble( ii, jj );
             }
         }
     }
 }
 
 void
-OneDimensionalModel_Solver::_updateMatrixCoefficients( const UInt& ii, const UInt& jj , const UInt& iedge )
+OneDimensionalModel_Solver::updateMatrixCoefficients( const UInt& ii, const UInt& jj , const UInt& iedge )
 {
     Real dFluxdUelem(0), dSrcdUelem(0);
 
@@ -1189,7 +1174,7 @@ OneDimensionalModel_Solver::_updateMatrixCoefficients( const UInt& ii, const UIn
 }
 
 void
-OneDimensionalModel_Solver::_updateElemMatrices()
+OneDimensionalModel_Solver::updateElemMatrices()
 {
     // set the elementary matrices to 0.
     M_elmatMass->zero();
@@ -1238,7 +1223,7 @@ OneDimensionalModel_Solver::_updateElemMatrices()
 }
 
 void
-OneDimensionalModel_Solver::_assemble_matrices(const UInt& ii, const UInt& jj )
+OneDimensionalModel_Solver::matrixAssemble( const UInt& ii, const UInt& jj )
 {
     ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
 
@@ -1256,15 +1241,15 @@ OneDimensionalModel_Solver::_assemble_matrices(const UInt& ii, const UInt& jj )
 }
 
 void
-OneDimensionalModel_Solver::_updateBCDirichletVector()
+OneDimensionalModel_Solver::updateBCDirichletVector()
 {
-    Debug( 6310 ) << "[_updateBCDirichletVector] \t firstDof = " << M_leftNodeId
+    Debug( 6310 ) << "[updateBCDirichletVector] \t firstDof = " << M_leftNodeId
                   << " lastDof = " << M_rightNodeId << ";\n";
 
-    Debug( 6310 ) << "[_updateBCDirichletVector] \t bcDirLeft[0] = " << M_bcDirLeft[0]
+    Debug( 6310 ) << "[updateBCDirichletVector] \t bcDirLeft[0] = " << M_bcDirLeft[0]
                   << " bcDirLeft[1] = " << M_bcDirLeft[1] << ";\n";
 
-    Debug( 6310 ) << "[_updateBCDirichletVector] \t bcDirRight[0] = " << M_bcDirRight[0]
+    Debug( 6310 ) << "[updateBCDirichletVector] \t bcDirRight[0] = " << M_bcDirRight[0]
                   << " bcDirRight[1] = " << M_bcDirRight[1] << ";\n";
 
     // unsymmetric treatment (LU must be used!)
@@ -1291,7 +1276,7 @@ OneDimensionalModel_Solver::_updateBCDirichletVector()
 }
 
 void
-OneDimensionalModel_Solver::_updateBCDirichletMatrix( Matrix_Type& mat )
+OneDimensionalModel_Solver::updateBCDirichletMatrix( Matrix_Type& mat )
 {
 
     // unsymmetric treatment (LU must be used!)
@@ -1309,7 +1294,7 @@ OneDimensionalModel_Solver::_updateBCDirichletMatrix( Matrix_Type& mat )
 }
 
 OneDimensionalModel_Solver::Vector_Type
-OneDimensionalModel_Solver::_correct_flux_inertial( const Vector_Type& flux )
+OneDimensionalModel_Solver::inertialFluxCorrection( const Vector_Type& flux )
 {
     Matrix_Type _matrixLHS(M_FESpace->map());
     Matrix_Type _stiffRHS (M_FESpace->map());
@@ -1346,7 +1331,7 @@ OneDimensionalModel_Solver::_correct_flux_inertial( const Vector_Type& flux )
         meanA0  = M_Physics->Data()->Area0(iedge - 1) + M_Physics->Data()->Area0(iedge);
         meanA0 /= 2;
 
-        m = M_Physics->Data()->DensityWall()*M_Physics->Data()->Thickness()/
+        m = M_Physics->Data()->DensityWall()*M_Physics->Data()->Thickness(iedge)/
             ( 2*std::sqrt(4*std::atan(1))*std::sqrt(meanA0) );
 
         _coeffStiff = m/M_Physics->Data()->DensityRho();
@@ -1388,7 +1373,7 @@ OneDimensionalModel_Solver::_correct_flux_inertial( const Vector_Type& flux )
     // penultimate row modified (for symmetry)
     //  _rhs( lastDof - 1 ) += - _matrix.UpDiag()( lastDof - 1 ) * M_bcDirRight.second;
 
-    _updateBCDirichletMatrix(_matrixLHS);
+    updateBCDirichletMatrix(_matrixLHS);
 
     //_tridiagsolver.Factor( _matrixLHS );
 
@@ -1407,7 +1392,7 @@ OneDimensionalModel_Solver::_correct_flux_inertial( const Vector_Type& flux )
 }
 
 OneDimensionalModel_Solver::Vector_Type
-OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux, const Real& TimeStep )
+OneDimensionalModel_Solver::viscoelasticFluxCorrection( const Vector_Type& flux, const Real& TimeStep )
 {
     Matrix_Type _matrixLHS(M_FESpace->map());
     Matrix_Type _stiffRHS (M_FESpace->map());
@@ -1504,7 +1489,7 @@ OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux,
     // but nothing has to be added because of homogeneous dirichlet bc
     //    _rhs( lastDof - 1 ) += - _matrix.UpDiag()( lastDof - 1 ) * M_bcDirRight.second;
 
-    _updateBCDirichletMatrix(_matrixLHS);
+    updateBCDirichletMatrix(_matrixLHS);
 
     Vector_Type _sol(_rhs);
 
@@ -1515,7 +1500,7 @@ OneDimensionalModel_Solver::_correct_flux_viscoelastic( const Vector_Type& flux,
 }
 
 OneDimensionalModel_Solver::Vector_Type
-OneDimensionalModel_Solver::_correct_flux_longitudinal()
+OneDimensionalModel_Solver::longitudinalFluxCorrection()
 {
     Matrix_Type _massLHS(M_FESpace->map());
     Matrix_Type _massRHS(M_FESpace->map());
@@ -1629,7 +1614,7 @@ OneDimensionalModel_Solver::_correct_flux_longitudinal()
     // penultimate row modified (for symmetry)
     //    _rhs( lastDof - 1 ) += - _matrix.UpDiag()( lastDof - 1 ) * M_bcDirRight.second;
 
-    _updateBCDirichletMatrix(_massLHS);
+    updateBCDirichletMatrix(_massLHS);
 
     //@_tridiagsolver.Factor( _massLHS );
 
@@ -1698,7 +1683,7 @@ OneDimensionalModel_Solver::_compute_d2Q_dx2( const ScalVec& flux )
     // but nothing has to be added because of homogeneous dirichlet bc
     //    _rhs( lastDof - 1 ) += - _matrix.UpDiag()( lastDof - 1 ) * M_bcDirRight.second;
 
-    _updateBCDirichletMatrix(_massLHS);
+    updateBCDirichletMatrix(_massLHS);
 
 //     Debug( 6310 ) << "\n[_compute_d2Q_dx2] _massLHS.Diag():\n";
 //     for(int i=0; i<_massLHS.OrderMatrix(); ++i)
