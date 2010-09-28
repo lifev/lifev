@@ -52,6 +52,15 @@ class MS_PhysicalCoupling
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
+    typedef std::vector< MS_Vector_PtrType >                     CouplingVariablesContainer_Type;
+    typedef std::vector< Real >                                  TimeContainer_Type;
+
+    //@}
+
+
     //! @name Constructors & Destructor
     //@{
 
@@ -275,6 +284,12 @@ public:
      */
     const MS_Vector_Type& GetResidual() const;
 
+    //! Get the time interpolation order.
+    /*!
+     * @return the value of the time interpolation order.
+     */
+    const UInt& GetTimeInterpolationOrder() const;
+
 
     //@}
 
@@ -335,21 +350,15 @@ protected:
      */
     void ExportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector );
 
-    //! Linear interpolation/extrapolation of the coupling variables
+    //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
     /*!
-     * @param coupling1 coupling variable at time t1
-     * @param coupling2 coupling variable at time t2
+     * @param timeContainer vector of times
      * @param t interpolation time
-     * @param t1 first coupling vector time
-     * @param t2 second coupling vector time
-     * @return coupling variable interpolated/extrapolated at time t
+     * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
      */
-    template < class CouplingType >
-    CouplingType InterpolateCouplingVariable( const CouplingType& coupling1,
-                                              const CouplingType& coupling2,
-                                              const Real& t,
-                                              const Real& t1,
-                                              const Real& t2 );
+    void InterpolateCouplingVariables( const TimeContainer_Type& timeContainer,
+                                       const Real& t,
+                                             MS_Vector_Type& interpolatedCouplingVariables );
 
     //! Display and error message for the specific model
     /*!
@@ -372,29 +381,16 @@ protected:
 
     std::pair< UInt, UInt >              M_couplingIndex;
 
-    MS_Vector_PtrType                    M_LocalCouplingVariables;
-    MS_Vector_PtrType                    M_LocalCouplingVariables_tn;
+    CouplingVariablesContainer_Type      M_LocalCouplingVariables;
     MS_Vector_PtrType                    M_LocalCouplingResiduals;
+
+    UInt                                 M_timeInterpolationOrder;
 
     Int                                  M_perturbedCoupling;
 
     MS_Comm_PtrType                      M_comm;
     boost::shared_ptr< Displayer >       M_displayer;
 };
-
-// ===================================================
-// Template implementation
-// ===================================================
-template < class CouplingType >
-CouplingType
-MS_PhysicalCoupling::InterpolateCouplingVariable( const CouplingType& coupling1,
-                                                  const CouplingType& coupling2,
-                                                  const Real& t,
-                                                  const Real& t1,
-                                                  const Real& t2 )
-{
-    return coupling1 + (coupling2 - coupling1) * ( (t - t1) / (t2 - t1) );
-}
 
 } // Namespace LifeV
 

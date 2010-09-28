@@ -52,8 +52,8 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
     M_globalData                  (),
     M_couplingIndex               (),
     M_LocalCouplingVariables      (),
-    M_LocalCouplingVariables_tn   (),
     M_LocalCouplingResiduals      (),
+    M_timeInterpolationOrder      ( 1 ),
     M_perturbedCoupling           ( false ),
     M_comm                        (),
     M_displayer                   ()
@@ -75,8 +75,8 @@ MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) 
     M_globalData                  ( coupling.M_globalData ),
     M_couplingIndex               ( coupling.M_couplingIndex ),
     M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
-    M_LocalCouplingVariables_tn   ( coupling.M_LocalCouplingVariables_tn ),
     M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
+    M_timeInterpolationOrder      ( coupling.M_timeInterpolationOrder ),
     M_perturbedCoupling           ( coupling.M_perturbedCoupling ),
     M_comm                        ( coupling.M_comm ),
     M_displayer                   ( coupling.M_displayer )
@@ -106,8 +106,8 @@ MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
         M_globalData                  = coupling.M_globalData;
         M_couplingIndex               = coupling.M_couplingIndex;
         M_LocalCouplingVariables      = coupling.M_LocalCouplingVariables;
-        M_LocalCouplingVariables_tn   = coupling.M_LocalCouplingVariables_tn;
         M_LocalCouplingResiduals      = coupling.M_LocalCouplingResiduals;
+        M_timeInterpolationOrder      = coupling.M_timeInterpolationOrder;
         M_perturbedCoupling           = coupling.M_perturbedCoupling;
         M_comm                        = coupling.M_comm;
         M_displayer                   = coupling.M_displayer;
@@ -130,12 +130,10 @@ MS_PhysicalCoupling::SetupData( const std::string& FileName )
 
     // Read multiscale parameters
     M_couplingName = DataFile( "MultiScale/couplingName", "couplingName" );
+    M_timeInterpolationOrder = DataFile( "MultiScale/timeInterpolationOrder", 0 );
 
-    UInt componentSize = DataFile.vector_variable_size( "MultiScale/couplingFlags" );
-
-    M_flags.reserve( componentSize );
-    for ( UInt j( 0 ); j < componentSize; ++j )
-        M_flags.push_back( DataFile( "MultiScale/couplingFlags", 0, j ) ); // flags
+    // Set the size of the local coupling variables
+    M_LocalCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
 }
 
 void
@@ -146,6 +144,10 @@ MS_PhysicalCoupling::ShowMe()
               << "Coupling type       = " << Enum2String( M_type, MS_couplingsMap ) << std::endl << std::endl;
 
     std::cout << "Models number       = " << GetModelsNumber() << std::endl;
+    std::cout << "Models ID(s)        = ";
+    for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
+        std::cout << M_models[i]->GetID() << " ";
+    std::cout << std::endl;
     std::cout << "Models type(s)      = ";
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
         std::cout << Enum2String( M_models[i]->GetType(), MS_modelsMap ) << " ";
@@ -169,7 +171,7 @@ MS_PhysicalCoupling::CreateCouplingMap( EpetraMap& couplingMap )
 
     M_couplingIndex.second = couplingMap.getMap( Unique )->NumGlobalElements();
 
-    couplingMap += M_LocalCouplingVariables->getMap();
+    couplingMap += M_LocalCouplingVariables[0]->getMap();
 }
 
 void
@@ -180,7 +182,7 @@ MS_PhysicalCoupling::ImportCouplingVariables( const MS_Vector_Type& CouplingVari
     Debug( 8200 ) << "MS_PhysicalCoupling::ImportCouplingVariables( CouplingVariables ) \n";
 #endif
 
-    ImportCouplingVector( CouplingVariables, *M_LocalCouplingVariables );
+    ImportCouplingVector( CouplingVariables, *M_LocalCouplingVariables[0] );
 }
 
 void
@@ -191,7 +193,7 @@ MS_PhysicalCoupling::ExportCouplingVariables( MS_Vector_Type& CouplingVariables 
     Debug( 8200 ) << "MS_PhysicalCoupling::ExportCouplingVariables( CouplingVariables ) \n";
 #endif
 
-    ExportCouplingVector( *M_LocalCouplingVariables, CouplingVariables );
+    ExportCouplingVector( *M_LocalCouplingVariables[0], CouplingVariables );
 }
 
 void
@@ -202,19 +204,33 @@ MS_PhysicalCoupling::ExtrapolateCouplingVariables()
     Debug( 8200 ) << "MS_PhysicalCoupling::ExtrapolateCouplingVariables() \n";
 #endif
 
-    MS_Vector_Type ExtrapolatedCouplingVariables( *M_LocalCouplingVariables );
+    MS_Vector_Type ExtrapolatedCouplingVariables( *M_LocalCouplingVariables[0] );
+    UInt couplingVariablesSize( M_LocalCouplingVariables.size() );
 
-    ExtrapolatedCouplingVariables = InterpolateCouplingVariable( *M_LocalCouplingVariables_tn, *M_LocalCouplingVariables,
-                                                                  M_globalData->GetDataTime()->getNextTime(),
-                                                                  M_globalData->GetDataTime()->getPreviousTime(),
-                                                                  M_globalData->GetDataTime()->getTime() );
+    // Time container for interpolation
+    TimeContainer_Type timeContainer( couplingVariablesSize, 0 );
+    for ( UInt i(0) ; i < couplingVariablesSize ; ++i )
+        timeContainer[i] = M_globalData->GetDataTime()->getTime() - i * M_globalData->GetDataTime()->getTimeStep();
 
-    *M_LocalCouplingVariables_tn = *M_LocalCouplingVariables;
-    *M_LocalCouplingVariables    = ExtrapolatedCouplingVariables;
+    // Interpolate the coupling variables at the next time
+    InterpolateCouplingVariables( timeContainer, M_globalData->GetDataTime()->getNextTime(), ExtrapolatedCouplingVariables );
+
+    // If we have not yet enough samples for interpolation, we add a new one
+    if ( couplingVariablesSize <= M_timeInterpolationOrder )
+    {
+        ++couplingVariablesSize;
+        M_LocalCouplingVariables.push_back( MS_Vector_PtrType ( new EpetraVector( *M_LocalCouplingVariables[0] ) ) );
+    }
+
+    // Updating database
+    for ( UInt i(1) ; i < couplingVariablesSize ; ++i )
+        *M_LocalCouplingVariables[couplingVariablesSize-i] = *M_LocalCouplingVariables[couplingVariablesSize-i-1];
+
+    *M_LocalCouplingVariables[0] = ExtrapolatedCouplingVariables;
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingVariables )[i]  << "\n";
+        Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingVariables[0] )[i]  << "\n";
 #endif
 
 }
@@ -418,6 +434,12 @@ MS_PhysicalCoupling::GetResidual() const
     return *M_LocalCouplingResiduals;
 }
 
+const UInt&
+MS_PhysicalCoupling::GetTimeInterpolationOrder() const
+{
+    return M_timeInterpolationOrder;
+}
+
 // ===================================================
 // Protected Methods
 // ===================================================
@@ -433,9 +455,8 @@ MS_PhysicalCoupling::CreateLocalVectors()
     EpetraMap map( -1, static_cast< int > ( MyGlobalElements.size() ), &MyGlobalElements[0], 0, M_comm );
 
     // Create local repeated vectors
-    M_LocalCouplingVariables.reset     ( new EpetraVector( map, Repeated ) );
-    M_LocalCouplingVariables_tn.reset  ( new EpetraVector( map, Repeated ) );
-    M_LocalCouplingResiduals.reset     ( new EpetraVector( map, Repeated ) );
+    M_LocalCouplingVariables.push_back( MS_Vector_PtrType ( new EpetraVector( map, Repeated ) ) );
+    M_LocalCouplingResiduals.reset( new EpetraVector( map, Repeated ) );
 }
 
 void
@@ -459,6 +480,26 @@ MS_PhysicalCoupling::ExportCouplingVector( const MS_Vector_Type& localVector, MS
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
         if ( M_comm->MyPID() == 0 )
             globalVector[ M_couplingIndex.second + i ] = localVector[i];
+}
+
+void
+MS_PhysicalCoupling::InterpolateCouplingVariables( const TimeContainer_Type& timeContainer,
+                                                   const Real& t,
+                                                         MS_Vector_Type& interpolatedCouplingVariables )
+{
+    // Lagrange interpolation
+    interpolatedCouplingVariables *= 0;
+    Real base(1);
+
+    for ( UInt i(0) ; i < M_LocalCouplingVariables.size() ; ++i )
+    {
+        base = 1;
+        for ( UInt j(0) ; j < M_LocalCouplingVariables.size() ; ++j )
+            if ( j != i )
+                base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
+
+        interpolatedCouplingVariables += *M_LocalCouplingVariables[i] * base;
+    }
 }
 
 void
