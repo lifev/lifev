@@ -1,0 +1,32 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-11-24
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - Heart Physical Flux #############################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_HeartFlux
+
+[boundary_conditions]
+list = 'HeartFlux'
+
+	[./HeartFlux]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	functionFile		= physicalFunctions/HeartPhysicalFlux.dat
+
+	# Additional parameters for 1D BC
+	quantity        = Q
+    line            = first
+    
+	[../]
+	

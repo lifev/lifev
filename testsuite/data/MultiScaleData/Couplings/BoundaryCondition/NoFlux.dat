@@ -1,0 +1,31 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-10-28
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### COUPLING: BoundaryCondition - No Flux #########################################################
+###################################################################################################
+
+[MultiScale]
+couplingName	= BoundaryCondition_NoFlux
+
+[boundary_conditions]
+list = 'NoFlux'  # Unitary Flux
+	
+	[./NoFlux]
+	type				= Flux
+	mode				= Full
+	component			= 3
+	function   			= '0' 
+	
+    # Additional parameters for 1D BC
+    quantity        = Q
+    line            = first
+    
+	[../]
