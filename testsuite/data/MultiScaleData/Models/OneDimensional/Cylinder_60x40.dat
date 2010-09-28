@@ -37,16 +37,13 @@ SourceType           = OneD_NonLinearSource
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
 
+DistributionLaw      = none          # Coefficients distribution law: none, linear, pointwise
 Area0                = 0.785398163397448 # Area of tube series
 
 thickVessel          = false
 thickness            = 0.1
 
-# Use Fixed Coefficients
-#AlphaCoriolis        = 1            # Coriolis Coefficients
-#Beta0                = 1.e6         # pressure law exponent
-#Beta1                = 0.5          # pressure law exponent
-#Kr                   = 2.419026343  # friction parameter (source term)
+externalPressure     = 0  # g/cm/s^2(dyne/cm^2)
 
 [../space_discretization]
 Length               = 60

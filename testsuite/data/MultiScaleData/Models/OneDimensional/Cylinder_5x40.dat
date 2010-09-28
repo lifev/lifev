@@ -37,10 +37,13 @@ SourceType           = OneD_NonLinearSource
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
 
+DistributionLaw      = none          # Coefficients distribution law: none, linear, pointwise
 Area0                = 0.785398163397448 # Area of tube series
 
 thickVessel          = false
 thickness            = 0.1
+
+externalPressure     = 0  # g/cm/s^2(dyne/cm^2)
 
 # Use Fixed Coefficients
 #AlphaCoriolis        = 1            # Coriolis Coefficients
