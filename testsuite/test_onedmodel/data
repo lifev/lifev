@@ -51,12 +51,6 @@ transform            = '1.0 1.0 1.0
                         0.0 90.0 90.0
                         0.0 0.0 0.0'
 
-[../initialize]
-variable             = Q
-initialValue         = 0
-restValue            = 0
-multiplier           = 1
-
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name
