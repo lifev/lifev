@@ -395,7 +395,7 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
     M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
     // Local matrices and vectors.
-    M_elmatMass       ( M_FESpace.mesh()->numElements(), ElemMat( M_FESpace.refFE().nbDof(), 1, 1 ) ),
+    M_elmatMass       ( ),
     M_initialSolution ( HyperbolicDefaultInitialSolution() )
 {
 
@@ -404,7 +404,8 @@ HyperbolicSolver ( const data_type&          dataFile,
                            *M_u,
                            M_data.dataTime()->getInitialTime() );
 
-	CONSTRUCTOR( "HyperbolicSolver" );
+    M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
+    CONSTRUCTOR( "HyperbolicSolver" );
 
 } // Constructor
 
@@ -430,7 +431,7 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
     M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
     // Local matrices and vectors.
-    M_elmatMass       ( M_FESpace.mesh()->numElements(), ElemMat( M_FESpace.refFE().nbDof(), 1, 1 ) ),
+    M_elmatMass       ( ),
     M_initialSolution ( HyperbolicDefaultInitialSolution() )
 
 {
@@ -440,7 +441,7 @@ HyperbolicSolver ( const data_type&          dataFile,
                            *M_u,
                            M_data.dataTime()->getInitialTime() );
 
-	CONSTRUCTOR( "HyperbolicSolver" );
+        CONSTRUCTOR( "HyperbolicSolver" );
 
 } // Constructor
 
@@ -481,16 +482,18 @@ setup ()
         M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
                                UPDATE_QUAD_NODES | UPDATE_WDET );
 
-        // Compute the mass matrix for the current element.
-        mass( static_cast<Real>(1), M_elmatMass[ iElem - 1 ], M_FESpace.fe(), 0, 0);
-
-        // Store in the mass matrix also the time step.
-        M_elmatMass[ iElem - 1 ] *= static_cast<Real>(1) / M_data.dataTime()->getTimeStep();
-
+	ElemMat matelem(M_FESpace.refFE().nbDof(), 1, 1);
+	matelem.zero();
+        // Compute the mass matrix for the current element, including time step
+	Real coeff = static_cast<Real>(1.) / M_data.dataTime()->getTimeStep();
+        mass( coeff, matelem, M_FESpace.fe(), 0, 0);
+    
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-        dpotrf_( _param_L, NB, M_elmatMass[ iElem - 1 ].mat(), NB, INFO );
+        dpotrf_( _param_L, NB, matelem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
+
+	M_elmatMass.push_back(matelem); 
 
     }
 
@@ -541,6 +544,7 @@ localEvolve ( const UInt& iElem )
     const UInt iGlobalElem( M_FESpace.dof().localToGlobal(iElem, 1) );
 
     ElemVec localFlux ( M_FESpace.refFE().nbDof(), 1 );
+    localFlux.zero();
 
     // Loop on the faces of the element iElem and compute the local contribution
     for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
@@ -554,13 +558,15 @@ localEvolve ( const UInt& iElem )
         // Take the right element to the face, see regionMesh for the meaning of right element
         UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
 
-        //std::cout << "iElem " << iElem << std::endl << "iGlobalElem " << iGlobalElem << std::endl << "Left " << leftElement << std::endl << "Right " << rightElement << std::endl << std::endl << std::flush;
+        //std::cout << "iElem " << iElem << std::endl << "iGlobalElem " << iGlobalElem << std::endl << "Left " << leftElement 
+	// << std::endl << "Right " << rightElement << std::endl << std::endl << std::flush;
 
 
         // Update the normal vector of the current face in each quadrature point
         M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
 
         ElemVec localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
+	localFaceFluxWeight.zero();
 
         // Solution in the left element
         ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
@@ -579,6 +585,7 @@ localEvolve ( const UInt& iElem )
         if ( !rightElement )
         {
             ElemVec localFaceFluxWeight1 ( M_FESpace.refFE().nbDof(), 1 );
+	    localFaceFluxWeight1.zero();
 
             // Loop on all the quadrature points
             for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig)
@@ -634,11 +641,8 @@ localEvolve ( const UInt& iElem )
             // If it is not an inflow face, it is an outflow face
             else
             {
-
                 rightValue = leftValue;
-
             }
-
         }
         else
         {
@@ -679,6 +683,7 @@ localEvolve ( const UInt& iElem )
                                                      rightValue[ 0 ],
                                                      normal,
                                                      M_data.dataTime()->getTime(), x, y, z );
+	    //std::cout << "localFaceFlux " << localFaceFlux << std::endl;
 
             localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
 
@@ -694,12 +699,13 @@ localEvolve ( const UInt& iElem )
         dtrtrs_( _param_L, _param_T, _param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
-
         localFlux += localFaceFluxWeight;
-
+	//	std::cout << M_me <<  "Inside loop:  leftValue, rightValue, localFaceFLuxWeight, localFlux " 
+	//  << leftValue[0] << " " << rightValue[0] << "  " << localFaceFluxWeight << " "  << localFlux(0) << std::endl << std::flush;
+    
     }
 
-    // std::cout << M_me <<  " localFlux " << localFlux << std::endl << std::flush;
+    //    std::cout << M_me <<  "End of localevolve:  localFlux " << localFlux(0) << std::endl << std::flush;
 
     (*M_u)[ iGlobalElem ] = (*M_uOld)[ iGlobalElem ] - localFlux(0);
 
@@ -732,7 +738,7 @@ solveOneStep ()
 
         M_FESpace.fe().update(M_FESpace.mesh()->element( iElem ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
-        //std::cout << "Element number " << iElem << " " << M_FESpace.mesh()->volume(iElem).localId() << std::endl;
+        //std::cout << "Element number " << iElem << std::endl;
 
         localReconstruct( iElem );
 
@@ -740,7 +746,7 @@ solveOneStep ()
 
         localAverage( iElem );
 
-        //   std::cout << std::endl;
+	//std::cout << std::endl;
     }
 
     *M_uOld = *M_u;
@@ -751,3 +757,8 @@ solveOneStep ()
 
 
 #endif //_darcySolver_H_
+
+
+/*
+
+*/
