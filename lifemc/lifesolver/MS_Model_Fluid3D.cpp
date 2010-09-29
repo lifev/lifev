@@ -223,7 +223,7 @@ MS_Model_Fluid3D::SetupModel()
     SetupLinearModel();
 
     //Setup solution
-    SetupSolution();
+    InitializeSolution();
 }
 
 void
@@ -455,7 +455,7 @@ MS_Model_Fluid3D::SetSolution( const FluidVector_PtrType& Solution )
 {
     M_solution = Solution;
 
-    SetupSolution();
+    M_fluid->initialize( *M_solution );
 }
 
 // ===================================================
@@ -781,19 +781,19 @@ MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< BC_Type >& BC )
 }
 
 void
-MS_Model_Fluid3D::SetupSolution()
+MS_Model_Fluid3D::InitializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupSolution() \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::InitializeSolution() \n";
 #endif
 
     if ( MS_ProblemStep > 0 )
     {
         M_importer->setMeshProcId( M_mesh->mesh(), M_comm->MyPID() );
 
-        M_importer->addVariable( ExporterData::Vector, "Velocity", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
+        M_importer->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
 
         // Import
         M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->getInitialTime() ) + 1 );
