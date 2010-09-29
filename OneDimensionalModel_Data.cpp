@@ -62,10 +62,10 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_flux_second_der           (),
     M_dP_dt_steps               (),
     M_CFLmax                    (),
-    M_initialVariable           (),
-    M_initialValue              (),
-    M_restValue                 (),
-    M_multiplier                (),
+//    M_initialVariable           (),
+//    M_initialValue              (),
+//    M_restValue                 (),
+//    M_multiplier                (),
     M_ComputeCoefficients       (),
     M_PowerlawCoefficient       (),
     M_Density                   (),
@@ -146,6 +146,7 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     if ( M_CFLmax > std::sqrt(3)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
+/*
     // Initialize
     std::map< std::string, OneD_Initialize > initializeMap;
     initializeMap["A"]       = OneD_InitializeArea;
@@ -154,10 +155,11 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     initializeMap["W2"]      = OneD_InitializeRiemann2;
     initializeMap["P"]       = OneD_InitializePressure;
 
-    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "P" ) ];
+    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
     M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
     M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
     M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
+*/
 
     // Physical Parameters
     M_ComputeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
@@ -362,6 +364,7 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     if ( M_CFLmax > std::sqrt(3)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
+/*
     // Initialize
     std::map< std::string, OneD_Initialize > initializeMap;
     initializeMap["A"]       = OneD_InitializeArea;
@@ -370,10 +373,11 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     initializeMap["W2"]      = OneD_InitializeRiemann2;
     initializeMap["P"]       = OneD_InitializePressure;
 
-    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "P" ) ];
+    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
     M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
     M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
     M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
+*/
 
     // Physical Parameters
     M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
@@ -573,14 +577,14 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Flux Second Derivative = " << M_flux_second_der << std::endl;
     output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
     output << "Maximum admissible CFL = " << M_CFLmax << std::endl;
-
+/*
     // Initialize
     output << "\n*** Values for data [initialize]\n\n";
     output << "Initial Variable       = " << M_initialVariable << std::endl;
     output << "Initial Value          = " << M_initialValue << std::endl;
     output << "Rest Value             = " << M_restValue << std::endl;
     output << "Multiplier             = " << M_multiplier << std::endl;
-
+*/
     // Physical Parameters
     output << "\n*** Values for data [PhysicalParameters]\n\n";
     output << "Compute Coefficients   = " << M_ComputeCoefficients << "\n";
@@ -833,6 +837,7 @@ OneDimensionalModel_Data::CFLmax() const
     return M_CFLmax;
 }
 
+/*
 const OneD_Initialize&
 OneDimensionalModel_Data::initialVariable() const
 {
@@ -856,6 +861,7 @@ OneDimensionalModel_Data::multiplier() const
 {
     return M_multiplier;
 }
+*/
 
 // ===================================================
 // Get Methods - Physical Parameters

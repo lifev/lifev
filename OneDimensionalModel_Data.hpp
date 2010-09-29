@@ -50,11 +50,13 @@
 
 namespace LifeV {
 
+/*
 enum OneD_Initialize { OneD_InitializeArea,
                        OneD_InitializeFlux,
                        OneD_InitializeRiemann1,
                        OneD_InitializeRiemann2,
                        OneD_InitializePressure };
+*/
 
 //! OneDimensionalModel_Data - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
@@ -261,10 +263,10 @@ public:
     const int&         DPdtSteps() const;
     const Real&        CFLmax() const;
 
-    const OneD_Initialize& initialVariable() const;
-    const Real&        initialValue() const;
-    const Real&        restValue() const;
-    const Real&        multiplier() const;
+//    const OneD_Initialize& initialVariable() const;
+//    const Real&        initialValue() const;
+//    const Real&        restValue() const;
+//    const Real&        multiplier() const;
 
     // Physical Parameters
     const Real& DensityRho() const;
@@ -362,10 +364,10 @@ private:
     Real              M_CFLmax;
 
     //! initialize
-    OneD_Initialize   M_initialVariable;
-    Real              M_initialValue;
-    Real              M_restValue;
-    Real              M_multiplier;
+//    OneD_Initialize   M_initialVariable;
+//    Real              M_initialValue;
+//    Real              M_restValue;
+//    Real              M_multiplier;
 
     //! Physical Parameters
     bool M_ComputeCoefficients;
