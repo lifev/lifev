@@ -211,6 +211,39 @@ public:
     //! setup
     void setupSolution( Solution_Type& solution );
 
+    //! Initialize all the variables of the solution to a reference condition with Q=0, A=A0, and P=P_ext
+    /*!
+     * @param solution the solution container
+     */
+    void initialize( Solution_Type& solution );
+
+    //! Update the Riemann variables.
+    /*!
+     *  @param solution the solution container is passed with A^n, Q^n and it is updated with W1^n, W2^n
+     */
+    void computeW1W2( Solution_Type& solution );
+
+    //! Update the pressure.
+    /*!
+     *  This method compute the value of the pressure (elastic and if necessary also viscoelastic)
+     *  adding it to the solution.
+     *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
+     *  @param TimeStep time step
+     */
+    void computePressure( Solution_Type& solution, const Real& TimeStep );
+
+    //! Update the ratio between A and A0.
+    /*!
+     *  @param solution the solution container is passed with A^n, is updated with A^n/A0-1
+     */
+    void computeAreaRatio( Solution_Type& solution );
+
+    //! Compute A from the area ratio: A/A0-1.
+    /*!
+     *  @param solution the solution container is passed with A^n/A0-1 and is updated with A^n
+     */
+    void computeArea( Solution_Type& solution );
+
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize variables with non constant values in space.
@@ -225,26 +258,26 @@ public:
      *  X = rest_value ( 1 + multiplier * exp( - ( z - node ) / ( 2 * width^2 ) ) )
      *  where node is alternatively firstnode or lastnode
      */
-    void initialize( Solution_Type& solution );
+    //void initialize( Solution_Type& solution );
 
     //! Sets initial condition for the unknowns
     /*!
      * @param var if var == "physical" then A  = u10 and Q  = u20
      *            if var == "Riemann"  then W1 = u10 and W2 = u20
      */
-    void initialize( Solution_Type& solution, const Real& u10, const Real& u20, const std::string& var = "physical" );
+    //void initialize( Solution_Type& solution, const Real& u10, const Real& u20, const std::string& var = "physical" );
 
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize with vectors containing all the nodal values
      */
-    void initialize( Solution_Type& solution, const Vector_Type& u10, const Vector_Type& u20 );
+    //void initialize( Solution_Type& solution, const Vector_Type& u10, const Vector_Type& u20 );
 
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize only Flux ( Area read from OneDNonLinParam )
      */
-    void initialize( Solution_Type& solution, const Real& u20 );
+    //void initialize( Solution_Type& solution, const Real& u20 );
 
     //! Compute the right hand side
     /*!
@@ -390,21 +423,6 @@ private:
 
     //! @name Private Methods
     //@{
-
-    //! Update the pressure.
-    /*!
-     *  This method compute the value of the pressure (elastic and if necessary also viscoelastic)
-     *  adding it to the solution.
-     *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
-     *  @param TimeStep time step
-     */
-    void updatePressure( Solution_Type& solution, const Real& TimeStep );
-
-    //! Update the ratio between A and A0.
-    /*!
-     *  @param solution the solution container is passed with A^n, is updated with A^n/A0
-     */
-    void updateAreaRatio( Solution_Type& solution );
 
     //! Update the P1 flux vector from U: M_Fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
     void updateFlux( const Solution_Type& solution );

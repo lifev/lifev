@@ -173,6 +173,69 @@ OneDimensionalModel_Solver::setupSolution( Solution_Type& solution )
 void
 OneDimensionalModel_Solver::initialize( Solution_Type& solution )
 {
+    for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
+    {
+        (*solution["A"])[inode] = M_Physics->Data()->Area0(inode - 1);
+        (*solution["Q"])[inode] = 0;
+    }
+
+    // Compute W1 and W2 from A and Q
+    computeW1W2( solution );
+
+    // Compute A/A0 from A
+    computeAreaRatio( solution );
+
+    // Compute initial pressure (taking into account the viscoelastic wall)
+    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+}
+
+void
+OneDimensionalModel_Solver::computeW1W2( Solution_Type& solution )
+{
+    for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
+    {
+        M_Physics->W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
+                             (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1], ielem);
+    }
+}
+
+void
+OneDimensionalModel_Solver::computePressure( Solution_Type& solution, const Real& TimeStep )
+{
+    for ( UInt i(0); i < M_FESpace->dim() ; ++i )
+    {
+        (*solution["P"])[i+1] = M_Physics->elasticPressure( (*solution["A"])[i+1], i );
+
+        if( M_Physics->Data()->viscoelasticWall() )
+        {
+            // Viscoelastic pressure is not working right now!
+            // We need to pass from outside U_prevtime and U_2prevtime
+            (*solution["P_visc"])[i+1] = M_Physics->viscoelasticPressure( (*solution["A"])[i+1],
+                                                                          (*M_U_prevtime["A"])[i+1],
+                                                                          (*M_U_2prevtime["A"])[i+1], TimeStep, i );
+            (*solution["P"])[i+1] += (*solution["P_visc"])[i+1];
+        }
+    }
+}
+
+void
+OneDimensionalModel_Solver::computeAreaRatio( Solution_Type& solution )
+{
+    for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
+        (*solution["A/A0-1"])[inode] = (*solution["A"])[inode] / M_Physics->Data()->Area0(inode - 1) - 1;
+}
+
+void
+OneDimensionalModel_Solver::computeArea( Solution_Type& solution )
+{
+    for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
+        (*solution["A"])[inode] = ( (*solution["A/A0-1"])[inode] + 1 ) * M_Physics->Data()->Area0(inode - 1);
+}
+
+/*
+void
+OneDimensionalModel_Solver::initialize( Solution_Type& solution )
+{
     ASSERT_PRE( (M_leftNodeId <= M_rightNodeId) && (M_rightNodeId <= M_FESpace->dim()),
                 "[initialize] outside tube boundaries" );
 
@@ -300,11 +363,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
     Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * M_Physics->Data()->multiplier() << "\n";
     Debug( 6310 ) << "[initialize]\t\tvalue2         = " << value2 << "\n";
 
-    // Compute A/A0
-    updateAreaRatio( solution );
+    // Compute A/A0 from A
+    computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -351,10 +414,10 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
     }
 
     // Compute A/A0
-    updateAreaRatio( solution );
+    computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -373,10 +436,10 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Vector_Ty
     }
 
     // Compute A/A0
-    updateAreaRatio( solution );
+    computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -396,14 +459,15 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u20
     }
 
     // Compute A/A0
-    updateAreaRatio( solution );
+    computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    updatePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
 }
+*/
 
 void
 OneDimensionalModel_Solver::updateRHS( const Solution_Type& solution, const Real& TimeStep )
@@ -570,18 +634,14 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
         *solution["A"] = area;
         *solution["Q"] = flowrate;
 
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
-        {
-            M_Physics->W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
-                                 (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1],
-                                  ielem);
-        }
+        // Compute W1 and W2 from A and Q
+        computeW1W2( solution );
 
-        // Compute A/A0
-        updateAreaRatio( solution );
+        // Compute A/A0 from A
+        computeAreaRatio( solution );
 
         // Update the pressure (taking into account the viscoelastic wall)
-        updatePressure( solution, TimeStep );
+        computePressure( solution, TimeStep );
     }
 }
 
@@ -996,32 +1056,6 @@ OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& 
 // ===================================================
 // Private Methods
 // ===================================================
-void
-OneDimensionalModel_Solver::updatePressure( Solution_Type& solution, const Real& TimeStep )
-{
-    for ( UInt i(0); i < M_FESpace->dim() ; ++i )
-    {
-        (*solution["P"])[i+1] = M_Physics->elasticPressure( (*solution["A"])[i+1], i );
-
-        if( M_Physics->Data()->viscoelasticWall() )
-        {
-            // Viscoelastic pressure is not working right now!
-            // We need to pass from outside U_prevtime and U_2prevtime
-            (*solution["P_visc"])[i+1] = M_Physics->viscoelasticPressure( (*solution["A"])[i+1],
-                                                                          (*M_U_prevtime["A"])[i+1],
-                                                                          (*M_U_2prevtime["A"])[i+1], TimeStep, i );
-            (*solution["P"])[i+1] += (*solution["P_visc"])[i+1];
-        }
-    }
-}
-
-void
-OneDimensionalModel_Solver::updateAreaRatio( Solution_Type& solution )
-{
-    for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
-        (*solution["A/A0-1"])[inode] = (*solution["A"])[inode] / M_Physics->Data()->Area0(inode - 1) - 1;
-}
-
 void
 OneDimensionalModel_Solver::updateFlux( const Solution_Type& solution )
 {
