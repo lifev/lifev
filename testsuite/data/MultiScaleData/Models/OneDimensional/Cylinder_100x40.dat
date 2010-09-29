@@ -49,12 +49,6 @@ externalPressure     = 0  # g/cm/s^2(dyne/cm^2)
 Length               = 100
 NumberOfElements     = 4000          # number of elements
 
-[../initialize]
-variable             = Q
-initialValue         = 0
-restValue            = 0
-multiplier           = 1
-
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name

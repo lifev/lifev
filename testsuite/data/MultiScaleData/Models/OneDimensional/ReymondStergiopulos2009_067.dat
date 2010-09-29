@@ -53,11 +53,6 @@ poisson              = 0.0
 Length               = 0.2
 NumberOfElements     = 2          # number of elements
 
-[../initialize]
-variable             = Q
-initialValue         = 0
-restValue            = 0
-multiplier           = 1
 
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files

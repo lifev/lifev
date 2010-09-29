@@ -49,11 +49,6 @@ externalPressure     = 0  # g/cm/s^2(dyne/cm^2)
 Length               = 80
 NumberOfElements     = 3200          # number of elements
 
-[../initialize]
-variable             = Q
-initialValue         = 0
-restValue            = 0
-multiplier           = 1
 
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files
