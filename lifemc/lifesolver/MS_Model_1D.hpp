@@ -368,6 +368,9 @@ private:
     //! Setup the FE space for pressure and velocity
     void SetupFESpace();
 
+    //! Initialize the solution.
+    void InitializeSolution();
+
     //! Update the solution (solution2 = solution1)
     /*!
      * @param solution1 solution to be copied.
@@ -417,6 +420,8 @@ private:
 
 #ifdef HAVE_HDF5
     boost::shared_ptr< IOFile_Type >       M_Exporter;
+    boost::shared_ptr< IOFile_Type >       M_Importer;
+
     boost::shared_ptr< Mesh_Type >         M_ExporterMesh;
 #endif
 
