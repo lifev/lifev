@@ -48,6 +48,7 @@ MS_Model_1D::MS_Model_1D() :
     super                          (),
 #ifdef HAVE_HDF5
     M_Exporter                     ( new IOFile_Type() ),
+    M_Importer                     ( new IOFile_Type() ),
     M_ExporterMesh                 ( new Mesh_Type() ),
 #endif
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -95,6 +96,7 @@ MS_Model_1D::MS_Model_1D( const MS_Model_1D& OneDimensionalModel ) :
     super                          ( OneDimensionalModel ),
 #ifdef HAVE_HDF5
     M_Exporter                     ( OneDimensionalModel.M_Exporter ),
+    M_Importer                     ( OneDimensionalModel.M_Importer ),
     M_ExporterMesh                 ( OneDimensionalModel.M_ExporterMesh ),
 #endif
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -130,6 +132,7 @@ MS_Model_1D::operator=( const MS_Model_1D& OneDimensionalModel )
         super::operator=( OneDimensionalModel );
 #ifdef HAVE_HDF5
         M_Exporter                     = OneDimensionalModel.M_Exporter;
+        M_Importer                     = OneDimensionalModel.M_Importer;
         M_ExporterMesh                 = OneDimensionalModel.M_ExporterMesh;
 #endif
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -222,6 +225,10 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_Exporter->setDirectory( MS_ProblemFolder );
 
     M_ExporterMesh->setup( M_Data->Length(), M_Data->NumberOfElements() );
+
+    M_Importer->setDataFromGetPot( DataFile );
+    M_Importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_Importer->setDirectory( MS_ProblemFolder );
 #endif
 
 }
@@ -240,9 +247,6 @@ MS_Model_1D::SetupModel()
     //Setup solution
     M_Solver->setupSolution( *M_Solution );
     M_Solver->setupSolution( *M_Solution_tn );
-
-    //Initialize solution
-    M_Solver->initialize( *M_Solution );
 
     //Set default BC (has to be called after setting other BC)
     M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source );
@@ -274,6 +278,8 @@ MS_Model_1D::SetupModel()
     }
 #endif
 
+    //Setup solution
+    InitializeSolution();
 }
 
 void
@@ -772,6 +778,38 @@ MS_Model_1D::SetupFESpace()
 
     M_FESpace.reset( new FESpace_Type( M_Data->mesh(), *refFE, *qR, *bdQr, 1, M_comm ) );
     M_Solver->setFESpace( M_FESpace );
+}
+
+void
+MS_Model_1D::InitializeSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MS_Model_1D::InitializeSolution() \n";
+#endif
+
+    if ( MS_ProblemStep > 0 )
+    {
+        M_Importer->setMeshProcId( M_ExporterMesh, M_comm->MyPID() );
+
+        //M_Exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_Solution)["A"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+        M_Importer->addVariable( ExporterData::Scalar, "Area ratio",      (*M_Solution)["A/A0-1"], static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+        M_Importer->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_Solution)["Q"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+        //M_Importer->addVariable( ExporterData::Scalar, "W1",              (*M_Solution)["W1"],   static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+        //M_Importer->addVariable( ExporterData::Scalar, "W2",              (*M_Solution)["W2"],   static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+        M_Importer->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_Solution)["P"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
+
+        // Import
+        M_Exporter->setStartIndex( M_Importer->importFromTime( M_Data->dataTime()->getInitialTime() ) + 1 );
+
+        // Compute A from AreaRatio
+        M_Solver->computeArea( *M_Solution );
+
+        // Compute W1 and W2 from A and Q
+        M_Solver->computeW1W2( *M_Solution );
+    }
+    else
+        M_Solver->initialize( *M_Solution );
 }
 
 void
