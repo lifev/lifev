@@ -347,8 +347,8 @@ private:
     //! Setup the offset for fluxes boundary conditions
     void SetupBCOffset( const boost::shared_ptr< BC_Type >& BC );
 
-    //! Setup the solution.
-    void SetupSolution();
+    //! Initialize the solution.
+    void InitializeSolution();
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void ImposePerturbation();
