@@ -352,6 +352,8 @@ protected:
 
     vector_ptrtype M_uOld;
 
+    vector_ptrtype M_globalFlux;
+
 
     //@}
 
@@ -361,6 +363,8 @@ protected:
 
 
     std::vector<ElemMat> M_elmatMass;
+
+    ElemVec              M_localFlux;
 
     //@}
 
@@ -394,7 +398,9 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_rhs             ( new vector_type ( M_localMap ) ),
     M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
     M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
+    M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
     // Local matrices and vectors.
+    M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( ),
     M_initialSolution ( HyperbolicDefaultInitialSolution() )
 {
@@ -430,7 +436,9 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_rhs             ( new vector_type ( M_localMap ) ),
     M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
     M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
+    M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
     // Local matrices and vectors.
+    M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( ),
     M_initialSolution ( HyperbolicDefaultInitialSolution() )
 
@@ -487,13 +495,13 @@ setup ()
         // Compute the mass matrix for the current element, including time step
 	Real coeff = static_cast<Real>(1.) / M_data.dataTime()->getTimeStep();
         mass( coeff, matelem, M_FESpace.fe(), 0, 0);
-    
+
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
         dpotrf_( _param_L, NB, matelem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
 
-	M_elmatMass.push_back(matelem); 
+	M_elmatMass.push_back(matelem);
 
     }
 
@@ -533,24 +541,21 @@ localEvolve ( const UInt& iElem )
 
     // Parameter that indicate the Lower storage of matrices.
     char _param_L[1] = {'L'};
-    char _param_N[1]    = {'N'};
+    char _param_N[1] = {'N'};
 
     // Paramater that indicate the Transpose of matrices.
-    char _param_T[1]    = {'T'};
+    char _param_T[1] = {'T'};
 
     // Numbers of columns of the right hand side := 1.
-    int NBRHS[1]        = {1};
+    int NBRHS[1]     = {1};
 
-    const UInt iGlobalElem( M_FESpace.dof().localToGlobal(iElem, 1) );
-
-    ElemVec localFlux ( M_FESpace.refFE().nbDof(), 1 );
-    localFlux.zero();
+    M_localFlux.zero();
 
     // Loop on the faces of the element iElem and compute the local contribution
     for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
     {
 
-        UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+        const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
 
         // Take the left element to the face, see regionMesh for the meaning of left element
         UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
@@ -558,12 +563,14 @@ localEvolve ( const UInt& iElem )
         // Take the right element to the face, see regionMesh for the meaning of right element
         UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
 
-        //std::cout << "iElem " << iElem << std::endl << "iGlobalElem " << iGlobalElem << std::endl << "Left " << leftElement 
-	// << std::endl << "Right " << rightElement << std::endl << std::endl << std::flush;
-
-
         // Update the normal vector of the current face in each quadrature point
         M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+
+        if( M_displayer.isLeader() )
+            std::cout << "iElem "  << iElem << std::endl << "dof().localToGlobal(elemId, 1) " << M_FESpace.dof().localToGlobal(iElem, 1) << std::endl << "M_FESpace.feBd().normal "<< M_FESpace.feBd().normal
+                      << std::endl << "righElem local " << rightElement << " global "<< M_FESpace.dof().localToGlobal(rightElement,1) << std::endl
+                      << "leftElem local " << leftElement << " global " << M_FESpace.dof().localToGlobal(leftElement,1) << std::endl
+                      << std::endl << std::flush;
 
         ElemVec localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
 	localFaceFluxWeight.zero();
@@ -579,13 +586,14 @@ localEvolve ( const UInt& iElem )
                      leftValue,
                      M_FESpace.refFE(),
                      M_FESpace.dof(),
-                     leftElement, 0 );
+                     leftElement , 0 );
+
+        //  if ( leftValue[0] > 1.1 )
+        //  std::cout << "M_me " << M_me << std::endl << "iElem " << iElem << std::endl << "leftElement " << leftElement << std::endl << "leftValue " << leftValue << std::endl << std::endl << std::flush;
 
         // Check if the current face is a boundary face, that is rightElement == 0
         if ( !rightElement )
         {
-            ElemVec localFaceFluxWeight1 ( M_FESpace.refFE().nbDof(), 1 );
-	    localFaceFluxWeight1.zero();
 
             // Loop on all the quadrature points
             for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig)
@@ -597,21 +605,21 @@ localEvolve ( const UInt& iElem )
                 y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
                 z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) );
 
-                KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
+                const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
 
-                Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
-                                                                                                M_data.dataTime()->getTime(),
-                                                                                                x, y, z, leftValue[ 0 ] );
+                const  Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
+                                                                                                       M_data.dataTime()->getTime(),
+                                                                                                       x, y, z, leftValue[ 0 ] );
 
-                localFaceFluxWeight1[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
+                localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
 
             }
 
             // Check if is the inflow face
-            if ( localFaceFluxWeight1[0] < 0 )
+            if ( localFaceFluxWeight[0] < 0 )
             {
 
-                const Index_t faceMarker( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+                rightValue.zero();
 
                 // Check if the boundary conditions were updated.
                 if ( !M_BCh->bdUpdateDone() )
@@ -623,9 +631,15 @@ localEvolve ( const UInt& iElem )
                                      M_FESpace.dof() );
 
                 }
-                //  std::cout << " INFLOW " << std::endl;
 
-                if ( (*M_BCh)[ faceMarker - 1 ].type() == Essential )
+                // Take the boundary marker for the current boundary face
+                const Index_t faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+
+                // Take the corrispectivly boundary function
+                const BCBase& bcBase ( M_BCh->GetBCWithFlag( faceMarker ) );
+
+                // Check if the bounday condition is of type Essential, useful for operator splitting strategies
+                if ( bcBase.type() == Essential  )
                 {
                     // Coordinates of the current quadrature point
                     Real x(0), y(0), z(0);
@@ -633,7 +647,8 @@ localEvolve ( const UInt& iElem )
                     y = M_FESpace.feBd().quadPt( 0, 1 );
                     z = M_FESpace.feBd().quadPt( 0, 2 );
 
-                    rightValue[0] = (*M_BCh)[ faceMarker - 1]( M_data.dataTime()->getTime(), x, y, z, 0 );
+                    // Compute the boundary contribution
+                    rightValue[0] = bcBase( M_data.dataTime()->getTime(), x, y, z, 0 );
                 }
 
                 // std::cout << "Flag marker " << M_FESpace.mesh()->bElement( iGlobalFace ).marker() << std::endl;
@@ -648,6 +663,8 @@ localEvolve ( const UInt& iElem )
         {
             // The current element is not a boundary element
 
+            rightValue.zero();
+
             // Extract the solution in the right element
             extract_vec( *M_uOld,
                          rightValue,
@@ -655,10 +672,15 @@ localEvolve ( const UInt& iElem )
                          M_FESpace.dof(),
                          rightElement, 0 );
 
+            //  if ( rightValue[0] > 1.1 )
+            //  std::cout << "M_me " << M_me << std::endl << "iElem " << iElem << std::endl << "rightElement " << rightElement << std::endl << "rightValue " << rightValue << std::endl << std::endl << std::flush;
+
         }
 
+        localFaceFluxWeight.zero();
+
         // Loop on all the quadrature points
-        for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig)
+        for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig )
         {
 
             // Coordinates of the current quadrature point
@@ -669,21 +691,20 @@ localEvolve ( const UInt& iElem )
             y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
             z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
 
-            KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
+            KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
 
 
             // If the normal is orientated inward, we change its sign and swap the left and value of the solution
-            if ( iElem == rightElement)
+            if ( iElem == rightElement )
             {
                 normal *= -1.;
                 std::swap( leftValue, rightValue );
             }
 
-            Real localFaceFlux = (*M_numericalFlux)( leftValue[ 0 ],
-                                                     rightValue[ 0 ],
-                                                     normal,
-                                                     M_data.dataTime()->getTime(), x, y, z );
-	    //std::cout << "localFaceFlux " << localFaceFlux << std::endl;
+            const Real localFaceFlux = (*M_numericalFlux)( leftValue[ 0 ],
+                                                           rightValue[ 0 ],
+                                                           normal,
+                                                           M_data.dataTime()->getTime(), x, y, z );
 
             localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
 
@@ -694,20 +715,14 @@ localEvolve ( const UInt& iElem )
         dtrtrs_( _param_L, _param_N, _param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
-        /* Put in localFlux the vector L^{-1} * localFlux
+        /* Put in localFlux the vector L^{-T} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
         dtrtrs_( _param_L, _param_T, _param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
-        localFlux += localFaceFluxWeight;
-	//	std::cout << M_me <<  "Inside loop:  leftValue, rightValue, localFaceFLuxWeight, localFlux " 
-	//  << leftValue[0] << " " << rightValue[0] << "  " << localFaceFluxWeight << " "  << localFlux(0) << std::endl << std::flush;
-    
+        M_localFlux += localFaceFluxWeight;
+
     }
-
-    //    std::cout << M_me <<  "End of localevolve:  localFlux " << localFlux(0) << std::endl << std::flush;
-
-    (*M_u)[ iGlobalElem ] = (*M_uOld)[ iGlobalElem ] - localFlux(0);
 
 } // localEvolve
 
@@ -733,10 +748,20 @@ solveOneStep ()
 
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
 
+    if( M_displayer.isLeader() )
+        M_FESpace.dof().showMe(std::cout, true);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (!M_displayer.isLeader())
+        M_FESpace.dof().showMe(std::cout, true);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
     for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
     {
 
-        M_FESpace.fe().update(M_FESpace.mesh()->element( iElem ), UPDATE_QUAD_NODES | UPDATE_WDET );
+        M_FESpace.fe().update(M_FESpace.mesh()->element( iElem ), UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
 
         //std::cout << "Element number " << iElem << std::endl;
 
@@ -744,10 +769,26 @@ solveOneStep ()
 
         localEvolve( iElem  );
 
+        assembleVector( *M_globalFlux,
+    	    			M_FESpace.fe().currentLocalId(),
+       				    M_localFlux,
+       				    M_FESpace.refFE().nbDof(),
+       				    M_FESpace.dof(), 0 );
+
         localAverage( iElem );
 
 	//std::cout << std::endl;
     }
+
+    // Assemble the global hybrid vector.
+    M_globalFlux->GlobalAssemble();
+
+    M_u.reset( new vector_type( M_FESpace.map(), Repeated ) );
+
+    (*M_u) = (*M_uOld) - (*M_globalFlux);
+
+    M_globalFlux.reset( new vector_type( M_FESpace.map(), Repeated ) );
+    M_uOld.reset( new vector_type( M_FESpace.map(), Repeated ) );
 
     *M_uOld = *M_u;
 
