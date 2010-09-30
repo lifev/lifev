@@ -1,0 +1,303 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2010 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-09-30
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: MultiScale - Reymond Stergiopulos 1D arterial tree #####################################
+###################################################################################################
+
+[MultiScale] ######################################################################################
+###################################################################################################
+modelName        = 'Reymond Stergiopulos 1D Absorbing (OneDimensional, Stress)'
+modelType        = MultiScale
+couplingFlags    = ' '
+
+[Problem] #########################################################################################
+###################################################################################################
+modelsPath       = './MultiScaleData/Models/'
+couplingsPath    = './MultiScaleData/Couplings/'
+
+# List of models ##################################################################################
+########### ID #### Type ############## File (without .dat) #######################################
+models = '    
+            1       OneDimensional      ReymondStergiopulos2009_001
+            2       OneDimensional      ReymondStergiopulos2009_002
+            3       OneDimensional      ReymondStergiopulos2009_003
+            4       OneDimensional      ReymondStergiopulos2009_004
+            5       OneDimensional      ReymondStergiopulos2009_005
+            6       OneDimensional      ReymondStergiopulos2009_006
+            7       OneDimensional      ReymondStergiopulos2009_007
+            8       OneDimensional      ReymondStergiopulos2009_008
+            9       OneDimensional      ReymondStergiopulos2009_009
+           10       OneDimensional      ReymondStergiopulos2009_010
+           11       OneDimensional      ReymondStergiopulos2009_011
+           12       OneDimensional      ReymondStergiopulos2009_012
+           13       OneDimensional      ReymondStergiopulos2009_013
+           14       OneDimensional      ReymondStergiopulos2009_014
+           15       OneDimensional      ReymondStergiopulos2009_015
+           16       OneDimensional      ReymondStergiopulos2009_016
+           17       OneDimensional      ReymondStergiopulos2009_017
+           18       OneDimensional      ReymondStergiopulos2009_018
+           19       OneDimensional      ReymondStergiopulos2009_019
+           20       OneDimensional      ReymondStergiopulos2009_020
+           21       OneDimensional      ReymondStergiopulos2009_021
+           22       OneDimensional      ReymondStergiopulos2009_022
+           23       OneDimensional      ReymondStergiopulos2009_023
+           24       OneDimensional      ReymondStergiopulos2009_024
+           25       OneDimensional      ReymondStergiopulos2009_025
+           26       OneDimensional      ReymondStergiopulos2009_026
+           27       OneDimensional      ReymondStergiopulos2009_027
+           28       OneDimensional      ReymondStergiopulos2009_028
+           29       OneDimensional      ReymondStergiopulos2009_029
+           30       OneDimensional      ReymondStergiopulos2009_030
+           31       OneDimensional      ReymondStergiopulos2009_031
+           32       OneDimensional      ReymondStergiopulos2009_032
+           33       OneDimensional      ReymondStergiopulos2009_033
+           34       OneDimensional      ReymondStergiopulos2009_034
+           35       OneDimensional      ReymondStergiopulos2009_035
+           36       OneDimensional      ReymondStergiopulos2009_036
+           37       OneDimensional      ReymondStergiopulos2009_037
+           38       OneDimensional      ReymondStergiopulos2009_038
+           39       OneDimensional      ReymondStergiopulos2009_039
+           40       OneDimensional      ReymondStergiopulos2009_040
+           41       OneDimensional      ReymondStergiopulos2009_041
+           42       OneDimensional      ReymondStergiopulos2009_042
+           43       OneDimensional      ReymondStergiopulos2009_043
+           44       OneDimensional      ReymondStergiopulos2009_044
+           45       OneDimensional      ReymondStergiopulos2009_045
+           46       OneDimensional      ReymondStergiopulos2009_046
+           47       OneDimensional      ReymondStergiopulos2009_047
+           48       OneDimensional      ReymondStergiopulos2009_048
+           49       OneDimensional      ReymondStergiopulos2009_049
+           50       OneDimensional      ReymondStergiopulos2009_050
+           51       OneDimensional      ReymondStergiopulos2009_051
+           52       OneDimensional      ReymondStergiopulos2009_052
+           53       OneDimensional      ReymondStergiopulos2009_053
+           54       OneDimensional      ReymondStergiopulos2009_054
+           55       OneDimensional      ReymondStergiopulos2009_055
+           56       OneDimensional      ReymondStergiopulos2009_056
+           57       OneDimensional      ReymondStergiopulos2009_057
+           58       OneDimensional      ReymondStergiopulos2009_058
+           59       OneDimensional      ReymondStergiopulos2009_059
+           60       OneDimensional      ReymondStergiopulos2009_060
+           61       OneDimensional      ReymondStergiopulos2009_061
+           62       OneDimensional      ReymondStergiopulos2009_062
+           63       OneDimensional      ReymondStergiopulos2009_063
+           64       OneDimensional      ReymondStergiopulos2009_064
+           65       OneDimensional      ReymondStergiopulos2009_065
+           66       OneDimensional      ReymondStergiopulos2009_066
+           67       OneDimensional      ReymondStergiopulos2009_067
+           68       OneDimensional      ReymondStergiopulos2009_068
+           69       OneDimensional      ReymondStergiopulos2009_069
+           70       OneDimensional      ReymondStergiopulos2009_070
+           71       OneDimensional      ReymondStergiopulos2009_071
+           72       OneDimensional      ReymondStergiopulos2009_072
+           73       OneDimensional      ReymondStergiopulos2009_073
+           74       OneDimensional      ReymondStergiopulos2009_074
+           75       OneDimensional      ReymondStergiopulos2009_075
+           76       OneDimensional      ReymondStergiopulos2009_076
+           77       OneDimensional      ReymondStergiopulos2009_077
+           78       OneDimensional      ReymondStergiopulos2009_078
+           79       OneDimensional      ReymondStergiopulos2009_079
+           80       OneDimensional      ReymondStergiopulos2009_080
+           81       OneDimensional      ReymondStergiopulos2009_081
+           82       OneDimensional      ReymondStergiopulos2009_082
+           83       OneDimensional      ReymondStergiopulos2009_083
+           84       OneDimensional      ReymondStergiopulos2009_084
+           85       OneDimensional      ReymondStergiopulos2009_085
+           86       OneDimensional      ReymondStergiopulos2009_086
+           87       OneDimensional      ReymondStergiopulos2009_087
+           88       OneDimensional      ReymondStergiopulos2009_088
+           89       OneDimensional      ReymondStergiopulos2009_089
+           90       OneDimensional      ReymondStergiopulos2009_090
+           91       OneDimensional      ReymondStergiopulos2009_091
+           92       OneDimensional      ReymondStergiopulos2009_092
+           93       OneDimensional      ReymondStergiopulos2009_093
+           94       OneDimensional      ReymondStergiopulos2009_094
+           95       OneDimensional      ReymondStergiopulos2009_095
+           96       OneDimensional      ReymondStergiopulos2009_096
+           97       OneDimensional      ReymondStergiopulos2009_097
+           98       OneDimensional      ReymondStergiopulos2009_098
+           99       OneDimensional      ReymondStergiopulos2009_099
+          100       OneDimensional      ReymondStergiopulos2009_100
+          101       OneDimensional      ReymondStergiopulos2009_101
+          102       OneDimensional      ReymondStergiopulos2009_102
+          103       OneDimensional      ReymondStergiopulos2009_103
+         '
+###################################################################################################
+
+# List of couplings ###############################################################################
+########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
+couplings = '    
+            1       BoundaryCondition   SinusoidalSquareFluxWave        1               0
+            2       Stress              StaticPressure                  95,96,97,1      0,0,0,1
+            3       Stress              StaticPressure                  2,3,95          0,0,1
+            4       Stress              StaticPressure                  4,5,3           0,0,1
+            5       Stress              StaticPressure                  6,7,4           0,0,1
+            6       Stress              StaticPressure                  8,9,7           0,0,1
+            7       Stress              StaticPressure                  10,11,9         0,0,1
+            8       Stress              StaticPressure                  14,15,2         0,0,1
+            9       Stress              StaticPressure                  18,19,14        0,0,1
+           10       Stress              StaticPressure                  20,21,19        0,0,1
+           11       Stress              StaticPressure                  22,23,21        0,0,1
+           12       Stress              StaticPressure                  24,25,23        0,0,1
+           13       Stress              StaticPressure                  26,27,18        0,0,1
+           14       Stress              StaticPressure                  28,29,27        0,0,1
+           15       Stress              StaticPressure                  30,31,29        0,0,1
+           16       Stress              StaticPressure                  32,33,30        0,0,1
+           17       Stress              StaticPressure                  38,35,28        0,0,1
+           18       Stress              StaticPressure                  36,37,35        0,0,1
+           19       Stress              StaticPressure                  34,39,37        0,0,1
+           20       Stress              StaticPressure                  40,41,39        0,0,1
+           21       Stress              StaticPressure                  40,41,39        0,0,1
+           22       Stress              StaticPressure                  42,43,41        0,0,1
+           23       Stress              StaticPressure                  44,45,43        0,0,1
+           24       Stress              StaticPressure                  46,47,44        0,0,1
+           25       Stress              StaticPressure                  48,49,46        0,0,1
+           26       Stress              StaticPressure                  50,51,42        0,0,1
+           27       Stress              StaticPressure                  52,53,50        0,0,1
+           28       Stress              StaticPressure                  54,55,52        0,0,1
+           29       Stress              StaticPressure                  12,13,5         0,0,1
+           30       Stress              StaticPressure                  83,84,13        0,0,1
+           31       Stress              StaticPressure                  87,88,83        0,0,1
+           32       Stress              StaticPressure                  91,92,87        0,0,1
+           33       Stress              StaticPressure                  16,17,15        0,0,1
+           34       Stress              StaticPressure                  85,86,17        0,0,1
+           35       Stress              StaticPressure                  89,90,85        0,0,1
+           36       Stress              StaticPressure                  93,94,89        0,0,1
+           37       Stress              StaticPressure                  79,80,12        0,0,1
+           38       Stress              StaticPressure                  81,82,16        0,0,1
+           39       Stress              StaticPressure                  56,6,20         0,1,1
+           40       Stress              StaticPressure                  57,58,59,56     0,0,0,1
+           41       Stress              StaticPressure                  60,61,59        0,0,1
+           42       Stress              StaticPressure                  62,64,60        0,0,1
+           43       Stress              StaticPressure                  63,65,61        0,0,1
+           44       Stress              StaticPressure                  66,62,79        0,1,1
+           45       Stress              StaticPressure                  67,63,81        0,1,1
+           46       Stress              StaticPressure                  100,101,66      0,0,1
+           47       Stress              StaticPressure                  102,103,67      0,0,1
+           48       Stress              StaticPressure                  68,70,101       0,0,1
+           49       Stress              StaticPressure                  71,72,70        0,0,1
+           50       Stress              StaticPressure                  69,73,103       0,0,1
+           51       Stress              StaticPressure                  74,75,73        0,0,1
+           52       Stress              StaticPressure                  76,77,68        0,0,1
+           53       Stress              StaticPressure                  78,69,77        0,1,1
+           54       Stress              StaticPressure                  98,99,97        0,0,1
+           55       BoundaryCondition   Absorbing_1D_right              8,10,11,22,24,25,26,31,32,33,34,36,38,40,45,47,48,49,51,53,54,55,57,58,64,65,71,72,74,75,76,78,80,82,84,86,88,90,91,92,93,94,96,98,99,100,102  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+           '
+###################################################################################################
+
+# Geometry offset #################################################################################
+########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
+offset = '    
+			1	1	1	1	0	0	125	0	0	0
+			2	1	1	1	0	0	30	-0.894556840009779	3.85640315768722	0
+			3	1	1	1	0	0	102.584651952004	-0.894556840009779	3.85640315768722	0
+			4	1	1	1	0	0	223.259640960740	-1.63535499698277	7.17471870787612	0
+			5	1	1	1	0	0	179.730626218098	-1.63535499698277	7.17471870787612	0
+			6	1	1	1	0	0	66.8347625363698	-4.11142426213906	4.84467986825383	0
+			7	1	1	1	0	0	-140	-4.11142426213906	4.84467986825383	0
+			8	1	1	1	0	0	-115	-36.4384997617599	-22.2809572605181	0
+			9	1	1	1	0	0	-85	-36.4384997617599	-22.2809572605181	0
+			10	1	1	1	0	0	-120	-35.8545562853506	-28.9554617377328	0
+			11	1	1	1	0	0	-105	-35.8545562853506	-28.9554617377328	0
+			12	1	1	1	0	0	51.1791679705414	-11.0352511096873	7.21891226354841	0
+			13	1	1	1	0	0	80	-11.0352511096873	7.21891226354841	0
+			14	1	1	1	0	0	-25	0.837493967559098	4.85640315768722	0
+			15	1	1	1	0	0	9.78576570966002	0.837493967559098	4.85640315768722	0
+			16	1	1	1	0	0	128.820832029459	14.5352511096873	7.21891226354840	0
+			17	1	1	1	0	0	100	14.5352511096873	7.21891226354840	0
+			18	1	1	1	0	0	-90	4.37209433700203	3.20819193689850	0
+			19	1	1	1	0	0	28.7716475127325	4.37209433700203	3.20819193689850	0
+			20	1	1	1	0	0	112.243088888121	7.35234722065610	4.84467986825381	0
+			21	1	1	1	0	0	-40	7.35234722065610	4.84467986825381	0
+			22	1	1	1	0	0	-65	39.6794227202770	-22.2809572605182	0
+			23	1	1	1	0	0	-95	39.6794227202770	-22.2809572605182	0
+			24	1	1	1	0	0	-55	39.0954792438677	-28.9554617377328	0
+			25	1	1	1	0	0	-75	39.0954792438677	-28.9554617377328	0
+			26	1	1	1	0	0	-20	4.37209433700203	-1.99180806310150	0
+			27	1	1	1	0	0	-115	4.37209433700203	-1.99180806310150	0
+			28	1	1	1	0	0	-80	-0.0231355851012403	-11.4174090482827	0
+			29	1	1	1	0	0	0	-0.0231355851012403	-11.4174090482827	0
+			30	1	1	1	0	0	-10	1.97686441489876	-11.4174090482827	0
+			31	1	1	1	0	0	35	1.97686441489876	-11.4174090482827	0
+			32	1	1	1	0	0	10	3.94647992092318	-11.7647054036165	0
+			33	1	1	1	0	0	-30	3.94647992092318	-11.7647054036165	0
+			34	1	1	1	0	0	210	0.897199756533491	-20.5761211512962	0
+			35	1	1	1	0	0	-100	0.897199756533491	-16.6368901392474	0
+			36	1	1	1	0	0	-30	0.549903401199630	-18.6065056452718	0
+			37	1	1	1	0	0	-80	0.549903401199630	-18.6065056452718	0
+			38	1	1	1	0	0	210	0.897199756533491	-16.6368901392474	0
+			39	1	1	1	0	0	-95	0.897199756533491	-20.5761211512962	0
+			40	1	1	1	0	0	-25	-0.0266511165916861	-31.1357849510687	0
+			41	1	1	1	0	0	-90	-0.0266511165916861	-31.1357849510687	0
+			42	1	1	1	0	0	-150	-0.0266511165916859	-33.1357849510687	0
+			43	1	1	1	0	0	-30	-0.0266511165916859	-33.1357849510687	0
+			44	1	1	1	0	0	-60	5.08289876573650	-36.0857849510687	0
+			45	1	1	1	0	0	-100	5.08289876573650	-36.0857849510687	0
+			46	1	1	1	0	0	-90	12.2828987657365	-48.5565507655646	0
+			47	1	1	1	0	0	-110	12.2828987657365	-48.5565507655646	0
+			48	1	1	1	0	0	-100	12.2828987657365	-92.8565507655646	0
+			49	1	1	1	0	0	-80	12.2828987657365	-92.8565507655646	0
+			50	1	1	1	0	0	-120	-5.13620099891987	-36.0857849510687	0
+			51	1	1	1	0	0	-80	-5.13620099891987	-36.0857849510687	0
+			52	1	1	1	0	0	-90	-12.3362009989199	-48.5565507655646	0
+			53	1	1	1	0	0	-70	-12.3362009989199	-48.5565507655646	0
+			54	1	1	1	0	0	-80	-12.3362009989199	-92.8565507655646	0
+			55	1	1	1	0	0	-100	-12.3362009989199	-92.8565507655646	0
+			56	1	1	1	0	0	90	1.75000000000001	18.5433551917735	0
+			57	1	1	1	0	0	-120	1.75000000000001	20.5433551917735	0
+			58	1	1	1	0	0	-60	1.75000000000001	20.5433551917735	0
+			59	1	1	1	0	0	90	1.75000000000001	20.5433551917735	0
+			60	1	1	1	0	0	170	1.75000000000001	21.0433551917735	0
+			61	1	1	1	0	0	10	1.75000000000001	21.0433551917735	0
+			62	1	1	1	0	0	150	1.55303844939756	21.0780848273069	0
+			63	1	1	1	0	0	30	1.94696155060245	21.0780848273069	0
+			64	1	1	1	0	0	-125	1.55303844939756	21.0780848273069	0
+			65	1	1	1	0	0	-55	1.94696155060245	21.0780848273069	0
+			66	1	1	1	0	0	110	1.20662828788379	21.2780848273069	0
+			67	1	1	1	0	0	70	2.29337171211622	21.2780848273069	0
+			68	1	1	1	0	0	64.7556350836581	1.13822425921866	21.6660233514641	0
+			69	1	1	1	0	0	115.244364916342	2.36177574078136	21.6660233514641	0
+			70	1	1	1	0	0	135	1.13822425921866	21.6660233514641	0
+			71	1	1	1	0	0	145	0.572538834269418	22.2317087764133	0
+			72	1	1	1	0	0	125	0.572538834269418	22.2317087764133	0
+			73	1	1	1	0	0	45	2.36177574078136	21.6660233514641	0
+			74	1	1	1	0	0	35	2.92746116573060	22.2317087764133	0
+			75	1	1	1	0	0	55	2.92746116573060	22.2317087764133	0
+			76	1	1	1	0	0	125	1.65000000000001	22.7514198647935	0
+			77	1	1	1	0	0	0	1.65000000000001	22.7514198647935	0
+			78	1	1	1	0	0	55	1.85000000000001	22.7514198647935	0
+			79	1	1	1	0	0	10	0.123339759570355	21.0870718318733	0
+			80	1	1	1	0	0	155	0.123339759570355	21.0870718318733	0
+			81	1	1	1	0	0	170	3.37666024042965	21.0870718318733	0
+			82	1	1	1	0	0	25	3.37666024042965	21.0870718318733	0
+			83	1	1	1	0	0	60	-10.3232935812529	11.2566240508985	0
+			84	1	1	1	0	0	145	-10.3232935812529	11.2566240508985	0
+			85	1	1	1	0	0	120	13.8232935812528	11.2566240508985	0
+			86	1	1	1	0	0	35	13.8232935812528	11.2566240508985	0
+			87	1	1	1	0	0	80	-7.27329358125285	16.5393790139835	0
+			88	1	1	1	0	0	145	-7.27329358125285	16.5393790139835	0
+			89	1	1	1	0	0	100	10.7732935812528	16.5393790139835	0
+			90	1	1	1	0	0	35	10.7732935812528	16.5393790139835	0
+			91	1	1	1	0	0	120	-6.21403969748457	22.5467063073580	0
+			92	1	1	1	0	0	145	-6.21403969748457	22.5467063073580	0
+			93	1	1	1	0	0	60	9.71403969748457	22.5467063073580	0
+			94	1	1	1	0	0	35	9.71403969748457	22.5467063073580	0
+			95	1	1	1	0	0	100	-0.286788218175523	0.409576022144496	0
+			96	1	1	1	0	0	-125	-0.286788218175523	0.409576022144496	0
+			97	1	1	1	0	0	50	-0.286788218175523	0.409576022144496	0
+			98	1	1	1	0	0	-60	0.0346055866677468	0.792598243703985	0
+			99	1	1	1	0	0	10	0.0346055866677468	0.792598243703985	0
+			100	1	1	1	0	0	155	1.13822425921866	21.4660233514641	0
+			101	1	1	1	0	0	90	1.13822425921866	21.4660233514641	0
+			102	1	1	1	0	0	25	2.36177574078136	21.4660233514641	0
+			103	1	1	1	0	0	90	2.36177574078136	21.4660233514641	0
+         '
+###################################################################################################
