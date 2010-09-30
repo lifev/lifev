@@ -14,10 +14,11 @@
 
 [Problem] #########################################################################################
 ProblemType = MultiScale
+ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_Absorbing_Stress.dat
 #ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_Aorta_Absorbing_Stress.dat
 #ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_Aorta_Resistance_Stress.dat
 #ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_AortaArmsLegs_Absorbing_Stress.dat
-ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_AortaArmsLegs_Resistance_Stress.dat
+#ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_AortaArmsLegs_Resistance_Stress.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -29,8 +30,8 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_Aort
     [../time_discretization]
     initialtime                = .00      # [s]
     #endtime                    = 0.12     # [s] Aorta
-    #endtime                    = 0.5      # [s] Aorta Arms Legs
-    endtime                    = 2.4      # [s] Physiological 3 HB
+    endtime                    = 0.5      # [s] Aorta Arms Legs
+    #endtime                    = 2.4      # [s] Physiological 3 HB
     timestep                   = 1e-3     # [s]
     
     [../Algorithm]
