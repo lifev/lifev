@@ -1,9 +1,0 @@
-Makefile
-Makefile.in
-atconfig
-atlocal
-gentest.pl
-package.m4
-testsuite
-testsuite.dir
-testsuite.log

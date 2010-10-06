@@ -1,0 +1,10 @@
+*.[oa]
+*~
+*.in
+*.m4
+configure
+configure.files
+autom4te.cache
+subdirs
+admin
+.gitmodules

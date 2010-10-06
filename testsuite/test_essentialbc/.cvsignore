@@ -1,7 +1,0 @@
- 
-.depend TestLogFile LogFile
-.deps
-.libs
-Makefile
-Makefile.in
-test_essentialbc

@@ -1,8 +1,0 @@
- 
-.depend TestLogFile LogFile
-.deps
-.libs
-Makefile
-Makefile.in
-testBuilders.dat
-test_mesh
