@@ -22,19 +22,12 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = cube4x4.mesh cube8x8.mesh cube16x16.mesh cube32x32.mesh\
-            cylhexa.mesh cyltetra.mesh\
-		    piece-of-tube-wall-tetra.mesh hexa16x16.mesh hexa2x2.mesh\
-		    hexa32x32.mesh hexa4x4.mesh hexa8x8.mesh tube2x4x20.mesh\
-		    tube_curve20.mesh vessel2x4x20.mesh vessel2x4x20_10cm.mesh\
-		    vessel_curve20.mesh hexahexa10x10x10.mesh\
+dist_pkgdata_DATA = cube4x4.mesh cube8x8.mesh cube16x16.mesh \
+            cyltetra.mesh\
+		    vessel2x4x20.mesh\
             tube20.mesh vessel20.mesh \
-            piece-of-tube.mesh piece-of-tube-wall.mesh hexa1x1.mesh tube.mesh vessel.mesh \
-            cyl2D.mesh \
-            vessel7x2_h002.mesh tube7x2_h002.mesh lid16.mesh\
-	    StructuredCube4.mesh StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh \
-                    cartesian_cube2.mesh cartesian_cube4.mesh cartesian_cube8.mesh \
-                    cartesian_cube16.mesh cartesian_cube32.mesh
+            lid16.mesh\
+	    StructuredCube4.mesh cartesian_cube8.mesh
 
 
 

@@ -22,9 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-dist_pkgdata_DATA	= cintot.m cube_47785.m++ cube_48_neumann.m++ cube_6000.m++ cube_99.m++\
-cintot_ext.m cube_48.m++ cube_59.m++ cube_6007.m++ mod_mesh.m++ \
-cube_384.m++ cube_48000.m++ cube_6.m++ cube_750.m++ simplemesh.m++ carotide.m++
+dist_pkgdata_DATA	= cube_47785.m++ cube_48_neumann.m++ cube_384.m++
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
