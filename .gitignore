@@ -8,3 +8,4 @@ autom4te.cache
 subdirs
 admin
 .gitmodules
+testsuite/testsuite
