@@ -36,9 +36,13 @@ namespace LifeV
 // Constructor of the abstract class
 AbstractNumericalFlux::
 AbstractNumericalFlux ( const vectorFunction& physicalFlux,
-                        const vectorFunction& firstDerivativePhysicalFlux ):
+                        const vectorFunction& firstDerivativePhysicalFlux,
+                        const Real&           CFLBrentToll,
+                        const UInt&           CFLBrentMaxIter ):
     M_physicalFlux                ( physicalFlux ),
-    M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux )
+    M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux ),
+    M_CFLBrentToll                ( CFLBrentToll ),
+    M_CFLBrentMaxIter             ( CFLBrentMaxIter )
 {
 
     CONSTRUCTOR( "AbstractNumericalFlux" );
@@ -54,6 +58,26 @@ AbstractNumericalFlux::
 
 } // destructor
 
+Real
+AbstractNumericalFlux::
+getNormInfty ( const Real& leftState, const Real& rightState, const KN<Real>& normal,
+               const Real& t, const Real& x, const Real& y, const Real& z )
+{
+
+    scalarFunction absFunctionDotNormalBound;
+
+    absFunctionDotNormalBound = boost::bind ( &absFunctionDotNormal, _1,
+                                              M_firstDerivativePhysicalFlux,
+                                              normal, t, x, y, z, -1 );
+
+    // Compute the maximum of the absFunctionDotNormal
+    const Real maxValue = brent( absFunctionDotNormalBound, leftState, rightState,
+                                 M_CFLBrentToll, M_CFLBrentMaxIter );
+
+    return - absFunctionDotNormalBound ( maxValue );
+
+} // getNormInfty
+
 // Create the fluxDotNormal function
 boost::function<Real ( const Real& )>
 AbstractNumericalFlux::
@@ -64,8 +88,8 @@ computeFunctionDotNormal ( const vectorFunction& function, const KN<Real>& norma
     scalarFunction functionDotNormalBound;
 
     // Bind the anonymousnamespace::fluxDotNormal function with known quantities.
-    functionDotNormalBound = boost::bind( &functionDotNormal, _1, function,
-                                          normal, t, x, y, z, plusMinus );
+    functionDotNormalBound = boost::bind ( &functionDotNormal, _1, function,
+                                           normal, t, x, y, z, plusMinus );
 
     return functionDotNormalBound;
 
@@ -76,9 +100,13 @@ computeFunctionDotNormal ( const vectorFunction& function, const KN<Real>& norma
 GodunovNumericalFlux::
 GodunovNumericalFlux ( const vectorFunction& physicalFlux,
                        const vectorFunction& firstDerivativePhysicalFlux,
-                       const Real& brentToll,
-                       const UInt& brentMaxIter ):
-    AbstractNumericalFlux::AbstractNumericalFlux  ( physicalFlux, firstDerivativePhysicalFlux ),
+                       const Real&           CFLBrentToll,
+                       const UInt&           CFLBrentMaxIter,
+                       const Real&           brentToll,
+                       const UInt&           brentMaxIter ):
+    AbstractNumericalFlux::AbstractNumericalFlux  ( physicalFlux,
+                                                    firstDerivativePhysicalFlux,
+                                                    CFLBrentToll, CFLBrentMaxIter ),
     M_brentToll                                   ( brentToll ),
     M_brentMaxIter                                ( brentMaxIter )
 {
