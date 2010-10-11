@@ -367,6 +367,33 @@ public:
         M_inversePermeability = inversePermeability;
     }
 
+    /*!
+      Set the hybrid solution vector.
+      @param hybrid Constant vector_ptrtype reference of the hybrid vector.
+     */
+    inline void setHybridSolution ( const vector_ptrtype& hybrid  )
+    {
+        M_hybrid = hybrid;
+    }
+
+    /*!
+      Set the primal solution vector.
+      @param primal Constant vector_type reference of the primal solution.
+    */
+    inline void setPrimalSolution ( const vector_ptrtype& primal )
+    {
+        M_primal = primal;
+    }
+
+    /*!
+      Set the dual solution vector.
+      @param dual Constant vector_ptrtype reference of the dual solution.
+    */
+    inline void setDualSolution ( const vector_ptrtype& dual )
+    {
+        M_dual = dual;
+    }
+
     //@}
 
     // Get methods.
