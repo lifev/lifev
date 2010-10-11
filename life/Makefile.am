@@ -29,6 +29,6 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 SUBDIRS		= lifecore lifearray lifemesh lifealg  lifefem  lifefilters lifesolver
 
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am
 
 dist_pkgdata_DATA  = debug.areas

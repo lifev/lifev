@@ -39,4 +39,4 @@ endif
 
 
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am

@@ -27,4 +27,4 @@ markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp structuredMesh3D.cpp
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la
 
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am
