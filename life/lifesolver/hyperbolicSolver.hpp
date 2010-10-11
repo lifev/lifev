@@ -194,8 +194,16 @@ public:
                                    const vectorFunction& firstDerivativePhysicalFlux )
     {
 
+        const GetPot& dataFile ( *(M_data.dataFile()) );
+
+        const string section   ( "hyperbolic/" );
+
         M_numericalFlux.reset( new GodunovNumericalFlux( physicalFlux,
-                                                         firstDerivativePhysicalFlux ) );
+                                                         firstDerivativePhysicalFlux,
+                                                         dataFile( ( section + "CFL/brent_toll" ).data(), 1e-4 ),
+                                                         dataFile( ( section + "CFL/brent_maxIter").data(), 20 ),
+                                                         dataFile( ( section + "numerical_flux/godunov/brent_toll" ).data(), 1e-4 ),
+                                                         dataFile( ( section + "numerical_flux/godunov/brent_maxIter" ).data(), 20 ) ) );
 
     }
 
@@ -270,6 +278,11 @@ public:
       Solve one time step of the hyperbolic problem.
      */
     void solveOneStep();
+
+    /*!
+      Compute the global CFL condition.
+    */
+    Real CFL() const;
 
     //@}
 
@@ -354,6 +367,7 @@ protected:
 
     vector_ptrtype M_globalFlux;
 
+    Real           M_CFLrelax;
 
     //@}
 
@@ -411,6 +425,7 @@ HyperbolicSolver ( const data_type&          dataFile,
                            M_data.dataTime()->getInitialTime() );
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
+
     CONSTRUCTOR( "HyperbolicSolver" );
 
 } // Constructor
@@ -441,7 +456,6 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( ),
     M_initialSolution ( HyperbolicDefaultInitialSolution() )
-
 {
 
     // Interpolate the primal initial value on the dafault initial value function.
@@ -449,7 +463,9 @@ HyperbolicSolver ( const data_type&          dataFile,
                            *M_u,
                            M_data.dataTime()->getInitialTime() );
 
-        CONSTRUCTOR( "HyperbolicSolver" );
+    M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
+
+    CONSTRUCTOR( "HyperbolicSolver" );
 
 } // Constructor
 
@@ -470,8 +486,6 @@ HyperbolicSolver<Mesh, SolverType>::
 setup ()
 {
 
-    GetPot dataFile( *(M_data.dataFile()) );
-
     // Flags for the BLAS and LAPACK routine.
     int INFO[1]      = {0};
     int NB[1]        = { M_FESpace.refFE().nbDof() };
@@ -490,18 +504,20 @@ setup ()
         M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
                                UPDATE_QUAD_NODES | UPDATE_WDET );
 
-	ElemMat matelem(M_FESpace.refFE().nbDof(), 1, 1);
-	matelem.zero();
-        // Compute the mass matrix for the current element, including time step
-	Real coeff = static_cast<Real>(1.) / M_data.dataTime()->getTimeStep();
-        mass( coeff, matelem, M_FESpace.fe(), 0, 0);
+        // Local mass matrix
+        ElemMat matelem(M_FESpace.refFE().nbDof(), 1, 1);
+        matelem.zero();
+
+        // Compute the mass matrix for the current element
+        mass( static_cast<Real>(1.), matelem, M_FESpace.fe(), 0, 0);
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
         dpotrf_( _param_L, NB, matelem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
 
-	M_elmatMass.push_back(matelem);
+        // Save the local mass matrix in the global vector of mass matrices
+        M_elmatMass.push_back(matelem);
 
     }
 
@@ -515,18 +531,7 @@ localReconstruct ( const UInt& iElem )
 {
 
     ;
-    /*  M_FESpace.fe().update(M_FESpace.mesh()->element( iElem ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
-    // Take the pressure at the previews time step in the local element.
-    ElemVec elvecSolutionOldLocal( M_FESpace.refFE().nbDof(), 1 );
-
-    // Extract the old primal variable for the current finite element and put it into elvecPrimalOldLocal.
-    extract_vec( *M_u,
-                 elvecSolutionOldLocal,
-                 M_FESpace.refFE(),
-                 M_FESpace.dof(),
-                 M_FESpace.fe().currentLocalId(), 0 );
-    */
 } // localReconstruct
 
 template<typename Mesh, typename SolverType>
@@ -549,6 +554,7 @@ localEvolve ( const UInt& iElem )
     // Numbers of columns of the right hand side := 1.
     int NBRHS[1]     = {1};
 
+    // Clean the local flux
     M_localFlux.zero();
 
     // Loop on the faces of the element iElem and compute the local contribution
@@ -566,14 +572,8 @@ localEvolve ( const UInt& iElem )
         // Update the normal vector of the current face in each quadrature point
         M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
 
-        if( M_displayer.isLeader() )
-            std::cout << "iElem "  << iElem << std::endl << "dof().localToGlobal(elemId, 1) " << M_FESpace.dof().localToGlobal(iElem, 1) << std::endl << "M_FESpace.feBd().normal "<< M_FESpace.feBd().normal
-                      << std::endl << "righElem local " << rightElement << " global "<< M_FESpace.dof().localToGlobal(rightElement,1) << std::endl
-                      << "leftElem local " << leftElement << " global " << M_FESpace.dof().localToGlobal(leftElement,1) << std::endl
-                      << std::endl << std::flush;
-
+        // Local flux of a face times the integration weight
         ElemVec localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
-	localFaceFluxWeight.zero();
 
         // Solution in the left element
         ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
@@ -588,81 +588,76 @@ localEvolve ( const UInt& iElem )
                      M_FESpace.dof(),
                      leftElement , 0 );
 
-        //  if ( leftValue[0] > 1.1 )
-        //  std::cout << "M_me " << M_me << std::endl << "iElem " << iElem << std::endl << "leftElement " << leftElement << std::endl << "leftValue " << leftValue << std::endl << std::endl << std::flush;
-
         // Check if the current face is a boundary face, that is rightElement == 0
         if ( !rightElement )
         {
 
-            // Loop on all the quadrature points
-            for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig)
+            // Clean the value of the right element
+            rightValue.zero();
+
+            // Check if the boundary conditions were updated.
+            if ( !M_BCh->bdUpdateDone() )
             {
-
-                // Coordinates of the current quadrature point
-                Real x(0), y(0), z(0);
-                x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
-                y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
-                z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) );
-
-                const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
-
-                const  Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
-                                                                                                       M_data.dataTime()->getTime(),
-                                                                                                       x, y, z, leftValue[ 0 ] );
-
-                localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
-
+                // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
+                M_BCh->bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
             }
 
-            // Check if is the inflow face
-            if ( localFaceFluxWeight[0] < 0 )
+            // Take the boundary marker for the current boundary face
+            const Index_t faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+
+            // Take the corrispective boundary function
+            const BCBase& bcBase ( M_BCh->GetBCWithFlag( faceMarker ) );
+
+            // Check if the bounday condition is of type Essential, useful for operator splitting strategies
+            if ( bcBase.type() == Essential  )
             {
 
-                rightValue.zero();
-
-                // Check if the boundary conditions were updated.
-                if ( !M_BCh->bdUpdateDone() )
+                // Loop on all the quadrature points
+                for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig)
                 {
 
-                    // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
-                    M_BCh->bdUpdate( *M_FESpace.mesh(),
-                                     M_FESpace.feBd(),
-                                     M_FESpace.dof() );
-
-                }
-
-                // Take the boundary marker for the current boundary face
-                const Index_t faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
-
-                // Take the corrispectivly boundary function
-                const BCBase& bcBase ( M_BCh->GetBCWithFlag( faceMarker ) );
-
-                // Check if the bounday condition is of type Essential, useful for operator splitting strategies
-                if ( bcBase.type() == Essential  )
-                {
                     // Coordinates of the current quadrature point
                     Real x(0), y(0), z(0);
-                    x = M_FESpace.feBd().quadPt( 0, 0 );
-                    y = M_FESpace.feBd().quadPt( 0, 1 );
-                    z = M_FESpace.feBd().quadPt( 0, 2 );
+                    x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
+                    y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
+                    z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) );
 
                     // Compute the boundary contribution
                     rightValue[0] = bcBase( M_data.dataTime()->getTime(), x, y, z, 0 );
+
+                    // Compute the outward unit normal of the boundary
+                    const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
+
+                    const  Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
+                                                                                                           M_data.dataTime()->getTime(),
+                                                                                                           x, y, z, rightValue[ 0 ] );
+                    // Update the local flux of the current face with the quadrature weight
+                    localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
                 }
 
-                // std::cout << "Flag marker " << M_FESpace.mesh()->bElement( iGlobalFace ).marker() << std::endl;
             }
-            // If it is not an inflow face, it is an outflow face
             else
+            {
+                /* If the boundary flag is not Essential then is automatically an outflow boundary.
+                   We impose to localFaceFluxWeight a positive value. */
+                localFaceFluxWeight[0] = 1.;
+            }
+
+            // It is an outflow face, we use a ghost cell
+            if ( localFaceFluxWeight[0] > 0 )
             {
                 rightValue = leftValue;
             }
+
+            // Clean the localFaceFluxWeight
+            localFaceFluxWeight.zero();
+
         }
         else
         {
             // The current element is not a boundary element
 
+            // Clean the rightValue
             rightValue.zero();
 
             // Extract the solution in the right element
@@ -672,11 +667,9 @@ localEvolve ( const UInt& iElem )
                          M_FESpace.dof(),
                          rightElement, 0 );
 
-            //  if ( rightValue[0] > 1.1 )
-            //  std::cout << "M_me " << M_me << std::endl << "iElem " << iElem << std::endl << "rightElement " << rightElement << std::endl << "rightValue " << rightValue << std::endl << std::endl << std::flush;
-
         }
 
+        // Clean the localFaceFluxWeight
         localFaceFluxWeight.zero();
 
         // Loop on all the quadrature points
@@ -706,6 +699,7 @@ localEvolve ( const UInt& iElem )
                                                            normal,
                                                            M_data.dataTime()->getTime(), x, y, z );
 
+            // Update the local flux of the current face with the quadrature weight
             localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
 
         }
@@ -720,6 +714,7 @@ localEvolve ( const UInt& iElem )
         dtrtrs_( _param_L, _param_T, _param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
+        // Add to the local flux the local flux of the current face
         M_localFlux += localFaceFluxWeight;
 
     }
@@ -736,6 +731,114 @@ localAverage ( const UInt& iElem )
 
 } // localAverage
 
+template<typename Mesh, typename SolverType>
+Real
+HyperbolicSolver<Mesh, SolverType>::
+CFL() const
+{
+
+    // Total number of elements in the mesh
+    const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
+
+    // The local value for the CFL condition, without the time step
+    Real localCFL(0.), localCFLOld( - 1. );
+
+    // Loop on all the elements to perform the fluxes
+    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    {
+        // Update the property of the current element
+        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
+                               UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+
+        // Volumetric measure of the current element
+        const Real K( M_FESpace.fe().measure() );
+
+        // Loop on the faces of the element iElem and compute the local contribution
+        for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
+        {
+
+            const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+
+            // Update the normal vector of the current face in each quadrature point
+            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+
+            // Take the left element to the face, see regionMesh for the meaning of left element
+            UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
+
+            // Take the right element to the face, see regionMesh for the meaning of right element
+            UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
+
+            // Solution in the left element
+            ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
+
+            // Solution in the right element
+            ElemVec rightValue ( M_FESpace.refFE().nbDof(), 1 );
+
+            // Extract the solution in the current element, now is the leftElement
+            extract_vec( *M_uOld,
+                         leftValue,
+                         M_FESpace.refFE(),
+                         M_FESpace.dof(),
+                         leftElement , 0 );
+
+            if ( rightElement )
+            {
+
+                // Extract the solution in the current element, now is the leftElement
+                extract_vec( *M_uOld,
+                             rightValue,
+                             M_FESpace.refFE(),
+                             M_FESpace.dof(),
+                             rightElement , 0 );
+            }
+            else
+            {
+                rightValue = leftValue;
+            }
+
+            // Area of the current face
+            const Real e( M_FESpace.feBd().measure() );
+
+            // Loop on all the quadrature points
+            for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig )
+            {
+
+                // Coordinates of the current quadrature point
+                Real x(0), y(0), z(0);
+
+                // Set the coordinates of the current quatrature point
+                x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
+                y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
+                z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
+
+                KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
+
+                // Compute the local CFL without the time step
+                localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal,
+                                                                   M_data.dataTime()->getTime(), x, y, z );
+
+                // Select the maximum between the old CFL condition and the new CFL condition
+                if ( localCFL > localCFLOld  )
+                {
+                    localCFLOld = localCFL;
+                }
+                else
+                {
+                    localCFL = localCFLOld;
+                }
+
+            }
+
+        }
+
+    }
+
+    const Real timeStep( M_data.getCFLrelax() / localCFL );
+
+    // Return the correct value of the time step
+    return timeStep;
+
+} //CFL
 
 // Solve one time step of the hyperbolic problem.
 template<typename Mesh, typename SolverType>
@@ -743,53 +846,46 @@ void
 HyperbolicSolver<Mesh, SolverType>::
 solveOneStep ()
 {
-    //M_FESpace.mesh()->showMe(true);
-    //M_FESpace.dof().showMe(std::cout, true);
 
+    // Total number of elements in the mesh
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
 
-    if( M_displayer.isLeader() )
-        M_FESpace.dof().showMe(std::cout, true);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    if (!M_displayer.isLeader())
-        M_FESpace.dof().showMe(std::cout, true);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
+    // Loop on all the elements to perform the fluxes
     for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
     {
 
-        M_FESpace.fe().update(M_FESpace.mesh()->element( iElem ), UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+        // Update the property of the current element
+        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
+                               UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
 
-        //std::cout << "Element number " << iElem << std::endl;
-
+        // Reconstruct step of the current element
         localReconstruct( iElem );
 
+        // Evolve step of the current element
         localEvolve( iElem  );
 
+        // Put the total flux of the current element in the global vector of fluxes
         assembleVector( *M_globalFlux,
     	    			M_FESpace.fe().currentLocalId(),
        				    M_localFlux,
        				    M_FESpace.refFE().nbDof(),
        				    M_FESpace.dof(), 0 );
 
+        // Average step of the current element
         localAverage( iElem );
 
-	//std::cout << std::endl;
     }
 
     // Assemble the global hybrid vector.
     M_globalFlux->GlobalAssemble();
 
-    M_u.reset( new vector_type( M_FESpace.map(), Repeated ) );
+    // Update the value of the solution
+    (*M_u) = (*M_uOld) - M_data.dataTime()->getTimeStep() * (*M_globalFlux);
 
-    (*M_u) = (*M_uOld) - (*M_globalFlux);
-
+    // Clean the vector of fluxes
     M_globalFlux.reset( new vector_type( M_FESpace.map(), Repeated ) );
-    M_uOld.reset( new vector_type( M_FESpace.map(), Repeated ) );
 
+    // Update the solution at previous time step
     *M_uOld = *M_u;
 
 } // run
