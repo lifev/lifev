@@ -194,6 +194,18 @@ public:
      */
     Real getTime()			 const { return M_time; }
 
+    //! Get the time left
+    /*!
+     * @return time left value
+     */
+    Real getTimeLeft()       const { return round( M_endTime - M_time ); }
+
+    //! Get the elapsed time
+    /*!
+     * @return elapsed time value
+    */
+    Real getElapsedTime()    const { return round( M_time - M_initialTime ); }
+
     //! Get the present time shifted inside the first cycle
     //! (i.e. in the interval (M_initialTime,M_periodTime)).
     //! Useful for periodic behavior, e.g. BC.
