@@ -64,6 +64,7 @@ apidox-am-doxygen:
 	echo "GENERATE_MAN           = NO" >> Doxyfile ;\
 	echo "GENERATE_LATEX         = NO" >> Doxyfile ;\
 	echo "GENERATE_TAGFILE       = $(top_builddir)/doc/api/$(PACKAGE).tag" >> Doxyfile ;\
+	echo "HAVE_DOT               = $(LIFE_HAS_DOT)" >> Doxyfile ; \
 	$(DOXYGEN) Doxyfile;\
 	rm -f Doxyfile;
 
