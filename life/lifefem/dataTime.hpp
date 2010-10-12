@@ -198,7 +198,7 @@ public:
     /*!
      * @return time left value
      */
-    Real getTimeLeft()       const { return round( M_endTime - M_time ); }
+    Real getLeftTime()       const { return round( M_endTime - M_time ); }
 
     //! Get the elapsed time
     /*!
