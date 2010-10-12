@@ -98,14 +98,14 @@ AC_CHECK_Y12M
 dnl hdf5
 AC_CHECK_HDF5
 
+dnl parmetis
+AC_CHECK_PARMETIS
+
 dnl trilinos
 AC_CHECK_TRILINOS
 dnl petsc
 dnl AC_CHECK_PETSC(2.1.6) #
 AM_CONDITIONAL(HAVE_PETSC, test "x$petsc_libs" != "x" )
-
-dnl parmetis
-AC_CHECK_PARMETIS
 
 dnl grace, commented since not used any more
 dnl AC_CHECK_HEADERS([grace_np.h])
