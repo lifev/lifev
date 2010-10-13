@@ -389,18 +389,20 @@ private:
         assert(M_data->dataFluid()->dataTime()->getTimeStep()==0.001);
         double dispNorm(M_fsi->displacement().Norm2());
 
-        if( sameAs(time,0.001) && sameAs(dispNorm, 0.0621691, 1e-5) ) return;
-        if( sameAs(time,0.002) && sameAs(dispNorm, 0.10668,   1e-5) )  return;
-        if( sameAs(time,0.003) && sameAs(dispNorm, 0.113252,  1e-5) )  return;
-        if( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  1e-5) )  return;
-        if( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, 1e-5) )  return;
-        if( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, 1e-5) ) return;
+        const LifeV::Real relTol(5e-3);
+
+        if( sameAs(time,0.001) && sameAs(dispNorm, 0.0621691, relTol) ) return;
+        if( sameAs(time,0.002) && sameAs(dispNorm, 0.10668,   relTol) )  return;
+        if( sameAs(time,0.003) && sameAs(dispNorm, 0.113252,  relTol) )  return;
+        if( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
+        if( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
+        if( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
 
         throw Problem::RESULT_CHANGED_EXCEPTION(time);
 
     }
 
-    bool sameAs(const LifeV::Real& a, const LifeV::Real& b, const LifeV::Real& relTol = 1e-9)
+    bool sameAs(const LifeV::Real& a, const LifeV::Real& b, const LifeV::Real& relTol = 1e-6)
     {
         const LifeV::Real maxAbs (std::max(std::abs(a),std::abs(b)));
         if (maxAbs < relTol*relTol) return true;
