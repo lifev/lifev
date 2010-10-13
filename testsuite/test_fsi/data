@@ -74,10 +74,7 @@ BDF_order		= 1
 [../ipstab]
 gammaBeta  = 1
 gammaDiv   = 0.2
-gammaPress = 0.05
-#gammaBeta  = 1
-#gammaDiv   = 0.2
-#gammaPress = 0.2
+gammaPress = 0.2
 reuse      = true
 max_iter_reuse = 100
 
@@ -156,7 +153,7 @@ filter_singletons      = false
   conv            = rhs
   max_iter        = 100
   kspace          = 100
-  tol             = 1.e-5    # AztecOO tolerance
+  tol             = 1.e-10    # AztecOO tolerance
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack
@@ -200,7 +197,8 @@ filter_singletons      = false
 [solid]
 
 [./physics]
-solidType = linearVenantKirchhof # the nonlinear case is not implemented yet
+material_flag   = '1' # '1 2'
+solidType = linearVenantKirchhof
 material_flag   = 1 # '1 2'
 young           = 3.0E6 #,1.9E9
 poisson         = 0.30 #,0.30
@@ -265,7 +263,7 @@ solvertype      = Amesos_Umfpack
   reuse           = true
   max_iter_reuse  = 101
   kspace          = 100
-  tol             = 1.e-5    # AztecOO tolerance
+  tol             = 1.e-10    # AztecOO tolerance
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack
