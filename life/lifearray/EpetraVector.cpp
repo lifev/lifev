@@ -118,7 +118,7 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&           vector,
                             const EpetraMapType&                maptype ):
     M_epetraMap   ( map ),
     M_maptype     ( maptype ),
-    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+    M_epetraVector( new vector_type( *map->getMap( maptype ) ) ),
     M_combineMode ( Add )
 {
     assert( this->BlockMap().SameAs(vector.Map()) );
