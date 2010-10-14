@@ -81,14 +81,13 @@ FSISolver::setData( const data_PtrType& data )
 		if ( numtasks == 1 )
 		{
 			std::cout << "Serial Fluid/Structure computation" << std::endl;
-			newComm = MPI_COMM_WORLD;
-			fluid = true;
-			solid = true;
-			fluidLeader = 0;
-			solidLeader = 0;
+            fluid = true;
+            solid = true;
+            solidLeader = 0;
+            fluidLeader = solidLeader;
 
-			M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
-			M_epetraComm = M_epetraWorldComm;
+            M_epetraWorldComm.reset( new Epetra_MpiComm(MPI_COMM_WORLD));
+            M_epetraComm = M_epetraWorldComm;
 		}
 		else
 		{

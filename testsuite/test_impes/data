@@ -1,0 +1,289 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for a Darcy problem
+#-------------------------------------------------
+
+    [exporter]
+    type       = hdf5
+    folder     = ./
+    multimesh  = false   # actually we export also the displacement
+    start      = 0
+    save       = 1
+    file_name  = PressureSaturation
+    [../]
+
+    [impes]
+
+        [./space_discretization]
+    	mesh_dir      = ./Mesh/ # the directory where the mesh file is
+    	mesh_file     = cartesian_cube8.mesh #twoTetrahedra.mesh #aTetrahedra.mesh #cartesian_cube1.mesh
+    	mesh_type     = .mesh #structured #.mesh
+	    verbose       = 0                        # verbose during mesh-reading
+    	# 0 -> tetra, 1 -> hexa
+	    element_shape = 0
+    	[../]
+
+        [darcy]
+
+            [./miscellaneous]
+    	    verbose       = 2
+        	[../]
+
+    	    [./prec]
+    	    # ML, Ifpack
+        	prectype                = Ifpack
+	        reuse                   = false
+        	displayList             = false
+
+	        	[./ML]
+    	    	analyze_smoother        = true
+	    	    default_parameter_list 	= SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+                max_levels              = 1
+
+        			[./smoother]
+	        		# smoother type
+		        	# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			        # ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+    			    # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+    	    		# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+	    	    	# IC, ICT, ILU, ILUT
+    	    		type                    = ILU
+	    	    	pre_or_post             = both
+		    	    sweeps                  = 3
+    			    damping_factor          = 1
+        			[../]
+
+    	    		[./coarse]
+	    	    	type                    = Amesos-UMFPACK
+    	    		sweeps                  = 1
+	    	    	pre_or_post             = both
+    		    	max_size                = 1024
+	    		    [../]
+
+        			[./repartition]
+	        		enable                  = 1
+		        	partitioner             = ParMETIS
+			        max_min_ration          = 1.3
+        			min_per_proc            = 500
+	        		[../]
+
+        			[./energy_minimization]
+	        		enable			= true
+    		    	type			= 3
+        			[../]
+                [../]
+
+        		[./ifpack]
+	        	prectype               = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+		        overlap                = 1
+
+    		    	[./relaxation]
+	    		    type                   = Jacobi
+    		    	damping_factor         = 1.
+	    		    sweeps                 = 1
+    	    		min_diagonal_value     = 0
+	    	    	zero_starting_solution = true
+		    	    [../]
+
+        			[./partitioner]
+	        		# linear, greedy, metis
+		        	type                   = metis
+			        overlap                = 0
+    			    local_parts            = 1
+    	    		root_node              = 0
+	    	    	use_symmetric_graph    = true
+		    	    [../]
+
+    		    	[./amesos]
+	    		    # Amesos_Lapack, Amesos_Klu (default), Amesos_Umfpack,
+    		    	# Amesos_Superlu, Amesos_Mumps, Amesos_Dscpack
+   	    		    solvertype             = Amesos_Umfpack
+	        		[../]
+
+    		    	[./fact]
+	    		    drop_tolerance         = 1.e-10
+    		    	level-of-fill          = 1
+	    		    ilut_level-of-fill     = 1
+    	    		absolute_threshold     = 1.e-5.
+	    	    	relative_threshold     = 1.
+		    	    relax_value            = 0.
+        			[../]
+
+        			[./schwarz]
+	        		combine_mode           = 0
+		        	compute_condest        = false
+    			    reordering_type        = none
+    	    		filter_singletons      = true
+	    	    	[../]
+
+                [../]
+
+            [../]
+
+            [./solver]
+            #gmres cg
+            solver          = gmres
+            scaling         = none
+            output          = all # none
+            conv            = rhs
+            max_iter        = 500
+            reuse           = true
+            max_iter_reuse  = 10
+            kspace          = 100
+            tol             = 1.e-8    # AztecOO tolerance
+            [../]
+
+    [../]
+
+    [hyperbolic]
+
+        [./time_discretization]
+        timestep      = 0.005
+        [../]
+
+        [./CFL]
+        brent_toll    = 1e-4
+        brent_maxIter = 50
+        relax         = 0.95
+        [../]
+
+        [./numerical_flux]
+        fluxtype          = Godunov
+
+            [./godunov]
+            brent_toll    = 1e-4
+            brent_maxIter = 50
+            [../]
+
+        [../]
+
+       	[./miscellaneous]
+	    verbose       = 2
+    	[../]
+
+    [../]
+
+    [darcy_transient_non_linear]
+
+        [./time_discretization]
+        initialtime   = 0.
+        endtime       = 1.
+        timestep      = 0.125
+        [../]
+
+        [./non-linear]
+        fixed_point_iteration = 200
+        fixed_point_toll      = 1.e-6
+        [../]
+
+    	[./miscellaneous]
+	    verbose       = 2
+    	[../]
+
+    	[./prec]
+	    # ML, Ifpack
+    	prectype                = Ifpack
+	    reuse                   = false
+    	displayList             = false
+
+	    	[./ML]
+		    analyze_smoother        = true
+    		default_parameter_list 	= SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+            max_levels              = 1
+
+		    	[./smoother]
+			    # smoother type
+    			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+	    		# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+		    	# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			    # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+    			# IC, ICT, ILU, ILUT
+	    		type                    = ILU
+		    	pre_or_post             = both
+			    sweeps                  = 3
+    			damping_factor          = 1
+	    		[../]
+
+    			[./coarse]
+	    		type                    = Amesos-UMFPACK
+		    	sweeps                  = 1
+			    pre_or_post             = both
+    			max_size                = 1024
+	    		[../]
+
+    			[./repartition]
+	    		enable                  = 1
+		    	partitioner             = ParMETIS
+    			max_min_ration          = 1.3
+		    	min_per_proc            = 500
+	    		[../]
+
+    			[./energy_minimization]
+	    		enable			= true
+		    	type			= 3
+    			[../]
+
+	    	[../]
+
+            [./ifpack]
+    		prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+	    	overlap                = 1
+
+		    	[./relaxation]
+    			type                   = Jacobi
+	    		damping_factor         = 1.
+		    	sweeps                 = 1
+			    min_diagonal_value     = 0
+    			zero_starting_solution = true
+	    		[../]
+
+    			[./partitioner]
+	    		# linear, greedy, metis
+		    	type                   = metis
+  			    overlap                = 0
+    			local_parts            = 1
+	    		root_node              = 0
+		    	use_symmetric_graph    = true
+    			[../]
+
+    			[./amesos]
+	    		# Amesos_Lapack, Amesos_Klu (default), Amesos_Umfpack,
+		    	# Amesos_Superlu, Amesos_Mumps, Amesos_Dscpack
+    			solvertype             = Amesos_Umfpack
+	    		[../]
+
+    			[./fact]
+	    		drop_tolerance         = 1.e-10
+		    	level-of-fill          = 1
+			    ilut_level-of-fill     = 1
+    			absolute_threshold     = 0.
+	    		relative_threshold     = 0.
+		    	relax_value            = 0.
+    			[../]
+
+    			[./schwarz]
+	    		combine_mode           = 0
+		    	compute_condest        = false
+			    reordering_type        = none
+    			filter_singletons      = true
+	    		[../]
+
+            [../]
+
+        [../]
+
+        [./solver]
+        solver          = gmres #gmres cg
+        scaling         = none
+        output          = all # none
+        conv            = rhs
+        max_iter        = 500
+        reuse           = true
+        max_iter_reuse  = 3
+        kspace          = 100
+        tol             = 1.e-8    # AztecOO tolerance
+        [../]
+
+    [../]
+
+[../]

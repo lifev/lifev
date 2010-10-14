@@ -45,14 +45,14 @@ typedef boost::function<LifeV::Vector ( const LifeV::Real&, const LifeV::Real&,
                                         const LifeV::Real&, const LifeV::Real&,
                                         const LifeV::Real& )> vectorFunction;
 
-LifeV::Real functionDotNormal ( const LifeV::Real& u,
-                                const vectorFunction& function,
+LifeV::Real functionDotNormal ( const LifeV::Real&            u,
+                                const vectorFunction&         function,
                                 const LifeV::KN<LifeV::Real>& normal,
-                                const LifeV::Real& t,
-                                const LifeV::Real& x,
-                                const LifeV::Real& y,
-                                const LifeV::Real& z,
-                                const LifeV::Real& plusMinus )
+                                const LifeV::Real&            t,
+                                const LifeV::Real&            x,
+                                const LifeV::Real&            y,
+                                const LifeV::Real&            z,
+                                const LifeV::Real&            plusMinus )
 {
     LifeV::Real value(0);
     const LifeV::UInt dimProblem( normal.size() );
@@ -64,6 +64,27 @@ LifeV::Real functionDotNormal ( const LifeV::Real& u,
     }
 
     return value;
+}
+
+LifeV::Real absFunctionDotNormal ( const LifeV::Real&            u,
+                                   const vectorFunction&         function,
+                                   const LifeV::KN<LifeV::Real>& normal,
+                                   const LifeV::Real&            t,
+                                   const LifeV::Real&            x,
+                                   const LifeV::Real&            y,
+                                   const LifeV::Real&            z,
+                                   const LifeV::Real&            plusMinus )
+{
+    LifeV::Real value(0);
+    const LifeV::UInt dimProblem( normal.size() );
+
+    // Compute \sum_{i} physicalFlux(i) * n(i)
+    for ( LifeV::UInt nDim(0); nDim < dimProblem; ++nDim )
+    {
+        value += function(t, x, y, z, u)[nDim] * normal[nDim];
+    }
+
+    return plusMinus * fabs( value );
 }
 
 }
@@ -85,17 +106,19 @@ public:
     typedef boost::function<Real ( const Real& )> scalarFunction;
 
     AbstractNumericalFlux ( const vectorFunction& physicalFlux,
-                            const vectorFunction& firstDerivativePhysicalFlux );
+                            const vectorFunction& firstDerivativePhysicalFlux,
+                            const Real&           CFLBrentToll    = 1e-4,
+                            const UInt&           CFLBrentMaxIter = 20 );
 
     virtual ~AbstractNumericalFlux ();
 
-    virtual Real operator() ( const Real& leftState,
-                              const Real& rightState,
+    virtual Real operator() ( const Real&     leftState,
+                              const Real&     rightState,
                               const KN<Real>& normal,
-                              const Real& t = 0,
-                              const Real& x = 0,
-                              const Real& y = 0,
-                              const Real& z = 0 ) = 0;
+                              const Real&     t = 0,
+                              const Real&     x = 0,
+                              const Real&     y = 0,
+                              const Real&     z = 0 ) = 0;
 
     inline vectorFunction getPhysicalFlux () const
     {
@@ -108,39 +131,60 @@ public:
     }
 
     inline Real getPhysicalFluxDotNormal ( const KN<Real>& normal,
-                                           const Real& t,
-                                           const Real& x,
-                                           const Real& y,
-                                           const Real& z,
-                                           const Real& u )
+                                           const Real&     t,
+                                           const Real&     x,
+                                           const Real&     y,
+                                           const Real&     z,
+                                           const Real&     u )
     {
         return computeFunctionDotNormal ( M_physicalFlux, normal, t, x, y, z, +1 ) ( u );
     }
 
     inline Real getFirstDerivativePhysicalFluxDotNormal ( const KN<Real>& normal,
-                                                          const Real& t,
-                                                          const Real& x,
-                                                          const Real& y,
-                                                          const Real& z,
-                                                          const Real& u )
+                                                          const Real&     t,
+                                                          const Real&     x,
+                                                          const Real&     y,
+                                                          const Real&     z,
+                                                          const Real&     u )
     {
         return computeFunctionDotNormal ( M_firstDerivativePhysicalFlux, normal, t, x, y, z, +1 ) ( u );
     }
 
+    Real getNormInfty ( const Real&     leftState,
+                        const Real&     rightState,
+                        const KN<Real>& normal,
+                        const Real&     t = 0,
+                        const Real&     x = 0,
+                        const Real&     y = 0,
+                        const Real&     z = 0 );
 
 protected:
 
     scalarFunction computeFunctionDotNormal ( const vectorFunction& function,
-                                              const KN<Real>& normal,
-                                              const Real& t,
-                                              const Real& x,
-                                              const Real& y,
-                                              const Real& z,
-                                              const Real& plusMinus );
+                                              const KN<Real>&       normal,
+                                              const Real&           t,
+                                              const Real&           x,
+                                              const Real&           y,
+                                              const Real&           z,
+                                              const Real&           plusMinus );
+
+    scalarFunction computeAbsFunctionDotNormal ( const vectorFunction& function,
+                                                 const KN<Real>&       normal,
+                                                 const Real&           t,
+                                                 const Real&           x,
+                                                 const Real&           y,
+                                                 const Real&           z,
+                                                 const Real&           plusMinus );
 
     vectorFunction M_physicalFlux;
 
     vectorFunction M_firstDerivativePhysicalFlux;
+
+    // Tollerance for the brent algorithm for computing the CFL condition
+    Real M_CFLBrentToll;
+
+    // Maxiter for the brent algorithm for computing the CFL condition
+    UInt M_CFLBrentMaxIter;
 
 }; // AbstractNumericalFlux
 
@@ -156,22 +200,24 @@ public:
 
     GodunovNumericalFlux ( const vectorFunction& physicalFlux,
                            const vectorFunction& firstDerivativePhysicalFlux,
-                           const Real& brentToll = 1e-8,
-                           const UInt& brentMaxIter = 100 );
+                           const Real&           CFLBrentToll    = 1e-4,
+                           const UInt&           CFLBrentMaxIter = 20,
+                           const Real&           brentToll       = 1e-4,
+                           const UInt&           brentMaxIter    = 20 );
 
-    Real operator() ( const Real& leftState,
-                      const Real& rightState,
+    Real operator() ( const Real&     leftState,
+                      const Real&     rightState,
                       const KN<Real>& normal,
-                      const Real& t = 0,
-                      const Real& x = 0,
-                      const Real& y = 0,
-                      const Real& z = 0 );
+                      const Real&     t = 0,
+                      const Real&     x = 0,
+                      const Real&     y = 0,
+                      const Real&     z = 0 );
 protected:
 
     // Tollerance for the brent algorithm
     Real M_brentToll;
 
-    // Maxiter
+    // Maxiter for the brent algorithm
     UInt M_brentMaxIter;
 
 }; // GodunovNumericalFlux

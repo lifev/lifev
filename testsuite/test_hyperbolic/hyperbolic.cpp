@@ -505,6 +505,12 @@ hyperbolic::run()
     while( !dataHyperbolic.dataTime()->isLastTimeStep() )
     {
 
+        // Compute the new time step according to the CFL condition.
+        //timeStep = hyperbolicSolver.CFL();
+
+        // Set the new time step in the dataHyperbolic.
+        //dataHyperbolic.dataTime()->setTimeStep( timeStep );
+
         // Advance the current time of \Delta t.
         dataHyperbolic.dataTime()->updateTime();
 

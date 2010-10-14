@@ -28,4 +28,4 @@ liblifefilters_la_SOURCES	= medit_wrtrs.cpp readMesh3D.cpp\
 				  importer.cpp selectMarker.cpp exporter.cpp
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am

@@ -138,14 +138,14 @@ public:
         For the space dependence of the initial conditions we need informations
         on:
         -# the function we want to interpolate
-        -# a vector type u_dummy, since the bdf_template doesn't know how to construct a VectorType
+        -# a vector type u_vect, u_vect is a corrected mapped vector in input, and contains u0(t0) in output
 		-# a finite element space
         -# which is the initial time (t0) and the time step (for solutions
            before the initial instant)
         Based on the NavierStokesHandler::initialize by M. Fernandez
     */
     template<typename FunctClass, typename FESpaceClass>
-    void initialize_unk(  const FunctClass& u0, const FeVector& u_dummy,
+    void initialize_unk(  const FunctClass& u0, FeVector& u_vect,
 							FESpaceClass & feSpace, Real t0, Real dt  );
 
     //@}
@@ -327,19 +327,19 @@ void BdfVS<FeVector>::initialize_unk(std::vector<FeVector> uv0, Real const dt)
 
 template<typename FeVector>
 template<typename FunctClass, typename FESpaceClass>
-void BdfVS<FeVector>::initialize_unk(  const FunctClass& u0, const FeVector& u_dummy, FESpaceClass & feSpace, Real t0, Real dt  )
+void BdfVS<FeVector>::initialize_unk(  const FunctClass& u0, FeVector& u_vect, FESpaceClass & feSpace, Real t0, Real dt  )
 {
 
     _M_unknowns.resize(0);
 
     for (UInt i = 0 ; i < _M_order; ++i )
     {
-    	FeVector_ptr tmp(new FeVector(u_dummy));
+    	FeVector_ptr tmp(new FeVector(u_vect));
     	_M_unknowns.push_back(tmp);
         feSpace.interpolate( u0, *_M_unknowns[i], t0-i*dt);
         _M_deltat[i] = dt;
     }
-
+    u_vect = *_M_unknowns[0];
     return ;
 }
 

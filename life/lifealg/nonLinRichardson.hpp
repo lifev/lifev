@@ -146,8 +146,8 @@ Int nonLinRichardson( EpetraVector& sol,
         normResOld = normRes;
         normRes    = residual.NormInf();
 
-
-        functional.solveJac(step, -1.*residual, linearRelTol); // J*step = -R
+        residual *= -1;
+        functional.solveJac(step, residual, linearRelTol); // J*step = -R
 
         solNormInf = sol.NormInf();
         stepNormInf = step.NormInf();

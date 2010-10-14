@@ -335,7 +335,8 @@ ADRProblem::run()
 
     // Initialize the solution
     adrSolver.initialize( solution_type::u_ex );
-    timeIntegratorBDFPtr->initialize_unk( solution_type::u_ex, adrSolver.solution(),
+    vector_type u0( adrSolver.solution() );
+    timeIntegratorBDFPtr->initialize_unk( solution_type::u_ex, u0,
                                           *uFESpacePtr, dataTimePtr->getInitialTime(),
                                           dataTimePtr->getTimeStep() );
     // timeIntegratorBDFPtr->initialize_unk( adrSolver.solution(), dataTimePtr->getTimeStep() );

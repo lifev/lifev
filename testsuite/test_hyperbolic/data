@@ -29,12 +29,18 @@
         timestep      = 0.01
         [../]
 
+        [./CFL]
+        brent_toll    = 1e-4
+        brent_maxIter = 50
+        relax         = 0.95
+        [../]
+
         [./numerical_flux]
         fluxtype = Godunov
 
             [./godunov]
-            brent_toll    = 1e-8
-            brent_maxIter = 100
+            brent_toll    = 1e-4
+            brent_maxIter = 50
             [../]
 
         [../]

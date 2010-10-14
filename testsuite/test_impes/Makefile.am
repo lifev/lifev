@@ -1,11 +1,9 @@
-# -*- Mode : makefile -*-
+# -*- makefile -*-
 #
-#    AUTHOR: Christophe Prud'homme
-#       ORG: EPFL
-#    E-MAIL: christophe.prudhomme@epfl.ch
 #
-# DESCRIPTION:
-# ============
+#
+# Copyright (C) 2004 Christophe Prud'homme (christophe.prudhomme@epfl.ch)
+#
 #  Distributed under the GPL(GNU Public License):
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,15 +18,22 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-# DESCRIP-END.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
+include $(top_srcdir)/testsuite/Makefile.testsuite
 
-SUBDIRS		= lifecore lifearray lifemesh lifealg  lifefem  lifefilters lifesolver
+check_HEADERS = impes.hpp user_fun.hpp
+check_PROGRAMS = test_impes
 
+test_impes_SOURCES = main.cpp impes.cpp user_fun.cpp
 
-include $(top_srcdir)/Doxyfile.am
+EXTRA_DIST = data
 
-dist_pkgdata_DATA  = debug.areas
+link:
+	test -a data || ln -s $(srcdir)/data
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
+
+clean-results:
+	-rm *.vct *.scl *.case *.geo *.h5 *.xmf

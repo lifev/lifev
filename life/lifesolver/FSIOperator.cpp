@@ -346,19 +346,18 @@ FSIOperator::setupDOF( void )
     M_bcvDerFluidLoadToFluid             .reset( new  BCVectorInterface );
     M_bcvDerStructureDispToSolid         .reset( new  BCVectorInterface );
 
-	M_dofFluidToStructure->setup(   M_dFESpace->refFE(), dDof, //M_dFESpace->dof(),
-			                        M_uFESpace->refFE(), M_uFESpace->dof() );
-	M_dofFluidToStructure->update( *M_solidMesh,         M_data->structureInterfaceFlag(),
-								   *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+	M_dofFluidToStructure->setup(   M_dFESpace->refFE(), M_dFESpace->dof(),
+			                        M_uFESpace->refFE(), uDof );
+	M_dofFluidToStructure->update( *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
+								   *M_fluidMesh,         M_data->fluidInterfaceFlag(),
                                    M_data->interfaceTolerance(),
                                    M_data->structureInterfaceVertexFlag() );
 
 	//here the solid mesh must be non partitioned in the monolithic case
 	M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
-											    M_dFESpace->refFE(), M_dFESpace->dof() );
-
-	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
-											   *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
+											    M_dFESpace->refFE(), dDof );
+    M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+                                               *M_solidMesh, M_data->structureInterfaceFlag(),
                                                M_data->interfaceTolerance(),
                                                M_data->fluidInterfaceVertexFlag() );
 
@@ -370,7 +369,7 @@ FSIOperator::setupDOF( void )
                                    M_data->structureInterfaceVertexFlag() );
 
     M_dofStructureToFluid->setup(   M_uFESpace->refFE(), M_uFESpace->dof(), //modifica matteo FSI
-                                    M_dFESpace->refFE(), M_dFESpace->dof() );
+                                    M_dFESpace->refFE(), dDof );
 	M_dofStructureToFluid->update( *M_uFESpace->mesh(), M_data->fluidInterfaceFlag(),
 								   *M_solidMesh,        M_data->structureInterfaceFlag(),
                                    M_data->interfaceTolerance(),
@@ -389,7 +388,7 @@ FSIOperator::setupDOF( void )
     createInterfaceMaps( M_dofStructureToHarmonicExtension->locDofMap() );
 }
 
-void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
+void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMapXX )
 {
     Displayer disp(M_epetraWorldComm);
 	disp.leaderPrint("FSI-  Building fluid variables ...             ");
@@ -402,6 +401,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 	//is the interface map between HE (first) and solid (second)
 	if( this->isFluid() )
 	{
+        std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
         dofInterfaceFluid.reserve( locDofMap.size() );
 
 		for (UInt dim = 0; dim < nDimensions; ++dim)
@@ -427,12 +427,13 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 
 	if (this->isSolid())
 	{
+        std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
         dofInterfaceSolid.reserve( locDofMap.size() );
 		//std::cout << "solid" << std::endl;
 		for (UInt dim = 0; dim < nDimensions; ++dim)
 			for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
             {
-                dofInterfaceSolid.push_back(i->second + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
+                dofInterfaceSolid.push_back(i->first + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
             }
 	}
 
@@ -678,8 +679,7 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1, vector_type &_ve
 
     _vec2 *= 0;
 
-    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
-
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
     int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
@@ -692,8 +692,8 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1, vector_type &_ve
 //                 std::cout <<  it->second + dim*numTotalDofFluid << " to "
 //                           <<  it->first + dim*numTotalDofSolid << " : "
 //                           << _vec1[it->second + dim*numTotalDofFluid] << std::endl;
-			_vec2.checkAndSet( it->first + dim*numTotalDofSolid,
-							   _vec1[it->second + dim*numTotalDofFluid] );
+			_vec2.checkAndSet( it->second + dim*numTotalDofSolid,
+							   _vec1[it->first + dim*numTotalDofFluid] );
 		}
 }
 
@@ -768,7 +768,7 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1, vector_type &_ve
 
     _vec2 *= 0;
 
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofStructureToSolid->locDofMap();
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
@@ -778,7 +778,7 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1, vector_type &_ve
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
 		{
 			_vec2.checkAndSet( it->second + dim*numTotalDofSolid,
-							   _vec1[it->second + dim*numTotalDofSolid] );
+							   _vec1[it->first + dim*numTotalDofSolid] );
 		}
 }
 

@@ -28,4 +28,4 @@ liblifearray_la_SOURCES	= elemMat.cpp elemVec.cpp \
 
 liblifearray_la_LIBADD	= ../lifecore/liblifecore.la
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am

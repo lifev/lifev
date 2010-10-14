@@ -44,6 +44,7 @@ LIFEV_CHECK_COMPILERS
 
 
 AC_ENABLE_STATIC
+AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 
 AC_LANG_SAVE
@@ -83,13 +84,13 @@ dnl
 dnl libm
 AC_CHECK_LIB(m,cos,[LIBS="-lm ${LIBS}"],[ echo "simple math functions not found"; exit 1;])
 dnl umfpack
-# disable it for not since it is not used yet: need to check for "NO"
-# AC_CHECK_UMFPACK(4.3.0) # at least umfpack 4.3
-AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
+dnl disable it for not since it is not used yet: need to check for "NO"
+dnl AC_CHECK_UMFPACK(4.3.0) # at least umfpack 4.3
+dnl AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
 dnl lapack, blas
 AC_CHECK_LAPACK
-dnl AC_CHECK_UMFPACK
+AC_CHECK_UMFPACK
 dnl AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
 dnl y12m
@@ -98,14 +99,14 @@ AC_CHECK_Y12M
 dnl hdf5
 AC_CHECK_HDF5
 
+dnl parmetis
+AC_CHECK_PARMETIS
+
 dnl trilinos
 AC_CHECK_TRILINOS
 dnl petsc
 dnl AC_CHECK_PETSC(2.1.6) #
 AM_CONDITIONAL(HAVE_PETSC, test "x$petsc_libs" != "x" )
-
-dnl parmetis
-AC_CHECK_PARMETIS
 
 dnl grace, commented since not used any more
 dnl AC_CHECK_HEADERS([grace_np.h])

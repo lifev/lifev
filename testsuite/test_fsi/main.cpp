@@ -25,6 +25,7 @@
 
 #include <cassert>
 #include <iomanip>
+#include <cmath>
 
 //#include <life/lifealg/IfpackPreconditioner.hpp>
 //#include <life/lifealg/MLPreconditioner.hpp>
@@ -387,17 +388,26 @@ private:
     {
         assert(M_data->dataFluid()->dataTime()->getTimeStep()==0.001);
         double dispNorm(M_fsi->displacement().Norm2());
-        if((time==0.001) && (dispNorm-0.0621691)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-        else
-        if((time==0.002) && (dispNorm-0.10668)  > 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-        else
-        if((time==0.003) && (dispNorm-0.113252) > 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-        else
-        if((time==0.004) && (dispNorm-0.107976) > 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-        else
-        if((time==0.005) && (dispNorm-0.0995918)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-        else
-        if(time==0.006 && (dispNorm-0.0751478)> 1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+
+        const LifeV::Real relTol(5e-3);
+
+        if( sameAs(time,0.001) && sameAs(dispNorm, 0.0621691, relTol) ) return;
+        if( sameAs(time,0.002) && sameAs(dispNorm, 0.10668,   relTol) )  return;
+        if( sameAs(time,0.003) && sameAs(dispNorm, 0.113252,  relTol) )  return;
+        if( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
+        if( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
+        if( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
+
+        throw Problem::RESULT_CHANGED_EXCEPTION(time);
+
+    }
+
+    bool sameAs(const LifeV::Real& a, const LifeV::Real& b, const LifeV::Real& relTol = 1e-6)
+    {
+        const LifeV::Real maxAbs (std::max(std::abs(a),std::abs(b)));
+        if (maxAbs < relTol*relTol) return true;
+
+        return std::abs(a-b) < relTol*maxAbs;
     }
 
 	fsi_solver_ptr M_fsi;

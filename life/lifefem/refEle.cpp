@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -40,8 +40,8 @@ RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor
     M_dPhi( dPhi ),
     M_d2Phi( d2Phi ),
     M_divPhi( divPhi),
-    M_refCoor( refCoor ), 
-    
+    M_refCoor( refCoor ),
+
     M_name( name ),
     M_shape( shape ),
     M_nbDof( nbDof ),
@@ -55,8 +55,8 @@ RefEle::~RefEle()
 {
     DESTRUCTOR( "RefEle" );
 }
-    
-std::vector<GeoVector> 
+
+std::vector<GeoVector>
 RefEle::refCoor() const
 {
     std::vector<GeoVector> coordinates(M_nbDof, GeoVector(3));

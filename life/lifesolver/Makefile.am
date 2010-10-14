@@ -31,4 +31,4 @@ liblifesolver_la_SOURCES   = DataFSI.cpp dataADR.cpp dataElasticStructure.cpp da
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am

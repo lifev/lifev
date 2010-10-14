@@ -1,0 +1,77 @@
+## generate API documentation with doxygen
+
+install-data-local: #install-apidox-instructions
+
+install-apidox-instructions:
+	@echo "* To install LifeV API documentation type make install-apidox"
+
+## install API documentation
+install-apidox: apidox
+	@if test "$(subdir)" == "."; then \
+		$(mkinstalldirs) $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api/html ; \
+		if test -f $(top_builddir)/doc/api/$(PACKAGE).tag; then \
+		echo $(INSTALL_DATA) $(top_builddir)/doc/api/$(PACKAGE).tag $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api; \
+		$(INSTALL_DATA) $(top_builddir)/doc/api/$(PACKAGE).tag $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api; \
+		fi; \
+		if test -d $(top_builddir)/doc/api/html; then \
+			list=`ls $(top_builddir)/doc/api/html`; \
+			echo "installing $(top_builddir)/doc/api/html" ;\
+			for file in $$list; do \
+				$(INSTALL_DATA) $(top_builddir)/doc/api/html/$$file $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api/html; \
+		done; \
+		fi; \
+		rm -f $(DESTDIR)$(datadir)/doc/$(PACKAGE)/common; \
+		$(LN_S) $(datadir)/doc/$(PACKAGE)/common $(DESTDIR)$(datadir)/doc/$(PACKAGE)/common; \
+	fi
+	@echo "* LifeV API has been generated in doc/api/"
+	@echo "* Open your browser at doc/api/html/index.html."
+	@echo "*"
+
+
+uninstall-local: uninstall-apidox
+
+uninstall-apidox:
+	@if test "$(subdir)" != "." ; then \
+		if test -d $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api/$(subdir); then \
+			rm -rfv $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api/$(subdir); \
+		fi; \
+	else \
+		if test -d $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api; then \
+			rm -rfv $(DESTDIR)$(datadir)/doc/$(PACKAGE)/api; \
+		fi; \
+	fi
+
+apidox:
+	$(MAKE) apidox-am-@DOXYGEN@ ;
+
+apidox-am-no-doxygen:
+apidox-am-doxygen:
+	@cp $(top_srcdir)/admin/Doxyfile.global Doxyfile; \
+	chmod a+w Doxyfile; \
+	echo "PROJECT_NAME           = \"$(PACKAGE)\"" >> Doxyfile ; \
+	echo "PROJECT_NUMBER         = \"$(VERSION)\"" >> Doxyfile ; \
+	echo "INPUT                  = $(top_srcdir) $(top_srcdir)/life/lifealg $(top_srcdir)/life/lifearray $(top_srcdir)/life/lifecore $(top_srcdir)/life/lifefem $(top_srcdir)/life/lifefilters $(top_srcdir)/life/lifemesh $(top_srcdir)/life/lifesolver $(top_srcdir)/testsuite/test_TemplateTest" >> Doxyfile; \
+	echo "IMAGE_PATH             = $(top_srcdir)/doc/api" >> Doxyfile ;\
+	echo "OUTPUT_DIRECTORY       = $(top_builddir)/doc/api" >> Doxyfile; \
+	echo "HTML_OUTPUT            = $(subdir)/html" >> Doxyfile; \
+	echo "HTML_HEADER            = $(top_srcdir)/doc/common/header.html" >> Doxyfile;\
+	echo "HTML_FOOTER            = $(top_srcdir)/doc/common/footer.html" >> Doxyfile;\
+	echo "HTML_STYLESHEET        = $(top_srcdir)/doc/common/doxygen.css" >> Doxyfile;\
+	echo "LATEX_OUTPUT           = $(subdir)/latex" >> Doxyfile; \
+	echo "RTF_OUTPUT             = $(subdir)/rtf" >> Doxyfile; \
+	echo "MAN_OUTPUT             = $(subdir)/man" >> Doxyfile; \
+	echo "GENERATE_HTML          = YES" >> Doxyfile ;\
+	echo "GENERATE_MAN           = NO" >> Doxyfile ;\
+	echo "GENERATE_LATEX         = NO" >> Doxyfile ;\
+	echo "GENERATE_TAGFILE       = $(top_builddir)/doc/api/$(PACKAGE).tag" >> Doxyfile ;\
+	echo "HAVE_DOT               = $(LIFE_HAS_DOT)" >> Doxyfile ; \
+	$(DOXYGEN) Doxyfile;\
+	rm -f Doxyfile;
+
+.PHONY: apidox-am-doxygen apidox-am-no-doxygen install-data-local install-apidox install-apidox uninstall-local uninstall-apidox uninstall-apidox apidox apidox-am-toplevel-no-doxygen apidox-am-toplevel-doxygen
+
+CLEANFILES	= Doxyfile index.html doxygen.css doxygen.png index.html pages.html search.html doxylog Doxylog
+
+# Local Variables:
+# mode: makefile
+# End:

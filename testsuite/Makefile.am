@@ -96,7 +96,7 @@ testsuite: $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
     fi
 
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am
 
 MOSTLYCLEANFILES	= testsuite.log `find -type f -print | grep testsuite.dir`
 

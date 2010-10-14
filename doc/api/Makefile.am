@@ -23,7 +23,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-include ../../admin/Doxyfile.am
+include ../../Doxyfile.am
 
 
 
