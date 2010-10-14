@@ -150,6 +150,7 @@ public:
         steklovPoincare* M_pFS;
     };
 
+    //void registerMyProducts( );
 
 private:
 

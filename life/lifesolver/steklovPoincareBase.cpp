@@ -109,13 +109,10 @@ void steklovPoincare::eval(const vector_type& disp,
 {
 
     if(status)
-        {
-            M_nbEval = 0; // new time step
-            this->M_fluid->resetPrec();
-            //this->M_solid->resetPrec();
-        }
-
-    M_nbEval++ ;
+    {
+        this->M_fluid->resetPrec();
+        //this->M_solid->resetPrec();
+    }
 
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -308,7 +305,7 @@ void  steklovPoincare::solveJac(vector_type        &muk,
 
     if (this->preconditioner() != NEWTON)
     {
-        if (M_nbEval == 1) M_aitkFS.restart();
+        M_aitkFS.restart();
         muk = M_aitkFS.computeDeltaLambdaFSI(M_dispStructOld, muF, muS );
     }
     else
@@ -962,6 +959,12 @@ void steklovPoincare::computeResidualFSI()
 
 }
 
+// void steklovPoincare::registerMyProducts( )
+// {
+// FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
+// solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
+// solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
+// }
 
 //
 // add steklovPoincare to factory
@@ -970,7 +973,7 @@ void steklovPoincare::computeResidualFSI()
 namespace
 {
 FSIOperator* createSP(){ return new steklovPoincare(); }
-static bool reg = FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
+static bool reg = FSIOperator::FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
 }
 
 
