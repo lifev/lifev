@@ -95,7 +95,7 @@ public:
     void                        setUp( const GetPot& dataFile );
 
     //! initializes the fluid and mesh problems, creates the map of the global matrix
-    void                       setupFluidSolid();
+    void                       setupFluidSolid( UInt const fluxes );
 
     /**
        updates the meshmotion, advances of a time step
@@ -152,12 +152,16 @@ public:
         return this->M_meshMotion->dispOld();
     }
 
-    //! getter for the current iteration solution.
-    /*!NOTE: this method can be dangerous because it returns a reference to
-    the current solution, which can be modified outside.
-    The vector sol is the one used in nonlinearRichardson
-    */
-    void getSolution                  (vector_ptrtype& sol){sol = M_uk;}
+    //! get the solution.
+    const vector_type& getSolution() const { return *M_uk; }
+
+    //! get the solution.
+    vector_ptrtype solutionPtr() const { return M_uk; }
+
+    //! set the solution
+    void setSolution( const vector_type& solution ) { M_uk.reset( new vector_type( solution ) ); }
+
+    void setSolutionPtr                     ( const vector_ptrtype& sol){ M_uk = sol; }
     //@}
 
     //! initialize the system with functions
@@ -167,6 +171,7 @@ public:
                                             FSIOperator::solid_type::value_type::Function const& w0,
                                             FSIOperator::solid_type::value_type::Function const& df0 );
 
+    void registerMyProducts( ){};
 private:
 
     //! @name Private Methods
@@ -193,12 +198,6 @@ private:
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
     void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
-
-    //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
-    /*
-      \param iter: current iteration: used as flag to distinguish the first nonlinear iteration from the others
-     */
-    void assembleFluidBlock(UInt iter);
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the

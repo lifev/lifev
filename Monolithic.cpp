@@ -34,7 +34,6 @@ Monolithic::Monolithic():
     M_rhsFull(),
     M_BCh_flux(),
     M_BCh_Robin(),
-    M_fluxes(0),
     M_BChWSS(),
     M_offset(0),
     M_solidAndFluidDim(0),
@@ -99,22 +98,22 @@ Monolithic::setupDOF( mesh_filtertype& filterMesh )
     createInterfaceMaps(*locDofMap);
 }
 
+
 void
-Monolithic::setupFluidSolid( )
+Monolithic::setupFluidSolid( UInt const fluxes )
 {
-    super::setupFluidSolid( );
+
+    super::setupFluidSolid(fluxes);
 
     // Note: up to now it works only with matching grids (and poly order) on the interface
     assert(M_fluidInterfaceMap->getMap(Unique)->NumGlobalElements() == M_solidInterfaceMap->getMap(Unique)->NumGlobalElements());
 
     M_interfaceMap = M_solidInterfaceMap;
 
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
 
     M_monolithicMap.reset(new EpetraMap(M_uFESpace->map()));
-    M_BCh_flux = M_BCh_u; // For the moment M_BCh_u contains only the fluxes.
-    M_fluxes=M_BCh_flux->size( );
 
     std::string opertype = M_dataFile("problem/blockOper", "AdditiveSchwarz");
 
@@ -134,6 +133,16 @@ Monolithic::setupFluidSolid( )
     M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + M_fluxes +  M_pFESpace->dof().numTotalDof();
     M_solidAndFluidDim= M_offset + M_dFESpace->dof().numTotalDof()*nDimensions;
     M_BCh_d->setOffset(M_offset);
+}
+
+void
+Monolithic::setupFluidSolid( )
+{
+    M_BCh_flux = M_BCh_u; // For the moment M_BCh_u contains only the fluxes.
+    M_fluxes=M_BCh_u->size( );
+
+    setupFluidSolid( M_fluxes );
+
     M_BCh_flux->setOffset(M_offset-M_fluxes);
     std::vector<BCBase>::iterator fluxIt = M_BCh_flux->begin( );
     for ( UInt i = 0; i < M_fluxes; ++i, ++fluxIt )
@@ -198,7 +207,6 @@ Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working wi
 void
 Monolithic::updateSystem()
 {
-
     vector_type solution(*this->M_monolithicMap);
     monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
     this->M_bdf->shift_right(solution);
@@ -256,103 +264,14 @@ Monolithic::monolithicToInterface(vector_type& lambdaSolid, const vector_type& d
 
 
 void
-Monolithic::setDispSolid(const vector_type &sol)
+Monolithic::setDispSolid( const vector_type& solution )
 {
     vector_type disp(*M_monolithicMap);
-    monolithicToX(sol, disp, M_dFESpace->map(), M_offset);
+    monolithicToX(solution, disp, M_dFESpace->map(), M_offset);
     this->M_solid->setDisp(disp);
 }
 
 
-
-void
-Monolithic::evalResidual( vector_type&       res,
-                          const vector_type& disp,
-                          const UInt          iter )
-{
-
-    if((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
-    {
-        setDispSolid(disp);
-        vector_type lambdaFluid(*M_interfaceMap, Unique);
-
-        monolithicToInterface(lambdaFluid, disp);
-
-        lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));//because of the matrix scaling
-        this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
-        M_meshMotion->iterate(*M_BCh_mesh);
-        M_meshMotion->updateDispDiff();
-
-        M_beta.reset(new vector_type(M_uFESpace->map()));
-        vector_type meshDispDiff( M_meshMotion->disp(), Repeated );
-
-        this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
-
-        meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
-        this->interpolateVelocity(meshDispDiff, *this->M_beta);
-
-        double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
-
-        *this->M_beta *= -alpha;
-
-        vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
-        fluid->subset(*M_un, (UInt)0);
-        *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
-
-        //M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
-
-        assembleFluidBlock(iter);
-        assembleSolidBlock();
-
-        if ( !M_BCh_u->bdUpdateDone() )
-            M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        M_BCh_d->setOffset(M_offset);
-        if ( !M_BCh_d->bdUpdateDone() )
-            M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-
-        M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
-        M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
-
-        if(!this->M_monolithicMatrix->set())
-        {
-            M_BChs.push_back(M_BCh_d);
-            M_BChs.push_back(M_BCh_u);
-            M_FESpaces.push_back(M_dFESpace);
-            M_FESpaces.push_back(M_uFESpace);
-
-            M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
-            M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
-            M_monolithicMatrix->setConditions(M_BChs);
-            M_monolithicMatrix->setSpaces(M_FESpaces);
-            M_monolithicMatrix->setOffsets(2, M_offset, 0);
-            M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
-        }
-        else
-        {
-            M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
-            M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
-        }
-
-        M_monolithicMatrix->blockAssembling();
-        M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
-
-        M_monolithicMatrix->GlobalAssemble();
-        //M_monolithicMatrix->getMatrix()->spy("M");
-
-        //NOTE: M_monolithic->GlobalAssemble has to be called before M_precPtr->blockAssembling(), because they hold
-        //shared pointers to the same blocks
-
-        M_nbEval++ ;
-        //M_precPtr->reset();
-        //M_precPtr->resetBlocks();
-        setupBlockPrec( );
-
-        M_precPtr->blockAssembling();
-        M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
-        M_precPtr->GlobalAssemble();
-    }
-    evalResidual( disp,  M_rhsFull, res, M_diagonalScale);
-}
 
 int Monolithic::setupBlockPrec( )
 {
@@ -376,12 +295,11 @@ void
 Monolithic::
 evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
 {
-    //M_monolithicMatrix->getMatrix()->GlobalAssemble();
-    if(diagonalScaling)
+    if( diagonalScaling )
         diagonalScale(*rhs, M_monolithicMatrix->getMatrix());
+
     res = *(M_monolithicMatrix->getMatrix())*sol;
-    res -= *rhs;
-    // Ax-b
+    res -= *rhs; // Ax-b
 }
 
 
@@ -392,30 +310,20 @@ Monolithic::solveJac(vector_type         &_step,
                      const vector_type   &_res,
                      const Real         /*_linearRelTol*/)
 {
+    setupBlockPrec( );
+
+    M_precPtr->blockAssembling();
+    M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
+    M_precPtr->GlobalAssemble();
+
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.NormInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
+    //M_monolithicMatrix->getMatrix()->spy("J");
     this->iterateMonolithic(_res, _step);
 
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.NormInf(), "\n");
 }
-
-
-void
-Monolithic::iterateMesh(const vector_type& disp)
-{
-    vector_type lambdaFluid(*M_interfaceMap, Unique);
-
-    monolithicToInterface(lambdaFluid, disp);
-
-    lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));
-
-    this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
-
-    M_meshMotion->iterate(*M_BCh_mesh);
-
-}
-
 
 void
 Monolithic::variablesInit(const std::string& dOrder)
@@ -430,13 +338,14 @@ Monolithic::variablesInit(const std::string& dOrder)
     M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
 }
 
-
-
 void
 Monolithic::
 updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
 {
     M_solid->updateSystem();
+
+    std::cout<<"rhs solid: "<<M_solid->rhsWithoutBC()->Norm2()<<std::endl;
+
     *rhsFluidCoupling += *M_solid->rhsWithoutBC();
 }
 
@@ -600,9 +509,7 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
 {
     Chrono chrono;
 
-    displayer().leaderPrint("    Solving the system ... \n" );
-
-    displayer().leaderPrint("    Updating the boundary conditions ... ");
+    displayer().leaderPrint("  M-  Solving the system ... \n" );
 
     //M_monolithicMatrix->GlobalAssemble();
     //necessary if we did not imposed Dirichlet b.c.
@@ -610,7 +517,7 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
 
-    int numIter = M_precPtr->solveSystem( rhs, step, M_linearSolver );
+    UInt numIter = M_precPtr->solveSystem( rhs, step, M_linearSolver );
 
     if (numIter < 0)
         {
@@ -622,16 +529,65 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
                 M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
         }
 
-    M_solid->getDisplayer().leaderPrint("   system solved.\n ");
+    M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
 }
 
 void
-Monolithic::assembleSolidBlock( )
+Monolithic::assembleSolidBlock( UInt iter, vector_ptrtype& solution )
 {
-    *this->M_rhs += *M_solid->rhsWithoutBC();
+    if(iter == 0)
+    {
+        if (!M_restarts)
+        {
+            this->M_solid->updateVel();
+            M_restarts = false;
+        }
+        updateSolidSystem(this->M_rhs);
+    }
+    else
+    {
+        M_solid->computeMatrix( *solution, 1.);
+    }
     M_solid->getSolidMatrix(M_solidBlock);
     M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solidBlock;
 }
+
+void
+Monolithic::assembleFluidBlock(UInt iter, vector_ptrtype& solution)
+{
+    M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+
+    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
+    M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
+    this->M_fluid->updateStab(*M_fluidBlock);
+
+    if(iter==0)
+    {
+        M_resetPrec=true;
+        *this->M_rhs += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+        couplingRhs(this->M_rhs, M_un);
+    }
+    *M_rhsFull = *M_rhs;
+}
+
+
+// void
+// MonolithicGI::assembleFluidBlock(UInt iter)
+// {
+//     double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
+//     M_fluid->recomputeMatrix(true);
+//     M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
+//     if(iter==0)
+//     {
+//         *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );// fluid time discr.
+//         super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
+//     //        super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
+//     }
+//     M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
+//     M_fluid->getFluidMatrix( *M_fluidBlock);
+//     M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
+//     *this->M_rhsFull = *this->M_rhs;//this will be the rhs with the BCs (the one who changes at each nonlinear iteration)
+// }
 
 }

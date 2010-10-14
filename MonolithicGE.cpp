@@ -43,9 +43,9 @@ namespace LifeV {
 // ===================================================
 
 
-void MonolithicGE::setupFluidSolid()
+void MonolithicGE::setupFluidSolid( UInt const fluxes )
 {
-    super::setupFluidSolid( );
+    super::setupFluidSolid( fluxes );
     M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
                                                             M_epetraComm));
 
@@ -81,6 +81,82 @@ void MonolithicGE::setupFluidSolid()
     //                                                      *M_epetraComm));
 }
 
+
+void
+MonolithicGE::evalResidual( vector_type&       res,
+                          const vector_type& disp,
+                          const UInt          iter )
+{
+
+    if((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
+    {
+        // Solve HE
+        iterateMesh(disp);
+
+        // Update displacement
+        M_meshMotion->updateDispDiff();
+
+        M_beta.reset(new vector_type(M_uFESpace->map()));
+        vector_type meshDispDiff( M_meshMotion->disp(), Repeated );
+
+        this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
+
+        meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
+        this->interpolateVelocity(meshDispDiff, *this->M_beta);
+
+        *this->M_beta /= -M_data->dataFluid()->dataTime()->getTimeStep(); //mesh velocity w
+
+        vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
+        fluid->subset(*M_un, (UInt)0);
+        *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
+
+        //M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
+
+        assembleFluidBlock(iter, M_un);
+        assembleSolidBlock(iter, M_un);
+
+        if ( !M_BCh_u->bdUpdateDone() )
+            M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+        M_BCh_d->setOffset(M_offset);
+        if ( !M_BCh_d->bdUpdateDone() )
+            M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+
+        M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
+        M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
+
+        if(!this->M_monolithicMatrix->set())
+        {
+            M_BChs.push_back(M_BCh_d);
+            M_BChs.push_back(M_BCh_u);
+            M_FESpaces.push_back(M_dFESpace);
+            M_FESpaces.push_back(M_uFESpace);
+
+            M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
+            M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
+            M_monolithicMatrix->setConditions(M_BChs);
+            M_monolithicMatrix->setSpaces(M_FESpaces);
+            M_monolithicMatrix->setOffsets(2, M_offset, 0);
+            M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+        }
+        else
+        {
+            M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
+            M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
+        }
+
+        M_monolithicMatrix->blockAssembling();
+        M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
+
+        M_monolithicMatrix->GlobalAssemble();
+        //M_monolithicMatrix->getMatrix()->spy("M");
+
+        //NOTE: M_monolithic->GlobalAssemble has to be called before M_precPtr->blockAssembling(), because they hold
+        //shared pointers to the same blocks
+    }
+    super::evalResidual( disp,  M_rhsFull, res, M_diagonalScale);
+}
+
+
 void MonolithicGE::setupDOF()
 {
     M_bcvStructureDispToHarmonicExtension.reset( new  BCVectorInterface );
@@ -94,98 +170,38 @@ MonolithicGE::setupSystem( )
     M_meshMotion->setUp( M_dataFile );
 }
 
+void
+MonolithicGE::updateSystem( )
+{
+    super::updateSystem();
+
+    // Set displacement for solid RHS
+    setDispSolid( *M_un );
+}
 
 
 void
-MonolithicGE::assembleFluidBlock(UInt iter)
+MonolithicGE::iterateMesh(const vector_type& disp)
 {
-    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
-    matrix_ptrtype newMatrix(new matrix_type(*M_monolithicMap));
-    M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, newMatrix );
-    this->M_fluid->updateStab(*newMatrix);
-    newMatrix->GlobalAssemble();
+    vector_type lambdaFluid(*M_interfaceMap, Unique);
 
-    M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
-    *M_fluidBlock += *newMatrix;
+    monolithicToInterface(lambdaFluid, disp);
 
+    lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*(M_solid->rescaleFactor()));
 
-        if(iter==0)
-        {
-            M_nbEval = 0; // new time step
-            M_resetPrec=true;
-            *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
-            couplingRhs(this->M_rhs, M_un);
+    this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
-            if (!M_restarts)
-            {
-                this->M_solid->updateVel();
-                M_restarts = false;
-            }
-            updateSolidSystem(this->M_rhs);
-        }
-
-        *M_rhsFull = *M_rhs;
+    M_meshMotion->iterate(*M_BCh_mesh);
 
 }
 
-namespace
-{
-
-BlockInterface* createComposedDNND(){
-    const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
-    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
-    const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
-    const std::vector<ComposedBlockOper::Block> orderVector(order, order+6);
-    return new ComposedDNND(couplingVectorDNND, orderVector);
-}
-
-BlockInterface* createComposedNN()
-{
-    const ComposedBlockOper::Block order[] = {  ComposedBlockOper::fluid, ComposedBlockOper::solid};
-    const Int couplingsNN[] = { 8, 4, 1, 2};
-    const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
-    const std::vector<ComposedBlockOper::Block> orderVector(order, order+4);
-    return new ComposedNN( couplingVectorNN, orderVector );
-}
-
-BlockMatrix*    createAdditiveSchwarz()
-{
-return new BlockMatrix(15);
-}
-
-BlockMatrix*    createAdditiveSchwarzRN()
-{
-return new BlockMatrixRN(15);
-}
-
-BlockInterface* createComposedDN()
-{
-    const ComposedBlockOper::Block order[] = { ComposedBlockOper::solid, ComposedBlockOper::fluid};
-    const Int couplingsDN[] = { 0, 7};
-    const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
-    const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
-    return new ComposedDN(couplingVectorDN, orderVector);
-}
-
-BlockInterface* createComposedDN2()
-{
-    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
-    const Int couplingsDN2[] = { 8, 6};
-    const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
-    const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
-    return new ComposedDN(couplingVectorDN2, orderVector);
-}
-
-FSIOperator* createM(){ return new MonolithicGE(); }
-}
-
-bool MonolithicGE::reg = FSIFactory::instance().registerProduct( "monolithicGE", &createM ) &&
-    BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &createComposedDNND) &&
-    BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &createAdditiveSchwarz) &&
-    BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &createAdditiveSchwarz ) &&
-    BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &createAdditiveSchwarzRN ) &&
-    BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &createAdditiveSchwarzRN ) &&
-    BlockPrecFactory::instance().registerProduct("ComposedDN"  , &createComposedDN ) &&
-    BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &createComposedDN2 );
+bool MonolithicGE::reg = FSIFactory::instance().registerProduct( "monolithicGE", &MonolithicGE::createM )  &&
+      BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &ComposedDNND::createComposedDNND) &&
+      BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz) &&
+      BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz ) &&
+      BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
+      BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
+      BlockPrecFactory::instance().registerProduct("ComposedDN"  , &ComposedDN::createComposedDN ) &&
+     BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &ComposedDN::createComposedDN2 );
 
 } // Namespace LifeV

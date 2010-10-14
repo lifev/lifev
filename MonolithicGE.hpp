@@ -98,16 +98,46 @@ public:
     //! @name Methods
     //@{
 
-    void setupFluidSolid();
+    void setupFluidSolid( UInt const fluxes );
 
-    void setupDOF( void );
+    void setupDOF();
 
-    void setupSystem( );
+    void setupSystem();
 
-    void assembleFluidBlock(UInt iter);
+    void updateSystem();
 
-    void getSolution                  (vector_ptrtype& sol){sol = M_un;}
 
+    /**
+       evaluates the residual b-Ax
+       \param res: output
+       \param _sol: monolithic solution
+       \param iter: current nonLinRichardson (Newton) iteration
+    */
+    void   evalResidual(vector_type&        res,
+                        const vector_type& _sol,
+                        const UInt          _iter);
+
+    /**
+      iterates the mesh
+      \param disp: monolithic solution
+    */
+    void iterateMesh( const vector_type& disp );
+
+    //! get the solution
+    const vector_type& getSolution() const { return *M_un; }
+
+    //! get the solution ptr
+    vector_ptrtype solutionPtr() const { return M_un; }
+
+    //! set the solution
+    void setSolution( const vector_type& solution ) { M_un.reset( new vector_type( solution ) ); }
+
+    //! set the solution ptr
+    void setSolutionPtr( const vector_ptrtype& sol) { M_un = sol; }
+
+    void registerMyProducts();
+
+    static FSIOperator* createM(){ return new MonolithicGE(); }
 
     //@}
 

@@ -32,6 +32,10 @@
  0&I&H
  \end{array}\right)\f$
  if the time discretization at hand is the Geometry-Implicit one (implemented in monolithicGI.hpp)
+
+TODO:
+1. move the class assembleFluidBlocks to the base class, handle in a way that matrices and solution are always outside Oseen
+
  */
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
@@ -130,6 +134,10 @@ public:
 
     //!@name Methods
     //!@{
+
+
+
+
     /**
        evaluates the residual b-Ax
        \param res: output
@@ -138,7 +146,7 @@ public:
     */
     void   evalResidual(vector_type&        res,
                         const vector_type& _sol,
-                        const UInt          _iter);
+                        const UInt          _iter) = 0 ;
 
 
 
@@ -170,8 +178,7 @@ public:
        iterates the mesh
        \param disp: monolithic solution
     */
-    void iterateMesh(const vector_type& disp);
-
+    virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
     /**
        builds the constant part of the monolithic matrix
     */
@@ -202,13 +209,15 @@ public:
     {
         M_un=u0;
 
-        M_BCh_u->merge(*M_BCh_flux);
-        M_BCh_flux.reset();
-        M_BCh_d->merge(*M_BCh_Robin);
-        M_BCh_Robin.reset();
+//         M_BCh_u->merge(*M_BCh_flux);
+//         M_BCh_flux.reset();
+//         M_BCh_d->merge(*M_BCh_Robin);
+//         M_BCh_Robin.reset();
 
     }
 
+
+    void  setRestarts( bool restarts ){ M_restarts = restarts; }
 
 #ifdef HAVE_TRILINOS_ANASAZI
     /**
@@ -280,6 +289,8 @@ public:
     */
     virtual void setupFluidSolid();
 
+    virtual void setupFluidSolid( UInt const fluxes );
+
     /**
        solves the Jacobian system
        \param _muk: output, solution at the current Newton step
@@ -350,32 +361,25 @@ public:
     //!@}
 
     //! get the solution vector
-    /*!
-      puts the solution vector into the vector sol
-      \param sol: solution vector
-    */
-    virtual void getSolution                  (vector_ptrtype& sol)=0;
+    virtual const vector_type& getSolution() const = 0;
+
+    virtual vector_ptrtype solutionPtr() const = 0;
 
     //! initializes the solution by reference (through a shared_ptr)
     /*!
       \param sol: input pointer
     */
-    void setSolutionPtr                     ( vector_ptrtype sol){initialize(sol);}
+    void setSolutionPtr                     ( const vector_ptrtype& sol)=0;
 
-    //! initializes the solution by copy
-    /*!
-      \param sol: input vector
-    */
-    //void setSolution                  ( const vector_type& sol ){ initialize(sol); }
-    void setSolution                     (const vector_type& sol)
+    //! set the solution
+    virtual void setSolution( const vector_type& solution ) = 0;
+
+    void mergeBCHandlers()
     {
-        *M_un=sol;
-
         M_BCh_u->merge(*M_BCh_flux);
         M_BCh_flux.reset();
         M_BCh_d->merge(*M_BCh_Robin);
         M_BCh_Robin.reset();
-
     }
 
     //!initializes the solid displacement
@@ -470,10 +474,22 @@ protected:
 
     //!@name protected getters
     //!@{
-    virtual void assembleSolidBlock();
 
 
-    virtual void assembleFluidBlock(UInt iter)=0;
+    //! assembles the solid problem (the matrix and the rhs due to the time derivative)
+    /*
+      \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
+     */
+    void assembleSolidBlock(UInt iter, vector_ptrtype& solution);
+
+
+    //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
+    /*
+      \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
+     */
+    void assembleFluidBlock(UInt iter, vector_ptrtype& solution);
+
+
     //!@}
 
 
@@ -489,7 +505,7 @@ protected:
 
     fluid_bchandler_type                              M_BCh_flux;
     solid_bchandler_type                              M_BCh_Robin;
-    UInt                                              M_fluxes;
+    //UInt                                              M_fluxes;
     solid_bchandler_type                              M_BChWSS;
     BCFunctionMixte                                   M_bcfWss;
     //    matrix_ptrtype                                    M_robinCoupling;
@@ -515,9 +531,9 @@ private:
 #ifdef OBSOLETE
     boost::shared_ptr<vector_type>                    M_rhsShapeDerivatives;
 #endif
-    bool                                              M_diagonalScale;
-protected:
     //!}
+protected:
+    bool                                              M_diagonalScale;
     bool                                              M_reusePrec;// to move to private
     bool                                              M_resetPrec;// to move to private
     UInt                                              M_maxIterSolver;// to move to private

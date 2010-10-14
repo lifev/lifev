@@ -50,9 +50,9 @@ MonolithicGI::MonolithicGI():
 {}
 
 void
-MonolithicGI::setupFluidSolid()
+MonolithicGI::setupFluidSolid( UInt const fluxes )
 {
-    super::setupFluidSolid();
+    super::setupFluidSolid( fluxes );
     UInt offset = M_monolithicMap->getMap(Unique)->NumGlobalElements();
     M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
 
@@ -121,11 +121,8 @@ MonolithicGI::evalResidual( vector_type&       res,
                             const vector_type& disp,
                             const UInt          iter )
 {
-    if(iter == 0)
-    {
-        M_nbEval = 0; // new time step
-    }
-    else
+    setDispSolid(disp);
+    if(iter > 0)
     {
         this->M_solid->updateVel();
     }
@@ -164,18 +161,18 @@ MonolithicGI::evalResidual( vector_type&       res,
         fluid->subset(disp, 0);
     *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
 
-    if(iter == 0)
-    {
-        M_solid->updateSystem();
-    }
-    else
-    {
-        M_solid->computeMatrix( disp, 1.);
-    }
+//      if(iter == 0)
+//      {
+// //         M_solid->updateSystem();
+//      }
+//      else
+//      {
+//          //         M_solid->computeMatrix( disp, 1.);
+//      }
 
-    assembleSolidBlock();
-    assembleFluidBlock(iter);
-    assembleMeshBlock(iter);
+    assembleSolidBlock( iter, M_uk );
+    assembleFluidBlock( iter, M_uk );
+    assembleMeshBlock ( iter );
 
     M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
     M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
@@ -221,13 +218,6 @@ MonolithicGI::evalResidual( vector_type&       res,
     //M_monolithicMatrix->getMatrix()->spy("FM");
 
     super::evalResidual( disp, M_rhsFull, res, false );
-
-    setupBlockPrec( );
-
-    M_precPtr->blockAssembling( );
-    M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->getTime() );
-    M_precPtr->GlobalAssemble( );
-
 }
 
 int MonolithicGI::setupBlockPrec( )
@@ -294,7 +284,12 @@ void MonolithicGI::solveJac(vector_type       &_step,
                             const Real       _linearRelTol)
 {
 
-    //M_monolithicMatrix->getMatrix()->spy("J");
+    setupBlockPrec( );
+
+    M_precPtr->blockAssembling( );
+    M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->getTime() );
+    M_precPtr->GlobalAssemble( );
+
     //boost::dynamic_pointer_cast<BlockMatrix>(M_precPtr)->getMatrix()->spy("P");
 
     M_linearSolver->setMatrix(*M_monolithicMatrix->getMatrix());
@@ -379,23 +374,6 @@ MonolithicGI::setUp( const GetPot& dataFile )
     M_convectiveTermDer     = dataFile( "fluid/convectiveTermDer", false);
 }
 
-void
-MonolithicGI::assembleFluidBlock(UInt iter)
-{
-    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
-    M_fluid->recomputeMatrix(true);
-    M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
-    if(iter==0)
-    {
-        *this->M_rhs += this->M_fluid->matrMass()*this->M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );// fluid time discr.
-        super::couplingRhs( this->M_rhs, this->M_un);//adds to the solid rhs the terms due to the coupling
-    //        super::updateSolidSystem(this->M_rhs);//updates the rhs in the solid system (the solid time discr. is implemented there)
-    }
-    M_fluidBlock.reset(new matrix_type(*M_monolithicMap));
-    M_fluid->getFluidMatrix( *M_fluidBlock);
-    M_fluid->updateStab( *M_fluidBlock);//applies the stabilization terms
-    *this->M_rhsFull = *this->M_rhs;//this will be the rhs with the BCs (the one who changes at each nonlinear iteration)
-}
 
 void
 MonolithicGI::assembleMeshBlock(UInt iter)
