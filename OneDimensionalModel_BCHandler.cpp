@@ -111,14 +111,14 @@ OneDimensionalModel_BCHandler::applyBC( const Real&              time,
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType& flux, const Source_PtrType& source )
+OneDimensionalModel_BCHandler::setDefaultBC()
 {
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler] Set Default BC ... \n";
 
     if( !M_boundarySet[ OneD_left ][OneD_first] )
     {
-        //BCFunction_Default_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Default( flux, source, OneD_left, OneD_W1 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Riemann( flux, source, OneD_left, OneD_W1 ) );
+        //BCFunction_Default_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Default( OneD_left, OneD_W1 ) );
+        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Riemann( OneD_left, OneD_W1 ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
 
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
@@ -132,8 +132,8 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType& flux, const Sou
 
     if( !M_boundarySet[ OneD_left ][OneD_second] )
     {
-        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Compatibility( flux, source, OneD_left, OneD_W2 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Compatibility( flux, source, OneD_left, OneD_W2 ) );
+        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_left, OneD_W2 ) );
+        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_left, OneD_W2 ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
 
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
@@ -148,8 +148,8 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType& flux, const Sou
 
     if( !M_boundarySet[ OneD_right ][ OneD_first ] )
     {
-        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Riemann( flux, source, OneD_right, OneD_W2 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Riemann( flux, source, OneD_right, OneD_W2 ) );
+        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Riemann( OneD_right, OneD_W2 ) );
+        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Riemann( OneD_right, OneD_W2 ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
 
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
@@ -163,8 +163,8 @@ OneDimensionalModel_BCHandler::setDefaultBC( const Flux_PtrType& flux, const Sou
 
     if( !M_boundarySet[ OneD_right ][ OneD_second ] )
     {
-        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Compatibility( flux, source, OneD_right, OneD_W1 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Compatibility( flux, source, OneD_right, OneD_W1 ) );
+        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_right, OneD_W1 ) );
+        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_right, OneD_W1 ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
 
         //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
@@ -197,6 +197,13 @@ OneDimensionalModel_BCHandler::setSolution( const Solution_PtrType& solution )
 {
     for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setSolution( solution );
+}
+
+void
+OneDimensionalModel_BCHandler::setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
+{
+    for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
+        ( *i )->setFluxSource( flux, source );
 }
 
 void

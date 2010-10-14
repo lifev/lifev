@@ -86,8 +86,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Default( const Flux_PtrType& flux, const Source_PtrType& source,
-                                            const OneD_BCSide& side, const OneD_BC& bcType );
+    OneDimensionalModel_BCFunction_Default( const OneD_BCSide& side, const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
@@ -113,15 +112,25 @@ public:
 
     void setSolution( const Solution_PtrType& solution );
 
+    void setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
+
     //@}
 
 protected:
+
+    //! @name Protected Methods
+    //@{
+
+    virtual void setupNode();
+
+    //@}
 
     Flux_PtrType                             M_Flux;
     Source_PtrType                           M_Source;
     Solution_PtrType                         M_Solution;
 
     UInt                                     M_bcNode;
+    OneD_BCSide                              M_bcSide;
     OneD_BC                                  M_bcType;
 };
 
@@ -141,8 +150,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType& flux, const Source_PtrType& source,
-                                            const OneD_BCSide& side, const OneD_BC& bcType );
+    OneDimensionalModel_BCFunction_Riemann( const OneD_BCSide& side, const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
@@ -207,8 +215,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType& flux, const Source_PtrType& source,
-                                                  const OneD_BCSide& side,  const OneD_BC& bcType );
+    OneDimensionalModel_BCFunction_Compatibility( const OneD_BCSide& side,  const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
@@ -233,6 +240,8 @@ protected:
 
     //! @name Protected Methods
     //@{
+
+    void setupNode();
 
     Real extrapolateW( const Real& timeStep );
 
@@ -290,8 +299,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType& flux, const Source_PtrType& source,
-                                              const OneD_BCSide& side,  const OneD_BC& bcType );
+    OneDimensionalModel_BCFunction_Absorbing( const OneD_BCSide& side,  const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
@@ -344,8 +352,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType& flux, const Source_PtrType& source,
-                                               const OneD_BCSide& side,  const OneD_BC& bcType,
+    OneDimensionalModel_BCFunction_Resistance( const OneD_BCSide& side,  const OneD_BC& bcType,
                                                const Real& resistance );
 
     //! Copy constructor
@@ -413,8 +420,7 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Windkessel3( const Flux_PtrType& flux,        const Source_PtrType& source,
-                                                const OneD_BCSide&  side,        const OneD_BC&        bcType,
+    OneDimensionalModel_BCFunction_Windkessel3( const OneD_BCSide&  side,        const OneD_BC&        bcType,
                                                 const Real&         resistance1, const Real&           resistance2,
                                                 const Real&         compliance,
                                                 const bool&         absorbing1 = false,

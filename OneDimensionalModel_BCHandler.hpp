@@ -112,9 +112,11 @@ public:
     void setBC( const OneD_BCSide& side, const OneD_BCLine& line,
                 const OneD_BC& bcType,   const BCFunction_Type& BCfunction );
 
-    void setDefaultBC( const Flux_PtrType& flux, const Source_PtrType& source );
+    void setDefaultBC();
 
     void setSolution( const Solution_PtrType& solution );
+
+    void setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
 
     void setInternalNode( const OneD_BCSide& side );
 

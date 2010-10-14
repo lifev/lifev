@@ -45,28 +45,14 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const Flux_PtrType&    flux,
-                                                                                const Source_PtrType&  source,
-                                                                                const OneD_BCSide&     bcSide,
+OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const OneD_BCSide&     bcSide,
                                                                                 const OneD_BC&         bcType ):
-    M_Flux                          ( flux ),
-    M_Source                        ( source ),
+    M_Flux                          (),
+    M_Source                        (),
     M_bcNode                        (),
+    M_bcSide                        ( bcSide ),
     M_bcType                        ( bcType )
 {
-    switch( bcSide )
-    {
-        case OneD_left:
-            M_bcNode = 1;
-        break;
-
-        case OneD_right:
-            M_bcNode = M_Flux->Physics()->Data()->NumberOfNodes();
-        break;
-
-        default:
-            std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
-    }
 }
 
 OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& BCF_Default ) :
@@ -95,16 +81,44 @@ OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType& sol
     M_Solution = solution;
 }
 
+void
+OneDimensionalModel_BCFunction_Default::setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
+{
+    M_Flux   = flux;
+    M_Source = source;
+
+    this->setupNode();
+}
+
+// ===================================================
+// Protected Methods
+// ===================================================
+void
+OneDimensionalModel_BCFunction_Default::setupNode()
+{
+    switch( M_bcSide )
+    {
+        case OneD_left:
+            M_bcNode = 1;
+        break;
+
+        case OneD_right:
+            M_bcNode = M_Flux->Physics()->Data()->NumberOfNodes();
+        break;
+
+        default:
+            std::cout << "Warning: bcSide \"" << M_bcSide << "\" not available!" << std::endl;
+    }
+}
+
 
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const Flux_PtrType&    flux,
-                                                                                const Source_PtrType&  source,
-                                                                                const OneD_BCSide&     bcSide,
+OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const OneD_BCSide&     bcSide,
                                                                                 const OneD_BC&         bcType ) :
-    super                           ( flux, source, bcSide, bcType ),
+    super                           ( bcSide, bcType ),
     M_bcU                           (),
     M_bcW                           ()
 {}
@@ -143,11 +157,9 @@ OneDimensionalModel_BCFunction_Riemann::updateBCVariables()
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const Flux_PtrType&    flux,
-                                                                                            const Source_PtrType&  source,
-                                                                                            const OneD_BCSide&     bcSide,
+OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const OneD_BCSide&     bcSide,
                                                                                             const OneD_BC&         bcType ):
-    super                           ( flux, source, bcSide, bcType ),
+    super                           ( bcSide, bcType ),
     M_bcInternalNode                (),
     M_boundaryPoint                 (),
     M_internalBdPoint               (),
@@ -155,34 +167,6 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
     M_leftEigenvector1              (),
     M_leftEigenvector2              ()
 {
-    Mesh_Type::EdgeType boundaryEdge;
-    switch( bcSide )
-    {
-        case OneD_left:
-            M_bcInternalNode      = M_bcNode + 1;
-            boundaryEdge          = M_Flux->Physics()->Data()->mesh()->edgeList(1);
-            M_boundaryPoint[0]    = boundaryEdge.point(1).x();
-            M_boundaryPoint[1]    = boundaryEdge.point(1).y();
-            M_boundaryPoint[2]    = boundaryEdge.point(1).z();
-            M_internalBdPoint[0]  = boundaryEdge.point(2).x();
-            M_internalBdPoint[1]  = boundaryEdge.point(2).y();
-            M_internalBdPoint[2]  = boundaryEdge.point(2).z();
-        break;
-
-        case OneD_right:
-            M_bcInternalNode      = M_bcNode - 1;
-            boundaryEdge          = M_Flux->Physics()->Data()->mesh()->edgeList(M_bcNode - 1);
-            M_boundaryPoint[0]    = boundaryEdge.point(2).x();
-            M_boundaryPoint[1]    = boundaryEdge.point(2).y();
-            M_boundaryPoint[2]    = boundaryEdge.point(2).z();
-            M_internalBdPoint[0]  = boundaryEdge.point(1).x();
-            M_internalBdPoint[1]  = boundaryEdge.point(1).y();
-            M_internalBdPoint[2]  = boundaryEdge.point(1).z();
-        break;
-
-        default:
-            std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
-    }
 }
 
 OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& BCF_Compatibility ) :
@@ -208,6 +192,41 @@ OneDimensionalModel_BCFunction_Compatibility::operator()( const Real& /*time*/, 
 // ===================================================
 // Protected Methods
 // ===================================================
+void
+OneDimensionalModel_BCFunction_Compatibility::setupNode()
+{
+    super::setupNode();
+
+    Mesh_Type::EdgeType boundaryEdge;
+    switch( M_bcSide )
+    {
+        case OneD_left:
+            M_bcInternalNode      = M_bcNode + 1;
+            boundaryEdge          = M_Flux->Physics()->Data()->mesh()->edgeList(1);
+            M_boundaryPoint[0]    = boundaryEdge.point(1).x();
+            M_boundaryPoint[1]    = boundaryEdge.point(1).y();
+            M_boundaryPoint[2]    = boundaryEdge.point(1).z();
+            M_internalBdPoint[0]  = boundaryEdge.point(2).x();
+            M_internalBdPoint[1]  = boundaryEdge.point(2).y();
+            M_internalBdPoint[2]  = boundaryEdge.point(2).z();
+        break;
+
+        case OneD_right:
+            M_bcInternalNode      = M_bcNode - 1;
+            boundaryEdge          = M_Flux->Physics()->Data()->mesh()->edgeList(M_bcNode - 1);
+            M_boundaryPoint[0]    = boundaryEdge.point(2).x();
+            M_boundaryPoint[1]    = boundaryEdge.point(2).y();
+            M_boundaryPoint[2]    = boundaryEdge.point(2).z();
+            M_internalBdPoint[0]  = boundaryEdge.point(1).x();
+            M_internalBdPoint[1]  = boundaryEdge.point(1).y();
+            M_internalBdPoint[2]  = boundaryEdge.point(1).z();
+        break;
+
+        default:
+            std::cout << "Warning: bcSide \"" << M_bcSide << "\" not available!" << std::endl;
+    }
+}
+
 Real
 OneDimensionalModel_BCFunction_Compatibility::extrapolateW( const Real& timeStep )
 {
@@ -309,11 +328,9 @@ OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const Flux_PtrType&    flux,
-                                                                                    const Source_PtrType&  source,
-                                                                                    const OneD_BCSide&     bcSide,
+OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const OneD_BCSide&     bcSide,
                                                                                     const OneD_BC&         bcType ):
-    super                           ( flux, source, bcSide, bcType )
+    super                           ( bcSide, bcType )
 {}
 
 OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing ) :
@@ -379,12 +396,10 @@ OneDimensionalModel_BCFunction_Absorbing::resistance( Real& /*resistance*/ )
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const Flux_PtrType&    flux,
-                                                                                      const Source_PtrType&  source,
-                                                                                      const OneD_BCSide&     bcSide,
+OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const OneD_BCSide&     bcSide,
                                                                                       const OneD_BC&         bcType,
                                                                                       const Real&            resistance ):
-    super                           ( flux, source, bcSide, bcType ),
+    super                           ( bcSide, bcType ),
     M_resistance                    ( resistance )
 {}
 
@@ -407,16 +422,14 @@ OneDimensionalModel_BCFunction_Resistance::resistance( Real& resistance )
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windkessel3( const Flux_PtrType&    flux,
-                                                                                        const Source_PtrType&  source,
-                                                                                        const OneD_BCSide&     bcSide,
+OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windkessel3( const OneD_BCSide&     bcSide,
                                                                                         const OneD_BC&         bcType,
                                                                                         const Real&            resistance1,
                                                                                         const Real&            resistance2,
                                                                                         const Real&            compliance,
                                                                                         const bool&            absorbing1,
                                                                                         const Real&            venousPressure ):
-    super                           ( flux, source, bcSide, bcType ),
+    super                           ( bcSide, bcType ),
     M_resistance1                   ( resistance1 ),
     M_resistance2                   ( resistance2 ),
     M_compliance                    ( compliance ),
