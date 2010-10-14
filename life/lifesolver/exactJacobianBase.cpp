@@ -92,21 +92,26 @@ exactJacobian::setupFluidSolid()
 UInt
 exactJacobian::imposeFlux( void )
 {
-	UInt numLM = super::imposeFlux();
-
-    std::vector<BCName> fluxVector = M_BCh_du->getBCWithType( Flux );
-    if( numLM != ( static_cast<UInt> ( fluxVector.size() ) ) )
+    if ( this->isFluid() )
     {
-    	ERROR_MSG("Different number of fluxes imposed on Fluid and on LinearFluid");
+        UInt numLM = super::imposeFlux();
+
+        std::vector<BCName> fluxVector = M_BCh_du->getBCWithType( Flux );
+        if( numLM != ( static_cast<UInt> ( fluxVector.size() ) ) )
+        {
+            ERROR_MSG("Different number of fluxes imposed on Fluid and on LinearFluid");
+        }
+
+        UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
+                    + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
+
+        for ( UInt i = 0; i < numLM; ++i )
+            M_BCh_du->setOffset( fluxVector[i], offset + i );
+
+        return numLM;
     }
-
-    UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
-                + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
-
-    for ( UInt i = 0; i < numLM; ++i )
-    	M_BCh_du->setOffset( fluxVector[i], offset + i );
-
-    return numLM;
+    else
+        return 0;
 }
 
 //
