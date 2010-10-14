@@ -41,7 +41,8 @@
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
 //#include <life/lifesolver/steklovPoincareBase.hpp>
-#include <lifemc/lifesolver/Monolithic.hpp>
+#include <lifemc/lifesolver/MonolithicGE.hpp>
+#include <lifemc/lifesolver/MonolithicGI.hpp>
 
 namespace LifeV {
 
@@ -57,8 +58,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Data< Operator >                                          Data_Type;
     typedef BCVectorInterface                                                     BCFunction_Type;
+    typedef BCInterface_Data                                                      Data_Type;
 
     //@}
 
@@ -80,6 +81,8 @@ public:
 
     BCInterface_FSI& operator=( const BCInterface_FSI& /*fsi*/) {}
     void SetData( const Data_Type& /*data*/) {}
+    void ExportData( Data_Type& /*data*/ ) {}
+    void CheckMethod( const boost::shared_ptr< Operator >& /*Oper*/ ) {}
 
     //@}
 
@@ -142,7 +145,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Data< FSIOperator >                                       Data_Type;
+    typedef BCInterface_Data                                                      Data_Type;
     typedef BCVectorInterface                                                     BCFunction_Type;
 
     //@}
@@ -188,10 +191,22 @@ public:
      */
     void SetData( const Data_Type& data );
 
+    //! Copy the stored parameters in the data container
+    /*!
+     * @param data BC data loaded from GetPot file
+     */
+    void ExportData( Data_Type& data );
+
+    //! Check method passing the operator
+    /*!
+     * @param Oper FSIOperator
+     */
+    void CheckMethod( const boost::shared_ptr< FSIOperator >& Oper );
+
     //@}
 
 
-    //! @name Get functions
+    //! @name Get methods
     //@{
 
     //! Get the base of the boundary condition
@@ -205,13 +220,13 @@ private:
     //@{
 
     template< class method >
-    inline void CheckFunction( const Data_Type& data );
+    inline void CheckFunction( const boost::shared_ptr< FSIOperator >& Oper );
 
     //@}
 
     enum FSIMethod
     {
-        EXACTJACOBIAN, FIXEDPOINT, MONOLITHIC, STEKLOVPOINCARE
+        EXACTJACOBIAN, FIXEDPOINT, MONOLITHIC_GE, MONOLITHIC_GI, STEKLOVPOINCARE
     };
 
     enum FSIFunction
@@ -229,33 +244,27 @@ private:
         StructureToFluid
     };
 
-    boost::shared_ptr< FSIOperator >       M_operator;
-    boost::shared_ptr< BCFunction_Type >   M_base;
+    FSIFunction                               M_FSIFunction;
+
+    // These are required since FSI BC are applied a posteriori
+    BCName                                    M_name;
+    BCFlag                                    M_flag;
+    BCType                                    M_type;
+    BCMode                                    M_mode;
+    BCComV                                    M_comV;
+
+    boost::shared_ptr< BCFunction_Type >      M_base;
 };
 
 // ===================================================
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data )
+inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_ptr< FSIOperator >& Oper )
 {
-    method *operMethod = dynamic_cast< method * > ( &*M_operator );
+    method *operMethod = dynamic_cast< method * > ( &*Oper );
 
-    //Set mapFunction
-    std::map< std::string, FSIFunction > mapFunction;
-    mapFunction["DerFluidLoadToFluid"]              = DerFluidLoadToFluid;
-    mapFunction["DerFluidLoadToStructure"]          = DerFluidLoadToStructure;
-    mapFunction["DerHarmonicExtensionVelToFluid"]   = DerHarmonicExtensionVelToFluid;
-    mapFunction["DerStructureDispToSolid"]          = DerStructureDispToSolid;
-    mapFunction["FluidInterfaceDisp"]               = FluidInterfaceDisp;
-    mapFunction["FluidLoadToStructure"]             = FluidLoadToStructure;
-    mapFunction["HarmonicExtensionVelToFluid"]      = HarmonicExtensionVelToFluid;
-    mapFunction["SolidLoadToStructure"]             = SolidLoadToStructure;
-    mapFunction["StructureDispToHarmonicExtension"] = StructureDispToHarmonicExtension;
-    mapFunction["StructureDispToSolid"]             = StructureDispToSolid;
-    mapFunction["StructureToFluid"]                 = StructureToFluid;
-
-    switch ( mapFunction[ data.GetBaseString() ] )
+    switch ( M_FSIFunction )
     {
         case DerFluidLoadToFluid:
 
@@ -270,10 +279,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 #ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
-            if ( !M_operator->isSolid() )
+            if ( !Oper->isSolid() )
                 return;
 
-            operMethod->setDerFluidLoadToStructure( M_operator->sigmaSolidRepeated() );
+            operMethod->setDerFluidLoadToStructure( Oper->sigmaSolidRepeated() );
 
             M_base = operMethod->bcvDerFluidLoadToStructure();
 
@@ -285,10 +294,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
-            if ( !M_operator->isFluid() )
+            if ( !Oper->isFluid() )
                 return;
 
-            operMethod->setDerHarmonicExtensionVelToFluid( M_operator->derVeloFluidMesh() );
+            operMethod->setDerHarmonicExtensionVelToFluid( Oper->derVeloFluidMesh() );
 
             M_base = operMethod->bcvDerHarmonicExtensionVelToFluid();
 
@@ -308,7 +317,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
-            //operMethod->FluidInterfaceDisp( (LifeV::Vector&) M_operator->lambdaFluidRepeated() );
+            //operMethod->FluidInterfaceDisp( (LifeV::Vector&) Oper->lambdaFluidRepeated() );
 
             //M_base = operMethod->bcvFluidInterfaceDisp();
 
@@ -320,10 +329,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
-            if ( !M_operator->isSolid() )
+            if ( !Oper->isSolid() )
                 return;
 
-            operMethod->setFluidLoadToStructure( M_operator->sigmaSolidRepeated() );
+            operMethod->setFluidLoadToStructure( Oper->sigmaSolidRepeated() );
 
             M_base = operMethod->bcvFluidLoadToStructure();
 
@@ -335,12 +344,12 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
-            if ( !M_operator->isFluid() )
+            if ( !Oper->isFluid() )
                 return;
 
-            M_operator->setHarmonicExtensionVelToFluid( M_operator->veloFluidMesh() );
+            Oper->setHarmonicExtensionVelToFluid( Oper->veloFluidMesh() );
 
-            M_base = M_operator->bcvHarmonicExtensionVelToFluid();
+            M_base = Oper->bcvHarmonicExtensionVelToFluid();
 
             break;
 
@@ -349,12 +358,12 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
 #ifdef HAVE_LIFEV_DEBUG
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
-            if ( !M_operator->isFluid() )
+            if ( !Oper->isFluid() )
                 return;
 
-            M_operator->setSolidLoadToStructure( M_operator->minusSigmaFluidRepeated() );
+            Oper->setSolidLoadToStructure( Oper->minusSigmaFluidRepeated() );
 
-            M_base = M_operator->bcvSolidLoadToStructure();
+            M_base = Oper->bcvSolidLoadToStructure();
 
             break;
 
@@ -364,10 +373,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
-            if ( !M_operator->isFluid() )
+            if ( !Oper->isFluid() )
                 return;
 
-            operMethod->setStructureDispToHarmonicExtension( M_operator->lambdaFluidRepeated() );
+            operMethod->setStructureDispToHarmonicExtension( Oper->lambdaFluidRepeated() );
 
             M_base = operMethod->bcvStructureDispToHarmonicExtension();
 
@@ -387,13 +396,13 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const Data_Type& data
             Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
-            if ( !M_operator->isFluid() )
+            if ( !Oper->isFluid() )
                 return;
 
-            M_operator->setStructureToFluid( M_operator->veloFluidMesh() );
-            M_operator->setStructureToFluidParametres();
+            Oper->setStructureToFluid( Oper->veloFluidMesh() );
+            Oper->setStructureToFluidParametres();
 
-            M_base = M_operator->bcvStructureToFluid();
+            M_base = Oper->bcvStructureToFluid();
 
             break;
     }

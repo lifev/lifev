@@ -63,7 +63,7 @@ public:
     typedef BCInterface1D_FunctionFile< Operator >                  super1;
     typedef BCInterface1D_OperatorFunction< Operator >              super2;
 
-    typedef typename super0::Data_Type                              Data_Type;
+    typedef BCInterface1D_Data                                      Data_Type;
 
     //@}
 
@@ -184,7 +184,6 @@ BCInterface1D_OperatorFunctionFile< Operator >::SetData( const Data_Type& data )
     super1::SetData( data );
 
     //super2::SetData( data ); Cannot call directly, because it call again BCInterface1D1D_Function::setup( data )
-    super2::M_operator = data.GetOperator();
     super2::M_side     = data.GetSide();
 
     super2::CreateAccessList( data );
