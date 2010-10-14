@@ -319,6 +319,12 @@ public:
     }
     //@}
 
+
+    static BlockMatrix*    createAdditiveSchwarz()
+    {
+        return new BlockMatrix(15);
+    }
+
 protected:
 
     //! @name Protected Members

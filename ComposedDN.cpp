@@ -82,7 +82,7 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
             if(M_recompute[(*M_blockReordering)[k]])
                 replace_precs(M_blocks[(*M_blockReordering)[k]], k);
             else
-                linearSolver->displayer()->leaderPrint("\n  M-  reusing prec. factor ", k);
+                linearSolver->displayer()->leaderPrint("  M-  Reusing preconditioner factor:           ", k, "\n");
         }
     }
     return linearSolver->solveSystem(rhs, step, boost::static_pointer_cast<EpetraPreconditioner>(M_blockPrecs));

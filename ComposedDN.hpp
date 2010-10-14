@@ -165,7 +165,11 @@ public:
                             const std::string& section );
 
     //! returns the true if the preconditioner has at leas one factor computed
-    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
+    bool set()
+    {
+        return (bool) M_blockPrecs.get()
+            && M_blockPrecs->getNumber();
+    }
 
     /*! copies the shared_ptr to the communicator in the member M_comm and builds the empty IfpackComposedPreconditioner
     M_blockPrecs
@@ -175,6 +179,27 @@ public:
         M_comm = comm;
         M_blockPrecs.reset( new IfpackComposedPrec(M_comm));
     }
+
+
+    static BlockInterface* createComposedDN()
+    {
+        const ComposedBlockOper::Block order[] = { ComposedBlockOper::solid, ComposedBlockOper::fluid};
+        const Int couplingsDN[] = { 0, 7};
+        const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
+        const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
+        return new ComposedDN(couplingVectorDN, orderVector);
+    }
+
+
+    static BlockInterface* createComposedDN2()
+    {
+        const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+        const Int couplingsDN2[] = { 8, 6};
+        const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
+        const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
+        return new ComposedDN(couplingVectorDN2, orderVector);
+    }
+
 
 protected:
 

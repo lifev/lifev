@@ -118,6 +118,13 @@ public:
     //! sets the matrix where the Robin contribution will be assembled
     void setRobin( matrix_ptrtype& matrix ){setRobinMatrix( matrix ); }
     //@}
+
+
+    static BlockMatrix*    createAdditiveSchwarzRN()
+    {
+        return new BlockMatrixRN(15);
+    }
+
 private:
 
 };

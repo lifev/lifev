@@ -127,6 +127,7 @@ void BlockInterface::applyBoundaryConditions(const Real& time, const UInt i)
         M_bch[i]->bdUpdate( *M_FESpace[i]->mesh(), M_FESpace[i]->feBd(), M_FESpace[i]->dof() );
         M_bch[i]->setOffset(M_offset[i]);
     }
+    M_blocks[i]->GlobalAssemble();
     bcManageMatrix( *M_blocks[i] , *M_FESpace[i]->mesh(), M_FESpace[i]->dof(), *M_bch[i], M_FESpace[i]->feBd(), 1., time);
 }
 

@@ -148,6 +148,17 @@ public:
     bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
     //@}
 
+
+static BlockInterface* createComposedNN()
+{
+    const ComposedBlockOper::Block order[] = {  ComposedBlockOper::fluid, ComposedBlockOper::solid};
+    const Int couplingsNN[] = { 8, 4, 1, 2};
+    const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+4);
+    return new ComposedNN( couplingVectorNN, orderVector );
+}
+
+
 protected:
 
     //! @name Protected Members

@@ -160,6 +160,16 @@ public:
      */
     void setDataFromGetPot( const GetPot&      dataFile,
                             const std::string& section ){}
+
+static BlockInterface* createComposedDNND()
+{
+    const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
+    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+    const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
+    const std::vector<ComposedBlockOper::Block> orderVector(order, order+6);
+    return new ComposedDNND(couplingVectorDNND, orderVector);
+}
+
     //@}
 private:
 
