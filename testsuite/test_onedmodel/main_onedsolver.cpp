@@ -159,10 +159,9 @@ int main(int argc, char** argv)
     BCFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
-    BC_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDModel.GetFlux(),
-                                                                                                  OneDModel.GetSource(),
-                                                                                                  OneD_right, OneD_W2 ) );
+    BC_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneD_right, OneD_W2 ) );
     absorbing->setSolution( OneDModel.GetSolution() );
+    absorbing->setFluxSource( OneDModel.GetFlux(), OneDModel.GetSource() );
 
     BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
                                         dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1, _2 ) );
