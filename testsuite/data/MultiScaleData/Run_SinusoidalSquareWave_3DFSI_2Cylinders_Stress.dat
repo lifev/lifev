@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = MultiScale
-ProblemFile = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_1Cylinder_tube20.dat
+ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalSquareWave_3DFSI_2Cylinders_Stress_tube20.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -25,17 +25,17 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/TestStress_3DFSI_1Cylinder_tube
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.010   # [s]
+    endtime                    = 0.030   # [s]
     timestep                   = 0.001   # [s]
 
     [../Algorithm]
-    AlgorithmType              = Explicit          # Aitken, Explicit, Newton
-    subITMax                   = 0                 # Maximum number for coupling subiterations
+    AlgorithmType              = Newton            # Aitken, Explicit, Newton
+    subITMax                   = 2000              # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
 
         [./Aitken_method]
         Omega                      = 0.5           # omega starting value
-        fixedOmega                 = false         # use fixed omega (if omega = 1 -> fixed point)
+        fixedOmega                 = true          # use fixed omega (if omega = 1 -> fixed point)
         method                     = Vectorial     # Scalar, Vectorial
         #range                      = '0.1 1.5'     # Range coefficient: OmegaMin < Omega < OmegaMax
         inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1

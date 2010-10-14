@@ -14,7 +14,7 @@
 
 [MultiScale] ######################################################################################
 ###################################################################################################
-modelName        = 'Test two serial cylinders (3DFSI)'
+modelName        = 'Test one serial cylinders (3DFSI)'
 modelType        = MultiScale
 couplingFlags    = ' '
 
@@ -27,23 +27,20 @@ couplingsPath    = './MultiScaleData/Couplings/'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
             0       FSI3D               Cylinder_tube20_MonolithicGE
-            1       FSI3D               Cylinder_tube20_MonolithicGE
          '  
 ###################################################################################################
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
-            0       BoundaryCondition   TestStress                      0               0
-            1       FluxStress          LagrangeMultiplier              1,0             0,1
-            2       BoundaryCondition   NoStress                        1               1
+            0       BoundaryCondition   SinusoidalSquareFluxWave        0               0
+            1       BoundaryCondition   NoStress                        0               1
             '
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '
-            0       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0 -2.575
-            1       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0  2.575
+            0       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0 0.0
          '
 ###################################################################################################

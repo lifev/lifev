@@ -1,0 +1,364 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                                 Copyright (C) 2010 EPFL
+#
+#      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
+#                 Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2010-05-01
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MODEL: FSI3D - Cylinder #######################################################################
+###################################################################################################
+
+[MultiScale]
+modelName        = FSI3D_Cylinder_tube20_MonolithicGI
+modelType        = FSI3D
+couplingFlags    = '2 3'
+
+
+
+[exporter]
+start            = 0             # start index for filenames
+save             = 1             # how many time steps per posptrocessing
+multimesh        = false         # true if the mesh has to be saved at each post-processing step
+type             = hdf5
+
+[importer]
+type             = hdf5
+
+
+
+[problem]
+method      = monolithicGI # monolithicGE, monolithicGI
+                           # exactJaobilan, fixedPoint
+
+blockOper   = AdditiveSchwarzGI # AdditiveSchwarz   AdditiveSchwarzRN
+                                AdditiveSchwarzGI AdditiveSchwarzRNGI
+
+DDBlockPrec = ComposedDNGI # OPTIONS:
+                         #AdditiveSchwarz: monolithic A-S preconditioner,
+                         #AdditiveSchwarzGI: monolithic A-S preconditioner,
+                         #ComposedDN: modular Dirichlet-Neumann preconditioner
+                         #ComposedDN2: modular Dirichlet-Neumann preconditioner
+                         #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+                         #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
+                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+                         #ComposedDNDGI: under testing, do not use
+                         #ComposedDN2DGI: under testing, do not use
+
+
+reducedFluid = 0    # 0 = exact, 1 = inexact
+defOmega     = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
+defOmegaS    = 0.01 # matters only with  precond = 2
+defOmegaF    = 0.01 # matters only with  precond = 2
+
+linesearch   = 0
+updateEvery  = 1
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+abstol       =  0.    # tolerance in nonLinearRichardson
+reltol       =  1.e-7 # tolerance in nonLinearRichardson
+restart      = 0
+maxSubIter   = 20
+fluidMeshPartitioned = none
+solidMeshPartitioned = none
+
+
+
+[fluid]
+useShapeDerivatives = true
+domainVelImplicit   = false  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer   = false  # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit        = false  # tells if we advance in time after the first nonlinear iteration or not
+
+    [./physics] # Defined here only if different from the one in the main file.
+    #density         = 1.0             # density   [g/cm^3]
+    #viscosity       = 0.035           # viscosity [g/cm/s]
+
+    [../time_discretization]
+    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
+    BDF_order       = 1
+
+    [../space_discretization]
+    mesh_dir        = ./Mesh/
+    mesh_file       = tube20.mesh      #  1050 Vertex
+    #mesh_file       = tube40.mesh      # 9486 Vertex
+    #mesh_file       = tube60.mesh      # 25063 Vertex
+    #mesh_file       = tube80.mesh      # 71820 Vertex
+    mesh_type       = .mesh
+    verbose         = 0                # verbose during mesh-reading
+
+    vel_order       = P1               # P1, P1Bubble, P2
+    #vel_order       = P1Bubble         # P1, P1Bubble, P2
+    #vel_order       = P2               # P1, P1Bubble, P2
+    press_order     = P1               # P1, P2
+    stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
+    div_beta_u_v    = false                # 1=on, 0=off
+    diagonalize     = 0                # weight, 0=off
+    stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
+
+    [../miscellaneous]
+    verbose   = 0
+    velname   = vel
+    steady    = 0
+    factor    = 1
+
+    [../ipstab]
+    gammaBeta       = 1
+    gammaDiv        = 0.2
+    gammaPress      = 0.05
+    max_iter_reuse  = 100
+    reuse           = true
+
+    #[../valuespersection]
+    #computeMeanValuesPerSection    = 0
+    #nb_z_section                   = 2
+    #tol_section                    = 2e-2
+    #x_section_frontier             = .0
+    #z_section_init                 = -1.0
+    #z_section_final                = .0
+    #nb_polygon_edges               = 10
+
+    [../boundary_conditions]
+        # DirichletNeumann conditions
+        list = ' '
+        #list = 'InFlowEdge OutFlowEdge'
+
+            [./InFlowEdge]
+            type            = Essential
+            flag            = 20
+            mode            = Full
+            component       = 3
+            function        = 0
+
+            [../OutFlowEdge]
+            type            = Essential
+            flag            = 30
+            mode            = Full
+            component       = 3
+            function        = 0
+
+            [../]
+
+    [../]
+
+
+
+
+[solid]
+
+    [./physics]
+    solidType = linearVenantKirchhof # linearVenantKirchhof
+                                     # nonLinearVenantKirchhof
+    #material_flag = 1
+    #density   = 1.2    # density
+    #young     = 4.0E6
+    #poisson   = 0.48
+
+    [../time_discretization]
+    #timestep                   = 0.0001 # [s]
+    BDF_order       = 1
+
+    [../space_discretization]
+    mesh_dir         = ./Mesh/
+    mesh_file        = vessel20.mesh  # mesh file
+    #mesh_file        = vessel40.mesh  # mesh file
+    order            = P1
+
+    [../miscellaneous]
+    factor     = 12
+    verbose    = 1
+    depname    = dep
+
+    [../newton]
+    maxiter    = 1
+    abstol     = 1.e-8
+    linesearch = 0
+
+    [../boundary_conditions]
+    list = ' '                            # Free dispacement
+    #list = 'Top Base TopEdge BaseEdge'   # Fixed dispacement
+
+        [./Top]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Base]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../TopEdge]
+        type       = Essential
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../BaseEdge]
+        type       = Essential
+        flag       = 30
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../]
+
+    [../]
+
+
+
+[mesh_motion]
+
+    [./boundary_conditions]
+    list = ' '                      # Free dispacement
+    #list = 'Top TopEdge Interface' # Fixed displacement
+
+        [./Top]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Base]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../TopEdge]
+        type       = Essential
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../BaseEdge]
+        type       = Essential
+        flag       = 30
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Interface]
+        type       = Essential
+        flag       = 1
+        mode       = Full
+        component  = 3
+        FSI        = StructureDispToHarmonicExtension
+        
+        [../NoInterface]
+        type       = Essential
+        flag       = 1
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../]
+
+    [../]
+
+
+
+[linear_system]
+
+    [./solver]                        # Solver Parameters
+    solver          = gmres
+    scaling         = none
+    output          = all # all none
+    conv            = rhs
+    max_iter        = 500
+    reuse           = true
+    max_iter_reuse  = 500
+    kspace          = 500
+    tol             = 1.e-13
+
+    [../prec]
+    #prectype                = AztecOO
+    prectype                = Ifpack
+    displayList             = false
+
+        [./robin]
+        alphaf = 0.
+        alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+
+        [../AztecOO]
+        precond             = 'dom_decomp'
+        prec_calc           = calc
+        reorder             = 1
+        keep_info           = 1
+        overlap             = 1
+        subdomain_solve     = ILUT
+        ilut_fill           = 4
+        drop                = 1.e-5
+
+        [../ifpack]
+        overlap             = 2
+        prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+            [./relaxation]
+            type                   = Jacobi
+            sweeps                 = 1
+            damping_factor         = 1.
+            min_diagonal_value     = 0
+            zero_starting_solution = true
+
+            [../partitioner]
+            type                   = metis
+            overlap                = 2
+            local_parts            = 1
+            root_node              = 0
+            use_symmetric_graph    = true
+
+            [../amesos]
+            solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+            [../fact]
+            level-of-fill          = 4
+            ilut_level-of-fill     = 10
+            absolute_threshold     = 0
+            relative_threshold     = 1
+            relax_value            = 0
+            drop_tolerance         = 1.e-10
+
+            [../schwarz]
+            combine_mode           = 0             # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+            compute_condest        = true
+            reordering_type        = none          #none, metis, rcm
+            filter_singletons      = true
+
+            [../]
+
+        [../ML]
+            default_parameter_list = DD    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+            prec_type              = two-level-additive
+            displayList            = false
+
+            [./smoother]
+                type               = IFPACK
+            [../]
+
+        [../]
+
+    [../]
+
+
+
+[eigensolver]
+nevec        = 10
+block_size   = 1;
+max_blocks   = 1000;
+max_restarts = 1000;
+tol          = 1e-5;
+which        = ML
+neval        = 5

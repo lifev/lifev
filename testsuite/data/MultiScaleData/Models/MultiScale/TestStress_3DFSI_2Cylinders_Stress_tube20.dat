@@ -20,14 +20,14 @@ couplingFlags    = ' '
 
 [Problem] #########################################################################################
 ###################################################################################################
-modelsPath         = './MultiScaleData/Models/'
-couplingsPath      = './MultiScaleData/Couplings/'
+modelsPath       = './MultiScaleData/Models/'
+couplingsPath    = './MultiScaleData/Couplings/'
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-            0       FSI3D               Cylinder_tube20_Monolithic
-            1       FSI3D               Cylinder_tube20_Segregated
+            0       FSI3D               Cylinder_tube20_MonolithicGE
+            1       FSI3D               Cylinder_tube20_MonolithicGE
          '  
 ###################################################################################################
 
@@ -35,15 +35,15 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
             0       BoundaryCondition   TestStress                      0               0
-            1       Stress              StaticPressure                  0,1             0,1
+            1       Stress              StaticPressure                  1,0             0,1
             2       BoundaryCondition   NoStress                        1               1
-             '
+            '
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '
-            0       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0 0.0
-            1       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0 0.0
+            0       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0 -2.575
+            1       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0  2.575
          '
 ###################################################################################################

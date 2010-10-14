@@ -52,6 +52,9 @@ dist_pkgdata_DATA = MultiScale_test.dat \
 					Run_SinusoidalWave_3DFluid-1D_2Cylinders_FluxStress.dat \
 					Run_SinusoidalWave_3DFluid-1D_2Cylinders_Stress.dat \
 					Run_SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress.dat \
+					Run_SinusoidalSquareWave_3DFSI_1Cylinder.dat \
+					Run_SinusoidalSquareWave_3DFSI_2Cylinders_FluxStress.dat \
+					Run_SinusoidalSquareWave_3DFSI_2Cylinders_Stress.dat \
 					Run_TestStress_3DFSI_1Cylinder.dat \
                     Run_TestStress_3DFSI_2Cylinders_FluxStress.dat \
                     Run_TestStress_3DFSI_2Cylinders_Stress.dat \
