@@ -98,7 +98,7 @@ FSIOperator::FSIOperator():
         M_Alphaf                             ( ), //vector_type, for alphaf robin
         M_AlphafCoef                         ( 0 ),
         M_betamedio                          ( ),
-        M_nbEval                             ( 0 ),
+        M_fluxes                             ( 0 ),
         M_epetraComm                         ( ),
         M_epetraWorldComm                    ( ),
         M_mpi                                ( true ),
@@ -458,24 +458,30 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 	M_epetraWorldComm->Barrier();
 }
 
+#ifdef HAVE_HDF5
 void
 FSIOperator::partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter )
 {
     M_fluidMesh = fluidMeshFilter.getMeshPartition();
-    M_solidMesh = fluidMeshFilter.getMeshPartition();
+    M_solidMesh = solidMeshFilter.getMeshPartition();
 }
-
-
+#endif
 
 void
 FSIOperator::setupFluidSolid( void )
 {
+    setupFluidSolid(imposeFlux());
+}
+
+void
+FSIOperator::setupFluidSolid( UInt const fluxes )
+{
     if ( this->isFluid() )
     {
-        UInt numLM = imposeFlux();
+        //M_fluxes = imposeFlux();
 
         M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
-        M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, numLM ) );
+        M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
         M_solid.reset( solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
         M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
 
@@ -644,7 +650,7 @@ FSIOperator::moveMesh( const vector_type& dep )
 	displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
     M_fluidMeshPart->mesh()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
     displayer().leaderPrint( "done\n" );
-    M_fluid->recomputeMatrix(true);
+    M_fluid->setRecomputeMatrix( true );
 }
 
 
@@ -816,7 +822,14 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1, vector_type& _ve
 		}
 }
 
+void
+FSIOperator::bcManageVectorRHS( const fluid_bchandler_type& bch, vector_type& rhs )
+{
+    if ( !bch->bdUpdateDone() || M_fluid->recomputeMatrix() )
+        bch->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
+    bcManageVector( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bch, M_uFESpace->feBd(), 1., 0. );
+}
 
 
 
@@ -897,8 +910,8 @@ FSIOperator::displacementOnInterface()
 //! Set Functions
 // ===================================================
 void
-FSIOperator::setComm( const boost::shared_ptr<Epetra_MpiComm>& comm,
-                      const boost::shared_ptr<Epetra_MpiComm>& worldComm )
+FSIOperator::setComm( const comm_PtrType& comm,
+                      const comm_PtrType& worldComm )
 {
     M_epetraComm       = comm;
     M_epetraWorldComm  = worldComm;
@@ -1268,16 +1281,20 @@ void FSIOperator::setMixteOuterWall(function_type const& dload, function_type co
 UInt
 FSIOperator::imposeFlux( void )
 {
-    std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
-    UInt numLM = static_cast<UInt>( fluxVector.size() );
+    if ( this->isFluid() )
+    {
+        std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
+        UInt numLM = static_cast<UInt>( fluxVector.size() );
 
-    UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
-                + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
+        UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
+                    + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
 
-    for ( UInt i = 0; i < numLM; ++i )
-    	M_BCh_u->setOffset( fluxVector[i], offset + i );
-
-    return numLM;
+        for ( UInt i = 0; i < numLM; ++i )
+            M_BCh_u->setOffset( fluxVector[i], offset + i );
+        return numLM;
+    }
+    else
+        return 0;
 }
 
 
@@ -1316,12 +1333,10 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
     M_sigmaSolidRepeated.reset    ( new vector_type(*M_solidInterfaceMap, Repeated) );
 }
 
-void FSIOperator::initializeBDF(vector_ptrtype un)
+void FSIOperator::initializeBDF( const vector_type& un )
 {
-    M_un = un;
-    //BDF initialization
     M_bdf.reset( new BdfT<vector_type>( M_data->dataFluid()->dataTime()->getBDF_order() ) );
-    M_bdf->initialize_unk( *un );
+    M_bdf->initialize_unk( un );
 }
 
 

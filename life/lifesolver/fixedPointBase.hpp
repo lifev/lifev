@@ -63,6 +63,8 @@ public:
 
     void setupFluidSolid();
 
+    void registerMyProducts( );
+
     //vector_type& displacement()    {return *M_displacement;}
     //vector_type& residual()        {return *M_stress;}
     //vector_type& velocity()        {return *M_velocity;}
@@ -92,7 +94,7 @@ private:
 inline FSIOperator* createFP(){ return new fixedPoint();}
 namespace
 {
-	static bool registerFP = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+static bool registerFP = FSIOperator::FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
 }
 
 }

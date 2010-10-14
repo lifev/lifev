@@ -37,7 +37,6 @@ Real fzeroEJ(const Real& /*t*/,
 
 exactJacobian::exactJacobian():
     super       (),
-    M_nbEvalAux(0),
     M_matrShapeDer()
 //    M_epetraOper(this)
 {
@@ -124,14 +123,12 @@ void exactJacobian::eval(const vector_type& _disp,
                                               (iter % M_data->updateEvery() == 0) ) ) );
 
     if(iter == 0)
-        {
-            M_nbEval = 0; // new time step
-            if (isFluid())
-                this->M_fluid->resetPrec();
-            //this->M_solid->resetPrec();
-        }
+    {
+        if (isFluid())
+            this->M_fluid->resetPrec();
+        //this->M_solid->resetPrec();
+    }
 
-    M_nbEval++ ;
 
     this->setLambdaFluid(_disp);
 
@@ -539,6 +536,19 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 
     return 0;
 }
+
+void  exactJacobian::bcManageVec( fluid_bchandler_type& /*bch*/, vector_type& /*rhs*/ )
+{
+
+}
+
+void exactJacobian::registerMyProducts( )
+{
+FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
+solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
+}
+
 
 }
 #endif

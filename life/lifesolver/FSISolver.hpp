@@ -76,7 +76,8 @@ public:
      */
     //@{
 
-    typedef boost::shared_ptr<FSIOperator>                          oper_fsi_ptr_mpi;
+    typedef FSIOperator                                             oper_fsi_type;
+    typedef boost::shared_ptr<oper_fsi_type>                        oper_fsi_ptr_mpi;
 
     typedef FSIOperator::mesh_type									mesh_type;
 
@@ -134,12 +135,7 @@ public:
     //oper_fsi_ptr_mpi FSIOper() const { return M_oper; }
 
     //! get the displacement, which will be on the solidInterfaceMap
-    vector_type const& displacement() const
-    {
-        vector_ptrtype solution;
-        M_oper->getSolution(solution);
-        return *solution;
-    }
+    const vector_type& displacement() const { return M_oper->getSolution(); }
 
     //! get access to the \c bchandler_type for the velocity
 //    fluid_bchandler_type& bcHandlerU() { return M_BCh_u; }

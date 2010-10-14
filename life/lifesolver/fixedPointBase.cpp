@@ -99,13 +99,11 @@ void fixedPoint::eval( const vector_type& _disp,
               << "; M_updateEvery = " << M_data->updateEvery() << std::endl;
 
     if (iter == 0 && this->isFluid())
-        {
-	    M_nbEval = 0; // new time step
-	    this->M_fluid->resetPrec();
-            //this->M_solid->resetPrec();
-        }
+    {
+    this->M_fluid->resetPrec();
+        //this->M_solid->resetPrec();
+    }
 
-    M_nbEval++ ;
 
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -296,7 +294,7 @@ void  fixedPoint::solveJac(vector_type        &muk,
                            const vector_type  &res,
                            const Real   /*_linearRelTol*/)
 {
-    if (M_nbEval == 1) M_aitkFS.restart();
+    M_aitkFS.restart();
 
     if(M_data->algorithm()=="RobinNeumann")
     {
@@ -306,6 +304,13 @@ void  fixedPoint::solveJac(vector_type        &muk,
     {
         muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
     }
+}
+
+void fixedPoint::registerMyProducts( )
+{
+FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
+solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 }
 
 

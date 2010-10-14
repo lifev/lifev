@@ -252,17 +252,17 @@ FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
     {
         u0.reset(new vector_type(*M_oper->getCouplingVariableMap()));
         M_oper->setSolution(*u0); // couplingVariableMap()
-        M_oper->initializeBDF(u0);
+        M_oper->initializeBDF(*u0);
     }
     else
     {
         M_oper->setSolution(*u0); // couplingVariableMap()//copy
-        M_oper->initializeBDF(u0);
+        M_oper->initializeBDF(*u0);
     }
     if(!v0.get())
-        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
+        M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
     else
-        M_oper->setSolutionDerivative(v0);
+        M_oper->setSolutionDerivative(*v0);
     //M_oper->setupBDF(*M_lambda);
 }
 
@@ -285,34 +285,26 @@ FSISolver::iterate()
     Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->getTime() << " with FSIOperator: " << M_data->method()  << "\n";
     Debug( 6220 ) << "============================================================\n";
 
+    // Update the system
     M_oper->updateSystem( );
 
-    // displacement prediction
-    //MPI_Barrier(MPI_COMM_WORLD);
-
-    // couplingVariable Extrapolation:
-
-    // END OF couplingVariable Extrapolation
-
-    //MPI_Barrier(MPI_COMM_WORLD);
-
-    UInt maxiter = M_data->maxSubIterationNumber();
+    // We extract a copy of the solution
+    vector_ptrtype solution( new vector_type( M_oper->getSolution() ) );
 
     // the newton solver
-    UInt status = 1;
-    Debug( 6220 ) << "Calling non-linear Richardson \n";
-    vector_ptrtype lambda;
-    M_oper->getSolution(lambda);//copy of a shared_ptr
+    UInt maxiter = M_data->maxSubIterationNumber();
+    UInt status = nonLinRichardson( *solution,
+                                    *M_oper,
+                                     M_data->absoluteTolerance(),
+                                     M_data->relativeTolerance(),
+                                     maxiter,
+                                     M_data->errorTolerance(),
+                                     M_data->linesearch(),
+                                     M_out_res,
+                                     M_data->dataFluid()->dataTime()->getTime() );
 
-    status = nonLinRichardson( *lambda,
-                               *M_oper,
-                               M_data->absoluteTolerance(),
-                               M_data->relativeTolerance(),
-                               maxiter,
-                               M_data->errorTolerance(),
-                               M_data->linesearch(),
-                               M_out_res,
-                               M_data->dataFluid()->dataTime()->getTime() );
+    // We update the solution
+    M_oper->setSolution( *solution );
 
     if(status == EXIT_FAILURE)
     {
@@ -325,8 +317,7 @@ FSISolver::iterate()
         //M_oper->displayer().leaderPrint("FSI-  Number of inner iterations:              ", maxiter, "\n" );
         if (M_epetraWorldComm->MyPID() == 0)
         {
-            M_out_iter << M_data->dataFluid()->dataTime()->getTime() << " " << maxiter << " "
-                       << M_oper->nbEval() << std::endl;
+            M_out_iter << M_data->dataFluid()->dataTime()->getTime() << " " << maxiter;
         }
     }
 
@@ -354,7 +345,7 @@ void
 FSISolver::setFSIOperator( )
 {
 	Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
-	M_oper = oper_fsi_ptr_mpi( FSIFactory::instance().createObject( M_data->method() ) );
+	M_oper = oper_fsi_ptr_mpi( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
 }
 
 void

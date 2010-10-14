@@ -100,9 +100,11 @@ public:
 
     // Fluid, Lin. Fluid, and inverses
 
+    void bcManageVec   ( bchandler_type& bch, vector_type& rhs );
+
     void setFluidInterfaceDisp      (vector_type &disp, UInt type = 0);
 
-
+    void registerMyProducts( );
 //    void setFluidLinInterfaceStress (vector_type &disp, UInt type = 0);
 
 //     bc_vector_interface bcvFluidLoadToSolid()       {return M_bcvFluidLoadToSolid;}
@@ -154,8 +156,6 @@ private:
     LifeV::SolverTrilinos        M_linearSolver;
 
     boost::shared_ptr<Epetra_ExactJacobian> M_epetraOper;
-
-    int M_nbEvalAux;
 
     matrix_ptrtype M_matrShapeDer;
     bool M_recomputeShapeDer;
@@ -227,7 +227,7 @@ inline FSIOperator* createEJ(){ return new exactJacobian(); }
 
 namespace
 {
-	static bool registerEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+static bool registerEJ = FSIOperator::FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }

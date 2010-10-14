@@ -28,7 +28,7 @@
 #include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 #include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
-#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
 #include <life/lifemesh/dataMesh.hpp>
@@ -74,8 +74,9 @@ public:
 
     typedef RegionMesh3D<LinearTetra>              mesh_type;
 
+#ifdef HAVE_HDF5
     typedef HDF5Filter3DMesh<mesh_type>            mesh_filtertype;
-
+#endif
     typedef OseenShapeDerivative   <mesh_type>     fluid_raw_type;
     //typedef NonLinearVenantKirchhofSolver   <mesh_type>     solid_raw_type;
     typedef VenantKirchhofSolver   <mesh_type>     solid_raw_type;
@@ -119,6 +120,11 @@ public:
 
     typedef std::map<ID, ID>::const_iterator                        Iterator;
 
+
+    typedef singleton<factory<FSIOperator, std::string> >           FSIFactory;
+
+    typedef Displayer::comm_PtrType                                 comm_PtrType;
+
 //     typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
 
     //@}
@@ -146,20 +152,25 @@ public:
 
     virtual void partitionMeshes();
 
+#ifdef HAVE_HDF5
     void partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter  );
-
+#endif
     virtual void setupDOF();
 
+#ifdef HAVE_HDF5
     /*!still not implemented*/
-    virtual void setupDOF( mesh_filtertype& filterMesh ){}
+    virtual void setupDOF( mesh_filtertype& /*filterMesh*/ ){}
+#endif
 
     virtual void setupFluidSolid();
+
+    virtual void setupFluidSolid( UInt const fluxes );
 
     virtual void setupSystem();
 
     virtual void buildSystem();
 
-    virtual void updateSystem( );
+    virtual void updateSystem();
 
     virtual void couplingVariableExtrap( );
 
@@ -188,9 +199,12 @@ public:
     }
 
 
-    void initializeBDF(vector_ptrtype un);
+    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
+
+    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
 
 
+    void initializeBDF( const vector_type& un );
 
     void createInterfaceMaps(std::map<ID, ID> const& locDofMap);
 
@@ -224,6 +238,8 @@ public:
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
     virtual const vector_ptrtype& un(){ return M_un; }
     virtual void setupBDF( const vector_type& /*u0*/ ){ }
+
+    void bcManageVectorRHS( const fluid_bchandler_type& bch, vector_type& rhs );
 
     //@}
 
@@ -269,9 +285,8 @@ public:
     const vector_type& minusSigmaFluidRepeated()                  const { return *M_minusSigmaFluidRepeated; }
 
     vector_type&       Alphaf()                                   const { return *M_Alphaf;}
-    const UInt&        nbEval()                                   const { return M_nbEval; }
 
-    boost::shared_ptr<Epetra_Comm>       worldComm()                                const { return M_epetraWorldComm; }
+    comm_PtrType worldComm()                                      const { return M_epetraWorldComm; }
 
     bool isFluid()                                                const { return M_isFluid; }
     bool isSolid()                                                const { return M_isSolid; }
@@ -320,8 +335,8 @@ public:
     const dof_interface_type3D& dofStructureToHarmonicExtension() const { return M_dofStructureToHarmonicExtension; }
     const dof_interface_type3D& dofHarmonicExtensionToFluid()     const { return M_dofHarmonicExtensionToFluid; }
 
-    boost::shared_ptr<EpetraMap>& fluidInterfaceMap()           { return M_fluidInterfaceMap; }
-    boost::shared_ptr<EpetraMap>& solidInterfaceMap()           { return M_solidInterfaceMap; }
+    boost::shared_ptr<EpetraMap>& fluidInterfaceMap()                   { return M_fluidInterfaceMap; }
+    boost::shared_ptr<EpetraMap>& solidInterfaceMap()                   { return M_solidInterfaceMap; }
 
     virtual boost::shared_ptr<EpetraMap>& getCouplingVariableMap()      { return M_solidInterfaceMap; }
 
@@ -351,7 +366,10 @@ public:
     const solid_bchandler_type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
 
     //! gets the solution vector by reference
-    virtual void getSolution( vector_ptrtype& lambda )                  { lambda = M_lambda; }
+    virtual const vector_type& getSolution()                      const { return *M_lambda; }
+
+    //! gets a pointer to the solution vector by reference
+    virtual vector_ptrtype solutionPtr()                      const { return M_lambda; }
 
     //! gets the solid displacement by copy
     virtual void getSolidDisp( vector_type& soliddisp )                 { soliddisp = M_solid->disp(); }
@@ -373,7 +391,7 @@ public:
      */
     //@{
 
-    void setComm( const boost::shared_ptr<Epetra_MpiComm>& comm, const boost::shared_ptr<Epetra_MpiComm>& worldComm );
+    void setComm( const comm_PtrType& comm, const comm_PtrType& worldComm );
 
     void setData( const data_PtrType& data ) { M_data = data; }
 
@@ -438,17 +456,30 @@ public:
     void setDerFluidLoadToStructure          ( const vector_type& dload, UInt type = 0 );
     void setDerFluidLoadToFluid              ( const vector_type& dload, UInt type = 0 );
     void setMixteOuterWall                   ( const function_type& dload, const function_type& E);
+    void setFluxesNumber                     ( const UInt numLM )
+    {
+        M_fluxes=numLM;
+    }
+    void setRHS                              ( vector_ptrtype& rhs ){M_rhs = rhs;}
+    vector_ptrtype const& getRHS       ( ) const {return M_rhs;}
 
     //! sets the solution vector by reference
-    virtual void setSolutionPtr                      ( vector_ptrtype sol )      { M_lambda = sol; }
+    virtual void setSolutionPtr              ( const vector_ptrtype& sol )      { M_lambda = sol; }
 
     //! sets the solution vector by copy
-    virtual void setSolution                 ( const vector_type& sol )         { M_lambda.reset( new vector_type( sol ) ); }
+    virtual void setSolution                 ( const vector_type& solution )    { M_lambda.reset( new vector_type( solution ) ); }
     virtual void initialize                  ( vector_ptrtype u0)               { setSolution(*u0); }
 
 
     //! sets the solution time derivative vector by copy
-    virtual void setSolutionDerivative       ( const vector_ptrtype& lambdaDot ){ M_lambdaDot=lambdaDot; }
+    void setSolutionDerivative( const vector_type& lambdaDot ) { *M_lambdaDot = lambdaDot; }
+
+    virtual void  setRestarts( bool restarts ){ /*M_restarts = restarts;*/ }
+
+    virtual UInt imposeFlux();
+
+    // to kill
+    virtual void mergeBCHandlers(){}
 
 //     void setDerReducedFluidLoadToStructure   ( vector_type &dload, UInt type = 0 );
 //     void setDerStructureAccToReducedFluid    ( vector_type &acc,   UInt type = 0 );
@@ -468,8 +499,6 @@ public:
 
 
 protected:
-
-    virtual UInt imposeFlux();
 
     //virtual void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
     virtual void variablesInit( const std::string& dOrder );
@@ -614,10 +643,10 @@ protected:
 //     boost::shared_ptr<vector_type>                    M_w;
 //     boost::shared_ptr<vector_type>                    M_dw;
 
-    UInt                                              M_nbEval;
+    UInt                                              M_fluxes;
 
-    boost::shared_ptr<Epetra_Comm>                    M_epetraComm;
-    boost::shared_ptr<Epetra_Comm>                    M_epetraWorldComm;
+    comm_PtrType                                      M_epetraComm;
+    comm_PtrType                                      M_epetraWorldComm;
 
 private:
 
@@ -631,8 +660,6 @@ private:
     int                                               M_fluidLeader;
     int                                               M_solidLeader;
 };
-
-typedef singleton<factory<FSIOperator, std::string> >           FSIFactory;
 
 } // Namespace LifeV
 
