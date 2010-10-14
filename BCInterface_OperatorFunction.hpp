@@ -79,7 +79,7 @@ public:
     //@{
 
     typedef BCInterface_Function< Operator >                        super;
-    typedef typename super::Data_Type                               Data_Type;
+    typedef BCInterface_Data                                        Data_Type;
 
     //@}
 
@@ -123,6 +123,12 @@ public:
      * @param data BC data loaded from GetPot file
      */
     virtual void SetData( const Data_Type& data );
+
+    //! Set an operator
+    /*!
+     * @param Oper operator
+     */
+    inline void SetOperator( const boost::shared_ptr< Operator >& Oper );
 
     //! Set variable function
     /*!
@@ -254,12 +260,18 @@ BCInterface_OperatorFunction< Operator >::SetData( const Data_Type& data )
     Debug( 5023 ) << "BCInterface_OperatorFunction::setData" << "\n";
 #endif
 
-    M_operator = data.GetOperator();
     M_flag     = data.GetFlag();
 
     super::SetData( data );
 
     CreateAccessList( data );
+}
+
+template< class Operator >
+inline void
+BCInterface_OperatorFunction< Operator >::SetOperator( const boost::shared_ptr< Operator >& Oper )
+{
+    M_operator = Oper;
 }
 
 template< class Operator >
@@ -307,7 +319,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
                 Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().flux( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_flux", M_operator->fluid().flux( M_flag ) );
+                SetVariable( "f_flux", M_operator->fluid().flux( M_flag, *M_operator->un() ) );
 
                 break;
 
@@ -317,7 +329,7 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
                 Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().pressure( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_pressure", M_operator->fluid().pressure( M_flag ) );
+                SetVariable( "f_pressure", M_operator->fluid().pressure( M_flag, *M_operator->un() ) );
 
                 break;
 

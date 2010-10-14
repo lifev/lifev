@@ -127,8 +127,10 @@ public:
     typedef boost::shared_ptr< BCHandler_Type >                                            BCHandler_PtrType;
 
     typedef BCHandler_Type::Solution_PtrType                                               Solution_PtrType;
+    typedef BCHandler_Type::Flux_PtrType                                                   Flux_PtrType;
+    typedef BCHandler_Type::Source_PtrType                                                 Source_PtrType;
 
-    typedef BCInterface1D_Data< Operator >                                                 Data_Type;
+    typedef BCInterface1D_Data                                                             Data_Type;
 
     typedef std::vector< boost::shared_ptr< BCInterface1D_Function< Operator > > >         VectorFunction_Type;
     typedef std::vector< boost::shared_ptr< BCInterface1D_DefaultFunctions< Operator > > > VectorDefaultFunction_Type;
@@ -232,6 +234,13 @@ public:
      * @param solution solution
      */
     void SetSolution( const Solution_PtrType solution );
+
+    //! Set the solution for the members that need it
+    /*!
+     * @param flux flux
+     * @param source source
+     */
+    void SetFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
 
     //! Set an Handler
     /*!
@@ -443,7 +452,15 @@ BCInterface1D< Operator >::setBC( const OneD_BCSide& bcSide,
 template< class Operator >
 void BCInterface1D< Operator >::SetOperator( const boost::shared_ptr< Operator >& Oper )
 {
-    M_data.SetOperator( Oper );
+    //for ( typename VectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
+    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    {
+        BCInterface1D_OperatorFunction< Operator > *castedOperator =
+                dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
+
+        if ( castedOperator != 0 )
+            castedOperator->SetOperator( Oper );
+    }
 }
 
 template< class Operator >
@@ -452,17 +469,26 @@ void BCInterface1D< Operator >::SetSolution( const Solution_PtrType solution )
     //for ( typename VectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterface1D_OperatorFunction< Operator > *Oper =
+        BCInterface1D_OperatorFunction< Operator > *castedOperator =
                 dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
 
-        if ( Oper != 0 )
-            Oper->SetSolution( solution );
+        if ( castedOperator != 0 )
+            castedOperator->SetSolution( solution );
     }
 
     for ( typename VectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
         ( *i )->SetSolution( solution );
 
     M_handler->setSolution( solution );
+}
+
+template< class Operator >
+void BCInterface1D< Operator >::SetFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
+{
+    for ( typename VectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
+        ( *i )->SetFluxSource( flux, source );
+
+    M_handler->setFluxSource( flux, source );
 }
 
 template< class Operator >

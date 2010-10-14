@@ -92,7 +92,7 @@ public:
     //@{
 
     typedef BCInterface_Function< Operator >                        super;
-    typedef typename super::Data_Type                               Data_Type;
+    typedef BCInterface_Data                                        Data_Type;
 
     //@}
 

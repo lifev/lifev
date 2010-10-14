@@ -89,8 +89,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Data< Operator >                                          Data_Type;
     typedef BCFunctionBase                                                        BCFunction_Type;
+    typedef BCInterface_Data                                                      Data_Type;
 
     //@}
 

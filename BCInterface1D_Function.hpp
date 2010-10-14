@@ -76,7 +76,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Data< Operator >                                        Data_Type;
+    typedef BCInterface1D_Data                                                    Data_Type;
     typedef OneDimensionalModel_BCFunction                                        BCFunction_Type;
 
     //@}

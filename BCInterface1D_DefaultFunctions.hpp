@@ -69,12 +69,14 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Data< Operator >                                        Data_Type;
+    typedef BCInterface1D_Data                                                    Data_Type;
 
     typedef OneDimensionalModel_BC::BCFunction_Type                               BCFunction_Type;
     typedef OneDimensionalModel_BC::BCFunction_PtrType                            BCFunction_PtrType;
     typedef OneDimensionalModel_BC::BCFunction_Default_PtrType                    BCFunction_Default_PtrType;
 
+    typedef OneDimensionalModel_BC::Flux_PtrType                                  Flux_PtrType;
+    typedef OneDimensionalModel_BC::Source_PtrType                                Source_PtrType;
     typedef OneDimensionalModel_BC::Solution_PtrType                              Solution_PtrType;
 
     //@}
@@ -124,7 +126,14 @@ public:
     /*!
      * @param solution solution container of the 1D model
      */
-    void SetSolution( const Solution_PtrType solution );
+    inline void SetSolution( const Solution_PtrType solution );
+
+    //! Set flux and source
+    /*!
+     * @param flux flux object of the 1D model
+     * @param source source object of the 1D model
+     */
+    inline void SetFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
 
     //@}
 
@@ -223,9 +232,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
     {
         case Riemann:
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Riemann( data.GetOperator()->Flux(),
-                                                                                 data.GetOperator()->Source(),
-                                                                                 data.GetSide(),
+            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Riemann( data.GetSide(),
                                                                                  data.GetQuantity()
                              ) );
 
@@ -236,9 +243,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 
         case Compatibility:
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Compatibility( data.GetOperator()->Flux(),
-                                                                                       data.GetOperator()->Source(),
-                                                                                       data.GetSide(),
+            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Compatibility( data.GetSide(),
                                                                                        data.GetQuantity()
                              ) );
 
@@ -253,9 +258,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
             Debug( 5025 ) << "BCInterface1D_DefaultFunctions::checkFunction                          Absorbing" << "\n";
 #endif
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.GetOperator()->Flux(),
-                                                                                   data.GetOperator()->Source(),
-                                                                                   data.GetSide(),
+            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.GetSide(),
                                                                                    data.GetQuantity()
                              ) );
 
@@ -266,9 +269,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 
         case Resistance:
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Resistance( data.GetOperator()->Flux(),
-                                                                                    data.GetOperator()->Source(),
-                                                                                    data.GetSide(),
+            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Resistance( data.GetSide(),
                                                                                     data.GetQuantity(),
                                                                                     data.GetResistance()[0]
                              ) );
@@ -283,9 +284,17 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 }
 
 template< class Operator >
-void BCInterface1D_DefaultFunctions< Operator >::SetSolution( const Solution_PtrType solution )
+inline void
+BCInterface1D_DefaultFunctions< Operator >::SetSolution( const Solution_PtrType solution )
 {
     M_defaultFunction->setSolution( solution );
+}
+
+template< class Operator >
+inline void
+BCInterface1D_DefaultFunctions< Operator >::SetFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
+{
+    M_defaultFunction->setFluxSource( flux, source );
 }
 
 } // Namespace LifeV

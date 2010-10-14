@@ -78,7 +78,7 @@ public:
     //@{
 
     typedef BCInterface1D_Function< Operator >                      super;
-    typedef typename super::Data_Type                               Data_Type;
+    typedef BCInterface1D_Data                                      Data_Type;
     typedef OneDimensionalModel_Solver::Solution_PtrType            Solution_PtrType;
 
     //@}
@@ -124,6 +124,12 @@ public:
      */
     virtual void SetData( const Data_Type& data );
 
+    //! Set an operator
+    /*!
+     * @param Oper operator
+     */
+    inline void SetOperator( const boost::shared_ptr< Operator >& Oper );
+    
     //! Set solution
     /*!
      * @param solution The solution container of the 1D problem
@@ -266,12 +272,18 @@ BCInterface1D_OperatorFunction< Operator >::SetData( const Data_Type& data )
     Debug( 5023 ) << "BCInterface1D_OperatorFunction::setData" << "\n";
 #endif
 
-    M_operator = data.GetOperator();
     M_side     = data.GetSide();
 
     super::SetData( data );
 
     CreateAccessList( data );
+}
+
+template< class Operator >
+inline void
+BCInterface1D_OperatorFunction< Operator >::SetOperator( const boost::shared_ptr< Operator >& Oper )
+{
+    M_operator = Oper;
 }
 
 template< class Operator >

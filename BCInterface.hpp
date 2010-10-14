@@ -130,7 +130,11 @@ public:
     typedef BCHandler                                                                  BCHandler_Type;
     typedef boost::shared_ptr< BCHandler_Type >                                        BCHandler_PtrType;
 
-    typedef BCInterface_Data< Operator >                                               Data_Type;
+    typedef BCInterface_Data                                                           Data_Type;
+
+    typedef std::vector< boost::shared_ptr< BCInterface_Function< Operator > > >       VectorFunction_Type;
+    typedef std::vector< boost::shared_ptr< BCFunctionDirectional > >                  VectorFunctionDirectional_Type;
+    typedef std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > >            VectorFSI_Type;
 
     //@}
 
@@ -310,13 +314,13 @@ private:
     Data_Type                       M_data;
 
     // Functions
-    std::vector< boost::shared_ptr< BCInterface_Function< Operator > > > M_vectorFunction;
+    VectorFunction_Type             M_vectorFunction;
 
     // Functions Directions
-    std::vector< boost::shared_ptr< BCFunctionDirectional > >            M_vectorFunctionDirection;
+    VectorFunctionDirectional_Type  M_vectorFunctionDirection;
 
     // FSI Functions
-    std::vector< boost::shared_ptr< BCInterface_FSI< Operator > > >      M_vectorFSI;
+    VectorFSI_Type                  M_vectorFSI;
 };
 
 // ===================================================
@@ -498,8 +502,24 @@ BCInterface< Operator >::addBC( const BCName& name,
 template< class Operator >
 void BCInterface< Operator >::SetOperator( const boost::shared_ptr< Operator >& Oper )
 {
-    M_data.SetOperator( Oper );
+    //for ( typename VectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
+    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    {
+        BCInterface_OperatorFunction< Operator > *castedOperator =
+                dynamic_cast < BCInterface_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
+
+        if ( castedOperator != 0 )
+            castedOperator->SetOperator( Oper );
+    }
+
+    for ( typename VectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
+    {
+        ( *i )->CheckMethod( Oper );
+        ( *i )->ExportData( M_data );
+        AddBCManager( ( *i )->GetBase() );
+    }
 }
+
 
 template< class Operator >
 void BCInterface< Operator >::SetHandler( const BCHandler_PtrType& handler )
@@ -568,8 +588,6 @@ BCInterface< Operator >::BuildBase()
         case BCInterface_OPERFSI:
 
             AddBase( M_vectorFSI );
-
-            AddBCManager( M_vectorFSI.back()->GetBase() );
 
             break;
     }
