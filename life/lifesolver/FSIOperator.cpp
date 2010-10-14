@@ -388,7 +388,7 @@ FSIOperator::setupDOF( void )
     createInterfaceMaps( M_dofStructureToHarmonicExtension->locDofMap() );
 }
 
-void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMapXX )
+void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 {
     Displayer disp(M_epetraWorldComm);
 	disp.leaderPrint("FSI-  Building fluid variables ...             ");
@@ -401,7 +401,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMapXX )
 	//is the interface map between HE (first) and solid (second)
 	if( this->isFluid() )
 	{
-        std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+        //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
         dofInterfaceFluid.reserve( locDofMap.size() );
 
 		for (UInt dim = 0; dim < nDimensions; ++dim)
@@ -427,7 +427,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMapXX )
 
 	if (this->isSolid())
 	{
-        std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
+        //std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
         dofInterfaceSolid.reserve( locDofMap.size() );
 		//std::cout << "solid" << std::endl;
 		for (UInt dim = 0; dim < nDimensions; ++dim)
