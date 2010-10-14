@@ -276,4 +276,16 @@ DataElasticStructure::verbose() const
     return M_verbose;
 }
 
+const std::string&
+DataElasticStructure::solidType()
+{
+    return M_solidType;
+}
+
+const bool&
+DataElasticStructure::useExactJacobian() const
+{
+    return M_useExactJacobian;
+}
+
 }

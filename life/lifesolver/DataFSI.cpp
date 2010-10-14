@@ -171,7 +171,7 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
 bool
 DataFSI::isMonolithic()
 {
-    return !( M_method.compare( "monolithic" ) && M_method.compare( "fullMonolithic" ) );
+    return !( M_method.compare( "monolithicGE" ) && M_method.compare( "monolithicGI" ) );
 }
 
 void

@@ -159,13 +159,13 @@ public:
     /*!
      * @return shared_ptr to dataFluid container
      */
-    inline dataFluid_PtrType dataFluid() const { return M_dataFluid; }
+    inline const dataFluid_PtrType& dataFluid() const { return M_dataFluid; }
 
     //! Get data solid container
     /*!
      * @return shared_ptr to dataSolid container
      */
-    inline dataSolid_PtrType dataSolid() const { return M_dataSolid; }
+    inline const dataSolid_PtrType& dataSolid() const { return M_dataSolid; }
 
     //! Get maximum number of subiterations
     /*!

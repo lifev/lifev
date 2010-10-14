@@ -118,33 +118,33 @@ public:
     /*!
      * @param DataTime shared_ptr to dataTime container
      */
-     void setDataTime( const Time_ptrType DataTime );
+    void setDataTime( const Time_ptrType DataTime );
 
     //! Set density
     /*!
      * @param density solid density value
      */
-     void setDensity( const Real& density );
+    void setDensity( const Real& density );
 
     //! Set thickness
     /*!
      * @param thickness solid thickness value
      */
-     void setThickness( const Real& thickness );
+    void setThickness( const Real& thickness );
 
     //! Set poisson
     /*!
      * @param poisson solid poisson value
      * @param material material ID (1 by default)
      */
-     void setPoisson( const Real& poisson, const UInt& material = 1 );
+    void setPoisson( const Real& poisson, const UInt& material = 1 );
 
     //! Set Young modulus
     /*!
      * @param Young solid young modulus value
      * @param material material ID (1 by default)
      */
-     void setYoung( const Real& young, const UInt& material = 1 );
+    void setYoung( const Real& young, const UInt& material = 1 );
 
     //@}
 
@@ -162,63 +162,72 @@ public:
     /*!
      * @return Solid density
      */
-     const Real& rho() const;
+    const Real& rho() const;
 
     //! Get solid thickness
     /*!
      * @return Solid thickness
      */
-     const Real& thickness() const;
+    const Real& thickness() const;
 
     //! Get solid poisson coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-     const Real& poisson( const UInt& material = 1 ) const;
+    const Real& poisson( const UInt& material = 1 ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-     const Real& young( const UInt& material = 1 ) const;
+    const Real& young( const UInt& material = 1 ) const;
 
     //! Get solid first lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-     Real lambda( const UInt& material = 1 ) const;
+    Real lambda( const UInt& material = 1 ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-     Real mu( const UInt& material = 1 ) const;
+    Real mu( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
      * @return FE order
      */
-     const std::string& order()     const;
+    const std::string& order() const;
 
     //! Get solid amplification factor
     /*!
      * @return Solid amplification factor
      */
-     const Real& factor()    const;
+    const Real& factor() const;
 
     //! Get verbose level
     /*!
      * @return verbose level
      */
-     const UInt& verbose()   const;
+    const UInt& verbose() const;
 
-    std::string& solidType(){return M_solidType; }
+    //! Get solid type
+    /*!
+     * @return solid type
+     */
+    const std::string& solidType();
 
-    const bool useExactJacobian()   const{return M_useExactJacobian;}
+    //! Get whether to use or not exact Jacobian
+    /*!
+     * @return true: if using exact Jacobian, false: otherwise
+     */
+    const bool& useExactJacobian() const;
+
     //@}
 
 private:
