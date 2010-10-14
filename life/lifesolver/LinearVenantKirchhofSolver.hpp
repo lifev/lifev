@@ -56,23 +56,24 @@ public:
         super()
     {}
 
-    void updateJacobian( vector_type& sol, matrix_ptrtype& jac )
+    void updateJacobian( vector_type& /*sol*/, matrix_ptrtype& /*jac*/ )
     {
         this->M_Displayer->leaderPrint("  Linear S-  Doing nothing (updating jacobian of a linear system) ...                    ");
     }
 
 
     //! solves the tangent problem for newton iterations
-    void solveJac( vector_type&       step,
-                   const vector_type& res,
-                           Real&            linear_rel_tol){assert(false);}
+    void solveJac( vector_type&       /*step*/,
+                   const vector_type& /*res*/,
+                   Real&              /*linear_rel_tol*/){assert(false);}
 
-    void solveJacobian( vector_type&       step,
-                           const vector_type& res,
-                           Real&            linear_rel_tol,
-                           bchandler_type&    BCd ){assert(false);}
+    void solveJacobian( vector_type&       /*step*/,
+                           const vector_type& /*res*/,
+                           Real&            /*linear_rel_tol*/,
+                           bchandler_type&    /*BCd*/ ){assert(false);}
 
 };
+
 
 } // Namespace LifeV
 
