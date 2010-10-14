@@ -139,6 +139,8 @@ public:
            boost::shared_ptr<Epetra_Comm>& comm );
 
 
+    virtual void registerMyProducts(){}
+
     //! virtual destructor
 
     virtual ~Oseen();
@@ -164,7 +166,8 @@ public:
     virtual void updateSystem(const double       alpha,
                               const vector_type& betaVec,
                               const vector_type& sourceVec,
-                              matrix_ptrtype matrix
+                              matrix_ptrtype matrix,
+                              vector_ptrtype un
                               );
 
     void updateStab( matrix_type& matrFull );
@@ -270,7 +273,9 @@ public:
 
     Displayer   const& getDisplayer() const { return M_Displayer; }
 
-    void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
+    void setRecomputeMatrix( const bool& recomputeMatrix ) { M_recomputeMatrix = recomputeMatrix; }
+
+    const bool& recomputeMatrix() const { return M_recomputeMatrix; }
 
     matrix_type& matrNoBC()
         {
@@ -857,8 +862,9 @@ void Oseen<Mesh, SolverType>::
 initialize( const vector_type& velAndPressure)
 {
 
-    *M_sol = velAndPressure;
     *M_un = velAndPressure;
+    if (M_sol.get())
+        *M_sol = velAndPressure;
 
 }
 
@@ -875,7 +881,7 @@ updateSystem(const double       alpha,
         M_matrNoBC.reset(new matrix_type(M_localMap, M_matrNoBC->getMeanNumEntries() ));
     else
         M_matrNoBC.reset(new matrix_type(M_localMap));
-    updateSystem( alpha, betaVec, sourceVec, M_matrNoBC);
+    updateSystem( alpha, betaVec, sourceVec, M_matrNoBC, M_un);
     if(alpha != 0.)
         M_matrNoBC->GlobalAssemble();
 
@@ -886,7 +892,8 @@ void Oseen<Mesh, SolverType>::
 updateSystem(const double       alpha,
              const vector_type& betaVec,
              const vector_type& sourceVec,
-             matrix_ptrtype matrNoBC)
+             matrix_ptrtype matrNoBC,
+             vector_ptrtype un)
 {
     Chrono chrono;
 
@@ -948,7 +955,7 @@ updateSystem(const double       alpha,
         // vector with repeated nodes over the processors
 
         vector_type betaVecRep(betaVec, Repeated );
-        vector_type unRep(*M_un, Repeated);
+        vector_type unRep(*un, Repeated);
 
         chrono.stop();
 
