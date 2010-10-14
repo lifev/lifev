@@ -40,7 +40,7 @@ EpetraPreconditioner::EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>&
 {
 }
 
-EpetraPreconditioner::EpetraPreconditioner(  EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
+EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
     M_displayer(comm),
     M_overlapLevel(P.getOverlapLevel()),
     M_Oper(P.M_Oper),
