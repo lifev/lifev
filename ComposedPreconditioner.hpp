@@ -86,7 +86,7 @@ public:
        Copy constructor: it doesn't make a real copy of the operators, it just copy the list of shared pointer
        (note that the implementation is mandatory in order to avoid a bit-copy of the shared_ptr vector)
     */
-    ComposedPreconditioner( ComposedPreconditioner<Operator>& P);
+    ComposedPreconditioner( const ComposedPreconditioner<Operator>& P);
 
     ~ComposedPreconditioner( );
 
@@ -99,7 +99,7 @@ public:
        \param summed: flag specifying if we want the operator to be summed. Note that the operator would be "out
        of the vector", summed in a second step after all the multiplications.
     */
-    int push_back(prec_type  P,
+    UInt push_back(prec_type  P,
                   const bool useInverse=false,
                   const bool useTranspose=false,
                   const bool summed=false);
@@ -113,7 +113,7 @@ public:
        of the vector", summed in a second step after all the multiplications.
     */
 
-    int push_back(prec_raw_type*  P,
+    UInt push_back(prec_raw_type*  P,
                   const bool useInverse=false,
                   const bool useTranspose=false,
                   const bool summed=false);
@@ -126,7 +126,7 @@ public:
        \param index: position (starting from 0)
        \param useInverse: flag specifying if the operator is already inverted (if AllpyInverse() is implemented)
     */
-    int replace(prec_type  P,
+    UInt replace(prec_type  P,
                 const UInt index,
                 const bool useInverse=false,
                 const bool useTranspose=false);
@@ -184,7 +184,7 @@ public:
 
     const std::vector<bool>& getInverse() const {return M_Inverse;}
 
-    const int getNumber() const {return M_Setted;}
+    const UInt getNumber() const {return M_Setted;}
 
     const double& getMeanIter() const {return M_meanIter;}
 
@@ -209,7 +209,7 @@ protected:
     std::vector<ID> M_Summed;
     bool M_allTranspose;
 
-    mutable int M_Setted;
+    UInt M_Setted;
 
     mutable double M_meanIter;
     mutable int M_numCalled;
@@ -237,7 +237,7 @@ ComposedPreconditioner<Operator>::ComposedPreconditioner(const boost::shared_ptr
 }
 
 template <typename Operator>
-ComposedPreconditioner<Operator>::ComposedPreconditioner( ComposedPreconditioner<Operator>& P)
+ComposedPreconditioner<Operator>::ComposedPreconditioner( const  ComposedPreconditioner<Operator>& P)
     :
     M_P(),
     M_Inverse(P.getInverse()),
@@ -262,20 +262,20 @@ ComposedPreconditioner<Operator>::~ComposedPreconditioner()
 }
 
 template <typename Operator>
-int ComposedPreconditioner<Operator>::
+UInt ComposedPreconditioner<Operator>::
 push_back( prec_raw_type* P,
            const bool useInverse,
            const bool useTranspose,
            const bool summed)
 {
     prec_type prec(P);
-    push_back(P, useInverse, useTranspose, summed);
+    return push_back(P, useInverse, useTranspose, summed);
 }
 
 
 // we expect an external matrix pointer, we will not destroy the matrix!
 template <typename Operator>
-int ComposedPreconditioner<Operator>::
+UInt ComposedPreconditioner<Operator>::
 push_back( prec_type  P,
            const bool useInverse,
            const bool useTranspose,
@@ -283,8 +283,8 @@ push_back( prec_type  P,
 {
     if (P.get() ==  0)   return(M_Setted);
 
-    M_displayer.leaderPrint( "Previous number of call: ", M_numCalled);
-    M_displayer.leaderPrint(  ", mean iters: ", M_meanIter);
+    M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
+    M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
     M_meanIter=0;
     M_numCalled=0;
@@ -302,12 +302,11 @@ push_back( prec_type  P,
     M_Setted++;
 
     return(M_Setted);
-
 }
 
 // we expect an external matrix pointer, we will not destroy the matrix!
 template <typename Operator>
-int ComposedPreconditioner<Operator>::
+UInt ComposedPreconditioner<Operator>::
 replace( prec_type  P,
          const UInt index,
          const bool useInverse,
@@ -317,8 +316,8 @@ replace( prec_type  P,
 
     ASSERT(index <= M_Setted, "ComposedPreconditioner::replace: index too large");
 
-    M_displayer.leaderPrint( "Previous number of call: ", M_numCalled);
-    M_displayer.leaderPrint(  ", mean iters: ", M_meanIter);
+    M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
+    M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
     M_meanIter=0;
     M_numCalled=0;
@@ -361,7 +360,7 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     // P = M_P(0) * ... * M_P(Qp-1)
 
     ID k=0;
-    for (int q(M_Setted-1); q>=0 ; q--)
+    for (UInt q(M_Setted-1); q>=0 ; q--)
     {
         if(M_Summed.size() && q==M_Summed[k])
         {
@@ -410,7 +409,7 @@ Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     Epetra_MultiVector Z(X);
     ID k=0;
 
-    for (int q(0); q<M_Setted ; q++, Z = Y)
+    for (UInt q(0); q<M_Setted ; q++, Z = Y)
     {
         if(M_Summed.size() && q==M_Summed[k])
         {
@@ -549,7 +548,7 @@ double ComposedPreconditioner<Operator>::Condest()  const
 {
     double cond(1);
 
-    for (int q(0); q<M_Setted ; q++) {
+    for (UInt q(0); q<M_Setted ; q++) {
         if (M_Inverse[q])
             cond = cond /  M_P[q]->Condest();
         else
@@ -561,7 +560,7 @@ double ComposedPreconditioner<Operator>::Condest()  const
 template <typename Operator>
 void ComposedPreconditioner<Operator>::reset()
 {
-    for (int q(0); q<M_Setted ; q++)
+    for (UInt q(0); q<M_Setted ; q++)
     {
         M_P[q].reset();
     }

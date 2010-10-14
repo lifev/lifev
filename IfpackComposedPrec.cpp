@@ -43,14 +43,6 @@ IfpackComposedPrec::IfpackComposedPrec(const boost::shared_ptr<Epetra_Comm> comm
 {
 }
 
-IfpackComposedPrec::IfpackComposedPrec(IfpackComposedPrec& P):
-    super(P, boost::dynamic_pointer_cast<ComposedPreconditioner<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
-    M_Prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
-    M_OperVector(P.getOperVector()),
-    M_precType(P.precType())
-{
-    //    *M_Prec=*P.getPrec();
-}
 IfpackComposedPrec::~IfpackComposedPrec()
 {}
 

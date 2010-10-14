@@ -76,8 +76,6 @@ public:
     //! default constructor.
     IfpackComposedPrec( const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
-    IfpackComposedPrec( IfpackComposedPrec& P );
-
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
     //    IfpackComposedPrec(operator_type& A);
@@ -99,7 +97,7 @@ public:
 
     super::prec_raw_type*  getPrec();
 
-    UInt getNumber() const {return M_Prec->getNumber();}
+    const UInt getNumber() const {return M_Prec->getNumber();}
 
     super::prec_type              getPrecPtr(){return M_Prec;}
 
@@ -135,6 +133,15 @@ public:
     std::vector<operator_type>& getOperVector(){return M_OperVector;}
 
 private:
+
+    IfpackComposedPrec( const IfpackComposedPrec& P)
+//     super(P, boost::dynamic_pointer_cast<ComposedPreconditioner<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
+//     M_Prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
+//     M_OperVector(P.getOperVector()),
+//     M_precType(P.precType())
+{
+    //    *M_Prec=*P.getPrec();
+}
 
     int createIfpackPrec (operator_type& oper,
                            prec_raw_type::prec_type& prec);
