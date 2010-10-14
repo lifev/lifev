@@ -350,6 +350,9 @@ void bcManageVector( VectorType&      b,
                 case Mixte:  // Mixte boundary conditions (Robin)
                     bcMixteManageVector( bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
                     break;
+                case Flux:  // Flux boundary conditions
+                    bcFluxManageVector( b, BCh[ i ], t, BCh.offset()+BCh[i].offset() );
+                    break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
                 }
@@ -389,6 +392,9 @@ void bcManageVector( VectorType&                     b,
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
                     bcMixteManageVector( bRepeated, *fespace.mesh(), fespace.dof(), BCh[ i ], fespace.feBd(), t, BCh.offset() );
+                    break;
+                case Flux:  // Flux boundary conditions
+                    bcFluxManageVector( b, BCh[ i ], t, BCh.offset()+BCh[i].offset() );
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -1647,8 +1653,20 @@ void bcFluxManage( MatrixType&     A,
                    UInt            offset)
 
 {
-    b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
+    bcFluxManageVector(b,BCb,t,offset);
     bcFluxManageMatrix(A, mesh, dof, BCb, bdfem, t, offset);
+}
+
+template <typename VectorType,
+          typename DataType>
+void bcFluxManageVector(
+                    VectorType&    b,
+                   const BCBase&   BCb,
+                   const DataType& t,
+                   UInt            offset)
+
+{
+    b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
 }
 
 

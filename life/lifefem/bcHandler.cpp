@@ -59,7 +59,7 @@ BCHandler::BCHandler( const ID& nbc, const BCHints& hint ):
 }
 
 BCHandler::BCHandler( const BCHandler& BCh ):
-    M_bdUpdateDone    ( BCh.M_bdUpdateDone ),
+    M_bdUpdateDone    ( false ), // BCBase is not a true copy -> we need this false!
     M_hint            ( BCh.M_hint ),
     M_bcList          ( BCh.M_bcList ),
     M_offset          ( BCh.M_offset ),

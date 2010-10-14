@@ -423,20 +423,26 @@ BCBase::BCBase( const BCBase& BCb )
     _M_flag( BCb._M_flag ),
     _M_type( BCb._M_type ),
     _M_mode( BCb._M_mode ),
-    _M_bcf( BCb._M_bcf ),
-    _M_bcfUDep(BCb._M_bcfUDep),
-    _M_bcv( BCb._M_bcv ),
+    _M_bcf( BCb._M_bcf ),           // Ptr copy
+    _M_bcfUDep(BCb._M_bcfUDep),     // Ptr copy
+    _M_bcv( BCb._M_bcv ),           // Ptr copy
     _M_dataVector( BCb._M_dataVector ),
     _M_comp( BCb._M_comp ),
+    list0( ),
+    listIdGlobal( ),
+    _M_IdGlobal( ),
+    _M_idList( ),
+    _M_IdGlobalList( ),
     _M_offset   ( BCb._M_offset ),
-    _M_finalised( BCb._M_finalised )
+    _M_finalised( BCb._M_finalised ),
+    _M_finalisedIdGlobal()
 {
     // Important!!: The set member list0 is always empty at this point, it is just
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
     if ( !_M_idList.empty() || !BCb._M_idList.empty() ) {
-        ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work whith list of identifiers which are not empty" );
+        ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work with list of identifiers which are not empty" );
     }
 }
 
