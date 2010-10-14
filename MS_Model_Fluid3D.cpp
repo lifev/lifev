@@ -168,9 +168,7 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_generalizedAitken.setMinimizationType( DataFile( "fluid/miscellaneous/inverseOmega", true ) );
 
     //Boundary Conditions for the problem
-    M_BC->SetOperator( M_fluid );    //MUST BE MOVED AFTER M_fluid.reset !!!
     M_BC->FillHandler( FileName, "fluid" );
-    M_BC->UpdateOperatorVariables(); //MUST BE MOVED INSIDE THE UPDATE !!!
 
     //Setup Exporter & Importer
     SetupExporterImporter( FileName );
@@ -196,6 +194,8 @@ MS_Model_Fluid3D::SetupModel()
 
     //Fluid
     M_fluid.reset( new Fluid_Type( M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
+    M_BC->SetOperator( M_fluid );
+
     GetPot DataFile( M_fileName );
     M_fluid->setUp( DataFile ); //Remove Preconditioner and Solver if possible!
 
@@ -277,6 +277,9 @@ MS_Model_Fluid3D::UpdateSystem()
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
+    //Update operator BC
+    M_BC->UpdateOperatorVariables();
+
     //Recompute preconditioner
     M_fluid->resetPrec( true );
 
@@ -313,6 +316,7 @@ MS_Model_Fluid3D::SolveSystem()
 
             //Linear model need to be updated!
             M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+            M_BC->UpdateOperatorVariables();
             M_updateLinearModel = true;
 
             //Solve system
@@ -408,7 +412,7 @@ MS_Model_Fluid3D::UpdateLinearModel()
     //Create an empty vector
     FluidVector_Type VectorZero( *M_solution ); VectorZero = 0.0;
 
-    //UpdateLinearModel
+    //UpdateLinearModel TODO REMOVE ?
     M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
                                  M_alpha,
                                  *M_beta,

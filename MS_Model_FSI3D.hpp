@@ -28,7 +28,7 @@
  *  @file
  *  @brief MultiScale Model FSI3D
  *
- *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>, Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 19-04-2010
  *
  */
@@ -41,8 +41,11 @@
 #include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
+#include <lifemc/lifesolver/MonolithicGE.hpp>
+#include <lifemc/lifesolver/MonolithicGI.hpp>
+
 // LifeV includes
-#include <life/lifesolver/FSISolver.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 #include <life/lifefilters/ensight.hpp>
 #ifdef HAVE_HDF5
@@ -64,7 +67,8 @@ public:
 
     typedef MS_PhysicalModel                                                               super;
 
-    typedef FSISolver                                                                      FSISolver_Type;
+    typedef FSIOperator                                                                    FSIOperator_Type;
+    typedef boost::shared_ptr< FSIOperator_Type>                                           FSIOperator_PtrType;
 
     typedef FSIOperator::data_Type                                                         data_Type;
     typedef FSIOperator::data_PtrType                                                      data_PtrType;
@@ -86,6 +90,7 @@ public:
 #endif
 
     typedef BCHandler                                                                      BC_Type;
+    typedef boost::shared_ptr< BC_Type >                                                   BC_PtrType;
     typedef BCInterface< FSIOperator >                                                     BCInterface_Type;
 
     //@}
@@ -98,7 +103,7 @@ public:
     MS_Model_FSI3D();
 
     //! Destructor
-    ~MS_Model_FSI3D();
+    ~MS_Model_FSI3D() {}
 
     //@}
 
@@ -122,13 +127,28 @@ public:
     void UpdateSystem();
 
     //! Solve the problem.
-    void SolveSystem();
+    void SolveSystem( );
 
     //! Save the solution
     void SaveSolution();
 
     //! Display some information about the model.
     void ShowMe();
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Setup the linear model
+    void SetupLinearModel();
+
+    //! Update the linear system matrix and vectors
+    void UpdateLinearModel();
+
+    //! Solve the linear problem
+    void SolveLinearModel( bool& SolveLinearSystem );
 
     //@}
 
@@ -256,17 +276,34 @@ private:
      */
     void SetupGlobalData( const std::string& FileName );
 
+    void setupCommunicator();
+
+    void setupBC( const std::string& fileName );
+    //void setupSegregatedBC( const std::string& fileName );
+    void updateBC();
+
     void SetupExporter( IOFile_PtrType& exporter, const GetPot& dataFile, const std::string& label = "" );
+    void SetupImporter( IOFile_PtrType& exporter, const GetPot& dataFile, const std::string& label = "" );
+
     void SetExporterFluid( const IOFile_PtrType& exporter );
     void SetExporterSolid( const IOFile_PtrType& exporter );
 
-    void setupBC( const std::string& fileName );
-    void setupSegregatedBC( const std::string& fileName );
+    //! Initialize the solution.
+    void initializeSolution();
+
+    //! Impose the coupling perturbation on the correct BC inside the BCHandler
+    void ImposePerturbation();
+
+    //! Reset all the coupling perturbations imposed on the BCHandler
+    void ResetPerturbation();
+
+    Real BCFunctionDelta_Zero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ );
+    Real BCFunctionDelta_One( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ );
 
     //@}
 
-    // Solver
-    boost::shared_ptr< FSISolver_Type >    M_solver;
+    // Operator
+    FSIOperator_PtrType                    M_FSIoperator;
 
     // Data
     data_PtrType                           M_data;
@@ -275,7 +312,16 @@ private:
     IOFile_PtrType                         M_exporterFluid;
     IOFile_PtrType                         M_exporterSolid;
 
+    // Importers
+    IOFile_PtrType                         M_importerFluid;
+    IOFile_PtrType                         M_importerSolid;
+
     // Solution
+    vector_PtrType                         M_solution_tn;
+    vector_PtrType                         M_meshDisp_tn;
+    vector_PtrType                         M_meshDispOld_tn;
+    vector_PtrType                         M_rhs_tn;
+
     vector_PtrType                         M_fluidVelocityPressure;
     vector_PtrType                         M_fluidDisplacement;
     vector_PtrType                         M_solidVelocity;
@@ -285,8 +331,19 @@ private:
     boost::shared_ptr< BCInterface_Type >  M_fluidBC;
     boost::shared_ptr< BCInterface_Type >  M_solidBC;
     boost::shared_ptr< BCInterface_Type >  M_harmonicExtensionBC;
-    boost::shared_ptr< BCInterface_Type >  M_linearizedFluidBC;
-    boost::shared_ptr< BCInterface_Type >  M_linearizedSolidBC;
+//    boost::shared_ptr< BCInterface_Type >  M_linearizedFluidBC;
+//    boost::shared_ptr< BCInterface_Type >  M_linearizedSolidBC;
+
+    // Linear Fluid problem
+    BC_PtrType                             M_linearBC;
+    vector_PtrType                         M_linearRHS;
+    vector_PtrType                         M_linearSolution;
+
+    // BC Functions for tangent problem
+    BCFunctionBase                         M_BCBaseDelta_Zero;
+    BCFunctionBase                         M_BCBaseDelta_One;
+
+    UInt                                   M_iter;
 };
 
 //! Factory create function
