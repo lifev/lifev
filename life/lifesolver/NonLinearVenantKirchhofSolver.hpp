@@ -227,6 +227,7 @@ void setup(
     //!Getter of the Offset parameter. It is taken into account when the boundary conditions are applied and the matrices are assembled.
     void getSolidMatrix( matrix_ptrtype& matrix);
 
+
 private:
 
 
@@ -312,7 +313,7 @@ buildSystem( )
 template <typename Mesh, typename SolverType>
 void
 NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-buildSystem(matrix_ptrtype massStiff, Real const & factor)
+buildSystem(matrix_ptrtype massStiff, Real const & /*factor*/)
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
 
@@ -489,7 +490,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  )
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( matrix_ptrtype& stiff )
 {
-    UInt totalDof   = this->M_FESpace->dof().numTotalDof();
+    //UInt totalDof   = this->M_FESpace->dof().numTotalDof();
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
     vector_type disp(*this->M_disp);
     vector_type dRep(disp, Repeated);
@@ -895,7 +896,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrix_ptrt
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( const vector_type& sol,  Real const& factor)
 {
-    computeMatrix(this->M_stiff, sol, factor);
+    computeMatirx(this->M_stiff, sol, factor);
 }
 
 template <typename Mesh, typename SolverType>
@@ -944,9 +945,6 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
     Real coef;
     coef = this->M_zeta;
     *jacobian *= coef;
-
-
-    UInt ig;
 
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
 
@@ -1091,7 +1089,7 @@ solveJacobian( vector_type&           step,
     //*this->M_f = res;
 
     // for BC treatment (done at each time-step)
-    Real tgv = 1.0;
+    //Real tgv = 1.0;
 
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
@@ -1112,7 +1110,7 @@ solveJacobian( vector_type&           step,
 
     this->M_linearSolver->setMatrix(*this->M_jacobian);
 
-    int numIter = this->M_linearSolver->solveSystem( rhsFull, step, this->M_jacobian );
+    //int numIter = this->M_linearSolver->solveSystem( rhsFull, step, this->M_jacobian );
 
 
 
@@ -1131,7 +1129,7 @@ solveJacobian( vector_type&           step,
 template<typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 applyBoundaryConditions(matrix_type&        matrix,
-                        vector_type&        rhs,
+                        vector_type&        /*rhs*/,
                         bchandler_type&     BCh,
                         UInt                offset)
 {
@@ -1170,6 +1168,8 @@ getSolidMatrix( matrix_ptrtype& matrix)
     matrix->GlobalAssemble();
     matrix *= this->M_data->dataTime()->getTimeStep() * this->M_rescaleFactor;
 }
+
+
 
 }
 
