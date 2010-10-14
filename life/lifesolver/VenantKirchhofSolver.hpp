@@ -268,25 +268,8 @@ protected:
 
     int                            M_me;
 
-    bchandler_type   M_BCh;
-
-    boost::shared_ptr<const EpetraMap>                      M_localMap;
-
-
-    //! Matrix M: mass
-    matrix_ptrtype                    M_mass;
-
-    //! Matrix Kl: stiffness linear
-    matrix_ptrtype                    M_linearStiff;
-
-    //! Matrix Knl: stiffness non-linear
-    matrix_ptrtype                    M_stiff;
-
-    //! Matrix C: mass + linear stiffness
-    matrix_ptrtype                    M_massStiff;
-
-    //! Matrix J: jacobian
-    matrix_ptrtype                    M_jacobian;
+    //! data for solving tangent problem with aztec
+    boost::shared_ptr<solver_type>                    M_linearSolver;
 
     //! Elementary matrices and vectors
     boost::shared_ptr<ElemMat>                        M_elmatK; // stiffnes
@@ -325,13 +308,31 @@ protected:
     std::ofstream                  M_out_iter;
     std::ofstream                  M_out_res;
 
+    bchandler_type   M_BCh;
+
+    boost::shared_ptr<const EpetraMap>                      M_localMap;
+
+
+    //! Matrix M: mass
+    matrix_ptrtype                    M_mass;
+
+    //! Matrix C: mass + linear stiffness
+    matrix_ptrtype                    M_massStiff;
+
+    //! Matrix Knl: stiffness non-linear
+    matrix_ptrtype                    M_stiff;
+
+    //! Matrix Kl: stiffness linear
+    matrix_ptrtype                    M_linearStiff;
+
+
+    //! Matrix J: jacobian
+    matrix_ptrtype                    M_jacobian;
+
     //! level of recursion for Aztec (has a sens with FSI coupling)
     UInt _recur;
 
     source_type                    M_source;
-
-    //! data for solving tangent problem with aztec
-    boost::shared_ptr<solver_type>                    M_linearSolver;
 
 
     int                            M_count;
@@ -380,12 +381,15 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( ):
     M_szz                        (/*M_localMap*/),//useless
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
-    M_massStiff                  ( /*new matrix_type(monolithicMap) */),//constructed outside
+    M_BCh                        (),
     M_localMap                   ( ),
     M_mass                       ( ),
-    M_linearStiff                ( ),
+    M_massStiff                  ( /*new matrix_type(monolithicMap) */),//constructed outside
     M_stiff                      ( /*new matrix_type(M_localMap)*/ ),
+    M_linearStiff                ( ),
     M_jacobian                   (/*M_localMap*/),
+    _recur                       (),
+    M_source                     (),
     M_count                      ( 0 ),//useless
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
@@ -602,8 +606,15 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrtype& /*sti
     vector_type _z = *M_disp;
     _z            += coef*(*M_vel);
 
+    std::cout<< "M_disp in solid" << M_disp->Norm2()<<std::endl;
+
     *M_rhsNoBC  = *M_mass*_z;
+
+    std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->Norm2()<<std::endl;
+
     *M_rhsNoBC -= *M_linearStiff*(*M_disp);
+
+    std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->Norm2()<<std::endl;
 
     coef = 2.0/M_data->dataTime()->getTimeStep();
 
