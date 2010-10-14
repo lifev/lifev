@@ -98,16 +98,6 @@
 #include "lumpedHeart.hpp"
 
 
-namespace LifeV
-{
-namespace
-{
-LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
-
-LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
-}
-}
-
 class Problem
 {
 public:
@@ -142,8 +132,9 @@ public:
     {
         using namespace LifeV;
 
-        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
-        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
+
+        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 
         M_data = data_PtrType( new data_Type() );
         M_data->setup( data_file );
@@ -264,6 +255,7 @@ public:
         {
             M_fsi->initialize();
         }
+        M_fsi->FSIOper()->mergeBCHandlers();
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");

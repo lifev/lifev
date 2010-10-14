@@ -67,7 +67,7 @@ Real& LumpedHeart::outPressure         (const Real& t, const Real& x, const Real
 void LumpedHeart::renewParameters ( FSIOperator&  oper, const int& flag, const Real& time , const Real& flux)
 {
     vector_ptrtype solution;
-    oper.getSolution(solution);
+    solution = oper.solutionPtr();
     M_intFlux += flux*M_dt;
     //should have a different sign, but it is assigned as a Normal bc so we take the opposite
     LumpedHeart::M_pressure = (-flux*(M_RV_art)-M_elastance(time)*(M_Vt_ao-M_intFlux-M_V_0))+(M_LV_art)*(-flux/M_dt+M_ODEscheme.time_der(M_dt));
