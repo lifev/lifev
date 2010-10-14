@@ -211,7 +211,6 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_Solver->setLinearSolver( M_LinearSolver );
 
     //BC - We need to create the BCHandler before using it
-    M_BC->SetOperator( M_Solver );
     M_BC->CreateHandler();
     //M_BC->FillHandler( FileName, "1D_Model" );
 
@@ -249,8 +248,10 @@ MS_Model_1D::SetupModel()
     M_Solver->setupSolution( *M_Solution_tn );
 
     //Set default BC (has to be called after setting other BC)
-    M_BC->GetHandler()->setDefaultBC( M_Flux, M_Source );
+    M_BC->GetHandler()->setDefaultBC();
+    M_BC->SetOperator( M_Solver );
     M_BC->SetSolution( M_Solution );
+    M_BC->SetFluxSource( M_Flux, M_Source );
 
 #ifdef HAVE_HDF5
     //Post-processing
@@ -401,11 +402,12 @@ MS_Model_1D::SetupLinearModel()
     M_LinearBC->setBC( OneD_right, OneD_first, M_BC->GetHandler()->BC( OneD_right )->type( OneD_first ),
                                                M_BC->GetHandler()->BC( OneD_right )->BCFunction( OneD_first ) );
 
-    M_LinearBC->setDefaultBC( M_Flux, M_Source );
+    M_LinearBC->setDefaultBC();
 
     // Solution for the linear problem (this does not change anything in the solver)
     M_Solver->setupSolution( *M_LinearSolution );
     M_LinearBC->setSolution( M_LinearSolution );
+    M_LinearBC->setFluxSource( M_Flux, M_Source );
 }
 
 void
