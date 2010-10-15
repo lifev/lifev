@@ -44,54 +44,61 @@
 
 \title{\texttt{LifeV} Development Guidelines}
 \author{C. Malossi, S. Deparis}
-\date{\today}
+\date{Last updated: October 15th, 2010}
 
 \begin{document}
 
 \maketitle
 
-This short guide provides some useful rules to improve the
-development of \texttt{LifeV} Library. Following the example of
-\texttt{Trilinos} and other well structured libraries, we have understood that
-it is mandatory to follow some common rules in the implementation of our code.
-A better organization of classes and files, together with the development of a
-complete and exaustive documentation, will help old and new developers to
-take advantage of all the available features of our library, improving
-productivity and results.
+This short guide provides some useful rules to improve the development of \texttt{LifeV} Library. Following the example of \texttt{Trilinos} and other well structured libraries, we have understood that it is mandatory to follow some common rules in the implementation of our code. A better organization of classes and files, together with the development of a complete and exaustive documentation, will help old and new developers to take advantage of all the available features of our library, improving productivity and results.
 
 \section{Nomenclature of classes and methods}
-This is a short list of rules for the nomenclature of files, classes and
-methods.
+This is a short list of rules for the nomenclature of files, classes and methods.
 \begin{itemize}
-  \item All declarations should be placed into \texttt{*.hpp} files. Method
-  definitions (except inlined methods or other possible special cases)
-  should be inside the \texttt{*.cpp} files.
-  \item Use type definitions at the beginning of the class to introduce more
-  generality in the code. The syntax for types and pointer types is
-  the following:
+  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions (except inlined methods or other possible special cases) should be inside the \texttt{*.cpp} files.
+  \item Use type definitions at the beginning of the class to introduce more generality in the code. The syntax for types and pointer types is the following:
 \begin{lstlisting}
 typedef Epetra_FEVector                       vector_Type;
 typedef const Epetra_FEVector                 vector_ConstType;
 
-typedef boost::shared_ptr< vector_Type >      vector_ptrType;
-typedef boost::shared_ptr< vector_constType > vector_ptrConstType;
+typedef boost::shared_ptr< vector_Type >      vector_PtrType;
+typedef boost::shared_ptr< vector_constType > vector_ConstPtrType;
+
+typedef std::map<Int,Real>::iterator          map_IteratorType;       
+typedef std::map<Int,Real>::const_iterator    map_ConstIteratorType;
 \end{lstlisting}
-  \item Classes, structures and files names should start with the capital
-  letter.
+  \item Classes and structures should start with the capital letter.
 \begin{lstlisting}
 class datatime; //NO!!!
 
 class DataTime; //OK
 \end{lstlisting}
-  \item In case of composed names, each word (starting from the second one)
-  should start with capital letter.
+  \item File names should start with the capital letter also. Moreover, the name of the file should be equal to the name of the class/structure coded in it.
+  \item Packages of classes/files which are related to the same project and application should start with a common prefix followed by the underscore
+  (as in \texttt{Trilinos})
+\begin{lstlisting}
+// FSI Classes as they are now:
+FSISolver
+FSIOperator
+exactJacobian
+fixedPoint
+DataFSI
+
+// FSI classes as they should be:
+FSI_Solver
+FSI_Operator
+FSI_Operator_EJ ( the additional underscore make it clear that 
+                  FSI_Operator_EJ derives from FSI_Operator )
+FSI_Operator_FP
+FSI_Data
+\end{lstlisting}
+  \item In case of composed names, each word (starting from the second one) should start with capital letter.
 \begin{lstlisting}
 void matrixvectormultiplication( matrixtype& matrix ); //NO!!!
 
 void matrixVectorMultiplication( matrix_Type& matrix ); //OK
 \end{lstlisting}
-  \item All variables and methods names should clearly describe what they are
-  doing.
+  \item All variables and methods names should clearly describe what they are doing.
 \begin{lstlisting}
 // This is a true bad example taken from EpetraMatrix class
 
@@ -106,14 +113,12 @@ void replaceSingleElement( UInt row, UInt column, data_Type value );
   \end{lstlisting}
   \item Do not use abbreviations in the code! They prevent its readability.
 \begin{lstlisting}
-void elByElMul( vtype& v1, vtype& v2 ); //NOOOOO!!!
+void elByElMul( vtype& v1, vtype& v2 ); //NO!!!
 
 void elementByElementMultiplication( vector_Type& vector1,
                                      vector_Type& vector2, ); //OK
 \end{lstlisting}
-  \item Member variables in \texttt{LifeV} should start with \texttt{M\_}.
-  Moreover all the rules for the names of methods are also valid for class
-  members.
+  \item Member variables in \texttt{LifeV} should start with \texttt{M\_}. Moreover all the rules for the names of methods are also valid for class members.
 \begin{lstlisting}
 private:
 
@@ -123,9 +128,7 @@ private:
     Real        M_velocity; //OK
     std::string M_fileName; //OK
 \end{lstlisting}
-  \item Static members variables in \texttt{LifeV} should start with
-  \texttt{S\_}. Moreover all the rules for the names of methods are also valid for class
-  members.
+  \item Static members variables in \texttt{LifeV} should start with \texttt{S\_}.
 \begin{lstlisting}
 private:
 
@@ -140,70 +143,42 @@ void setDataFile( const std::string& ); //NO!!!
 
 void setDataFile( const std::string& fileName ); //OK
 \end{lstlisting}
-\newpage
-  \item All get functions and methods should be declared const, and should
-  return a const object.
+  \item All get functions and methods should be declared const, and should return a const object.
 \begin{lstlisting}
-matrix_Type&   matrix();     //NO!!!
-matrix_ptrType matrix_ptr(); //NO!!!
+matrix_Type&    matrix();     //NO!!!
+matrix_PtrType& matrix_ptr(); //NO!!!
 
-const matrix_Type&   matrix() const;     //OK
-const matrix_ptrType matrix_ptr() const; //OK
+const matrix_Type&    matrix() const;     //OK
+const matrix_PtrType& matrix_ptr() const; //OK
 \end{lstlisting}
-  \item All set functions and methods should start with the prefix
-  \texttt{set}.
+  \item All set functions and methods should start with the prefix \texttt{set}.
 \begin{lstlisting}
-void matrix( matrix_Type& matrix );          //NO!!!
-void matrix_ptr( matrix_ptrType matrix_ptr); //NO!!!
+void matrix( matrix_Type& matrix );           //NO!!!
+void matrix_ptr( matrix_PtrType& matrix_ptr); //NO!!!
 
-void setMatrix( matrix_Type& matrix );          //OK
-void setMatrix_ptr( matrix_ptrType matrix_ptr); //OK
+void setMatrix( matrix_Type& matrix );           //OK
+void setMatrix_ptr( matrix_PtrType& matrix_ptr); //OK
 \end{lstlisting}
   \item All principal classes should have a method \texttt{showMe()},
 \begin{lstlisting}
 void showMe( std::ostream& output = std::cout ) const;
 \end{lstlisting}
-  which outputs on \texttt{output} (which may be the standard output
-  or a file) the state of the class (i.e.  the content of the global
-  and local variables).
+  which outputs on \texttt{output} (which may be the standard output or a file) the state of the class (i.e.  the content of the global and local variables).
 \end{itemize}
 
-\newpage
 \section{Conventions}
-This is a short list of programming and general conventions that should be used
-working with \texttt{LifeV} library.
+This is a short list of programming and general conventions that should be used working with \texttt{LifeV} library.
 
 \subsection{Programming conventions}
 \begin{itemize}
-  \item Use \texttt{boost::shared\_ptr} instead raw pointers. If the raw
-  pointer is needed by another external class (for example by \texttt{Trilinos})
-  you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
+  \item Use \texttt{boost::shared\_ptr} instead raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
   \item Don't use reference types, expecially for members inside classes.
-  \item \texttt{using} directives should be avoided entirely, especially in
-  header files. They cause wanton namespace pollution
-  by bringing in potentially huge numbers of names, many (usually the vast
-  majority) of which are unnecessary. The presence of the unnecessary names
-  greatly increases the possibility of unintended name conflicts not just in
-  the header, but in every module that includes the header. Moreover
-  \texttt{using namespace} declarations should never appear in header files.
-  The meaning of the \texttt{using} declaration may change depending on what
-  other headers have included before it in any given module.
-  \item Use \texttt{const} keyword when possible. This helps the compiler
-  and the developers reading the code. Moreover, it enhances
-  debugging. See \url{http://en.wikipedia.org/wiki/Const-correctness} for more
-  details on the use of \texttt{const}.
-  \item Use the \texttt{C++} cast utility (\texttt{static\_cast}) instead of
-  implicit compiling casts. This will avoid warnings and will keep
-  each cast visible for future debugging. See
-  \url{http://www.acm.org/crossroads/xrds3-1/ovp3-1.html} for more details on
-  the use of cast commands.
-  \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and
-  \texttt{Uint}, instead of the built-in types \texttt{double},
-  \texttt{int} and \texttt{unsigned int}. This helps making code
-  changes afterwards. All the type definitions are contained into
-  \texttt{life.hpp}. \newline \textbf{NOTE:} Only for MPI instructions and
-  Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}.
-  In these cases, use \texttt{static\_cast} to avoid warning messages.
+  \item \texttt{using} directives should be avoided entirely, especially in header files. They cause wanton namespace pollution by bringing in potentially huge numbers of names, many (usually the vast majority) of which are unnecessary. The presence of the unnecessary names greatly increases the possibility of unintended name conflicts not just in the header, but in every module that includes the header. Moreover
+  \texttt{using namespace} declarations should never appear in header files. The meaning of the \texttt{using} declaration may change depending on what other headers have included before it in any given module.
+  \item Use \texttt{const} keyword when possible. This helps the compiler and the developers reading the code. Moreover, it enhances debugging. See \url{http://en.wikipedia.org/wiki/Const-correctness} for more details on the use of \texttt{const}.
+  \item Use the \texttt{C++} cast utility (\texttt{static\_cast}) instead of implicit compiling casts. This will avoid warnings and will keep each cast visible for future debugging. See
+  \url{http://www.cplusplus.com/doc/tutorial/typecasting} for more details on the use of cast commands.
+  \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and \texttt{Uint}, instead of the built-in types \texttt{double}, \texttt{int} and \texttt{unsigned int}. This helps making code changes afterwards. All the type definitions are contained into \texttt{life.hpp}. \newline \textbf{NOTE:} Only for MPI instructions and Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}. In these cases, use \texttt{static\_cast} to avoid warning messages.
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
 #ifdef DEBUG
@@ -211,94 +186,45 @@ working with \texttt{LifeV} library.
                   << M_myVariable << "\n";
 #endif
 \end{lstlisting}
-  Thanks to this syntax no output will be displayed, unless the debug
-  mode is enabled and an enviroment variable is set in the shell with the
-  command \texttt{export DEBUG="3000"}. This will avoid a lot of unuseful
-  outputs especially on parallel runs. For the complete list of debug numbers
-  (that you can enrich) see the file \texttt{debug.areas} in the library.
-  \item For assertion purposes please use the \texttt{lifeassert.hpp} class
-  features.
+  Thanks to this syntax no output will be displayed, unless the debug mode is enabled and an enviroment variable is set in the shell with the command \texttt{export DEBUG="3000"}. This will avoid a lot of unuseful outputs especially on parallel runs. For the complete list of debug numbers (that you can enrich) see the file \texttt{debug.areas} in the library.
+  \item For assertion purposes please use the \texttt{lifeassert.hpp} class features.
 \end{itemize}
 
 \subsection{General conventions}
 \begin{itemize}
-  \item To uniform the code inside the library, all developers have to
-  use the same notation and in particular the same indentation style. The style
-  used in \texttt{LifeV} is the BSD/Allman Indent style. Please see
-  \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29}
-  for more details about this style and its inventor.
-  Moreover please note that both Eclipse and Emacs (and probably also other editors)
-  have a special utility to help follow this style.
-  \item Before committing any code, be sure that all tabs have been converted
-  into $4$ spaces, and that your editor has removed endline spaces.
-  \item Before committing any modification in the library, always check
-  that these modifications have not broken any test present in the
-  testsuite.
-  \item Always include a complete description of all the modifications in the
-  commit message, to allow other developers to easily understand what is
-  changing in the library.
-  \item About the debugging procedure: if you find a bug in the code, fix it
-  and then use the \texttt{lifev-dev} mailing list to notify all the developers
-  about the bug. A simple commit with short description is not sufficient!
-  \item All the documentation, files and variables names, comments and more
-  generally any kind of text must be in english language.
-  \item Don't write comment or documentation using all caps look letters. Use
-  them only for titles, or specific words.
-  \item In order to improve readability of the code, headers should
-  contain sections (see Section \ref{doxygen} for doxygen syntax) grouping
-  all the similar methods. Basically all the classes should contain at least
-  these sections:
+  \item To uniform the code inside the library, all developers have to use the same notation and in particular the same indentation style. The style used in \texttt{LifeV} is the BSD/Allman Indent style. Please see \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29} for more details about this style and its inventor. Moreover please note that both Eclipse and Emacs (and probably also other editors) have a special utility to help follow this style.
+  \item Before committing any code, be sure that all tabs have been converted into $4$ spaces, and that your editor has removed endline spaces.
+  \item Before committing any modification in the library, always check that these modifications have not broken any test present in the testsuite.
+  \item Do not introduce warnings in the library: \texttt{C++} compilers help us for free, giving important hints about what is wrong or dangerous in our code. Why should we ignore it?!!
+  \item Always include a complete description of all the modifications in the commit message, to allow other developers to easily understand what is changing in the library.
+  \item About the debugging procedure: if you find a bug in the code, fix it and then use the \texttt{lifev-dev} mailing list to notify all the developers about the bug. A simple commit with short description is not sufficient!
+  \item All the documentation, files and variables names, comments and more generally any kind of text must be in english language.
+  \item Don't write comment or documentation using all caps look letters. Use them only for titles, or specific words.
+  \item In order to improve readability of the code, headers should contain sections (see Section \ref{doxygen} for doxygen syntax) grouping all the similar methods. Basically all the classes should contain at least these sections:
   \begin{description}
       \item[Public Types]: containing the public enum and type definition(s).
-	  \item[Constructors \& Destructor]: containing the constructor(s), the
-      copy constructor and the destructor(s).
-      \item[Operators]: containing the operators defined in the class, such as
-      the \texttt{operator=} for making copies.
-      \item[Methods]: containing all the general methods of the class. Note that
-      a method performs operations on private variables and it is
-      not just a setter or getter function.
-      \item[Set Methods]: containing all the set methods (starting with the
-      prefix \texttt{set})
+	  \item[Constructors \& Destructor]: containing the constructor(s), the copy constructor and the destructor(s).
+      \item[Operators]: containing the operators defined in the class, such as the \texttt{operator=} for making copies.
+      \item[Methods]: containing all the general methods of the class. Note that a method performs operations on private variables and it is not just a setter or getter function.
+      \item[Set Methods]: containing all the set methods (starting with the prefix \texttt{set})
       \item[Get Methods]: containing all the get methods.
       % starting with the prefix \texttt{get})
   \end{description}
 \end{itemize}
 
-\newpage
 \section{Testsuite development} \label{testsuite}
-All new packages and main classes should have a working test in the testsuite:
-this is mandatory to allow easy mantainance of all the classes in the
-library. Moreover, it is important to have a working test for the night
-compilation of the library, that runs all the tests in order to verify their
-status.
+All new packages and main classes should have a working test in the testsuite: this is mandatory to allow easy mantainance of all the classes in the library. Moreover, it is important to have a working test for the night compilation of the library, that runs all the tests in order to verify their status.
 
 \subsection{How to add a test in the testsuite}
-The first step to add a new test in the testsuite is the creation of a new
-folder, with the name \texttt{test\_NameOfTheTest}. Inside the folder, at least
-these files should be present:
+The first step to add a new test in the testsuite is the creation of a new folder, with the name \texttt{test\_NameOfTheTest}. Inside the folder, at least these files should be present:
 \begin{description}
-	\item[main.cpp]: the main file for the test, containing information about the
-	test and a doxygen description of its purposes. A template for this file is
-	provided in appendix \ref{main}.
-	\item[Makefile.am]: the makefile of the test. A template for this file is
-	provided in appendix \ref{Makefileam}. \textbf{NOTE:} To enable the automatic
-	compilation of the test, it is necessary to add a line in the
-	\texttt{Makefile.am} file placed in the main testsuite folder.
-	\item[data.txt]: the data file(s) for the test, which should be a significant
-	case. This data file is used when a manual execution of the test is performed.
-	\item[testsuite.at]: the configure file for the night test, which could
-	contain the same test as the one in the \texttt{data.txt}, or a different one.
-	A template for this file is provided in appendix \ref{testsuiteat}.
-	\textbf{NOTE:} To enable the night execution of the test, it is necessary to
-	add a line inside the \texttt{Makefile.am} and \texttt{testsuite.at}
-	files placed in the main testsuite folder.
+	\item[main.cpp]: the main file for the test, containing information about the test and a doxygen description of its purposes. A template for this file is provided in appendix \ref{main}.
+	\item[Makefile.am]: the makefile of the test. A template for this file is provided in appendix \ref{Makefileam}. \textbf{NOTE:} To enable the automatic compilation of the test, it is necessary to add a line in the \texttt{Makefile.am} file placed in the main testsuite folder.
+	\item[data.txt]: the data file(s) for the test, which should be a significant case. This data file is used when a manual execution of the test is performed.
+	\item[testsuite.at]: the configure file for the night test, which could contain the same test as the one in the \texttt{data.txt}, or a different one. A template for this file is provided in appendix \ref{testsuiteat}.
+	\textbf{NOTE:} To enable the night execution of the test, it is necessary to add a line inside the \texttt{Makefile.am} and \texttt{testsuite.at} files placed in the main testsuite folder.
 \end{description}
-Note that \texttt{data.txt} and \texttt{testsuite.at} are independent.
-The test should verify both the compilation and execution of the test. For this
-second task, it is necessary to place a check at the end of the main file. The
-check could consist in a tolerance test (for a numeric comparison of the
-obtained result with the expected one), or a flag check. Here there is an
-example:
+Note that \texttt{data.txt} and \texttt{testsuite.at} are independent. The test should verify both the compilation and execution of the test. For this second task, it is necessary to place a check at the end of the main file. The check could consist in a tolerance test (for a numeric comparison of the obtained result with the expected one), or a flag check. Here there is an example:
 \begin{lstlisting}
 Real tolerance = 1.e-10;
 if ( tolerance > result )
@@ -306,71 +232,34 @@ if ( tolerance > result )
 else
     return EXIT_SUCCESS;
 \end{lstlisting}
-Please also note that the testsuite is not the right place for applications.
-The testsuite has the purpose to test classes and packages with simple tests.
-Moreover, the tests should be no longer than $5$
-minutes, to allow a quick check of the library before committing new software.
+Please also note that the testsuite is not the right place for applications. The testsuite has the purpose to test classes and packages with simple tests. Moreover, the tests should be no longer than $5$ minutes, to allow a quick check of the library before committing new software.
 
-\newpage
 \section{Doxygen documentation} \label{doxygen}
-All classes should have documentation lines explaining in a concise
-but thorough way their usage. Doxygen provides an easy and general format to
-obtain this result.
+All classes should have documentation lines explaining in a concise but thorough way their usage. Doxygen provides an easy and general format to obtain this result.
 
-\subsection{How to obtain \texttt{LifeV} doxygen documentation}
-If the \texttt{doxygen} and \texttt{graphviz} packages are
-present on your machine, \texttt{LifeV} automatically generates doxygen
-documentation at the end of each compilation process. The documentation is
-accessible at the following path: \newline
+\subsection{How to obtain \texttt{LifeV} doxygen documentation} If the \texttt{doxygen} and \texttt{graphviz} packages are present on your machine, you can generate the \texttt{LifeV} doxygen documentation by typing \texttt{make apidox} at the end of the compilation process. The documentation is accessible at the following path: \newline
 
 \texttt{\$LIFEV-COMPILATION-FOLDER/doc/api/html/index.html}\newline
 
 \subsection{How to add doxygen style in \texttt{C++} classes}
-In order to be fully documented, the code should follow some simple rules which
-are described on the doxygen website \url{www.doxygen.org}. In particular the
-main doxygen style commands are described at the following page
-\url{http://www.stack.nl/~dimitri/doxygen/manual.html}.
+In order to be fully documented, the code should follow some simple rules which are described on the doxygen website \url{www.doxygen.org}. In particular the main doxygen style commands are described at the following page \url{http://www.stack.nl/~dimitri/doxygen/manual.html}.
 
-To make things easier for all \texttt{LifeV} developers, a general
-\texttt{LifeV} template class has been generated and attached to this guide
-as an appendix (see appendix \ref{TemplateClassHPP} and
-\ref{TemplateClassCPP}). It contains the general layout structure for any new
-class. All the future classes in \texttt{LifeV} should be developed starting
-from these two files, which contain everything to make doxygen work
-properly.
+To make things easier for all \texttt{LifeV} developers, a general \texttt{LifeV} template class has been generated and attached to this guide as an appendix (see appendix \ref{TemplateClassHPP} and \ref{TemplateClassCPP}). It contains the general layout structure for any new class. All the future classes in \texttt{LifeV} should be developed starting from these two files, which contain everything to make doxygen work properly.
 
 \bigskip
 \noindent In particular, the header file is divided into $4$ sections:
 \begin{enumerate}
-  \item A general header containing license and copyright information that
-  should appear at the beginning of each file.
-  \item A short description of the file content, with at least a brief description of the file
-  content (using command \texttt{@brief}), the author(s) list (using
-  \texttt{@author}) and the date (using
-  \texttt{@date}). In particular, for the description of the file it
-  could simply be the list of classes contained in the file, which are fully
-  described later.
-  \item \label{point3} A full description of the class,
-  describing its purpose and its external interface. It should be
-  placed before its declaration. The first line (starting with
-  \texttt{//!}) contains the name of the class and a very short
-  description of it (one line maximum). In the following block of lines
-  (starting with \texttt{/*!} and finishing with \texttt{/*}) the
-  full description of the class should be given. This is a good place also to
-  describe the list of parameters that are required by the class and that
-  should be provided from a data file.
-  \newpage
-  \item \label{point4} A detailed description of all the public methods
-  contained in the class, and their input and output
-  parameters. All the methods are grouped using the syntax:
+  \item A general header containing license and copyright information that should appear at the beginning of each file.
+  \item A short description of the file content, with at least a brief description of the file content (using command \texttt{@brief}), the author(s) list (using \texttt{@author}) and the date (using \texttt{@date}). In particular, for the description of the file it could simply be the list of classes contained in the file, which are fully described later.
+  \item \label{point3} A full description of the class, describing its purpose and its external interface. It should be placed before its declaration. The first line (starting with  \texttt{//!}) contains the name of the class and a very short description of it (one line maximum). In the following block of lines  (starting with \texttt{/*!} and finishing with \texttt{/*}) the  full description of the class should be given. This is a good place also to describe the list of parameters that are required by the class and that should be provided from a data file.
+  \item \label{point4} A detailed description of all the public methods contained in the class, and their input and output  parameters. All the methods are grouped using the syntax:
   \begin{lstlisting}
 //! @name Name of the group (for example Methods)
 //@{
 
 //@}
 \end{lstlisting}
-  and inside each group all the methods contain a full description of their
-  usage such as:
+  and inside each group all the methods contain a full description of their usage such as:
 \begin{lstlisting}
 //! Short description of the equivalence operator
 /*!
@@ -387,18 +276,12 @@ TemplateClass& operator=( const TemplateClass& T );
 @param inputParameter   Description of the input parameter
 @return                 Description of the output parameter
 \end{lstlisting}
- Note that for input parameters (command \texttt{@param}) the first word is the
- name of the parameter, followed by his description, while for output
- parameters (command \texttt{@return}) there is only the description.
+ Note that for input parameters (command \texttt{@param}) the first word is the name of the parameter, followed by his description, while for output parameters (command \texttt{@return}) there is only the description.
 \end{enumerate}
-If there are more classes (or structures) in the file, point \ref{point3} and
-\ref{point4} should be repeated for all of them.
+If there are more classes (or structures) in the file, point \ref{point3} and \ref{point4} should be repeated for all of them.
 
-For the \texttt{.cpp} file the first two sections are exactly the same of the
-\texttt{*.hpp} file. Then all the implementations of the methods should be
-placed in the same order as in the header file. To keep the same group division
-given in the header, the following comment could be used to identify the
-beginning of a group:
+For the \texttt{.cpp} file the first two sections are exactly the same of the \texttt{*.hpp} file. Then all the implementations of the methods should be
+placed in the same order as in the header file. To keep the same group division given in the header, the following comment could be used to identify the beginning of a group:
 \begin{lstlisting}
 // ===================================================
 // Name of the group
