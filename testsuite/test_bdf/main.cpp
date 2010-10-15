@@ -96,6 +96,7 @@ makeAbout()
 //! Namespaces
 // ===================================================
 using namespace LifeV;
+//Register products in the preconditioner factory, so we can use Ifpack and ML as preconditioners.
 namespace
 {
 	static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
