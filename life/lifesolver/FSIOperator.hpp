@@ -472,7 +472,7 @@ public:
 
 
     //! sets the solution time derivative vector by copy
-    void setSolutionDerivative( const vector_type& lambdaDot ) { *M_lambdaDot = lambdaDot; }
+    void setSolutionDerivative( const vector_type& solutionDerivative )         { M_lambdaDot.reset( new vector_type( solutionDerivative ) ); }
 
     virtual void  setRestarts( bool restarts ){ /*M_restarts = restarts;*/ }
 
