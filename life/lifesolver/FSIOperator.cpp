@@ -433,7 +433,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 		for (UInt dim = 0; dim < nDimensions; ++dim)
 			for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
             {
-                dofInterfaceSolid.push_back(i->first + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
+                dofInterfaceSolid.push_back(i->second + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
             }
 	}
 
