@@ -70,4 +70,4 @@ liblifemcsolver_la_SOURCES   = BCInterface_FSI.cpp \
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am
