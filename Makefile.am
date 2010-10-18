@@ -45,4 +45,4 @@ clean_PROGRAMS:
 clean-results:
 	-rm *.vct *.scl *.case *.geo
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am
