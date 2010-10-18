@@ -17,7 +17,7 @@ Suppose that we want to create a new test with the name "MyTest", than we have t
 
    $(top_srcdir)/testsuite/test_MyTest
 
-   in the INPUT section of admin/Doxyfile.am  
+   in the INPUT section of Doxyfile.am  
 
 For any additional information about this procedure, please read the "LifeV Development Guidelines"
 or contact the LifeV administrator.
