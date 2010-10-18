@@ -63,6 +63,7 @@ all-local:
 	@echo "*"
 	@echo "* To generate LifeV API documentation type make apidox"
 	@echo "* To install LifeV API documentation type make install-apidox"
+	@echo "*"
 	@echo "* Enjoy!"
 	@echo "*  The LifeV Developing Team"
 	@echo "************************************************************"
