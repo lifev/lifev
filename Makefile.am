@@ -30,4 +30,4 @@ liblifemcalg_la_SOURCES	= AztecOOPreconditioner.cpp IfpackComposedPrec.cpp eigen
 
 liblifemcalg_la_LIBADD	= -llifealg
 
-include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/Doxyfile.am
