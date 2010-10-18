@@ -110,6 +110,7 @@ GodunovNumericalFlux ( const vectorFunction& physicalFlux,
     M_brentToll                                   ( brentToll ),
     M_brentMaxIter                                ( brentMaxIter )
 {
+    std::cout << "M_brentToll " << M_brentToll << std::endl;
 
     CONSTRUCTOR( "GodunovNumericalFlux" );
 

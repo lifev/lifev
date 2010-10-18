@@ -181,10 +181,10 @@ Vector saturationPhysicalFlux( const Real& /*t*/,
     Vector physicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = u*u;
+    Real Entry0 = u;
 
     // Second row
-    Real Entry1 = u;
+    Real Entry1 = 0.;
 
     // Third row
     Real Entry2 = 0.;
@@ -206,10 +206,10 @@ Vector saturationFirstDerivativePhysicalFlux( const Real& /*t*/,
     Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = 2.*u;
+    Real Entry0 = 1.;
 
     // Second row
-    Real Entry1 = 1.;
+    Real Entry1 = 0.;
 
     // Third row
     Real Entry2 = 0.;

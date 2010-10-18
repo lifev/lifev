@@ -25,7 +25,7 @@
 
         [./time_discretization]
         initialtime   = 0.
-        endtime       = 0.5
+        endtime       = 0.3
         timestep      = 0.01
         [../]
 
