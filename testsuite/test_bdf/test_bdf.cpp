@@ -48,30 +48,19 @@
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfVariableStep.hpp>
+
+#include <life/lifefilters/exporter.hpp>
+#include <life/lifefilters/noexport.hpp>
 #include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 
 #include "ud_functions.hpp"
 #include "test_bdf.hpp"
-
-#define POSTPROCESS 1
 
 // ===================================================
 //! Namespaces & Define
 // ===================================================
 using namespace LifeV;
-
-#ifdef TWODIM
-
-const int TOP = 3;
-const int BOTTOM = 1;
-const int LEFT = 4;
-const int RIGHT = 2;
-
-typedef RegionMesh2D<LinearTriangle> RegionMesh;
-
-const std::string discretization_section="discretization2D";
-
-#elif defined THREEDIM
 
 const int TOP = 6;
 const int BOTTOM = 5;
@@ -82,9 +71,7 @@ const int BACK = 1;
 
 typedef RegionMesh3D<LinearTetra> RegionMesh;
 
-const std::string discretization_section = "discretization3D";
-
-#endif
+const std::string discretization_section = "space_discretization";
 
 // ===================================================
 //! Private Members
@@ -145,17 +132,6 @@ void test_bdf::run() {
 	// the boundary conditions
 	BCFunctionBase g_Ess(AnalyticalSol::u);
 
-#ifdef TWODIM
-
-	BCHandler bc( 4, BCHandler::HINT_BC_ONLY_ESSENTIAL );
-
-	bc.addBC( "Top", TOP, Essential, Full, g_Ess, 1 );
-	bc.addBC( "Bottom", BOTTOM, Essential, Full, g_Ess, 1 );
-	bc.addBC( "Left", LEFT, Essential, Full, g_Ess, 1 );
-	bc.addBC( "Right", RIGHT, Essential, Full, g_Ess, 1 );
-
-#elif defined THREEDIM
-
 	BCHandler bc(6, BCHandler::HINT_BC_ONLY_ESSENTIAL);
 
 	bc.addBC("Top", TOP, Essential, Full, g_Ess, 1);
@@ -164,7 +140,6 @@ void test_bdf::run() {
 	bc.addBC("Right", RIGHT, Essential, Full, g_Ess, 1);
 	bc.addBC("Front", FRONT, Essential, Full, g_Ess, 1);
 	bc.addBC("Back", BACK, Essential, Full, g_Ess, 1);
-#endif
 
 	//=============================================================================
 	//Mesh stuff
@@ -230,19 +205,38 @@ void test_bdf::run() {
 
 	//===================================================
 	// post processing setup
-#if POSTPROCESS
 	boost::shared_ptr<Exporter<RegionMesh> > exporter;
-	exporter.reset(new Ensight<RegionMesh> (dataFile, meshPart.mesh(), "u",
-			Members->comm->MyPID()));
+    std::string const exporterType =  dataFile( "exporter/type", "hdf5");
+
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+    {
+        exporter.reset( new Hdf5exporter<RegionMesh > ( dataFile, "bdf_test" ) );
+    }
+    else
+#endif
+    {
+        if (exporterType.compare("none") == 0)
+        {
+            exporter.reset( new NoExport<RegionMesh > ( dataFile, meshPart.mesh(), "bdf_test", Members->comm->MyPID()) );
+        }
+        else
+        {
+            exporter.reset( new Ensight<RegionMesh > ( dataFile, meshPart.mesh(), "bdf_test", Members->comm->MyPID()) );
+        }
+    }
+
+    exporter->setDirectory( "./" );
+    exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
 
 	boost::shared_ptr<EpetraVector> u_display_ptr(new EpetraVector(
-			FeSpace.map(), Repeated));
+			FeSpace.map(), exporter->mapType()));
 	exporter->addVariable(ExporterData::Scalar, "u", u_display_ptr,
                           UInt(0),
                           UInt(FeSpace.dof().numTotalDof()));
 	*u_display_ptr = u;
 	exporter->postProcess(0);
-#endif
+
 
 	//===================================================
 	//Definition of the linear solver
@@ -260,7 +254,6 @@ void test_bdf::run() {
 			cout << "Now we are at time " << t << endl;
 
 		matA_ptr.reset(new EpetraMatrix<double> (FeSpace.map()));
-//		matA_ptr->clear();	/*Reset the EpetraMatrix pointer until we discuss how to clear a EpetraMatrix*/
 
 		chrono.start();
 		//Assemble A
@@ -281,10 +274,9 @@ void test_bdf::run() {
 			cout << "A has been constructed in "<< chrono.diff() << "s." << endl;
 
 		// Handling of the right hand side
-		FeSpace.interpolate(sf, f, t);
+		f = (matM*bdf.time_der_dt());       //f = M*\sum_{i=1}^{orderBdf} \alpha_i u_{n-i}
+		FeSpace.L2ScalarProduct(sf, f, t);  //f +=\int_\Omega{ volumeForces *v dV}
 		Members->comm->Barrier();
-		f += bdf.time_der_dt();
-		f = matM * f;
 
 		// Treatment of the Boundary conditions
 		if(verbose) cout << "*** BC Management: " << endl;
@@ -295,6 +287,7 @@ void test_bdf::run() {
 		chrono.stop();
 		if(verbose) cout << chrono.diff() << "s." << endl;
 
+		//Set Up the linear system
 		Members->comm->Barrier();
 		chrono.start();
 		az_A.setMatrix(*matA_ptr);
@@ -311,8 +304,8 @@ void test_bdf::run() {
 					<< endl;
 
 		Members->comm->Barrier();
-		// Error L2 and H1 Norms
-		AnalyticalSol uExact;
+
+		// Error in the L2
 		vector_type uComputed(u, Repeated);
 
 		Real L2_Error, L2_RelError;
@@ -323,11 +316,10 @@ void test_bdf::run() {
 			std::cout << "Error Norm L2: " << L2_Error
 					<< "\nRelative Error Norm L2: " << L2_RelError << std::endl;
 
-#if POSTPROCESS
-		//store solution at time t
+
+		//transfer the solution at time t.
 		*u_display_ptr = u;
 		exporter->postProcess(t);
-#endif
 	}
 
 }

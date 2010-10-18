@@ -78,7 +78,7 @@ Vector physicalFlux( const Real& /*t*/,
     Vector physicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = -u;
+    Real Entry0 = u*u;
 
     // Second row
     Real Entry1 = 0.;
@@ -103,7 +103,7 @@ Vector firstDerivativePhysicalFlux( const Real& /*t*/,
     Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = -1.;
+    Real Entry0 = 2.*u;
 
     // Second row
     Real Entry1 = 0.;
@@ -131,7 +131,7 @@ Real initialCondition( const Real& /*t*/,
     // if ( (x < 1./2. && x > 1./4.) && (y < 1./2. && y > 1./4.) && (z < 1./2. && z>1./4.) )
     //  return 1;
 
-    if (( x > 1./2. && x < 3./4. ) && (y > 1./2. && y < 3./4 )  && (z < 1./2. && z>1./4.) )
+    if (( x > 0. && x < 1./4. ) && (y > 1./2. && y < 3./4 )  && (z < 1./2. && z>1./4.) )
         return 1;
 
         return 0;
@@ -145,7 +145,7 @@ Real dirichlet( const Real& /* t */,
                 const Real& z,
                 const ID&   /*icomp*/)
 {
-    return 0.;
+    return 1.;
 }
 
 
@@ -501,15 +501,17 @@ hyperbolic::run()
     // Save the initial solution into the exporter
     exporter->postProcess( dataHyperbolic.dataTime()->getInitialTime() );
 
+    Real timeStep(0.);
+
     // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
     while( !dataHyperbolic.dataTime()->isLastTimeStep() )
     {
 
         // Compute the new time step according to the CFL condition.
-        //timeStep = hyperbolicSolver.CFL();
+        timeStep = hyperbolicSolver.CFL();
 
         // Set the new time step in the dataHyperbolic.
-        //dataHyperbolic.dataTime()->setTimeStep( timeStep );
+        dataHyperbolic.dataTime()->setTimeStep( timeStep );
 
         // Advance the current time of \Delta t.
         dataHyperbolic.dataTime()->updateTime();

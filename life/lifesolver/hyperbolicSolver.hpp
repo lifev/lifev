@@ -196,16 +196,26 @@ public:
 
         const GetPot& dataFile ( *(M_data.dataFile()) );
 
-        const string section   ( "hyperbolic/" );
+        const std::string section ( M_data.section() );
 
         M_numericalFlux.reset( new GodunovNumericalFlux( physicalFlux,
                                                          firstDerivativePhysicalFlux,
-                                                         dataFile( ( section + "CFL/brent_toll" ).data(), 1e-4 ),
-                                                         dataFile( ( section + "CFL/brent_maxIter").data(), 20 ),
-                                                         dataFile( ( section + "numerical_flux/godunov/brent_toll" ).data(), 1e-4 ),
-                                                         dataFile( ( section + "numerical_flux/godunov/brent_maxIter" ).data(), 20 ) ) );
+                                                         dataFile( ( section + "/CFL/brent_toll" ).data(), 1e-4 ),
+                                                         dataFile( ( section + "/CFL/brent_maxIter").data(), 20 ),
+                                                         dataFile( ( section + "/numerical_flux/godunov/brent_toll" ).data(), 1e-4 ),
+                                                         dataFile( ( section + "/numerical_flux/godunov/brent_maxIter" ).data(), 20 ) ) );
 
     }
+
+    /*!
+      Set the solution vector.
+      @param solution Constant vector_type reference of the solution.
+    */
+    inline void setSolution ( const vector_ptrtype& solution )
+    {
+        M_u = solution;
+    }
+
 
     //@}
 
@@ -505,19 +515,19 @@ setup ()
                                UPDATE_QUAD_NODES | UPDATE_WDET );
 
         // Local mass matrix
-        ElemMat matelem(M_FESpace.refFE().nbDof(), 1, 1);
-        matelem.zero();
+        ElemMat matElem(M_FESpace.refFE().nbDof(), 1, 1);
+        matElem.zero();
 
         // Compute the mass matrix for the current element
-        mass( static_cast<Real>(1.), matelem, M_FESpace.fe(), 0, 0);
+        mass( static_cast<Real>(1.), matElem, M_FESpace.fe(), 0, 0);
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-        dpotrf_( _param_L, NB, matelem.mat(), NB, INFO );
+        dpotrf_( _param_L, NB, matElem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
 
         // Save the local mass matrix in the global vector of mass matrices
-        M_elmatMass.push_back(matelem);
+        M_elmatMass.push_back( matElem );
 
     }
 
@@ -644,7 +654,7 @@ localEvolve ( const UInt& iElem )
             }
 
             // It is an outflow face, we use a ghost cell
-            if ( localFaceFluxWeight[0] > 0 )
+            if ( localFaceFluxWeight[0] > 1e-4 )
             {
                 rightValue = leftValue;
             }
@@ -736,6 +746,7 @@ Real
 HyperbolicSolver<Mesh, SolverType>::
 CFL() const
 {
+    return M_data.dataTime()->getTimeStep();
 
     // Total number of elements in the mesh
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
