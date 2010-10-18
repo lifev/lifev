@@ -69,7 +69,7 @@ const UInt BDFT_MAX_ORDER = 4;
 
   Thus we have
 
-  \f$ \frac{\alpha_0}{\Delta t} M U_{k+1} = A U_{k+1} + f + M f_V$
+  \f$ \frac{\alpha_0}{\Delta t} M U_{k+1} = A U_{k+1} + f + M f_V \f$
 
   with
 
@@ -105,7 +105,7 @@ const UInt BDFT_MAX_ORDER = 4;
 
   Thus we have
 
-  \f$ \frac{\xi_0}{\Delta t^2} M U_{k+1} + \frac{\alpha_0}{\Delta t } D U_{k+1} + A U_{k+1} + f + M f_W + D f_V $
+  \f$ \frac{\xi_0}{\Delta t^2} M U_{k+1} + \frac{\alpha_0}{\Delta t } D U_{k+1} + A U_{k+1} + f + M f_W + D f_V \f$
 
   with
 
@@ -122,7 +122,7 @@ const UInt BDFT_MAX_ORDER = 4;
 
   and  V^* in following way:
 
-  \f$  V_{k+1} \approx V^*=\sum_{i=0}^p \frac{\beta_i^V}{\Delta t}\Ubf^{n-i} = \Wbf^{n+1}+O(\Delta t^p),  \f$
+  \f$  V_{k+1} \approx V^*=\sum_{i=0}^p \frac{\beta_i^V}{\Delta t}Ubf^{n-i} = Wbf^{n+1}+O(\Delta t^p),  \f$
 */
 
 template<typename VectorType = EpetraVector >
