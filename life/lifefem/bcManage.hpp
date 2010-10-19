@@ -1314,7 +1314,8 @@ template <typename MatrixType, typename DataType, typename MeshType>
 void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                           const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
-    bool replace=A.getMatrixPtr()->Filled();
+    if( A.getMatrixPtr()->Filled() )
+        A.openCrsMatrix();
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
@@ -1372,10 +1373,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                         }
 
                                     // Assembling diagonal entry
-                                    if(replace)
-                                        A.set_mat( idDof - 1, idDof - 1, sum );
-                                    else
-                                        A.set_mat_inc( idDof - 1, idDof - 1, sum );
+                                    A.set_mat_inc( idDof - 1, idDof - 1, sum );
                                 }
 
                             // Upper diagonal columns of the elementary boundary mass matrix
@@ -1402,16 +1400,8 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                             jdDof = BCb( k ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                                             // Assembling upper entry.  The boundary mass matrix is symetric
-                                            if(replace)
-                                            {
-                                                A.set_mat( idDof - 1, jdDof - 1, sum );
-                                                A.set_mat( jdDof - 1, idDof - 1, sum );
-                                            }
-                                            else
-                                            {
-                                                A.set_mat_inc( idDof - 1, jdDof - 1, sum );
-                                                A.set_mat_inc( jdDof - 1, idDof - 1, sum );
-                                            }
+                                            A.set_mat_inc( idDof - 1, jdDof - 1, sum );
+                                            A.set_mat_inc( jdDof - 1, idDof - 1, sum );
                                         }
                                 }
                         }
@@ -1470,10 +1460,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                     // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
                                     // Assembling diagonal entry
-                                    if(replace)
-                                        A.set_mat( idDof - 1, idDof - 1, sum );
-                                    else
-                                        A.set_mat_inc( idDof - 1, idDof - 1, sum );
+                                    A.set_mat_inc( idDof - 1, idDof - 1, sum );
                                 }
 
                             // Upper diagonal columns of the elementary boundary mass matrix
@@ -1502,16 +1489,8 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                             jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                                             // Assembling upper entry.  The boundary mas matrix is symetric
-                                            if(replace)
-                                            {
-                                            A.set_mat( idDof - 1, jdDof - 1, sum );
-                                            A.set_mat( jdDof - 1, idDof - 1, sum );
-                                            }
-                                            else
-                                            {
                                             A.set_mat_inc( idDof - 1, jdDof - 1, sum );
                                             A.set_mat_inc( jdDof - 1, idDof - 1, sum );
-                                            }
                                         }
                                 }
                         }
