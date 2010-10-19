@@ -260,8 +260,10 @@ FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
     }
     if(!v0.get())
         M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
+    //        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
     else
         M_oper->setSolutionDerivative(*v0);
+    //M_oper->setSolutionDerivative(v0);
     //M_oper->setupBDF(*M_lambda);
 }
 
@@ -287,12 +289,13 @@ FSISolver::iterate()
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a copy of the solution
-    vector_ptrtype solution( new vector_type( M_oper->getSolution() ) );
+    // We extract a pointer to the solution
+    vector_ptrtype lambda(new vector_type(M_oper->getSolution()));
+    //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
     // the newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
-    UInt status = nonLinRichardson( *solution,
+    UInt status = nonLinRichardson( *lambda,
                                     *M_oper,
                                      M_data->absoluteTolerance(),
                                      M_data->relativeTolerance(),
@@ -303,7 +306,7 @@ FSISolver::iterate()
                                      M_data->dataFluid()->dataTime()->getTime() );
 
     // We update the solution
-    M_oper->setSolution( *solution );
+    M_oper->setSolution( *lambda );
 
     if(status == EXIT_FAILURE)
     {
