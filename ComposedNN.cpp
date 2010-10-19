@@ -140,7 +140,7 @@ void ComposedNN::coupler(map_shared_ptrtype& map,
         M_bch.push_back(M_bch[k]);
         M_FESpace.push_back(M_FESpace[k]);
         M_offset.push_back(M_offset[k]);
-        M_recompute.push_back(M_recompute[k]);
+        M_recompute[2+k]=(M_recompute[k]);
     }
 
     matrix_ptrtype coupling(new matrix_type(*map));
