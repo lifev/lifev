@@ -369,7 +369,7 @@ public:
     virtual const vector_type& getSolution()                      const { return *M_lambda; }
 
     //! gets a pointer to the solution vector by reference
-    virtual vector_ptrtype solutionPtr()                      const { return M_lambda; }
+    virtual void solutionPtr( vector_ptrtype& lambda )                  { lambda = M_lambda; }
 
     //! gets the solid displacement by copy
     virtual void getSolidDisp( vector_type& soliddisp )                 { soliddisp = M_solid->disp(); }
@@ -472,14 +472,18 @@ public:
 
 
     //! sets the solution time derivative vector by copy
+    //void setSolutionDerivative( vector_ptrtype& lambdaDot ) { M_lambdaDot = lambdaDot; }
     void setSolutionDerivative( const vector_type& solutionDerivative )         { M_lambdaDot.reset( new vector_type( solutionDerivative ) ); }
-
     virtual void  setRestarts( bool restarts ){ /*M_restarts = restarts;*/ }
 
     virtual UInt imposeFlux();
 
     // to kill
     virtual void mergeBCHandlers(){}
+
+    virtual void updateRHS(){}
+
+    virtual void applyBoundaryConditions(){}
 
 //     void setDerReducedFluidLoadToStructure   ( vector_type &dload, UInt type = 0 );
 //     void setDerStructureAccToReducedFluid    ( vector_type &acc,   UInt type = 0 );
