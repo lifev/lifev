@@ -275,8 +275,8 @@ int MonolithicGI::setupBlockPrec( )
     }
      else
     {
-        M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
-        M_precPtr->replace_matrix( M_fluidBlock, 1 );
+        //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
+        //M_precPtr->replace_matrix( M_fluidBlock, 1 );
         M_precPtr->replace_matrix( M_meshBlock, 2 );
 
         if(M_data->dataFluid()->useShapeDerivatives())

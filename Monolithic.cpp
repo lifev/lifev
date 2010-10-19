@@ -289,7 +289,6 @@ int Monolithic::setupBlockPrec( )
          M_precPtr->replace_matrix(M_fluidBlock, 1);
          M_precPtr->replace_matrix(M_solidBlockPrec, 0);
      }
-     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
 }
 
 void
@@ -312,6 +311,8 @@ Monolithic::solveJac(vector_type         &_step,
                      const Real         /*_linearRelTol*/)
 {
     setupBlockPrec( );
+    M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
+
 
     M_precPtr->blockAssembling();
     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
