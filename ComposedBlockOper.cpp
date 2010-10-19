@@ -73,7 +73,7 @@ void ComposedBlockOper::GlobalAssemble()
 void ComposedBlockOper::push_back_matrix(const matrix_ptrtype& Mat, const  bool recompute)
 {
     M_blocks.push_back(Mat);
-    M_recompute.push_back(recompute);
+    M_recompute[M_blocks.size()-1] = recompute;
 }
 
 void ComposedBlockOper::replace_matrix( const matrix_ptrtype& Mat, UInt position )
