@@ -39,7 +39,8 @@ Int nonLinRichardson( EpetraVector& sol,
                       Real        eta_max,
                       Int         linesearch,
                       std::ofstream& out_res,
-                      const Real& time )
+                      const Real& time,
+                      UInt iter = UInt(0) )
 {
     /*
       sol            :  the solution
@@ -79,7 +80,7 @@ Int nonLinRichardson( EpetraVector& sol,
 
     bool const verbose(sol.Comm().MyPID() == 0);
 
-    UInt iter = 0;
+    //UInt iter = 0;
 
     EpetraVector residual ( sol.getMap() );
     EpetraVector step     ( sol.getMap() );
