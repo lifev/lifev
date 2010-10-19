@@ -149,12 +149,13 @@ public:
      */
     virtual void addToCoupling( const matrix_ptrtype& Mat, UInt position ) =0;
 
+    virtual void setRecompute(UInt position, bool flag){assert(false);}
 
     //!
     /*!
       adds a new block
         @param Mat block matrix to push
-        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+        @param position position of the matrix to which we want to add Mat
      */
     virtual void addToBlock( const matrix_ptrtype& Mat, UInt position );
 
