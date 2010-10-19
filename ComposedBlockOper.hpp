@@ -78,7 +78,7 @@ public:
     //@{
     ComposedBlockOper(const std::vector<Int>& flags, const std::vector<Block>& order):
         super(),
-        M_recompute(),
+        M_recompute(order.size()),
         M_coupling(),
         M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
         M_blockReordering(new std::vector<Block>(order))
@@ -168,6 +168,9 @@ public:
     //@{
     //! returns the vector of flags (by const reference).
     const std::vector<bool>& getRecompute(){return M_recompute;}
+
+    //! turns on/off the recomputation of the preconditioner for a specified factor
+    void setRecompute( UInt position, bool flag ){ M_recompute[position] = flag; }
 
     //! returns the vector of pointers to the coupling blocks (by const reference).
     const std::vector<matrix_ptrtype> getCouplingVector(){return M_coupling;}
