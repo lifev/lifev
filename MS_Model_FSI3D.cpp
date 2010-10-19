@@ -68,7 +68,8 @@ MS_Model_FSI3D::MS_Model_FSI3D() :
     M_linearSolution               (),
     M_BCBaseDelta_Zero             (),
     M_BCBaseDelta_One              (),
-    M_iter                         (0)
+    M_iter                         (0),
+    M_meshDisp_tn                  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -177,6 +178,7 @@ MS_Model_FSI3D::SetupModel()
     //Setup linear model
     SetupLinearModel();
 
+    M_meshDisp_tn.reset( new vector_Type( *M_fluidDisplacement ));
     //to kill when everithing is merged
     //M_offset=(dynamic_cast<LifeV::Monolithic*>(M_FSIoperator.get()))->getOffset();
 }
@@ -199,18 +201,6 @@ MS_Model_FSI3D::BuildSystem()
 
     // Non-linear Richardson solver
     //vector_PtrType solution = M_solution_tn ;
-
-//     boost::dynamic_pointer_cast<LifeV::Monolithic>(M_FSIoperator)->initializeMesh(M_meshDisp_tn);
-//     M_FSIoperator->meshMotion().setDispOld(*M_meshDispOld_tn);
-//     //M_FSIoperator->fluid().initialize( *M_fluidVelocityPressure );
-//     vector_PtrType newDisp(new vector_Type(*M_solidDisplacement));
-//     M_FSIoperator->solid().initialize( newDisp );
-//     M_FSIoperator->solid().initializeVel( *M_solidVelocity );
-//     vector_PtrType newRHS(new vector_Type(*M_rhs_tn));
-//     M_FSIoperator->setRHS( newRHS );
-//     M_solver->initialize( M_solution_tn );
-//     M_FSIoperator->setRestarts( true );
-
 }
 
 void
@@ -222,11 +212,16 @@ MS_Model_FSI3D::UpdateSystem()
     // Update System
     M_FSIoperator->updateSystem();
 
-    // Update solution at time n
+
+    //Update solution at time n
     *M_meshDispOld_tn = M_FSIoperator->meshMotion().dispOld();
-    M_solution_tn = M_FSIoperator->solutionPtr();
+    M_FSIoperator->solutionPtr( M_solution_tn );
     *M_meshDisp_tn = M_FSIoperator->meshDisp();
-    *M_rhs_tn = *M_FSIoperator->getRHS();
+    *M_rhs_tn *= 0;
+
+    boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, true );
+    //M_solution_tn = M_FSIoperator->solutionPtr();
+
     M_iter = 0;
 }
 
@@ -240,8 +235,7 @@ MS_Model_FSI3D::SolveSystem( )
     //vector_PtrType solution = M_solution_tn ;
     vector_PtrType solution( new vector_Type( *M_solution_tn ) ) ;
     boost::dynamic_pointer_cast<LifeV::Monolithic>(M_FSIoperator)->initializeMesh(M_meshDisp_tn);
-    M_FSIoperator->meshMotion().setDispOld(*M_meshDispOld_tn);
-    //M_FSIoperator->fluid().initialize( *M_fluidVelocityPressure );
+    M_FSIoperator->fluid().initialize( *M_fluidVelocityPressure );//useless?
     vector_PtrType newDisp(new vector_Type(*M_solidDisplacement));
     M_FSIoperator->solid().initialize( newDisp, M_solidVelocity );
     vector_PtrType newRHS(new vector_Type(*M_rhs_tn));
@@ -250,7 +244,15 @@ MS_Model_FSI3D::SolveSystem( )
     M_FSIoperator->initializeBDF( *M_solution_tn );
     M_FSIoperator->setRestarts( true );
 
-    std::cout<< "norm displacement: " << M_meshDisp_tn->Norm2() << std::endl;
+//    std::cout<< "norm displacement: " << M_meshDisp_tn->Norm2() << std::endl;
+
+
+     if(M_iter != 0)
+     {
+         boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, false );
+         M_FSIoperator->updateRHS();
+         M_FSIoperator->applyBoundaryConditions( );
+     }
 
     UInt status = nonLinRichardson( *solution, *M_FSIoperator,
                                     M_data->absoluteTolerance(),
@@ -259,11 +261,17 @@ MS_Model_FSI3D::SolveSystem( )
                                     M_data->errorTolerance(),
                                     M_data->linesearch(),
                                     outRes,
-                                    M_data->dataFluid()->dataTime()->getTime()/*,*/
-                                    /*M_iter*/
+                                    M_data->dataFluid()->dataTime()->getTime(),
+                                    M_iter
                                     );
-    /*    ++M_iter;*/
-    // We set the solution for the next time step
+     if(M_iter == 0)
+     {
+         *M_fluidDisplacement = M_FSIoperator->meshDisp();
+     }
+
+
+     M_iter=1;
+     // We set the solution for the next time step
     M_FSIoperator->setSolutionPtr( solution );
 
     if( status == EXIT_FAILURE )
@@ -302,8 +310,8 @@ MS_Model_FSI3D::SaveSolution()
     //      To solve this do HE after FluidAndSolid
 
     // Saving Fluid (displacement) for this post-processing
-    if( M_FSIoperator->isFluid() )
-        *M_fluidDisplacement = M_FSIoperator->meshDisp();
+//     if( M_FSIoperator->isFluid() )
+//         *M_fluidDisplacement = M_FSIoperator->meshDisp();
 
     if( M_FSIoperator->isFluid() )
         M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() - M_data->dataFluid()->dataTime()->getTimeStep() );
@@ -450,13 +458,17 @@ MS_Model_FSI3D::GetBoundaryArea( const BCFlag& Flag ) const
 Real
 MS_Model_FSI3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    return M_FSIoperator->fluid().flux( Flag, *M_FSIoperator->solutionPtr() );
+    vector_PtrType solution;
+    M_FSIoperator->solutionPtr( solution );
+    return M_FSIoperator->fluid().flux( Flag, *solution );
 }
 
 Real
 MS_Model_FSI3D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
-    return M_FSIoperator->fluid().pressure( Flag, *M_FSIoperator->solutionPtr() );
+    vector_PtrType solution;
+    M_FSIoperator->solutionPtr( solution );
+    return M_FSIoperator->fluid().pressure( Flag, *solution );
 }
 
 Real
@@ -469,7 +481,7 @@ MS_Model_FSI3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 Real
 MS_Model_FSI3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
 {
-    return M_FSIoperator->fluid().LagrangeMultiplier(Flag, *M_fluidBC->GetHandler(), *M_FSIoperator->solutionPtr() );
+    return M_FSIoperator->fluid().LagrangeMultiplier(Flag, *M_fluidBC->GetHandler(), M_FSIoperator->getSolution() );
 }
 
 Real
