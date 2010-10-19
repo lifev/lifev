@@ -115,47 +115,51 @@ MonolithicGE::evalResidual( vector_type&       res,
         assembleFluidBlock(iter, M_un);
         assembleSolidBlock(iter, M_un);
 
-        if ( !M_BCh_u->bdUpdateDone() )
-            M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        M_BCh_d->setOffset(M_offset);
-        if ( !M_BCh_d->bdUpdateDone() )
-            M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-
-        M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
-        M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
-
-        if(!this->M_monolithicMatrix->set())
-        {
-            M_BChs.push_back(M_BCh_d);
-            M_BChs.push_back(M_BCh_u);
-            M_FESpaces.push_back(M_dFESpace);
-            M_FESpaces.push_back(M_uFESpace);
-
-            M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
-            M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
-            M_monolithicMatrix->setConditions(M_BChs);
-            M_monolithicMatrix->setSpaces(M_FESpaces);
-            M_monolithicMatrix->setOffsets(2, M_offset, 0);
-            M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
-        }
-        else
-        {
-            M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
-            M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
-        }
-
-        M_monolithicMatrix->blockAssembling();
-        M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
-
-        M_monolithicMatrix->GlobalAssemble();
-        //M_monolithicMatrix->getMatrix()->spy("M");
-
-        //NOTE: M_monolithic->GlobalAssemble has to be called before M_precPtr->blockAssembling(), because they hold
-        //shared pointers to the same blocks
+        applyBoundaryConditions();
     }
     super::evalResidual( disp,  M_rhsFull, res, M_diagonalScale);
 }
 
+
+void MonolithicGE::applyBoundaryConditions( )
+{
+
+         if ( !M_BCh_u->bdUpdateDone() )
+             M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+         M_BCh_d->setOffset(M_offset);
+         if ( !M_BCh_d->bdUpdateDone() )
+             M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+
+         M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
+         M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
+
+         if(!this->M_monolithicMatrix->set())
+         {
+             M_BChs.push_back(M_BCh_d);
+             M_BChs.push_back(M_BCh_u);
+             M_FESpaces.push_back(M_dFESpace);
+             M_FESpaces.push_back(M_uFESpace);
+
+             M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
+             M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
+             M_monolithicMatrix->setConditions(M_BChs);
+             M_monolithicMatrix->setSpaces(M_FESpaces);
+             M_monolithicMatrix->setOffsets(2, M_offset, 0);
+             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+         }
+         else
+         {
+             M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
+             M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
+         }
+
+         M_monolithicMatrix->blockAssembling();
+         M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
+
+         M_monolithicMatrix->GlobalAssemble();
+         M_monolithicMatrix->getMatrix()->spy("M");
+
+}
 
 void MonolithicGE::setupDOF()
 {

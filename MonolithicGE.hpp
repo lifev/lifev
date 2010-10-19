@@ -137,6 +137,8 @@ public:
 
     void registerMyProducts();
 
+    void applyBoundaryConditions();
+
     static FSIOperator* createM(){ return new MonolithicGE(); }
 
     //@}

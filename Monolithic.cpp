@@ -289,6 +289,7 @@ int Monolithic::setupBlockPrec( )
          M_precPtr->replace_matrix(M_fluidBlock, 1);
          M_precPtr->replace_matrix(M_solidBlockPrec, 0);
      }
+     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
 }
 
 void
@@ -569,6 +570,17 @@ Monolithic::assembleFluidBlock(UInt iter, vector_ptrtype& solution)
         couplingRhs(this->M_rhs, M_un);
     }
     *M_rhsFull = *M_rhs;
+}
+
+
+
+void Monolithic::updateRHS(  )
+{
+        *this->M_rhs += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+        couplingRhs(this->M_rhs, M_un);
+        *M_rhsFull = *M_rhs;
+        //this->M_solid->updateVel();
+        updateSolidSystem(this->M_rhs);
 }
 
 

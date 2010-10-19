@@ -174,6 +174,14 @@ MonolithicGI::evalResidual( vector_type&       res,
     assembleFluidBlock( iter, M_uk );
     assembleMeshBlock ( iter );
 
+    applyBoundaryConditions();
+
+    super::evalResidual( disp, M_rhsFull, res, false );
+}
+
+void
+MonolithicGI::applyBoundaryConditions()
+{
     M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
     M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
 
@@ -216,9 +224,8 @@ MonolithicGI::evalResidual( vector_type&       res,
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
     //M_monolithicMatrix->getMatrix()->spy("FM");
-
-    super::evalResidual( disp, M_rhsFull, res, false );
 }
+
 
 int MonolithicGI::setupBlockPrec( )
 {

@@ -123,6 +123,8 @@ public:
 
 
 
+    void applyBoundaryConditions();
+
 
     /**
        solves the Jacobian system

@@ -103,6 +103,9 @@ public:
     typedef boost::shared_ptr<matrix_type>                     matrix_ptrtype;
     typedef BlockInterface                                     prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>                   prec_ptrtype;
+
+    typedef BlockMatrix                                        block_matrix_raw_type;
+    typedef boost::shared_ptr<block_matrix_raw_type>                   block_matrix_ptrtype;
     typedef SolverTrilinos                                     solver_type;
 
 
@@ -270,6 +273,12 @@ public:
 
     //! Returns the offset assigned to the solid block
     UInt const getOffset(){return M_offset;}
+
+    //! returns a non-const pointer to the preconditioner. Can be used also as a setter.
+    prec_ptrtype& precPtr(){ return M_precPtr; }
+
+    //! returns a non-const pointer to the preconditioner. Can be used also as a setter.
+    block_matrix_ptrtype& operatorPtr(){ return M_monolithicMatrix; }
 
     //!@}
     //!@name Virtual methods
@@ -489,6 +498,7 @@ protected:
      */
     void assembleFluidBlock(UInt iter, vector_ptrtype& solution);
 
+    void updateRHS();
 
     //!@}
 
