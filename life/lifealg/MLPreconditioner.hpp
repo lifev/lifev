@@ -90,7 +90,8 @@ public:
      */
 
     void                    setDataFromGetPot ( const GetPot&      dataFile,
-                                                const std::string& section );
+                                                const std::string& section,
+                                                const UInt listnumber = 0);
 
     double                  Condest ();
 
@@ -109,24 +110,48 @@ public:
     //! returns true if prec exists
     /*const*/ bool  set() const {return M_Prec;}
 
+    virtual void createList( const GetPot&              dataFile,
+                             const std::string&         section,
+                             Teuchos::ParameterList&    list)
+    {createMLList(dataFile, section, list);}
+
+
+    static void createMLList( const GetPot&              dataFile,
+                            const std::string&         section,
+                            Teuchos::ParameterList&    list);
+
+    int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
+    bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
+
+    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return M_Prec->ApplyInverse(X, Y);
+    }
+
+    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return M_Prec->Apply(X, Y);
+    }
+
+    const Epetra_Map & OperatorRangeMap() const
+    {return M_Prec->OperatorRangeMap();}
+
+    const Epetra_Map & OperatorDomainMap() const
+    {return M_Prec->OperatorDomainMap();}
+
 protected:
 
     Teuchos::ParameterList  M_IFPACKSubList;
 
 private:
-    prec_type               M_Prec;
 
-    std::string             M_precType;
+    operator_raw_type::matrix_ptrtype   M_Oper;
+
+    prec_type               M_Prec;
 
     bool                    M_analyze;
 
 };
-
-
-void
-createMLList( const GetPot&              dataFile,
-              const std::string&         section,
-              Teuchos::ParameterList&    list);
 
 
 inline EpetraPreconditioner* createML(){return new MLPreconditioner(); }
