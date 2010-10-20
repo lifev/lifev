@@ -83,7 +83,8 @@ public:
      */
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
-					                           const std::string& section );
+					                           const std::string& section,
+                                               UInt listNumber=0);
 
     double                 Condest ();
 
@@ -98,22 +99,58 @@ public:
 
     void                   precReset();
 
-    //! returns true if prec exists
-    /*const*/
     bool                   set() const {return M_Prec;}
 
+    virtual void createList( const GetPot&              dataFile,
+                             const std::string&         section,
+                             Teuchos::ParameterList&    list)
+    {createIfpackList(dataFile, section, list);}
+
+    static void createIfpackList( const GetPot&              dataFile,
+                                          const std::string&         section,
+                                          Teuchos::ParameterList&    list);
+
+    const int&
+    getOverlapLevel() const
+    {
+        return M_overlapLevel;
+    }
+
+
+
+    int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
+    bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
+
+    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return M_Prec->ApplyInverse(X, Y);
+    }
+
+    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return M_Prec->Apply(X, Y);
+    }
+
+    const Epetra_Map & OperatorRangeMap() const
+    {return M_Prec->OperatorRangeMap();}
+
+    const Epetra_Map & OperatorDomainMap() const
+    {return M_Prec->OperatorDomainMap();}
+
+    //! returns true if prec exists
+    /*const*/
 
 protected:
 
     prec_type              M_Prec;
-    std::string            M_precType;
+
+private:
+
+    int                                 M_overlapLevel;
+    operator_raw_type::matrix_ptrtype   M_Oper;
 
 };
 
-void
-createIfpackList( const GetPot&              dataFile,
-                  const std::string&         section,
-                  Teuchos::ParameterList&    list);
 
 inline EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
 namespace
