@@ -139,8 +139,6 @@ public:
            boost::shared_ptr<Epetra_Comm>& comm );
 
 
-    virtual void registerMyProducts(){}
-
     //! virtual destructor
 
     virtual ~Oseen();
