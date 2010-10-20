@@ -32,7 +32,7 @@
 namespace LifeV {
 
 EpetraPreconditioner::EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm):
-    M_precType("EpetraPreconditioner")
+    M_precType("EpetraPreconditioner"),
     M_displayer(comm),
     M_List(1),
     M_preconditionerCreated( false )
