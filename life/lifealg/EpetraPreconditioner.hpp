@@ -78,7 +78,7 @@ public:
     EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    EpetraPreconditioner(const EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    EpetraPreconditioner(EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~EpetraPreconditioner();
@@ -89,7 +89,7 @@ public:
     /** @name  Methods
      */
 
-    virtual void            setDataFromGetPot ( const GetPot& dataFile, const std::string& section ) = 0;
+    virtual void            setDataFromGetPot ( const GetPot& dataFile, const std::string& section, const UInt listNumber=1 ) = 0;
 
     virtual double          Condest() = 0;
 
@@ -117,10 +117,21 @@ public:
 
     virtual void            setSolver( SolverTrilinos& /*solver*/ ) {}
 
+    virtual int            SetUseTranspose( const bool useTranspose=false ) =0;
+    virtual bool            UseTranspose(  ) =0;
+    virtual int             ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const =0;
+    virtual int             Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const =0;
+    virtual const Epetra_Map & OperatorRangeMap() const = 0;
+    virtual const Epetra_Map & OperatorDomainMap() const = 0;
+
     // Teuchos list management
-    void                    setList(Teuchos::ParameterList list);
-    const Teuchos::ParameterList& getList() const;
-    const int& getOverlapLevel() const;
+    void                    setList(Teuchos::ParameterList list, UInt i=0);
+    const Teuchos::ParameterList& getList( UInt =0 ) const;
+
+    const std::vector<Teuchos::ParameterList>& getListVector( ) const
+    {
+        return M_List;
+    }
 
     //! Return if the preconditioner has been created
     /*!
@@ -128,13 +139,23 @@ public:
      */
     bool preconditionerCreated();
 
+    virtual void createList( const GetPot&              dataFile,
+                             const std::string&         section,
+                             Teuchos::ParameterList&    list)
+    {createPreconditionerList(dataFile, section, list);}
+
 protected:
 
+    std::string                         M_precType;
     Displayer                           M_displayer;
-    int                                 M_overlapLevel;
-    operator_raw_type::matrix_ptrtype   M_Oper;
-    Teuchos::ParameterList              M_List;
+    std::vector<Teuchos::ParameterList> M_List;
     bool                                M_preconditionerCreated;
+
+private:
+
+    static void createPreconditionerList( const GetPot&              dataFile,
+                                          const std::string&         section,
+                                          Teuchos::ParameterList&    list){};
 
 };
 

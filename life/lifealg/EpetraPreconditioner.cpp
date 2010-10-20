@@ -32,19 +32,17 @@
 namespace LifeV {
 
 EpetraPreconditioner::EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm):
-  M_displayer(comm),
-  M_overlapLevel(0),
-  M_Oper(),
-  M_List(),
-  M_preconditionerCreated( false )
+    M_precType("EpetraPreconditioner")
+    M_displayer(comm),
+    M_List(1),
+    M_preconditionerCreated( false )
 {
 }
 
-EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
+EpetraPreconditioner::EpetraPreconditioner(  EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
+    M_precType(P.M_precType),
     M_displayer(comm),
-    M_overlapLevel(P.getOverlapLevel()),
-    M_Oper(P.M_Oper),
-    M_List(P.getList()),
+    M_List(P.getListVector()),
     M_preconditionerCreated( P.M_preconditionerCreated )
 {
 }
@@ -54,21 +52,15 @@ EpetraPreconditioner::~EpetraPreconditioner()
 }
 
 void
-EpetraPreconditioner::setList(Teuchos::ParameterList list)
+EpetraPreconditioner::setList(Teuchos::ParameterList list, UInt i)
 {
-    M_List = list;
+    M_List[i] = list;
 }
 
 const Teuchos::ParameterList&
-EpetraPreconditioner::getList() const
+EpetraPreconditioner::getList( UInt i ) const
 {
-    return M_List;
-}
-
-const int&
-EpetraPreconditioner::getOverlapLevel() const
-{
-    return M_overlapLevel;
+    return M_List[i];
 }
 
 bool
