@@ -49,7 +49,8 @@ AztecOOPreconditioner::AztecOOPreconditioner():
 
 void
 AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
-                                          const std::string& section )
+                                          const std::string& section,
+                                          const UInt listSize)
 {
 
 #ifdef HAVE_LIFEV_DEBUG

@@ -104,7 +104,7 @@ public:
      *  @param dataFile the GetPot file
      *  @param section the section inside the GetPot file containing the parameters
      */
-    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
+    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section , const UInt listSize = 0);
 
     //! Set the external solver (AztecOO)
     /*!
@@ -141,6 +141,29 @@ public:
      *  @return "AztecOO"
      */
     std::string precType() { return "AztecOO"; }
+
+    int            SetUseTranspose( const bool useTranspose=false )
+    {
+        return 0; //M_Prec->SetUseTranspose(useTranspose);
+    }
+
+    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return 0;
+    }
+
+    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return 0;
+    }
+
+    const Epetra_Map & OperatorRangeMap() const
+    {}
+
+    const Epetra_Map & OperatorDomainMap() const
+    {}
+
+    bool            UseTranspose(  ) {/*return M_Prec->UseTranspose();*/return false;}
 
     //@}
 
