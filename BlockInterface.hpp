@@ -45,7 +45,7 @@
 
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
-#include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#include <lifemc/lifealg/ComposedOperator.hpp>
 #include <life/lifefem/bcManage.hpp>
 
 namespace LifeV {
@@ -458,7 +458,7 @@ protected:
 
     //! @name Protected Members
     //@{
-    //ComposedPreconditioner<Epetra_Operator>                      M_blocks;
+    //ComposedOperator<Epetra_Operator>                      M_blocks;
     std::vector<matrix_ptrtype>                                  M_blocks;
     std::vector<bchandler_ptrtype>                               M_bch;
     std::vector<fespace_ptrtype>                                 M_FESpace;
