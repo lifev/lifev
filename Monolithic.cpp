@@ -311,7 +311,6 @@ Monolithic::solveJac(vector_type         &_step,
                      const Real         /*_linearRelTol*/)
 {
     setupBlockPrec( );
-    M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
 
 
     M_precPtr->blockAssembling();
@@ -447,7 +446,7 @@ Monolithic::computeMaxSingularValue( )
 {
     typedef Epetra_Operator                                                operator_type;
 
-    M_PAAP.reset(new ComposedPreconditioner<Epetra_Operator>(M_epetraComm));
+    M_PAAP.reset(new ComposedOperator<Epetra_Operator>(M_epetraComm));
 
     boost::shared_ptr<operator_type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
