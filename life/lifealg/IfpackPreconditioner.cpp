@@ -49,11 +49,7 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
-    for(UInt i=0; i < M_List.size(); ++i)
-    {
-        createIfpackList(dataFile, section, this->M_List[i]);
-        M_overlapLevel = this->M_List[i].get("overlap level", -1);
-    }
+    createIfpackList(dataFile, section, this->M_List);
 }
 
 int
@@ -61,22 +57,22 @@ IfpackPreconditioner::buildPreconditioner(operator_type& _oper)
 {
     M_Oper = _oper->getMatrixPtr();
 
-    M_overlapLevel = this->M_List[0].get("overlap level", -1);
+    M_overlapLevel = this->M_List.get("overlap level", -1);
 
-    M_precType     = this->M_List[0].get("prectype", "Amesos");
-    M_precType += "_Ifpack";
+    M_precType     = this->M_List.get("prectype", "Amesos");
 
     Ifpack factory;
 
     M_Prec.reset(factory.Create(M_precType, M_Oper.get(), M_overlapLevel));
 
+    M_precType += "_Ifpack";
     //    M_Prec.reset(new prec_type(&A.getEpetraMatrix(), OverlapLevel));
     if ( !M_Prec.get() )
-    { //! if not filled, I do not know how to diagonalize.
+    {
         ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
     }
 
-    IFPACK_CHK_ERR(M_Prec->SetParameters(this->M_List[0]));
+    IFPACK_CHK_ERR(M_Prec->SetParameters(this->M_List));
     IFPACK_CHK_ERR(M_Prec->Initialize());
     IFPACK_CHK_ERR(M_Prec->Compute());
 
@@ -105,6 +101,7 @@ IfpackPreconditioner::precReset()
 
     this->M_preconditionerCreated = false;
 }
+
 
 void
 IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,

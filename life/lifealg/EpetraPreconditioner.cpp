@@ -34,7 +34,7 @@ namespace LifeV {
 EpetraPreconditioner::EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm):
     M_precType("EpetraPreconditioner"),
     M_displayer(comm),
-    M_List(1),
+    M_List(),
     M_preconditionerCreated( false )
 {
 }
@@ -42,7 +42,7 @@ EpetraPreconditioner::EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>&
 EpetraPreconditioner::EpetraPreconditioner(  EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
     M_precType(P.M_precType),
     M_displayer(comm),
-    M_List(P.getListVector()),
+    M_List(P.getList()),
     M_preconditionerCreated( P.M_preconditionerCreated )
 {
 }
@@ -52,15 +52,15 @@ EpetraPreconditioner::~EpetraPreconditioner()
 }
 
 void
-EpetraPreconditioner::setList(Teuchos::ParameterList list, UInt i)
+EpetraPreconditioner::setList(Teuchos::ParameterList list)
 {
-    M_List[i] = list;
+    M_List = list;
 }
 
 const Teuchos::ParameterList&
-EpetraPreconditioner::getList( UInt i ) const
+EpetraPreconditioner::getList( ) const
 {
-    return M_List[i];
+    return M_List;
 }
 
 bool

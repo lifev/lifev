@@ -125,13 +125,8 @@ public:
     virtual const Epetra_Map & OperatorDomainMap() const = 0;
 
     // Teuchos list management
-    void                    setList(Teuchos::ParameterList list, UInt i=0);
-    const Teuchos::ParameterList& getList( UInt =0 ) const;
-
-    const std::vector<Teuchos::ParameterList>& getListVector( ) const
-    {
-        return M_List;
-    }
+    void                    setList(Teuchos::ParameterList list);
+    const Teuchos::ParameterList& getList(  ) const;
 
     //! Return if the preconditioner has been created
     /*!
@@ -148,7 +143,7 @@ protected:
 
     std::string                         M_precType;
     Displayer                           M_displayer;
-    std::vector<Teuchos::ParameterList> M_List;
+    Teuchos::ParameterList              M_List;
     bool                                M_preconditionerCreated;
 
 private:
