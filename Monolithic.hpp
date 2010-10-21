@@ -46,8 +46,8 @@ TODO:
 
 #include <life/lifefem/FESpace.hpp>
 
-#include <lifemc/lifealg/IfpackComposedPrec.hpp>
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#include <lifemc/lifealg/ComposedOperator.hpp>
 #ifdef HAVE_TRILINOS_ANASAZI
 #include <lifemc/lifealg/eigenSolver.hpp>
 #endif
@@ -225,7 +225,7 @@ public:
 #ifdef HAVE_TRILINOS_ANASAZI
     /**
        \small Computes the maximum singular value of the preconditioned system \f$P^-1A\f$ where \f$P\f$ is an
-       instance of ComposedPreconditioner and \f$A\f$ is the system matrix.
+       instance of ComposedOperator and \f$A\f$ is the system matrix.
     */
     LifeV::Real& computeMaxSingularValue();
 #endif
@@ -311,17 +311,17 @@ public:
 
        - DDBlockPrec = AdditiveSchwarz is AAS on a the system matrix
       Only for the Monolithic Geometry Explicit:
-       - DDBlockPrec = ComposedDN is AAS on a Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
-       - DDBlockPrec = ComposedDN2 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedPreconditioner strategy
-       - DDBlockPrec = ComposedNN is AAS on a Neumann-Neumann preconditioner using the ComposedPreconditioner strategy
-       - DDBlockPrec = ComposedDNND is AAS on a Dirichler-Neumamm -- Neumann-Dirichlet preconditioner using the ComposedPreconditioner strategy
+       - DDBlockPrec = ComposedDN is AAS on a Dirichlet-Neumann preconditioner using the ComposedOperator strategy
+       - DDBlockPrec = ComposedDN2 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedOperator strategy
+       - DDBlockPrec = ComposedNN is AAS on a Neumann-Neumann preconditioner using the ComposedOperator strategy
+       - DDBlockPrec = ComposedDNND is AAS on a Dirichler-Neumamm -- Neumann-Dirichlet preconditioner using the ComposedOperator strategy
 
        Only for the Geometry Implicit:
-       - DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy
-       - DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy
-       - DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedPreconditioner strategy, composing
+       - DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedOperator strategy
+       - DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedOperator strategy
+       - DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedOperator strategy, composing
        3 preconditioners
-       - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedPreconditioner strategy, composing
+       - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedOperator strategy, composing
        3 preconditioners
     */
     virtual void   solveJac(vector_type&       _muk,
@@ -537,7 +537,7 @@ private:
     //!@}
     //!@name Private attributes
     //!@{
-    boost::shared_ptr<ComposedPreconditioner<Epetra_Operator> > M_PAAP;
+    boost::shared_ptr<ComposedOperator<Epetra_Operator> > M_PAAP;
 #ifdef OBSOLETE
     boost::shared_ptr<vector_type>                    M_rhsShapeDerivatives;
 #endif
