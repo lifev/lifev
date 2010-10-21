@@ -69,9 +69,9 @@ namespace LifeV
 {
 /**
  * class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator:
- * in particular in Lifev it shuld be used with the ComposedPreconditioner, that inherits direcly
- * from the Epetra_Operator. Since the class ComposedPreconditioner is templated it can contain
- *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedPreconditioner.
+ * in particular in Lifev it shuld be used with the ComposedOperator, that inherits direcly
+ * from the Epetra_Operator. Since the class ComposedOperator is templated it can contain
+ *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedOperator.
  */
 
 class UNDEF_EIGENSOLVER_EXCEPTION;
