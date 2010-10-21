@@ -49,8 +49,8 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     Ifpack factory;
 
     if( !M_blockPrecs.get() )
-        M_blockPrecs.reset(new ComposedPreconditioner< composed_prec >(M_comm));
-    if( true || !(M_blockPrecs->getNumber()))
+        M_blockPrecs.reset(new ComposedOperator< composed_prec >(M_comm));
+    if( true || !set())
     {
         for(ID k(0); k < M_blocks.size(); ++k)
         {
@@ -175,7 +175,7 @@ void ComposedNN::coupler(map_shared_ptrtype& map,
 
 void ComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
-    createIfpackList(data, section, M_list);
+    IfpackPreconditioner::createIfpackList(data, section, M_list);
 }
 
 void ComposedNN::push_back_matrix(const matrix_ptrtype& Mat, const  bool recompute)

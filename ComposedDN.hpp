@@ -71,7 +71,7 @@
 
 #include <lifemc/lifesolver/ComposedBlockOper.hpp>
 
-#include <lifemc/lifealg/IfpackComposedPrec.hpp>
+#include <lifemc/lifealg/ComposedPreconditioner.hpp>
 
 namespace LifeV {
 
@@ -150,7 +150,7 @@ public:
 
     //!pushes back the preconditioner for a block
     /*!
-      In this case M_blockPrecs is of type IfpackComposedPrec, thus this method calls IfpackComposedPrec::push_back(...)
+      In this case M_blockPrecs is of type ComposedPreconditioner, thus this method calls ComposedPreconditioner::push_back(...)
       which computes the AAS preconditioner for the input matrix
       \param Mat: input matrix
      */
@@ -167,17 +167,16 @@ public:
     //! returns the true if the preconditioner has at leas one factor computed
     bool set()
     {
-        return (bool) M_blockPrecs.get()
-            && M_blockPrecs->getNumber();
+        return  M_blockPrecs->preconditionerCreated();
     }
 
-    /*! copies the shared_ptr to the communicator in the member M_comm and builds the empty IfpackComposedPreconditioner
+    /*! copies the shared_ptr to the communicator in the member M_comm and builds the empty ComposedPreconditioneronditioner
     M_blockPrecs
     */
     void setComm( boost::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
-        M_blockPrecs.reset( new IfpackComposedPrec(M_comm));
+        M_blockPrecs.reset( new ComposedPreconditioner(M_comm));
     }
 
 
@@ -216,9 +215,9 @@ protected:
     //@{
 
     /*!
-      Pointer to an IfpackComposedPrec object containing the preconditioners for each block
+      Pointer to an ComposedPreconditioner object containing the preconditioners for each block
     */
-    boost::shared_ptr<IfpackComposedPrec>            M_blockPrecs;
+    boost::shared_ptr<ComposedPreconditioner>            M_blockPrecs;
     map_ptrtype                                      M_uMap;
     map_ptrtype                                      M_pMap;
     map_ptrtype                                      M_dMap;

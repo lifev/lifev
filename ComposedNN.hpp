@@ -57,7 +57,7 @@ class ComposedNN: public ComposedBlockOper
 public:
 
     typedef ComposedBlockOper          super;
-    typedef  ComposedPreconditioner<Ifpack_Preconditioner> composed_prec;
+    typedef  ComposedOperator<Ifpack_Preconditioner> composed_prec;
 
 
     //! @name Constructor & Destructor
@@ -84,7 +84,7 @@ public:
     //! Solves the preconditioned linear system (used only when dealing with a preconditioner)
     /*!
       Provided the linear solver and the right hand side this method computes the preconditioners, builds the composed
-      operator (of type ComposedPreconditioner) and solves the preconditioned linear system.
+      operator (of type ComposedOperator) and solves the preconditioned linear system.
         @param rhs right hand side of the linear system
         @param result output result
         @param linearSolver the linear system
@@ -164,7 +164,7 @@ protected:
     //! @name Protected Members
     //@{
 
-    boost::shared_ptr<ComposedPreconditioner<ComposedPreconditioner<Ifpack_Preconditioner> > >            M_blockPrecs;
+    boost::shared_ptr<ComposedOperator<ComposedOperator<Ifpack_Preconditioner> > >            M_blockPrecs;
     Teuchos::ParameterList                                                 M_list;
     std::vector<boost::shared_ptr<Ifpack_Preconditioner> >                 M_prec;
 

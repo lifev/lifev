@@ -87,7 +87,7 @@ void ComposedDNND::coupler(map_shared_ptrtype& map,
     M_coupling.push_back( coupling );
 
     M_prec.resize(M_blocks.size());
-    //M_blockPrecs.reset(new ComposedPreconditioner<ComposedPreconditioner<Ifpack_Preconditioner> >(&M_blocks[0]->getMatrixPtr()->Comm()));
+    //M_blockPrecs.reset(new ComposedOperator<ComposedOperator<Ifpack_Preconditioner> >(&M_blocks[0]->getMatrixPtr()->Comm()));
 }
 
 } // Namespace LifeV
