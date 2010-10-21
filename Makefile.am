@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcalg.la
 
-liblifemcalg_la_SOURCES	= AztecOOPreconditioner.cpp IfpackComposedPrec.cpp eigenSolver.cpp
+liblifemcalg_la_SOURCES	= AztecOOPreconditioner.cpp ComposedPreconditioner.cpp eigenSolver.cpp
 
 liblifemcalg_la_LIBADD	= -llifealg
 
