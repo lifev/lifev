@@ -40,7 +40,8 @@ void ComposedDN::setDataFromGetPot( const GetPot& dataFile,
                                       const std::string& section )
 {
     M_blockPrecs->setDataFromGetPot(  dataFile,
-                                      section );
+                                      section ,
+                                      M_recompute.size());
 }
 
 
@@ -70,7 +71,7 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
 {
     assert(M_blockPrecs.get());
 
-    if(!M_blockPrecs->getNumber())
+    if(!set())
     {
         for(UInt k=0; k < M_blocks.size(); ++k)
             push_back_precs(M_blocks[(*M_blockReordering)[k]]);
@@ -80,7 +81,10 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
         for(UInt k=0; k < M_blocks.size(); ++k)
         {
             if(M_recompute[(*M_blockReordering)[k]])
+            {
+                linearSolver->displayer()->leaderPrint("  M-  Computing preconditioner factor:           ", k, "\n");
                 replace_precs(M_blocks[(*M_blockReordering)[k]], k);
+            }
             else
                 linearSolver->displayer()->leaderPrint("  M-  Reusing preconditioner factor:           ", k, "\n");
         }
