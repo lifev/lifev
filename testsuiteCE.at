@@ -49,10 +49,10 @@ DDBlockPrec = ComposedDNGI
 #ComposedDN2: modular Dirichlet-Neumann preconditioner
 #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
 #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
-#ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
-#ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+#ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+#ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
 #ComposedDNDGI: under testing, do not use
-#ComposedDN2DGI: under testing, do not use
+#ComposedDND2GI: under testing, do not use
 
 
 method     = monolithicGI # monolithicGE, monolithicGI
@@ -151,7 +151,7 @@ useExactJacobian = false # always false for linear structure model. Otherwise it
 
 [./physics]
 
-solidType = linearVenantKirchhof
+solidType = linearVenantKirchhof #NOTE: the nonlinear choice is not available (still in development)
 # either linearVenantKirchhof or nonLinearVenantKirchhof (the last one still in development)
 material_flag = 1
 # volume flag of the solid mesh
@@ -212,17 +212,160 @@ displayList        = false
 
 [../prec]
 reuse           = false
-prectype        = Ifpack
+prectype        = Composed
 rescale_factor = 1. # solid matrix rescale factor
-displayList     = false
-entry           = 0.
+displayList     = true
+entry           = 0.0
+
+1composedPrecType = Ifpack1 # used for the ComposedPreconditioner: each factor uses the corresponding
+                       # preconditioning strategy.
+2composedPrecType = ML2
+3composedPrecType = ML2
+4composedPrecType = Ifpack2
 
 [./robin]
 alphaf = 0.
 alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 
 
-[../ifpack] # if Ifpack
+
+[../ML1] # preconditioner for the first factor in case our choice was ML
+displayList = false
+[./ML]
+default_parameter_list = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+prec_type =  MGV # MGV
+    # one-level-postsmoothing , two-level-additive
+    # two-level-hybrid , two-level-hybrid2
+max_levels = 10
+inc_or_dec = increasing
+
+[./energy_minimization]
+enable = true
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+[../repartition]
+enable              = 1
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions = 3
+
+[../aggregation]
+type                = METIS
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+[../coarse]
+max_size            = 60
+type                = Amesos-KLU
+################
+
+[../smoother]
+type = IFPACK # IFPACK, Aztec
+pre_or_post = pre
+[../] # end of ML
+[../] # end of ML1
+
+
+
+
+[../ML2]  # preconditioner for the second factor in case our choice was ML
+[./ML]
+default_parameter_list = NSSA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+displayList = true
+prec_type = MGV # MGV, MGW
+          # one-level-postsmoothing , two-level-additive
+          # two-level-hybrid , two-level-hybrid2
+
+max_levels = 3
+inc_or_dec = increasing
+
+[./energy_minimization]
+enable = true
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+[../repartition]
+enable              = true
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions   = 3
+
+[../aggregation]
+type                = METIS
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+[../coarse]
+max_size            = 60
+#type                = Amesos-KLU
+################
+
+[../smoother]
+type = IFPACK # Aztec, IFPACK
+##pre_or_post = pre
+
+[../] # end of ML
+[../] # end of ML2
+
+
+
+
+[../Ifpack1]  # preconditioner for the first factor in case our choice was Ifpack
+prectype        = Amesos
+overlap         = 2
+
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+[../amesos]
+solvertype = Amesos_Umfpack
+
+[../partitioner]
+overlap = 2
+
+[../schwarz]
+reordering_type = none #metis, rcm, none
+flter_singletons = true
+
+[../] # Ifpack1
+
+
+
+[../Ifpack2]   # preconditioner for the second factor in case our choice was Ifpack
+prectype        = Amesos
+overlap         = 2
+
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+[../amesos]
+solvertype = Amesos_Umfpack
+
+[../partitioner]
+overlap = 2
+
+[../schwarz]
+reordering_type = none #metis, rcm, none
+flter_singletons = true
+
+[../] # Ifpack2
+
+
+
+[../ifpack] # if Ifpack, and if the preconditioner was not of type "Composed"
 prectype        = Amesos
 overlap         = 2
 
@@ -244,13 +387,38 @@ flter_singletons = true
 
 [../] # ifpack
 
-[../ML] #if ML
-default_parameter_list = DD    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
-prec_type = two-level-additive
-displayList		= false
+[../ML] #if ML, and if the preconditioner was not of type "Composed"
+default_parameter_list = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+prec_type = MGV # MGV
+max_levels = 2
 
-[./smoother]
-type = IFPACK
+[energy_minimization]
+enable = 0
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+[./repartition]
+enable              = 0
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions   = 3
+
+[../aggregation]
+type                = METIS
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+[../coarse]
+max_size            = 60
+## type                = Amesos-KLU
+################
+
+[../smoother]
+type = Ifpack
+pre_or_post = pre
 
 [../] # end if ML
 [../] # prec
