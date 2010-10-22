@@ -36,7 +36,7 @@
 namespace LifeV
 {
 
-ComposedPreconditioner::ComposedPreconditioner(const boost::shared_ptr<Epetra_Comm> comm):
+ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> comm):
     super (comm ),
     M_Prec(new prec_raw_type(comm)),
     M_OperVector(0)

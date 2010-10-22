@@ -78,7 +78,7 @@ public:
      */
     //@{
     //! default constructor.
-    ComposedPreconditioner( const boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
     ComposedPreconditioner( ComposedPreconditioner& P );
 

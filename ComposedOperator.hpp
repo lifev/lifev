@@ -366,7 +366,7 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     // P = M_P(0) * ... * M_P(Qp-1)
 
     ID k=0;
-    for (UInt q(M_Setted-1); q>=0 ; q--)
+    for (Int q(M_Setted-1); q>=0 ; q--)
     {
         if(M_Summed.size() && q==M_Summed[k])
         {
