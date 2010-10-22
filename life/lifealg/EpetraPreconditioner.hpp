@@ -128,6 +128,8 @@ public:
     void                    setList(Teuchos::ParameterList list);
     const Teuchos::ParameterList& getList(  ) const;
 
+    Teuchos::ParameterList& list(  ){return M_List;}
+
     //! Return if the preconditioner has been created
     /*!
      *  @return true if the preconditioner has been created.

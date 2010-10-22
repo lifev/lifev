@@ -69,6 +69,9 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
     M_precType = M_List.get("prec type", "undefined??");
     M_precType += "_ML";
 
+    // <one-level-postsmoothing> / <two-level-additive>
+    // <two-level-hybrid> / <two-level-hybrid2>
+
     M_Prec.reset(new prec_raw_type(*M_Oper, this->getList(), true));
 
     if (M_analyze)
