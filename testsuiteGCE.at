@@ -216,10 +216,8 @@ displayList     = true
 entry           = 0.0
 
 1composedPrecType = Ifpack1 # used for the ComposedPreconditioner: each factor uses the corresponding
-                            # preconditioning strategy.
-2composedPrecType = ML2
-3composedPrecType = ML2
-4composedPrecType = Ifpack2
+                       # preconditioning strategy.
+2composedPrecType = ML
 
 [./robin]
 alphaf = 0.
