@@ -70,10 +70,10 @@ ComposedPreconditioner::setDataFromGetPot( const GetPot& dataFile,
         std::string newSection(section);
         newSection = section + "/" + (i+1);
         //dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
-        std::string prectype = dataFile( (newSection + "composedPrecType" ).data(), "ML");
-        epetra_prec_type tmp(PRECFactory::instance().createObject( prectype ) );
+        std::string prectype = dataFile( ( newSection + "composedPrecType" ).data(), "ML" );
+        epetra_prec_type tmp( PRECFactory::instance().createObject( prectype ) );
         M_Prec->push_back(tmp);
-        M_Prec->P()[i]->createList(dataFile, section + "/" +  prectype , M_Prec->P()[i]->list());
+        M_Prec->P()[i]->createList(dataFile, section + "/" +  prectype + (i+1) , M_Prec->P()[i]->list());
     }
 }
 
