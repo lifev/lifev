@@ -54,16 +54,16 @@ namespace LifeV
 {
 //! ComposedPreconditioner -
 /*!
-    @author Simone Deparis, Paolo Crosetto
+  @author Simone Deparis, Paolo Crosetto
 
- * Class handling a preconditioner defined as a composition of operators. The class is templated
- * so that the operators that define the preconditioner can be general
- * (matrices, other preconditioners, other composed preconditioners, etc.).
- */
+  * Class handling a preconditioner defined as a composition of operators. The class is templated
+  * so that the operators that define the preconditioner can be general
+  * (matrices, other preconditioners, other composed preconditioners, etc.).
+  */
 
 template<typename Operator>
 class  ComposedOperator
-        : public Epetra_Operator
+    : public Epetra_Operator
 {
 
 public:
@@ -81,7 +81,7 @@ public:
        The constructor builds an empty chain of composed preconditioner.
        The resulting preconditioner shall be equal to the identity.
     */
-    ComposedOperator(const boost::shared_ptr<Epetra_Comm> comm );
+    ComposedOperator( const  boost::shared_ptr<Epetra_Comm>& comm );
 
     /**
        Copy constructor: it doesn't make a real copy of the operators, it just copy the list of shared pointer
@@ -155,7 +155,7 @@ public:
     //! Returns an estimation of the condition number
     /**
        the estimation is devised from an estimation on each factor with the rule \f$ K_{12}\leq K_1K_2 \f$
-     */
+    */
     double Condest() const;
 
     const char * Label() const;
@@ -227,30 +227,30 @@ protected:
 
 template <typename Operator>
 ComposedOperator<Operator>::ComposedOperator(const boost::shared_ptr<Epetra_Comm> comm)
-        :
-        M_P(),
-        M_Inverse(),
-        M_Transpose(),
-        M_Summed(),
-        M_Setted(0),
-        M_meanIter(0),
-        M_numCalled(0),
-        M_displayer(comm)
+    :
+    M_P(),
+    M_Inverse(),
+    M_Transpose(),
+    M_Summed(),
+    M_Setted(0),
+    M_meanIter(0),
+    M_numCalled(0),
+    M_displayer(comm)
 {
 }
 
 template <typename Operator>
 ComposedOperator<Operator>::ComposedOperator( const ComposedOperator<Operator>& P)
-        :
-        M_P(),
-        M_Inverse(P.getInverse()),
-        M_Transpose(P.getTranspose()),
-        M_Summed(P.getSummed()),
-        M_allTranspose(P.getAllTranspose()),
-        M_Setted(P.getNumber()),
-        M_meanIter(P.getMeanIter()),
-        M_numCalled(P.getNumCalled()),
-        M_displayer(P.getCommPtr())
+    :
+    M_P(),
+    M_Inverse(P.getInverse()),
+    M_Transpose(P.getTranspose()),
+    M_Summed(P.getSummed()),
+    M_allTranspose(P.getAllTranspose()),
+    M_Setted(P.getNumber()),
+    M_meanIter(P.getMeanIter()),
+    M_numCalled(P.getNumCalled()),
+    M_displayer(P.getCommPtr())
 {
     for (int i=0; i<M_Setted; ++i)
     {
