@@ -34,6 +34,8 @@
 // ===================================================
 //! User functions for the pressure equation
 // ===================================================
+namespace dataProblem
+{
 
 // Inverse of permeability matrix
 /* In this case the permeability matrix is
@@ -44,7 +46,8 @@ K = [2 1 0
 Matrix pressurePermeability( const Real& /*t*/,
                              const Real& x,
                              const Real& y,
-                             const Real& z )
+                             const Real& z,
+                             const std::vector<Real> & u )
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
@@ -81,15 +84,35 @@ Real pressureSource( const Real& /*t*/,
                      const Real& /*z*/,
                      const ID&  /*icomp*/)
 {
-    return -2.*x*x - 4.*y*y - 8.*x*y;
+    return 0.;
 }
 
 // Boundary condition of Dirichlet
-Real pressureDirichlet( const Real& /* t */,
-                        const Real& x,
-                        const Real& y,
-                        const Real& z,
-                        const ID&   /*icomp*/)
+Real pressureDirichlet1( const Real& /* t */,
+                         const Real& x,
+                         const Real& y,
+                         const Real& z,
+                         const ID&   /*icomp*/)
+{
+    return x*x*y*y + 6.*x + 5.*z;
+}
+
+// Boundary condition of Dirichlet
+Real pressureDirichlet2( const Real& /* t */,
+                         const Real& x,
+                         const Real& y,
+                         const Real& z,
+                         const ID&   /*icomp*/)
+{
+    return x*x*y*y + 6.*x + 5.*z;
+}
+
+// Boundary conditisaturationDirichletBDfunon of Dirichlet
+Real pressureDirichlet3( const Real& /* t */,
+                         const Real& x,
+                         const Real& y,
+                         const Real& z,
+                         const ID&   /*icomp*/)
 {
     return x*x*y*y + 6.*x + 5.*z;
 }
@@ -137,25 +160,25 @@ K = [p^2+2 1   0
      1     1   0
      0     0   2]
 */
-Matrix saturationPermeability( const Real& u,
-                               const Real& t,
+Matrix saturationPermeability( const Real& t,
                                const Real& x,
                                const Real& y,
-                               const Real& z )
+                               const Real& z,
+                               const std::vector<Real> & u )
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
     // First row
-    Real Entry00 = 1./(u*u + 1);
-    Real Entry01 = -1./(u*u + 1);
+    Real Entry00 = 1. / ( u[0] * u[0] + 1 );
+    Real Entry01 = -1. / ( u[0] * u[0] + 1 );
     Real Entry02 = 0.;
 
     // Second row
-    Real Entry11 = (u*u + 2)/(u*u + 1);
+    Real Entry11 = ( u[0] * u[0] + 2 ) / ( u[0] * u[0] + 1 );
     Real Entry12 = 0.;
 
     // Third row
-    Real Entry22 = 1./2.;
+    Real Entry22 = 1. / 2.;
 
     // Fill in of the inversePermeabilityMatrix
     inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
@@ -228,7 +251,7 @@ Real saturationSource( const Real& /*t*/,
                        const Real& /*z*/,
                        const ID&  /*icomp*/)
 {
-    return -2.*x*x - 4.*y*y - 8.*x*y;
+    return 0.;
 }
 
 // Initial condition
@@ -238,15 +261,35 @@ Real saturationInitialCondition( const Real& /* t */,
                                  const Real& z,
                                  const ID&   /*icomp*/ )
 {
-    return 1.;
+    return 0.;
 }
 
 // Boundary condition of Dirichlet
-Real saturationDirichlet( const Real& /* t */,
-                          const Real& x,
-                          const Real& y,
-                          const Real& z,
-                          const ID&   /*icomp*/)
+Real saturationDirichlet1( const Real& /* t */,
+                           const Real& x,
+                           const Real& y,
+                           const Real& z,
+                           const ID&   /*icomp*/)
+{
+    return x*x*y*y + 6.*x + 5.*z;
+}
+
+// Boundary condition of Dirichlet
+Real saturationDirichlet2( const Real& /* t */,
+                           const Real& x,
+                           const Real& y,
+                           const Real& z,
+                           const ID&   /*icomp*/)
+{
+    return x*x*y*y + 6.*x + 5.*z;
+}
+
+// Boundary condition of Dirichlet
+Real saturationDirichlet3( const Real& /* t */,
+                           const Real& x,
+                           const Real& y,
+                           const Real& z,
+                           const ID&   /*icomp*/)
 {
     return x*x*y*y + 6.*x + 5.*z;
 }
@@ -260,7 +303,7 @@ Real saturationNeumann( const Real& /* t */,
 {
 	switch(icomp){
   		case 1:   //! Dx
-            return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
+            return 0.;
 		break;
 		case 2:   //! Dy
             return 0.;
@@ -279,5 +322,7 @@ Real saturationMixte( const Real& /* t */,
                       const Real& z,
                       const ID&   /*icomp*/)
 {
-    return -2.*y*x*x - 2*x*y*y - 6. + x*x*y*y + 6.*x + 5.*z;
+    return 0.;
+}
+
 }

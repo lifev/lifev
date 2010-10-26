@@ -110,6 +110,8 @@ enum BCNAME
 // ===================================================
 //! User functions
 // ===================================================
+namespace dataProblem
+{
 
 // Analytical solution
 Real analyticalSolution( const Real& t,
@@ -147,25 +149,25 @@ K = [p^2+2 1   0
      1     1   0
      0     0   2]
 */
-Matrix nonLinearInversePermeability( const Real& primalOld,
-                                     const Real& t,
-                                     const Real& x,
-                                     const Real& y,
-                                     const Real& z )
+Matrix inversePermeability( const Real& t,
+                            const Real& x,
+                            const Real& y,
+                            const Real& z,
+                            const std::vector<Real> & u )
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
     // First row
-    Real Entry00 = 1./(primalOld*primalOld + 1);
-    Real Entry01 = -1./(primalOld*primalOld + 1);
+    Real Entry00 = 1. / ( u[0] * u[0] + 1 );
+    Real Entry01 = -1. / ( u[0] * u[0] + 1 );
     Real Entry02 = 0.;
 
     // Second row
-    Real Entry11 = (primalOld*primalOld + 2)/(primalOld*primalOld + 1);
+    Real Entry11 = ( u[0] * u[0] + 2) / ( u[0] * u[0] + 1);
     Real Entry12 = 0.;
 
     // Third row
-    Real Entry22 = 1./2.;
+    Real Entry22 = 1. / 2.;
 
     // Fill in of the inversePermeabilityMatrix
     inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
@@ -282,6 +284,7 @@ Real UZero( const Real& /* t */,
     return 0.;
 }
 
+}
 // ===================================================
 //! Private Members
 // ===================================================
@@ -294,10 +297,12 @@ struct darcy::Private
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>
                                      fct_type;
+
     // Policy for matrices
-    typedef boost::function<Matrix ( const Real&, const Real&, const Real&,
-                                     const Real&, const Real& )>
-                                     nonLinearMatrix_type;
+    typedef boost::function<Matrix ( const Real&, const Real&,
+                                     const Real&, const Real&,
+                                     const std::vector<Real>& )>
+                                     matrix_type;
 
     std::string    data_file_name;
     std::string    discretization_section;
@@ -309,36 +314,50 @@ struct darcy::Private
     fct_type getUOne()
     {
     	fct_type f;
-    	f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero()
     {
     	fct_type f;
-    	f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
     	return f;
     }
 
     fct_type getAnalyticalSolution()
     {
         fct_type f;
-        f = boost::bind( &analyticalSolution, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getAnalyticalFlux()
     {
         fct_type f;
-        f = boost::bind( &analyticalFlux, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::analyticalFlux, _1, _2, _3, _4, _5 );
         return f;
     }
 
-    nonLinearMatrix_type getNonLinearInversePermeability()
+    matrix_type getInversePermeability()
     {
-        nonLinearMatrix_type m;
-        m = boost::bind( &nonLinearInversePermeability, _1, _2, _3, _4, _5 );
+        matrix_type m;
+        m = boost::bind( &dataProblem::inversePermeability, _1, _2, _3, _4, _5 );
         return m;
+    }
+
+    fct_type getSource ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::source_in, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
+    fct_type getInitialPrimal ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::initialPrimal, _1, _2, _3, _4, _5 );
+        return f;
     }
 
 };
@@ -446,11 +465,12 @@ darcy::run()
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
    	BCFunctionMixte mixteBDfun;
 
-    dirichletBDfun.setFunction( dirichlet );
-	neumannBDfun1.setFunction( neumann1 );
-	neumannBDfun2.setFunction( neumann2 );
+    dirichletBDfun.setFunction ( dataProblem::dirichlet );
+	neumannBDfun1.setFunction  ( dataProblem::neumann1 );
+	neumannBDfun2.setFunction  ( dataProblem::neumann2 );
 	// dp/dn = first_parameter + second_parameter * p
-	mixteBDfun.setFunctions_Mixte( mixte, Members->getUOne() );
+	mixteBDfun.setFunctions_Mixte ( dataProblem::mixte,
+                                    Members->getUOne() );
 
 	BCHandler bcDarcy( 6 );
 
@@ -604,13 +624,17 @@ darcy::run()
     darcySolver.setup();
 
     // Set the initial primal variable
-    darcySolver.setInitialPrimal( initialPrimal );
+    darcySolver.setInitialPrimal( Members->getInitialPrimal() );
 
 	// Set the source term
-    darcySolver.setSourceTerm( source_in );
+    darcySolver.setSourceTerm( Members->getSource() );
+
+    // Create the inverse permeability
+    inversePermeability < RegionMesh > invPerm ( Members->getInversePermeability(),
+                                                 p_FESpace );
 
     // Set the inverse of the permeability
-    darcySolver.setNonLinearInversePermeability( Members->getNonLinearInversePermeability() );
+    darcySolver.setInversePermeability( invPerm );
 
     // Set the boudary conditions
     darcySolver.setBC( bcDarcy );

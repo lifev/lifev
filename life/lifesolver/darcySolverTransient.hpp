@@ -251,11 +251,7 @@ public:
 
     typedef typename DarcySolverPolicies::Function           Function;
 
-    typedef typename DarcySolverPolicies::permeability_type  permeability_type;
-
     typedef typename DarcySolverPolicies::data_type          data_type;
-
-    typedef typename DarcySolverPolicies::mesh_type          mesh_type;
 
     typedef typename DarcySolverPolicies::bchandler_raw_type bchandler_raw_type;
     typedef typename DarcySolverPolicies::bchandler_type     bchandler_type;
@@ -265,9 +261,6 @@ public:
 
     typedef typename DarcySolverPolicies::vector_type        vector_type;
     typedef typename DarcySolverPolicies::vector_ptrtype     vector_ptrtype;
-
-    typedef typename DarcySolverPolicies::prec_raw_type      prec_raw_type;
-    typedef typename DarcySolverPolicies::prec_type          prec_type;
 
     typedef typename DarcySolverPolicies::comm_type          comm_type;
     typedef typename DarcySolverPolicies::comm_ptrtype       comm_ptrtype;

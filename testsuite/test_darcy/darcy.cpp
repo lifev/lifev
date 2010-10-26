@@ -108,6 +108,8 @@ enum BCNAME
 // ===================================================
 //! User functions
 // ===================================================
+namespace dataProblem
+{
 
 // Analytical solution
 Real analyticalSolution( const Real&/*t*/,
@@ -148,7 +150,7 @@ K = [2 1 0
 Matrix inversePermeability( const Real& /*t*/,
                             const Real& x,
                             const Real& y,
-                            const Real& z )
+                            const Real& z, const std::vector<Real>& )
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
@@ -268,6 +270,7 @@ Real UZero( const Real& /* t */,
     return 0.;
 }
 
+}
 // ===================================================
 //! Private Members
 // ===================================================
@@ -279,12 +282,15 @@ struct darcy::Private
     // Policy for scalar functions
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>
-                                     fct_type;
+                                                   fct_type;
 
     // Policy for matrices
+    //  typedef boost::function<Matrix ( const Real&, const Real&,
+    //                                 const Real&, const Real& )>
     typedef boost::function<Matrix ( const Real&, const Real&,
-                                     const Real&, const Real& )>
-                                     matrix_type;
+                                     const Real&, const Real&,
+                                     const std::vector<Real> & )>
+                                                   matrix_type;
 
     std::string    data_file_name;
     std::string    discretization_section;
@@ -293,39 +299,46 @@ struct darcy::Private
 
     // Function Types
 
-    fct_type getUOne()
+    fct_type getUOne ( )
     {
     	fct_type f;
-    	f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
-    fct_type getUZero()
+    fct_type getUZero ( )
     {
     	fct_type f;
-    	f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
     	return f;
     }
 
-    fct_type getAnalyticalSolution()
+    fct_type getAnalyticalSolution ( )
     {
         fct_type f;
-        f = boost::bind( &analyticalSolution, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
         return f;
     }
 
-    fct_type getAnalyticalFlux()
+    fct_type getAnalyticalFlux ( )
     {
         fct_type f;
-        f = boost::bind( &analyticalFlux, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::analyticalFlux, _1, _2, _3, _4, _5 );
         return f;
     }
 
-    matrix_type getInversePermeability()
+    matrix_type getInversePermeability ( )
     {
         matrix_type m;
-        m = boost::bind( &inversePermeability, _1, _2, _3, _4 );
+        m = boost::bind( &dataProblem::inversePermeability, _1, _2, _3, _4 , _5 );
         return m;
+    }
+
+    fct_type getSource ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::source_in, _1, _2, _3, _4, _5 );
+        return f;
     }
 
 };
@@ -410,7 +423,7 @@ darcy::run()
     dataMesh.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr(new RegionMesh);
+    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
 
     // Set up the mesh
     readMesh( *fullMeshPtr, dataMesh );
@@ -434,11 +447,12 @@ darcy::run()
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
    	BCFunctionMixte mixteBDfun;
 
-    dirichletBDfun.setFunction( dirichlet );
-	neumannBDfun1.setFunction( neumann1 );
-	neumannBDfun2.setFunction( neumann2 );
+    dirichletBDfun.setFunction ( dataProblem::dirichlet );
+	neumannBDfun1.setFunction  ( dataProblem::neumann1 );
+	neumannBDfun2.setFunction  ( dataProblem::neumann2 );
 	// dp/dn = first_parameter + second_parameter * p
-	mixteBDfun.setFunctions_Mixte( mixte, Members->getUOne() );
+	mixteBDfun.setFunctions_Mixte( dataProblem::mixte,
+                                   Members->getUOne() );
 
 	BCHandler bcDarcy( 6 );
 
@@ -592,10 +606,14 @@ darcy::run()
     darcySolver.setup();
 
 	// Set the source term
-    darcySolver.setSourceTerm( source_in );
+    darcySolver.setSourceTerm( Members->getSource() );
+
+    // Create the inverse permeability
+    inversePermeability < RegionMesh > invPerm ( Members->getInversePermeability(),
+                                                 p_FESpace );
 
     // Set the inverse of the permeability
-    darcySolver.setInversePermeability( Members->getInversePermeability() );
+    darcySolver.setInversePermeability( invPerm );
 
     // Set the boudary conditions
     darcySolver.setBC( bcDarcy );

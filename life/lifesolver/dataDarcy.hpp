@@ -34,6 +34,7 @@
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifearray/tab.hpp>
 #include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/assemb.hpp>
 
 // LifeV namespace
 namespace LifeV
@@ -251,6 +252,100 @@ void DataDarcy<Mesh>::setup( const Data_Type& dataFile, const std::string& secti
 
     // Miscellaneous
     M_verbose      = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+template< typename Mesh,
+          typename SolverType = LifeV::SolverTrilinos >
+class inversePermeability
+{
+
+public:
+
+    // Policies.
+    //! @name Policies
+    //@{
+
+    typedef boost::function<Matrix ( const Real&, const Real&,
+                                     const Real&, const Real&,
+                                     const std::vector<Real> & )>
+                                                  permeability_type;
+
+    typedef typename SolverType::vector_type      vector_type;
+    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+
+    //@}
+
+    // Constructors and destructor.
+    //! @name Constructors and destructor
+    //@{
+
+    // Copy constructor
+    inversePermeability ( const permeability_type& invPerm, const FESpace<Mesh, EpetraMap>& fESpace ):
+        M_inversePermeability ( invPerm ),
+        M_fESpace             ( fESpace ),
+        M_fields              ( std::vector< const vector_ptrtype* >(0) ) {};
+
+    //! Virtual destructor.
+    // virtual ~inversePermeability ();
+
+    //@}
+
+    // Set methods
+    //! @name Set methods
+    //@{
+
+    // Add one field
+    inline void setField ( const vector_ptrtype & field ) { M_fields.push_back( &field ); };
+
+    inline void setFunction ( const permeability_type & invPerm ) { M_inversePermeability = invPerm; };
+
+    //@}
+
+    // Get methods
+    //! @name Get methods
+    //@{
+
+    Matrix operator() ( const Real& t, const Real& x, const Real& y, const Real& z );
+
+    //@}
+
+private:
+
+    // Vector of pointers for the dependences of the permeability to an external field.
+    std::vector< const vector_ptrtype* > M_fields;
+
+    // Inverse permeability function
+    permeability_type             M_inversePermeability;
+
+    // Finite element space
+    const FESpace<Mesh, EpetraMap>&     M_fESpace;
+
+};
+
+template < typename Mesh, typename SolverType >
+Matrix
+inversePermeability < Mesh, SolverType >::
+operator() ( const Real& t, const Real& x, const Real& y, const Real& z )
+{
+    std::vector<Real> values ( M_fields.size(), 0 );
+    ElemVec value ( M_fESpace.refFE().nbDof(), 1 );
+
+    for ( UInt i(static_cast<UInt>(0)); i < values.size(); ++i )
+    {
+        extract_vec ( *( *(M_fields)[i] ),
+                      value,
+                      M_fESpace.refFE(),
+                      M_fESpace.dof(),
+                      M_fESpace.fe().currentLocalId(), 0 );
+
+        values[i] = value[0];
+
+    }
+
+    return M_inversePermeability ( t, x, y, z, values );
 }
 
 }
