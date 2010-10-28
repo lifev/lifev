@@ -94,9 +94,9 @@ public:
                const UInt& indz = 0 ) const;
 
     //! Second derivative tensor d2Si/(dxj dxk)
-    Real diff2( const Real& _U1, const Real& _U2,
-                const ID& ii,    const ID& jj, const ID& kk,
-                const UInt& indz = 0 ) const;
+//    Real diff2( const Real& _U1, const Real& _U2,
+//                const ID& ii,    const ID& jj, const ID& kk,
+//                const UInt& indz = 0 ) const;
 
     //! Sql = [Sql1, Sql2]^T
     /*!
@@ -109,9 +109,8 @@ public:
      *
      *  \param indz : is the index position for the parameter
      */
-    Real QuasiLinearSource( const Real& _U1, const Real& _U2,
-                            const ID& ii,
-                            const UInt& indz = 0 ) const ;
+    Real interpolatedQuasiLinearSource( const Real& _U1, const Real& _U2,
+                                        const ID& ii,    const Container2D_Type& bcNodes, const Real& cfl ) const ;
 
     //@}
 

@@ -133,7 +133,7 @@ OneDimensionalModel_Solver::buildConstantMatrices()
     // In the classical case the linear system use a mass matrix (with Dirichlet BC)
     Matrix_PtrType matrFull( new Matrix_Type( *M_massMatrix ));
     updateBCDirichletMatrix( *matrFull );
-    M_linearSolver->setMatrix(*matrFull);
+    M_linearSolver->setMatrix( *matrFull );
 }
 
 void
@@ -192,7 +192,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
 void
 OneDimensionalModel_Solver::computeW1W2( Solution_Type& solution )
 {
-    for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
+    for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
     {
         M_Physics->W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
                              (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1], ielem);
@@ -384,7 +384,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
         Debug( 6310 ) << "[OneDimensionalModel_Solver::initialize] O- A0 = " << u10 << "\n";
         Debug( 6310 ) << "[OneDimensionalModel_Solver::initialize] O- Q0 = " << u20 << "\n";
 
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
+        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
         {
             (*solution["A"])[ielem + 1] = u10;
             (*solution["Q"])[ielem + 1] = u20;
@@ -402,7 +402,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
         (*solution["W2"]) = Vector_Type( M_FESpace->map() );
         (*solution["W2"]) = u20;
 
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ielem++ )
+        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
             M_Physics->U_from_W( (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1],
                                  (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
                                    ielem + 1 ); // WARNING the +1 is not debugged yet (GF 12/2009)
@@ -429,7 +429,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Vector_Ty
     (*solution["A"]) = u10;
     (*solution["Q"]) = u20;
 
-    for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
+    for (UInt ielem=0; ielem <= M_FESpace->dim() ; ++ielem )
     {
         M_Physics->W_from_U( (*solution["W1"])[ielem], (*solution["W2"])[ielem],
                              (*solution["A"])[ielem], (*solution["Q"])[ielem], ielem );
@@ -451,7 +451,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u20
     (*solution["Q"]) = Vector_Type( M_FESpace->map() );
     (*solution["Q"]) = u20;
 
-    for (UInt ielem = 0; ielem <= M_FESpace->dim() ; ielem++ )
+    for (UInt ielem = 0; ielem <= M_FESpace->dim() ; ++ielem )
     {
         (*solution["A"])[ielem]=M_Physics->Data()->Area0(ielem);
         M_Physics->W_from_U( (*solution["W1"])[ielem], (*solution["W2"])[ielem],
@@ -540,8 +540,9 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
         Real lambda1_minus = 0.;
         Real lambda2_minus = 0.;
 
-        Real eigval1, eigval2;
-        Real tmp11, tmp12, tmp21, tmp22;
+        Container2D_Type eigenvalues;
+        Container2D_Type leftEigenvector1;
+        Container2D_Type leftEigenvector2;
 
         //Real deltaX = M_FESpace->mesh()->edgeList( 1 ).point(1).x() - M_FESpace->mesh()->edgeList( 1 ).point(2).x();
         Real delta  = - std::sqrt( ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).x() ) *
@@ -563,36 +564,37 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
                                M_rhs[0][M_FESpace->dim()-1], M_rhs[1][M_FESpace->dim()-1],
                                M_FESpace->dim() - 1 );
 
-        for ( UInt ii=1; ii < (M_FESpace->dim()-1) ; ii++ )
+        for ( UInt ii=1; ii < (M_FESpace->dim()-1) ; ++ii )
         {
             // compute the eigenvalues at node
             Ainode = (*solution["A"])( ii );
             Qinode = (*solution["Q"])( ii );
-            M_Flux->jacobian_EigenValues_Vectors( Ainode, Qinode,
-                                                  eigval1, eigval2,
-                                                  tmp11, tmp12,
-                                                  tmp21, tmp22,
-                                                  ii );
+            M_Flux->EigenValuesEigenVectors( Ainode, Qinode,
+                                             eigenvalues,
+                                             leftEigenvector1,
+                                             leftEigenvector2,
+                                             ii - 1 );
 
-            lambda1_plus  = std::max<Real>( eigval1, 0. );
-            lambda1_minus = std::min<Real>( eigval1, 0. );
-            lambda2_plus  = std::max<Real>( eigval2, 0. );
-            lambda2_minus = std::min<Real>( eigval2, 0. );
+            lambda1_plus  = std::max<Real>( eigenvalues[0], 0. );
+            lambda1_minus = std::min<Real>( eigenvalues[0], 0. );
+            lambda2_plus  = std::max<Real>( eigenvalues[1], 0. );
+            lambda2_minus = std::min<Real>( eigenvalues[1], 0. );
+
             // update the solution for the next time step
             W1_UW[ii] = (*solution["W1"])[ii]
                       - (TimeStep / delta)  * lambda1_plus  * ( (*solution["W1"])[ii]   - (*solution["W1"])[ii-1])
                       - (TimeStep / delta)  * lambda1_minus * ( (*solution["W1"])[ii+1] - (*solution["W1"])[ii])
-                      -  TimeStep * ( tmp11 * M_SourceVector[0][ii] + tmp12 * M_SourceVector[1][ii] );
+                      -  TimeStep * ( leftEigenvector1[0] * M_SourceVector[0][ii] + leftEigenvector1[1] * M_SourceVector[1][ii] );
             W2_UW[ii] = (*solution["W2"])[ii]
                       - (TimeStep / delta)  * lambda2_plus  * ( (*solution["W2"])[ii]   - (*solution["W2"])[ii-1])
                       - (TimeStep / delta)  * lambda2_minus * ( (*solution["W2"])[ii+1] - (*solution["W2"])[ii])
-                      -  TimeStep * ( tmp21 * M_SourceVector[0][ii] + tmp22 * M_SourceVector[1][ii] );
+                      -  TimeStep * ( leftEigenvector2[0] * M_SourceVector[0][ii] + leftEigenvector2[1] * M_SourceVector[1][ii] );
         }
 
         (*solution["W1"]) = W1_UW;
         (*solution["W2"]) = W2_UW;
 
-        for (UInt ielem=0; ielem <= M_FESpace->dim() ; ielem++ )
+        for (UInt ielem=0; ielem <= M_FESpace->dim() ; ++ielem )
             M_Physics->U_from_W( (*solution["A"])[ielem], (*solution["Q"])[ielem],
                                  (*solution["W1"])[ielem], (*solution["W2"])[ielem],
                                  ielem );
@@ -648,25 +650,23 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
 Real
 OneDimensionalModel_Solver::ComputeCFL( const Solution_Type& solution, const Real& timeStep ) const
 {
-    Real CFL = 0.;
-
     Real lambdaMax = 0.;
 
-    Real eigval1, eigval2;
-    Real tmp11, tmp12, tmp21, tmp22;
+    Container2D_Type eigenvalues;
+    Container2D_Type leftEigenvector1;
+    Container2D_Type leftEigenvector2;
 
-    for ( UInt inode(1); inode <= M_FESpace->dim() ; ++inode )
+    for ( UInt inode(0); inode < M_FESpace->dim() ; ++inode )
     {
         // compute the eigenvalues at node
-        M_Flux->jacobian_EigenValues_Vectors( (*solution.find("A")->second)( inode ),
-                                              (*solution.find("Q")->second)( inode ),
-                                              eigval1, eigval2,
-                                              tmp11, tmp12, tmp21, tmp22, inode );
+        M_Flux->EigenValuesEigenVectors( (*solution.find("A")->second)( inode + 1 ),
+                                         (*solution.find("Q")->second)( inode + 1 ),
+                                           eigenvalues, leftEigenvector1, leftEigenvector2, inode );
 
-        lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigval1), std::fabs(eigval2) ), lambdaMax );
+        lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigenvalues[0]), std::fabs(eigenvalues[1]) ), lambdaMax );
     }
 
-    return CFL = lambdaMax * timeStep / M_FESpace->mesh()->minH();
+    return lambdaMax * timeStep / M_FESpace->mesh()->minH();
 }
 
 /*
@@ -804,7 +804,7 @@ OneDimensionalModel_Solver::seekpFileBuffers()
 {
     std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator iter;
 
-    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); iter++ )
+    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter )
         (*iter).second->seekp( M_post_process_buffer_offset[(*iter).first] );
 }
 
@@ -813,7 +813,7 @@ OneDimensionalModel_Solver::tellpFileBuffers()
 {
     std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator iter;
 
-    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); iter++ )
+    for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter )
         M_post_process_buffer_offset[(*iter).first] = (*iter).second->tellp();
 }
 
@@ -1035,22 +1035,20 @@ OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& 
     switch( bcSide )
     {
         case OneD_left:
-            boundaryDof = 1;
+            boundaryDof = 0;
         break;
         case OneD_right:
-            boundaryDof = M_Flux->Physics()->Data()->NumberOfElements() + 1;
+            boundaryDof = M_Flux->Physics()->Data()->NumberOfElements();
         break;
         default:
             std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
         return;
     }
 
-    M_Flux->jacobian_EigenValues_Vectors( (*solution.find("A")->second)( boundaryDof ),
-                                          (*solution.find("Q")->second)( boundaryDof ),
-                                          eigenvalues[0],      eigenvalues[1],
-                                          leftEigenvector1[0], leftEigenvector1[1],
-                                          leftEigenvector2[0], leftEigenvector2[1],
-                                          boundaryDof );
+    M_Flux->EigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof ),
+                                     (*solution.find("Q")->second)( boundaryDof ),
+                                      eigenvalues, leftEigenvector1, leftEigenvector2,
+                                      boundaryDof );
 }
 
 // ===================================================
@@ -1061,7 +1059,7 @@ OneDimensionalModel_Solver::updateFlux( const Solution_Type& solution )
 {
     Real Aii, Qii;
 
-    for ( UInt ii = 1; ii <= M_FESpace->dim() ; ii++ )
+    for ( UInt ii = 1; ii <= M_FESpace->dim() ; ++ii )
     {
         Aii = (*solution.find("A")->second)( ii );
         Qii = (*solution.find("Q")->second)( ii );
@@ -1082,7 +1080,7 @@ OneDimensionalModel_Solver::updateFluxDer( const Solution_Type& solution )
     Real Aiip1, Qiip1;
     UInt ii, iip1;
 
-    for ( UInt ielem = 0; ielem < M_FESpace->dim() - 1; ielem++ )
+    for ( UInt ielem = 0; ielem < M_FESpace->dim() - 1; ++ielem )
     {
         // for P1Seg and appropriate mesh only!
         ii    = ielem;      // left node of current element
@@ -1112,7 +1110,7 @@ OneDimensionalModel_Solver::updateSource( const Solution_Type& solution )
 {
     Real Aii, Qii;
 
-    for ( UInt ii = 1; ii <= M_FESpace->dim() ; ii++ )
+    for ( UInt ii = 1; ii <= M_FESpace->dim() ; ++ii )
     {
         Aii = (*solution.find("A")->second)( ii );
         Qii = (*solution.find("Q")->second)( ii );
@@ -1133,7 +1131,7 @@ OneDimensionalModel_Solver::updateSourceDer( const Solution_Type& solution )
     Real Aiip1, Qiip1;
     UInt ii, iip1;
 
-    for ( UInt ielem=0; ielem < M_FESpace->dim() - 1 ; ielem++ )
+    for ( UInt ielem=0; ielem < M_FESpace->dim() - 1 ; ++ielem )
     {
         // for P1Seg and appropriate mesh only!
         ii = ielem;        // left node of current element
@@ -1169,14 +1167,14 @@ OneDimensionalModel_Solver::updateMatrices()
     }
 
     // Elementary computation and matrix assembling
-    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); iedge++)
+    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
     {
         // update the current element
         M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
 
-        for(UInt ii = 1; ii <= 2; ii ++)
+        for(UInt ii = 1; ii <= 2; ++ii)
         {
-            for(UInt jj = 1; jj <= 2; jj ++)
+            for(UInt jj = 1; jj <= 2; ++jj)
             {
                 // update the M_coeff*
                 updateMatrixCoefficients( ii , jj, iedge);
@@ -1351,7 +1349,7 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const Vector_Type& flux )
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); iedge++)
+    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
     {
         // set the elementary matrices to 0.
         _elmatMassLHS. zero();
@@ -1449,7 +1447,7 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const Vector_Type& flux,
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); iedge++)
+    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
     {
         // set the elementary matrices to 0.
         _elmatMassLHS.zero();
@@ -1568,7 +1566,7 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); iedge++)
+    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
     {
         inode = iedge - 1;
 
@@ -1679,7 +1677,7 @@ OneDimensionalModel_Solver::_compute_d2Q_dx2( const ScalVec& flux )
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); iedge++){
+    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge){
 
         // set the elementary matrices to 0.
         _elmatMassLHS *= 0.;
