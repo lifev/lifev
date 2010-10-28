@@ -33,9 +33,9 @@ namespace LifeV {
 
 IfpackPreconditioner::IfpackPreconditioner():
         super (),
+        M_Prec(),
         M_overlapLevel(0),
-        M_Oper(),
-        M_Prec()
+        M_Oper()
 {
 }
 
@@ -43,9 +43,9 @@ IfpackPreconditioner::~IfpackPreconditioner()
 {}
 
 void
-IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
+IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                          const std::string& section,
-                                         const UInt listNumber)
+                                         const UInt&        /*listNumber*/ )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
@@ -106,7 +106,7 @@ IfpackPreconditioner::precReset()
 void
 IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
                   const std::string&         section,
-                  Teuchos::ParameterList&    list)
+                  list_Type&    list)
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters

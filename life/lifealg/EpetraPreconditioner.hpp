@@ -1,57 +1,53 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV library
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
+               2006-2010 EPFL, Politecnico di Milano
 
-  Author(s): Simone Deparis <simone.deparis@epfl.ch>
-       Date: 2006-11-09
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2006 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+************************************************************************
 */
-/**
-   \file EpetraPreconditioner.hpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \date 2006-11-09
- */
+//@HEADER
 
+/*!
+ *  @file
+ *  @brief Epetra preconditioner
+ *
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *  @date 09-11-2006
+ */
 
 #ifndef _EPETRAPRECONDITIONER_HPP_
 #define _EPETRAPRECONDITIONER_HPP_
 
+#include <boost/shared_ptr.hpp>
+
+#include <Teuchos_ParameterList.hpp>
 
 #include <life/lifecore/factory.hpp>
 #include <life/lifecore/singleton.hpp>
-
-
-#include <boost/shared_ptr.hpp>
-
-#include <Ifpack_config.h>
-#include <Ifpack.h>
-#include <Ifpack_Preconditioner.h>
-#include <Ifpack_AdditiveSchwarz.h>
-#include <Ifpack_Amesos.h>
-#include <Ifpack_ILU.h>
-
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/displayer.hpp>
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
-namespace LifeV
-{
+namespace LifeV {
 
 // Forward declaration
 class SolverTrilinos;
@@ -60,103 +56,139 @@ class EpetraPreconditioner
 {
 public:
 
-    /** @name Typedefs
-     */
+    //! @name Typedefs
     //@{
+
     typedef Epetra_Operator                      prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
 
     typedef EpetraMatrix<double>                 operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type> operator_type;
+
+    typedef Displayer::comm_Type                 comm_Type;
+    typedef Displayer::comm_PtrType              comm_PtrType;
+
+    typedef Teuchos::ParameterList               list_Type;
+
     //@}
 
 
-    /** @name Constructors, destructor
-     */
+    //! @name Constructors & Destructor
     //@{
-    //! default constructor.
-    EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+
+    //! Default constructor.
+    EpetraPreconditioner( const comm_PtrType& comm = comm_PtrType() );
 
     /** Copy constructor*/
-    EpetraPreconditioner(EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm = comm_PtrType() );
 
-    //! default virtual destructor
+    //! Default virtual destructor
     virtual ~EpetraPreconditioner();
 
     //@}
 
 
-    /** @name  Methods
-     */
+    //! @name Methods
+    //@{
 
-    virtual void            setDataFromGetPot ( const GetPot& dataFile, const std::string& section, const UInt listNumber=1 ) = 0;
+    virtual void createList( const GetPot& dataFile, const std::string& section, list_Type& list);
 
-    virtual double          Condest() = 0;
-
-    /** Get a standard pointer to the preconditioner. In most of the cases is more safe to use getPrecPtr(), which
-     returns a boost::shared_ptr*/
-    virtual prec_raw_type*  getPrec() = 0;
-
-    /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
-     it must derive from the Epetra_Operator object*/
-    virtual prec_type       getPrecPtr()=0;
-
-    //! Return the type name of the preconditioner.
+    //! Build the preconditioner
     /*!
-     *  @return type of the preconditioner
+     *  @param A the base matrix for computing the preconditioner
      */
-    virtual std::string     precType() = 0;
+    virtual int buildPreconditioner( operator_type& A ) = 0;
 
-    virtual int             buildPreconditioner(operator_type& A) = 0;
+    virtual void precReset() = 0;
 
-    virtual void            precReset() = 0;
+    //! Compute the condition number of the preconditioner
+    /*!
+     *  @return Condition number of the preconditioner
+     */
+    virtual double Condest() = 0;
 
-    //! returns true if prec exists
-    /*const*/
-    virtual bool            set() const = 0;
+    //@}
 
-    virtual void            setSolver( SolverTrilinos& /*solver*/ ) {}
 
-    virtual int            SetUseTranspose( const bool useTranspose=false ) =0;
-    virtual bool            UseTranspose(  ) =0;
-    virtual int             ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const =0;
-    virtual int             Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const =0;
-    virtual const Epetra_Map & OperatorRangeMap() const = 0;
-    virtual const Epetra_Map & OperatorDomainMap() const = 0;
+    //! @name Epetra Operator Interface Methods
+    //@{
 
-    // Teuchos list management
-    void                    setList(Teuchos::ParameterList list);
-    const Teuchos::ParameterList& getList(  ) const;
+    virtual int SetUseTranspose( const bool useTranspose = false );
 
-    Teuchos::ParameterList& list(  ){return M_List;}
+    virtual int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+
+    virtual int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+
+    virtual bool UseTranspose();
+
+    virtual const Epetra_Map& OperatorRangeMap() const;
+
+    virtual const Epetra_Map& OperatorDomainMap() const;
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    void setList( const list_Type& list );
+
+    virtual void setDataFromGetPot ( const GetPot& dataFile, const std::string& section, const UInt& listNumber=1 ) = 0;
+
+    virtual void setSolver( SolverTrilinos& /*solver*/ );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
 
     //! Return if the preconditioner has been created
     /*!
      *  @return true if the preconditioner has been created.
      */
-    bool preconditionerCreated();
+    const bool& preconditionerCreated();
 
-    virtual void createList( const GetPot&              dataFile,
-                             const std::string&         section,
-                             Teuchos::ParameterList&    list)
-    {createPreconditionerList(dataFile, section, list);}
+    //! Preconditioner is set?
+    /*!
+     *  @return true
+     */
+    virtual bool set() const = 0;
+
+    /** Get a standard pointer to the preconditioner. In most of the cases is more safe to use getPrecPtr(), which
+     returns a boost::shared_ptr*/
+    virtual prec_raw_type* getPrec() = 0;
+
+    /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
+     it must derive from the Epetra_Operator object*/
+    virtual prec_type getPrecPtr() = 0;
+
+    //! Return the type name of the preconditioner.
+    /*!
+     *  @return type of the preconditioner
+     */
+    virtual std::string precType() = 0;
+
+    const list_Type& getList() const;
+
+    list_Type& list();
+
+    //@}
 
 protected:
 
     std::string                         M_precType;
     Displayer                           M_displayer;
-    Teuchos::ParameterList              M_List;
+    list_Type                           M_List;
     bool                                M_preconditionerCreated;
 
 private:
 
-    static void createPreconditionerList( const GetPot&              dataFile,
-                                          const std::string&         section,
-                                          Teuchos::ParameterList&    list){};
+    static void createPreconditionerList( const GetPot& dataFile, const std::string& section, list_Type& list) {};
 
 };
 
-typedef singleton<factory<EpetraPreconditioner,  std::string> > PRECFactory;
+typedef singleton<factory<EpetraPreconditioner, std::string> > PRECFactory;
 
 } // namespace LifeV
 

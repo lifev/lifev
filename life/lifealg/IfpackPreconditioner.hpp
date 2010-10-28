@@ -84,7 +84,7 @@ public:
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
 					                           const std::string& section,
-                                               UInt listNumber=0);
+                                               const UInt&        listNumber = 0 );
 
     double                 Condest ();
 
@@ -103,12 +103,12 @@ public:
 
     virtual void createList( const GetPot&              dataFile,
                              const std::string&         section,
-                             Teuchos::ParameterList&    list)
+                             list_Type&    list)
     {createIfpackList(dataFile, section, list);}
 
     static void createIfpackList( const GetPot&              dataFile,
                                           const std::string&         section,
-                                          Teuchos::ParameterList&    list);
+                                          list_Type&    list);
 
     const int&
     getOverlapLevel() const

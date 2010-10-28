@@ -1,49 +1,58 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV library
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
+               2006-2010 EPFL, Politecnico di Milano
 
-  Author(s): Simone Deparis <simone.deparis@epfl.ch>
-       Date: 2006-11-09
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2006 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+************************************************************************
 */
-/**
-   \file EpetraPreconditioner.cpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \date 2006-11-09
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief Epetra preconditioner
+ *
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *  @date 09-11-2006
  */
 
 #include "EpetraPreconditioner.hpp"
 
 namespace LifeV {
 
-EpetraPreconditioner::EpetraPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm):
-    M_precType("EpetraPreconditioner"),
-    M_displayer(comm),
-    M_List(),
-    M_preconditionerCreated( false )
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+EpetraPreconditioner::EpetraPreconditioner( const comm_PtrType& comm ):
+    M_precType              ( "EpetraPreconditioner" ),
+    M_displayer             ( comm ),
+    M_List                  (),
+    M_preconditionerCreated ( false )
 {
 }
 
-EpetraPreconditioner::EpetraPreconditioner(  EpetraPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
-    M_precType(P.M_precType),
-    M_displayer(comm),
-    M_List(P.getList()),
-    M_preconditionerCreated( P.M_preconditionerCreated )
+EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm):
+    M_precType              ( P.M_precType ),
+    M_displayer             ( comm ),
+    M_List                  ( P.getList() ),
+    M_preconditionerCreated ( P.M_preconditionerCreated )
 {
 }
 
@@ -51,19 +60,95 @@ EpetraPreconditioner::~EpetraPreconditioner()
 {
 }
 
+// ===================================================
+// Methods
+// ===================================================
 void
-EpetraPreconditioner::setList(Teuchos::ParameterList list)
+EpetraPreconditioner::createList( const GetPot&                 dataFile,
+                                  const std::string&            section,
+                                        list_Type& list )
+{
+    createPreconditionerList( dataFile, section, list );
+}
+
+// ===================================================
+// Epetra Operator Interface Methods
+// ===================================================
+int
+EpetraPreconditioner::SetUseTranspose( const bool /*useTranspose=false*/ )
+{
+    assert( false );
+    return 0;
+}
+
+int
+EpetraPreconditioner::Apply( const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/ ) const
+{
+    assert( false );
+    return 0;
+}
+
+int
+EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/ ) const
+{
+    assert( false );
+    return 0;
+}
+
+bool
+EpetraPreconditioner::UseTranspose()
+{
+    assert( false );
+    return false;
+}
+
+const Epetra_Map&
+EpetraPreconditioner::OperatorRangeMap() const
+{
+    assert( false );
+    Epetra_Map *emptyMapPtr( NULL );
+    return *emptyMapPtr;
+}
+
+const Epetra_Map&
+EpetraPreconditioner::OperatorDomainMap() const
+{
+    assert( false );
+    Epetra_Map *emptyMapPtr( NULL );
+    return *emptyMapPtr;
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+EpetraPreconditioner::setList( const list_Type& list )
 {
     M_List = list;
 }
 
-const Teuchos::ParameterList&
-EpetraPreconditioner::getList( ) const
+void
+EpetraPreconditioner::setSolver( SolverTrilinos& /*solver*/ )
+{
+    assert( false );
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+const EpetraPreconditioner::list_Type&
+EpetraPreconditioner::getList() const
 {
     return M_List;
 }
 
-bool
+EpetraPreconditioner::list_Type&
+EpetraPreconditioner::list()
+{
+    return M_List;
+}
+
+const bool&
 EpetraPreconditioner::preconditionerCreated()
 {
     return M_preconditionerCreated;

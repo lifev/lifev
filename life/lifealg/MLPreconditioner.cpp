@@ -44,7 +44,7 @@ MLPreconditioner::~MLPreconditioner()
 void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
                                      const std::string&     section,
-                                     const UInt listNumber)
+                                     const UInt&            /*listNumber*/ )
 {
         bool found;
         M_analyze = dataFile((section + "/ML/analyze_smoother").data(), false, found);
@@ -53,7 +53,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
 
         std::string CT;
 
-        Teuchos::ParameterList& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
+        list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
         IfpackPreconditioner::createIfpackList(dataFile, section, SmootherIFSubList);
 }
 
@@ -123,7 +123,7 @@ MLPreconditioner::precReset()
 void
 MLPreconditioner::createMLList( const GetPot&              dataFile,
                                 const std::string&         section,
-                                Teuchos::ParameterList&    list)
+                                list_Type&    list)
 {
     list.setName("ML paramters list");
 

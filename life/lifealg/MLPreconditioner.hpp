@@ -91,7 +91,7 @@ public:
 
     void                    setDataFromGetPot ( const GetPot&      dataFile,
                                                 const std::string& section,
-                                                const UInt listnumber = 0);
+                                                const UInt&        listnumber = 0 );
 
     double                  Condest ();
 
@@ -112,13 +112,13 @@ public:
 
     virtual void createList( const GetPot&              dataFile,
                              const std::string&         section,
-                             Teuchos::ParameterList&    list)
+                             list_Type&    list)
     {createMLList(dataFile, section, list);}
 
 
     static void createMLList( const GetPot&              dataFile,
                             const std::string&         section,
-                            Teuchos::ParameterList&    list);
+                            list_Type&    list);
 
     int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
     bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
@@ -141,7 +141,7 @@ public:
 
 protected:
 
-    Teuchos::ParameterList  M_IFPACKSubList;
+    list_Type  M_IFPACKSubList;
 
 private:
 
