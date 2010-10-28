@@ -75,7 +75,6 @@ FSISolver::setData( const data_PtrType& data )
     if( ( data->method().compare("monolithicGE") && data->method().compare("monolithicGI") ) )
 	{
 		MPI_Group  originGroup, newGroup;
-		MPI_Comm   newComm;
 		MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
 
 		if ( numtasks == 1 )
