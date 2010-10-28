@@ -1137,7 +1137,7 @@ template <typename GEOSHAPE, typename MC>
 const Real
 RegionMesh1D<GEOSHAPE, MC>::edgeLength( const ID& i ) const
 {
-    ASSERT_BD( i > 0 && i <= edgeList.size() );
+    ASSERT_BD( i >= 0 && i < edgeList.size() );
 
     Real deltaX, deltaY, deltaZ;
 
