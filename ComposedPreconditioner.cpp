@@ -57,9 +57,9 @@ ComposedPreconditioner::~ComposedPreconditioner()
 
 
 void
-ComposedPreconditioner::setDataFromGetPot( const GetPot& dataFile,
-                                       const std::string& section,
-                                       const UInt listNumber)
+ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+                                           const std::string& section,
+                                           const UInt&        listNumber)
 {
     //M_List.resize(listNumber);
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
