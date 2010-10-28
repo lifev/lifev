@@ -35,11 +35,6 @@
 #ifndef MS_Algorithm_Explicit_H
 #define MS_Algorithm_Explicit_H 1
 
-#include <life/lifealg/SolverTrilinos.hpp>
-
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
-
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 
 namespace LifeV {
