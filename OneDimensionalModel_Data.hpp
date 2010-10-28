@@ -43,7 +43,7 @@
 // LIFEV
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <lifemc/lifemesh/regionMesh1D.hpp>
+#include <life/lifemesh/regionMesh1D.hpp>
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
@@ -327,7 +327,7 @@ private:
     /*!
      * Useful for tapering.
      */
-    void linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue );
+    void linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea = false );
 
     //! Compute the derivatives of alpha, area0, beta0, and beta1 using centered differences.
     /*!

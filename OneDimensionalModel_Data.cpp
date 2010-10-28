@@ -262,7 +262,7 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
             linearInterpolation( M_FrictionKr, dataFile, section + "/PhysicalParameters/Kr", 1. );
 
             linearInterpolation( M_Area0, dataFile, section + "/PhysicalParameters/Area0", M_PI );
-            linearInterpolation( M_Alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_RobertsonCorrection );
+            linearInterpolation( M_Alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_RobertsonCorrection, true );
             linearInterpolation( M_Beta0, dataFile, section + "/PhysicalParameters/Beta0", 1.e6 );
             linearInterpolation( M_Beta1, dataFile, section + "/PhysicalParameters/Beta1", 0.5 );
 
@@ -549,6 +549,7 @@ void
 OneDimensionalModel_Data::showMe( std::ostream& output ) const
 {
     // Model
+    //output << std::scientific << std::setprecision(15);
     output << "\n*** Values for data [Model]\n\n";
     output << "Physics Type           = " << Enum2String( M_PhysicsType, OneDimensionalModel_PhysicsMap ) << std::endl;
     output << "Flux Type              = " << Enum2String( M_FluxType,    OneDimensionalModel_FluxMap    ) << std::endl;
@@ -917,6 +918,8 @@ OneDimensionalModel_Data::InertialModulus() const
 const Real&
 OneDimensionalModel_Data::RobertsonCorrection() const
 {
+    if ( M_RobertsonCorrection != 1. )
+        std::cout << "!!! WARNING: Robertson corretion has not been checked in this version of the code !!!" << std::endl;
     return M_RobertsonCorrection;
 }
 
@@ -1075,20 +1078,23 @@ OneDimensionalModel_Data::Source22( const UInt& i ) const
 // Private methods
 // ===================================================
 void
-OneDimensionalModel_Data::linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue )
+OneDimensionalModel_Data::linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea )
 {
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
-    Real xa =  M_Mesh->firstPoint().x();
-    Real xb =  M_Mesh->lastPoint().x();
+//    Real xa =  M_Mesh->firstPoint().x();
+//    Real xb =  M_Mesh->lastPoint().x();
 
     // Note: due to offset numeration start from 1
-    for ( UInt i(1); i <= M_Mesh->numPoints() ; ++i )
-        vector[i-1] = a + ( b - a ) / ( xb - xa ) * ( M_Mesh->point(i).x() - xa );
+//    for ( UInt i(1); i <= M_Mesh->numPoints() ; ++i )
+//        vector[i-1] = a + ( b - a ) / ( xb - xa ) * ( M_Mesh->point(i).x() - xa );
 
-    // linearInterpolation temporary disabled!
-    //for ( UInt i(1); i <= M_Mesh->numPoints() ; ++i )
-    //    vector[i-1] = (a + b) / 2;
+    // linearInterpolation disabled as tapering is not working!
+    for ( UInt i(1); i <= M_Mesh->numPoints() ; ++i )
+        if ( isArea )
+            vector[i-1] = (a + b + 2 * std::sqrt(a*b)) / 4;
+        else
+            vector[i-1] = (a + b) / 2;
 }
 
 void
