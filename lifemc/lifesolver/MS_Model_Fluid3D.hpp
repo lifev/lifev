@@ -37,7 +37,6 @@
 #define MS_Model_Fluid3D_H 1
 
 // Mathcard includes
-#include <lifemc/lifealg/AztecOOPreconditioner.hpp>
 #include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
