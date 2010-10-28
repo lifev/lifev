@@ -100,24 +100,25 @@ OneDimensionalModel_Source_Linear::diff( const Real& /*_U1*/, const Real& /*_U2*
     return -1.;
 }
 
-Real
-OneDimensionalModel_Source_Linear::diff2( const Real& /*_U1*/, const Real& /*_U2*/,
-                                          const ID& ii,        const ID& jj, const ID& kk,
-                                          const UInt& /*indz*/ ) const
-{
-    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) )
-    {
-        return 0.;
-    }
-    ERROR_MSG("Source's second differential function has only 8 components.");
-    return -1.;
-}
+//Real
+//OneDimensionalModel_Source_Linear::diff2( const Real& /*_U1*/, const Real& /*_U2*/,
+//                                          const ID& ii,        const ID& jj, const ID& kk,
+//                                          const UInt& /*indz*/ ) const
+//{
+//    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) )
+//    {
+//        return 0.;
+//    }
+//    ERROR_MSG("Source's second differential function has only 8 components.");
+//    return -1.;
+//}
 
 Real
-OneDimensionalModel_Source_Linear::QuasiLinearSource( const Real& _U1, const Real& _U2,
-                                                      const ID& ii,    const UInt& indz ) const
+OneDimensionalModel_Source_Linear::interpolatedQuasiLinearSource( const Real& _U1, const Real& _U2,
+                                                                  const ID& ii,    const Container2D_Type& bcNodes, const Real& /*cfl*/ ) const
 {
-    return this->operator()(_U1, _U2, ii, indz);
+    //TODO Implement the interpolation as done for the non-linear case
+    return this->operator()(_U1, _U2, ii, bcNodes[0]);
 }
 
 }

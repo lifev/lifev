@@ -77,7 +77,7 @@ public:
      *  when they are space dependent.
      *  This is NOT pretty. I should try to remove this dependency. VM 09/04
      */
-    virtual Real operator()( const Real& _A, const Real& _Q,
+    virtual Real operator()( const Real& A, const Real& Q,
                              const ID& ii,   const UInt& indz = 0 ) const = 0;
 
 
@@ -88,7 +88,7 @@ public:
      *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
      *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
      */
-    virtual Real diff( const Real& _A, const Real& _Q,
+    virtual Real diff( const Real& A, const Real& Q,
                        const ID& ii,   const ID& jj, const UInt& indz = 0 ) const  = 0;
 
     //! Second derivative tensor d2Fi/(dxj dxk)
@@ -100,20 +100,27 @@ public:
      *
      *  with d2Fi/dx1dx2 = d2Fi/dx2dx1
      */
-    virtual Real diff2( const Real& _A, const Real& _Q,
-                        const ID& ii,   const ID& jj, const ID& kk,
-                        const UInt& indz = 0 ) const  = 0;
+//    virtual Real diff2( const Real& A, const Real& Q,
+//                        const ID& ii,   const ID& jj, const ID& kk,
+//                        const UInt& indz = 0 ) const  = 0;
 
     //! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj
     /*!
      * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
      * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
      */
-    virtual void jacobian_EigenValues_Vectors( const Real& _A,     const Real& _Q,
-                                                     Real& eig1,         Real& eig2,
-                                                     Real& lefteigvec11, Real& lefteigvec12,
-                                                     Real& lefteigvec21, Real& lefteigvec22,
-                                               const UInt& indz = 0 ) const  = 0;
+    virtual void EigenValuesEigenVectors( const Real& A, const Real& Q,
+                                                Container2D_Type& eigenvalues,
+                                                Container2D_Type& leftEigenvector1,
+                                                Container2D_Type& leftEigenvector2,
+                                          const UInt& indz = 0 ) const = 0;
+
+    //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
+    virtual void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
+                                                     Container2D_Type& deltaEigenvalues,
+                                                     Container2D_Type& deltaLeftEigenvector1,
+                                                     Container2D_Type& deltaLeftEigenvector2,
+                                               const UInt& indz = 0 ) const = 0;
 
     //@}
 
