@@ -85,38 +85,24 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         //Container2D_Type leftEigenvector_first, leftEigenvector_second;
 
         UInt dof;
-        ( M_bcSide == OneD_left ) ? dof = 1 : dof = flux->Physics()->Data()->NumberOfNodes();
+        ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->Physics()->Data()->NumberOfNodes() - 1;
 
         Container2D_Type U_boundary;
-        U_boundary[0] = (*solution.find("A")->second)(dof);
-        U_boundary[1] = (*solution.find("Q")->second)(dof);
+        U_boundary[0] = (*solution.find("A")->second)(dof + 1);
+        U_boundary[1] = (*solution.find("Q")->second)(dof + 1);
 
-        Container2D_Type W_boundary;
-        W_boundary[0] = (*solution.find("W1")->second)(dof);
-        W_boundary[1] = (*solution.find("W2")->second)(dof);
-
-        // Eigen values of the jacobian diffFlux (= dF/dU = H)
+        // Eigenvalues and eigenvectors of the jacobian diffFlux (= dF/dU = H)
         Container2D_Type eigenvalues;
-
-        // Left eigen vectors for the eigen values
         Container2D_Type leftEigenvector1, leftEigenvector2;
-        leftEigenvector1[0] = 0.;
-        leftEigenvector1[1] = 0.;
 
-        leftEigenvector2[0] = 0.;
-        leftEigenvector2[1] = 0.;
-
-        flux->jacobian_EigenValues_Vectors( U_boundary[0],       U_boundary[1],
-                                            eigenvalues[0],      eigenvalues[1],
-                                            leftEigenvector1[0], leftEigenvector1[1],
-                                            leftEigenvector2[0], leftEigenvector2[1],
-                                            dof );
+        flux->EigenValuesEigenVectors( U_boundary[0], U_boundary[1],
+                                       eigenvalues, leftEigenvector1, leftEigenvector2, dof );
 
         computeMatrixAndRHS( time, timeStep, flux, OneD_first,
-                             leftEigenvector1, leftEigenvector2, U_boundary, W_boundary, dof, M_bcRHS[0]);
+                             leftEigenvector1, leftEigenvector2, dof, M_bcRHS[0]);
 
         computeMatrixAndRHS( time, timeStep, flux, OneD_second,
-                             leftEigenvector1, leftEigenvector2, U_boundary, W_boundary, dof, M_bcRHS[1]);
+                             leftEigenvector1, leftEigenvector2, dof, M_bcRHS[1]);
 
         BC = solveLinearSystem( M_bcMatrix[OneD_first], M_bcMatrix[OneD_second], M_bcRHS );
     }
@@ -181,12 +167,8 @@ OneDimensionalModel_BC::isInternal()
 void
 OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
                                              const Container2D_Type& leftEigenvector1, const Container2D_Type& leftEigenvector2,
-                                             const Container2D_Type& U, const Container2D_Type& W,
                                              const UInt& dof, Real& rhs )
 {
-    ASSERT_PRE( leftEigenvector1.size() == 2 && leftEigenvector2.size() == 2 && U.size() == 2 && W.size() == 2,
-                "compute_resBC_line works only for 2D vectors");
-
     // This is not general (typical situation):
     //     on first line,  left boundary,  I impose W1
     //     on second line, left boundary,  I impose W2
@@ -200,22 +182,20 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
     {
         case OneD_W1:
             M_bcMatrix[line] = leftEigenvector1;
-            rhs += dot( leftEigenvector1, U ) - W[0];
         break;
         case OneD_W2:
             M_bcMatrix[line] = leftEigenvector2;
-            rhs += dot( leftEigenvector2, U ) - W[1];
         break;
         case OneD_A:
             M_bcMatrix[line][0] = 1.; M_bcMatrix[line][1] = 0.;
         break;
         case OneD_P:
-            rhs = flux->Physics()->A_from_P( rhs, dof - 1 ); // Index start from 0
+            rhs = flux->Physics()->A_from_P( rhs, dof );
             M_bcMatrix[line][0] = 1.; M_bcMatrix[line][1] = 0.;
         break;
         case OneD_Q:
             // Flow rate is positive with respect to the outgoing normal
-            if ( line == OneD_first && M_bcSide == OneD_left )
+            if ( M_bcSide == OneD_left )
                 rhs *= -1;
             M_bcMatrix[line][0] = 0.; M_bcMatrix[line][1] = 1.;
         break;

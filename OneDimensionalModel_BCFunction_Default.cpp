@@ -164,8 +164,11 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
     M_boundaryPoint                 (),
     M_internalBdPoint               (),
     M_eigenvalues                   (),
+    M_deltaEigenvalues              (),
     M_leftEigenvector1              (),
-    M_leftEigenvector2              ()
+    M_leftEigenvector2              (),
+    M_deltaLeftEigenvector1         (),
+    M_deltaLeftEigenvector2         ()
 {
 }
 
@@ -175,8 +178,11 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
     M_boundaryPoint                 ( BCF_Compatibility.M_boundaryPoint ),
     M_internalBdPoint               ( BCF_Compatibility.M_internalBdPoint ),
     M_eigenvalues                   ( BCF_Compatibility.M_eigenvalues ),
+    M_deltaEigenvalues              ( BCF_Compatibility.M_deltaEigenvalues ),
     M_leftEigenvector1              ( BCF_Compatibility.M_leftEigenvector1 ),
-    M_leftEigenvector2              ( BCF_Compatibility.M_leftEigenvector2 )
+    M_leftEigenvector2              ( BCF_Compatibility.M_leftEigenvector2 ),
+    M_deltaLeftEigenvector1         ( BCF_Compatibility.M_deltaLeftEigenvector1 ),
+    M_deltaLeftEigenvector2         ( BCF_Compatibility.M_deltaLeftEigenvector2 )
 {
 }
 
@@ -186,7 +192,7 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
 Real
 OneDimensionalModel_BCFunction_Compatibility::operator()( const Real& /*time*/, const Real& timeStep )
 {
-    return extrapolateW( timeStep );
+    return computeRHS( timeStep );
 }
 
 // ===================================================
@@ -228,85 +234,92 @@ OneDimensionalModel_BCFunction_Compatibility::setupNode()
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::extrapolateW( const Real& timeStep )
+OneDimensionalModel_BCFunction_Compatibility::computeRHS( const Real& timeStep )
 {
     updateBCVariables();
     computeEigenValuesVectors();
 
-    Real W_out(0.);
     switch( M_bcType )
     {
         case OneD_W1:
-            W_out = M_bcW[0] + computeDeltaLU( M_eigenvalues[0], M_leftEigenvector1, timeStep );
-            //W_out = interpolateW( M_eigenvalues[0], timeStep )[0];
+            return evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep );
         break;
 
         case OneD_W2:
-            W_out = M_bcW[1] + computeDeltaLU( M_eigenvalues[1], M_leftEigenvector2, timeStep );
-            //W_out = interpolateW( M_eigenvalues[1], timeStep )[1];
+            return evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep );
         break;
 
         default:
             std::cout << "Warning: bcType \"" << M_bcType << "\"not available!" << std::endl;
+            return 0.;
     }
-
-    return W_out;
 }
 
 void
 OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 {
-    M_Flux->jacobian_EigenValues_Vectors( M_bcU[0], M_bcU[1],
-                                          M_eigenvalues[0], M_eigenvalues[1],
-                                          M_leftEigenvector1[0], M_leftEigenvector1[1],
-                                          M_leftEigenvector2[0], M_leftEigenvector2[1],
-                                          M_bcNode );
+    M_Flux->EigenValuesEigenVectors( M_bcU[0], M_bcU[1],
+                                     M_eigenvalues, M_leftEigenvector1, M_leftEigenvector2,
+                                     M_bcNode - 1 );
+
+    M_Flux->deltaEigenValuesEigenVectors( M_bcU[0], M_bcU[1],
+                                          M_deltaEigenvalues, M_deltaLeftEigenvector1, M_deltaLeftEigenvector2,
+                                          M_bcNode - 1 );
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::computeDeltaLU( const Real& eigenvalue, const Container2D_Type& eigenvector, const Real& timeStep )
-{
-    Container2D_Type U;
-    Container2D_Type U_interpolated = interpolateU( eigenvalue, timeStep );
-
-    U[0] = U_interpolated[0] - timeStep * M_Source->QuasiLinearSource( U_interpolated[0], U_interpolated[1], 1, M_bcNode - 1) - M_bcU[0];
-    U[1] = U_interpolated[1] - timeStep * M_Source->QuasiLinearSource( U_interpolated[0], U_interpolated[1], 2, M_bcNode - 1) - M_bcU[1];
-
-    return dot( eigenvector, U );
-}
-
-Container2D_Type
-OneDimensionalModel_BCFunction_Compatibility::interpolateU( const Real& eigenvalue, const Real& timeStep ) const
+OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalue, const Container2D_Type& eigenvector, const Container2D_Type& deltaEigenvector, const Real& timeStep )
 {
     Real cfl = computeCFL( eigenvalue, timeStep );
 
     Container2D_Type U_interpolated;
+    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_Solution)["A"])( M_bcInternalNode );
+    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_Solution)["Q"])( M_bcInternalNode );
 
-    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_Solution)["A"])(M_bcInternalNode);
-    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_Solution)["Q"])(M_bcInternalNode);
+    Container2D_Type U;
 
-    return U_interpolated;
-}
+    Container2D_Type bcNodes;
+    switch( M_bcSide )
+    {
+        case OneD_left:
+            bcNodes[0] = M_bcNode - 1; // Boundary node
+            bcNodes[1] = M_bcNode;     // Inner node
+        break;
 
-Container2D_Type
-OneDimensionalModel_BCFunction_Compatibility::interpolateW( const Real& eigenvalue, const Real& timeStep ) const
-{
-    Real cfl = computeCFL( eigenvalue, timeStep );
+        case OneD_right:
+            bcNodes[0] = M_bcNode - 1; // Boundary node
+            bcNodes[1] = M_bcNode - 2; // Inner node
+        break;
 
-    Container2D_Type W_interpolated;
+        default:
+            bcNodes[0] = M_bcNode - 1; // Boundary node
+            bcNodes[1] = M_bcNode - 1; // Inner node = boundary node -> no interpolation
+            std::cout << "Warning: bcSide \"" << M_bcSide << "\" not available!" << std::endl;
+    }
 
-    W_interpolated[0] = ( 1 - cfl ) * M_bcW[0]  + cfl * (*(*M_Solution)["W1"])(M_bcInternalNode);
-    W_interpolated[1] = ( 1 - cfl ) * M_bcW[1]  + cfl * (*(*M_Solution)["W2"])(M_bcInternalNode);
+    U[0] = U_interpolated[0] - timeStep * M_Source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
+    U[1] = U_interpolated[1] - timeStep * M_Source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 2, bcNodes, cfl );
 
-    return W_interpolated;
+    return dot( eigenvector, U ) +  timeStep * eigenvalue * dot( deltaEigenvector, U_interpolated );
 }
 
 Real
 OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
 {
-    Real deltaX = std::sqrt( std::pow(M_boundaryPoint[0] - M_internalBdPoint[0], 2) +
-                             std::pow(M_boundaryPoint[1] - M_internalBdPoint[1], 2) +
-                             std::pow(M_boundaryPoint[2] - M_internalBdPoint[2], 2) );
+    Real deltaX(0);
+    switch( M_bcSide )
+    {
+        case OneD_left:
+            deltaX = M_Flux->Physics()->Data()->mesh()->edgeLength( 0 );
+        break;
+
+        case OneD_right:
+            deltaX = M_Flux->Physics()->Data()->mesh()->edgeLength( M_bcNode - 2 );
+        break;
+
+        default:
+            std::cout << "Warning: bcSide \"" << M_bcSide << "\" not available!" << std::endl;
+    }
 
     Real cfl = eigenvalue * timeStep / deltaX;
 
@@ -346,17 +359,17 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, cons
     updateBCVariables();
     computeEigenValuesVectors();
 
-    Real W_out(0.);
+    Real W_out(0.), W_out_old(0.);
     switch( M_bcType )
     {
     case OneD_W1:
-        W_out = M_bcW[1] + computeDeltaLU( M_eigenvalues[1], M_leftEigenvector2, timeStep );
-        //W_out = interpolateW( M_eigenvalues[1], timeStep )[1];
+        W_out = M_bcW[1] + evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep ) - dot( M_leftEigenvector2, M_bcU );
+        W_out_old = -M_bcW[0] + dot( M_leftEigenvector1, M_bcU );
     break;
 
     case OneD_W2:
-        W_out = M_bcW[0] + computeDeltaLU( M_eigenvalues[0], M_leftEigenvector1, timeStep );
-        //W_out = interpolateW( M_eigenvalues[0], timeStep )[0];
+        W_out = M_bcW[0] + evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep ) - dot( M_leftEigenvector1, M_bcU );
+        W_out_old = -M_bcW[1] + dot( M_leftEigenvector2, M_bcU );
     break;
     default:
         std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
@@ -379,7 +392,7 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, cons
 
     this->resistance( resistance );
 
-    return W_out * ((b2*resistance-b1)/(c1-c2*resistance)) + ((a22*resistance-a11)/(c1-c2*resistance));
+    return W_out_old + W_out * (b2*resistance-b1)/(c1-c2*resistance) + (a22*resistance-a11)/(c1-c2*resistance);
 }
 
 // ===================================================
@@ -460,7 +473,23 @@ OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windk
 Real
 OneDimensionalModel_BCFunction_Windkessel3::operator()( const Real& time, const Real& timeStep )
 {
-    updateBCVariables();
+    UInt W_outID;
+    Real W_out;
+
+    switch( M_bcType )
+    {
+    case OneD_W1:
+        W_outID = 2;
+        W_out = computeRHS( timeStep );
+        break;
+    case OneD_W2:
+        W_outID = 1;
+        W_out = computeRHS( timeStep );
+        break;
+    default:
+        std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
+    }
+
     Real A( M_bcU[0] );
     Real Q( M_bcU[1] );
 
@@ -498,23 +527,6 @@ OneDimensionalModel_BCFunction_Windkessel3::operator()( const Real& time, const 
     M_integral_tn = integral;
     M_dQdt_tn     = dQdt;
     M_Q_tn        = Q;
-
-    UInt W_outID;
-    Real W_out;
-
-    switch( M_bcType )
-    {
-    case OneD_W1:
-        W_outID = 2;
-        W_out = extrapolateW( timeStep );
-        break;
-    case OneD_W2:
-        W_outID = 1;
-        W_out = extrapolateW( timeStep );
-        break;
-    default:
-        std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
-    }
 
     return  M_Flux->Physics()->W_from_P( P, W_out, W_outID, M_bcNode ); // W_in
 }

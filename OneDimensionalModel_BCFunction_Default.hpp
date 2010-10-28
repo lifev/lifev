@@ -243,14 +243,11 @@ protected:
 
     void setupNode();
 
-    Real extrapolateW( const Real& timeStep );
+    Real computeRHS( const Real& timeStep );
 
     void computeEigenValuesVectors();
 
-    Real computeDeltaLU( const Real& eigenvalue, const Container2D_Type& eigenvector, const Real& timeStep );
-
-    Container2D_Type interpolateU( const Real& eigenvalue, const Real& timeStep ) const;
-    Container2D_Type interpolateW( const Real& eigenvalue, const Real& timeStep ) const;
+    Real evaluateRHS( const Real& eigenvalue, const Container2D_Type& eigenvector, const Container2D_Type& deltaEigenvector, const Real& timeStep );
 
     Real computeCFL( const Real& eigenvalue, const Real& timeStep ) const;
 
@@ -265,10 +262,13 @@ protected:
 
     //! Eigen values of the jacobian diffFlux (= dF/dU = H)
     Container2D_Type                                   M_eigenvalues;
+    Container2D_Type                                   M_deltaEigenvalues;
 
     //! Left eigen vectors for the two eigen values
     Container2D_Type                                   M_leftEigenvector1;
     Container2D_Type                                   M_leftEigenvector2;
+    Container2D_Type                                   M_deltaLeftEigenvector1;
+    Container2D_Type                                   M_deltaLeftEigenvector2;
 };
 
 

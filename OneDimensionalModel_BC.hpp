@@ -136,7 +136,7 @@ private:
     //! Compute the matrix and the RHS for the BC 2x2 linear system
     void computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
                               const Container2D_Type& leftEigenvector1, const Container2D_Type& leftEigenvector2,
-                              const Container2D_Type& U, const Container2D_Type& W, const UInt& dof, Real& rhs );
+                              const UInt& dof, Real& rhs );
 
     //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
     /*!
