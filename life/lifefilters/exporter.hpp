@@ -350,6 +350,12 @@ public:
 
     virtual void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
 
+    //! Close the output file
+    /*!
+         This method is only used by  some of the exporter which derived from this class.
+     */
+    virtual void CloseFile() {}
+
     //@}
 
 
