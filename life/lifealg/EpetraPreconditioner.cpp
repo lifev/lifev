@@ -130,7 +130,7 @@ EpetraPreconditioner::setList( const list_Type& list )
 void
 EpetraPreconditioner::setSolver( SolverTrilinos& /*solver*/ )
 {
-    assert( false );
+    //assert( false );
 }
 
 // ===================================================
