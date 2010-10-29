@@ -29,6 +29,11 @@
    @date 2010-07-29
 */
 
+#ifndef __user_fun_H
+#define __user_fun_H 1
+
+#include <vector>
+
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
 #include <life/lifearray/tab.hpp>
@@ -38,15 +43,23 @@ using namespace LifeV;
 // ===================================================
 //! User functions for the pressure equation
 // ===================================================
+namespace dataProblem
+{
 
 // Inverse of permeability matrix
-Matrix pressurePermeability( const Real& /*t*/, const Real& x, const Real& y, const Real& z );
+Matrix pressurePermeability( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const std::vector<Real>& u );
 
 // Source term
 Real pressureSource( const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& /*icomp*/);
 
 // Boundary condition of Dirichlet
-Real pressureDirichlet( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+Real pressureDirichlet1( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+
+// Boundary condition of Dirichlet
+Real pressureDirichlet2( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+
+// Boundary condition of Dirichlet
+Real pressureDirichlet3( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
 
 // Boundary condition of Neumann
 Real pressureNeumann( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& icomp);
@@ -59,7 +72,7 @@ Real pressureMixte( const Real& /* t */, const Real& x, const Real& y, const Rea
 // ===================================================
 
 // Inverse of permeability matrix
-Matrix saturationPermeability( const Real& u, const Real& t, const Real& x, const Real& y, const Real& z );
+Matrix saturationPermeability( const Real& t, const Real& x, const Real& y, const Real& z, const std::vector<Real>& u );
 
 // Physical flux function
 Vector saturationPhysicalFlux( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const Real& u );
@@ -74,10 +87,20 @@ Real saturationSource( const Real& /*t*/, const Real& x, const Real& y, const Re
 Real saturationInitialCondition( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/ );
 
 // Boundary condition of Dirichlet
-Real saturationDirichlet( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+Real saturationDirichlet1( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+
+// Boundary condition of Dirichlet
+Real saturationDirichlet2( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+
+// Boundary condition of Dirichlet
+Real saturationDirichlet3( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
 
 // Boundary condition of Neumann
 Real saturationNeumann( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& icomp);
 
 // Boundary condition of Robin
 Real saturationMixte( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+
+}
+
+#endif /* __user_fun_H */

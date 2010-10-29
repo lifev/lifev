@@ -211,13 +211,9 @@ public:
 
     typedef DarcySolver<Mesh, SolverType> DarcySolverPolicies;
 
-    typedef typename DarcySolverPolicies::Function           Function;
-
     typedef typename DarcySolverPolicies::permeability_type  permeability_type;
 
     typedef typename DarcySolverPolicies::data_type          data_type;
-
-    typedef typename DarcySolverPolicies::mesh_type          mesh_type;
 
     typedef typename DarcySolverPolicies::bchandler_raw_type bchandler_raw_type;
     typedef typename DarcySolverPolicies::bchandler_type     bchandler_type;
@@ -227,9 +223,6 @@ public:
 
     typedef typename DarcySolverPolicies::vector_type        vector_type;
     typedef typename DarcySolverPolicies::vector_ptrtype     vector_ptrtype;
-
-    typedef typename DarcySolverPolicies::prec_raw_type      prec_raw_type;
-    typedef typename DarcySolverPolicies::prec_type          prec_type;
 
     typedef typename DarcySolverPolicies::comm_type          comm_type;
     typedef typename DarcySolverPolicies::comm_ptrtype       comm_ptrtype;
@@ -302,6 +295,18 @@ public:
 
         // Update the primal solution.
         *this->M_primalOld = *(this->M_primal);
+
+    }
+
+    /*!
+      Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
+      @param invPerm Inverse of the permeability tensor for the problem.
+    */
+    inline void setInversePermeability ( const permeability_type& invPerm )
+    {
+
+        // Call the set inverse permeability of the non-linear Darcy solver
+        DarcySolverNonLinear<Mesh, SolverType>::setInversePermeability( invPerm );
 
     }
 
@@ -406,26 +411,13 @@ setup ()
 } // setup
 
 // Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template <typename Mesh, typename SolverType>
+template<typename Mesh, typename SolverType>
 void
 DarcySolverTransientNonLinear<Mesh, SolverType>::
 localElementComputation ( const UInt & iElem )
 {
-    /* Call the localElementComputation of the DarcySolverNonLinear for update the finite elements
-       and for compute the matrix N, thanks to the fact that we store in M_inverseNonLinearPermeability
-       the non-linear permeability. */
-    DarcySolverNonLinear<Mesh, SolverType>::localElementComputation( iElem );
 
-    // Clear the mass matrix for the primal variable.
-    this->M_elmatMassPrimal.zero();
-
-    // Compute the mass matrix for the primal variable.
-    mass( static_cast<Real>(1),
-          this->M_elmatMassPrimal,
-          this->M_primal_FESpace.fe(), 0, 0);
-
-    // Store in the mass matrix for the primal variable also the time step.
-    this->M_elmatMassPrimal *= static_cast<Real>(1) / this->M_data.dataTime()->getTimeStep();
+    DarcySolverTransient<Mesh, SolverType>::localElementComputation( iElem );
 
 } // localElementComputation
 

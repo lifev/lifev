@@ -31,6 +31,7 @@
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/AztecOOPreconditioner.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 
 #include <life/lifearray/elemMat.hpp>
@@ -138,8 +139,6 @@ public:
            std::vector<int> const&   lagrangeMultipliers,
            boost::shared_ptr<Epetra_Comm>& comm );
 
-
-    virtual void registerMyProducts(){}
 
     //! virtual destructor
 
@@ -292,6 +291,13 @@ public:
     void          updateUn( )                              {*M_un = *M_sol;}
     void          updateUn(const vector_type& sol )        {*M_un = sol;}// for the monolithic
     void          setupPostProc(const EntityFlag& flag, const Mesh meshPart);
+
+    //! Set the tolerance and the maximum number of iterations of the linear solver
+    /*!
+     * @param tol tolerance
+     * @param maxiter maximum number of iterations
+     */
+    void setTolMaxiter(const double& tol, const int& maxiter = -1);
 protected:
 
     UInt dim_u() const           { return M_uFESpace.dim(); }
@@ -1531,7 +1537,12 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 
 }
 
-
+template <typename Mesh, typename SolverType>
+void
+Oseen<Mesh, SolverType>::setTolMaxiter(const double& tol, const int& maxiter)
+{
+    M_linearSolver.setTolMaxiter(tol,maxiter);
+}
 
 } // namespace LifeV
 

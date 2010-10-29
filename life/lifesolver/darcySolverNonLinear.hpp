@@ -53,27 +53,6 @@ struct DarcyDefaultStartUpFunction
     }
 };
 
-/*!
-  @class Default Darcy inverse of the non-linear permeability tensor. Needed in DarcySolverNonLinear class.
-  This class implement the default inverse of the non-linear permeability tensor for the non-linear Darcy problem,
-  it is the identity matrix.
-*/
-class DarcyDefaultInverseNonLinearPermeability
-{
-public:
-    DarcyDefaultInverseNonLinearPermeability(): M_id( LifeV::IdentityMatrix( 3 ) )
-    {}
-
-    LifeV::Matrix operator()( const LifeV::Real&,
-                              const LifeV::Real&, const LifeV::Real&,
-                              const LifeV::Real&, const LifeV::Real& ) const
-    {
-        return M_id;
-    }
-private:
-    LifeV::Matrix M_id;
-};
-
 }
 
 // LifeV namespace.
@@ -269,9 +248,9 @@ public:
 
     typedef typename DarcySolverPolicies::Function           Function;
 
-    typedef typename DarcySolverPolicies::data_type          data_type;
+    typedef typename DarcySolverPolicies::permeability_type  permeability_type;
 
-    typedef typename DarcySolverPolicies::mesh_type          mesh_type;
+    typedef typename DarcySolverPolicies::data_type          data_type;
 
     typedef typename DarcySolverPolicies::bchandler_raw_type bchandler_raw_type;
     typedef typename DarcySolverPolicies::bchandler_type     bchandler_type;
@@ -282,15 +261,8 @@ public:
     typedef typename DarcySolverPolicies::vector_type        vector_type;
     typedef typename DarcySolverPolicies::vector_ptrtype     vector_ptrtype;
 
-    typedef typename DarcySolverPolicies::prec_raw_type      prec_raw_type;
-    typedef typename DarcySolverPolicies::prec_type          prec_type;
-
     typedef typename DarcySolverPolicies::comm_type          comm_type;
     typedef typename DarcySolverPolicies::comm_ptrtype       comm_ptrtype;
-
-    typedef boost::function<Matrix ( const Real&, const Real&,const Real&,
-                                     const Real&, const Real& )>
-                                                             nonLinearPermeability_type;
 
     //@}
 
@@ -348,15 +320,6 @@ public:
     virtual void setup ();
 
     /*!
-      Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
-      @param invPermeability Inverse of the permeability tensor for the problem.
-    */
-    inline void setNonLinearInversePermeability ( const nonLinearPermeability_type& inverseNonLinearPermeability )
-    {
-        M_inverseNonLinearPermeability = inverseNonLinearPermeability;
-    }
-
-    /*!
       Set the function for the first iteration for the fixed point method. The default is the zero function.
       @param primalZeroIteration The function for the first iteration.
     */
@@ -370,6 +333,20 @@ public:
                                             *(this->M_primal),
                                             this->M_data.dataTime()->getInitialTime() );
 
+    }
+
+    /*!
+      Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
+      @param invPerm Inverse of the permeability tensor for the problem.
+    */
+    inline void setInversePermeability ( const permeability_type& invPerm )
+    {
+
+        // Call the standard set inverse permeability
+        DarcySolver<Mesh, SolverType>::setInversePermeability( invPerm );
+
+        // Set the dependence of the previous solution in the permeability
+        this->M_inversePermeability->setField( M_primalPreviousIteration );
     }
 
     //@}
@@ -396,6 +373,15 @@ public:
         return M_residualFixedPoint;
     }
 
+    /*!
+      Returns the pointer of the primal solution vector at previous step.
+      @return Constant vector_type reference of the primal solution at previous step.
+    */
+    inline const vector_ptrtype& primalPreviousIteration () const
+    {
+        return M_primalPreviousIteration;
+    }
+
     //@}
 
     // Solve functions.
@@ -413,14 +399,6 @@ public:
 protected:
 
     /*!
-      Locally update the current finite element for the primal
-      and dual finite element space, then compute the Hdiv mass
-      matrix.
-      @param iElem Id of the current geometrical element.
-    */
-    virtual void localElementComputation ( const UInt & iElem );
-
-    /*!
       Update all the variables of the problem before the construction of
       the global hybrid matrix, e.g. reset the global hybrid matrix.
       It is principally used for a time dependent derived class.
@@ -430,9 +408,6 @@ protected:
     // Data of the problem.
     //! @name Data of the problem
     //@{
-
-    //! Non-linear permeability tensor.
-    nonLinearPermeability_type    M_inverseNonLinearPermeability;
 
     //@}
 
@@ -478,8 +453,6 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
     DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
-    // Data of the problem.
-    M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.
     M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
     M_iterationFixedPoint           ( static_cast<UInt>(0) ),
@@ -510,8 +483,6 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        comm_ptrtype&              comm ):
     // Standard Darcy solver constructor.
     DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-    // Data of the problem.
-    M_inverseNonLinearPermeability  ( DarcyDefaultInverseNonLinearPermeability() ),
     // Non-linear stuff.
     M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
     M_iterationFixedPoint           ( static_cast<UInt>(0) ),
@@ -559,49 +530,6 @@ setup ()
     M_tollFixedPoint = dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
 
 } // setup
-
-// Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template <typename Mesh, typename SolverType>
-void
-DarcySolverNonLinear<Mesh, SolverType>::
-localElementComputation ( const UInt & iElem )
-{
-    // Update the current element of ID iElem only for the dual variable.
-    this->M_dual_FESpace.fe().update( this->M_primal_FESpace.mesh()->element( iElem ),
-                                      UPDATE_PHI_VECT | UPDATE_WDET );
-
-    /* Update the current element of ID iElem only for the primal variable,
-       it is used for computing the source term. */
-    this->M_primal_FESpace.fe().update( this->M_primal_FESpace.mesh()->element( iElem ),
-                                       UPDATE_QUAD_NODES | UPDATE_WDET );
-
-    /* Modify the (0,0) block (A) of the matrix M_elmatMix. The blocks (0,1) (B)
-       and (0,2) (C) are independent of the element and have already been computed. */
-
-    // Only one block is set to zero since the other ones are not recomputed.
-    this->M_elmatMix.block(0, 0) = static_cast<Real>( 0 );
-
-    // Get the coordinate of the barycenter of the current element of ID iElem.
-    Real xg(0.), yg(0.), zg(0.);
-    this->M_primal_FESpace.fe().barycenter( xg, yg, zg );
-
-    // Take the pressure at the previews time step in the local element.
-    ElemVec elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
-
-    /* Extract the primal variable at previous iteration for the current finite element.
-       We suppose that the primal unknown is appoximated with P0 elements. Change this in a future. */
-    extract_vec( *M_primalPreviousIteration,
-                 elvecPrimalOldLocal,
-                 this->M_primal_FESpace.refFE(),
-                 this->M_primal_FESpace.dof(),
-                 iElem, 0 );
-
-    // Compute the Hdiv mass matrix.
-    mass_Hdiv( M_inverseNonLinearPermeability( elvecPrimalOldLocal(0), this->M_data.dataTime()->getTimeStep(), xg, yg, zg ),
-               this->M_elmatMix,
-               this->M_dual_FESpace.fe(), 0, 0 );
-
-} // localElementComputation
 
 // Update all the variables of the problem.
 template<typename Mesh, typename SolverType>

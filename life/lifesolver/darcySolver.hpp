@@ -33,7 +33,6 @@
 #define _darcySolver_H_
 
 #include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
@@ -59,25 +58,6 @@ struct DarcyDefaultSource
     {
     	return static_cast<LifeV::Real>( 0 );
     }
-};
-
-/*!
-  @class Default Darcy inverse of the permeability tensor. Needed in DarcySolver class.
-  This class implement the default inverse of the permeability tensor for the Darcy problem, it is the identity matrix.
-*/
-class DarcyDefaultInversePermeability
-{
-public:
-    DarcyDefaultInversePermeability(): M_id( LifeV::IdentityMatrix( 3 ) )
-    {}
-
-    LifeV::Matrix operator()( const LifeV::Real&, const LifeV::Real&,
-                              const LifeV::Real&, const LifeV::Real& ) const
-    {
-        return M_id;
-    }
-private:
-    LifeV::Matrix M_id;
 };
 
 }
@@ -260,30 +240,29 @@ public:
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const UInt& )>
-                                                  Function;
+                                                   Function;
 
-    typedef boost::function<Matrix ( const Real&, const Real&,
-                                     const Real&, const Real& )>
-                                                  permeability_type;
+    typedef inversePermeability<Mesh, SolverType>  permeability_type;
+    typedef boost::shared_ptr<permeability_type>   permeability_ptrtype;
 
-    typedef DataDarcy<Mesh>                       data_type;
+    typedef DataDarcy<Mesh>                        data_type;
 
-    typedef Mesh                                  mesh_type;
+    typedef Mesh                                   mesh_type;
 
-    typedef BCHandler                             bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
+    typedef BCHandler                              bchandler_raw_type;
+    typedef boost::shared_ptr<bchandler_raw_type>  bchandler_type;
 
-    typedef typename SolverType::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
+    typedef typename SolverType::matrix_type       matrix_type;
+    typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
 
-    typedef typename SolverType::vector_type      vector_type;
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+    typedef typename SolverType::vector_type       vector_type;
+    typedef boost::shared_ptr<vector_type>         vector_ptrtype;
 
-    typedef typename SolverType::prec_raw_type    prec_raw_type;
-    typedef typename SolverType::prec_type        prec_type;
+    typedef typename SolverType::prec_raw_type     prec_raw_type;
+    typedef typename SolverType::prec_type         prec_type;
 
-    typedef Epetra_Comm                           comm_type;
-    typedef boost::shared_ptr< comm_type >        comm_ptrtype;
+    typedef Epetra_Comm                            comm_type;
+    typedef boost::shared_ptr< comm_type >         comm_ptrtype;
 
     //@}
 
@@ -360,11 +339,11 @@ public:
 
     /*!
       Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
-      @param invPermeability Inverse of the permeability tensor for the problem.
+      @param invPerm Inverse of the permeability tensor for the problem.
     */
-    inline void setInversePermeability ( const permeability_type& inversePermeability )
+    inline void setInversePermeability ( const permeability_type& invPerm )
     {
-        M_inversePermeability = inversePermeability;
+        M_inversePermeability.reset ( new permeability_type( invPerm ) );
     }
 
     /*!
@@ -584,7 +563,7 @@ protected:
     Function             M_source;
 
     //! Permeability tensor.
-    permeability_type    M_inversePermeability;
+    permeability_ptrtype M_inversePermeability;
 
     //! Bondary conditions handler.
     bchandler_raw_type*  M_BCh;
@@ -708,7 +687,6 @@ DarcySolver ( const data_type&           dataFile,
     // Data of the problem.
     M_data                   ( dataFile ),
 	M_source                 ( DarcyDefaultSource() ),
-    M_inversePermeability    ( DarcyDefaultInversePermeability() ),
     M_BCh                    ( &bcHandler ),
     M_setBC                  ( true ),
     // Finite element spaces.
@@ -758,7 +736,6 @@ DarcySolver ( const data_type&           dataFile,
     // Data of the problem.
     M_data                   ( dataFile ),
 	M_source                 ( DarcyDefaultSource() ),
-    M_inversePermeability    ( DarcyDefaultInversePermeability() ),
     M_setBC                  ( false ),
     // Finite element spaces.
     M_primal_FESpace         ( primal_FESpace ),
@@ -864,7 +841,7 @@ computeConstantMatrices ()
 
     /* Update the divergence matrix, it is independant of the current element
        thanks to the Piola transform. */
-    grad_Hdiv( static_cast<Real>(1),
+    grad_Hdiv( static_cast<Real>(1.),
                M_elmatMix,
                M_dual_FESpace.fe(),
                M_primal_FESpace.fe(), 0, 1 );
@@ -875,7 +852,7 @@ computeConstantMatrices ()
        a FESpace object. In fact the method refFE return a const RefFE&, but the function
        TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const RefFE&
        to a const RefHybridFE&. The cast of type is static and uses pointers. */
-	TP_VdotN_Hdiv( static_cast<Real>(1),
+	TP_VdotN_Hdiv( static_cast<Real>(1.),
                    M_elmatMix,
                    *static_cast<const RefFEHybrid*>(&M_hybrid_FESpace.refFE()),
                    *static_cast<const RefFEHybrid*>(&M_VdotN_FESpace.refFE()),
@@ -891,11 +868,13 @@ localElementComputation ( const UInt & iElem )
 {
 
     // Update the current element of ID iElem only for the dual variable.
-    M_dual_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ), UPDATE_PHI_VECT | UPDATE_WDET );
+    M_dual_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ),
+                                UPDATE_PHI_VECT | UPDATE_WDET );
 
     /* Update the current element of ID iElem only for the primal variable,
        it is used for computing the source term. */
-    M_primal_FESpace.fe().update(M_primal_FESpace.mesh()->element( iElem ), UPDATE_QUAD_NODES | UPDATE_WDET );
+    M_primal_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ),
+                                  UPDATE_QUAD_NODES | UPDATE_WDET );
 
     /* Modify the (0,0) block (A) of the matrix M_elmatMix. The blocks (0,1) (B)
        and (0,2) (C) are independent of the element and have already been computed. */
@@ -910,7 +889,7 @@ localElementComputation ( const UInt & iElem )
     /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
        because the DarcySolverTransient needs the pemeability time dependent. In this case
        we do not have a time evolution. */
-    mass_Hdiv( M_inversePermeability( M_data.dataTime()->getTime(), xg, yg, zg ),
+    mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->getTime(), xg, yg, zg ),
                M_elmatMix,
                M_dual_FESpace.fe(), 0, 0 );
 

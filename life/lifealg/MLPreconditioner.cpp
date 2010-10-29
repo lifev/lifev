@@ -33,8 +33,8 @@ namespace LifeV {
 
 MLPreconditioner::MLPreconditioner():
         super(),
+        M_Oper(),
         M_Prec(),
-        M_precType(),
         M_analyze(false)
 {}
 
@@ -43,17 +43,18 @@ MLPreconditioner::~MLPreconditioner()
 
 void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
-                                     const std::string&     section)
+                                     const std::string&     section,
+                                     const UInt&            /*listNumber*/ )
 {
-    bool found;
-    M_analyze = dataFile((section + "/ML/analyze_smoother").data(), false, found);
+        bool found;
+        M_analyze = dataFile((section + "/ML/analyze_smoother").data(), false, found);
 
-    createMLList(dataFile, section, M_List);
+        createMLList(dataFile, section, M_List);
 
-    std::string CT;
+        std::string CT;
 
-    Teuchos::ParameterList& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
-    createIfpackList(dataFile, section, SmootherIFSubList);
+        list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
+        IfpackPreconditioner::createIfpackList(dataFile, section, SmootherIFSubList);
 }
 
 int
@@ -64,6 +65,12 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
 	//to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
 	M_Prec.reset();
     M_Oper = oper->getMatrixPtr();
+
+    M_precType = M_List.get("prec type", "undefined??");
+    M_precType += "_ML";
+
+    // <one-level-postsmoothing> / <two-level-additive>
+    // <two-level-hybrid> / <two-level-hybrid2>
 
     M_Prec.reset(new prec_raw_type(*M_Oper, this->getList(), true));
 
@@ -112,10 +119,11 @@ MLPreconditioner::precReset()
     this->M_preconditionerCreated = false;
 }
 
+
 void
-createMLList( const GetPot&              dataFile,
-              const std::string&         section,
-              Teuchos::ParameterList&    list)
+MLPreconditioner::createMLList( const GetPot&              dataFile,
+                                const std::string&         section,
+                                list_Type&    list)
 {
     list.setName("ML paramters list");
 
@@ -145,8 +153,8 @@ createMLList( const GetPot&              dataFile,
     std::string IncOrDec     = dataFile((section + "/ML/inc_or_dec").data(),         "increasing", found);
     if (found) list.set("increasing or decreasing", IncOrDec);
 
-    std::string PrecType     = dataFile((section + "/ML/prec_type").data(),          "MGV", found);
-    if (found) list.set("prec type", PrecType);
+    std::string precType     = dataFile((section + "/ML/prec_type").data(),          "MGV", found);
+    if (found) list.set("prec type", precType);
 
     //    int NumProjectedModes    = dataFile((section + "/ML/number_of_prejected_modes").data(), 0);
 
@@ -301,7 +309,6 @@ createMLList( const GetPot&              dataFile,
 
     int RepartitionZoltanDimensions    = dataFile((section + "/ML/repartition/Zoltan_dimensions").data(), 2, found);
     if (found) list.set("repartition: Zoltan dimensions",  RepartitionZoltanDimensions);
-
 
 
     if (MLPrintParameterList)

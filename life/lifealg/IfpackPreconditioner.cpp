@@ -33,7 +33,9 @@ namespace LifeV {
 
 IfpackPreconditioner::IfpackPreconditioner():
         super (),
-        M_Prec()
+        M_Prec(),
+        M_overlapLevel(0),
+        M_Oper()
 {
 }
 
@@ -41,16 +43,13 @@ IfpackPreconditioner::~IfpackPreconditioner()
 {}
 
 void
-IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
-                                         const std::string& section )
+IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+                                         const std::string& section,
+                                         const UInt&        /*listNumber*/ )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
-
     createIfpackList(dataFile, section, this->M_List);
-
-    M_overlapLevel = this->M_List.get("overlap level", -1);
-    M_precType     = this->M_List.get("prectype", "Amesos");
 }
 
 int
@@ -59,15 +58,17 @@ IfpackPreconditioner::buildPreconditioner(operator_type& _oper)
     M_Oper = _oper->getMatrixPtr();
 
     M_overlapLevel = this->M_List.get("overlap level", -1);
+
     M_precType     = this->M_List.get("prectype", "Amesos");
 
     Ifpack factory;
 
     M_Prec.reset(factory.Create(M_precType, M_Oper.get(), M_overlapLevel));
 
+    M_precType += "_Ifpack";
     //    M_Prec.reset(new prec_type(&A.getEpetraMatrix(), OverlapLevel));
     if ( !M_Prec.get() )
-    { //! if not filled, I do not know how to diagonalize.
+    {
         ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
     }
 
@@ -101,10 +102,11 @@ IfpackPreconditioner::precReset()
     this->M_preconditionerCreated = false;
 }
 
+
 void
-createIfpackList( const GetPot&              dataFile,
+IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
                   const std::string&         section,
-                  Teuchos::ParameterList&    list)
+                  list_Type&    list)
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters

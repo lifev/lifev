@@ -37,7 +37,7 @@
 // ===================================================
 
 #include "hyperbolic.hpp"
-
+#include <math.h>
 // ===================================================
 //! Namespaces & define
 // ===================================================
@@ -57,15 +57,17 @@ enum BCNAME
 // ===================================================
 //! User functions
 // ===================================================
+namespace dataProblem
+{
 
 // Analytical solution
-Real analyticalSolution( const Real&/*t*/,
+Real analyticalSolution( const Real& t,
                          const Real& x,
                          const Real& y,
                          const Real& z,
                          const ID& /*ic*/)
 {
-    return x*x*y*y + 6.*x + 5.*z;
+    return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
 }
 
 // Physical flux function
@@ -78,10 +80,10 @@ Vector physicalFlux( const Real& /*t*/,
     Vector physicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = u*u;
+    Real Entry0 = -2.*Pi*y*u;
 
     // Second row
-    Real Entry1 = 0.;
+    Real Entry1 = 2.*Pi*x*u;
 
     // Third row
     Real Entry2 = 0.;
@@ -103,10 +105,10 @@ Vector firstDerivativePhysicalFlux( const Real& /*t*/,
     Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = 2.*u;
+    Real Entry0 = -2.*Pi*y;
 
     // Second row
-    Real Entry1 = 0.;
+    Real Entry1 = 2.*Pi*x;
 
     // Third row
     Real Entry2 = 0.;
@@ -123,29 +125,19 @@ Real initialCondition( const Real& /*t*/,
                        const Real& x,
                        const Real& y,
                        const Real& z,
-                       const ID& /*ic*/)
+                       const ID&   ic )
 {
-
-    // exp(-((x-1./2.)*(x-1./2.)+(y-1./2.)*(y-1./2.)));
-    //return 6*x;
-    // if ( (x < 1./2. && x > 1./4.) && (y < 1./2. && y > 1./4.) && (z < 1./2. && z>1./4.) )
-    //  return 1;
-
-    if (( x > 0. && x < 1./4. ) && (y > 1./2. && y < 3./4 )  && (z < 1./2. && z>1./4.) )
-        return 1;
-
-        return 0;
-
+      return analyticalSolution( 0., x, y, z, ic );
 }
 
 // Boundary condition of Dirichlet
-Real dirichlet( const Real& /* t */,
+Real dirichlet( const Real& t,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&   /*icomp*/)
+                const ID&   ic )
 {
-    return 1.;
+    return analyticalSolution( t, x, y, z, ic );
 }
 
 
@@ -178,6 +170,7 @@ Real UZero( const Real& /* t */,
     return 0.;
 }
 
+}
 // ===================================================
 //! Private Members
 // ===================================================
@@ -206,37 +199,52 @@ struct hyperbolic::Private
     fct_type getUOne()
     {
     	fct_type f;
-    	f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero()
     {
     	fct_type f;
-    	f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
     	return f;
     }
 
     fct_type getAnalyticalSolution()
     {
         fct_type f;
-        f = boost::bind( &analyticalSolution, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
         return f;
     }
 
     vectorFct_type getPhysicalFlux()
     {
         vectorFct_type f;
-        f = boost::bind( &physicalFlux, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::physicalFlux, _1, _2, _3, _4, _5 );
         return f;
     }
 
     vectorFct_type getFirstDerivativePhysicalFlux()
     {
         vectorFct_type f;
-        f = boost::bind( &firstDerivativePhysicalFlux, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::firstDerivativePhysicalFlux, _1, _2, _3, _4, _5 );
         return f;
     }
+
+    fct_type getSource ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::source_in, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
+    fct_type getInitialCondition ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::initialCondition, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
 };
 
 // ===================================================
@@ -340,10 +348,9 @@ hyperbolic::run()
     // Start chronoBoundaryCondition for measure the total time for create the boundary conditions
     chronoBoundaryCondition.start();
 
-    BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
-   	BCFunctionMixte mixteBDfun;
+    BCFunctionBase dirichletBDfun;
 
-    dirichletBDfun.setFunction( dirichlet );
+    dirichletBDfun.setFunction( dataProblem::dirichlet );
 
 	BCHandler bcHyperbolic( 6 );
 
@@ -419,10 +426,10 @@ hyperbolic::run()
     hyperbolicSolver.setup();
 
 	// Set the source term
-    hyperbolicSolver.setSourceTerm( source_in );
+    hyperbolicSolver.setSourceTerm( Members->getSource() );
 
     // Set the initial solution
-    hyperbolicSolver.setInitialSolution( initialCondition );
+    hyperbolicSolver.setInitialSolution( Members->getInitialCondition() );
 
     // Set the numerical flux usign the physical flux
     hyperbolicSolver.setNumericalFlux( Members->getPhysicalFlux(),
@@ -562,7 +569,7 @@ hyperbolic::run()
 
     // Compute the L2 norm for the analytical solution
     exactL2Norm = fESpace.L2NormFunction( Members->getAnalyticalSolution(),
-                                          static_cast<Real>(0) );
+                                          dataHyperbolic.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical solution
     hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of exact solution:              ",
@@ -572,7 +579,7 @@ hyperbolic::run()
     L2Error = fESpace.L2ErrorWeighted( Members->getAnalyticalSolution(),
                                        *hyperbolicSolver.solution(),
                                        Members->getUOne(),
-                                       static_cast<Real>(0) );
+                                       dataHyperbolic.dataTime()->getEndTime() );
 
     // Display the L2 error for the solution
     hyperbolicSolver.getDisplayer().leaderPrint( " L2 error:           ",

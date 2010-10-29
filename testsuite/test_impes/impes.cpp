@@ -51,6 +51,9 @@ enum BCNAME
     TOP    = 6
 };
 
+namespace dataProblem
+{
+
 // Standard functions
 Real UOne( const Real& /* t */,
            const Real& /* x */,
@@ -70,6 +73,7 @@ Real UZero( const Real& /* t */,
     return 0.;
 }
 
+}
 // ===================================================
 //! Private Members
 // ===================================================
@@ -91,13 +95,10 @@ struct impes::Private
 
     // Policy for matrix function
     typedef boost::function<Matrix ( const Real&, const Real&,
-                                     const Real&, const Real& )>
+                                     const Real&, const Real&,
+                                     const std::vector<Real> & )>
                                      Mfct_type;
 
-    // Policy for non-linear matrix function
-    typedef boost::function<Matrix ( const Real&, const Real&, const Real&,
-                                     const Real&, const Real& )>
-                                     Mnlfct_type;
     std::string data_file_name;
 
     // General section
@@ -119,63 +120,63 @@ struct impes::Private
     fct_type getUOne()
     {
     	fct_type f;
-    	f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero()
     {
     	fct_type f;
-    	f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
     	return f;
     }
 
     fct_type getPressureSource()
     {
         fct_type f;
-        f = boost::bind( &pressureSource, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::pressureSource, _1, _2, _3, _4, _5 );
         return f;
     }
 
     Mfct_type getPressurePermeability()
     {
         Mfct_type m;
-        m = boost::bind( &pressurePermeability, _1, _2, _3, _4 );
+        m = boost::bind( &dataProblem::pressurePermeability, _1, _2, _3, _4, _5 );
         return m;
     }
 
     fct_type getSaturationInitialCondition()
     {
         fct_type f;
-        f = boost::bind( &saturationInitialCondition, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::saturationInitialCondition, _1, _2, _3, _4, _5 );
         return f;
     }
 
     Vfct_type getSaturationPhysicalFlux()
     {
         Vfct_type v;
-        v = boost::bind( &saturationPhysicalFlux, _1, _2, _3, _4, _5 );
+        v = boost::bind( &dataProblem::saturationPhysicalFlux, _1, _2, _3, _4, _5 );
         return v;
     }
 
     Vfct_type getSaturationFirstDerivativePhysicalFlux()
     {
         Vfct_type v;
-        v = boost::bind( &saturationFirstDerivativePhysicalFlux, _1, _2, _3, _4, _5 );
+        v = boost::bind( &dataProblem::saturationFirstDerivativePhysicalFlux, _1, _2, _3, _4, _5 );
         return v;
     }
 
     fct_type getSaturationSource()
     {
         fct_type f;
-        f = boost::bind( &saturationSource, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::saturationSource, _1, _2, _3, _4, _5 );
         return f;
     }
 
-    Mnlfct_type getSaturationPermeability()
+    Mfct_type getSaturationPermeability()
     {
-        Mnlfct_type mnl;
-        mnl = boost::bind( &saturationPermeability, _1, _2, _3, _4, _5 );
+        Mfct_type mnl;
+        mnl = boost::bind( &dataProblem::saturationPermeability, _1, _2, _3, _4, _5 );
         return mnl;
     }
 };
@@ -298,22 +299,38 @@ impes::run()
     // Start chronoBoundaryCondition for measure the total time for create the boundary conditions.
     chronoBoundaryCondition.start();
 
-    BCFunctionBase pressureDirichletBDfun, pressureNeumannBDfun;
-    BCFunctionBase saturationDirichletBDfun, saturationNeumannBDfun;
+    BCFunctionBase pressureDirichletBDfun1,
+        pressureDirichletBDfun2,
+        pressureDirichletBDfun3,
+        pressureNeumannBDfun;
 
-   	BCFunctionMixte pressureMixteBDfun, saturationMixteBDfun;
+    BCFunctionBase saturationDirichletBDfun1,
+        saturationDirichletBDfun2,
+        saturationDirichletBDfun3,
+        saturationNeumannBDfun;
+
+   	//BCFunctionMixte pressureMixteBDfun, saturationMixteBDfun;
 
     // Set pressure bounday data.
-    pressureDirichletBDfun.setFunction( pressureDirichlet );
-	pressureNeumannBDfun.setFunction( pressureNeumann );
+    pressureDirichletBDfun1.setFunction ( dataProblem::pressureDirichlet1 );
+    pressureDirichletBDfun2.setFunction ( dataProblem::pressureDirichlet2 );
+    pressureDirichletBDfun3.setFunction ( dataProblem::pressureDirichlet3 );
+
+	pressureNeumannBDfun.setFunction    ( dataProblem::pressureNeumann );
+
 	// dp/dn = first_parameter + second_parameter * p.
-	pressureMixteBDfun.setFunctions_Mixte( pressureMixte, Members->getUOne() );
+	//pressureMixteBDfun.setFunctions_Mixte ( dataProblem::pressureMixte,
+    //                                         Members->getUOne() );
 
     // Set pressure bounday data.
-    saturationDirichletBDfun.setFunction( saturationDirichlet );
-	saturationNeumannBDfun.setFunction( saturationNeumann );
+    saturationDirichletBDfun1.setFunction ( dataProblem::saturationDirichlet1 );
+    saturationDirichletBDfun2.setFunction ( dataProblem::saturationDirichlet2 );
+    saturationDirichletBDfun3.setFunction ( dataProblem::saturationDirichlet3 );
+
+	saturationNeumannBDfun.setFunction    ( dataProblem::saturationNeumann );
 	// dp/dn = first_parameter + second_parameter * p.
-	pressureMixteBDfun.setFunctions_Mixte( saturationMixte, Members->getUOne() );
+	//pressureMixteBDfun.setFunctions_Mixte ( dataProblem::saturationMixte,
+    //                                      Members->getUOne() );
 
     // Total number of different boundary contitions.
     const UInt bcNumber( 6 );
@@ -325,20 +342,20 @@ impes::run()
     BCHandler bcSaturation( bcNumber );
 
     // Setting the boundary condition for the pressure equation.
-    bcPressure.addBC(   "Top",    TOP,    Essential,  Scalar,  pressureDirichletBDfun  );
-    bcPressure.addBC("Bottom", BOTTOM,    Essential,  Scalar,  pressureDirichletBDfun  );
-    bcPressure.addBC(  "Left",   LEFT,    Essential,  Scalar,  pressureDirichletBDfun  );
-    bcPressure.addBC( "Right",  RIGHT,    Essential,  Scalar,  pressureDirichletBDfun  );
-    bcPressure.addBC( "Front",  FRONT,    Essential,  Scalar,  pressureDirichletBDfun  );
-    bcPressure.addBC(  "Back",   BACK,    Essential,  Scalar,  pressureDirichletBDfun  );
+    bcPressure.addBC(   "Top",    TOP,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    bcPressure.addBC("Bottom", BOTTOM,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    bcPressure.addBC(  "Left",   LEFT,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    bcPressure.addBC( "Right",  RIGHT,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    bcPressure.addBC( "Front",  FRONT,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    bcPressure.addBC(  "Back",   BACK,    Essential,  Scalar,  pressureDirichletBDfun1 );
 
     // Setting the boundary condition for the saturation equation.
-    bcSaturation.addBC(   "Top",    TOP,    Essential,  Scalar,  saturationDirichletBDfun  );
-    bcSaturation.addBC("Bottom", BOTTOM,    Essential,  Scalar,  saturationDirichletBDfun  );
-    bcSaturation.addBC(  "Left",   LEFT,    Essential,  Scalar,  saturationDirichletBDfun  );
-    bcSaturation.addBC( "Right",  RIGHT,    Essential,  Scalar,  saturationDirichletBDfun  );
-    bcSaturation.addBC( "Front",  FRONT,    Essential,  Scalar,  saturationDirichletBDfun  );
-    bcSaturation.addBC(  "Back",   BACK,    Essential,  Scalar,  saturationDirichletBDfun  );
+    bcSaturation.addBC(   "Top",    TOP,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    bcSaturation.addBC("Bottom", BOTTOM,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    bcSaturation.addBC(  "Left",   LEFT,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    bcSaturation.addBC( "Right",  RIGHT,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    bcSaturation.addBC( "Front",  FRONT,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    bcSaturation.addBC(  "Back",   BACK,    Essential,  Scalar,  saturationDirichletBDfun1 );
 
     // Stop chronoBoundaryCondition.
     chronoBoundaryCondition.stop();
@@ -542,6 +559,13 @@ impes::run()
     // Set up phase for the linear solver for the pressure equation.
     pressureSolver.setup();
 
+    // Create the inverse permeability.
+    inversePermeability < RegionMesh > invPermPress ( Members->getPressurePermeability(),
+                                                      saturation_darcy_p_FESpace );
+
+    // Set the inverse of the permeability in the pressure equation.
+    pressureSolver.setInversePermeability( invPermPress );
+
     // Set the source term in the pressure equation.
     pressureSolver.setSourceTerm( Members->getPressureSource() );
 
@@ -561,6 +585,13 @@ impes::run()
     // Set up phase for the linear solver.
     saturationDarcySolver.setup();
 
+    // Create the inverse permeability.
+    inversePermeability < RegionMesh > invPermSat ( Members->getSaturationPermeability(),
+                                                    saturation_darcy_p_FESpace );
+
+    // Set the inverse of the permeability.
+    saturationDarcySolver.setInversePermeability( invPermSat );
+
     // Set the initial solution.
     saturationDarcySolver.setInitialPrimal( Members->getSaturationInitialCondition() );
 
@@ -569,6 +600,11 @@ impes::run()
 
     // Set the boudary conditions.
     saturationDarcySolver.setBC( bcSaturation );
+
+    // Cross solvers dependences
+
+    // Set the saturation dependence for the permeability tensor.
+    invPermPress.setField( saturationDarcySolver.primalSolution() );
 
     // Set the exporter for the solution.
     boost::shared_ptr< Exporter< RegionMesh > > exporter;
@@ -664,9 +700,6 @@ impes::run()
 
         // Solve the pressure equation.
 
-        // Set the inverse of the permeability in the pressure equation.
-        pressureSolver.setInversePermeability( Members->getPressurePermeability() );
-
         // Build the linear system and the right hand side.
         pressureSolver.buildSystem();
 
@@ -712,7 +745,7 @@ impes::run()
             saturationHyperbolicSolver.getDisplayer().leaderPrint( "Inner loop for sub-temporal iteration for the hyperbolic equation.\n" );
 
             // Compute the new time step according to the CFL condition.
-            innerTimeStep = saturationHyperbolicSolver.CFL();
+            //innerTimeStep = saturationHyperbolicSolver.CFL();
 
             // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
             if ( dataSaturationHyperbolic.dataTime()->isLastTimeStep() )
@@ -726,7 +759,7 @@ impes::run()
             }
 
             // Set the new time step in the dataHyperbolic.
-            dataSaturationHyperbolic.dataTime()->setTimeStep( innerTimeStep );
+            //dataSaturationHyperbolic.dataTime()->setTimeStep( innerTimeStep );
 
             // The leader process prints the temporal data for the inner loop.
             if ( saturationHyperbolicSolver.getDisplayer().isLeader() )
@@ -740,9 +773,6 @@ impes::run()
         }
 
         // Solve the parabolic part of the saturation equation.
-
-        // Set the inverse of the permeability.
-        saturationDarcySolver.setNonLinearInversePermeability( Members->getSaturationPermeability() );
 
         // Set the new previous time step solution.
         saturationDarcySolver.setPrimalSolution( saturationHyperbolicSolver.solution() );
