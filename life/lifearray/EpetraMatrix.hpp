@@ -69,10 +69,14 @@ public:
     typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
     typedef EpetraVector                   vector_type;
 
-    //! Constructor for square matrices
+    //! Constructor for square and rectangular matrices
+    /*!
+     * Constructor for square and rectangular matrices
+     * @param _map: the row map. The column map will be defined in EpetraMatrix<DataType>::GlobalAssemble(...,...)
+     * @param numEntries: the average number of entries for each row.
+     * @param indexBase: the base index to address entries in the matrix (Usually 0 o 1)
+     */
     EpetraMatrix( const EpetraMap&    _map, int numEntries = 50, int indexBase = 1 );
-    //! Constructor for rectangular matrices
-    EpetraMatrix( const EpetraMap&    _rowMap,  const EpetraMap&    _colMap, int numEntries = 50, int indexBase = 1 );
 
     //! Copy Constructor
     EpetraMatrix( const EpetraMatrix& _matrix);
@@ -186,37 +190,64 @@ public:
      */
     void spy    ( std::string const &filename );
 
-    // Calls insertZeroDiagonal and then epetra.globalAssemble;
+    //! Global assemble of a square matrix with default domain and range map
+    /*
+     * !
+     * 1) Calls insertZeroDiagonal and then Epetra_FECsrMatrix::GlobalAssemble();
+     * 2) Set M_domainMap and M_rangeMap
+     *
+     * EpetraFECsrMatrix will assume that both the domain and range map are the same
+     * of the row map defined in the constructor.
+     *
+     * NOTE: domain and range map must be one-to-one and onto. (Unique map)
+     *
+     */
     int GlobalAssemble();
 
     //! Global assemble for rectangular matrices.
-    /*! If global GlobalAssemble() is called instead, Epetra will not partition
-     * correctly the matrix among the processors
-     * */
-    int GlobalAssemble(EpetraMap & rangeMap, EpetraMap & domainMap);
+    /*
+     * !
+     * 1) Calls Epetra_FECsrMatrix::GlobalAssemble(Epetra_Map & domainMap, Epetra_Map & rangeMap);
+     * 2) Set M_domainMap and M_rangeMap
+     * Input:
+     * @param domainMap the domain map
+     * @param rangeMap the range map
+     */
+    int GlobalAssemble(const boost::shared_ptr<const EpetraMap> & domainMap,
+    		const boost::shared_ptr<const EpetraMap> & rangeMap);
 
     int MyPID() { return  M_epetraCrs->Comm().MyPID(); }
 
-    //FIXME I left this method for backward compatibility
-    //! Return the internal row EpetraMap of the EpetraMatrix
+    //! Return the row EpetraMap of the EpetraMatrix used in the assembling
+    /*!
+     * This method should be call when EpetraMap is still open.
+     */
     const EpetraMap& getMap() const
     {
-        ASSERT( M_rowMap.get() != 0, "EpetraMatrix::getMap: Error: M_rowMap pointer is null" );
-        return *M_rowMap;
+        ASSERT( M_map.get() != 0, "EpetraMatrix::getMap: Error: M_map pointer is null" );
+        return *M_map;
     }
 
-    //! Return the internal row EpetraMap of the EpetraMatrix
-    const EpetraMap& getRowMap() const
+    //! Return the domain EpetraMap of the EpetraMatrix
+    /*!
+     * This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
+     * If this is an open matrix that M_domainMap is an invalid pointer
+     */
+    const EpetraMap& getDomainMap() const
     {
-        ASSERT( M_rowMap.get() != 0, "EpetraMatrix::getRowMap: Error: M_rowMap pointer is null" );
-        return *M_rowMap;
+        ASSERT( M_domainMap.get() != 0, "EpetraMatrix::getdomainMap: Error: M_domainMap pointer is null" );
+        return *M_domainMap;
     }
 
-    //! Return the internal row EpetraMap of the EpetraMatrix
-    const EpetraMap& getColMap() const
+    //! Return the range EpetraMap of the EpetraMatrix
+    /*!
+     * This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
+     * If this is an open matrix that M_domainMap is an invalid pointer
+     */
+    const EpetraMap& getRangeMap() const
     {
-        ASSERT( M_colMap.get() != 0, "EpetraMatrix::getColMap: Error: M_colMap pointer is null" );
-        return *M_colMap;
+        ASSERT( M_rangeMap.get() != 0, "EpetraMatrix::getRangeMap: Error: M_rangeMap pointer is null" );
+        return *M_rangeMap;
     }
 
     //! insert ones into the diagonal to ensure the matrix' graph has a entry there
@@ -280,11 +311,30 @@ public:
 private:
 
 
-    //! Shared pointer on an EpetraMap
-    boost::shared_ptr< EpetraMap > M_rowMap;
+    //! Shared pointer on the row EpetraMap used in the assembling
+    boost::shared_ptr< EpetraMap > M_map;
 
-    //! Shared pointer on an EpetraMap
-    boost::shared_ptr< EpetraMap > M_colMap;
+    //! Shared pointer on the domain EpetraMap.
+    /*
+     * !
+     * if y = this*x,
+     * then x.getMap() is the domain map.
+     * NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
+     * M_domainMap is a NULL pointer until EpetraMatrix<DataType> is called.
+     */
+    boost::shared_ptr< const EpetraMap > M_domainMap;
+
+    //! Shared pointer on the range EpetraMap.
+    //! Shared pointer on the domain EpetraMap.
+    /*
+     * !
+     * if y = this*x,
+     * then y.getMap() is the range map.
+     * NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
+     * M_rangeMap is a NULL pointer until EpetraMatrix<DataType> is called.
+     */
+    boost::shared_ptr< const EpetraMap > M_rangeMap;
+
 
     //!Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
@@ -300,8 +350,9 @@ private:
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
-    M_rowMap(_matrix.M_rowMap),
-    M_colMap(_matrix.M_colMap),
+    M_map(_matrix.M_map),
+    M_domainMap(_matrix.M_domainMap),
+    M_rangeMap(_matrix.M_rangeMap),
     M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs)),
     M_indexBase(_matrix.M_indexBase )
 {
@@ -309,31 +360,18 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int indexBase ):
-    M_rowMap      ( new EpetraMap  (_map)),
-    M_colMap      ( M_rowMap),
-    M_epetraCrs   ( new matrix_type( Copy, *M_rowMap->getMap(Unique), numEntries, false)),
+    M_map      ( new EpetraMap  (_map)),
+    M_epetraCrs   ( new matrix_type( Copy, *M_map->getMap(Unique), numEntries, false)),
     M_indexBase   ( indexBase )
 {
 }
-
-
-template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _rowMap, const EpetraMap& _colMap, int numEntries, int indexBase ):
-    M_rowMap      ( new EpetraMap  (_rowMap)),
-    M_colMap      ( new EpetraMap  (_colMap)),
-    M_epetraCrs   ( new matrix_type( Copy, *M_rowMap->getMap(Unique), *M_colMap->getMap(Unique), numEntries, false)),
-    M_indexBase   ( indexBase )
-{
-}
-
 
 // Copies _matrix to a matrix which resides only on the processor "reduceToProc"
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt reduceToProc):
-    M_rowMap   (_matrix.getRowMap().createRootMap(reduceToProc)),
-    M_colMap   (_matrix.getColMap().createRootMap(reduceToProc) ),
-    M_epetraCrs   ( new matrix_type( Copy, *M_rowMap->getMap(Unique), *M_colMap->getMap(Unique), numEntries
-                                     (_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20,
+    M_map   (_matrix.getMap().createRootMap(reduceToProc)),
+    M_epetraCrs   ( new matrix_type( Copy, *M_map->getMap(Unique),
+    								numEntries(_matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc) * 20,
                                      false) ),
     M_indexBase   (_matrix.M_indexBase)
 {
@@ -357,12 +395,19 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix, const UInt re
 
     Epetra_Export reducedExport(M_epetraCrs->Map(), _matrix.M_epetraCrs->Map());
     M_epetraCrs->Import(*_matrix.M_epetraCrs, reducedExport, Add);
+
+    if(M_epetraCrs->Filled())
+    {
+    	M_domainMap = _matrix.getDomainMap().createRootMap(reduceToProc);
+    	M_rangeMap = _matrix.getRangeMap().createRootMap(reduceToProc);
+    }
 }
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( matrix_ptrtype CRSMatrixPtr ):
-    M_rowMap(),
-    M_colMap(),
+    M_map(),
+    M_domainMap(),
+    M_rangeMap(),
     M_indexBase(CRSMatrixPtr->Map().IndexBase())
 {
     M_epetraCrs=CRSMatrixPtr;
@@ -401,8 +446,9 @@ void EpetraMatrix<DataType>::add (const DataType val, const EpetraMatrix& _matri
 template<typename DataType>
 EpetraMatrix<DataType>&  EpetraMatrix<DataType>::operator=(const EpetraMatrix& _matrix)
 {
-	M_rowMap = _matrix.M_rowMap;
-    M_colMap = _matrix.M_colMap;
+	M_map       = _matrix.M_map;
+	M_domainMap = _matrix.M_domainMap;
+    M_rangeMap  = _matrix.M_rangeMap;
     *M_epetraCrs = *(_matrix.M_epetraCrs);
     M_indexBase = _matrix.M_indexBase;
 
@@ -413,6 +459,10 @@ template<typename DataType>
 typename EpetraMatrix<DataType>::vector_type
 EpetraMatrix<DataType>::operator * (const vector_type& vec) const
 {
+	ASSERT_PRE(M_epetraCrs->Filled(),
+			"EpetraMatrix::Operator*: globalAssemble(...) should be called first");
+	ASSERT_PRE(vec.getMap().MapsAreSimilar(*M_domainMap),
+			"EpetraMatrix::Operator*: the map of vec is not the same of domainMap");
     vector_type result(vec);
 
     M_epetraCrs->Apply(vec.getEpetraVector(), result.getEpetraVector());
@@ -513,11 +563,14 @@ int EpetraMatrix<DataType>::GlobalAssemble()
     }
 
     insertZeroDiagonal();
+    M_domainMap = M_map;
+    M_rangeMap  = M_map;
     return  M_epetraCrs->GlobalAssemble();
 }
 
 template <typename DataType>
-int EpetraMatrix<DataType>::GlobalAssemble(EpetraMap & rangeMap, EpetraMap & domainMap)
+int EpetraMatrix<DataType>::GlobalAssemble(const boost::shared_ptr<const EpetraMap> & domainMap,
+										   const boost::shared_ptr<const EpetraMap> & rangeMap)
 {
     if ( M_epetraCrs->Filled ())
     {
@@ -526,7 +579,9 @@ int EpetraMatrix<DataType>::GlobalAssemble(EpetraMap & rangeMap, EpetraMap & dom
         return -1;
     }
 
-    return  M_epetraCrs->GlobalAssemble(*domainMap.getMap(Unique), *rangeMap.getMap(Unique));
+    M_domainMap = domainMap;
+    M_rangeMap  = rangeMap;
+    return  M_epetraCrs->GlobalAssemble(*domainMap->getMap(Unique), *rangeMap->getMap(Unique));
 }
 
 
@@ -1073,6 +1128,9 @@ void EpetraMatrix<DataType>::openCrsMatrix()
 #else
 #error error: do not have nor EpetraExt 6 nor 7 or 8
 #endif
+        M_domainMap.reset();
+        M_rangeMap.reset();
+
 	}
 }
 
@@ -1150,6 +1208,14 @@ int EpetraMatrix<DataType>::Multiply(bool transposeA,
 template <typename DataType>
 int EpetraMatrix<DataType>::Multiply(bool transposeA, const vector_type& x, vector_type &y) const
 {
+	ASSERT_PRE(M_epetraCrs->Filled(),
+			"EpetraMatrix<DataType>::Multiply: GlobalAssemble(...) must be called first");
+	ASSERT_PRE(x.getMap().MapsAreSimilar(*M_domainMap),
+			   "EpetraMatrix<DataType>::Multiply: x map is different from M_domainMap");
+	ASSERT_PRE(y.getMap().MapsAreSimilar(*M_rangeMap),
+			   "EpetraMatrix<DataType>::Multiply: y map is different from M_rangeMap");
+
+
     return M_epetraCrs->Multiply(transposeA,x.getEpetraVector(),y.getEpetraVector());
 }
 
