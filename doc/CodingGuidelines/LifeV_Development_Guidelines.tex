@@ -19,8 +19,6 @@
 \usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{amsmath}
-\usepackage{mathtools}
-\usepackage{theorem}
 \usepackage{lscape}
 %\usepackage{glossary}
 %\usepackage{array}
@@ -54,8 +52,8 @@ This short guide provides some useful rules to improve the development of \textt
 
 \section{Nomenclature of classes and methods}
 This is a short list of rules for the nomenclature of files, classes and methods.
-\begin{itemize}
-  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions (except inlined methods or other possible special cases) should be inside the \texttt{*.cpp} files.
+\begin{enumerate}
+  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions, except inlined methods (usually no more than one line), should be inside the \texttt{*.cpp} files.
   \item Use type definitions at the beginning of the class to introduce more generality in the code. The syntax for types and pointer types is the following:
 \begin{lstlisting}
 typedef Epetra_FEVector                       vector_Type;
@@ -98,7 +96,7 @@ void matrixvectormultiplication( matrixtype& matrix ); //NO!!!
 
 void matrixVectorMultiplication( matrix_Type& matrix ); //OK
 \end{lstlisting}
-  \item All variables and methods names should clearly describe what they are doing.
+  \item All variables and methods names should clearly describe what they are doing. In addition, do not use the underscore at the beginning of input/output variables.
 \begin{lstlisting}
 // This is a true bad example taken from EpetraMatrix class
 
@@ -143,7 +141,7 @@ void setDataFile( const std::string& ); //NO!!!
 
 void setDataFile( const std::string& fileName ); //OK
 \end{lstlisting}
-  \item All get functions and methods should be declared const, and should return a const object.
+  \item All get functions and methods should be declared const and should return a const object by reference (even if it is a \texttt{boost::shared\_ptr}).
 \begin{lstlisting}
 matrix_Type&    matrix();     //NO!!!
 matrix_PtrType& matrix_ptr(); //NO!!!
@@ -151,26 +149,26 @@ matrix_PtrType& matrix_ptr(); //NO!!!
 const matrix_Type&    matrix() const;     //OK
 const matrix_PtrType& matrix_ptr() const; //OK
 \end{lstlisting}
-  \item All set functions and methods should start with the prefix \texttt{set}.
+  \item All set functions and methods should start with the prefix \texttt{set}. In addition the input parameters should be passed as reference to const.
 \begin{lstlisting}
 void matrix( matrix_Type& matrix );           //NO!!!
 void matrix_ptr( matrix_PtrType& matrix_ptr); //NO!!!
 
-void setMatrix( matrix_Type& matrix );           //OK
-void setMatrix_ptr( matrix_PtrType& matrix_ptr); //OK
+void setMatrix( const matrix_Type& matrix );           //OK
+void setMatrix_ptr( const matrix_PtrType& matrix_ptr); //OK
 \end{lstlisting}
   \item All principal classes should have a method \texttt{showMe()},
 \begin{lstlisting}
 void showMe( std::ostream& output = std::cout ) const;
 \end{lstlisting}
   which outputs on \texttt{output} (which may be the standard output or a file) the state of the class (i.e.  the content of the global and local variables).
-\end{itemize}
+\end{enumerate}
 
 \section{Conventions}
 This is a short list of programming and general conventions that should be used working with \texttt{LifeV} library.
 
 \subsection{Programming conventions}
-\begin{itemize}
+\begin{enumerate}
   \item Use \texttt{boost::shared\_ptr} instead raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
   \item Don't use reference types, expecially for members inside classes.
   \item \texttt{using} directives should be avoided entirely, especially in header files. They cause wanton namespace pollution by bringing in potentially huge numbers of names, many (usually the vast majority) of which are unnecessary. The presence of the unnecessary names greatly increases the possibility of unintended name conflicts not just in the header, but in every module that includes the header. Moreover
@@ -178,7 +176,7 @@ This is a short list of programming and general conventions that should be used 
   \item Use \texttt{const} keyword when possible. This helps the compiler and the developers reading the code. Moreover, it enhances debugging. See \url{http://en.wikipedia.org/wiki/Const-correctness} for more details on the use of \texttt{const}.
   \item Use the \texttt{C++} cast utility (\texttt{static\_cast}) instead of implicit compiling casts. This will avoid warnings and will keep each cast visible for future debugging. See
   \url{http://www.cplusplus.com/doc/tutorial/typecasting} for more details on the use of cast commands.
-  \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and \texttt{Uint}, instead of the built-in types \texttt{double}, \texttt{int} and \texttt{unsigned int}. This helps making code changes afterwards. All the type definitions are contained into \texttt{life.hpp}. \newline \textbf{NOTE:} Only for MPI instructions and Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}. In these cases, use \texttt{static\_cast} to avoid warning messages.
+  \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and \texttt{UInt}, instead of the built-in types \texttt{double}, \texttt{int} and \texttt{unsigned int}. This helps making code changes afterwards. All the type definitions are contained into \texttt{life.hpp}. \newline \textbf{NOTE:} Only for MPI instructions and Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}. In these cases, use \texttt{static\_cast} to avoid warning messages.
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
 #ifdef DEBUG
@@ -188,10 +186,10 @@ This is a short list of programming and general conventions that should be used 
 \end{lstlisting}
   Thanks to this syntax no output will be displayed, unless the debug mode is enabled and an enviroment variable is set in the shell with the command \texttt{export DEBUG="3000"}. This will avoid a lot of unuseful outputs especially on parallel runs. For the complete list of debug numbers (that you can enrich) see the file \texttt{debug.areas} in the library.
   \item For assertion purposes please use the \texttt{lifeassert.hpp} class features.
-\end{itemize}
+\end{enumerate}
 
 \subsection{General conventions}
-\begin{itemize}
+\begin{enumerate}
   \item To uniform the code inside the library, all developers have to use the same notation and in particular the same indentation style. The style used in \texttt{LifeV} is the BSD/Allman Indent style. Please see \url{http://en.wikipedia.org/wiki/Indent_style#Allman_style_.28bsd_in_Emacs.29} for more details about this style and its inventor. Moreover please note that both Eclipse and Emacs (and probably also other editors) have a special utility to help follow this style.
   \item Before committing any code, be sure that all tabs have been converted into $4$ spaces, and that your editor has removed endline spaces.
   \item Before committing any modification in the library, always check that these modifications have not broken any test present in the testsuite.
@@ -210,7 +208,7 @@ This is a short list of programming and general conventions that should be used 
       \item[Get Methods]: containing all the get methods.
       % starting with the prefix \texttt{get})
   \end{description}
-\end{itemize}
+\end{enumerate}
 
 \section{Testsuite development} \label{testsuite}
 All new packages and main classes should have a working test in the testsuite: this is mandatory to allow easy mantainance of all the classes in the library. Moreover, it is important to have a working test for the night compilation of the library, that runs all the tests in order to verify their status.
