@@ -105,7 +105,8 @@ public:
         @param section is the section containing the data
      */
     void        setDataFromGetPot ( const GetPot&      dataFile,
-                                               const std::string& section );
+                                    const std::string& section,
+                                    const UInt& listNumber=1 );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double      Condest ();

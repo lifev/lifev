@@ -55,7 +55,7 @@ public:
     //@{
     typedef EpetraPreconditioner                 super;
 
-    typedef Ifpack_Preconditioner                prec_raw_type;
+    typedef Epetra_Operator                      prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
 
     typedef super::operator_raw_type             operator_raw_type;

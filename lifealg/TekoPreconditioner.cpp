@@ -65,6 +65,35 @@ bool TekoPreconditioner::set() const
     return M_Prec;
 }
 
+int TekoPreconditioner::SetUseTranspose( const bool useTranspose)
+{
+    return M_Prec->SetUseTranspose(useTranspose);
+}
+
+bool TekoPreconditioner::UseTranspose()
+{
+    return M_Prec->UseTranspose();
+}
+int TekoPreconditioner::ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+{
+    return M_Prec->ApplyInverse(X, Y);
+}
+
+int TekoPreconditioner::Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+{
+    return M_Prec->Apply(X, Y);
+}
+
+const Epetra_Map & TekoPreconditioner::OperatorRangeMap() const
+{
+    return M_Prec->OperatorRangeMap();
+}
+
+const Epetra_Map & TekoPreconditioner::OperatorDomainMap() const
+{
+    return M_Prec->OperatorRangeMap();
+}
+
 void TekoPreconditioner::buildBlockGIDs(std::vector<std::vector<int> > & gids,
                                         const EpetraMap & map,
                                         const std::vector<int>& blockSizes)
@@ -103,7 +132,7 @@ void TekoPreconditioner::buildTekoPreconditioner(RCP<Teko::BlockPreconditionerFa
     M_Oper = oper->getMatrixPtr();
 
     std::vector<std::vector<int> > vec;
-    buildBlockGIDs(vec,oper->getRowMap(),blockSizes);
+    buildBlockGIDs(vec,oper->getRangeMap(),blockSizes);
 
     // Building the block operator from the matrix
     Teuchos::RCP<Teko::Epetra::BlockedEpetraOperator> sA

@@ -110,6 +110,13 @@ public:
     /*const*/
     bool                  set() const;
 
+    virtual int           SetUseTranspose( const bool useTranspose=false );
+    virtual bool          UseTranspose();
+    virtual int           ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual int           Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual const Epetra_Map & OperatorRangeMap() const;
+    virtual const Epetra_Map & OperatorDomainMap() const;
+
 protected:
     prec_type             M_Prec;
 
@@ -119,6 +126,9 @@ protected:
     void buildTekoPreconditioner(RCP<Teko::BlockPreconditionerFactory> precFact,
                                  operator_type& oper,
                                  const std::vector<int>& blockSizes);
+
+private:
+    operator_raw_type::matrix_ptrtype M_Oper;
 
 };
 

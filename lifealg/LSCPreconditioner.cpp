@@ -42,7 +42,8 @@ LSCPreconditioner::~LSCPreconditioner()
 {}
 
 void LSCPreconditioner::setDataFromGetPot( const GetPot& dataFile,
-                                           const std::string& section )
+                                           const std::string& section,
+                                           const UInt& listNumber )
 {
     createLSCList(dataFile, section, this->M_List);
 
