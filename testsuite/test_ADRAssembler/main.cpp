@@ -221,7 +221,8 @@ main( int argc, char** argv )
 // Definition and assembly of the RHS
 
 	if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
-	vector_type rhs(uFESpace->map(),Unique);
+	//vector_type rhs(uFESpace->map(),Unique);
+	vector_type rhs(uFESpace->map(),Repeated);
 	rhs*=0.0;
 
 #ifdef TEST_RHS
@@ -286,7 +287,7 @@ main( int argc, char** argv )
 // Solve the solution
 
 	if (verbose) std::cout << " -- Solving the system ... " << std::flush;
-	linearSolver.solveSystem(rhs,solution,systemMatrix);
+	linearSolver.solveSystem(rhsBC,solution,systemMatrix);
 	if (verbose) std::cout << " done ! " << std::endl;
 
 	//************* SPY ***********
