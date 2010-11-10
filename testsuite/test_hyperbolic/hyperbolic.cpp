@@ -284,7 +284,7 @@ hyperbolic::run()
     typedef RegionMesh3D<LinearTetra>                   RegionMesh;
     typedef SolverTrilinos                              solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
-	typedef hyper::vector_type                          vector_type;
+    typedef hyper::vector_type                          vector_type;
     typedef boost::shared_ptr<vector_type>              vector_ptrtype;
 
     Chrono chronoTotal;
@@ -315,7 +315,7 @@ hyperbolic::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file
-	DataHyperbolic<RegionMesh> dataHyperbolic;
+    DataHyperbolic<RegionMesh> dataHyperbolic;
 
     // Set up the data
     dataHyperbolic.setup( dataFile );
