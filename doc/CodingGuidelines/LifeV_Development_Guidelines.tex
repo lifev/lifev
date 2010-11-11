@@ -42,7 +42,7 @@
 
 \title{\texttt{LifeV} Development Guidelines}
 \author{C. Malossi, S. Deparis}
-\date{Last updated: November 5th, 2010}
+\date{Last updated: November 11th, 2010}
 
 \begin{document}
 
@@ -169,8 +169,8 @@ This is a short list of programming and general conventions that should be used 
 
 \subsection{Programming conventions}
 \begin{enumerate}
-  \item Use \texttt{boost::shared\_ptr} instead raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
-  \item Don't use reference types, expecially for members inside classes.
+  \item Use \texttt{boost::shared\_ptr} instead of raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
+  \item Don't use reference types for members inside classes. Of course use them for functions and methods arguments.
   \item \texttt{using} directives should be avoided entirely, especially in header files. They cause wanton namespace pollution by bringing in potentially huge numbers of names, many (usually the vast majority) of which are unnecessary. The presence of the unnecessary names greatly increases the possibility of unintended name conflicts not just in the header, but in every module that includes the header. Moreover
   \texttt{using namespace} declarations should never appear in header files. The meaning of the \texttt{using} declaration may change depending on what other headers have included before it in any given module.
   \item Use \texttt{const} keyword when possible. This helps the compiler and the developers reading the code. Moreover, it enhances debugging. See \url{http://en.wikipedia.org/wiki/Const-correctness} for more details on the use of \texttt{const}.
