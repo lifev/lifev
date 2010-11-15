@@ -45,10 +45,10 @@ DDBlockPrec = ComposedDN # OPTIONS:
                          #ComposedDN2: modular Dirichlet-Neumann preconditioner
                          #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
                          #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
-                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
-                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
                          #ComposedDNDGI: under testing, do not use
-                         #ComposedDN2DGI: under testing, do not use
+                         #ComposedDND2DGI: under testing, do not use
 
 
 reducedFluid = 0    # 0 = exact, 1 = inexact
@@ -355,12 +355,16 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../prec]
     #prectype                = AztecOO
-    prectype                = Ifpack
+    prectype                = Composed
     displayList             = false
 
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+        
+        [../Composed]
+        list                = 'Ifpack Ifpack'
+        sections            = 'ifpack ifpack'
 
         [../AztecOO]
         precond             = 'dom_decomp'

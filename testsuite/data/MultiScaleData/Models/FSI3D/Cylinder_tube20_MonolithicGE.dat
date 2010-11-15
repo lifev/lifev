@@ -356,15 +356,16 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../prec]
     #prectype                = AztecOO
-    prectype                = Ifpack
+    prectype                = Composed
     displayList             = false
-    
-    1composedPrecType = Ifpack1
-    2composedPrecType = Ifpack1
 
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+        
+        [../Composed]
+        list                = 'Ifpack Ifpack'
+        sections            = 'ifpack ifpack'
 
         [../AztecOO]
         precond             = 'dom_decomp'
@@ -376,7 +377,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         ilut_fill           = 4
         drop                = 1.e-5
 
-        [../Ifpack1]
+        [../ifpack]
         overlap             = 2
         prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
 

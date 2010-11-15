@@ -285,12 +285,16 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../prec]
     #prectype                = AztecOO
-    prectype                = Ifpack
+    prectype                = Composed
     displayList             = false
 
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+        
+        [../Composed]
+        list                = 'Ifpack Ifpack'
+        sections            = 'ifpack ifpack'
 
         [../AztecOO]
         precond             = 'dom_decomp'

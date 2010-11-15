@@ -356,12 +356,16 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../prec]
     #prectype                = AztecOO
-    prectype                = Ifpack
+    prectype                = Composed
     displayList             = false
 
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+        
+        [../Composed]
+        list                = 'Ifpack Ifpack'
+        sections            = 'ifpack ifpack'
 
         [../AztecOO]
         precond             = 'dom_decomp'
