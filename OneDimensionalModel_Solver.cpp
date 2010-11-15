@@ -1045,8 +1045,8 @@ OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& 
         return;
     }
 
-    M_Flux->EigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof ),
-                                     (*solution.find("Q")->second)( boundaryDof ),
+    M_Flux->EigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof + 1 ),
+                                     (*solution.find("Q")->second)( boundaryDof + 1 ),
                                       eigenvalues, leftEigenvector1, leftEigenvector2,
                                       boundaryDof );
 }
