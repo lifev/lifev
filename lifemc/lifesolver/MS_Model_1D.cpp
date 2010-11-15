@@ -270,6 +270,9 @@ MS_Model_1D::SetupModel()
     M_Solver->resetOutput( *M_Solution );
 #endif
 
+    //Setup solution
+    InitializeSolution();
+
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
     if ( M_couplings.size() > 0 )
     {
@@ -279,8 +282,6 @@ MS_Model_1D::SetupModel()
     }
 #endif
 
-    //Setup solution
-    InitializeSolution();
 }
 
 void
@@ -291,7 +292,7 @@ MS_Model_1D::BuildSystem()
     Debug( 8130 ) << "MS_Model_1D::BuildSystem() \n";
 #endif
 
-    M_Data->showMe();
+    //M_Data->showMe();
     M_Solver->buildConstantMatrices();
 
     // Update previous solution
@@ -934,18 +935,20 @@ MS_Model_1D::ImposePerturbation()
             //if ( std::abs( M_BCDelta ) < 1e-6 || std::abs( M_BCDelta ) > 1e6 )
             switch( M_BCDeltaType )
             {
-                case OneD_P:
+                case OneD_A:
 
-                    //M_BCDelta = 1;
-                    M_BCDelta = 10;
-
+                    M_BCDelta = M_Data->JacobianPerturbationArea();
                     break;
 
                 case OneD_Q:
-                case OneD_A:
 
-                    //M_BCDelta = 0.001;
-                    M_BCDelta = 0.01;
+                    M_BCDelta = M_Data->JacobianPerturbationFlowRate();
+
+                    break;
+
+                case OneD_P:
+
+                    M_BCDelta = 5; //M_Data->JacobianPerturbationPressure();
 
                     break;
 
