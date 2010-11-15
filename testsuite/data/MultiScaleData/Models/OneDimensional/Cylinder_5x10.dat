@@ -49,6 +49,10 @@ externalPressure     = 0  # g/cm/s^2(dyne/cm^2)
 Length               = 5.
 NumberOfElements     = 50          # number of elements
 
+[../JacobianPerturbation]
+deltaArea            = 0.001        # perturbation on the area
+deltaFlowRate        = 0.001        # perturbation on the flow rate
+deltaPressure        = 1            # perturbation on the pressure
 
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files
