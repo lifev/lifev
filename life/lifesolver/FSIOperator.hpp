@@ -369,7 +369,7 @@ public:
     virtual const vector_type& getSolution()                      const { return *M_lambda; }
 
     //! gets a pointer to the solution vector by reference
-    virtual void solutionPtr( vector_ptrtype& lambda )                  { lambda = M_lambda; }
+    virtual vector_ptrtype& solutionPtr()                               { return M_lambda; }
 
     //! gets the solid displacement by copy
     virtual void getSolidDisp( vector_type& soliddisp )                 { soliddisp = M_solid->disp(); }
