@@ -45,10 +45,10 @@ DDBlockPrec = ComposedDNGI # OPTIONS:
                          #ComposedDN2: modular Dirichlet-Neumann preconditioner
                          #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
                          #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
-                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factor
-                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factor
+                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
                          #ComposedDNDGI: under testing, do not use
-                         #ComposedDN2DGI: under testing, do not use
+                         #ComposedDND2DGI: under testing, do not use
 
 
 reducedFluid = 0    # 0 = exact, 1 = inexact

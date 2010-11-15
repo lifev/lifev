@@ -26,7 +26,6 @@ dist_pkgdata_DATA = Carotid_MonolithicGE.dat \
                     Cylinder_tube20_MonolithicGE.dat \
                     Cylinder_tube20_MonolithicGI.dat \
                     Cylinder_tube40_MonolithicGE.dat \
-                    Cylinder_tube20_Segregated.dat \
                     TemplateGE.dat \
                     TemplateGI.dat
 
