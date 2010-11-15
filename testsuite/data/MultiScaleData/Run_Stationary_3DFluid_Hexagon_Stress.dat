@@ -1,8 +1,8 @@
 # -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Applications
+#                                 Copyright (C) 2010 EPFL
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
 #           Date: 2009-09-01
@@ -27,7 +27,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Stationary_3DFluid_Hexagon_Stre
     initialtime                = 0.0   # [s]
     endtime                    = 1.0   # [s]
     timestep                   = 1.0   # [s]
-    
+
     [../Algorithm]
     AlgorithmType              = Newton            # Aitken, Explicit, Newton
     subITMax                   = 1                 # Maximum number for coupling subiterations

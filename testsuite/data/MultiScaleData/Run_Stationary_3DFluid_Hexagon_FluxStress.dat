@@ -27,7 +27,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/Stationary_3DFluid_Hexagon_Flux
     initialtime                = 0.0   # [s]
     endtime                    = 1.0   # [s]
     timestep                   = 1.0   # [s]
-    
+
     [../Algorithm]
     AlgorithmType              = Newton            # Aitken, Explicit, Newton
     subITMax                   = 1                 # Maximum number for coupling subiterations
