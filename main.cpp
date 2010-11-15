@@ -191,21 +191,21 @@ main( int argc, char** argv )
     std::cout << std::endl << "TEST ENDS SUCCESFULLY -> NOW TESTING PERFORMANCES" << std::endl;
 
 	// PERFORMANCE TEST
-	Chrono chrono;
-
-	expression = "sqrt(((index+pi)*2)^3)"; //We test ONE expression containing different operations
-	parser.SetString(expression);
-
-	chrono.start();
-	UInt nEvaluations = 10000000; // 10 Milions
-	for (UInt i = 0 ; i < nEvaluations ; ++i)
-	{
-	    parser.SetVariable("index", i);
-		parser.Evaluate();
-	}
-	chrono.stop();
-
-	std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chrono.diff() << " s" << std::endl;
+//	Chrono chrono;
+//
+//	expression = "sqrt(((index+pi)*2)^3)"; //We test ONE expression containing different operations
+//	parser.SetString(expression);
+//
+//	chrono.start();
+//	UInt nEvaluations = 10000000; // 10 Milions
+//	for (UInt i = 0 ; i < nEvaluations ; ++i)
+//	{
+//	    parser.SetVariable("index", i);
+//		parser.Evaluate();
+//	}
+//	chrono.stop();
+//
+//	std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chrono.diff() << " s" << std::endl;
 
 	#ifdef HAVE_MPI
 		std::cout << std::endl << "MPI Finalization" << std::endl;
