@@ -323,18 +323,8 @@ public:
       Set the function for the first iteration for the fixed point method. The default is the zero function.
       @param primalZeroIteration The function for the first iteration.
     */
-    inline void setZeroItarationPrimal ( const Function& primalZeroIteration )
-    {
-        // Set the function for the first iteration.
-        M_primalZeroIteration = primalZeroIteration;
-
-        // Interpolate the primal variable for the first iteration.
-        this->M_primal_FESpace.interpolate( M_primalZeroIteration,
-                                            *(this->M_primal),
-                                            this->M_data.dataTime()->getInitialTime() );
-
-    }
-
+    void setZeroItarationPrimal ( const Function& primalZeroIteration );
+   
     /*!
       Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
       @param invPerm Inverse of the permeability tensor for the problem.
@@ -468,7 +458,7 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                                         *(this->M_primal),
                                         static_cast<Real>(0) );
 
-	CONSTRUCTOR( "DarcySolverNonLinear" );
+    CONSTRUCTOR( "DarcySolverNonLinear" );
 
 } // Constructor
 
@@ -497,7 +487,7 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                                         *(this->M_primal),
                                         static_cast<Real>(0) );
 
-	CONSTRUCTOR( "DarcySolverNonLinear" );
+    CONSTRUCTOR( "DarcySolverNonLinear" );
 
 } // Constructor
 
@@ -530,6 +520,22 @@ setup ()
     M_tollFixedPoint = dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
 
 } // setup
+
+// Set the first value for the fixed point method. 
+template<typename Mesh, typename SolverType>
+void 
+DarcySolverNonLinear<Mesh, SolverType>::
+setZeroItarationPrimal ( const Function& primalZeroIteration )
+{
+    // Set the function for the first iteration.
+    M_primalZeroIteration = primalZeroIteration;
+
+    // Interpolate the primal variable for the first iteration.
+    this->M_primal_FESpace.interpolate( M_primalZeroIteration,
+                                        *(this->M_primal),
+                                        this->M_data.dataTime()->getInitialTime() );
+    
+} // SetZeroIterationPrimal
 
 // Update all the variables of the problem.
 template<typename Mesh, typename SolverType>

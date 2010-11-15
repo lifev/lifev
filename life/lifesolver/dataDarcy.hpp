@@ -283,7 +283,7 @@ public:
     //@{
 
     // Copy constructor
-    inversePermeability ( const permeability_type& invPerm, const FESpace<Mesh, EpetraMap>& fESpace ):
+    inversePermeability ( const permeability_type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
         M_inversePermeability ( invPerm ),
         M_fESpace             ( fESpace ),
         M_fields              ( std::vector< const vector_ptrtype* >(0) ) {};
@@ -308,7 +308,7 @@ public:
     //! @name Get methods
     //@{
 
-    Matrix operator() ( const Real& t, const Real& x, const Real& y, const Real& z );
+    Matrix operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& iElem );
 
     //@}
 
@@ -321,17 +321,21 @@ private:
     permeability_type             M_inversePermeability;
 
     // Finite element space
-    const FESpace<Mesh, EpetraMap>&     M_fESpace;
+    FESpace<Mesh, EpetraMap>&     M_fESpace;
 
 };
 
 template < typename Mesh, typename SolverType >
 Matrix
 inversePermeability < Mesh, SolverType >::
-operator() ( const Real& t, const Real& x, const Real& y, const Real& z )
+operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& iElem )
 {
     std::vector<Real> values ( M_fields.size(), 0 );
     ElemVec value ( M_fESpace.refFE().nbDof(), 1 );
+
+    // Update the value of the current element
+    M_fESpace.fe().update( M_fESpace.mesh()->element( iElem ), 
+                           UPDATE_QUAD_NODES | UPDATE_WDET );
 
     for ( UInt i(static_cast<UInt>(0)); i < values.size(); ++i )
     {

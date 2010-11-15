@@ -323,16 +323,7 @@ public:
       variable at step zero.
       @param primalInitial The primal initial function.
     */
-    inline void setInitialPrimal ( const Function& primalInitial )
-    {
-        // Set the initial value function.
-        M_primalInitial = primalInitial;
-
-        // Interpolate the primal initial value.
-        this->M_primal_FESpace.interpolate( M_primalInitial,
-                                            *(this->M_primal),
-                                            this->M_data.dataTime()->getInitialTime() );
-    }
+    void setInitialPrimal ( const Function& primalInitial );
 
     //@}
 
@@ -436,7 +427,7 @@ DarcySolverTransient ( const data_type&           dataFile,
                                         *(this->M_primal),
                                         this->M_data.dataTime()->getInitialTime() );
 
-	CONSTRUCTOR( "DarcySolverTransient" );
+    CONSTRUCTOR( "DarcySolverTransient" );
 
 } // Constructor
 
@@ -468,7 +459,7 @@ DarcySolverTransient ( const data_type&           dataFile,
                                         *(this->M_primal),
                                         this->M_data.dataTime()->getInitialTime() );
 
-	CONSTRUCTOR( "DarcySolverTransient" );
+    CONSTRUCTOR( "DarcySolverTransient" );
 
 } // Constructor
 
@@ -505,6 +496,22 @@ setup ()
                                                    static_cast<Int>(0) ) );
 
 } // setup
+
+// Set the inital value
+template<typename Mesh, typename SolverType>
+void 
+DarcySolverTransient<Mesh, SolverType>::
+setInitialPrimal ( const Function& primalInitial )
+{
+    // Set the initial value function.
+    M_primalInitial = primalInitial;
+
+    // Interpolate the primal initial value.
+    this->M_primal_FESpace.interpolate( M_primalInitial,
+                                        *(this->M_primal),
+                                         this->M_data.dataTime()->getInitialTime() );
+
+} // setInitialPrimal
 
 // Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
 template <typename Mesh, typename SolverType>

@@ -38,12 +38,11 @@
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 
-#include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/clapack.hpp>
-
+#include <life/lifesolver/dataHyperbolic.hpp>
+#include <life/lifealg/SolverTrilinos.hpp>
 //
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/dataHyperbolic.hpp>
 #include <life/lifefem/NumericalFluxes.hpp>
 //
 #include <life/lifecore/displayer.hpp>
@@ -91,25 +90,21 @@ public:
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const UInt& )>
-                                                  Function;
+                                                     Function;
 
-    typedef boost::function<Vector ( const Real&, const Real&, const Real&,
-                                     const Real&, const Real& )>
-                                                  vectorFunction;
+    typedef DataHyperbolic<Mesh>                     data_type;
 
-    typedef DataHyperbolic<Mesh>                  data_type;
+    typedef BCHandler                                bchandler_raw_type;
+    typedef boost::shared_ptr<bchandler_raw_type>    bchandler_type;
 
-    typedef BCHandler                             bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
+    typedef typename SolverType::vector_type         vector_type;
+    typedef boost::shared_ptr<vector_type>           vector_ptrtype;
 
-    typedef typename SolverType::vector_type      vector_type;
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+    typedef Epetra_Comm                              comm_type;
+    typedef boost::shared_ptr< comm_type >           comm_ptrtype;
 
-    typedef Epetra_Comm                           comm_type;
-    typedef boost::shared_ptr< comm_type >        comm_ptrtype;
-
-    typedef AbstractNumericalFlux                 flux_type;
-    typedef boost::shared_ptr< flux_type >        flux_ptrtype;
+    typedef AbstractNumericalFlux<Mesh, SolverType>  flux_type;
+    typedef boost::shared_ptr< flux_type >           flux_ptrtype;
 
     //@}
 
@@ -190,21 +185,10 @@ public:
     }
 
 
-    inline void setNumericalFlux ( const vectorFunction& physicalFlux,
-                                   const vectorFunction& firstDerivativePhysicalFlux )
+    inline void setNumericalFlux ( const GodunovNumericalFlux<Mesh, SolverType>& flux )
     {
 
-        const GetPot& dataFile ( *(M_data.dataFile()) );
-
-        const std::string section ( M_data.section() );
-
-        M_numericalFlux.reset( new GodunovNumericalFlux( physicalFlux,
-                                                         firstDerivativePhysicalFlux,
-                                                         dataFile( ( section + "/CFL/brent_toll" ).data(), 1e-4 ),
-                                                         dataFile( ( section + "/CFL/brent_maxIter").data(), 20 ),
-                                                         dataFile( ( section + "/numerical_flux/godunov/brent_toll" ).data(), 1e-4 ),
-                                                         dataFile( ( section + "/numerical_flux/godunov/brent_maxIter" ).data(), 20 ) ) );
-
+        M_numericalFlux.reset ( new GodunovNumericalFlux<Mesh, SolverType>( flux ) );
     }
 
     /*!
@@ -344,7 +328,7 @@ protected:
     //! Initial solution.
     Function            M_initialSolution;
 
-    boost::shared_ptr< AbstractNumericalFlux > M_numericalFlux;
+    boost::shared_ptr< GodunovNumericalFlux<Mesh, SolverType> > M_numericalFlux;
 
     //! Bondary conditions handler.
     bchandler_raw_type* M_BCh;
@@ -619,7 +603,7 @@ localEvolve ( const UInt& iElem )
             const BCBase& bcBase ( M_BCh->GetBCWithFlag( faceMarker ) );
 
             // Check if the bounday condition is of type Essential, useful for operator splitting strategies
-            if ( bcBase.type() == Essential  )
+            if ( bcBase.type() == Essential )
             {
 
                 // Loop on all the quadrature points
@@ -639,6 +623,7 @@ localEvolve ( const UInt& iElem )
                     const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
 
                     const  Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
+                                                                                                           iElem,
                                                                                                            M_data.dataTime()->getTime(),
                                                                                                            x, y, z, rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
@@ -707,6 +692,7 @@ localEvolve ( const UInt& iElem )
             const Real localFaceFlux = (*M_numericalFlux)( leftValue[ 0 ],
                                                            rightValue[ 0 ],
                                                            normal,
+                                                           iElem,
                                                            M_data.dataTime()->getTime(), x, y, z );
 
             // Update the local flux of the current face with the quadrature weight
@@ -746,7 +732,7 @@ Real
 HyperbolicSolver<Mesh, SolverType>::
 CFL() const
 {
-    return M_data.dataTime()->getTimeStep();
+//    return M_data.dataTime()->getTimeStep();
 
     // Total number of elements in the mesh
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
@@ -825,7 +811,7 @@ CFL() const
                 KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
 
                 // Compute the local CFL without the time step
-                localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal,
+                localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
                                                                    M_data.dataTime()->getTime(), x, y, z );
 
                 // Select the maximum between the old CFL condition and the new CFL condition
