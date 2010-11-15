@@ -98,7 +98,7 @@ public:
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
                                                const std::string& section,
-                                               const UInt&        listNumber = 1);
+                                               const std::string& subSection = "Composed" );
 
     double                 Condest ();
 

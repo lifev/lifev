@@ -59,21 +59,17 @@ ComposedPreconditioner::~ComposedPreconditioner()
 void
 ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section,
-                                           const UInt&        listNumber)
+                                           const std::string& subSection )
 {
     //M_List.resize(listNumber);
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
     ASSERT( !M_Prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
-    for(UInt i = 0; i < listNumber; ++i)
+    for( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
-        std::string newSection(section);
-        newSection = section + "/" + (i+1);
-        //dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
-        std::string prectype = dataFile( ( newSection + "composedPrecType" ).data(), "ML" );
-        epetra_prec_type tmp( PRECFactory::instance().createObject( prectype ) );
+        epetra_prec_type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_Prec->push_back(tmp);
-        M_Prec->P()[i]->createList(dataFile, section + "/" +  prectype + (i+1) , M_Prec->P()[i]->list());
+        M_Prec->P()[i]->createList(M_Prec->P()[i]->list(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }
 }
 
