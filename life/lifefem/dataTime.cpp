@@ -46,6 +46,7 @@ DataTime::DataTime( ) :
     M_periodTime       ( 1. ),
     M_time          ( M_initialTime ),
     M_timeStep      ( M_endTime ),
+    M_timeStepNumber( 0 ),
     M_BDF_order     ( 1 ),
     M_theta         ( 0.25 ),
     M_zeta          ( 0.5)
@@ -61,9 +62,10 @@ DataTime::DataTime( const DataTime& dataTime )
 {
 	M_initialTime	= dataTime.M_initialTime;
 	M_endTime		= dataTime.M_endTime;
-	M_periodTime		= dataTime.M_periodTime;
+	M_periodTime    = dataTime.M_periodTime;
 	M_time			= dataTime.M_time;
 	M_timeStep		= dataTime.M_timeStep;
+	M_timeStepNumber= dataTime.M_timeStepNumber;
 	M_BDF_order		= dataTime.M_BDF_order;
 	M_theta	        = dataTime.M_theta;
 	M_zeta          = dataTime.M_zeta;
@@ -91,13 +93,14 @@ DataTime::showMe( std::ostream& output ) const
     output << "\n*** DataTime: values for user-defined data\n";
 
     output << "\n[/time_discretization]" << std::endl;
-    output << "Initial time = " << M_initialTime << std::endl;
-	output << "End time     = " << M_endTime	 << std::endl;
-	output << "Time         = " << M_time		 << std::endl;
-	output << "TimeStep     = " << M_timeStep	 << std::endl;
-	output << "BDF order    = " << M_BDF_order   << std::endl;
-	output << "theta        = " << M_theta       << std::endl;
-	output << "zeta         = " << M_zeta        << std::endl;
+    output << "Initial time   = " << M_initialTime    << std::endl;
+	output << "End time       = " << M_endTime	      << std::endl;
+	output << "Time           = " << M_time		      << std::endl;
+	output << "TimeStep       = " << M_timeStep	      << std::endl;
+	output << "TimeStepNumber = " << M_timeStepNumber << std::endl;
+	output << "BDF order      = " << M_BDF_order      << std::endl;
+	output << "theta          = " << M_theta          << std::endl;
+	output << "zeta           = " << M_zeta           << std::endl;
 }
 
 // ===================================================

@@ -90,25 +90,25 @@ public:
     void setup( const GetPot& dfile, const std::string& section = "time_discretization" );
 
     //! Update the time by a timestep.
-    void updateTime()       { M_time += M_timeStep; }
+    void updateTime() { M_time += M_timeStep; ++M_timeStepNumber; }
 
     //! Return if we can make a new timestep
     /*!
      * @return true if time <= endTime, false viceversa
      */
-    bool canAdvance()       { return round( M_time ) <= round( M_endTime ); }
+    bool canAdvance() { return round( M_time ) <= round( M_endTime ); }
 
     //! Return if it is the initial time step
     /*!
      * @return true if time = initial time, false viceversa
      */
-    bool isFirstTimeStep()  { return round( M_time ) == round( M_initialTime ); }
+    bool isFirstTimeStep() { return round( M_time ) == round( M_initialTime ); }
 
     //! Return if it is the last time step
     /*!
      * @return true if time + timestep > endTime, false viceversa.
      */
-    bool isLastTimeStep()   { return round( M_time + M_timeStep ) > round( M_endTime ); }
+    bool isLastTimeStep() { return round( M_time + M_timeStep ) > round( M_endTime ); }
 
     //! Display general information about the content of the class
     /*!
@@ -126,43 +126,43 @@ public:
     /*!
      * @param initialTime initial time step value
      */
-    void setInitialTime ( const Real& initialTime ) { M_initialTime = initialTime; }
+    void setInitialTime( const Real& initialTime ) { M_initialTime = initialTime; }
 
     //! Set the final time step
     /*!
      * @param endtime final time step value
      */
-    void setEndTime     ( const Real& endTime )     { M_endTime = endTime; }
+    void setEndTime( const Real& endTime ) { M_endTime = endTime; }
 
     //! Set the present time of the simulation
     /*!
      * @param time present time value
      */
-    void setTime        ( const Real& time )        { M_time = time; }
+    void setTime( const Real& time ) { M_time = time; }
 
     //! Set the initial time step
     /*!
      * @param timeStep initial time step value
      */
-    void setTimeStep    ( const Real& timeStep )    { M_timeStep = timeStep; }
+    void setTimeStep( const Real& timeStep ) { M_timeStep = timeStep; }
 
     //! Set the BDF odert to use
     /*!
      * @param order BDF order
      */
-    void setBDF_order   ( const UInt& BDF_order )   { M_BDF_order = BDF_order; }
+    void setBDF_order( const UInt& BDF_order ) { M_BDF_order = BDF_order; }
 
     //! Set the theta of Newmark scheme
     /*!
      * @param theta theta Newmark value
      */
-    void setTheta ( const Real& theta )             { M_theta = theta; }
+    void setTheta( const Real& theta ) { M_theta = theta; }
 
     //! Set the theta of Newmark scheme
     /*!
      * @param zeta zeta Newmark value
      */
-    void setZeta ( const Real& zeta )               { M_zeta = zeta; }
+    void setZeta( const Real& zeta ) { M_zeta = zeta; }
 
     //@}
 
@@ -174,37 +174,37 @@ public:
     /*!
      * @return initial time step value
      */
-    Real getInitialTime()	 const { return M_initialTime; }
+    const Real& getInitialTime() const { return M_initialTime; }
 
     //! Get the final time step
     /*!
      * @return final time step value
      */
-    Real getEndTime()		 const { return M_endTime; }
+    const Real& getEndTime() const { return M_endTime; }
 
     //! Get the period
     /*!
      * @return period value
      */
-    Real getPeriodTime()		 const { return M_periodTime; }
+    const Real& getPeriodTime() const { return M_periodTime; }
 
     //! Get the present time
     /*!
      * @return time value
      */
-    Real getTime()			 const { return M_time; }
+    const Real& getTime() const { return M_time; }
 
     //! Get the time left
     /*!
      * @return time left value
      */
-    Real getLeftTime()       const { return round( M_endTime - M_time ); }
+    Real getLeftTime() const { return round( M_endTime - M_time ); }
 
     //! Get the elapsed time
     /*!
      * @return elapsed time value
     */
-    Real getElapsedTime()    const { return round( M_time - M_initialTime ); }
+    Real getElapsedTime() const { return round( M_time - M_initialTime ); }
 
     //! Get the present time shifted inside the first cycle
     //! (i.e. in the interval (M_initialTime,M_periodTime)).
@@ -212,8 +212,7 @@ public:
     /*!
      * @return time value in first cycle
      */
-    Real getInCycleTime()			 const
-		{ return (M_time - static_cast<int>(floor((M_time-M_timeStep/2)/M_periodTime)) * M_periodTime); }
+    Real getInCycleTime() const { return (M_time - static_cast<int>(floor((M_time-M_timeStep/2)/M_periodTime)) * M_periodTime); }
 
     //! Get the previous time
     /*!
@@ -231,31 +230,31 @@ public:
     /*!
      * @return time step value
      */
-    Real getTimeStep()		 const { return M_timeStep; }
+    const Real& getTimeStep()		 const { return M_timeStep; }
 
     //! Get the number of time step performed
     /*!
      * @return time step performed
      */
-    UInt getTimeStepNumber() const { return static_cast <UInt> ( round( round( M_time-M_initialTime ) / round( M_timeStep ) ) ); }
+    const UInt& getTimeStepNumber() const { return M_timeStepNumber; }
 
     //! Get the BDF order used
     /*!
      * @return BDF order value
      */
-    UInt getBDF_order()		 const { return M_BDF_order; }
+    const UInt& getBDF_order()		 const { return M_BDF_order; }
 
     //! Return theta parameter of Newmark scheme
     /*!
      * @return theta value
      */
-    Real theta()             const { return M_theta; }
+    const Real& theta()             const { return M_theta; }
 
     //! Return zeta of Newmark scheme
     /*!
      * @return zeta value
      */
-    Real zeta()              const { return M_zeta; }
+    const Real& zeta()              const { return M_zeta; }
 
     //! Return Newmark parameters (theta, zeta and timestep)
     std::vector<Real> getNewmark_parameters();
@@ -266,15 +265,16 @@ private:
 
     Real round( const Real n, const Int decimal=10 ) const;
 
-    Real					M_initialTime;	// initial time
-    Real					M_endTime;		// end time
-    Real					M_periodTime;	// period time
-    Real					M_inCycleTime;	// in cycle time
-    Real					M_time;			// time
-    Real					M_timeStep; 	// time step
-    UInt					M_BDF_order; 	// order of the time discretization formula
-    Real                    M_theta;        // Newmark parameter
-    Real                    M_zeta;         // Newmark parameter
+    Real					M_initialTime;	  // initial time
+    Real					M_endTime;		  // end time
+    Real					M_periodTime;	  // period time
+    Real					M_inCycleTime;	  // in cycle time
+    Real					M_time;           // time
+    Real					M_timeStep; 	  // time step
+    UInt                    M_timeStepNumber; // iteration number
+    UInt					M_BDF_order; 	  // order of the time discretization formula
+    Real                    M_theta;          // Newmark parameter
+    Real                    M_zeta;           // Newmark parameter
 };
 
 } // namespace LifeV
