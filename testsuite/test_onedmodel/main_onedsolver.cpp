@@ -210,7 +210,8 @@ int main(int argc, char** argv)
         chronoSystem.stop();
 
 		//Save solution
-        OneDModel.SaveSolution();
+        if( count%50 == 0 || OneDModel.GetData().dataTime()->isLastTimeStep() )
+            OneDModel.SaveSolution();
 
         chronoIteration.stop();
 
