@@ -9,14 +9,15 @@
     multimesh  = false   # actually we export also the displacement
     start      = 0
     save       = 1
+    file_name  = PressureVelocity
     [../]
 
     [darcy]
 
         [./space_discretization]
-    	mesh_dir      = ./Mesh/  # the directory where the mesh file is
+    	mesh_dir      = ./Mesh/old/  # the directory where the mesh file is
     	mesh_file     = cartesian_cube8.mesh
-	    mesh_type     = .mesh #structured #.mesh
+	mesh_type     = .mesh #structured #.mesh
     	verbose       = 0
 	    # 0 -> tetra, 1 -> hexa
     	element_shape = 0

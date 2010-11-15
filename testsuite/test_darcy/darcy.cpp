@@ -97,6 +97,14 @@ using namespace LifeV;
 
 enum BCNAME
 {
+    /*
+    FLUX0            = 0,
+    INLETPRESSURE1   = 1,
+    INLETPRESSURE2   = 2,
+    OUTLETPRESSURE   = 3,
+    FLUX1            = 4*/
+
+
     BACK   = 1,
     FRONT  = 2,
     LEFT   = 3,
@@ -154,6 +162,40 @@ Matrix inversePermeability( const Real& /*t*/,
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
+    /* Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
+
+    if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
+         || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
+         || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
+    {
+        // First row
+        Entry00 = 100.;
+        Entry01 = 0.;
+        Entry02 = 0.;
+
+        // Second row
+        Entry11 = 100.;
+        Entry12 = 0.;
+
+        // Third row
+        Entry22 =  100.;
+
+    }
+    else
+    { // First row
+        Entry00 = 1.;
+        Entry01 = 0.;
+        Entry02 = 0.;
+
+        // Second row
+        Entry11 = 1.;
+        Entry12 = 0.;
+
+        // Third row
+        Entry22 = 1.;
+        }*/
+
+
     // First row
     Real Entry00 = 1.;
     Real Entry01 = -1.;
@@ -178,6 +220,33 @@ Matrix inversePermeability( const Real& /*t*/,
     inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
 
     return inversePermeabilityMatrix;
+}
+
+Real dirichlet1( const Real& /* t */,
+		 const Real& /* x */,
+		 const Real& /* y */,
+		 const Real& /* z */,
+                const ID&   /*icomp*/)
+{
+  return 11000000.;
+}
+
+ Real dirichlet2( const Real& /* t */,
+		  const Real& /* x */,
+		  const Real& /* y */,
+		  const Real& /* z */,
+               const ID&   /*icomp*/)
+{
+  return  10000000.;
+}
+
+ Real dirichlet3( const Real& /* t */,
+		  const Real& /* x */,
+		  const Real& /* y */,
+		  const Real& /* z */,
+               const ID&   /*icomp*/)
+{
+  return  10500000.;
 }
 
 // Boundary condition of Dirichlet
@@ -231,6 +300,16 @@ Real neumann2( const Real& /* t */,
 	return 0.;
 }
 
+// Boundary condition of Neumann
+Real neumann3( const Real& /* t */,
+               const Real& /* x */,
+               const Real& /* y */,
+               const Real& /* z */,
+               const ID&   /* icomp */)
+{
+	return 0.;
+}
+
 // Boundary condition of Robin
 Real mixte( const Real& /* t */,
             const Real& x,
@@ -248,7 +327,7 @@ Real source_in( const Real& /*t*/,
                 const Real& /*z*/,
                 const ID&  /*icomp*/)
 {
-    return -2.*x*x - 4.*y*y - 8.*x*y;
+    return -2.*x*x - 4.*y*y - 8.*x*y;//0.;
 }
 
 // Standard functions
@@ -444,6 +523,24 @@ darcy::run()
     // Start chronoBoundaryCondition for measure the total time for create the boundary conditions
     chronoBoundaryCondition.start();
 
+    /*
+    BCFunctionBase dirichletBDfun1, dirichletBDfun2, dirichletBDfun3, neumannBDfun1;
+    BCFunctionMixte mixteBDfun;
+
+    dirichletBDfun1.setFunction( dataProblem::dirichlet1 );
+    dirichletBDfun2.setFunction( dataProblem::dirichlet2 );
+    dirichletBDfun3.setFunction( dataProblem::dirichlet3 );
+    neumannBDfun1.setFunction( dataProblem::neumann3 );
+
+
+    BCHandler bcDarcy( 5 );
+    bcDarcy.addBC( "Top",            FLUX0,          Natural,   Full,    neumannBDfun1, 0 );
+    bcDarcy.addBC( "Top2",           FLUX1,          Natural,   Full,    neumannBDfun1, 0 );
+    bcDarcy.addBC( "InletPressure",  INLETPRESSURE1, Essential, Scalar,  dirichletBDfun1  );
+    bcDarcy.addBC( "InletPressure1", INLETPRESSURE2, Essential, Scalar,  dirichletBDfun3  );
+    bcDarcy.addBC( "OutletPressure", OUTLETPRESSURE, Essential, Scalar,  dirichletBDfun2  );
+*/
+
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
    	BCFunctionMixte mixteBDfun;
 
@@ -465,6 +562,7 @@ darcy::run()
     bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichletBDfun  );
     //bcDarcy.addBC(  "Back",   BACK,    Essential,  Scalar,  dirichletBDfun  );
     bcDarcy.addBC( "Back",    BACK,    Natural,    Full,    neumannBDfun2, 1 );
+
 
     // Stop chronoBoundaryCondition
     chronoBoundaryCondition.stop();
@@ -634,7 +732,7 @@ darcy::run()
 #ifdef HAVE_HDF5
     if ( exporterType.compare("hdf5") == 0 )
     {
-        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, "PressureVelocity" ) );
+        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
 
         // Set directory where to save the solution
         exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -646,7 +744,7 @@ darcy::run()
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new NoExport< RegionMesh > ( dataFile, "PressureVelocity" ) );
+            exporter.reset( new NoExport< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
 
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -655,7 +753,7 @@ darcy::run()
         }
         else
         {
-            exporter.reset( new Ensight< RegionMesh > ( dataFile, "PressureVelocity" ) );
+            exporter.reset( new Ensight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
 
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );

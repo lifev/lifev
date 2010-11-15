@@ -655,7 +655,7 @@ darcy::run()
 #ifdef HAVE_HDF5
     if ( exporterType.compare("hdf5") == 0 )
     {
-        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, "PressureVelocity" ) );
+        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
 
         // Set directory where to save the solution
         exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -667,7 +667,7 @@ darcy::run()
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new NoExport< RegionMesh > ( dataFile, "PressureVelocity" ) );
+            exporter.reset( new NoExport< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
 
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -676,7 +676,7 @@ darcy::run()
         }
         else
         {
-            exporter.reset( new Ensight< RegionMesh > ( dataFile, "PressureVelocity" ) );
+            exporter.reset( new Ensight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
 
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
