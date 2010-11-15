@@ -127,6 +127,7 @@ main( int argc, char** argv )
     std::string dataFile      = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
     bool verbose              = commandLine.follow( false, 2, "-s", "--showme" );
     std::string problemFolder = commandLine.follow( "MultiScale", 2, "-n", "--name" );
+    Real externalResidual     = commandLine.follow( -1., 2, "-c", "--check" );
 
     // Create the problem folder
     if ( problemFolder.compare("./") )
@@ -145,7 +146,7 @@ main( int argc, char** argv )
         MS.ShowMe();
 
     // Solve the problem
-    exitFlag = MS.SolveProblem();
+    exitFlag = MS.SolveProblem( externalResidual );
 
 #ifdef HAVE_MPI
     if ( rank == 0 )

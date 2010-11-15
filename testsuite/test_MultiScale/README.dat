@@ -26,4 +26,6 @@ where the star * means that you should chose which main file do you want to load
 More generally, after ./test_MS you can specify the following option:
 -f (--file):   to specify the file
 -s (--showme): to turn on verbose mode (available parameters: 0, 1)
--n (--name): to specify the output folder (default: MultiScale/)
+-n (--name):   to specify the output folder (default: MultiScale/)
+-c (--check):  to specify the final external residual at the coupling interface that
+               will be compared with the one obtained from the solver (default: -1.)
