@@ -152,6 +152,14 @@ MS_Algorithm::InitializeCouplingVariables()
     M_multiscale->InitializeCouplingVariables();
 }
 
+Real
+MS_Algorithm::Residual() const
+{
+    // Compute residual
+    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
+    return M_couplingResiduals->Norm2();
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -266,8 +274,8 @@ MS_Algorithm::Save( const UInt& SubiterationsNumber, const Real& residual )
 bool
 MS_Algorithm::ToleranceSatisfied()
 {
-    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
-    Real residual = M_couplingResiduals->Norm2();
+    // Compute residual
+    Real residual ( Residual() );
 
     // Display residual value
     if ( M_displayer->isLeader() )
