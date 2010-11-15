@@ -50,6 +50,10 @@ thickness            = 0.1
 Length               = 5.
 NumberOfElements     = 50          # number of elements
 
+[../JacobianPerturbation]
+deltaArea            = 0.001        # perturbation on the area
+deltaFlowRate        = 0.001        # perturbation on the flow rate
+deltaPressure        = 1            # perturbation on the pressure
 
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files

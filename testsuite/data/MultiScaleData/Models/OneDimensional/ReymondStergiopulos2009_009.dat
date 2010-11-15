@@ -53,6 +53,10 @@ poisson              = 0.0
 Length               = 6.7
 NumberOfElements     = 67          # number of elements
 
+[../JacobianPerturbation]
+deltaArea            = 0.01         # perturbation on the area
+deltaFlowRate        = 0.01         # perturbation on the flow rate
+deltaPressure        = 10           # perturbation on the pressure
 
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files
