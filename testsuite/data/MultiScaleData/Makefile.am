@@ -25,8 +25,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 SUBDIRS		= 	Couplings\
 				Models
 
-dist_pkgdata_DATA = MultiScale_test.dat \
-					MultiScale.dat \
+dist_pkgdata_DATA = MultiScale.dat \
 					Run_CarotidBifurcation_1D-3DFluid_FluxStress.dat \
 					Run_CarotidBifurcation_1D-3DFSI_FluxStress.dat \
 					Run_CarotidBifurcation_3DFluid.dat \
@@ -66,7 +65,9 @@ dist_pkgdata_DATA = MultiScale_test.dat \
 					Run_Womersley_3DFluid_5Cylinders_Stress_tube20.dat \
 					Run_Womersley_3DFluid_5Cylinders_Stress_tube40.dat \
 					Run_Womersley_3DFluid_5Cylinders_Stress_tube60.dat \
-					Run_Womersley_3DFluid_5Cylinders_Stress_tube80.dat
+					Run_Womersley_3DFluid_5Cylinders_Stress_tube80.dat \
+					Test_Fluid3D.dat \
+					Test_1D.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
