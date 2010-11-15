@@ -37,11 +37,11 @@ namespace LifeV {
 
 
 void ComposedDN::setDataFromGetPot( const GetPot& dataFile,
-                                      const std::string& section )
+                                    const std::string& section )
 {
     M_blockPrecs->setDataFromGetPot(  dataFile,
-                                      section ,
-                                      M_recompute.size());
+                                      section,
+                                      "Composed" );
 }
 
 

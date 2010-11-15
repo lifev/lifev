@@ -175,7 +175,7 @@ void ComposedNN::coupler(map_shared_ptrtype& map,
 
 void ComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
-    IfpackPreconditioner::createIfpackList(data, section, M_list);
+    IfpackPreconditioner::createIfpackList(M_list, data, section);
 }
 
 void ComposedNN::push_back_matrix(const matrix_ptrtype& Mat, const  bool recompute)
