@@ -259,6 +259,9 @@ public:
                              const UInt subdomainMaxId,
                              const boost::shared_ptr<Epetra_Comm> epetraWorldComm );
 
+    //! TODO Paolo implement this method!
+    void setRecompute(UInt /*position*/, bool /*flag*/) { }
+
     //! returns the map built for theLagrange multipliers
     map_shared_ptrtype getInterfaceMap() const { return M_interfaceMap; }
 
