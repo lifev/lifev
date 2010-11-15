@@ -62,6 +62,9 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_flux_second_der           (),
     M_dP_dt_steps               (),
     M_CFLmax                    (),
+    M_JacobianPerturbationArea  (),
+    M_JacobianPerturbationFlowRate(),
+    M_JacobianPerturbationPressure(),
 //    M_initialVariable           (),
 //    M_initialValue              (),
 //    M_restValue                 (),
@@ -145,6 +148,11 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
 
     if ( M_CFLmax > std::sqrt(3)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
+
+    // Jacobian perturbation
+    M_JacobianPerturbationArea     = dataFile( ( section + "/JacobianPerturbation/deltaArea"         ).data(), 0.001 );
+    M_JacobianPerturbationFlowRate = dataFile( ( section + "/JacobianPerturbation/deltaFlowRate"     ).data(), 0.001 );
+    M_JacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1 );
 
 /*
     // Initialize
@@ -364,6 +372,11 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     if ( M_CFLmax > std::sqrt(3)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
+    // Jacobian perturbation
+    M_JacobianPerturbationArea     = dataFile( ( section + "JacobianPerturbation/deltaArea"          ).data(), 0.001 );
+    M_JacobianPerturbationFlowRate = dataFile( ( section + "JacobianPerturbation/deltaFlowRate"      ).data(), 0.001 );
+    M_JacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1 );
+
 /*
     // Initialize
     std::map< std::string, OneD_Initialize > initializeMap;
@@ -578,6 +591,12 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Flux Second Derivative = " << M_flux_second_der << std::endl;
     output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
     output << "Maximum admissible CFL = " << M_CFLmax << std::endl;
+
+    // Jacobian perturbation
+    output << "Jacobian perturbation Area      = " << M_JacobianPerturbationArea << std::endl;
+    output << "Jacobian perturbation Flow Rate = " << M_JacobianPerturbationFlowRate << std::endl;
+    output << "Jacobian perturbation Pressure  = " << M_JacobianPerturbationPressure << std::endl;
+
 /*
     // Initialize
     output << "\n*** Values for data [initialize]\n\n";
@@ -836,6 +855,24 @@ const Real&
 OneDimensionalModel_Data::CFLmax() const
 {
     return M_CFLmax;
+}
+
+const Real&
+OneDimensionalModel_Data::JacobianPerturbationArea() const
+{
+    return M_JacobianPerturbationArea;
+}
+
+const Real&
+OneDimensionalModel_Data::JacobianPerturbationFlowRate() const
+{
+    return M_JacobianPerturbationFlowRate;
+}
+
+const Real&
+OneDimensionalModel_Data::JacobianPerturbationPressure() const
+{
+    return M_JacobianPerturbationPressure;
 }
 
 /*
