@@ -41,6 +41,7 @@ dist_pkgdata_DATA = CarotidBifurcation_1D-3DFluid_FluxStress.dat \
                     SinusoidalWave_1D_3Cylinders_FluxStress.dat \
                     SinusoidalWave_1D_Hexagon_Stress.dat \
                     SinusoidalWave_1D_Hexagon_FluxStress.dat \
+                    SinusoidalWave_1D_Hexagon_Mixte.dat \
                     SinusoidalWave_1D-3DFluid_2Cylinders_FluxStress.dat \
                     SinusoidalWave_1D-3DFluid_2Cylinders_Stress.dat \
                     SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress.dat \
