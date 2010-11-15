@@ -5,14 +5,14 @@
 
 [problem]
 
-blockOper   = AdditiveSchwarzGI
+blockOper   = AdditiveSchwarz
 # OPTIONS:
 #AdditiveSchwarz
 #AdditiveSchwarzRN
 #AdditiveSchwarzGI
 #AdditiveSchwarzRNGI
 
-DDBlockPrec = ComposedDNGI
+DDBlockPrec = ComposedDN
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -25,7 +25,7 @@ DDBlockPrec = ComposedDNGI
 #ComposedDNDGI: under testing, do not use
 #ComposedDND2GI: under testing, do not use
 
-method     = monolithicGI # monolithicGE, monolithicGI
+method     = monolithicGE # monolithicGE, monolithicGI
 
 reducedFluid = 0 # 0 = exact, 1 = inexact
 defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
