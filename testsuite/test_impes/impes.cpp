@@ -43,12 +43,19 @@ using namespace LifeV;
 
 enum BCNAME
 {
-    BACK   = 1,
-    FRONT  = 2,
-    LEFT   = 3,
-    RIGHT  = 4,
-    BOTTOM = 5,
-    TOP    = 6
+
+    FLUX0            = 0,
+    INLETPRESSURE1   = 1,
+    INLETPRESSURE2   = 2,
+    OUTLETPRESSURE   = 3,
+    FLUX1            = 4
+
+//    BACK   = 1,
+//    FRONT  = 2,
+//    LEFT   = 3,
+//    RIGHT  = 4,
+//    BOTTOM = 5,
+//    TOP    = 6
 };
 
 namespace dataProblem
@@ -88,8 +95,9 @@ struct impes::Private
                                      fct_type;
 
     // Policy for vector function
-    typedef boost::function<Vector ( const Real&, const Real&, const Real&,
-                                     const Real&, const Real& )>
+    typedef boost::function<Vector ( const Real&, const Real&,
+                                     const Real&, const Real&,
+                                     const std::vector<Real>& )>
                                      Vfct_type;
 
 
@@ -223,7 +231,7 @@ impes::run()
     typedef DarcySolver< RegionMesh, solver_type >                   ds;
     typedef DarcySolverTransientNonLinear< RegionMesh, solver_type > dstnl;
     typedef HyperbolicSolver< RegionMesh, solver_type >              hyper;
-	typedef ds::vector_type                                          vector_type;
+    typedef ds::vector_type                                          vector_type;
     typedef boost::shared_ptr<vector_type>                           vector_ptrtype;
 
     Chrono chronoTotal;
@@ -333,7 +341,7 @@ impes::run()
     //                                      Members->getUOne() );
 
     // Total number of different boundary contitions.
-    const UInt bcNumber( 6 );
+    const UInt bcNumber( 5 );
 
     // Boundary condition handler for the pressure equation.
 	BCHandler bcPressure( bcNumber );
@@ -341,21 +349,33 @@ impes::run()
     // Boundary condition handler for the saturation equation.
     BCHandler bcSaturation( bcNumber );
 
+    bcPressure.addBC( "Top",            FLUX0,          Natural,   Full,    pressureNeumannBDfun, 0 );
+    bcPressure.addBC( "Top2",           FLUX1,          Natural,   Full,    pressureNeumannBDfun, 0 );
+    bcPressure.addBC( "InletPressure",  INLETPRESSURE1, Essential, Scalar,  pressureDirichletBDfun1  );
+    bcPressure.addBC( "InletPressure1", INLETPRESSURE2, Essential, Scalar,  pressureDirichletBDfun3  );
+    bcPressure.addBC( "OutletPressure", OUTLETPRESSURE, Essential, Scalar,  pressureDirichletBDfun2  );
+
+    bcSaturation.addBC( "Top",            FLUX0,          Natural,   Full,    saturationNeumannBDfun, 0 );
+    bcSaturation.addBC( "Top2",           FLUX1,          Natural,   Full,    saturationNeumannBDfun, 0 );
+    bcSaturation.addBC( "InletPressure",  INLETPRESSURE1, Essential, Scalar,  saturationDirichletBDfun1  );
+    bcSaturation.addBC( "InletPressure1", INLETPRESSURE2, Essential, Scalar,  saturationDirichletBDfun3  );
+    bcSaturation.addBC( "OutletPressure", OUTLETPRESSURE, Essential, Scalar,  saturationDirichletBDfun2  );
+
     // Setting the boundary condition for the pressure equation.
-    bcPressure.addBC(   "Top",    TOP,    Essential,  Scalar,  pressureDirichletBDfun1 );
-    bcPressure.addBC("Bottom", BOTTOM,    Essential,  Scalar,  pressureDirichletBDfun1 );
-    bcPressure.addBC(  "Left",   LEFT,    Essential,  Scalar,  pressureDirichletBDfun1 );
-    bcPressure.addBC( "Right",  RIGHT,    Essential,  Scalar,  pressureDirichletBDfun1 );
-    bcPressure.addBC( "Front",  FRONT,    Essential,  Scalar,  pressureDirichletBDfun1 );
-    bcPressure.addBC(  "Back",   BACK,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    //bcPressure.addBC(   "Top",    TOP,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    //bcPressure.addBC("Bottom", BOTTOM,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    //bcPressure.addBC(  "Left",   LEFT,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    //bcPressure.addBC( "Right",  RIGHT,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    //bcPressure.addBC( "Front",  FRONT,    Essential,  Scalar,  pressureDirichletBDfun1 );
+    //bcPressure.addBC(  "Back",   BACK,    Essential,  Scalar,  pressureDirichletBDfun1 );
 
     // Setting the boundary condition for the saturation equation.
-    bcSaturation.addBC(   "Top",    TOP,    Essential,  Scalar,  saturationDirichletBDfun1 );
-    bcSaturation.addBC("Bottom", BOTTOM,    Essential,  Scalar,  saturationDirichletBDfun1 );
-    bcSaturation.addBC(  "Left",   LEFT,    Essential,  Scalar,  saturationDirichletBDfun1 );
-    bcSaturation.addBC( "Right",  RIGHT,    Essential,  Scalar,  saturationDirichletBDfun1 );
-    bcSaturation.addBC( "Front",  FRONT,    Essential,  Scalar,  saturationDirichletBDfun1 );
-    bcSaturation.addBC(  "Back",   BACK,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    //bcSaturation.addBC(   "Top",    TOP,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    //bcSaturation.addBC("Bottom", BOTTOM,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    //bcSaturation.addBC(  "Left",   LEFT,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    //bcSaturation.addBC( "Right",  RIGHT,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    //bcSaturation.addBC( "Front",  FRONT,    Essential,  Scalar,  saturationDirichletBDfun1 );
+    //bcSaturation.addBC(  "Back",   BACK,    Essential,  Scalar,  saturationDirichletBDfun1 );
 
     // Stop chronoBoundaryCondition.
     chronoBoundaryCondition.stop();
@@ -384,8 +404,8 @@ impes::run()
     pressure_qR_primal    = &quadRuleTetra15pt;
     pressure_bdQr_primal  = &quadRuleTria4pt;
 
-	// Dual solution parameters.
-	const RefFE*    pressure_refFE_dual ( static_cast<RefFE*>(NULL) );
+    // Dual solution parameters.
+    const RefFE*    pressure_refFE_dual ( static_cast<RefFE*>(NULL) );
     const QuadRule* pressure_qR_dual    ( static_cast<QuadRule*>(NULL) );
     const QuadRule* pressure_bdQr_dual  ( static_cast<QuadRule*>(NULL) );
 
@@ -393,8 +413,8 @@ impes::run()
     pressure_qR_dual    = &quadRuleTetra15pt;
     pressure_bdQr_dual  = &quadRuleTria4pt;
 
-	// Interpolate of dual solution parameters.
-	const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
+    // Interpolate of dual solution parameters.
+    const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
     const QuadRule* pressure_qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
     const QuadRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
 
@@ -431,7 +451,8 @@ impes::run()
                                                          *pressure_bdQr_dual, 1, Members->comm );
 
     // Finite element space of the interpolation of dual variable.
-    FESpace< RegionMesh, EpetraMap > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
+    FESpace< RegionMesh, EpetraMap > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, 
+                                                                    *pressure_qR_dualInterpolate,
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
 
     // Vector for the interpolated dual solution.
@@ -457,7 +478,8 @@ impes::run()
     saturation_hyperbolic_bdQr  = &quadRuleTria1pt;
 
     // Finite element space.
-    FESpace< RegionMesh, EpetraMap > saturation_hyperbolic_FESpace( meshPart, *saturation_hyperbolic_refFE, *saturation_hyperbolic_qR,
+    FESpace< RegionMesh, EpetraMap > saturation_hyperbolic_FESpace( meshPart, *saturation_hyperbolic_refFE, 
+                                                                    *saturation_hyperbolic_qR,
                                                                     *saturation_hyperbolic_bdQr, 1, Members->comm );
 
     // Non-linear and transient Darcy parameters.
@@ -471,8 +493,8 @@ impes::run()
     saturation_darcy_qR_primal    = pressure_qR_primal;
     saturation_darcy_bdQr_primal  = pressure_bdQr_dual;
 
-	// Dual solution parameters.
-	const RefFE*    saturation_darcy_refFE_dual ( static_cast<RefFE*>(NULL) );
+    // Dual solution parameters.
+    const RefFE*    saturation_darcy_refFE_dual ( static_cast<RefFE*>(NULL) );
     const QuadRule* saturation_darcy_qR_dual    ( static_cast<QuadRule*>(NULL) );
     const QuadRule* saturation_darcy_bdQr_dual  ( static_cast<QuadRule*>(NULL) );
 
@@ -501,19 +523,23 @@ impes::run()
 
 
     // Finite element space of the primal variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_p_FESpace( meshPart, *saturation_darcy_refFE_primal, *saturation_darcy_qR_primal,
+    FESpace< RegionMesh, EpetraMap > saturation_darcy_p_FESpace( meshPart, *saturation_darcy_refFE_primal, 
+                                                                 *saturation_darcy_qR_primal,
                                                                  *saturation_darcy_bdQr_primal, 1, Members->comm );
 
     // Finite element space of the dual variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_u_FESpace( meshPart, *saturation_darcy_refFE_dual, *saturation_darcy_qR_dual,
+    FESpace< RegionMesh, EpetraMap > saturation_darcy_u_FESpace( meshPart, *saturation_darcy_refFE_dual, 
+                                                                 *saturation_darcy_qR_dual,
                                                                  *saturation_darcy_bdQr_dual, 1, Members->comm );
 
     // Finite element space of the hybrid variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_hybrid_FESpace( meshPart, *saturation_darcy_refFE_hybrid, *saturation_darcy_qR_hybrid,
+    FESpace< RegionMesh, EpetraMap > saturation_darcy_hybrid_FESpace( meshPart, *saturation_darcy_refFE_hybrid, 
+                                                                      *saturation_darcy_qR_hybrid,
                                                                       *saturation_darcy_bdQr_hybrid, 1, Members->comm );
 
     // Finite element space of the  outward unit normal variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_VdotN_FESpace( meshPart, *saturation_darcy_refFE_VdotN, *saturation_darcy_qR_VdotN,
+    FESpace< RegionMesh, EpetraMap > saturation_darcy_VdotN_FESpace( meshPart, *saturation_darcy_refFE_VdotN, 
+                                                                     *saturation_darcy_qR_VdotN,
                                                                      *saturation_darcy_bdQr_VdotN, 1, Members->comm );
 
 
@@ -563,6 +589,9 @@ impes::run()
     inversePermeability < RegionMesh > invPermPress ( Members->getPressurePermeability(),
                                                       saturation_darcy_p_FESpace );
 
+    // Set the saturation dependence for the permeability tensor.
+    invPermPress.setField( saturationDarcySolver.primalSolution() );
+
     // Set the inverse of the permeability in the pressure equation.
     pressureSolver.setInversePermeability( invPermPress );
 
@@ -576,6 +605,19 @@ impes::run()
 
     // Set up for the hyperbolic solver in the saturation equation.
     saturationHyperbolicSolver.setup();
+
+    // Create the numerical flux
+    GodunovNumericalFlux < RegionMesh > numericalFlux ( Members->getSaturationPhysicalFlux(),
+                                                        Members->getSaturationFirstDerivativePhysicalFlux(),
+                                                        pressure_uInterpolate_FESpace,
+                                                        dataFile,
+                                                        "impes/hyperbolic/numerical_flux/" );
+
+    // Set the dependence field
+    numericalFlux.setField ( pressure_dualInterpolated );
+
+    // Set the numerical flux usign the physical flux
+    saturationHyperbolicSolver.setNumericalFlux( numericalFlux );
 
     // Set the boudary conditions.
     saturationHyperbolicSolver.setBC( bcSaturation );
@@ -601,18 +643,13 @@ impes::run()
     // Set the boudary conditions.
     saturationDarcySolver.setBC( bcSaturation );
 
-    // Cross solvers dependences
-
-    // Set the saturation dependence for the permeability tensor.
-    invPermPress.setField( saturationDarcySolver.primalSolution() );
-
     // Set the exporter for the solution.
     boost::shared_ptr< Exporter< RegionMesh > > exporter;
 
     // Shared pointer used in the exporter for the pressure in the pressure equation.
     vector_ptrtype pressureExporter;
 
-    // Shared pointer used in the exporter for the saturation in the saturation equation.
+    // Shared pointer  in the exporter for the saturation in the saturation equation.
     vector_ptrtype saturationExporter;
 
     // Type of the exporter.
@@ -709,6 +746,10 @@ impes::run()
         // Post process of the global pressure and total velocity.
         pressureSolver.computePrimalAndDual();
 
+        // Interpolate the Darcy velocity
+        *pressure_dualInterpolated = pressure_uInterpolate_FESpace.FeToFeInterpolate( pressure_u_FESpace,
+                                                                                      *pressureSolver.dualSolution() );
+
         // Solve the saturation equation.
 
         // Solve the hyperbolic part of the saturation equation.
@@ -716,11 +757,7 @@ impes::run()
         // Set the initial condition for the inner loop
         saturationHyperbolicSolver.setSolution( saturationDarcySolver.primalSolution()  );
 
-        // Set the numerical flux usign the physical flux.
-        saturationHyperbolicSolver.setNumericalFlux( Members->getSaturationPhysicalFlux(),
-                                                     Members->getSaturationFirstDerivativePhysicalFlux() );
-
-        // Set the time paramether for the hyperbolic part of the saturation equation.
+        // Set the time parameters for the hyperbolic part of the saturation equation.
 
         // Set the initial time.
         dataSaturationHyperbolic.dataTime()->setInitialTime( dataSaturationDarcyNonLinear.dataTime()->getTime() );
@@ -732,7 +769,7 @@ impes::run()
         dataSaturationHyperbolic.dataTime()->setEndTime( dataSaturationDarcyNonLinear.dataTime()->getNextTime() );
 
         // Define the inner time step.
-        Real innerTimeStep(0.);
+        Real innerTimeStep( 0. );
 
         // Define if the current time is the last time step.
         bool isLastTimeStep( false );
