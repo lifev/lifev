@@ -170,7 +170,7 @@ MS_Solver::SetupProblem( const std::string& FileName, const std::string& problem
 }
 
 bool
-MS_Solver::SolveProblem()
+MS_Solver::SolveProblem( const Real& externalResidual )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -224,6 +224,12 @@ MS_Solver::SolveProblem()
         if ( M_displayer->isLeader() )
             std::cout << " MS-  Total iteration time:                    " << M_chrono.diff() << " s" << std::endl;
     }
+
+    // Redisual check
+    Real algorithmResidual( M_algorithm->Residual() );
+    if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-12 )
+        MS_ErrorCheck( MS_Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
+                                    " (External Residual: " + number2string( externalResidual ) + ")\n" );
 
     return MS_ExitFlag;
 }
