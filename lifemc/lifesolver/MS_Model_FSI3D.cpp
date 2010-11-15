@@ -215,7 +215,7 @@ MS_Model_FSI3D::UpdateSystem()
 
     //Update solution at time n
     *M_meshDispOld_tn = M_FSIoperator->meshMotion().dispOld();
-    M_FSIoperator->solutionPtr( M_solution_tn );
+    *M_solution_tn = *M_FSIoperator->solutionPtr();
     *M_meshDisp_tn = M_FSIoperator->meshDisp();
     *M_rhs_tn *= 0;
 
@@ -458,17 +458,13 @@ MS_Model_FSI3D::GetBoundaryArea( const BCFlag& Flag ) const
 Real
 MS_Model_FSI3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    vector_PtrType solution;
-    M_FSIoperator->solutionPtr( solution );
-    return M_FSIoperator->fluid().flux( Flag, *solution );
+    return M_FSIoperator->fluid().flux( Flag, *M_FSIoperator->solutionPtr() );
 }
 
 Real
 MS_Model_FSI3D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
-    vector_PtrType solution;
-    M_FSIoperator->solutionPtr( solution );
-    return M_FSIoperator->fluid().pressure( Flag, *solution );
+    return M_FSIoperator->fluid().pressure( Flag, *M_FSIoperator->solutionPtr() );
 }
 
 Real
