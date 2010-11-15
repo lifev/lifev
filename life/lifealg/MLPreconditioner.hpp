@@ -91,7 +91,7 @@ public:
 
     void                    setDataFromGetPot ( const GetPot&      dataFile,
                                                 const std::string& section,
-                                                const UInt&        listnumber = 0 );
+                                                const std::string& subSection = "ML" );
 
     double                  Condest ();
 
@@ -110,15 +110,15 @@ public:
     //! returns true if prec exists
     /*const*/ bool  set() const {return M_Prec;}
 
-    virtual void createList( const GetPot&              dataFile,
-                             const std::string&         section,
-                             list_Type&    list)
-    {createMLList(dataFile, section, list);}
+    virtual void createList(       list_Type&   list,
+                             const GetPot&      dataFile,
+                             const std::string& section,
+                             const std::string& subSection = "ML" ) {createMLList( list, dataFile, section, subSection);}
 
-
-    static void createMLList( const GetPot&              dataFile,
-                            const std::string&         section,
-                            list_Type&    list);
+    static void createMLList(       list_Type&   list,
+                              const GetPot&      dataFile,
+                              const std::string& section,
+                              const std::string& subSection = "ML" );
 
     int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
     bool            UseTranspose(  ) {return M_Prec->UseTranspose();}

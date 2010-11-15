@@ -51,7 +51,7 @@ AztecOOPreconditioner::AztecOOPreconditioner():
 void
 AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                           const std::string& section,
-                                          const UInt&        /*listNumber*/ )
+                                          const std::string& subSection )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -59,53 +59,53 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 #endif
 
     // Preconditioner
-    M_solver->getParameterList().set("precond", dataFile( ( section + "/AztecOO/precond" ).data(), "dom_decomp" ));
+    M_solver->getParameterList().set("precond", dataFile( ( section + "/" + subSection + "/precond" ).data(), "dom_decomp" ));
 
     // Compute the preconditioner
-    M_solver->getParameterList().set("pre_calc", dataFile( ( section + "/AztecOO/pre_calc" ).data(), "calc" ));
+    M_solver->getParameterList().set("pre_calc", dataFile( ( section + "/" + subSection + "/pre_calc" ).data(), "calc" ));
 
     // Reordering
-    M_solver->getParameterList().set("reorder", dataFile( ( section + "/AztecOO/reorder" ).data(), 1 ));
+    M_solver->getParameterList().set("reorder", dataFile( ( section + "/" + subSection + "/reorder" ).data(), 1 ));
 
     // Keep the information
-    M_solver->getParameterList().set("keep_info", dataFile( ( section + "/AztecOO/keep_info" ).data(), 1 ));
+    M_solver->getParameterList().set("keep_info", dataFile( ( section + "/" + subSection + "/keep_info" ).data(), 1 ));
 
     // Polynomial order when using Jacobi and GS preconditioners
-    //M_solver->getParameterList().set("poly_ord", dataFile( ( section + "/AztecOO/poly_ord" ).data(), 3 ));
+    //M_solver->getParameterList().set("poly_ord", dataFile( ( section + "/" + subSection + "/poly_ord" ).data(), 3 ));
 
     // Overlap level
-    M_solver->getParameterList().set("overlap", dataFile( ( section + "/AztecOO/overlap" ).data(), AZ_none ));
+    M_solver->getParameterList().set("overlap", dataFile( ( section + "/" + subSection + "/overlap" ).data(), AZ_none ));
 
     // Overlap type
-    M_solver->getParameterList().set("type_overlap", dataFile( ( section + "/AztecOO/type_overlap" ).data(), AZ_standard ));
+    M_solver->getParameterList().set("type_overlap", dataFile( ( section + "/" + subSection + "/type_overlap" ).data(), AZ_standard ));
 
 
 
     // SUBDOMAIN SOLVER
 
-    M_solver->getParameterList().set("subdomain_solve", dataFile( ( section + "/AztecOO/subdomain_solve" ).data(), "ILUT" ));
+    M_solver->getParameterList().set("subdomain_solve", dataFile( ( section + "/" + subSection + "/subdomain_solve" ).data(), "ILUT" ));
 
-    M_solver->getParameterList().set("drop", dataFile( ( section + "/AztecOO/drop" ).data(), 1.e-5 ));
+    M_solver->getParameterList().set("drop", dataFile( ( section + "/" + subSection + "/drop" ).data(), 1.e-5 ));
 
-    //M_solver->getParameterList().set("graph_fill", dataFile( ( section + "/AztecOO/graph_fill" ).data(), 6. ));
+    //M_solver->getParameterList().set("graph_fill", dataFile( ( section + "/" + subSection + "/graph_fill" ).data(), 6. ));
 
-    M_solver->getParameterList().set("ilut_fill", dataFile( ( section + "/AztecOO/ilut_fill" ).data(), 4. ));
+    M_solver->getParameterList().set("ilut_fill", dataFile( ( section + "/" + subSection + "/ilut_fill" ).data(), 4. ));
 
-    //M_solver->getParameterList().set("init_guess", dataFile( ( section + "/AztecOO/init_guess" ).data(), AZ_NOT_ZERO ));
+    //M_solver->getParameterList().set("init_guess", dataFile( ( section + "/" + subSection + "/init_guess" ).data(), AZ_NOT_ZERO ));
 
-    //M_solver->getParameterList().set("keep_kvecs", dataFile( ( section + "/AztecOO/keep_kvecs" ).data(), 0 ));
+    //M_solver->getParameterList().set("keep_kvecs", dataFile( ( section + "/" + subSection + "/keep_kvecs" ).data(), 0 ));
 
-    //M_solver->getParameterList().set("apply_kvecs", dataFile( ( section + "/AztecOO/apply_kvecs" ).data(), AZ_FALSE ));
+    //M_solver->getParameterList().set("apply_kvecs", dataFile( ( section + "/" + subSection + "/apply_kvecs" ).data(), AZ_FALSE ));
 
-    //M_solver->getParameterList().set("orth_kvecs", dataFile( ( section + "/AztecOO/orth_kvecs" ).data(), AZ_FALSE ));
+    //M_solver->getParameterList().set("orth_kvecs", dataFile( ( section + "/" + subSection + "/orth_kvecs" ).data(), AZ_FALSE ));
 
-    //M_solver->getParameterList().set("ignore_scaling", dataFile( ( section + "/AztecOO/ignore_scaling" ).data(), AZ_FALSE ));
+    //M_solver->getParameterList().set("ignore_scaling", dataFile( ( section + "/" + subSection + "/ignore_scaling" ).data(), AZ_FALSE ));
 
-    //M_solver->getParameterList().set("check_update_size", dataFile( ( section + "/AztecOO/check_update_size" ).data(), AZ_FALSE ));
+    //M_solver->getParameterList().set("check_update_size", dataFile( ( section + "/" + subSection + "/check_update_size" ).data(), AZ_FALSE ));
 
-    //M_solver->getParameterList().set("omega", dataFile( ( section + "/AztecOO/omega" ).data(), 1. ));
+    //M_solver->getParameterList().set("omega", dataFile( ( section + "/" + subSection + "/omega" ).data(), 1. ));
 
-    //M_solver->getParameterList().set("update_reduction", dataFile( ( section + "/AztecOO/update_reduction" ).data(), 10e10 ));
+    //M_solver->getParameterList().set("update_reduction", dataFile( ( section + "/" + subSection + "/update_reduction" ).data(), 10e10 ));
 
 
     // SET PARAMETERS

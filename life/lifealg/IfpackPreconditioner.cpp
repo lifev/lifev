@@ -45,11 +45,11 @@ IfpackPreconditioner::~IfpackPreconditioner()
 void
 IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                          const std::string& section,
-                                         const UInt&        /*listNumber*/ )
+                                         const std::string& subSection )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
-    createIfpackList(dataFile, section, this->M_List);
+    createIfpackList( this->M_List, dataFile, section, subSection );
 }
 
 int
@@ -104,26 +104,27 @@ IfpackPreconditioner::precReset()
 
 
 void
-IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
-                  const std::string&         section,
-                  list_Type&    list)
+IfpackPreconditioner::createIfpackList(       list_Type&   list,
+                                        const GetPot&      dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    int overlapLevel = dataFile((section + "/ifpack/overlap").data(),     0);
-    std::string precType     = dataFile((section + "/ifpack/prectype").data(),"Amesos");
+    int overlapLevel = dataFile((section + "/" + subSection + "/overlap").data(),     0);
+    std::string precType     = dataFile((section + "/" + subSection + "/prectype").data(),"Amesos");
 
     list.set("prectype", precType);
     list.set("overlap level", overlapLevel);
 
     bool displayList = dataFile((section + "/displayList").data(),     false);
 
-    std::string relaxationType              = dataFile((section + "/ifpack/relaxation/type").data(), "Jacobi");
-    int         relaxationSweeps            = dataFile((section + "/ifpack/relaxation/sweeps").data(), 1);
-    double      relaxationDampingFactor     = dataFile((section + "/ifpack/relaxation/damping_factor").data(), 1.0);
-    double      relaxationMinDiagValue      = dataFile((section + "/ifpack/relaxation/min_diagonal_value").data(), 0.0);
-    bool        relaxationZeroStartSolution = dataFile((section + "/ifpack/relaxation/zero_starting_solution").data(), true);
+    std::string relaxationType              = dataFile((section + "/" + subSection + "/relaxation/type").data(), "Jacobi");
+    int         relaxationSweeps            = dataFile((section + "/" + subSection + "/relaxation/sweeps").data(), 1);
+    double      relaxationDampingFactor     = dataFile((section + "/" + subSection + "/relaxation/damping_factor").data(), 1.0);
+    double      relaxationMinDiagValue      = dataFile((section + "/" + subSection + "/relaxation/min_diagonal_value").data(), 0.0);
+    bool        relaxationZeroStartSolution = dataFile((section + "/" + subSection + "/relaxation/zero_starting_solution").data(), true);
 
     list.set("relaxation: type",                    relaxationType);
     list.set("relaxation: sweeps",                  relaxationSweeps);
@@ -131,11 +132,11 @@ IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
     list.set("relaxation: min diagonal value",      relaxationMinDiagValue);
     list.set("relaxation: zero starting solution",  relaxationZeroStartSolution);
 
-    std::string partitionerType             = dataFile((section + "/ifpack/partitioner/type").data(), "metis");
-    int         partitionerOverlap          = dataFile((section + "/ifpack/partitioner/overlap").data(), 0);
-    int         partitionerLocalParts       = dataFile((section + "/ifpack/partitioner/local_parts").data(), 1);
-    int         partitionerRootNode         = dataFile((section + "/ifpack/partitioner/root_node").data(), 0);
-    bool        partitionerUseSymmGraph     = dataFile((section + "/ifpack/partitioner/use_symmetric_graph").data(), true);
+    std::string partitionerType             = dataFile((section + "/" + subSection + "/partitioner/type").data(), "metis");
+    int         partitionerOverlap          = dataFile((section + "/" + subSection + "/partitioner/overlap").data(), 0);
+    int         partitionerLocalParts       = dataFile((section + "/" + subSection + "/partitioner/local_parts").data(), 1);
+    int         partitionerRootNode         = dataFile((section + "/" + subSection + "/partitioner/root_node").data(), 0);
+    bool        partitionerUseSymmGraph     = dataFile((section + "/" + subSection + "/partitioner/use_symmetric_graph").data(), true);
 
     list.set("partitioner: type",                partitionerType);
     list.set("partitioner: overlap",             partitionerOverlap);
@@ -143,16 +144,16 @@ IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
     list.set("partitioner: root node",           partitionerRootNode);
     list.set("partitioner: use symmetric graph", partitionerUseSymmGraph);
 
-    std::string amesosSolverType            = dataFile((section + "/ifpack/amesos/solvertype").data(), "Amesos_KLU");
+    std::string amesosSolverType            = dataFile((section + "/" + subSection + "/amesos/solvertype").data(), "Amesos_KLU");
 
     list.set("amesos: solver type", amesosSolverType);
 
-    double levelOfFill     = dataFile((section + "/ifpack/fact/level-of-fill").data(),      4.);
-    double ILUTlevelOfFill = dataFile((section + "/ifpack/fact/ilut_level-of-fill").data(), 4.);
-    double athr            = dataFile((section + "/ifpack/fact/absolute_threshold").data(), 0.);
-    double rthr            = dataFile((section + "/ifpack/fact/relative_threshold").data(), 1.);
-    double relaxValue      = dataFile((section + "/ifpack/fact/relax_value").data(),        0.);
-    double dropTolerance   = dataFile((section + "/ifpack/fact/drop_tolerance").data(),     1e-5);
+    double levelOfFill     = dataFile((section + "/" + subSection + "/fact/level-of-fill").data(),      4.);
+    double ILUTlevelOfFill = dataFile((section + "/" + subSection + "/fact/ilut_level-of-fill").data(), 4.);
+    double athr            = dataFile((section + "/" + subSection + "/fact/absolute_threshold").data(), 0.);
+    double rthr            = dataFile((section + "/" + subSection + "/fact/relative_threshold").data(), 1.);
+    double relaxValue      = dataFile((section + "/" + subSection + "/fact/relax_value").data(),        0.);
+    double dropTolerance   = dataFile((section + "/" + subSection + "/fact/drop_tolerance").data(),     1e-5);
 
     list.set("fact: drop tolerance",     dropTolerance);
     list.set("fact: level-of-fill",      levelOfFill);
@@ -161,7 +162,7 @@ IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
     list.set("fact: relative threshold", rthr);
     list.set("fact: relax value",        relaxValue);
 
-    int combineMode              = dataFile((section + "/ifpack/schwarz/combine_mode").data(),    0);
+    int combineMode              = dataFile((section + "/" + subSection + "/schwarz/combine_mode").data(),    0);
     Epetra_CombineMode schwarzCombineMode;
 
      switch(combineMode)
@@ -185,9 +186,9 @@ IfpackPreconditioner::createIfpackList( const GetPot&              dataFile,
              schwarzCombineMode = Zero;
          }
 
-    bool schwarzComputeCondest          = dataFile((section + "/ifpack/schwarz/compute_condest").data(),   true);
-    std::string schwarzReorderingType   = dataFile((section + "/ifpack/schwarz/reordering_type").data(),      "none");
-    bool schwarzFilterSingletons        = dataFile((section + "/ifpack/schwarz/filter_singletons").data(), true);
+    bool schwarzComputeCondest          = dataFile((section + "/" + subSection + "/schwarz/compute_condest").data(),   true);
+    std::string schwarzReorderingType   = dataFile((section + "/" + subSection + "/schwarz/reordering_type").data(),      "none");
+    bool schwarzFilterSingletons        = dataFile((section + "/" + subSection + "/schwarz/filter_singletons").data(), true);
 
     list.set("schwarz: combine mode",       schwarzCombineMode);
     list.set("schwarz: compute condest",    schwarzComputeCondest);

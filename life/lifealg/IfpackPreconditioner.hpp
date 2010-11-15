@@ -84,7 +84,7 @@ public:
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
 					                           const std::string& section,
-                                               const UInt&        listNumber = 0 );
+					                           const std::string& subSection = "ifpack" );
 
     double                 Condest ();
 
@@ -101,14 +101,15 @@ public:
 
     bool                   set() const {return M_Prec;}
 
-    virtual void createList( const GetPot&              dataFile,
-                             const std::string&         section,
-                             list_Type&    list)
-    {createIfpackList(dataFile, section, list);}
+    virtual void createList( list_Type&         list,
+                             const GetPot&      dataFile,
+                             const std::string& section,
+                             const std::string& subSection = "ifpack" ) { createIfpackList( list, dataFile, section, subSection );}
 
-    static void createIfpackList( const GetPot&              dataFile,
-                                          const std::string&         section,
-                                          list_Type&    list);
+    static void createIfpackList(       list_Type&   list,
+                                  const GetPot&      dataFile,
+                                  const std::string& section,
+                                  const std::string& subSection = "ifpack" );
 
     const int&
     getOverlapLevel() const

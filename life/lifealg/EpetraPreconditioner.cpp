@@ -48,7 +48,7 @@ EpetraPreconditioner::EpetraPreconditioner( const comm_PtrType& comm ):
 {
 }
 
-EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm):
+EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm ):
     M_precType              ( P.M_precType ),
     M_displayer             ( comm ),
     M_List                  ( P.getList() ),
@@ -64,11 +64,12 @@ EpetraPreconditioner::~EpetraPreconditioner()
 // Methods
 // ===================================================
 void
-EpetraPreconditioner::createList( const GetPot&                 dataFile,
-                                  const std::string&            section,
-                                        list_Type& list )
+EpetraPreconditioner::createList(       list_Type&   list,
+                                  const GetPot&      dataFile,
+                                  const std::string& section,
+                                  const std::string& subSection )
 {
-    createPreconditionerList( dataFile, section, list );
+    createPreconditionerList( list, dataFile, section, subSection );
 }
 
 // ===================================================

@@ -105,7 +105,7 @@ public:
      *  @param dataFile the GetPot file
      *  @param section the section inside the GetPot file containing the parameters
      */
-    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section , const UInt& listNumber = 0 );
+    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section, const std::string& subSection = "AztecOO" );
 
     //! Set the external solver (AztecOO)
     /*!
