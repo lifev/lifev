@@ -108,7 +108,7 @@ public:
     /*!
      * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
      */
-    bool SolveProblem();
+    bool SolveProblem( const Real& externalResidual = -1 );
 
     //! Display some information about the MultiScale problem (to be called after SetupProblem)
     void ShowMe();

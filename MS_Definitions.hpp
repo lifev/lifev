@@ -114,6 +114,7 @@ enum errorsTypes
 {
     MS_IterationsMaximumNumber, /*!< Maximum number of iterations reached */
     MS_Tolerance,               /*!< Tolerance not satisfied */
+    MS_Residual,                /*!< External residual not satisfied */
     MS_ModelType,               /*!< Model type not recognized */
     MS_CouplingType             /*!< Coupling type not recognized */
 };
@@ -243,6 +244,12 @@ MS_ErrorCheck( const errorsTypes& error, const std::string& message = "" )
         case MS_Tolerance:
 
             errorMessage << "Tolerance not satisfied!\n";
+
+            break;
+
+        case MS_Residual:
+
+            errorMessage << "External residual not satisfied!\n";
 
             break;
 
