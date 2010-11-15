@@ -1,11 +1,12 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2006, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano   
 #
 #      Author(s): Name Surname <name.surname@epfl.ch>
 #           Date: 00-00-0000
-#  License Terms: GNU GPL
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### TEST: TEST NAME ###############################################################################
