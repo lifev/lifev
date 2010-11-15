@@ -196,9 +196,15 @@ Real brent( const Function& f/* const fct_type& f*/, const Real& leftExtremeBase
         // Increase the iterations number
         ++numIter;
     }
+    std::ostringstream os;
+    os << "Attention the brent scheme does not reach the convergence in "
+       << numIter
+       << ", with tollerance "
+       << tollRelative << std::endl;
+
 
     // Check if the method reach the tollerance.
-    ASSERT( maxIter > numIter, "Attention the brent scheme does not reach the convergence." );
+    ASSERT( maxIter > numIter, os.str().c_str() );
 
     return x;
 

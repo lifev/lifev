@@ -67,7 +67,12 @@ Real analyticalSolution( const Real& t,
                          const Real& z,
                          const ID& /*ic*/)
 {
-    return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
+    Real u1 = 5;
+    if ( ( x <= u1*t/2 && x >= u1*(t - 0.15)/2 ) && ( y >= 0.25 && y <= 0.75 )  && ( z >= 0.25 && z <= 0.75 ) )
+        return 1;
+    else
+        return 0;
+    //  return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
 }
 
 // Physical flux function
@@ -75,18 +80,18 @@ Vector physicalFlux( const Real& /*t*/,
                      const Real& x,
                      const Real& y,
                      const Real& z,
-                     const Real& u )
+                     const std::vector<Real>& u )
 {
     Vector physicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = -2.*Pi*y*u;
+    Real Entry0 = u[0]*u[0]*u[1];//y*u[0]*u[1];
 
     // Second row
-    Real Entry1 = 2.*Pi*x*u;
+    Real Entry1 = u[2];//x*u[0]*u[2];
 
     // Third row
-    Real Entry2 = 0.;
+    Real Entry2 = u[3];
 
     physicalFluxVector( static_cast<UInt>(0) ) = Entry0;
     physicalFluxVector( static_cast<UInt>(1) ) = Entry1;
@@ -97,18 +102,18 @@ Vector physicalFlux( const Real& /*t*/,
 
 // First derivative in u of the physical flux function
 Vector firstDerivativePhysicalFlux( const Real& /*t*/,
-                     const Real& x,
-                     const Real& y,
-                     const Real& z,
-                     const Real& u )
+                                    const Real& x,
+                                    const Real& y,
+                                    const Real& z,
+                                    const std::vector<Real>& u )
 {
     Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = -2.*Pi*y;
+    Real Entry0 = 2.*u[0]*u[1];//y*u[1];
 
     // Second row
-    Real Entry1 = 2.*Pi*x;
+    Real Entry1 = 0.;//x*u[2];
 
     // Third row
     Real Entry2 = 0.;
@@ -118,6 +123,27 @@ Vector firstDerivativePhysicalFlux( const Real& /*t*/,
     firstDerivativePhysicalFluxVector( static_cast<UInt>(2) ) = Entry2;
 
     return firstDerivativePhysicalFluxVector;
+}
+
+// Initial time condition
+Real dual( const Real& /*t*/,
+           const Real& x,
+           const Real& y,
+           const Real& z,
+           const ID&   ic )
+{
+    switch( ic )
+    {
+    case 1:
+        return 5.;//-2.*Pi;
+        break;
+    case 2:
+        return 0.;//2.*Pi;
+        break;
+    case 3:
+      return 0.;
+        break;
+    }
 }
 
 // Initial time condition
@@ -148,7 +174,7 @@ Real source_in( const Real& /*t*/,
                 const Real& /*z*/,
                 const ID&  /*icomp*/)
 {
-    return -2.*x*x - 4.*y*y - 8.*x*y;
+    return 0.;
 }
 
 // Standard functions
@@ -185,8 +211,9 @@ struct hyperbolic::Private
                                      fct_type;
 
     // Policy for the flux function
-    typedef boost::function<Vector ( const Real&, const Real&, const Real&,
-                                     const Real&, const Real& )>
+    typedef boost::function<Vector ( const Real&, const Real&,
+                                     const Real&, const Real&,
+                                     const std::vector<Real>& )>
                                      vectorFct_type;
 
     std::string    data_file_name;
@@ -386,6 +413,24 @@ hyperbolic::run()
     qR    = &quadRuleTetra15pt;
     bdQr  = &quadRuleTria1pt;
 
+	// Interpolate of dual solution parameters.
+	const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
+    const QuadRule* pressure_qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
+    const QuadRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
+
+    pressure_refFE_dualInterpolate = &feTetraP0;
+    pressure_qR_dualInterpolate    = &quadRuleTetra15pt;
+    pressure_bdQr_dualInterpolate  = &quadRuleTria4pt;
+
+    // Finite element space of the interpolation of dual variable.
+    FESpace< RegionMesh, EpetraMap > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
+                                                                    *pressure_bdQr_dualInterpolate, 3, Members->comm );
+
+    // Vector for the interpolated dual solution.
+    vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );
+
+    pressure_uInterpolate_FESpace.interpolate( dataProblem::dual, *pressure_dualInterpolated, 0 );
+
     // Finite element space
     FESpace< RegionMesh, EpetraMap > fESpace( meshPart,
                                               *refFE,
@@ -431,9 +476,18 @@ hyperbolic::run()
     // Set the initial solution
     hyperbolicSolver.setInitialSolution( Members->getInitialCondition() );
 
+    // Create the numerical flux.
+    GodunovNumericalFlux < RegionMesh > numericalFlux ( Members->getPhysicalFlux(),
+                                                        Members->getFirstDerivativePhysicalFlux(),
+                                                        pressure_uInterpolate_FESpace,
+                                                        dataFile,
+                                                        "hyperbolic/numerical_flux/" );
+
+    // Set the dependence field
+    numericalFlux.setField ( pressure_dualInterpolated );
+
     // Set the numerical flux usign the physical flux
-    hyperbolicSolver.setNumericalFlux( Members->getPhysicalFlux(),
-                                       Members->getFirstDerivativePhysicalFlux() );
+    hyperbolicSolver.setNumericalFlux( numericalFlux );
 
     // Set the boudary conditions
     hyperbolicSolver.setBC( bcHyperbolic );
@@ -451,7 +505,7 @@ hyperbolic::run()
 #ifdef HAVE_HDF5
     if ( exporterType.compare("hdf5") == 0 )
     {
-        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, "Concentration" ) );
+        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
 
         // Set directory where to save the solution
         exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -463,7 +517,7 @@ hyperbolic::run()
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new NoExport< RegionMesh > ( dataFile, "Concentration" ) );
+            exporter.reset( new NoExport< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
 
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -472,7 +526,7 @@ hyperbolic::run()
         }
         else
         {
-            exporter.reset( new Ensight< RegionMesh > ( dataFile, "Concentration" ) );
+            exporter.reset( new Ensight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
 
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
@@ -508,20 +562,31 @@ hyperbolic::run()
     // Save the initial solution into the exporter
     exporter->postProcess( dataHyperbolic.dataTime()->getInitialTime() );
 
+    // Changing time step for the simulation
     Real timeStep(0.);
 
+    // Flag for the last time step that does not coincide with the last advance
+    bool isLastTimeStep( false );
+
     // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-    while( !dataHyperbolic.dataTime()->isLastTimeStep() )
+    for (; dataHyperbolic.dataTime()->canAdvance() && !isLastTimeStep; dataHyperbolic.dataTime()->updateTime() )
     {
 
         // Compute the new time step according to the CFL condition.
-        timeStep = hyperbolicSolver.CFL();
+        //timeStep = hyperbolicSolver.CFL();
 
-        // Set the new time step in the dataHyperbolic.
-        dataHyperbolic.dataTime()->setTimeStep( timeStep );
+        // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
+        if ( dataHyperbolic.dataTime()->isLastTimeStep() )
+        {
+            // Compute the last time step.
+            timeStep = dataHyperbolic.dataTime()->getLeftTime();
 
-        // Advance the current time of \Delta t.
-        dataHyperbolic.dataTime()->updateTime();
+            // This is the last time step in the simulation
+            isLastTimeStep = true;
+        }
+
+       // Set the last time step for the simulation.
+       //dataHyperbolic.dataTime()->setTimeStep( timeStep );
 
         // The leader process prints the temporal data.
         if ( hyperbolicSolver.getDisplayer().isLeader() )
@@ -572,7 +637,7 @@ hyperbolic::run()
                                           dataHyperbolic.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of exact solution:              ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of exact solution:      ",
                                                  exactL2Norm, "\n" );
 
     // Compute the L2 error for the solution
@@ -582,14 +647,14 @@ hyperbolic::run()
                                        dataHyperbolic.dataTime()->getEndTime() );
 
     // Display the L2 error for the solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 error:           ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 error:                       ",
                                                  L2Error, "\n" );
 
     // Compute the L2 realative error for the solution
     L2RelativeError = L2Error / L2Norm;
 
     // Display the L2 relative error for the solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 relative error:  ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 relative error:              ",
                                                  L2RelativeError, "\n" );
 
     // Stop chronoError
