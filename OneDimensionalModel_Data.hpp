@@ -295,6 +295,11 @@ public:
     const Real& dBeta0dz( const UInt& i ) const;
     const Real& dBeta1dz( const UInt& i ) const;
 
+    // Jacobian perturbation parameters
+    const Real& JacobianPerturbationArea() const;
+    const Real& JacobianPerturbationFlowRate() const;
+    const Real& JacobianPerturbationPressure() const;
+
     // Linear Parameters
     const Real& Flux11( const UInt& i ) const;
     const Real& Flux12( const UInt& i ) const;
@@ -368,6 +373,11 @@ private:
 //    Real              M_initialValue;
 //    Real              M_restValue;
 //    Real              M_multiplier;
+
+    //! Jacobian perturbation
+    Real M_JacobianPerturbationArea;
+    Real M_JacobianPerturbationFlowRate;
+    Real M_JacobianPerturbationPressure;
 
     //! Physical Parameters
     bool M_ComputeCoefficients;
