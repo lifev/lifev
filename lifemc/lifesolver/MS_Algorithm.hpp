@@ -110,6 +110,8 @@ public:
     //! Initialize coupling variables for the first time step.
     void InitializeCouplingVariables();
 
+    Real Residual() const;
+
     //@}
 
 
