@@ -5,14 +5,14 @@
 
 [problem]
 
-blockOper   = AdditiveSchwarz
+blockOper   = AdditiveSchwarzGI
 # OPTIONS:
 #AdditiveSchwarz
 #AdditiveSchwarzRN
 #AdditiveSchwarzGI
 #AdditiveSchwarzRNGI
 
-DDBlockPrec = ComposedDNND
+DDBlockPrec = ComposedDNGI
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -25,7 +25,7 @@ DDBlockPrec = ComposedDNND
 #ComposedDNDGI: under testing, do not use
 #ComposedDND2GI: under testing, do not use
 
-method     = monolithicGE # monolithicGE, monolithicGI
+method     = monolithicGI # monolithicGE, monolithicGI
 
 reducedFluid = 0 # 0 = exact, 1 = inexact
 defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
@@ -91,7 +91,7 @@ mesh_dir  = ./Mesh/
 mesh_file = tube20.mesh
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-stiff_strain    = true
+stiff_strain    = false
 
 [../miscellaneous]
 verbose   = 1
@@ -145,9 +145,12 @@ factor    = 12
 verbose   = 1
 depname   = dep
 
+
 [../newton]
-  maxiter = 100
-  reltol  = 1.e-8
+maxiter = 1
+abstol  = 1.e-8
+linesearch = 0
+
 
 
 [linear_system]
@@ -183,19 +186,16 @@ rescale_factor = 1. # solid matrix rescale factor
 displayList     = true
 entry           = 0.0
 
-1composedPrecType = Ifpack # used for the ComposedPreconditioner: each factor uses the corresponding
-                       # preconditioning strategy.
-2composedPrecType = ML
-
 [./robin]
 alphaf = 0.
 alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 
-
+[../Composed]
+list                = 'Ifpack Ifpack'
+sections            = 'Ifpack1 Ifpack2'
 
 [../ML1] # preconditioner for the first factor in case our choice was ML
 displayList = false
-[./ML]
 default_parameter_list = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 prec_type =  MGV # MGV
     # one-level-postsmoothing , two-level-additive
@@ -230,14 +230,12 @@ type                = Amesos-KLU
 [../smoother]
 type = IFPACK # IFPACK, Aztec
 pre_or_post = pre
-[../] # end of ML
 [../] # end of ML1
 
 
 
 
 [../ML2]  # preconditioner for the second factor in case our choice was ML
-[./ML]
 default_parameter_list = NSSA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 displayList = true
 prec_type = MGV # MGV, MGW
@@ -275,7 +273,6 @@ max_size            = 60
 type = IFPACK # Aztec, IFPACK
 ##pre_or_post = pre
 
-[../] # end of ML
 [../] # end of ML2
 
 
