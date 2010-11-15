@@ -158,7 +158,7 @@ public:
     const vector_type& getSolution() const { return *M_uk; }
 
     //! get the solution.
-    vector_ptrtype solutionPtr() const { return M_uk; }
+    vector_ptrtype& solutionPtr() { return M_uk; }
 
     //! set the solution
     void setSolution( const vector_type& solution ) { M_uk.reset( new vector_type( solution ) ); }

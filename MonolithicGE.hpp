@@ -127,7 +127,7 @@ public:
     const vector_type& getSolution() const { return *M_un; }
 
     //! get the solution ptr
-    vector_ptrtype solutionPtr() const { return M_un; }
+    vector_ptrtype& solutionPtr() { return M_un; }
 
     //! set the solution
     void setSolution( const vector_type& solution ) { M_un.reset( new vector_type( solution ) ); }

@@ -372,7 +372,7 @@ public:
     //! get the solution vector
     virtual const vector_type& getSolution() const = 0;
 
-    virtual vector_ptrtype solutionPtr() const = 0;
+    virtual vector_ptrtype& solutionPtr() = 0;
 
     //! initializes the solution by reference (through a shared_ptr)
     /*!
