@@ -58,13 +58,19 @@ ComposedPreconditioner::~ComposedPreconditioner()
 
 void
 ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
-                                           const std::string& section,
-                                           const std::string& subSection )
+                                           const std::string& section )
 {
-    //M_List.resize(listNumber);
-    //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
-    //! for more informations on the parameters
+    createList( M_List, dataFile, section, "Composed" );
+}
+
+void
+ComposedPreconditioner::createList(       list_Type& /*list*/,
+                                    const GetPot&      dataFile,
+                                    const std::string& section,
+                                    const std::string& subSection )
+{
     ASSERT( !M_Prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
+
     for( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
         epetra_prec_type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );

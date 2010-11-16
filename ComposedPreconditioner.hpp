@@ -97,9 +97,9 @@ public:
      */
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
-                                               const std::string& section,
-                                               const std::string& subSection = "Composed" );
+                                               const std::string& section );
 
+    void                   createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
     double                 Condest ();
 
     super::prec_raw_type*  getPrec();
