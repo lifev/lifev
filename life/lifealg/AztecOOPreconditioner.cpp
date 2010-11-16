@@ -50,14 +50,19 @@ AztecOOPreconditioner::AztecOOPreconditioner():
 
 void
 AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
-                                          const std::string& section,
-                                          const std::string& subSection )
+                                          const std::string& section )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "AztecOOPreconditioner::setDataFromGetPot(dataFile, section) \n";
 #endif
 
+    createList( M_List, dataFile, section, "AztecOO" );
+}
+
+void
+AztecOOPreconditioner::createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection )
+{
     // Preconditioner
     M_solver->getParameterList().set("precond", dataFile( ( section + "/" + subSection + "/precond" ).data(), "dom_decomp" ));
 
@@ -78,7 +83,6 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
     // Overlap type
     M_solver->getParameterList().set("type_overlap", dataFile( ( section + "/" + subSection + "/type_overlap" ).data(), AZ_standard ));
-
 
 
     // SUBDOMAIN SOLVER
@@ -106,7 +110,6 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
     //M_solver->getParameterList().set("omega", dataFile( ( section + "/" + subSection + "/omega" ).data(), 1. ));
 
     //M_solver->getParameterList().set("update_reduction", dataFile( ( section + "/" + subSection + "/update_reduction" ).data(), 10e10 ));
-
 
     // SET PARAMETERS
     M_solver->setParameters( true );

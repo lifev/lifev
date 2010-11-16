@@ -91,7 +91,7 @@ public:
     //! @name Methods
     //@{
 
-    virtual void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+    virtual void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection ) = 0;
 
     //! Build the preconditioner
     /*!
@@ -133,7 +133,7 @@ public:
 
     void setList( const list_Type& list );
 
-    virtual void setDataFromGetPot ( const GetPot& dataFile, const std::string& section, const std::string& subSection = "" ) = 0;
+    virtual void setDataFromGetPot ( const GetPot& dataFile, const std::string& section ) = 0;
 
     virtual void setSolver( SolverTrilinos& /*solver*/ );
 
@@ -184,7 +184,7 @@ protected:
 
 private:
 
-    static void createPreconditionerList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection ) {};
+    ///static void createPreconditionerList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection ) {};
 
 };
 

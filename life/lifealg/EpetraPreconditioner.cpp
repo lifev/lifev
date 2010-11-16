@@ -63,14 +63,14 @@ EpetraPreconditioner::~EpetraPreconditioner()
 // ===================================================
 // Methods
 // ===================================================
-void
-EpetraPreconditioner::createList(       list_Type&   list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& subSection )
-{
-    createPreconditionerList( list, dataFile, section, subSection );
-}
+//void
+//EpetraPreconditioner::createList(       list_Type&   list,
+//                                  const GetPot&      dataFile,
+//                                  const std::string& section,
+//                                  const std::string& subSection )
+//{
+//    createPreconditionerList( list, dataFile, section, subSection );
+//}
 
 // ===================================================
 // Epetra Operator Interface Methods

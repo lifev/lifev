@@ -44,12 +44,9 @@ IfpackPreconditioner::~IfpackPreconditioner()
 
 void
 IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
-                                         const std::string& section,
-                                         const std::string& subSection )
+                                         const std::string& section )
 {
-    //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
-    //! for more informations on the parameters
-    createIfpackList( this->M_List, dataFile, section, subSection );
+    createIfpackList( this->M_List, dataFile, section, "ifpack" );
 }
 
 int
@@ -113,6 +110,7 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     //! for more informations on the parameters
 
     int overlapLevel = dataFile((section + "/" + subSection + "/overlap").data(),     0);
+
     std::string precType     = dataFile((section + "/" + subSection + "/prectype").data(),"Amesos");
 
     list.set("prectype", precType);

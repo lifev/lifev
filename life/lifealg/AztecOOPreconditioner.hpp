@@ -94,6 +94,9 @@ public:
      */
     bool set() const { return M_preconditionerCreated; }
 
+    //! Create the list of parameters
+    void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+
     //@}
 
 
@@ -105,7 +108,7 @@ public:
      *  @param dataFile the GetPot file
      *  @param section the section inside the GetPot file containing the parameters
      */
-    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section, const std::string& subSection = "AztecOO" );
+    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
 
     //! Set the external solver (AztecOO)
     /*!

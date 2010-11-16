@@ -90,8 +90,7 @@ public:
      */
 
     void                    setDataFromGetPot ( const GetPot&      dataFile,
-                                                const std::string& section,
-                                                const std::string& subSection = "ML" );
+                                                const std::string& section );
 
     double                  Condest ();
 
@@ -113,7 +112,7 @@ public:
     virtual void createList(       list_Type&   list,
                              const GetPot&      dataFile,
                              const std::string& section,
-                             const std::string& subSection = "ML" ) {createMLList( list, dataFile, section, subSection);}
+                             const std::string& subSection ) {createMLList( list, dataFile, section, subSection);}
 
     static void createMLList(       list_Type&   list,
                               const GetPot&      dataFile,

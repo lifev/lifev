@@ -83,8 +83,7 @@ public:
      */
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
-					                           const std::string& section,
-					                           const std::string& subSection = "ifpack" );
+					                           const std::string& section );
 
     double                 Condest ();
 
@@ -104,7 +103,7 @@ public:
     virtual void createList( list_Type&         list,
                              const GetPot&      dataFile,
                              const std::string& section,
-                             const std::string& subSection = "ifpack" ) { createIfpackList( list, dataFile, section, subSection );}
+                             const std::string& subSection ) { createIfpackList( list, dataFile, section, subSection );}
 
     static void createIfpackList(       list_Type&   list,
                                   const GetPot&      dataFile,

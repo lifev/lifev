@@ -43,18 +43,16 @@ MLPreconditioner::~MLPreconditioner()
 
 void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
-                                     const std::string&     section,
-                                     const std::string&     subSection )
+                                     const std::string&     section )
 {
-        bool found;
-        M_analyze = dataFile((section + "/" + subSection + "/analyze_smoother").data(), false, found);
+    M_analyze = dataFile((section + "/" + "ML" + "/analyze_smoother").data(), false); // To be moved in createMLList
 
-        createMLList(M_List, dataFile, section, subSection);
+    // ML List
+    createMLList(M_List, dataFile, section, "ML" );
 
-        std::string CT;
-
-        list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
-        IfpackPreconditioner::createIfpackList(SmootherIFSubList, dataFile, section, subSection);
+    // IfPack list
+    list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
+    IfpackPreconditioner::createIfpackList(SmootherIFSubList, dataFile, section, "ML");
 }
 
 int
