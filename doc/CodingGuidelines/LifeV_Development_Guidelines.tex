@@ -1,5 +1,7 @@
-\documentclass[a4paper]{article}
+\documentclass[10p]{article}
 
+\usepackage{a4wide}
+\usepackage[left=2.5cm,top=2.5cm,right=2.5cm,bottom=2.5cm,nohead]{geometry}
 \usepackage[latin1]{inputenc}
 \usepackage[english]{babel}
 %\usepackage{textcomp}
@@ -42,7 +44,7 @@
 
 \title{\texttt{LifeV} Development Guidelines}
 \author{C. Malossi, S. Deparis}
-\date{Last updated: November 15th, 2010}
+\date{Last updated: November 16th, 2010}
 
 \begin{document}
 
@@ -157,6 +159,12 @@ void matrix_ptr( matrixPtr_Type& matrixPtr); //NO!!!
 void setMatrix( const matrix_Type& matrix );         //OK
 void setMatrixPtr( const matrixPtr_Type& matrixPtr); //OK
 \end{lstlisting}
+  \item Use white space to improve the readability of the code.
+\begin{lstlisting}
+M_result=(a+b)/(c*d)             //NO!!!
+
+M_result = ( a + b ) / ( c * d ) //OK
+\end{lstlisting}
   \item All principal classes should have a method \texttt{showMe()},
 \begin{lstlisting}
 void showMe( std::ostream& output = std::cout ) const;
@@ -172,6 +180,7 @@ This is a short list of programming and general conventions that should be used 
   \item Each file should include another one only if it is strictly required; as a general rule, try to shorten as much as possible the list of \texttt{\#include} directives.
   \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and \texttt{UInt}, instead of the built-in types \texttt{double}, \texttt{int} and \texttt{unsigned int}. This helps making code changes afterwards. All the type definitions are contained into \texttt{life.hpp}. \newline \textbf{NOTE:} Only for MPI instructions and Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}. In these cases, use \texttt{static\_cast} to avoid warning messages.
   \item Use \texttt{boost::shared\_ptr} instead of raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
+  \item All the members should be private or protected (if necessary).
   \item Don't use reference types for members inside classes. Of course use them for functions and methods arguments.
   \item \texttt{using} directives should be avoided entirely, especially in header files. They cause wanton namespace pollution by bringing in potentially huge numbers of names, many (usually the vast majority) of which are unnecessary. The presence of the unnecessary names greatly increases the possibility of unintended name conflicts not just in the header, but in every module that includes the header. Moreover
   \texttt{using namespace} declarations should never appear in header files. The meaning of the \texttt{using} declaration may change depending on what other headers have included before it in any given module.
@@ -207,8 +216,11 @@ This is a short list of programming and general conventions that should be used 
       \item[Methods]: containing all the general methods of the class. Note that a method performs operations on private variables and it is not just a setter or getter function.
       \item[Set Methods]: containing all the set methods (starting with the prefix \texttt{set})
       \item[Get Methods]: containing all the get methods.
+      \item[Protected Methods]: containing all the protected methods.
+      \item[Private Methods]: containing all the private methods.
       % starting with the prefix \texttt{get})
   \end{description}
+  Note that protected and private methods are also grupped and appears after all the other methods. Finally regarding the members of the classes, they should be placed after (and outside) the corresponding group of methods (i.e. protected members, after all the protected methods \& private members, after all the private methods).
 \end{enumerate}
 
 \section{Testsuite development} \label{testsuite}
@@ -291,7 +303,7 @@ placed in the same order as in the header file. To keep the same group division 
 \addtocontents{toc}{\protect\addappendixname}
 \clearpage
 
-\changepage{20em}{20em}{0em}{-10em}{0em}{-10em}{}{}{}
+%\changepage{20em}{20em}{0em}{-10em}{0em}{-10em}{}{}{}
 
 \section{TemplateClass.hpp - Template Class header} \label{TemplateClassHPP}
 \small{\lstinputlisting{TemplateClass.hpp}}

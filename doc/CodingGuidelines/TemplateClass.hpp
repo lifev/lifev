@@ -2,8 +2,8 @@
 /*
 *******************************************************************************
 
-    Copyright (C) 2004, 2005, 2006, 2007 EPFL, Politecnico di Milano, INRIA
-    Copyright (C) 2010 EPFL, Politecnico di Milano
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
     This file is part of LifeV.
 
