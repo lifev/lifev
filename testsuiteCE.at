@@ -223,8 +223,8 @@ alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 
 
 [../Composed]
-list                = 'Ifpack Ifpack'
-sections            = 'Ifpack1 Ifpack2'
+list                = 'Ifpack Ifpack Ifpack'
+sections            = 'Ifpack1 Ifpack2 Ifpack2'
 
 [../ML1] # preconditioner for the first factor in case our choice was ML
 displayList = false
