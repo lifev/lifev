@@ -67,7 +67,8 @@ dist_pkgdata_DATA = MultiScale.dat \
 					Run_Womersley_3DFluid_5Cylinders_Stress_tube60.dat \
 					Run_Womersley_3DFluid_5Cylinders_Stress_tube80.dat \
 					Test_Fluid3D.dat \
-					Test_1D.dat
+					Test_1D.dat \
+					Test_FSI3D.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
