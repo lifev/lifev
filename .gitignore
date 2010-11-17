@@ -1,7 +1,8 @@
-*.[oa]
 *~
+._*
 *.in
 *.m4
+*.[oa]
 configure
 configure.files
 autom4te.cache
