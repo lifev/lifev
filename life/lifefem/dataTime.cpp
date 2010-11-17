@@ -53,7 +53,8 @@ DataTime::DataTime( ) :
 {
 }
 
-DataTime::DataTime( const GetPot& dfile, const std::string& section )
+DataTime::DataTime( const GetPot& dfile, const std::string& section ) :
+    M_timeStepNumber( 0 )
 {
     setup( dfile, section );
 }
