@@ -26,7 +26,8 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_Aort
     
     [../time_discretization]
     initialtime                = .00      # [s]
-    endtime                    = 0.5      # [s] Aorta Arms Legs
+    endtime                    = 0.35     # [s] Aorta Arms Legs Absorbing
+    #endtime                    = 0.8      # [s] Aorta Arms Legs 1-HB
     timestep                   = 1e-3     # [s]
     
     [../Algorithm]
