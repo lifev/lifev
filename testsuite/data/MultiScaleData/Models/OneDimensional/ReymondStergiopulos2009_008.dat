@@ -51,7 +51,7 @@ poisson              = 0.0
 
 [../space_discretization]
 Length               = 23.5
-NumberOfElements     = 235          # number of elements
+NumberOfElements     = 117          # number of elements (half)
 
 [../JacobianPerturbation]
 deltaArea            = 0.01         # perturbation on the area
