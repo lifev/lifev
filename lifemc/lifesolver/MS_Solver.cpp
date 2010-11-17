@@ -227,7 +227,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
 
     // Redisual check
     Real algorithmResidual( M_algorithm->Residual() );
-    if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-12 )
+    if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
         MS_ErrorCheck( MS_Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
                                     " (External Residual: " + number2string( externalResidual ) + ")\n" );
 
