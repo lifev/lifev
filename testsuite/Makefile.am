@@ -44,6 +44,7 @@ SUBDIRS		= data  \
               test_timeAdvance_orderI \
               test_timeAdvance_orderII \
 	      test_ADRAssembler \
+	      test_LevelSetSolver \
               $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
@@ -59,7 +60,7 @@ TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_darcy_transient_nonlinear/testsuite.at \
            $(srcdir)/test_resistance/testsuite.at \
 	   $(srcdir)/test_ADRAssembler/testsuite.at
-
+	   $(srcdir)/test_LevelSetSolver/testsuite.at
 
 
 
