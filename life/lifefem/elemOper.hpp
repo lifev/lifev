@@ -22,16 +22,139 @@
 
 #ifndef _ELEMOPER_H_INCLUDED
 #define _ELEMOPER_H_INCLUDED
-#include <life/lifecore/life.hpp>
+
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
-#include <life/lifefem/currentFE.hpp>
+
+#include <life/lifecore/life.hpp>
+
 #include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/dof.hpp>
+
 #include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {
+
+/*! /namespace ElemOper
+  
+  This namespace is specially designed to contain the elementary
+  operations (corresponding to differential operators) that build
+  the local contributions to be used in the assembly procedures.
+  
+ */
+namespace ElemOper
+{
+    //! Elementary mass for constant mass coefficient
+    /*!
+      This function assembles the local mass matrix when the mass coefficient is constant.
+
+      @param localMass The local matrix to be filled (not cleaned by this function)
+      @param massCFE The currentFE structure already updated for the assembly. It requires
+      phi and wDetJacobian to be accessible.
+      @param coefficient The mass coefficient
+      @param fieldDim The dimension of the FE space (scalar/vectorial)
+     */
+    void mass(ElemMat& localMass,
+              const CurrentFE& massCFE,
+              const Real& coefficient,
+              const UInt& fieldDim);
+
+    //! Elementary stiffness for constant coefficient
+    /*!
+      This function assembles the local stiffness matrix when the coefficient is constant.
+
+      @param localStiff The local matrix to be filled (not cleaned by this function)
+      @param stiffCFE The currentFE structure already updated for the assembly. It requires
+      dphi and wDetJacobian to be accessible.
+      @param coefficient The coefficient
+      @param fieldDim The dimension of the FE space (scalar/vectorial)
+     */
+    void stiffness(ElemMat& localStiff,
+                   const CurrentFE& stiffCFE,
+                   const Real& coefficient,
+                   const UInt& fieldDim);
+
+
+    //! Interpolation procedure
+    template<typename localVector, typename globalVector>
+    void interpolate(localVector& localValues,
+                     const CurrentFE& interpCFE, 
+                     const UInt& spaceDim,
+                     const Dof& betaDof,
+                     const UInt& elementID,
+                     const globalVector& beta)
+    {
+        const UInt nbQuadPt(interpCFE.nbQuadPt());
+        const UInt nbFEDof(interpCFE.nbFEDof());
+        const UInt totalDof(betaDof.numTotalDof());
+
+        for (UInt iterDim(0); iterDim<spaceDim; ++iterDim)
+        {
+            //Loop on the quadrature nodes
+            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+            {
+                localValues[iQuadPt][iterDim]=0.0;
+
+                // Loop over the basis functions
+                for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+                {
+                    localValues[iQuadPt][iterDim] +=
+                        beta[ betaDof.localToGlobal(elementID,iDof+1) + iterDim*totalDof]
+                        * interpCFE.phi(iDof,iQuadPt);
+                }
+            }
+        }
+    }
+
+    //! Elementary advection
+    template<typename localVector>
+    void advection(ElemMat& localAdv,
+                   const CurrentFE& advCFE,
+                   const localVector& localValues,
+                   const UInt& fieldDim)
+    {
+        const UInt nbFEDof(advCFE.nbFEDof());
+        const UInt nbQuadPt(advCFE.nbQuadPt());
+        Real localValue(0.0);
+        
+        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        {
+            // Extract the view of the matrix
+            ElemMat::matrix_view localView = localAdv.block(iterFDim,iterFDim);
+
+            // Loop over the basis functions
+            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            {
+                // Build the local matrix
+                for (UInt jDof(0); jDof < nbFEDof; ++jDof)
+                {
+                    localValue = 0.0;
+
+                    //Loop on the quadrature nodes
+                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                    {
+                        for (UInt iDim(0); iDim<3; ++iDim)
+                        {
+                            localValue += localValues[iQuadPt][iDim]
+                                * advCFE.dphi(jDof,iDim,iQuadPt)
+                                * advCFE.phi(iDof,iQuadPt)
+                                * advCFE.wDetJacobian(iQuadPt);
+                        }
+
+                    }
+
+                    // Add on the local matrix
+                    localView(iDof,jDof)=localValue;
+                }
+            }
+        }
+    }
+    
+    
+}
+
   //----------------------------------------------------------------------
   //
   //!@name               Operators for classical finite elements

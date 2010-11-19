@@ -27,6 +27,106 @@
 
 namespace LifeV
 {
+
+namespace ElemOper
+{
+    void mass(ElemMat& localMass,
+              const CurrentFE& massCFE,
+              const Real& coefficient,
+              const UInt& fieldDim)
+    {
+        const UInt nbFEDof(massCFE.nbFEDof());
+        const UInt nbQuadPt(massCFE.nbQuadPt());
+        Real localValue(0);
+
+        // Assemble the local mass
+        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        {
+            // Extract the view of the matrix
+            ElemMat::matrix_view localView = localMass.block(iterFDim,iterFDim);
+
+            // Loop over the basis functions
+            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            {
+                // Build the local matrix only where needed:
+                // Lower triangular + diagonal parts
+                for (UInt jDof(0); jDof <= iDof; ++jDof)
+                {
+                    localValue = 0.0;
+
+                    //Loop on the quadrature nodes
+                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                    {
+                        localValue += massCFE.phi(iDof,iQuadPt)
+                            * massCFE.phi(jDof,iQuadPt)
+                            * massCFE.wDetJacobian(iQuadPt);
+                    }
+                    
+                    localValue*=coefficient;
+
+                    // Add on the local matrix
+                    localView(iDof,jDof)+=localValue;
+                    
+                    if (iDof!=jDof)
+                    {
+                        localView(jDof,iDof)+=localValue;
+                    }
+                }
+            }
+        }
+    }
+
+
+    void stiffness(ElemMat& localStiff,
+                   const CurrentFE& stiffCFE,
+                   const Real& coefficient,
+                   const UInt& fieldDim)
+    {
+        const UInt nbFEDof(stiffCFE.nbFEDof());
+        const UInt nbQuadPt(stiffCFE.nbQuadPt());
+        Real localValue(0);
+
+        // Assemble the local diffusion
+        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        {
+            // Extract the view of the matrix
+            ElemMat::matrix_view localView = localStiff.block(iterFDim,iterFDim);
+            
+            // Loop over the basis functions
+            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            {
+                // Build the local matrix only where needed:
+                // Lower triangular + diagonal parts
+                for (UInt jDof(0); jDof <= iDof; ++jDof)
+                {
+                    localValue = 0.0;
+
+                    //Loop on the quadrature nodes
+                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                    {
+                        for (UInt iDim(0); iDim<3; ++iDim)
+                        {
+                            localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
+                                * stiffCFE.dphi(jDof,iDim,iQuadPt)
+                                * stiffCFE.wDetJacobian(iQuadPt);
+                        }
+                    }
+                    
+                    localValue*=coefficient;
+                    
+                    // Add on the local matrix
+                    localView(iDof,jDof)+=localValue;
+                    
+                    if (iDof != jDof)
+                    {
+                        localView(jDof,iDof)+=localValue;
+                    }
+                }
+            }
+        }
+    }
+}
+
 //
 //----------------------------------------------------------------------
 //                      Element matrix operator
