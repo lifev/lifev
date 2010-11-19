@@ -55,6 +55,7 @@
 #include <Epetra_IntVector.h>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifefem/refFE.hpp>
+#include <life/lifefem/refFEScalar.hpp>
 #include <Epetra_Comm.h>
 #include <sstream>
 #include <string>
