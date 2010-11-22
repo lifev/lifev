@@ -48,24 +48,8 @@
     #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Name of the application" ,
-                            "Name of the test" ,
-                            "Test version 0.0",
-                            "Short description",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2009 EPFL");
-
-    about.addAuthor("Name Surname", "Developer", "name.surname@epfl.ch", "");
-    about.addAuthor("Name Surname", "Developer", "name.surname@epfl.ch", "");
-
-    return about;
-}
+#include <boost/shared_ptr.hpp>
 
 using namespace LifeV;
 
