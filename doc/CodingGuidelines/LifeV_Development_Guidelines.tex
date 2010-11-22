@@ -6,7 +6,6 @@
 \usepackage[english]{babel}
 %\usepackage{textcomp}
 \usepackage[T1]{fontenc}
-\usepackage{type1ec}%per i font cmsuper
 \usepackage[pdftex]{graphicx}
 \usepackage{epstopdf}
 \usepackage[bw,framed]{mcode}
@@ -64,7 +63,7 @@ typedef const Epetra_FEVector                 vectorConst_Type;
 typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
 typedef boost::shared_ptr< vector_constType > vectorConstPtr_Type;
 
-typedef std::map<Int,Real>::iterator          mapIterator_Type;       
+typedef std::map<Int,Real>::iterator          mapIterator_Type;
 typedef std::map<Int,Real>::const_iterator    mapConstIterator_Type;
 \end{lstlisting}
   \item Classes and structures should start with the capital letter. In case of composed names, each word should start with capital letter.
@@ -87,7 +86,7 @@ DataFSI
 // FSI classes as they should be:
 FSISolver
 FSIOperator
-FSIOperatorEJ ( here the common prefix FSIOperator make it clear that 
+FSIOperatorEJ ( here the common prefix FSIOperator make it clear that
                 FSIOperatorEJ is strictly related to FSIOperator )
 FSIOperatorFP
 FSIData
@@ -305,7 +304,7 @@ placed in the same order as in the header file. To keep the same group division 
 // ===================================================
 // Name of the group
 // ===================================================
-\end{lstlisting}  
+\end{lstlisting}
 
 \appendix
 \addtocontents{toc}{\protect\addappendixname}
