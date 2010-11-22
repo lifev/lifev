@@ -24,7 +24,6 @@
 \usepackage{subfigure}
 \usepackage{algorithme}
 \usepackage{longtable}
-\usepackage{eqnarray}
 
 %Pour aligner verticalement les tableaux
 \usepackage{array}
@@ -416,10 +415,12 @@ The FSI solver is able to solve the problem composed by the Navier-Stokes equati
 \mathbf{u}\circ\mathcal{A}_t=\frac{d\mathbf{d}_s}{dt} \text{ on }\Gamma;
 \end{equation}
 where
-\begin{equationarray}{rrcl}
+\begin{equation}
+\begin{array}{rrcl}
 \mathcal{A}_t: & \Omega_0 & \rightarrow & \Omega_t\nonumber\\
 & \mathbf{x}_0 & \mapsto & \mathcal{A}_t(\mathbf{x}_0)=\mathbf{x}_0+\mathbf{d}_f(\mathbf{x}_0)
-\end{equationarray}
+\end{array}
+\end{equation}
 is the ALE mapping from the reference domain $\Omega_0$ to the current domain $\Omega_t$.
 \item the continuity of stresses at the fluid-structure interface
 \begin{equation}
