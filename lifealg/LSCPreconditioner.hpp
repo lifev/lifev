@@ -76,6 +76,8 @@ public:
 
     typedef super::operator_raw_type                operator_raw_type;
     typedef super::operator_type                    operator_type;
+
+    typedef Teuchos::ParameterList                  list_type;
     //@}
 
 
@@ -104,9 +106,18 @@ public:
         @param dataFile is a GetPot dataFile
         @param section is the section containing the data
      */
-    void        setDataFromGetPot ( const GetPot&      dataFile,
-                                    const std::string& section,
-                                    const UInt& listNumber=1 );
+    void setDataFromGetPot ( const GetPot&      dataFile,
+                            const std::string& section );
+
+    void createList( list_type&         list,
+                     const GetPot&      dataFile,
+                     const std::string& section,
+                     const std::string& subSection );
+
+    static void createLSCList( list_type&         list,
+                               const GetPot&      dataFile,
+                               const std::string& section,
+                               const std::string& subSection = "LSC" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double      Condest ();
@@ -117,8 +128,8 @@ public:
     //! Build the preconditioner
     int         buildPreconditioner(operator_type& A);
 
-    int         numBlockRow() const;
-    int         numBlockCol() const;
+    int         numBlocksRows() const;
+    int         numBlocksCols() const;
 protected:
 
     std::string M_precType;
@@ -126,10 +137,6 @@ protected:
     int         M_pressureBlockSize;
 
 };
-
-void createLSCList( const GetPot&              dataFile,
-                    const std::string&         section,
-                    Teuchos::ParameterList&    list);
 
 inline EpetraPreconditioner* createLSC(){ return new LSCPreconditioner(); }
 namespace

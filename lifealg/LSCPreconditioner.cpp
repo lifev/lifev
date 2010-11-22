@@ -42,10 +42,9 @@ LSCPreconditioner::~LSCPreconditioner()
 {}
 
 void LSCPreconditioner::setDataFromGetPot( const GetPot& dataFile,
-                                           const std::string& section,
-                                           const UInt& listNumber )
+                                           const std::string& section )
 {
-    createLSCList(dataFile, section, this->M_List);
+    createLSCList(M_List, dataFile, section, "LSC");
 
     M_velocityBlockSize = this->M_List.get("blocks: velocity block size", -1);
     M_pressureBlockSize = this->M_List.get("blocks: pressure block size", -1);
@@ -81,24 +80,18 @@ int LSCPreconditioner::buildPreconditioner(operator_type& oper)
     return ( EXIT_SUCCESS );
 }
 
-Real LSCPreconditioner::Condest()
+void LSCPreconditioner::createList( list_type&         list,
+                                    const GetPot&      dataFile,
+                                    const std::string& section,
+                                    const std::string& subSection )
 {
-    return 0.0;
+    createLSCList( list, dataFile, section, subSection );
 }
 
-int LSCPreconditioner::numBlockRow() const
-{
-    return 2;
-}
-
-int LSCPreconditioner::numBlockCol() const
-{
-    return 2;
-}
-
-void createLSCList( const GetPot&              dataFile,
-                    const std::string&         section,
-                    Teuchos::ParameterList&    list)
+void LSCPreconditioner::createLSCList( list_type&         list,
+                                       const GetPot&      dataFile,
+                                       const std::string& section,
+                                       const std::string& subsection )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
@@ -108,21 +101,36 @@ void createLSCList( const GetPot&              dataFile,
     std::string precType = dataFile((section + "/prectype").data(),"LSC");
     list.set("prectype", precType);
 
-    //std::string value1 = dataFile((section + "/LSC/subsection1/value1").data(), "string example");
-    //int         value2 = dataFile((section + "/LSC/subsection2/value2").data(), 1);
-    //double      value3 = dataFile((section + "/LSC/subsection3/value3").data(), 1.0);
+    //std::string value1 = dataFile((section + "/" + subsection + "/subsection1/value1").data(), "string example");
+    //int         value2 = dataFile((section + "/" + subsection + "/subsection2/value2").data(), 1);
+    //double      value3 = dataFile((section + "/" + subsection + "/subsection3/value3").data(), 1.0);
     //list.set("subsection1: value1", value1);
     //list.set("subsection2: value2", value2);
     //list.set("subsection3: value3", value3);
 
-    int velocityBlockSize = dataFile((section + "/LSC/blocks/velocity_block_size").data(), -1);
-    int pressureBlockSize = dataFile((section + "/LSC/blocks/pressure_block_size").data(), -1);
+    int velocityBlockSize = dataFile((section + "/" + subsection + "/blocks/velocity_block_size").data(), -1);
+    int pressureBlockSize = dataFile((section + "/" + subsection + "/blocks/pressure_block_size").data(), -1);
     std::cout << "section: " << section << std::endl;
 
     list.set("blocks: velocity block size", velocityBlockSize);
     list.set("blocks: pressure block size", pressureBlockSize);
 
     if (displayList) list.print(std::cout);
+}
+
+Real LSCPreconditioner::Condest()
+{
+    return 0.0;
+}
+
+int LSCPreconditioner::numBlocksRows() const
+{
+    return 2;
+}
+
+int LSCPreconditioner::numBlocksCols() const
+{
+    return 2;
 }
 
 } // namespace LifeV

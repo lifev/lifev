@@ -80,8 +80,8 @@ public:
 
     /** @name  Methods
      */
-    virtual int numBlockRow() const=0;
-    virtual int numBlockCol() const=0;
+    virtual int numBlocksRows() const=0;
+    virtual int numBlocksCols() const=0;
 
 protected:
 
