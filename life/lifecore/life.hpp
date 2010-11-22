@@ -48,11 +48,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/begin_end.hpp>
 
-#include <boost/lambda/lambda.hpp>
-#include <boost/lambda/bind.hpp>
-
-
-
+// only available in boost 1.32
+#include <boost/mpl/eval_if.hpp>
 
 # include <cstdlib>
 
@@ -70,8 +67,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 namespace LifeV
 {
-namespace mpl = boost::mpl;
-namespace lambda = boost::lambda;
 
 /*!  \page types_page LifeV Types
   \section types Types
@@ -104,26 +99,25 @@ namespace lambda = boost::lambda;
   -# \c uint64_type a 64 bit unsigned integer
 
   LifeV defines a number of useful aliases for integers
-  -# \c Int an alias to int16_type
-  -# \c UInt an alias to uint16_type used for adressing
-  -# \c USInt an alias to uint8_type
-  -# \c id_type an alias to uint8_type used to identify local numbering or components
+  -# \c SInt an alias to int16_type
+  -# \c Int an alias to int32_type
+  -# \c UInt an alias to uint32_type used for adressing
+  -# \c USInt an alias to uint16_type
+  -# \c id_type an alias to uint32_type used to identify local numbering or components
+  -# \c ID an alias to id_type used to identify local numbering or components
+  -# \c Index_t an alias to id_type used to identify local numbering or components
   -# \c dim_type an alias to uint8_type used to identify dimensions
   -# \c size_type an alias to size_t used as indices for arrays, vectors or matrices
 
 */
 
 typedef double Real;
-typedef double scalar_type;
 
 //
 // Create type that are machine independent
 // \warning should test here the boost version
 //
-#if LIFEV_IS_VERSION(0,9,0)
 
-// only available in boost 1.32
-#include <boost/mpl/eval_if.hpp>
 
 /*! \namespace detail
   \internal
@@ -140,18 +134,18 @@ private:
 template< int bit_size >
 struct integer
 {
-    typedef mpl::list<signed char,signed short, signed int, signed long int, signed long long> builtins_;
-    typedef typename mpl::base< typename mpl::lower_bound<
-          mpl::transform_view< builtins_, mpl::multiplies< mpl::sizeof_<mpl::placeholders::_1>, mpl::int_<8> >
+    typedef boost::mpl::list<signed char,signed short, signed int, signed long int, signed long long> builtins_;
+    typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
+            boost::mpl::transform_view< builtins_, boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
             >
-        , mpl::integral_c<size_t, bit_size>
+        , boost::mpl::integral_c<size_t, bit_size>
         >::type >::type iter_;
 
-    typedef typename mpl::end<builtins_>::type last_;
-    typedef typename mpl::eval_if<
+    typedef typename boost::mpl::end<builtins_>::type last_;
+    typedef typename boost::mpl::eval_if<
           boost::is_same<iter_,last_>
-        , mpl::identity< no_int<bit_size> >
-        , mpl::deref<iter_>
+        , boost::mpl::identity< no_int<bit_size> >
+        , boost::mpl::deref<iter_>
         >::type type;
 };
 }
@@ -171,19 +165,19 @@ namespace detail
 template< int bit_size >
 struct unsigned_integer
 {
-    typedef mpl::list<unsigned char,unsigned short,unsigned int,unsigned long int, unsigned long long> builtins_;
-    typedef typename mpl::base< typename mpl::lower_bound<
-        mpl::transform_view< builtins_
-                             , mpl::multiplies< mpl::sizeof_<mpl::placeholders::_1>, mpl::int_<8> >
+    typedef boost::mpl::list<unsigned char,unsigned short,unsigned int,unsigned long int, unsigned long long> builtins_;
+    typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
+        boost::mpl::transform_view< builtins_
+      , boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
     >
-        , mpl::integral_c<size_t, bit_size>
+        , boost::mpl::integral_c<size_t, bit_size>
     >::type >::type iter_;
 
-    typedef typename mpl::end<builtins_>::type last_;
-    typedef typename mpl::eval_if<
+    typedef typename boost::mpl::end<builtins_>::type last_;
+    typedef typename boost::mpl::eval_if<
         boost::is_same<iter_,last_>
-        , mpl::identity< no_int<bit_size> >
-        , mpl::deref<iter_>
+        , boost::mpl::identity< no_int<bit_size> >
+        , boost::mpl::deref<iter_>
     >::type type;
 };
 }
@@ -211,53 +205,24 @@ typedef uint8_type dim_type;
 //! Indices (starting from 0)
 typedef size_t size_type;
 
-#else
-//! Generic integer data
-typedef int   Int;
-typedef short SInt;
-//! generic unsigned integer (used mainly for addressing)
-typedef unsigned int UInt;
-typedef unsigned short USInt;
-
-//! IDs (which starts ALWAYS from 1)
-typedef unsigned int id_type;
-typedef id_type ID;
-typedef id_type Index_t;
-
-//! dimension type
-typedef unsigned short dim_type;
-
-//! Indices (starting from 0)
-typedef size_t size_type;
-
-#endif
-
 // typedef for indices
 
-#ifdef INT_BCNAME
-typedef int BCName;
-//! nullBCName identify a NULL Bundary condition
-const BCName nullBCName = 0;
-#else
 typedef std::string BCName;
 const BCName nullBCName; // The empty string!
-#endif
 
 #define THREEDIM 1
 
 extern const UInt nDimensions;
 
-#if defined(TWODIM)
-#define NDIM 2
-
-#elif defined(THREEDIM)
+#if defined(THREEDIM)
 #define NDIM 3
+
+#elif defined(TWODIM)
+#define NDIM 2
 
 #else
 #error You MUST compile with either -DTWODIM of -DTHREEDIM set, sorry.
 #endif
-
-#undef VERSION_2D
 
 } // end namespace LifeV
 
