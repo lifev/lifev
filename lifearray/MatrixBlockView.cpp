@@ -41,7 +41,7 @@ namespace LifeV {
 // ===================================================
 MatrixBlockView::MatrixBlockView() :
     M_numRows( 0 ),
-    M_numCols( 0 ),
+    M_numColumns( 0 ),
     M_firstRowIndex( 0 ),
     M_lastRowIndex( 0 ),
     M_firstColumnIndex( 0 ),
@@ -51,13 +51,13 @@ MatrixBlockView::MatrixBlockView() :
 
 }
 
-MatrixBlockView::MatrixBlockView( const MatrixBlockView& mbv ) :
+MatrixBlockView::MatrixBlockView( MatrixBlockView& mbv ) :
     M_numRows( mbv.M_numRows ),
-    M_numCols( mbv.M_numCols ),
+    M_numColumns( mbv.M_numColumns ),
     M_firstRowIndex( mbv.M_firstRowIndex ),
-    M_lastRowIndex( mbv.M_firstRowIndex ),
+    M_lastRowIndex( mbv.M_lastRowIndex ),
     M_firstColumnIndex( mbv.M_firstColumnIndex ),
-    M_lastColumnIndex( mbv.M_firstColumnIndex ),
+    M_lastColumnIndex( mbv.M_lastColumnIndex ),
     M_matrix( mbv.M_matrix )
 {
 
@@ -72,18 +72,18 @@ MatrixBlockView::~MatrixBlockView()
 // Set Methods
 // ===================================================
 void
-MatrixBlockView::setup( const UInt& nRows,
-                    const UInt& nCols,
-                    const UInt& firstRow,
-                    const UInt& firstCol,
-                    const matrix_type& A )
+MatrixBlockView::setup( const UInt& firstRow,
+                        const UInt& firstColumn,
+                        const UInt& numRows,
+                        const UInt& numColumns,
+                        const matrix_type& A )
 {
-    M_numRows          = nRows;
-    M_numCols          = nCols;
+    M_numRows          = numRows;
+    M_numColumns       = numColumns;
     M_firstRowIndex    = firstRow;
-    M_lastRowIndex     = firstRow+nRows-1;
-    M_firstColumnIndex = firstCol;
-    M_lastColumnIndex  = firstCol+nCols-1;
+    M_lastRowIndex     = firstRow+numRows-1;
+    M_firstColumnIndex = firstColumn;
+    M_lastColumnIndex  = firstColumn+numColumns-1;
     M_matrix           = A.getMatrixPtr();
 }
 
@@ -97,9 +97,9 @@ MatrixBlockView::numRows() const
 }
 
 UInt
-MatrixBlockView::numCols() const
+MatrixBlockView::numColumns() const
 {
-    return M_numCols;
+    return M_numColumns;
 }
 
 UInt

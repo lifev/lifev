@@ -68,7 +68,7 @@ public:
     MatrixBlockView();
 
     //! Copy constructor
-    MatrixBlockView( const MatrixBlockView& mbv );
+    MatrixBlockView( MatrixBlockView& mbv );
 
     //! default virtual destructor
     ~MatrixBlockView();
@@ -78,16 +78,16 @@ public:
     //! @name  Set Methods
     //@{
     /*! Set all the informations relative to the block
-     *  @param nRows Number of rows in the block
-     *  @param nCols Number of columns in the block
      *  @param firstRow First row in the block
-     *  @param firstCol First column in the block
+     *  @param firstColumn First column in the block
+     *  @param numRows Number of rows in the block
+     *  @param numColumns Number of columns in the block
      *  @param A Matrix which contains the block
      */
-    void setup( const UInt& nRows,
-                const UInt& nCols,
-                const UInt& firstRow,
-                const UInt& firstCol,
+    void setup( const UInt& firstRow,
+                const UInt& firstColumn,
+                const UInt& numRows,
+                const UInt& numColumns,
                 const matrix_type& A );
 
     //@}
@@ -98,7 +98,7 @@ public:
     UInt numRows() const;
 
     //! Returns the number of columns in the block
-    UInt numCols() const;
+    UInt numColumns() const;
 
     //! Returns the index of the first row in the block
     UInt firstRowIndex() const;
@@ -122,7 +122,7 @@ public:
 
 private:
     UInt M_numRows;
-    UInt M_numCols;
+    UInt M_numColumns;
     UInt M_firstRowIndex;
     UInt M_lastRowIndex;
     UInt M_firstColumnIndex;

@@ -37,6 +37,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
+#include <lifemc/lifearray/MatrixBlockView.hpp>
 
 namespace LifeV {
 
@@ -58,10 +59,10 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixBlock();
+    MatrixBlock( const EpetraMap& map, int numEntries = 50, int indexBase = 1 );
 
     //! Casting constructor
-    MatrixBlock( const EpetraMatrix& matrix );
+    MatrixBlock( const EpetraMatrix<DataType>& matrix );
 
     //! Copy constructor
     MatrixBlock( const MatrixBlock& matrix );
@@ -100,9 +101,11 @@ public:
     /*!
      * @param rowIndex Row position of the block in the matrix
      * @param columnIndex Column position of the block in the matrix
+     * @param mbv MatrixBlockView to be filled
      */
-    MatrixBlockView getMatrixBlockView( const UInt& rowIndex,
-                                        const UInt& columnIndex ) const;
+    void getMatrixBlockView( const UInt& rowIndex,
+                             const UInt& columnIndex,
+                             MatrixBlockView& mbv);
 
     //@}
 
@@ -121,22 +124,22 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock() :
-    EpetraMatrix()
+MatrixBlock<DataType>::MatrixBlock(const EpetraMap& map, int numEntries, int indexBase) :
+    EpetraMatrix<DataType>(map,numEntries,indexBase)
 {
 
 }
 
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock( const EpetraMatrix& matrix ) :
-    EpetraMatrix(matrix)
+MatrixBlock<DataType>::MatrixBlock( const EpetraMatrix<DataType>& matrix ) :
+    EpetraMatrix<DataType>(matrix)
 {
 
 }
 
 template <typename DataType>
 MatrixBlock<DataType>::MatrixBlock( const MatrixBlock& matrix ) :
-    EpetraMatrix(matrix),
+    EpetraMatrix<DataType>(matrix),
     M_blockNumRows(matrix.M_blockNumRows),
     M_blockNumColumns(matrix.M_blockNumColumns)
 {
@@ -179,26 +182,27 @@ MatrixBlock<DataType>::getBlockNumColumns(const UInt& columnIndex) const
 }
 
 template <typename DataType>
-MatrixBlockView
+void
 MatrixBlock<DataType>::getMatrixBlockView(const UInt& rowIndex,
-                                          const UInt& columnIndex) const
+                                          const UInt& columnIndex,
+                                          MatrixBlockView& mbv)
 {
     UInt firstRow(0);
     UInt firstCol(0);
     for(UInt i(0);i<rowIndex;++i)
     {
         firstRow += M_blockNumRows[i];
+    }
+    for(UInt i(0);i<columnIndex;++i)
+    {
         firstCol += M_blockNumColumns[i];
     }
 
-    MatrixBlockView mbv;
-    mbv.setup(M_blockNumRows[rowIndex],
-              M_blockNumColumns[columnIndex],
-              firstRow,
+    mbv.setup(firstRow,
               firstCol,
+              M_blockNumRows[rowIndex],
+              M_blockNumColumns[columnIndex],
               *this);
-
-    return mbv;
 }
 
 } // namespace LifeV
