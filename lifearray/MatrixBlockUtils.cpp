@@ -42,6 +42,7 @@ void copyBlock ( const MatrixBlockView& srcBlock,
                  MatrixBlockView& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
+    // BLOCK PTR CHECK
 
     int indexBase(0);
 
@@ -86,19 +87,41 @@ void copyBlock ( const MatrixBlockView& srcBlock,
 	}
 }
 
-void createZeroBlock ( MatrixBlockView& B )
+void createZeroBlock ( MatrixBlockView& destBlock )
 {
     // This method will maybe be replaced
     // by the method setBlockToZero
 }
 
-void createIdentityBlock ( MatrixBlockView& B )
+void createIdentityBlock ( MatrixBlockView& destBlock )
 {
     // SQUARE TEST
 
-    int from(0);
-    int to(10);
-    //B.getMatrixPtr()->insertOneDiagonal(from,to);
+    int indexBase(0);
+
+    int destRow(0);
+    int destIndex(0);
+    double one(1.0);
+
+    int firstRowIndex(destBlock.firstRowIndex());
+    int lastRowIndex(destBlock.lastRowIndex());
+    int firstColumnIndex(destBlock.firstColumnIndex());
+
+    // Processor informations
+    int  numMyElements    = destBlock.getMatrixPtr()->RowMap().NumMyElements();
+    int* myGlobalElements = destBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  currentRowElement(0);
+
+    for(int i(0);i<numMyElements;++i)
+    {
+        currentRowElement = myGlobalElements[i];
+        if((currentRowElement>=firstRowIndex) && (currentRowElement<=lastRowIndex))
+        {
+            destRow = destBlock.getMatrixPtr()->LRID(currentRowElement+indexBase);
+            destIndex = firstColumnIndex+currentRowElement-firstRowIndex+indexBase;
+            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&one,&destIndex);
+        }
+    }
 }
 
 void createDiagBlock ( const MatrixBlockView& srcBlock,
