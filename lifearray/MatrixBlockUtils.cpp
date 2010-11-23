@@ -42,7 +42,7 @@ void copyBlock ( const MatrixBlockView& srcBlock,
                  MatrixBlockView& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
-    // BLOCK PTR CHECK
+    // BLOCK PTR TEST
 
     int indexBase(0);
 
@@ -108,17 +108,19 @@ void createIdentityBlock ( MatrixBlockView& destBlock )
     int firstColumnIndex(destBlock.firstColumnIndex());
 
     // Processor informations
-    int  numMyElements    = destBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* myGlobalElements = destBlock.getMatrixPtr()->RowMap().MyGlobalElements();
-    int  currentRowElement(0);
+    int  numDestElements    = destBlock.getMatrixPtr()->RowMap().NumMyElements();
+    int* destGlobalElements = destBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  destRowElement(0);
 
-    for(int i(0);i<numMyElements;++i)
+    for(int i(0);i<numDestElements;++i)
     {
-        currentRowElement = myGlobalElements[i];
-        if((currentRowElement>=firstRowIndex) && (currentRowElement<=lastRowIndex))
+        destRowElement = destGlobalElements[i];
+
+        // Test if the rows are in the block
+        if((destRowElement>=firstRowIndex) && (destRowElement<=lastRowIndex))
         {
-            destRow = destBlock.getMatrixPtr()->LRID(currentRowElement+indexBase);
-            destIndex = firstColumnIndex+currentRowElement-firstRowIndex+indexBase;
+            destRow = destBlock.getMatrixPtr()->LRID(destRowElement+indexBase);
+            destIndex = firstColumnIndex+destRowElement-firstRowIndex+indexBase;
             destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&one,&destIndex);
         }
     }
@@ -127,8 +129,59 @@ void createIdentityBlock ( MatrixBlockView& destBlock )
 void createDiagBlock ( const MatrixBlockView& srcBlock,
                        MatrixBlockView& destBlock )
 {
-    // Usefull command
-    //M->set_mat_inc(i,j,value);
+    // SQUARE TEST
+    // BLOCK COMPATIBILITY TEST
+    // BLOCK PTR TEST
+    // ZERO ON DIAGONAL TEST
+
+    int indexBase(0);
+
+    int destRow(0);
+    int destIndex(0);
+    double diagValue(0.0);
+    int diagIndex(0);
+
+    // Processor informations
+    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  srcRowElement(0);
+
+    // Source informations handlers
+    int numSrcEntries;
+    double* srcValues;
+    int* srcIndices;
+    int srcRow(0);
+
+    for(int i(0);i<numSrcElements;++i)
+    {
+        // Collecting the data from the source
+        srcRowElement = srcGlobalElements[i];
+
+        // Test if the rows are in the source block
+        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        {
+            // Get the data of the row
+            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement+indexBase);
+            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+
+            // index of the diagonal
+            diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            diagValue = 0.0;
+            for(int j(0);j<numSrcEntries;++j)
+            {
+                // Test if the coefficient is on the diagonal of the source block
+                if(srcIndices[j]-srcBlock.firstColumnIndex()==diagIndex)
+                {
+                    diagValue = srcValues[j];
+                    j=numSrcEntries; //Exit the loop
+                }
+            }
+
+            destRow   = destBlock.firstRowIndex()+diagIndex+indexBase;
+            destIndex = destBlock.firstColumnIndex()+diagIndex+indexBase;
+            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
+        }
+    }
 }
 
 void createInvDiagBlock ( const MatrixBlockView& srcBlock,

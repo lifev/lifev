@@ -51,15 +51,15 @@ void copyBlock ( const MatrixBlockView& srcBlock,
 
 //! Copy the block specified in the given matrix
 /*!
-  @param B Block where the data will be stored
+  @param destBlock Block where the data will be stored
 */
-void createZeroBlock ( MatrixBlockView& B );
+void createZeroBlock ( MatrixBlockView& destBlock );
 
 //! Copy the block specified in the given matrix
 /*!
-  @param B Block where the data will be stored
+  @param destBlock Block where the data will be stored
 */
-void createIdentityBlock ( MatrixBlockView& B );
+void createIdentityBlock ( MatrixBlockView& destBlock );
 
 //! Copy the block specified in the given matrix
 /*!
