@@ -41,6 +41,8 @@ namespace MatrixBlockUtils {
 void copyBlock ( const MatrixBlockView& srcBlock,
                  MatrixBlockView& destBlock )
 {
+    // BLOCK COMPATIBILITY TEST
+
     int indexBase(0);
 
     // The matrix A should be filled
@@ -48,32 +50,37 @@ void copyBlock ( const MatrixBlockView& srcBlock,
     {
 
         //Variables to store the informations
-        int NumEntries;
-        double* Values;
-        int* Indices;
-        int row(0);
+        int numSrcEntries;
+        double* srcValues;
+        int* srcIndices;
+        int srcRow(0);
+
+        //Offset between the first row/column of the source and destination blocks
+        int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+        int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
 
         for(int i(0);i<srcBlock.getMatrixPtr()->NumGlobalRows();++i)
         {
             if((i>=srcBlock.firstRowIndex())&&(i<=srcBlock.lastRowIndex()))
             {
-                row = srcBlock.getMatrixPtr()->LRID(i+indexBase);
-                srcBlock.getMatrixPtr()->ExtractMyRowView(row, NumEntries, Values, Indices);
+                srcRow = srcBlock.getMatrixPtr()->LRID(i+indexBase);
+                srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-                int Indices2[NumEntries];
-                double Values2[NumEntries];
-                int NumEntries2(0);
+                int destIndices[numSrcEntries];
+                double destValues[numSrcEntries];
+                int numDestEntries(0);
+                int destRow(destBlock.getMatrixPtr()->LRID(i+rowsOffset+indexBase));
 
-                for(int j(0);j<NumEntries;++j)
+                for(int j(0);j<numSrcEntries;++j)
                 {
-                    if((Indices[j]>=srcBlock.firstRowIndex())&&(Indices[j]<=srcBlock.lastRowIndex()))
+                    if((srcIndices[j]>=srcBlock.firstColumnIndex())&&(srcIndices[j]<=srcBlock.lastColumnIndex()))
                     {
-                        Indices2[NumEntries2] = srcBlock.getMatrixPtr()->GCID(Indices[j]);
-                        Values2[NumEntries2] = Values[j];
-                        NumEntries2++;
+                        destIndices[numDestEntries] = srcBlock.getMatrixPtr()->GCID(srcIndices[j])+columnsOffset;
+                        destValues[numDestEntries] = srcValues[j];
+                        numDestEntries++;
                     }
                 }
-                destBlock.getMatrixPtr()->InsertGlobalValues(row,NumEntries2,Values2,Indices2);
+                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
             }
         }
 	}
@@ -81,11 +88,14 @@ void copyBlock ( const MatrixBlockView& srcBlock,
 
 void createZeroBlock ( MatrixBlockView& B )
 {
-
+    // This method will maybe be replaced
+    // by the method setBlockToZero
 }
 
 void createIdentityBlock ( MatrixBlockView& B )
 {
+    // SQUARE TEST
+
     int from(0);
     int to(10);
     //B.getMatrixPtr()->insertOneDiagonal(from,to);
