@@ -62,7 +62,7 @@ updateEvery  = 1
 abstol       =  0.    # tolerance in nonLinearRichardson
 reltol       =  1.e-7 # tolerance in nonLinearRichardson
 restart      = 0
-maxSubIter   = 20
+maxSubIter   = 50
 fluidMeshPartitioned = none
 solidMeshPartitioned = none
 
