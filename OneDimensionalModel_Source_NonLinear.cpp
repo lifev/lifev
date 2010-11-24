@@ -119,7 +119,7 @@ OneDimensionalModel_Source_NonLinear::diff( const Real& A, const Real& Q,
         }
         if( jj == 2 ) // dB2/dQ
         {
-            return M_Physics->Data()->RobertsonCorrection() * ( M_Physics->Data()->Friction() * / A + 2 * Q / A * M_Physics->Data()->dAlphadz(i) );
+            return M_Physics->Data()->RobertsonCorrection() * ( M_Physics->Data()->Friction() / A + 2 * Q / A * M_Physics->Data()->dAlphadz(i) );
         }
     }
 
