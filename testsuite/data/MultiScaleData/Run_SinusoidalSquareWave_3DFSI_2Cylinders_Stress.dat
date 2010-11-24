@@ -25,7 +25,7 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalSquareWave_3DFSI_2Cyl
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.030   # [s]
+    endtime                    = 0.250   # [s]
     timestep                   = 0.001   # [s]
 
     [../Algorithm]
