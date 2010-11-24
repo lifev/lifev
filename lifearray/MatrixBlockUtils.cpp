@@ -32,6 +32,7 @@
    @date 2010-11-8
  */
 
+#include <math.h>
 #include "MatrixBlockUtils.hpp"
 
 namespace LifeV {
@@ -364,8 +365,62 @@ void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
 void createLumpedBlock ( const MatrixBlockView& srcBlock,
                          MatrixBlockView& destBlock )
 {
-    // Usefull command
-    //M->set_mat_inc(i,j,value);
+    // SQUARE TEST
+    // BLOCK COMPATIBILITY TEST
+    // BLOCK PTR TEST
+
+    int indexBase(0);
+
+    // Processor informations
+    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  srcRowElement(0);
+
+    //Offset between the first row/column of the source and destination blocks
+    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+
+    // Source informations handlers
+    int numSrcEntries;
+    double* srcValues;
+    int* srcIndices;
+    int srcRow(0);
+
+    int destRow(0);
+    int destIndex(0);
+    int diagIndex(0);
+    double srcBlockRowSum(0.0);
+
+    for(int i(0);i<numSrcElements;++i)
+    {
+        // Collecting the data from the source
+        srcRowElement = srcGlobalElements[i];
+
+        // Test if the rows are in the source block
+        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        {
+            // Get the data of the row
+            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement+indexBase);
+            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+
+            diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            srcBlockRowSum = 0.0;
+            for(int j(0);j<numSrcEntries;++j)
+            {
+                // Test if the coefficient is:
+                // a) in the block, and
+                // b) on the upper triangular part of the block.
+                if((srcIndices[j]>=srcBlock.firstColumnIndex()) &&
+                   (srcIndices[j]<=srcBlock.lastColumnIndex()))
+                {
+                    srcBlockRowSum += abs(srcValues[j]);
+                }
+            }
+            destRow   = destBlock.firstRowIndex()+diagIndex+indexBase;
+            destIndex = destBlock.firstColumnIndex()+diagIndex+indexBase;
+            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+        }
+    }
 }
 
 void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
