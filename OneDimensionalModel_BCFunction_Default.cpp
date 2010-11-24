@@ -300,7 +300,7 @@ OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalu
     U[0] = U_interpolated[0] - timeStep * M_Source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
     U[1] = U_interpolated[1] - timeStep * M_Source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 2, bcNodes, cfl );
 
-    return dot( eigenvector, U ) +  timeStep * eigenvalue * dot( deltaEigenvector, U_interpolated );
+    return dot( eigenvector, U ) + timeStep * eigenvalue * dot( deltaEigenvector, U_interpolated );
 }
 
 Real
