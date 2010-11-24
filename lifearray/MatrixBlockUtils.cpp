@@ -305,7 +305,60 @@ void createUpperTriangularBlock ( const MatrixBlockView& srcBlock,
 void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
                                   MatrixBlockView& destBlock )
 {
+    // SQUARE TEST
+    // BLOCK COMPATIBILITY TEST
+    // BLOCK PTR TEST
 
+    int indexBase(0);
+
+    // Processor informations
+    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  srcRowElement(0);
+
+    //Offset between the first row/column of the source and destination blocks
+    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+
+    // Source informations handlers
+    int numSrcEntries;
+    double* srcValues;
+    int* srcIndices;
+    int srcRow(0);
+
+    for(int i(0);i<numSrcElements;++i)
+    {
+        // Collecting the data from the source
+        srcRowElement = srcGlobalElements[i];
+
+        // Test if the rows are in the source block
+        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        {
+            // Get the data of the row
+            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement+indexBase);
+            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+
+            int destIndices[numSrcEntries];
+            double destValues[numSrcEntries];
+            int numDestEntries(0);
+            int destRow(destBlock.getMatrixPtr()->LRID(i+rowsOffset+indexBase));
+            for(int j(0);j<numSrcEntries;++j)
+            {
+                // Test if the coefficient is:
+                // a) in the block, and
+                // b) on the upper triangular part of the block.
+                if((srcIndices[j]>=srcBlock.firstColumnIndex()) &&
+                   (srcIndices[j]<=srcBlock.lastColumnIndex()) &&
+                   (srcIndices[j]-srcBlock.firstColumnIndex()<=srcRowElement-srcBlock.firstRowIndex()))
+                {
+                    destIndices[numDestEntries] = srcBlock.getMatrixPtr()->GCID(srcIndices[j])+columnsOffset;
+                    destValues[numDestEntries] = srcValues[j];
+                    numDestEntries++;
+                }
+            }
+            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+        }
+    }
 }
 
 void createLumpedBlock ( const MatrixBlockView& srcBlock,
