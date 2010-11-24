@@ -69,7 +69,7 @@
 #include <boost/timer.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
+//#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
 #include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 
@@ -134,7 +134,7 @@ public:
 
         VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
 
-        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
+        //VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 
         M_data = data_PtrType( new data_Type() );
         M_data->setup( data_file );
