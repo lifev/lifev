@@ -82,7 +82,7 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_InertialModulus           (),
     M_RobertsonCorrection       (),
     M_Thickness                 (),
-    M_FrictionKr                (),
+    M_Friction                  (),
     M_Area0                     (),
     M_Alpha                     (),
     M_Beta0                     (),
@@ -182,6 +182,7 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_Poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
 
     M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
+    M_Friction               = dataFile( ( section + "/PhysicalParameters/Kr"                        ).data(), 1. );
 
     M_ViscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
     M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
@@ -191,7 +192,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
 
     // Physical Parameters defined along the 1D model
     M_Thickness.resize( M_Mesh->numPoints() );
-    M_FrictionKr.resize( M_Mesh->numPoints() );
 
     M_Area0.resize( M_Mesh->numPoints() );
     M_Beta0.resize( M_Mesh->numPoints() );
@@ -236,7 +236,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
             {
                 // Physical Parameters
                 M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
-                M_FrictionKr[i]                = dataFile( ( section + "/PhysicalParameters/Kr"              ).data(), 1. );
 
                 M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI );
                 M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection );
@@ -267,7 +266,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
         case linear:
 
             linearInterpolation( M_Thickness, dataFile, section + "/PhysicalParameters/thickness", 0. );
-            linearInterpolation( M_FrictionKr, dataFile, section + "/PhysicalParameters/Kr", 1. );
 
             linearInterpolation( M_Area0, dataFile, section + "/PhysicalParameters/Area0", M_PI );
             linearInterpolation( M_Alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_RobertsonCorrection, true );
@@ -299,7 +297,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
             {
                 // Physical Parameters
                 M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
-                M_FrictionKr[i]                = dataFile( ( section + "/PhysicalParameters/Kr"              ).data(), 1., i );
 
                 M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI, i );
                 M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection, i );
@@ -410,10 +407,10 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     M_InertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_RobertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
 
+    M_Friction               = dataFile( ( section + "/parameters/Kr"                                ).data(), 1. );
     M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
 
     M_Thickness.resize( M_Mesh->numPoints() );
-    M_FrictionKr.resize( M_Mesh->numPoints() );
 
     M_Area0.resize( M_Mesh->numPoints() );
     M_Beta0.resize( M_Mesh->numPoints() );
@@ -452,7 +449,6 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
             M_Area0[i]                 = dataFile( ( section + "/parameters/Area0"                   ).data(), M_PI );
         M_Beta0[i]                     = dataFile( ( section + "/parameters/beta0"                   ).data(), 1.e6 );
         M_Beta1[i]                     = dataFile( ( section + "/parameters/beta1"                   ).data(), 0.5 );
-        M_FrictionKr[i]                = dataFile( ( section + "/parameters/Kr"                      ).data(), 1. );
         M_Thickness[i]                 = dataFile( ( section + "/1d_physics/thickness"               ).data(), 0. );
 
         M_Alpha[i]                     = dataFile( ( section + "/parameters/alphaCor"                ).data(), 1. / M_RobertsonCorrection );
@@ -484,22 +480,21 @@ OneDimensionalModel_Data::UpdateCoefficients()
 {
     if ( M_ComputeCoefficients )
     {
-        Real radius(0);
-        Real profileIntegral(0);
+        // PowerlawProfile: s(r) = (1+2/gamma)*(1-r^gamma)
+        Real radius (1.); //std::sqrt( M_Area0[i] / M_PI );
+
+        Real profileIntegral =   std::pow(1+2./M_PowerlawCoefficient, 2) *
+                             (   std::pow(radius,2) / 2 +
+                                 std::pow(radius,2*M_PowerlawCoefficient+2) / (2*M_PowerlawCoefficient+2) -
+                               2*std::pow(radius,  M_PowerlawCoefficient+2) / (  M_PowerlawCoefficient+2) );
+
+        // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
+        M_Friction = 2 * M_PI * M_Viscosity / M_Density * ( M_PowerlawCoefficient + 2 ) * std::pow( radius, M_PowerlawCoefficient - 1 );
+
         for ( UInt i = 0; i < M_Mesh->numPoints(); ++i )
         {
-            // PowerlawProfile: s(r) = (1+2/gamma)*(1-r^gamma)
-            radius = 1.; //std::sqrt( M_Area0[i] / M_PI );
-
             // Compute Coriolis Coefficient: Alpha = 2*pi/Area0*Int(s(r)^2)
-            profileIntegral    =     std::pow(1+2./M_PowerlawCoefficient, 2) *
-                                 (   std::pow(radius,2) / 2 +
-                                     std::pow(radius,2*M_PowerlawCoefficient+2) / (2*M_PowerlawCoefficient+2) -
-                                   2*std::pow(radius,  M_PowerlawCoefficient+2) / (  M_PowerlawCoefficient+2) );
             M_Alpha[i] = 2 / std::pow(radius,2) * profileIntegral;
-
-            // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
-            M_FrictionKr[i]    = 2 * M_PI * M_Viscosity / M_Density * ( M_PowerlawCoefficient + 2 ) * std::pow( radius, M_PowerlawCoefficient - 1 );
 
             // Compute Beta0
             if( M_ThickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
@@ -536,7 +531,7 @@ OneDimensionalModel_Data::initLinearParam( const GetPot& /*dataFile*/ )  // CHEC
     {
         M_Celerity1[indz] = std::sqrt( M_Beta0[indz] * M_Beta1[indz] / M_Density );
         M_Flux21[indz]    = std::pow( M_Celerity1[indz], 2 );
-        M_Source22[indz]  = M_FrictionKr[indz] / M_Area0(indz);
+        M_Source22[indz]  = M_Friction / M_Area0(indz);
     }
 
     M_Celerity2 = - M_Celerity1;
@@ -631,7 +626,7 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "dAlpha (Coriolis)      = " << M_dAlphadz << "\n";
 
     output << "Thickness              = " << M_Thickness << "\n";
-    output << "Friction               = " << M_FrictionKr << "\n";
+    output << "Friction               = " << M_Friction << "\n";
 
     // Linear Parameters
     output << "\n*** Values for data [LinearParameters]\n\n";
@@ -967,9 +962,9 @@ OneDimensionalModel_Data::Thickness( const UInt& i ) const
 }
 
 const Real&
-OneDimensionalModel_Data::FrictionKr( const UInt& i ) const
+OneDimensionalModel_Data::Friction() const
 {
-    return M_FrictionKr[i];
+    return M_Friction;
 }
 
 const Real&
