@@ -131,6 +131,9 @@ OneDimensionalModel_Solver::buildConstantMatrices()
     M_gradMatrix->GlobalAssemble();
 
     // In the classical case the linear system use a mass matrix (with Dirichlet BC)
+    //Matrix_PtrType matrFull( new Matrix_Type( M_FESpace->map() ) );
+    //matrFull->insertValueDiagonal( M_Physics->Data()->mesh()->meanH() );
+    //matrFull->GlobalAssemble();
     Matrix_PtrType matrFull( new Matrix_Type( *M_massMatrix ));
     updateBCDirichletMatrix( *matrFull );
     M_linearSolver->setMatrix( *matrFull );
