@@ -88,7 +88,7 @@ MS_Model_FSI3D::MS_Model_FSI3D() :
     BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN", &BlockMatrixRN::createAdditiveSchwarzRN ) ;
 
     FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
-    FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
+    //FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
 }
 
 // ===================================================

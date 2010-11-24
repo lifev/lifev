@@ -45,6 +45,7 @@
 
 // LifeV includes
 #include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifealg/nonLinRichardson.hpp>
 
 #include <life/lifefilters/ensight.hpp>
 #ifdef HAVE_HDF5
