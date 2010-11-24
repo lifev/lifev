@@ -194,7 +194,7 @@ This is a short list of programming and general conventions that should be used 
   \item Use \texttt{const} keyword when possible. This helps the compiler and the developers reading the code. Moreover, it enhances debugging. See \url{http://en.wikipedia.org/wiki/Const-correctness} for more details on the use of \texttt{const}.
   \item Use the \texttt{C++} cast utility (\texttt{static\_cast}) instead of implicit compiling casts. This will avoid warnings and will keep each cast visible for future debugging. See
   \url{http://www.cplusplus.com/doc/tutorial/typecasting} for more details on the use of cast commands.
-  \item the classes should always have an empty constructor and a virtual empty destructor, being filled by specific calls to setters or methods. The copy constructor, if not required / implemented, should exist as a private method without implementation. Declare explicit all constructors which may take only one argument, unless there is the very need of having implicit conversion (it may be required in certain constructs).
+  \item the classes should always have an empty constructor and a virtual empty destructor, being filled by specific calls to setters or methods. The copy constructor, if not required / implemented, should exist as a private method without implementation. Declare explicit all constructors which may take only one argument, unless there is the very need of having implicit conversion (it may be required in certain constructs). In addition, avoid to assign member in the body of the constructors if you can just initialize them (of course in the intialization list).
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
 #ifdef DEBUG
