@@ -499,7 +499,7 @@ setup ()
 
 // Set the inital value
 template<typename Mesh, typename SolverType>
-void 
+void
 DarcySolverTransient<Mesh, SolverType>::
 setInitialPrimal ( const Function& primalInitial )
 {

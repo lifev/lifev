@@ -147,7 +147,7 @@ public:
     /*! Get the relaxation paramether for the CFL condition
       @return CFL relaxation paramether
     */
-    inline Real getCFLrelax( void ) const
+    inline const Real getCFLrelax( void ) const
     {
         return M_relaxCFL;
     }
@@ -212,13 +212,14 @@ DataHyperbolic<Mesh>::DataHyperbolic( ):
 template < typename Mesh >
 DataHyperbolic<Mesh>::DataHyperbolic( const DataHyperbolic &dataHyperbolic ):
     // Data containers
-    M_data     ( dataHyperbolic.M_data ),
-	M_time     ( dataHyperbolic.M_time ),
-    M_mesh     ( dataHyperbolic.M_mesh ),
+    M_data        ( dataHyperbolic.M_data ),
+	M_time        ( dataHyperbolic.M_time ),
+    M_mesh        ( dataHyperbolic.M_mesh ),
     // Miscellaneous
-    M_verbose  ( dataHyperbolic.M_verbose ),
-    M_section  ( dataHyperbolic.M_section ),
-    M_relaxCFL ( dataHyperbolic.M_relaxCFL )
+    M_verbose     ( dataHyperbolic.M_verbose ),
+    M_section     ( dataHyperbolic.M_section ),
+    // CFL
+    M_relaxCFL    ( dataHyperbolic.M_relaxCFL )
 {
     CONSTRUCTOR( "DataHyperbolic" );
 }
@@ -232,13 +233,13 @@ DataHyperbolic<Mesh>::operator=( const DataHyperbolic& dataHyperbolic )
     if ( this != &dataHyperbolic )
     {
         // Data containers
-        M_data     = dataHyperbolic.M_data;
-        M_time     = dataHyperbolic.M_time;
-        M_mesh     = dataHyperbolic.M_mesh;
+        M_data        = dataHyperbolic.M_data;
+        M_time        = dataHyperbolic.M_time;
+        M_mesh        = dataHyperbolic.M_mesh;
         // Mescellaneous
-        M_verbose  = dataHyperbolic.M_verbose;
+        M_verbose     = dataHyperbolic.M_verbose;
         // CFL
-        M_relaxCFL = dataHyperbolic.M_relaxCFL;
+        M_relaxCFL    = dataHyperbolic.M_relaxCFL;
     }
 
     return *this;
@@ -268,7 +269,7 @@ void DataHyperbolic<Mesh>::setup( const Data_Type& dataFile, const std::string& 
     M_verbose = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
 
     // CFL
-    M_relaxCFL = dataFile( (M_section + "/CFL/relax").data(), 0.9 );
+    M_relaxCFL = dataFile( (M_section + "/numerical_flux/CFL/relax").data(), 0.9 );
 
 }
 

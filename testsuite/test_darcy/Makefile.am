@@ -24,10 +24,10 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = darcy.hpp
+check_HEADERS = darcy.hpp user_fun.hpp
 check_PROGRAMS = test_darcy
 
-test_darcy_SOURCES = main.cpp darcy.cpp
+test_darcy_SOURCES = main.cpp darcy.cpp user_fun.cpp
 
 EXTRA_DIST = data
 

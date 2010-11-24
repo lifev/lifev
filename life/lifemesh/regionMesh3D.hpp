@@ -1910,10 +1910,10 @@ namespace LifeV
     work in any case. If less than zero it may work in some cases.
     */
 
-    template <class RegionMesh3D>
-    extern
-    bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
-                      std::ostream & out, std::ostream & err, std::ostream & clog );
+template <class RegionMesh3D>
+extern
+bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
+                  std::ostream & out, std::ostream & err, std::ostream & clog );
 
 
     template <typename GEOSHAPE, typename MC>

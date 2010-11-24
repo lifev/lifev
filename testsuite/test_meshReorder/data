@@ -23,7 +23,8 @@
 [space_discretization]
 mesh_dir  = ./ # the directory where the mesh file is
 #mesh_file = aorta_fluid_scaled.mesh  # mesh file
-mesh_file = aorta_full.mesh  # mesh file
+#mesh_file = aorta_full.mesh  # mesh file
+mesh_file       = Mesh/tube20.mesh
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 mesh_type       = .mesh
@@ -34,7 +35,8 @@ output_mesh_file = output.mesh
 [./space_discretization]
 mesh_dir  = ./ # the directory where the mesh file is
 #mesh_file = aorta_solid_scaled.mesh  # mesh file
-mesh_file = aorta_full.mesh  # mesh file
+#mesh_file = aorta_full.mesh  # mesh file
+mesh_file = Mesh/tube20.mesh
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 mesh_type       = .mesh

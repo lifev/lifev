@@ -35,32 +35,49 @@ AT_DATA([data],[[
 #          Data file for a Darcy problem
 #-------------------------------------------------
 [exporter]
-    type       = hdf5
-    folder     = ./
-    multimesh  = false   # actually we export also the displacement
-    start      = 0
-    save       = 1
+type       = hdf5
+folder     = ./
+multimesh  = false   # actually we export also the displacement
+start      = 0
+save       = 1
+file_name   = PressureVelocity
+name_primal = Pressure
+name_dual   = Valocity
 [../]
 
 [darcy]
+# linear = 1, nonLinear = 2, transient = 3, transientNonLinear = 4
+problem_type = 1
 
-	[./physics]
-	[../]
+    # used for nonLinear and transientNonLinear
+    [./non-linear]
+    fixed_point_iteration = 200
+    fixed_point_toll      = 1.e-6
+    [../]
+
+    # used for transient and transientNonLinear
+    [./time_discretization]
+    initialtime   = 0.
+    endtime       = 1.
+    timestep      = 0.0625
+    [../]
 
 	[./space_discretization]
 	mesh_dir      = ./  # the directory where the mesh file is
 	mesh_file     = cartesian_cube8.mesh #hexahexa10x10x10.mesh
 	mesh_type     = .mesh #structured #.mesh
+    mesh_faces    = all
 	verbose       = 1                        # verbose during mesh-reading
 	# 0 -> tetra, 1 -> hexa
 	element_shape = 0
+    # For structured mesh
+    nx = 8
+    ny = 8
+    nz = 8
 	[../]
 
 	[./miscellaneous]
-	post_dir         = ./             # the directory for postprocessing files
-	test_case        = 1                             # in particular for b.c. condition
-	verbose          = false
-	post_proc_format = medit          # vtk or medit
+	verbose          = 0
 	[../]
 
 	[./prec]

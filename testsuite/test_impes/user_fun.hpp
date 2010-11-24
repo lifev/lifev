@@ -46,51 +46,51 @@ using namespace LifeV;
 namespace dataProblem
 {
 
-    namespace dataPhysical
-    {
+namespace dataPhysical
+{
 
-        // Porosity
-        const Real Phi = 0.4;
+// Porosity
+const Real Phi = 0.4;
 
-        // Dynamic viscosity
-        const Real mu_w = 1; // [Pa * s]
-        const Real mu_n = 1; // [Pa * s]
+// Dynamic viscosity
+const Real mu_w = 1; //1e-3; // [Pa * s]
+const Real mu_n = 5; //2*1e-3; // [Pa * s]
 
-        // Density
-        const Real rho_w = 2; // [Kg / m^3]
-        const Real rho_n = 3; // [Kg / m^3]
+// Density
+const Real rho_w = 1; //960; // [Kg / m^3]
+const Real rho_n = 0.5; //700; // [Kg / m^3]
 
-        // Relative permeability
-        const Real k_rw ( const Real& S_w );
-        const Real k_rn ( const Real& S_n );
+// Relative permeability
+const Real k_rw ( const Real& S_w );
+const Real k_rn ( const Real& S_n );
 
-        // Absolute inverse permeability
-        const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z ); // [m^2]
+// Absolute inverse permeability
+const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z ); // [m^2]
 
-        // Gravity acceleration
-        const Real g = 9.7803184; // [m / s^2]
+// Gravity acceleration, assumed to be g = [0, 0, -9.7803184]
+const Real g = -9.7803184; // [m / s^2]
 
-        // Residual saturation
-        const Real S_wr = 0;
-        const Real S_nr = 0;
+// Residual saturation
+const Real S_wr = 0.1;
+const Real S_nr = 0;
 
-        // Entry pressure
-        const Real pd = 1000000.; // [Pa]
+// Entry pressure
+const Real pd = 1200.; // [Pa]
 
-        // Brooks-Corey constant
-        const Real lambda = 1;
+// Brooks-Corey constant
+const Real lambda = 1;
 
-        // Capillary pressure
-        const Real pc ( const Real& S_w ); // [Pa]
+// Capillary pressure
+const Real pc ( const Real& S_w ); // [Pa]
 
-        // First derivative of the relative permeability
-        const Real Dk_rw ( const Real& S_w );
-        const Real Dk_rn ( const Real& S_n );
+// First derivative of the relative permeability
+const Real Dk_rw ( const Real& S_w );
+const Real Dk_rn ( const Real& S_n );
 
-        // First derivative of the capillary pressure
-        const Real Dpc ( const Real& S_w ); // [Pa]
+// First derivative of the capillary pressure
+const Real Dpc ( const Real& S_w ); // [Pa]
 
-    }
+}
 
 // Inverse of permeability matrix
 Matrix pressurePermeability( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const std::vector<Real>& u );

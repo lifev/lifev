@@ -324,7 +324,7 @@ public:
       @param primalZeroIteration The function for the first iteration.
     */
     void setZeroItarationPrimal ( const Function& primalZeroIteration );
-   
+
     /*!
       Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
       @param invPerm Inverse of the permeability tensor for the problem.
@@ -521,9 +521,9 @@ setup ()
 
 } // setup
 
-// Set the first value for the fixed point method. 
+// Set the first value for the fixed point method.
 template<typename Mesh, typename SolverType>
-void 
+void
 DarcySolverNonLinear<Mesh, SolverType>::
 setZeroItarationPrimal ( const Function& primalZeroIteration )
 {
@@ -534,7 +534,7 @@ setZeroItarationPrimal ( const Function& primalZeroIteration )
     this->M_primal_FESpace.interpolate( M_primalZeroIteration,
                                         *(this->M_primal),
                                         this->M_data.dataTime()->getInitialTime() );
-    
+
 } // SetZeroIterationPrimal
 
 // Update all the variables of the problem.

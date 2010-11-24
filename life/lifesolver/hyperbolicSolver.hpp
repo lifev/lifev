@@ -197,7 +197,9 @@ public:
     */
     inline void setSolution ( const vector_ptrtype& solution )
     {
-        M_u = solution;
+        // Set both the final step solution and beginning step solution.
+        M_u    = solution;
+        M_uOld = solution;
     }
 
 
@@ -830,6 +832,7 @@ CFL() const
 
     }
 
+    // Compute the timeStep according to CLF
     const Real timeStep( M_data.getCFLrelax() / localCFL );
 
     // Return the correct value of the time step

@@ -88,6 +88,7 @@ The analytical solutions are
 // ===================================================
 
 #include "darcy.hpp"
+#include "user_fun.hpp"
 
 // ===================================================
 //! Namespaces & define
@@ -96,241 +97,43 @@ The analytical solutions are
 using namespace LifeV;
 
 enum BCNAME
-{
-    /*
-    FLUX0            = 0,
-    INLETPRESSURE1   = 1,
-    INLETPRESSURE2   = 2,
-    OUTLETPRESSURE   = 3,
-    FLUX1            = 4*/
+    {
+        /*
+          FLUX0            = 0,
+          INLETPRESSURE1   = 1,
+          INLETPRESSURE2   = 2,
+          OUTLETPRESSURE   = 3,
+          FLUX1            = 4*/
 
+        /*
+          BACK   = 1,
+          FRONT  = 2,
+          LEFT   = 3,
+          RIGHT  = 4,
+          BOTTOM = 5,
+          TOP    = 6
+        */
 
-    BACK   = 1,
-    FRONT  = 2,
-    LEFT   = 3,
-    RIGHT  = 4,
-    BOTTOM = 5,
-    TOP    = 6
-};
+        LEFT   = 4,
+        RIGHT  = 2,
+        FRONT  = 1,
+        BACK   = 3,
+        TOP    = 6,
+        BOTTOM = 5
+    };
+
+enum DARCY_SOLVER_TYPE
+    {
+        DARCY_LINEAR               = 1,
+        DARCY_NON_LINEAR           = 2,
+        DARCY_TRANSIENT            = 3,
+        DARCY_TRANSIENT_NON_LINEAR = 4
+    };
 
 // ===================================================
-//! User functions
+//!              Standard functions
 // ===================================================
-namespace dataProblem
-{
 
-// Analytical solution
-Real analyticalSolution( const Real&/*t*/,
-                         const Real& x,
-                         const Real& y,
-                         const Real& z,
-                         const ID& /*ic*/)
-{
-    return x*x*y*y + 6.*x + 5.*z;
-}
-
-// Gradient of the analytical solution
-Real analyticalFlux( const Real& /*t*/,
-                     const Real& x,
-                     const Real& y,
-                     const Real& z,
-                     const ID& icomp)
-{
-    switch(icomp)
-    {
-    case 1: // \frac{\partial }{\partial x}
-        return -1. * (4.*x*y*y + 12. + 2.*x*x*y);
-    case 2: // \frac{\partial }{\partial y}
-        return -1. * (2.*y*x*x + 2.*x*y*y + 6.);
-    case 3: // \frac{\partial }{\partial z}
-        return -5.;
-    default:
-        return 0.;
-    }
-}
-
-// Inverse of permeability matrix
-/* In this case the permeability matrix is
-K = [2 1 0
-     1 1 0
-     0 0 1]
-*/
-Matrix inversePermeability( const Real& /*t*/,
-                            const Real& x,
-                            const Real& y,
-                            const Real& z, const std::vector<Real>& )
-{
-    Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
-
-    /* Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
-
-    if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
-         || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
-         || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
-    {
-        // First row
-        Entry00 = 100.;
-        Entry01 = 0.;
-        Entry02 = 0.;
-
-        // Second row
-        Entry11 = 100.;
-        Entry12 = 0.;
-
-        // Third row
-        Entry22 =  100.;
-
-    }
-    else
-    { // First row
-        Entry00 = 1.;
-        Entry01 = 0.;
-        Entry02 = 0.;
-
-        // Second row
-        Entry11 = 1.;
-        Entry12 = 0.;
-
-        // Third row
-        Entry22 = 1.;
-        }*/
-
-
-    // First row
-    Real Entry00 = 1.;
-    Real Entry01 = -1.;
-    Real Entry02 = 0.;
-
-    // Second row
-    Real Entry11 = 2.;
-    Real Entry12 = 0.;
-
-    // Third row
-    Real Entry22 = 1.;
-
-    // Fill in of the inversePermeabilityMatrix
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
-
-    return inversePermeabilityMatrix;
-}
-
-Real dirichlet1( const Real& /* t */,
-		 const Real& /* x */,
-		 const Real& /* y */,
-		 const Real& /* z */,
-                const ID&   /*icomp*/)
-{
-  return 11000000.;
-}
-
- Real dirichlet2( const Real& /* t */,
-		  const Real& /* x */,
-		  const Real& /* y */,
-		  const Real& /* z */,
-               const ID&   /*icomp*/)
-{
-  return  10000000.;
-}
-
- Real dirichlet3( const Real& /* t */,
-		  const Real& /* x */,
-		  const Real& /* y */,
-		  const Real& /* z */,
-               const ID&   /*icomp*/)
-{
-  return  10500000.;
-}
-
-// Boundary condition of Dirichlet
-Real dirichlet( const Real& /* t */,
-                const Real& x,
-                const Real& y,
-                const Real& z,
-                const ID&   /*icomp*/)
-{
-    return x*x*y*y + 6.*x + 5.*z;
-}
-
-// Boundary condition of Neumann
-Real neumann1( const Real& /* t */,
-              const Real& x,
-              const Real& y,
-              const Real& z,
-              const ID&   icomp)
-{
-	switch(icomp){
-  		case 1:   //! Dx
-            return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
-		break;
-		case 2:   //! Dy
-            return 0.;
-	 	break;
-  		case 3:   //! Dz
-    		return 0.;
-    	break;
-  	}
-	return 0.;
-}
-
-Real neumann2( const Real& /* t */,
-              const Real& x,
-              const Real& y,
-              const Real& z,
-              const ID&   icomp)
-{
-	switch(icomp){
-  		case 1:   //! Dx
-            return  4.*x*y*y + 2.*x*x*y + 12.;
-		break;
-		case 2:   //! Dy
-            return 0.;
-	 	break;
-  		case 3:   //! Dz
-    		return 0.;
-    	break;
-  	}
-	return 0.;
-}
-
-// Boundary condition of Neumann
-Real neumann3( const Real& /* t */,
-               const Real& /* x */,
-               const Real& /* y */,
-               const Real& /* z */,
-               const ID&   /* icomp */)
-{
-	return 0.;
-}
-
-// Boundary condition of Robin
-Real mixte( const Real& /* t */,
-            const Real& x,
-            const Real& y,
-            const Real& z,
-            const ID&   /*icomp*/)
-{
-    return -2.*y*x*x - 2*x*y*y - 6. + x*x*y*y + 6.*x + 5.*z;
-}
-
-// Source term
-Real source_in( const Real& /*t*/,
-                const Real& x,
-                const Real& y,
-                const Real& /*z*/,
-                const ID&  /*icomp*/)
-{
-    return -2.*x*x - 4.*y*y - 8.*x*y;//0.;
-}
-
-// Standard functions
 Real UOne( const Real& /* t */,
            const Real& /* x */,
            const Real& /* y */,
@@ -349,9 +152,9 @@ Real UZero( const Real& /* t */,
     return 0.;
 }
 
-}
+
 // ===================================================
-//! Private Members
+//!                  Private Members
 // ===================================================
 
 struct darcy::Private
@@ -364,11 +167,9 @@ struct darcy::Private
                                                    fct_type;
 
     // Policy for matrices
-    //  typedef boost::function<Matrix ( const Real&, const Real&,
-    //                                 const Real&, const Real& )>
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
-                                     const std::vector<Real> & )>
+                                     const std::vector<Real>& )>
                                                    matrix_type;
 
     std::string    data_file_name;
@@ -381,14 +182,14 @@ struct darcy::Private
     fct_type getUOne ( )
     {
     	fct_type f;
-    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero ( )
     {
     	fct_type f;
-    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
+    	f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
     	return f;
     }
 
@@ -420,10 +221,24 @@ struct darcy::Private
         return f;
     }
 
+    fct_type getZeroItarationPrimal ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::zeroItarationPrimal, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
+    fct_type getInitialPrimal ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::initialPrimal, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
 };
 
 // ===================================================
-//! Constructors
+//!                  Constructors
 // ===================================================
 
 darcy::darcy( int argc,
@@ -450,17 +265,26 @@ darcy::darcy( int argc,
 }
 
 // ===================================================
-//! Methods
+//!                      Methods
 // ===================================================
 
 Real
 darcy::run()
 {
-    typedef RegionMesh3D<LinearTetra>                   RegionMesh;
-    typedef SolverTrilinos                              solver_type;
-    typedef DarcySolver< RegionMesh, solver_type >      ds;
-	typedef ds::vector_type                             vector_type;
-    typedef boost::shared_ptr<vector_type>              vector_ptrtype;
+    using boost::dynamic_pointer_cast;
+
+    typedef RegionMesh3D< LinearTetra >                               RegionMesh;
+    typedef SolverTrilinos                                            solver_type;
+
+    typedef DarcySolver< RegionMesh, solver_type >                    darcyLinearSolver_type;
+    typedef DarcySolverNonLinear< RegionMesh, solver_type >           darcyNonLinearSolver_type;
+    typedef DarcySolverTransient< RegionMesh, solver_type >           darcyTransientSolver_type;
+    typedef DarcySolverTransientNonLinear< RegionMesh, solver_type >  darcyTransientNonLinearSolver_type;
+
+    typedef boost::shared_ptr< darcyLinearSolver_type >               darcyLinearSolver_ptrtype;
+
+	typedef darcyLinearSolver_type::vector_type                       vector_type;
+    typedef boost::shared_ptr< vector_type >                          vector_ptrtype;
 
     Chrono chronoTotal;
     Chrono chronoReadAndPartitionMesh;
@@ -478,6 +302,13 @@ darcy::run()
 
     // Create the leader process, i.e. the process with MyPID equal to zero
     bool isLeader = ( Members->comm->MyPID() == 0 );
+
+    // Darcy solver type from file
+    const UInt solverTypeKey =  dataFile( ( Members->discretization_section + "/problem_type" ).data(),
+                                          DARCY_LINEAR );
+
+    // Darcy solver type
+    DARCY_SOLVER_TYPE solverType( static_cast<DARCY_SOLVER_TYPE>( solverTypeKey ) );
 
     //
     // The Darcy Solver
@@ -501,11 +332,23 @@ darcy::run()
     // Set up the mesh file
     dataMesh.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
-    // Create the mesh
+    // Create the the mesh
     boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
 
-    // Set up the mesh
-    readMesh( *fullMeshPtr, dataMesh );
+    // Select if the mesh is structured or not
+    if ( dataMesh.meshType() != "structured" )
+    {
+        // Set up the mesh
+        readMesh( *fullMeshPtr, dataMesh );
+    }
+    else
+    {
+        // Set up the structured mesh
+        regularMesh3D( *fullMeshPtr, 0,
+                       dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/ny" ).data(), 4 ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ) );
+    }
 
     // Partition the mesh using ParMetis
     partitionMesh< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
@@ -650,6 +493,7 @@ darcy::run()
                                                            *bdQr_dualInterpolate,
                                                            3,
                                                            Members->comm );
+
     // Vector for the interpolated dual solution
     vector_ptrtype dualInterpolated( new vector_type ( uInterpolate_FESpace.map(), Repeated ) );
 
@@ -681,19 +525,54 @@ darcy::run()
     chronoProblem.start();
 
     // Instantiation of the DarcySolver class
-    ds darcySolver ( dataDarcy,
-                     p_FESpace,
-                     u_FESpace,
-                     hybrid_FESpace,
-                     VdotN_FESpace,
-                     Members->comm );
+    darcyLinearSolver_ptrtype darcySolver;
+
+    switch ( solverType )
+    {
+    case DARCY_LINEAR:
+
+        darcySolver.reset( new darcyLinearSolver_type( dataDarcy, p_FESpace,
+                                                       u_FESpace, hybrid_FESpace,
+                                                       VdotN_FESpace,
+                                                       Members->comm ) );
+
+        break;
+
+    case DARCY_NON_LINEAR:
+
+        darcySolver.reset( new darcyNonLinearSolver_type( dataDarcy, p_FESpace,
+                                                          u_FESpace, hybrid_FESpace,
+                                                          VdotN_FESpace,
+                                                          Members->comm ) );
+
+        break;
+
+    case DARCY_TRANSIENT:
+
+        darcySolver.reset( new darcyTransientSolver_type( dataDarcy, p_FESpace,
+                                                          u_FESpace, hybrid_FESpace,
+                                                          VdotN_FESpace,
+                                                          Members->comm ) );
+
+        break;
+
+    case DARCY_TRANSIENT_NON_LINEAR:
+
+        darcySolver.reset( new darcyTransientNonLinearSolver_type( dataDarcy, p_FESpace,
+                                                                   u_FESpace, hybrid_FESpace,
+                                                                   VdotN_FESpace,
+                                                                   Members->comm ) );
+
+        break;
+
+    }
 
     // Stop chronoProblem
     chronoProblem.stop();
 
     // The leader process print chronoProblem
-    darcySolver.getDisplayer().leaderPrint( "Time for create the problem ",
-                                            chronoProblem.diff(), "\n" );
+    darcySolver->getDisplayer().leaderPrint( "Time for create the problem ",
+                                             chronoProblem.diff(), "\n" );
 
     // Process the problem
 
@@ -701,20 +580,41 @@ darcy::run()
     chronoProcess.start();
 
     // Setup phase for the linear solver
-    darcySolver.setup();
+    darcySolver->setup();
 
 	// Set the source term
-    darcySolver.setSourceTerm( Members->getSource() );
+    darcySolver->setSourceTerm( Members->getSource() );
 
     // Create the inverse permeability
     inversePermeability < RegionMesh > invPerm ( Members->getInversePermeability(),
                                                  p_FESpace );
 
     // Set the inverse of the permeability
-    darcySolver.setInversePermeability( invPerm );
+    darcySolver->setInversePermeability( invPerm );
 
     // Set the boudary conditions
-    darcySolver.setBC( bcDarcy );
+    darcySolver->setBC( bcDarcy );
+
+    switch( solverType )
+    {
+    case DARCY_LINEAR:
+        break;
+
+    case DARCY_NON_LINEAR:
+    case DARCY_TRANSIENT_NON_LINEAR:
+
+        // Set the initial primal variable
+        ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->setZeroItarationPrimal( Members->getZeroItarationPrimal() );
+
+        break;
+
+    case DARCY_TRANSIENT:
+
+        // Set the initial primal variable
+        ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setInitialPrimal( Members->getInitialPrimal() );
+
+        break;
+    }
 
     // Set the exporter for the solution
     boost::shared_ptr< Exporter< RegionMesh > > exporter;
@@ -763,12 +663,12 @@ darcy::run()
     }
 
     // Set the exporter primal pointer
-    primalExporter.reset( new vector_type ( *darcySolver.primalSolution(),
+    primalExporter.reset( new vector_type ( *( darcySolver->primalSolution() ),
                                             exporter->mapType() ) );
 
     // Add the primal variable to the exporter
     exporter->addVariable( ExporterData::Scalar,
-                           "Pressure",
+                           dataFile( "exporter/name_primal", "Pressure" ),
                            primalExporter,
                            static_cast<UInt>( 0 ),
                            static_cast<UInt>( p_FESpace.dof().numTotalDof() ),
@@ -780,7 +680,7 @@ darcy::run()
 
     // Add the variable to the exporter
     exporter->addVariable( ExporterData::Vector,
-                           "Velocity",
+                           dataFile( "exporter/name_dual", "Velocity" ),
                            dualExporter,
                            static_cast<UInt>( 0 ),
                            static_cast<UInt>( uInterpolate_FESpace.dof().numTotalDof() ),
@@ -788,43 +688,179 @@ darcy::run()
                            ExporterData::Cell );
 
     // Display the total number of unknowns
-    darcySolver.getDisplayer().leaderPrint( "Number of unknowns : ",
-                                            hybrid_FESpace.map().getMap(Unique)->NumGlobalElements(), "\n" );
+    darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
+                                             hybrid_FESpace.map().getMap(Unique)->NumGlobalElements(), "\n" );
 
-    // Solve the problem
+    switch( solverType )
+    {
+    case DARCY_LINEAR:
 
-    // Build the linear system and the right hand side
-    darcySolver.buildSystem();
+        // Solve the problem
 
-    // Solve the linear system
-    darcySolver.solve();
+        // Build the linear system and the right hand side
+        darcySolver->buildSystem();
 
-    // Post process of the primal and dual variables
-    darcySolver.computePrimalAndDual();
+        // Solve the linear system
+        darcySolver->solve();
 
-    // Save the solution
+        // Post process of the primal and dual variables
+        darcySolver->computePrimalAndDual();
 
-    // Copy the primal solution to the exporter
-    *primalExporter = *darcySolver.primalSolution();
+        // Save the solution
 
-    // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-    *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
-                                                                *darcySolver.dualSolution() );
+        // Copy the primal solution to the exporter
+        *primalExporter = *( darcySolver->primalSolution() );
 
-    // Copy the dual interpolated solution to the exporter
-    *dualExporter = *dualInterpolated;
+        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+        *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+                                                                    *( darcySolver->dualSolution() ) );
 
-    // Save the solution into the exporter
-    exporter->postProcess( static_cast<Real>(0) );
+        // Copy the dual interpolated solution to the exporter
+        *dualExporter = *dualInterpolated;
+
+        // Save the solution into the exporter
+        exporter->postProcess( static_cast<Real>(0) );
+
+        break;
+
+    case DARCY_NON_LINEAR:
+
+        // Solve the problem
+
+        // Start the fixed point simulation
+        ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->fixedPointScheme();
+
+        // Save the solution
+
+        // Copy the primal solution to the exporter
+        *primalExporter = *( darcySolver->primalSolution() );
+
+        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+        *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+                                                                    *( darcySolver->dualSolution() ) );
+
+        // Copy the dual interpolated solution to the exporter
+        *dualExporter = *dualInterpolated;
+
+        // Save the solution into the exporter
+        exporter->postProcess( static_cast<Real>(0) );
+
+        break;
+
+    case DARCY_TRANSIENT:
+
+        // Solve the problem
+
+        // Save the initial primal
+
+        // Copy the initial primal to the exporter
+        *primalExporter = *( darcySolver->primalSolution() );
+
+        // Save the initial primal solution into the exporter
+        exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
+
+        // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
+        while( !dataDarcy.dataTime()->isLastTimeStep() )
+        {
+
+            // Advance the current time of \Delta t.
+            dataDarcy.dataTime()->updateTime();
+
+            // The leader process prints the temporal data.
+            if ( darcySolver->getDisplayer().isLeader() )
+            {
+                dataDarcy.dataTime()->showMe();
+            }
+
+            // Build the linear system and the right hand side
+            darcySolver->buildSystem();
+
+            // Solve the linear system
+            darcySolver->solve();
+
+            // Post process of the primal and dual variables
+            darcySolver->computePrimalAndDual();
+
+            // Save the solution
+
+            // Copy the primal solution to the exporter
+            *primalExporter = *( darcySolver->primalSolution() );
+
+            // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+            *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+                                                                        *( darcySolver->dualSolution() ) );
+
+            // Copy the dual interpolated solution to the exporter
+            *dualExporter = *dualInterpolated;
+
+            // Save the solution into the exporter
+            exporter->postProcess( dataDarcy.dataTime()->getTime() );
+
+        }
+
+        break;
+
+    case DARCY_TRANSIENT_NON_LINEAR:
+
+        // Solve the problem
+
+        // Save the initial primal
+
+        // Copy the initial primal to the exporter
+        *primalExporter = *( darcySolver->primalSolution() );
+
+        // Save the initial primal solution into the exporter
+        exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
+
+        // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
+        while( !dataDarcy.dataTime()->isLastTimeStep() )
+        {
+            // Update the primal old solution for the fixed point scheme
+            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->updatePrimalOldSolution();
+
+            // Advance the current time of \Delta t.
+            dataDarcy.dataTime()->updateTime();
+
+            // The leader process prints the temporal data.
+            if ( darcySolver->getDisplayer().isLeader() )
+            {
+                dataDarcy.dataTime()->showMe();
+            }
+
+            // Start the fixed point simulation
+            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->fixedPointScheme();
+
+            // Save the solution
+
+            // Copy the primal solution to the exporter
+            *primalExporter = *( darcySolver->primalSolution() );
+
+            // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+            *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+                                                                        *( darcySolver->dualSolution() ) );
+
+            // Copy the dual interpolated solution to the exporter
+            *dualExporter = *dualInterpolated;
+
+            // Save the solution into the exporter
+            exporter->postProcess( dataDarcy.dataTime()->getTime() );
+
+        }
+
+        break;
+
+    }
 
     // Stop chronoProcess
     chronoProcess.stop();
 
     // The leader process print chronoProcess
-    darcySolver.getDisplayer().leaderPrint( "Time for process ",
-                                            chronoProcess.diff(), "\n" );
+    darcySolver->getDisplayer().leaderPrint( "Time for process ",
+                                             chronoProcess.diff(), "\n" );
 
     // Compute the errors
+    // For non time dependences problem the time where the errors are computed is useless,
+    // but thanks to common interface we handle both cases.
 
     // Start chronoError for measure the total time for computing the errors.
     chronoError.start();
@@ -834,88 +870,88 @@ darcy::run()
     Real dualL2Norm(0), exactDualL2Norm(0), dualL2Error(0), dualL2RelativeError(0);
 
     // Norms and errors for the pressure
-    darcySolver.getDisplayer().leaderPrint( "\nPRESSURE ERROR\n" );
+    darcySolver->getDisplayer().leaderPrint( "\nPRESSURE ERROR\n" );
 
     // Compute the L2 norm for the primal solution
-    primalL2Norm = p_FESpace.L2Norm( *darcySolver.primalSolution() );
+    primalL2Norm = p_FESpace.L2Norm( *( darcySolver->primalSolution() ) );
 
     // Display the L2 norm for the primal solution
-    darcySolver.getDisplayer().leaderPrint( " L2 norm of primal unknown:            ",
-                                            primalL2Norm, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 norm of primal unknown:            ",
+                                             primalL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical primal
     exactPrimalL2Norm = p_FESpace.L2NormFunction( Members->getAnalyticalSolution(),
-                                                  static_cast<Real>(0) );
+                                                  dataDarcy.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical primal
-    darcySolver.getDisplayer().leaderPrint( " L2 norm of primal exact:              ",
-                                            exactPrimalL2Norm, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 norm of primal exact:              ",
+                                             exactPrimalL2Norm, "\n" );
 
     // Compute the L2 error for the primal solution
     primalL2Error = p_FESpace.L2ErrorWeighted( Members->getAnalyticalSolution(),
-                                               *darcySolver.primalSolution(),
+                                               *( darcySolver->primalSolution() ),
                                                Members->getUOne(),
-                                               static_cast<Real>(0) );
+                                               dataDarcy.dataTime()->getEndTime() );
 
     // Display the L2 error for the primal solution
-    darcySolver.getDisplayer().leaderPrint( " L2 error of primal unknown:           ",
-                                            primalL2Error, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 error of primal unknown:           ",
+                                             primalL2Error, "\n" );
 
     // Compute the L2 realative error for the primal solution
     primalL2RelativeError = primalL2Error / exactPrimalL2Norm;
 
     // Display the L2 relative error for the primal solution
-    darcySolver.getDisplayer().leaderPrint( " L2 relative error of primal unknown:  ",
-                                            primalL2RelativeError, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 relative error of primal unknown:  ",
+                                             primalL2RelativeError, "\n" );
 
     // Norms and errors for the interpolated dual
-    darcySolver.getDisplayer().leaderPrint( "\n\nINTERPOLATED DARCY VELOCITY ERROR\n" );
+    darcySolver->getDisplayer().leaderPrint( "\n\nINTERPOLATED DARCY VELOCITY ERROR\n" );
 
     // Compute the L2 norm for the interpolated dual solution
     dualL2Norm = uInterpolate_FESpace.L2Norm( *dualInterpolated );
 
     // Display the L2 norm for the interpolated dual solution
-    darcySolver.getDisplayer().leaderPrint( " L2 norm of dual unknown:              ",
-                                            dualL2Norm, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 norm of dual unknown:              ",
+                                             dualL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical dual
     exactDualL2Norm = uInterpolate_FESpace.L2NormFunction( Members->getAnalyticalFlux(),
-                                                           static_cast<Real>(0) );
+                                                           dataDarcy.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical dual
-    darcySolver.getDisplayer().leaderPrint( " L2 norm of dual exact:                ",
-                                            exactDualL2Norm, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 norm of dual exact:                ",
+                                             exactDualL2Norm, "\n" );
 
     // Compute the L2 error for the dual solution
     dualL2Error = uInterpolate_FESpace.L2Error( Members->getAnalyticalFlux(),
                                                 *dualInterpolated,
-                                                static_cast<Real>(0),
+                                                dataDarcy.dataTime()->getEndTime(),
                                                 NULL );
 
     // Display the L2 error for the dual solution
-    darcySolver.getDisplayer().leaderPrint( " L2 error of dual unknown:             ",
-                                            dualL2Error, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 error of dual unknown:             ",
+                                             dualL2Error, "\n" );
 
     // Compute the L2 relative error for the dual solution
     dualL2RelativeError = dualL2Error / exactDualL2Norm;
 
     // Display the L2 relative error for the dual solution
-    darcySolver.getDisplayer().leaderPrint( " L2 relative error of Dual unknown:    ",
-                                            dualL2RelativeError, "\n" );
+    darcySolver->getDisplayer().leaderPrint( " L2 relative error of Dual unknown:    ",
+                                             dualL2RelativeError, "\n" );
 
     // Stop chronoError
     chronoError.stop();
 
     // The leader process print chronoError
-    darcySolver.getDisplayer().leaderPrint( "Time for compute errors ",
-                                            chronoError.diff(), "\n" );
+    darcySolver->getDisplayer().leaderPrint( "Time for compute errors ",
+                                             chronoError.diff(), "\n" );
 
     // Stop chronoTotal
     chronoTotal.stop();
 
     // The leader process print chronoTotal
-    darcySolver.getDisplayer().leaderPrint( "Total time for the computation ",
-                                            chronoTotal.diff(), "\n" );
+    darcySolver->getDisplayer().leaderPrint( "Total time for the computation ",
+                                             chronoTotal.diff(), "\n" );
 
     // Return the error, needed for the succes/failure of the test
     return primalL2Error;

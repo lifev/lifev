@@ -67,12 +67,12 @@ Real analyticalSolution( const Real& t,
                          const Real& z,
                          const ID& /*ic*/)
 {
-    Real u1 = 5;
-    if ( ( x <= u1*t/2 && x >= u1*(t - 0.15)/2 ) && ( y >= 0.25 && y <= 0.75 )  && ( z >= 0.25 && z <= 0.75 ) )
-        return 1;
-    else
-        return 0;
-    //  return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
+    //Real u1 = 5;
+    //if ( ( x <= u1*(t+0.25)/2 && x >= u1*(t - 0.15)/2 ) && ( y >= 0.25 && y <= 0.75 )  && ( z >= 0.25 && z <= 0.75 ) )
+    ///   return 1;
+    //else
+     //   return 0;
+    return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
 }
 
 // Physical flux function
@@ -85,10 +85,10 @@ Vector physicalFlux( const Real& /*t*/,
     Vector physicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = u[0]*u[0]*u[1];//y*u[0]*u[1];
+    Real Entry0 = y*u[0]*u[1];//u[0]*u[0]*u[1];
 
     // Second row
-    Real Entry1 = u[2];//x*u[0]*u[2];
+    Real Entry1 = x*u[0]*u[2];//u[2];
 
     // Third row
     Real Entry2 = u[3];
@@ -110,10 +110,10 @@ Vector firstDerivativePhysicalFlux( const Real& /*t*/,
     Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
 
     // First row
-    Real Entry0 = 2.*u[0]*u[1];//y*u[1];
+    Real Entry0 = y*u[1];//2.*u[0]*u[1];
 
     // Second row
-    Real Entry1 = 0.;//x*u[2];
+    Real Entry1 = x*u[2];//0.;
 
     // Third row
     Real Entry2 = 0.;
@@ -135,10 +135,10 @@ Real dual( const Real& /*t*/,
     switch( ic )
     {
     case 1:
-        return 5.;//-2.*Pi;
+        return -2.*Pi;//5
         break;
     case 2:
-        return 0.;//2.*Pi;
+        return 2.*Pi; //0
         break;
     case 3:
       return 0.;
@@ -573,7 +573,7 @@ hyperbolic::run()
     {
 
         // Compute the new time step according to the CFL condition.
-        //timeStep = hyperbolicSolver.CFL();
+        timeStep = hyperbolicSolver.CFL();
 
         // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
         if ( dataHyperbolic.dataTime()->isLastTimeStep() )
@@ -586,7 +586,7 @@ hyperbolic::run()
         }
 
        // Set the last time step for the simulation.
-       //dataHyperbolic.dataTime()->setTimeStep( timeStep );
+       dataHyperbolic.dataTime()->setTimeStep( timeStep );
 
         // The leader process prints the temporal data.
         if ( hyperbolicSolver.getDisplayer().isLeader() )

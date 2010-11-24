@@ -9,14 +9,14 @@
     multimesh  = false   # actually we export also the displacement
     start      = 0
     save       = 1
-	file_name  = PressureSaturation8
+    file_name  = PressureSaturation3
     [../]
 
     [impes]
 
         [./space_discretization]
     	mesh_dir      = ./Mesh/old/ # the directory where the mesh file is
-    	mesh_file     = mesh8544.mesh #twoTetrahedra.mesh #aTetrahedra.mesh #cartesian_cube1.mesh
+    	mesh_file     = mesh48603.mesh #twoTetrahedra.mesh #aTetrahedra.mesh #cartesian_cube1.mesh
     	mesh_type     = .mesh #structured #.mesh
         mesh_faces    = all
         verbose       = 0                        # verbose during mesh-reading
@@ -38,7 +38,7 @@
 
             [./ML]
             analyze_smoother        = true
-            default_parameter_list 	= SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+            default_parameter_list  = SA    # for ML precond, none SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
             max_levels              = 1
 
                 [./smoother]
@@ -139,7 +139,7 @@
     [./hyperbolic]
 
         [./time_discretization]
-        timestep      = 0.00004
+        timestep      = 0.0004
         [../]
 
         [./numerical_flux]
@@ -153,7 +153,7 @@
             fluxtype          = Godunov
 
             [./godunov]
-            brent_toll    = 1e-6
+            brent_toll    = 1e-3
             brent_maxIter = 1000
             [../]
 
@@ -169,7 +169,7 @@
 
         [./time_discretization]
         initialtime   = 0.
-        endtime       = 1.
+        endtime       = 50.
         timestep      = 0.03125
         [../]
 
