@@ -30,7 +30,7 @@ LifeV_Development_Guidelines.pdf: $(LifeV_Development_Guidelines_TEX)
 
 IMAGES_SRC	=
 
-LISTING_SRC = TemplateClass.hpp TemplateClass.cpp main.cpp LifeV_Makefile.am testsuite.at
+LISTING_SRC = ExampleClass.hpp ExampleClass.cpp main.cpp LifeV_Makefile.am testsuite.at
 
 EXTRA_DIST = $(LifeV_Development_Guidelines_TEX) $(IMAGES_SRC) $(LISTING_SRC) ltxcompile mcode.sty
 

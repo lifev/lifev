@@ -44,7 +44,7 @@
 
 \title{\texttt{LifeV} Development Guidelines}
 \author{C. Malossi, S. Deparis}
-\date{Last updated: November 16th, 2010}
+\date{Last updated: November 24th, 2010}
 
 \begin{document}
 
@@ -55,7 +55,7 @@ This short guide provides some useful rules to improve the development of \textt
 \section{Nomenclature of classes and methods}
 This is a short list of rules for the nomenclature of files, classes and methods.
 \begin{enumerate}
-  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions, except inlined methods (usually no more than one line), should be inside the \texttt{*.cpp} files.
+  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions should be inside the \texttt{*.cpp} files. In case of template classes and/or methods, the definitions should be placed at the end of the \texttt{*.hpp} files. Inlined methods must be in the \texttt{*.hpp} files: short inline methods (usually no more than one line), should be defined inside the class definition (without the inline keyword), while longer inline methods should be defined at the end of the \texttt{*.hpp} files, using the inline keyword. 
   \item Use type definitions at the beginning of the class to introduce more generality in the code. The syntax for types and pointer types is the following:
 \begin{lstlisting}
 typedef Epetra_FEVector                       vector_Type;
@@ -67,7 +67,7 @@ typedef boost::shared_ptr< vector_constType > vectorConstPtr_Type;
 typedef std::map<Int,Real>::iterator          mapIterator_Type;       
 typedef std::map<Int,Real>::const_iterator    mapConstIterator_Type;
 \end{lstlisting}
-  \item Classes and structures should start with the capital letter.
+  \item Classes and structures should start with the capital letter. In case of composed names, each word should start with capital letter.
 \begin{lstlisting}
 class datatime; //NO!!!
 
@@ -92,7 +92,7 @@ FSIOperatorEJ ( here the common prefix FSIOperator make it clear that
 FSIOperatorFP
 FSIData
 \end{lstlisting}
-  \item In case of composed names, each word (starting from the second one) should start with capital letter.
+  \item In case of composed names for methods, each word (starting from the second one) should start with the capital letter.
 \begin{lstlisting}
 void matrixvectormultiplication( matrixtype& matrix ); //NO!!!
 
@@ -143,7 +143,7 @@ void setDataFile( const std::string& ); //NO!!!
 
 void setDataFile( const std::string& fileName ); //OK
 \end{lstlisting}
-  \item All get functions and methods should be declared const and should return a const object by reference (even if it is a \texttt{boost::shared\_ptr}).
+  \item Any method that does not change the state of the object must be made const (in particular getters). In addition all get methods should return a const object by reference (even if it is a \texttt{boost::shared\_ptr}). For clarity, the const directive should appear before the type of the object. 
 \begin{lstlisting}
 matrix_Type&    matrix();     //NO!!!
 matrix_PtrType& matrix_ptr(); //NO!!!
@@ -151,15 +151,22 @@ matrix_PtrType& matrix_ptr(); //NO!!!
 const matrix_Type&    matrix() const;     //OK
 const matrixPtr_Type& matrixPtr() const; //OK
 \end{lstlisting}
-  \item All set functions and methods should start with the prefix \texttt{set}. In addition the input parameters should be passed as reference to const.
+\textbf{NOTE:} if a method is returning a reference, and you want to be able to use the returned reference as lvalue (i.e. to modify the content) you must provide both the const and non-const version, even if it requires some code duplication:
 \begin{lstlisting}
-void matrix( matrix_Type& matrix );          //NO!!!
+const matrix_Type& matrix() const;
+      matrix_Type& matrix();
+\end{lstlisting}
+Providing only the non-cont version will indeed impede to use the method on const objects.
+  \item Arguments should preferably be passed by reference and (compulsorily) by constant reference if they are not modified by the function/method
+(i.e. are used just an input). In addition, all set methods should start with the prefix \texttt{set}.
+\begin{lstlisting}
+void matrix( matrix_Type matrix );           //NO!!!
 void matrix_ptr( matrixPtr_Type& matrixPtr); //NO!!!
 
 void setMatrix( const matrix_Type& matrix );         //OK
 void setMatrixPtr( const matrixPtr_Type& matrixPtr); //OK
 \end{lstlisting}
-  \item Use white space to improve the readability of the code.
+  \item Use white space to improve the readability of the code. 
 \begin{lstlisting}
 M_result=(a+b)/(c*d)             //NO!!!
 
@@ -178,8 +185,8 @@ This is a short list of programming and general conventions that should be used 
 \subsection{Programming conventions}
 \begin{enumerate}
   \item Each file should include another one only if it is strictly required; as a general rule, try to shorten as much as possible the list of \texttt{\#include} directives.
-  \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and \texttt{UInt}, instead of the built-in types \texttt{double}, \texttt{int} and \texttt{unsigned int}. This helps making code changes afterwards. All the type definitions are contained into \texttt{life.hpp}. \newline \textbf{NOTE:} Only for MPI instructions and Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}. In these cases, use \texttt{static\_cast} to avoid warning messages.
-  \item Use \texttt{boost::shared\_ptr} instead of raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class.
+  \item Use the typedefs aliases \texttt{Real}, \texttt{Int} and \texttt{UInt}, instead of the built-in types \texttt{double}, \texttt{int} and \texttt{unsigned int}. This helps making code changes afterwards. All the type definitions are contained into \texttt{life.hpp}. %\newline \textbf{NOTE:} Only for MPI instructions and Trilinos call functions, it could be necessary to use \texttt{int} instead of \texttt{Int}. In these cases, use \texttt{static\_cast} to avoid warning messages.
+  \item Use \texttt{boost::shared\_ptr} instead of raw pointers. If the raw pointer is needed by another external class (for example by \texttt{Trilinos}) you can use the \texttt{get()} method of \texttt{boost::shared\_ptr} class. If the full ownership of the pointer is required use \texttt{boost::scoped\_ptr}.
   \item All the members should be private or protected (if necessary).
   \item Don't use reference types for members inside classes. Of course use them for functions and methods arguments.
   \item \texttt{using} directives should be avoided entirely, especially in header files. They cause wanton namespace pollution by bringing in potentially huge numbers of names, many (usually the vast majority) of which are unnecessary. The presence of the unnecessary names greatly increases the possibility of unintended name conflicts not just in the header, but in every module that includes the header. Moreover
@@ -187,6 +194,7 @@ This is a short list of programming and general conventions that should be used 
   \item Use \texttt{const} keyword when possible. This helps the compiler and the developers reading the code. Moreover, it enhances debugging. See \url{http://en.wikipedia.org/wiki/Const-correctness} for more details on the use of \texttt{const}.
   \item Use the \texttt{C++} cast utility (\texttt{static\_cast}) instead of implicit compiling casts. This will avoid warnings and will keep each cast visible for future debugging. See
   \url{http://www.cplusplus.com/doc/tutorial/typecasting} for more details on the use of cast commands.
+  \item the classes should always have an empty constructor and a virtual empty destructor, being filled by specific calls to setters or methods. The copy constructor, if not required / implemented, should exist as a private method without implementation. Declare explicit all constructors which may take only one argument, unless there is the very need of having implicit conversion (it may be required in certain constructs).
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
 #ifdef DEBUG
@@ -194,7 +202,7 @@ This is a short list of programming and general conventions that should be used 
                   << M_myVariable << "\n";
 #endif
 \end{lstlisting}
-  Thanks to this syntax no output will be displayed, unless the debug mode is enabled and an enviroment variable is set in the shell with the command \texttt{export DEBUG="3000"}. This will avoid a lot of unuseful outputs especially on parallel runs. For the complete list of debug numbers (that you can enrich) see the file \texttt{debug.areas} in the library.
+  Thanks to this syntax no output will be displayed, unless the debug mode is enabled and an enviroment variable is set in the shell with the command \texttt{export DEBUG="3000"}. This will avoid a lot of unuseful outputs especially on parallel runs. For the complete list of debug numbers (that you can enrich) see the file \texttt{debug.areas} in the library. In addition, use the \texttt{\_\_LINE\_\_} and \texttt{\_\_FILE\_\_} C preprocessor macros in debugging messages.
   \item For assertion purposes please use the \texttt{lifeassert.hpp} class features.
 \end{enumerate}
 
@@ -255,7 +263,7 @@ All classes should have documentation lines explaining in a concise but thorough
 \subsection{How to add doxygen style in \texttt{C++} classes}
 In order to be fully documented, the code should follow some simple rules which are described on the doxygen website \url{www.doxygen.org}. In particular the main doxygen style commands are described at the following page \url{http://www.stack.nl/~dimitri/doxygen/manual.html}.
 
-To make things easier for all \texttt{LifeV} developers, a general \texttt{LifeV} template class has been generated and attached to this guide as an appendix (see appendix \ref{TemplateClassHPP} and \ref{TemplateClassCPP}). It contains the general layout structure for any new class. All the future classes in \texttt{LifeV} should be developed starting from these two files, which contain everything to make doxygen work properly.
+To make things easier for all \texttt{LifeV} developers, a general \texttt{LifeV} example class has been generated and attached to this guide as an appendix (see appendix \ref{TemplateClassHPP} and \ref{TemplateClassCPP}). It contains the general layout structure for any new class. All the future classes in \texttt{LifeV} should be developed starting from these two files, which contain everything to make doxygen work properly.
 
 \bigskip
 \noindent In particular, the header file is divided into $4$ sections:
@@ -305,13 +313,13 @@ placed in the same order as in the header file. To keep the same group division 
 
 %\changepage{20em}{20em}{0em}{-10em}{0em}{-10em}{}{}{}
 
-\section{TemplateClass.hpp - Template Class header} \label{TemplateClassHPP}
-\small{\lstinputlisting{TemplateClass.hpp}}
+\section{ExampleClass.hpp - Example Class header} \label{TemplateClassHPP}
+\small{\lstinputlisting{ExampleClass.hpp}}
 
 \clearpage
-\section{TemplateClass.cpp - Template Class sourse code}
+\section{ExampleClass.cpp - Example Class sourse code}
 \label{TemplateClassCPP}
-\small{\lstinputlisting{TemplateClass.cpp}}
+\small{\lstinputlisting{ExampleClass.cpp}}
 
 \clearpage
 \section{main.cpp - Testsuite main file} \label{main}

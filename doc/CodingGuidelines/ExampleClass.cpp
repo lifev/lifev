@@ -34,36 +34,36 @@
     A more detailed description of the file (if necessary)
  */
 
-#include <TemplateClass.hpp>
+#include <ExampleClass.hpp>
 
 namespace LifeV {
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-TemplateClass::TemplateClass() :
+ExampleClass::ExampleClass() :
     M_variableOne (),
     M_variableTwo ()
 {
 
 }
 
-TemplateClass::TemplateClass( first_Type&  variableOne,
-                              second_Type& variableTwo ) :
+ExampleClass::ExampleClass( first_Type&  variableOne,
+                            second_Type& variableTwo ) :
     M_variableOne ( variableOne ),
     M_variableTwo ( variableTwo )
 {
 
 }
 
-TemplateClass::TemplateClass( const TemplateClass& T ) :
-    M_variableOne ( T.M_variableOne ),
-    M_variableTwo ( T.M_variableTwo )
+ExampleClass::ExampleClass( const ExampleClass& example ) :
+    M_variableOne ( example.M_variableOne ),
+    M_variableTwo ( example.M_variableTwo )
 {
 
 }
 
-TemplateClass::~TemplateClass()
+ExampleClass::~ExampleClass()
 {
 
 }
@@ -71,13 +71,13 @@ TemplateClass::~TemplateClass()
 // ===================================================
 // Operators
 // ===================================================
-TemplateClass&
-TemplateClass::operator=( const TemplateClass& T )
+ExampleClass&
+ExampleClass::operator=( const ExampleClass& example )
 {
-    if ( this != &T )
+    if ( this != &example )
     {
-    	M_variableOne = T.M_variableOne;
-    	M_variableTwo = T.M_variableTwo;
+    	M_variableOne = example.M_variableOne;
+    	M_variableTwo = example.M_variableTwo;
     }
 
     return *this;
@@ -87,22 +87,22 @@ TemplateClass::operator=( const TemplateClass& T )
 // Methods
 // ===================================================
 void
-TemplateClass::methodOne( first_Type&  inputVariableOne,
-                          second_Type& inputVariableTwo )
+ExampleClass::methodOne( first_Type&  inputVariableOne,
+                         second_Type& inputVariableTwo )
 {
 	//Do something
 }
 
 void
-TemplateClass::methodTwo()
+ExampleClass::methodTwo()
 {
 
 }
 
 void
-TemplateClass::showMe( std::ostream& output ) const
+ExampleClass::showMe( std::ostream& output ) const
 {
-	output << "TemplateClass::showMe()" << std::endl;
+	output << "ExampleClass::showMe()" << std::endl;
 	output << "Variable one: " << M_variableOne << std::endl;
 	output << "Variable two: " << M_variableTwo << std::endl;
 }
@@ -111,7 +111,7 @@ TemplateClass::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-TemplateClass::setVariableOne( const first_Type& variableOne )
+ExampleClass::setVariableOne( const first_Type& variableOne )
 {
     M_variableOne = variableOne;
 }
@@ -119,8 +119,8 @@ TemplateClass::setVariableOne( const first_Type& variableOne )
 // ===================================================
 // Get Methods
 // ===================================================
-const TemplateClass::first_Type&
-TemplateClass::variableOne() const
+const ExampleClass::first_Type&
+ExampleClass::variableOne() const
 {
     return M_variableOne;
 }
@@ -129,7 +129,7 @@ TemplateClass::variableOne() const
 // Private Methods
 // ===================================================
 void
-TemplateClass::privateMethodOne()
+ExampleClass::privateMethodOne()
 {
     //Do something ..
 }

@@ -34,14 +34,14 @@
     A more detailed description of the file (if necessary)
  */
 
-#ifndef TEMPLATECLASS_H
-#define TEMPLATECLASS_H 1
+#ifndef EXAMPLECLASS_H
+#define EXAMPLECLASS_H 1
 
 #include <life/lifecore/life.hpp>
 
 namespace LifeV {
 
-//! TemplateClass - Short description of the class
+//! ExampleClass - Short description of the class
 /*!
     @author Name Surname
     @see Reference to papers (if available)
@@ -79,7 +79,7 @@ namespace LifeV {
 
     For any other kind of information visit www.doxygen.org.
  */
-class TemplateClass
+class ExampleClass
 {
 public:
 
@@ -106,7 +106,7 @@ public:
     //@{
 
     //! Empty Constructor
-    TemplateClass();
+    ExampleClass();
 
     //! Short description of the constructor
     /*!
@@ -115,18 +115,18 @@ public:
         @param VariableOne Description of the first variable
         @param VariableTwo Description of the second variable
      */
-    TemplateClass( first_Type& VariableOne, second_Type& VariableTwo );
+    ExampleClass( first_Type& VariableOne, second_Type& VariableTwo );
 
     //! Copy constructor
     /*!
         Add more details about the copy constructor.
         NOTE: short description is automatically added before this part.
-        @param T TemplateClass
+        @param example ExampleClass
      */
-    TemplateClass( const TemplateClass& T );
+    ExampleClass( const ExampleClass& example );
 
     //! Destructor
-    ~TemplateClass();
+    ~ExampleClass();
 
     //@}
 
@@ -169,11 +169,11 @@ public:
     /*!
         Add more details about the method.
         NOTE: short description is automatically added before this part.
-        @param T TemplateClass
-        @return Reference to a new TemplateClass with the same
-                content of TemplateClass T
+        @param example ExampleClass
+        @return Reference to a new ExampleClass with the same
+                content of ExampleClass example
      */
-    TemplateClass& operator=( const TemplateClass& T );
+    ExampleClass& operator=( const ExampleClass& example );
 
     //@}
 
@@ -225,4 +225,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* TEMPLATECLASS_H */
+#endif /* EXAMPLECLASS_H */

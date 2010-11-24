@@ -49,7 +49,7 @@
 %%   in your document preamble.
 %%   
 %%   Note:  inside code blocks you  can escape to LaTeX math mode
-%%   using § \pi x^2 §  (instead of the default $...$),  which is
+%%   using ï¿½ \pi x^2 ï¿½  (instead of the default $...$),  which is
 %%   especially  useful  in comments  for putting  nicely typeset
 %%   equations etc.
 %%
@@ -123,7 +123,7 @@
 \fi
 
 % Check if textcomp has been loaded (this package is needed for
-% upright quotes '' (instead of typographic ones `´)...
+% upright quotes '' (instead of typographic ones `ï¿½)...
 \ifx\textquotesingle\undefined% 
   \RequirePackage{textcomp}%
 \fi
@@ -139,9 +139,8 @@
 \lstdefinelanguage{matlabfloz}{%
   alsoletter={...},%
   morekeywords={%                             % keywords
-  break,case,catch,continue,elseif,else,end,for,function,global,%
-  if,otherwise,persistent,return,switch,try,while,...},%
-  comment=[l]\%,%                             % comments
+  },%
+  comment=[l],%                             % comments
   morecomment=[l]...,%                        % comments
   morestring=[m]',%                           % strings 
 }[keywords,comments,strings]%
@@ -165,7 +164,7 @@
   basicstyle={\lstbasicfont\footnotesize},    % use font and smaller size
   showstringspaces=false,                     % do not emphasize spaces in strings
   tabsize=4,                                  % number of spaces of a TAB
-  mathescape=false,escapechar=§,              % escape to latex with §...§
+  mathescape=false,escapechar=ï¿½,              % escape to latex with ï¿½...ï¿½
   upquote=true,                               % upright quotes
   aboveskip={1.5\baselineskip},               % a bit of space above
   columns=fixed,                              % nice spacing
