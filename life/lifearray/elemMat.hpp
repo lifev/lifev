@@ -37,8 +37,24 @@ public:
 
     ~ElemMat();
     ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ); // constructor for 1 finite element
+    
+    //! This is the constructor for the local matrix involving 2 finite elements
+    /*!
+      There are 6 arguments for this constructor. The arguements nbNode1 and nbNode2
+      are simply the number of basis function for each finite element.
+      
+      The 4 others are used to describe the number of blocks on want in the matrix.
+      
+      Warning: all the blocks do not have the same size!
+      
+      Indeed, nbr1 describes the number of blocks that have a "height" of nbNode1,
+      nbr2 the number of blocks that have a "height" of nbNode2, and the same with
+      the columns for nbc1 and nbc2 (Think about it as a "local Stokes matrix": nbr1
+      and nbc1 are 3 (components for the velocity), nbr2 and nbc2 are 1 (pressure
+      is scalar)).
+     */
     ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
-             UInt nNode2, UInt nbr2, UInt nbc2 ); // constructor for 2 finite elements
+             UInt nNode2, UInt nbr2, UInt nbc2 );
     ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
              UInt nNode2, UInt nbr2, UInt nbc2,
              UInt nNode3, UInt nbr3, UInt nbc3 ); // constructor for 3 finite elements
