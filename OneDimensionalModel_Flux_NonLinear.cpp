@@ -66,11 +66,11 @@ OneDimensionalModel_Flux_NonLinear::operator()( const Real& A, const Real& Q,
 
     if( ii == 2 ) // F2
     {
-        return M_Physics->Data()->RobertsonCorrection() *
-               ( M_Physics->Data()->Alpha(i) * Q * Q / A +
-                 ( M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) * M_Physics->Data()->Area0(i) )
-                 / ( ( M_Physics->Data()->Beta1(i) + 1) * M_Physics->Data()->DensityRho() )
-                 * std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) + 1 ) );
+        return ( M_Physics->Data()->Alpha(i) * Q * Q / A
+               + M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) * M_Physics->Data()->Area0(i)
+               / ( ( M_Physics->Data()->Beta1(i) + 1) * M_Physics->Data()->DensityRho() )
+               * ( std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) + 1 ) - 1 )
+               ) * M_Physics->Data()->RobertsonCorrection();
     }
 
     ERROR_MSG("The flux function has only 2 components.");
@@ -94,10 +94,10 @@ OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
 
     if( ii == 2 && jj == 1 )  // dF2/dA
     {
-        return M_Physics->Data()->RobertsonCorrection() *
-               ( M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) / M_Physics->Data()->DensityRho()
+        return ( M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) / M_Physics->Data()->DensityRho()
                * std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) )
-               - M_Physics->Data()->Alpha(i) * Q * Q / A / A );
+               - M_Physics->Data()->Alpha(i) * Q * Q / A / A
+               ) * M_Physics->Data()->RobertsonCorrection();
     }
     if( ii == 2 && jj == 2 )  // dF2/dQ
     {
