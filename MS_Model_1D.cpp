@@ -779,6 +779,10 @@ MS_Model_1D::SetupFESpace()
     const QuadRule* qR    = &quadRuleSeg3pt;
     const QuadRule* bdQr  = &quadRuleSeg1pt;
 
+//    const RefFE*    refFE = &feSegP2;
+//    const QuadRule* qR    = &quadRuleSeg3pt;
+//    const QuadRule* bdQr  = &quadRuleSeg1pt;
+
     M_FESpace.reset( new FESpace_Type( M_Data->mesh(), *refFE, *qR, *bdQr, 1, M_comm ) );
     M_Solver->setFESpace( M_FESpace );
 }
