@@ -283,7 +283,7 @@ public:
     const Real& RobertsonCorrection() const;
 
     const Real& Thickness( const UInt& i ) const;
-    const Real& FrictionKr( const UInt& i ) const;
+    const Real& Friction() const;
 
     const Real& Area0( const UInt& i ) const;
     const Real& Alpha( const UInt& i ) const;
@@ -398,7 +398,7 @@ private:
     Real M_RobertsonCorrection;
 
     ScalVec M_Thickness;
-    ScalVec M_FrictionKr; // Friction parameter Kr
+    Real M_Friction; // Friction parameter
 
     ScalVec M_Area0;      // area
     ScalVec M_Alpha;      // Coriolis coefficient (often called alpha)
