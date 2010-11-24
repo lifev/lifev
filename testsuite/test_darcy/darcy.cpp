@@ -112,8 +112,7 @@ enum BCNAME
           BOTTOM = 5,
           TOP    = 6
 
-
-        /*        LEFT   = 4,
+    /*    LEFT   = 4,
         RIGHT  = 2,
         FRONT  = 1,
         BACK   = 3,
