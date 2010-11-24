@@ -551,7 +551,7 @@ void exactJacobian::registerMyProducts( )
 {
 FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
-solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
+//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
 }
 
 

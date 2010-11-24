@@ -27,7 +27,7 @@
 #include <life/lifefem/dofInterface3Dto2D.hpp>
 #include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
-#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
+//#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
 #include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
@@ -199,7 +199,7 @@ public:
     }
 
 
-    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
+  //    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
 
     static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
 

@@ -38,7 +38,7 @@
 //#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
-#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
+//#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
 
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifefilters/ensight.hpp>
@@ -73,7 +73,7 @@ namespace
 LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
-LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+//LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
 }
 }
 
@@ -178,7 +178,7 @@ public:
     {
 
         VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
-        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+	//        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
 
 		Debug( 10000 ) << "Setting up data from GetPot \n";
 		GetPot dataFile( dataFileName );

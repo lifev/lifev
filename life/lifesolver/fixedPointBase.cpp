@@ -310,7 +310,7 @@ void fixedPoint::registerMyProducts( )
 {
 FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
 solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
-solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
+//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 }
 
 
