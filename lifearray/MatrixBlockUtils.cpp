@@ -142,22 +142,20 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
-    int indexBase(0);
-
-    int destRow(0);
-    int destIndex(0);
-    double diagValue(0.0);
-    int diagIndex(0);
-
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
+    //Offset between the first row/column of the source and destination blocks
+    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+
     // Source informations handlers
     int numSrcEntries;
     double* srcValues;
     int* srcIndices;
+    int srcGlobalIndex(0);
     int srcRow(0);
 
     for(int i(0);i<numSrcElements;++i)
@@ -169,25 +167,30 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
         if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement+indexBase);
+            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
             srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            // index of the diagonal
-            diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            diagValue = 0.0;
+            int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            int destRow = destBlock.firstRowIndex()+diagIndex;
+            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            double diagValue = 0.0;
+
             for(int j(0);j<numSrcEntries;++j)
             {
+                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+
                 // Test if the coefficient is on the diagonal of the source block
-                if(srcIndices[j]-srcBlock.firstColumnIndex()==diagIndex)
+                if(srcGlobalIndex-srcBlock.firstColumnIndex()==diagIndex)
                 {
                     diagValue = srcValues[j];
                     j=numSrcEntries; //Exit the loop
                 }
             }
 
-            destRow   = destBlock.firstRowIndex()+diagIndex+indexBase;
-            destIndex = destBlock.firstColumnIndex()+diagIndex+indexBase;
-            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
+            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
+                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
+            else
+                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,1,&diagValue,&destIndex);
         }
     }
 }
