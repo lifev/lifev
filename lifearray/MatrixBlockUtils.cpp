@@ -299,7 +299,9 @@ void createUpperTriangularBlock ( const MatrixBlockView& srcBlock,
             {
                 srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
 
-                // Test if the coefficient is in the block
+                // Test if the coefficient is:
+                // a) in the block, and
+                // b) on the upper triangular part of the block.
                 if((srcGlobalIndex>=srcBlock.firstColumnIndex()) &&
                    (srcGlobalIndex<=srcBlock.lastColumnIndex()) &&
                    (srcGlobalIndex-srcBlock.firstColumnIndex()>=srcRowElement-srcBlock.firstRowIndex()))
@@ -324,8 +326,6 @@ void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
-    int indexBase(0);
-
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
@@ -339,6 +339,7 @@ void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
     int numSrcEntries;
     double* srcValues;
     int* srcIndices;
+    int srcGlobalIndex(0);
     int srcRow(0);
 
     for(int i(0);i<numSrcElements;++i)
@@ -350,28 +351,33 @@ void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
         if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement+indexBase);
+            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
             srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int destIndices[numSrcEntries];
             double destValues[numSrcEntries];
             int numDestEntries(0);
-            int destRow(destBlock.getMatrixPtr()->LRID(i+rowsOffset+indexBase));
+            int destRow(srcRowElement+rowsOffset);
             for(int j(0);j<numSrcEntries;++j)
             {
+                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+
                 // Test if the coefficient is:
                 // a) in the block, and
-                // b) on the upper triangular part of the block.
-                if((srcIndices[j]>=srcBlock.firstColumnIndex()) &&
-                   (srcIndices[j]<=srcBlock.lastColumnIndex()) &&
-                   (srcIndices[j]-srcBlock.firstColumnIndex()<=srcRowElement-srcBlock.firstRowIndex()))
+                // b) on the lower triangular part of the block.
+                if((srcGlobalIndex>=srcBlock.firstColumnIndex()) &&
+                   (srcGlobalIndex<=srcBlock.lastColumnIndex()) &&
+                   (srcGlobalIndex-srcBlock.firstColumnIndex()<=srcRowElement-srcBlock.firstRowIndex()))
                 {
-                    destIndices[numDestEntries] = srcBlock.getMatrixPtr()->GCID(srcIndices[j])+columnsOffset;
+                    destIndices[numDestEntries] = srcGlobalIndex+columnsOffset;
                     destValues[numDestEntries] = srcValues[j];
                     numDestEntries++;
                 }
             }
-            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
+                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+            else
+                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
         }
     }
 }
