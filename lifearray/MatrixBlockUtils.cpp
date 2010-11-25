@@ -109,9 +109,6 @@ void createIdentityBlock ( MatrixBlockView& destBlock )
     // SQUARE TEST
     // BLOCK PTR TEST
 
-    int indexBase(0);
-
-    int destRow(0);
     int destIndex(0);
     double one(1.0);
 
@@ -131,9 +128,8 @@ void createIdentityBlock ( MatrixBlockView& destBlock )
         // Test if the rows are in the block
         if((destRowElement>=firstRowIndex) && (destRowElement<=lastRowIndex))
         {
-            destRow = destBlock.getMatrixPtr()->LRID(destRowElement+indexBase);
-            destIndex = firstColumnIndex+destRowElement-firstRowIndex+indexBase;
-            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&one,&destIndex);
+            destIndex = firstColumnIndex+destRowElement-firstRowIndex;
+            destBlock.getMatrixPtr()->InsertGlobalValues(destRowElement,1,&one,&destIndex);
         }
     }
 }
