@@ -41,7 +41,7 @@ namespace LifeV {
 
 namespace MatrixBlockUtils {
 
-//! Copy the block specified in the given matrix
+//! Copy the block specified in another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
@@ -49,19 +49,19 @@ namespace MatrixBlockUtils {
 void copyBlock ( const MatrixBlockView& srcBlock,
                  MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Create a block full of zeros
 /*!
   @param destBlock Block where the data will be stored
 */
 void createZeroBlock ( MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Create a block with ones on the diagonal
 /*!
   @param destBlock Block where the data will be stored
 */
 void createIdentityBlock ( MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Copy the diagonal of the block specified to another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
@@ -69,7 +69,7 @@ void createIdentityBlock ( MatrixBlockView& destBlock );
 void createDiagBlock ( const MatrixBlockView& srcBlock,
                        MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Copy the inverse of the diagonal of the block specified to another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
@@ -77,7 +77,7 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
 void createInvDiagBlock ( const MatrixBlockView& srcBlock,
                           MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Copy the upper part of the block specified to another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
@@ -85,7 +85,7 @@ void createInvDiagBlock ( const MatrixBlockView& srcBlock,
 void createUpperTriangularBlock ( const MatrixBlockView& srcBlock,
                                   MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Copy the lower part of the block specified to another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
@@ -93,7 +93,7 @@ void createUpperTriangularBlock ( const MatrixBlockView& srcBlock,
 void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
                                   MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Copy the lumped version of the block specified to another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
@@ -101,7 +101,7 @@ void createLowerTriangularBlock ( const MatrixBlockView& srcBlock,
 void createLumpedBlock ( const MatrixBlockView& srcBlock,
                          MatrixBlockView& destBlock );
 
-//! Copy the block specified in the given matrix
+//! Copy the inverse of the lumped version of the block specified to another block
 /*!
   @param srcBlock Source block
   @param destBlock Destination block where the data will be stored
