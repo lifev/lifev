@@ -234,6 +234,13 @@ struct darcy::Private
         return f;
     }
 
+    fct_type getMass ( )
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::mass, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
 };
 
 // ===================================================
@@ -600,17 +607,19 @@ darcy::run()
         break;
 
     case DARCY_NON_LINEAR:
-    case DARCY_TRANSIENT_NON_LINEAR:
-
         // Set the initial primal variable
         ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->setZeroItarationPrimal( Members->getZeroItarationPrimal() );
 
         break;
 
+    case DARCY_TRANSIENT_NON_LINEAR:
     case DARCY_TRANSIENT:
 
         // Set the initial primal variable
         ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setInitialPrimal( Members->getInitialPrimal() );
+
+        // Set the mass function
+        ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setMassTerm( Members->getMass() );
 
         break;
     }

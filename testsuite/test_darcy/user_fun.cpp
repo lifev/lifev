@@ -139,8 +139,19 @@ Real zeroItarationPrimal( const Real& /*t*/,
                           const Real& /*z*/,
                           const ID& /*ic*/)
 {
-    return 1;
+    return 1.;
 }
+
+// Mass function for time dependent problem
+Real mass( const Real& /*t*/,
+           const Real& x,
+           const Real& y,
+           const Real& z,
+           const ID&   /*ic*/)
+{
+    return 1.;
+}
+
 
 // ===================================================
 //!                    Boundary data

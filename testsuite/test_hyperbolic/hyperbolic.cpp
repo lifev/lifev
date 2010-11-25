@@ -156,6 +156,16 @@ Real initialCondition( const Real& /*t*/,
       return analyticalSolution( 0., x, y, z, ic );
 }
 
+// Mass function
+Real mass( const Real& /*t*/,
+           const Real& x,
+           const Real& y,
+           const Real& z,
+           const ID&   ic )
+{
+    return 1.;
+}
+
 // Boundary condition of Dirichlet
 Real dirichlet( const Real& t,
                 const Real& x,
@@ -269,6 +279,13 @@ struct hyperbolic::Private
     {
         fct_type f;
         f = boost::bind( &dataProblem::initialCondition, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
+    fct_type getMass ( )
+    {
+        fct_type f;
+        f = boost::bind( & dataProblem::initialCondition, _1, _2, _3, _4, _5 );
         return f;
     }
 
@@ -475,6 +492,9 @@ hyperbolic::run()
 
     // Set the initial solution
     hyperbolicSolver.setInitialSolution( Members->getInitialCondition() );
+
+    // Set the mass function
+    hyperbolicSolver.setMassTerm( Members->getMass() );
 
     // Create the numerical flux.
     GodunovNumericalFlux < RegionMesh > numericalFlux ( Members->getPhysicalFlux(),

@@ -37,130 +37,137 @@
 namespace dataProblem
 {
 
-    namespace dataPhysical
+namespace dataPhysical
+{
+
+// Porosity
+const Real Phi ( const Real& x, const Real& y, const Real& z )
+{
+    return 0.4;
+}
+
+// Relative permeability for the wetting phase
+const Real k_rw ( const Real& S_w )
+{
+    // Define the effective saturation
+    const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
+
+    return pow( barS_w, (2. + 3.*lambda) / lambda );
+}
+
+// First derivative of the relative permeability for the wetting phase
+const Real Dk_rw ( const Real& S_w )
+{
+    // Define the effective saturation
+    const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
+
+    return (2. + 3.*lambda) / lambda * pow(barS_w, (2. + 3.*lambda) / lambda - 1.) / (1. - S_wr - S_nr);
+}
+
+// Relative permeability for the non-wetting phase
+const Real k_rn ( const Real& S_n )
+{
+    // Define the effective saturation
+    const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
+
+    return pow( barS_n, 2.) * (1 - pow( 1 - barS_n, (2. + lambda) / lambda));
+}
+
+// First derivative of the relative permeability for the non-wetting phase
+const Real Dk_rn ( const Real& S_n )
+{
+    // Define the effective saturation
+    const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
+
+    return ( 2.*barS_n * (1 - pow( 1 - barS_n, (2. + lambda) / lambda)) -
+             pow( barS_n, 2.) * (2. + lambda) / lambda * pow(1 - barS_n, (2. + lambda) / lambda - 1.) ) /
+        (1. - S_wr - S_nr);
+}
+
+// Capillary pressure
+const Real pc ( const Real& S_w ) // [Pa]
+{
+    // Define the effective saturation
+    const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
+
+    return pd * pow(barS_w, -1. / lambda);
+}
+
+// First derivative of the capillary pressure
+const Real Dpc ( const Real& S_w ) // [Pa]
+{
+    // Define the effective saturation
+    const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
+
+    return pd / lambda * pow(barS_w, -1. / lambda - 1.) / (1. - S_wr - S_nr);
+}
+
+// Absolute inverse permeability
+const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z ) // [m^2]
+{
+    Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
+
+    const Real highInvPermeability = 1e5;
+    const Real lowInvPermeability = 1.;
+
+    Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
+
+    if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
+         || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
+         || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
     {
+        // First row
+        Entry00 = highInvPermeability;
+        Entry01 = 0.;
+        Entry02 = 0.;
 
-        // Relative permeability for the wetting phase
-        const Real k_rw ( const Real& S_w )
-        {
-            // Define the effective saturation
-            const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
+        // Second row
+        Entry11 = highInvPermeability;
+        Entry12 = 0.;
 
-            return pow( barS_w, (2. + 3.*lambda) / lambda );
-        }
-
-        // First derivative of the relative permeability for the wetting phase
-        const Real Dk_rw ( const Real& S_w )
-        {
-            // Define the effective saturation
-            const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
-
-            return (2. + 3.*lambda) / lambda * pow(barS_w, (2. + 3.*lambda) / lambda - 1.) / (1. - S_wr - S_nr);
-        }
-
-        // Relative permeability for the non-wetting phase
-        const Real k_rn ( const Real& S_n )
-        {
-            // Define the effective saturation
-            const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
-
-            return pow( barS_n, 2.) * (1 - pow( 1 - barS_n, (2. + lambda) / lambda));
-        }
-
-        // First derivative of the relative permeability for the non-wetting phase
-        const Real Dk_rn ( const Real& S_n )
-        {
-            // Define the effective saturation
-            const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
-
-            return ( 2.*barS_n * (1 - pow( 1 - barS_n, (2. + lambda) / lambda)) -
-                     pow( barS_n, 2.) * (2. + lambda) / lambda * pow(1 - barS_n, (2. + lambda) / lambda - 1.) ) /
-                   (1. - S_wr - S_nr);
-        }
-
-        // Capillary pressure
-        const Real pc ( const Real& S_w ) // [Pa]
-        {
-            // Define the effective saturation
-            const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
-
-            return pd * pow(barS_w, -1. / lambda);
-        }
-
-        // First derivative of the capillary pressure
-        const Real Dpc ( const Real& S_w ) // [Pa]
-        {
-            // Define the effective saturation
-            const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
-
-            return pd / lambda * pow(barS_w, -1. / lambda - 1.) / (1. - S_wr - S_nr);
-        }
-
-        // Absolute inverse permeability
-        const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z ) // [m^2]
-        {
-            Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
-
-            const Real highInvPermeability = 1e5;
-            const Real lowInvPermeability = 1.;
-
-            Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
-
-            if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
-              || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
-              || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
-            {
-                // First row
-                Entry00 = highInvPermeability;
-                Entry01 = 0.;
-                Entry02 = 0.;
-
-               // Second row
-               Entry11 = highInvPermeability;
-               Entry12 = 0.;
-
-               // Third row
-               Entry22 =  highInvPermeability;
-
-           }
-           else
-           {
-               // First row
-               Entry00 = lowInvPermeability;
-               Entry01 = 0.;
-               Entry02 = 0.;
-
-              // Second row
-              Entry11 = lowInvPermeability;
-              Entry12 = 0.;
-
-              // Third row
-              Entry22 = lowInvPermeability;
-          }
-
-         // Fill in of the inversePermeabilityMatrix
-         inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
-         inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
-         inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
-         inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
-         inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
-         inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
-         inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
-         inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
-         inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
-
-         return inversePermeabilityMatrix;
-
-      }
-
+        // Third row
+        Entry22 =  highInvPermeability;
 
     }
+    else
+    {
+        // First row
+        Entry00 = lowInvPermeability;
+        Entry01 = 0.;
+        Entry02 = 0.;
+
+        // Second row
+        Entry11 = lowInvPermeability;
+        Entry12 = 0.;
+
+        // Third row
+        Entry22 = lowInvPermeability;
+    }
+
+    // Fill in of the inversePermeabilityMatrix
+    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
+    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
+    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
+    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
+    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
+    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
+    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
+    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
+    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
+
+    return inversePermeabilityMatrix;
+
+}
+
+
+}
 
 
 // Inverse of permeability matrix
 /* In this case the permeability matrix is
-K = [2 1 0   1 1 0
-     0 0 1]
+   K = [2 1 0
+        1 1 0
+        0 0 1]
 */
 Matrix pressurePermeability( const Real& t,
                              const Real& x,
@@ -423,6 +430,16 @@ Real saturationInitialCondition( const Real& /* t */,
                                  const ID&   /*icomp*/ )
 {
     return 0.1;
+}
+
+// Mass function
+Real saturationMass( const Real& /*t*/,
+                     const Real& x,
+                     const Real& y,
+                     const Real& z,
+                     const ID&   /*icomp*/ )
+{
+    return dataPhysical::Phi( x, y, z );
 }
 
 // Boundary condition of Dirichlet

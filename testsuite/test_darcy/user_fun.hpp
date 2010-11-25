@@ -59,6 +59,9 @@ Real initialPrimal( const Real&, const Real&, const Real&, const Real&, const ID
 // Zero iteration primal variable for non-linear solver
 Real zeroItarationPrimal( const Real&, const Real&, const Real&, const Real&, const ID& );
 
+// Mass function for time dependent problem
+Real mass( const Real&, const Real&, const Real&, const Real&, const ID& );
+
 // ===================================================
 //!                    Boundary data
 // ===================================================

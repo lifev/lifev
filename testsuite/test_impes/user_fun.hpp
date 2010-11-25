@@ -50,7 +50,7 @@ namespace dataPhysical
 {
 
 // Porosity
-const Real Phi = 0.4;
+const Real Phi ( const Real& x, const Real& y, const Real& z );
 
 // Dynamic viscosity
 const Real mu_w = 1; //1e-3; // [Pa * s]
@@ -131,6 +131,9 @@ Real saturationSource( const Real& /*t*/, const Real& x, const Real& y, const Re
 
 // Initial condition
 Real saturationInitialCondition( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/ );
+
+// Mass function
+Real saturationMass( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/ );
 
 // Boundary condition of Dirichlet
 Real saturationDirichlet1( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);

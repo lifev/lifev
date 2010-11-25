@@ -50,25 +50,12 @@
 namespace
 {
 
-struct HyperbolicDefaultSource
+const LifeV::Real _ZeroFun( const LifeV::Real&, const LifeV::Real&,
+                            const LifeV::Real&, const LifeV::Real&,
+                            const LifeV::UInt& )
 {
-    const LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
-                                  const LifeV::Real&, const LifeV::Real&,
-                                  const LifeV::UInt&) const
-    {
-    	return static_cast<LifeV::Real>( 0 );
-    }
-};
-
-struct HyperbolicDefaultInitialSolution
-{
-     LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
-                             const LifeV::Real&, const LifeV::Real&,
-                             const LifeV::UInt& )
-    {
-    	return static_cast<LifeV::Real>( 0 );
-    }
-};
+    return static_cast<LifeV::Real>( 0. );
+}
 
 }
 
@@ -184,6 +171,15 @@ public:
         M_source = source;
     }
 
+    /*!
+      Set the mass term, the default setted source term is the one function.
+      By defaul it does not depend on time.
+      @param mass Mass term for the problem.
+    */
+    inline void setMassTerm ( const Function& mass )
+    {
+        M_mass = mass;
+    }
 
     inline void setNumericalFlux ( const GodunovNumericalFlux<Mesh, SolverType>& flux )
     {
@@ -327,6 +323,9 @@ protected:
     //! Source function.
     Function            M_source;
 
+    //! Mass function, it does not depend on time
+    Function            M_mass;
+
     //! Initial solution.
     Function            M_initialSolution;
 
@@ -399,7 +398,8 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_displayer       ( comm ),
     // Data of the problem.
     M_data            ( dataFile ),
-	M_source          ( HyperbolicDefaultSource() ),
+	M_source          ( NULL ),
+    M_mass            ( NULL ),
     M_BCh             ( &bcHandler ),
     M_setBC           ( true ),
     // Finite element spaces.
@@ -412,13 +412,8 @@ HyperbolicSolver ( const data_type&          dataFile,
     // Local matrices and vectors.
     M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( ),
-    M_initialSolution ( HyperbolicDefaultInitialSolution() )
+    M_initialSolution ( NULL )
 {
-
-    // Interpolate the primal initial value on the dafault initial value function.
-    M_FESpace.interpolate( M_initialSolution,
-                           *M_u,
-                           M_data.dataTime()->getInitialTime() );
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
 
@@ -439,7 +434,8 @@ HyperbolicSolver ( const data_type&          dataFile,
     M_displayer       ( comm ),
     // Data of the problem.
     M_data            ( dataFile ),
-	M_source          ( HyperbolicDefaultSource() ),
+	M_source          ( NULL ),
+    M_mass            ( NULL ),
     M_setBC           ( false ),
     // Finite element spaces.
     M_FESpace         ( fESpace ),
@@ -451,13 +447,8 @@ HyperbolicSolver ( const data_type&          dataFile,
     // Local matrices and vectors.
     M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( ),
-    M_initialSolution ( HyperbolicDefaultInitialSolution() )
+    M_initialSolution ( NULL )
 {
-
-    // Interpolate the primal initial value on the dafault initial value function.
-    M_FESpace.interpolate( M_initialSolution,
-                           *M_u,
-                           M_data.dataTime()->getInitialTime() );
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
 
@@ -492,6 +483,20 @@ setup ()
     // Total number of elements.
     UInt meshNumberOfElements = M_FESpace.mesh()->numElements();
 
+    // Vector of interpolation of the mass function
+    vector_type vectorMass( M_FESpace.map(), Repeated );
+
+    // If the mass function is given take it, otherwise use one as a value.
+    if ( M_mass != NULL )
+    {
+        // Interpolate the mass function on the finite element space.
+        M_FESpace.interpolate( M_mass, vectorMass );
+    }
+    else
+    {
+        vectorMass = 1.;
+    }
+
     // For each element it creates the mass matrix and factorize it using Cholesky.
     for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
     {
@@ -505,7 +510,7 @@ setup ()
         matElem.zero();
 
         // Compute the mass matrix for the current element
-        mass( static_cast<Real>(1.), matElem, M_FESpace.fe(), 0, 0);
+        mass( vectorMass[iElem], matElem, M_FESpace.fe(), 0, 0);
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */

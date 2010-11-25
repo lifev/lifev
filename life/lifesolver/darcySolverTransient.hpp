@@ -34,23 +34,15 @@
 
 #include <life/lifesolver/darcySolver.hpp>
 
-// Local namespace to store the default initial value term for the primal variable.
 namespace
 {
 
-/*! @class Default Darcy initial value term for the primal variable. Needed in DarcySolverTransient class.
-  This class implement the default initial value for the primal variable in
-  the Darcy problem, it is the zero function.
-*/
-struct DarcyDefaultInitialPrimal
+using namespace LifeV;
+
+Real _One_ ( const Real&, const Real&, const Real&, const Real&, const ID& )
 {
-     LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
-                             const LifeV::Real&, const LifeV::Real&,
-                             const LifeV::UInt& )
-    {
-    	return static_cast<LifeV::Real>( 0 );
-    }
-};
+    return static_cast<Real>( 1. );
+}
 
 }
 
@@ -233,6 +225,7 @@ namespace LifeV
   conditions are imposed via BCHandler class.
   @todo Insert any scientific publications that use this solver.
   @todo Post process for the dual variable.
+  @todo Use a better mass assembler
 */
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
@@ -325,6 +318,16 @@ public:
     */
     void setInitialPrimal ( const Function& primalInitial );
 
+    /*!
+      Set the mass term, the default setted source term is the one function.
+      By defaul it does not depend on time.
+      @param mass Mass term for the problem.
+    */
+    inline void setMassTerm ( const Function& mass )
+    {
+        M_mass = mass;
+    }
+
     //@}
 
 protected:
@@ -358,6 +361,9 @@ protected:
 
     //! Initial time primal variable.
     Function    M_primalInitial;
+
+    //! Mass function, it does not depend on time.
+    Function    M_mass;
 
     //@}
 
@@ -411,7 +417,8 @@ DarcySolverTransient ( const data_type&           dataFile,
     // Standard Darcy solver constructor.
     DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
     // Data of the problem
-    M_primalInitial          ( DarcyDefaultInitialPrimal() ),
+    M_primalInitial          ( NULL ),
+    M_mass                   ( _One_ ),
     // Linear solver.
     M_primalOld              ( new vector_type ( this->M_primal_FESpace.map() ) ),
     M_reusePrec              ( false ),
@@ -421,11 +428,6 @@ DarcySolverTransient ( const data_type&           dataFile,
     // Local matrices and vectors
     M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
 {
-
-    // Interpolate the primal initial value on the dafault initial value function.
-    this->M_primal_FESpace.interpolate( M_primalInitial,
-                                        *(this->M_primal),
-                                        this->M_data.dataTime()->getInitialTime() );
 
     CONSTRUCTOR( "DarcySolverTransient" );
 
@@ -443,7 +445,8 @@ DarcySolverTransient ( const data_type&           dataFile,
     // Standard Darcy solver constructor.
     DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
     // Data of the problem
-    M_primalInitial          ( DarcyDefaultInitialPrimal() ),
+    M_primalInitial          ( NULL ),
+    M_mass                   ( _One_ ),
     // Linear solver.
     M_primalOld              ( new vector_type ( this->M_primal_FESpace.map() ) ),
     M_reusePrec              ( false ),
@@ -454,12 +457,7 @@ DarcySolverTransient ( const data_type&           dataFile,
     M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
 {
 
-    // Interpolate the primal initial value on the default initial value function.
-    this->M_primal_FESpace.interpolate( M_primalInitial,
-                                        *(this->M_primal),
-                                        this->M_data.dataTime()->getInitialTime() );
-
-    CONSTRUCTOR( "DarcySolverTransient" );
+  CONSTRUCTOR( "DarcySolverTransient" );
 
 } // Constructor
 
@@ -527,11 +525,17 @@ localElementComputation ( const UInt & iElem )
     // Clear the mass matrix for the primal variable.
     M_elmatMassPrimal.zero();
 
+    // Get the coordinate of the barycenter of the current element of ID iElem.
+    Real xg(0), yg(0), zg(0);
+    this->M_primal_FESpace.fe().barycenter( xg, yg, zg );
+
     // Compute the mass matrix for the primal variable.
-    mass( static_cast<Real>(1), M_elmatMassPrimal, this->M_primal_FESpace.fe(), 0, 0);
+    mass( M_mass( 0., xg, yg, zg, 0),
+          M_elmatMassPrimal,
+          this->M_primal_FESpace.fe(), 0, 0);
 
     // Store in the mass matrix for the primal variable also the time step.
-    M_elmatMassPrimal *= static_cast<Real>(1) / this->M_data.dataTime()->getTimeStep();
+    M_elmatMassPrimal *= static_cast<Real>(1.) / this->M_data.dataTime()->getTimeStep();
 
 } // localElementComputation
 

@@ -187,6 +187,14 @@ struct impes::Private
         mnl = boost::bind( &dataProblem::saturationPermeability, _1, _2, _3, _4, _5 );
         return mnl;
     }
+
+    fct_type getSaturationMass()
+    {
+        fct_type f;
+        f = boost::bind( &dataProblem::saturationMass, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
 };
 
 // ===================================================
@@ -618,6 +626,9 @@ impes::run()
 
     // Set the numerical flux usign the physical flux
     saturationHyperbolicSolver.setNumericalFlux( numericalFlux );
+
+    // Set the porosity
+    saturationHyperbolicSolver.setMassTerm( Members->getSaturationMass() );
 
     // Set the boudary conditions.
     saturationHyperbolicSolver.setBC( bcSaturation );
