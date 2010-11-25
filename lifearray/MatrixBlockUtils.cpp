@@ -186,7 +186,6 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
                     j=numSrcEntries; //Exit the loop
                 }
             }
-
             if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
                 destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
             else
@@ -247,7 +246,6 @@ void createInvDiagBlock ( const MatrixBlockView& srcBlock,
                     j=numSrcEntries; //Exit the loop
                 }
             }
-
             if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
                 destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
             else
@@ -446,8 +444,7 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
-
-    int indexBase(0);
+    // ZERO ON DIAGONAL TEST
 
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
@@ -462,12 +459,8 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
     int numSrcEntries;
     double* srcValues;
     int* srcIndices;
+    int srcGlobalIndex(0);
     int srcRow(0);
-
-    int destRow(0);
-    int destIndex(0);
-    int diagIndex(0);
-    double srcBlockRowSum(0.0);
 
     for(int i(0);i<numSrcElements;++i)
     {
@@ -478,26 +471,29 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
         if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement+indexBase);
+            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
             srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            srcBlockRowSum = 0.0;
+            int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            int destRow = destBlock.firstRowIndex()+diagIndex;
+            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            double srcBlockRowSum = 0.0;
             for(int j(0);j<numSrcEntries;++j)
             {
-                // Test if the coefficient is:
-                // a) in the block, and
-                // b) on the upper triangular part of the block.
-                if((srcIndices[j]>=srcBlock.firstColumnIndex()) &&
-                   (srcIndices[j]<=srcBlock.lastColumnIndex()))
+                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+
+                // Test if the coefficient is in the block
+                if((srcGlobalIndex>=srcBlock.firstColumnIndex()) &&
+                   (srcGlobalIndex<=srcBlock.lastColumnIndex()))
                 {
                     srcBlockRowSum += abs(srcValues[j]);
                 }
             }
             srcBlockRowSum = 1/srcBlockRowSum;
-            destRow   = destBlock.firstRowIndex()+diagIndex+indexBase;
-            destIndex = destBlock.firstColumnIndex()+diagIndex+indexBase;
-            destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
+                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+            else
+                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
         }
     }
 }
