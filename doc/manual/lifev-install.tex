@@ -5,102 +5,179 @@
 \section{Scope of the document}
 \label{sec:scope-document}
 
-This is a ``working document'' meant to drive the development of the
-software library \thelibrary. It is an informal document. All the
-people involved in the library development (from now on called the
-\emph{authors}) are supposed to freely contribute to its writing.
+This is an informal document dedicated to amateur or inexperienced users of the 
+software library \thelibrary (life 5). 
 
-The major objectives of this document is manifold:
+The major objectives of this document are:
 \begin{enumerate}
-\item Set up a set of rules regarding program development, coding rules
-  and standards, which must be followed by the software developers;
-\item Provide the architectural design for the libraries and classes
-  to be developed, with a special stress on public interfaces;
-\item Provide a subtask subdivision for the work to be done and a
-  (possibly accurate) \emph{scheduling}.
+\item To compile the software library.
+\item To provide examples of its use.
 \end{enumerate}
 
 \section{Language and nomenclature convection}
 \label{sec:lang-nomencl-conv}
 
-%Because of many practical reasons, the document will be written in
-%English, or at least the best English the authors can manage.
-
-We will use \texttt{typesetting font style} to indicate parts of
-actual computer code or name of variables, types, etc..
-\textbf{Boldface} is used to mark portion containing rules which
-should be followed during program development and \emph{emphasised}
-text to indicate important concepts and nomenclature.
+\texttt{typesetting font style} is used to indicate parts of
+computer code, configure shell scripts, command-prompt instructions and webpages.
 
 \section{Software Management}
 \label{sec:software-management}
 
-%This software is the result of the work of many people working in a
-%coordinated fashion, some rules for software management
-%must be set and agreed upon. A related problem is how to allow for the most ample discussion
-%between the authors and, at the same time, coordinate  software
-%production.
-
-
 The software source, its documentation and all related documents (this
-one included) is kept in a repository under revision control
-using \verb!CVS!\ixns{CVS}{versioning}\footnote{CVS stands for Concurrent Version System}. This is a Software Configuration Management (SCM). Its goal
-is to provide tools to mangage software developpment in a concurrent environment.
-See \url{http://cvsbook.red-bean.com/cvsbook.html#A%20Day%20With%20CVS}
-for a tutorial. CVS keywords like \verb!Id! and \verb!Log! should not be included in source files,
-they cause many unnecessary conflicts at update/commit time. Use
-\verb!cvs log! to get the information given by \verb!Id! or \verb!Log!.
+one included) are kept in a repository under revision control
+using \verb!git!\ixns{git}{versioning}\footnote{git is the fast version control system}. Its goal
+is to provide tools to manage software development in a concurrent environment.
+See \url{http://git-scm.com/documentation}
+for a tutorial.
 
-A web site {\it\`a la} Sourceforge\footnote{\url{http://www.sourceforge.net}} \url{http://cmcsforge.epfl.ch} has been set up to host the source code and help the software management.
-It requires that you open an account\footnote{\url{https://cmcsforge.epfl.ch/account/register.php}} there and that you declare your intentions to work on \lifev through an email to the development mailing list of \lifev.
-Once you are part of the project, you have access to all the facilities: tracker, task manager, CVS repository, forums, document manager and a few other tools which are very useful if not absolutely essential to such a project.
+A web site {\it\`a la} Sourceforge
+\footnote{\url{http://www.sourceforge.net}} 
+\url{http://cmcsforge.epfl.ch} has been set up 
+to host the source code and help the software management.
+It requires that you open an account 
+\footnote{\url{https://cmcsforge.epfl.ch/account/register.php}} 
+there and ask to join the project \lifev using the link at the 
+bottom of the developers' list.
+Once you'd become a member, you'll gain access to all the facilities: 
+tracker, task manager, git repository, forums, document manager and a few other 
+tools which are very useful if not absolutely essential to such a project.
 
-Finally, since you will access the source repository A LOT, you should be confortable
-with \verb!ssh! \ix{ssh} and \verb!ssh-agent!\ixns{ssh-agent}{ssh}
-in order to acces the CVS repository without prompting your password everytime you issue
-a CVS command. Please refer to \url{http://mah.everybody.org/docs/ssh} in order to configure
+Finally, if you expect a frequent use of the \verb!git!\ixns{git}{versioning} repository 
+we recommend to costumize the 
+\verb!ssh! and \verb!ssh-agent!
+ in order to gain acces  without the need to type your password everytime you issue
+a command. Please refer to \url{http://mah.everybody.org/docs/ssh} in order to configure
 your ssh agent.
+
+We advice every user to apply to the list lifev-users on \url{http://groups.google.com} 
+where one can get in touch with other users and developers.  
 
 \section{Compiling LifeV}
 \label{compile-lifev}
 
-In order to compile \lifev, certain requirements must be met in terms
-of compilation tools, and libraries to link to.
+There are a few compilation tools and libraries we need to build and install before 
+compiling \lifev. 
 
-\noindent In this document, we shall use \verb+$(top_srcdir)+ (aka \verb+$LIFEV_HOME+) to designate the top level \emph{source} directory
-and \verb+$(top_builddir)+ to designate the top level \emph{build}
-directory where \lifev has been \emph{configured}(see
-sections~\ref{sec:compile-cvs} and~\ref{sec:comp-from-offic}) for a
-compilation environment.  \verb+$(top_builddir)+ may be different from
-\verb+$(top_srcdir)+, see for example the configure hint in
-section~\ref{hint:configure}.
+In computer science a library is a set of subroutines or classes used to develop software. 
+Usually they are downloaded as a so called ``tarball" file  
+compressed using the \verb!tar! command. There are different ways to compress 
+libraries but the most common is to use the command \verb!tar -cvf! and further compress 
+``zip" it with \verb!gzip!. If your tarball has the suffix \verb!.tar.gz! equivalent to \verb!.tgz!,
+you can decompress ``unzip" it with \verb!gunzip! followed by the name of the \verb!.tar.gz! file and 
+extract its contents using \verb!tar -xvf! followed by the name of the \verb!.tar! file.
+If you find the libraries compressed with other formats 
+please refer to the unix manuals \verb!man! or the numerous 
+on-line documents for further information. 
 
-\subsection{Requirements}
+Software libraries need to be extracted, compiled and installed. In unix-like 
+systems, the libraries \verb!.a! and 
+\verb!.so! files are installed usually in the directory \verb!/usr/lib!, 
+ while header files 
+\verb!.h! are installed in the \verb!/usr/include! directory. Compilers search  
+for libraries there by default, but in principle they can be installed anywhere you want 
+as long as you pass the path to the library using the compiler flag \verb!-L! immediately 
+followed by the library path and similarly for the header files using the compiler 
+flag \verb!-I! followed by the include path. 
+
+Libraries are usually created with the prefix \verb!lib! followed by the name of the library
+and linked with the compiler flag \verb!-l! followed by its name. 
 
 \subsubsection{Compilation Environment}
 \label{sec:comp-envir}
 
-\lifev depends on a number of tools at compilation time, they are part
-of the \ix{autotools} from the GNU project\footnote{\url{http://www.gnu.org}}.
+\lifev depends on a number of tools at compilation time that are part
+of the \ix{autotools} from the GNU project \footnote{\url{http://www.gnu.org}} 
+available in most Linux OS:
 
 \begin{itemize}
-\item \verb!libtool 1.5!\ixns{libtool}{autotools}
-\item \verb!automake 1.7!\ixns{automake}{autotools}
-\item \verb!autoconf 2.5x x>=2!\ixns{autoconf}{autotools}
-\item \verb!g++-4.0 !\ixns{g++}{compilers}
+\item \verb!libtool 1.5!\ixns{libtool}{autotools} or newer (currently $2.2.6$)
+\item \verb!automake 1.7!\ixns{automake}{autotools} or newer (currently $1.9.6$)
+\item \verb!autoconf 2.52!\ixns{autoconf}{autotools} or newer (currently $2.65$)
+\item \verb!g++-4.0!\ixns{g++}{compilers} or newer (currently $4.4.4$)
+\item \verb!CMake 2.8! or newer
 \end{itemize}
 
-\lifev also depends on :
+In Mac OS X you get the autotools in Xcode and cmake can be 
+installed using MacPorts \verb!sudo port install cmake!. 
+
+You can check the version of a command typing the command followed by \verb!--help!, 
+for example type \verb!cmake --help!. 
+
+\lifev depends on several optimized libraries, you can check if you have them installed 
+using the \verb!locate! command followed by the name of the library, for example 
+\verb!locate liblapack.a!, or go to the \verb!/usr/lib! directory and search on the 
+list with \verb!ls!. 
+It is important to notice that some libraries are linked to others and they should 
+be compatible, therefore you should build them in the order of dependency and with 
+compatible flags and compilers. 
+
+These are the optimized libraries you need to have installed:
 
 \begin{itemize}
-\item \verb!the boost library!
-\item \verb!parmetis!
-\item a version of \verb!mpi!
-\item \verb!Trilinos!\ixns{aztec}{algebra} (which depends on \verb!mpi!, \verb!blas! and \verb!lapack!)
-\item \verb!libumfpack4! (set of routines for solving unsymmetric sparse linear systems)
+\item A version of \verb!MPI!.
+The message passing interface for C and Fortran compilers. For example \url{http://www.open-mpi.org/}. 
+Once installed you can check the necessary flags for its use by typing 
+\verb!mpicc --show!. 
+In Mac OS X using MacPorts install a fortran compiler typing 
+\verb!sudo port install gcc46! and openmpi with \verb!sudo port install openmpi!.
+  
+\item \verb!BOOST!.
+Libraries to extend the functionality of C$++$. Check if they exist on your computer, they are many 
+libraries with the prefix \verb!libboost!. 
+If you need to install them, try \verb!sudo apt-get install libboost*! in devian systems or 
+something similar in others. 
+If you can't do something like that then download at \url{http://www.boost.org}. 
+Make sure you include the line ``\verb!using mpi;!" in the configuration text file \verb!project-config.jam!.
+You can specify the path to install using the flag \verb!--prefix=/path/! when running \verb!./bjam! 
+\verb!install!. But most of the time cross compilation of this library won't work completely. 
+In Mac OS X using MacPorts type \verb!sudo port install boost!.
+
+\item \verb!HDF5!
+If you don't have the library hdf5 installed in your system, you could use the 
+\verb!sudo! \verb!apt-get install libhdf5-openmpi-dev! instruction in devian linux systems or something similar 
+for your particular system. There are detailed instructions on-line on how to build it for other systems and 
+with other options, for example at \url{http://micro.stanford.edu/wiki/Install_HDF5#Build_and_Installation_from_Sources}.
+In Mac OS X using MacPorts type \verb!sudo port install hdf5! or build it from the sources to link it to the correct 
+openmpi compilers.
+
+\item \verb!BLAS!.
+For example get \url{http://www.tacc.utexas.edu/tacc-projects/gotoblas2/}. To build just type \verb!make!. 
+To make use of the library remember to 
+have the pthreads library and flag  \verb!-lpthread! while linking to the blas library  \verb!libgoto2_xxxxx_xx.xx.a!,
+whose exact name depends on the characteristics of your hardware. In Mac OS X 
+the system comes with blas and lapack as part of the Accelerate framework \verb!-framework Accelerate!, 
+and if using MacPorts type 
+\verb!sudo port install atlas! to install the atlas library (blas and lapack).
+
+\item \verb!LAPACK!.
+Fortran $90$ Linear Algebra Routines for systems of simultaneous linear algebra equations, linear least-squares problems
+and matrix eigenvalue problems. You must pay attention to build the lapack using an optimized blas like the gotoblas of 
+last item. Download at \url{http://www.netlib.org/lapack/}. You need a fortran compiler (for example gfortran).
+Copy \verb!make.inc.example! to \verb!make.inc! and edit the path to the blas library followed by the flag \verb!-lpthread! 
+and type \verb!make!. 
+
+\item \verb!PARMETIS!.
+Download from \url{http://glaros.dtc.umn.edu/gkhome/metis/parmetis/download}. Set \verb!CC=mpicc! 
+in \verb!Makefile.in!. and type \verb!make!. In Mac OS X you need the include path flags
+\verb!-I/usr/include! and \verb!-I/usr/include/malloc!.
+
+\item \verb!UMFPACK!.
+Set of routines for solving unsymmetric sparse linear systems. 
+Download from \url{http://www.cise.ufl.edu/research/sparse/umfpack/}. Requires 
+the packages \verb!UFconfig! and \verb!AMD!. Place amd, ufconfig and umfpack in the same parent directory. 
+Modify the file \verb!UFconfig.mk! to specify the C compiler \verb!CC = gcc!, \verb!CPLUSPLUS=g++!, 
+\verb!CFLAGS=-O3! 
+\verb!-fexceptions! 
+and the blas, lapack and metis paths and libraries including the \verb!-lpthread! flag. 
+For Mac OS X you must uncheck the special options given for this system, you can use the blas and lapack 
+from atlas or from the Accelerate framework \verb!-framework Accelerate!. 
+Type \verb!make! in 
+the umfpack directory. Move the files in amd \verb!Lib! and \verb!Include! to the umfpack \verb!Lib! and \verb!Include! directories.
+Finally move \verb!UFconfig.h! to the corresponding \verb!Include! directory of umfpack.  
+
+\item \verb!TRILINOS!\ixns{aztec}{algebra}.
+
 \end{itemize}
-
-
 
 %\subsubsection{Runtime Environment}
 %\label{sec:runtime-env}
@@ -110,101 +187,87 @@ of the \ix{autotools} from the GNU project\footnote{\url{http://www.gnu.org}}.
 %\end{itemize}
 
 \subsection{Trilinos compilation}
-Before we start compiling \lifev, we have to compile Trilinos. A copy of the source
-code is available at \url{http://trilinos.sandia.gov/packages/}. When it is
-downloaded and unzipped in a directory ( which will be from now on reference as the Trilinos
-source directory ), create a directory where the library will be stored :
+\lifev depends on Trilinos, a set of object oriented C$++$ interfaces for packages like 
+blas, lapack, parmetis, umfpack and many more. A copy of the source
+code is available for download at \url{http://trilinos.sandia.gov/packages/}. 
+
+After downloading, decompressing and extracting the tarball, you'll need to 
+make a build directory anywhere you want to avoid build in the sources directory. 
+The autotools build is no longer available after the $10.0$ release. 
+Trilinos now requires the CMake 
+build system, version $2.8$ or newer. 
+Go to the build directory and write a do-configure shell script like the following
+
 
 \begin{verbatim}
-mkdir <path to the Trilinos library directory>/debug-openmpi
+#!/bin/bash
+
+EXTRA_ARGS=$@
+
+cmake \
+    -D CMAKE_BUILD_TYPE:STRING=RELEASE \
+    -D Trilinos_ENABLE_TESTS:BOOL=OFF \
+    -D Trilinos_ENABLE_Epetra:BOOL=ON \
+    -D Trilinos_ENABLE_Tpetra:BOOL=ON \
+    -D Trilinos_ENABLE_Kokkos:BOOL=ON \
+    -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
+    -D Trilinos_ENABLE_AztecOO:BOOL=ON \
+    -D Trilinos_ENABLE_Amesos:BOOL=ON \
+    -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+    -D Trilinos_ENABLE_Ifpack:BOOL=ON \
+    -D Trilinos_ENABLE_ThreadPool:BOOL=ON \
+    -D Trilinos_ENABLE_ML:BOOL=ON \
+    -D Trilinos_ENABLE_Triutils:BOOL=ON \
+    -D Trilinos_ENABLE_Zoltan:BOOL=ON \
+    -D Trilinos_ENABLE_Galeri:BOOL=OFF \
+    -D Trilinos_ENABLE_Isorropia:BOOL=OFF \
+    -D Trilinos_EXTRA_LINK_FLAGS:STRING="-lpthread" \
+    -D TPL_ENABLE_UMFPACK:BOOL=ON \
+    -D UMFPACK_LIBRARY_DIRS:PATH=/umfpack_library_path/ \
+    -D UMFPACK_INCLUDE_DIRS:PATH=/umfpack_include_path/ \
+    -D TPL_ENABLE_Pthread:BOOL=ON \
+    -D TPL_ENABLE_BLAS:BOOL=ON \
+    -D BLAS_LIBRARY_DIRS:PATH=/blas_library_path/ \
+    -D BLAS_LIBRARY_NAMES:STRING="blas_library_name" \
+    -D TPL_ENABLE_LAPACK:BOOL=ON \
+    -D LAPACK_LIBRARY_DIRS:PATH=/lapack_library_path/ \
+    -D LAPACK_LIBRARY_NAMES:STRING="lapack_library_name" \
+    -D TPL_ENABLE_MPI:BOOL=ON \
+    -D TPL_ENABLE_ParMETIS:BOOL=ON \
+    -D ParMETIS_LIBRARY_DIRS:PATH=/parmetis_library_path/ \
+    -D METIS_LIBRARY_DIRS:PATH=/metis_library_path/ \
+    -D TPL_ENABLE_HDF5:BOOL=ON \
+    -D MPI_BASE_DIR:PATH=/mpi_library_path/ \
+    -D MPI_BIN_DIR:PATH=/mpi_binary_path/ \
+    -D CMAKE_INSTALL_PREFIX:PATH=./ \
+    $EXTRA_ARGS \
+    /trilinos_source_path/
 \end{verbatim}
 
-for instance, if you want to compile the Trilinos library in debug mode using OpenMPI or
-
-\begin{verbatim}
-mkdir <path to the Trilinos library directory>/opt-openmpi
-\end{verbatim}
-
-if you want to compile the library in optimized mode. You can also set whatever name you feel confortable with instead of \verb!debug-openmpi!.
-Now go to the Trilinos source directory and start configuring :
-
-\begin{verbatim}
-../configure --prefix=<path to where you want to install the library> \
-             --enable-<debug or opt> \
-             --enable-default-packages \
-             --disable-belos \
-             --disable-capo \
-             --disable-claps \
-             --disable-didasko \
-             --disable-komplex \
-             --disable-loca \
-             --disable-meros \
-             --disable-new_package \
-             --disable-pliris \
-             --disable-pytrilinos \
-             --disable-python \
-             --disable-rythmos \
-             --disable-thyra \
-             --disable-tpetra \
-             --disable-tsf \
-             --disable-tsfcore \
-             --disable-tsfcoreutils \
-             --disable-tsfextended \
-             --disable-tests \
-             --disable-examples \
-             --enable-ml \
-             --enable-teuchos \
-             --enable-ifpack \
-             --enable-ifpack-amesos \
-             --enable-ifpack-teuchos \
-             --enable-amesos \
-             --enable-triutils \
-             --enable-epetra-abc \
-             --enable-anasazi \
-             --enable-aztecoo \
-             --enable-epetraext \
-             --enable-nox \
-             --enable-triutils \
-             --with-trilinos \
-             --with-gnumake \
-             --with-ml_metis --with-ml_parmetis3x \
-             --with-mpi=/usr/lib/openmpi/ \
-             CC=gcc CXX=g++ F77=gfortran \
-             --with-incdirs=''-I/usr/include/metis/ -I/usr/include/parmetis''
-\end{verbatim}
-Simply modify the first two lines according to your own configuration.
+Simply modify the paths and names of libraries according to your particular configuration and run the shell script.
+For example, instead of \verb!lapack_library_name! you should type the name of your lapack library without the 
+\verb!lib! prefix and the \verb!.a! suffix. The prefix and suffix are automatically added by CMake. 
 After the configuration is done, just type
 \begin{verbatim}
-make
+make 
+\end{verbatim}
+that  will compile the static files using 4 processors and further 
+\begin{verbatim}
 make install
 \end{verbatim}
-Optionally, you use the \verb!-j x(x=2,3 or 4)! option, which set the number of processor to use,
-in order speed up the compilation time on a multiprocessor machine.
+that will create and install the library files
+in two subdirectories \verb|lib| and \verb|include|, where
+it will respectively pack the objects files into library files (.a and .la files)
+and copy the include files ( .h or .hpp files ).
 
-\verb|make| will compile the static files, and make install will create and install
-the library files. The Trilinos library is now installed in the \verb!prefix! setting directory.
+The trilinos library is now installed in the build directory you created.
 
-\begin{hint}{Object files vs Library file}
-\verb|make| and \verb|make install| have very different purposes and should not be confused.
-\begin{itemize}
-\item make will basically build the code, turning, in UNIX systems, source code
-files into .o files using directives found in the makefile. These files are objects files, that is compiled code.
-\item make install will create the library in the specified \verb|prefix| install path.
-More precisely, it will create two subdirectories, \verb|lib| and \verb|include|, where
-it will respectively aggregate the objects files into library files (.a and .la files)
-and copy include files ( .h or .hpp files ).
-\end{itemize}
-Using the library means using the \verb|lib| and \verb|include| files, not the .o files as we will see later
-in this tutorial.
-\end{hint}
-
-
-\subsection{Compilation from CVS}
+\subsection{Compilation from git}
 \label{sec:compile-cvs}
 You need first to have an account on \url{http://cmcsforge.epfl.ch} and
 be part of the \lifev project, see~\ref{sec:software-management}.
 
-\noindent First, you need to checkout \lifev. \ixv{CVS} has
+\noindent First, you need to checkout \lifev. \verb!git! has
 been configured to use \ixv{ssh} and your \verb!ssh! keys to
 access the repository via \verb!ssh! without entering your password.
 When your ssh agent is properly configure, log into your cmcsforge account and
@@ -214,92 +277,81 @@ input your public key, then click on \verb!update!. The server will take up to o
 hour to update your ssh account information, then you will be able to access the
 repositories without password.\\
 
-It is now time to download and compile the code. The first step is to checkout the repository : your should insert
-
+It is now time to download and compile the code. 
+Just type
 \begin{verbatim}
-export CVS_RSH=ssh
+git clone developername@cmcsforge.epfl.ch:/gitroot/lifev/lifev
 \end{verbatim}
-in your \verb!.profile! or shell configuration file (which are located at the root of the user account), then type
-\begin{verbatim}
-cvs -z3 -d:ext:developername@cmcsforge.epfl.ch:/cvsroot/lifev co lifev
-\end{verbatim}
-where developername is your account name on cmcsforge. Place yourself in the new directory :
+where developername is your account name on cmcsforge. Place yourself in the new directory
 
 \begin{verbatim}
 cd lifev
 \end{verbatim}
-
-\noindent Second, you have to generate the compilation environment by typing:
+and type
 \begin{verbatim}
-make -f Makefile.cvs
+git clone  developername@cmcsforge.epfl.ch:/gitroot/lifev/admin
 \end{verbatim}
 
-\noindent Third, you have to execute the script
+\noindent Second, you have to generate the compilation environment by typing
+\begin{verbatim}
+make -f Makefile.git
+\end{verbatim}
+
+\noindent Third, you must make a build directory apart from the 
+lifev sources directory, for example in your home you can have a 
+\verb!lib! directory with a \verb!lifev! subdirectory and further 
+an optimized version subdirectory \verb!opt! or the debugging mode 
+subdirectory \verb!debug!, or something similar according to your own taste. 
+
+
+\noindent Fourth, you have to execute the script
 \ixvs{configure}{autotools}
 it will automatically check the availability of the needed components
-for \lifev compilation. Type:
+for \lifev compilation. Type
 
 \begin{verbatim}
-configure --with-trilinos-lib=<your Trilinos library path>
-          --with-trilinos-include=<your trilinos include path>
-          <--enable-opt or --enable-debug> --with-mpi=/usr/lib/openmpi
-          --prefix=<your lifev library install path>
+./configure \
+    --with-trilinos-lib=/your_trilinos_library_path/ \
+    --with-trilinos-include=/your_trilinos_include_path/ \
+    --enable-opt \
+    --with-mpi=/usr/lib/openmpi \
+    --with-mpi-lib=/usr/lib/openmpi/lib \
+    --with-mpi-include=/usr/include/openmpi \
+    --with-parmetis-include=/your_parmetis_include_path/ \
+    --with-parmetis-lib=/your_parmetis_library_path/ \
+    --with-umfpack-include=/your_umfpack_include_path/ \
+    --with-umfpack-lib=/your_umfpack_library_path/ \
+    --with-amd-include=/your_amd_include_path/ \
+    --with-amd-lib=/your_amd_library_path/ \
+    --with-hdf5=/usr \
+    --prefix=/your_lifeV_library_install_path/
+    CXXFLAGS ="-O2"
 \end{verbatim}
+
+to configure with optimized libraries, or change the line \verb!--enable-opt! to
+\verb!--enable-debug! and \verb!CXXFLAGS="-g2 -O0"! to build the libraries 
+in debugging mode. 
+
+Remember to specify the 
+path to your build directory (external to the sources directory) with the flag \verb!--prefix!. 
+
+Change the path and name of mpi, mpi library and include if yours is different. 
+You can check for additional flags for mpi typing \verb!mpicc -show!. 
+
 
 \noindent Finally, you just have to use \ixv{make} to compile \lifev libraries and documentation.
 Enter
 \begin{verbatim}
-make
+make -j4
 make install
 \end{verbatim}
 
-\begin{hint}{Configure}
-  \label{hint:configure}
-  \verb!configure! is extremely powerful and allows you to maintain
-  several concurrent build directories. Typically during development
-  and testing, you need to have \lifev compiled with debugging flags,
-  optimization flags and/or profiling flags. However combining
-  optimization and debugging flags does not necessarily produce
-  anything useful for debugging and testing purposes.
-
-  With configure it is possible to compile a code in a directory which
-  is different from the source directory. This is extremely useful to
-  tacke our problem. Let's consider given the source directory to be
-  store in the environment variable \verb!$LIFEV_HOME! which is not
-  mandatory.
-
-Here is what you can do to compile with debugging flags:
-\begin{verbatim}
-cd $LIFEV_HOME
-mkdir debug
-cd debug
-../configure CXXFLAGS="-g2 -O0"
-make
-\end{verbatim}
-Here we have \verb+$(top_builddir) == $LIFEV_HOME/debug+.
-
-Here is what you can do to compile with optimization flags:
-\begin{verbatim}
-cd $LIFEV_HOME
-mkdir optimized
-cd optimized
-../configure CXXFLAGS="-O2"
-make
-\end{verbatim}
-Here we have \verb+$(top_builddir) == $LIFEV_HOME/optimized+.
-
-\noindent Note that you may have several concurrent \verb+$(top_builddir)+
-
-\noindent Note that \verb!configure! will fail if you have already compiled
-\lifev in the source directory.
-
-
-\end{hint}
-
+\noindent Be careful because \verb!configure! will fail if you have already compiled
+\lifev in the source directory. Therefore is not a good idea to build in the sources. 
 
 \subsection{Compilation from Official Distribution}
 \label{sec:comp-from-offic}
-The \lifev project provides releases, they are named using the following convention:
+The \lifev project provides releases, they are named using the following convention
 \begin{center}
 \verb!lifev-x.y.z.tar.gz!
 \end{center}
@@ -310,20 +362,16 @@ Here is what you have to do:
 \item download \lifev release \verb!lifev-x.y.z.tar.gz!
 \item unpack it
 \begin{verbatim}
-tar xzf lifev-x.y.z.tar.gz
+tar -xzf lifev-x.y.z.tar.gz
 \end{verbatim}
-\item configure it
+\item configure it following the instructions of the previous section,
+\item compile and install it
 \begin{verbatim}
-cd lifev-x.y.z
-configure
-\end{verbatim}
-\item compile it
-\begin{verbatim}
-make
+make -j4
+make install
 \end{verbatim}
 \end{enumerate}
 
-Some comments in section\ref{sec:compile-cvs} apply also here.
 
 \subsection{Compiling Testsuite}
 
@@ -351,24 +399,18 @@ Some comments in section\ref{sec:compile-cvs} apply also here.
 
 \noindent In order to compile the testsuite, you need the following steps
 \begin{verbatim}
-cd $(top_builddir)/testsuite
+cd lifev-directory/testsuite
 make check
 \end{verbatim}
+where the lifev-directory is the directory where you unpacked \lifev.
 
-\noindent If you just want to compile a specific test, say \verb+test_darcy+:
+\noindent If you just want to compile a specific test, say \verb+test_darcy+
 \begin{verbatim}
-cd $(top_builddir)/testsuite/data
+cd lifev-directory/testsuite/data
 make check
-cd $(top_builddir)/testsuite/test_darcy
-make test_darcy _OR_ make check
+cd lifev-directory/testsuite/test_darcy
+make test_darcy OR make check
 \end{verbatim}
-
-\noindent Since most tests are using meshes that are located in
-\verb+$(top_srcdir)/testsuite/data+, it is mandatory to execute \verb+make check+ in
-\verb+$(builddir)/testsuite/data+ in order to create the proper
-symlinks to the meshes when \verb+$(top_builddir) != $(top_srcdir)+. It is also possible
-to use the command \verb+make link+ inside the repertory of a particular test in order to
-set the meshes available.
 
 %
 %%%%%%%%%%%%% Some Settings for emacs and auc-TeX

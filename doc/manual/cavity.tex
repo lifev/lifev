@@ -8,14 +8,14 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 24-Nov-08 at 14:03:21
-% LAST-MOD: 10-Feb-09 at 14:18:08 by Gilles Fourestey
+% LAST-MOD: 10-Nov-10 at 14:18:08 by Julian Sagredo
 %
 % DESCRIPTION:
 % DESCRIP-END.
 
 
 Let us consider flow of a viscous and incompressible fluid described by its velocity $u$
-and pressure $p$. Its flow can be described, at low reynolds number, by the Oseen Problem :
+and pressure $p$. Its flow can be described, at low Reynolds number, by the Oseen Problem 
 
 \begin{equation} \label{eqn-oseen}
 \left\{
@@ -29,7 +29,6 @@ and pressure $p$. Its flow can be described, at low reynolds number, by the Osee
 
 were $\nu$ is the kinematic viscosity of the fluid. If we set the convective
 acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations
-\ixv{Stokes problem} :
 
 \begin{equation} \label{eqn-stokes}
 \left\{
@@ -41,7 +40,7 @@ acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations
 \right.
 \end{equation}
 
-We want to solve the following Stokes problem :
+We want to solve the following Stokes problem
 
 \begin{equation} \label{eqn-stokes}
 \left\{
@@ -56,7 +55,7 @@ u \cdot n = 0 & \mbox { on } \partial \Omega_2\\
 \right.
 \end{equation}
 
-on the 3D domain represented by :
+on the 3D domain represented by 
 
 \vspace{0.5cm}
 \begin{center}
@@ -64,14 +63,14 @@ on the 3D domain represented by :
 \end{center}
 \vspace{0.5cm}
 
-These equation can be written in using the following bilinear forms :
+These equations can be written using the bilinear forms
 \begin{eqnarray*}
 \displaystyle \forall u,v \in H^1(\Omega) & : &
 a(u,v) = \nu \int_{\Omega}\nabla u \cdot \nabla v dx \\
 \displaystyle \forall v \in H^1(\Omega),\mbox{ } q \in L^2(\Omega) & : &
 b(v,q) = \int_{\Omega} q\nabla \cdot v dx \\
 \end{eqnarray*}\\
-which lead us to the variational formulation : let $f
+into the variational form: let $f
 \in L_0(\Omega)$, find $u \in H^1_0(\Omega)$ et $p \in
 L^2_0(\Omega)$ such that
 \begin{equation} \label{eqn-varia}
@@ -85,8 +84,8 @@ b(u,q) & = 0 & \hspace{1cm} \forall t \in (0,T), \forall q \in L^2_0(\Omega)
 \end{equation}
 %find $u_h \in X_h$ and $p_h \in M_h$ so that,
 
-In order to solve (\ref{eqn-varia}) using \lifev, create a working directory.
-In this directory, copy the following files :
+In order to solve (\ref{eqn-varia}) using \lifev, let us create a working directory
+and get the following files:
 
 \begin{itemize}
 \item Makefile-cavity
@@ -94,12 +93,15 @@ In this directory, copy the following files :
 \item data-cavity
 \end{itemize}
 
-from the \verb|<lifev directory>/doc/manual/| directory. \verb!cavity.cpp! contains the
-C++ code to solve the variational problem (\ref{eqn-varia}). But before compiling it,
-let's have a look a the makefile \ixns{Makefile}{GNU Makefile}.
+from the \verb|<lifev directory>/doc/manual/| directory. The library has evolved 
+much during the last years and you will find a few differences between the 
+instructions explained here and the \verb!cavity.cpp! code updated by 
+Gwenol Grandperrin in October of 2010. 
+
+
+Let's have a look a the makefile \ixns{Makefile}{GNU Makefile}.
 
 \begin{verbatim}
-
 # path to the compiler
 CC               = /usr/bin/g++
 
@@ -157,10 +159,10 @@ clean:
 \end{verbatim}
 
 
-In order to make everything work, you need to fill the \verb|<...>| with your local
+You will need to fill the \verb|<...>| with your local
 configuration paths. You can also change the \verb|LDFLAGS| options in order to
 compile using the debug or the optimized mode in the g++ compiler. More information
-about the using makefiles are available at \url{http://www.gnu.org/software/make/manual/make.html}.
+about using makefiles is available at \url{http://www.gnu.org/software/make/manual/make.html}.
 
 
 Now that we have the makefile, we can look at the sources, contained in the file cavity.cpp
@@ -173,18 +175,15 @@ Now that we have the makefile, we can look at the sources, contained in the file
 
 \end{verbatim}
 
-This part is mendatory in order to define the Epetra Communicators and should be
+This part is mandatory in order to define the Epetra Communicators (that contain the MPI calls) 
+ and should be
 at the begining of each program.
 
 
 \begin{verbatim}
 #include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
-
-#include "mpi.h"
-
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
@@ -192,9 +191,7 @@ at the begining of each program.
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
-
 #include <life/lifesolver/Oseen.hpp>
-
 #include <iostream>
 \end{verbatim}
 
@@ -204,12 +201,11 @@ at the begining of each program.
 using namespace LifeV;
 \end{verbatim}
 
-Using this procedure, we are now able to use LifeV contents without refering to LifeV:: everytime.
+Use this to use LifeV objects  without refering to LifeV:: everytime.
 Without it, we have to use LifeV::RefFE instead of just RefFE for instance.
 
 
 \begin{verbatim}
-
 typedef boost::function<Real ( Real const&,
                                Real const&,
                                Real const&,
@@ -247,7 +243,7 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
 \end{verbatim}
 
 In this section, we have defined real functions that will be used in the boundary condition
-object. Boundary conditions functions must be defined using the following scheme :
+object. Boundary conditions functions must be defined using the following scheme
 
 \begin{verbatim}
 
@@ -263,11 +259,12 @@ is the simulation time,
 \verb|x, y, z|
 are the space coodinates, and
 \verb|ID|
-
 is the component of the variable we want to set.
 In our example, we want to set $(u_x, u_y, u_z) = (1, 0, 0)$ when we are in ${\partial \Omega}_1$
 Therefore, when the ID is 1, i.e $x$, we return 1. For every other cases, i.e $y$ and $z$,
-we return 0. We could have used another boundary condition, for instance :
+we return 0. 
+
+We could have used another boundary condition, for instance 
 
 \begin{verbatim}\end{verbatim}
 \begin{verbatim}
@@ -290,7 +287,7 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
 
 
 The main difference is that, using this functions, the boundary condition on ${\partial \Omega}_1$
-now becomes :
+now becomes
 \begin{equation*}
   u = (x(1 - x), 0, 0) \mbox{ on } {\partial \Omega}_0 \\
 \end{equation*}
@@ -298,23 +295,15 @@ now becomes :
 We can now proceed to the main block of the code.
 
 \begin{verbatim}
-int
-main( int argc, char** argv )
+int main( int argc, char** argv )
 {
-
-    //
-    // Mpi Communicator definition ( see http://www.mpi-forum.org/docs/docs.html for documentation ).
-    // The communicator (paralell or sequential) is then given to Epetra.
-    // This is standard and can be "copy/pasted"
-    //
-
     MPI_Init(&argc, &argv);
     Epetra_MpiComm comm(MPI_COMM_WORLD);
 
 \end{verbatim}
 
 These two lines will initialize the MPI process and create an Epetra communicator
-that will be used throughout the code to establish communications. See
+that will be used throughout the code for message passing. See
 \begin{itemize}
 \item \url{http://www-unix.mcs.anl.gov/mpi/www/www3/MPI\_Init.html}
 \item \url{http://trilinos.sandia.gov/packages/docs/r6.0/packages/epetra/doc/html/classEpetra\_MpiComm.html}
@@ -322,7 +311,7 @@ that will be used throughout the code to establish communications. See
 for more explanations.
 
 \begin{verbatim}
-    // a flag to see who's the leader for output purposes
+    // a flag to see who's the master for output purposes
     bool verbose = comm.MyPID() == 0;
 
     if ( comm.MyPID() == 0 )
@@ -334,13 +323,13 @@ for more explanations.
                       << ntasks << " running." << std::endl;
         }
 \end{verbatim}
-This block, although not necessary in the comprehention of the FE resolution code, explains
+This block, although not necessarily in the comprehension of the FE resolution code, explains
 how to manage output from a parallel code. As we do not want every processor to output
-every piece of information, we set a ``leader'' processor that will display relevant
-informations on the console ( 0 in our case ).
+every piece of information, we set a master processor that will display relevant
+pieces of information on the console ($0$ in our case).
 \begin{verbatim}
 
-    // We now proceed to the data file. Its name can be given using the
+    // Read from the data file. Its name can be given using the
     // -f or --file argument after the name of launch program.
     // By default, it's data.
 
@@ -351,23 +340,25 @@ informations on the console ( 0 in our case ).
 \end{verbatim}
 
 \noindent In this part, a GetPot object (http://getpot.sourceforge.net/) is created
-and is linked to a data description file using  the ``-f'' ou ``--file'' parameters after
-the main program name. This GetPot object is used to store values like
+and is linked to a data description file using  the ``-f'' or ``--file'' parameters after
+the main program name. This GetPot object is used to store values like:
 \begin{itemize}
 \item the mesh name,
 \item the time step,
 \item the discretization order,
-\item the problem physic
-\item solver informations
+\item the physics of the model,
+\item the solver information,
 \item ...
 \end{itemize}
 You can browse the default data file in every testsuite directory to see examples.
-Some entries are mendatory, like the mesh name for instance, others are not and will be
-filled with a default value if not specified.\\
-A data object will be used to store these informations. In our case, since we want to
-solve a Navier-Stokes problem, we will be using the DataNavierStokes object.
+In general the entries
+are filled with a default value if not specified,
+but some entries are obligatory, like the mesh name for instance. 
+
+A data object will be used to store this information. In our case, since we want to
+solve a Navier-Stokes problem, we need to use the DataNavierStokes object.
 Given the GetPot object we have just defined, it will parse the specified data file
-to retreive all necessary informations in order to run the simulation.
+to retreive all the information necessary to run the simulation.
 
 \begin{verbatim}
 
@@ -388,7 +379,7 @@ Name & Options & Description \\
 mesh\_dir & & mesh directory path \\ \hline
 mesh\_name & & mesh file name \\ \hline
 timestep & & problem time step \\ \hline
-vel\_order & P1 & volicity discretization order \\ \
+vel\_order & P1 & velocity discretization order \\ \
 & P1Bubble & \\
 & P2 & \\ \hline
 press\_order & P1 & pressure discretization order \\
@@ -397,7 +388,7 @@ order\_bdf & 1 & time discretization order \\
 & 2 & \\ \hline
 \end{tabular}
 \end{center}
-\caption{ Fluid discretization parameters description
+\caption{ Description of the discretization parameters.
 %\ixt{Fluid discretization parameters}{Fluid discretization}
 }
 \label{table-bcparams}
@@ -405,20 +396,18 @@ order\_bdf & 1 & time discretization order \\
 
 
 \noindent After this line, everything we need to know about our problem is stored
-in dataNavierStokes. It is time to proceed the solver definition. \\
+in dataNavierStokes.
 
-In order to build a FE solver to solve our cavity problem, we need :
+To build a FE solver for our cavity problem we need:
 \begin{itemize}
-\item boundary conditions
-\item a finite element space
-\item a solver that will build and solve the linear system derived from our weak formulation
+\item a finite element space,
+\item the boundary conditions,
+\item a solver that will build and solve the linear system derived from our weak formulation.
 \end{itemize}
 
-
 \begin{verbatim}
-    // Now for the boundary conditions :
     // BCHandler is the class that stores the boundary conditions. Here we will
-    // set 3 boundary conditions :
+    // set 3 boundary conditions:
     // top               : (ux, uy, uz) = (1., 0., 0.) essential BC
     // left, right, down : (ux, uy, uz) = (0., 0., 0.) essential BC
     // front and rear    : uz = 0 essential BC
@@ -437,7 +426,7 @@ In order to build a FE solver to solve our cavity problem, we need :
     bcH.addBC( "Wall",     WALL,     Essential, Full,      uZero, 3 );
 \end{verbatim}
 
-Bondary conditions \ixv{Boundary Conditions} part. Here is the prototype of the \verb!addBC! function :
+Bondary conditions \ixv{Boundary Conditions} part. Here is the prototype of the \verb!addBC! function 
 
 \begin{verbatim}
     //! add new BC to the list (user defined function)
@@ -461,7 +450,7 @@ Bondary conditions \ixv{Boundary Conditions} part. Here is the prototype of the 
 and \verb+WALL+ are defined at the beginning of the file),
 \verb!mode! is the mode, \verb!bcf! is the function holding the user-defined function involved
 in the boundary condition. \verb!type! and \verb!mode! are respectively the boundary condition type
-and mode. Please refer to the table (\ref{table-bcparam) for a description of their values.
+and mode. Please refer to the table (\ref{table-bcparam}) for a description of their values.
 
 \begin{table}
 \begin{center}
@@ -489,10 +478,11 @@ mode & Scalar & 1 dimension BC \\
 \label{table-bcparams}
 \end{table}
 
-\verb!comp! is a vector storing the components involved in the boundary condition.
-The last boundary condition we want to impose is a little more tricky.As defined
-in (\ref{eqn-stokes}), we have decided that boundary condition \verb!SLIPWALL! ( i.e 20 in the mesh file, or $\partial \Omega_2$ in (\ref{eqn-stokes}) ), will recive
-a boundary slipwall condition, i.e
+\verb!comp! is a vector storing the components in the boundary condition.
+The last boundary condition we want to impose is 
+\verb!SLIPWALL! 
+( i.e $20$ in the mesh file, or $\partial \Omega_2$ in (\ref{eqn-stokes}) ), will get 
+a slipwall boundary condition, i.e
 \begin{equation}\label{eqn-slipwallbc}
 u \cdot n = 0
 \end{equation}
@@ -500,56 +490,48 @@ This means, since the two concerned planes are defined by $z = 0$ and $z = L$, t
 \begin{equation*}
 u_z = 0 \mbox{ for } z=1,L
 \end{equation*}
-In order to set our third component (\verb!z!), we define the vector :
+In order to set our third component (\verb!z!), we define the vector
 \begin{verbatim}
     std::vector<ID> zComp(1);
     zComp[0] = 3;
 \end{verbatim}
-Then, we call add an essential (Dirichlet) boundary condition on the z component by calling
+Then, we add an essential (Dirichlet) boundary condition on the z component by calling
 \begin{verbatim}
-    // this bc is imposed only on some compenants,
-    // that is the ones given in zComp
-    // Here it's the thirs, ie z, in order to have u.n = 0
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 \end{verbatim}
-This will set a null function to the third component on the sleepwall. We could have just easily defined
+This will set a null function to the third component on the slipwall. We could have just easily defined
 another function for the others components using the same procedure.
 
-Now that boundary conditions are set, let's have the mesh \ixv{Mesh}. LifeV partitions meshes \ixns{Paritioning}{Mesh}on the fly
-using the parMetis libreary, that means that you do not have to provide the partioned mesh in
+Now we get the mesh \ixv{Mesh}. LifeV partitions meshes \ixns{Paritioning}{Mesh} on the fly
+using the parMetis library, that means that you do not have to provide the partitioned mesh in
 order to have the simulation running.
 
 \begin{verbatim}
-
     // partitioning the mesh
     partitionMesh< RegionMesh3D<LinearTetra> >
              meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
-
 \end{verbatim}
 
 In our case, after the call to the \verb!partitionMesh! constructor, \verb!meshPart! will store
-the local partitioned mesh. Using this local mesh, we can create our Finite Element \ixns{Finite Element Space}{Finite Element} spaces.
-In \lifev, a Finite Element Space is a class storing :
+the local part of the mesh. Using this local mesh, 
+we can create our Finite Element \ixns{Finite Element Space}{Finite Element} spaces.
+In \lifev, a Finite Element Space is a class storing:
 \begin{description}
 \item a mesh,
-\item a reference Lagrangian Finite Element,
+\item a reference Finite Element,
 \item quadrature rules to integrate reference functions on the mesh elements or the boundaries.
 \end{description}
-A reference Lagrangian Finite Element in \lifev is a classe containing the geometrical definition
+
+A reference Finite Element in \lifev is a class containing the geometrical definition
 of the mesh elements and the polynomial approximation order we want to use.
-Let's have a look a the code :
 
 \begin{verbatim}
-
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
-
-
 
     const RefFE*    refFE_vel;
     const QuadRule* qR_vel;
     const QuadRule* bdQr_vel;
-
 
     refFE_vel = &feTetraP2;
     qR_vel    = &quadRuleTetra15pt; // DoE 5
@@ -557,7 +539,8 @@ Let's have a look a the code :
 
 \end{verbatim}
 
-After these lines, \verb!refFE_vel! contains the desired reference finite element  \ixns{Reference Finite Element}{Finite Element}. See table \ref{table-feapproxorder}
+After these lines, \verb!refFE_vel! contains the desired reference finite element  
+\ixns{Reference Finite Element}{Finite Element}. See table \ref{table-feapproxorder}
 for the descrition of available parameters.
 
 \begin{table}
@@ -596,10 +579,9 @@ quadRuleTetra64pt  & 64 point &  \\
 \label{table-feapproxorder}
 \end{table}
 
-Everything is ready to create our Finite Element space :
+Everything is ready to create our Finite Element space
 
 \begin{verbatim}
-
     // Everything is ready to build the FE space
     // first the velocity FE space
 
@@ -615,18 +597,18 @@ Everything is ready to create our Finite Element space :
 
 \end{verbatim}
 
-We have now defined the reference finite element as P2 and defined two quadrature rule: one general and one
+We define the reference finite element as P2 and two quadrature rules: one general and one
 for the boundary integration. Once these classes are defined, we call the FE space
-object constructor with the following input parameters :
+object constructor with the following input parameters:
 \begin{itemize}
 \item meshPart is the local partioned mesh,
 \item *refFE\_vel is the reference finite element,
-\item *qR\_vel and *bdQR\_vel are the quadratic rules,
+\item *qR\_vel and *bdQR\_vel are the quadrature rules,
 \item 3 is the field dimension,
-\item comm is the trilinos communicator.
+\item comm is the MPI communicator.
 \end{itemize}
 
-Of course, we do the same with the pressure. This time, we will use a P1 discretization.
+Of course, we do the same with the pressure. This time, we use a P1 discretization
 
 \begin{verbatim}
 
@@ -650,22 +632,22 @@ Of course, we do the same with the pressure. This time, we will use a P1 discret
 
 \end{verbatim}
 
-Now that our Finite Element spaces are created, we can build the solver. In \lifev,
-a solver has the following properties :
+Now we build the solver. In \lifev,
+a solver has the following properties:
 \begin{itemize}
-\item They build and store the linear FE matrices.
-\item They build the preconditioners.
-\item They build the linear solvers.
+\item it builds and stores the linear FE matrices,
+\item it builds the preconditioners,
+\item it builds the linear solvers.
 \end{itemize}
 
 Calling the constructor will initialize the matrices, preconditioner and the linear solver
-but neither will be constructed. Instead, the matrices will be initialized using the
-velocity and pressure FE spaces.
+but neither will be fully constructed. Instead, the matrices will be initialized using the
+velocity and pressure FE spaces
 
 \begin{verbatim}
 
     // now that the FE spaces are built, we proceed to the NS solver constrution
-    // we will use oseen here
+    // we use the oseen class
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
@@ -677,7 +659,7 @@ velocity and pressure FE spaces.
 
 \end{verbatim}
 
-Now that the class has been instanciated, we need to set it up by passing the data file :
+Now that the class has been instantiated, we need to set it up with the data file parameters
 
 \begin{verbatim}
     // Now, the fluid solver is set up using the data file
@@ -685,7 +667,8 @@ Now that the class has been instanciated, we need to set it up by passing the da
 \end{verbatim}
 
 Calling \verb|setUp|
-will basically build the preconditioner and the linear solver using the AztecOO options \footnote{see \url{http://trilinos.sandia.gov/packages/docs/r9.0/packages/aztecoo/doc/html/classAztecOO.html} for more informations }
+will basically build the preconditioner and the linear solver using the AztecOO 
+options \footnote{see \url{http://trilinos.sandia.gov/packages/docs/r9.0/packages/aztecoo/doc/html/classAztecOO.html} for more information}
 contained in the data file.
 
 \begin{table}
@@ -752,8 +735,8 @@ drop\_tol & default : 0. \\
 \end{table}
 
 %See \url{
-%http://trilinos.sandia.gov/packages/aztecoo/AztecOOUserGuide.pdf} for more informations ).
-Now that the linear solver and the preconditioner are set, we can build the linear system by calling :
+%http://trilinos.sandia.gov/packages/aztecoo/AztecOOUserGuide.pdf} for more information).
+Then we can build the linear system
 \begin{verbatim}
     // then we build the constant matrices
     fluid.buildSystem();
@@ -762,7 +745,7 @@ Now that the linear solver and the preconditioner are set, we can build the line
 This will create the full finite element linear matrix. Note that, despite the fact
 that we passed both the velocity and the pressure FE spaces, the solver will consider
 only one finite element constructed by performing a direct sum of the two FE spaces.
-The associated ``full'' map can be retrieved using the \verb|getMap| method :
+The associated ``full'' map can be retrieved using the \verb|getMap| method 
 
 \begin{verbatim}
     // this is the total map ( velocity + pressure ). it will be used to create
@@ -773,12 +756,12 @@ The associated ``full'' map can be retrieved using the \verb|getMap| method :
     if (verbose) std::cout << "ok." << std::endl;
 \end{verbatim}
 
-Using this map is mendatory when we access the solution vector after the linear system is solved.\\
-Before solving our system, let's have a look at the post-precessing class.
+Using this map is obligatory when we access the solution vector after the linear system is solved.\\
+
 In \lifev, we mainly use paraview in order to postprocess our problem solutions.
-Writing a paraview solution is quite straightforward using the Ensight class :
-we call the Ensight constructor where we give the data file, the mesh and the filename of the solution file,
-we give references of the solution vector and that's it.
+Writing a paraview solution is quite straightforward using the Ensight class.
+We call the Ensight constructor where we give the data file, the mesh and the filename of the solution file
+with references to the solution vector.
 
 \begin{verbatim}
 
@@ -803,14 +786,13 @@ we give references of the solution vector and that's it.
                          UInt(3*uFESpace.dof().numTotalDof() +
                                 pFESpace.dof().numTotalDof()) );
 
-    // everything is ready now
     // a little barrier to synchronize the processes
     MPI_Barrier(MPI_COMM_WORLD);
 \end{verbatim}
 
 %Here is the occasion to introduce an important concept in \lifev/Trilinos (...).
 
-We are now set for the linear system resolution.
+We are now set for the solution of the linear system.
 
 \begin{verbatim}
 
@@ -825,14 +807,13 @@ We are now set for the linear system resolution.
 
 Using the full map defined above, we set the advection term and right handside to zero.
 
-
 \begin{verbatim}
     // updating the system with no mass matrix, advection and rhs set to zero,
     // that is the stokes problem
     fluid.updateSystem(alpha, beta, rhs );
 \end{verbatim}
 
-In the Oseen class, \verb|updateSystem| takes 3 arguments :
+In the Oseen class, \verb|updateSystem| has 3 arguments:
 \begin{itemize}
 \item \verb|alpha| is the coefficient in front of the mass term,
 \item \verb|beta| is the advection term,
@@ -841,8 +822,7 @@ In the Oseen class, \verb|updateSystem| takes 3 arguments :
 
 Setting these 3 terms to zero will result in solving the system (\ref{eqn-stokes}).
 The linear system is solved by calling \verb!iterate!, which requires the boundary conditions
-in parameters. The member \verb!iterate! will
-
+as parameters. The member \verb!iterate! will:
 \begin{itemize}
 \item build the full matrix,
 \item apply the boundary conditions,
@@ -859,7 +839,13 @@ in parameters. The member \verb!iterate! will
 
 \end{verbatim}
 
-You may now postprocess the result using Paraview.
+You must run the cavity executable named \verb!cavity_example! using 
+\verb!mpirun -np procs cavity_example! where \verb!procs! is the number 
+of processors you want to use for your computation. 
+
+
+
+You may now visualize the result using Paraview.
 
 %
 %%%%%%%%%%%%% Some Settings for emacs and auc-TeX

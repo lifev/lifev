@@ -28,7 +28,7 @@ Navier-Stokes problem \ixn{Navier-Stokes Problem}. Starting from the Oseen probl
 \right.
 \end{equation*}
 
-We want to solve the instationary Navier-Stokes problem :
+We want to solve the non-stationary Navier-Stokes problem
 
 \begin{equation*} \label{eqn-navierstokes}
 \left\{
@@ -40,7 +40,7 @@ We want to solve the instationary Navier-Stokes problem :
 \right.
 \end{equation*}
 
-which can be written, using a time semi-discretisation of the time partial derivative :
+which can be written, using a semi-discretization of the time partial derivative as
 
 \begin{equation*} \label{eqn-nsnl}
 \left\{
@@ -52,10 +52,13 @@ which can be written, using a time semi-discretisation of the time partial deriv
 \right.
 \end{equation*}
 
-Where $alpha$ is a constant which depends on the time discritization order, $\Delta t$ is the time step, $u^{n+1}$ and $p^{n+1}$ are the velocity and the pressure at the time $t^n = n\Delta t$.
+Where $\alpha$ is a constant which depends on the time discretization order, 
+$\Delta t$ is the time step, $u^{n+1}$ and $p^{n+1}$ 
+are the velocity and the pressure at the time $t^n = n\Delta t$.
 Note that $f^n$ now contains terms resulting from the time discretization.
-Using a linearaztion $\beta^n$ of (\ref{eqn-nsnl}) around $u^{n+1}$, we get the full semi-discretized linear Navier-Stokes
-equations :
+Using a linearization $\beta^n$ of (\ref{eqn-nsnl}) around $u^{n+1}$, 
+we get the full semi-discrete linearized Navier-Stokes
+equations
 
 \begin{equation*} \label{eqn-ns}
 \left\{
@@ -67,54 +70,54 @@ equations :
 \right.
 \end{equation*}
 
-Solving (\ref{eqn-ns}) using the framework we used for the stationary driven cavity is not difficult :
-instead of setting $alpha$, $beta$ and $f^n$ to zero, we give them their proper values. For instance,
-is the consider the first order time discretization, we get :
+Solving (\ref{eqn-ns}) using the framework we used for the stationary driven cavity is not difficult.
+Instead of setting $\alpha$, $\beta$ and $f^n$ to zero, we give them their proper values. For instance,
+consider the first order discretization in time
 
 \begin{equation*} \label{eqn-nso1}
 \left\{
 \begin{array}{rl}
 \displaystyle \frac {u^{n+1}}{\Delta t} + u^n \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
 \nabla p^{n+1} & = \displaystyle \frac{u^n}{\Delta t}  \\
-\displaystyle \nabla \cdot u & = 0  \\
+\displaystyle \nabla \cdot u & = 0. \\
 \end{array}
 \right.
 \end{equation*}
 
-The second order time discretization is :
+Or the second order discretization 
 
 \begin{equation*} \label{eqn-nso2}
 \left\{
 \begin{array}{rl}
 \displaystyle \frac {3u^{n+1}}{2\Delta t} + u^n \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
 \nabla p^{n+1} & = \displaystyle \frac{2u^n}{\Delta t} - \frac{u^{n-1}}{2\Delta t}  \\
-\displaystyle \nabla \cdot u & = 0  \\
+\displaystyle \nabla \cdot u & = 0. \\
 \end{array}
 \right.
 \end{equation*}
 
 Let's have a look at the code in \verb!testsuite/test_cavity/main.cpp!.
 Until the first \verb!fluid.iterate()!, the code is the same as the one used to compute the Stokes problem.
-Now, we want to use this Stokes solution to initialize the our instationary Navier-Stokes problem, and be able
-to store a history of previous solution in order to be able to compute the discretized time derivative.
-This can be done by using the following object :
+Now, we want to use this Stokes solution to initialize our non-stationary Navier-Stokes problem, and be able
+to store a history of previous solutions in order to compute the time derivative.
+This can be done by using the following object 
 \begin{verbatim}
     // bdf initialization with the stokes problem solution
     BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 \end{verbatim}
-The Backward Differentiation Formula templated class \verb!BdfTNS! \ixn{Backward Differentiation Formula} will store the previous solution $u^n$, $u^{n-1}$ ... so that
-they will always be accessible when we need them. All we have to do is to construct this class
-with the correct time discretization order given in the data file by the variable \verb!fluid/discretization/bdf_order!
-so that the storing vector will be resized correctly, and intialize it with our previously computed Stokes problem solution :
+The backward differentiation formula, class \verb!BdfTNS! \ixn{Backward Differentiation Formula}, 
+stores the previous solution $u^n$, $u^{n-1}$ ... 
+All we need to do is to construct this class
+with the correct time discretization order given in the data file (variable \verb!fluid/discretization/bdf_order!) 
+so that the stored vector will be resized correctly, and intialize it with our previously computed Stokes problem solution
 
 \begin{verbatim}
    bdf.bdf_u().initialize_unk( fluid.solution() );
 \end{verbatim}
 
-We are now ready to enter the time loop :
+We are now ready to enter the time loop 
 
 \begin{verbatim}
-
     Real dt     = dataNavierStokes.getTimeStep();
     Real t0     = dataNavierStokes.getInitialTime();
     Real tFinal = dataNavierStokes.getEndTime ();
@@ -146,7 +149,7 @@ We are now ready to enter the time loop :
         // rhs  part of the time-derivative
         rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
 
-        // the we update the Oseen system
+        // update the Oseen system
         fluid.updateSystem( alpha, beta, rhs );
 
         // and we solve it
@@ -155,11 +158,11 @@ We are now ready to enter the time loop :
         // shifting the previous solutions
         bdf.bdf_u().shift_right( fluid.solution() );
 
-        // and we postprocess
+        // postprocess
         *velAndPressure = fluid.solution();
         ensight.postProcess( time );
 
-        // a barrier to make sure everyone is here, and we start again
+        // a barrier for sinchronization 
         MPI_Barrier(MPI_COMM_WORLD);
 
         chrono.stop();
@@ -171,18 +174,18 @@ We are now ready to enter the time loop :
 \end{verbatim}
 
 The time step \verb!dt!, the initial time \verb!t0! and the final simulation time \verb!tFinal!
-are found in the data file variables respectively name \verb!fluid/discretization/timestep!,
-\verb!problem/Tstart! and \verb!fluid/physics/endtime!. As we can see, a time step can be describe
-as a follow up of several intuitive calls :
+are found in the data file, their names are respectively  \verb!fluid/discretization/timestep!,
+\verb!problem/Tstart! and \verb!fluid/physics/endtime!. As we can see, a time step can be described
+as a follow up of several intuitive calls:
 \begin{itemize}
-\item computation of $\alpha$ ( which should is constant in most cases ),
+\item computation of $\alpha$ (which should is constant in most cases),
 \item computation of $\beta$ using the \verb!Bdf! class,
-\item computation of the Right Hand Side $rhs$,
+\item computation of the right hand side $rhs$,
 \item update of the system using these three variables,
-\item resolution of the linear system.
+\item solution of the linear system.
 \end{itemize}
-After the system is solve, we simply update all time-depend variables such as the storage
-of the previous solutions, and we restart at the begining of the loop until all time steps are computed.
+After the system is solved, we simply update all time-dependent variables such as the storage
+of the previous solutions and we loop until all time steps are computed.
 
 
 %

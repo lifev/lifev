@@ -3,8 +3,8 @@ In order to address each problem in its natural setting, we
 choose to consider the fluid in an ALE (Arbitrary Lagrangian
 Eulerian) formulation and the structure in a pure Lagrangian framework.
 
-\ixn{Fluid-Structure Interactions}
 
+\ixn{Fluid-Structure Interactions}
 
 The system under investigation occupies a moving domain $\Omegat$
 in its actual configuration. It is made of a deformable structure
@@ -61,7 +61,7 @@ $\Str(\ldots)$ the fluid and structure problems, respectively.
 Precisely, for given vector functions $\uu u_\In$, $\uu g_\mf$ and
 $\uu f_\mf$, $\NS(\U,p,\ALE{t};\uu u_\In, \uu g_\mf, \uu f_\mf)$
 means that we consider the following problem whose solution is
-$\U$, $p$, $\ALE{t}$:
+$\U$, $p$ and $\ALE{t}$:
 \begin{equation}\label{eq:fluid}
   \NS(\U,p,\ALE{t};\uu u_\In, \uu g_\mf, \uu f_\mf):
   \begin{cases}
@@ -134,7 +134,6 @@ time $t^{n+1}$, we can find its harmonic extension on the fluid domain by solvin
 the  following variational formulation of
 (\ref{eq:harmonicextension}):
 
-
 find $\Df_{t^{n+1}} \in H^1(\DomFi)^3$ such that
 \begin{equation} \label{eq:variationalvelocity2}
 \left\{
@@ -146,7 +145,8 @@ find $\Df_{t^{n+1}} \in H^1(\DomFi)^3$ such that
 \end{equation}
 completed with appropriate boundary conditions  on $\GamIn\cup\GamOu$.
 
-Then we compute the velocity of the fluid domain as $\dis \wf{}^{,n+1}_{|\GamFS{n+1}} = 1/\delta t\,(\Df_{t^{n+1}}{}_{|\GamFSi} - \Df_{t^n}{}_{|\GamFSi})
+Then we compute the velocity of the fluid domain as 
+$\dis \wf{}^{,n+1}_{|\GamFS{n+1}} = 1/\delta t\,(\Df_{t^{n+1}}{}_{|\GamFSi} - \Df_{t^n}{}_{|\GamFSi})
 \circ(\ALE {t^{n+1}})^{-1}$ and the velocity and pressure of the fluid at time
 $t^{n+1}$ by solving:
 
@@ -173,7 +173,7 @@ V_0^\mf(t) & = & \left\{\V^\mf \in V^\mf(t) \vert \,\V^\mf  \circ \ALE {t}
 = \mathbf{0} \mbox { on } \GamFSi \cup \GamIn \right\}, \\
 Q^\mf (t)& = & \left\{q^\mf  \vert \, q^\mf \circ \ALE {t} \in L^2(\DomFi)\right\},
 \end{eqnarray*}
-and where the fluid domain $\DomF(t^{n+1})$ is given by:
+and where the fluid domain $\DomF(t^{n+1})$ is given by
 \begin{equation*}
 \DomF(t^{n+1})  = \ALE {t^{n+1}}(\DomFi).
 \end{equation*}
@@ -268,7 +268,7 @@ only on $\GamFSi$. More precisely, we can envisage three possible formulations f
 equation which are all equivalent from a mathematical point of view, but give rise to different
 iterative methods.
 
-First, we have the fixed-point formulation:
+First, we have the fixed-point formulation
 \begin{equation} \label{eq:fixedpoint}
 \mbox{find } \lambda \mbox { such that } \Ss^{-1}(-\Sf(\lambda)) = \lambda
 \mbox{ on } \GamFSi .
@@ -279,7 +279,7 @@ literature the solution obtained via
 fixed-point algorithms usually represents the displacement of the whole solid domain.
 
 The second possible approach is a slight modification of the previous equation
-(\ref{eq:fixedpoint}):
+(\ref{eq:fixedpoint})
 \begin{equation} \label{eq:newton}
 \mbox{find } \lambda \mbox { such that } \Ss^{-1}(-\Sf(\lambda)) - \lambda = 0 \mbox{ on } \GamFSi,
 \end{equation}
@@ -288,7 +288,7 @@ Again, this is applied solely to the interface displacement,
 instead of the whole solid displacement as proposed.
 
 Let's have a look at the code located at \verb!testsuite/test_fsi/main.cpp!. The first interesting part
-is the problem definition part, starting from these lines :
+is the problem definition part, starting from these lines 
 \begin{verbatim}
     Problem( GetPot const& data_file, std::string _oper = "" )
         {
@@ -303,13 +303,13 @@ is the problem definition part, starting from these lines :
 \end{verbatim}
 
 This will create a new fluid/structure interaction problem that will be solved using a
-non-linear Richardson algorithm on the following interface equation :
+non-linear Richardson algorithm on the following interface equation 
 
 \begin{equation}\label{eqn-interface}
-\lambda^{k+1}  =  \lambda^k + \omega^k f(\lambda^k)
+\lambda^{k+1}  =  \lambda^k + \omega^k f(\lambda^k),
 \end{equation}
 where $f$ depends on the chosen FSI method. If we look at the FSI problem constructor
-the file \verb!life/lifesolver/FSISolver.cpp!, we have :
+the file \verb!life/lifesolver/FSISolver.cpp!, we have 
 
 \begin{verbatim}
 FSISolver::FSISolver( GetPot const& data_file,
@@ -335,7 +335,7 @@ FSISolver::FSISolver( GetPot const& data_file,
 
 where
 \begin{itemize}
-\item \verb!M_lambda! is the interface displacement as defined in (\ref{eq:condizioni}).
+\item \verb!M_lambda! is the interface displacement as defined in (\ref{eq:condizioni}),
 \item \verb!M_lambdaDot! is the temporal derivative of \verb!M_lambda!.
 \end{itemize}
 See table \ref{table-fsiparams} for a complete of these options of options.
@@ -443,10 +443,10 @@ with a separate structure and fluid problems, we define two MPI groups where for
 For now, by convention, and since the structure problem is resolved more easily than the
 fluid problem by far, the structure group has only the \#0 (leader) processor, whereas the fluid group is
 composed of all the other processors. At the end of these lines, two MPI intracommunicators
-(communicator used in order to communicate within a single group of processes), one for the structure,
-one for the fuid, and one MPI intercommunicator (communicator in order to communicate within two or
+(communicator within a single group of processes), one for the structure,
+one for the fuid, and one MPI intercommunicator (communicator within two or
 more groups of processes) are created. See \url{http://www.mpi-forum.org/docs/mpi-11-html/mpi-report.html}
-for more informations on intra and intercommunicators.
+for more information on intra and intercommunicators.
 
 From now on, each processor knows if it belongs to the structure or the fluid group. This is
 very important since each group will create its own problem, either stucture of fluid.
@@ -505,7 +505,7 @@ will be solved on a lead structure processor (\#0 processor within the structure
 
 \end{verbatim}
 
-This part will create the proper numerical FSI Operator (fixed point, exact jacobian, ...)
+This part  creates the proper numerical FSI Operator (fixed point, exact jacobian, ...)
 for solving (\ref{eqn-interface}), that is the fluid and the structure operators ($S_f$, $S_s$ ... )
 defined previously, and set them up. You can have a look at the code which is in \verb!life/lifesolver/FSIOpertator.hpp,cpp!,
 \verb!life/lifesolver/exactJacobianBase.hpp,cpp! and \verb!life/lifesolver/fixedPointBase.hpp,cpp!.
@@ -513,7 +513,7 @@ The last two classes, exactJacobian and fixedPoint, derive from the class FSIOpe
 deals with passing information (displacement or constrain) from the solid or the fluid to the fluid or solid via
 the interface. The the specialized classes exactJacobian or fixedPoint evalute the interface residual
 and solve $f(\lambda)$ as defined in (\ref{eqn-interface}).
-The last interesting part in the \verb!FSISolver! classe it the \verb!iterate! member :
+The last interesting part in the \verb!FSISolver! class, is the \verb!iterate! member
 \begin{verbatim}
     M_oper->setTime(time);
 
@@ -598,7 +598,7 @@ The last interesting part in the \verb!FSISolver! classe it the \verb!iterate! m
 
 \end{verbatim}
 
-This code will perform one FSI time step. First, il will ``guess'' the interface
+This code will perform one FSI time step. First, it ``guesses'' the interface
 displacement by interpolation of the previous displacement, then it will call the
 non-linear Richardson algorithm that will compute the new displacement by solving
 (\ref{eqn-interface}).
