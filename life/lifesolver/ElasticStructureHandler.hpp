@@ -34,7 +34,6 @@
 #include <cstdlib>
 
 #include <life/lifesolver/dataElasticStructure.hpp>
-//#include <life/lifealg/dataAztec.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/dof.hpp>
 #include <life/lifecore/life.hpp>
