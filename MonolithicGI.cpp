@@ -28,7 +28,7 @@
 */
 
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
-#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
+//#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
 
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 #include <lifemc/lifesolver/ComposedDN.hpp>
