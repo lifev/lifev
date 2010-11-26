@@ -26,8 +26,12 @@ ProblemFile = ./MultiScaleData/Models/MultiScale/ReymondStergiopulos2009_1D_Aort
     
     [../time_discretization]
     initialtime                = .00      # [s]
-    endtime                    = 0.12     # [s] Aorta Absorbing
-    #endtime                    = 0.8     # [s] Aorta 1-HB
+    endtime                    = 0.8      # [s] Aorta 1-HB
+    #initialtime                = 0.8      # [s] Aorta 2-HB start
+    #endtime                    = 1.6      # [s] Aorta 2-HB end
+    #initialtime                = 1.6      # [s] Aorta 2-HB start
+    #endtime                    = 2.4      # [s] Aorta 2-HB end
+    #endtime                    = 0.12     # [s] Aorta Absorbing
     timestep                   = 1e-3     # [s]
     
     [../Algorithm]
