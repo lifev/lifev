@@ -23,7 +23,6 @@
 #include "comprow_double.hpp"   // SparseLib++ matrix for "assemble_SparseLib"
 */
 
-#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {
