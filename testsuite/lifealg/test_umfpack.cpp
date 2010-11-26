@@ -28,7 +28,6 @@
  */
 #include <stdio.h>
 
-#include <life/lifearray/vecUnknown.hpp>
 #include <lifeconfig.h>
 #include <life/lifecore/debug.hpp>
 

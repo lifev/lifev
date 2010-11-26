@@ -44,24 +44,10 @@
 #include <mpi.h>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/FSIOfflinePartitioner.hpp>
 #include <life/lifefilters/HDF5Filter3DMesh.hpp>
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "fsi_cutter" ,
-                            "fsi_cutter" ,
-                            "0.1",
-                            "offline fsi partitioning",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 EPFL");
-    about.addAuthor("Radu Popescu", "developer", "radu.popescu@epfl.ch", "");
-    return about;
-}
 
 using namespace LifeV;
 

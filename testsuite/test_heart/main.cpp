@@ -39,28 +39,10 @@
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 #include <heart.hpp>
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "life_monodomain" ,
-                            "life_monodomain" ,
-                            "0.1",
-                            "3D monodomain + Rogers-McCulloch",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2005 EPFL");
-
-    about.addAuthor("Lucia Mirabella", "developer", "lucia.mirabella@mail.polimi.it", "");
-    about.addAuthor("Mauro Perego", "developer", "mauro.perego@polimi.it", "");
-    return about;
-
-}
 
 
 namespace LifeV
@@ -109,10 +91,7 @@ main( int argc, char** argv )
 #endif
 
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-    Heart heart( argc, argv, makeAbout(), desc );
+    Heart heart( argc, argv, makeAbout() );
     heart.run();
 
 //! Finalizing Epetra communicator

@@ -31,8 +31,6 @@
 #ifndef __Cylinder_H
 #define __Cylinder_H 1
 
-#include <life/lifecore/application.hpp>
-
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
 /*!
@@ -62,9 +60,7 @@ public:
     //@{
 
     Cylinder( int argc,
-              char** argv,
-              LifeV::AboutData const& ad,
-              LifeV::po::options_description const& od );
+              char** argv );
 
     ~Cylinder()
         {}

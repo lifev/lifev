@@ -309,9 +309,7 @@ struct Cylinder::Private
 };
 
 Cylinder::Cylinder( int argc,
-                    char** argv,
-                    LifeV::AboutData const& /*ad*/,
-                    LifeV::po::options_description const& /*od*/ )
+                    char** argv )
     :
     d( new Private )
 {

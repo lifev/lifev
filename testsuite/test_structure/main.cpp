@@ -39,10 +39,7 @@
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
@@ -50,21 +47,6 @@
 #include <structure.hpp>
 #include <mpi.h>
 
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "life_structure" ,
-                            "life_structure" ,
-                            "0.1",
-                            "3D Structure test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2005 EPFL");
-
-    about.addAuthor("GillesFourestey", "developer", "gilles.fourestey@epfl.ch", "");
-    return about;
-
-}
 
 
 using namespace LifeV;
@@ -111,11 +93,8 @@ main( int argc, char** argv )
 #endif
 
 //**************** cylinder
-//    MPI_Init(&argc,&argv);
-  LifeV::po::options_description desc("Specific options");
-  desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
 
-  Structure structure( argc, argv, Comm, makeAbout(), desc );
+  Structure structure( argc, argv, Comm );
   structure.run();
 
 #ifdef HAVE_MPI

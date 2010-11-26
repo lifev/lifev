@@ -66,9 +66,7 @@ Real minus84_scalar( const Real& /* t */,
 // ===================================================
 
 Heart::Heart( int argc,
-              char** argv,
-              LifeV::AboutData const& /*ad*/,
-              LifeV::po::options_description const& /*od*/ )
+              char** argv )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");

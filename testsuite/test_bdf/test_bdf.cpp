@@ -91,8 +91,7 @@ struct test_bdf::Private {
 // ===================================================
 //! Constructors
 // ===================================================
-test_bdf::test_bdf(int argc, char** argv, LifeV::AboutData const& /*ad*/,
-		LifeV::po::options_description const& /*od*/) :
+test_bdf::test_bdf(int argc, char** argv) :
 	Members(new Private) {
 	GetPot command_line(argc, argv);
 	const string data_file_name =

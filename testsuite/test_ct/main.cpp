@@ -9,32 +9,13 @@
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include <ct.hpp>
 #include <mpi.h>
-
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "test_ct" ,
-                            "test_chorintemam" ,
-                            "0.1",
-                            "3D test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2008 INRIA/EPFL");
-    return about;
-
-}
-
-using namespace LifeV;
 
 
 namespace LifeV
@@ -45,6 +26,9 @@ static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createI
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 }
+
+using namespace LifeV;
+
 
 
 int
@@ -61,11 +45,7 @@ main( int argc, char** argv )
   cout << "  a-  Using serial version" << endl;
 #endif
 
-
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-    CT ct( argc, argv, makeAbout(), desc );
+    CT ct( argc, argv );
     ct.run();
 
 #ifdef HAVE_MPI

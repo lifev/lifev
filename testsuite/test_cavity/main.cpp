@@ -42,10 +42,7 @@
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <mpi.h>
 
@@ -101,21 +98,6 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
   return 0;
 }
 
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "life_cavity" ,
-                            "life_cavity" ,
-                            "0.1",
-                            "3D cavity test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2008 EPFL");
-
-    about.addAuthor("Gilles Fourestey", "developer", "gilles.fourestey@epfl.ch", "");
-    return about;
-
-}
 
 namespace LifeV
 {

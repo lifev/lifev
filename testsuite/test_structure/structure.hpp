@@ -31,8 +31,6 @@
 #ifndef __Structure_H
 #define __Structure_H 1
 
-#include <life/lifecore/application.hpp>
-
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
@@ -71,9 +69,7 @@ public:
 
     Structure( int                                   argc,
                char**                                argv,
-               boost::shared_ptr<Epetra_Comm>        structComm,
-               LifeV::AboutData const&               ad,
-               LifeV::po::options_description const& od );
+               boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
         {}

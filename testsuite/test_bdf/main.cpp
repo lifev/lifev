@@ -62,34 +62,11 @@
 #include <boost/program_options.hpp>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include "test_bdf.hpp"
-
-
-// ===================================================
-//! Program information
-// ===================================================
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Test BDF" ,
-                            "LifeV Test BDF" ,
-                            "1.0",
-                            "BDF test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 EPFL");
-
-    about.addAuthor("Umberto Villa", "Developer", "uvilla@emory.edu", "");
-
-    return about;
-}
-
-
-
 
 
 // ===================================================
@@ -118,11 +95,7 @@ int main(int argc, char** argv)
 		std::cout << "MPI Initialization" << std::endl;
 	#endif
 
-
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-    test_bdf bdf_t( argc, argv, makeAbout(), desc );
+    test_bdf bdf_t( argc, argv );
     bdf_t.run();
 
 

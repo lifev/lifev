@@ -133,10 +133,8 @@ struct  ResistanceProblem::Private
 
 
 
- ResistanceProblem:: ResistanceProblem( int argc,
-                    char** argv,
-                    LifeV::AboutData const& /*ad*/,
-                    LifeV::po::options_description const& /*od*/ )
+ResistanceProblem::ResistanceProblem( int argc,
+                                      char** argv )
     :
     d( new Private )
 {

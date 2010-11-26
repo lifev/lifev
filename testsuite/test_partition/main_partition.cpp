@@ -41,7 +41,6 @@
 #endif
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
@@ -53,20 +52,6 @@
 #include <string>
 #include <mpi.h>
 
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "life_partitioning" ,
-                            "life_partitioning" ,
-                            "0.1",
-                            "serial mesh partitioning test",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 EPFL");
-
-    about.addAuthor("Radu Popescu", "developer", "radu.popescu@epfl.ch", "");
-    return about;
-
-}
 
 using namespace LifeV;
 

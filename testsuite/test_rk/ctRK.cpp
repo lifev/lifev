@@ -24,9 +24,7 @@
 using namespace LifeV;
 
 CTRK::CTRK( int argc,
-        char** argv,
-        LifeV::AboutData const& /*ad*/,
-        LifeV::po::options_description const& /*od*/ )
+            char** argv  )
     :
     C_case (new CTRKcaseUser)
 {
@@ -38,12 +36,12 @@ CTRK::CTRK( int argc,
     M_comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-    std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID() 
+    std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID()
 	<< " among " << ntasks << " running." << std::endl;
 #else
     M_comm = new Epetra_SerialComm();
 #endif
-   
+
     C_case->set_base_data(dataFile, M_comm);
     C_case->set_user_data();
     C_case->create_bcs();
@@ -51,7 +49,7 @@ CTRK::CTRK( int argc,
 }
 
 /*
- * CTRK::run() 
+ * CTRK::run()
  */
 
 void
@@ -60,15 +58,15 @@ CTRK::run()
 
     typedef ChorinTemamRK< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
-    
+
     // Reading from data file
     GetPot dataFile( C_case->get_data_hdl() );
 
     int save = dataFile("fluid/miscellaneous/save", 1);
-    
+
     bool verbose = (M_comm->MyPID() == 0);
 
-    // retrieve boundary conditions from the CTRKcase 
+    // retrieve boundary conditions from the CTRKcase
     boost::shared_ptr<BCHandler> bcHu = C_case->get_bcHu();
     boost::shared_ptr<BCHandler> bcHp = C_case->get_bcHp();
 
@@ -85,7 +83,7 @@ CTRK::run()
 
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
-    
+
     partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.dataMesh()->mesh(), *M_comm);
 
     // fill in the space and time discretization orders
@@ -131,7 +129,7 @@ CTRK::run()
             if (verbose) std::cout << "P1 pressure";
             refFE_press = &feTetraP1;
             // qR_press    = &quadRuleTetra4pt;  // DoE 2
-            qR_press    = qR_vel;    // test purpose 
+            qR_press    = qR_vel;    // test purpose
 	    // because we need same qrule for u and p wrt coupling CT terms
 	    // bdQr_press  = &quadRuleTria3pt;   // DoE 2
             bdQr_press  = bdQr_vel;	 // test purpose
@@ -255,13 +253,13 @@ CTRK::run()
         fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_1);
 
         if (verbose) std::cout << "\n  l-  Crank-Nicholson step\n" << std::endl;
-	
+
 	// corrective velocity step (Crank-Nicholson)
 	fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
 	fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
 
         if (verbose) std::cout << "\n  l-  Projection step\n" << std::endl;
-	
+
 	// projection step
 	fluid.iterate_p(*bcHp);
 
@@ -272,7 +270,7 @@ CTRK::run()
         MPI_Barrier(MPI_COMM_WORLD);
 
         chrono.stop();
-        if (verbose) std::cout << "\n l-  Total iteration time : " << chrono.diff() 
+        if (verbose) std::cout << "\n l-  Total iteration time : " << chrono.diff()
 	                       << " s." << std::endl;
     }
 

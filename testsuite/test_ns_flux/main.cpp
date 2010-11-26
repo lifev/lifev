@@ -35,31 +35,13 @@
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include "cylinder.hpp"
 #include <mpi.h>
-
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "lifev_fluxes" ,
-                            "lifev_fluxes" ,
-                            "0.1",
-                            "3D fluxes test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2008 EPFL");
-
-    about.addAuthor("Simone Deparis", "developer", "simone.deparis@epfl.ch", "");
-    return about;
-
-}
 
 
 using namespace LifeV;
@@ -107,10 +89,7 @@ main( int argc, char** argv )
   cout << "% using serial Version" << endl;
 #endif
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-    Cylinder cyl( argc, argv, makeAbout(), desc );
+    Cylinder cyl( argc, argv );
     cyl.run();
 
 #ifdef HAVE_MPI

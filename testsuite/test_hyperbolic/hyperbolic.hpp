@@ -37,9 +37,6 @@
 //! Includes
 // ===================================================
 
-#include <boost/program_options.hpp>
-
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
 #include <life/lifemesh/structuredMesh3D.hpp>
@@ -70,9 +67,7 @@ public:
     //@{
 
     hyperbolic( int argc,
-                char** argv,
-                LifeV::AboutData const& ad,
-                LifeV::po::options_description const& od );
+                char** argv );
 
     ~hyperbolic()
     {}

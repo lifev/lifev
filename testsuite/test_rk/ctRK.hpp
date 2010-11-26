@@ -1,13 +1,12 @@
 #ifndef __CTRK_H
 #define __CTRK_H 1
 
-#include <life/lifecore/application.hpp>
 
 /*!
  * \class CTRK
- * \brief Class for running Chorin-Temam methods with RK2 time stepping. 
+ * \brief Class for running Chorin-Temam methods with RK2 time stepping.
  *        Uses opaque pointer to hide implementation of specific case study stuff
- *        from the run itself. 
+ *        from the run itself.
  *
  * @author
  * @see
@@ -31,9 +30,7 @@ class CTRK
     //@{
 
     CTRK( int argc,
-        char** argv,
-        LifeV::AboutData const& ad,
-        LifeV::po::options_description const& od );
+          char** argv );
 
     ~CTRK()
         {}

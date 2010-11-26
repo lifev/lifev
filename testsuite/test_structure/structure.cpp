@@ -128,9 +128,7 @@ struct Structure::Private
 
 Structure::Structure( int                                   argc,
                       char**                                argv,
-                      boost::shared_ptr<Epetra_Comm>        structComm,
-                      LifeV::AboutData const&               ad,
-                      LifeV::po::options_description const& od ):
+                      boost::shared_ptr<Epetra_Comm>        structComm):
     parameters( new Private() )
 {
     GetPot command_line(argc, argv);

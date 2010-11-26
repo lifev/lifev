@@ -25,9 +25,7 @@
 using namespace LifeV;
 
 CT::CT( int argc,
-        char** argv,
-        LifeV::AboutData const& /*ad*/,
-        LifeV::po::options_description const& /*od*/ )
+        char** argv )
     :
     C_case (new CTcaseUser)
 {

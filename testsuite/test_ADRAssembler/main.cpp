@@ -37,7 +37,6 @@
 #endif
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
@@ -256,7 +255,7 @@ main( int argc, char** argv )
 	bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
 	rhs = rhsBC;
 	if (verbose) std::cout << " done ! " << std::endl;
-	
+
 	//************* SPY ***********
 	//systemMatrix->spy("matrix");
 	//rhs.spy("vector");
@@ -293,7 +292,7 @@ main( int argc, char** argv )
 	//************* SPY ***********
 	//solution.spy("solution");
 	//*****************************
-	
+
 // Error computation
 
 	if (verbose) std::cout << " -- Computing the error ... " << std::flush;
@@ -334,7 +333,7 @@ main( int argc, char** argv )
 	if (verbose) std::cout << " -- Updating the exporter ... " << std::flush;
 	exporter.addVariable( ExporterData::Scalar, "solution", solutionPtr, UInt(0), uFESpace->dof().numTotalDof() );
 	exporter.addVariable( ExporterData::Scalar, "error", solutionErrPtr, UInt(0), uFESpace->dof().numTotalDof() );
-	if (verbose) std::cout << " done ! " << std::endl;	
+	if (verbose) std::cout << " done ! " << std::endl;
 
 	if (verbose) std::cout << " -- Exporting ... " << std::flush;
 	exporter.postProcess(0);

@@ -46,7 +46,6 @@
 // ===================================================
 //! Includes
 // ===================================================
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
 
@@ -69,9 +68,7 @@ public:
     //@{
 
     ADRProblem( int argc,
-              char** argv,
-              LifeV::AboutData const& ad,
-              LifeV::po::options_description const& od );
+              char** argv );
 
     ~ADRProblem()
         {}

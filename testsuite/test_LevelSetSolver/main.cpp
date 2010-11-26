@@ -37,7 +37,6 @@
 #endif
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
@@ -137,7 +136,7 @@ main( int argc, char** argv )
 	if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
 // Read the data
-	
+
 	boost::shared_ptr<DataLevelSet> data_level_set(new DataLevelSet);
 	data_level_set->setup(dataFile,"level-set");
 
@@ -145,7 +144,7 @@ main( int argc, char** argv )
 
 	LevelSetSolver<mesh_type> level_set(uFESpace,betaFESpace);
 	level_set.setup(data_level_set);
-	
+
 	vector_type initLS(level_set.map());
 	uFESpace->interpolate(initLSFct,initLS,0.0);
 	level_set.initialize(initLS);
@@ -190,23 +189,23 @@ main( int argc, char** argv )
 		if (verbose) std::cout << " Iterate done in " << c.diff() << std::endl;
 		if (verbose) std::cout << "[LS] Reinitizialization ... " << std::flush;
 		level_set.reinitializationDirect();
-		if (verbose) std::cout << " done " << std::endl;		
+		if (verbose) std::cout << " done " << std::endl;
 		if (verbose) std::cout << "[LS] Exporting ... " << std::flush;
 		*solutionPtr = level_set.solution();
 		exporter.postProcess(current_time);
 		if (verbose) std::cout << " done " << std::endl;
 	}
-	
+
 	Real N(level_set.solution().Norm1());
 	if (verbose) std::cout << "Final norm of the solution : " << N << std::endl;
-	
+
 	if ((N < 6900) || (N>7100))
 	{
 		return (EXIT_FAILURE);
 	}
 
 	exporter.CloseFile();
-	
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

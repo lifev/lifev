@@ -1,13 +1,11 @@
 #ifndef __CT_H
 #define __CT_H 1
 
-#include <life/lifecore/application.hpp>
-
 /*!
  * \class CT
- * \brief Class for running Chorin-Temam / Projection methods. 
+ * \brief Class for running Chorin-Temam / Projection methods.
  *        Uses opaque pointer to hide implementation of specific case study stuff
- *        from the run itself. 
+ *        from the run itself.
  *
  * @author
  * @see
@@ -31,9 +29,7 @@ class CT
     //@{
 
     CT( int argc,
-        char** argv,
-        LifeV::AboutData const& ad,
-        LifeV::po::options_description const& od );
+        char** argv );
 
     ~CT()
         {}

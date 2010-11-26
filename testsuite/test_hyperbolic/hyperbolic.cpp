@@ -296,9 +296,8 @@ struct hyperbolic::Private
 // ===================================================
 
 hyperbolic::hyperbolic( int argc,
-                        char** argv,
-                        LifeV::AboutData const& /*ad*/,
-                        LifeV::po::options_description const& /*od*/ ): Members( new Private )
+                        char** argv )
+  : Members( new Private )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");

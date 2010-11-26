@@ -72,42 +72,12 @@ Solve the problem
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include "laplacian.hpp"
-
-
-
-
-
-// ===================================================
-//! Program information
-// ===================================================
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Test Laplacian" ,
-                            "LifeV Test Laplacian" ,
-                            "1.0",
-                            "Laplacian test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2009 EPFL");
-
-    about.addAuthor("Laura Iapichino", "Developer", "laura.iapichino@epfl.ch", "");
-    about.addAuthor("Cristiano Malossi", "Developer", "cristiano.malossi@epfl.ch", "");
-    about.addAuthor("Andrea Manzoni", "Developer", "andrea.manzoni@epfl.ch", "");
-
-    return about;
-}
-
-
-
 
 
 // ===================================================
@@ -135,11 +105,7 @@ int main(int argc, char** argv)
 		std::cout << "MPI Initialization" << std::endl;
 	#endif
 
-
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-    laplacian Laplace( argc, argv, makeAbout(), desc );
+    laplacian Laplace( argc, argv );
     Laplace.run();
 
 

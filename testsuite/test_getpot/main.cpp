@@ -49,31 +49,6 @@
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
-
-
-
-
-
-// ===================================================
-//! Program information
-// ===================================================
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Test GetPot" ,
-                            "LifeV Test GetPot" ,
-                            "1.0",
-                            "LifeV Test GetPot",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2009 EPFL");
-
-    about.addAuthor("Cristiano Malossi", "Developer", "cristiano.malossi@epfl.ch", "");
-
-    return about;
-}
-
-
 
 
 
@@ -81,9 +56,6 @@ makeAbout()
 //! Namespaces
 // ===================================================
 using namespace LifeV;
-
-
-
 
 
 // ===================================================

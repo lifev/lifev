@@ -33,7 +33,6 @@
 #ifndef __Ethiersteinman_H
 #define __Ethiersteinman_H 1
 
-#include <life/lifecore/application.hpp>
 #include <life/lifesolver/Oseen.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifemesh/basisElSh.hpp>
@@ -82,9 +81,7 @@ public:
     //@{
 
     Ethiersteinman( int argc,
-              char** argv,
-              LifeV::AboutData const& ad,
-              LifeV::po::options_description const& od );
+              char** argv );
 
     ~Ethiersteinman()
         {}

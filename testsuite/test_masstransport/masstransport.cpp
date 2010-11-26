@@ -205,9 +205,7 @@ struct MassTransport::Private
 
 
 MassTransport::MassTransport( int argc,
-                              char** argv,
-                              LifeV::AboutData const& /*ad*/,
-                              LifeV::po::options_description const& /*od*/ ):
+                              char** argv ):
     d( new Private )
 {
     GetPot command_line(argc, argv);

@@ -37,7 +37,6 @@
 
 #define BIDOMAIN
 
-#include <life/lifecore/application.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
@@ -94,9 +93,7 @@ public:
     //@{
 
     Heart( int argc,
-              char** argv,
-              AboutData const& ad,
-              po::options_description const& od );
+              char** argv );
 
     ~Heart()
         {}

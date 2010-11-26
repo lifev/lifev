@@ -54,32 +54,11 @@ Solve the problem
 #include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include "hyperbolic.hpp"
 
 
-// ===================================================
-//! Program information
-// ===================================================
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Test Hyperbolic" ,
-                            "LifeV Test Hyperbolic" ,
-                            "1.0",
-                            "Hyperbolic test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 MOX");
-
-    about.addAuthor("Alessio Fumagalli", "Developer", "alessio.fumagalli@mail.polimi.it", "");
-
-    return about;
-}
 
 // ===================================================
 //! Namespaces
@@ -98,9 +77,6 @@ int main(int argc, char** argv)
 #endif
 
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
     // Error of the problem
     LifeV::Real error(0);
     // Error known
@@ -108,7 +84,7 @@ int main(int argc, char** argv)
     // Tollerance between the error and the errorKnown
     const LifeV::Real tollerance( 1e-8 );
 
-    hyperbolic Hyperbolic( argc, argv, makeAbout(), desc );
+    hyperbolic Hyperbolic( argc, argv );
     error = Hyperbolic.run();
 
 

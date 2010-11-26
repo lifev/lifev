@@ -31,20 +31,12 @@
  */
 
 
-
-
-
 #ifndef __laplacian_H
 #define __laplacian_H 1
-
-
-
-
 
 // ===================================================
 //! Includes
 // ===================================================
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
 
@@ -69,9 +61,7 @@ public:
     //@{
 
     laplacian( int argc,
-              char** argv,
-              LifeV::AboutData const& ad,
-              LifeV::po::options_description const& od );
+              char** argv );
 
     ~laplacian()
         {}

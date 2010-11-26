@@ -43,31 +43,12 @@
 #endif
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include "ethiersteinman.hpp"
 #include <mpi.h>
-
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "life_ethier_steinman" ,
-                            "life_ethier_steinman" ,
-                            "0.1",
-                            "Ethier-Steinman test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 EPFL");
-
-    about.addAuthor("Christophe Prud'homme", "developer", "christophe.prudhomme@epfl.ch", "");
-    about.addAuthor("Christoph Winkelmann", "developer", "christoph.winkelmann@epfl.ch", "");
-    about.addAuthor("Gwenol Grandperrin", "developer", "gwenol.grandperrin@epfl.ch", "");
-    return about;
-
-}
 
 
 using namespace LifeV;
@@ -98,9 +79,7 @@ main( int argc, char** argv )
 //**************** cylinder
 //    MPI_Init(&argc,&argv);
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-    Ethiersteinman es( argc, argv, makeAbout(), desc );
+    Ethiersteinman es( argc, argv );
 
     GetPot command_line( argc, argv );
     const bool check = command_line.search(2, "-c", "--check");

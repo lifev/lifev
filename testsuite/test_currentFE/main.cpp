@@ -43,7 +43,6 @@
     #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
 #include <life/lifefem/currentFE.hpp>
@@ -87,24 +86,24 @@ main( int argc, char** argv )
 
 #endif
 
-    
+
 // Test the current FE...
-	
-	Real test_tolerance(1e-10);	
+
+	Real test_tolerance(1e-10);
 
 // We define a fictious tetra
 	std::vector<Real> P0 (3); P0[0]=1; P0[1]=0; P0[2]=0;
 	std::vector<Real> P1 (3); P1[0]=1.1; P1[1]=0; P1[2]=0;
 	std::vector<Real> P2 (3); P2[0]=1; P2[1]=0.2; P2[2]=0;
 	std::vector<Real> P3 (3); P3[0]=1; P3[1]=0; P3[2]=0.15;
-	
+
 	std::vector< std::vector< Real > > Tetra1(4);
 	Tetra1[0]=P0; Tetra1[1]=P1; Tetra1[2]=P2; Tetra1[3]=P3;
 
 // 1. Part: flags & update
 
 	std::cout << " Checking updates ... " << std::endl;
-	
+
 	CurrentFE test_CFE(feTetraP2,geoLinearTetra,quadRuleTetra4pt);
 
 	Real notInterestedIn(0.0);
@@ -125,11 +124,11 @@ main( int argc, char** argv )
 	notInterestedIn = test_CFE.wDetJacobian(0);
 
 // 2. Part: check values
-	
+
 	// Check the partition of unity
 
 	std::cout << " Checking partition of unity ... " << std::endl;
-	
+
 	test_CFE.update(Tetra1,UPDATE_PHI | UPDATE_DPHI);
 	Real sum_phi;
 	Real sum_dphi;
@@ -145,13 +144,13 @@ main( int argc, char** argv )
 		}
 
 		if (std::abs(sum_phi-1) > test_tolerance)
-		{		
-			std::cerr << " Sum of the basis functions : " << sum_phi << std::endl;	
+		{
+			std::cerr << " Sum of the basis functions : " << sum_phi << std::endl;
 			return EXIT_FAILURE;
 		};
 		if (std::abs(sum_dphi) > test_tolerance)
-		{	
-			std::cerr << " Sum of the derivatives of the basis functions : " << sum_dphi << std::endl;	
+		{
+			std::cerr << " Sum of the derivatives of the basis functions : " << sum_dphi << std::endl;
 			return EXIT_FAILURE;
 		};
 	}
@@ -165,7 +164,7 @@ main( int argc, char** argv )
 	Real meas(test_CFE.measure());
 	if (std::abs(meas-0.0005) > test_tolerance)
 	{
-		std::cerr << " Measure : " << meas << std::endl;	
+		std::cerr << " Measure : " << meas << std::endl;
 		return EXIT_FAILURE;
 	}
 
