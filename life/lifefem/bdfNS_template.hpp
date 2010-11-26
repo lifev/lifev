@@ -35,7 +35,6 @@
 #include <algorithm>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifearray/vecUnknown.hpp>
 #include <life/lifefem/bdf_template.hpp>
 
 namespace LifeV
