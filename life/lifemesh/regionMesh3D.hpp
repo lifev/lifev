@@ -38,7 +38,6 @@
 #include <life/lifecore/switch.hpp>
 #include <life/lifemesh/bareItems.hpp>
 
-#include <life/lifearray/vecUnknown.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 
 #include <life/lifemesh/basisElSh.hpp>
