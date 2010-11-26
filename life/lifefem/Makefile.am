@@ -29,7 +29,7 @@ lib_LTLIBRARIES		= liblifefem.la
 
 liblifefem_la_SOURCES	= assemb.cpp\
           bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
-          bdf.cpp bdfNS.cpp dataTime.cpp  \
+          dataTime.cpp  \
           currentFE.cpp currentBdFE.cpp defQuadRuleFE.cpp dof.cpp \
           dofInterface3Dto2D.cpp dofInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \
           elemOper.cpp  geoMap.cpp \
