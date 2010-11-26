@@ -31,7 +31,6 @@
 #ifndef __EnsightToHdf5_H
 #define __EnsightToHdf5_H 1
 
-#include <life/lifecore/application.hpp>
 
 class EnsightToHdf5
 
@@ -52,9 +51,7 @@ public:
     //@{
 
     EnsightToHdf5( int argc,
-                   char** argv,
-                   LifeV::AboutData const& ad,
-                   LifeV::po::options_description const& od );
+                   char** argv );
 
     ~EnsightToHdf5()
         {}

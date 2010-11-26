@@ -35,29 +35,10 @@
 	#include <Epetra_SerialComm.h>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include "ensightToHdf5.hpp"
 #include <mpi.h>
-
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "life_test_filters" ,
-                            "life_test_filters" ,
-                            "0.1",
-                            "3D reader-writer test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2008 EPFL");
-
-    about.addAuthor("Simone Deparis'homme", "developer", "simone.deparis@epfl.ch", "");
-    return about;
-
-}
 
 
 using namespace LifeV;
@@ -80,9 +61,7 @@ main( int argc, char** argv )
 //**************** cylinder
 //    MPI_Init(&argc,&argv);
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-    EnsightToHdf5 es( argc, argv, makeAbout(), desc );
+    EnsightToHdf5 es( argc, argv );
     es.run();
 
 #ifdef HAVE_MPI

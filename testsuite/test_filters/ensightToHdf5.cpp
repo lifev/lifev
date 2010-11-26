@@ -82,9 +82,7 @@ struct EnsightToHdf5::Private
 };
 
 EnsightToHdf5::EnsightToHdf5( int argc,
-                              char** argv,
-                              LifeV::AboutData const& /*ad*/,
-                              LifeV::po::options_description const& /*od*/ )
+                              char** argv )
     :
     d( new Private )
 {
