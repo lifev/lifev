@@ -113,7 +113,7 @@ public:
     */
     template <typename Mesh, typename RefFE, typename CurrFE, typename Dof>
     void initialize_unk( const Funct& u0, Mesh& mesh, RefFE& refFE, CurrFE& currFE,
-                         Dof& dof, Real t0, Real dt, UInt nbComp );
+                         Dof& dof, Real t0, Real dt, UInt nbComp = 1 );
 
     /*! Update the vectors of the previous time steps by shifting on the right
      *  the old values.
@@ -175,7 +175,7 @@ void Bdf::initialize_unk( const Funct& u0,
                           CurrFE& currFE,
                           Dof& dof,
                           Real t0, Real dt,
-                          UInt nbComp = 1 )
+                          UInt nbComp )
 {
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
 
