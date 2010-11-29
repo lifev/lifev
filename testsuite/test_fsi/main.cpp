@@ -100,7 +100,7 @@ public:
 
         Real qn		= M_oper.fluid().flux(3);
 
-    	M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
+    	M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
 							- beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
