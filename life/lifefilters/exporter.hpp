@@ -52,7 +52,7 @@
 #include <set>
 #include <map>
 #include <list>
-#include <ext/slist>
+//#include <ext/slist>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifearray/EpetraVector.hpp>

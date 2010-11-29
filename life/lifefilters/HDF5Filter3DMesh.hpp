@@ -730,7 +730,7 @@ boost::shared_ptr< std::map<UInt, UInt> >& HDF5Filter3DMesh<Mesh>::getStoredInte
 
     for (UInt i = 0; i < size; ++i)
     {
-        interface->insert(make_pair(keyVector[i], valueVector[i]));
+        interface->insert(std::make_pair(keyVector[i], valueVector[i]));
     }
 
     return interface;
