@@ -2471,11 +2471,11 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
             edgeList.resize( 0 );
         }
         BareItemsHandler<BareEdge> _be;
-        pair<UInt, bool> e;
+        std::pair<UInt, bool> e;
         _VToE.reshape( numLocalEdges(), numVolumes() ); // DIMENSION ARRAY
 
         UInt vid, i1, i2;
-        pair<BareEdge, bool> _edge;
+        std::pair<BareEdge, bool> _edge;
         GEOSHAPE ele;
         FaceShape bele;
         // First We check if we have already Edges stored
@@ -2484,7 +2484,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
             // dump first the existing edges, to maintain the correct numbering
             // if everything is correct the numbering in the bareedge
             // structure will reflect the actual edge numbering
-            pair<UInt, bool> _check;
+            std::pair<UInt, bool> _check;
             for ( UInt j = 0; j < edgeList.size();++j )
             {
                 i1 = ( edgeList[ j ].point( 1 ) ).id();
@@ -2628,11 +2628,11 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
 
 
         BareItemsHandler<BareFace> _be;
-        pair<UInt, bool> e;
+        std::pair<UInt, bool> e;
         _VToF.reshape( numLocalFaces(), numVolumes() ); // DIMENSION ARRAY
 
         UInt vid, i1, i2, i3, i4;
-        pair<BareFace, bool>_face;
+        std::pair<BareFace, bool>_face;
         GEOSHAPE ele;
         // If we have all faces and the faces store all adjacency info
         // everything is easier
@@ -2666,7 +2666,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
             if ( cf )
                 faceList.resize( M_numBFaces );
 
-            pair<UInt, bool> _check;
+            std::pair<UInt, bool> _check;
             for ( UInt j = 0; j < faceList.size();++j )
             {
                 i1 = ( faceList[ j ].point( 1 ) ).localId();
