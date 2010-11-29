@@ -303,13 +303,13 @@ UInt findFaces( const RegionMesh3D & mesh, TempFaceContainer & bfaces,
 
             if ( ( fi = bfaces.find( bface ) ) == bfaces.end() )
             {
-                bfaces.insert( make_pair( bface, make_pair( iv->id(), j ) ) );
+                bfaces.insert( std::make_pair( bface, std::make_pair( iv->id(), j ) ) );
             }
             else
             {
                 if ( allFaces && i1 > i2 )
                     intfaces.insert
-                        ( ( make_pair( bface, make_pair( iv->id(), j ) ) ) );
+                        ( ( std::make_pair( bface, std::make_pair( iv->id(), j ) ) ) );
                 bfaces.erase( fi ); // counted twice: internal face
                 ++numInternalFaces;
             }
@@ -381,7 +381,7 @@ UInt findBoundaryEdges( const RegionMesh3D & mesh, TempEdgeContainer & bedges )
             i1 = ( ifa->point( i1 ) ).id();
             i2 = ( ifa->point( i2 ) ).id();
             bedge = ( makeBareEdge( i1, i2 ) ).first;
-            bedges.insert( make_pair( bedge, make_pair( ifa->id(), j ) ) );
+            bedges.insert( std::make_pair( bedge, std::make_pair( ifa->id(), j ) ) );
         }
     }
     return bedges.size();
@@ -430,7 +430,7 @@ UInt findInternalEdges( const RegionMesh3D & mesh,
             bedge = ( makeBareEdge( i1, i2 ) ).first;
             if ( boundary_edges.find( bedge ) == boundary_edges.end() )
                 internal_edges.insert
-                    ( make_pair( bedge, make_pair( ifa->id(), j ) ) );
+                    ( std::make_pair( bedge, std::make_pair( ifa->id(), j ) ) );
         }
     }
     return internal_edges.size();
