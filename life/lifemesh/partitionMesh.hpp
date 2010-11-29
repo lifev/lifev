@@ -754,7 +754,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
         MPI_Bcast(&maxs[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
     }
 
-    std::vector<pair<UInt, int> > procIndex(nprocs);
+    std::vector<std::pair<UInt, int> > procIndex(nprocs);
     for(int k = 0; k < nprocs; ++k)
     {
         procIndex[k] = std::make_pair( maxs[k], k);
@@ -1079,7 +1079,7 @@ void partitionMesh<Mesh>::constructVolumes()
             pv->setId (M_originalMesh->volume(*it + 1).id());
             pv->setLocalId(count);
 
-            M_globalToLocalVolume[i].insert(make_pair(M_originalMesh->volume(*it + 1).id(), count));
+            M_globalToLocalVolume[i].insert(std::make_pair(M_originalMesh->volume(*it + 1).id(), count));
 
             for (ID id = 1; id <= M_elementNodes; ++id)
             {
