@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <sstream>
 
 #include <life/lifecore/dataString.hpp>
+#include <life/lifecore/debug.hpp>
 
 namespace LifeV
 {
@@ -60,7 +61,7 @@ int DataStringList::value( const std::string& str ) const
         ds++;
     };
     std::ostringstream __ex;
-    __ex << "Error in " << __PRETTY_FUNCTION__ << ": " << str << " is not in the list of possible choices for '" << _title;
+    __ex << "Error in " << LIFEV_FUNCINFO  << ": " << str << " is not in the list of possible choices for '" << _title;
     throw std::invalid_argument( __ex.str() );
 }
 }
