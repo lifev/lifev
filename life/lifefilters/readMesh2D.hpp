@@ -484,7 +484,7 @@ bool
       bool )
   {
     BareItemsHandler<BareEdge> _be;
-    pair<BareEdge, bool> _edge;
+    std::pair<BareEdge, bool> _edge;
 
     typename RegionMesh2D<GeoShape, MC>::PointType * pp = 0;
     typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
@@ -534,7 +534,7 @@ bool
         // dump first the existing edges, to maintain the correct numbering
         // if everything is correct the numbering in the bareedge
         // structure will reflect the actual edge numbering
-        pair<UInt, bool> _check;
+        std::pair<UInt, bool> _check;
         i1 = __triangle_nodes[3*__i];
         i2 = __triangle_nodes[3*__i+1];
         i3 = __triangle_nodes[3*__i+2];
