@@ -805,7 +805,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 
             localIDs.push_back(rVec[ii] + 1);
             localData.push_back(datumVec[ii]);
-            localBC.insert(pair<int, double>(rVec[ii] + 1, datumVec[ii]));
+            localBC.insert(std::pair<int, double>(rVec[ii] + 1, datumVec[ii]));
         }
         else
         {
@@ -913,7 +913,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 
                 for (int ii = 0; ii < length; ++ii, ++ptrID, ++ptrData)
                 {
-                    localBC.insert(pair<int, double>
+                    localBC.insert(std::pair<int, double>
                                    (*ptrID, *ptrData));
 
                     //std::cout << *ptrID << " <-> " << *ptrData << std::endl;
