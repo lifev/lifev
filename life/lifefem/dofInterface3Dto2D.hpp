@@ -43,7 +43,7 @@
 #include <vector>   //necessary to write faces and access them arbitrarily.
 
 #include <life/lifemesh/markers.hpp>
-#include <ext/slist>
+//#include <ext/slist>
 //using namespace __gnu_cxx;
 
 namespace LifeV
