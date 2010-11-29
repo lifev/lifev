@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -43,7 +43,7 @@ RefFEScalar::RefFEScalar( std::string name, FE_TYPE type, ReferenceShapes shape,
                           int nbDofPerVolume, int nbDof, int nbCoor, const Fct* phi,
                           const Fct* dPhi, const Fct* d2Phi, const Real* refCoor,
                           DofPatternType patternType,
-                          const RefFE* bdRefFE, const ValuesToValuesFct* nodalToFE ) :
+                          const RefFE* bdRefFE, const ValuesToValuesFct nodalToFE ) :
     RefFE( name, type, shape,nbDofPerVertex,nbDofPerEdge,nbDofPerFace,
            nbDofPerVolume, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<Fct*>(NULL), refCoor,
            patternType, bdRefFE ),

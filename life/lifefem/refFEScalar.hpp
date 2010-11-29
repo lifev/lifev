@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -44,7 +44,7 @@ namespace LifeV {
 
 //! refFEScalar - Short description of the class
 /*!
-  
+
  */
 class RefFEScalar
     : public RefFE
@@ -52,8 +52,8 @@ class RefFEScalar
 public:
 
     typedef RefFE::Fct Fct;
-    typedef std::vector<Real> (ValuesToValuesFct) (const std::vector<Real>&);
-   
+    typedef std::vector<Real> (*ValuesToValuesFct) (const std::vector<Real>&);
+
     //! Constructor of a reference Lagrangian finite element.
     /*!
       Constructor of a reference finite element. The arguments are:
@@ -97,7 +97,7 @@ public:
                  const Real*          refCoor,
                  DofPatternType       patternType,
                  const RefFE*         bdRefFE,
-                 const ValuesToValuesFct* nodalToFE);
+                 const ValuesToValuesFct nodalToFE);
 
     ~RefFEScalar()
     {
@@ -116,8 +116,8 @@ public:
     //@}
 
 private:
-    
-    const ValuesToValuesFct* M_nodalToFEValues;
+
+    const ValuesToValuesFct M_nodalToFEValues;
 
 };
 
