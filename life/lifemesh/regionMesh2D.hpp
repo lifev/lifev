@@ -1459,7 +1459,7 @@ RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const FaceType & ifac, ID const locE ) 
 {
     ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
     ASSERT_BD( locE > 0 && locE <= FaceType::numLocalEdges );
-    pair<BareEdge, bool> it;
+    std::pair<BareEdge, bool> it;
     ID i1, i2;
     i1 = GEOSHAPE::eToP( locE, 1 );
     i2 = GEOSHAPE::eToP( locE, 2 );
@@ -1618,11 +1618,11 @@ template <typename GEOSHAPE, typename MC>
 
 
        BareItemsHandler<BareEdge> _be;
-       pair<UInt, bool> e;
+       std::pair<UInt, bool> e;
        _FToE.reshape( numLocalEdges(), numFaces() ); // DIMENSION ARRAY
 
        UInt fid, i1, i2;
-       pair<BareEdge, bool>_edge;
+       std::pair<BareEdge, bool>_edge;
        GEOSHAPE ele;
        // If we have all edges and the edges store all adjacency info
        // everything is easier
@@ -1654,7 +1654,7 @@ template <typename GEOSHAPE, typename MC>
            if ( ce )
                edgeList.resize( M_numBEdges );
 
-           pair<UInt, bool> _check;
+           std::pair<UInt, bool> _check;
            for ( UInt j = 0; j < edgeList.size();++j )
            {
                i1 = ( edgeList[ j ].point( 1 ) ).localId();

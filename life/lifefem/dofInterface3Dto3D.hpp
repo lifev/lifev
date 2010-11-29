@@ -150,14 +150,14 @@ private:
     boost::shared_ptr<Dof> _dof;
 
     //! STL list which holds the connections between faces at the interface
-    __gnu_cxx::slist< pair<ID, ID> > _elc;
+    __gnu_cxx::slist< std::pair<ID, ID> > _elc;
 
     //!  Auxiliary STL list which holds the connections between Dof at the interface
     //! Empty after calling update
-    __gnu_cxx::slist< pair<ID, ID> > _locDof;
+    __gnu_cxx::slist< std::pair<ID, ID> > _locDof;
 
     //!  STL iterator type for the lists
-    typedef __gnu_cxx::slist< pair<ID, ID> >::iterator Iterator;
+    typedef __gnu_cxx::slist< std::pair<ID, ID> >::iterator Iterator;
 
     //! This method builds the connections between faces at the interface (_elc container)
     /*!
@@ -272,7 +272,7 @@ void DofInterface3Dto3D::_updateFaceConnections( const Mesh& mesh1, const Entity
                     //! Do the faces match?
                     if ( vertexOk == nFaceV )
                     {
-                        pair<ID, ID> elc( ibF1, ibF2 );
+                        std::pair<ID, ID> elc( ibF1, ibF2 );
                         _elc.push_front( elc );
                         break; // Stop loop on boundary faces on mesh2
                     }
@@ -385,7 +385,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
                             {
                                 gDof1 = dof1.localToGlobal( iElAd1, ( iVeEl1 - 1 ) * nDofpV1 + l ); // Global Dof on mesh1
                                 gDof2 = dof2.localToGlobal( iElAd2, ( iVeEl2 - 1 ) * nDofpV2 + k ); // Global Dof on mesh2
-                                pair<ID, ID> locDof( gDof1, gDof2 );
+                                std::pair<ID, ID> locDof( gDof1, gDof2 );
                                 _locDof.push_front( locDof ); // Updating the list of dof connections
                                 break;
                             }
@@ -436,7 +436,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
                             {
                                 gDof1 = dof1.localToGlobal( iElAd1, nDofElemV1 + ( iEdEl1 - 1 ) * nDofpE1 + l ); // Global Dof on mesh1
                                 gDof2 = dof2.localToGlobal( iElAd2, nDofElemV2 + ( iEdEl2 - 1 ) * nDofpE2 + k ); // Global Dof on mesh2
-                                pair<ID, ID> locDof( gDof1, gDof2 );
+                                std::pair<ID, ID> locDof( gDof1, gDof2 );
                                 _locDof.push_front( locDof ); // Updating the list of dof connections
                                 break;
                             }
@@ -468,7 +468,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
                 {
                     gDof1 = dof1.localToGlobal( iElAd1, nDofElemE1 + nDofElemV1 + ( iFaEl1 - 1 ) * nDofpF1 + l ); // Global Dof in mesh1
                     gDof2 = dof2.localToGlobal( iElAd2, nDofElemE2 + nDofElemV2 + ( iFaEl2 - 1 ) * nDofpF2 + k ); // Global Dof in mesh2
-                    pair<ID, ID> locDof( gDof1, gDof2 );
+                    std::pair<ID, ID> locDof( gDof1, gDof2 );
                     _locDof.push_front( locDof ); // Updating the list of dof connections
                     break;
                 }
