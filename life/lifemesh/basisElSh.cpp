@@ -184,7 +184,7 @@ LinearTetra::fToP( id_type const _localFace, id_type const _point )   // indexin
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
     return _fToP[ 3 * _localFace + _point - 4 ];
 }
-pair<id_type, bool>
+std::pair<id_type, bool>
 LinearTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
@@ -200,7 +200,7 @@ LinearTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing
     ASSERT_BD( _edge > 0 && _edge < 4 ) ;
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
 
-    return make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
+    return std::make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
 }
 
 ///////////////////////
@@ -245,7 +245,7 @@ LinearTetraBubble::fToP( id_type const _localFace, id_type const _point )   // i
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
     return _fToP[ 3 * _localFace + _point - 4 ];
 }
-pair<id_type, bool>
+std::pair<id_type, bool>
 LinearTetraBubble::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
@@ -261,7 +261,7 @@ LinearTetraBubble::fToE( id_type const _localFace, id_type const _edge )   // in
     ASSERT_BD( _edge > 0 && _edge < 4 ) ;
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
 
-    return make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
+    return std::make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
 }
 
 ///////////////////////
@@ -307,7 +307,7 @@ QuadraticTetra::fToP( id_type const _localFace, id_type const _point )   // inde
     return _fToP[ 6 * _localFace + _point - 7 ];
 }
 
-pair<id_type, bool>
+std::pair<id_type, bool>
 QuadraticTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
 {
     return LinearTetra::fToE( _localFace, _edge );
@@ -360,7 +360,7 @@ LinearHexa::fToP( id_type const _localFace, id_type const _point )   // indexing
     return _fToP[ 4 * _localFace + _point - 5 ];
 }
 
-pair<id_type, bool>
+std::pair<id_type, bool>
 LinearHexa::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
@@ -381,7 +381,7 @@ LinearHexa::fToE( id_type const _localFace, id_type const _edge )   // indexing 
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
 
     return
-        make_pair( _fToE[ 4 * _localFace + _edge - 5 ], _orient[ 4 * _localFace + _edge - 5 ] );
+        std::make_pair( _fToE[ 4 * _localFace + _edge - 5 ], _orient[ 4 * _localFace + _edge - 5 ] );
 }
 
 /*
@@ -419,7 +419,7 @@ QuadraticHexa::fToP( id_type const _localFace, id_type const _point )
     return _fToP[ 9 * _localFace + _point - 10 ];
 }
 
-pair<id_type, bool>
+std::pair<id_type, bool>
 QuadraticHexa::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {

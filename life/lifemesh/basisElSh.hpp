@@ -63,8 +63,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #endif
 
 #include <life/lifecore/life.hpp>
-using std::pair;
-using std::make_pair;
 
 namespace LifeV
 {
@@ -279,7 +277,7 @@ public:
     static const UInt nbPtsPerVolume = 0;
     static id_type eToP( id_type const _localEdge, id_type const _point );
     static id_type fToP( id_type const _localFace, id_type const _point );
-    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 //! \ingroup GeoShape
 class LinearTetraBubble:
@@ -295,7 +293,7 @@ public:
     static const UInt nbPtsPerVolume = 1;
     static id_type eToP( id_type const _localEdge, id_type const _point );
     static id_type fToP( id_type const _localFace, id_type const _point );
-    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 //! \ingroup GeoShape
@@ -312,7 +310,7 @@ public:
     static const UInt nbPtsPerVolume = 0;
     static id_type eToP( id_type const _localEdge, id_type const _point );
     static id_type fToP( id_type const _localFace, id_type const _point );
-    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 //! \ingroup GeoShape
@@ -329,7 +327,7 @@ public:
     static const UInt nbPtsPerVolume = 0;
     static id_type eToP( id_type const _localEdge, id_type const _point );
     static id_type fToP( id_type const _localFace, id_type const _point );
-    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 //! \ingroup GeoShape
@@ -346,7 +344,7 @@ public:
     static const UInt nbPtsPerVolume = 1;
     static id_type eToP( id_type const _localEdge, id_type const _point );
     static id_type fToP( id_type const _localFace, id_type const _point );
-    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 /*******************************************************************
