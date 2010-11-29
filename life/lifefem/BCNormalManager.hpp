@@ -180,7 +180,7 @@ void BCNormalManager<MeshType,MatrixType>::init(const BCBase& BCb,const DataType
 template<typename MeshType,typename MatrixType>
 void BCNormalManager<MeshType,MatrixType>::addBoundaryPoint(const ID& idof,const ID& flag)
 {
-    M_flags.insert(pair<ID,ID>(idof,flag));
+    M_flags.insert(std::pair<ID,ID>(idof,flag));
 }
 
 //! This method add a dof in which we want to impose a Normal Dirichlet boundary condition with a given vector.
@@ -197,7 +197,7 @@ void BCNormalManager<MeshType,MatrixType>::addNormalPoint(const ID& idof,const R
     n[0] = vx;
     n[1] = vy;
     n[2] = vz;
-    M_imposedNormals.insert(pair<ID,std::vector<Real> >(idof,n));
+    M_imposedNormals.insert(std::pair<ID,std::vector<Real> >(idof,n));
 }
 
 //! This method calculate all the normal and tangential vectors.

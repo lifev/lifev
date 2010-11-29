@@ -60,7 +60,6 @@
 
 #include <life/lifemesh/partitionMesh.hpp>
 
-using std::pair;
 
 namespace LifeV
 {
