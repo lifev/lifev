@@ -128,7 +128,7 @@ EnsightToHdf5::run()
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    writeMesh("test.mesh", *fullMeshPtr);
+    // writeMesh("test.mesh", *fullMeshPtr);
     // Scale, Rotate, Translate (if necessary)
     boost::array< Real, NDIM >    geometryScale;
     boost::array< Real, NDIM >    geometryRotate;
