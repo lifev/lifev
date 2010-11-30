@@ -26,8 +26,6 @@
 #ifndef _OSEEN_H_
 #define _OSEEN_H_
 
-#include <life/lifefilters/medit_wrtrs.hpp>
-
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
@@ -257,9 +255,6 @@ public:
     // return the density and the viscosity of the fluid
     Real density()   const { return M_data->density(); }
     Real viscosity() const { return M_data->viscosity(); }
-
-    //! Postprocessing
-    void postProcess(bool _writeMesh = false);
 
     void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
@@ -1408,133 +1403,6 @@ template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::area(const EntityFlag& flag) {
 
   return M_post_proc->area(flag);
-}
-
-// Postprocessing
-template <typename Mesh, typename SolverType>
-void
-Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
-{
-    std::ostringstream index;
-    std::ostringstream indexMe;
-    std::string name;
-    std::string me;
-
-
-    indexMe << M_Displayer.comm()->MyPID();
-
-    switch ( indexMe.str().size() )
-    {
-        case 1:
-            me = "00" + indexMe.str();
-            break;
-        case 2:
-            me = "0" + indexMe.str();
-            break;
-        case 3:
-            me = indexMe.str();
-            break;
-    }
-
-
-//     if (_writeMesh || (M_count / M_data.verbose() == 0) )
-//         writeMesh  ("partedMesh." + me + ".mesh", M_pFESpace.mesh() );
-
-    vector_type velAndPressure(*M_sol, Repeated);
-    vector_type res(M_residual, Repeated);
-
-
-//         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
-//         {
-    M_Displayer.leaderPrint( "  F-  Post-processing " );
-
-    index << std::setfill('0') << std::setw(3);
-    index << ( M_count / M_data->verbose() );
-    name = index.str();
-
-    PhysVectUnknown<Vector> u(nDimensions*dim_u());
-    ScalUnknown<Vector>     p(dim_p());
-
-    reduceSolution(u, p);
-
-//     if (M_me == 0)
-//     {
-        // postprocess data file for medit
-//         wr_medit_ascii_scalar( "vel_x." + name + ".bb", u.giveVec(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "vel_y." + name + ".bb", u.giveVec() + this->dim_u(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "vel_z." + name + ".bb", u.giveVec()+2*this->dim_u(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
-//                                p.size() );
-
-    	// double dt = M_data.getTimeStep();
-
-
-       writeMesh("vel_x." + me + "." + name + ".mesh", *M_uFESpace.mesh());
-       writeMesh("resf_x." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-       writeMesh("vel_y." + me + "." + name + ".mesh", *M_uFESpace.mesh());
-       writeMesh("resf_y." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-       writeMesh("vel_z." + me + "." + name + ".mesh", *M_uFESpace.mesh());
-       writeMesh("resf_z." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-       writeMesh("press." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-
-        meditSolutionWriter( "vel_x." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*0);
-        meditSolutionWriter( "vel_y." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*1);
-        meditSolutionWriter( "vel_z." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*2);
-
-//         wr_medit_ascii2("vel_x." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("vel_y." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("vel_z." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-
-
-//         wr_medit_ascii2("resf_x." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("resf_y." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("resf_z." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-
-        meditSolutionWriter( "resf_x." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*0);
-        meditSolutionWriter( "resf_y." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*1);
-        meditSolutionWriter( "resf_z." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*2);
-
-
-        meditSolutionWriter( "press." + me + "." + name + ".bb",
-                             *M_pFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*3);
-
-
-//    cout << ( "should do ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//             " press." + name + "." + me + ".mesh" ).data()  ;
-
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " press." + name + ".mesh" ).data() );
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " vel_x." + name + ".mesh" ).data() );
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " vel_y." + name + ".mesh" ).data() );
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " vel_z." + name + ".mesh" ).data() );
-
-//     }
-//    }
-
-        M_count++;
-
 }
 
 template <typename Mesh, typename SolverType>
