@@ -27,7 +27,6 @@
 #define _HEARTFUNCTORS_H_
 
 
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
