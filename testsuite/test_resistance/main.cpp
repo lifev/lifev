@@ -90,10 +90,6 @@ main( int argc, char** argv )
   cout << "% using serial Version" << endl;
 #endif
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-
     ResistanceProblem problem( argc, argv );
     problem.run();
 
