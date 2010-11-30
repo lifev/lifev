@@ -211,8 +211,7 @@ void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
     {
         x += point( i, 0 ) * geoMap.phi( i, xi, eta, 0. );
         y += point( i, 1 ) * geoMap.phi( i, xi, eta, 0. );
-#if defined(THREEDIM)
-
+#ifndef TWODIM
         z += point( i, 2 ) * geoMap.phi( i, xi, eta, 0. );
 #endif
 
