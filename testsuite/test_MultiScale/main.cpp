@@ -62,27 +62,12 @@
     #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
 #include <lifemc/lifesolver/MS_Solver.hpp>
 
 #include <sys/stat.h>
 #include <sys/types.h>
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "MultiScale" ,
-                            "LifeV MultiScale Tester" ,
-                            "0.1",
-                            "Under development",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 EPFL");
-
-    about.addAuthor("Cristiano Malossi", "Developer", "cristiano.malossi@epfl.ch", "");
-    return about;
-}
 
 using namespace LifeV;
 
