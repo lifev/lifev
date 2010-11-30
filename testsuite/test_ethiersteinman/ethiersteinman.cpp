@@ -617,15 +617,6 @@ Ethiersteinman::run()
                              2.0,   2.0,   2.0,
                             -1.0,  -1.0,  -1.0);
 
-            if (d->comm->MyPID()==0)
-            {
-                std::string fname = "cube-" + number2string(mElem) + ".mesh";
-                writeMesh(fname, *fullMeshPtr);
-            }
-
-            // exportMesh3D(mesh,"cube4x4",MESH_FORMAT);
-            // exportMesh3D(mesh,"cube4x4",MATLAB_FORMAT);
-
             partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
             std::string uOrder =  uFE[iElem];
