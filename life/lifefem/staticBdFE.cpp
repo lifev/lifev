@@ -173,7 +173,7 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
             }
         }
     }
-   
+
     for ( int i = 0;i < nbGeoNode;i++ )
     {
         point( i, 0 ) = refcoor[ 3 * i ];
@@ -286,7 +286,7 @@ void StaticBdFE::_comp_meas()
         meas( ig ) = sqrt( metric( 0, 0, ig ) );
         weightMeas( ig ) = meas( ig ) * qr.weight( ig );
 }
-#elif defined(THREEDIM)
+#else
         s = 0.;
         for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
             s += tangent( 1, icoor, ig ) * tangent( 1, icoor, ig );
@@ -324,7 +324,7 @@ void StaticBdFE::_comp_meas_normal()
         normal( 0, ig ) = n1 / norm;
         normal( 1, ig ) = n2 / norm;
     }
-#elif defined(THREEDIM)
+#else
     Real n3;
     for ( int ig = 0;ig < nbQuadPt;ig++ )
     {
