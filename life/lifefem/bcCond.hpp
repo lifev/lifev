@@ -67,6 +67,12 @@
 
 namespace LifeV
 {
+
+/** Type of the name of thee Boundary conditions
+*/
+typedef std::string BCName;
+const BCName nullBCName; // The empty string!
+
 /** Boundary condition basic types
     Essential, Natural, Mixte, Flux, Resistance,
 */
