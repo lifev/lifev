@@ -35,7 +35,6 @@
 #include <vector>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 #include <life/lifearray/tab.hpp>
 
 namespace dataProblem
