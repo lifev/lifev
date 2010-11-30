@@ -86,11 +86,10 @@ public:
         }
     Real & z()
         {
-#if defined(THREEDIM)
-            return _coor[ 2 ];
-#else
-
+#ifdef TWODIM
             ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
+#else // THREEDIM
+            return _coor[ 2 ];
 #endif
 
         }
@@ -104,11 +103,10 @@ public:
         };
     Real z() const
         {
-#if defined(THREEDIM)
-            return _coor[ 2 ];
-#else
-
+#ifdef TWODIM
             return 0;
+#else // THREEDIM
+            return _coor[ 2 ];
 #endif
 
         }
