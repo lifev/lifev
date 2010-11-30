@@ -418,7 +418,7 @@ public:
 
     //! Returns a pointer to the i-th elements in the (finalised) list
     //! (counting from 0 ' a la C')
-    const IdentifierBase* operator[] ( const Index_t& i ) const;
+    const IdentifierBase* operator[] ( const ID& i ) const;
 
     //! Add a new indentifier in the list
     void addIdentifier( IdentifierBase* );

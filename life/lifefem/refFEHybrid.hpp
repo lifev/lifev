@@ -154,9 +154,9 @@ public:
 	//@}
 
     //! Extracting a StaticBdFE from the faces list.
-    inline const StaticBdFE& operator[] ( const Index_t& i ) const
+    inline const StaticBdFE& operator[] ( const ID& i ) const
     {
-        ASSERT_BD( i < static_cast<Index_t>( M_numberBoundaryFE ) );
+        ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
     	return M_boundaryFEList[ i ];
 	}
 

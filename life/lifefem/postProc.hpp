@@ -200,7 +200,7 @@ namespace LifeV
 
     std::vector<Real> patch_normal() const { return _normal; }
 
-    std::vector< id_type > fBdToIn() const { return _fBdToIn; }
+    std::vector< ID > fBdToIn() const { return _fBdToIn; }
 
     //! Number of boundary DOF for the mesh at hand
     UInt nBdDof() const { return _nBdDof; }
@@ -232,9 +232,9 @@ namespace LifeV
     std::map< EntityFlag, std::list<ID> > _faces_with_flag;
 
     // for each boundary face, it contains the numbering of the dof of the face
-    std::vector< std::vector< SimpleVect<id_type> > > _bdLtoG;
+    std::vector< std::vector< SimpleVect<ID> > > _bdLtoG;
     // it converts from a local numeration over the boundary faces on the global numeration of the mesh
-    std::vector< std::vector< id_type > > _fBdToIn;
+    std::vector< std::vector< ID > > _fBdToIn;
 
     // reference to the current boundary FE
     std::vector<CurrentBdFE* > _feBd;
@@ -351,12 +351,12 @@ namespace LifeV
   template<typename Mesh>
   void PostProc<Mesh>::build_vectors()
   {
-    SimpleVect<id_type> bdltg;
+    SimpleVect<ID> bdltg;
 
     UInt iElAd, iVeEl, iFaEl, iEdEl;
-    id_type lDof, gDof, auxDof;
-    std::vector<id_type> bDof(_nvar);
-    std::vector<id_type>::iterator vidit;
+    ID lDof, gDof, auxDof;
+    std::vector<ID> bDof(_nvar);
+    std::vector<ID>::iterator vidit;
     EntityFlag _flag;
 
     for(UInt var=0; var<_nvar; ++var) {
@@ -383,7 +383,7 @@ namespace LifeV
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( id_type ibF = 1 ; ibF <= _M_bdnF; ++ibF )
+    for ( ID ibF = 1 ; ibF <= _M_bdnF; ++ibF )
       {
 
         iElAd = _mesh->bElement( ibF ).ad_first();  // id of the element adjacent to the face
@@ -405,12 +405,12 @@ namespace LifeV
             {
 
               // loop on face vertices
-              for ( id_type iVeFa = 1; iVeFa <= _M_nFaceV; ++iVeFa )
+              for ( ID iVeFa = 1; iVeFa <= _M_nFaceV; ++iVeFa )
                 {
                   iVeEl = GeoShape::fToP( iFaEl, iVeFa ); // local vertex number (in element)
 
                   // Loop number of Dof per vertex
-                  for ( id_type l = 1; l <= _M_nDofpV[var]; ++l )
+                  for ( ID l = 1; l <= _M_nDofpV[var]; ++l )
                     {
                       lDof = ( iVeFa - 1 ) * _M_nDofpV[var] + l ; // local Dof
                       gDof = _dof[var]->localToGlobal( iElAd, ( iVeEl - 1 ) * _M_nDofpV[var] + l ); // global Dof
@@ -423,7 +423,7 @@ namespace LifeV
                         }
                       else
                         { // the gDof has been already inserted in the _fBdToIn vector
-                          auxDof = ( id_type ) ( ( vidit - _fBdToIn[var].begin() ) ) + 1;
+                          auxDof = ( ID ) ( ( vidit - _fBdToIn[var].begin() ) ) + 1;
                           bdltg( lDof ) = auxDof; // local to boundary global on this face
                         }
                     }
@@ -435,11 +435,11 @@ namespace LifeV
           if ( _M_nDofpE[var] )
             {
               // loop on face edges
-              for ( id_type iEdFa = 1; iEdFa <= _M_nFaceV; ++iEdFa )
+              for ( ID iEdFa = 1; iEdFa <= _M_nFaceV; ++iEdFa )
                 {
                   iEdEl = GeoShape::fToE( iFaEl, iEdFa ).first; // local edge number (in element)
                   // Loop number of Dof per edge
-                  for ( id_type l = 1; l <= _M_nDofpE[var]; ++l )
+                  for ( ID l = 1; l <= _M_nDofpE[var]; ++l )
                     {
                       lDof = _M_nDofFV[var] + ( iEdFa - 1 ) * _M_nDofpE[var] + l ; // local Dof
                       gDof = _dof[var]->localToGlobal( iElAd, _M_nDofElemV[var] + ( iEdEl - 1 )
@@ -453,7 +453,7 @@ namespace LifeV
                         }
                       else
                         { // the gDof has been already inserted in the _fBdToIn vector
-                          auxDof = ( id_type ) ( vidit - _fBdToIn[var].begin() ) + 1;
+                          auxDof = ( ID ) ( vidit - _fBdToIn[var].begin() ) + 1;
                           bdltg( lDof ) = auxDof; // local to boundary global on this face
                         }
                     }
@@ -463,7 +463,7 @@ namespace LifeV
           // Face based Dof
           // ===================================================
           // Loop on number of Dof per face
-          for ( id_type l = 1; l <= _M_nDofpF[var]; ++l )
+          for ( ID l = 1; l <= _M_nDofpF[var]; ++l )
             {
               lDof = _M_nDofFE[var] + _M_nDofFV[var] + l; // local Dof
               gDof = _dof[var]->localToGlobal( iElAd, _M_nDofElemE[var] + _M_nDofElemV[var]
@@ -477,7 +477,7 @@ namespace LifeV
                 }
               else
                 { // the gDof has been already inserted in the _fBdToIn vector
-                  auxDof = ( id_type ) ( vidit - _fBdToIn[var].begin() ) + 1;
+                  auxDof = ( ID ) ( vidit - _fBdToIn[var].begin() ) + 1;
                   bdltg( lDof ) = auxDof; // local to boundary global on this face
                 }
             }
@@ -687,19 +687,19 @@ namespace LifeV
       Real loc_area;
 
       // ID of the considered dof in this class' vectors
-      id_type idLocalDof;
+      ID idLocalDof;
 
       // ===================================================
       // Loop on boundary faces
       // ===================================================
-      for ( id_type ibF = 1 ; ibF <= _M_bdnF; ++ibF )
+      for ( ID ibF = 1 ; ibF <= _M_bdnF; ++ibF )
         {
 
           _feBd[var]->updateMeas( _mesh->bElement( ibF ) );  // updating finite element information
 
           loc_area = _feBd[var]->measure();
           // Loop on the total Dof per Face
-          for ( id_type idofF = 1; idofF <= _M_nDofF[var]; ++idofF )
+          for ( ID idofF = 1; idofF <= _M_nDofF[var]; ++idofF )
             {
               // Extracting local ID of idofF
               idLocalDof = _bdLtoG[var][ ibF - 1 ][ idofF - 1 ];
@@ -716,7 +716,7 @@ namespace LifeV
 
       std::cout << "\n***** Post Proc: Area of the patches *****"
       << "\n\tfor variable " << var << std::endl;
-      id_type count = 1;
+      ID count = 1;
 
       for ( std::vector<Real>::iterator it = _area[var].begin(); it<_area[var].end(); it++ )
         {
@@ -737,12 +737,12 @@ namespace LifeV
       std::cout << "\n***** Post Proc: Bd Local To Global *****"
       << "\n\tfor variable " << var << std::endl;
       std::cout << _bdLtoG[var].size() << std::endl;
-      for ( std::vector<SimpleVect<id_type> >::iterator it1 = _bdLtoG[var].begin();
+      for ( std::vector<SimpleVect<ID> >::iterator it1 = _bdLtoG[var].begin();
       it1<_bdLtoG[var].end();it1++ )
         {
           count++;
           std::cout << "Bd Face " << count << std::endl;
-          for ( SimpleVect<id_type>::iterator it2 = it1->begin();it2<it1->end();it2++ )
+          for ( SimpleVect<ID>::iterator it2 = it1->begin();it2<it1->end();it2++ )
             {
               std::cout << *it2 << ",";
             }
@@ -752,7 +752,7 @@ namespace LifeV
       std::cout << "***** Post Proc: From Boundary Faces to Global Dof *****" << std::endl;
       std::cout << _fBdToIn[var].size() << std::endl;
 
-      for ( std::vector<id_type>::iterator it3 = _fBdToIn[var].begin();
+      for ( std::vector<ID>::iterator it3 = _fBdToIn[var].begin();
       it3<_fBdToIn[var].end(); it3++ )
         {
           std::cout << "Index :" << it3 - _fBdToIn[var].begin()
@@ -776,12 +776,12 @@ namespace LifeV
       Real sum;
 
       // ID of the considered dof in this class' vectors
-      id_type idLocalDof;
+      ID idLocalDof;
 
       // ===================================================
       // Loop on boundary faces
       // ===================================================
-      for ( id_type ibF = 1 ; ibF <= _M_bdnF; ++ibF )
+      for ( ID ibF = 1 ; ibF <= _M_bdnF; ++ibF )
         {
           // updating finite element information
           _feBd[var]->updateMeasNormal( _mesh->bElement( ibF ) );
@@ -795,7 +795,7 @@ namespace LifeV
                 {
                   sum += _feBd[var]->normal( icomp, l ) * _feBd[var]->weightMeas( l );
                 }
-              for ( id_type idofF = 1; idofF <= _M_nDofF[var]; ++idofF )
+              for ( ID idofF = 1; idofF <= _M_nDofF[var]; ++idofF )
                 {
                   // Extracting local ID of idofF
                   idLocalDof = _bdLtoG[var][ ibF - 1 ][ idofF - 1 ];
@@ -822,7 +822,7 @@ namespace LifeV
       std::cout << "\n***** Post Proc: Normal vector on the patches *****"
       << "\n\tfor variable " << var << std::endl;
 
-      id_type count = 1;
+      ID count = 1;
 
       for ( std::vector<Real>::iterator it = _area[var].begin();it<_area[var].end();it++ )
         {
@@ -855,17 +855,17 @@ namespace LifeV
       Real sum;
 
       // ID of the considered dof in this class' vectors
-      id_type idLocalDof;
+      ID idLocalDof;
 
       // ===================================================
       // Loop on boundary faces
       // ===================================================
-      for ( id_type ibF = 1 ; ibF <= _M_bdnF; ++ibF )
+      for ( ID ibF = 1 ; ibF <= _M_bdnF; ++ibF )
         {
 
           _feBd[var]->updateMeas( _mesh->bElement( ibF ) );  // updating finite element information
 
-          for ( id_type idofF = 1; idofF <= _M_nDofF[var]; ++idofF )
+          for ( ID idofF = 1; idofF <= _M_nDofF[var]; ++idofF )
             {
               sum = 0.0;
               // global dof
@@ -891,7 +891,7 @@ namespace LifeV
       std::cout << "\n***** Post Proc: Average phi on the patches *****"
       << "\n\tfor variable " << var << std::endl;
 
-      id_type count = 0;
+      ID count = 0;
 
       for ( std::vector<Real>::iterator it = _area[var].begin();it<_area[var].end();it++ )
         {
@@ -920,7 +920,7 @@ namespace LifeV
     V stress( _nBdDof[0] * NDIM ); stress.clear();
     V nstress( _nBdDof[0] * NDIM ); nstress.clear();
     V sstress( _nBdDof[0] * NDIM ); sstress.clear();
-    id_type count, idGlobalDof;
+    ID count, idGlobalDof;
 
     // number of DOFs for each component
     UInt dim = r.size() / ncomp;
@@ -929,7 +929,7 @@ namespace LifeV
     // if residual==true, vector r has ncomp*_nBdDof components
     // if residual==false, vector r has ncomp*_M_nTotalDof components
     Vector coef(2);
-    std::vector<id_type> index(2);
+    std::vector<ID> index(2);
 
     // loop on locally stored DOFs
     for ( count = 0; count < _nBdDof[0]; ++count )
@@ -976,10 +976,10 @@ namespace LifeV
       {
         V stress( _nBdDof[0] * NDIM ); stress.clear();
 
-        id_type idGlobalDof;
+        ID idGlobalDof;
 
         // cycle over boundary dof
-        for ( id_type bound_dof = 0; bound_dof < _nBdDof[0]; ++bound_dof )
+        for ( ID bound_dof = 0; bound_dof < _nBdDof[0]; ++bound_dof )
           {
             // find global ID for boundary dof
             idGlobalDof = _fBdToIn[0][bound_dof]; // this is in the GLOBAL mesh

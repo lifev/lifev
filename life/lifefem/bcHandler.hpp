@@ -161,10 +161,10 @@ public:
     BCHandler& operator= ( const BCHandler& BCh );
 
     //! extracting a BC in the list
-          BCBase& operator[] ( const Index_t& );
+          BCBase& operator[] ( const ID& );
 
     //! extracting a BC in the list
-    const BCBase& operator[] ( const Index_t& ) const;
+    const BCBase& operator[] ( const ID& ) const;
 
     //@}
 
@@ -366,7 +366,7 @@ public:
     BCBase_Iterator end();
 
     //! How many BC stored?
-    Index_t size() const;
+    ID size() const;
 
     //! Is there no BC stored?
     bool empty() const;

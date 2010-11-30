@@ -58,7 +58,7 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 
     bool globalassemble=false;
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
             switch ( BCh[ i ].type() )
                 {
@@ -97,7 +97,7 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 
 
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
 
             switch ( BCh[ i ].type() )
@@ -124,7 +124,7 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
                         const BCHandler& BCh, const DataType coef)
 {
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
 
             if( BCh[ i ].type()==Essential )
@@ -189,7 +189,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
 
 
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
     {
         // std::cout << i << " " << BCh[i].type() << " " << Flux << std::endl;
 	    switch ( BCh[ i ].type() )
@@ -232,7 +232,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
     normalConditions.bcShiftToNormalTangentialCoordSystem(A, b);
 
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
             switch ( BCh[ i ].type() )
                 {
@@ -268,7 +268,7 @@ void bcManageMatrix( MatrixType&      A,
 
     bool globalassemble=false;
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
 
             switch ( BCh[ i ].type() )
@@ -296,7 +296,7 @@ void bcManageMatrix( MatrixType&      A,
         A.GlobalAssemble();
 
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
 
             switch ( BCh[ i ].type() )
@@ -332,7 +332,7 @@ void bcManageVector( VectorType&      b,
     VectorType bRepeated(b.getMap(),Repeated);
 
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
 
             switch ( BCh[ i ].type() )
@@ -375,7 +375,7 @@ void bcManageVector( VectorType&                     b,
     VectorType bRepeated(b.getMap(),Repeated);
 
     // Loop on boundary conditions
-    for ( Index_t i = 0; i < BCh.size(); ++i )
+    for ( ID i = 0; i < BCh.size(); ++i )
         {
 
             switch ( BCh[ i ].type() )

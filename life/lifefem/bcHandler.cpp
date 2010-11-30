@@ -84,13 +84,13 @@ BCHandler::operator = (const BCHandler &BCh)
 }
 
 BCBase&
-BCHandler::operator[] ( const Index_t& i )
+BCHandler::operator[] ( const ID& i )
 {
     return M_bcList[ i ];
 }
 
 const BCBase&
-BCHandler::operator[] ( const Index_t& i ) const
+BCHandler::operator[] ( const ID& i ) const
 {
     return M_bcList[ i ];
 }
@@ -285,7 +285,7 @@ BCHandler::boundaryType(const EntityFlag& aFlag) const
 BCBase&
 BCHandler::GetBCWithFlag(const EntityFlag& aFlag)
 {
-    Index_t i;
+    ID i;
 
     for(i = 0; i <= M_bcList.size(); i++)
         if(aFlag == M_bcList[i].flag())
@@ -297,7 +297,7 @@ BCHandler::GetBCWithFlag(const EntityFlag& aFlag)
 const BCBase&
 BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const
 {
-    Index_t i;
+    ID i;
 
     for(i = 0; i <= M_bcList.size(); i++)
         if(aFlag == M_bcList[i].flag())
@@ -311,7 +311,7 @@ BCHandler::getBCWithType( const BCType& type )
 {
     std::vector<BCName> vectorName;
 
-    for( size_type i = 0; i < M_bcList.size(); ++i )
+    for( std::size_t i = 0; i < M_bcList.size(); ++i )
         if( M_bcList[i].type() == type)
             vectorName.push_back( M_bcList[i].name() );
 
@@ -323,7 +323,7 @@ BCHandler::getNumberBCWithType( const BCType& type )
 {
     UInt typeNumber = 0;
 
-    for( size_type i = 0; i < M_bcList.size(); ++i )
+    for( std::size_t i = 0; i < M_bcList.size(); ++i )
         if( M_bcList[i].type() == type)
             ++typeNumber;
 
@@ -372,7 +372,7 @@ BCHandler::end()
     return M_bcList.end();
 }
 
-Index_t
+ID
 BCHandler::size() const
 {
     return M_bcList.size();

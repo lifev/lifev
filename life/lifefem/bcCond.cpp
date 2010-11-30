@@ -730,7 +730,7 @@ BCBase::operator() ( const ID& i ) const
 //! Returns a pointer to the i-th elements in the (finalised) list
 //! (counting from 0 ' a la C')
 const IdentifierBase*
-BCBase::operator[] ( const Index_t& i ) const
+BCBase::operator[] ( const ID& i ) const
 {
     ASSERT_PRE( _M_finalised, "BC List should be finalised before being accessed" );
     ASSERT_BD( i < _M_idList.size() );
@@ -830,7 +830,7 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
     out << "Mode                 : " << _M_mode << std::endl;
     out << "Number of components : " << _M_comp.size() << std::endl;
     out << "List of components   : ";
-    for ( Index_t i = 0; i < _M_comp.size(); ++i )
+    for ( ID i = 0; i < _M_comp.size(); ++i )
         out << _M_comp[ i ] << " ";
     out << std::endl;
     out << "Offset               : " << _M_offset << std::endl;
