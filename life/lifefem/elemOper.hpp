@@ -38,11 +38,11 @@ namespace LifeV
 {
 
 /*! /namespace ElemOper
-  
+
   This namespace is specially designed to contain the elementary
   operations (corresponding to differential operators) that build
   the local contributions to be used in the assembly procedures.
-  
+
  */
 namespace ElemOper
 {
@@ -80,7 +80,7 @@ namespace ElemOper
     //! Interpolation procedure
     template<typename localVector, typename globalVector>
     void interpolate(localVector& localValues,
-                     const CurrentFE& interpCFE, 
+                     const CurrentFE& interpCFE,
                      const UInt& spaceDim,
                      const Dof& betaDof,
                      const UInt& elementID,
@@ -118,7 +118,7 @@ namespace ElemOper
         const UInt nbFEDof(advCFE.nbFEDof());
         const UInt nbQuadPt(advCFE.nbQuadPt());
         Real localValue(0.0);
-        
+
         for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
         {
             // Extract the view of the matrix
@@ -151,8 +151,8 @@ namespace ElemOper
             }
         }
     }
-    
-    
+
+
 }
 
   //----------------------------------------------------------------------
@@ -161,19 +161,6 @@ namespace ElemOper
   //@{
   //----------------------------------------------------------------------
   //!coef(t,x,y,z,u)
-  void mass( Real (*coef)(Real,Real,Real,Real,Real),
-	     ElemMat& elmat, const CurrentFE& fe,
-	     const Dof& dof,
-	     const ScalUnknown<Vector>& U,Real t);
-
-  void stiff( Real (*coef)(Real,Real,Real,Real,Real),
-	      ElemMat& elmat, const CurrentFE& fe,
-	      const Dof& dof,
-	      const ScalUnknown<Vector>& U,Real t);
-  void source( Real (*fct)(Real,Real,Real,Real,Real),
-	       ElemVec& elvec, const CurrentFE& fe,
-	       const Dof& dof,
-	       const ScalUnknown<Vector>& U,Real t);
 
   void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 	     int iblock = 0, int jblock = 0 );
