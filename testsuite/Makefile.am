@@ -34,7 +34,6 @@ SUBDIRS		= data  \
               test_fsi \
               test_ns_flux \
               test_meshReorder \
-              test_laplacian \
               test_currentFE \
               test_filters \
               test_partition \
@@ -45,6 +44,9 @@ SUBDIRS		= data  \
 	      test_ADRAssembler \
 	      test_LevelSetSolver \
               $(DO_NOT_COMPILE)
+
+#              test_laplacian
+
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_cylinder/testsuite.at \
