@@ -20,7 +20,6 @@
 
 #ifndef TWODIM
 #include <life/lifesolver/exactJacobianBase.hpp>
-#include <life/lifefilters/medit_wrtrs.hpp>
 //#include <life/lifesolver/reducedLinFluid.hpp>
 
 
