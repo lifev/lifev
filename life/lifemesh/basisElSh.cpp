@@ -62,11 +62,11 @@ UInt getReferenceDimension(const ReferenceShapes& shape)
 
 */
 
-id_type
-LinearTriangle::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
-// id_type eToP(i,j) = localId of jth point on ith local edge
+ID
+LinearTriangle::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
+// ID eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 2 * numEdges ] =
+    static const ID _eToP[ 2 * numEdges ] =
         {
             1, 2, 2, 3, 3, 1
         };
@@ -85,11 +85,11 @@ LinearTriangle::eToP( id_type const _localEdge, id_type const _point )   // inde
            /        \
          1 -----3----2
 */
-id_type
-QuadraticTriangle::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+QuadraticTriangle::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 3 * numEdges ] =
+    static const ID _eToP[ 3 * numEdges ] =
         {
             1, 2, 4, 2, 3, 5, 3, 1, 6
         };
@@ -108,11 +108,11 @@ QuadraticTriangle::eToP( id_type const _localEdge, id_type const _point )   // i
 
 
 */
-id_type
-LinearQuad::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+LinearQuad::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 2 * numEdges ] =
+    static const ID _eToP[ 2 * numEdges ] =
         {
             1, 2, 2, 3, 3, 4, 4, 1
         };
@@ -131,11 +131,11 @@ LinearQuad::eToP( id_type const _localEdge, id_type const _point )   // indexing
         1---5---2
 
 */
-id_type
-QuadraticQuad::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+QuadraticQuad::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 3 * numEdges ] =
+    static const ID _eToP[ 3 * numEdges ] =
         {
             1, 2, 5, 2, 3, 6, 3, 4, 7, 4, 1, 8
         };
@@ -157,11 +157,11 @@ QuadraticQuad::eToP( id_type const _localEdge, id_type const _point )   // index
 
 
 */
-id_type
-LinearTetra::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+LinearTetra::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 2 * numEdges ] =
+    static const ID _eToP[ 2 * numEdges ] =
         {
             1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
         };
@@ -170,11 +170,11 @@ LinearTetra::eToP( id_type const _localEdge, id_type const _point )   // indexin
     return _eToP[ 2 * _localEdge + _point - 3 ];
 }
 
-id_type
-LinearTetra::fToP( id_type const _localFace, id_type const _point )   // indexing from 1!!!
+ID
+LinearTetra::fToP( ID const _localFace, ID const _point )   // indexing from 1!!!
 // fToP(i,j) = localId of jth point on ith local face
 {
-    static const id_type _fToP[ 3 * numFaces ] =
+    static const ID _fToP[ 3 * numFaces ] =
         {
             1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
         }
@@ -184,11 +184,11 @@ LinearTetra::fToP( id_type const _localFace, id_type const _point )   // indexin
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
     return _fToP[ 3 * _localFace + _point - 4 ];
 }
-std::pair<id_type, bool>
-LinearTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
+std::pair<ID, bool>
+LinearTetra::fToE( ID const _localFace, ID const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
-    static const id_type _fToE[ 3 * numFaces ] =
+    static const ID _fToE[ 3 * numFaces ] =
         {
             3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
         };
@@ -218,11 +218,11 @@ LinearTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing
 
 
 */
-id_type
-LinearTetraBubble::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+LinearTetraBubble::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 2 * numEdges ] =
+    static const ID _eToP[ 2 * numEdges ] =
         {
             1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
         };
@@ -231,11 +231,11 @@ LinearTetraBubble::eToP( id_type const _localEdge, id_type const _point )   // i
     return _eToP[ 2 * _localEdge + _point - 3 ];
 }
 
-id_type
-LinearTetraBubble::fToP( id_type const _localFace, id_type const _point )   // indexing from 1!!!
+ID
+LinearTetraBubble::fToP( ID const _localFace, ID const _point )   // indexing from 1!!!
 // fToP(i,j) = localId of jth point on ith local face
 {
-    static const id_type _fToP[ 3 * numFaces ] =
+    static const ID _fToP[ 3 * numFaces ] =
         {
             1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
         }
@@ -245,11 +245,11 @@ LinearTetraBubble::fToP( id_type const _localFace, id_type const _point )   // i
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
     return _fToP[ 3 * _localFace + _point - 4 ];
 }
-std::pair<id_type, bool>
-LinearTetraBubble::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
+std::pair<ID, bool>
+LinearTetraBubble::fToE( ID const _localFace, ID const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
-    static const id_type _fToE[ 3 * numFaces ] =
+    static const ID _fToE[ 3 * numFaces ] =
         {
             3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
         };
@@ -278,11 +278,11 @@ LinearTetraBubble::fToE( id_type const _localFace, id_type const _edge )   // in
            /.       \!
          1 -----5----2
 */
-id_type
-QuadraticTetra::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+QuadraticTetra::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 3 * numEdges ] =
+    static const ID _eToP[ 3 * numEdges ] =
         {
             1, 2, 5, 2, 3, 6, 3, 1, 7, 1, 4, 8, 2, 4, 9, 3, 4, 10
         };
@@ -291,11 +291,11 @@ QuadraticTetra::eToP( id_type const _localEdge, id_type const _point )   // inde
     return _eToP[ 3 * _localEdge + _point - 4 ];
 }
 
-id_type
-QuadraticTetra::fToP( id_type const _localFace, id_type const _point )   // indexing from 1!!!
+ID
+QuadraticTetra::fToP( ID const _localFace, ID const _point )   // indexing from 1!!!
 // fToP(i,j) = localId of jth point on ith local face
 {
-    static const id_type _fToP[ 6 * numFaces ] =
+    static const ID _fToP[ 6 * numFaces ] =
         {
             1, 3, 2, 7, 6, 5,
             1, 2, 4, 5, 9, 8,
@@ -307,8 +307,8 @@ QuadraticTetra::fToP( id_type const _localFace, id_type const _point )   // inde
     return _fToP[ 6 * _localFace + _point - 7 ];
 }
 
-std::pair<id_type, bool>
-QuadraticTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
+std::pair<ID, bool>
+QuadraticTetra::fToE( ID const _localFace, ID const _edge )   // indexing from 1!!!
 {
     return LinearTetra::fToE( _localFace, _edge );
 }
@@ -327,11 +327,11 @@ QuadraticTetra::fToE( id_type const _localFace, id_type const _edge )   // index
      |.      |/
      1_______2
 */
-id_type
-LinearHexa::eToP( id_type const _localEdge, id_type const _point )   // indexing from 1!!!
+ID
+LinearHexa::eToP( ID const _localEdge, ID const _point )   // indexing from 1!!!
 // eToP(i,j) = localId of jth point on ith local edge
 {
-    static const id_type _eToP[ 2 * numEdges ] =
+    static const ID _eToP[ 2 * numEdges ] =
         {
             1, 2, 2, 3, 3, 4, 4, 1,
             1, 5, 2, 6, 3, 7, 4, 8,
@@ -342,11 +342,11 @@ LinearHexa::eToP( id_type const _localEdge, id_type const _point )   // indexing
     return _eToP[ 2 * _localEdge + _point - 3 ];
 }
 
-id_type
-LinearHexa::fToP( id_type const _localFace, id_type const _point )   // indexing from 1!!!
+ID
+LinearHexa::fToP( ID const _localFace, ID const _point )   // indexing from 1!!!
 // fToP(i,j) = localId of jth point on ith local face
 {
-    static const id_type _fToP[ 4 * numFaces ] =
+    static const ID _fToP[ 4 * numFaces ] =
         {
             1, 4, 3, 2,
             1, 5, 8, 4,
@@ -360,11 +360,11 @@ LinearHexa::fToP( id_type const _localFace, id_type const _point )   // indexing
     return _fToP[ 4 * _localFace + _point - 5 ];
 }
 
-std::pair<id_type, bool>
-LinearHexa::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
+std::pair<ID, bool>
+LinearHexa::fToE( ID const _localFace, ID const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
-    static const id_type _fToE[ 4 * numFaces ] =
+    static const ID _fToE[ 4 * numFaces ] =
         {
             4, 3, 2, 1, 5, 12, 8, 4, 1, 6, 9, 5,
             2, 7, 10, 6, 3, 8, 11, 7, 9, 10, 11, 12
@@ -388,10 +388,10 @@ LinearHexa::fToE( id_type const _localFace, id_type const _edge )   // indexing 
           -- QuadraticHexa
 */
 
-id_type
-QuadraticHexa::eToP( id_type const _localEdge, id_type const _point )
+ID
+QuadraticHexa::eToP( ID const _localEdge, ID const _point )
 {
-    static const id_type _eToP[ 3 * numEdges ] =
+    static const ID _eToP[ 3 * numEdges ] =
         {
             1, 2, 9, 2, 3, 10, 3, 4, 11, 4, 1, 12,
             1, 5, 13, 2, 6, 14, 3, 7, 15, 4, 8, 16,
@@ -402,10 +402,10 @@ QuadraticHexa::eToP( id_type const _localEdge, id_type const _point )
     return _eToP[ 3 * _localEdge + _point - 4 ];
 }
 
-id_type
-QuadraticHexa::fToP( id_type const _localFace, id_type const _point )
+ID
+QuadraticHexa::fToP( ID const _localFace, ID const _point )
 {
-    static const id_type _fToP[ 9 * numFaces ] =
+    static const ID _fToP[ 9 * numFaces ] =
         {
             1, 4, 3, 2, 12, 11, 10, 9, 21,
             1, 5, 8, 4, 13, 20, 16, 12, 22,
@@ -419,8 +419,8 @@ QuadraticHexa::fToP( id_type const _localFace, id_type const _point )
     return _fToP[ 9 * _localFace + _point - 10 ];
 }
 
-std::pair<id_type, bool>
-QuadraticHexa::fToE( id_type const _localFace, id_type const _edge )   // indexing from 1!!!
+std::pair<ID, bool>
+QuadraticHexa::fToE( ID const _localFace, ID const _edge )   // indexing from 1!!!
 // fToE(i,j) = localId of jth edge on ith local face
 {
     return LinearHexa::fToE( _localFace, _edge );

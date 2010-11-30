@@ -21,18 +21,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from three Point id_type's
+ \brief It creates Bare Face objects from three Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point id_type
-  \param j is a Point id_type
-  \param k is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
+  \param k is a Point ID
 
   To be used for triangular faces.
   \pre i, j and k >0. i!=j!=k
 
 */
 std::pair<BareFace, bool>
-makeBareFace( id_type const i, id_type const j, id_type const k )
+makeBareFace( ID const i, ID const j, ID const k )
 {
     if ( i < j && i < k )
     {
@@ -70,12 +70,12 @@ makeBareFace( id_type const i, id_type const j, id_type const k )
 }
 
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from four Point id_type's
+ \brief It creates Bare Face objects from four Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point id_type
-  \param j is a Point id_type
-  \param k is a Point id_type
-  \param l is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
+  \param k is a Point ID
+  \param l is a Point ID
   \pre i, j, k and l >0. i!=j!=k!=l
 
   To be used with Quad faces.
@@ -86,14 +86,14 @@ makeBareFace( id_type const i, id_type const j, id_type const k )
 */
 
 std::pair<BareFace, bool>
-makeBareFace( id_type const i, id_type const j, id_type const k, id_type const l )
+makeBareFace( ID const i, ID const j, ID const k, ID const l )
 {
-    std::vector<id_type> helper( 4 );
+    std::vector<ID> helper( 4 );
     helper[ 0 ] = i;
     helper[ 1 ] = j;
     helper[ 2 ] = k;
     helper[ 3 ] = l;
-    std::vector<id_type>::iterator vi = std::max_element( helper.begin(), helper.end() );
+    std::vector<ID>::iterator vi = std::max_element( helper.begin(), helper.end() );
     std::rotate( helper.begin(), vi, helper.end() );
     return makeBareFace( helper[ 1 ], helper[ 2 ], helper[ 3 ] );
 }

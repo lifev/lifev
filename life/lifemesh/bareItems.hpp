@@ -29,9 +29,9 @@ library is the fact that degrees of freedom (Dof) are linked to geometrical
 entities.  Now if we have degrees of freedom associated, for instance, to
 an Edge (like in a P2 Tetra) in order to build the global numbering of the
 Dof and the association between local (element-wise) and global numbering,
-I need to identify edges and give them a unique id_type. Yet, I may not want
+I need to identify edges and give them a unique ID. Yet, I may not want
 want to build a full Edge (GeoElement2D) object: after all that I need is
-the id_type of the edge and a way of computing the id_type's of the degrees of
+the ID of the edge and a way of computing the ID's of the degrees of
 freedom on the edge, all the remaining data of a full Edge object is not
 necessarily needed.
 
@@ -41,10 +41,10 @@ Another related problem is how to uniquely identify a face or an edge in the mes
 The dilemma has been resolved by creating the concept of a BareEdge and
 BareFace (bare geometry items).  A bare geometry item is formed by the
 minimal information required to uniquely identify it, namely 2
-<tt>Point</tt>'s id_type 's for an edge and 3 <tt>Point</tt>'s id_type 's for the
+<tt>Point</tt>'s ID 's for an edge and 3 <tt>Point</tt>'s ID 's for the
 Faces (it is enough also for Quad faces!). We build the bare items by
 looping through the elements and obviously we make sure that the BareItem
-id_type is consistent with that of the corresponding ``full item'' if the latter
+ID is consistent with that of the corresponding ``full item'' if the latter
 has been instantiated.
 
 Another <em>very important</em> issue is that of orientation.  There are
@@ -79,11 +79,11 @@ convention for natural orientation of faces and edges
 
 <ul>
 <li>The positive natural orientation of an  <em>Edge</em> is given by \f$V_{min} \rightarrow V_{max} \f$,
-    \f$V_{min}\f$ being the Edge Vertex with smallest id_type</li>
+    \f$V_{min}\f$ being the Edge Vertex with smallest ID</li>
 
 <li>The positive natural orientation of a  <em>Face</em> is given by the cicle
     \f$V_{min} \rightarrow V_2\rightarrow V_3 \f$,
-    \f$V_{min}\f$ being the Face Vertex with smallest id_type, \f$V_2\f$ the second smallest
+    \f$V_{min}\f$ being the Face Vertex with smallest ID, \f$V_2\f$ the second smallest
     and \f$V_2\f$ the thirsd smallest.</li>
 </ul>
 
@@ -123,15 +123,15 @@ detailed documentation.
 namespace LifeV
 {
 #ifndef _LIFEV_HH_
-/*! \typedef typedef unsigned int id_type
+/*! \typedef typedef unsigned int ID
 \brief type used for Identifiers (Integral type in the range [1, MAX_INT]).
 All principal items handled by the library have an identified, which is an
 unsigned integer <em>greater or equal to one</em>
 */
 // more correct version
-typedef size_t id_type;
+typedef size_t ID;
 // original version
-//typedef unsigned int id_type;
+//typedef unsigned int ID;
 //! I define UInt=unsigned int. This allow to use this stuff also outside lifeV
 // more correct version
 //typedef size_t UInt;
@@ -141,7 +141,7 @@ typedef unsigned int UInt;
 
 //! The Edge basis class
 /*! It contains the attributes common to all Edges In particular, it
-contains the two id_type's (first and second) of the points at the two ends
+contains the two ID's (first and second) of the points at the two ends
 of the edge.
 \invariant first < second
 */
@@ -150,16 +150,16 @@ struct BareEdge
     BareEdge() : first( 0 ), second( 0 )
     {}
     ; /*!< Standard Constructor*/
-    BareEdge( id_type i, id_type j ) : first( i ), second( j )
+    BareEdge( ID i, ID j ) : first( i ), second( j )
     {}
-    ; /*!< constructor taking the id_type's */
-    id_type first; //!< First id_type which defines the Edge
-    id_type second; //!< Second id_type which defines the Edge
+    ; /*!< constructor taking the ID's */
+    ID first; //!< First ID which defines the Edge
+    ID second; //!< Second ID which defines the Edge
 };
 
 //! The base Face class
 /*! Contains the common parameters of all Edges A Face contains three
-  id_type's (first, second and third) of points at face vertex, chosen so
+  ID's (first, second and third) of points at face vertex, chosen so
   to uniquely identify the face.
 \invariant first<second<third.
 
@@ -169,19 +169,19 @@ struct BareFace
     BareFace() : first( 0 ), second( 0 ), third( 0 )
     {}
     ; //!< Default constructor
-    //! Constructor that takes the id_type's as parameter
-    BareFace( id_type i, id_type j, id_type k ) : first( i ), second( j ), third( k )
+    //! Constructor that takes the ID's as parameter
+    BareFace( ID i, ID j, ID k ) : first( i ), second( j ), third( k )
     {}
     ;
-    /*! Constructor that takes a BareEdge Object and an id_type. The face is
-      then identified by the id_type of the Points on the BareEdge +
+    /*! Constructor that takes a BareEdge Object and an ID. The face is
+      then identified by the ID of the Points on the BareEdge +
       <tt>i</tt>*/
-    BareFace( id_type i, const BareEdge & e ) : first( i ), second( e.first ), third( e.second )
+    BareFace( ID i, const BareEdge & e ) : first( i ), second( e.first ), third( e.second )
     {}
     ;
-    id_type first; //!< First id_type which defines the BareFace
-    id_type second; //!< Second id_type which defines the BareFace
-    id_type third; //!< Third id_type which defines the BareFace
+    ID first; //!< First ID which defines the BareFace
+    ID second; //!< Second ID which defines the BareFace
+    ID third; //!< Third ID which defines the BareFace
 };
 
 
@@ -191,8 +191,8 @@ struct BareFace
   \brief It creates a BareEdge end returns the orientation of the created edge with respect
   to the given data.
   \param  bool is false if orientation  has been changed.
-  \param i is a Point id_type
-  \param j is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
 
   The BareEdge that will be built is the one passing by <tt>i</tt> and
   <tt>j</tt>. The orientation is i->j if the returned parameter is a
@@ -201,7 +201,7 @@ struct BareFace
   \pre i and j >0, i!=j */
 inline
 std::pair<BareEdge, bool>
-makeBareEdge( id_type const i, id_type const j )
+makeBareEdge( ID const i, ID const j )
 {
     if ( i < j )
     {
@@ -215,8 +215,8 @@ makeBareEdge( id_type const i, id_type const j )
 }
 
 /*! \ingroup BareItemsBuilder
-  \param i is a Point id_type
-  \param j is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
   \brief It creates a BareEdge, ignoring orientation.
 
   The BareEdge that will be built is the one passing by <tt>i</tt> and <tt>j</tt>
@@ -226,7 +226,7 @@ makeBareEdge( id_type const i, id_type const j )
 */
 inline
 BareEdge
-setBareEdge( id_type const i, id_type const j )
+setBareEdge( ID const i, ID const j )
 {
     BareEdge be;
     be.first = i < j ? i : j;
@@ -236,8 +236,8 @@ setBareEdge( id_type const i, id_type const j )
 
 /*! \ingroup BareItemsBuilder
   \param  bool is false if orientation  has been changed.
-  \param i is a Point id_type
-  \param j is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
   \pre i and j >0
   \brief It creates a non-standard BareEdge.
 
@@ -249,38 +249,38 @@ setBareEdge( id_type const i, id_type const j )
  */
 inline
 BareEdge
-setBareEdgeNo( id_type const i, id_type const j )
+setBareEdgeNo( ID const i, ID const j )
 {
     return BareEdge( i, j );
 }
 
 
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from three Point id_type's
+ \brief It creates Bare Face objects from three Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point id_type
-  \param j is a Point id_type
-  \param k is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
+  \param k is a Point ID
 
   To be used for triangular faces.
   \pre i, j and k >0. i!=j!=k
 
 */
-std::pair<BareFace, bool> makeBareFace( id_type const i, id_type const j, id_type const k );
+std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k );
 
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from four Point id_type's
+ \brief It creates Bare Face objects from four Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point id_type
-  \param j is a Point id_type
-  \param k is a Point id_type
-  \param l is a Point id_type
+  \param i is a Point ID
+  \param j is a Point ID
+  \param k is a Point ID
+  \param l is a Point ID
 
   To be used for triangular faces.
   \pre i, j and k >0. i!=j!=k
 
 */
-std::pair<BareFace, bool> makeBareFace( id_type const i, id_type const j, id_type const k, id_type const l );
+std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k, ID const l );
 
 /*! \defgroup comparison Comparison Operators
   Operators for comparing BareItems
@@ -407,11 +407,11 @@ struct cmpBareItem<BareFace>
 //! Handles Bare Items
 /*! This class handles mesh bare edges and faces construction. Used only in mesh builders
  A BareItemsHandler is a specialisation of a STL map which holds the pair
- formed by a bareitem and its id_type.
- The id_type  is automatically generated if one uses the method  addIfNotThere
+ formed by a bareitem and its ID.
+ The ID  is automatically generated if one uses the method  addIfNotThere
 */
 template <typename BareItem>
-class BareItemsHandler: public std::map<BareItem, id_type, cmpBareItem<BareItem> >
+class BareItemsHandler: public std::map<BareItem, ID, cmpBareItem<BareItem> >
 {
 public:
     typedef std::map<BareItem, UInt, cmpBareItem<BareItem> > container;
@@ -421,17 +421,17 @@ public:
 
     BareItemsHandler();
     bool isThere( BareItem const & ) const; //!< is the item there? I just ask
-    id_type id( BareItem const & ) const; //!< Returns id_type of a BareItem. 0 if not there
-    bool setId( BareItem const & item, id_type const i ); //!< To modify id_type of bareitem item in the list
-    std::pair<id_type, bool> addIfNotThere( BareItem const & ); //!< if not there adds it, the item id_type is autogenerated
-    std::pair<id_type, bool> addIfNotThere( BareItem const &, const id_type id ); //!<if not there adds it, and sets id_type id
+    ID id( BareItem const & ) const; //!< Returns ID of a BareItem. 0 if not there
+    bool setId( BareItem const & item, ID const i ); //!< To modify ID of bareitem item in the list
+    std::pair<ID, bool> addIfNotThere( BareItem const & ); //!< if not there adds it, the item ID is autogenerated
+    std::pair<ID, bool> addIfNotThere( BareItem const &, const ID id ); //!<if not there adds it, and sets ID id
     bool isThereDel( BareItem const & ); //!< if it is there take it out (Id is lost)
 
     UInt howMany() const; //!< The # of entities ones actually stored.
     UInt maxId() const
     {
         return _idCount;
-    } //!< Max id_type currently in use
+    } //!< Max ID currently in use
     void showMe() const; //!< Writes info in output
 private:
     UInt _idCount;
@@ -447,7 +447,7 @@ private:
 //!\ingroup Helper
 template <typename BareItem>
 inline
-id_type getId( std::pair<BareItem, id_type> const & i )
+ID getId( std::pair<BareItem, ID> const & i )
 {
     return i.second;
 }
@@ -455,7 +455,7 @@ id_type getId( std::pair<BareItem, id_type> const & i )
 //!\ingroup Helper
 template <typename BareItem>
 inline
-BareItem getItem( std::pair<BareItem, id_type> const & i )
+BareItem getItem( std::pair<BareItem, ID> const & i )
 {
     return i.first;
 }
@@ -479,7 +479,7 @@ BareItemsHandler<BareItem>::isThere( const BareItem & s ) const
 template <class BareItem>
 inline
 bool
-BareItemsHandler<BareItem>::setId( const BareItem & s, id_type const id )
+BareItemsHandler<BareItem>::setId( const BareItem & s, ID const id )
 {
     const_iterator i = find( s );
     if ( i != container::end() )
@@ -496,7 +496,7 @@ BareItemsHandler<BareItem>::setId( const BareItem & s, id_type const id )
 
 template <class BareItem>
 inline
-id_type
+ID
 BareItemsHandler<BareItem>::id( const BareItem & s ) const
 {
     const_iterator i = this->find( s );
@@ -508,7 +508,7 @@ BareItemsHandler<BareItem>::id( const BareItem & s ) const
 
 template <class BareItem>
 inline
-std::pair<id_type, bool>
+std::pair<ID, bool>
 BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s )
 {
     std::pair<typename BareItemsHandler<BareItem>::iterator, bool> i( insert( std::make_pair( s, _idCount + 1 ) ) );
@@ -519,8 +519,8 @@ BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s )
 
 template <class BareItem>
 inline
-std::pair<id_type, bool>
-BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s, const id_type id )
+std::pair<ID, bool>
+BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s, const ID id )
 {
     std::pair<typename BareItemsHandler<BareItem>::iterator, bool> i( insert( std::make_pair( s, id ) ) );
     ( i.first ) ->second = id; // Set new id in any case.

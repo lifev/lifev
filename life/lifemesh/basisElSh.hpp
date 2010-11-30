@@ -34,21 +34,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
  A Basis Geometric Shape contains (when relevant) the following methods
 
-  static id_type eToP(id_type const _localEdge, id_type const _point);
+  static ID eToP(ID const _localEdge, ID const _point);
 
 
-  static id_type fToP(id_type const _localFace, id_type const _point);
+  static ID fToP(ID const _localFace, ID const _point);
 
-  which returns the local id_type of a point on a face of the GeoShape
+  which returns the local ID of a point on a face of the GeoShape
 
-  static pair<id_type,bool> fToE(id_type const _localFace, id_type const _edge);
+  static pair<ID,bool> fToE(ID const _localFace, ID const _edge);
 
-  which returns the local id_type corresponding and edge on the face _localface.
+  which returns the local ID corresponding and edge on the face _localface.
   It returna also if the orientation of the edge on the face is consistent
   with that of the same edge on the element
 
 
- \note The methods edge to point-id_type (EtoP) and Face to point-id_type (FtoP)
+ \note The methods edge to point-ID (EtoP) and Face to point-ID (FtoP)
  return the local id number of points on faces and edges (when relevant)
  We follow the convention of indicating THE VERTICES FIRST!  */
 
@@ -71,7 +71,7 @@ template <typename GeoShape>
 class reversePoint
 {
 public:
-    INLINE id_type operate( id_type const & point );
+    INLINE ID operate( ID const & point );
 };
 
 
@@ -218,7 +218,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static ID eToP( ID const _localEdge, ID const _point );
 };
 
 //! \ingroup GeoShape
@@ -232,7 +232,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 0;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static ID eToP( ID const _localEdge, ID const _point );
 };
 
 //! \ingroup GeoShape
@@ -246,7 +246,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static ID eToP( ID const _localEdge, ID const _point );
 };
 
 //! \ingroup GeoShape
@@ -260,7 +260,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 1;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static ID eToP( ID const _localEdge, ID const _point );
 };
 
 //! \ingroup GeoShape
@@ -275,9 +275,9 @@ public:
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
-    static id_type fToP( id_type const _localFace, id_type const _point );
-    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static ID eToP( ID const _localEdge, ID const _point );
+    static ID fToP( ID const _localFace, ID const _point );
+    static std::pair<ID, bool> fToE( ID const _localFace, ID const _edge );
 };
 //! \ingroup GeoShape
 class LinearTetraBubble:
@@ -291,9 +291,9 @@ public:
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 1;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
-    static id_type fToP( id_type const _localFace, id_type const _point );
-    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static ID eToP( ID const _localEdge, ID const _point );
+    static ID fToP( ID const _localFace, ID const _point );
+    static std::pair<ID, bool> fToE( ID const _localFace, ID const _edge );
 };
 
 //! \ingroup GeoShape
@@ -308,9 +308,9 @@ public:
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
-    static id_type fToP( id_type const _localFace, id_type const _point );
-    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static ID eToP( ID const _localEdge, ID const _point );
+    static ID fToP( ID const _localFace, ID const _point );
+    static std::pair<ID, bool> fToE( ID const _localFace, ID const _edge );
 };
 
 //! \ingroup GeoShape
@@ -325,9 +325,9 @@ public:
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
-    static id_type fToP( id_type const _localFace, id_type const _point );
-    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static ID eToP( ID const _localEdge, ID const _point );
+    static ID fToP( ID const _localFace, ID const _point );
+    static std::pair<ID, bool> fToE( ID const _localFace, ID const _edge );
 };
 
 //! \ingroup GeoShape
@@ -342,9 +342,9 @@ public:
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 1;
     static const UInt nbPtsPerVolume = 1;
-    static id_type eToP( id_type const _localEdge, id_type const _point );
-    static id_type fToP( id_type const _localFace, id_type const _point );
-    static std::pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
+    static ID eToP( ID const _localEdge, ID const _point );
+    static ID fToP( ID const _localFace, ID const _point );
+    static std::pair<ID, bool> fToE( ID const _localFace, ID const _edge );
 };
 
 /*******************************************************************
@@ -352,8 +352,8 @@ public:
 *******************************************************************/
 template <typename GeoShape>
 INLINE
-id_type reversePoint<GeoShape>::
-operate( id_type const & point )
+ID reversePoint<GeoShape>::
+operate( ID const & point )
 {
     return point <= GeoShape::numVertices ? GeoShape::numVertices - point + 1 : GeoShape::numPoints - point + GeoShape::numVertices + 1;
 }
