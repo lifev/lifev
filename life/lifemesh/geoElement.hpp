@@ -158,7 +158,7 @@ public:
     typedef EdgeType GeoBElement;
 
 
-#ifdef THREEDIM
+#ifndef TWODIM
     //! ID of first adjacent 2D element
     ID ad_first() const
     {
@@ -326,7 +326,11 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoE
 template <typename GEOSHAPE, typename MC>
 const UInt GeoElement2D<GEOSHAPE, MC>::numLocalEdges;
 
-#ifdef THREEDIM
+#ifdef TWODIM
+template <typename GEOSHAPE, typename MC>
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+#else //THREEDIM
 template <typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
@@ -334,16 +338,17 @@ GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
         esecond  ( 0 ),
         posfirst ( 0 ),
         possecond( 0 )
-#else
-template <typename GEOSHAPE, typename MC>
-GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
 }
 
-#ifdef THREEDIM
+#ifdef TWODIM
+template <typename GEOSHAPE, typename MC>
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
+    MC::FaceMarker                    ( geoElement2D )
+#else //THREEDIM
 template <typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
     GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
@@ -352,11 +357,6 @@ GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoE
     esecond  ( geoElement2D.esecond   ),
     posfirst ( geoElement2D.posfirst  ),
     possecond( geoElement2D.possecond )
-#else
-template <typename GEOSHAPE, typename MC>
-GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
-    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
-    MC::FaceMarker                    ( geoElement2D )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
