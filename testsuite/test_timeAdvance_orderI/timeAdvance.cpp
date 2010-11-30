@@ -70,7 +70,6 @@ nonlinear_function.hpp:
 
 #include <life/lifesolver/SecondOrderSolver.hpp>
 #include <life/lifesolver/dataSecondOrder.hpp>
-#include <life/lifefilters/medit_wrtrs.hpp>
 
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifefem/FESpace.hpp>
