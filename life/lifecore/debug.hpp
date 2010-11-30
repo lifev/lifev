@@ -44,44 +44,6 @@ typedef NdebugStream & (*LNManipFunction)( NdebugStream&); // manipulator functi
 
 #define LIFEV_LINEINFO "[" << __FILE__ << ":" << __LINE__ << "] "
 
-namespace detail
-{
-#if 0
-class print
-{
-public:
-    explicit print ( std::ostream& __os ) : _M_os ( __os ) {}
-
-    template<typename T>
-    std::ostream& operator<< ( T const& __t )
-        {
-            __print ( __t, St::SInt2Type<St::STypeTraits<T>::isFundamental>() );
-            return _M_os;
-        }
-    template<typename T>
-    std::ostream& operator<< ( T const* __t )
-        {
-            //__print ( __t, St::SInt2Type<St::STypeTraits<T>::isFundamental>() );
-            _M_os << __t;
-            return _M_os;
-        }
-private:
-    template<typename T>
-    void __print ( T const& __t, St::SInt2Type<true> )
-        {
-            _M_os << __t;
-        }
-    template<typename T>
-    void __print ( T const& __t, St::SInt2Type<false> )
-        {
-
-        }
-private:
-    std::ostream& _M_os;
-};
-#endif
-} // end namespace detail
-
 class DebugStream
 {
 public:
