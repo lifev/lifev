@@ -61,12 +61,12 @@ namespace ElemOper
                             * massCFE.phi(jDof,iQuadPt)
                             * massCFE.wDetJacobian(iQuadPt);
                     }
-                    
+
                     localValue*=coefficient;
 
                     // Add on the local matrix
                     localView(iDof,jDof)+=localValue;
-                    
+
                     if (iDof!=jDof)
                     {
                         localView(jDof,iDof)+=localValue;
@@ -91,7 +91,7 @@ namespace ElemOper
         {
             // Extract the view of the matrix
             ElemMat::matrix_view localView = localStiff.block(iterFDim,iterFDim);
-            
+
             // Loop over the basis functions
             for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
             {
@@ -111,12 +111,12 @@ namespace ElemOper
                                 * stiffCFE.wDetJacobian(iQuadPt);
                         }
                     }
-                    
+
                     localValue*=coefficient;
-                    
+
                     // Add on the local matrix
                     localView(iDof,jDof)+=localValue;
-                    
+
                     if (iDof != jDof)
                     {
                         localView(jDof,iDof)+=localValue;
@@ -135,189 +135,6 @@ namespace ElemOper
 /*
   Mass matrix: \int coef(t,x,y,z,u) v_i v_j
 */
-void mass( Real (*coef)(Real,Real,Real,Real,Real),
-           ElemMat& elmat, const CurrentFE& fe,
-           const Dof& dof,
-           const ScalUnknown<Vector>& U,Real t)
-{
-    int iblock=0,jblock=0;
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    UInt i, ig;
-    int iloc, jloc;
-    Real s, coef_s;
-    ID eleId=fe.currentId();
-    UInt iu;
-    double uPt;
-    Real x,y,z;
-
-    std::vector<Real> locU(fe.nbFEDof());
-    for (i=0;i<fe.nbFEDof();i++)
-    {
-        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];    //(one component)
-    }
-
-    //
-    // diagonal
-    //
-    for ( i = 0;i < fe.nbDiag();i++ )
-    {
-        iloc = fe.patternFirst( i );
-        s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-        {
-            uPt=0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                uPt+=locU[iu]*fe.phi(iu,ig);
-            }
-            fe.coorQuadPt(x,y,z,ig);
-            s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig )*
-                coef(t,x,y,z,uPt);
-        }
-        mat( iloc, iloc ) += s;
-    }
-    //
-    // extra diagonal
-    //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
-    {
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
-        s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-        {
-            uPt=0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                uPt+=locU[iu]*fe.phi(iu,ig);
-            }
-            fe.coorQuadPt(x,y,z,ig);
-            s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig )*
-                coef(t,x,y,z,uPt);
-        }
-        coef_s = s;
-        mat( iloc, jloc ) += coef_s;
-        mat( jloc, iloc ) += coef_s;
-    }
-}
-
-
-/*
-  Stiffness matrix: \int coef(t,x,y,z,u) grad v_i . grad v_j
-*/
-void stiff( Real (*coef)(Real,Real,Real,Real,Real),
-            ElemMat& elmat, const CurrentFE& fe,
-            const Dof& dof,
-            const ScalUnknown<Vector>& U,Real t)
-{
-    int iblock=0,jblock=0;
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    int iloc, jloc;
-    UInt i, icoor, ig;
-    double s, coef_s;
-    ID eleId=fe.currentId();
-    UInt iu;
-    double uPt;
-    Real x,y,z;
-
-    std::vector<Real> locU(fe.nbFEDof());
-    for (i=0;i<fe.nbFEDof();i++)
-    {
-        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];    //(one component)
-    }
-    //
-    // diagonal
-    //
-    for ( i = 0;i < fe.nbDiag();i++ )
-    {
-        iloc = fe.patternFirst( i );
-        s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-        {
-            uPt=0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                uPt+=locU[iu]*fe.phi(iu,ig);
-            }
-            fe.coorQuadPt(x,y,z,ig);
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                    * fe.weightDet( ig )*coef(t,x,y,z,uPt);
-        }
-        mat( iloc, iloc ) += s;
-    }
-    //
-    // extra diagonal
-    //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
-    {
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
-        s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-        {
-            uPt=0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                uPt+=locU[iu]*fe.phi(iu,ig);
-            }
-            fe.coorQuadPt(x,y,z,ig);
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig )*coef(t,x,y,z,uPt);
-        }
-        coef_s = s;
-        mat( iloc, jloc ) += coef_s;
-        mat( jloc, iloc ) += coef_s;
-    }
-}
-
-
-/*
-  compute \int fct(t,x,y,z,u) \phi_i
-*/
-void source( Real (*fct)(Real,Real,Real,Real,Real),
-             ElemVec& elvec, const CurrentFE& fe,
-             const Dof& dof,
-             const ScalUnknown<Vector>& U,Real t)
-{
-    int iblock=0;
-    UInt i, ig;
-    ElemVec::vector_view vec = elvec.block( iblock );
-    Real s;
-    ID eleId=fe.currentId();
-    UInt iu;
-    double uPt;
-
-    std::vector<Real> locU(fe.nbFEDof());
-    for (i=0;i<fe.nbFEDof();i++)
-    {
-        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];    //(one component)
-    }
-    for ( i = 0;i < fe.nbFEDof();i++ )
-    {
-        s = 0.0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-        {
-            uPt=0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                uPt+=locU[iu]*fe.phi(iu,ig);
-            }
-            s += fe.phi( i, ig ) *
-                fct(t, fe.quadPt( ig, 0 ),
-                    fe.quadPt( ig, 1 ),
-                    fe.quadPt( ig, 2 ), uPt) *
-                fe.weightDet( ig );
-        }
-        vec( i ) += s;
-    }
-}
-
-
-
-
-
-
-
-
-
-
 
 //
 // coeff*Mass
