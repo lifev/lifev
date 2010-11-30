@@ -205,24 +205,11 @@ typedef uint8_type dim_type;
 //! Indices (starting from 0)
 typedef size_t size_type;
 
-// typedef for indices
-
-typedef std::string BCName;
-const BCName nullBCName; // The empty string!
-
-#define THREEDIM 1
+// For now only 3 dimensional problems.
 
 extern const UInt nDimensions;
-
-#if defined(THREEDIM)
 #define NDIM 3
 
-#elif defined(TWODIM)
-#define NDIM 2
-
-#else
-#error You MUST compile with either -DTWODIM of -DTHREEDIM set, sorry.
-#endif
 
 } // end namespace LifeV
 
