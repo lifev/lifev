@@ -5,8 +5,6 @@
 
 #include <Epetra_config.h>
 
-#include <life/lifefilters/medit_wrtrs.hpp>
-
 #include<life/lifemesh/dataMesh.hpp>
 
 #include<life/lifecore/GetPot.hpp>
@@ -58,6 +56,7 @@ int main(int argc, char** argv)
                 members[i]=0;
             int ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
 
+            /* We have removed mesh_wrt, but here it was called ...
             MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
             if(me==0)
                 {
@@ -66,6 +65,7 @@ int main(int argc, char** argv)
                     writeMesh( mesh_output , *mesh);
                     //writeMesh( "solid_ord.mesh", *solidData.mesh());
                 }
+            */
         }
     else
         if(create_edge)
@@ -101,7 +101,9 @@ int main(int argc, char** argv)
                                                 *mesh, SolidInterfaceFlag,
                                                 0., &edgeFlag);
                 mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->locDofMap(), newMarker);
+            /* We have removed mesh_wrt, but here it was called ...
                 writeMesh( mesh_output , *mesh2);
+            */
             }
     MPI_Finalize();
 #endif
