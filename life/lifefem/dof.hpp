@@ -373,7 +373,7 @@ void Dof::update( Mesh& M )
             // when working in 2D we simply iterate over the elements to have faces
             for ( l = 0; l < nldpf; ++l )
               _ltg( ++lc, ie ) = gcount + ( ie - 1 ) * nldpf + l;
-#elif defined THREEDIM
+#else // THREEDIM
             for ( i = 1; i <= nlf; ++i )
                 for ( l = 0; l < nldpf; ++l )
                 {
