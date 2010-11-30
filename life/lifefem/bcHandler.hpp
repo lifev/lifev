@@ -530,7 +530,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             marker = mesh.bElement( iBoundaryElement ).point( iVeBEl ).marker(); // vertex marker
 #ifdef TWODIM
                             iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
-#elif defined THREEDIM
+#else // THREEDIM
                             iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
 #endif
 
@@ -663,7 +663,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         {
 #ifdef TWODIM
                             iEdEl = iBElEl; // local edge number (in element)
-#elif defined THREEDIM
+#else // THREEDIM
                             iEdEl = GeoShape::fToE( iBElEl, iLocalBElement ).first; // local edge number (in element)
 #endif
                             marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
