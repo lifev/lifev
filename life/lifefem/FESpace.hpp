@@ -708,15 +708,15 @@ FESpace<Mesh, Map>::setSpace( const std::string& space )
 	{
 		case P1 :
 
-			#ifdef TWODIM
+#ifdef TWODIM
 				M_refFE = &feTriaP1;
 				M_Qr    = &quadRuleTria6pt;
 				M_bdQr  = &quadRuleSeg3pt;
-			#elif defined THREEDIM
+#else // THREEDIM
 				M_refFE = &feTetraP1;
 				M_Qr    = &quadRuleTetra4pt;
 				M_bdQr	= &quadRuleTria3pt;
-			#endif
+#endif
 
 			break;
 
@@ -726,7 +726,7 @@ FESpace<Mesh, Map>::setSpace( const std::string& space )
 				M_refFE = &feTriaP1;
 				M_Qr    = &quadRuleTria6pt;
 				M_bdQr  = &quadRuleSeg3pt;
-			#elif defined THREEDIM
+			#else // THREEDIM
 				M_refFE = &feTetraP1;
 				M_Qr    = &quadRuleTetra15pt;
 				M_bdQr	= &quadRuleTria4pt;
@@ -740,7 +740,7 @@ FESpace<Mesh, Map>::setSpace( const std::string& space )
 
 				break;
 
-			#elif defined THREEDIM
+			#else // THREEDIM
 				M_refFE = &feTetraP1bubble;
 				M_Qr    = &quadRuleTetra64pt;
 				M_bdQr	= &quadRuleTria3pt;
@@ -754,7 +754,7 @@ FESpace<Mesh, Map>::setSpace( const std::string& space )
 				M_refFE = &feTriaP2;
 				M_Qr    = &quadRuleTria6pt;
 				M_bdQr  = &quadRuleSeg3pt;
-			#elif defined THREEDIM
+			#else // THREEDIM
 				M_refFE = &feTetraP2;
 				M_Qr    = &quadRuleTetra15pt;
 				M_bdQr	= &quadRuleTria3pt;
@@ -766,7 +766,7 @@ FESpace<Mesh, Map>::setSpace( const std::string& space )
 				M_refFE = &feTriaP2;
 				M_Qr    = &quadRuleTria6pt;
 				M_bdQr  = &quadRuleSeg3pt;
-			#elif defined THREEDIM
+			#else // THREEDIM
 				M_refFE = &feTetraP2;
 				M_Qr    = &quadRuleTetra64pt;
 				M_bdQr	= &quadRuleTria4pt;
