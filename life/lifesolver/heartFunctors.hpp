@@ -51,7 +51,8 @@ public:
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&)> fct_type1;
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&,const ID&, const EntityFlag& )> fct_typeREO;
     GetPot _dataFile;
-    Epetra_Comm*   comm;
+    boost::shared_ptr<Epetra_Comm>   comm;
+    // Epetra_Comm*   comm;
 	int stim_source;
     Real stim_period_1;
     Real stim_period_2;
