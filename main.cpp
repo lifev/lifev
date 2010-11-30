@@ -44,26 +44,11 @@
 #include <iomanip>
 #include <string>
 
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/util_string.hpp>
 #include <life/lifecore/chrono.hpp>
 
 #include <lifemc/lifecore/Parser.hpp>
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "SpiritParser Test" ,
-                            "A spirit parser tester" ,
-                            "1.0",
-                            "Some practical examples about how the spirit parser is working!",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2009 EPFL");
-
-    about.addAuthor("Cristiano Malossi", "Developer", "cristiano.malossi@epfl.ch", "");
-    return about;
-}
 
 using namespace LifeV;
 
