@@ -99,10 +99,8 @@ namespace LifeV
   -# \c uint64_type a 64 bit unsigned integer
 
   LifeV defines a number of useful aliases for integers
-  -# \c SInt an alias to int16_type
   -# \c Int an alias to int32_type
   -# \c UInt an alias to uint32_type used for adressing
-  -# \c USInt an alias to uint16_type
   -# \c id_type an alias to uint32_type used to identify local numbering or components
   -# \c ID an alias to id_type used to identify local numbering or components
   -# \c Index_t an alias to id_type used to identify local numbering or components
@@ -189,13 +187,11 @@ typedef detail::unsigned_integer<64>::type uint64_type;
 
 //! Generic integer data
 typedef int32_type  Int;
-typedef int16_type  SInt;
 //! generic unsigned integer (used mainly for addressing)
 typedef uint32_type UInt;
-typedef uint16_type USInt;
 
 //! IDs (which starts ALWAYS from 1)
-typedef uint32_type id_type;
+typedef uint32_type id_type;  //togliere : id_type, Index_t size_type(if unused), dim_type
 typedef id_type ID;
 typedef id_type Index_t;
 
