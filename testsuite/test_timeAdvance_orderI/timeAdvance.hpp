@@ -44,12 +44,7 @@
 // ===================================================
 //! Includes
 // ===================================================
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
-
-
-
-
 
 /*!
  * \class problem
