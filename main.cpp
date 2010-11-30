@@ -42,7 +42,6 @@
 #include <iomanip>
 #include <string>
 
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
 
 #include <life/lifealg/EpetraMap.hpp>
@@ -52,20 +51,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "TestFunction.hpp"
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "ContainerOfVectors Test" ,
-                            "A ContainerOfVectors tester" ,
-                            "1.0",
-                            "Some practical examples about how the ContainerOfVectors is working!",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2009 EPFL");
-
-    about.addAuthor("Cristiano Malossi", "Developer", "cristiano.malossi@epfl.ch", "");
-    return about;
-}
 
 using namespace LifeV;
 
