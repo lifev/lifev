@@ -20,8 +20,6 @@
 
 #ifndef TWODIM
 #include <life/lifesolver/fixedPointBase.hpp>
-#include <life/lifefilters/medit_wrtrs.hpp>
-
 
 namespace LifeV
 {
