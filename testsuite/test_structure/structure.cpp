@@ -43,7 +43,6 @@
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataElasticStructure.hpp>
 #include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
-#include <life/lifefilters/medit_wrtrs.hpp>
 
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
