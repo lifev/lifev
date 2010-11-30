@@ -35,7 +35,7 @@
 
 
 #ifndef __timeAdvance_H
-#define __timeAdvance_H 
+#define __timeAdvance_H
 
 
 
@@ -44,11 +44,7 @@
 // ===================================================
 //! Includes
 // ===================================================
-#include <life/lifecore/application.hpp>
 #include <life/lifecore/life.hpp>
-
-
-
 
 
 /*!
@@ -59,7 +55,7 @@
  *  @see
  */
 class problem
-// 
+//
 {
 public:
 
@@ -69,9 +65,7 @@ public:
 
     problem( int argc,
               char** argv,
-	      boost::shared_ptr<Epetra_Comm>        structComm,
-              LifeV::AboutData const& ad,
-              LifeV::po::options_description const& od );
+	      boost::shared_ptr<Epetra_Comm>        structComm);
 
     ~problem()
         {}

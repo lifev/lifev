@@ -64,37 +64,12 @@ nonlinear_function.hpp:
 	#include "Epetra_SerialComm.h"
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/application.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include "timeAdvance.hpp"
-
-// ===================================================
-//! Program information
-// ===================================================
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Test TimeAdvance Order II" ,
-                            "LifeV Test TimeAdvance Order II" ,
-                            "1.0",
-                            "Time Advance test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 MOX");
-
-    about.addAuthor("Fabio Nobile", "Developer", "fabio.nobile@polimi.it", ""); 
-    about.addAuthor("Matteo Pozzoli", "Developer", "matteo1.pozzoli@mail.polimi.it", "");
-    about.addAuthor("Christian Vergara", "Developer", "christian.vergara@polimi.it", "");
-    return about;
-}
-
-
-
 
 
 // ===================================================
@@ -135,7 +110,7 @@ std::set<UInt> parseList( const std::string& list )
 // ===================================================
 int
 main( int argc, char** argv )
-{   
+{
    #ifdef HAVE_MPI
       MPI_Init(&argc, &argv);
 
@@ -148,10 +123,7 @@ main( int argc, char** argv )
    #endif
 
 
-    LifeV::po::options_description desc("Specific options");
-    desc.add_options()("file,f", LifeV::po::value<std::string>()->default_value( "data" ), "data file name");
-
-    problem ProblemOrderII( argc, argv,  Comm, makeAbout(), desc );
+    problem ProblemOrderII( argc, argv,  Comm );
     ProblemOrderII.run();
 
 
