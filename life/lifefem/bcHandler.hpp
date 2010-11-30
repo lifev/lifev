@@ -325,7 +325,7 @@ public:
 
     //! specific BC hint
     void setBCHint(const BCHints& hint) {M_hint = hint;}
-    
+
     //@}
 
 
@@ -489,7 +489,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     UInt nDofBElE = nDofPerEdge * nBElementE; // number of edge's Dof on a boundary element
 #ifdef TWODIM
     UInt nDofBEl = nDofBElV + nDofBElE; // number of total Dof on a boundary element
-#elif defined THREEDIM
+#else
     UInt nDofBEl = nDofBElV + nDofBElE + nDofPerFace; // number of total Dof on a boundary element
 #endif
     UInt nDofElemV = nElemV * nDofPerVert; // number of vertex's Dof on a Element
