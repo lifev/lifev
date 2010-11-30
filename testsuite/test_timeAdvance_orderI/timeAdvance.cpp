@@ -26,7 +26,7 @@
 */
 /**
    \file timeAdvance.cpp
-  
+
    \date 2010-02-10
  */
 
@@ -104,7 +104,7 @@ using namespace LifeV;
     const int BACK   = 1;
 
     typedef RegionMesh3D<LinearTetra> RegionMesh;
-    
+
 
 // ===================================================
 //! Private members
@@ -118,8 +118,8 @@ struct problem::Private
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
     double rho;
     std::string    data_file_name;
-   
-    boost::shared_ptr<Epetra_Comm>     comm; 
+
+    boost::shared_ptr<Epetra_Comm>     comm;
 
     fct_type getUZero()
     {
@@ -138,9 +138,7 @@ struct problem::Private
 // ===================================================
 problem::problem( int          argc,
                       char**                argv,
-                      boost::shared_ptr<Epetra_Comm>        structComm,
-                      LifeV::AboutData const&               ad,
-                      LifeV::po::options_description const& od ):
+                      boost::shared_ptr<Epetra_Comm>        structComm):
     members( new Private() )
 {
     GetPot command_line(argc, argv);
@@ -168,9 +166,9 @@ problem::run()
   typedef boost::shared_ptr<vector_type>                                         vector_ptrtype;
 
   typedef boost::shared_ptr< TimeAdvance< vector_type > >                 TimeAdvance_type;
-  
+
   bool verbose = (members->comm->MyPID() == 0);
-   
+
     //
     // dataSecondOrder
     //
@@ -191,125 +189,125 @@ problem::run()
   //
   // The Problem Solver
   //
-  
+
   if (verbose) std::cout << "The Problem Solver" << std::flush;
-  
+
   const RefFE*    refFE_beta  (0);
   const QuadRule* qR_beta     (0);
   const QuadRule* bdQr_beta   (0);
-  
+
   refFE_beta = &feTetraP1;
-  
+
   // Scalar Solution Space:
 
   std::string Order =  dataFile( "problem/space_discretization/order", "P1");
   const RefFE*    refFE(0);
   const QuadRule* qR(0);
   const QuadRule* bdQr(0);
-  
+
   if ( Order.compare("P1") == 0 )
     {
       if (verbose) std::cout << "  Space order : P1" << std::flush;
-      
+
       refFE = &feTetraP1;
       qR    = &quadRuleTetra15pt; // DoE 5
       bdQr  = &quadRuleTria4pt;   // DoE 2
-      
+
     }
   else
     if ( Order.compare("P2") == 0 )
             {
 	      if (verbose) std::cout << " Space order : P2";
-	      
+
 	      refFE = &feTetraP2;
 	      qR    = &quadRuleTetra64pt; // DoE 6
 	      bdQr = &quadRuleTria4pt;   // DoE 2
-	      
+
             }
   if (verbose) std::cout << std::endl;
-  
+
 
   // finite element space of the solution
-  
+
   FESpace< RegionMesh, EpetraMap > FESpace(meshPart,
 					   *refFE,
 					   *qR,
 					   *bdQr,
 					   1,
 					  members->comm);
-  
+
   // instantiation of the SecondOrderSolver class
-  
+
   SecondOrderSolver< RegionMesh3D<LinearTetra> > problem                 (dataProblem,
 									  FESpace,
 									  members->comm);
 
 // the boundary conditions
-  
+
   BCFunctionBase uZero ( members->getUZero()  );
   BCFunctionBase uEx(uexact);
-  
+
   BCHandler bcH( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
-  
+
   bcH.addBC( "Top",     TOP,    Essential, Full,      uEx, 1 );
   bcH.addBC( "Bottom",  BOTTOM, Essential, Full,      uEx, 1 );
   bcH.addBC( "Left",    LEFT,   Essential, Full,      uEx, 1 );
   bcH.addBC( "Right",   RIGHT,  Essential, Full,      uEx, 1 );
   bcH.addBC( "Front",   FRONT,  Essential, Full,      uEx, 1 );
   bcH.addBC( "Back",    BACK,   Essential, Full,      uEx, 1 );
-  
+
   std::ofstream out_norm;
   if (verbose)
     {
       out_norm.open("norm.txt");
-      out_norm << "  time   " 
+      out_norm << "  time   "
 	       <<"  L2_Error    "
-	       <<"  H1_Error    "  
-	       <<"  L2_RelError "   
-	       <<"  H1_RelError \n"; 
+	       <<"  H1_Error    "
+	       <<"  L2_RelError "
+	       <<"  H1_RelError \n";
       out_norm.close();
     }
-  
+
   Chrono chrono;
 
  std::string TimeAdvanceMethod =  dataFile( "problem/time_discretization/method", "Newmark");
 
- TimeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( TimeAdvanceMethod ) ); 
+ TimeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( TimeAdvanceMethod ) );
 
   UInt OrderDev = 1;
 
   //! initialization of parameters of time Advance method:
-  
+
   if (TimeAdvanceMethod =="Newmark")
     timeAdvance->setup( dataProblem.dataTime()->getNewmark_parameters() , OrderDev);
-   
+
   if (TimeAdvanceMethod =="BDF")
     timeAdvance->setup(dataProblem.dataTime()->getBDF_order() , OrderDev);
 
   Real dt = dataProblem.dataTime()->getTimeStep();
   Real T  = dataProblem.dataTime()->getEndTime();
-  
+
   chrono.start();
   problem.setUp(dataFile);
-  
+
   problem.buildSystem();
-  
+
   MPI_Barrier(MPI_COMM_WORLD);
-  
+
   if (verbose ) std::cout << "ok." << std::endl;
- 
-  // building some vectors: 
+
+  // building some vectors:
   EpetraMap uMap = problem.u().getMap();
-  
+
   // computing the rhs
   vector_type rhs ( uMap, Unique );
   vector_type rhsV( uMap, Unique );
-  
+
   // postProcess
   boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
-  
+
   std::string const exporterType =  dataFile( "exporter/type", "ensight");
-  
+
 #ifdef HAVE_HDF5
   if (exporterType.compare("hdf5") == 0)
     exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "problem" ) );
@@ -321,10 +319,10 @@ problem::run()
       else
 	exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "problem",   members->comm->MyPID()) );
     }
-  
+
   exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
   exporter->setMeshProcId( meshPart.mesh(),  members->comm->MyPID() );
-  
+
   vector_ptrtype U ( new vector_type(problem.u(), exporter->mapType() ) );
   vector_ptrtype V  ( new vector_type(problem.u(),  exporter->mapType() ) );
   vector_ptrtype Exact ( new vector_type(problem.u(), exporter->mapType() ) );
@@ -332,27 +330,27 @@ problem::run()
   vector_ptrtype RHS ( new vector_type(problem.u(), exporter->mapType() ) );
   exporter->addVariable( ExporterData::Scalar, "displacement", U,
   		       UInt(0), FESpace.dof().numTotalDof() );
-  
+
   exporter->addVariable( ExporterData::Scalar, "velocity", V,
 			 UInt(0), FESpace.dof().numTotalDof() );
-  exporter->addVariable( ExporterData::Scalar, "uexact", Exact, 
+  exporter->addVariable( ExporterData::Scalar, "uexact", Exact,
 			 UInt(0), FESpace.dof().numTotalDof() );
-  
+
   exporter->addVariable( ExporterData::Scalar, "vexact", vExact,
 			 UInt(0), FESpace.dof().numTotalDof() );
 
 exporter->postProcess( 0 );
- 
+
    //initialization of unk
- 
+
    //evaluate disp and vel as interpolate the bcFunction d0 and v0
    FESpace.interpolate(d0, *U, 0.0);
    FESpace.interpolate(v0, *V , 0.0);
-   
+
 //evaluate disp and vel as interpolate the bcFunction d0 and v0
-    
+
    std::vector<vector_type> uv0;
-  
+
    if(TimeAdvanceMethod =="Newmark")
      {
     uv0.push_back(*U);
@@ -367,9 +365,9 @@ exporter->postProcess( 0 );
 	    uv0.push_back(*U);
 	  }
       }
-  
+
     timeAdvance->initialize_unk(uv0);
-   
+
    timeAdvance-> setDeltaT(dataProblem.dataTime()->getTimeStep());
 
     timeAdvance->showMe();
@@ -383,13 +381,13 @@ exporter->postProcess( 0 );
     for (Real time = dt; time <= T; time += dt)
       {
 	dataProblem.setTime(time);
-	
+
 	if (verbose)
 	  {
 	    std::cout << std::endl;
 	    std::cout << " P - Now we are at time " << dataProblem.getTime() << " s." << std::endl;
 	  }
-	
+
 	double alpha = timeAdvance->coeff_der( 0 ) / ( dataProblem.dataTime()->getTimeStep());
 
 	//evaluate rhs
@@ -398,22 +396,22 @@ exporter->postProcess( 0 );
        	rhsV = timeAdvance->time_der(dt);
 	FESpace.L2ScalarProduct(source_in, rhs, time);
 	rhs += problem.matrMass() *rhsV;
-      
+
 	//update system
 	problem.updateSystem(alpha, rhs );
-     
+
 	//solver system
 	problem.iterate( bcH );    // Computes the matrices and solves the system
-    	
+
 	//update unknowns of timeAdvance
 	timeAdvance->shift_right(problem.u());
-      
+
 	//evaluate uexact solution
 	FESpace.interpolate(uexact, *Exact , time);
 	FESpace.interpolate(v0, *vExact , time);
 	*U =  timeAdvance->unk(0);
 	*V  =timeAdvance->vnk();
-     
+
 	//postProcess
 	exporter->postProcess(time);
 
@@ -422,13 +420,13 @@ exporter->postProcess( 0 );
 	vector_type u (problem.u(), Repeated);
 
 	Real H1_Error,H1_Error1, H1_RelError, L2_Error1, L2_Error, L2_RelError;
-	
-	L2_Error = FESpace.L2Error(uexact, u, time ,&L2_RelError);
-	H1_Error = FESpace.H1Error(uExact, u, time ,&H1_RelError);	
 
-		
+	L2_Error = FESpace.L2Error(uexact, u, time ,&L2_RelError);
+	H1_Error = FESpace.H1Error(uExact, u, time ,&H1_RelError);
+
+
 	//save the norm
-	if (verbose) 
+	if (verbose)
 	  {
 	    out_norm.open("norm.txt", std::ios::app);
 	    out_norm << time             << "   "
@@ -438,7 +436,7 @@ exporter->postProcess( 0 );
 		     << H1_RelError << "\n";
 	    out_norm.close();
 	  }
-	
+
 	MPI_Barrier(MPI_COMM_WORLD);
       }
     chrono.stop();
