@@ -31,6 +31,8 @@
 #ifndef __EnsightToHdf5_H
 #define __EnsightToHdf5_H 1
 
+#include <boost/shared_ptr.hpp>
+
 
 class EnsightToHdf5
 
