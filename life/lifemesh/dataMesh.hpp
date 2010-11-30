@@ -48,7 +48,7 @@
 #ifdef TWODIM
     #include <life/lifemesh/regionMesh2D.hpp>
     #include <life/lifefilters/readMesh2D.hpp>
-#elif defined THREEDIM
+#else // THREEDIM
 	#include <life/lifemesh/regionMesh3D.hpp>
 	#include <life/lifefilters/readMesh3D.hpp>
     #include <life/lifemesh/structuredMesh3D.hpp>
@@ -144,7 +144,7 @@ void readMesh( Mesh& mesh, const DataMesh& data )
     //Update Edges
     M_mesh->updateElementEdges(true);
 
-#elif defined( THREEDIM )
+#else // THREEDIM
 
     bool updateEdgesAndFaces(true);
 
