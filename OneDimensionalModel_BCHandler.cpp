@@ -55,10 +55,10 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler() :
     M_boundary[ OneD_left ].reset(  new BC_Type( OneD_left ) );
     M_boundary[ OneD_right ].reset( new BC_Type( OneD_right ) );
 
-    M_boundarySet[ OneD_left ].insert(  make_pair( OneD_first,  false ) );
-    M_boundarySet[ OneD_left ].insert(  make_pair( OneD_second, false ) );
-    M_boundarySet[ OneD_right ].insert( make_pair( OneD_first,  false ) );
-    M_boundarySet[ OneD_right ].insert( make_pair( OneD_second, false ) );
+    M_boundarySet[ OneD_left ].insert(  std::make_pair( OneD_first,  false ) );
+    M_boundarySet[ OneD_left ].insert(  std::make_pair( OneD_second, false ) );
+    M_boundarySet[ OneD_right ].insert( std::make_pair( OneD_first,  false ) );
+    M_boundarySet[ OneD_right ].insert( std::make_pair( OneD_second, false ) );
 }
 
 OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH ) :
