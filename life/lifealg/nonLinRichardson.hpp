@@ -25,9 +25,6 @@
 #include <life/lifealg/generalizedAitken.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
-// debug
-#include <life/lifefilters/medit_wrtrs.hpp>
-//
 namespace LifeV
 {
 template < class Fct >
