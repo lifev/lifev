@@ -48,24 +48,24 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
               boost::shared_ptr<VectorType> A3, boost::shared_ptr<VectorType> B3,
               boost::shared_ptr<VectorType> A4, boost::shared_ptr<VectorType> B4 )
 {
-	//CONTAINER OF BASE VECTORS
-	typedef ContainerOfVectors< VectorType >             ContainerOfBaseVectors;
-	typedef boost::shared_ptr<ContainerOfBaseVectors>    ContainerOfBaseVectors_ptr;
+    //CONTAINER OF BASE VECTORS
+    typedef ContainerOfVectors< VectorType >             ContainerOfBaseVectors;
+    typedef boost::shared_ptr<ContainerOfBaseVectors>    ContainerOfBaseVectors_ptr;
 
-	ContainerOfBaseVectors_ptr V1, V2, V3, V4;
-	Real scalar = 1.0;
+    ContainerOfBaseVectors_ptr V1, V2, V3, V4;
+    Real scalar = 1.0;
 
-	V1.reset( new ContainerOfBaseVectors() );
-	V1->push_back( A1 );
-	V1->push_back( B1 );
-	std::cout << "V1" << std::endl;
-	V1->ShowMe();
+    V1.reset( new ContainerOfBaseVectors() );
+    V1->push_back( A1 );
+    V1->push_back( B1 );
+    std::cout << "V1" << std::endl;
+    V1->ShowMe();
 
-	V2.reset( new ContainerOfBaseVectors() );
-	V2->push_back( A2 );
-	V2->push_back( B2 );
-	std::cout << "V2" << std::endl;
-	V2->ShowMe();
+    V2.reset( new ContainerOfBaseVectors() );
+    V2->push_back( A2 );
+    V2->push_back( B2 );
+    std::cout << "V2" << std::endl;
+    V2->ShowMe();
 
     V3.reset( new ContainerOfBaseVectors() );
     V3->push_back( A3 );
@@ -79,46 +79,46 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
     std::cout << "V4" << std::endl;
     V4->ShowMe();
 
-	// Test operator= (initialize a vector as a copy of another vector)
-	ContainerOfBaseVectors_ptr VV1, VV2, VV3;
-	VV1.reset( new ContainerOfBaseVectors() );
-	*VV1 = *V1;
-	std::cout << "VV1 = V1" << std::endl;
-	VV1->ShowMe();
+    // Test operator= (initialize a vector as a copy of another vector)
+    ContainerOfBaseVectors_ptr VV1, VV2, VV3;
+    VV1.reset( new ContainerOfBaseVectors() );
+    *VV1 = *V1;
+    std::cout << "VV1 = V1" << std::endl;
+    VV1->ShowMe();
 
-	// Test operator= (for initialize the vector with a scalar - cannot be done for an empty vector!)
-	*VV1 = scalar;
-	std::cout << "VV1 = 1.0" << std::endl;
-	VV1->ShowMe();
+    // Test operator= (for initialize the vector with a scalar - cannot be done for an empty vector!)
+    *VV1 = scalar;
+    std::cout << "VV1 = 1.0" << std::endl;
+    VV1->ShowMe();
 
-	// Test operator+=
-	*VV1 += *V1;
-	std::cout << "VV1 += V1" << std::endl;
-	VV1->ShowMe();
+    // Test operator+=
+    *VV1 += *V1;
+    std::cout << "VV1 += V1" << std::endl;
+    VV1->ShowMe();
 
-	// Test operator-
-	*VV1 = *VV1 - *V2;
-	std::cout << "VV1 = VV1 - V2" << std::endl;
-	VV1->ShowMe();
+    // Test operator-
+    *VV1 = *VV1 - *V2;
+    std::cout << "VV1 = VV1 - V2" << std::endl;
+    VV1->ShowMe();
 
-	// Test operator*= (multiplication: scalar * vector)
-	scalar = 1.23456789;
-	*VV1 = *V1;
-	*VV1 = scalar * *V1;
-	std::cout << "VV1 = 1.23456789 * V1" << std::endl;
-	VV1->ShowMe();
+    // Test operator*= (multiplication: scalar * vector)
+    scalar = 1.23456789;
+    *VV1 = *V1;
+    *VV1 = scalar * *V1;
+    std::cout << "VV1 = 1.23456789 * V1" << std::endl;
+    VV1->ShowMe();
 
-	// Test operator* (scalar product multiplication)
-	scalar = VV1->Dot( *V1 );
-	std::cout << "scalarProduct = VV1.Dot(V1) = " << scalar << std::endl << std::endl;
+    // Test operator* (scalar product multiplication)
+    scalar = VV1->Dot( *V1 );
+    std::cout << "scalarProduct = VV1.Dot(V1) = " << scalar << std::endl << std::endl;
 
-	// Concatenate two vector of vectors
-	VV1->push_back( *V1 );
-	VV1->push_back( *V2 );
-	std::cout << "VV1->push_back( V1 ); VV1->push_back( V2 )" << std::endl;
-	VV1->ShowMe();
+    // Concatenate two vector of vectors
+    VV1->push_back( *V1 );
+    VV1->push_back( *V2 );
+    std::cout << "VV1->push_back( V1 ); VV1->push_back( V2 )" << std::endl;
+    VV1->ShowMe();
 
-	VV2.reset( new ContainerOfBaseVectors() );
+    VV2.reset( new ContainerOfBaseVectors() );
     VV2->push_back( *V3 );
     VV2->push_back( *V4 );
     VV2->push_back( *V3 );
@@ -126,7 +126,7 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
     VV2->ShowMe();
 
     // Element by element Multiplication
-	std::cout << "VV2 *= VV1" << std::endl;
+    std::cout << "VV2 *= VV1" << std::endl;
     *VV2 *= *VV1;
     VV2->ShowMe();
     std::cout << "VV1 =" << std::endl;
@@ -190,5 +190,5 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
     std::cout << "!VV3 " << std::endl;
     (!(*VV3)).ShowMe();
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
