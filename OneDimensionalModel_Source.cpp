@@ -35,7 +35,8 @@
 
 #include "OneDimensionalModel_Source.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, OneDimensionalModel_SourceTypes > OneDimensionalModel_SourceMap;
 
@@ -43,11 +44,11 @@ std::map< std::string, OneDimensionalModel_SourceTypes > OneDimensionalModel_Sou
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_Source::OneDimensionalModel_Source() :
-    M_Physics   ()
+        M_Physics   ()
 {}
 
 OneDimensionalModel_Source::OneDimensionalModel_Source( const Physics_PtrType Physics ) :
-    M_Physics   ( Physics )
+        M_Physics   ( Physics )
 {}
 
 // ===================================================

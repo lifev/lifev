@@ -38,7 +38,8 @@
 #include <lifemc/lifesolver/BCInterface_FunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface_OperatorFunction.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface_OperatorFunctionFile - LifeV bcFunction wrapper for BCInterface (with Operators)
 /*!
@@ -52,7 +53,7 @@ namespace LifeV {
  */
 template< class Operator >
 class BCInterface_OperatorFunctionFile: public virtual BCInterface_FunctionFile< Operator > ,
-                                        public virtual BCInterface_OperatorFunction< Operator >
+        public virtual BCInterface_OperatorFunction< Operator >
 {
 public:
 
@@ -124,9 +125,9 @@ inline BCInterface_Function< Operator >* BCInterface_CreateOperatorFunctionFile(
 // ===================================================
 template< class Operator >
 BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile() :
-    super0      (),
-    super1      (),
-    super2      ()
+        super0      (),
+        super1      (),
+        super2      ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -137,9 +138,9 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile()
 
 template< class Operator >
 BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const Data_Type& data ) :
-    super0      (),
-    super1      (),
-    super2      ()
+        super0      (),
+        super1      (),
+        super2      ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -151,9 +152,9 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( 
 
 template< class Operator >
 BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const BCInterface_OperatorFunctionFile& function ) :
-    super0      ( function ),
-    super1      ( function ),
-    super2      ( function )
+        super0      ( function ),
+        super1      ( function ),
+        super2      ( function )
 {
 }
 

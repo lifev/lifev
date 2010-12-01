@@ -37,7 +37,8 @@
 
 #include <lifemc/lifesolver/BCInterface1D_Definitions.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface1D_Data - The BCInterface data container
 /*!

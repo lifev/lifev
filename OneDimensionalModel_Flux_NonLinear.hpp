@@ -43,7 +43,8 @@
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Flux.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_Flux_NonLinear - Class containing the non-linear flux function F of the 1D hyperbolic problem.
 /*!
@@ -116,16 +117,16 @@ public:
      * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
      */
     void EigenValuesEigenVectors( const Real& A, const Real& Q,
-                                        Container2D_Type& eigenvalues,
-                                        Container2D_Type& leftEigenvector1,
-                                        Container2D_Type& leftEigenvector2,
+                                  Container2D_Type& eigenvalues,
+                                  Container2D_Type& leftEigenvector1,
+                                  Container2D_Type& leftEigenvector2,
                                   const UInt& indz = 0 ) const;
 
     //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
     void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
-                                             Container2D_Type& deltaEigenvalues,
-                                             Container2D_Type& deltaLeftEigenvector1,
-                                             Container2D_Type& deltaLeftEigenvector2,
+                                       Container2D_Type& deltaEigenvalues,
+                                       Container2D_Type& deltaLeftEigenvector1,
+                                       Container2D_Type& deltaLeftEigenvector2,
                                        const UInt& indz = 0 ) const;
 
     //@}

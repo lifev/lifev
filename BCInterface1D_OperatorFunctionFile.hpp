@@ -38,7 +38,8 @@
 #include <lifemc/lifesolver/BCInterface1D_FunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface1D_OperatorFunction.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface1D_OperatorFunctionFile - LifeV bcFunction wrapper for BCInterface1D (with Operators)
 /*!
@@ -52,7 +53,7 @@ namespace LifeV {
  */
 template< class Operator >
 class BCInterface1D_OperatorFunctionFile: public virtual BCInterface1D_FunctionFile< Operator > ,
-                                          public virtual BCInterface1D_OperatorFunction< Operator >
+        public virtual BCInterface1D_OperatorFunction< Operator >
 {
 public:
 
@@ -124,9 +125,9 @@ inline BCInterface1D_Function< Operator >* BCInterface1D_CreateOperatorFunctionF
 // ===================================================
 template< class Operator >
 BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFile() :
-    super0      (),
-    super1      (),
-    super2      ()
+        super0      (),
+        super1      (),
+        super2      ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -137,9 +138,9 @@ BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFi
 
 template< class Operator >
 BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFile( const Data_Type& data ) :
-    super0      (),
-    super1      (),
-    super2      ()
+        super0      (),
+        super1      (),
+        super2      ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -151,9 +152,9 @@ BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFi
 
 template< class Operator >
 BCInterface1D_OperatorFunctionFile< Operator >::BCInterface1D_OperatorFunctionFile( const BCInterface1D_OperatorFunctionFile& function ) :
-    super0      ( function ),
-    super1      ( function ),
-    super2      ( function )
+        super0      ( function ),
+        super1      ( function ),
+        super2      ( function )
 {
 }
 

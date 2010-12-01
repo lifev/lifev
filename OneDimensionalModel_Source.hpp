@@ -39,7 +39,8 @@
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_Source - Base class for the source function of the 1D hyperbolic problem.
 /*!

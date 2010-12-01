@@ -44,7 +44,8 @@
 #include <lifemc/lifesolver/MonolithicGE.hpp>
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface_FSI Fake class for non-FSI problems.
 /*!
@@ -266,145 +267,145 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
 
     switch ( M_FSIFunction )
     {
-        case DerFluidLoadToFluid:
+    case DerFluidLoadToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
-            break;
+        break;
 
-        case DerFluidLoadToStructure:
+    case DerFluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
-            if ( !Oper->isSolid() )
-                return;
+        if ( !Oper->isSolid() )
+            return;
 
-            operMethod->setDerFluidLoadToStructure( Oper->sigmaSolidRepeated() );
+        operMethod->setDerFluidLoadToStructure( Oper->sigmaSolidRepeated() );
 
-            M_base = operMethod->bcvDerFluidLoadToStructure();
+        M_base = operMethod->bcvDerFluidLoadToStructure();
 
-            break;
+        break;
 
-        case DerHarmonicExtensionVelToFluid:
+    case DerHarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
-            if ( !Oper->isFluid() )
-                return;
+        if ( !Oper->isFluid() )
+            return;
 
-            operMethod->setDerHarmonicExtensionVelToFluid( Oper->derVeloFluidMesh() );
+        operMethod->setDerHarmonicExtensionVelToFluid( Oper->derVeloFluidMesh() );
 
-            M_base = operMethod->bcvDerHarmonicExtensionVelToFluid();
+        M_base = operMethod->bcvDerHarmonicExtensionVelToFluid();
 
-            break;
+        break;
 
-        case DerStructureDispToSolid:
+    case DerStructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerStructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
-            break;
+        break;
 
-        case FluidInterfaceDisp:
+    case FluidInterfaceDisp:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
-            //operMethod->FluidInterfaceDisp( (LifeV::Vector&) Oper->lambdaFluidRepeated() );
+        //operMethod->FluidInterfaceDisp( (LifeV::Vector&) Oper->lambdaFluidRepeated() );
 
-            //M_base = operMethod->bcvFluidInterfaceDisp();
+        //M_base = operMethod->bcvFluidInterfaceDisp();
 
-            break;
+        break;
 
-        case FluidLoadToStructure:
+    case FluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
-            if ( !Oper->isSolid() )
-                return;
+        if ( !Oper->isSolid() )
+            return;
 
-            operMethod->setFluidLoadToStructure( Oper->sigmaSolidRepeated() );
+        operMethod->setFluidLoadToStructure( Oper->sigmaSolidRepeated() );
 
-            M_base = operMethod->bcvFluidLoadToStructure();
+        M_base = operMethod->bcvFluidLoadToStructure();
 
-            break;
+        break;
 
-        case HarmonicExtensionVelToFluid:
+    case HarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
-            if ( !Oper->isFluid() )
-                return;
+        if ( !Oper->isFluid() )
+            return;
 
-            Oper->setHarmonicExtensionVelToFluid( Oper->veloFluidMesh() );
+        Oper->setHarmonicExtensionVelToFluid( Oper->veloFluidMesh() );
 
-            M_base = Oper->bcvHarmonicExtensionVelToFluid();
+        M_base = Oper->bcvHarmonicExtensionVelToFluid();
 
-            break;
+        break;
 
-        case SolidLoadToStructure:
+    case SolidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
-            if ( !Oper->isFluid() )
-                return;
+        if ( !Oper->isFluid() )
+            return;
 
-            Oper->setSolidLoadToStructure( Oper->minusSigmaFluidRepeated() );
+        Oper->setSolidLoadToStructure( Oper->minusSigmaFluidRepeated() );
 
-            M_base = Oper->bcvSolidLoadToStructure();
+        M_base = Oper->bcvSolidLoadToStructure();
 
-            break;
+        break;
 
-        case StructureDispToHarmonicExtension:
+    case StructureDispToHarmonicExtension:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
-            if ( !Oper->isFluid() )
-                return;
+        if ( !Oper->isFluid() )
+            return;
 
-            operMethod->setStructureDispToHarmonicExtension( Oper->lambdaFluidRepeated() );
+        operMethod->setStructureDispToHarmonicExtension( Oper->lambdaFluidRepeated() );
 
-            M_base = operMethod->bcvStructureDispToHarmonicExtension();
+        M_base = operMethod->bcvStructureDispToHarmonicExtension();
 
-            break;
+        break;
 
-        case StructureDispToSolid:
+    case StructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
-            break;
+        break;
 
-        case StructureToFluid:
+    case StructureToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
-            if ( !Oper->isFluid() )
-                return;
+        if ( !Oper->isFluid() )
+            return;
 
-            Oper->setStructureToFluid( Oper->veloFluidMesh() );
-            Oper->setStructureToFluidParametres();
+        Oper->setStructureToFluid( Oper->veloFluidMesh() );
+        Oper->setStructureToFluidParametres();
 
-            M_base = Oper->bcvStructureToFluid();
+        M_base = Oper->bcvStructureToFluid();
 
-            break;
+        break;
     }
 }
 

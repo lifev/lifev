@@ -35,22 +35,23 @@
 
 #include <lifemc/lifesolver/BCInterface1D_Data.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 BCInterface1D_Data::BCInterface1D_Data() :
-    M_side               (),
-    M_line               (),
-    M_quantity           (),
-    M_baseString         (),
-    M_base               (),
-    M_resistance         (),
-    M_mapSide            (),
-    M_mapQuantity        (),
-    M_mapLine            (),
-    M_mapBase            ()
+        M_side               (),
+        M_line               (),
+        M_quantity           (),
+        M_baseString         (),
+        M_base               (),
+        M_resistance         (),
+        M_mapSide            (),
+        M_mapQuantity        (),
+        M_mapLine            (),
+        M_mapBase            ()
 {
     //Set mapSide
     M_mapSide["left"]   = OneD_left;
@@ -76,16 +77,16 @@ BCInterface1D_Data::BCInterface1D_Data() :
 }
 
 BCInterface1D_Data::BCInterface1D_Data( const BCInterface1D_Data& data ) :
-    M_side              ( data.M_side ),
-    M_line              ( data.M_line ),
-    M_quantity          ( data.M_quantity ),
-    M_baseString        ( data.M_baseString ),
-    M_base              ( data.M_base ),
-    M_resistance        ( data.M_resistance ),
-    M_mapSide           ( data.M_mapSide ),
-    M_mapQuantity       ( data.M_mapQuantity ),
-    M_mapLine           ( data.M_mapLine ),
-    M_mapBase           ( data.M_mapBase )
+        M_side              ( data.M_side ),
+        M_line              ( data.M_line ),
+        M_quantity          ( data.M_quantity ),
+        M_baseString        ( data.M_baseString ),
+        M_base              ( data.M_base ),
+        M_resistance        ( data.M_resistance ),
+        M_mapSide           ( data.M_mapSide ),
+        M_mapQuantity       ( data.M_mapQuantity ),
+        M_mapLine           ( data.M_mapLine ),
+        M_mapBase           ( data.M_mapBase )
 {
 }
 

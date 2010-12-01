@@ -40,7 +40,8 @@
 
 #include <lifemc/lifesolver/BCInterface_Function.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface_OperatorFunction - LifeV bcFunction wrapper for BCInterface (with operators)
 /*!
@@ -196,10 +197,10 @@ inline BCInterface_Function< Operator >* BCInterface_CreateOperatorFunction()
 // ===================================================
 template< class Operator >
 BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction() :
-    super                            (),
-    M_operator                       (),
-    M_flag                           (),
-    M_list                           ()
+        super                            (),
+        M_operator                       (),
+        M_flag                           (),
+        M_list                           ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -210,10 +211,10 @@ BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction() :
 
 template< class Operator >
 BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const Data_Type& data ) :
-    super                            (),
-    M_operator                       (),
-    M_flag                           (),
-    M_list                           ()
+        super                            (),
+        M_operator                       (),
+        M_flag                           (),
+        M_list                           ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -225,10 +226,10 @@ BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const Da
 
 template< class Operator >
 BCInterface_OperatorFunction< Operator >::BCInterface_OperatorFunction( const BCInterface_OperatorFunction& function ) :
-    super                            ( function ),
-    M_operator                       ( function.M_operator ),
-    M_flag                           ( function.M_flag ),
-    M_list                           ( function.M_list )
+        super                            ( function ),
+        M_operator                       ( function.M_operator ),
+        M_flag                           ( function.M_flag ),
+        M_list                           ( function.M_list )
 {
 }
 
@@ -295,96 +296,96 @@ BCInterface_OperatorFunction< FSIOperator >::UpdateOperatorVariables()
         switch ( *j )
         {
             // f_ -> FLUID
-            case f_area:
+        case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().area( M_flag ) << "\n";
+            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().area( M_flag ) << "\n";
 #endif
-                SetVariable( "f_area", M_operator->fluid().area( M_flag ) );
+            SetVariable( "f_area", M_operator->fluid().area( M_flag ) );
 
-                break;
+            break;
 
-            case f_density:
+        case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                  f_density: " << M_operator->fluid().density() << "\n";
+            Debug( 5023 ) << "                                                  f_density: " << M_operator->fluid().density() << "\n";
 #endif
-                SetVariable( "f_density", M_operator->fluid().density() );
+            SetVariable( "f_density", M_operator->fluid().density() );
 
-                break;
+            break;
 
-            case f_flux:
+        case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().flux( M_flag ) << "\n";
+            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().flux( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_flux", M_operator->fluid().flux( M_flag, *M_operator->un() ) );
+            SetVariable( "f_flux", M_operator->fluid().flux( M_flag, *M_operator->un() ) );
 
-                break;
+            break;
 
-            case f_pressure:
+        case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().pressure( M_flag ) << "\n";
+            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->fluid().pressure( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_pressure", M_operator->fluid().pressure( M_flag, *M_operator->un() ) );
+            SetVariable( "f_pressure", M_operator->fluid().pressure( M_flag, *M_operator->un() ) );
 
-                break;
+            break;
 
-            case f_viscosity:
+        case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
+            Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
 #endif
-                SetVariable( "f_viscosity", M_operator->fluid().viscosity() );
+            SetVariable( "f_viscosity", M_operator->fluid().viscosity() );
 
-                break;
+            break;
 
-                // s_ -> SOLID
-            case s_density:
+            // s_ -> SOLID
+        case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho() << "\n";
+            Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho() << "\n";
 #endif
 
-                SetVariable( "s_density", M_operator->solid().rho() );
+            SetVariable( "s_density", M_operator->solid().rho() );
 
-                break;
+            break;
 
-            case s_poisson:
+        case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson() << "\n";
+            Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson() << "\n";
 #endif
 
-                SetVariable( "s_poisson", M_operator->solid().poisson() );
+            SetVariable( "s_poisson", M_operator->solid().poisson() );
 
-                break;
+            break;
 
-            case s_thickness:
+        case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness() << "\n";
+            Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness() << "\n";
 #endif
 
-                SetVariable( "s_thickness", M_operator->solid().thickness() );
+            SetVariable( "s_thickness", M_operator->solid().thickness() );
 
-                break;
+            break;
 
-            case s_young:
+        case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young() << "\n";
+            Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young() << "\n";
 #endif
 
-                SetVariable( "s_young", M_operator->solid().young() );
+            SetVariable( "s_young", M_operator->solid().young() );
 
-                break;
+            break;
 
-            default:
-                SwitchErrorMessage( "FSI" );
+        default:
+            SwitchErrorMessage( "FSI" );
         }
 }
 
@@ -402,56 +403,56 @@ BCInterface_OperatorFunction< Oseen< RegionMesh3D< LinearTetra > > >::UpdateOper
         switch ( *j )
         {
             // f_ -> FLUID
-            case f_area:
+        case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
+            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
 #endif
-                SetVariable( "f_area", M_operator->area( M_flag ) );
+            SetVariable( "f_area", M_operator->area( M_flag ) );
 
-                break;
+            break;
 
-            case f_density:
+        case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                  f_density: " << M_operator->density() << "\n";
+            Debug( 5023 ) << "                                                  f_density: " << M_operator->density() << "\n";
 #endif
-                SetVariable( "f_density", M_operator->density() );
+            SetVariable( "f_density", M_operator->density() );
 
-                break;
+            break;
 
-            case f_flux:
+        case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
+            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_flux", M_operator->flux( M_flag ) );
+            SetVariable( "f_flux", M_operator->flux( M_flag ) );
 
-                break;
+            break;
 
-            case f_pressure:
+        case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
+            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_pressure", M_operator->pressure( M_flag ) );
+            SetVariable( "f_pressure", M_operator->pressure( M_flag ) );
 
-                break;
+            break;
 
-            case f_viscosity:
+        case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                f_viscosity: " << M_operator->viscosity() << "\n";
+            Debug( 5023 ) << "                                                f_viscosity: " << M_operator->viscosity() << "\n";
 #endif
-                SetVariable( "f_viscosity", M_operator->viscosity() );
+            SetVariable( "f_viscosity", M_operator->viscosity() );
 
-                break;
+            break;
 
-            default:
+        default:
 
-                SwitchErrorMessage( "OSEEN" );
+            SwitchErrorMessage( "OSEEN" );
         }
 }
 
@@ -469,56 +470,56 @@ BCInterface_OperatorFunction< OseenShapeDerivative< RegionMesh3D< LinearTetra > 
         switch ( *j )
         {
             // f_ -> FLUID
-            case f_area:
+        case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
+            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_flag) << "): " << M_operator->area( M_flag ) << "\n";
 #endif
-                SetVariable( "f_area", M_operator->area( M_flag ) );
+            SetVariable( "f_area", M_operator->area( M_flag ) );
 
-                break;
+            break;
 
-            case f_density:
+        case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                f_density(): " << M_operator->density() << "\n";
+            Debug( 5023 ) << "                                                f_density(): " << M_operator->density() << "\n";
 #endif
-                SetVariable( "f_density", M_operator->density() );
+            SetVariable( "f_density", M_operator->density() );
 
-                break;
+            break;
 
-            case f_flux:
+        case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
+            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_flag) << "): " << M_operator->flux( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_flux", M_operator->flux( M_flag ) );
+            SetVariable( "f_flux", M_operator->flux( M_flag ) );
 
-                break;
+            break;
 
-            case f_pressure:
+        case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
+            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_flag) << "): " << M_operator->pressure( M_flag ) << "\n";
 #endif
 
-                SetVariable( "f_pressure", M_operator->pressure( M_flag ) );
+            SetVariable( "f_pressure", M_operator->pressure( M_flag ) );
 
-                break;
+            break;
 
-            case f_viscosity:
+        case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                              f_viscosity(): " << M_operator->viscosity() << "\n";
+            Debug( 5023 ) << "                                              f_viscosity(): " << M_operator->viscosity() << "\n";
 #endif
-                SetVariable( "f_viscosity", M_operator->viscosity() );
+            SetVariable( "f_viscosity", M_operator->viscosity() );
 
-                break;
+            break;
 
-            default:
+        default:
 
-                SwitchErrorMessage( "OSEENSHAPEDERIVATIVE" );
+            SwitchErrorMessage( "OSEENSHAPEDERIVATIVE" );
         }
 }
 

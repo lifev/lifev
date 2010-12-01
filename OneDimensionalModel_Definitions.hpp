@@ -61,7 +61,8 @@
 
 namespace ublas = boost::numeric::ublas;
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*! @enum Physics Types
  */
@@ -100,11 +101,11 @@ class OneDimensionalModel_BCFunction;
 
 // Type definitions
 typedef singleton< factory< OneDimensionalModel_Physics,
-                            OneDimensionalModel_PhysicsTypes > > Factory_OneDimensionalModel_Physics;
+OneDimensionalModel_PhysicsTypes > > Factory_OneDimensionalModel_Physics;
 typedef singleton< factory< OneDimensionalModel_Flux,
-                            OneDimensionalModel_FluxTypes > >    Factory_OneDimensionalModel_Flux;
+OneDimensionalModel_FluxTypes > >    Factory_OneDimensionalModel_Flux;
 typedef singleton< factory< OneDimensionalModel_Source,
-                            OneDimensionalModel_SourceTypes > >  Factory_OneDimensionalModel_Source;
+OneDimensionalModel_SourceTypes > >  Factory_OneDimensionalModel_Source;
 
 //typedef singleton< factoryClone< OneDimensionalModel_BCFunction > > FactoryClone_OneDimensionalModel_BCFunction;
 
@@ -113,23 +114,26 @@ typedef boost::array< Real, 2 >                 Container2D_Type;
 // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
 typedef ublas::vector< Real >                   ScalVec;
 
-enum OneD_BC {
-                 OneD_W1,
-                 OneD_W2,
-                 OneD_A,
-                 OneD_Q,
-                 OneD_P
-             };
+enum OneD_BC
+{
+    OneD_W1,
+    OneD_W2,
+    OneD_A,
+    OneD_Q,
+    OneD_P
+};
 
-enum OneD_BCSide {
-                    OneD_left,
-                    OneD_right
-                 };
+enum OneD_BCSide
+{
+    OneD_left,
+    OneD_right
+};
 
-enum OneD_BCLine {
-                    OneD_first,
-                    OneD_second
-                 };
+enum OneD_BCLine
+{
+    OneD_first,
+    OneD_second
+};
 
 // ===================================================
 // OneDimensionalModel Utility Methods
