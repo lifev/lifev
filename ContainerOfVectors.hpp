@@ -39,7 +39,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ContainerOfVectors - LifeV vector made of other vectors
 /*!
@@ -430,7 +431,7 @@ private:
 // ===================================================
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors():
-    M_container()
+        M_container()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -441,7 +442,7 @@ ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors():
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors( const ContainerOfVectors& containerOfVectors ) :
-    M_container()
+        M_container()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1021,7 +1022,7 @@ ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< 
 template< class VectorType, class ContainerType >
 void
 ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors,
-                                                            Real& scalarProduct )
+                                                      Real& scalarProduct )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1048,7 +1049,7 @@ ContainerOfVectors< VectorType, ContainerType >::Abs()
 template< class VectorType, class ContainerType >
 void
 ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< VectorType,
-        ContainerType >& containerOfVectors )
+                                                      ContainerType >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
