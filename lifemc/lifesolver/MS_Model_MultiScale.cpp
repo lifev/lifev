@@ -34,14 +34,15 @@
 
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Model_MultiScale::MS_Model_MultiScale() :
-    M_modelsList        (),
-    M_couplingsList     ()
+        M_modelsList        (),
+        M_couplingsList     ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -52,9 +53,9 @@ MS_Model_MultiScale::MS_Model_MultiScale() :
 }
 
 MS_Model_MultiScale::MS_Model_MultiScale( const MS_Model_MultiScale& multiscale ) :
-    super               ( multiscale ),
-    M_modelsList        ( multiscale.M_modelsList ),
-    M_couplingsList     ( multiscale.M_couplingsList )
+        super               ( multiscale ),
+        M_modelsList        ( multiscale.M_modelsList ),
+        M_couplingsList     ( multiscale.M_couplingsList )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -66,9 +67,9 @@ MS_Model_MultiScale::MS_Model_MultiScale( const MS_Model_MultiScale& multiscale 
 MS_Model_MultiScale::~MS_Model_MultiScale()
 {
 
-    #ifdef HAVE_LIFEV_DEBUG
-        Debug( 8110 ) << "MS_Model_MultiScale::~MS_Model_MultiScale( ) \n";
-    #endif
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8110 ) << "MS_Model_MultiScale::~MS_Model_MultiScale( ) \n";
+#endif
 
     // Disconnect models and couplings to allow their destruction
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
@@ -178,7 +179,7 @@ MS_Model_MultiScale::SetupData( const std::string& FileName )
         M_modelsList[i]->SetGeometry( geometryScale, geometryRotate, geometryTranslate );
         M_modelsList[i]->SetGlobalData( M_globalData );
         M_modelsList[i]->SetupData( path + Enum2String( model, MS_modelsMap ) + "/"
-                                         + DataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
+                                    + DataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
     }
 
     // Load couplings
@@ -191,7 +192,7 @@ MS_Model_MultiScale::SetupData( const std::string& FileName )
         M_couplingsList[i]->SetCommunicator( M_comm );
         M_couplingsList[i]->SetGlobalData( M_globalData );
         M_couplingsList[i]->SetupData( path + Enum2String( coupling, MS_couplingsMap ) + "/"
-                                            + DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
+                                       + DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
 
         string2numbersVector< UInt > ( DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 3 ), modelsIDVector );
         string2numbersVector< UInt > ( DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 4 ), flagsIDVector );

@@ -44,7 +44,8 @@
 
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Solver - The MultiScale problem solver
 /*!

@@ -51,10 +51,10 @@
 // LifeV Trilinos
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-    #include <Epetra_MpiComm.h>
-    #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#include <mpi.h>
 #else
-    #include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifealg/EpetraMap.hpp>
@@ -70,7 +70,8 @@
 #include <string>
 #include <fstream>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // Enum objects
 /*! @enum algorithmsTypes
@@ -235,39 +236,39 @@ MS_ErrorCheck( const errorsTypes& error, const std::string& message = "" )
 
     switch ( error )
     {
-        case MS_IterationsMaximumNumber:
+    case MS_IterationsMaximumNumber:
 
-            errorMessage << "Maximum number of iterations reached!\n";
+        errorMessage << "Maximum number of iterations reached!\n";
 
-            break;
+        break;
 
-        case MS_Tolerance:
+    case MS_Tolerance:
 
-            errorMessage << "Tolerance not satisfied!\n";
+        errorMessage << "Tolerance not satisfied!\n";
 
-            break;
+        break;
 
-        case MS_Residual:
+    case MS_Residual:
 
-            errorMessage << "External residual not satisfied!\n";
+        errorMessage << "External residual not satisfied!\n";
 
-            break;
+        break;
 
-        case MS_ModelType:
+    case MS_ModelType:
 
-            errorMessage << "Model type incorrect!\n";
+        errorMessage << "Model type incorrect!\n";
 
-            break;
+        break;
 
-        case MS_CouplingType:
+    case MS_CouplingType:
 
-            errorMessage << "Coupling type incorrect!\n";
+        errorMessage << "Coupling type incorrect!\n";
 
-            break;
+        break;
 
-        default:
+    default:
 
-            errorMessage << "No error message for this errorType!\n";
+        errorMessage << "No error message for this errorType!\n";
     }
 
     errorMessage << message << "\n";

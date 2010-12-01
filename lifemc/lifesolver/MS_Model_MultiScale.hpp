@@ -45,7 +45,8 @@
 #include <lifemc/lifesolver/MS_Coupling_Stress.hpp>
 #include <lifemc/lifesolver/MS_Coupling_FluxStress.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Model_MultiScale - MultiScale model
 /*!

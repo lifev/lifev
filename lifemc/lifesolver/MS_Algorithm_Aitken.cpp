@@ -34,16 +34,17 @@
 
 #include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
-    super               (),
-    M_methodMap         (),
-    M_method            (),
-    M_generalizedAitken ()
+        super               (),
+        M_methodMap         (),
+        M_method            (),
+        M_generalizedAitken ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -59,10 +60,10 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
 }
 
 MS_Algorithm_Aitken::MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm ) :
-    super               ( algorithm ),
-    M_methodMap         ( algorithm.M_methodMap ),
-    M_method            ( algorithm.M_method ),
-    M_generalizedAitken ( algorithm.M_generalizedAitken )
+        super               ( algorithm ),
+        M_methodMap         ( algorithm.M_methodMap ),
+        M_method            ( algorithm.M_method ),
+        M_generalizedAitken ( algorithm.M_generalizedAitken )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -149,23 +150,23 @@ MS_Algorithm_Aitken::SubIterate()
         // Update Coupling Variables
         switch ( M_method )
         {
-            case Scalar:
+        case Scalar:
 
-                *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaScalar( *M_couplingVariables, *M_couplingResiduals );
+            *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaScalar( *M_couplingVariables, *M_couplingResiduals );
 
-                break;
+            break;
 
-            case Vectorial:
+        case Vectorial:
 
-                *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVector( *M_couplingVariables, *M_couplingResiduals, true );
+            *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVector( *M_couplingVariables, *M_couplingResiduals, true );
 
-                break;
+            break;
 
-            case VectorialBlock:
+        case VectorialBlock:
 
-                //*M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVectorBlock( *M_couplingVariables, *M_couplingResiduals, blocksVector, 2 );
+            //*M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVectorBlock( *M_couplingVariables, *M_couplingResiduals, blocksVector, 2 );
 
-                break;
+            break;
         }
 
         //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
@@ -192,7 +193,7 @@ MS_Algorithm_Aitken::SubIterate()
     Save( M_SubiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
     MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
-                                 " (required: " + number2string( M_Tolerance ) + ")\n" );
+                   " (required: " + number2string( M_Tolerance ) + ")\n" );
 }
 
 void

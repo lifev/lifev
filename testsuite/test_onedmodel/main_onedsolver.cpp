@@ -43,10 +43,10 @@
 #include <life/lifealg/EpetraMap.hpp>
 
 #ifdef EPETRA_MPI
-	#include "Epetra_MpiComm.h"
-	#include <mpi.h>
+#include "Epetra_MpiComm.h"
+#include <mpi.h>
 #else
-	#include "Epetra_SerialComm.h"
+#include "Epetra_SerialComm.h"
 #endif
 
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     absorbing->setFluxSource( OneDModel.GetFlux(), OneDModel.GetSource() );
 
     BCFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
-                                        dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1, _2 ) );
+                                                     dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
     // BC to test A_from_P conversion
     //Constant constantArea( 1.05 );
@@ -209,8 +209,8 @@ int main(int argc, char** argv)
 
         chronoSystem.stop();
 
-		//Save solution
-        if( count%50 == 0 || OneDModel.GetData().dataTime()->isLastTimeStep() )
+        //Save solution
+        if ( count%50 == 0 || OneDModel.GetData().dataTime()->isLastTimeStep() )
             OneDModel.SaveSolution();
 
         chronoIteration.stop();
@@ -221,12 +221,12 @@ int main(int argc, char** argv)
 
     chronoTotal.stop();
     std::cout << std::endl << " Simulation ended successfully in " << chronoTotal.diff()
-                      << " s" << std::endl;
+              << " s" << std::endl;
 
-    #ifdef HAVE_MPI
+#ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
-    #endif
+#endif
 
     if ( check )
     {

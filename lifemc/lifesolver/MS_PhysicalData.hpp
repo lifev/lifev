@@ -37,7 +37,8 @@
 
 #include <lifemc/lifesolver/MS_Definitions.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_PhysicalData - Global data container for the physical quantities of the problem
 /*!

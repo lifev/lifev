@@ -49,10 +49,11 @@
 
 #include <life/lifefilters/ensight.hpp>
 #ifdef HAVE_HDF5
-    #include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 #endif
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Model_FSI3D - MultiScale model for 3D FSI simulations
 /*!

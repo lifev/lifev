@@ -78,7 +78,7 @@ private:
     void f_jac( const Vector& x,
                 Vector& f,
                 Matrix& jac
-                ) const;
+              ) const;
     //! 2D dot product
     Real dot(const Vec2D& vec1, const Vec2D& vec2) const;
 
@@ -117,23 +117,23 @@ template<typename Params, typename Flux, typename Source>
 Interface2Vessels<Params, Flux, Source>::
 Interface2Vessels( OneDModelSolver<Params, Flux, Source> const& tube_alpha,
                    OneDModelSolver<Params, Flux, Source> const& tube_beta ):
-    _M_Un_alpha_bd    ( tube_alpha.BCValuesRight() ),
-    _M_Un_alpha_int   ( tube_alpha.BCValuesInternalRight() ),
-    _M_edge_alpha     ( tube_alpha.RightEdge() ),
-    _M_dof_alpha      ( tube_alpha.RightNodeId() ),
-    _M_fluxFun_alpha  ( tube_alpha.FluxFun() ),
-    _M_sourceFun_alpha( tube_alpha.SourceFun() ),
-    _M_bcDir_alpha    ( 2 ),
-    _M_Un_beta_bd     ( tube_beta.BCValuesLeft() ),
-    _M_Un_beta_int    ( tube_beta.BCValuesInternalLeft() ),
-    _M_edge_beta      ( tube_beta.LeftEdge() ),
-    _M_dof_beta       ( tube_beta.LeftNodeId() ),
-    _M_fluxFun_beta   ( tube_beta.FluxFun() ),
-    _M_sourceFun_beta ( tube_beta.SourceFun() ),
-    _M_bcDir_beta     ( 2 ),
-    _M_time_step      ( tube_alpha.timestep() )
+        _M_Un_alpha_bd    ( tube_alpha.BCValuesRight() ),
+        _M_Un_alpha_int   ( tube_alpha.BCValuesInternalRight() ),
+        _M_edge_alpha     ( tube_alpha.RightEdge() ),
+        _M_dof_alpha      ( tube_alpha.RightNodeId() ),
+        _M_fluxFun_alpha  ( tube_alpha.FluxFun() ),
+        _M_sourceFun_alpha( tube_alpha.SourceFun() ),
+        _M_bcDir_alpha    ( 2 ),
+        _M_Un_beta_bd     ( tube_beta.BCValuesLeft() ),
+        _M_Un_beta_int    ( tube_beta.BCValuesInternalLeft() ),
+        _M_edge_beta      ( tube_beta.LeftEdge() ),
+        _M_dof_beta       ( tube_beta.LeftNodeId() ),
+        _M_fluxFun_beta   ( tube_beta.FluxFun() ),
+        _M_sourceFun_beta ( tube_beta.SourceFun() ),
+        _M_bcDir_beta     ( 2 ),
+        _M_time_step      ( tube_alpha.timestep() )
 {
-  //  std::cout << "A0 = " << _M_sourceFun_alpha.
+    //  std::cout << "A0 = " << _M_sourceFun_alpha.
 
 
 }
@@ -219,7 +219,7 @@ Interface2Vessels::computeInterface2TubesValues()
         //! compute f(x) and its jacobian df(x)
         f_jac(x, f, jac);
 
-	std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
+        std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
 
         //! transpose to pass to fortran storage (lapack!)
         jac_trans = trans(jac);
@@ -231,39 +231,39 @@ Interface2Vessels::computeInterface2TubesValues()
 
         std::cout << "---After lapack inversion:\nx : " << x << "\ndf(x)^{-1}f(x) : " << f << std::endl;
 
-	double norm = std::fabs(std::fabs(x[0] - x[2]) - std::fabs(x[1] - x[3]));
-	
-	if (norm < 1e-10) 
-	  {
-	    converge = true;
-	    break;
-	  }
-			
+        double norm = std::fabs(std::fabs(x[0] - x[2]) - std::fabs(x[1] - x[3]));
 
-    /* //Write a correct test here!
-        //! convergence if Q_alpha == Q_beta
-        if ( std::fabs( x[1] - x[3] ) < 1e-12 ) {
-            _M_bcDir_alpha( 0 ) = x[0];
-            _M_bcDir_alpha( 1 ) = x[1];
-            _M_bcDir_beta( 0 )  = x[2];
-            _M_bcDir_beta( 1 )  = x[3];
-
-            std::cout << "\n\tNewton finished : iter =" << iter << "\n========" << std::endl;
-            return 0;
+        if (norm < 1e-10)
+        {
+            converge = true;
+            break;
         }
-    */
+
+
+        /* //Write a correct test here!
+            //! convergence if Q_alpha == Q_beta
+            if ( std::fabs( x[1] - x[3] ) < 1e-12 ) {
+                _M_bcDir_alpha( 0 ) = x[0];
+                _M_bcDir_alpha( 1 ) = x[1];
+                _M_bcDir_beta( 0 )  = x[2];
+                _M_bcDir_beta( 1 )  = x[3];
+
+                std::cout << "\n\tNewton finished : iter =" << iter << "\n========" << std::endl;
+                return 0;
+            }
+        */
     }
     //! dummy convergence test ( if Q_alpha == Q_beta )
-    if ( std::fabs( x[1] - x[3] ) < 1e-12 ) 
-      {
+    if ( std::fabs( x[1] - x[3] ) < 1e-12 )
+    {
         _M_bcDir_alpha( 0 ) = x[0];
         _M_bcDir_alpha( 1 ) = x[1];
         _M_bcDir_beta ( 0 ) = x[2];
         _M_bcDir_beta ( 1 ) = x[3];
-	
-	// std::cout << "\n\tNewton finished\n========" << std::endl;
-	return iter;
-      }
+
+        // std::cout << "\n\tNewton finished\n========" << std::endl;
+        return iter;
+    }
     //! no convergence
     return -1;
 }
@@ -438,11 +438,11 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
 
     //@
 
-   
+
     qlSource[0] = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                           1, rightDof - 1);
+                                                       1, rightDof - 1);
     qlSource[1] = _M_sourceFun_alpha.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                           2, rightDof - 1);
+                                                       2, rightDof - 1);
 
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
 
@@ -450,23 +450,23 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //std::cout << "qlSource " << qlSource[0] << " " << qlSource[1] << std::endl;
 
     rhsBC1 -= _M_time_step*dot( left_eigvec1 , qlSource );
-    
+
     //! return f(2): left_eigvec1 dot (A_alpha_n+1, Q_alpha_n+1)
     //@
     //     std::cout << "left_eig0 = " << left_eigvec1[0] << std::endl;
     //     std::cout << "left_eig1 = " << left_eigvec1[1] << std::endl;
     //     std::cout << "A_alpha   = " << A_alpha << std::endl;
     //     std::cout << "Q_alpha   = " << Q_alpha << std::endl;
-//     std::cout << "rhsBC1    = " << rhsBC1 << " " << _M_time_step << " " 
+//     std::cout << "rhsBC1    = " << rhsBC1 << " " << _M_time_step << " "
 // 	      << qlSource[0] << " "
 // 	      << qlSource[1] << " " << std::endl;
 
     f(2) = left_eigvec1[0] * A_alpha + left_eigvec1[1] * Q_alpha - rhsBC1;
-//     std::cout << "f(2) = " 
-// 	      << left_eigvec1[0] << " " 
-// 	      <<  A_alpha << " " 
-// 	      << left_eigvec1[1] << " " 
-// 	      <<  Q_alpha << " " 
+//     std::cout << "f(2) = "
+// 	      << left_eigvec1[0] << " "
+// 	      <<  A_alpha << " "
+// 	      << left_eigvec1[1] << " "
+// 	      <<  Q_alpha << " "
 // 	      <<  rhsBC1 << std::endl;
 
     //! Jacobian
@@ -525,9 +525,9 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     //!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
     //! THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
     qlSource[0]  = _M_sourceFun_beta.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                          1, leftDof - 1);
+                                                       1, leftDof - 1);
     qlSource[1] = _M_sourceFun_beta.QuasiLinearSource(U_charact_pt[0], U_charact_pt[1],
-                                                          2, leftDof - 1);
+                                                      2, leftDof - 1);
 
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
     rhsBC2 -= _M_time_step * dot( left_eigvec2 , qlSource );
@@ -565,13 +565,15 @@ Interface2Vessels::interpolLinear(const Real& point_bound, const Real& point_int
 
     Real weight;   //!< weight in the linear approximation
 
-    if ( point_bound < point_internal ) { //! the edge is on the left of the domain
+    if ( point_bound < point_internal )   //! the edge is on the left of the domain
+    {
         ASSERT( -1. < cfl && cfl < 0. ,
                 "This characteristics is wrong!\nEither it is not outcoming (eigenvalue>0 at the left of the domain),\n or CFL is too high.");
 
         weight = - cfl;
     }
-    else {  //! the edge is on the right of the domain
+    else    //! the edge is on the right of the domain
+    {
         ASSERT( 0. < cfl && cfl < 1. ,
                 "This characteristics is wrong!\nEither it is not outcoming (eigenvalue<0 at the right of the domain),\n or CFL is too high.");
 

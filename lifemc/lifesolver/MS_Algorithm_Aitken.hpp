@@ -39,7 +39,8 @@
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Algorithm_Aitken - The MultiScale Algorithm implementation of Aitken
 /*!

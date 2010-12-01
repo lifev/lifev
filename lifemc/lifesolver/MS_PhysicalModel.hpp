@@ -40,7 +40,8 @@
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_PhysicalModel - The MultiScale Physical Model
 /*!

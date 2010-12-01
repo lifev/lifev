@@ -34,32 +34,33 @@
 
 #include <lifemc/lifesolver/MS_PhysicalData.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_PhysicalData::MS_PhysicalData() :
-    M_DataTime                      (),
-    M_FluidDensity                  (),
-    M_FluidViscosity                (),
-    M_FluidReferencePressure        (),
-    M_StructureDensity              (),
-    M_StructurePoissonCoefficient   (),
-    //M_StructureThickness            (),
-    M_StructureYoungModulus         ()
+        M_DataTime                      (),
+        M_FluidDensity                  (),
+        M_FluidViscosity                (),
+        M_FluidReferencePressure        (),
+        M_StructureDensity              (),
+        M_StructurePoissonCoefficient   (),
+        //M_StructureThickness            (),
+        M_StructureYoungModulus         ()
 {
 }
 
 MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& PhysicalData ) :
-    M_DataTime                      ( PhysicalData.M_DataTime ),
-    M_FluidDensity                  ( PhysicalData.M_FluidDensity ),
-    M_FluidViscosity                ( PhysicalData.M_FluidViscosity ),
-    M_FluidReferencePressure        ( PhysicalData.M_FluidReferencePressure ),
-    M_StructureDensity              ( PhysicalData.M_StructureDensity ),
-    M_StructurePoissonCoefficient   ( PhysicalData.M_StructurePoissonCoefficient ),
-    //M_StructureThickness            ( PhysicalData.M_StructureThickness ),
-    M_StructureYoungModulus         ( PhysicalData.M_StructureYoungModulus )
+        M_DataTime                      ( PhysicalData.M_DataTime ),
+        M_FluidDensity                  ( PhysicalData.M_FluidDensity ),
+        M_FluidViscosity                ( PhysicalData.M_FluidViscosity ),
+        M_FluidReferencePressure        ( PhysicalData.M_FluidReferencePressure ),
+        M_StructureDensity              ( PhysicalData.M_StructureDensity ),
+        M_StructurePoissonCoefficient   ( PhysicalData.M_StructurePoissonCoefficient ),
+        //M_StructureThickness            ( PhysicalData.M_StructureThickness ),
+        M_StructureYoungModulus         ( PhysicalData.M_StructureYoungModulus )
 {
 }
 

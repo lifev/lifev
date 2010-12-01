@@ -201,7 +201,8 @@ int main(int argc, char** argv)
     //
     Chrono chrono;
     int count = 0;
-    for ( Real time = startT_t1 + dt_t1 ; time <= T_t1 ; time += dt_t1 ) {
+    for ( Real time = startT_t1 + dt_t1 ; time <= T_t1 ; time += dt_t1 )
+    {
 
         count++;
         std::cout << "Iteration " <<  count  << ", t = " << time
@@ -215,11 +216,11 @@ int main(int argc, char** argv)
 
         int cvg_newton  = interf_t1_t2.computeInterface2TubesValues();
 
-	if (cvg_newton < 0)
-	  {
-	    std::cout << "Convergence failed !" << std::endl;
-	    exit(-1);
-	  }
+        if (cvg_newton < 0)
+        {
+            std::cout << "Convergence failed !" << std::endl;
+            exit(-1);
+        }
 
         Vector bcDir_t1 = interf_t1_t2.BcDir_alpha();
         Vector bcDir_t2 = interf_t1_t2.BcDir_beta();
@@ -228,8 +229,8 @@ int main(int argc, char** argv)
         std::cout << "P_t1 " << bcDir_t1[1]   << " P_t2 " << bcDir_t2[1]  << std::endl;
 
         //! set the interface values
-         onedm_t1.setBCValuesRight  ( bcDir_t1[0], bcDir_t1[1] );
-         onedm_t2.setBCValuesLeft   ( bcDir_t2[0], bcDir_t2[1] );
+        onedm_t1.setBCValuesRight  ( bcDir_t1[0], bcDir_t1[1] );
+        onedm_t2.setBCValuesLeft   ( bcDir_t2[0], bcDir_t2[1] );
 //         onedm_t1.setBCValuesRight  ( 0, 0);
 //         onedm_t2.setBCValuesLeft   ( 0, 0);
 
@@ -248,8 +249,8 @@ int main(int argc, char** argv)
 
 //         if ( data_file_t1( "miscellaneous/show_graceplot", 0 ) )
 //         {
-            onedm_t1.postProcess( time );
-            onedm_t2.postProcess( time );
+        onedm_t1.postProcess( time );
+        onedm_t2.postProcess( time );
 //         }
 
     }

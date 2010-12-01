@@ -34,16 +34,17 @@
 
 #include <lifemc/lifesolver/MS_Coupling_BoundaryCondition.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
-    super       (),
-    M_FileName  (),
-    M_list      (),
-    M_listSize  ()
+        super       (),
+        M_FileName  (),
+        M_list      (),
+        M_listSize  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -54,10 +55,10 @@ MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
 }
 
 MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition( const MS_Coupling_BoundaryCondition& BoundaryCondition ) :
-    super       ( BoundaryCondition ),
-    M_FileName  ( BoundaryCondition.M_FileName ),
-    M_list      ( BoundaryCondition.M_list ),
-    M_listSize  ( BoundaryCondition.M_listSize )
+        super       ( BoundaryCondition ),
+        M_FileName  ( BoundaryCondition.M_FileName ),
+        M_list      ( BoundaryCondition.M_list ),
+        M_listSize  ( BoundaryCondition.M_listSize )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -123,28 +124,28 @@ MS_Coupling_BoundaryCondition::SetupCoupling()
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
+        case Fluid3D:
 
-                ApplyBoundaryConditions3D< MS_Model_Fluid3D > ( i );
+            ApplyBoundaryConditions3D< MS_Model_Fluid3D > ( i );
 
-                break;
+            break;
 
-            case FSI3D:
+        case FSI3D:
 
-                ApplyBoundaryConditions3D< MS_Model_FSI3D > ( i );
+            ApplyBoundaryConditions3D< MS_Model_FSI3D > ( i );
 
-                break;
+            break;
 
-            case OneDimensional:
+        case OneDimensional:
 
-                ApplyBoundaryConditions1D< MS_Model_1D > ( i );
+            ApplyBoundaryConditions1D< MS_Model_1D > ( i );
 
-                break;
+            break;
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
 }
 
@@ -187,46 +188,46 @@ MS_Coupling_BoundaryCondition::DisplayCouplingValues( std::ostream& output )
     {
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
-            {
-                FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+        case Fluid3D:
+        {
+            FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            case FSI3D:
-            {
-                FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-                Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+        case FSI3D:
+        {
+            FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            case OneDimensional:
-            {
-                FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-                Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+        case OneDimensional:
+        {
+            FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
 
         if ( M_comm->MyPID() == 0 )
             output << "  " << M_globalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
-                                                                     << "    " << M_flags[i]
-                                                                     << "    " << FlowRate
-                                                                     << "    " << "NaN                   "
-                                                                     << "    " << Pressure
-                                                                     << "    " << DynamicPressure << std::endl;
+            << "    " << M_flags[i]
+            << "    " << FlowRate
+            << "    " << "NaN                   "
+            << "    " << Pressure
+            << "    " << DynamicPressure << std::endl;
     }
 }
 

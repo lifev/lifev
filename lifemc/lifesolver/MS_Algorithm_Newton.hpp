@@ -42,7 +42,8 @@
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Algorithm_Newton - The MultiScale Algorithm implementation of Newton
 /*!

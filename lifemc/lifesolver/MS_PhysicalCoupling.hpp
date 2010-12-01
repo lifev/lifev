@@ -39,7 +39,8 @@
 #include <lifemc/lifesolver/MS_PhysicalData.hpp>
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_PhysicalCoupling - The MultiScale Physical Coupling
 /*!
@@ -358,7 +359,7 @@ protected:
      */
     void InterpolateCouplingVariables( const TimeContainer_Type& timeContainer,
                                        const Real& t,
-                                             MS_Vector_Type& interpolatedCouplingVariables );
+                                       MS_Vector_Type& interpolatedCouplingVariables );
 
     //! Display and error message for the specific model
     /*!
