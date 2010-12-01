@@ -76,13 +76,12 @@ void LumpedHeart::renewParameters ( FSIOperator&  oper, const int& flag, const R
 Real LumpedHeart::M_elastance(const Real& t)
 {
     Real ret = 1 - cos((t-M_Tpb)/M_Tpw*2*PI);
-    if(t<M_Tpb)
+    if (t<M_Tpb)
         return (0.0);
+    else if (t<M_Tpb+M_Tpw)
+        return ret*1333.22;
     else
-        if(t<M_Tpb+M_Tpw)
-            return ret*1333.22;
-        else
-            return (0.0);
+        return (0.0);
 }
 
 

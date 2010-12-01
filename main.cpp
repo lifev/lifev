@@ -158,7 +158,7 @@ public:
 
         std::string  fluidMeshPartitioned    =  data_file( "problem/fluidMeshPartitioned", "none" );
         std::string  solidMeshPartitioned    =  data_file( "problem/solidMeshPartitioned", "none" );
-        if( fluidMeshPartitioned.compare( "none" ) )
+        if ( fluidMeshPartitioned.compare( "none" ) )
         {
             FSIOperator::mesh_filtertype fluidMeshFilter( data_file, fluidMeshPartitioned );
             fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
@@ -184,12 +184,12 @@ public:
 #ifdef DEBUG
         Debug( 10000 ) << "Setting up the BC \n";
 #endif
-	    M_fsi->setFluidBC( BCh_monolithicFlux( ) );
-	    M_fsi->setSolidBC( BCh_monolithicRobin( *M_fsi->FSIOper( ) ) );
+        M_fsi->setFluidBC( BCh_monolithicFlux( ) );
+        M_fsi->setSolidBC( BCh_monolithicRobin( *M_fsi->FSIOper( ) ) );
 
-	    M_fsi->setup(/*data_file*/);
+        M_fsi->setup(/*data_file*/);
 
-	    M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ) ) );
+        M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ) ) );
         M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
         M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
 #ifdef DEBUG
@@ -213,7 +213,9 @@ public:
             {
                 M_exporterFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), fluidName, M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
                 M_exporterSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), solidName, M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
-            } else {
+            }
+            else
+            {
                 M_exporterFluid.reset( new  ensightfilter_type( data_file, fluidName) );
                 M_exporterSolid.reset( new  ensightfilter_type ( data_file, solidName) );
             }
@@ -244,10 +246,10 @@ public:
                                       M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
 
-		// load using ensight/hdf5
-		std::string loadInitSol(data_file("importer/initSol","-1"));
+        // load using ensight/hdf5
+        std::string loadInitSol(data_file("importer/initSol","-1"));
 
-		if(loadInitSol.compare("-1"))
+        if (loadInitSol.compare("-1"))
         {
             initialize(loadInitSol, data_file);
         }
@@ -303,7 +305,8 @@ public:
                 }
             }
             // close the valve
-            else{
+            else
+            {
                 if (M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
                 {
                     valveIsOpen=true;
@@ -352,15 +355,17 @@ public:
                       << M_fsi->displacement().Norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            try{
-                if(!M_data->method().compare("monolithicGI"))
-                 checkCEResult(M_data->dataFluid()->dataTime()->getTime());
-             else
-                 checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
-            }catch(Problem::RESULT_CHANGED_EXCEPTION){std::cout<<"res. changed"<<std::endl;}
+            try
+            {
+                if (!M_data->method().compare("monolithicGI"))
+                    checkCEResult(M_data->dataFluid()->dataTime()->getTime());
+                else
+                    checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
+            }
+            catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
-        if(M_data->method().compare("monolithicGI"))
+        if (M_data->method().compare("monolithicGI"))
         {
             M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
 
@@ -405,7 +410,7 @@ private:
 
     struct RESULT_CHANGED_EXCEPTION
     {
-    public:
+public:
         RESULT_CHANGED_EXCEPTION(LifeV::Real time)
         {
             std::cout<<"Some modifications led to changes in the l2 norm of the solution at time"<<time<<std::endl;
@@ -416,17 +421,17 @@ private:
 struct FSIChecker
 {
     FSIChecker( GetPot const& _data_file ):
-        data_file( _data_file ),
-        oper     ( _data_file( "problem/method", "exactJacobian" ) ),
-        prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+            data_file( _data_file ),
+            oper     ( _data_file( "problem/method", "exactJacobian" ) ),
+            prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
     {}
 
     FSIChecker( GetPot const& _data_file,
                 std::string _oper,
                 LifeV::Preconditioner _prec = LifeV::NO_PRECONDITIONER ):
-        data_file( _data_file ),
-        oper     ( _oper ),
-        prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+            data_file( _data_file ),
+            oper     ( _oper ),
+            prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
     {}
 
     void operator()()
@@ -532,7 +537,9 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
         {
             M_importerFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
             M_importerSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
-        } else {
+        }
+        else
+        {
             M_importerFluid.reset( new  ensightfilter_type( data_file, fluidName) );
             M_importerSolid.reset( new  ensightfilter_type ( data_file, solidName) );
         }
@@ -600,7 +607,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
 
-    if(!M_data->method().compare("monolithicGI"))
+    if (!M_data->method().compare("monolithicGI"))
     {
         UniqueVFD.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
         UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
@@ -617,27 +624,27 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-684898)     /dispNorm*(dispNorm-684898)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-854345)     /dispNorm*(dispNorm-850537)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-1.11118e+06)/dispNorm*(dispNorm-1.10523e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.004 && (dispNorm-802296)     /dispNorm*(dispNorm-807697)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-869612)     /dispNorm*(dispNorm-869367)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-799188)     /dispNorm*(dispNorm-794390)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-795947)     /dispNorm*(dispNorm-794135)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-756083)     /dispNorm*(dispNorm-752333)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.009 && (dispNorm-765216)     /dispNorm*(dispNorm-762949)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.001 && (dispNorm-684898)     /dispNorm*(dispNorm-684898)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-854345)     /dispNorm*(dispNorm-850537)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-1.11118e+06)/dispNorm*(dispNorm-1.10523e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-802296)     /dispNorm*(dispNorm-807697)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.005 && (dispNorm-869612)     /dispNorm*(dispNorm-869367)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.006 && (dispNorm-799188)     /dispNorm*(dispNorm-794390)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.007 && (dispNorm-795947)     /dispNorm*(dispNorm-794135)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.008 && (dispNorm-756083)     /dispNorm*(dispNorm-752333)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.009 && (dispNorm-765216)     /dispNorm*(dispNorm-762949)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().Norm2();
-    if(time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.002 && (dispNorm-1.00181e+06)/dispNorm*(dispNorm-1.00181e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.003 && (dispNorm-1.01128e+06)/dispNorm*(dispNorm-1.01128e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);else
-    if(time==0.004 && (dispNorm-644936)/dispNorm*(dispNorm-644936)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.005 && (dispNorm-652025)/dispNorm*(dispNorm-652025)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.006 && (dispNorm-555216)/dispNorm*(dispNorm-555216)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.007 && (dispNorm-538934)/dispNorm*(dispNorm-538934)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time); else
-    if(time==0.008 && (dispNorm-520004)/dispNorm*(dispNorm-520004)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-1.00181e+06)/dispNorm*(dispNorm-1.00181e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-1.01128e+06)/dispNorm*(dispNorm-1.01128e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-644936)/dispNorm*(dispNorm-644936)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.005 && (dispNorm-652025)/dispNorm*(dispNorm-652025)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.006 && (dispNorm-555216)/dispNorm*(dispNorm-555216)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.007 && (dispNorm-538934)/dispNorm*(dispNorm-538934)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.008 && (dispNorm-520004)/dispNorm*(dispNorm-520004)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }

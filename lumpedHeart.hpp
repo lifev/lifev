@@ -45,21 +45,21 @@ public:
     typedef FSIOperator::vector_ptrtype                                                    vector_ptrtype;
 
     LumpedHeart()
-        :
-        M_time(0.),
-        M_BC(),
-        M_ODEscheme(1),
-        M_dt(0.),
-        M_T_max()  ,
-        M_E_max()  ,
-        M_V_0()    ,
-        M_RV_art() ,
-        M_RA_V()   ,
-        M_LV_art() ,
-        M_LA_V()   ,
-        M_PV(),
-        M_intFlux(),
-        M_Vt_ao()
+            :
+            M_time(0.),
+            M_BC(),
+            M_ODEscheme(1),
+            M_dt(0.),
+            M_T_max()  ,
+            M_E_max()  ,
+            M_V_0()    ,
+            M_RV_art() ,
+            M_RA_V()   ,
+            M_LV_art() ,
+            M_LA_V()   ,
+            M_PV(),
+            M_intFlux(),
+            M_Vt_ao()
     {}
 
     void initParameters      ( FSIOperator&  oper,

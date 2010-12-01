@@ -81,9 +81,9 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux(bool isOpen=true)
 
     BCFunctionBase flow_3 (fluxFunction);
     BCFunctionBase bcf      (fZero);
-     //uncomment  to use fluxes
+    //uncomment  to use fluxes
 
-  //  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+    //  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
 //   if(!isOpen)
 //       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
 

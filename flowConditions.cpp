@@ -35,19 +35,19 @@
 namespace LifeV
 {
 FlowConditions::FlowConditions():
-    pi(3.141592635),
-    bcOnFluid(true),
-    M_outflux(0),
-    M_influx(0),
-    M_outP(0),
-    M_area0(0),
-    M_inRadius0(0),
-    M_outRadius0(0),
-    M_inDeltaRadius(0),
-    M_outDeltaRadius(0),
-    M_beta(0),
-    M_rhos(0),
-    conditionNumber(0)
+        pi(3.141592635),
+        bcOnFluid(true),
+        M_outflux(0),
+        M_influx(0),
+        M_outP(0),
+        M_area0(0),
+        M_inRadius0(0),
+        M_outRadius0(0),
+        M_inDeltaRadius(0),
+        M_outDeltaRadius(0),
+        M_beta(0),
+        M_rhos(0),
+        conditionNumber(0)
 {
     outputVector.push_back(0);
     conditionNumber= FlowConditions::outputVector.size()-1;
@@ -115,7 +115,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
     }
 
     oper->worldComm()->Broadcast( fluidQuantities.Values(), fluidQuantities.Length(),
-                                 oper->getFluidLeaderId() );
+                                  oper->getFluidLeaderId() );
 
 
     Real qn;
@@ -129,7 +129,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
     if (bcOnFluid)
     {
         M_outP =  pow((M_rhos/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
-            - M_beta*sqrt(M_area0);
+                  - M_beta*sqrt(M_area0);
         FlowConditions::outputVector[conditionNumber]=M_outP;
 
         oper->displayer().leaderPrint( " Flow rate = " , qn );
@@ -138,7 +138,9 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
         M_outDeltaRadius = 0;
 
 
-    } else {
+    }
+    else
+    {
         // if imposing the absorbing boundary condition through change in radius: --> Not ready
 #ifdef  TESTING
         M_outP = Pout;
@@ -209,7 +211,8 @@ Real FlowConditions::inDeltaRadius (const Real& t, const Real& x, const Real& y,
 
     Real r ( sqrt(x*x + y*y) );
 
-    switch(i) {
+    switch (i)
+    {
     case 1:
         return M_inDeltaRadius * x/r;
     case 2:
@@ -226,7 +229,8 @@ Real FlowConditions::outDeltaRadius(const Real& t, const Real& x, const Real& y,
 
     Real r ( sqrt(x*x + y*y) );
 
-    switch(i) {
+    switch (i)
+    {
     case 1:
         return M_outDeltaRadius * x/r;
     case 2:
