@@ -37,7 +37,8 @@
 
 #include <lifemc/lifesolver/BlockInterface.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BlockMatrix - class which handles matrices with a block structure.
 /*!
@@ -72,16 +73,16 @@ public:
     //@{
 
     BlockMatrix(UInt coupling):
-        super(),
-        M_globalMatrix(),
-        M_coupling(),
-        M_interfaceMap(),
-        M_interface(0),
-        M_couplingFlag(coupling),
-        M_numerationInterface()
+            super(),
+            M_globalMatrix(),
+            M_coupling(),
+            M_interfaceMap(),
+            M_interface(0),
+            M_couplingFlag(coupling),
+            M_numerationInterface()
     {}
 
-    ~BlockMatrix(){}
+    ~BlockMatrix() {}
     //@}
 
     //! @name Virtual methods
@@ -148,7 +149,7 @@ public:
     //! returns true if the operator has at least one block
     /*!
     */
-    virtual bool  set(){return (bool) super::M_blocks.size();}
+    virtual bool  set() {return (bool) super::M_blocks.size();}
 
     //@}
     //! @name Public methods
@@ -210,7 +211,7 @@ public:
     //! returns the global matrix, with all the blocks and the coupling parts
     /*!
     */
-    matrix_ptrtype& getMatrix( ){return M_globalMatrix;}
+    matrix_ptrtype& getMatrix( ) {return M_globalMatrix;}
 
     //! multiplies the whole system times a matrix
     /*!
@@ -276,7 +277,7 @@ public:
     /*!
       NOTE: it has to be multiplied times nDimensions to get the number of interface dofs
      */
-    UInt getInterface(){return M_interface;}
+    UInt getInterface() {return M_interface;}
 
     //! applies the b.c. to every block
     void applyBoundaryConditions(const Real& time);

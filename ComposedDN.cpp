@@ -33,7 +33,8 @@
 
 #include <ComposedDN.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 void ComposedDN::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
@@ -67,16 +68,16 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
 {
     assert(M_blockPrecs.get());
 
-    if(!set())
+    if (!set())
     {
-        for(UInt k=0; k < M_blocks.size(); ++k)
+        for (UInt k=0; k < M_blocks.size(); ++k)
             push_back_precs(M_blocks[(*M_blockReordering)[k]]);
     }
     else
     {
-        for(UInt k=0; k < M_blocks.size(); ++k)
+        for (UInt k=0; k < M_blocks.size(); ++k)
         {
-            if(M_recompute[(*M_blockReordering)[k]])
+            if (M_recompute[(*M_blockReordering)[k]])
             {
                 linearSolver->displayer()->leaderPrint("  M-  Computing preconditioner factor:           ", k, "\n");
                 replace_precs(M_blocks[(*M_blockReordering)[k]], k);

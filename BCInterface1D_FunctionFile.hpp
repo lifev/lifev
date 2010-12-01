@@ -36,7 +36,8 @@
 
 #include <lifemc/lifesolver/BCInterface1D_Function.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface1D_FunctionFile - LifeV bcFunction wrapper for BCInterface1D
 /*!
@@ -170,11 +171,11 @@ inline BCInterface1D_Function< Operator >* BCInterface1D_CreateFunctionFile()
 // ===================================================
 template< typename Operator >
 BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile() :
-    super                            (),
-    M_variables                      (),
-    M_loop                           (),
-    M_data                           (),
-    M_dataIterator                   ()
+        super                            (),
+        M_variables                      (),
+        M_loop                           (),
+        M_data                           (),
+        M_dataIterator                   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -185,11 +186,11 @@ BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile() :
 
 template< typename Operator >
 BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const Data_Type& data ) :
-    super                            (),
-    M_variables                      (),
-    M_loop                           (),
-    M_data                           (),
-    M_dataIterator                   ()
+        super                            (),
+        M_variables                      (),
+        M_loop                           (),
+        M_data                           (),
+        M_dataIterator                   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -201,11 +202,11 @@ BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const Data_T
 
 template< typename Operator >
 BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const BCInterface1D_FunctionFile& function ) :
-    super                            ( function ),
-    M_variables                      ( function.M_variables ),
-    M_loop                           ( function.M_loop ),
-    M_data                           ( function.M_data ),
-    M_dataIterator                   ( function.M_dataIterator )
+        super                            ( function ),
+        M_variables                      ( function.M_variables ),
+        M_loop                           ( function.M_loop ),
+        M_data                           ( function.M_data ),
+        M_dataIterator                   ( function.M_dataIterator )
 {
 }
 
@@ -294,7 +295,7 @@ BCInterface1D_FunctionFile< Operator >::LoadData( Data_Type data )
     for ( UInt i( 0 ); i < dataLines; ++i )
         for ( UInt j( 0 ); j < variablesNumber; ++j )
             M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i
-                    * variablesNumber + j ) );
+                                                                   * variablesNumber + j ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     output.str("");
@@ -380,7 +381,7 @@ BCInterface1D_FunctionFile< Operator >::DataInterpolation()
     //Linear interpolation (extrapolation if X > xB)
     Real xA, xB, A, B;
     for ( UInt j( 1 ), position = static_cast< UInt > ( M_dataIterator - M_data[M_variables[0]].begin() ) ;
-          j < static_cast< UInt > ( M_variables.size() ); ++j )
+            j < static_cast< UInt > ( M_variables.size() ); ++j )
     {
         xA = M_data[M_variables[0]][position];
         xB = M_data[M_variables[0]][position + 1];

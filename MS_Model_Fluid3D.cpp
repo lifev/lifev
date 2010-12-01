@@ -34,35 +34,36 @@
 
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Model_Fluid3D::MS_Model_Fluid3D() :
-    super                          (),
-    M_exporter                     (),
-    M_importer                     (),
-    M_fileName                     (),
-    M_fluid                        (),
-    M_BC                           ( new BCInterface_Type() ),
-    M_BDF                          (),
-    M_data                         ( new Data_Type() ),
-    M_dataMesh                     ( new DataMesh()),
-    M_mesh                         (),
-    M_map                          (),
-    M_solution                     (),
-    M_linearBC                     ( new BC_Type() ),
-    M_updateLinearModel            ( true ),
-    M_uFESpace                     (),
-    M_pFESpace                     (),
-    M_lmDOF                        ( 0 ),
-    M_alpha                        ( 0 ),
-    M_beta                         (),
-    M_RHS                          (),
-    M_subiterationsMaximumNumber   (),
-    M_tolerance                    (),
-    M_generalizedAitken            ()
+        super                          (),
+        M_exporter                     (),
+        M_importer                     (),
+        M_fileName                     (),
+        M_fluid                        (),
+        M_BC                           ( new BCInterface_Type() ),
+        M_BDF                          (),
+        M_data                         ( new Data_Type() ),
+        M_dataMesh                     ( new DataMesh()),
+        M_mesh                         (),
+        M_map                          (),
+        M_solution                     (),
+        M_linearBC                     ( new BC_Type() ),
+        M_updateLinearModel            ( true ),
+        M_uFESpace                     (),
+        M_pFESpace                     (),
+        M_lmDOF                        ( 0 ),
+        M_alpha                        ( 0 ),
+        M_beta                         (),
+        M_RHS                          (),
+        M_subiterationsMaximumNumber   (),
+        M_tolerance                    (),
+        M_generalizedAitken            ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -73,29 +74,29 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
 }
 
 MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
-    super                          ( Fluid3D ),
-    M_exporter                     ( Fluid3D.M_exporter ),
-    M_importer                     ( Fluid3D.M_importer ),
-    M_fileName                     ( Fluid3D.M_fileName ),
-    M_fluid                        ( Fluid3D.M_fluid ),
-    M_BC                           ( Fluid3D.M_BC ),
-    M_BDF                          ( Fluid3D.M_BDF ),
-    M_data                         ( Fluid3D.M_data ),
-    M_dataMesh                     ( Fluid3D.M_dataMesh ),
-    M_mesh                         ( Fluid3D.M_mesh ),
-    M_map                          ( Fluid3D.M_map ),
-    M_solution                     ( Fluid3D.M_solution ),
-    M_linearBC                     ( Fluid3D.M_linearBC ),
-    M_updateLinearModel            ( Fluid3D.M_updateLinearModel ),
-    M_uFESpace                     ( Fluid3D.M_uFESpace ),
-    M_pFESpace                     ( Fluid3D.M_pFESpace ),
-    M_lmDOF                        ( Fluid3D.M_lmDOF ),
-    M_alpha                        ( Fluid3D.M_alpha ),
-    M_beta                         ( Fluid3D.M_beta ),
-    M_RHS                          ( Fluid3D.M_RHS ),
-    M_subiterationsMaximumNumber   ( Fluid3D.M_subiterationsMaximumNumber ),
-    M_tolerance                    ( Fluid3D.M_tolerance ),
-    M_generalizedAitken            ( Fluid3D.M_generalizedAitken )
+        super                          ( Fluid3D ),
+        M_exporter                     ( Fluid3D.M_exporter ),
+        M_importer                     ( Fluid3D.M_importer ),
+        M_fileName                     ( Fluid3D.M_fileName ),
+        M_fluid                        ( Fluid3D.M_fluid ),
+        M_BC                           ( Fluid3D.M_BC ),
+        M_BDF                          ( Fluid3D.M_BDF ),
+        M_data                         ( Fluid3D.M_data ),
+        M_dataMesh                     ( Fluid3D.M_dataMesh ),
+        M_mesh                         ( Fluid3D.M_mesh ),
+        M_map                          ( Fluid3D.M_map ),
+        M_solution                     ( Fluid3D.M_solution ),
+        M_linearBC                     ( Fluid3D.M_linearBC ),
+        M_updateLinearModel            ( Fluid3D.M_updateLinearModel ),
+        M_uFESpace                     ( Fluid3D.M_uFESpace ),
+        M_pFESpace                     ( Fluid3D.M_pFESpace ),
+        M_lmDOF                        ( Fluid3D.M_lmDOF ),
+        M_alpha                        ( Fluid3D.M_alpha ),
+        M_beta                         ( Fluid3D.M_beta ),
+        M_RHS                          ( Fluid3D.M_RHS ),
+        M_subiterationsMaximumNumber   ( Fluid3D.M_subiterationsMaximumNumber ),
+        M_tolerance                    ( Fluid3D.M_tolerance ),
+        M_generalizedAitken            ( Fluid3D.M_generalizedAitken )
 {
 }
 
@@ -398,7 +399,7 @@ MS_Model_Fluid3D::SetupLinearModel()
 
     // Set all te BCFunctions to zero
     for ( BC_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-            i->setBCFunction( M_BCBaseDelta_Zero );
+        i->setBCFunction( M_BCBaseDelta_Zero );
 }
 
 void
@@ -410,7 +411,8 @@ MS_Model_Fluid3D::UpdateLinearModel()
 #endif
 
     //Create an empty vector
-    FluidVector_Type VectorZero( *M_solution ); VectorZero = 0.0;
+    FluidVector_Type VectorZero( *M_solution );
+    VectorZero = 0.0;
 
     //UpdateLinearModel TODO REMOVE ?
     M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
@@ -505,7 +507,7 @@ Real
 MS_Model_Fluid3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 {
     return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
-                                            / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+           / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
 }
 
 Real
@@ -519,26 +521,26 @@ MS_Model_Fluid3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& Stre
 {
     switch ( StressType )
     {
-        case StaticPressure:
-        {
-            return -GetBoundaryPressure( Flag );
-        }
+    case StaticPressure:
+    {
+        return -GetBoundaryPressure( Flag );
+    }
 
-        case TotalPressure:
-        {
-            return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
-        }
+    case TotalPressure:
+    {
+        return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
+    }
 
-        case LagrangeMultiplier:
-        {
-            return -GetBoundaryLagrangeMultiplier( Flag );
-        }
+    case LagrangeMultiplier:
+    {
+        return -GetBoundaryLagrangeMultiplier( Flag );
+    }
 
-        default:
+    default:
 
-            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
 
-            return 0.0;
+        return 0.0;
     }
 }
 
@@ -577,26 +579,26 @@ MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearS
 {
     switch ( StressType )
     {
-        case StaticPressure:
-        {
-            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
-        }
+    case StaticPressure:
+    {
+        return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
+    }
 
-        case TotalPressure:
-        {
-            return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
-        }
+    case TotalPressure:
+    {
+        return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+    }
 
-        case LagrangeMultiplier:
-        {
-            return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
-        }
+    case LagrangeMultiplier:
+    {
+        return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
+    }
 
-        default:
+    default:
 
-            std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
 
-            return 0.0;
+        return 0.0;
     }
 }
 
@@ -705,26 +707,24 @@ MS_Model_Fluid3D::SetupFEspace()
         u_qR = &quadRuleTetra15pt; // DoE 5
         u_bdQr = &quadRuleTria3pt; // DoE 2
     }
+    else if ( M_data->uOrder().compare( "P1" ) == 0 )
+    {
+        u_refFE = &feTetraP1;
+        u_qR = &quadRuleTetra4pt; // DoE 2
+        u_bdQr = &quadRuleTria3pt; // DoE 2
+    }
+    else if ( M_data->uOrder().compare( "P1Bubble" ) == 0 )
+    {
+        u_refFE = &feTetraP1bubble;
+        u_qR = &quadRuleTetra64pt; // DoE 2
+        u_bdQr = &quadRuleTria3pt; // DoE 2
+    }
     else
-        if ( M_data->uOrder().compare( "P1" ) == 0 )
-        {
-            u_refFE = &feTetraP1;
-            u_qR = &quadRuleTetra4pt; // DoE 2
-            u_bdQr = &quadRuleTria3pt; // DoE 2
-        }
-        else
-            if ( M_data->uOrder().compare( "P1Bubble" ) == 0 )
-            {
-                u_refFE = &feTetraP1bubble;
-                u_qR = &quadRuleTetra64pt; // DoE 2
-                u_bdQr = &quadRuleTria3pt; // DoE 2
-            }
-            else
-            {
-                if ( M_displayer->isLeader() )
-                    std::cout << M_data->uOrder() << " Velocity FE not implemented yet." << std::endl;
-                exit( EXIT_FAILURE );
-            }
+    {
+        if ( M_displayer->isLeader() )
+            std::cout << M_data->uOrder() << " Velocity FE not implemented yet." << std::endl;
+        exit( EXIT_FAILURE );
+    }
 
     //Pressure FE Space
     const RefFE* p_refFE;
@@ -737,19 +737,18 @@ MS_Model_Fluid3D::SetupFEspace()
         p_qR = u_qR;
         p_bdQr = &quadRuleTria3pt; // DoE 2
     }
+    else if ( M_data->pOrder().compare( "P1" ) == 0 )
+    {
+        p_refFE = &feTetraP1;
+        p_qR = u_qR;
+        p_bdQr = &quadRuleTria3pt; // DoE 2
+    }
     else
-        if ( M_data->pOrder().compare( "P1" ) == 0 )
-        {
-            p_refFE = &feTetraP1;
-            p_qR = u_qR;
-            p_bdQr = &quadRuleTria3pt; // DoE 2
-        }
-        else
-        {
-            if ( M_displayer->isLeader() )
-                std::cout << M_data->pOrder() << " pressure FE not implemented yet." << std::endl;
-            exit( EXIT_FAILURE );
-        }
+    {
+        if ( M_displayer->isLeader() )
+            std::cout << M_data->pOrder() << " pressure FE not implemented yet." << std::endl;
+        exit( EXIT_FAILURE );
+    }
 
     M_uFESpace.reset( new FESpace_Type( *M_mesh, *u_refFE, *u_qR, *u_bdQr, 3, M_comm ) );
     M_pFESpace.reset( new FESpace_Type( *M_mesh, *p_refFE, *p_qR, *p_bdQr, 1, M_comm ) );

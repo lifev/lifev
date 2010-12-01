@@ -39,17 +39,18 @@
 
 #include "OneDimensionalModel_Source_Linear.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear() :
-    super    ()
+        super    ()
 {}
 
 OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear( const Physics_PtrType Physics ) :
-    super    ( Physics )
+        super    ( Physics )
 {}
 
 // ===================================================
@@ -59,13 +60,13 @@ Real
 OneDimensionalModel_Source_Linear::operator()( const Real& _U1, const Real& _U2,
                                                const ID& ii,    const UInt& indz ) const
 {
-    if( ii == 1 ) // S1
+    if ( ii == 1 ) // S1
     {
         return M_Physics->Data()->Source10( indz ) +
                M_Physics->Data()->Source11( indz ) * _U1 +
                M_Physics->Data()->Source12( indz ) * _U2;
     }
-    if( ii == 2 ) // S2
+    if ( ii == 2 ) // S2
     {
         return M_Physics->Data()->Source20( indz ) +
                M_Physics->Data()->Source21( indz ) * _U1 +
@@ -80,19 +81,19 @@ OneDimensionalModel_Source_Linear::diff( const Real& /*_U1*/, const Real& /*_U2*
                                          const ID& ii,        const ID& jj,
                                          const UInt& indz ) const
 {
-    if( ii == 1 && jj == 1) // dS1/dU1 = 0
+    if ( ii == 1 && jj == 1) // dS1/dU1 = 0
     {
         return M_Physics->Data()->Source11( indz );
     }
-    if( ii == 1 && jj == 2) // dS1/dU2 = 0
+    if ( ii == 1 && jj == 2) // dS1/dU2 = 0
     {
         return M_Physics->Data()->Source12( indz );
     }
-    if( ii == 2 && jj == 1 ) // dS2/dU1
+    if ( ii == 2 && jj == 1 ) // dS2/dU1
     {
         return M_Physics->Data()->Source21( indz );
     }
-    if( ii == 2 && jj == 2 ) // dS2/dU2
+    if ( ii == 2 && jj == 2 ) // dS2/dU2
     {
         return M_Physics->Data()->Source22( indz );
     }

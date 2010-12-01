@@ -34,13 +34,14 @@
 
 #include <lifemc/lifesolver/MS_Algorithm_Explicit.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Algorithm_Explicit::MS_Algorithm_Explicit() :
-    super               ()
+        super               ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -51,7 +52,7 @@ MS_Algorithm_Explicit::MS_Algorithm_Explicit() :
 }
 
 MS_Algorithm_Explicit::MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algorithm ) :
-    super               ( algorithm )
+        super               ( algorithm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

@@ -39,7 +39,8 @@
 
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, OneDimensionalModel_PhysicsTypes > OneDimensionalModel_PhysicsMap;
 
@@ -47,12 +48,12 @@ std::map< std::string, OneDimensionalModel_PhysicsTypes > OneDimensionalModel_Ph
 // Constructors
 // ===================================================
 OneDimensionalModel_Physics::OneDimensionalModel_Physics() :
-    M_Data      ()
+        M_Data      ()
 {
 }
 
 OneDimensionalModel_Physics::OneDimensionalModel_Physics( const Data_PtrType Data ) :
-    M_Data      ( Data )
+        M_Data      ( Data )
 {
 }
 
@@ -117,10 +118,10 @@ OneDimensionalModel_Physics::totalPressure( const Real& A, const Real& Q, const 
 Real
 OneDimensionalModel_Physics::totalPressureDiff( const Real& A, const Real& Q, const ID& id, const UInt& i) const
 {
-    if( id == 1 ) // dPt/dA
+    if ( id == 1 ) // dPt/dA
         return dPdA( A, i ) - M_Data->DensityRho() * Q * Q / ( A * A * A );
 
-    if( id == 2 ) // dPt/dQ
+    if ( id == 2 ) // dPt/dQ
         return M_Data->DensityRho() * Q / ( A * A);
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");
@@ -148,17 +149,17 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
 
         //      alpha_iz = static_cast<UInt>( alpha / (xr-xl) * static_cast<Real>( M_Data->NumberOfElements()-1 ) );
         alpha_iz = static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) +
-            ( (M_Data->NumberOfElements() - 1) -
-              static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) ) -
-              static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) ) / 2;
+                   ( (M_Data->NumberOfElements() - 1) -
+                     static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) ) -
+                     static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) ) / 2;
 
         //      n_elem_r = static_cast<Real>( (M_Data->NumberOfElements()-1) - alpha_iz );
         n_elem_r = ( (M_Data->NumberOfElements()-1) - alpha_iz ) -
-            static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) );
+                   static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) );
 
         //      n_elem_l = static_cast<Real>( alpha_iz );
         n_elem_l = alpha_iz -
-            static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) );
+                   static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) );
 
         n_elem_delta = static_cast<Real>(M_Data->NumberOfElements() - 1) / (xr - xl) * delta;
 
@@ -174,7 +175,7 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
             ratio=(( (alpha + delta/2) - x_current ) / delta);
 
             M_Data->setdBeta0dz( M_Data->Beta0(alpha_iz+iz) *
-                ( factor * (- n / delta) * ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), alpha_iz+iz );
+                                 ( factor * (- n / delta) * ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), alpha_iz+iz );
             M_Data->setdBeta0dz( M_Data->dBeta0dz(alpha_iz+iz), alpha_iz-iz );
 
             M_Data->setBeta0( M_Data->Beta0(alpha_iz+iz) * ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n))), alpha_iz+iz );
@@ -188,14 +189,14 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
 
 
             deltax_adaptive = ( -1/n_elem_delta ) * ( 1 / ( (-n/delta) * pow(2,(n-1)) *
-                              pow( ratio , (n-1) ) ) );
+                                                            pow( ratio , (n-1) ) ) );
 
             deltax_uniform = ( (alpha+delta/2) - x_current) / ( n_elem_r - iz );
 
             iz++;
 
             deltax = ( ( deltax_adaptive < deltax_uniform ) && (iz < n_elem_r) )
-                ? deltax_adaptive : deltax_uniform;
+                     ? deltax_adaptive : deltax_uniform;
 
             //( xr - xl ) / M_edgeList.size();
             ASSERT_PRE( deltax > 0 , "The left point is on the right..." );
@@ -266,7 +267,7 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
                                                  const Real& delta,  const Real& n,
                                                  const Real& min_deltax, const UInt& yesAdaptive )
 {
-  Debug( 6320 ) << "stiffenVesselright ...\n";
+    Debug( 6320 ) << "stiffenVesselright ...\n";
     /* Stiffen Left boundary with a fifth order polynomial law
 
        if (alpha-delta/2) <= x < alpha
@@ -283,19 +284,19 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
 
         //      alpha_iz = static_cast<UInt>( alpha / (xr-xl) * ( static_cast<Real>( M_Data->NumberOfElements()-1 ) ) );
         alpha_iz = static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) +
-            ( (M_Data->NumberOfElements() - 1) -
-              static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) ) -
-              static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) ) / 2;
+                   ( (M_Data->NumberOfElements() - 1) -
+                     static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) ) -
+                     static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) ) ) / 2;
 
         n_elem_delta = static_cast<Real>(M_Data->NumberOfElements() - 1) / (xr - xl) * delta;
 
         //      n_elem_r = static_cast<Real>( (M_Data->NumberOfElements()-1) - alpha_iz );
         n_elem_r = ( (M_Data->NumberOfElements()-1) - alpha_iz ) -
-            static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) );
+                   static_cast<int>( std::floor( (xr - (alpha+delta/2)) / min_deltax + 0.5 ) );
 
         //      n_elem_l = static_cast<Real>( alpha_iz );
         n_elem_l = alpha_iz -
-            static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) );
+                   static_cast<int>( std::floor( (alpha-delta/2) / min_deltax + 0.5 ) );
 
         Real x_current,deltax,deltax_adaptive,deltax_uniform;
 
@@ -308,7 +309,7 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
             ratio=(( (alpha + delta/2) - x_current) / delta);
 
             M_Data->setdBeta0dz( M_Data->Beta0( alpha_iz+iz ) * ( factor * ( n / delta) *
-                                 ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), alpha_iz+iz );
+                                                                  ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), alpha_iz+iz );
 
             M_Data->setdBeta0dz( M_Data->dBeta0dz(alpha_iz+iz), alpha_iz-iz );
 
@@ -316,7 +317,7 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
                               ( 1 + factor * ( 1 - ( pow(2,(n-1)) * pow(ratio,n) ) ) ), (alpha_iz+iz) );
 
             M_Data->setBeta0( M_Data->Beta0(alpha_iz+iz) /
-                                ( 1 + factor * ( 1 - ( pow(2,(n-1)) * pow(ratio,n) ) ) )
+                              ( 1 + factor * ( 1 - ( pow(2,(n-1)) * pow(ratio,n) ) ) )
                               * ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n) ) ), alpha_iz-iz );
 
             // first order
@@ -325,17 +326,17 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
             //M_Data->Beta0(iz) = M_Data->Beta0(iz) * ( 1 + factor * ratio );
 
             deltax_adaptive = ( -1/n_elem_delta ) *
-                ( 1 / ( (-n/delta) * pow(2,(n-1)) *
-                        pow( ratio , (n-1) )
-                        )
-                  );
+                              ( 1 / ( (-n/delta) * pow(2,(n-1)) *
+                                      pow( ratio , (n-1) )
+                                    )
+                              );
 
             deltax_uniform = ( (alpha+delta/2) - x_current) / ( n_elem_r - iz );
 
             iz++;
 
             deltax = ( ( deltax_adaptive < deltax_uniform ) && (iz < n_elem_r) )
-                ? deltax_adaptive : deltax_uniform;
+                     ? deltax_adaptive : deltax_uniform;
 
             //( xr - xl ) / M_edgeList.size();
             ASSERT_PRE( deltax > 0 ,

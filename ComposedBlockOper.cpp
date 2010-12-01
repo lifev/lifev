@@ -34,11 +34,12 @@
 
 #include <ComposedBlockOper.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 void ComposedBlockOper::blockAssembling()
 {
-    for(UInt k=0; k<M_blocks.size(); ++k)
+    for (UInt k=0; k<M_blocks.size(); ++k)
     {
         blockAssembling(k);
     }
@@ -48,7 +49,7 @@ void ComposedBlockOper::blockAssembling()
 
 void ComposedBlockOper::blockAssembling(const UInt k)
 {
-    if(M_blocks[k]->getMatrixPtr()->Filled())
+    if (M_blocks[k]->getMatrixPtr()->Filled())
     {
         matrix_ptrtype tmp(new matrix_type(M_blocks[0]->getMap(), 1));
         *tmp += *M_blocks[k];
@@ -60,7 +61,7 @@ void ComposedBlockOper::blockAssembling(const UInt k)
 
 void ComposedBlockOper::GlobalAssemble()
 {
-    for(UInt k=0; k<M_blocks.size(); ++k)
+    for (UInt k=0; k<M_blocks.size(); ++k)
     {
         M_blocks[k]->GlobalAssemble();
     }
@@ -104,7 +105,7 @@ void ComposedBlockOper::swap(const UInt i, const UInt j)
 
 void ComposedBlockOper::addToCoupling( const matrix_ptrtype& Mat, UInt position)
 {
-     Mat->GlobalAssemble();
+    Mat->GlobalAssemble();
     *M_coupling[position] += *Mat;
 }
 
@@ -127,7 +128,7 @@ void ComposedBlockOper::coupler( map_shared_ptrtype& map,
     coupling->insertValueDiagonal( 1., 1 , M_offset[couplingBlock]+1 );
     coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().getMap(Unique)->NumGlobalElements()+1, totalDofs+1 );
 
-    if(couplingBlock != M_coupling.size()+1)
+    if (couplingBlock != M_coupling.size()+1)
     {
         M_coupling.insert(M_coupling.begin()+couplingBlock, coupling);
     }

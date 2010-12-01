@@ -73,7 +73,8 @@
 
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ComposedDN - Short description of the class
 /*!
@@ -88,13 +89,13 @@ public:
     typedef ComposedBlockOper super;
 
     ComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
-        super( flag, order ),
-        M_blockPrecs(),
-        M_uMap(),
-        M_pMap(),
-        M_dMap(),
-        M_interfaceMap(),
-        M_multipliers(0)
+            super( flag, order ),
+            M_blockPrecs(),
+            M_uMap(),
+            M_pMap(),
+            M_dMap(),
+            M_interfaceMap(),
+            M_multipliers(0)
     {
     }
 

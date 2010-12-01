@@ -48,11 +48,11 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     std::string precType = M_list.get("prectype", "Amesos");
     Ifpack factory;
 
-    if( !M_blockPrecs.get() )
+    if ( !M_blockPrecs.get() )
         M_blockPrecs.reset(new ComposedOperator< composed_prec >(M_comm));
-    if( true || !set())
+    if ( true || !set())
     {
-        for(ID k(0); k < M_blocks.size(); ++k)
+        for (ID k(0); k < M_blocks.size(); ++k)
         {
             M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
             chrono.start();
@@ -70,9 +70,9 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     }
     else
     {
-        for(ID k(0); k < M_blocks.size(); ++k)
+        for (ID k(0); k < M_blocks.size(); ++k)
         {
-            if(M_recompute[(*M_blockReordering)[k]])
+            if (M_recompute[(*M_blockReordering)[k]])
             {
                 M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
                 chrono.start();
@@ -97,8 +97,8 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
     M_secondCompPrec->push_back(M_prec[2], false, false);
     M_secondCompPrec->push_back(M_prec[3], false, false);
 
-        //M_blockPrecs->resetP();
-    if(!(M_blockPrecs->getNumber()))
+    //M_blockPrecs->resetP();
+    if (!(M_blockPrecs->getNumber()))
     {
         M_blockPrecs->push_back(M_firstCompPrec, false, false, false);
         M_blockPrecs->push_back(M_secondCompPrec, false, false, true /*sum*/);
@@ -132,7 +132,7 @@ void ComposedNN::coupler(map_shared_ptrtype& map,
     UInt totalDofs=map->getMap(Unique)->NumGlobalElements()+1;
     UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements();
 
-    for(ID k=0; k<2; ++k)
+    for (ID k=0; k<2; ++k)
     {
         M_blocks[k]->GlobalAssemble();
         matrix_ptrtype block(new matrix_type(*M_blocks[k]));

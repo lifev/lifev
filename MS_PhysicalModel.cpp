@@ -34,7 +34,8 @@
 
 #include <lifemc/lifesolver/MS_PhysicalModel.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, modelsTypes > MS_modelsMap;
 
@@ -44,17 +45,17 @@ UInt MS_PhysicalModel::M_modelsNumber = 0;
 // Constructors & Destructor
 // ===================================================
 MS_PhysicalModel::MS_PhysicalModel() :
-    M_ID                (),
-    M_type              (),
-    M_couplings         (),
-    M_modelName         (),
-    M_flags             (),
-    M_globalData        (),
-    M_geometryScale     (),
-    M_geometryRotate    (),
-    M_geometryTranslate (),
-    M_comm              (),
-    M_displayer         ()
+        M_ID                (),
+        M_type              (),
+        M_couplings         (),
+        M_modelName         (),
+        M_flags             (),
+        M_globalData        (),
+        M_geometryScale     (),
+        M_geometryRotate    (),
+        M_geometryTranslate (),
+        M_comm              (),
+        M_displayer         ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -73,17 +74,17 @@ MS_PhysicalModel::MS_PhysicalModel() :
 }
 
 MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
-    M_ID                ( model.M_ID ),
-    M_type              ( model.M_type ),
-    M_couplings         ( model.M_couplings ),
-    M_modelName         ( model.M_modelName ),
-    M_flags             ( model.M_flags ),
-    M_globalData        ( model.M_globalData ),
-    M_geometryScale     ( model.M_geometryScale ),
-    M_geometryRotate    ( model.M_geometryRotate ),
-    M_geometryTranslate ( model.M_geometryTranslate ),
-    M_comm              ( model.M_comm ),
-    M_displayer         ( model.M_displayer )
+        M_ID                ( model.M_ID ),
+        M_type              ( model.M_type ),
+        M_couplings         ( model.M_couplings ),
+        M_modelName         ( model.M_modelName ),
+        M_flags             ( model.M_flags ),
+        M_globalData        ( model.M_globalData ),
+        M_geometryScale     ( model.M_geometryScale ),
+        M_geometryRotate    ( model.M_geometryRotate ),
+        M_geometryTranslate ( model.M_geometryTranslate ),
+        M_comm              ( model.M_comm ),
+        M_displayer         ( model.M_displayer )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

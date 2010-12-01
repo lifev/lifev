@@ -42,7 +42,8 @@
 #include <life/lifecore/life.hpp>
 #include <lifemc/lifesolver/ComposedNN.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ComposedPrecDNND - Short description of the class
 /*!
@@ -121,7 +122,7 @@ public:
     //@{
 
     ComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
-        super( flag, order )
+            super( flag, order )
     {
     }
 
@@ -159,16 +160,16 @@ public:
         @param section string specifying the path in the data file where to find the options for the operator
      */
     void setDataFromGetPot( const GetPot&      dataFile,
-                            const std::string& section ){}
+                            const std::string& section ) {}
 
-static BlockInterface* createComposedDNND()
-{
-    const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
-    const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
-    const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
-    const std::vector<ComposedBlockOper::Block> orderVector(order, order+6);
-    return new ComposedDNND(couplingVectorDNND, orderVector);
-}
+    static BlockInterface* createComposedDNND()
+    {
+        const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
+        const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+        const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
+        const std::vector<ComposedBlockOper::Block> orderVector(order, order+6);
+        return new ComposedDNND(couplingVectorDNND, orderVector);
+    }
 
     //@}
 private:

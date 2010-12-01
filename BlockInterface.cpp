@@ -35,7 +35,8 @@
 
 #include <BlockInterface.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 
 void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
@@ -47,7 +48,7 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
                                     const Real& timeStep,
                                     const Real& value) // not working with non-matching grids
 {// coupling from 1 to 31, working as chmod
-    if( flag-31 > 0 )//recursive call
+    if ( flag-31 > 0 )//recursive call
     {
         Int subFlag(flag);
         subFlag -= 31;
@@ -60,16 +61,16 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
     UInt interface(numerationInterface->getMap().getMap(Unique)->NumGlobalElements());
     UInt totalSize(offset[0]+problem[0]->map().getMap(Unique)->NumGlobalElements());
 
-    if(flag-16>=0)//coupling the mesh in FSI
+    if (flag-16>=0)//coupling the mesh in FSI
     {
         UInt interface( numerationInterface->getMap().getMap( Unique )->NumGlobalElements() );
         UInt solidFluidInterface( offset[2] );
         std::map<ID, ID>::const_iterator ITrow;
-        for( UInt dim = 0; dim < nDimensions; ++dim )
+        for ( UInt dim = 0; dim < nDimensions; ++dim )
         {
-            for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow )
+            for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow )
             {
-                if( numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+                if ( numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
                     bigMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof() - 1, offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(), (-value)*timeStep/**1.e-2*//*scaling of the solid matrix*/ );
                 }
@@ -80,28 +81,28 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
 
     Int newFlag(flag);
 
-    for(UInt dim = 0; dim < nDimensions; ++dim)//coupling F-S in FSI
+    for (UInt dim = 0; dim < nDimensions; ++dim)//coupling F-S in FSI
     {
-        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, newFlag = flag )
+        for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, newFlag = flag )
         {
-            if(numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
-                if(newFlag-8>=0)//right low
+                if (newFlag-8>=0)//right low
                 {
                     bigMatrix->set_mat_inc( offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(),(int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, value );//right low
                     newFlag -= 8;
                 }
-                if(newFlag-4>=0)// right up
+                if (newFlag-4>=0)// right up
                 {
                     bigMatrix->set_mat_inc( offset[1] + ITrow->first-1 + dim* problem[1]->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, -value );//right up
                     newFlag -= 4;
                 }
-                if(newFlag-2>=0)//low left
+                if (newFlag-2>=0)//low left
                 {
                     bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* problem[1]->dof().numTotalDof(), value);//low left
                     newFlag -= 2;
                 }
-                if(newFlag-1>=0)//low right
+                if (newFlag-1>=0)//low right
                     bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (offset[0] + ITrow->second)-1 + dim* problem[0]->dof().numTotalDof(), -value);//low right
 
                 bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, 0.0);
@@ -113,7 +114,7 @@ void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
 void BlockInterface::applyBoundaryConditions(const Real& time)
 {
     ASSERT( M_bch.size() == M_blocks.size(), "The number of BChandlers must correspond to the number of blocks" )
-    for(ID i=0; i<M_bch.size(); ++i)
+    for (ID i=0; i<M_bch.size(); ++i)
     {
         applyBoundaryConditions(time, i);
     }
@@ -159,42 +160,42 @@ BlockInterface::setOffsets(UInt blocks, ...)
 
 void
 BlockInterface::robinCoupling( matrix_ptrtype& matrix,
-                            Real&  alphaf,
-                            Real&  alphas,
-                            UInt  coupling,
-                            const BlockInterface::fespace_ptrtype& FESpace1,
-                            const UInt& offset1,
-                            const BlockInterface::fespace_ptrtype& FESpace2,
-                            const UInt& offset2,
-                            const std::map<ID, ID>& locDofMap,
-                            const BlockInterface::vector_ptrtype& numerationInterface ) // not working with non-matching grids
+                               Real&  alphaf,
+                               Real&  alphas,
+                               UInt  coupling,
+                               const BlockInterface::fespace_ptrtype& FESpace1,
+                               const UInt& offset1,
+                               const BlockInterface::fespace_ptrtype& FESpace2,
+                               const UInt& offset2,
+                               const std::map<ID, ID>& locDofMap,
+                               const BlockInterface::vector_ptrtype& numerationInterface ) // not working with non-matching grids
 {//coupling: flag from 1 to 4 working as chmod
     UInt interface(numerationInterface->getMap().getMap(Unique)->NumGlobalElements());
     std::map<ID, ID>::const_iterator ITrow;
     UInt totalSize(offset2+FESpace2->map().getMap(Unique)->NumGlobalElements());
 
 
-    if(coupling-4 >= 0)
+    if (coupling-4 >= 0)
     {
-            for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        {
+            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
-                if(numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+                for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    for(UInt dim = 0; dim < nDimensions; ++dim)
-                    {
-                        matrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (offset2 + ITrow->second)-1 + dim* FESpace2->dof().numTotalDof(), alphas);//low right
-                    }
+                    matrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (offset2 + ITrow->second)-1 + dim* FESpace2->dof().numTotalDof(), alphas);//low right
                 }
             }
-            coupling -= 4;
+        }
+        coupling -= 4;
     }
-    if(coupling-2 >= 0)
+    if (coupling-2 >= 0)
     {
-        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if(numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
-                for(UInt dim = 0; dim < nDimensions; ++dim)
+                for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
                     matrix->set_mat_inc( ITrow->first-1 + dim* FESpace1->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, alphaf );//right up
                 }
@@ -202,18 +203,18 @@ BlockInterface::robinCoupling( matrix_ptrtype& matrix,
         }
         coupling -= 2;
     }
-    if(coupling-1 >= 0)
+    if (coupling-1 >= 0)
     {
-            for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        {
+            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
-                if(numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+                for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    for(UInt dim = 0; dim < nDimensions; ++dim)
-                    {
                     matrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* FESpace1->dof().numTotalDof(), alphas);//low left
-                    }
                 }
             }
+        }
     }
 }
 

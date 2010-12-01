@@ -43,7 +43,7 @@
 // Jacobian coefficient approximation
 #define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
-    //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
+//#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
 
 // Matlab post-processing
@@ -65,10 +65,11 @@
 // LifeV includes
 #include <life/lifefem/FESpace.hpp>
 #ifdef HAVE_HDF5
-    #include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 #endif
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Model_1D - MultiScale model for 1D Fluid simulations
 /*!

@@ -55,7 +55,8 @@
 #include <string>
 #include <vector>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // Enum objects
 enum BCInterface1D_BaseList

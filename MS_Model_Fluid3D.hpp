@@ -48,11 +48,12 @@
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
 #ifdef HAVE_HDF5
-    #include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 #endif
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Model_Fluid3D - MultiScale model for 3D Fluid simulations
 /*!

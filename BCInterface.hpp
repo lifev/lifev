@@ -44,7 +44,8 @@
 #include <lifemc/lifesolver/BCInterface_OperatorFunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface_FSI.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface - LifeV Interface to load Boundary Conditions completely from a GetPot file
 /*!
@@ -218,7 +219,7 @@ public:
                 const BCFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                      BCBase& base );
+                BCBase& base );
 
     //! Add a Boundary Condition with component using the standard interface of the BCHandler
     /*!
@@ -234,7 +235,7 @@ public:
                 const BCFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                      BCBase& base,
+                BCBase& base,
                 const BCComp& comp );
 
     //@}
@@ -295,7 +296,7 @@ private:
 
     template< class BCInterfaceBase >
     inline void AddBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
-                         const BCBaseList_Type& Oper );
+                               const BCBaseList_Type& Oper );
 
     // This method should be removed: it is a workaround due to legacy of LifeV BC.
     inline void AddBCManager( BCVectorInterface& base );
@@ -328,13 +329,13 @@ private:
 // ===================================================
 template< class Operator >
 BCInterface< Operator >::BCInterface( ) :
-    M_bcNumber                ( 0 ),
-    M_hint                    ( BCHandler_Type::HINT_BC_NONE ),
-    M_handler                 (),
-    M_data                    (),
-    M_vectorFunction          (),
-    M_vectorFunctionDirection (),
-    M_vectorFSI               ()
+        M_bcNumber                ( 0 ),
+        M_hint                    ( BCHandler_Type::HINT_BC_NONE ),
+        M_handler                 (),
+        M_data                    (),
+        M_vectorFunction          (),
+        M_vectorFunctionDirection (),
+        M_vectorFSI               ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -350,13 +351,13 @@ BCInterface< Operator >::BCInterface( ) :
 
 template< class Operator >
 BCInterface< Operator >::BCInterface( const BCInterface& interface ) :
-    M_bcNumber                ( interface.M_bcNumber ),
-    M_hint                    ( interface.M_hint ),
-    M_handler                 ( interface.M_handler ),
-    M_data                    ( interface.M_data ),
-    M_vectorFunction          ( interface.M_vectorFunction ),
-    M_vectorFunctionDirection ( interface.M_vectorFunctionDirection ),
-    M_vectorFSI               ( interface.M_vectorFSI )
+        M_bcNumber                ( interface.M_bcNumber ),
+        M_hint                    ( interface.M_hint ),
+        M_handler                 ( interface.M_handler ),
+        M_data                    ( interface.M_data ),
+        M_vectorFunction          ( interface.M_vectorFunction ),
+        M_vectorFunctionDirection ( interface.M_vectorFunctionDirection ),
+        M_vectorFSI               ( interface.M_vectorFSI )
 {
 }
 
@@ -456,7 +457,7 @@ BCInterface< Operator >::UpdateOperatorVariables()
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
         BCInterface_OperatorFunction< Operator > *Oper =
-                dynamic_cast< BCInterface_OperatorFunction< Operator > * > ( &( *M_vectorFunction[i] ) );
+            dynamic_cast< BCInterface_OperatorFunction< Operator > * > ( &( *M_vectorFunction[i] ) );
 
         if ( Oper != 0 )
             Oper->UpdateOperatorVariables();
@@ -469,7 +470,7 @@ BCInterface< Operator >::addBC( const BCName& name,
                                 const BCFlag& flag,
                                 const BCType& type,
                                 const BCMode& mode,
-                                      BCBase& base )
+                                BCBase& base )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -485,7 +486,7 @@ BCInterface< Operator >::addBC( const BCName& name,
                                 const BCFlag& flag,
                                 const BCType& type,
                                 const BCMode& mode,
-                                      BCBase& base,
+                                BCBase& base,
                                 const BCComp& comp )
 {
 
@@ -506,7 +507,7 @@ void BCInterface< Operator >::SetOperator( const boost::shared_ptr< Operator >& 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
         BCInterface_OperatorFunction< Operator > *castedOperator =
-                dynamic_cast < BCInterface_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
+            dynamic_cast < BCInterface_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
 
         if ( castedOperator != 0 )
             castedOperator->SetOperator( Oper );
@@ -574,22 +575,22 @@ BCInterface< Operator >::BuildBase()
 
     switch ( M_data.GetBase().second )
     {
-        case BCInterface_function:
-        case BCInterface_functionFile:
-        case BCInterface_OPERfunction:
-        case BCInterface_OPERfunctionFile:
+    case BCInterface_function:
+    case BCInterface_functionFile:
+    case BCInterface_OPERfunction:
+    case BCInterface_OPERfunctionFile:
 
-            AddBase( M_vectorFunction, M_data.GetBase().second );
+        AddBase( M_vectorFunction, M_data.GetBase().second );
 
-            AddBCManager( M_vectorFunction.back()->GetBase() );
+        AddBCManager( M_vectorFunction.back()->GetBase() );
 
-            break;
+        break;
 
-        case BCInterface_OPERFSI:
+    case BCInterface_OPERFSI:
 
-            AddBase( M_vectorFSI );
+        AddBase( M_vectorFSI );
 
-            break;
+        break;
     }
 }
 
@@ -604,7 +605,7 @@ BCInterface< Operator >::AddBase( std::vector< boost::shared_ptr< BCInterfaceBas
 template< class Operator > template< class BCInterfaceBase >
 inline void
 BCInterface< Operator >::AddBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
-                                  const BCBaseList_Type& Oper )
+                                        const BCBaseList_Type& Oper )
 {
     boost::shared_ptr< BCInterfaceBase > Function( FactoryBCInterface_Function::instance().createObject( Oper ) );
 
@@ -622,26 +623,26 @@ BCInterface< Operator >::AddBCManager( BCVectorInterface& base )
 
     switch ( M_data.GetMode() )
     {
-        case Scalar:
-        case Normal:
-        case Tangential:
-        case Directional:
-        case Component:
+    case Scalar:
+    case Normal:
+    case Tangential:
+    case Directional:
+    case Component:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5020 ) << "BCInterface::AddBCManager                              others" << "\n\n";
+        Debug( 5020 ) << "BCInterface::AddBCManager                              others" << "\n\n";
 #endif
 
-            std::cout << "ERROR: Scalar, Normal, Tangential, Directional, Component NOT AVAILABLE FOR FSI BC" << std::endl;
+        std::cout << "ERROR: Scalar, Normal, Tangential, Directional, Component NOT AVAILABLE FOR FSI BC" << std::endl;
         break;
 
-        case Full:
+    case Full:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
+        Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
 #endif
 
-            M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
+        M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
 
         break;
     }
@@ -656,22 +657,22 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
     switch ( M_data.GetMode() )
     {
-        case Scalar:
-        case Normal:
-        case Tangential:
+    case Scalar:
+    case Normal:
+    case Tangential:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5020 ) << "BCInterface::AddBCManager                              Scalar, Normal, Tangential" << "\n\n";
+        Debug( 5020 ) << "BCInterface::AddBCManager                              Scalar, Normal, Tangential" << "\n\n";
 #endif
 
-            M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base );
+        M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base );
 
         break;
 
-        case Directional:
+    case Directional:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5020 ) << "BCInterface::AddBCManager                              Directional" << "\n\n";
+        Debug( 5020 ) << "BCInterface::AddBCManager                              Directional" << "\n\n";
 #endif
         {
             // Parameters for direction BC
@@ -691,23 +692,23 @@ BCInterface< Operator >::AddBCManager( BCBase& base )
 
         break;
 
-        case Full:
+    case Full:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
+        Debug( 5020 ) << "BCInterface::AddBCManager                              Full" << "\n\n";
 #endif
 
-            M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
+        M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComN() );
 
         break;
 
-        case Component:
+    case Component:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5020 ) << "BCInterface::AddBCManager                              Component" << "\n\n";
+        Debug( 5020 ) << "BCInterface::AddBCManager                              Component" << "\n\n";
 #endif
 
-            M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComV() );
+        M_handler->addBC( M_data.GetName(), M_data.GetFlag(), M_data.GetType(), M_data.GetMode(), base, M_data.GetComV() );
 
         break;
     }

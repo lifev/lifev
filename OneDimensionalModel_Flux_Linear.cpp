@@ -39,17 +39,18 @@
 
 #include "OneDimensionalModel_Flux_Linear.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_Flux_Linear::OneDimensionalModel_Flux_Linear() :
-    super   ()
+        super   ()
 {}
 
 OneDimensionalModel_Flux_Linear::OneDimensionalModel_Flux_Linear( const Physics_PtrType Physics ) :
-    super   ( Physics )
+        super   ( Physics )
 {}
 
 // ===================================================
@@ -59,11 +60,11 @@ Real
 OneDimensionalModel_Flux_Linear::operator()( const Real& U1, const Real& U2,
                                              const ID& ii,    const UInt& i ) const
 {
-    if( ii == 1 ) // F1
+    if ( ii == 1 ) // F1
     {
         return M_Physics->Data()->Flux11( i ) * U1 + M_Physics->Data()->Flux12( i ) * U2;
     }
-    if( ii == 2 ) // F2
+    if ( ii == 2 ) // F2
     {
         return M_Physics->Data()->Flux21( i ) * U1 + M_Physics->Data()->Flux22( i ) * U2;
     }
@@ -75,19 +76,19 @@ Real
 OneDimensionalModel_Flux_Linear::diff( const Real& /*U1*/, const Real& /*U2*/,
                                        const ID& ii, const ID& jj, const UInt& i) const
 {
-    if( ii == 1 && jj == 1 ) // dF1/dU1
+    if ( ii == 1 && jj == 1 ) // dF1/dU1
     {
         return M_Physics->Data()->Flux11( i );
     }
-    if( ii == 1 && jj == 2 ) // dF1/dU2
+    if ( ii == 1 && jj == 2 ) // dF1/dU2
     {
         return M_Physics->Data()->Flux12( i );
     }
-    if( ii == 2 && jj == 1 ) // dF2/dU1
+    if ( ii == 2 && jj == 1 ) // dF2/dU1
     {
         return M_Physics->Data()->Flux21( i );
     }
-    if( ii == 2 && jj == 2 ) // dF2/dU2
+    if ( ii == 2 && jj == 2 ) // dF2/dU2
     {
         return M_Physics->Data()->Flux22( i );
     }
@@ -111,9 +112,9 @@ OneDimensionalModel_Flux_Linear::diff( const Real& /*U1*/, const Real& /*U2*/,
 
 void
 OneDimensionalModel_Flux_Linear::EigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
-                                                                Container2D_Type& eigenvalues,
-                                                                Container2D_Type& leftEigenvector1,
-                                                                Container2D_Type& leftEigenvector2,
+                                                          Container2D_Type& eigenvalues,
+                                                          Container2D_Type& leftEigenvector1,
+                                                          Container2D_Type& leftEigenvector2,
                                                           const UInt& i ) const
 {
     eigenvalues[0] = M_Physics->Data()->Celerity1( i );
@@ -127,9 +128,9 @@ OneDimensionalModel_Flux_Linear::EigenValuesEigenVectors( const Real& /*U1*/, co
 
 void
 OneDimensionalModel_Flux_Linear::deltaEigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
-                                                                     Container2D_Type& deltaEigenvalues,
-                                                                     Container2D_Type& deltaLeftEigenvector1,
-                                                                     Container2D_Type& deltaLeftEigenvector2,
+                                                               Container2D_Type& deltaEigenvalues,
+                                                               Container2D_Type& deltaLeftEigenvector1,
+                                                               Container2D_Type& deltaLeftEigenvector2,
                                                                const UInt& /*i*/ ) const
 {
     deltaEigenvalues[0] = 0;

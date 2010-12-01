@@ -42,7 +42,8 @@
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! robinInterface - Class for the Robin coupling of etherogeneaous problems
 /*!
@@ -66,14 +67,14 @@ public:
     //@{
 
     RobinInterface():
-        M_alphaf(),
-        M_alphas(),
-        M_robinCoupling(),
-        M_robinPart(),
-        M_rhsVec()
+            M_alphaf(),
+            M_alphas(),
+            M_robinCoupling(),
+            M_robinPart(),
+            M_rhsVec()
     {}
 
-    ~RobinInterface(){}
+    ~RobinInterface() {}
 
     //@}
 
@@ -93,13 +94,13 @@ public:
       \param data: data file
       \param section: the section (usually /robin) in the GetPot file where the parameters are specified
      */
-    void setRobinMatrix( BlockInterface::matrix_ptrtype& robinMatrix ){M_robinPart=robinMatrix;}
+    void setRobinMatrix( BlockInterface::matrix_ptrtype& robinMatrix ) {M_robinPart=robinMatrix;}
 
     //! method to initialize the pointer to the robin RHS
     /*!
       \param vec: the rhs vector
      */
-    void setRobinRhs( BlockInterface::vector_ptrtype& vec ){ M_rhsVec = vec; }
+    void setRobinRhs( BlockInterface::vector_ptrtype& vec ) { M_rhsVec = vec; }
 
     //! method to apply the robin coupling to the blocks.
     /*!

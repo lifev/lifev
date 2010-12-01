@@ -39,7 +39,8 @@
 
 #include <lifemc/lifesolver/OneDimensionalModel_Physics_Linear.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
@@ -49,7 +50,7 @@ OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear()
 }
 
 OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear( const Data_PtrType Data ) :
-    super   ( Data )
+        super   ( Data )
 {
 }
 
@@ -58,7 +59,7 @@ OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear( const Da
 // ===================================================
 void
 OneDimensionalModel_Physics_Linear::W_from_U(       Real& _W1,       Real& _W2,
-                                              const Real& _U1, const Real& _U2, const UInt& indz ) const
+                                                    const Real& _U1, const Real& _U2, const UInt& indz ) const
 {
     _W1 = _U2 + Celerity0(indz) * ( _U1 - M_Data->Area0(indz) );
 
@@ -73,7 +74,7 @@ OneDimensionalModel_Physics_Linear::W_from_U(       Real& _W1,       Real& _W2,
 
 void
 OneDimensionalModel_Physics_Linear::U_from_W(       Real& _U1,       Real& _U2,
-                                              const Real& _W1, const Real& _W2, const UInt& indz ) const
+                                                    const Real& _W1, const Real& _W2, const UInt& indz ) const
 {
     _U1 = M_Data->Area0(indz) + (_W1 - _W2) / ( 2 * Celerity0(indz) );
 
@@ -87,7 +88,7 @@ OneDimensionalModel_Physics_Linear::pressure_W( const Real& _W1, const Real& _W2
              * ( std::pow( 1 / M_Data->Area0(indz), M_Data->Beta1(indz) )
                  * std::pow( (_W1 - _W2) / ( 2*Celerity0(indz) ) + M_Data->Area0(indz), M_Data->Beta1(indz) )
                  - 1 )
-             );
+           );
 }
 
 Real
@@ -101,10 +102,10 @@ OneDimensionalModel_Physics_Linear::pressure_WDiff( const Real& _W1, const Real&
     Real result( beta0beta1overA0beta1 * oneover2celerity );
     result *= ( ( _W1 - _W2 ) * oneover2celerity + M_Data->Area0(indz) );
 
-    if( i == 1 ) //! dP/dW1
+    if ( i == 1 ) //! dP/dW1
         return result;
 
-    if( i == 2 ) //! dP/dW2
+    if ( i == 2 ) //! dP/dW2
         return -result;
 
     ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");
@@ -118,14 +119,14 @@ OneDimensionalModel_Physics_Linear::W_from_P( const Real& _P, const Real& _W, co
               * ( pow( ( _P / M_Data->Beta0(indz) + 1 ), 1 / M_Data->Beta1(indz) ) - 1 ) );
 
     Debug(6320) << "[W_from_P] "
-                << "2 * Celerity0(indz) * Area0(indz) = " << 2 * Celerity0(indz) * M_Data->Area0(indz)
-                << ", pow( ( _P / Beta0(indz) + 1 ), 1 / Beta1(indz) ) = "
-                << pow( ( _P / M_Data->Beta0(indz) + 1 ), 1 / M_Data->Beta1(indz)  ) << "\n";
+    << "2 * Celerity0(indz) * Area0(indz) = " << 2 * Celerity0(indz) * M_Data->Area0(indz)
+    << ", pow( ( _P / Beta0(indz) + 1 ), 1 / Beta1(indz) ) = "
+    << pow( ( _P / M_Data->Beta0(indz) + 1 ), 1 / M_Data->Beta1(indz)  ) << "\n";
     Debug(6320) << "[W_from_P] add term = " << add << "\n";
 
-    if( i == 1 )
+    if ( i == 1 )
         return _W - add;
-    if( i == 2 )
+    if ( i == 2 )
         return _W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -137,10 +138,10 @@ OneDimensionalModel_Physics_Linear::W_from_Q( const Real& _Q, const Real& /*_W_n
 {
     Real add( 2 * _Q );
 
-    if( i == 1 ) // W1 given
+    if ( i == 1 ) // W1 given
         return add - _W;
 
-    if( i == 2 ) // W2 given
+    if ( i == 2 ) // W2 given
         return add - _W;
 
     ERROR_MSG("You can only find W1 or W2 as function of Q");

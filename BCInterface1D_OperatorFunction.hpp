@@ -39,7 +39,8 @@
 
 #include <lifemc/lifesolver/BCInterface1D_Function.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface1D_OperatorFunction - LifeV bcFunction wrapper for BCInterface1D (with operators)
 /*!
@@ -129,7 +130,7 @@ public:
      * @param Oper operator
      */
     inline void SetOperator( const boost::shared_ptr< Operator >& Oper );
-    
+
     //! Set solution
     /*!
      * @param solution The solution container of the 1D problem
@@ -204,11 +205,11 @@ inline BCInterface1D_Function< Operator >* BCInterface1D_CreateOperatorFunction(
 // ===================================================
 template< class Operator >
 BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction() :
-    super                            (),
-    M_operator                       (),
-    M_solution                       (),
-    M_side                           (),
-    M_list                           ()
+        super                            (),
+        M_operator                       (),
+        M_solution                       (),
+        M_side                           (),
+        M_list                           ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -219,11 +220,11 @@ BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction() :
 
 template< class Operator >
 BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction( const Data_Type& data ) :
-    super                            (),
-    M_operator                       (),
-    M_solution                       (),
-    M_side                           (),
-    M_list                           ()
+        super                            (),
+        M_operator                       (),
+        M_solution                       (),
+        M_side                           (),
+        M_list                           ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -235,11 +236,11 @@ BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction( cons
 
 template< class Operator >
 BCInterface1D_OperatorFunction< Operator >::BCInterface1D_OperatorFunction( const BCInterface1D_OperatorFunction& function ) :
-    super                            ( function ),
-    M_operator                       ( function.M_operator ),
-    M_solution                       ( function.M_solution ),
-    M_side                           ( function.M_side ),
-    M_list                           ( function.M_list )
+        super                            ( function ),
+        M_operator                       ( function.M_operator ),
+        M_solution                       ( function.M_solution ),
+        M_side                           ( function.M_side ),
+        M_list                           ( function.M_list )
 {
 }
 
@@ -314,96 +315,96 @@ BCInterface1D_OperatorFunction< Operator >::UpdateOperatorVariables()
         switch ( *j )
         {
             // f_ -> FLUID
-            case f_area:
+        case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_A, M_side ) << "\n";
+            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_A, M_side ) << "\n";
 #endif
-                SetVariable( "f_area", M_operator->BoundaryValue( *M_solution, OneD_A, M_side ) );
+            SetVariable( "f_area", M_operator->BoundaryValue( *M_solution, OneD_A, M_side ) );
 
-                break;
+            break;
 
-            case f_density:
+        case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                  f_density: " << M_operator->Physics()->Data()->DensityRho() << "\n";
+            Debug( 5023 ) << "                                                  f_density: " << M_operator->Physics()->Data()->DensityRho() << "\n";
 #endif
-                SetVariable( "f_density", M_operator->Physics()->Data()->DensityRho() );
+            SetVariable( "f_density", M_operator->Physics()->Data()->DensityRho() );
 
-                break;
+            break;
 
-            case f_flux:
+        case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_Q, M_side ) << "\n";
+            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_Q, M_side ) << "\n";
 #endif
 
-                SetVariable( "f_flux", M_operator->BoundaryValue( *M_solution, OneD_Q, M_side ) );
+            SetVariable( "f_flux", M_operator->BoundaryValue( *M_solution, OneD_Q, M_side ) );
 
-                break;
+            break;
 
-            case f_pressure:
+        case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_P, M_side ) << "\n";
+            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_operator->BoundaryValue( OneD_P, M_side ) << "\n";
 #endif
 
-                SetVariable( "f_pressure", M_operator->BoundaryValue( *M_solution, OneD_P, M_side ) );
+            SetVariable( "f_pressure", M_operator->BoundaryValue( *M_solution, OneD_P, M_side ) );
 
-                break;
+            break;
 
-            case f_viscosity:
+        case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
+            Debug( 5023 ) << "                                                f_viscosity: " << M_operator->fluid().viscosity() << "\n";
 #endif
-                SetVariable( "f_viscosity", M_operator->Physics()->Data()->Viscosity() );
+            SetVariable( "f_viscosity", M_operator->Physics()->Data()->Viscosity() );
 
-                break;
+            break;
 
-                // s_ -> SOLID
-            case s_density:
+            // s_ -> SOLID
+        case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho() << "\n";
+            Debug( 5023 ) << "                                                   s_density: " << M_operator->solid().rho() << "\n";
 #endif
 
-                SetVariable( "s_density", M_operator->Physics()->Data()->DensityWall() );
+            SetVariable( "s_density", M_operator->Physics()->Data()->DensityWall() );
 
-                break;
+            break;
 
-            case s_poisson:
+        case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson() << "\n";
+            Debug( 5023 ) << "                                                   s_poisson: " << M_operator->solid().poisson() << "\n";
 #endif
 
-                SetVariable( "s_poisson", M_operator->Physics()->Data()->Poisson() );
+            SetVariable( "s_poisson", M_operator->Physics()->Data()->Poisson() );
 
-                break;
+            break;
 
-            case s_thickness:
+        case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness() << "\n";
+            Debug( 5023 ) << "                                                 s_thickness: " << M_operator->solid().thickness() << "\n";
 #endif
 
-                SetVariable( "s_thickness", M_operator->Physics()->Data()->Thickness() );
+            SetVariable( "s_thickness", M_operator->Physics()->Data()->Thickness() );
 
-                break;
+            break;
 
-            case s_young:
+        case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young() << "\n";
+            Debug( 5023 ) << "                                                     s_young: " << M_operator->solid().young() << "\n";
 #endif
 
-                SetVariable( "s_young", M_operator->Physics()->Data()->Young() );
+            SetVariable( "s_young", M_operator->Physics()->Data()->Young() );
 
-                break;
+            break;
 
-            default:
-                SwitchErrorMessage( "OneDimensionalModel_Solver" );
+        default:
+            SwitchErrorMessage( "OneDimensionalModel_Solver" );
         }
 }
 

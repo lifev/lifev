@@ -61,7 +61,8 @@
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_Solver - Solver class for the 1D model.
 /*!
@@ -413,9 +414,9 @@ public:
      *  @param leftEigenvector1 output left eigenvector associated to the second eigenvalue.
      */
     void BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const Solution_Type& solution,
-                                                Container2D_Type& eigenvalues,
-                                                Container2D_Type& leftEigenvector1,
-                                                Container2D_Type& leftEigenvector2 );
+                                          Container2D_Type& eigenvalues,
+                                          Container2D_Type& leftEigenvector1,
+                                          Container2D_Type& leftEigenvector2 );
 
     //@}
 

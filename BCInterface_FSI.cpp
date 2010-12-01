@@ -34,19 +34,20 @@
 
 #include <lifemc/lifesolver/BCInterface_FSI.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
-    M_FSIFunction   (),
-    M_name          (),
-    M_flag          (),
-    M_type          (),
-    M_mode          (),
-    M_comV          (),
-    M_base          ()
+        M_FSIFunction   (),
+        M_name          (),
+        M_flag          (),
+        M_type          (),
+        M_mode          (),
+        M_comV          (),
+        M_base          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -56,13 +57,13 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
 }
 
 BCInterface_FSI< FSIOperator >::BCInterface_FSI( const Data_Type& data ) :
-    M_FSIFunction   (),
-    M_name          (),
-    M_flag          (),
-    M_type          (),
-    M_mode          (),
-    M_comV          (),
-    M_base          ()
+        M_FSIFunction   (),
+        M_name          (),
+        M_flag          (),
+        M_type          (),
+        M_mode          (),
+        M_comV          (),
+        M_base          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -73,13 +74,13 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI( const Data_Type& data ) :
 }
 
 BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_FSI& fsi ) :
-    M_FSIFunction   ( fsi.M_FSIFunction ),
-    M_name          ( fsi.M_name ),
-    M_flag          ( fsi.M_flag ),
-    M_type          ( fsi.M_type ),
-    M_mode          ( fsi.M_mode ),
-    M_comV          ( fsi.M_comV ),
-    M_base          ( fsi.M_base )
+        M_FSIFunction   ( fsi.M_FSIFunction ),
+        M_name          ( fsi.M_name ),
+        M_flag          ( fsi.M_flag ),
+        M_type          ( fsi.M_type ),
+        M_mode          ( fsi.M_mode ),
+        M_comV          ( fsi.M_comV ),
+        M_base          ( fsi.M_base )
 {
 }
 
@@ -164,55 +165,55 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
 
     switch ( mapMethod[Oper->data().method()] )
     {
-        case EXACTJACOBIAN:
+    case EXACTJACOBIAN:
 
-    #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            exactJacobian" << "\n";
-    #endif
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface_FSI::checkMethod                            exactJacobian" << "\n";
+#endif
 
-            CheckFunction< exactJacobian > ( Oper );
+        CheckFunction< exactJacobian > ( Oper );
 
-            break;
+        break;
 
-        case FIXEDPOINT:
+    case FIXEDPOINT:
 
-    #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            fixedPoint" << "\n";
-    #endif
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface_FSI::checkMethod                            fixedPoint" << "\n";
+#endif
 
-            CheckFunction< fixedPoint > ( Oper );
+        CheckFunction< fixedPoint > ( Oper );
 
-            break;
+        break;
 
-        case MONOLITHIC_GE:
+    case MONOLITHIC_GE:
 
-    #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithicGE" << "\n";
-    #endif
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithicGE" << "\n";
+#endif
 
-            CheckFunction< MonolithicGE >( Oper );
+        CheckFunction< MonolithicGE >( Oper );
 
-            break;
+        break;
 
-        case MONOLITHIC_GI:
+    case MONOLITHIC_GI:
 
-    #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithicGI" << "\n";
-    #endif
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithicGI" << "\n";
+#endif
 
-            CheckFunction< MonolithicGI >( Oper );
+        CheckFunction< MonolithicGI >( Oper );
 
-            break;
+        break;
 
-        case STEKLOVPOINCARE:
+    case STEKLOVPOINCARE:
 
-    #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface_FSI::checkMethod                            steklovPoincare" << "\n";
-    #endif
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface_FSI::checkMethod                            steklovPoincare" << "\n";
+#endif
 
-            //CheckFunction< steklovPoincare >( Oper );
+        //CheckFunction< steklovPoincare >( Oper );
 
-            break;
+        break;
     }
 }
 

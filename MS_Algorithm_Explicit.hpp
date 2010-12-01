@@ -37,7 +37,8 @@
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Algorithm_Explicit - The MultiScale Algorithm implementation of Explicit
 /*!

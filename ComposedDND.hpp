@@ -40,7 +40,8 @@
 #include <life/lifecore/life.hpp>
 #include <lifemc/lifesolver/ComposedDN.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ComposedDND - Modular preconditioner for geometry implicit monolithic FSI, three factors splitting
 /*!
@@ -59,12 +60,12 @@ public:
     //@{
 
     ComposedDND( const std::vector<Int>& flag, const std::vector<Block>& order ):
-        super(flag, order),
-        M_swapped(false)
+            super(flag, order),
+            M_swapped(false)
     {
     }
 
-    ~ComposedDND(){}
+    ~ComposedDND() {}
 
     //@}
 

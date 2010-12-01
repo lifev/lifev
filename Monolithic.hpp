@@ -220,7 +220,7 @@ public:
     }
 
 
-    void  setRestarts( bool restarts ){ M_restarts = restarts; }
+    void  setRestarts( bool restarts ) { M_restarts = restarts; }
 
 #ifdef HAVE_TRILINOS_ANASAZI
     /**
@@ -258,7 +258,7 @@ public:
 
 #ifdef OBSOLETE
     /** get the shape derivatives vector*/
-    vector_type getRhsShapeDerivatives(){return *M_rhsShapeDerivatives;}
+    vector_type getRhsShapeDerivatives() {return *M_rhsShapeDerivatives;}
 #endif
     //    const boost::shared_ptr<EpetraMap>& monolithicMap() {return M_monolithicMap;}
 
@@ -266,19 +266,19 @@ public:
     const UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->getInterface();}
 
     //! Returns the solution at the previous time step
-    vector_ptrtype const&       un(){return M_un;}
+    vector_ptrtype const&       un() {return M_un;}
 
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     //bool const isFullMonolithic(){return M_fullMonolithic;}
 
     //! Returns the offset assigned to the solid block
-    UInt const getOffset(){return M_offset;}
+    UInt const getOffset() {return M_offset;}
 
     //! returns a non-const pointer to the preconditioner. Can be used also as a setter.
-    prec_ptrtype& precPtr(){ return M_precPtr; }
+    prec_ptrtype& precPtr() { return M_precPtr; }
 
     //! returns a non-const pointer to the preconditioner. Can be used also as a setter.
-    block_matrix_ptrtype& operatorPtr(){ return M_monolithicMatrix; }
+    block_matrix_ptrtype& operatorPtr() { return M_monolithicMatrix; }
 
     //!@}
     //!@name Virtual methods
@@ -291,7 +291,7 @@ public:
     virtual void setUp( const GetPot& dataFile );
 
     /** returns the monolithic map*/
-    virtual    boost::shared_ptr<EpetraMap>& getCouplingVariableMap(){return M_monolithicMap;}
+    virtual    boost::shared_ptr<EpetraMap>& getCouplingVariableMap() {return M_monolithicMap;}
 
     /**
        assigns each mesh partition to the corresponding processor, builds the monolithic map
@@ -448,7 +448,7 @@ protected:
     void evalResidual( const vector_type& sol, const vector_ptrtype& rhs,  vector_type& res, bool diagonalScaling=false);
 
     //!\small says if the preconditioner will be recomputed
-    bool recomputePrec(){return(!M_reusePrec || M_resetPrec);}
+    bool recomputePrec() {return(!M_reusePrec || M_resetPrec);}
 
     //!\small left-multiply both the monolithic matrix and the rhs times a preconditioner matrix
     void applyPreconditioner(matrix_ptrtype robinCoupling, vector_type& rhs);
@@ -461,7 +461,7 @@ protected:
        \param matrFull: the output matrix*/
     void    diagonalScale(vector_type& rhs, matrix_ptrtype matrFull);
 
-    void shiftSolution(){}
+    void shiftSolution() {}
 
     void couplingVariableExtrap(vector_ptrtype& /*lambda*/, vector_ptrtype& /*lambdaDot*/, bool& /*firstIter*/)
     { }
@@ -471,11 +471,11 @@ protected:
     void variablesInit(std::string const& dOrder);
 
     int  setupBlockPrec( );
-        //!@}
+    //!@}
     //!@name protected setters
     //!@{
 #ifdef OBSOLETE
-    void setOperator(Epetra_Operator& epetraOperator){M_linearSolver->setOperator(epetraOperator);}
+    void setOperator(Epetra_Operator& epetraOperator) {M_linearSolver->setOperator(epetraOperator);}
 #endif
 
     void fillFactorDiagonal();
@@ -553,10 +553,11 @@ private:
     static bool                                       reg;
 };
 
-class WRONG_PREC_EXCEPTION{
+class WRONG_PREC_EXCEPTION
+{
 public:
-    WRONG_PREC_EXCEPTION(){}
-    virtual ~WRONG_PREC_EXCEPTION(){}
+    WRONG_PREC_EXCEPTION() {}
+    virtual ~WRONG_PREC_EXCEPTION() {}
 };
 
 }

@@ -33,11 +33,12 @@
 
 #include <ComposedDND.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 void ComposedDND::blockAssembling( )
 {
-    if(!M_swapped)
+    if (!M_swapped)
     {
         super::super::super::swap(M_coupling[2], M_coupling[3]);
         M_swapped = true;

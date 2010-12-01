@@ -33,17 +33,18 @@
 
 #include <ComposedDNND.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 void ComposedDNND::coupler(map_shared_ptrtype& map,
-                     const std::map<ID, ID>& locDofMap,
+                           const std::map<ID, ID>& locDofMap,
                            const vector_ptrtype& numerationInterface,
                            const Real& timeStep)
 {
     UInt totalDofs=map->getMap(Unique)->NumGlobalElements()+1;
     UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements();
 
-    for(ID k=0; k<2; ++k)
+    for (ID k=0; k<2; ++k)
     {
         M_blocks[k]->GlobalAssemble();
         matrix_ptrtype block(new matrix_type(*M_blocks[k]));

@@ -36,7 +36,8 @@
 
 #include <BlockMatrix.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 
 
@@ -56,7 +57,7 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
                           const vector_ptrtype& numerationInterface,
                           const Real& timeStep
-                            )
+                         )
 {
     ASSERT(!M_coupling.get(), "coupler must not be called twice \n");
     M_coupling.reset(new matrix_type(*map));
@@ -68,7 +69,7 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const vector_ptrtype& numerationInterface,
                           const Real& timeStep,
                           UInt /*flag1*/
-                            )
+                         )
 {
     super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
 }
@@ -97,7 +98,7 @@ void BlockMatrix::blockAssembling()
     M_coupling->GlobalAssemble();
     M_globalMatrix.reset(new matrix_type(M_coupling->getMap()));
     *M_globalMatrix += *M_coupling;
-    for(UInt k=0; k<M_blocks.size(); ++k)
+    for (UInt k=0; k<M_blocks.size(); ++k)
     {
         M_blocks[k]->GlobalAssemble();
         *M_globalMatrix += *M_blocks[k];
@@ -156,15 +157,15 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     //should be an int vector instead of double
     //                    M_numerationInterfaceInt.reset(new Epetra_IntVector(*M_interfaceMap.getMap(Unique)));
 
-    for(int j=0; j<numtasks; ++j)
+    for (int j=0; j<numtasks; ++j)
         epetraWorldComm->Broadcast( &numInterfaceDof[j], 1, j);
 
-    for(int j=numtasks-1; j>0 ; --j)
+    for (int j=numtasks-1; j>0 ; --j)
     {
         numInterfaceDof[j] = numInterfaceDof[j-1];
     }
     numInterfaceDof[0]=0;
-    for(int j=1; j<numtasks ; ++j)
+    for (int j=1; j<numtasks ; ++j)
         numInterfaceDof[j] += numInterfaceDof[j-1];
 
     UInt k=1;
@@ -172,13 +173,13 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
 
     M_interface = (UInt) interfaceMap.getMap(Unique)->NumGlobalElements()/nDimensions;
 //UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
-    for(l=0, ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
+    for (l=0, ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
     {
-        if(interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
+        if (interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
         {
             (*M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
             //                                    (*M_numerationInterfaceInt)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(M_numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
-            if((int)(*M_numerationInterface)(ITrow->second )!=floor(l+1+ numInterfaceDof[pid]/nDimensions+0.2 /*+ dim*localInterface*/) )
+            if ((int)(*M_numerationInterface)(ITrow->second )!=floor(l+1+ numInterfaceDof[pid]/nDimensions+0.2 /*+ dim*localInterface*/) )
                 std::cout<<"ERROR! the numeration of the coupling map is not correct"<<std::endl;
             ++l;
         }
@@ -187,11 +188,11 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     std::vector<int> couplingVector;
     couplingVector.reserve((int)(interfaceMap.getMap(Unique)->NumMyElements()));
 
-    for(int dim=0; dim<nDimensions; ++dim)
+    for (int dim=0; dim<nDimensions; ++dim)
     {
-        for( ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
+        for ( ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
         {
-            if(interfaceMap.getMap(Unique)->LID(ITrow->second)>=0)
+            if (interfaceMap.getMap(Unique)->LID(ITrow->second)>=0)
             {
                 couplingVector.push_back((*M_numerationInterface)(ITrow->second /*+ dim * solidDim*/)+ dim * M_interface );
                 //couplingVector.push_back((*M_numerationInterfaceInt)[ITrow->second /*+ dim * solidDim*/]+ dim * M_interface );
@@ -204,13 +205,13 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
 
 void BlockMatrix::applyBoundaryConditions(const Real& time)
 {
-    for( UInt i = 0; i < super::M_blocks.size(); ++i )
+    for ( UInt i = 0; i < super::M_blocks.size(); ++i )
         applyBoundaryConditions( time, i );
 }
 
 void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs)
 {
-    for( UInt i = 0; i < super::M_blocks.size(); ++i )
+    for ( UInt i = 0; i < super::M_blocks.size(); ++i )
         applyBoundaryConditions( time, rhs, i );
 }
 
@@ -226,7 +227,7 @@ void BlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
 
 void BlockMatrix::addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/)
 {
-    if(!M_coupling->getMatrixPtr()->Filled())
+    if (!M_coupling->getMatrixPtr()->Filled())
         *M_coupling += *Mat;
     else
     {

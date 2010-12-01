@@ -34,7 +34,8 @@
 
 #include <lifemc/lifesolver/MS_Solver.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::string MS_ProblemFolder = "./";
 UInt        MS_ProblemStep   = 0;
@@ -44,12 +45,12 @@ bool        MS_ExitFlag      = EXIT_SUCCESS;
 // Constructors
 // ===================================================
 MS_Solver::MS_Solver() :
-    M_model             (),
-    M_algorithm         (),
-    M_globalData        ( new MS_GlobalDataContainer_Type() ),
-    M_comm              (),
-    M_displayer         (),
-    M_chrono            ()
+        M_model             (),
+        M_algorithm         (),
+        M_globalData        ( new MS_GlobalDataContainer_Type() ),
+        M_comm              (),
+        M_displayer         (),
+        M_chrono            ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -75,12 +76,12 @@ MS_Solver::MS_Solver() :
 }
 
 MS_Solver::MS_Solver( const MS_Solver& solver ) :
-    M_model             ( solver.M_model ),
-    M_algorithm         ( solver.M_algorithm ),
-    M_globalData        ( solver.M_globalData ),
-    M_comm              ( solver.M_comm ),
-    M_displayer         ( solver.M_displayer ),
-    M_chrono            ( solver.M_chrono )
+        M_model             ( solver.M_model ),
+        M_algorithm         ( solver.M_algorithm ),
+        M_globalData        ( solver.M_globalData ),
+        M_comm              ( solver.M_comm ),
+        M_displayer         ( solver.M_displayer ),
+        M_chrono            ( solver.M_chrono )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -195,7 +196,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
             std::cout << "                    MULTISCALE SIMULATION" << std::endl;
             std::cout << "             time = " << M_globalData->GetDataTime()->getTime() << " s; "  <<
-                          "time step number = " << M_globalData->GetDataTime()->getTimeStepNumber()  << std::endl;
+                      "time step number = " << M_globalData->GetDataTime()->getTimeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 
@@ -229,7 +230,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
     Real algorithmResidual( M_algorithm->Residual() );
     if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
         MS_ErrorCheck( MS_Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
-                                    " (External Residual: " + number2string( externalResidual ) + ")\n" );
+                       " (External Residual: " + number2string( externalResidual ) + ")\n" );
 
     return MS_ExitFlag;
 }

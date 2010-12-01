@@ -38,7 +38,8 @@
 #include <lifemc/lifesolver/MS_Definitions.hpp>
 #include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Algorithm - The MultiScale Algorithm Interface
 /*!

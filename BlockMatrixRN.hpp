@@ -40,7 +40,8 @@
 #include <lifemc/lifesolver/BlockMatrix.hpp>
 #include <lifemc/lifesolver/RobinInterface.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BlockMatrixRN - class for handling a 2-blocks matrix with Robin-Neumann coupling
 /*!
@@ -71,12 +72,12 @@ public:
 
     //! Empty Constructor
     BlockMatrixRN(UInt flag):
-        super(flag),
-        superRobin()
+            super(flag),
+            superRobin()
     {}
 
     //! Destructor
-    ~BlockMatrixRN(){}
+    ~BlockMatrixRN() {}
     //@}
 
     //! @name Public methods
@@ -113,10 +114,10 @@ public:
     //! sets the matrix where the Robin contribution will be assembled (which have to passed from outside) and the
     /*! right hand side vector of the linear system, which will be updated with the Robin part.
      */
-    void setRobin( matrix_ptrtype& matrix, vector_ptrtype& vec ){setRobinMatrix( matrix ); setRobinRhs( vec );}
+    void setRobin( matrix_ptrtype& matrix, vector_ptrtype& vec ) {setRobinMatrix( matrix ); setRobinRhs( vec );}
 
     //! sets the matrix where the Robin contribution will be assembled
-    void setRobin( matrix_ptrtype& matrix ){setRobinMatrix( matrix ); }
+    void setRobin( matrix_ptrtype& matrix ) {setRobinMatrix( matrix ); }
     //@}
 
 

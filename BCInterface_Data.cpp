@@ -34,23 +34,24 @@
 
 #include <lifemc/lifesolver/BCInterface_Data.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 BCInterface_Data::BCInterface_Data() :
-    M_name               (),
-    M_flag               (),
-    M_type               (),
-    M_mode               (),
-    M_comV               (),
-    M_direction          (),
-    M_baseString         (),
-    M_base               (),
-    M_mapType            (),
-    M_mapMode            (),
-    M_mapBase            ()
+        M_name               (),
+        M_flag               (),
+        M_type               (),
+        M_mode               (),
+        M_comV               (),
+        M_direction          (),
+        M_baseString         (),
+        M_base               (),
+        M_mapType            (),
+        M_mapMode            (),
+        M_mapBase            ()
 {
     //Set mapType
     M_mapType["Essential"]  = Essential;
@@ -76,17 +77,17 @@ BCInterface_Data::BCInterface_Data() :
 }
 
 BCInterface_Data::BCInterface_Data( const BCInterface_Data& data ) :
-    M_name              ( data.M_name ),
-    M_flag              ( data.M_flag ),
-    M_type              ( data.M_type ),
-    M_mode              ( data.M_mode ),
-    M_comV              ( data.M_comV ),
-    M_direction         ( data.M_direction ),
-    M_baseString        ( data.M_baseString ),
-    M_base              ( data.M_base ),
-    M_mapType           ( data.M_mapType ),
-    M_mapMode           ( data.M_mapMode ),
-    M_mapBase           ( data.M_mapBase )
+        M_name              ( data.M_name ),
+        M_flag              ( data.M_flag ),
+        M_type              ( data.M_type ),
+        M_mode              ( data.M_mode ),
+        M_comV              ( data.M_comV ),
+        M_direction         ( data.M_direction ),
+        M_baseString        ( data.M_baseString ),
+        M_base              ( data.M_base ),
+        M_mapType           ( data.M_mapType ),
+        M_mapMode           ( data.M_mapMode ),
+        M_mapBase           ( data.M_mapBase )
 {
 }
 

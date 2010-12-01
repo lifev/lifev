@@ -36,7 +36,8 @@
 #include <BlockMatrixRN.hpp>
 #include <EpetraExt_MatrixMatrix.h>
 
-namespace LifeV {
+namespace LifeV
+{
 
 void BlockMatrixRN::coupler(map_shared_ptrtype& map,
                             const std::map<ID, ID>& locDofMap,
@@ -55,7 +56,7 @@ void BlockMatrixRN::blockAssembling()
     M_coupling->GlobalAssemble();
     M_globalMatrix.reset(new matrix_type(M_coupling->getMap()));
     *M_globalMatrix += *M_coupling;
-    for(UInt k=0; k<super::M_blocks.size(); ++k)
+    for (UInt k=0; k<super::M_blocks.size(); ++k)
     {
         super::M_blocks[k]->GlobalAssemble();
     }
@@ -69,7 +70,7 @@ void BlockMatrixRN::blockAssembling()
     fluidRobinBlock->GlobalAssemble();
     M_blocks[1]->swapCrsMatrix( fluidRobinBlock->getMatrixPtr() );
 
-    for(UInt k=0; k<M_blocks.size(); ++k)
+    for (UInt k=0; k<M_blocks.size(); ++k)
     {
         *M_globalMatrix += *M_blocks[k];
     }

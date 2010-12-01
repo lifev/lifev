@@ -34,7 +34,8 @@
 
 #include <lifemc/lifesolver/MS_Coupling_Stress.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, stressTypes > MS_stressesMap;
 
@@ -42,10 +43,10 @@ std::map< std::string, stressTypes > MS_stressesMap;
 // Constructors & Destructor
 // ===================================================
 MS_Coupling_Stress::MS_Coupling_Stress() :
-    super                (),
-    M_baseStress3D       (),
-    M_baseStress1D       (),
-    M_stressType         ()
+        super                (),
+        M_baseStress3D       (),
+        M_baseStress1D       (),
+        M_stressType         ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -56,10 +57,10 @@ MS_Coupling_Stress::MS_Coupling_Stress() :
 }
 
 MS_Coupling_Stress::MS_Coupling_Stress( const MS_Coupling_Stress& Stress ) :
-    super               ( Stress ),
-    M_baseStress3D      ( Stress.M_baseStress3D ),
-    M_baseStress1D      ( Stress.M_baseStress1D ),
-    M_stressType        ( Stress.M_stressType )
+        super               ( Stress ),
+        M_baseStress3D      ( Stress.M_baseStress3D ),
+        M_baseStress1D      ( Stress.M_baseStress1D ),
+        M_stressType        ( Stress.M_stressType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -126,28 +127,28 @@ MS_Coupling_Stress::SetupCoupling()
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
+        case Fluid3D:
 
-                ImposeStress3D< MS_Model_Fluid3D > ( i );
+            ImposeStress3D< MS_Model_Fluid3D > ( i );
 
-                break;
+            break;
 
-            case FSI3D:
+        case FSI3D:
 
-                ImposeStress3D< MS_Model_FSI3D > ( i );
+            ImposeStress3D< MS_Model_FSI3D > ( i );
 
-                break;
+            break;
 
-            case OneDimensional:
+        case OneDimensional:
 
-                ImposeStress1D< MS_Model_1D > ( i );
+            ImposeStress1D< MS_Model_1D > ( i );
 
-                break;
+            break;
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
 }
 
@@ -165,31 +166,31 @@ MS_Coupling_Stress::InitializeCouplingVariables()
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
-            {
-                ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+        case Fluid3D:
+        {
+            ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
 
-                break;
-            }
+            break;
+        }
 
-            case FSI3D:
-            {
-                ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+        case FSI3D:
+        {
+            ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
 
-                break;
-            }
+            break;
+        }
 
-            case OneDimensional:
-            {
-                ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+        case OneDimensional:
+        {
+            ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
 
-                break;
-            }
+            break;
+        }
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
     ( *M_LocalCouplingVariables[0] )[0] /= GetModelsNumber();
 
@@ -197,34 +198,34 @@ MS_Coupling_Stress::InitializeCouplingVariables()
     for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
-            {
+        case Fluid3D:
+        {
 
-                ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            case FSI3D:
-            {
+        case FSI3D:
+        {
 
-                ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            case OneDimensional:
-            {
+        case OneDimensional:
+        {
 
-                ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -245,28 +246,28 @@ MS_Coupling_Stress::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
     for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
+        case Fluid3D:
 
-                ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
-                break;
+            break;
 
-            case FSI3D:
+        case FSI3D:
 
-                ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
-                break;
+            break;
 
-            case OneDimensional:
+        case OneDimensional:
 
-                ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
 
-                break;
+            break;
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
 
     for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
@@ -355,28 +356,28 @@ MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, c
 
     switch ( M_models[ModelLocalID]->GetType() )
     {
-        case Fluid3D:
+    case Fluid3D:
 
-            Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
+        Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
-            break;
+        break;
 
-        case FSI3D:
+    case FSI3D:
 
-            Coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
+        Coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
-            break;
+        break;
 
-        case OneDimensional:
+    case OneDimensional:
 
-            Coefficient = MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
+        Coefficient = MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
 
-            break;
+        break;
 
-        default:
+    default:
 
-            if ( M_displayer->isLeader() )
-                switchErrorMessage( M_models[ModelLocalID] );
+        if ( M_displayer->isLeader() )
+            switchErrorMessage( M_models[ModelLocalID] );
     }
 
     // Add coefficient to the matrix
@@ -398,49 +399,49 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
     {
         switch ( M_models[i]->GetType() )
         {
-            case Fluid3D:
-            {
-                FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-                Stress          = ( *M_LocalCouplingVariables[0] )[0];
-                Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+        case Fluid3D:
+        {
+            FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            Stress          = ( *M_LocalCouplingVariables[0] )[0];
+            Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            case FSI3D:
-            {
-                FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-                Stress          = ( *M_LocalCouplingVariables[0] )[0];
-                Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+        case FSI3D:
+        {
+            FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            Stress          = ( *M_LocalCouplingVariables[0] )[0];
+            Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            case OneDimensional:
-            {
-                FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-                Stress          = ( *M_LocalCouplingVariables[0] )[0];
-                Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-                DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+        case OneDimensional:
+        {
+            FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            Stress          = ( *M_LocalCouplingVariables[0] )[0];
+            Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
 
-                break;
-            }
+            break;
+        }
 
-            default:
+        default:
 
-                if ( M_displayer->isLeader() )
-                    switchErrorMessage( M_models[i] );
+            if ( M_displayer->isLeader() )
+                switchErrorMessage( M_models[i] );
         }
 
         if ( M_comm->MyPID() == 0 )
             output << "  " << M_globalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
-                                                                     << "    " << M_flags[i]
-                                                                     << "    " << FlowRate
-                                                                     << "    " << Stress
-                                                                     << "    " << Pressure
-                                                                     << "    " << DynamicPressure << std::endl;
+            << "    " << M_flags[i]
+            << "    " << FlowRate
+            << "    " << Stress
+            << "    " << Pressure
+            << "    " << DynamicPressure << std::endl;
     }
 }
 

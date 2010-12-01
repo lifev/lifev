@@ -34,7 +34,8 @@
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, couplingsTypes > MS_couplingsMap;
 
@@ -44,19 +45,19 @@ UInt MS_PhysicalCoupling::M_couplingsNumber = 0;
 // Constructors & Destructor
 // ===================================================
 MS_PhysicalCoupling::MS_PhysicalCoupling() :
-    M_ID                          (),
-    M_type                        (),
-    M_models                      (),
-    M_couplingName                (),
-    M_flags                       (),
-    M_globalData                  (),
-    M_couplingIndex               (),
-    M_LocalCouplingVariables      (),
-    M_LocalCouplingResiduals      (),
-    M_timeInterpolationOrder      ( 1 ),
-    M_perturbedCoupling           ( false ),
-    M_comm                        (),
-    M_displayer                   ()
+        M_ID                          (),
+        M_type                        (),
+        M_models                      (),
+        M_couplingName                (),
+        M_flags                       (),
+        M_globalData                  (),
+        M_couplingIndex               (),
+        M_LocalCouplingVariables      (),
+        M_LocalCouplingResiduals      (),
+        M_timeInterpolationOrder      ( 1 ),
+        M_perturbedCoupling           ( false ),
+        M_comm                        (),
+        M_displayer                   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -67,19 +68,19 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
 }
 
 MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) :
-    M_ID                          ( coupling.M_ID ),
-    M_type                        ( coupling.M_type ),
-    M_models                      ( coupling.M_models ),
-    M_couplingName                ( coupling.M_couplingName ),
-    M_flags                       ( coupling.M_flags ),
-    M_globalData                  ( coupling.M_globalData ),
-    M_couplingIndex               ( coupling.M_couplingIndex ),
-    M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
-    M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
-    M_timeInterpolationOrder      ( coupling.M_timeInterpolationOrder ),
-    M_perturbedCoupling           ( coupling.M_perturbedCoupling ),
-    M_comm                        ( coupling.M_comm ),
-    M_displayer                   ( coupling.M_displayer )
+        M_ID                          ( coupling.M_ID ),
+        M_type                        ( coupling.M_type ),
+        M_models                      ( coupling.M_models ),
+        M_couplingName                ( coupling.M_couplingName ),
+        M_flags                       ( coupling.M_flags ),
+        M_globalData                  ( coupling.M_globalData ),
+        M_couplingIndex               ( coupling.M_couplingIndex ),
+        M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
+        M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
+        M_timeInterpolationOrder      ( coupling.M_timeInterpolationOrder ),
+        M_perturbedCoupling           ( coupling.M_perturbedCoupling ),
+        M_comm                        ( coupling.M_comm ),
+        M_displayer                   ( coupling.M_displayer )
 
 {
 
@@ -485,7 +486,7 @@ MS_PhysicalCoupling::ExportCouplingVector( const MS_Vector_Type& localVector, MS
 void
 MS_PhysicalCoupling::InterpolateCouplingVariables( const TimeContainer_Type& timeContainer,
                                                    const Real& t,
-                                                         MS_Vector_Type& interpolatedCouplingVariables )
+                                                   MS_Vector_Type& interpolatedCouplingVariables )
 {
     // Lagrange interpolation
     interpolatedCouplingVariables *= 0;
@@ -506,7 +507,7 @@ void
 MS_PhysicalCoupling::switchErrorMessage( const MS_Model_PtrType& model )
 {
     MS_ErrorCheck( MS_ModelType, "Invalid model type ["  + Enum2String( model->GetType(), MS_modelsMap ) +
-                                 "] for coupling type [" + Enum2String( M_type, MS_couplingsMap ) +"]\n" );
+                   "] for coupling type [" + Enum2String( M_type, MS_couplingsMap ) +"]\n" );
 }
 
 } // Namespace LifeV

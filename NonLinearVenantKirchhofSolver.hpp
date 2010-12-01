@@ -110,12 +110,12 @@ public:
                 boost::shared_ptr<Epetra_Comm>&     comm,
                 const boost::shared_ptr<const EpetraMap>&   monolithicMap,
                 UInt       offset=0
-                );
-void setup(
-           boost::shared_ptr<data_type>        data,
-           const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
-           boost::shared_ptr<Epetra_Comm>&     comm
-           );
+              );
+    void setup(
+        boost::shared_ptr<data_type>        data,
+        const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+        boost::shared_ptr<Epetra_Comm>&     comm
+    );
 
 
     //! Update the right  hand side  for time advancing given a source term
@@ -195,9 +195,9 @@ void setup(
       \param linear_rel_tol send for the relative tolerance to the linear solver is therefore eta. eta is determined
              by the modified Eisenstat-Walker formula
      */
-     void solveJac( vector_type&       step,
-                    const vector_type& res,
-                    Real&            linear_rel_tol);
+    void solveJac( vector_type&       step,
+                   const vector_type& res,
+                   Real&            linear_rel_tol);
 
     //! solves the tangent problem with custom BC
 
@@ -264,11 +264,11 @@ private:
 template <typename Mesh, typename SolverType>
 NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 NonLinearVenantKirchhofSolver( ) :
-    super                        ( ),
-    M_zeta                       ( 0.75 ),
-    M_theta                      ( 0.7 ),
-    M_acc			 ( ),
-    M_rhsA			 ( )
+        super                        ( ),
+        M_zeta                       ( 0.75 ),
+        M_theta                      ( 0.7 ),
+        M_acc			 ( ),
+        M_rhsA			 ( )
 {
     //    M_BCh->setOffset(M_offset);
 }
@@ -276,12 +276,12 @@ NonLinearVenantKirchhofSolver( ) :
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 setup(
-      boost::shared_ptr<data_type>        data,
-      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
-      boost::shared_ptr<Epetra_Comm>&     comm,
-      const boost::shared_ptr<const EpetraMap>&  monolithicMap,
-      UInt                                offset
-      )
+    boost::shared_ptr<data_type>        data,
+    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+    boost::shared_ptr<Epetra_Comm>&     comm,
+    const boost::shared_ptr<const EpetraMap>&  monolithicMap,
+    UInt                                offset
+)
 {
     super::setup(data, dFESpace, comm, monolithicMap, offset);
 
@@ -293,10 +293,10 @@ setup(
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 setup(
-      boost::shared_ptr<data_type>        data,
-      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
-      boost::shared_ptr<Epetra_Comm>&     comm
-      )
+    boost::shared_ptr<data_type>        data,
+    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+    boost::shared_ptr<Epetra_Comm>&     comm
+)
 {
     super::setup(data, dFESpace, comm);
 }
@@ -713,7 +713,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_type
 
 // loop on volumes: assembling source term
     for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
-      {
+    {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
@@ -722,10 +722,10 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_type
         int nothing;
         for ( UInt ic = 0; ic < nc; ++ic )
         {
-          compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->dataTime()->getTime(), ic ); // compute local vector
-          assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->dim() ); // assemble local vector into global one
+            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->dataTime()->getTime(), ic ); // compute local vector
+            assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->dim() ); // assemble local vector into global one
         }
-      }
+    }
 
     this->M_rhsNoBC->GlobalAssemble();
     // end
@@ -809,7 +809,7 @@ iterate( bchandler_type& bch )
     }
     else // if status == 0 vuol dire che Newton converge
     {
-    	std::cout << std::endl;
+        std::cout << std::endl;
 
         std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
@@ -960,7 +960,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
     UInt nc = nDimensions;
 
 #ifdef nonlinear
-        // loop on volumes: assembling source term
+    // loop on volumes: assembling source term
     for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
     {
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -1128,7 +1128,7 @@ solveJacobian( vector_type&           step,
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
- //    *this->M_residual_d = *this->M_massStiff*step; // - *this->M_rhsNoBC;
+//    *this->M_residual_d = *this->M_massStiff*step; // - *this->M_rhsNoBC;
 }
 
 
@@ -1141,7 +1141,7 @@ applyBoundaryConditions(matrix_type&        matrix,
 {
 
     // BC manage for the velocity
-    if(offset)
+    if (offset)
         BCh->setOffset(offset);
     if ( !BCh->bdUpdateDone() )
         BCh->bdUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
@@ -1158,8 +1158,8 @@ applyBoundaryConditions(matrix_type&        matrix,
 
     // matrix should be GlobalAssembled by  bcManage
 
-   //The Boundary conditions should not be applied to rhs
-   // rhs = rhsFull;
+    //The Boundary conditions should not be applied to rhs
+    // rhs = rhsFull;
 
 } // applyBoundaryCondition
 

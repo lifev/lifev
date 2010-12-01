@@ -35,7 +35,8 @@
 
 #include "OneDimensionalModel_Flux.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, OneDimensionalModel_FluxTypes > OneDimensionalModel_FluxMap;
 
@@ -43,11 +44,11 @@ std::map< std::string, OneDimensionalModel_FluxTypes > OneDimensionalModel_FluxM
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_Flux::OneDimensionalModel_Flux() :
-    M_Physics   ()
+        M_Physics   ()
 {}
 
 OneDimensionalModel_Flux::OneDimensionalModel_Flux( const Physics_PtrType Physics ) :
-    M_Physics   ( Physics )
+        M_Physics   ( Physics )
 {}
 
 // ===================================================

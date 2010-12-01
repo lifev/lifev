@@ -40,7 +40,8 @@
 
 #include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface1D_DefaultFunctions - Interface with the default boundary conditions of the OneDimensionalModel
 /*!
@@ -168,8 +169,8 @@ private:
 // ===================================================
 template< class Operator >
 BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions() :
-    M_base              ( new BCFunction_Type() ),
-    M_defaultFunction   ()
+        M_base              ( new BCFunction_Type() ),
+        M_defaultFunction   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -180,8 +181,8 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions() :
 
 template< class Operator >
 BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( const Data_Type& data ) :
-    M_base              ( new BCFunction_Type() ),
-    M_defaultFunction   ()
+        M_base              ( new BCFunction_Type() ),
+        M_defaultFunction   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -193,8 +194,8 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( cons
 
 template< class Operator >
 BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& Default ) :
-    M_base              ( Default.M_base ),
-    M_defaultFunction   ()
+        M_base              ( Default.M_base ),
+        M_defaultFunction   ()
 {
 }
 
@@ -230,55 +231,55 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 
     switch ( mapFunction[data.GetBaseString()] )
     {
-        case Riemann:
+    case Riemann:
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Riemann( data.GetSide(),
-                                                                                 data.GetQuantity()
-                             ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Riemann( data.GetSide(),
+                                                                             data.GetQuantity()
+                                                                           ) );
 
-            M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
+                                          dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
-            break;
+        break;
 
-        case Compatibility:
+    case Compatibility:
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Compatibility( data.GetSide(),
-                                                                                       data.GetQuantity()
-                             ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Compatibility( data.GetSide(),
+                                                                                   data.GetQuantity()
+                                                                                 ) );
 
-            M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
+                                          dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
-            break;
+        break;
 
-        case Absorbing:
+    case Absorbing:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5025 ) << "BCInterface1D_DefaultFunctions::checkFunction                          Absorbing" << "\n";
+        Debug( 5025 ) << "BCInterface1D_DefaultFunctions::checkFunction                          Absorbing" << "\n";
 #endif
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.GetSide(),
-                                                                                   data.GetQuantity()
-                             ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.GetSide(),
+                                                                               data.GetQuantity()
+                                                                             ) );
 
-            M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
+                                          dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
-            break;
+        break;
 
-        case Resistance:
+    case Resistance:
 
-            M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Resistance( data.GetSide(),
-                                                                                    data.GetQuantity(),
-                                                                                    data.GetResistance()[0]
-                             ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Resistance( data.GetSide(),
+                                                                                data.GetQuantity(),
+                                                                                data.GetResistance()[0]
+                                                                              ) );
 
-            M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
-                                              dynamic_cast<OneDimensionalModel_BCFunction_Resistance *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
+                                          dynamic_cast<OneDimensionalModel_BCFunction_Resistance *> ( &( *M_defaultFunction ) ), _1, _2 ) );
 
 
-            break;
+        break;
 
     }
 }

@@ -44,7 +44,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ComposedBlockOper - Class handling block-structured preconditioners
 /*!
@@ -77,15 +78,15 @@ public:
     //! @name Constructor and Destructor
     //@{
     ComposedBlockOper(const std::vector<Int>& flags, const std::vector<Block>& order):
-        super(),
-        M_recompute(order.size()),
-        M_coupling(),
-        M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
-        M_blockReordering(new std::vector<Block>(order))
+            super(),
+            M_recompute(order.size()),
+            M_coupling(),
+            M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
+            M_blockReordering(new std::vector<Block>(order))
     {}
 
 
-    ~ComposedBlockOper(){}
+    ~ComposedBlockOper() {}
     //@}
 
     //! @name Pure virtual methods
@@ -167,13 +168,13 @@ public:
     //!@name Getters
     //@{
     //! returns the vector of flags (by const reference).
-    const std::vector<bool>& getRecompute(){return M_recompute;}
+    const std::vector<bool>& getRecompute() {return M_recompute;}
 
     //! turns on/off the recomputation of the preconditioner for a specified factor
-    void setRecompute( UInt position, bool flag ){ M_recompute[position] = flag; }
+    void setRecompute( UInt position, bool flag ) { M_recompute[position] = flag; }
 
     //! returns the vector of pointers to the coupling blocks (by const reference).
-    const std::vector<matrix_ptrtype> getCouplingVector(){return M_coupling;}
+    const std::vector<matrix_ptrtype> getCouplingVector() {return M_coupling;}
 
     //! adds a default coupling matrix for a specified block.
     /*!
@@ -191,7 +192,7 @@ public:
                  const vector_ptrtype& numerationInterface,
                  const Real& timeStep,
                  UInt couplingBlock
-                 );
+                );
 
     virtual void push_back_coupling( matrix_ptrtype& coupling);
 

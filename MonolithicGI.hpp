@@ -85,7 +85,7 @@ public:
 
 
     ///destructor
-    virtual ~MonolithicGI(){}
+    virtual ~MonolithicGI() {}
 
     /**
        constructs the matrix handling the coupling and sums it to matrix
@@ -163,7 +163,7 @@ public:
     //! set the solution
     void setSolution( const vector_type& solution ) { M_uk.reset( new vector_type( solution ) ); }
 
-    void setSolutionPtr                     ( const vector_ptrtype& sol){ M_uk = sol; }
+    void setSolutionPtr                     ( const vector_ptrtype& sol) { M_uk = sol; }
     //@}
 
     //! initialize the system with functions
@@ -173,7 +173,7 @@ public:
                                             FSIOperator::solid_type::value_type::Function const& w0,
                                             FSIOperator::solid_type::value_type::Function const& df0 );
 
-    void registerMyProducts( ){};
+    void registerMyProducts( ) {};
 private:
 
     //! @name Private Methods

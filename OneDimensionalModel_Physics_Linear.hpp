@@ -43,7 +43,8 @@
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_Physics_Linear - Class providing linear physical operations for the 1D model data.
 /*!

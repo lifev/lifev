@@ -48,7 +48,8 @@
 #include <lifemc/lifealg/ComposedOperator.hpp>
 #include <life/lifefem/bcManage.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BlockInterface - This is a pure virtual class for the linear operators with a block structure
 /*!    (i.e. block matrices and preconditioners).
@@ -90,10 +91,10 @@ public:
     //@{
     //! Empty Constructor
     BlockInterface():
-        M_bch(),
-        M_blocks(),
-        M_FESpace(),
-        M_comm()
+            M_bch(),
+            M_blocks(),
+            M_FESpace(),
+            M_comm()
     {}
 
 //     BlockInterface( Int flag ):
@@ -106,10 +107,10 @@ public:
 
     //! Destructor
     ~BlockInterface()
-{
+    {
 //     free(M_offset);
 //     free(M_FESpace);
-}
+    }
     //@}
 
 
@@ -149,7 +150,7 @@ public:
      */
     virtual void addToCoupling( const matrix_ptrtype& Mat, UInt position ) =0;
 
-    virtual void setRecompute(UInt position, bool flag){assert(false);}
+    virtual void setRecompute(UInt position, bool flag) {assert(false);}
 
     //!
     /*!
@@ -220,11 +221,11 @@ public:
       @param couplingBlock: flag specifying the block associated with the coupling
      */
     virtual void coupler(map_shared_ptrtype& map,
-                          const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype& numerationInterface,
-                          const Real& timeStep,
-                          UInt couplingBlock
-                          )=0;
+                         const std::map<ID, ID>& locDofMap,
+                         const vector_ptrtype& numerationInterface,
+                         const Real& timeStep,
+                         UInt couplingBlock
+                        )=0;
 
     //! returns true if the operator is set
     /*!
@@ -255,7 +256,7 @@ public:
       \param bch: input BCHandler to replace
       \param position: position
      */
-    virtual void replace_bch(bchandler_ptrtype& bch, UInt position){};
+    virtual void replace_bch(bchandler_ptrtype& bch, UInt position) {};
 
     //!Applies the correspondent boundary conditions to every block
     /*!
@@ -276,7 +277,7 @@ public:
     /*!
       Everything (but the boundary conditions) must have been set before calling this
      */
-    virtual void blockAssembling(){}
+    virtual void blockAssembling() {}
 
 
     //!resets the blocks (frees the shared pointers)
@@ -310,7 +311,7 @@ public:
     /*!
       Applies the robin preconditioners when needed, otherwise does nothing
      */
-    virtual void setRobin(matrix_ptrtype& mat, vector_ptrtype& rhs){}
+    virtual void setRobin(matrix_ptrtype& mat, vector_ptrtype& rhs) {}
 
 
     //! builds the coupling matrix.
@@ -349,7 +350,7 @@ public:
       \param matrix: input matrix (the matrix of the linear system)
       \param rhsFull: right hand side of the linear system
      */
-    void robinPreconditioner(matrix_ptrtype& matrix, vector_ptrtype& rhsFull){}
+    void robinPreconditioner(matrix_ptrtype& matrix, vector_ptrtype& rhsFull) {}
 
     //!sets the vector of raw pointer to the BCHandler
     /*!
@@ -414,16 +415,16 @@ public:
     //!@name Getters
     //@{
     //! returns the vector of pointers to the blocks (by const reference).
-    const std::vector<matrix_ptrtype>&    getBlockVector(){return M_blocks;}
+    const std::vector<matrix_ptrtype>&    getBlockVector() {return M_blocks;}
 
     //! returns the vector of pointers to the BCHandlers (by const reference).
-    const std::vector<bchandler_ptrtype>& getBChVector(){return M_bch;}
+    const std::vector<bchandler_ptrtype>& getBChVector() {return M_bch;}
 
     //! returns the vector of pointers to the FE spaces (by const reference).
-    const std::vector<fespace_ptrtype>&   getFESpaceVector(){return M_FESpace;}
+    const std::vector<fespace_ptrtype>&   getFESpaceVector() {return M_FESpace;}
 
     //! returns the vector of the offsets (by const reference).
-    const std::vector<UInt>&              getOffsetVector(){return M_offset;}
+    const std::vector<UInt>&              getOffsetVector() {return M_offset;}
     //@}
 
 protected:
@@ -435,7 +436,7 @@ protected:
     /*!
       Everything (but the boundary conditions) must have been set before calling this
      */
-    virtual void blockAssembling(const UInt k){}
+    virtual void blockAssembling(const UInt k) {}
 
     //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
     /*!
@@ -486,22 +487,22 @@ private:
 typedef singleton<factory<BlockInterface,  std::string> >     BlockPrecFactory;
 
 
-    template <typename Operator>
-    void
-    BlockInterface::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
-    {
-        boost::shared_ptr<Operator> tmp = operFrom;
-        operFrom = operTo;
-        operTo = tmp;
-    }
+template <typename Operator>
+void
+BlockInterface::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
+{
+    boost::shared_ptr<Operator> tmp = operFrom;
+    operFrom = operTo;
+    operTo = tmp;
+}
 
 
-    template <typename Operator>
-    void
-    BlockInterface::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
-    {
-        vectorTo.insert(vectorTo.end(), vectorFrom.begin(), vectorFrom.end());
-    }
+template <typename Operator>
+void
+BlockInterface::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
+{
+    vectorTo.insert(vectorTo.end(), vectorFrom.begin(), vectorFrom.end());
+}
 
 
 } // Namespace LifeV

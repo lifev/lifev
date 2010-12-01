@@ -47,7 +47,8 @@
 
 #include <lifemc/lifesolver/Monolithic.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! monolithicGE - Monolithic Geometry-Explicit solver
 /*!
@@ -84,7 +85,7 @@ public:
 
     //! Empty Constructor
     MonolithicGE():
-        super()
+            super()
     {}
 
     //! Destructor
@@ -139,7 +140,7 @@ public:
 
     void applyBoundaryConditions();
 
-    static FSIOperator* createM(){ return new MonolithicGE(); }
+    static FSIOperator* createM() { return new MonolithicGE(); }
 
     //@}
 

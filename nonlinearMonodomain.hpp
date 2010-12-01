@@ -67,7 +67,7 @@ namespace LifeV
 
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class Nonlinearmonodomain
 {
 
@@ -128,8 +128,8 @@ public:
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(double       alpha,
-                              vector_type& sourceVec
-                              );
+                                 vector_type& sourceVec
+                                );
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem( vector_type& sourceVec );
@@ -141,7 +141,7 @@ public:
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
 
-     const vector_type& fiber_vector() const {return M_fiber_vector;}
+    const vector_type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local displacements vector
     vector_type& disp()        { return M_disp; }
@@ -162,9 +162,10 @@ public:
 
     //! Sets Monodomain BCs
     void setBC(BCHandler &BCh_u)
-        {
-            M_BCh_electric = &BCh_u; M_setBC = true;
-        }
+    {
+        M_BCh_electric = &BCh_u;
+        M_setBC = true;
+    }
 
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
@@ -178,17 +179,17 @@ public:
 
     EpetraMap const& getMap() const { return M_localMap; }
 
-    void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
+    void recomputeMatrix(bool const recomp) {M_recomputeMatrix = recomp;}
 
     matrix_type& matrMass()
-        {
-            return *M_matrMass;
-        }
+    {
+        return *M_matrMass;
+    }
 
 
 protected:
 
-	//! Solves PDE system
+    //! Solves PDE system
     void solveSystem            (  matrix_ptrtype matrFull,
                                    vector_type&   rhsFull );
 
@@ -285,57 +286,57 @@ private:
 template<typename Mesh, typename SolverType>
 Nonlinearmonodomain<Mesh, SolverType>::
 Nonlinearmonodomain( const data_type&          dataType,
-		     FESpace<Mesh, EpetraMap>& uFESpace,
-		     BCHandler&                BCh_u,
-		     boost::shared_ptr<Epetra_Comm>       comm ):
-    M_data                   ( dataType ),
-    M_uFESpace               ( uFESpace ),
-    M_BCh_electric           ( &BCh_u ),
-    M_setBC                  ( true ),
-    M_comm                   ( comm ),
-    M_me                     ( M_comm->MyPID() ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
-    M_localMap               ( M_uFESpace.map() ),
-    M_localMapVec              (M_localMap+M_localMap+M_localMap),
-    M_matrMass               ( ),
-    M_matrStiff	             ( ),
-    M_matrNoBC               ( ),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
-    M_rhsNoBC                ( M_localMap ),
-    M_sol_u                  ( M_localMap ),
-    M_disp                   ( M_localMapVec, Repeated ),
-    M_fiber_vector           ( M_localMapVec, Repeated ),
-    M_residual               ( M_localMap ),
-    M_verbose                ( M_me == 0),
-    M_updated                ( false ),
-    M_reusePrec              ( true ),
-    M_resetPrec              ( true ),
-    M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false )
+                     FESpace<Mesh, EpetraMap>& uFESpace,
+                     BCHandler&                BCh_u,
+                     boost::shared_ptr<Epetra_Comm>       comm ):
+        M_data                   ( dataType ),
+        M_uFESpace               ( uFESpace ),
+        M_BCh_electric           ( &BCh_u ),
+        M_setBC                  ( true ),
+        M_comm                   ( comm ),
+        M_me                     ( M_comm->MyPID() ),
+        M_linearSolver           ( ),
+        M_prec                   ( ),
+        M_localMap               ( M_uFESpace.map() ),
+        M_localMapVec              (M_localMap+M_localMap+M_localMap),
+        M_matrMass               ( ),
+        M_matrStiff	             ( ),
+        M_matrNoBC               ( ),
+        M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
+        M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
+        M_rhsNoBC                ( M_localMap ),
+        M_sol_u                  ( M_localMap ),
+        M_disp                   ( M_localMapVec, Repeated ),
+        M_fiber_vector           ( M_localMapVec, Repeated ),
+        M_residual               ( M_localMap ),
+        M_verbose                ( M_me == 0),
+        M_updated                ( false ),
+        M_reusePrec              ( true ),
+        M_resetPrec              ( true ),
+        M_maxIterSolver          ( -1 ),
+        M_recomputeMatrix        ( false )
 {
 
- if (M_data.has_fibers() )
-	    {
-	    	std::stringstream MyPID;
-	        ifstream fibers(M_data.fibers_file().c_str());
+    if (M_data.has_fibers() )
+    {
+        std::stringstream MyPID;
+        ifstream fibers(M_data.fibers_file().c_str());
 
-	        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
-	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
-	        std::vector<Real> fiber_global_vector(NumGlobalElements);
+        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
+        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
+        std::vector<Real> fiber_global_vector(NumGlobalElements);
 
-	        for( UInt i=0; i< NumGlobalElements; ++i)
-	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
-	    	for(UInt j=0; j< NumMyElements; ++j)
-	    	{
-	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
-	    		}
-	    	std::cout << std::endl;
-	    	fiber_global_vector.clear();
-	    }
+        for ( UInt i=0; i< NumGlobalElements; ++i)
+            fibers>>fiber_global_vector[i];
+        UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
+        for (UInt j=0; j< NumMyElements; ++j)
+        {
+            UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
+            M_fiber_vector[ig]= fiber_global_vector[ig-1];
+        }
+        std::cout << std::endl;
+        fiber_global_vector.clear();
+    }
 
 }
 
@@ -343,32 +344,32 @@ Nonlinearmonodomain( const data_type&          dataType,
 template<typename Mesh, typename SolverType>
 Nonlinearmonodomain<Mesh, SolverType>::
 Nonlinearmonodomain( const data_type&          dataType,
-		     FESpace<Mesh, EpetraMap>& uFESpace,
-		     boost::shared_ptr<Epetra_Comm>       comm ):
-    M_data                   ( dataType ),
-    M_uFESpace               ( uFESpace ),
-    M_setBC                  ( false ),
-    M_comm                   ( comm ),
-    M_me                     ( M_comm->MyPID() ),
-    M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
-    M_localMap               ( M_uFESpace.map() ),
-    M_matrMass               ( ),
-    M_matrStiff	             ( ),
-    M_matrNoBC               ( ),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
-    M_rhsNoBC                ( M_localMap ),
-    M_sol_u                  ( M_localMap ),
-    M_disp                   (M_localMapVec, Repeated),
-    M_fiber_vector           (M_localMapVec, Repeated),
-    M_residual               ( M_localMap ),
-    M_verbose                ( M_me == 0),
-    M_updated                ( false ),
-    M_reusePrec              ( true ),
-    M_resetPrec              ( true ),
-    M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false )
+                     FESpace<Mesh, EpetraMap>& uFESpace,
+                     boost::shared_ptr<Epetra_Comm>       comm ):
+        M_data                   ( dataType ),
+        M_uFESpace               ( uFESpace ),
+        M_setBC                  ( false ),
+        M_comm                   ( comm ),
+        M_me                     ( M_comm->MyPID() ),
+        M_linearSolver           ( ),
+        M_prec                   ( new prec_raw_type() ),
+        M_localMap               ( M_uFESpace.map() ),
+        M_matrMass               ( ),
+        M_matrStiff	             ( ),
+        M_matrNoBC               ( ),
+        M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
+        M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 ),
+        M_rhsNoBC                ( M_localMap ),
+        M_sol_u                  ( M_localMap ),
+        M_disp                   (M_localMapVec, Repeated),
+        M_fiber_vector           (M_localMapVec, Repeated),
+        M_residual               ( M_localMap ),
+        M_verbose                ( M_me == 0),
+        M_updated                ( false ),
+        M_reusePrec              ( true ),
+        M_resetPrec              ( true ),
+        M_maxIterSolver          ( -1 ),
+        M_recomputeMatrix        ( false )
 {
 
 }
@@ -535,10 +536,10 @@ void Nonlinearmonodomain<Mesh, SolverType>::
 initialize( const Function& u0 )
 {
 
-     vector_type u(M_uFESpace.map());
-     M_uFESpace.interpolate(u0, u, 0.);
+    vector_type u(M_uFESpace.map());
+    M_uFESpace.interpolate(u0, u, 0.);
 
-     initialize(u);
+    initialize(u);
 }
 
 
@@ -559,7 +560,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
     Chrono chrono;
 
     if (M_verbose)
-            std::cout << "  f-  Updating mass term and right hand side... "
+        std::cout << "  f-  Updating mass term and right hand side... "
                   << std::flush;
 
     chrono.start();
@@ -578,8 +579,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
         buildSystem();
 
     if (M_verbose)
-          std::cout << "  f-  Copying the matrices ...                 "
-                    << std::flush;
+        std::cout << "  f-  Copying the matrices ...                 "
+                  << std::flush;
 
     chrono.start();
 
@@ -593,7 +594,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
 
     chrono.stop();
     if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
-                             << std::flush;
+                                 << std::flush;
 
 
 
@@ -610,7 +611,7 @@ updatePDESystem(vector_type& sourceVec )
     Chrono chrono;
 
     if (M_verbose)
-            std::cout << "  f-  Updating right hand side... "
+        std::cout << "  f-  Updating right hand side... "
                   << std::flush;
 
     chrono.start();
@@ -649,7 +650,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch 
     // boundary conditions update
     M_comm->Barrier();
     if (M_verbose) std::cout << "  f-  Applying boundary conditions ...         "
-              << std::flush;
+                                 << std::flush;
 
     chrono.start();
 
@@ -673,7 +674,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch 
 
 template<typename Mesh, typename SolverType>
 void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull )
+                                                         vector_type&    rhsFull )
 {
     Chrono chrono;
     for ( int i = 0 ; i < rhsFull.getEpetraVector().MyLength() ; i++ )
@@ -708,7 +709,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFul
         if (M_verbose)
         {
             std::cout << "done in " << chrono.diff() << " s.\n";
-          	std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
+            std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
         }
 
         M_resetPrec = false;

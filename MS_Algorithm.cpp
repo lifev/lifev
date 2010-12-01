@@ -34,7 +34,8 @@
 
 #include <lifemc/lifesolver/MS_Algorithm.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 std::map< std::string, algorithmsTypes > MS_algorithmsMap;
 
@@ -42,14 +43,14 @@ std::map< std::string, algorithmsTypes > MS_algorithmsMap;
 // Constructors & Destructor
 // ===================================================
 MS_Algorithm::MS_Algorithm() :
-    M_type                       (),
-    M_multiscale                 (),
-    M_couplingVariables          (),
-    M_couplingResiduals          (),
-    M_comm                       (),
-    M_displayer                  (),
-    M_SubiterationsMaximumNumber (),
-    M_Tolerance                  ()
+        M_type                       (),
+        M_multiscale                 (),
+        M_couplingVariables          (),
+        M_couplingResiduals          (),
+        M_comm                       (),
+        M_displayer                  (),
+        M_SubiterationsMaximumNumber (),
+        M_Tolerance                  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -59,14 +60,14 @@ MS_Algorithm::MS_Algorithm() :
 }
 
 MS_Algorithm::MS_Algorithm( const MS_Algorithm& algorithm ) :
-    M_type                       ( algorithm.M_type ),
-    M_multiscale                 ( algorithm.M_multiscale ),
-    M_couplingVariables          ( algorithm.M_couplingVariables ),
-    M_couplingResiduals          ( algorithm.M_couplingResiduals ),
-    M_comm                       ( algorithm.M_comm ),
-    M_displayer                  ( algorithm.M_displayer ),
-    M_SubiterationsMaximumNumber ( algorithm.M_SubiterationsMaximumNumber ),
-    M_Tolerance                  ( algorithm.M_Tolerance )
+        M_type                       ( algorithm.M_type ),
+        M_multiscale                 ( algorithm.M_multiscale ),
+        M_couplingVariables          ( algorithm.M_couplingVariables ),
+        M_couplingResiduals          ( algorithm.M_couplingResiduals ),
+        M_comm                       ( algorithm.M_comm ),
+        M_displayer                  ( algorithm.M_displayer ),
+        M_SubiterationsMaximumNumber ( algorithm.M_SubiterationsMaximumNumber ),
+        M_Tolerance                  ( algorithm.M_Tolerance )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -264,8 +265,8 @@ MS_Algorithm::Save( const UInt& SubiterationsNumber, const Real& residual )
             output.open( filename.c_str(), std::ios::app );
 
         output << M_multiscale->GetGlobalData()->GetDataTime()->getTime()
-               << "      "<< SubiterationsNumber
-               << "                  "<< residual << std::endl;
+        << "      "<< SubiterationsNumber
+        << "                  "<< residual << std::endl;
 
         output.close();
     }

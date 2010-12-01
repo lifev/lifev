@@ -39,74 +39,75 @@
 
 #include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 OneDimensionalModel_Data::OneDimensionalModel_Data():
-    M_PhysicsType               (),
-    M_FluxType                  (),
-    M_SourceType                (),
-    M_Time                      (),
-    M_Mesh                      ( new Mesh_Type() ),
-    M_postprocessingDirectory   (),
-    M_postprocessingFile        (),
-    M_verbose                   (),
-    M_UW                        (),
-    M_inertial_wall             (),
-    M_viscoelastic_wall         (),
-    M_linearize_string_model    (),
-    M_linearize_equations       (),
-    M_longitudinal_wall         (),
-    M_flux_second_der           (),
-    M_dP_dt_steps               (),
-    M_CFLmax                    (),
-    M_JacobianPerturbationArea  (),
-    M_JacobianPerturbationFlowRate(),
-    M_JacobianPerturbationPressure(),
+        M_PhysicsType               (),
+        M_FluxType                  (),
+        M_SourceType                (),
+        M_Time                      (),
+        M_Mesh                      ( new Mesh_Type() ),
+        M_postprocessingDirectory   (),
+        M_postprocessingFile        (),
+        M_verbose                   (),
+        M_UW                        (),
+        M_inertial_wall             (),
+        M_viscoelastic_wall         (),
+        M_linearize_string_model    (),
+        M_linearize_equations       (),
+        M_longitudinal_wall         (),
+        M_flux_second_der           (),
+        M_dP_dt_steps               (),
+        M_CFLmax                    (),
+        M_JacobianPerturbationArea  (),
+        M_JacobianPerturbationFlowRate(),
+        M_JacobianPerturbationPressure(),
 //    M_initialVariable           (),
 //    M_initialValue              (),
 //    M_restValue                 (),
 //    M_multiplier                (),
-    M_ComputeCoefficients       (),
-    M_PowerlawCoefficient       (),
-    M_Density                   (),
-    M_Viscosity                 (),
-    M_DensityWall               (),
-    M_ThickVessel               (),
-    M_Young                     (),
-    M_Poisson                   (),
-    M_externalPressure          (),
-    M_ViscoelasticModulus       (),
-    M_InertialModulus           (),
-    M_RobertsonCorrection       (),
-    M_Thickness                 (),
-    M_Friction                  (),
-    M_Area0                     (),
-    M_Alpha                     (),
-    M_Beta0                     (),
-    M_Beta1                     (),
-    M_dArea0dz                  (),
-    M_dAlphadz                  (),
-    M_dBeta0dz                  (),
-    M_dBeta1dz                  (),
-    M_Flux11                    (),
-    M_Flux12                    (),
-    M_Flux21                    (),
-    M_Flux22                    (),
-    M_Celerity1                 (),
-    M_Celerity2                 (),
-    M_Celerity1LeftEigenvector1 (),
-    M_Celerity1LeftEigenvector2 (),
-    M_Celerity2LeftEigenvector1 (),
-    M_Celerity2LeftEigenvector2 (),
-    M_Source10                  (),
-    M_Source20                  (),
-    M_Source11                  (),
-    M_Source12                  (),
-    M_Source21                  (),
-    M_Source22                  ()
+        M_ComputeCoefficients       (),
+        M_PowerlawCoefficient       (),
+        M_Density                   (),
+        M_Viscosity                 (),
+        M_DensityWall               (),
+        M_ThickVessel               (),
+        M_Young                     (),
+        M_Poisson                   (),
+        M_externalPressure          (),
+        M_ViscoelasticModulus       (),
+        M_InertialModulus           (),
+        M_RobertsonCorrection       (),
+        M_Thickness                 (),
+        M_Friction                  (),
+        M_Area0                     (),
+        M_Alpha                     (),
+        M_Beta0                     (),
+        M_Beta1                     (),
+        M_dArea0dz                  (),
+        M_dAlphadz                  (),
+        M_dBeta0dz                  (),
+        M_dBeta1dz                  (),
+        M_Flux11                    (),
+        M_Flux12                    (),
+        M_Flux21                    (),
+        M_Flux22                    (),
+        M_Celerity1                 (),
+        M_Celerity2                 (),
+        M_Celerity1LeftEigenvector1 (),
+        M_Celerity1LeftEigenvector2 (),
+        M_Celerity2LeftEigenvector1 (),
+        M_Celerity2LeftEigenvector2 (),
+        M_Source10                  (),
+        M_Source20                  (),
+        M_Source11                  (),
+        M_Source12                  (),
+        M_Source21                  (),
+        M_Source22                  ()
 {
 }
 
@@ -154,20 +155,20 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_JacobianPerturbationFlowRate = dataFile( ( section + "/JacobianPerturbation/deltaFlowRate"     ).data(), 0.001 );
     M_JacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1 );
 
-/*
-    // Initialize
-    std::map< std::string, OneD_Initialize > initializeMap;
-    initializeMap["A"]       = OneD_InitializeArea;
-    initializeMap["Q"]       = OneD_InitializeFlux;
-    initializeMap["W1"]      = OneD_InitializeRiemann1;
-    initializeMap["W2"]      = OneD_InitializeRiemann2;
-    initializeMap["P"]       = OneD_InitializePressure;
+    /*
+        // Initialize
+        std::map< std::string, OneD_Initialize > initializeMap;
+        initializeMap["A"]       = OneD_InitializeArea;
+        initializeMap["Q"]       = OneD_InitializeFlux;
+        initializeMap["W1"]      = OneD_InitializeRiemann1;
+        initializeMap["W2"]      = OneD_InitializeRiemann2;
+        initializeMap["P"]       = OneD_InitializePressure;
 
-    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
-    M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
-    M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
-    M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
-*/
+        M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
+        M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
+        M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
+        M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
+    */
 
     // Physical Parameters
     M_ComputeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
@@ -230,102 +231,102 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     OneD_distributionLaw distributionLaw = distributionLawMap[ dataFile( ( section + "/PhysicalParameters/DistributionLaw" ).data(), "none" ) ];
     switch ( distributionLaw )
     {
-        case none:
+    case none:
 
-            for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
-            {
-                // Physical Parameters
-                M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
+        for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
+        {
+            // Physical Parameters
+            M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
 
-                M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI );
-                M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection );
-                M_Beta0[i]                     = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6 );
-                M_Beta1[i]                     = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5 );
+            M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI );
+            M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection );
+            M_Beta0[i]                     = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6 );
+            M_Beta1[i]                     = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5 );
 
-                // Linear Parameters
-                M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1. );
-                M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0. );
-                M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0. );
-                M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1. );
-                M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1. );
-                M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1. );
-                M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1. );
-                M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0. );
-                M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0. );
-                M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1. );
-                M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0. );
-                M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0. );
-                M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0. );
-                M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0. );
-                M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0. );
-                M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0. );
-            }
+            // Linear Parameters
+            M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1. );
+            M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0. );
+            M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0. );
+            M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1. );
+            M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1. );
+            M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1. );
+            M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1. );
+            M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0. );
+            M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0. );
+            M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1. );
+            M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0. );
+            M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0. );
+            M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0. );
+            M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0. );
+            M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0. );
+            M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0. );
+        }
 
-            break;
+        break;
 
-        case linear:
+    case linear:
 
-            linearInterpolation( M_Thickness, dataFile, section + "/PhysicalParameters/thickness", 0. );
+        linearInterpolation( M_Thickness, dataFile, section + "/PhysicalParameters/thickness", 0. );
 
-            linearInterpolation( M_Area0, dataFile, section + "/PhysicalParameters/Area0", M_PI );
-            linearInterpolation( M_Alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_RobertsonCorrection, true );
-            linearInterpolation( M_Beta0, dataFile, section + "/PhysicalParameters/Beta0", 1.e6 );
-            linearInterpolation( M_Beta1, dataFile, section + "/PhysicalParameters/Beta1", 0.5 );
+        linearInterpolation( M_Area0, dataFile, section + "/PhysicalParameters/Area0", M_PI );
+        linearInterpolation( M_Alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_RobertsonCorrection, true );
+        linearInterpolation( M_Beta0, dataFile, section + "/PhysicalParameters/Beta0", 1.e6 );
+        linearInterpolation( M_Beta1, dataFile, section + "/PhysicalParameters/Beta1", 0.5 );
 
-            linearInterpolation( M_Flux11, dataFile, section + "/PhysicalParameters/Flux11", 1. );
-            linearInterpolation( M_Flux12, dataFile, section + "/PhysicalParameters/Flux12", 0. );
-            linearInterpolation( M_Flux21, dataFile, section + "/PhysicalParameters/Flux21", 0. );
-            linearInterpolation( M_Flux22, dataFile, section + "/PhysicalParameters/Flux22", 1. );
-            linearInterpolation( M_Celerity1, dataFile, section + "/PhysicalParameters/Celerity1", 1. );
-            linearInterpolation( M_Celerity2, dataFile, section + "/PhysicalParameters/Celerity2", 1. );
-            linearInterpolation( M_Celerity1LeftEigenvector1, dataFile, section + "/PhysicalParameters/LeftEigenvector11", 1. );
-            linearInterpolation( M_Celerity1LeftEigenvector2, dataFile, section + "/PhysicalParameters/LeftEigenvector12", 0. );
-            linearInterpolation( M_Celerity2LeftEigenvector1, dataFile, section + "/PhysicalParameters/LeftEigenvector21", 0. );
-            linearInterpolation( M_Celerity2LeftEigenvector2, dataFile, section + "/PhysicalParameters/LeftEigenvector22", 1. );
-            linearInterpolation( M_Source10, dataFile, section + "/PhysicalParameters/Source10", 0. );
-            linearInterpolation( M_Source20, dataFile, section + "/PhysicalParameters/Source20", 0. );
-            linearInterpolation( M_Source11, dataFile, section + "/PhysicalParameters/Source11", 0. );
-            linearInterpolation( M_Source12, dataFile, section + "/PhysicalParameters/Source12", 0. );
-            linearInterpolation( M_Source21, dataFile, section + "/PhysicalParameters/Source21", 0. );
-            linearInterpolation( M_Source22, dataFile, section + "/PhysicalParameters/Source22", 0. );
+        linearInterpolation( M_Flux11, dataFile, section + "/PhysicalParameters/Flux11", 1. );
+        linearInterpolation( M_Flux12, dataFile, section + "/PhysicalParameters/Flux12", 0. );
+        linearInterpolation( M_Flux21, dataFile, section + "/PhysicalParameters/Flux21", 0. );
+        linearInterpolation( M_Flux22, dataFile, section + "/PhysicalParameters/Flux22", 1. );
+        linearInterpolation( M_Celerity1, dataFile, section + "/PhysicalParameters/Celerity1", 1. );
+        linearInterpolation( M_Celerity2, dataFile, section + "/PhysicalParameters/Celerity2", 1. );
+        linearInterpolation( M_Celerity1LeftEigenvector1, dataFile, section + "/PhysicalParameters/LeftEigenvector11", 1. );
+        linearInterpolation( M_Celerity1LeftEigenvector2, dataFile, section + "/PhysicalParameters/LeftEigenvector12", 0. );
+        linearInterpolation( M_Celerity2LeftEigenvector1, dataFile, section + "/PhysicalParameters/LeftEigenvector21", 0. );
+        linearInterpolation( M_Celerity2LeftEigenvector2, dataFile, section + "/PhysicalParameters/LeftEigenvector22", 1. );
+        linearInterpolation( M_Source10, dataFile, section + "/PhysicalParameters/Source10", 0. );
+        linearInterpolation( M_Source20, dataFile, section + "/PhysicalParameters/Source20", 0. );
+        linearInterpolation( M_Source11, dataFile, section + "/PhysicalParameters/Source11", 0. );
+        linearInterpolation( M_Source12, dataFile, section + "/PhysicalParameters/Source12", 0. );
+        linearInterpolation( M_Source21, dataFile, section + "/PhysicalParameters/Source21", 0. );
+        linearInterpolation( M_Source22, dataFile, section + "/PhysicalParameters/Source22", 0. );
 
-            break;
+        break;
 
-        case pointwise:
+    case pointwise:
 
-            for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
-            {
-                // Physical Parameters
-                M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
+        for ( UInt i = 0; i < M_Mesh->numPoints() ; ++i )
+        {
+            // Physical Parameters
+            M_Thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
 
-                M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI, i );
-                M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection, i );
-                M_Beta0[i]                     = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6, i );
-                M_Beta1[i]                     = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5, i );
+            M_Area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI, i );
+            M_Alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_RobertsonCorrection, i );
+            M_Beta0[i]                     = dataFile( ( section + "/PhysicalParameters/Beta0"           ).data(), 1.e6, i );
+            M_Beta1[i]                     = dataFile( ( section + "/PhysicalParameters/Beta1"           ).data(), 0.5, i );
 
-                // Linear Parameters
-                M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1., i );
-                M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0., i );
-                M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0., i );
-                M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1., i );
-                M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1., i );
-                M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1., i );
-                M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1., i );
-                M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0., i );
-                M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0., i );
-                M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1., i );
-                M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0., i );
-                M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0., i );
-                M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0., i );
-                M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0., i );
-                M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0., i );
-                M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0., i );
-            }
+            // Linear Parameters
+            M_Flux11[i]                    = dataFile( ( section + "/LinearParameters/Flux11"            ).data(), 1., i );
+            M_Flux12[i]                    = dataFile( ( section + "/LinearParameters/Flux12"            ).data(), 0., i );
+            M_Flux21[i]                    = dataFile( ( section + "/LinearParameters/Flux21"            ).data(), 0., i );
+            M_Flux22[i]                    = dataFile( ( section + "/LinearParameters/Flux22"            ).data(), 1., i );
+            M_Celerity1[i]                 = dataFile( ( section + "/LinearParameters/Celerity1"         ).data(), 1., i );
+            M_Celerity2[i]                 = dataFile( ( section + "/LinearParameters/Celerity2"         ).data(), 1., i );
+            M_Celerity1LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector11" ).data(), 1., i );
+            M_Celerity1LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector12" ).data(), 0., i );
+            M_Celerity2LeftEigenvector1[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector21" ).data(), 0., i );
+            M_Celerity2LeftEigenvector2[i] = dataFile( ( section + "/LinearParameters/LeftEigenvector22" ).data(), 1., i );
+            M_Source10[i]                  = dataFile( ( section + "/LinearParameters/Source10"          ).data(), 0., i );
+            M_Source20[i]                  = dataFile( ( section + "/LinearParameters/Source20"          ).data(), 0., i );
+            M_Source11[i]                  = dataFile( ( section + "/LinearParameters/Source11"          ).data(), 0., i );
+            M_Source12[i]                  = dataFile( ( section + "/LinearParameters/Source12"          ).data(), 0., i );
+            M_Source21[i]                  = dataFile( ( section + "/LinearParameters/Source21"          ).data(), 0., i );
+            M_Source22[i]                  = dataFile( ( section + "/LinearParameters/Source22"          ).data(), 0., i );
+        }
 
-            break;
+        break;
 
-        default:
-            std::cout << "Warning: taperLaw \"" << distributionLaw << "\"not available!" << std::endl;
+    default:
+        std::cout << "Warning: taperLaw \"" << distributionLaw << "\"not available!" << std::endl;
     }
 
     UpdateCoefficients();
@@ -374,20 +375,20 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     M_JacobianPerturbationFlowRate = dataFile( ( section + "JacobianPerturbation/deltaFlowRate"      ).data(), 0.001 );
     M_JacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1 );
 
-/*
-    // Initialize
-    std::map< std::string, OneD_Initialize > initializeMap;
-    initializeMap["A"]       = OneD_InitializeArea;
-    initializeMap["Q"]       = OneD_InitializeFlux;
-    initializeMap["W1"]      = OneD_InitializeRiemann1;
-    initializeMap["W2"]      = OneD_InitializeRiemann2;
-    initializeMap["P"]       = OneD_InitializePressure;
+    /*
+        // Initialize
+        std::map< std::string, OneD_Initialize > initializeMap;
+        initializeMap["A"]       = OneD_InitializeArea;
+        initializeMap["Q"]       = OneD_InitializeFlux;
+        initializeMap["W1"]      = OneD_InitializeRiemann1;
+        initializeMap["W2"]      = OneD_InitializeRiemann2;
+        initializeMap["P"]       = OneD_InitializePressure;
 
-    M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
-    M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
-    M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
-    M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
-*/
+        M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
+        M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
+        M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
+        M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
+    */
 
     // Physical Parameters
     M_ComputeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
@@ -484,9 +485,9 @@ OneDimensionalModel_Data::UpdateCoefficients()
         Real radius (1.); //std::sqrt( M_Area0[i] / M_PI );
 
         Real profileIntegral =   std::pow(1+2./M_PowerlawCoefficient, 2) *
-                             (   std::pow(radius,2) / 2 +
-                                 std::pow(radius,2*M_PowerlawCoefficient+2) / (2*M_PowerlawCoefficient+2) -
-                               2*std::pow(radius,  M_PowerlawCoefficient+2) / (  M_PowerlawCoefficient+2) );
+                                 (   std::pow(radius,2) / 2 +
+                                     std::pow(radius,2*M_PowerlawCoefficient+2) / (2*M_PowerlawCoefficient+2) -
+                                     2*std::pow(radius,  M_PowerlawCoefficient+2) / (  M_PowerlawCoefficient+2) );
 
         // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
         M_Friction = 2 * M_PI * M_Viscosity / M_Density * ( M_PowerlawCoefficient + 2 ) * std::pow( radius, M_PowerlawCoefficient - 1 );
@@ -497,10 +498,10 @@ OneDimensionalModel_Data::UpdateCoefficients()
             M_Alpha[i] = 2 / std::pow(radius,2) * profileIntegral;
 
             // Compute Beta0
-            if( M_ThickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
+            if ( M_ThickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
             {
                 M_Beta0[i] = - M_Thickness[i] * M_Young * std::sqrt(M_PI) / ( std::sqrt( M_Area0[i] ) * ( (1 - M_Poisson * M_Poisson )
-                             + M_Poisson * ( 1 + M_Poisson ) * ( M_Thickness[i] * std::sqrt(M_PI) / std::sqrt( M_Area0[i] ) ) ) );
+                                                                              + M_Poisson * ( 1 + M_Poisson ) * ( M_Thickness[i] * std::sqrt(M_PI) / std::sqrt( M_Area0[i] ) ) ) );
                 M_Beta1[i] = - 0.5;
             }
             else
@@ -527,7 +528,7 @@ OneDimensionalModel_Data::initLinearParam( const GetPot& /*dataFile*/ )  // CHEC
 
       c_L = sqrt( beta0 * beta1 / rho );
     */
-    for( UInt indz=0; indz < M_Mesh->numPoints(); ++indz )
+    for ( UInt indz=0; indz < M_Mesh->numPoints(); ++indz )
     {
         M_Celerity1[indz] = std::sqrt( M_Beta0[indz] * M_Beta1[indz] / M_Density );
         M_Flux21[indz]    = std::pow( M_Celerity1[indz], 2 );
@@ -592,14 +593,14 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Jacobian perturbation Flow Rate = " << M_JacobianPerturbationFlowRate << std::endl;
     output << "Jacobian perturbation Pressure  = " << M_JacobianPerturbationPressure << std::endl;
 
-/*
-    // Initialize
-    output << "\n*** Values for data [initialize]\n\n";
-    output << "Initial Variable       = " << M_initialVariable << std::endl;
-    output << "Initial Value          = " << M_initialValue << std::endl;
-    output << "Rest Value             = " << M_restValue << std::endl;
-    output << "Multiplier             = " << M_multiplier << std::endl;
-*/
+    /*
+        // Initialize
+        output << "\n*** Values for data [initialize]\n\n";
+        output << "Initial Variable       = " << M_initialVariable << std::endl;
+        output << "Initial Value          = " << M_initialValue << std::endl;
+        output << "Rest Value             = " << M_restValue << std::endl;
+        output << "Multiplier             = " << M_multiplier << std::endl;
+    */
     // Physical Parameters
     output << "\n*** Values for data [PhysicalParameters]\n\n";
     output << "Compute Coefficients   = " << M_ComputeCoefficients << "\n";

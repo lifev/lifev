@@ -40,7 +40,8 @@
 #include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
 #include <lifemc/lifesolver/MS_Model_1D.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MS_Coupling_Stress - Stress coupling condition
 /*!

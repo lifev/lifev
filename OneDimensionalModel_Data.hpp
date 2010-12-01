@@ -48,7 +48,8 @@
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*
 enum OneD_Initialize { OneD_InitializeArea,

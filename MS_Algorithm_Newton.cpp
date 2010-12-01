@@ -34,15 +34,16 @@
 
 #include <lifemc/lifesolver/MS_Algorithm_Newton.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Algorithm_Newton::MS_Algorithm_Newton() :
-    super               (),
-    M_solver            (),
-    M_Jacobian          ()
+        super               (),
+        M_solver            (),
+        M_Jacobian          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -53,9 +54,9 @@ MS_Algorithm_Newton::MS_Algorithm_Newton() :
 }
 
 MS_Algorithm_Newton::MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm ) :
-    super               ( algorithm ),
-    M_solver            ( algorithm.M_solver ),
-    M_Jacobian          ( algorithm.M_Jacobian )
+        super               ( algorithm ),
+        M_solver            ( algorithm.M_solver ),
+        M_Jacobian          ( algorithm.M_Jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -118,8 +119,10 @@ MS_Algorithm_Newton::SubIterate()
 
     M_multiscale->ExportCouplingVariables( *M_couplingVariables );
 
-    MS_Vector_Type delta( *M_couplingResiduals ); delta = 0.0;
-    MS_Vector_Type minusCouplingResidual( *M_couplingResiduals ); minusCouplingResidual = 0.0;
+    MS_Vector_Type delta( *M_couplingResiduals );
+    delta = 0.0;
+    MS_Vector_Type minusCouplingResidual( *M_couplingResiduals );
+    minusCouplingResidual = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
     {
@@ -170,7 +173,7 @@ MS_Algorithm_Newton::SubIterate()
     Save( M_SubiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
     MS_ErrorCheck( MS_Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
-                                 " (required: " + number2string( M_Tolerance ) + ")\n" );
+                   " (required: " + number2string( M_Tolerance ) + ")\n" );
 }
 
 void

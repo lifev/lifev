@@ -44,7 +44,8 @@
 #include <lifemc/lifesolver/BCInterface1D_OperatorFunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface1D_DefaultFunctions.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface1D - LifeV Interface to load Boundary Conditions completely from a GetPot file
 /*!
@@ -280,7 +281,7 @@ private:
 
     template< class BCInterfaceBase >
     inline void AddBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
-                         const BCBaseList_Type& Oper );
+                               const BCBaseList_Type& Oper );
 
     template< class BCBase >
     inline void AddBCManager( BCBase& base );
@@ -305,10 +306,10 @@ private:
 // ===================================================
 template< class Operator >
 BCInterface1D< Operator >::BCInterface1D( ) :
-    M_handler                 (),
-    M_data                    (),
-    M_vectorFunction          (),
-    M_vectorDefaultFunction1D ()
+        M_handler                 (),
+        M_data                    (),
+        M_vectorFunction          (),
+        M_vectorDefaultFunction1D ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -324,10 +325,10 @@ BCInterface1D< Operator >::BCInterface1D( ) :
 
 template< class Operator >
 BCInterface1D< Operator >::BCInterface1D( const BCInterface1D& interface ) :
-    M_handler                 ( interface.M_handler ),
-    M_data                    ( interface.M_data ),
-    M_vectorFunction          ( interface.M_vectorFunction ),
-    M_vectorDefaultFunction1D ( interface.M_vectorDefaultFunction1D )
+        M_handler                 ( interface.M_handler ),
+        M_data                    ( interface.M_data ),
+        M_vectorFunction          ( interface.M_vectorFunction ),
+        M_vectorDefaultFunction1D ( interface.M_vectorDefaultFunction1D )
 {
 }
 
@@ -389,8 +390,8 @@ BCInterface1D< Operator >::FillHandler( const std::string& FileName,
 template< class Operator >
 void
 BCInterface1D< Operator >::ReadBC( const std::string& FileName,
-                                 const std::string& dataSection,
-                                 const BCName&      name )
+                                   const std::string& dataSection,
+                                   const BCName&      name )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -424,7 +425,7 @@ BCInterface1D< Operator >::UpdateOperatorVariables()
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
         BCInterface1D_OperatorFunction< Operator > *Oper =
-                dynamic_cast< BCInterface1D_OperatorFunction< Operator > * > ( &( *M_vectorFunction[i] ) );
+            dynamic_cast< BCInterface1D_OperatorFunction< Operator > * > ( &( *M_vectorFunction[i] ) );
 
         if ( Oper != 0 )
             Oper->UpdateOperatorVariables();
@@ -456,7 +457,7 @@ void BCInterface1D< Operator >::SetOperator( const boost::shared_ptr< Operator >
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
         BCInterface1D_OperatorFunction< Operator > *castedOperator =
-                dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
+            dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
 
         if ( castedOperator != 0 )
             castedOperator->SetOperator( Oper );
@@ -470,7 +471,7 @@ void BCInterface1D< Operator >::SetSolution( const Solution_PtrType solution )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
         BCInterface1D_OperatorFunction< Operator > *castedOperator =
-                dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
+            dynamic_cast < BCInterface1D_OperatorFunction< Operator >* > ( &( *M_vectorFunction[i] ) );
 
         if ( castedOperator != 0 )
             castedOperator->SetSolution( solution );
@@ -530,24 +531,24 @@ BCInterface1D< Operator >::BuildBase()
 
     switch ( M_data.GetBase().second )
     {
-        case BCInterface1D_function:
-        case BCInterface1D_functionFile:
-        case BCInterface1D_OPERfunction:
-        case BCInterface1D_OPERfunctionFile:
+    case BCInterface1D_function:
+    case BCInterface1D_functionFile:
+    case BCInterface1D_OPERfunction:
+    case BCInterface1D_OPERfunctionFile:
 
-            AddBase( M_vectorFunction, M_data.GetBase().second );
+        AddBase( M_vectorFunction, M_data.GetBase().second );
 
-            AddBCManager( M_vectorFunction.back()->GetBase() );
+        AddBCManager( M_vectorFunction.back()->GetBase() );
 
-            break;
+        break;
 
-        case BCInterface1D_Default:
+    case BCInterface1D_Default:
 
-            AddBase( M_vectorDefaultFunction1D );
+        AddBase( M_vectorDefaultFunction1D );
 
-            AddBCManager( M_vectorDefaultFunction1D.back()->GetBase() );
+        AddBCManager( M_vectorDefaultFunction1D.back()->GetBase() );
 
-            break;
+        break;
     }
 }
 
@@ -562,7 +563,7 @@ BCInterface1D< Operator >::AddBase( std::vector< boost::shared_ptr< BCInterfaceB
 template< class Operator > template< class BCInterfaceBase >
 inline void
 BCInterface1D< Operator >::AddBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
-                                    const BCBaseList_Type& Oper )
+                                          const BCBaseList_Type& Oper )
 {
     boost::shared_ptr< BCInterfaceBase > Function( FactoryBCInterface_Function::instance().createObject( Oper ) );
 

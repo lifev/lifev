@@ -43,7 +43,8 @@
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Source.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_Source_NonLinear - Class for the non-linear source function B of the 1D hyperbolic problem.
 /*!

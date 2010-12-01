@@ -25,35 +25,35 @@ namespace LifeV
 
 
 Monolithic::Monolithic():
-    super(),
-    M_monolithicMap(),
-    M_interfaceMap(),
-    M_beta(),
-    M_monolithicMatrix(),
-    M_precPtr(),
-    M_rhsFull(),
-    M_BCh_flux(),
-    M_BCh_Robin(),
-    M_BChWSS(),
-    M_offset(0),
-    M_solidAndFluidDim(0),
-    M_fluidBlock(),
-    M_solidBlock(),
-    M_solidBlockPrec(),
-    M_linearSolver(),
-    M_numerationInterface(),
-    M_BChs(),
-    M_FESpaces(),
-    //end of protected attributes
-    M_PAAP(),
+        super(),
+        M_monolithicMap(),
+        M_interfaceMap(),
+        M_beta(),
+        M_monolithicMatrix(),
+        M_precPtr(),
+        M_rhsFull(),
+        M_BCh_flux(),
+        M_BCh_Robin(),
+        M_BChWSS(),
+        M_offset(0),
+        M_solidAndFluidDim(0),
+        M_fluidBlock(),
+        M_solidBlock(),
+        M_solidBlockPrec(),
+        M_linearSolver(),
+        M_numerationInterface(),
+        M_BChs(),
+        M_FESpaces(),
+        //end of protected attributes
+        M_PAAP(),
 #ifdef OBSOLETE
-    M_rhsShapeDerivatives(),
+        M_rhsShapeDerivatives(),
 #endif
-    M_diagonalScale(false),
-    M_reusePrec(true),
-    M_resetPrec(true),
-    M_maxIterSolver(-1),
-    M_restarts(false)
+        M_diagonalScale(false),
+        M_reusePrec(true),
+        M_resetPrec(true),
+        M_maxIterSolver(-1),
+        M_restarts(false)
 {}
 
 // Destructor
@@ -65,9 +65,9 @@ Monolithic::~Monolithic()
 void
 Monolithic::setupFEspace()
 {
-	super::setupFEspace();
+    super::setupFEspace();
 
-	// Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
+    // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( M_solidMesh,
                                                          M_data->dataSolid()->order(),
                                                          nDimensions,
@@ -80,10 +80,10 @@ Monolithic::setupDOF( void )
 
     M_dofStructureToHarmonicExtension    .reset( new DofInterface3Dto3D );
 
-	M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
-											    M_dFESpace->refFE(), M_dFESpace->dof() );
-	M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
-											   *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
+    M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
+                                                M_dFESpace->refFE(), M_dFESpace->dof() );
+    M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+                                               *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
                                                M_data->interfaceTolerance(),
                                                M_data->fluidInterfaceVertexFlag() );
 
@@ -190,13 +190,13 @@ Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working wi
     UInt totalDofs(M_dFESpace->dof().numTotalDof());
 
 
-    for(UInt dim = 0; dim < nDimensions; ++dim)
+    for (UInt dim = 0; dim < nDimensions; ++dim)
     {
-        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if(M_interfaceMap->getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (M_interfaceMap->getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
-                if(rhs.get())
+                if (rhs.get())
                     (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs )*rescale;
             }
         }
@@ -223,7 +223,7 @@ Monolithic::updateSystem()
 void
 Monolithic::monolithicToX(const vector_type& disp, vector_type& dispFluid, EpetraMap& map, UInt offset)
 {
-    if(disp.getMaptype()== Repeated)
+    if (disp.getMaptype()== Repeated)
     {
         vector_type dispUnique(disp, Unique);
         monolithicToX(dispUnique, dispFluid, map, offset);
@@ -275,27 +275,27 @@ Monolithic::setDispSolid( const vector_type& solution )
 
 int Monolithic::setupBlockPrec( )
 {
-     if(!(M_precPtr->set()))
-     {
+    if (!(M_precPtr->set()))
+    {
         M_precPtr->push_back_matrix(M_solidBlockPrec, false);
         M_precPtr->push_back_matrix(M_fluidBlock, true);
         M_precPtr->setConditions(M_BChs);
         M_precPtr->setSpaces(M_FESpaces);
         M_precPtr->setOffsets(2, M_offset, 0);
         M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
-     }
-     else
-     {
-         M_precPtr->replace_matrix(M_fluidBlock, 1);
-         M_precPtr->replace_matrix(M_solidBlockPrec, 0);
-     }
+    }
+    else
+    {
+        M_precPtr->replace_matrix(M_fluidBlock, 1);
+        M_precPtr->replace_matrix(M_solidBlockPrec, 0);
+    }
 }
 
 void
 Monolithic::
 evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
 {
-    if( diagonalScaling )
+    if ( diagonalScaling )
         diagonalScale(*rhs, M_monolithicMatrix->getMatrix());
 
     res = *(M_monolithicMatrix->getMatrix())*sol;
@@ -413,10 +413,10 @@ Monolithic::solidInit(std::string const& dOrder)
 
 void
 Monolithic::initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                             FSIOperator::solid_type::value_type::Function const& p0,
-                             FSIOperator::solid_type::value_type::Function const& d0,
-                             FSIOperator::solid_type::value_type::Function const& w0,
-                             FSIOperator::solid_type::value_type::Function const& /*w0*/ )
+                        FSIOperator::solid_type::value_type::Function const& p0,
+                        FSIOperator::solid_type::value_type::Function const& d0,
+                        FSIOperator::solid_type::value_type::Function const& w0,
+                        FSIOperator::solid_type::value_type::Function const& /*w0*/ )
 {
     vector_type u(M_uFESpace->map());
     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->getTime());
@@ -464,7 +464,7 @@ Monolithic::computeMaxSingularValue( )
     boost::shared_ptr<EigenSolver> eig;
 
     UInt nev = M_dataFile("eigensolver/nevec", 10);//number of eigenvectors
-    if(nev)
+    if (nev)
     {
         eig.reset(new EigenSolver(M_PAAP, M_PAAP->OperatorDomainMap(), nev));
         eig->setDataFromGetPot(M_dataFile, "eigensolver/");
@@ -521,14 +521,14 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
     UInt numIter = M_precPtr->solveSystem( rhs, step, M_linearSolver );
 
     if (numIter < 0)
-        {
-            chrono.start();
+    {
+        chrono.start();
 
-            M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
+        M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
 
-            if (numIter <= -M_maxIterSolver)
-                M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
-        }
+        if (numIter <= -M_maxIterSolver)
+            M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
+    }
 
     M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
 }
@@ -536,7 +536,7 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
 void
 Monolithic::assembleSolidBlock( UInt iter, vector_ptrtype& solution )
 {
-    if(iter == 0)
+    if (iter == 0)
     {
         if (!M_restarts)
         {
@@ -563,7 +563,7 @@ Monolithic::assembleFluidBlock(UInt iter, vector_ptrtype& solution)
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
     this->M_fluid->updateStab(*M_fluidBlock);
 
-    if(iter==0)
+    if (iter==0)
     {
         M_resetPrec=true;
         *this->M_rhs += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
@@ -576,11 +576,11 @@ Monolithic::assembleFluidBlock(UInt iter, vector_ptrtype& solution)
 
 void Monolithic::updateRHS(  )
 {
-        *this->M_rhs += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
-        couplingRhs(this->M_rhs, M_un);
-        *M_rhsFull = *M_rhs;
-        //this->M_solid->updateVel();
-        updateSolidSystem(this->M_rhs);
+    *this->M_rhs += M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+    couplingRhs(this->M_rhs, M_un);
+    *M_rhsFull = *M_rhs;
+    //this->M_solid->updateVel();
+    updateSolidSystem(this->M_rhs);
 }
 
 

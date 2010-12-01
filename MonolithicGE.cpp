@@ -36,7 +36,8 @@
 
 #include <MonolithicGE.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -72,7 +73,7 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
                    M_epetraComm,
                    M_monolithicMap,
                    M_offset
-                   );
+                  );
 
     //             if (isLinearSolid())// to be implemented with the offset
     //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
@@ -84,11 +85,11 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
 
 void
 MonolithicGE::evalResidual( vector_type&       res,
-                          const vector_type& disp,
-                          const UInt          iter )
+                            const vector_type& disp,
+                            const UInt          iter )
 {
 
-    if((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
+    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
         // Solve HE
         iterateMesh(disp);
@@ -124,40 +125,40 @@ MonolithicGE::evalResidual( vector_type&       res,
 void MonolithicGE::applyBoundaryConditions( )
 {
 
-         if ( !M_BCh_u->bdUpdateDone() )
-             M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-         M_BCh_d->setOffset(M_offset);
-         if ( !M_BCh_d->bdUpdateDone() )
-             M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+    if ( !M_BCh_u->bdUpdateDone() )
+        M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    M_BCh_d->setOffset(M_offset);
+    if ( !M_BCh_d->bdUpdateDone() )
+        M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
 
-         M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
-         M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
+    M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
+    M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
 
-         if(!this->M_monolithicMatrix->set())
-         {
-             M_BChs.push_back(M_BCh_d);
-             M_BChs.push_back(M_BCh_u);
-             M_FESpaces.push_back(M_dFESpace);
-             M_FESpaces.push_back(M_uFESpace);
+    if (!this->M_monolithicMatrix->set())
+    {
+        M_BChs.push_back(M_BCh_d);
+        M_BChs.push_back(M_BCh_u);
+        M_FESpaces.push_back(M_dFESpace);
+        M_FESpaces.push_back(M_uFESpace);
 
-             M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
-             M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
-             M_monolithicMatrix->setConditions(M_BChs);
-             M_monolithicMatrix->setSpaces(M_FESpaces);
-             M_monolithicMatrix->setOffsets(2, M_offset, 0);
-             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
-         }
-         else
-         {
-             M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
-             M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
-         }
+        M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
+        M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
+        M_monolithicMatrix->setConditions(M_BChs);
+        M_monolithicMatrix->setSpaces(M_FESpaces);
+        M_monolithicMatrix->setOffsets(2, M_offset, 0);
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+    }
+    else
+    {
+        M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
+        M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
+    }
 
-         M_monolithicMatrix->blockAssembling();
-         M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
+    M_monolithicMatrix->blockAssembling();
+    M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
 
-         M_monolithicMatrix->GlobalAssemble();
-         M_monolithicMatrix->getMatrix()->spy("M");
+    M_monolithicMatrix->GlobalAssemble();
+    M_monolithicMatrix->getMatrix()->spy("M");
 
 }
 
@@ -200,12 +201,12 @@ MonolithicGE::iterateMesh(const vector_type& disp)
 }
 
 bool MonolithicGE::reg = FSIFactory::instance().registerProduct( "monolithicGE", &MonolithicGE::createM )  &&
-      BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &ComposedDNND::createComposedDNND) &&
-      BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz) &&
-      BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz ) &&
-      BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
-      BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
-      BlockPrecFactory::instance().registerProduct("ComposedDN"  , &ComposedDN::createComposedDN ) &&
-     BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &ComposedDN::createComposedDN2 );
+                         BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &ComposedDNND::createComposedDNND) &&
+                         BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz) &&
+                         BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz ) &&
+                         BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
+                         BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
+                         BlockPrecFactory::instance().registerProduct("ComposedDN"  , &ComposedDN::createComposedDN ) &&
+                         BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &ComposedDN::createComposedDN2 );
 
 } // Namespace LifeV

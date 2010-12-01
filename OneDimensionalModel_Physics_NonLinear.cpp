@@ -39,18 +39,19 @@
 
 #include <lifemc/lifesolver/OneDimensionalModel_Physics_NonLinear.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 OneDimensionalModel_Physics_NonLinear::OneDimensionalModel_Physics_NonLinear() :
-    super   ()
+        super   ()
 {
 }
 
 OneDimensionalModel_Physics_NonLinear::OneDimensionalModel_Physics_NonLinear( const Data_PtrType Data ) :
-    super   ( Data )
+        super   ( Data )
 {
 }
 
@@ -59,7 +60,7 @@ OneDimensionalModel_Physics_NonLinear::OneDimensionalModel_Physics_NonLinear( co
 // ===================================================
 void
 OneDimensionalModel_Physics_NonLinear::W_from_U(       Real& W1,       Real& W2,
-                                                 const Real& A,  const Real& Q, const UInt& indz ) const
+                                                       const Real& A,  const Real& Q, const UInt& indz ) const
 {
     Real celerity( Celerity0(indz) * std::sqrt( std::pow( A / M_Data->Area0(indz), M_Data->Beta1(indz) ) ) );
 
@@ -73,15 +74,15 @@ OneDimensionalModel_Physics_NonLinear::W_from_U(       Real& W1,       Real& W2,
 
 void
 OneDimensionalModel_Physics_NonLinear::U_from_W(       Real& A,        Real& Q,
-                                                 const Real& W1, const Real& W2, const UInt& indz ) const
+                                                       const Real& W1, const Real& W2, const UInt& indz ) const
 {
     Real rhooverbeta0beta1 ( M_Data->DensityRho() / ( M_Data->Beta0(indz) * M_Data->Beta1(indz) ) );
 
     Real beta1over4SQRTchi( M_Data->Beta1(indz) / ( std::sqrt(M_Data->RobertsonCorrection()) * 4 ) );
 
     A = M_Data->Area0(indz)
-      * std::pow( rhooverbeta0beta1, (1/M_Data->Beta1(indz)) )
-      * std::pow( beta1over4SQRTchi * (W1 - W2) + Celerity0(indz), (2/M_Data->Beta1(indz)) );
+        * std::pow( rhooverbeta0beta1, (1/M_Data->Beta1(indz)) )
+        * std::pow( beta1over4SQRTchi * (W1 - W2) + Celerity0(indz), (2/M_Data->Beta1(indz)) );
 
     Q = A * ( W1 + W2 ) / 2;
 }
@@ -108,12 +109,12 @@ OneDimensionalModel_Physics_NonLinear::pressure_WDiff( const Real& W1, const Rea
     result += Celerity0(indz);
     result *= rhoover2SQRTchi;
 
-    if( i == 1 ) //! dP/dW1
+    if ( i == 1 ) //! dP/dW1
     {
         return result;
     }
 
-    if( i == 2 ) //! dP/dW2
+    if ( i == 2 ) //! dP/dW2
     {
         return -result;
     }
@@ -135,14 +136,14 @@ OneDimensionalModel_Physics_NonLinear::W_from_P( const Real& _P, const Real& _W,
               * ( pow( ( _P / M_Data->Beta0(indz) + 1 ), 0.5 ) - 1 ) );
 
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_from_P] "
-                << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
-                << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
-                << ", pow( ( _P / M_Data->Beta0(indz) + 1 ), 0.5 ) = " << pow( ( _P / M_Data->Beta0(indz) + 1 ), 0.5 ) << "\n";
+    << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
+    << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
+    << ", pow( ( _P / M_Data->Beta0(indz) + 1 ), 0.5 ) = " << pow( ( _P / M_Data->Beta0(indz) + 1 ), 0.5 ) << "\n";
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_from_P] add term = " << add << "\n";
 
-    if( i == 1 )
+    if ( i == 1 )
         return _W - add;
-    if( i == 2 )
+    if ( i == 2 )
         return _W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -162,14 +163,14 @@ OneDimensionalModel_Physics_NonLinear::W_from_Q( const Real& _Q, const Real& _W_
     Real w_k = _W_n;
     Real f_k, df_k, tau_k(0);
 
-    if( i == 1 ) // W1 given
+    if ( i == 1 ) // W1 given
     {
         f_k = pow( _W - w_k + Celerity0(indz) / K0, 2/M_Data->Beta1(indz) );
         tau_k = pow( _W - w_k + Celerity0(indz) / K0, 2/M_Data->Beta1(indz) );
         df_k = (-2 / M_Data->Beta1(indz))
-            * pow( _W - w_k + Celerity0(indz) / K0, 2/M_Data->Beta1(indz) - 1 );
+               * pow( _W - w_k + Celerity0(indz) / K0, 2/M_Data->Beta1(indz) - 1 );
     }
-    if( i == 2 ) // W2 given
+    if ( i == 2 ) // W2 given
     {
         f_k = pow( w_k - _W + Celerity0(indz) / K0, 2/M_Data->Beta1(indz) );
         tau_k = pow( w_k - _W + Celerity0(indz) / K0, 2/M_Data->Beta1(indz) );
@@ -181,19 +182,19 @@ OneDimensionalModel_Physics_NonLinear::W_from_Q( const Real& _Q, const Real& _W_
     df_k += f_k;
 
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_from_Q] "
-                << "K0 = " << K0
-                << ", K1 = " << K1
-                << ", tau_k = " << tau_k << "\n";
+    << "K0 = " << K0
+    << ", K1 = " << K1
+    << ", tau_k = " << tau_k << "\n";
 
     Real w_kp1 = _Q / (K1 * tau_k) - _W;
 
-        /* for debugging purposes
+    /* for debugging purposes
     std::ofstream ofile;
     ofile.open( "imposed_W_from_Q.m", std::ios::app );
     ofile << _Q << "\t"
-          << w_kp1 << "\n";
+      << w_kp1 << "\n";
     ofile.close();
-        */
+    */
 
     return w_kp1;
 

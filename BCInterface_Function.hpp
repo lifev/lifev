@@ -40,7 +40,8 @@
 
 #include <lifemc/lifecore/Parser.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCInterface_Function - LifeV bcFunction wrapper for BCInterface
 /*!
@@ -188,9 +189,9 @@ inline BCInterface_Function< Operator >* BCInterface_CreateFunction()
 // ===================================================
 template< typename Operator >
 BCInterface_Function< Operator >::BCInterface_Function() :
-    M_parser    (),
-    M_base      (),
-    M_mapID     ()
+        M_parser    (),
+        M_base      (),
+        M_mapID     ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -201,9 +202,9 @@ BCInterface_Function< Operator >::BCInterface_Function() :
 
 template< typename Operator >
 BCInterface_Function< Operator >::BCInterface_Function( const Data_Type& data ) :
-    M_parser    (),
-    M_base      (),
-    M_mapID     ()
+        M_parser    (),
+        M_base      (),
+        M_mapID     ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -215,9 +216,9 @@ BCInterface_Function< Operator >::BCInterface_Function( const Data_Type& data ) 
 
 template< typename Operator >
 BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Function& function ) :
-    M_parser    ( function.M_parser ),
-    M_base      ( function.M_base ),
-    M_mapID     ( function.M_mapID )
+        M_parser    ( function.M_parser ),
+        M_base      ( function.M_base ),
+        M_mapID     ( function.M_mapID )
 {
 }
 
