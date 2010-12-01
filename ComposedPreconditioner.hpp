@@ -106,9 +106,9 @@ public:
 
     const UInt getNumber() const {return M_Prec->getNumber();}
 
-    super::prec_type              getPrecPtr(){return M_Prec;}
+    super::prec_type              getPrecPtr() {return M_Prec;}
 
-    std::string            precType(){return "composedPreconditioner";}
+    std::string            precType() {return "composedPreconditioner";}
 
     int                    buildPreconditioner(operator_type& A);
     int                    buildPreconditioner(operator_type& A,
@@ -118,7 +118,7 @@ public:
     int                    push_back          (operator_type& A,
                                                const bool useInverse=false,
                                                const bool useTranspose=false
-                                               );
+                                              );
 
     //! Build a preconditioner based on A and replace it in the composedPreconditioner.
     int                    replace            (operator_type& A,
@@ -134,15 +134,15 @@ public:
 
 
 
-    const Epetra_Comm& Comm(){return getPrec()->Comm(); }
+    const Epetra_Comm& Comm() {return getPrec()->Comm(); }
 
     const Epetra_Map& OperatorDomainMap() { return  M_Prec->OperatorDomainMap(); }
     const Epetra_Map& OperatorRangeMap() { return  M_Prec->OperatorRangeMap(); }
-    std::vector<operator_type>& getOperVector(){return M_OperVector;}
+    std::vector<operator_type>& getOperVector() {return M_OperVector;}
 
     int            SetUseTranspose( const bool useTranspose=false )
     {
-       return M_Prec->SetUseTranspose(useTranspose);
+        return M_Prec->SetUseTranspose(useTranspose);
     }
 
     bool            UseTranspose(  ) {return M_Prec->UseTranspose();}

@@ -63,7 +63,8 @@ namespace LifeV
 
 template<typename Operator>
 class  ComposedOperator
-    : public Epetra_Operator {
+        : public Epetra_Operator
+{
 
 public:
 
@@ -100,9 +101,9 @@ public:
        of the vector", summed in a second step after all the multiplications.
     */
     UInt push_back(prec_type  P,
-                  const bool useInverse=false,
-                  const bool useTranspose=false,
-                  const bool summed=false);
+                   const bool useInverse=false,
+                   const bool useTranspose=false,
+                   const bool summed=false);
 
     /**
        Method to add an operator at the end of the operators list.
@@ -114,9 +115,9 @@ public:
     */
 
     UInt push_back(prec_raw_type*  P,
-                  const bool useInverse=false,
-                  const bool useTranspose=false,
-                  const bool summed=false);
+                   const bool useInverse=false,
+                   const bool useTranspose=false,
+                   const bool summed=false);
 
     //! we expecte an external matrix shared pointer, we will not destroy the matrix!
     //! remember: P = M_P(0) * ... * M_P(Qp-1)
@@ -127,9 +128,9 @@ public:
        \param useInverse: flag specifying if the operator is already inverted (if AllpyInverse() is implemented)
     */
     UInt replace(prec_type  P,
-                const UInt index,
-                const bool useInverse=false,
-                const bool useTranspose=false);
+                 const UInt index,
+                 const bool useInverse=false,
+                 const bool useTranspose=false);
 
     /** @name Epetra_Operator Implementation
      */
@@ -198,9 +199,9 @@ public:
 
     void setComm(const boost::shared_ptr<Epetra_Comm> comm);
 
-    const Displayer& displayer(){return M_displayer;}
+    const Displayer& displayer() {return M_displayer;}
 
-    void resetP(){M_P.clear();}
+    void resetP() {M_P.clear();}
 
 protected:
 
@@ -226,32 +227,32 @@ protected:
 
 template <typename Operator>
 ComposedOperator<Operator>::ComposedOperator(const boost::shared_ptr<Epetra_Comm> comm)
-    :
-    M_P(),
-    M_Inverse(),
-    M_Transpose(),
-    M_Summed(),
-    M_Setted(0),
-    M_meanIter(0),
-    M_numCalled(0),
-    M_displayer(comm)
+        :
+        M_P(),
+        M_Inverse(),
+        M_Transpose(),
+        M_Summed(),
+        M_Setted(0),
+        M_meanIter(0),
+        M_numCalled(0),
+        M_displayer(comm)
 {
 }
 
 template <typename Operator>
 ComposedOperator<Operator>::ComposedOperator( const ComposedOperator<Operator>& P)
-    :
-    M_P(),
-    M_Inverse(P.getInverse()),
-    M_Transpose(P.getTranspose()),
-    M_Summed(P.getSummed()),
-    M_allTranspose(P.getAllTranspose()),
-    M_Setted(P.getNumber()),
-    M_meanIter(P.getMeanIter()),
-    M_numCalled(P.getNumCalled()),
-    M_displayer(P.getCommPtr())
+        :
+        M_P(),
+        M_Inverse(P.getInverse()),
+        M_Transpose(P.getTranspose()),
+        M_Summed(P.getSummed()),
+        M_allTranspose(P.getAllTranspose()),
+        M_Setted(P.getNumber()),
+        M_meanIter(P.getMeanIter()),
+        M_numCalled(P.getNumCalled()),
+        M_displayer(P.getCommPtr())
 {
-    for(int i=0; i<M_Setted; ++i)
+    for (int i=0; i<M_Setted; ++i)
     {
         M_P.push_back(P.getP()[i]);
     }
@@ -300,7 +301,7 @@ push_back( prec_type  P,
     M_P.        push_back(P);
     M_Inverse.  push_back(useInverse);
     M_Transpose.push_back(useTranspose);
-    if(summed)
+    if (summed)
         M_Summed.push_back(M_Setted);
 
     //    if (useInverse && useTranspose) assert(false); // I am not sure I have coded this in the right way
@@ -368,18 +369,21 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     ID k=0;
     for (Int q(M_Setted-1); q>=0 ; q--)
     {
-        if(M_Summed.size() && q==M_Summed[k])
+        if (M_Summed.size() && q==M_Summed[k])
         {
             ++k;
         }
         else
         {
-            if (M_Inverse[q]) {
+            if (M_Inverse[q])
+            {
                 useTranspose = M_P[q]->UseTranspose (); // storing original status
                 assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
                 M_P[q]->ApplyInverse(Z,Y);
                 M_P[q]->SetUseTranspose(useTranspose); // put back to original status
-            } else {
+            }
+            else
+            {
                 useTranspose = M_P[q]->UseTranspose (); // storing original status
                 assert (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1);
                 M_P[q]->Apply(Z,Y);
@@ -389,9 +393,9 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
         }
     }
 
-    for(UInt k=0; k<M_Summed.size(); ++k)
+    for (UInt k=0; k<M_Summed.size(); ++k)
     {
-        if(M_Inverse[M_Summed[k]])
+        if (M_Inverse[M_Summed[k]])
             M_P[M_Summed[k]]->ApplyInverse(X,Y);
         else
             M_P[M_Summed[k]]->Apply(X,Y);
@@ -417,18 +421,21 @@ Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 
     for (UInt q(0); q<M_Setted ; q++, Z = Y)
     {
-        if(M_Summed.size() && q==M_Summed[k])
+        if (M_Summed.size() && q==M_Summed[k])
         {
             ++k;
         }
         else
         {
-            if (M_Inverse[q]) {
+            if (M_Inverse[q])
+            {
                 useTranspose = M_P[q]->UseTranspose (); // storing original status
                 ASSERT (M_P[q]->SetUseTranspose(M_Transpose[q]) != -1, "SetUseTranspose failed in the preconditioner of your choice");
                 M_P[q]->Apply(Z,Y);//y+=Pi*z
                 M_P[q]->SetUseTranspose(useTranspose); // put back to original status
-            } else {
+            }
+            else
+            {
                 useTranspose = M_P[q]->UseTranspose (); // storing original status
                 //ifdef DEBUG
                 ASSERT(!M_Transpose[q] || M_P[q]->SetUseTranspose(M_Transpose[q]) == -1, "Something went wrong in SetUseTranspose for your preconditioner.\n");
@@ -440,9 +447,9 @@ Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
         }
     }
     Y.Scale(0.);
-    for(UInt k=0; k<M_Summed.size(); ++k)
+    for (UInt k=0; k<M_Summed.size(); ++k)
     {
-        if(M_Inverse[M_Summed[k]])
+        if (M_Inverse[M_Summed[k]])
         {
             useTranspose = M_P[M_Summed[k]]->UseTranspose (); // storing original status
             assert (M_P[M_Summed[k]]->SetUseTranspose(M_Transpose[M_Summed[k]]) != -1);
@@ -517,12 +524,12 @@ OperatorRangeMap() const
 template <typename Operator>
 int ComposedOperator<Operator>::SetUseTranspose(bool useTranspose)
 {
-    if(useTranspose!=UseTranspose())
+    if (useTranspose!=UseTranspose())
     {
         M_allTranspose=useTranspose;
         int size=M_P.size()-1;
-        if(size)
-            for(int i=0; i<size/2; ++i)
+        if (size)
+            for (int i=0; i<size/2; ++i)
             {
                 prec_type swp;
                 swp=M_P[i];
@@ -556,7 +563,8 @@ double ComposedOperator<Operator>::Condest()  const
 {
     double cond(1);
 
-    for (UInt q(0); q<M_Setted ; q++) {
+    for (UInt q(0); q<M_Setted ; q++)
+    {
         if (M_Inverse[q])
             cond = cond /  M_P[q]->Condest();
         else

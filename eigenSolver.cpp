@@ -40,10 +40,10 @@
 namespace LifeV
 {
 EigenSolver::EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec):
-    MyProblem( new Anasazi::BasicEigenproblem<DataType, Vector, Solver>(Teuchos::rcp(matrix), M_eigenVectors) ),
-    M_eigenVectors(new Epetra_MultiVector(block_map, numvec)),
-    MyPL(),
-    MySolver()
+        MyProblem( new Anasazi::BasicEigenproblem<DataType, Vector, Solver>(Teuchos::rcp(matrix), M_eigenVectors) ),
+        M_eigenVectors(new Epetra_MultiVector(block_map, numvec)),
+        MyPL(),
+        MySolver()
 {
 }
 
@@ -63,16 +63,17 @@ EigenSolver::setDataFromGetPot(GetPot const& data , const std::string& section)
 
 
     int verbosity = Anasazi::Errors + Anasazi::Warnings;
-    if (verbose) {
+    if (verbose)
+    {
         verbosity += Anasazi::FinalSummary + Anasazi::TimingDetails;
     }
 #ifdef DEBUG
     if (debug)
         verbosity += Anasazi::Debug;
 #endif
-  //
-  // Create parameter list to pass into solver manager
-  //
+    //
+    // Create parameter list to pass into solver manager
+    //
 
     MyPL.set( "Verbosity", verbosity );
     MyPL.set( "Block Size", block_size );
@@ -92,21 +93,21 @@ EigenSolver
 {
     Anasazi::Eigensolution<DataType,Vector> sol = MyProblem->getSolution();
     std::vector<Anasazi::Value<DataType> > evals = sol.Evals;
-    for(UInt i=0; i<evals.size(); ++i)
-        {
-            realPart.push_back(evals[i].realpart);
-            imgPart.push_back(evals[i].imagpart);
-        }
+    for (UInt i=0; i<evals.size(); ++i)
+    {
+        realPart.push_back(evals[i].realpart);
+        imgPart.push_back(evals[i].imagpart);
+    }
 }
 
- int
- EigenSolver
- ::solve()
- {
-     bool out=MyProblem->setProblem();
-     std::cout<<"problem set: "<<out<<std::endl;
-     MySolver.reset(new eigensolver_raw_type(MyProblem, MyPL));
-     return MySolver->solve();
- }
+int
+EigenSolver
+::solve()
+{
+    bool out=MyProblem->setProblem();
+    std::cout<<"problem set: "<<out<<std::endl;
+    MySolver.reset(new eigensolver_raw_type(MyProblem, MyPL));
+    return MySolver->solve();
+}
 }
 #endif

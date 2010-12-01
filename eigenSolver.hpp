@@ -80,49 +80,50 @@ class UNDEF_EIGENSOLVER_EXCEPTION;
 // {
 
 //  template <typename DataType, typename Solver, typename Vector>
-  class EigenSolver
-  {
-  public:
-      typedef double DataType;
-      typedef Epetra_Operator Solver;
-      typedef Epetra_MultiVector Vector;
-
-      typedef Anasazi::BasicEigenproblem<DataType, Vector, Solver>                     eigenpb_raw_type;
-      typedef Teuchos::RCP<Anasazi::BasicEigenproblem<DataType, Vector, Solver> >      eigenpb_type;
-      typedef Anasazi::BlockKrylovSchurSolMgr <DataType,Vector,Solver>                 eigensolver_raw_type;
-      typedef boost::shared_ptr<eigensolver_raw_type>                                  eigensolver_type;
-
-      EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
-
-      virtual ~EigenSolver()
-      {}
-
-      /**sets the parameters for the eigenproblem:
-       */
-      void setDataFromGetPot( GetPot const& dataFile, std::string const& section/*="eigensolver"*/ );
-
-      /** set to true if the operator is symmetric*/
-      void setHermitian(bool flag){ MyProblem->setHermitian(flag);}
-
-      /** fills the input vectors with the real and imaginary part of the eigenvalues*/
-      void eigenvalues(std::vector< DataType>& realPart, std::vector< DataType>& imgPart);
-
-      /** solves the eigenproblem*/
-      int solve();
-
-
-  private :
-
-      Teuchos::RCP<Vector> M_eigenVectors;
-      eigenpb_type MyProblem;
-      Teuchos::ParameterList MyPL;
-      eigensolver_type MySolver;
-  };
-
-class UNDEF_EIGENSOLVER_EXCEPTION{
+class EigenSolver
+{
 public:
-    UNDEF_EIGENSOLVER_EXCEPTION(){}
-    virtual ~UNDEF_EIGENSOLVER_EXCEPTION(){}
+    typedef double DataType;
+    typedef Epetra_Operator Solver;
+    typedef Epetra_MultiVector Vector;
+
+    typedef Anasazi::BasicEigenproblem<DataType, Vector, Solver>                     eigenpb_raw_type;
+    typedef Teuchos::RCP<Anasazi::BasicEigenproblem<DataType, Vector, Solver> >      eigenpb_type;
+    typedef Anasazi::BlockKrylovSchurSolMgr <DataType,Vector,Solver>                 eigensolver_raw_type;
+    typedef boost::shared_ptr<eigensolver_raw_type>                                  eigensolver_type;
+
+    EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
+
+    virtual ~EigenSolver()
+    {}
+
+    /**sets the parameters for the eigenproblem:
+     */
+    void setDataFromGetPot( GetPot const& dataFile, std::string const& section/*="eigensolver"*/ );
+
+    /** set to true if the operator is symmetric*/
+    void setHermitian(bool flag) { MyProblem->setHermitian(flag);}
+
+    /** fills the input vectors with the real and imaginary part of the eigenvalues*/
+    void eigenvalues(std::vector< DataType>& realPart, std::vector< DataType>& imgPart);
+
+    /** solves the eigenproblem*/
+    int solve();
+
+
+private :
+
+    Teuchos::RCP<Vector> M_eigenVectors;
+    eigenpb_type MyProblem;
+    Teuchos::ParameterList MyPL;
+    eigensolver_type MySolver;
+};
+
+class UNDEF_EIGENSOLVER_EXCEPTION
+{
+public:
+    UNDEF_EIGENSOLVER_EXCEPTION() {}
+    virtual ~UNDEF_EIGENSOLVER_EXCEPTION() {}
 };
 
 }

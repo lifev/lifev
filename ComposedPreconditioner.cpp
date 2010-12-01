@@ -37,18 +37,18 @@ namespace LifeV
 {
 
 ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> comm):
-    super (comm ),
-    M_Prec(new prec_raw_type(comm)),
-    M_OperVector(0)
-    //M_precType()
+        super (comm ),
+        M_Prec(new prec_raw_type(comm)),
+        M_OperVector(0)
+        //M_precType()
 {
 }
 
 ComposedPreconditioner::ComposedPreconditioner(ComposedPreconditioner& P):
-    super(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
-    M_Prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
-    M_OperVector(P.getOperVector())
-    //M_precType(P.precType())
+        super(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
+        M_Prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
+        M_OperVector(P.getOperVector())
+        //M_precType(P.precType())
 {
     //    *M_Prec=*P.getPrec();
 }
@@ -65,13 +65,13 @@ ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
 void
 ComposedPreconditioner::createList(       list_Type& /*list*/,
-                                    const GetPot&      dataFile,
-                                    const std::string& section,
-                                    const std::string& subSection )
+                                          const GetPot&      dataFile,
+                                          const std::string& section,
+                                          const std::string& subSection )
 {
     ASSERT( !M_Prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
 
-    for( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
+    for ( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
         epetra_prec_type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_Prec->push_back(tmp);
@@ -88,8 +88,8 @@ ComposedPreconditioner::buildPreconditioner(operator_type& oper)
 
 int
 ComposedPreconditioner::buildPreconditioner(operator_type& oper,
-                                        const bool useInverse,
-                                        const bool useTranspose)
+                                            const bool useInverse,
+                                            const bool useTranspose)
 {
     //M_Prec.reset(new prec_raw_type(M_displayer.comm()));
     return push_back(oper, useInverse, useTranspose);
@@ -97,7 +97,7 @@ ComposedPreconditioner::buildPreconditioner(operator_type& oper,
 
 int
 ComposedPreconditioner::createPrec(operator_type& oper,
-                               boost::shared_ptr<EpetraPreconditioner> & prec )
+                                   boost::shared_ptr<EpetraPreconditioner> & prec )
 {
     prec->buildPreconditioner( oper );
 }
@@ -105,11 +105,11 @@ ComposedPreconditioner::createPrec(operator_type& oper,
 
 int
 ComposedPreconditioner::push_back(operator_type& oper,
-                              const bool useInverse,
-                              const bool useTranspose
-                              )
+                                  const bool useInverse,
+                                  const bool useTranspose
+                                 )
 {
-    if(!M_Prec.get())
+    if (!M_Prec.get())
         M_Prec.reset(new prec_raw_type(M_displayer.comm()));
     M_OperVector.push_back(oper);
     Chrono chrono;
@@ -121,16 +121,16 @@ ComposedPreconditioner::push_back(operator_type& oper,
     chrono.stop();
     this->M_displayer.leaderPrintMax("done in ", chrono.diff());
     M_Prec->replace(prec, useInverse, useTranspose);// \TODO to reset as push_back
-    if( M_Prec->P().size() == M_OperVector.size() )
+    if ( M_Prec->P().size() == M_OperVector.size() )
         this->M_preconditionerCreated=true;
     return EXIT_SUCCESS;
 }
 
 int
 ComposedPreconditioner::replace(operator_type& oper,
-                            const UInt index,
-                            const bool useInverse,
-                            const bool useTranspose)
+                                const UInt index,
+                                const bool useInverse,
+                                const bool useTranspose)
 {
     ASSERT(index <= M_OperVector.size(), "ComposedPreconditioner::replace: index too large");
 
