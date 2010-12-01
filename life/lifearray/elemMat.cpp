@@ -39,7 +39,7 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ) :
     _firstCol.resize( _nBlockCol );
     //
     UInt first = 0;
-    for ( UInt n = 0;n < nbr1;n++ )
+    for ( UInt n = 0; n < nbr1; n++ )
     {
         _nRow[ n ] = nNode1;
         _firstRow[ n ] = first;
@@ -47,7 +47,7 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ) :
     }
     //
     first = 0;
-    for ( UInt n = 0;n < nbc1;n++ )
+    for ( UInt n = 0; n < nbc1; n++ )
     {
         _nCol[ n ] = nNode1;
         _firstCol[ n ] = first;
@@ -70,13 +70,13 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
     _firstCol.resize( _nBlockCol );
     //
     UInt first = 0, n;
-    for ( n = 0;n < nbr1;n++ )
+    for ( n = 0; n < nbr1; n++ )
     {
         _nRow[ n ] = nNode1;
         _firstRow[ n ] = first;
         first += nNode1;
     }
-    for ( n = nbr1;n < nbr1 + nbr2;n++ )
+    for ( n = nbr1; n < nbr1 + nbr2; n++ )
     {
         _nRow[ n ] = nNode2;
         _firstRow[ n ] = first;
@@ -84,13 +84,13 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
     }
     //
     first = 0;
-    for ( n = 0;n < nbc1;n++ )
+    for ( n = 0; n < nbc1; n++ )
     {
         _nCol[ n ] = nNode1;
         _firstCol[ n ] = first;
         first += nNode1;
     }
-    for ( n = nbc1;n < nbc1 + nbc2;n++ )
+    for ( n = nbc1; n < nbc1 + nbc2; n++ )
     {
         _nCol[ n ] = nNode2;
         _firstCol[ n ] = first;
@@ -116,19 +116,19 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
     _firstCol.resize( _nBlockCol );
     //
     UInt first = 0, n;
-    for ( n = 0;n < nbr1;n++ )
+    for ( n = 0; n < nbr1; n++ )
     {
         _nRow[ n ] = nNode1;
         _firstRow[ n ] = first;
         first += nNode1;
     }
-    for ( n = nbr1;n < nbr1 + nbr2;n++ )
+    for ( n = nbr1; n < nbr1 + nbr2; n++ )
     {
         _nRow[ n ] = nNode2;
         _firstRow[ n ] = first;
         first += nNode2;
     }
-    for ( n = nbr1 + nbr2;n < nbr1 + nbr2 + nbr3;n++ )
+    for ( n = nbr1 + nbr2; n < nbr1 + nbr2 + nbr3; n++ )
     {
         _nRow[ n ] = nNode3;
         _firstRow[ n ] = first;
@@ -136,19 +136,19 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
     }
     //
     first = 0;
-    for ( n = 0;n < nbc1;n++ )
+    for ( n = 0; n < nbc1; n++ )
     {
         _nCol[ n ] = nNode1;
         _firstCol[ n ] = first;
         first += nNode1;
     }
-    for ( n = nbc1;n < nbc1 + nbc2;n++ )
+    for ( n = nbc1; n < nbc1 + nbc2; n++ )
     {
         _nCol[ n ] = nNode2;
         _firstCol[ n ] = first;
         first += nNode2;
     }
-    for ( n = nbc1 + nbc2;n < nbc1 + nbc2 + nbc3;n++ )
+    for ( n = nbc1 + nbc2; n < nbc1 + nbc2 + nbc3; n++ )
     {
         _nCol[ n ] = nNode3;
         _firstCol[ n ] = first;
@@ -159,9 +159,9 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
 void ElemMat::showMe( std::ostream& c )
 {
     UInt i, j;
-    for ( i = 0;i < _nBlockRow;i++ )
+    for ( i = 0; i < _nBlockRow; i++ )
     {
-        for ( j = 0;j < _nBlockCol;j++ )
+        for ( j = 0; j < _nBlockCol; j++ )
         {
             c << "Block (" << i << "," << j << "), ";
             c << block( i, j ) << std::endl;

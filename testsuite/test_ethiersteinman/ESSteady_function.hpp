@@ -33,7 +33,8 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 class EthierSteinmanSteady
 {

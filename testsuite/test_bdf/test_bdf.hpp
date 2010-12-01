@@ -90,7 +90,7 @@ public:
               char** argv );
 
     ~test_bdf()
-        {}
+    {}
 
     //@}
 

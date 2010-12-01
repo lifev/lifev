@@ -117,9 +117,9 @@ Int nonLinRichardson( EpetraVector& sol,
         out_res << std::scientific;
         out_res << "# time = ";
         out_res << time << "   " << "initial norm_res " <<  normRes
-                << " stop tol = " << stop_tol
-                << "initial norm_sol "
-                << solNormInf << std::endl;
+        << " stop tol = " << stop_tol
+        << "initial norm_sol "
+        << solNormInf << std::endl;
         out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
     }
     while ( normRes > stop_tol && iter < maxit )
@@ -152,8 +152,8 @@ Int nonLinRichardson( EpetraVector& sol,
         if (verbose)
         {
             out_res   << std::setw(5) << iter
-                      << std::setw(15) << solNormInf
-                      << std::setw(15) << stepNormInf;
+            << std::setw(15) << solNormInf
+            << std::setw(15) << stepNormInf;
         }
         linres = linearRelTol;
 
@@ -163,20 +163,20 @@ Int nonLinRichardson( EpetraVector& sol,
         Int status(EXIT_SUCCESS);
         switch ( linesearch )
         {
-            case 0: // no linesearch
-                sol += step;
-                functional.evalResidual( residual, sol, iter);
+        case 0: // no linesearch
+            sol += step;
+            functional.evalResidual( residual, sol, iter);
 //                normRes = residual.NormInf();
-                break;
-            case 1:
-                status = lineSearch_parab( functional, residual, sol, step, normRes, lambda, iter, verbose );
-                break;
-            case 2:  // recommended
-                status = lineSearch_cubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
-                break;
-            default:
-                std::cout << "Unknown linesearch \n";
-                status = EXIT_FAILURE;
+            break;
+        case 1:
+            status = lineSearch_parab( functional, residual, sol, step, normRes, lambda, iter, verbose );
+            break;
+        case 2:  // recommended
+            status = lineSearch_cubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
+            break;
+        default:
+            std::cout << "Unknown linesearch \n";
+            status = EXIT_FAILURE;
         }
 
         if (status == EXIT_FAILURE)
@@ -199,8 +199,8 @@ Int nonLinRichardson( EpetraVector& sol,
             }
             linearRelTol = std::min<Real>( eta_new, eta_max );
             linearRelTol = std::min<Real>( eta_max,
-                                             std::max<Real>( linearRelTol,
-                                                             .5 * stop_tol / normRes ) );
+                                           std::max<Real>( linearRelTol,
+                                                           .5 * stop_tol / normRes ) );
             //if (verbose)
             //    std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
         }

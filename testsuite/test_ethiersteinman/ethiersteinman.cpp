@@ -107,9 +107,9 @@ std::set<UInt> parseList( const std::string& list )
 struct Ethiersteinman::Private
 {
     Private() :
-        nu    (1),
-        steady(0)
-        {}
+            nu    (1),
+            steady(0)
+    {}
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
@@ -126,9 +126,9 @@ struct Ethiersteinman::Private
 
 
 Ethiersteinman::Ethiersteinman( int argc,
-                              char** argv )
-    :
-    d( new Private )
+                                char** argv )
+        :
+        d( new Private )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -138,7 +138,7 @@ Ethiersteinman::Ethiersteinman( int argc,
 
     d->Re = dataFile( "fluid/problem/Re", 1. );
     d->nu = dataFile( "fluid/physics/viscosity", 1. ) /
-        dataFile( "fluid/physics/density", 1. );
+            dataFile( "fluid/physics/density", 1. );
 
 #ifdef EPETRA_MPI
 
@@ -170,7 +170,7 @@ Ethiersteinman::check()
     GetPot dataFile( d->data_file_name.c_str() );
 
     bool verbose = (d->comm->MyPID() == 0);
-    if(verbose) std::cout << "Test checks the accuracy of the solution" << std::endl;
+    if (verbose) std::cout << "Test checks the accuracy of the solution" << std::endl;
 
     chrono.start();
 
@@ -184,10 +184,14 @@ Ethiersteinman::check()
 
 
     BCHandler::BCHints hint;
-    if(neumannMarkers.size() != 0){
+    if (neumannMarkers.size() != 0)
+    {
         hint = BCHandler::HINT_BC_NONE;
-    }else{
-        if(verbose){
+    }
+    else
+    {
+        if (verbose)
+        {
             std::cout << "Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
         }
         hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
@@ -197,12 +201,12 @@ Ethiersteinman::check()
     BCFunctionBase uNeumann( Problem::fNeumann );
 
     for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
-         it != dirichletMarkers.end(); ++it)
+            it != dirichletMarkers.end(); ++it)
     {
         bcH.addBC( "Wall", *it, Essential, Full, uWall, 3 );
     }
     for (std::set<UInt>::const_iterator it = neumannMarkers.begin();
-         it != neumannMarkers.end(); ++it)
+            it != neumannMarkers.end(); ++it)
     {
         bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
     }
@@ -336,13 +340,13 @@ Ethiersteinman::check()
         }
 
 
-         bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdf_u().shift_right( *fluid.solution() );
 
     }
 
     chrono.stop();
     if (verbose)
-	std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
+        std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
     // end initialization step
 
     fluid.resetPrec();
@@ -366,7 +370,9 @@ Ethiersteinman::check()
         if (exporterType.compare("none") == 0)
         {
             exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-        } else {
+        }
+        else
+        {
             exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
         }
     }
@@ -374,11 +380,11 @@ Ethiersteinman::check()
     velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
 
     exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+                           UInt(0), uFESpace.dof().numTotalDof() );
 
     exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(pFESpace.dof().numTotalDof()) );
+                           UInt(3*uFESpace.dof().numTotalDof()),
+                           UInt(pFESpace.dof().numTotalDof()) );
     exporter->postProcess( 0 );
 
     std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
@@ -457,14 +463,17 @@ Ethiersteinman::check()
 
     double testTol(0.02);
 
-    if(verbose) std::cout << "Relative error: E(u)=" << urelerr << ", E(p)=" << prelerr << std::endl
-                          << "Tolerance=" << testTol << std::endl;
+    if (verbose) std::cout << "Relative error: E(u)=" << urelerr << ", E(p)=" << prelerr << std::endl
+                               << "Tolerance=" << testTol << std::endl;
 
-    if(urelerr>testTol || prelerr>testTol){
-        if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
+    if (urelerr>testTol || prelerr>testTol)
+    {
+        if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
         throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
-    }else{
-        if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
+    }
+    else
+    {
+        if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
     }
 
 }
@@ -481,7 +490,7 @@ Ethiersteinman::run()
     GetPot dataFile( d->data_file_name.c_str() );
 
     bool verbose = (d->comm->MyPID() == 0);
-    if(verbose) std::cout << "Test checks the convergence in space of the solution" << std::endl;
+    if (verbose) std::cout << "Test checks the convergence in space of the solution" << std::endl;
 
     Problem::setParamsFromGetPot( dataFile );
 
@@ -529,22 +538,23 @@ Ethiersteinman::run()
     uL2Error.clear();
     pL2Error.clear();
     std::vector<LifeV::Real> tmpVec(discretizationNumber,0.0);
-    for(UInt iElem(0);iElem<FEnumber;++iElem){
+    for (UInt iElem(0); iElem<FEnumber; ++iElem)
+    {
         uL2Error.push_back(tmpVec);
         pL2Error.push_back(tmpVec);
     }
 
     // Loop on the mesh refinement
-    for(UInt jDiscretization(0);jDiscretization<discretizationNumber;++jDiscretization)
+    for (UInt jDiscretization(0); jDiscretization<discretizationNumber; ++jDiscretization)
     {
         UInt mElem = meshDiscretization[jDiscretization];
 
         // Loop on the finite element
-        for(UInt iElem(0);iElem<FEnumber;++iElem)
+        for (UInt iElem(0); iElem<FEnumber; ++iElem)
         {
             chrono.start();
 
-            if(d->comm->MyPID()==0)
+            if (d->comm->MyPID()==0)
             {
                 std::cout << "Using: -" << uFE[iElem] << "-" << pFE[iElem] << " finite element" << std::endl;
                 std::cout << "       -Regular mesh " << mElem << "x" << mElem << "x" << mElem << std::endl;
@@ -574,10 +584,14 @@ Ethiersteinman::run()
 
 
             BCHandler::BCHints hint;
-            if(neumannMarkers.size() != 0){
+            if (neumannMarkers.size() != 0)
+            {
                 hint = BCHandler::HINT_BC_NONE;
-            }else{
-                if(verbose){
+            }
+            else
+            {
+                if (verbose)
+                {
                     std::cout << "Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
                 }
                 hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
@@ -587,12 +601,12 @@ Ethiersteinman::run()
             BCFunctionBase uNeumann( Problem::fNeumann );
 
             for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
-                 it != dirichletMarkers.end(); ++it)
+                    it != dirichletMarkers.end(); ++it)
             {
                 bcH.addBC( "Wall", *it, Essential, Full, uWall, 3 );
             }
             for (std::set<UInt>::const_iterator it = neumannMarkers.begin();
-                 it != neumannMarkers.end(); ++it)
+                    it != neumannMarkers.end(); ++it)
             {
                 bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
             }
@@ -614,8 +628,8 @@ Ethiersteinman::run()
                            1,
                            mElem, mElem, mElem,
                            verbose,
-                             2.0,   2.0,   2.0,
-                            -1.0,  -1.0,  -1.0);
+                           2.0,   2.0,   2.0,
+                           -1.0,  -1.0,  -1.0);
 
             partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
@@ -754,10 +768,10 @@ Ethiersteinman::run()
                 if (verbose)
                 {
                     out_norm << time  << " "
-                             << ul2error << " "
-                             << urelerr << " "
-                             << pl2error << " "
-                             << prelerr << "\n" << std::flush;
+                    << ul2error << " "
+                    << urelerr << " "
+                    << pl2error << " "
+                    << prelerr << "\n" << std::flush;
                 }
 
 
@@ -796,7 +810,9 @@ Ethiersteinman::run()
                 if (exporterType.compare("none") == 0)
                 {
                     exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-                } else {
+                }
+                else
+                {
                     exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
                 }
             }
@@ -887,10 +903,10 @@ Ethiersteinman::run()
                 if (verbose)
                 {
                     out_norm << time  << " "
-                             << ul2error << " "
-                             << urelerr << " "
-                             << pl2error << " "
-                             << prelerr << "\n" << std::flush;
+                    << ul2error << " "
+                    << urelerr << " "
+                    << pl2error << " "
+                    << prelerr << "\n" << std::flush;
                 }
 
                 // Saving the errors for the final test
@@ -913,7 +929,8 @@ Ethiersteinman::run()
             chronoGlobal.stop();
             if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
-            if(d->comm->MyPID()==0){
+            if (d->comm->MyPID()==0)
+            {
                 out_norm.close();
             }
         } // End of loop on the finite elements
@@ -924,7 +941,8 @@ Ethiersteinman::run()
     // +-----------------------------------------------+
 
     // Check if the correct convergence is achieved
-    if(verbose){
+    if (verbose)
+    {
         // We want to check the convergence of the error and
         // see if it matches the theory.
         std::cout << "Checking the convergence:" << std::endl;
@@ -936,14 +954,15 @@ Ethiersteinman::run()
         Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
         std::string status(""); // Information string
 
-        for(UInt iElem(0);iElem<FEnumber;++iElem)
+        for (UInt iElem(0); iElem<FEnumber; ++iElem)
         {
             std::cout << "    - " << uFE[iElem] << "-" << pFE[iElem] << " ... ";
 
             // Everything is OK a priori
             status = "OK";
 
-            for(UInt jDiscretization(1);jDiscretization<discretizationNumber;++jDiscretization){
+            for (UInt jDiscretization(1); jDiscretization<discretizationNumber; ++jDiscretization)
+            {
                 h1 = 1.0/meshDiscretization[jDiscretization-1];
                 h2 = 1.0/meshDiscretization[jDiscretization];
 
@@ -953,11 +972,13 @@ Ethiersteinman::run()
                 uErrRatio = uL2Error[iElem][jDiscretization-1]/uL2Error[iElem][jDiscretization]; // E1/E2
                 pErrRatio = pL2Error[iElem][jDiscretization-1]/pL2Error[iElem][jDiscretization];
 
-                if(uErrRatio < uBound){
+                if (uErrRatio < uBound)
+                {
                     status = "FAILED";
                     success = false;
                 }
-                if(pErrRatio < pBound){
+                if (pErrRatio < pBound)
+                {
                     status = "FAILED";
                     success = false;
                 }
@@ -966,11 +987,14 @@ Ethiersteinman::run()
 
         }
 
-        if(!success){
-            if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
+        if (!success)
+        {
+            if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
             throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
-        }else{
-            if(verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
+        }
+        else
+        {
+            if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
         }
     }
 }

@@ -296,12 +296,12 @@ void compute_mat( ElemMat& elmat, Oper& _oper,
     unsigned int i, j;
     double s;
     Real x = 0, y = 0, z = 0;
-    for ( i = 0;i < ( UInt ) fe.nbNode;i++ )
+    for ( i = 0; i < ( UInt ) fe.nbNode; i++ )
     {
-        for ( j = 0;j < ( UInt ) fe.nbNode;j++ )
+        for ( j = 0; j < ( UInt ) fe.nbNode; j++ )
         {
             s = 0;
-            for ( ig = 0;ig < ( UInt ) fe.nbQuadPt();ig++ )
+            for ( ig = 0; ig < ( UInt ) fe.nbQuadPt(); ig++ )
             {
 #ifdef SPACE_DEP_OPERATOR
                 fe.coorQuadPt( x, y, z, ig );
@@ -331,9 +331,9 @@ void compute_mat_mixed( ElemMat& elmat, Oper& _oper,
     double s;
     Real x, y, z;
 
-    for ( i = 0;i < fe1.nbNode;i++ )
+    for ( i = 0; i < fe1.nbNode; i++ )
     {
-        for ( j = 0;j < fe2.nbNode;j++ )
+        for ( j = 0; j < fe2.nbNode; j++ )
         {
             s = 0;
             // Alain, 08/02/02:
@@ -341,7 +341,7 @@ void compute_mat_mixed( ElemMat& elmat, Oper& _oper,
             //          of the type FE1 and FE2 in mainAZ.h.
             //          Therefore the same quadrature rule must be chosen
             //          for both FE1 and FE2.
-            for ( ig = 0;ig < fe1.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe1.nbQuadPt(); ig++ )
             {
                 fe1.coorQuadPt( x, y, z, ig );
                 s += _oper( i, j, ig, x, y, z, iblock, jblock ) * fe1.weightDet( ig );
@@ -363,11 +363,11 @@ void compute_mat_symm( ElemMat& elmat, Oper& _oper,
     //
     // diagonal
     //
-    for ( i = 0;i < ( UInt ) fe.nbDiag();i++ )
+    for ( i = 0; i < ( UInt ) fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < ( UInt ) fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < ( UInt ) fe.nbQuadPt(); ig++ )
         {
 #ifdef SPACE_DEP_OPERATOR
             fe.coorQuadPt( x, y, z, ig );
@@ -380,12 +380,12 @@ void compute_mat_symm( ElemMat& elmat, Oper& _oper,
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < ( UInt ) fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < ( UInt ) fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < ( UInt ) fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < ( UInt ) fe.nbQuadPt(); ig++ )
         {
 #ifdef SPACE_DEP_OPERATOR
             fe.coorQuadPt( x, y, z, ig );
@@ -449,7 +449,7 @@ assembleVector( EpetraVector&    vec,
 template <typename DOF>
 void
 assembleMatrix( EpetraMatrix<double>&   M,
-				const UInt&      		eleID,
+                const UInt&      		eleID,
                 ElemMat&          		elmat,
                 const UInt&             feNbDof,
                 const DOF&       		dof,
@@ -931,10 +931,10 @@ void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, int ib
     int i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
-    for ( i = 0;i < fe.nbNode;i++ )
+    for ( i = 0; i < fe.nbNode; i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             fe.coorQuadPt( x, y, z, ig );
             s += fe.phi( i, ig ) * fct( x, y, z, iblock + 1 ) * fe.weightDet( ig );
@@ -958,10 +958,10 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe,
     int i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
-    for ( i = 0;i < fe.nbNode;i++ )
+    for ( i = 0; i < fe.nbNode; i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             fe.coorQuadPt( x, y, z, ig );
             s += fct( i, ig, x, y, z, iblock + 1 ) * fe.weightDet( ig );
@@ -977,10 +977,10 @@ void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, const 
     UInt i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
-    for ( i = 0;i < fe.nbFEDof();i++ )
+    for ( i = 0; i < fe.nbFEDof(); i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             x = fe.quadPt( ig, 0 );
             y = fe.quadPt( ig, 1 );
@@ -999,10 +999,10 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t
     int i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
-    for ( i = 0;i < fe.nbNode;i++ )
+    for ( i = 0; i < fe.nbNode; i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             fe.coorQuadPt( x, y, z, ig );
             s += fct( i, ig, x, y, z, t, iblock + 1 ) * fe.weightDet( ig );

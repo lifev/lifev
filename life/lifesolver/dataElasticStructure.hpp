@@ -49,7 +49,8 @@
 #include <life/lifecore/util_string.hpp>
 #include <life/lifefem/dataTime.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! DataElasticStructure - Data container for solid problems with elastic structure
 class DataElasticStructure: public DataTime

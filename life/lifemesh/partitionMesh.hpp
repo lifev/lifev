@@ -295,13 +295,13 @@ template<typename Mesh>
 partitionMesh<Mesh>::partitionMesh(mesh_ptrtype &_mesh, boost::shared_ptr<Epetra_Comm> _comm,
                                    Epetra_Map* interfaceMap,
                                    Epetra_Map* interfaceMapRep):
-    M_nPartitions (1),
-    M_comm (_comm),
-    M_originalMesh (_mesh),
-    M_interfaceMap (interfaceMap),
-    M_interfaceMapRep (interfaceMapRep),
-    M_locProc (new graph_type),
-    M_serialMode (false)
+        M_nPartitions (1),
+        M_comm (_comm),
+        M_originalMesh (_mesh),
+        M_interfaceMap (interfaceMap),
+        M_interfaceMapRep (interfaceMapRep),
+        M_locProc (new graph_type),
+        M_serialMode (false)
 {
     M_me = M_comm->MyPID();
 
@@ -377,10 +377,10 @@ void partitionMesh<Mesh>::update()
     // Rebuild M_part
     M_part.resize(numElements);
     for (std::vector<std::vector<int> >::iterator it1 = M_locProc->begin();
-         it1 != M_locProc->end(); ++it1)
+            it1 != M_locProc->end(); ++it1)
     {
         for (std::vector<int>::iterator it2 = it1->begin();
-             it2 != it1->end(); ++it2)
+                it2 != it1->end(); ++it2)
         {
             M_part[*it2] = int(it1 - M_locProc->begin());
         }
@@ -409,7 +409,7 @@ template<typename Mesh>
 void partitionMesh<Mesh>::doPartitionGraph()
 {
     distributeElements(M_originalMesh->numElements());
-    if(M_interfaceMap)
+    if (M_interfaceMap)
     {
         findRepeatedFacesFSI();
     }
@@ -491,7 +491,7 @@ void partitionMesh<Mesh>::findRepeatedFacesFSI()
     bool myFaceRep;
     bool myFace(false);
     short count;
-    for(UInt h = 0; h < M_originalMesh->numVolumes(); ++h)
+    for (UInt h = 0; h < M_originalMesh->numVolumes(); ++h)
     {
         (*myIsOnProc)[h] = -1;
     }
@@ -515,7 +515,7 @@ void partitionMesh<Mesh>::findRepeatedFacesFSI()
                 myFace = false;
                 myFaceRep = false;
                 count = 0;
-                for(int ipoint = 1; ipoint <= (int) M_faceNodes; ++ipoint) // vertex-based dofs
+                for (int ipoint = 1; ipoint <= (int) M_faceNodes; ++ipoint) // vertex-based dofs
                 {
                     myFaceRep = ((M_interfaceMap->LID(M_originalMesh->face(face).point(ipoint).id())
                                   /* first is fluid */ == -1) &&
@@ -704,25 +704,25 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
     std::vector<std::vector<UInt> > matchesForProc(nprocs);
     bool orderingError[nprocs];
 
-    for(int i=0; i<nprocs ; ++i)
+    for (int i=0; i<nprocs ; ++i)
     {
         orderingError[i]=false;
-        for(int j=0; j<nprocs ; ++j)
+        for (int j=0; j<nprocs ; ++j)
         {
             mymatchesForProc[i].push_back(0);
             matchesForProc[i].push_back(0);
         }
     }
 
-    for(UInt kk=0; kk<M_part.size(); ++kk)
+    for (UInt kk=0; kk<M_part.size(); ++kk)
     {
-        if((*M_isOnProc)[kk+M_vertexDist[M_me]]!=-1)
+        if ((*M_isOnProc)[kk+M_vertexDist[M_me]]!=-1)
         {
             ++mymatchesForProc[M_part[kk]][(*M_isOnProc)[kk+M_vertexDist[M_me]]];
         }
     }
 
-    for(UInt j=0; (int)j<nprocs; ++j)
+    for (UInt j=0; (int)j<nprocs; ++j)
     {
         MPI_Allreduce(&mymatchesForProc[j][0], &matchesForProc[j][0], nprocs,
                       MPI_INT, MPI_SUM, MPIcomm);
@@ -733,9 +733,9 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
     int suitableProcess = -1;
     UInt max = 0;
 
-    for(int ii = 0; ii<nprocs; ++ii)
+    for (int ii = 0; ii<nprocs; ++ii)
     {
-        if(matchesForProc[M_me][ii] > max)
+        if (matchesForProc[M_me][ii] > max)
         {
             suitableProcess = ii;
             max = matchesForProc[M_me][ii];
@@ -749,24 +749,24 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
 
     std::vector<UInt> maxs(nprocs);
     maxs[M_me] = max;
-    for(int j = 0; j < nprocs ; ++j) // Allgather
+    for (int j = 0; j < nprocs ; ++j) // Allgather
     {
         MPI_Bcast(&maxs[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
     }
 
     std::vector<std::pair<UInt, int> > procIndex(nprocs);
-    for(int k = 0; k < nprocs; ++k)
+    for (int k = 0; k < nprocs; ++k)
     {
         procIndex[k] = std::make_pair( maxs[k], k);
     }
 
     std::sort(procIndex.begin(), procIndex.end() /*, &booleanCondition::reordering*/);
 
-    for(int l=0;l<nprocs;++l)
+    for (int l=0; l<nprocs; ++l)
     {
-        for(int l=0;l<nprocs;++l)
+        for (int l=0; l<nprocs; ++l)
         {
-            for(int j=0; j<nprocs ; ++j) // Allgather
+            for (int j=0; j<nprocs ; ++j) // Allgather
             {
                 MPI_Bcast( &procOrder[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
             }
@@ -774,7 +774,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
     }
 
     std::vector< std::vector<int> > locProc2((*M_locProc));
-    for(int j = nprocs; j > 0 ; --j)
+    for (int j = nprocs; j > 0 ; --j)
     {
         if (orderingError[procOrder[procIndex[j - 1].second]] == false)
         {
@@ -787,7 +787,7 @@ void partitionMesh<Mesh>::matchFluidPartitionsFSI()
                       << " parmetis did a bad job." << std::endl;
             for (int i = nprocs; i > 0; --i)
             {
-                if(orderingError[procIndex[i - 1].second] == false) // means that i is the first proc not assigned
+                if (orderingError[procIndex[i - 1].second] == false) // means that i is the first proc not assigned
                 {
                     procOrder[procIndex[j - 1].second] = procIndex[i - 1].second;
                     (*M_locProc)[procIndex[i - 1].second] = locProc2[procIndex[j - 1].second];
@@ -824,32 +824,32 @@ void partitionMesh<Mesh>::redistributeElements()
         ssize[iproc] = (*M_locProc)[iproc].size();
     }
     MPI_Alltoall(ssize, 1, MPI_INT, rsize, 1, MPI_INT, MPIcomm);
-/*
-    for (int iproc = 0; iproc < nProc; ++iproc)
-    {
-        // all processes other than me are sending vertices
-        // belonging to my subdomain
-        if (int(M_me) != iproc)
+    /*
+        for (int iproc = 0; iproc < nProc; ++iproc)
         {
-            size = M_locProc[iproc].size();
-
-            // tell me how many vertices belonging to me you have to send me
-            MPI_Isend(&size, 1, MPI_INT, iproc, 10, MPIcomm, &send_request);
-            ssize[iproc] = size;
-        }
-        else
-        {
-            for (int jproc = 0; jproc < nProc; ++jproc)
+            // all processes other than me are sending vertices
+            // belonging to my subdomain
+            if (int(M_me) != iproc)
             {
-                if ((int)M_me != jproc)
+                size = M_locProc[iproc].size();
+
+                // tell me how many vertices belonging to me you have to send me
+                MPI_Isend(&size, 1, MPI_INT, iproc, 10, MPIcomm, &send_request);
+                ssize[iproc] = size;
+            }
+            else
+            {
+                for (int jproc = 0; jproc < nProc; ++jproc)
                 {
-                    MPI_Recv(&size, 1, MPI_INT, jproc, 10, MPIcomm, &recv_status);
-                    rsize[jproc] = size;
+                    if ((int)M_me != jproc)
+                    {
+                        MPI_Recv(&size, 1, MPI_INT, jproc, 10, MPIcomm, &recv_status);
+                        rsize[jproc] = size;
+                    }
                 }
             }
         }
-    }
-*/
+    */
     for (int iproc = 0; iproc < nProc; ++iproc)
     {
         if ((int)M_me != iproc)
@@ -1404,7 +1404,7 @@ void partitionMesh<Mesh>::execute()
 
 
     //////////////////// BEGIN OF SOLID PARTITION PART ////////////////////////
-    if(M_interfaceMap)
+    if (M_interfaceMap)
     {
         findRepeatedFacesFSI();
     }
@@ -1414,7 +1414,7 @@ void partitionMesh<Mesh>::execute()
     partitionConnectivityGraph(M_comm->NumProc());
 
     //////////////// BEGIN OF SOLID PARTITION PART ////////////////
-    if(M_interfaceMap)
+    if (M_interfaceMap)
     {
         matchFluidPartitionsFSI();
     }

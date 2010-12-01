@@ -73,41 +73,41 @@ public:
 
 
     //! FE space order
-    std::string uOrder() const{return M_uOrder;};
+    std::string uOrder() const {return M_uOrder;};
     //! Chi
-	inline   Real Chi() const {return M_Chi;}
-	 //! Chi
-	inline   string fibers_file() const {return M_fibers_file;}
+    inline   Real Chi() const {return M_Chi;}
+    //! Chi
+    inline   string fibers_file() const {return M_fibers_file;}
 
-	inline int heart_diff_fct() const {return M_heart_diff_fct;}
+    inline int heart_diff_fct() const {return M_heart_diff_fct;}
 
-	inline bool has_fibers() const {return M_has_fibers;}
+    inline bool has_fibers() const {return M_has_fibers;}
 
     //! format vct
-	inline bool fibers_format() const{return M_fibers_format;}
+    inline bool fibers_format() const {return M_fibers_format;}
 
-	//! sigma_l
-	inline   Real sigmal_i() const 	{return M_sigmal_i;}
-	inline   Real sigmal_e() const 	{return M_sigmal_e;}
+    //! sigma_l
+    inline   Real sigmal_i() const 	{return M_sigmal_i;}
+    inline   Real sigmal_e() const 	{return M_sigmal_e;}
 
-	//! sigma_t
-	inline   Real sigmat_i() const 	{return M_sigmat_i;}
-	inline   Real sigmat_e() const 	{return M_sigmat_e;}
+    //! sigma_t
+    inline   Real sigmat_i() const 	{return M_sigmat_i;}
+    inline   Real sigmat_e() const 	{return M_sigmat_e;}
 
-	//! Cm
-	inline   Real Cm() const 	{return M_Cm;}
-	//! D
-	inline   Real D_i() const 	{return M_D_i;}
-	//! Post_dir
-	inline   Real D_e() const 	{return M_D_e;}
-		//! Post_dir
-	inline   string Post_dir() const {return M_post_dir;}
+    //! Cm
+    inline   Real Cm() const 	{return M_Cm;}
+    //! D
+    inline   Real D_i() const 	{return M_D_i;}
+    //! Post_dir
+    inline   Real D_e() const 	{return M_D_e;}
+    //! Post_dir
+    inline   string Post_dir() const {return M_post_dir;}
 
-	inline	 UInt order_bdf() const {return M_order_bdf;}
+    inline	 UInt order_bdf() const {return M_order_bdf;}
 
-	fct_type red_sigma_sphere;
-	fct_type red_sigma_cyl;
-	fct_type red_sigma_box;
+    fct_type red_sigma_sphere;
+    fct_type red_sigma_cyl;
+    fct_type red_sigma_box;
 
 
 protected:

@@ -41,23 +41,23 @@ void
 import( std::string const& __filename, MeshFormat const& __format,
         RegionMesh3D<Elt> & mesh, EntityFlag regionFlag )
 {
-    switch( __format )
+    switch ( __format )
     {
-        case MESHPP:
-            readMppFile( mesh, __filename, regionFlag );
-            break;
+    case MESHPP:
+        readMppFile( mesh, __filename, regionFlag );
+        break;
 
-        case INRIA:
-            readINRIAMeshFile( mesh, __filename, regionFlag );
-            break;
+    case INRIA:
+        readINRIAMeshFile( mesh, __filename, regionFlag );
+        break;
 
-        case GMSH:
-            readGmshFile( mesh, __filename, regionFlag );
-            break;
+    case GMSH:
+        readGmshFile( mesh, __filename, regionFlag );
+        break;
 
-        case NETGEN:
-            readNetgenMesh( mesh, __filename, regionFlag );
-            break;
+    case NETGEN:
+        readNetgenMesh( mesh, __filename, regionFlag );
+        break;
 
     }
 
@@ -67,20 +67,20 @@ void
 import( std::string const& __filename, MeshFormat const& __format,
         RegionMesh2D<Elt> & mesh, EntityFlag regionFlag )
 {
-    switch( __format )
+    switch ( __format )
     {
-        case MESHPP:
-        case INRIA:
-        case NETGEN:
-          {
-            std::ostringstream __ostr;
-            __ostr << "Unsupported file format for RegionMesh2D";
-            throw std::invalid_argument( __ostr.str() );
-          }
-          break;
-        case GMSH:
-            readGmshFile( mesh, __filename, regionFlag );
-            break;
+    case MESHPP:
+    case INRIA:
+    case NETGEN:
+    {
+        std::ostringstream __ostr;
+        __ostr << "Unsupported file format for RegionMesh2D";
+        throw std::invalid_argument( __ostr.str() );
+    }
+    break;
+    case GMSH:
+        readGmshFile( mesh, __filename, regionFlag );
+        break;
     }
 
 }

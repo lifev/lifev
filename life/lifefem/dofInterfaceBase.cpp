@@ -58,10 +58,10 @@ ID DofInterfaceBase::getInterfaceDof( const ID& i ) const
 {
     std::map<ID, ID>::const_iterator it = _locDofMap.find( i );
     if ( it == _locDofMap.end() )
-        {
-            std::cout << i << " : " << std::flush;
-            ERROR_MSG( "DofInterfaceBase::getInterfaceDof : Dof number not found" );
-        }
+    {
+        std::cout << i << " : " << std::flush;
+        ERROR_MSG( "DofInterfaceBase::getInterfaceDof : Dof number not found" );
+    }
     return it->second;
 }
 

@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -47,13 +47,14 @@ namespace LifeV
 
 enum DofPatternType {STANDARD_PATTERN = 1,
                      P1ISOP2_SEG_PATTERN = 2,
-                     P1ISOP2_TRIA_PATTERN = 3};
+                     P1ISOP2_TRIA_PATTERN = 3
+                    };
 
 //! LocalDofPattern - A class to store the "couplings" between the basis functions
 /*!
   The aim of this class is to store the way the basis functions couple one with each other. This might seem useless,
   however, some "advanced" finite elements require this structure.
-  
+
   For example, consider the P1-iso-P2 element in 2D. This finite element is composed of 6 basis functions, based on the
   nodes with the same numerotation as the P2 element. The reference triangle is split into 4 subtriangles using the
   nodes on the faces. Each basis function is build such that it is 1 on its node, 0 on all the other nodes and such that
@@ -64,17 +65,17 @@ enum DofPatternType {STANDARD_PATTERN = 1,
 
   With this definition of the P1-iso-P2 finite element, we see that the basis functions 1 and 2 have no common support.
   So, they are not directly coupled.
-  
-  In order to represent the couplings between the basis functions, we can use a matrix \f$ C \f$ such that 
+
+  In order to represent the couplings between the basis functions, we can use a matrix \f$ C \f$ such that
   \f$ C_{ij} = 1 \f$ if the basis functions \f$ i \f$ and \f$ j \f$ have a common support, otherwise it is \f$ 0 \f$.
   This matrix is symetric.
-  
+
   For the P1-iso-P2 element, this matrix would be:
   \f[
   \begin{array}{|c||cccccc|}
   \hline
    & 1 & 2 & 3 & 4 & 5 & 6 \\
-  \hline 
+  \hline
   \hline
   1 & 1 & 0 & 0 & 1 & 0 & 1 \\
   2 & 0 & 1 & 0 & 1 & 1 & 0 \\
@@ -103,10 +104,10 @@ class LocalDofPattern
 {
 
 public:
-    
+
     //! @name Constructor & Destructor
     //@{
-    
+
     //! Full constructor for 3D elements
     LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex, const UInt& _nbDofPerEdge,
                      const UInt& _nbDofPerFace, const UInt& _nbDofPerVolume, const DofPatternType& _patternType );
@@ -118,34 +119,34 @@ public:
     //! Full constructor for 1D elements
     LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex, const UInt& _nbDofPerEdge,
                      const DofPatternType& _patternType );
-    
+
     //! Simple copy constructor
     LocalDofPattern( const LocalDofPattern& _localDofPattern);
-    
+
     //! Empty destructor
     ~LocalDofPattern()
     {};
-    
+
     //@}
 
-    
+
     //! @name Methods
     //@{
-    
+
     //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern (the index starts from 0, not from 1 !).
     inline const UInt& patternFirst(const UInt& i ) const
     {
         ASSERT_BD( i < M_nbPattern );
         return M_pattern[i].first;
     }
-    
+
     //! patternSecond(i): column index in the element matrix of the i-th term of the pattern (the index starts from 0, not from 1 !).
     inline const UInt& patternSecond(const UInt& i ) const
     {
         ASSERT_BD( i < M_nbPattern );
         return M_pattern[i].second;
     }
-    
+
     //! The showMe method for the pattern
     void showMe( std::ostream& output = std::cout ) const;
 
@@ -155,56 +156,56 @@ public:
     //! @name Get Methods
     //@{
 
-     //! Number of non-zero terms in the element matrix
+    //! Number of non-zero terms in the element matrix
     inline const UInt& nbPattern() const
     {
         return M_nbPattern;
     }
-    
+
     //! Number of diagonal terms in the element matrix
     inline const UInt& nbDiag() const
     {
         return M_nbDiag;
     }
-    
+
     //! Number of upper terms in the element matrix
     inline const UInt& nbUpper() const
     {
         return M_nbUpper;
-    } 
+    }
 
     //! Return the number of local degrees of freedom
     inline const UInt& nbLocalDof() const
     {
         return M_nbLocalDof;
     };
-    
+
     //! Return the number of degrees of freedom located on the vertices (0D structures)
-    inline const UInt& nbDofPerVertex() const 
+    inline const UInt& nbDofPerVertex() const
     {
         return M_nbDofPerDimEntity[0];
     };
 
     //! Return the number of degrees of freedom located on the edges (1D structures)
     inline const UInt& nbDofPerEdge() const
-    { 
+    {
         ASSERT(M_dim >=1, "No edge available for that dimension");
         return M_nbDofPerDimEntity[1];
     };
-    
+
     //! Return the number of degrees of freedom located on the faces (2D structures).
     /*!Beware that in the 2D case, the face of a triangle is the triangle itself
       (use edges or vertices if you want to access substructures).
      */
-    inline const UInt& nbDofPerFace() const 
-    { 
+    inline const UInt& nbDofPerFace() const
+    {
         ASSERT(M_dim >=2, "No face available for that dimension");
         return M_nbDofPerDimEntity[2];
     };
-    
+
     //! Return the number of degrees of freedom located in the volume (3D structures).
     inline const UInt& nbDofPerVolume() const
-    { 
+    {
         ASSERT(M_dim >=3, "No volume available for that dimension");
         return M_nbDofPerDimEntity[3];
     };
@@ -234,14 +235,14 @@ public:
 
     //@}
 
-   
+
 private:
 
     //! dimension of the element (3 for a tetrahedra for example).
     UInt M_dim;
-    
+
     //! Total number of degrees of freedom (equal to refEle::nbDof)
-    UInt M_nbLocalDof; 
+    UInt M_nbLocalDof;
 
     //! Number of degrees of freedom per geometric entity
     /*! In this vector, we store all the number of degrees of freedom
@@ -259,15 +260,15 @@ private:
 
     //! Pairs of couplings to appear in the pattern
     std::vector< std::pair< UInt,UInt > > M_pattern;
- 
+
     //! Number of non-zero terms in the element matrix
     UInt M_nbPattern;
-    
+
     //! Number of diagonal terms in the element matrix
     UInt M_nbDiag;
 
     //! Number of upper terms in the element matrix
-    UInt M_nbUpper; 
+    UInt M_nbUpper;
 
 
     //! Default constructor disabled (because there is no setup/set method)

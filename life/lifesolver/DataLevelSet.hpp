@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -41,7 +41,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! dataLevelSet - Container for the data for the level set solver
 /*!
@@ -51,23 +52,23 @@ namespace LifeV {
   setters defined in the class. Mixture of the two solutions are also possible.
 
   <b> Reading from a data file </b>
-  
+
   If one read the data from a file, the following informations
   can be provided:
-  
+
   \verbatim
   [section]
 
       [./time_discretization]
-      
+
           #everything for the dataTime class
 
       [../]
-      
+
       stabilization = ip  #options: none, ip
-      
+
       [./ip]
-      
+
           coefficient = 0.5
           treatment = implicit  #options: implicit, semi-implicit, explicit
 
@@ -77,9 +78,9 @@ namespace LifeV {
   \endverbatim
 
   The code that one need then (usually in the main file) is simply
-  
+
   \code
-  
+
   GetPot dataFile( ... );
 
   DataLevelSet data_level_set;
@@ -89,15 +90,15 @@ namespace LifeV {
 
   <b> Using the setters </b>
 
-  This way allows you to define all the members 
+  This way allows you to define all the members
   of the class. Simply use the setters defined.
 
   For the stabilization and its treatment, prefer
   using the setters with the enumerated types, this makes
   code more robust with respect to typos.
-  
+
   <b> Mixing the two solutions </b>
-  
+
   Mixing the two solutions might be a good idea is some cases,
   for example to write the time discretization only once in a
   data file for a problem that consists in coupling smaller
@@ -106,13 +107,13 @@ namespace LifeV {
   for the time discretization), create a DataTime (outside
   DataLevelSet) and set this new DataTime in DataLevelSet. As
   DataLevelSet will retain a pointer to the DataTime, any change
-  to it will be repercuted in the DataLevelSet. Then, only one 
+  to it will be repercuted in the DataLevelSet. Then, only one
   DataTime needs to be managed.
 
-  Beware that, when mixing the two solutions, any call to the 
+  Beware that, when mixing the two solutions, any call to the
   setup will overwrite ALL the previous informations stored
   in the DataLevelSet.
-  
+
     @author Samuel Quinodoz
  */
 class DataLevelSet
@@ -121,7 +122,7 @@ public:
 
     //! @name Public Types
     //@{
-    
+
     typedef DataTime dataTime_type;
     typedef boost::shared_ptr<dataTime_type> dataTime_ptrType;
 
@@ -131,7 +132,7 @@ public:
         NONE, //!< No stabilization will be added
         IP //!< The IP stabiilzation will be used
     };
-    
+
     //! \enum Enumerated type for the treatment of the stabilization (if IP is chosen)
     enum IPTreatment_type
     {
@@ -150,7 +151,7 @@ public:
     DataLevelSet();
 
     //! Destructor
-    virtual ~DataLevelSet(){};
+    virtual ~DataLevelSet() {};
 
     //@}
 
@@ -162,7 +163,7 @@ public:
     /*!
       Using this method overrides all the previously stored informations!
      */
-    
+
     void setup( const GetPot& dataFile, const std::string& section="level-set");
 
     //! ShowMe method
@@ -174,13 +175,13 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set the data time 
+    //! Set the data time
     /*!
       This method sets the dataTime to the one given.
       @Warning: this copies the pointer, not the data!
      */
-    inline void setDataTime(const dataTime_ptrType& t){ M_dataTime = t; };
-    
+    inline void setDataTime(const dataTime_ptrType& t) { M_dataTime = t; };
+
     //! Set the stabilization type
     /*!
       This set the stabilization to the one given in the string format.
@@ -191,7 +192,7 @@ public:
     void setStabilization(const std::string& stab);
 
     //! Set the stabilization type
-    inline void setStabilization(const stabilization_type& stab){ M_stabilization = stab; }
+    inline void setStabilization(const stabilization_type& stab) { M_stabilization = stab; }
 
     //! Set the treatment for the IP stabilization
     /*!
@@ -203,10 +204,10 @@ public:
     void setIPTreatment(const std::string& treat);
 
     //! Set the IP treatment
-    void setIPTreatment(const IPTreatment_type& treat){ M_IPTreatment = treat; }
-    
+    void setIPTreatment(const IPTreatment_type& treat) { M_IPTreatment = treat; }
+
     //! Set the IP coefficient
-    inline void setIPCoef(const Real& coef){ M_IPCoef = coef; };
+    inline void setIPCoef(const Real& coef) { M_IPCoef = coef; };
 
     //@}
 
@@ -216,26 +217,26 @@ public:
 
     //! Getter for the DataTime structure
     inline dataTime_ptrType dataTime() const { return M_dataTime; };
-    
+
     //! Getter for the stabilization type
     inline stabilization_type stabilization() const { return M_stabilization; };
-    
+
     //! Getter for the IP treatment
     inline IPTreatment_type IPTreatment() const { return M_IPTreatment; };
-    
+
     //! Getter for the IP coefficient
     inline Real IPCoef() const { return M_IPCoef; };
 
     //@}
 
 private:
-    
+
     // No copy
     DataLevelSet(const DataLevelSet&);
 
     // Data for the time
     dataTime_ptrType M_dataTime;
-    
+
     // Stabilization type
     stabilization_type M_stabilization;
 

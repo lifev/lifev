@@ -49,7 +49,7 @@ struct DarcyDefaultStartUpFunction
                                   const LifeV::Real&, const LifeV::Real&,
                                   const LifeV::UInt&) const
     {
-    	return static_cast<LifeV::Real>( 0 );
+        return static_cast<LifeV::Real>( 0 );
     }
 };
 
@@ -232,9 +232,9 @@ namespace LifeV
   @todo Add criteria to ensure convergence of the fixed point method.
 */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class DarcySolverNonLinear
-    :
+        :
         virtual public DarcySolver<Mesh, SolverType>
 {
 
@@ -441,15 +441,15 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                        bchandler_raw_type&        bcHandler,
                        comm_ptrtype&              comm ):
-    // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
-    // Non-linear stuff.
-    M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
-    M_iterationFixedPoint           ( static_cast<UInt>(0) ),
-    M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
-    M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
-    M_primalPreviousIteration       ( new vector_type ( this->M_primal_FESpace.map() ) ),
-    M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
+        // Standard Darcy solver constructor.
+        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        // Non-linear stuff.
+        M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
+        M_iterationFixedPoint           ( static_cast<UInt>(0) ),
+        M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
+        M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
+        M_primalPreviousIteration       ( new vector_type ( this->M_primal_FESpace.map() ) ),
+        M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 
 {
 
@@ -471,15 +471,15 @@ DarcySolverNonLinear ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                        comm_ptrtype&              comm ):
-    // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-    // Non-linear stuff.
-    M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
-    M_iterationFixedPoint           ( static_cast<UInt>(0) ),
-    M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
-    M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
-    M_primalPreviousIteration       ( new vector_type ( this->M_primal_FESpace.map() ) ),
-    M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
+        // Standard Darcy solver constructor.
+        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+        // Non-linear stuff.
+        M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
+        M_iterationFixedPoint           ( static_cast<UInt>(0) ),
+        M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
+        M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
+        M_primalPreviousIteration       ( new vector_type ( this->M_primal_FESpace.map() ) ),
+        M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 {
 
     // Interpolate the primal initial value on the default initial value function, for the fixed point scheme.
@@ -497,7 +497,7 @@ DarcySolverNonLinear<Mesh, SolverType>::
 ~DarcySolverNonLinear ()
 {
 
-	DESTRUCTOR( "DarcySolverNonLinear" );
+    DESTRUCTOR( "DarcySolverNonLinear" );
 
 } // Destructor
 
@@ -569,7 +569,7 @@ fixedPointScheme ()
 
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
-    while( M_residualFixedPoint > M_tollFixedPoint && M_iterationFixedPoint < M_maxIterationFixedPoint )
+    while ( M_residualFixedPoint > M_tollFixedPoint && M_iterationFixedPoint < M_maxIterationFixedPoint )
     {
         // Increment the iteration number.
         ++M_iterationFixedPoint;

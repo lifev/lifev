@@ -30,101 +30,101 @@ namespace LifeV
 
 namespace ElemOper
 {
-    void mass(ElemMat& localMass,
-              const CurrentFE& massCFE,
-              const Real& coefficient,
-              const UInt& fieldDim)
+void mass(ElemMat& localMass,
+          const CurrentFE& massCFE,
+          const Real& coefficient,
+          const UInt& fieldDim)
+{
+    const UInt nbFEDof(massCFE.nbFEDof());
+    const UInt nbQuadPt(massCFE.nbQuadPt());
+    Real localValue(0);
+
+    // Assemble the local mass
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
     {
-        const UInt nbFEDof(massCFE.nbFEDof());
-        const UInt nbQuadPt(massCFE.nbQuadPt());
-        Real localValue(0);
+        // Extract the view of the matrix
+        ElemMat::matrix_view localView = localMass.block(iterFDim,iterFDim);
 
-        // Assemble the local mass
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
         {
-            // Extract the view of the matrix
-            ElemMat::matrix_view localView = localMass.block(iterFDim,iterFDim);
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            // Build the local matrix only where needed:
+            // Lower triangular + diagonal parts
+            for (UInt jDof(0); jDof <= iDof; ++jDof)
             {
-                // Build the local matrix only where needed:
-                // Lower triangular + diagonal parts
-                for (UInt jDof(0); jDof <= iDof; ++jDof)
+                localValue = 0.0;
+
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    localValue = 0.0;
+                    localValue += massCFE.phi(iDof,iQuadPt)
+                                  * massCFE.phi(jDof,iQuadPt)
+                                  * massCFE.wDetJacobian(iQuadPt);
+                }
 
-                    //Loop on the quadrature nodes
-                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                    {
-                        localValue += massCFE.phi(iDof,iQuadPt)
-                            * massCFE.phi(jDof,iQuadPt)
-                            * massCFE.wDetJacobian(iQuadPt);
-                    }
+                localValue*=coefficient;
 
-                    localValue*=coefficient;
+                // Add on the local matrix
+                localView(iDof,jDof)+=localValue;
 
-                    // Add on the local matrix
-                    localView(iDof,jDof)+=localValue;
-
-                    if (iDof!=jDof)
-                    {
-                        localView(jDof,iDof)+=localValue;
-                    }
+                if (iDof!=jDof)
+                {
+                    localView(jDof,iDof)+=localValue;
                 }
             }
         }
     }
+}
 
 
-    void stiffness(ElemMat& localStiff,
-                   const CurrentFE& stiffCFE,
-                   const Real& coefficient,
-                   const UInt& fieldDim)
+void stiffness(ElemMat& localStiff,
+               const CurrentFE& stiffCFE,
+               const Real& coefficient,
+               const UInt& fieldDim)
+{
+    const UInt nbFEDof(stiffCFE.nbFEDof());
+    const UInt nbQuadPt(stiffCFE.nbQuadPt());
+    Real localValue(0);
+
+    // Assemble the local diffusion
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
     {
-        const UInt nbFEDof(stiffCFE.nbFEDof());
-        const UInt nbQuadPt(stiffCFE.nbQuadPt());
-        Real localValue(0);
+        // Extract the view of the matrix
+        ElemMat::matrix_view localView = localStiff.block(iterFDim,iterFDim);
 
-        // Assemble the local diffusion
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
         {
-            // Extract the view of the matrix
-            ElemMat::matrix_view localView = localStiff.block(iterFDim,iterFDim);
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            // Build the local matrix only where needed:
+            // Lower triangular + diagonal parts
+            for (UInt jDof(0); jDof <= iDof; ++jDof)
             {
-                // Build the local matrix only where needed:
-                // Lower triangular + diagonal parts
-                for (UInt jDof(0); jDof <= iDof; ++jDof)
+                localValue = 0.0;
+
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    localValue = 0.0;
-
-                    //Loop on the quadrature nodes
-                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                    for (UInt iDim(0); iDim<3; ++iDim)
                     {
-                        for (UInt iDim(0); iDim<3; ++iDim)
-                        {
-                            localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
-                                * stiffCFE.dphi(jDof,iDim,iQuadPt)
-                                * stiffCFE.wDetJacobian(iQuadPt);
-                        }
+                        localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
+                                      * stiffCFE.dphi(jDof,iDim,iQuadPt)
+                                      * stiffCFE.wDetJacobian(iQuadPt);
                     }
+                }
 
-                    localValue*=coefficient;
+                localValue*=coefficient;
 
-                    // Add on the local matrix
-                    localView(iDof,jDof)+=localValue;
+                // Add on the local matrix
+                localView(iDof,jDof)+=localValue;
 
-                    if (iDof != jDof)
-                    {
-                        localView(jDof,iDof)+=localValue;
-                    }
+                if (iDof != jDof)
+                {
+                    localView(jDof,iDof)+=localValue;
                 }
             }
         }
     }
+}
 }
 
 //
@@ -152,11 +152,11 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
         }
@@ -165,12 +165,12 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
         coef_s = coef * s;
         mat( iloc, jloc ) += coef_s;
@@ -194,11 +194,11 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
         }
@@ -207,27 +207,27 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
         coef_s = coef * s;
         mat_tmp( iloc, jloc ) += coef_s;
         mat_tmp( jloc, iloc ) += coef_s;
     }
     // copy on the components
-    for ( UInt icomp = 0;icomp < nb;icomp++ )
+    for ( UInt icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -254,11 +254,11 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += coef[ig] * fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
         }
@@ -267,26 +267,26 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += coef[ig]*fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
         mat_tmp( iloc, jloc ) += s;
         mat_tmp( jloc, iloc ) += s;
     }
     // copy on the components
-    for ( int icomp = 0;icomp < nb;icomp++ )
+    for ( int icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -309,36 +309,36 @@ void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt(); ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
-    	s=0;
+        s=0;
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
-               // s = 0.0; Alessandro
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
-                    s += fe.phiDer( i, icoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; // costruzione di \div u^k at a quadrature point
+            // s = 0.0; Alessandro
+            for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                s += fe.phiDer( i, icoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; // costruzione di \div u^k at a quadrature point
 
-          // duk[ ig ] = s; Alessandro
+            // duk[ ig ] = s; Alessandro
         }// chiude il ciclo su icoor
         duk[ ig ] = s;
     }// chiude il ciclo su ig
 
     ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
-  	for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+    for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
-    	for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+        for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
-        	s = 0.0;
+            s = 0.0;
             for ( UInt k = 0; k < fe.nbCoor(); ++k )
             {
-             	for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
-                	s += duk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                    s += duk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
             }
             mat_tmp( i, j ) = coef * s;
         }
-     }
+    }
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
@@ -356,16 +356,16 @@ void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cu
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -388,7 +388,7 @@ void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cu
                 {
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += fe.phiDer( j, jcoor, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                     mat( i, j ) += coef * s;
                 }
@@ -405,11 +405,11 @@ void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cur
     Real gguk[ fe.nbQuadPt() ]; //    (\grad u_k : \grad u_k) at each quadrature point
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         s=0;
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
             for ( UInt l = 0; l < fe.nbCoor(); l++ )
             {
@@ -431,7 +431,7 @@ void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cur
             s = 0.0;
             for ( UInt k = 0; k < fe.nbCoor(); ++k )
             {
-                for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                     s += gguk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
             }
             mat_tmp( i, j ) = coef * s;
@@ -445,7 +445,7 @@ void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cur
     }
 }
 
- // Stiffness matrix: coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  ) controllato!!!
+// Stiffness matrix: coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  ) controllato!!!
 void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
@@ -453,16 +453,16 @@ void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -484,11 +484,11 @@ void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
                     {
                         for ( UInt l = 0; l < fe.nbCoor(); ++l )
                         {
-                        	for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
-                          		s += guk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer(i, k, ig ) * fe.weightDet( ig ); // il ciclo sui nodi di quadratura
+                            for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                                s += guk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer(i, k, ig ) * fe.weightDet( ig ); // il ciclo sui nodi di quadratura
                         }       																																							 // fa l'integrale
                     }
-              	    mat( i, j ) += coef  * s;
+                    mat( i, j ) += coef  * s;
                 }
             }
         }
@@ -504,18 +504,18 @@ void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, co
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -539,7 +539,7 @@ void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, co
                     s = 0.0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                     {
-                        for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += guk[ icoor ][ jcoor ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                     }
                     mat( i, j ) += coef * s;
@@ -558,18 +558,18 @@ void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -593,7 +593,7 @@ void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
                     s = 0.0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                     {
-                        for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += guk[ icoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
                     }
                     mat( i, j ) += coef * s;
@@ -612,18 +612,18 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -632,34 +632,34 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
     //
     // blocks (icoor,jcoor) of elmat
     //
-	ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
-  			for ( UInt i = 0; i < fe.nbFEDof(); ++i )
-    		{
-    			for ( UInt j = 0; j < fe.nbFEDof(); ++j )
-        		{
-        			s = 0.0;
-        			for ( UInt l = 0; l < fe.nbCoor(); ++l )
-        			{
-            			for ( UInt k = 0; k < fe.nbCoor(); ++k )
-            			{
-             				for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
-                				s += guk[ l ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
-            			}
-        			}
-            	mat_tmp( i, j ) = coef * s;
-        		}
-     		}
+    for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+        {
+            s = 0.0;
+            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            {
+                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                {
+                    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                        s += guk[ l ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                }
+            }
+            mat_tmp( i, j ) = coef * s;
+        }
+    }
 
-    		for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
-    		{
-        		ElemMat::matrix_view mat = elmat.block( icoor, icoor );
-        		mat += mat_tmp;
-    		}
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
+    }
 }
 
 // Stiffness matrix: coef * ( \grad \delta d [\grad d^k]^T : \grad v  )
- void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -667,18 +667,18 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -687,30 +687,30 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
     //
     // blocks (icoor,jcoor) of elmat
     //
-	ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
-  			for ( UInt i = 0; i < fe.nbFEDof(); ++i )
-    		{
-    			for ( UInt j = 0; j < fe.nbFEDof(); ++j )
-        		{
-        			s = 0.0;
-        			for ( UInt l = 0; l < fe.nbCoor(); ++l )
-        			{
-            			for ( UInt k = 0; k < fe.nbCoor(); ++k )
-            			{
-             				for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
-                				s += guk[ k ][ l ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
-            			}
-        			}
-            	 mat_tmp( i, j ) = coef * s;
-        		}
-     		}
+    for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+        {
+            s = 0.0;
+            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            {
+                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                {
+                    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                        s += guk[ k ][ l ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                }
+            }
+            mat_tmp( i, j ) = coef * s;
+        }
+    }
 
-    		for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
-    		{
-        		ElemMat::matrix_view mat = elmat.block( icoor, icoor );
-        		mat += mat_tmp;
-    		}
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
+    {
+        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
+    }
 }
 
 //  Stiffness matrix: coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  ) controllato!!!
@@ -721,25 +721,25 @@ void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
     Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt n = 0; n < fe.nbCoor(); n++ )
-        		{
-                	for ( UInt i = 0;i < fe.nbFEDof(); i++ )
-                	{
-                		for ( UInt j = 0;j < fe.nbFEDof(); j++ )
-                   		s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ; // \grad u^k  [\grad u^k]^T  at each quadrature point
-        			}
-        		}
+                {
+                    for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    {
+                        for ( UInt j = 0; j < fe.nbFEDof(); j++ )
+                            s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ; // \grad u^k  [\grad u^k]^T  at each quadrature point
+                    }
+                }
                 guk_gukT[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -761,7 +761,7 @@ void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
                 {
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += fe.phiDer( i, k, ig ) * guk_gukT[ icoor ][ jcoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                     mat( i, j ) += coef * s;
                 }
@@ -779,28 +779,28 @@ void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
     }
 
-     //
+    //
     // blocks (icoor,jcoor) of elmat
     //
-	for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
@@ -813,13 +813,13 @@ void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
                 {
                     s = 0;
                     for ( UInt l = 0; l < fe.nbCoor(); ++l )
-        			{
-            			for ( UInt k = 0; k < fe.nbCoor(); ++k )
-            			{
-             				for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
-                				s += guk[ icoor ][ l ][ ig ] *guk[ jcoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
-            			}
-        			}
+                    {
+                        for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                        {
+                            for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                                s += guk[ icoor ][ l ][ ig ] *guk[ jcoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                        }
+                    }
                     mat( i, j ) += coef * s;
                 }
             }
@@ -827,33 +827,33 @@ void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
     }
 }
 
- //  Stiffness matrix: coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )controllato!!!
+//  Stiffness matrix: coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )controllato!!!
 void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
 {
 
-	double s;
+    double s;
     Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
-																							 // attenzione in questa funzione si deve usare il trasposto
+    // attenzione in questa funzione si deve usare il trasposto
     // loop on quadrature points                                                // (\grad u^k  [\grad u^k]^T )^T
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt n = 0; n < fe.nbCoor(); n++ )
-        		{
-                	for ( UInt i = 0;i < fe.nbFEDof(); i++ )
-                	{
-                		for ( UInt j = 0;j < fe.nbFEDof(); j++ )
-                   		s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ; // \grad u^k  [\grad u^k]^T  at each quadrature point
-        			}
-        		}
+                {
+                    for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    {
+                        for ( UInt j = 0; j < fe.nbFEDof(); j++ )
+                            s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ; // \grad u^k  [\grad u^k]^T  at each quadrature point
+                    }
+                }
                 guk_gukT[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -864,28 +864,28 @@ void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elma
     //
     ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
-  			for ( UInt i = 0; i < fe.nbFEDof(); ++i )
-    		{
-    			for ( UInt j = 0; j < fe.nbFEDof(); ++j )
-        		{
-        			s = 0.0;
-        			for ( UInt l = 0; l < fe.nbCoor(); ++l )
-        			{
-            			for ( UInt k = 0; k < fe.nbCoor(); ++k )
-            			{
-             				for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
-                				s += guk_gukT[ k ][ l ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
-            			}
-        			}
-            	mat_tmp( i, j ) = coef * s;
-        		}
-     		}
+    for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+        {
+            s = 0.0;
+            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            {
+                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                {
+                    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                        s += guk_gukT[ k ][ l ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                }
+            }
+            mat_tmp( i, j ) = coef * s;
+        }
+    }
 
-    		for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
-    		{
-        		ElemMat::matrix_view mat = elmat.block( icoor, icoor );
-        		mat += mat_tmp;
-    		}
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
+    {
+        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
+    }
 }
 
 
@@ -1077,7 +1077,7 @@ void ipstab_grad( const Real         coef,
 
 
     // copy on the components
-    for ( int icomp = 0;icomp < nb;icomp++ )
+    for ( int icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp += mat_tmp;
@@ -1115,7 +1115,7 @@ void ipstab_bgrad( const Real         coef,
 
     for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
     {
-        for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
+        for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
         {
             sum = 0;
             for ( i = 0; i < bdfe.nbNode; ++i )
@@ -1195,16 +1195,16 @@ void ipstab_bgrad( const Real         coef,
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
                 for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
-                    for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
+                    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
                         sum += phid1[ i ][ icoor ][ ig ]*phid2[ j ][ jcoor ][ ig ]
-                            *b[ icoor ][ ig ]*b[ jcoor ][ ig ]
-                            *bdfe.weightMeas( ig );
+                               *b[ icoor ][ ig ]*b[ jcoor ][ ig ]
+                               *bdfe.weightMeas( ig );
             mat_tmp( i, j ) = coef * sum;
         }
     }
 
     // copy on the components
-    for ( int icomp = 0;icomp < nb; icomp++ )
+    for ( int icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp += mat_tmp;
@@ -1290,7 +1290,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
                 for ( j = 0; j < fe2.nbFEDof(); ++j )
                 {
                     sum = 0.0;
-                    for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
+                    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
                         sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * bdfe.weightMeas( ig );
                     mat_icomp( i, j ) += coef * sum;
                 }
@@ -1334,10 +1334,12 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
     {
         sum1 = 0;
         sum2 = 0;
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor ) {
-            for ( i = 0; i < bdfe.nbCoor; ++i ) {
+        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        {
+            for ( i = 0; i < bdfe.nbCoor; ++i )
+            {
                 Real betaLoc = bdfe.phi( i, ig ) *
-                    beta.vec() [ icoor * bdfe.nbCoor + i ];
+                               beta.vec() [ icoor * bdfe.nbCoor + i ];
                 sum1 += betaLoc * normal(icoor, ig);
                 sum2 += betaLoc * betaLoc;
             }
@@ -1402,9 +1404,9 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
                     sum += ba2[ ig ] *
-                        phid1[ i ][ icoor ][ ig ] *
-                        phid2[ j ][ icoor ][ ig ] *
-                        bdfe.weightMeas( ig );
+                           phid1[ i ][ icoor ][ ig ] *
+                           phid2[ j ][ icoor ][ ig ] *
+                           bdfe.weightMeas( ig );
             mat( i, j ) += coef * sum;
         }
     }
@@ -1457,10 +1459,12 @@ void ipstab_bagrad( const Real         coef,
         sum1 = 0;
         sum2 = 0;
 
-        for ( icoor = 0; icoor < fe3.nbCoor(); ++icoor ) {
-            for ( i = 0; i < fe3.nbFEDof(); ++i ) {
-	        Real betaLoc = fe3.phi( i, ig ) *
-		  beta.vec() [ icoor*fe3.nbFEDof() + i ];
+        for ( icoor = 0; icoor < fe3.nbCoor(); ++icoor )
+        {
+            for ( i = 0; i < fe3.nbFEDof(); ++i )
+            {
+                Real betaLoc = fe3.phi( i, ig ) *
+                               beta.vec() [ icoor*fe3.nbFEDof() + i ];
                 sum1 += betaLoc * normal(icoor, ig);
             }
         }
@@ -1524,9 +1528,9 @@ void ipstab_bagrad( const Real         coef,
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
                     sum += bn[ ig ] *
-                        phid1[ i ][ icoor ][ ig ] *
-                        phid2[ j ][ icoor ][ ig ] *
-                        bdfe.weightMeas( ig );
+                           phid1[ i ][ icoor ][ ig ] *
+                           phid2[ j ][ icoor ][ ig ] *
+                           bdfe.weightMeas( ig );
             mat( i, j ) += coef * sum;
         }
     }
@@ -1547,31 +1551,31 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                    * fe.weightDet( ig );
+                     * fe.weightDet( ig );
         }
         mat( iloc, iloc ) += coef * s;
     }
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig );
+                     fe.weightDet( ig );
         }
         coef_s = coef * s;
         mat( iloc, jloc ) += coef_s;
@@ -1593,33 +1597,33 @@ void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             coef_f = fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ) );
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += coef_f * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                    * fe.weightDet( ig );
+                     * fe.weightDet( ig );
         }
         mat( iloc, iloc ) += coef * s;
     }
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             coef_f = fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ) );
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += coef_f * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig );
+                     fe.weightDet( ig );
         }
         coef_s = coef * s;
         mat( iloc, jloc ) += coef_s;
@@ -1645,46 +1649,46 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                    * fe.weightDet( ig );
+                     * fe.weightDet( ig );
         }
         mat_tmp( iloc, iloc ) += coef * s;
     }
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig );
+                     fe.weightDet( ig );
         }
         coef_s = coef * s;
         mat_tmp( iloc, jloc ) += coef_s;
         mat_tmp( jloc, iloc ) += coef_s;
     }
     // copy on the components
-    for ( int icomp = 0;icomp < nb;icomp++ )
+    for ( int icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -1712,45 +1716,45 @@ void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += coef[ig] *fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                    * fe.weightDet( ig );
+                     * fe.weightDet( ig );
         }
         mat_tmp( iloc, iloc ) += s;
     }
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += coef[ig] * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig );
+                     fe.weightDet( ig );
         }
         mat_tmp( iloc, jloc ) += s;
         mat_tmp( jloc, iloc ) += s;
     }
     // copy on the components
-    for ( int icomp = 0;icomp < nb;icomp++ )
+    for ( int icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -1815,12 +1819,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 11
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig )
                 + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
@@ -1844,12 +1848,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 12
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig );
         }
@@ -1872,12 +1876,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 13
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig );
         }
@@ -1900,12 +1904,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 21
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig );
         }
@@ -1929,12 +1933,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 22
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig )
                 + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
@@ -1958,12 +1962,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 23
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig );
         }
@@ -1986,12 +1990,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 31
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig );
         }
@@ -2014,12 +2018,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 32
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig );
         }
@@ -2043,12 +2047,12 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
     // extra diagonal 33
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig )
                 + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
@@ -2064,7 +2068,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) += mat_tmp11( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2078,7 +2082,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) -= mat_tmp12( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2092,7 +2096,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) -= mat_tmp13( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2106,7 +2110,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) -= mat_tmp21( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2120,7 +2124,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) += mat_tmp22( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2134,7 +2138,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) -= mat_tmp23( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2148,7 +2152,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) -= mat_tmp31( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2162,7 +2166,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) -= mat_tmp32( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2176,7 +2180,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         iloc = fe.patternFirst( i );
         mat_icomp( iloc, iloc ) += mat_tmp33( iloc, iloc );
     }
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
@@ -2231,18 +2235,18 @@ void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -2265,7 +2269,7 @@ void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
                 {
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += fe.phiDer( i, k, ig ) * guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                     mat( i, j ) += coef * s;
                 }
@@ -2288,18 +2292,18 @@ void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
 
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -2322,7 +2326,7 @@ void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
                 {
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
                             s += fe.phiDer( i, k, ig ) * ( guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, icoor, ig )
                                                            + guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
@@ -2349,18 +2353,18 @@ void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
     Real s;
 
     // loop on quadrature points
-    for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0;i < fe.nbFEDof();i++ )
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
@@ -2382,7 +2386,7 @@ void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
                 {
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
                             s += fe.phiDer( i, icoor, ig ) * guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                     mat( i, j ) += coef * s;
                 }
@@ -2456,7 +2460,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
     Real s, coef_s, divw[ fe.nbQuadPt() ];
 
     // divw at quadrature nodes
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         divw[ ig ] = 0.0;
         for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
@@ -2467,11 +2471,11 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
         }
@@ -2480,27 +2484,27 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
         coef_s = coef * s;
         mat_tmp( iloc, jloc ) += coef_s;
         mat_tmp( jloc, iloc ) += coef_s;
     }
     // copy on the components
-    for ( icomp = 0;icomp < nb;icomp++ )
+    for ( icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -2512,7 +2516,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
 
 
 void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
-                int iblock, int jblock, UInt nb )
+               int iblock, int jblock, UInt nb )
 /*
   modified mass matrix: ( div w u,v )
 */
@@ -2525,7 +2529,7 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
     Real s, divw[ fe.nbQuadPt() ]; // , coef_s
 
     // divw at quadrature nodes
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         divw[ ig ] = 0.0;
         for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
@@ -2536,11 +2540,11 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += coef[ig] * divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
         }
@@ -2549,26 +2553,26 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += coef[ig]* divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
         mat_tmp( iloc, jloc ) += s;
         mat_tmp( jloc, iloc ) += s;
     }
     // copy on the components
-    for ( icomp = 0;icomp < nb;icomp++ )
+    for ( icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -2595,7 +2599,7 @@ void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const Current
     //
     // grad u0 at quadrature nodes
     //
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
             for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
@@ -2650,28 +2654,28 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < nDimensions;icoor++ )
+            for ( icoor = 0; icoor < nDimensions; icoor++ )
                 coef_v[ icoor ] = 0.;
 
             // computation of the convection term in the quadrature nodes
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
             {
-                for ( UInt iloc = 0;iloc < nbN2;iloc++ )
+                for ( UInt iloc = 0; iloc < nbN2; iloc++ )
                     coef_v[ icoor ] += vec_loc.vec() [ iloc + icoor * nbN2 ] * fe2.phi( iloc, ig );
             }
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
             {
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 {
                     s += coef_v[ icoor ] * fe.phiDer( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer( iloc, jcoor, ig )
-                        * fe.weightDet( ig );
+                         * fe.weightDet( ig );
                 }
             }
         }
@@ -2680,28 +2684,28 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         iloc = fe.patternFirst( i );
         jloc = fe.patternSecond( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0;icoor < nDimensions;icoor++ )
+            for ( icoor = 0; icoor < nDimensions; icoor++ )
                 coef_v[ icoor ] = 0.;
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
             {
-                for ( UInt iloc = 0;iloc < nbN2;iloc++ )
+                for ( UInt iloc = 0; iloc < nbN2; iloc++ )
                     coef_v[ icoor ] += vec_loc.vec() [ iloc + icoor * nbN2 ] * fe2.phi( iloc, ig );
             }
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
             {
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 {
                     s += coef_v[ icoor ] * fe.phiDer( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer( jloc, jcoor, ig )
-                        * fe.weightDet( ig );
+                         * fe.weightDet( ig );
                 }
             }
         }
@@ -2710,15 +2714,15 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
         mat( jloc, iloc ) += coef_s;
     }
     // copy on the other components (if necessary, i.e. if nb>1)
-    for ( int icomp = 1;icomp < nb;icomp++ )
+    for ( int icomp = 1; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        for ( i = 0;i < fe.nbDiag();i++ )
+        for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
             mat_icomp( iloc, iloc ) += mat( iloc, iloc );
         }
-        for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+        for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
         {
             iloc = fe.patternFirst( i );
             jloc = fe.patternSecond( i );
@@ -2741,12 +2745,12 @@ void grad( const int icoor, Real coef, ElemMat& elmat,
     UInt ig;
     UInt i, j;
     double s;
-    for ( i = 0;i < fe_u.nbFEDof();i++ )
+    for ( i = 0; i < fe_u.nbFEDof(); i++ )
     {
-        for ( j = 0;j < fe_p.nbFEDof();j++ )
+        for ( j = 0; j < fe_p.nbFEDof(); j++ )
         {
             s = 0;
-            for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
                 // Be careful the minus is here and not in coef!!!!
 
                 // wrong for different quadrules of fe_u and fe_p !!   Martin P.
@@ -2775,7 +2779,7 @@ void div( const int icoor, Real coef, ElemMat& elmat,
         for (j = 0; j < fe_p.nbFEDof(); j++)
         {
             s = 0;
-            for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
                 s -= fe_u.phi(i, ig) * fe_p.phiDer(j, icoor, ig) * fe_u.weightDet( ig );
             mat( i, j ) += coef * s;
         }
@@ -2791,16 +2795,16 @@ void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
 {
     double s;
     int iblock = block_pres - nDimensions;
-    for ( UInt icoor = 0;icoor < 3;icoor++ )
+    for ( UInt icoor = 0; icoor < 3; icoor++ )
     {
         ElemMat::matrix_view mat_grad = elmat.block( iblock + icoor, block_pres );
         ElemMat::matrix_view mat_div = elmat.block( block_pres , iblock + icoor );
-        for ( UInt i = 0;i < fe_u.nbFEDof();i++ )
+        for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
         {
-            for ( UInt j = 0;j < fe_p.nbFEDof();j++ )
+            for ( UInt j = 0; j < fe_p.nbFEDof(); j++ )
             {
                 s = 0;
-                for ( UInt ig = 0;ig < fe_u.nbQuadPt();ig++ )
+                for ( UInt ig = 0; ig < fe_u.nbQuadPt(); ig++ )
                     s -= fe_p.phi( j, ig ) * fe_u.phiDer( i, icoor, ig ) * fe_u.weightDet( ig );
                 mat_grad( i, j ) += coef_grad * s;
                 mat_div( j, i ) += coef_div * s;
@@ -2815,14 +2819,14 @@ void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
     ElemMat::matrix_view mat = elmat.block( block_pres, block_pres );
     Real s, h = fe.diameter();
     Real fh2 = coef_stab * h * h / ( 2 * visc );
-    for ( UInt i = 0;i < fe.nbFEDof();i++ )
+    for ( UInt i = 0; i < fe.nbFEDof(); i++ )
     {
-        for ( UInt j = 0;j < fe.nbFEDof();j++ )
+        for ( UInt j = 0; j < fe.nbFEDof(); j++ )
         {
             s = 0;
-            for ( UInt ig = 0;ig < fe.nbQuadPt();ig++ )
+            for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
             {
-                for ( UInt icoor = 0;icoor < 3;icoor++ )
+                for ( UInt icoor = 0; icoor < 3; icoor++ )
                 {
                     s += fe.phiDer( i, icoor, ig ) * fe.phiDer( j, icoor, ig ) * fe.weightDet( ig );
                 }
@@ -2864,12 +2868,12 @@ void advection( Real coef, ElemVec& vel,
             for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
             {
                 v_grad = 0.;
-                for ( int icoor = 0;icoor < ( int ) nDimensions;icoor++ )
-                        v_grad += v(iq, icoor) * fe.phiDer( j, icoor, iq );
+                for ( int icoor = 0; icoor < ( int ) nDimensions; icoor++ )
+                    v_grad += v(iq, icoor) * fe.phiDer( j, icoor, iq );
 
                 s += v_grad * fe.phi( i, iq ) * fe.weightDet( iq );
-             }
-             mat_tmp( i, j ) = s*coef;
+            }
+            mat_tmp( i, j ) = s*coef;
         }
     }
 
@@ -2904,15 +2908,15 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
         UInt i, j;
         double s, coef;
         UInt nbN1 = fe1.nbFEDof();
-        for ( i = 0;i < nbN1;i++ )
+        for ( i = 0; i < nbN1; i++ )
         {
-            for ( j = 0;j < fe2.nbFEDof();j++ )
+            for ( j = 0; j < fe2.nbFEDof(); j++ )
             {
                 s = 0;
-                for ( iq = 0;iq < fe1.nbQuadPt();iq++ )
+                for ( iq = 0; iq < fe1.nbQuadPt(); iq++ )
                 {
                     coef = 0;
-                    for ( UInt iloc = 0;iloc < nbN1;iloc++ )
+                    for ( UInt iloc = 0; iloc < nbN1; iloc++ )
                         coef += vec_loc.vec() [ iloc + icoor * nbN1 ] * fe1.phi( iloc, iq );
 
                     s += coef * fe2.phi( i, iq ) * fe1.phiDer( j, icoor, iq ) * fe1.weightDet( iq );
@@ -2945,17 +2949,17 @@ void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
         UInt i, j;
         double s, coef, coef_div;
         UInt nbN1 = fe1.nbFEDof();
-        for ( i = 0;i < nbN1;i++ )
+        for ( i = 0; i < nbN1; i++ )
         {
-            for ( j = 0;j < fe2.nbFEDof();j++ )
+            for ( j = 0; j < fe2.nbFEDof(); j++ )
             {
                 s = 0;
-                for ( iq = 0;iq < fe1.nbQuadPt();iq++ )
+                for ( iq = 0; iq < fe1.nbQuadPt(); iq++ )
                 {
                     coef = 0;
                     coef_div = 0;
 
-                    for ( UInt iloc = 0;iloc < nbN1;iloc++ )
+                    for ( UInt iloc = 0; iloc < nbN1; iloc++ )
                     {
                         coef += vec_loc.vec() [ iloc + icoor * nbN1 ] * fe1.phi( iloc, iq );
                         coef_div += vec_loc.vec() [ iloc + icoor * nbN1 ] * fe1.phiDer( iloc, icoor, iq );
@@ -3007,7 +3011,7 @@ void grad( const int icoor,
                 {
                     coef = 0;
 
-                    for ( UInt iloc = 0;iloc < nbN3; iloc++ )
+                    for ( UInt iloc = 0; iloc < nbN3; iloc++ )
                         coef += vec_loc.vec() [iloc + icoor*nbN3] * fe3.phi(iloc, iq);
 
                     s += coef * fe2.phi(i, iq) * fe1.phiDer(j, icoor, iq) * fe1.weightDet(iq);
@@ -3047,9 +3051,9 @@ void grad( const int& icoor,
                     double coef(localVector[icoor*currentFE1.nbQuadPt() + iq]);
 
                     sum += coef
-                        * currentFE2.phi(iNode1, iq)
-                        * currentFE1.phiDer(jNode2, icoor, iq)
-                        * currentFE1.weightDet(iq);
+                           * currentFE2.phi(iNode1, iq)
+                           * currentFE1.phiDer(jNode2, icoor, iq)
+                           * currentFE1.weightDet(iq);
                 } // Loop on quadrature nodes
 
                 mat(iNode1, jNode2) += sum;
@@ -3122,10 +3126,10 @@ void source( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
     UInt i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
-    for ( i = 0;i < fe.nbFEDof();i++ )
+    for ( i = 0; i < fe.nbFEDof(); i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += fe.phi( i, ig ) * fe.weightDet( ig );
         vec( i ) += constant * s;
     }
@@ -3145,12 +3149,12 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
     ElemVec::vector_view vecf = f.block( fblock );
     Real f_ig;
 
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         f_ig = 0.;
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
             f_ig += vecf( i ) * fe.phi( i, ig );
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
         {
             vec( i ) += coef * f_ig * fe.phi( i, ig ) * fe.weightDet( ig );
         }
@@ -3166,8 +3170,8 @@ void source_mass(const std::vector<Real>& constant, ElemVec& elvec, const Curren
         for ( UInt iterQuadNode(0); iterQuadNode < currentFe.nbQuadPt(); iterQuadNode++ )
         {
             vec(iterNode) += constant[iterQuadNode]
-                    * currentFe.phi( iterNode, iterQuadNode )
-                    * currentFe.weightDet( iterQuadNode );
+                             * currentFe.phi( iterNode, iterQuadNode )
+                             * currentFe.weightDet( iterQuadNode );
         };
     };
 };
@@ -3183,8 +3187,8 @@ void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const Curre
             for (UInt iterGradComp(0); iterGradComp<currentFe.nbCoor(); ++iterGradComp)
             {
                 vec(iterNode) += constant[iterQuadNode + iterGradComp*nbQuadPt]
-                    * currentFe.phiDer( iterNode,iterGradComp, iterQuadNode )
-                    * currentFe.weightDet( iterQuadNode );
+                                 * currentFe.phiDer( iterNode,iterGradComp, iterQuadNode )
+                                 * currentFe.weightDet( iterQuadNode );
             };
         };
     };
@@ -3192,39 +3196,40 @@ void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const Curre
 
 
 
-  void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock  )
-  {
+void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock  )
+{
     UInt i, j, ic, iq;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
 
-    for (i = 0; i < fe_p.nbFEDof(); i++) {
-      s = 0;
-      for (iq = 0; iq < fe_p.nbQuadPt(); ++iq )
-	for (j = 0; j < fe_u.nbFEDof(); ++j)
-	  for (ic = 0; ic < nDimensions; ++ic)
-	    s += uLoc[ic*fe_u.nbFEDof()+j]*fe_u.phiDer(j,ic,iq)*fe_p.phi(i,iq)* fe_p.weightDet( iq );
+    for (i = 0; i < fe_p.nbFEDof(); i++)
+    {
+        s = 0;
+        for (iq = 0; iq < fe_p.nbQuadPt(); ++iq )
+            for (j = 0; j < fe_u.nbFEDof(); ++j)
+                for (ic = 0; ic < nDimensions; ++ic)
+                    s += uLoc[ic*fe_u.nbFEDof()+j]*fe_u.phiDer(j,ic,iq)*fe_p.phi(i,iq)* fe_p.weightDet( iq );
 
-      vec( i ) += s*alpha;
+        vec( i ) += s*alpha;
     }
-  }
+}
 
 
-  void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock )
-  {
+void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock )
+{
     UInt i, j, iq;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
 
-    for ( i = 0;i < fe_u.nbFEDof();i++ )
-      {
+    for ( i = 0; i < fe_u.nbFEDof(); i++ )
+    {
         s = 0;
         for (iq = 0; iq < fe_u.nbQuadPt(); ++iq )
-	  for (j = 0; j < fe_p.nbFEDof(); ++j)
-	    s += pLoc[j]*fe_p.phiDer(j,iblock,iq)*fe_u.phi(i,iq)*fe_u.weightDet( iq );
-	vec( i ) += s*alpha;
-      }
-  }
+            for (j = 0; j < fe_p.nbFEDof(); ++j)
+                s += pLoc[j]*fe_p.phiDer(j,iblock,iq)*fe_u.phi(i,iq)*fe_u.weightDet( iq );
+        vec( i ) += s*alpha;
+    }
+}
 
 
 
@@ -3244,12 +3249,12 @@ void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const Cur
     ElemVec::vector_view vecu = u.block( fblock );
     Real f_ig;
 
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         f_ig = 0.;
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
             f_ig += vecu( i ) * fe.phi( i, ig );
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
         {
             vec( i ) += coef_f * f_ig * ( 1 - f_ig ) * ( f_ig - coef_a ) * fe.phi( i, ig ) * fe.weightDet( ig );
         }
@@ -3277,33 +3282,33 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
 
     UInt icoor, jcoor, ig, i;
     // loop on quadrature points
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordindates
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // each compontent of uk at each quadrature points
             s = 0.0;
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
             uk[ ig ][ icoor ] = s;//uk_x(pt_ig), uk_y(pt_ig), uk_z(pt_ig)
 
             // each compontent of convect at this quadrature point
             s = 0.0;
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * convect_loc.vec() [ i + icoor * fe.nbFEDof() ];
             convect[ icoor ] = s;
 
 
             // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 sB = 0.0;
                 sA = 0.0;
                 sG = 0.0;
-                for ( i = 0;i < fe.nbFEDof();i++ )
+                for ( i = 0; i < fe.nbFEDof(); i++ )
                 {
                     sG += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at each quadrature point
                     sB -= fe.phiDer( i, jcoor, ig ) * wk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad (- w^k) at this quadrature point
@@ -3316,22 +3321,22 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
         }
 
         s = 0.0;
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
 
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point (A+I(-tr(A)))
 
         s = 0;
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
         aux[ ig ] = s;
 
         s = 0;
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
         {
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 s += convect[ icoor ] * A[ icoor ][ jcoor ]; // convect^T [I\div d - (\grad d)^T]
             convect_A[ ig ][ jcoor ] = s;
         }
@@ -3356,26 +3361,26 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
     {
 
         // the block iccor of the elementary vector
         ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
         {
 
             // loop on quadrature points
             s = 0;
-            for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             {
 
                 // \grad ( - w^k ):[I\div d - (\grad d)^T] \phi_i
                 s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
 
                 // convect^T [I\div d - (\grad d)^T] (\grad u^k)^T \phi_i
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                     s += convect_A[ ig ][ jcoor ] * guk[ ig ][ icoor ][ jcoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
             }
             vec( i ) += coef * s;
@@ -3401,34 +3406,34 @@ void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
     UInt ig, icoor, jcoor, i;
 
     // loop on quadrature points
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // each compontent (icoor) of dw at this quadrature point
             s = 0.0;
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * dw_loc.vec() [ i + icoor * fe.nbFEDof() ];
             dw[ icoor ] = s;
 
             // loop  on space coordinates
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( i = 0;i < fe.nbFEDof();i++ )
+                for ( i = 0; i < fe.nbFEDof(); i++ )
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ] = s;
             }
         }
 
         // (\grad u^k)dw at each quadrature point
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
             s = 0.0;
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 s += guk[ icoor ][ jcoor ] * dw[ jcoor ];
             aux[ ig ][ icoor ] = s;
         }
@@ -3439,18 +3444,18 @@ void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
     {
 
         ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
         {
 
             // loop on quadrature points
             s = 0;
-            for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
                 s += aux[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
             vec( i ) += coef * s;
         }
@@ -3476,45 +3481,45 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, cons
 
     UInt icoor, jcoor, ig, i;
     // loop on quadrature points
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordindates
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // each compontent of uk at each quadrature points
             s = 0.0;
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
             uk[ ig ][ icoor ] = s;
 
 
             // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 sB = 0.0;
                 sA = 0.0;
-                for ( i = 0;i < fe.nbFEDof();i++ )
+                for ( i = 0; i < fe.nbFEDof(); i++ )
                 {
                     sB += fe.phiDer( i, jcoor, ig ) * un_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^n at this quadrature point
                     sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbFEDof() ]; //  - (\grad d) ^T at this quadrature point
                 }
-		B[ icoor ][ jcoor ] = sB; // \grad u^n at this quadrature point
+                B[ icoor ][ jcoor ] = sB; // \grad u^n at this quadrature point
                 A[ icoor ][ jcoor ] = sA; // -(\grad d) ^T at this quadrature point
             }
         }
 
         s = 0.0;
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
-	  s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
 
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
-	  A[ jcoor ][ jcoor ] += 2 * s;  // 2 * I\div d - (\grad d)^T at this quadrature point
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            A[ jcoor ][ jcoor ] += 2 * s;  // 2 * I\div d - (\grad d)^T at this quadrature point
 
         s = 0;
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad u^n:[2 * I\div d - (\grad d)^T] at each quadrature point
         aux[ ig ] = s;
     }
@@ -3529,21 +3534,21 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, cons
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
     {
 
-      // the block iccor of the elementary vector
-      ElemVec::vector_view vec = elvec.block( icoor );
+        // the block iccor of the elementary vector
+        ElemVec::vector_view vec = elvec.block( icoor );
 
-      // loop on nodes, i.e. loop on components of this block
-      for ( i = 0;i < fe.nbFEDof();i++ )
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0; i < fe.nbFEDof(); i++ )
         {
-	  // loop on quadrature points
-	  s = 0;
-	  for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-	    // \grad u^n:[2 * I\div d - (\grad d)^T] u^k \phi_i
-	    s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
-	  vec( i ) += coef * s;
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+                // \grad u^n:[2 * I\div d - (\grad d)^T] u^k \phi_i
+                s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+            vec( i ) += coef * s;
         }
     }
 }
@@ -3570,19 +3575,19 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
     UInt icoor, jcoor, kcoor, ig, i;
 
     // loop on quadrature points
-    for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
         {
 
             // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
                 sA = 0.0;
                 sG = 0.0;
-                for ( i = 0;i < fe_u.nbFEDof();i++ )
+                for ( i = 0; i < fe_u.nbFEDof(); i++ )
                 {
                     sG += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbFEDof() ]; //  \grad u^k at this quadrature point
                     sA -= fe_u.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe_u.nbFEDof() ]; //  - (\grad d) ^T at this quadrature point
@@ -3593,23 +3598,23 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
         }
 
         s = 0.0;
-        for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             s -= A[ jcoor ][ jcoor ];  // \div d at a quadrature point ( - trace( A ) )
 
 //         std::cout<<"div = "<< s <<std::endl;
 
-        for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             A[ jcoor ][ jcoor ] += s;  // I\div d  - (\grad d)^T
 
         pk = 0.0;
-        for ( i = 0;i < fe_p.nbFEDof();i++ )
+        for ( i = 0; i < fe_p.nbFEDof(); i++ )
             pk += fe_p.phi( i, ig ) * pk_loc.vec() [ i ]; // p^k at this quadrature point
 
 
         // sigma = [-p^k I + 2*mu e(u^k)] a quadrature point
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
         {
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
                 sigma[ icoor ][ jcoor ] = mu * ( guk[ icoor ][ jcoor ] + guk[ jcoor ][ icoor ] );
             }
@@ -3617,15 +3622,15 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
         }
 
         // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
                 s = 0;
-                for ( kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+                for ( kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
                     s += sigma[ icoor ][ kcoor ] * A[ kcoor ][ jcoor ];
                 B[ ig ][ icoor ][ jcoor ] = s;
             }
-     }
+    }
 
 //     for(icoor=0; icoor<fe_u.nbCoor(); ++icoor)
 //         for(jcoor=0; jcoor<fe_u.nbCoor(); ++jcoor)
@@ -3647,20 +3652,20 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+    for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
     {
 
         ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
-        for ( i = 0;i < fe_u.nbFEDof();i++ )
+        for ( i = 0; i < fe_u.nbFEDof(); i++ )
         {
 
             // loop on quadrature points
             s = 0;
-            for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
 
-                for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
                     s += B[ ig ][ icoor ][ jcoor ] * fe_u.phiDer( i, jcoor, ig ) * fe_u.weightDet( ig );
             vec( i ) += coef * s;
         }
@@ -3683,19 +3688,19 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
     UInt icoor, jcoor, kcoor, ig, i;
 
     // loop on quadrature points
-    for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
         {
 
             // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
                 su = 0.0;
                 sd = 0.0;
-                for ( i = 0;i < fe_u.nbFEDof();i++ )
+                for ( i = 0; i < fe_u.nbFEDof(); i++ )
                 {
                     su += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbFEDof() ]; //  \grad u^k at this quadrature point
                     sd += fe_u.phiDer( i, jcoor, ig ) * d_loc.vec() [ i + icoor * fe_u.nbFEDof() ];  //  \grad d at this quadrature point
@@ -3706,12 +3711,12 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
         }
 
 
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
         {
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
                 s = 0;
-                for ( kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+                for ( kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
                     s += guk[ icoor ][ kcoor ] * gd[ kcoor ][ jcoor ] + gd[ kcoor ][ icoor ] * guk[ jcoor ][ kcoor ];
                 A[ ig ][ icoor ][ jcoor ] = s;
             }
@@ -3733,20 +3738,20 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
     // Numerical integration
     //
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+    for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
     {
 
         ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
-        for ( i = 0;i < fe_u.nbFEDof();i++ )
+        for ( i = 0; i < fe_u.nbFEDof(); i++ )
         {
 
             // loop on quadrature points
             s = 0;
-            for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+            for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
 
-                for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
                     s += fe_u.phiDer( i, jcoor, ig ) * A[ ig ][ icoor ][ jcoor ] * fe_u.weightDet( ig );
             vec( i ) += coef * s;
         }
@@ -3774,19 +3779,19 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 
 
     // loop on quadrature points
-    for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
                 sA = 0.0;
                 sG = 0.0;
-                for ( i = 0;i < fe_u.nbFEDof();i++ )
+                for ( i = 0; i < fe_u.nbFEDof(); i++ )
                 {
                     sG += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbFEDof() ]; //  \grad u^k at a quadrature point
                     sA -= fe_u.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe_u.nbFEDof() ]; //  - (\grad d) ^T at a quadrature point
@@ -3797,15 +3802,15 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
         }
 
         s = 0.0;
-        for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
 
-        for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
 
         s = 0;
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
                 s += guk[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
         aux[ ig ] = s;
     }
@@ -3815,12 +3820,12 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
     //
 
     // Loop on nodes, i.e. loop on elementary vector components
-    for ( i = 0;i < fe_p.nbFEDof();i++ )
+    for ( i = 0; i < fe_p.nbFEDof(); i++ )
     {
 
         // loop on quadrature points
         s = 0;
-        for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
         {
             //std::cout << i << " " << ig << " " << fe_p.phi(i, ig) << " " << aux[ig] << std::endl;
             s += aux[ ig ] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
@@ -3834,63 +3839,63 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 // coef * ( [I\div d - (\grad d)^T - \grad d] \grap p, \grad q  ) for Newton FSI
 //
 void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemVec& elvec,
-		    const CurrentFE& fe, int iblock )
+                    const CurrentFE& fe, int iblock )
 {
 
-  Real A[ fe.nbCoor() ][ fe.nbCoor() ];     //  I\div d - (\grad d)^T - \grad d at a quadrature point
-  Real B[ fe.nbCoor() ][ fe.nbCoor() ];     // - \grad d
-  Real gpk[ fe.nbCoor() ];   // \grad p^k at a quadrature point
-  Real aux[ fe.nbQuadPt() ][fe.nbCoor()];              // [I\div d - (\grad d)^T - \grad d ]\grad p^k at each quadrature point
+    Real A[ fe.nbCoor() ][ fe.nbCoor() ];     //  I\div d - (\grad d)^T - \grad d at a quadrature point
+    Real B[ fe.nbCoor() ][ fe.nbCoor() ];     // - \grad d
+    Real gpk[ fe.nbCoor() ];   // \grad p^k at a quadrature point
+    Real aux[ fe.nbQuadPt() ][fe.nbCoor()];              // [I\div d - (\grad d)^T - \grad d ]\grad p^k at each quadrature point
 
-  ElemVec::vector_view vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
 
-  Real s, sA, sG;
-  UInt icoor, jcoor, ig, i;
+    Real s, sA, sG;
+    UInt icoor, jcoor, ig, i;
 
 
-  // loop on quadrature points
-  for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    // loop on quadrature points
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
 
-      // loop on space coordinates
-      for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        // loop on space coordinates
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
-	  sG = 0.0;
-	  for ( i = 0;i < fe.nbFEDof();i++ )
-	    sG += fe.phiDer( i, icoor, ig ) * p_loc.vec() [ i ]; //  \grad p^k at a quadrature point
-	  gpk[ icoor ] = sG;
+            sG = 0.0;
+            for ( i = 0; i < fe.nbFEDof(); i++ )
+                sG += fe.phiDer( i, icoor, ig ) * p_loc.vec() [ i ]; //  \grad p^k at a quadrature point
+            gpk[ icoor ] = sG;
 
-	  // loop  on space coordinates
-	  for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            // loop  on space coordinates
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
-	      sA = 0.0;
-	      for ( i = 0;i < fe.nbFEDof();i++ )
-		sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbFEDof() ]; //  - (\grad d) ^T at a quadrature point
-	      A[ icoor ][ jcoor ] = sA;
-	      B[ jcoor ][ icoor ] = sA;
+                sA = 0.0;
+                for ( i = 0; i < fe.nbFEDof(); i++ )
+                    sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbFEDof() ]; //  - (\grad d) ^T at a quadrature point
+                A[ icoor ][ jcoor ] = sA;
+                B[ jcoor ][ icoor ] = sA;
             }
         }
 
         s = 0.0;
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
 
-        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
 
-	for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-	  for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
-	    A[ icoor ][ jcoor ] += B[ icoor ][ jcoor ]; // I\div d - (\grad d)^T - \grad d at this quadrature point
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                A[ icoor ][ jcoor ] += B[ icoor ][ jcoor ]; // I\div d - (\grad d)^T - \grad d at this quadrature point
 
         s = 0;
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-	  {
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
-	      s += A[ icoor ][ jcoor ] * gpk[jcoor]; // [I\div d - (\grad d)^T -\grad d] \grad p^k at each quadrature point
-	    aux[ ig ][icoor] = s;
-	  }
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                s += A[ icoor ][ jcoor ] * gpk[jcoor]; // [I\div d - (\grad d)^T -\grad d] \grad p^k at each quadrature point
+            aux[ ig ][icoor] = s;
+        }
     }
 
     //
@@ -3898,14 +3903,14 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
     //
 
     // Loop on nodes, i.e. loop on elementary vector components
-    for ( i = 0;i < fe.nbFEDof();i++ )
+    for ( i = 0; i < fe.nbFEDof(); i++ )
     {
 
         // loop on quadrature points
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-	  for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-            s += aux[ ig ][icoor] * fe.phiDer( i, icoor, ig ) * fe.weightDet( ig );
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                s += aux[ ig ][icoor] * fe.phiDer( i, icoor, ig ) * fe.weightDet( ig );
         vec [ i ] += coef * s;
     }
 }
@@ -3922,11 +3927,11 @@ void choldc( KNM<Real> &a, KN<Real> &p )
     Real sum;
 
     int n = a.N();
-    for ( i = 0;i < n;i++ )
+    for ( i = 0; i < n; i++ )
     {
-        for ( j = i;j < n;j++ )
+        for ( j = i; j < n; j++ )
         {
-            for ( sum = a( i, j ), k = i - 1;k >= 0;k-- )
+            for ( sum = a( i, j ), k = i - 1; k >= 0; k-- )
                 sum -= a( i, k ) * a( j, k );
             if ( i == j )
             {
@@ -3945,15 +3950,15 @@ void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x )
     Real sum;
 
     int n = a.N();
-    for ( i = 0;i < n;i++ )
+    for ( i = 0; i < n; i++ )
     {
-        for ( sum = b( i ), k = i - 1;k >= 0;k-- )
+        for ( sum = b( i ), k = i - 1; k >= 0; k-- )
             sum -= a( i, k ) * x( k );
         x( i ) = sum / p( i );
     }
-    for ( i = n - 1;i >= 0;i-- )
+    for ( i = n - 1; i >= 0; i-- )
     {
-        for ( sum = x( i ), k = i + 1;k < n;k++ )
+        for ( sum = x( i ), k = i + 1; k < n; k++ )
             sum -= a( k, i ) * x( k );
         x( i ) = sum / p( i );
     }
@@ -3977,47 +3982,47 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 
 
     // loop on quadrature points
-    for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
+    {
+
+
+        ////INIT
+        for (UInt p=0; p<fe_u.nbCoor(); ++p)
         {
-
-
-            ////INIT
-            for(UInt p=0; p<fe_u.nbCoor(); ++p)
+            for (UInt q=0; q<fe_u.nbCoor(); ++q)
+            {
+                for (UInt d=0; d<fe_u.nbFEDof(); ++d)
                 {
-                    for(UInt q=0; q<fe_u.nbCoor(); ++q)
-                        {
-                            for(UInt d=0; d<fe_u.nbFEDof(); ++d)
-                                {
-                                    for(UInt e=0; e<fe_u.nbCoor(); ++e)
-                                        A[p][q][d][e]=0.;
-                                }
-                            //guk[p][q]=0.;
-                        }
-                    //for(int h=0; h<fe_u.nbFEDof(); ++h)
-                        //aux[ig][h][p]=0.;
+                    for (UInt e=0; e<fe_u.nbCoor(); ++e)
+                        A[p][q][d][e]=0.;
                 }
-    ////END INIT
+                //guk[p][q]=0.;
+            }
+            //for(int h=0; h<fe_u.nbFEDof(); ++h)
+            //aux[ig][h][p]=0.;
+        }
+        ////END INIT
 
         // loop on space coordinates
-        for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
         {
 
             //for ( i = 0;i < fe_u.nbFEDof();i++ )
-                //for ( short k = 0;k < fe_u.nbCoor();k++ )
-                    //sA[i][k] = 0.0;
+            //for ( short k = 0;k < fe_u.nbCoor();k++ )
+            //sA[i][k] = 0.0;
             // loop  on space coordinates
-            for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-            for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
-            {
-                sG = 0.0;
-                for ( UInt i = 0;i < fe_u.nbFEDof();i++ )
+            for ( UInt kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+                for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
                 {
-                    sG += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbFEDof() ]; //  \grad u^k at a quadrature point
-                    sA = -fe_u.phiDer( i, icoor, ig )/**fe_u.phi( i, ig )*/ ;/** d_loc.vec() [ i + jcoor * fe_u.nbFEDof() ];*/ //  - (\grad d) ^T at a quadrature point
-                    A[ icoor ][ jcoor ][i][jcoor] = sA; // -\delta_{jcoor kcoor} \partial_{icoor}
+                    sG = 0.0;
+                    for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
+                    {
+                        sG += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbFEDof() ]; //  \grad u^k at a quadrature point
+                        sA = -fe_u.phiDer( i, icoor, ig )/**fe_u.phi( i, ig )*/ ;/** d_loc.vec() [ i + jcoor * fe_u.nbFEDof() ];*/ //  - (\grad d) ^T at a quadrature point
+                        A[ icoor ][ jcoor ][i][jcoor] = sA; // -\delta_{jcoor kcoor} \partial_{icoor}
+                    }
+                    guk[ icoor ][ jcoor ] = sG;
                 }
-                guk[ icoor ][ jcoor ] = sG;
-            }
         }
 
 
@@ -4025,23 +4030,23 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 
 
         double z[fe_u.nbCoor()];
-        for ( UInt i = 0;i < fe_u.nbFEDof();i++ )
+        for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
+        {
+            //                for ( int kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
             {
-                //                for ( int kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-                for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
-                    {
-                                //if(icoor==jcoor)
-                                z[ jcoor ] = A[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
-                    }
+                //if(icoor==jcoor)
+                z[ jcoor ] = A[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
+            }
 
-                for ( jcoor = 0;jcoor < fe_p.nbCoor();jcoor++ )
-                    {
-                        for (UInt kcoor = 0;kcoor < fe_p.nbCoor();kcoor++ )
-                        {
-                                //if(icoor==jcoor)
-                                A[ jcoor ][ jcoor ][i][kcoor] -= z[ kcoor ];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
-                        }
-                    }
+            for ( jcoor = 0; jcoor < fe_p.nbCoor(); jcoor++ )
+            {
+                for (UInt kcoor = 0; kcoor < fe_p.nbCoor(); kcoor++ )
+                {
+                    //if(icoor==jcoor)
+                    A[ jcoor ][ jcoor ][i][kcoor] -= z[ kcoor ];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
+                }
+            }
 
 
 
@@ -4056,9 +4061,9 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 //                                             //f[icoor][jcoor]=0.;
 //                                         }
 //                             }
-                        //                    }
-                        //                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-                        //                    {
+            //                    }
+            //                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+            //                    {
 //                         for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
 //                         {
 //                             for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
@@ -4073,55 +4078,55 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 //                               //{
 //                                 }
 //                         }
-                        //                    }
-                        //                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-                        //                    {
-                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-                    {
+            //                    }
+            //                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+            //                    {
+            for ( UInt kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+            {
                 l=0;
                 //for ( kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-                 for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
-                 for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
-                     {
-                         l += guk[ icoor ][ jcoor ] * A[ icoor ][ jcoor ][i][kcoor]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
-                            //}
-                     }
-                 aux[ ig ][i][kcoor] = l;
-                 //}
+                for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+                    for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+                    {
+                        l += guk[ icoor ][ jcoor ] * A[ icoor ][ jcoor ][i][kcoor]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
+                        //}
                     }
-                //std::cout<<"aux[ ig ][i][jcoor] "<<  aux[ ig ][i][jcoor] <<std::endl;
+                aux[ ig ][i][kcoor] = l;
+                //}
+            }
+            //std::cout<<"aux[ ig ][i][jcoor] "<<  aux[ ig ][i][jcoor] <<std::endl;
         }
-        }
+    }
     //
     // Numerical integration
     //
-    for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-        {
-            //            for ( short l = 0;i < fe_u.nbFEDof();i++ )
-            //for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
-            double l = 0.;
+    for ( UInt kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+    {
+        //            for ( short l = 0;i < fe_u.nbFEDof();i++ )
+        //for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        double l = 0.;
 
-            ElemMat::matrix_view mat = elmat.block( iblock, kcoor );
-            for ( UInt j = 0;j < mmDim;j++ )
-            for ( UInt i = 0;i < fe_p.nbFEDof();i++ )
-            mat(i,j)=0.;
+        ElemMat::matrix_view mat = elmat.block( iblock, kcoor );
+        for ( UInt j = 0; j < mmDim; j++ )
+            for ( UInt i = 0; i < fe_p.nbFEDof(); i++ )
+                mat(i,j)=0.;
 
-            // Loop on nodes, i.e. loop on elementary vector components
-            for ( UInt j = 0;j < mmDim;j++ )
-                for (UInt i = 0;i < fe_p.nbFEDof();i++ )
-                    {
-                        l=0.;
-                        // loop on quadrature points
-                        for ( ig = 0;ig < fe_u.nbQuadPt();ig++ )
-                            {
-                                //            std::cout << ig << " " << fe_p.phi(i, ig) << std::endl;
-                                l += aux[ ig ][j][kcoor] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
-                            }
-                        mat( i , j) += coef * l;
-                        //std::cout<<"mat [ i , j] "<<mat [ i , j]<<std::endl;
-                        //std::cout<<"l "<<l<<std::endl;
-                    }
+        // Loop on nodes, i.e. loop on elementary vector components
+        for ( UInt j = 0; j < mmDim; j++ )
+            for (UInt i = 0; i < fe_p.nbFEDof(); i++ )
+            {
+                l=0.;
+                // loop on quadrature points
+                for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
+                {
+                    //            std::cout << ig << " " << fe_p.phi(i, ig) << std::endl;
+                    l += aux[ ig ][j][kcoor] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
+                }
+                mat( i , j) += coef * l;
+                //std::cout<<"mat [ i , j] "<<mat [ i , j]<<std::endl;
+                //std::cout<<"l "<<l<<std::endl;
             }
+    }
 }
 
 
@@ -4149,24 +4154,24 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 // rho * ( \grad u^k du, v  )
 //
 void shape_terms(
-                     //const ElemVec& d_loc,
-                     Real rho,
-                      Real mu,
-                      const ElemVec& un_loc,
-                      const ElemVec& uk_loc,
-                      const ElemVec& wk_loc,
-                      const ElemVec& convect_loc,
-                      const ElemVec& pk_loc,
-                      ElemMat& elmat,
-                      const CurrentFE& fe,
-                      const CurrentFE& fe_p,
-                      ID /*mmDim*/,
-                      ElemMat& /*elmatP*/,
-                      int /*iblock*/,
-                      bool wImplicit,
-                      Real alpha,
-                      boost::shared_ptr<ElemMat> elmat_convect
-                      )
+    //const ElemVec& d_loc,
+    Real rho,
+    Real mu,
+    const ElemVec& un_loc,
+    const ElemVec& uk_loc,
+    const ElemVec& wk_loc,
+    const ElemVec& convect_loc,
+    const ElemVec& pk_loc,
+    ElemMat& elmat,
+    const CurrentFE& fe,
+    const CurrentFE& fe_p,
+    ID /*mmDim*/,
+    ElemMat& /*elmatP*/,
+    int /*iblock*/,
+    bool wImplicit,
+    Real alpha,
+    boost::shared_ptr<ElemMat> elmat_convect
+)
 {
     //Real BGrConv[ fe.nbCoor() ][ fe.nbCoor() ]/*[fe.nbFEDof()]*/;                 // \grad (convect) at a quadrature point
     Real eta[ fe.nbCoor() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
@@ -4192,26 +4197,26 @@ void shape_terms(
 
     // loop on quadrature points
 
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         ////INIT
-        for(UInt p=0; p<fe.nbCoor(); ++p)
+        for (UInt p=0; p<fe.nbCoor(); ++p)
         {
             uk[ig][p]=0.;
             convect[p]=0.;
-            for(UInt q=0; q<fe.nbCoor(); ++q)
+            for (UInt q=0; q<fe.nbCoor(); ++q)
             {
                 guk[ig][p][q]=0.;
                 gun[ig][p][q]=0.;
                 sigma[p][q]=0.;
                 BMass[p][q]=0.;
-                for(UInt d=0; d<fe.nbFEDof(); ++d)
+                for (UInt d=0; d<fe.nbFEDof(); ++d)
                 {
                     auxMass[ ig ][d][q]=0.;
                     auxMass3[ ig ][d][q]=0.;
                     aux[ig][p][d][q]=0.;
                     convect_eta[ig][p][d][q]=0.;
-                    for(UInt e=0; e<fe.nbCoor(); ++e)
+                    for (UInt e=0; e<fe.nbCoor(); ++e)
                     {
                         gd[p][q][d][e]=0.;
                         eta[p][q][d][e]=0.;
@@ -4225,29 +4230,29 @@ void shape_terms(
         ////////END INIT
 
         // loop on space coordindates
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
 
             // each compontent of uk at each quadrature points
             s = 0.0;
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
             uk[ ig ][ icoor ] = s;//uk_x(pt_ig), uk_y(pt_ig), uk_z(pt_ig)
 
             // each compontent of convect at this quadrature point
             s = 0.0;
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * convect_loc.vec() [ i + icoor * fe.nbFEDof() ];
             convect[ icoor ] = s;
 
 
             // loop  on space coordindates
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 sB = 0.0;
                 sGk = 0.0;
                 sGn = 0.0;
-                for ( i = 0;i < fe.nbFEDof();i++ )
+                for ( i = 0; i < fe.nbFEDof(); i++ )
                 {
                     gd[ icoor ][ jcoor ][i][jcoor] = fe.phiDer( i, jcoor, ig )/** d_loc.vec() [ i + jcoor * fe.nbFEDof() ]*/;
 
@@ -4266,13 +4271,13 @@ void shape_terms(
 
         //!a part of source_stress
         pk = 0.0;
-        for ( i = 0;i < fe_p.nbFEDof();i++ )
+        for ( i = 0; i < fe_p.nbFEDof(); i++ )
             pk += fe_p.phi( i, ig ) * pk_loc.vec() [ i ]; // p^k at this quadrature point
 
         // sigma = [-p^k I + 2*mu e(u^k)] a quadrature point
-        for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 sigma[ icoor ][ jcoor ] = mu * ( guk[ig][ icoor ][ jcoor ] + guk[ig][ jcoor ][ icoor ] );
             }
@@ -4280,18 +4285,18 @@ void shape_terms(
         }
 
         //!building the tensor \f$\eta = [I\nabla\cdot d - (\nabla d)^T]\f$
-        for ( i = 0;i < fe.nbFEDof();i++ )
+        for ( i = 0; i < fe.nbFEDof(); i++ )
         {
 
             Real z[fe.nbCoor()];
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 //if(icoor==jcoor)
                 z[ jcoor ] = eta[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
             }
-            for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
-                for ( kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+                for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
                 {
                     eta[ jcoor ][ jcoor ][i][kcoor] -= z[kcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
                 }
@@ -4299,18 +4304,18 @@ void shape_terms(
 
             //!source_mass1
 
-            for ( kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+            for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
             {
                 s = 0;
-                for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                    for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                         s += BMass[ icoor ][ jcoor ] * eta[ icoor ][ jcoor ][i][kcoor]; // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
                 auxMass[ ig ][i][kcoor] = s;
 
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 {
                     s = 0.;
-                    for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+                    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                     {
                         s += convect[ icoor ] * eta[ icoor ][ jcoor ][i][kcoor]; // convect^T [I\div d - (\grad d)^T]
                     }
@@ -4319,14 +4324,14 @@ void shape_terms(
             }
             //! source_stress
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
             {
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 {
-                    for ( kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+                    for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
                     {
                         s = 0.;
-                        for (UInt zcoor = 0;zcoor < fe.nbCoor();zcoor++ )
+                        for (UInt zcoor = 0; zcoor < fe.nbCoor(); zcoor++ )
                             s += sigma[ icoor ][ zcoor ] * eta[ zcoor ][ jcoor ][i][kcoor];
                         B[ ig ][ icoor ][ jcoor ][i][kcoor] = s;
                     }
@@ -4335,14 +4340,14 @@ void shape_terms(
 
 
             //! source_stress2
-            for ( kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+            for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
             {
-                for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 {
-                    for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                     {
                         s = 0.;
-                        for ( UInt zcoor = 0;zcoor < fe.nbCoor();zcoor++ )
+                        for ( UInt zcoor = 0; zcoor < fe.nbCoor(); zcoor++ )
                             // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
                             s += guk[ig][ icoor ][ zcoor ] * gd[ zcoor ][ jcoor ][i][kcoor] + gd[ zcoor ][ icoor ][i][kcoor] * guk[ig][ jcoor ][ zcoor ];
                         A2[ ig ][ icoor ][ jcoor ][i][kcoor] = s;
@@ -4350,18 +4355,18 @@ void shape_terms(
                 }
             }
 
-            if(wImplicit)//source_mass2 and convective term derivative
+            if (wImplicit)//source_mass2 and convective term derivative
             {
-                for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 {
                     //s = 0.0;
-                    for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                     {
                         aux[ ig ][ icoor ][i][jcoor] = guk[ig][ icoor ][ jcoor ]  * fe.phi( i, ig ) /**alpha*/;
                     }
 
                 }
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 {
                     duk[ig] += guk[ig][ jcoor ][ jcoor ];  //div uk
                 }
@@ -4376,21 +4381,21 @@ void shape_terms(
             //!building the tensor \f$\eta = [I\nabla\cdot d - (\nabla d)^T]\f$
             //                for ( int kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                 {
-                    for (kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+                    for (kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
                     {
                         //if(icoor==jcoor)
                         etaMass3[ icoor ][ jcoor ][i][kcoor] -= 2*z[kcoor];  //! -2*\delta_{jcoor, kcoor} \partial_{icoor} + \delta_{jcoor, icoor}\partial_{kcoor}
                     }
                 }
 
-            for(kcoor =0; kcoor<fe.nbCoor(); ++kcoor)
+            for (kcoor =0; kcoor<fe.nbCoor(); ++kcoor)
             {
                 s = 0;
-                for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                    for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                         s += gun[ig][ icoor ][ jcoor ] * etaMass3/**/[ icoor ][ jcoor ][i][kcoor]; // \grad u^n:[/*2*/ * I\div d - (\grad d)^T] at each quadrature point
                 auxMass3[ ig ][i][kcoor] = s;
                 //if fullImplicit un=uk
@@ -4408,33 +4413,33 @@ void shape_terms(
     //
     Real g=0.;
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
+    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
     {
-        for ( kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+        for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
         {
 
             // the block iccor of the elementary vector
             ElemMat::matrix_view mat = elmat.block( icoor, kcoor );
             boost::shared_ptr<ElemMat::matrix_view> mat_convect;
 
-            if(elmat_convect.get())
+            if (elmat_convect.get())
             {
                 mat_convect.reset(new ElemMat::matrix_view(elmat_convect->block( icoor, kcoor )));
             }
             // loop on nodes, i.e. loop on components of this block
-            for ( i = 0;i < fe.nbFEDof();i++ )
+            for ( i = 0; i < fe.nbFEDof(); i++ )
             {
-                for ( j = 0;j < fe.nbFEDof();j++ )
+                for ( j = 0; j < fe.nbFEDof(); j++ )
                 {
 
                     // loop on quadrature points
                     s = 0.;
                     g = 0.;
 
-                    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+                    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
                     {
                         // - convect^T [I\div d - (\grad d)^T] (u^k)^T :\grad\phi_i
-                        for ( jcoor = 0;jcoor < fe.nbCoor();jcoor++ )
+                        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
                         {
                             //source_mass1
                             s += convect_eta[ ig ][ jcoor ][j][kcoor] * guk[ ig ][ icoor ][jcoor] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
@@ -4451,7 +4456,7 @@ void shape_terms(
                         //source_mass3
                         s += 0.5*auxMass3[ ig ][j][kcoor] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig )*rho;
 
-                        if(wImplicit)
+                        if (wImplicit)
                         {
                             //source_mass2{
                             s -= aux[ ig ][ icoor ][j][kcoor] * fe.phi( i, ig ) * fe.weightDet( ig )*rho*alpha;
@@ -4460,7 +4465,7 @@ void shape_terms(
                         }
                     }
                     mat( i , j ) += s;
-                    if(wImplicit && mat_convect.get())
+                    if (wImplicit && mat_convect.get())
                         (*mat_convect)( i , j ) += g;
                 }
             }
@@ -4473,21 +4478,21 @@ void shape_terms(
 // Compute the gradient in the Hdiv space, i.e. the opposite and transpose of the divergence matrix.
 void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
 {
-	ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Real sumdivphi(0.);
     const QuadRule& dualQuadRule( dualFE.quadRule() );
 
     // Loop over all the degrees of freedom of the dual variable.
     for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
     {
-    	// Loop over all the degrees of freedom of the primal variable.
+        // Loop over all the degrees of freedom of the primal variable.
         for ( UInt j(0); j < primalFE.nbFEDof(); ++j )
         {
             sumdivphi = 0.;
             // Loop over all the quadrature points.
             for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
             {
-	            // There is no jacobian because of property of Piola transformation.
+                // There is no jacobian because of property of Piola transformation.
                 sumdivphi -= primalFE.phi( j, ig ) * dualFE.divPhiRef( i, ig ) * dualQuadRule.weight( ig );
             }
             mat( i, j ) += coef * sumdivphi;
@@ -4506,7 +4511,7 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const Current
     // Loop over all the degrees of freedom of the dual variable.
     for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
     {
-    	// Loop over all the degrees of freedom of the primal variable.
+        // Loop over all the degrees of freedom of the primal variable.
         for ( UInt j(0); j < primalFE.nbFEDof(); ++j )
         {
             sumdivphi = 0.;
@@ -4527,10 +4532,10 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
                     const RefFEHybrid& dualDotNFE, int iblock, int jblock )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-	UInt nbnode;
-	Real sum(0.);
+    UInt nbnode;
+    Real sum(0.);
 
-	// Loop over all the staticBdFE.
+    // Loop over all the staticBdFE.
     for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
@@ -4539,10 +4544,10 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
         const StaticBdFE & boundaryElementDualDotNFE( dualDotNFE[ nf ] );
         nbnode = boundaryElementHybridFE.nbNode;
 
-		// Loop over all the the degrees of freedom of the dual dot normal variable.
+        // Loop over all the the degrees of freedom of the dual dot normal variable.
         for ( UInt i(0); i < nbnode; ++i )
         {
-        	// Loop over all the degrees of freedom of the hybrid variable.
+            // Loop over all the degrees of freedom of the hybrid variable.
             for ( UInt j(0); j < nbnode; ++j )
             {
                 sum = 0.;
@@ -4550,8 +4555,8 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
                 for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt; ++ig )
                     // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
-                    	   boundaryElementDualDotNFE.phi( i , ig ) *
-                    	   boundaryElementHybridFE.weightMeas( ig );
+                           boundaryElementDualDotNFE.phi( i , ig ) *
+                           boundaryElementHybridFE.weightMeas( ig );
 
                 // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
                 mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;
@@ -4568,26 +4573,26 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int ibl
     UInt nbnode;
     Real sum(0.);
 
-	// Loop over all the staticBdFE.
+    // Loop over all the staticBdFE.
     for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
         const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
         nbnode = boundaryElementHybridFE.nbNode;
 
-		// Loop over all the degrees of freedom of the first hybrid variable.
+        // Loop over all the degrees of freedom of the first hybrid variable.
         for ( UInt i(0); i < nbnode; ++i )
         {
-       		// Loop over all the the degrees of freedom of the second hybrid variable.
+            // Loop over all the the degrees of freedom of the second hybrid variable.
             for ( UInt j(0); j < nbnode; ++j )
             {
                 sum = 0.;
                 // Loop over all the quadrature point.
                 for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt ; ++ig )
-                	// Using the Piola transform properties.
+                    // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
-                    	   boundaryElementHybridFE.phi( i , ig ) *
-                    	   boundaryElementHybridFE.weightMeas( ig );
+                           boundaryElementHybridFE.phi( i , ig ) *
+                           boundaryElementHybridFE.weightMeas( ig );
 
                 // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
                 mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;
@@ -4614,7 +4619,7 @@ void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, int iblock, 
             // Loop over all the quadrature point.
             for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
             {
-            	// Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
+                // Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
                 for ( UInt icoor(0); icoor < dualFE.nbCoor() ; ++icoor )
                 {
                     sum += dualFE.phi( j, icoor, ig ) * dualFE.phi( i, icoor, ig ) * dualFE.wDetJacobian( ig );
@@ -4631,7 +4636,7 @@ void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, int iblock, 
 void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-	Real partialSum(0.), sum(0.);
+    Real partialSum(0.), sum(0.);
 
     // Loop over all the degrees of freedom of the first dual variable.
     for ( UInt j(0); j < dualFE.nbFEDof(); ++j )
@@ -4643,14 +4648,14 @@ void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentFE& dualFE,
             // Loop over all the quadrature point.
             for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
             {
-	            // partialSum = phi[icoor]^T * K^-1 * phi[jcoor] for all icorr and jcoor.
-            	partialSum = 0.;
-              	/* Loop over all the space dimension of the first dual variable,
-               	   e.g. in 3D three times, in 2D two times.*/
+                // partialSum = phi[icoor]^T * K^-1 * phi[jcoor] for all icorr and jcoor.
+                partialSum = 0.;
+                /* Loop over all the space dimension of the first dual variable,
+                    e.g. in 3D three times, in 2D two times.*/
                 for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
                 {
-    	            /* Loop over all the space dimension of the first dual variable,
-	               	   e.g. in 3D three times, in 2D two times.*/
+                    /* Loop over all the space dimension of the first dual variable,
+                          e.g. in 3D three times, in 2D two times.*/
                     for ( UInt jcoor(0); jcoor < dualFE.nbCoor(); ++jcoor )
                     {
                         // Invperm is the inverse of the permeability.
@@ -4669,7 +4674,7 @@ void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentFE& dualFE,
 //----------------------------------------------------------------------
 // Compute the mass matrix in Hdiv with a real function coefficient.
 void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
-			    ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+                ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Real sum(0.), x(0.), y(0.), z(0.);
@@ -4684,12 +4689,12 @@ void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
             // Loop over all the quadrature point.
             for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
             {
-            	// Get the coordinate in the current element of the current quadrature point.
-            	x = dualFE.quadNode(ig, 0);
-            	y = dualFE.quadNode(ig, 1);
-            	z = dualFE.quadNode(ig, 2);
+                // Get the coordinate in the current element of the current quadrature point.
+                x = dualFE.quadNode(ig, 0);
+                y = dualFE.quadNode(ig, 1);
+                z = dualFE.quadNode(ig, 2);
 
-            	// Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
+                // Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
                 for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
                 {
                     // Caution Invperm is the inverse of the permeability.

@@ -57,7 +57,7 @@ namespace LifeV
 /*!
 
   <b> Definition of a quadrature rule </b>
-  
+
   To define a quadrature rule, several constructors have been defined for this class. Besides the classical constructors, one is provided with an arbitrary number of arguements (indicated by "..."). Its usage is quite simple: first of all, one defines the standard arguements (name...) but also the number of quadrature points and their dimension. After that, one add the coordinates and weights of the quadrature points in the order: coordinates for the first point, weight for the first point, coordinates of the second point, weight of the second point,...
 
 For example, if we want to define a Simpson rule in 1D, we can write:
@@ -84,17 +84,17 @@ The following code would have produced the same quadrature:
   \endcode
 
   <b> Basic Use </b>
-  
+
   A quadrature rule consists mainly in a container of quadrature points. The stored quadrature points can be accessed through accessors to the quadrature points or through specific accessors for the coordinates and the weight of the quadrature points.
 
   <b> Degree of exactness </b>
-  
+
   The quadrature rules store the degree of exactness that they are supposed to achieve. It can be specified when building the quadrature rule. No test is performed automatically to check the order and when the quadrature rule is modified (with the addPoint method for example), the order of exactness is kept unchanged.
-  
+
   However, the QuadRule class provides a test for the degree of exactness. When called, this test returns the degree of exactness that has been found by trying to perform several integrals, but it does not change the stored degree of exactness.
-  
+
   <b> Dimension and Shape </b>
-  
+
   For some problems, it makes sens to use quadrature rules outside their "original" space, e.g. one could need a quadrature rule for the triangles in a 3D space (when integrating on a surface). The QuadRule class provides the possibility of changing the dimension in which a quadrature rule in defined (i.e. how many coordinates are used for the coordinates of the quadrature points).
 
   When using a quadrature rule in a space with higher dimension, 0 coordinates are added to fill the missing coordinates. The shape of the quadrature (i.e. the geometric shape where it is defined) remains the same.
@@ -130,12 +130,12 @@ public:
      */
     QuadRule( const QuadPoint* pt, int id, std::string name, ReferenceShapes shape,
               UInt nbQuadPt, UInt degOfExact );
-    
+
     //! Full constructor
     /*!
-      This constructor enables to use as many arguments as needed for the declaration of the 
+      This constructor enables to use as many arguments as needed for the declaration of the
       quadrature rules (the number of quadrature points is not known a priori).
-      
+
       The last arguements are the coordinates and the weights of the points, in the order:
       coordinates of the first point, weight of the first point, coordinates of the second
       point, weight of the second point,...
@@ -159,22 +159,22 @@ public:
     /*!
       This can be used to export a quadrature rule from a space dimension
       to another one.
-      
+
       @param qr The quadrature rule to export
       @param dim The new dimension to be used with the quadrature rule.
      */
     QuadRule( const QuadRule& qr, const UInt dim);
-    
+
 
     //! Destructor
     ~QuadRule();
 
     //@}
 
-    
+
     //! @name Methods
     //@{
-    
+
     //! Method to add a point to an existing quadrature rule.
     /*!
       Beware to have set the dimension and the shape before calling
@@ -182,7 +182,7 @@ public:
 
       @note: the degree of exactness is not changed, it is up to the user
       to take care of it.
-      
+
       @param qp The quadrature point to add.
      */
     inline void addPoint(const QuadPoint& qp)
@@ -193,25 +193,25 @@ public:
 
     //! ShowMe method
     void showMe( std::ostream& output = std::cout) const;
-    
+
     //! Check for the exactness of the quadrature
     /*!
       The quadrature rule is used to performed intergrals whose
       values are known. The degree of exactness is evaluated
       using these results.
-      
+
       @note The degree of exactness stored internally is not
       changed when calling this method.
      */
     UInt checkExactness() const;
-    
+
     //! VTK export for the quadrature
     /*!
-      Creates a file with the positions of the 
+      Creates a file with the positions of the
       quadrature points in a VTK format. No extension
       is added to the name of the file, please provide a name
       ending by ".vtk".
-      
+
       @param filename The name of the file to be created.
      */
     void VTKexport( const std::string& filename) const;
@@ -221,16 +221,16 @@ public:
 
     //! @name Operators
     //@{
-   
+
     //! Output operator
     friend std::ostream& operator << ( std::ostream& c, const QuadRule& qr );
-    
+
     //@}
 
 
     //! @name Set methods
     //@{
-   
+
     //! Change the quadrature points for the ones given here.
     /*!
       Beware to have set the dimension (default: 0!) before calling
@@ -241,7 +241,7 @@ public:
     //! Change the quadrature points for the one given here
     /*!
       Use coordinates and weights separetly. The two vectors
-      given in argument must have the same length. The quadrature 
+      given in argument must have the same length. The quadrature
       points are then given by (coorindates[i],weights[i]).
 
       Beware to have set the dimension (default: 0!) before calling
@@ -264,10 +264,10 @@ public:
 
     //@}
 
-    
+
     //! @name Get methods
     //@{
-    
+
     //! quadPoint(ig) is the ig-th quadrature point
     inline const QuadPoint& quadPoint( const UInt& ig ) const
     {
@@ -303,7 +303,7 @@ public:
     };
 
     //@}
-   
+
 
 private:
     //! Check the exactness for quadrature rules on segments

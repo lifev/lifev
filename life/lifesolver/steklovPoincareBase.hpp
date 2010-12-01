@@ -73,8 +73,8 @@ public:
     Vector dzFluid()       {return M_dzFluid;}
     Real   defOmega()      {return M_defOmega;}
 
-    void setResidualS  ( Vector const& _res ){M_residualS = _res;}
-    void setResidualF  ( Vector const& _res ){M_residualF = _res;}
+    void setResidualS  ( Vector const& _res ) {M_residualS = _res;}
+    void setResidualF  ( Vector const& _res ) {M_residualF = _res;}
 
     void setResidualFSI( double const* _res );
     void setResidualFSI( Vector const& _res );
@@ -141,11 +141,11 @@ public:
     struct DataJacobian
     {
         DataJacobian():
-            M_pFS(0)
-            {}
+                M_pFS(0)
+        {}
         DataJacobian(steklovPoincare* oper):
-            M_pFS(oper)
-            {}
+                M_pFS(oper)
+        {}
 
         steklovPoincare* M_pFS;
     };
@@ -199,32 +199,32 @@ private:
 
 
 class Epetra_SteklovPoincare:
-    public Epetra_Operator
+        public Epetra_Operator
 {
 
 public:
 
     Epetra_SteklovPoincare(exactJacobian* ej):
-        M_ej               (ej),
-        M_operatorDomainMap(*M_ej->solidInterfaceMap().getEpetra_Map()),
-        M_operatorRangeMap (*M_ej->solidInterfaceMap().getEpetra_Map()),
-        M_comm             (&M_ej->worldComm())
-        {
+            M_ej               (ej),
+            M_operatorDomainMap(*M_ej->solidInterfaceMap().getEpetra_Map()),
+            M_operatorRangeMap (*M_ej->solidInterfaceMap().getEpetra_Map()),
+            M_comm             (&M_ej->worldComm())
+    {
 //             std::cout << ej << std::endl;
 //             std::cout << M_ej->fluidInterfaceMap().getEpetra_Map() << std::endl;
 //             std::cout << M_ej->solidInterfaceMap().getEpetra_Map() << std::endl;
 //             std::cout << "ok" << std::endl;
-        };
+    };
 
-    virtual ~Epetra_SteklovPoincare(){};
+    virtual ~Epetra_SteklovPoincare() {};
 
     int 	SetUseTranspose (bool  UseTranspose)
-        {std::cout << "********* SP : transpose not available\n"; return -1;}
+    {std::cout << "********* SP : transpose not available\n"; return -1;}
     int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
     int 	ApplyInverse    (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
-        {std::cout << "********* SP : inverse not available\n"; return -1;}
+    {std::cout << "********* SP : inverse not available\n"; return -1;}
     double 	NormInf         () const
-        {std::cout << "********* SP : NormInf not available\n"; return 1.;}
+    {std::cout << "********* SP : NormInf not available\n"; return 1.;}
     const char * Label      () const {return "exactJacobian";}
     bool 	UseTranspose    () const {return false;}
     bool 	HasNormInf      () const {return false;}

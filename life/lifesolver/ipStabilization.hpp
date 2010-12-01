@@ -44,14 +44,14 @@ class IPStabilization
 {
 public:
 
-  //! Constructor
-  IPStabilization( const GetPot& dataFile, 
-		   const MESH&     mesh,
-		   const DOF&      dof,
-		   const RefFE&    refFE,
-		   CurrentBdFE&    feBd,
-		   const QuadRule& quadRule,
-		   Real            viscosity );
+    //! Constructor
+    IPStabilization( const GetPot& dataFile,
+                     const MESH&     mesh,
+                     const DOF&      dof,
+                     const RefFE&    refFE,
+                     CurrentBdFE&    feBd,
+                     const QuadRule& quadRule,
+                     Real            viscosity );
 
     /*! compute IP stabilization terms and add them into matrix
      *  @param matrix matrix where the stabilization terms are added into
@@ -79,42 +79,42 @@ private:
 }; // class IPStabilization
 
 template<typename MESH, typename DOF>
- IPStabilization<MESH, DOF>::IPStabilization(  const GetPot& dataFile, 
-					       const MESH&     mesh,
-					       const DOF&      dof,
-					       const RefFE&    refFE,
-					       CurrentBdFE&    feBd,
-					       const QuadRule& quadRule,                                          
-					       Real            viscosity ) :
-   M_mesh( mesh ),
-   M_dof( dof ),
-   M_fe1( refFE, getGeoMap(mesh), quadRule ),
-   M_fe2( refFE, getGeoMap(mesh), quadRule ),
-   M_feBd( feBd ),
-   M_gammaBeta(  dataFile( "fluid/ipstab/gammaBeta", 0. ) ),
-   M_gammaDiv(   dataFile( "fluid/ipstab/gammaDiv", 0. ) ),
-   M_gammaPress( dataFile( "fluid/ipstab/gammaPress", 0. ) ),
-   M_viscosity( viscosity ),
-   M_elMatU( M_fe1.nbNode, nDimensions, nDimensions ),
-   M_elMatP( M_fe1.nbNode, nDimensions+1, nDimensions+1 )
+IPStabilization<MESH, DOF>::IPStabilization(  const GetPot& dataFile,
+                                              const MESH&     mesh,
+                                              const DOF&      dof,
+                                              const RefFE&    refFE,
+                                              CurrentBdFE&    feBd,
+                                              const QuadRule& quadRule,
+                                              Real            viscosity ) :
+        M_mesh( mesh ),
+        M_dof( dof ),
+        M_fe1( refFE, getGeoMap(mesh), quadRule ),
+        M_fe2( refFE, getGeoMap(mesh), quadRule ),
+        M_feBd( feBd ),
+        M_gammaBeta(  dataFile( "fluid/ipstab/gammaBeta", 0. ) ),
+        M_gammaDiv(   dataFile( "fluid/ipstab/gammaDiv", 0. ) ),
+        M_gammaPress( dataFile( "fluid/ipstab/gammaPress", 0. ) ),
+        M_viscosity( viscosity ),
+        M_elMatU( M_fe1.nbNode, nDimensions, nDimensions ),
+        M_elMatP( M_fe1.nbNode, nDimensions+1, nDimensions+1 )
 {
-    switch( M_fe1.nbNode )
+    switch ( M_fe1.nbNode )
     {
-        case 4:
-            M_fToP = LinearTetra::fToP;
-            break;
-        case 10:
-            M_fToP = QuadraticTetra::fToP;
-            break;
-        case 8:
-            M_fToP = LinearHexa::fToP;
-            break;
-        case 20:
-            M_fToP = QuadraticHexa::fToP;
-            break;
-        default:
-            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
-            break;
+    case 4:
+        M_fToP = LinearTetra::fToP;
+        break;
+    case 10:
+        M_fToP = QuadraticTetra::fToP;
+        break;
+    case 8:
+        M_fToP = LinearHexa::fToP;
+        break;
+    case 20:
+        M_fToP = QuadraticHexa::fToP;
+        break;
+    default:
+        ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
+        break;
     }
 }
 
@@ -140,7 +140,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
 
     // loop on interior faces
     for ( UInt iFace = M_mesh.numBFaces()+1; iFace<= M_mesh.numFaces();
-          ++iFace )
+            ++iFace )
     {
         chronoUpdate.start();
         // update current finite elements
@@ -190,7 +190,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             //Real coeffPress = M_gammaPress * sqrt( hK2 ); // P1 p nonsmooth (code)
 #else
             Real coeffPress = M_gammaPress * hK2 / // Pk (paper)
-                std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
+                              std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
 #endif
 
             M_elMatP.zero();
@@ -253,16 +253,18 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             chronoBeta.start();
             Real bnmax = 0;
             Real bcmax = 0;
-            for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode ) {
+            for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode )
+            {
                 Real bn = 0;
-                for ( int iCoor=0; iCoor<M_fe1.nbCoor; ++iCoor ) {
+                for ( int iCoor=0; iCoor<M_fe1.nbCoor; ++iCoor )
+                {
                     bn += normal(iNode, iCoor) *
-                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
+                          beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
                     bcmax = std::max<Real>
-                        (bcmax, normal(iNode, (iCoor+1)%3) *
-                         beta.vec()[ (iCoor+2)%3*M_feBd.nbNode + iNode ] -
-                         normal(iNode, (iCoor+2)%3) *
-                         beta.vec()[ (iCoor+1)%3*M_feBd.nbNode + iNode ]);
+                            (bcmax, normal(iNode, (iCoor+1)%3) *
+                             beta.vec()[ (iCoor+2)%3*M_feBd.nbNode + iNode ] -
+                             normal(iNode, (iCoor+2)%3) *
+                             beta.vec()[ (iCoor+1)%3*M_feBd.nbNode + iNode ]);
                 }
                 bnmax = std::max<Real> (bnmax, bn);
             }
@@ -278,7 +280,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             ipstab_div( coeffDiv, M_elMatU, M_fe1, M_fe1, M_feBd );
 #else
             ipstab_grad( coeffGrad, M_elMatU, M_fe1, M_fe1, M_feBd, 0, 0,
-            nDimensions );
+                         nDimensions );
 #endif
             chronoElemComp.stop();
             chronoAssembly.start();
@@ -296,7 +298,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             ipstab_div( coeffDiv, M_elMatU, M_fe2, M_fe2, M_feBd );
 #else
             ipstab_grad( coeffGrad, M_elMatU, M_fe2, M_fe2, M_feBd, 0, 0,
-            nDimensions );
+                         nDimensions );
 #endif
             chronoElemComp.stop();
             chronoAssembly.start();
@@ -328,7 +330,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             ipstab_bgrad( -coeffBeta, M_elMatU, M_fe2, M_fe1, beta,
-                         M_feBd, 0, 0, nDimensions );
+                          M_feBd, 0, 0, nDimensions );
             ipstab_div( -coeffDiv, M_elMatU, M_fe2, M_fe1, M_feBd );
 #else
             ipstab_grad( -coeffGrad, M_elMatU, M_fe2, M_fe1, M_feBd, 0, 0,

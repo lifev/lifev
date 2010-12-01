@@ -151,7 +151,7 @@ public:
     //! if set to true,  do not recompute the preconditioner
     void setReusePreconditioner( const bool reuse );
 
-    boost::shared_ptr<Displayer> displayer(){return M_displayer;}
+    boost::shared_ptr<Displayer> displayer() {return M_displayer;}
     //@}
 
 
@@ -192,7 +192,7 @@ public:
         @param  rhsFull   right hand side
         @param  sol       solution
         @param  prec      preconditioner to use (templated parameter, can derive from
-EpetraPreconditioner class or from Epetra_Operator)
+    EpetraPreconditioner class or from Epetra_Operator)
     */
     template <typename PrecPtrOperator>
     int solveSystem(  const vector_type& rhsFull,

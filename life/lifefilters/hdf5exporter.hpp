@@ -61,7 +61,8 @@
 #include <string>
 #include <map>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Hdf5 data exporter, implementation of Exporter
 /*!
@@ -75,7 +76,8 @@ namespace LifeV {
   </ol>
 */
 template<typename Mesh>
-class Hdf5exporter : public Exporter<Mesh> {
+class Hdf5exporter : public Exporter<Mesh>
+{
 
 public:
 
@@ -223,30 +225,30 @@ protected:
 // ===================================================
 template<typename Mesh>
 Hdf5exporter<Mesh>::Hdf5exporter():
-    super               (),
-    M_HDF5              (),
-    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-    M_outputFileName    ( "noninitialisedFileName" )
+        super               (),
+        M_HDF5              (),
+        M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+        M_outputFileName    ( "noninitialisedFileName" )
 {
 }
 
 template<typename Mesh>
 Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
                                  const int& procId) :
-    super               ( dfile, prefix ),
-    M_HDF5              (),
-    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-    M_outputFileName    ( "noninitialisedFileName" )
+        super               ( dfile, prefix ),
+        M_HDF5              (),
+        M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+        M_outputFileName    ( "noninitialisedFileName" )
 {
     setMeshProcId( mesh, procId );
 }
 
 template<typename Mesh>
 Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, const std::string& prefix):
-    super               ( dfile, prefix ),
-    M_HDF5              (),
-    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-    M_outputFileName    ( "noninitialisedFileName" )
+        super               ( dfile, prefix ),
+        M_HDF5              (),
+        M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+        M_outputFileName    ( "noninitialisedFileName" )
 {
 }
 
@@ -291,7 +293,8 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
 
         M_wr_Xdmf(time);
 
-        if (this->M_multimesh) {
+        if (this->M_multimesh)
+        {
             M_wr_geo(); // see also M_wr_geometry
         }
 
@@ -363,7 +366,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
     chrono.stop();
     if ( !this->M_procId )
         std::cout << "done in " << chrono.diff() << " s. (Time " << SelectedTimeAndPostfix.first
-                                                 << ", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
+                  << ", Iteration " << SelectedTimeAndPostfix.second << " )" << std::endl;
 
     return static_cast <UInt> ( SelectedTimeAndPostfix.second );
 }
@@ -526,7 +529,7 @@ template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_var(const ExporterData& dvar)
 {
 
-    switch( dvar.type() )
+    switch ( dvar.type() )
     {
     case ExporterData::Scalar:
         M_wr_scalar(dvar);
@@ -625,9 +628,9 @@ void Hdf5exporter<Mesh>::M_wr_geo()
        write out
     */
 
-  // We need a map ,but it's not always possible to use that from the variables
-  // (if we write out a P0 variable)
-  // We build a map for the connections based on the element numbers and for the points we fake a P1 map
+    // We need a map ,but it's not always possible to use that from the variables
+    // (if we write out a P0 variable)
+    // We build a map for the connections based on the element numbers and for the points we fake a P1 map
 
     ASSERT (this->M_listData.size() > 0 , "hdf5exporter: ListData is empty");
 
@@ -647,18 +650,18 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     }
 
     Epetra_Map connectionsMap(this->M_mesh->numGlobalElements()*Mesh::ElementShape::numPoints,
-			      this->M_mesh->numElements()*Mesh::ElementShape::numPoints,
-			      &elementList[0],
-			      0, this->M_listData.begin()->storedArray()->Comm());
+                              this->M_mesh->numElements()*Mesh::ElementShape::numPoints,
+                              &elementList[0],
+                              0, this->M_listData.begin()->storedArray()->Comm());
 
     Epetra_IntVector connections(connectionsMap);
     for (ID i=1; i <= this->M_mesh->numElements(); ++i)
     {
         typename Mesh::ElementType const& element (this->M_mesh->element(i));
-	UInt lid=(i-1)*Mesh::ElementShape::numPoints;
+        UInt lid=(i-1)*Mesh::ElementShape::numPoints;
         for (ID j=1; j<= Mesh::ElementShape::numPoints; ++j, ++lid)
         {
-	  connections[lid] = element.point(j).id();
+            connections[lid] = element.point(j).id();
         }
     }
 
@@ -677,29 +680,29 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     switch ( Mesh::ElementShape::Shape )
     {
     case TETRA:
-      {
+    {
         const RefFE & refFEP1 = feTetraP1;
         EpetraMap tmpMapP1(refFEP1, *this->M_mesh,
-		       this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
+                           this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
         subMap = tmpMapP1;
         break;
-      }
+    }
     case HEXA:
-      {
+    {
         const RefFE & refFEQ1 = feHexaQ1;
         EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh,
-		       this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
+                           this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
         subMap = tmpMapQ1;
         break;
-      }
+    }
     case LINE:
-      {
+    {
         const RefFE & refFEP11D = feSegP1;
         EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh,
-		       this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
+                             this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
         subMap = tmpMapQ11D;
         break;
-      }
+    }
     default:
         ERROR_MSG( "FE not allowed in HDF5 Exporter" );
 
@@ -712,7 +715,7 @@ void Hdf5exporter<Mesh>::M_wr_geo()
     EpetraVector pointsZ(subMap);
 
     int gid;
-    for(ID i=1; i <= this->M_mesh->numVertices(); ++i)
+    for (ID i=1; i <= this->M_mesh->numVertices(); ++i)
     {
         typename Mesh::PointType const& point (this->M_mesh->pointList(i));
         gid = point.id() - hdf5Offset;
@@ -758,15 +761,15 @@ void Hdf5exporter<Mesh>::M_wr_initXdmf()
         M_xdmf.open( (this->M_post_dir+this->M_prefix+".xmf").c_str(), std::ios_base::out );
 
         M_xdmf <<
-            "<?xml version=\"1.0\" ?>\n" <<
-            "<!DOCTYPE Xdmf SYSTEM \"" << this->M_prefix << ".xdmf\" [\n" <<
-            "<!ENTITY DataFile \"" << this->M_prefix << ".h5\">\n" <<
-            "]>\n" <<
-            "<!-- " << this->M_prefix << ".h5 is generated by LifeV -->\n" <<
-            "<Xdmf>\n" <<
-            "  <Domain Name=\"" << this->M_prefix << "\">\n" <<
-            "    <Grid Name=\"" << this->M_prefix << "Grid\" GridType=\"Collection\" CollectionType=\"Temporal\">\n" <<
-            "\n";
+        "<?xml version=\"1.0\" ?>\n" <<
+        "<!DOCTYPE Xdmf SYSTEM \"" << this->M_prefix << ".xdmf\" [\n" <<
+        "<!ENTITY DataFile \"" << this->M_prefix << ".h5\">\n" <<
+        "]>\n" <<
+        "<!-- " << this->M_prefix << ".h5 is generated by LifeV -->\n" <<
+        "<Xdmf>\n" <<
+        "  <Domain Name=\"" << this->M_prefix << "\">\n" <<
+        "    <Grid Name=\"" << this->M_prefix << "Grid\" GridType=\"Collection\" CollectionType=\"Temporal\">\n" <<
+        "\n";
 
         M_wr_closeLinesXdmf();
     }
@@ -847,15 +850,15 @@ void Hdf5exporter<Mesh>::M_wr_Xdmf(const Real& time)
         // NOTE: The first line (<!-- Time t Iteration i -->) is used in function importFromTime.
         //       Check compatibility after any change on it!
         M_xdmf <<
-            "<!-- Time " << time << " Iteration " << this->M_postfix.substr(1,5) << " -->\n" <<
-            "    <Grid Name=\"Mesh " << time << "\">\n" <<
-            "      <Time TimeType=\"Single\" Value=\"" << time << "\" />\n";
+        "<!-- Time " << time << " Iteration " << this->M_postfix.substr(1,5) << " -->\n" <<
+        "    <Grid Name=\"Mesh " << time << "\">\n" <<
+        "      <Time TimeType=\"Single\" Value=\"" << time << "\" />\n";
         M_wr_topology(M_xdmf);
         M_wr_geometry(M_xdmf);
         M_wr_attributes(M_xdmf);
 
         M_xdmf << "\n"
-            "    </Grid>\n\n";
+        "    </Grid>\n\n";
 
 
 
@@ -885,54 +888,54 @@ void Hdf5exporter<Mesh>::M_wr_topology  ( std::ofstream& xdmf )
     }
 
     xdmf <<
-        "      <Topology\n" <<
-        "         Type=\"" << FEstring <<"\"\n" <<
-        "         NumberOfElements=\"" << this->M_mesh->numGlobalElements() << "\"\n" <<
-        "         BaseOffset=\"1\">\n" <<
-        "         <DataStructure Format=\"HDF\"\n" <<
-        "                        Dimensions=\""<< this->M_mesh->numGlobalElements() << " " << this->M_mesh->numLocalVertices() << "\"\n" <<
-        "                        DataType=\"Int\"\n" <<
-        "                        Precision=\"8\">\n" <<
-        "             " << M_outputFileName << ":/Connections/Values\n" <<
-        "         </DataStructure>\n" <<
-        "      </Topology>\n";
+    "      <Topology\n" <<
+    "         Type=\"" << FEstring <<"\"\n" <<
+    "         NumberOfElements=\"" << this->M_mesh->numGlobalElements() << "\"\n" <<
+    "         BaseOffset=\"1\">\n" <<
+    "         <DataStructure Format=\"HDF\"\n" <<
+    "                        Dimensions=\""<< this->M_mesh->numGlobalElements() << " " << this->M_mesh->numLocalVertices() << "\"\n" <<
+    "                        DataType=\"Int\"\n" <<
+    "                        Precision=\"8\">\n" <<
+    "             " << M_outputFileName << ":/Connections/Values\n" <<
+    "         </DataStructure>\n" <<
+    "      </Topology>\n";
 }
 
 template <typename Mesh>
 void Hdf5exporter<Mesh>::M_wr_geometry  ( std::ofstream& xdmf )
 {
 
-  std::string postfix_string;
+    std::string postfix_string;
 
-  // see also in postProcess
-  if (this->M_multimesh)
-    postfix_string = this->M_postfix;
-  else
-    postfix_string = "";
+    // see also in postProcess
+    if (this->M_multimesh)
+        postfix_string = this->M_postfix;
+    else
+        postfix_string = "";
 
 
     xdmf <<
-        "      <Geometry Type=\"X_Y_Z\">\n" <<
-        "         <DataStructure Format=\"HDF\"\n" <<
-        "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
-        "                        DataType=\"Float\"\n" <<
-        "                        Precision=\"8\">\n" <<
-      "             " << M_outputFileName << ":/" << "PointsX" << postfix_string << "/Values\n" <<
-        "         </DataStructure>\n" <<
-        "         <DataStructure Format=\"HDF\"\n" <<
-        "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
-        "                        DataType=\"Float\"\n" <<
-        "                        Precision=\"8\">\n" <<
-        "             " << M_outputFileName << ":/" << "PointsY" << postfix_string << "/Values\n" <<
-        "         </DataStructure>\n" <<
-        "         <DataStructure Format=\"HDF\"\n" <<
-        "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
-        "                        DataType=\"Float\"\n" <<
-        "                        Precision=\"8\">\n" <<
-        "             " << M_outputFileName << ":/" << "PointsZ" << postfix_string << "/Values\n" <<
-        "         </DataStructure>\n" <<
-        "      </Geometry>\n" <<
-        "\n";
+    "      <Geometry Type=\"X_Y_Z\">\n" <<
+    "         <DataStructure Format=\"HDF\"\n" <<
+    "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
+    "                        DataType=\"Float\"\n" <<
+    "                        Precision=\"8\">\n" <<
+    "             " << M_outputFileName << ":/" << "PointsX" << postfix_string << "/Values\n" <<
+    "         </DataStructure>\n" <<
+    "         <DataStructure Format=\"HDF\"\n" <<
+    "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
+    "                        DataType=\"Float\"\n" <<
+    "                        Precision=\"8\">\n" <<
+    "             " << M_outputFileName << ":/" << "PointsY" << postfix_string << "/Values\n" <<
+    "         </DataStructure>\n" <<
+    "         <DataStructure Format=\"HDF\"\n" <<
+    "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << "\"\n" <<
+    "                        DataType=\"Float\"\n" <<
+    "                        Precision=\"8\">\n" <<
+    "             " << M_outputFileName << ":/" << "PointsZ" << postfix_string << "/Values\n" <<
+    "         </DataStructure>\n" <<
+    "      </Geometry>\n" <<
+    "\n";
 }
 
 template <typename Mesh>
@@ -943,12 +946,12 @@ void Hdf5exporter<Mesh>::M_wr_attributes  ( std::ofstream& xdmf )
     for (std::list< ExporterData >::const_iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
     {
         xdmf <<
-            "\n      <Attribute\n" <<
-            "         Type=\"" << i->typeName() << "\"\n" <<
-            "         Center=\"" << i->whereName() << "\"\n" <<
-            "         Name=\"" << i->variableName()<<"\">\n";
+        "\n      <Attribute\n" <<
+        "         Type=\"" << i->typeName() << "\"\n" <<
+        "         Center=\"" << i->whereName() << "\"\n" <<
+        "         Name=\"" << i->variableName()<<"\">\n";
 
-        switch( i->type() )
+        switch ( i->type() )
         {
         case ExporterData::Scalar:
             M_wr_scalar_datastructure(xdmf, *i);
@@ -960,7 +963,7 @@ void Hdf5exporter<Mesh>::M_wr_attributes  ( std::ofstream& xdmf )
         }
 
         xdmf <<
-            "      </Attribute>\n";
+        "      </Attribute>\n";
     }
 }
 
@@ -982,23 +985,23 @@ void Hdf5exporter<Mesh>::M_wr_scalar_datastructure  ( std::ofstream& xdmf, const
     // First: hyperslab definition, then description of the data
     xdmf <<
 
-        "         <DataStructure ItemType=\"HyperSlab\"\n" <<
-        "                        Dimensions=\"" << globalUnknowns << " " << dvar.typeDim() << "\"\n" <<
-        "                        Type=\"HyperSlab\">\n" <<
-        "           <DataStructure  Dimensions=\"3 2\"\n" <<
-        "                           Format=\"XML\">\n" <<
-        "               0    0\n" <<
-        "               1    1\n" <<
-        "               " << globalUnknowns << " " << dvar.typeDim() << "\n" <<
-        "           </DataStructure>\n" <<
+    "         <DataStructure ItemType=\"HyperSlab\"\n" <<
+    "                        Dimensions=\"" << globalUnknowns << " " << dvar.typeDim() << "\"\n" <<
+    "                        Type=\"HyperSlab\">\n" <<
+    "           <DataStructure  Dimensions=\"3 2\"\n" <<
+    "                           Format=\"XML\">\n" <<
+    "               0    0\n" <<
+    "               1    1\n" <<
+    "               " << globalUnknowns << " " << dvar.typeDim() << "\n" <<
+    "           </DataStructure>\n" <<
 
-        "           <DataStructure  Format=\"HDF\"\n" <<
-        "                           Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
-        "                           DataType=\"Float\"\n" <<
-        "                           Precision=\"8\">\n" <<
-        "               " << M_outputFileName << ":/" << dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
-        "           </DataStructure>\n" <<
-        "         </DataStructure>\n";
+    "           <DataStructure  Format=\"HDF\"\n" <<
+    "                           Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
+    "                           DataType=\"Float\"\n" <<
+    "                           Precision=\"8\">\n" <<
+    "               " << M_outputFileName << ":/" << dvar.variableName() << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+    "           </DataStructure>\n" <<
+    "         </DataStructure>\n";
 
 }
 
@@ -1010,23 +1013,23 @@ void Hdf5exporter<Mesh>::M_wr_vector_datastructure  ( std::ofstream& xdmf, const
     string coord[3]={"X","Y","Z"}; // see also wr_vector
 
     xdmf <<
-                "         <DataStructure ItemType=\"Function\"\n" <<
-                "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << " " << dvar.typeDim() << "\"\n" <<
-                "                        Function=\"JOIN($0 , $1, $2)\">\n";
+    "         <DataStructure ItemType=\"Function\"\n" <<
+    "                        Dimensions=\"" << this->M_mesh->numGlobalVertices() << " " << dvar.typeDim() << "\"\n" <<
+    "                        Function=\"JOIN($0 , $1, $2)\">\n";
 
-            for(int i(0); i < dvar.typeDim(); ++i)
-                {
-                    xdmf <<
-                "           <DataStructure  Format=\"HDF\"\n" <<
-                "                           Dimensions=\"" << this->M_mesh->numGlobalVertices() << " 1\"\n" <<
-                "                           DataType=\"Float\"\n" <<
-                "                           Precision=\"8\">\n" <<
-                "               " << M_outputFileName << ":/" << dvar.variableName()<< coord[i] << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
-                "           </DataStructure>\n";
-                }
+    for (int i(0); i < dvar.typeDim(); ++i)
+    {
+        xdmf <<
+        "           <DataStructure  Format=\"HDF\"\n" <<
+        "                           Dimensions=\"" << this->M_mesh->numGlobalVertices() << " 1\"\n" <<
+        "                           DataType=\"Float\"\n" <<
+        "                           Precision=\"8\">\n" <<
+        "               " << M_outputFileName << ":/" << dvar.variableName()<< coord[i] << this->M_postfix  <<"/Values\n" << // see also in M_wr_vector/scalar
+        "           </DataStructure>\n";
+    }
 
     xdmf <<
-                "         </DataStructure>\n";
+    "         </DataStructure>\n";
 
 
 }
@@ -1053,7 +1056,7 @@ void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
     Epetra_MultiVector* subVar(0);
 
     std::string varname (dvar.variableName()); // see also in M_wr_attributes
-    if(this->M_postfix!="")
+    if (this->M_postfix!="")
     {
         varname += this->M_postfix;
     }
@@ -1083,7 +1086,7 @@ void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
     bool readTranspose (true);
     std::string varname (dvar.variableName()); // see also in M_wr_attributes
 
-    if(this->M_postfix!="")
+    if (this->M_postfix!="")
     {
         varname += this->M_postfix;
     }

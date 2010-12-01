@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 // Modif Miguel 02/12/2002
 // "operator=" was changed to "operator oper" when
 // tab are consecutive in memory
@@ -25,7 +25,7 @@ template <class R>
 const KN_<R>& KN_<R>::operator oper ( const_R a )
 {
     R * l( v );
-    for ( int i = 0;i < n;i++, l += step )
+    for ( int i = 0; i < n; i++, l += step )
         * l oper a;
     return *this;
 }
@@ -38,7 +38,7 @@ inline const KNM_<R> & KNM_<R>::operator oper ( const_R a )
     else
     {
         KN_<R> lj( operator() ( '.',0 ) ); //  (.,.,O)
-        for ( int j = 0;j < M();++j, ++lj )
+        for ( int j = 0; j < M(); ++j, ++lj )
             lj oper a;
     }
     return *this;
@@ -68,7 +68,7 @@ const KN_<R>& KN_<R>::operator oper ( const KN_<const_R> & u )
     K_assert( u.n == n );
     R * l( v );
     const R *r( u );
-    for ( int i = 0;i < n;i++, l += step, r += u.step )
+    for ( int i = 0; i < n; i++, l += step, r += u.step )
         * l oper * r;
     return *this;
 }

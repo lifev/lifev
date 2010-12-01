@@ -49,7 +49,7 @@ namespace
 typedef boost::function<LifeV::Vector ( const LifeV::Real&, const LifeV::Real&,
                                         const LifeV::Real&, const LifeV::Real&,
                                         const std::vector<LifeV::Real>& )>
-                                      vectorFunction;
+vectorFunction;
 
 LifeV::Real functionDotNormal ( const LifeV::Real&              u,
                                 const vectorFunction&           function,
@@ -112,7 +112,7 @@ namespace LifeV
 {
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class AbstractNumericalFlux
 {
 
@@ -125,7 +125,7 @@ public:
     typedef boost::function<Vector ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real>& )>
-                                                  vectorFunction;
+    vectorFunction;
 
     typedef boost::function<Real ( const Real& )> scalarFunction;
 
@@ -250,12 +250,12 @@ AbstractNumericalFlux ( const vectorFunction&            physicalFlux,
                         const FESpace<Mesh, EpetraMap>&  fESpace,
                         const dataFile&                  data,
                         const std::string&               section ):
-    M_physicalFlux                ( physicalFlux ),
-    M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux ),
-    M_fESpace                     ( fESpace ),
-    M_fields                      ( std::vector< const vector_ptrtype* >(0) ),
-    M_CFLBrentToll                ( data( ( section + "CFL/brent_toll" ).data(), 1e-4 ) ),
-    M_CFLBrentMaxIter             ( data( ( section + "CFL/brent_maxIter" ).data(), 20 ) )
+        M_physicalFlux                ( physicalFlux ),
+        M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux ),
+        M_fESpace                     ( fESpace ),
+        M_fields                      ( std::vector< const vector_ptrtype* >(0) ),
+        M_CFLBrentToll                ( data( ( section + "CFL/brent_toll" ).data(), 1e-4 ) ),
+        M_CFLBrentMaxIter             ( data( ( section + "CFL/brent_maxIter" ).data(), 20 ) )
 {
 
     CONSTRUCTOR( "AbstractNumericalFlux" );
@@ -338,7 +338,7 @@ computeFunctionDotNormal ( const vectorFunction& function, const KN<Real>& norma
 // ######################################################################### //
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class GodunovNumericalFlux : public AbstractNumericalFlux<Mesh, SolverType>
 {
 
@@ -382,13 +382,13 @@ GodunovNumericalFlux ( const vectorFunction&            physicalFlux,
                        const FESpace<Mesh, EpetraMap>&  fESpace,
                        const dataFile&                  data,
                        const std::string&               section ):
-    AbstractNumericalFlux<Mesh, SolverType>::AbstractNumericalFlux  ( physicalFlux,
-                                                                      firstDerivativePhysicalFlux,
-                                                                      fESpace,
-                                                                      data,
-                                                                      section ),
-    M_brentToll                                   ( data( ( section + "godunov/brent_toll" ).data(), 1e-4 ) ),
-    M_brentMaxIter                                ( data( ( section + "godunov/brent_maxIter" ).data(), 20) )
+        AbstractNumericalFlux<Mesh, SolverType>::AbstractNumericalFlux  ( physicalFlux,
+                                                                          firstDerivativePhysicalFlux,
+                                                                          fESpace,
+                                                                          data,
+                                                                          section ),
+        M_brentToll                                   ( data( ( section + "godunov/brent_toll" ).data(), 1e-4 ) ),
+        M_brentMaxIter                                ( data( ( section + "godunov/brent_maxIter" ).data(), 20) )
 {
 
     CONSTRUCTOR( "GodunovNumericalFlux" );

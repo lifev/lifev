@@ -44,7 +44,8 @@
 static char help[] = "Solves a linear system with KSP.\n\
 -N <N>       : number of rows/cols\n\n";
 
-namespace LifeV{
+namespace LifeV
+{
 
 template<typename Mat>
 bool test_umfpack( Mat& __mat )
@@ -187,12 +188,12 @@ int main( int argc, char** argv )
         success &= LifeV::test_aztec( convdiff );
 
     }
-    catch( std::exception const& __e )
+    catch ( std::exception const& __e )
     {
         std::cerr << "std::exception: " << __e.what() << "\n";
         return EXIT_FAILURE;
     }
-    catch( ... )
+    catch ( ... )
     {
         std::cerr << "unknown exception caught\n";
         return EXIT_FAILURE;

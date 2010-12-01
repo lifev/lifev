@@ -146,12 +146,12 @@ public:
 
     EpetraMap&         operator += (const EpetraMap& _epetraMap);
     EpetraMap          operator +  (const EpetraMap& _epetraMap)
-        {
-            EpetraMap map( *this );
-            map += _epetraMap;
-            createImportExport();
-            return map;
-        }
+    {
+        EpetraMap map( *this );
+        map += _epetraMap;
+        createImportExport();
+        return map;
+    }
 
     /*
     EpetraMap&         operator += (std::vector<int> const&   lagrangeMultipliers);
@@ -166,13 +166,13 @@ public:
 
     EpetraMap&         operator += (int const size);
     EpetraMap          operator +  (int const size)
-        {
-            //int me =  M_uniqueEpetraMap->Comm().MyPID();
-            EpetraMap map( *this );
-            map += size;
-            createImportExport();
-            return map;
-        }
+    {
+        //int me =  M_uniqueEpetraMap->Comm().MyPID();
+        EpetraMap map( *this );
+        map += size;
+        createImportExport();
+        return map;
+    }
 
 
 
@@ -248,11 +248,11 @@ EpetraMap::
 EpetraMap(const RefFE&               refFE,
           const partitionMesh<Mesh>& meshPart,
           const comm_ptrtype&        _commPtr):
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr(_commPtr)
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr(_commPtr)
 {
 
     // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
@@ -273,11 +273,11 @@ EpetraMap::
 EpetraMap(const RefFE&               refFE,
           const Mesh&                mesh,
           const comm_ptrtype&        _commPtr):
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr(_commPtr)
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr(_commPtr)
 {
 
     std::vector<int> repeatedNodeVector;

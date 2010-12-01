@@ -20,33 +20,34 @@ using namespace LifeV;
 
 struct CTRKcaseBase
 {
-  public:
+public:
     // typedefs
     typedef boost::function<Real (const Real&, const Real&, const Real&, const Real&, const ID&)> func_type;
     typedef boost::shared_ptr<BCHandler> bc_ptrtype;
 
     // no ctor
     virtual ~CTRKcaseBase() {}
-    
+
     // methods called by CTRK upstream class
     GetPot &get_data_hdl() {return C_data;}
     bc_ptrtype get_bcHu() {return C_bcHu;}
     bc_ptrtype get_bcHp() {return C_bcHp;}
-    void set_base_data(const GetPot& _data, Epetra_Comm *_comm) 
+    void set_base_data(const GetPot& _data, Epetra_Comm *_comm)
     {
         C_comm = _comm;
-	C_data = _data;
-	C_hasdata = true;
+        C_data = _data;
+        C_hasdata = true;
     }
 
     // handy die
     void die(std::string msg)
-    { 
-    	if (!C_comm->MyPID()) {
-	  std::cout << "  --  ERROR: " << msg << std::endl;
-	  std::cout << "  --  Exiting ..." << std::endl;
-	}
-	exit(1);
+    {
+        if (!C_comm->MyPID())
+        {
+            std::cout << "  --  ERROR: " << msg << std::endl;
+            std::cout << "  --  Exiting ..." << std::endl;
+        }
+        exit(1);
     }
 
     // Use data interface
@@ -59,7 +60,7 @@ struct CTRKcaseBase
     void create_bcs()
     {
         C_bcHu.reset(new BCHandler(C_num_bcs, BCHandler::HINT_BC_NONE));
-	C_bcHp.reset(new BCHandler(C_num_bcs, BCHandler::HINT_BC_NONE));
+        C_bcHp.reset(new BCHandler(C_num_bcs, BCHandler::HINT_BC_NONE));
     }
 
     // User bcs interface
@@ -67,8 +68,8 @@ struct CTRKcaseBase
     {
         die("Cannot set BCs without user input.");
     }
- 
-  protected:
+
+protected:
     // mandatory members
     GetPot C_data;
     bool C_hasdata;
@@ -76,7 +77,7 @@ struct CTRKcaseBase
     bc_ptrtype C_bcHu;
     bc_ptrtype C_bcHp;
     Epetra_Comm *C_comm;
-   
+
 }; // struct CTRKcaseBase
 
 #endif /* __CTRK_BASE_CASE_HH */

@@ -72,11 +72,11 @@ int picard( Oper* f, Norm norm, Vector& fx1, Vector& fx0,
         exit( 1 );
     }
     std::cout << "--------------------------=----------------------------------------"
-    << std::endl;
+              << std::endl;
     std::cout << "    Picard 1 : residual=" << normRes << ", stoping tolerance = "
-    << stop_tol << std::endl;
+              << stop_tol << std::endl;
     std::cout << "-------------------------------------------------------------------"
-    << std::endl;
+              << std::endl;
     if ( normRes <= stop_tol )
     {
         // the algorithm has converged in 1 iteration without relaxation
@@ -116,11 +116,11 @@ int picard( Oper* f, Norm norm, Vector& fx1, Vector& fx0,
             break;
         }
         std::cout << "-----------------------------------------------------------------"
-        << std::endl;
+                  << std::endl;
         std::cout << "Picard " << iter << " ( " << methodName
-        << ") " << "omega=" << omega << ", residual=" << normRes << std::endl;
+                  << ") " << "omega=" << omega << ", residual=" << normRes << std::endl;
         std::cout << "-----------------------------------------------------------------"
-        << std::endl;
+                  << std::endl;
         iter++;
         // save the old iterate
         fx0 = fx1;

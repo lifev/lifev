@@ -29,7 +29,8 @@
 
 #include "MLPreconditioner.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 MLPreconditioner::MLPreconditioner():
         super(),
@@ -59,9 +60,9 @@ int
 MLPreconditioner::buildPreconditioner(operator_type& oper)
 {
 
-	//the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
-	//to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
-	M_Prec.reset();
+    //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
+    //to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
+    M_Prec.reset();
     M_Oper = oper->getMatrixPtr();
 
     M_precType = M_List.get("prec type", "undefined??");
@@ -97,7 +98,7 @@ Real
 MLPreconditioner::Condest()
 {
     return 0.;
- }
+}
 
 EpetraPreconditioner::prec_raw_type*
 MLPreconditioner::getPrec()
@@ -108,10 +109,10 @@ MLPreconditioner::getPrec()
 void
 MLPreconditioner::precReset()
 {
-	//the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
-	//to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
+    //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
+    //to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
 
-	M_Prec.reset();
+    M_Prec.reset();
     M_Oper.reset();
 
     this->M_preconditionerCreated = false;
@@ -120,9 +121,9 @@ MLPreconditioner::precReset()
 
 void
 MLPreconditioner::createMLList(       list_Type&    list,
-                                const GetPot&       dataFile,
-                                const std::string&  section,
-                                const std::string&  subSection )
+                                      const GetPot&       dataFile,
+                                      const std::string&  section,
+                                      const std::string&  subSection )
 {
     list.setName("ML paramters list");
 

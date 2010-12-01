@@ -65,8 +65,9 @@ public:
         return sin(2*Pi*x)*sin(2*Pi*y); // Trigonometric solution
     }
     // The gradient of the exact solution
-    static Real grad_ex(const UInt& icoor, const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const UInt& /*ic=0*/) {
-        switch(icoor)
+    static Real grad_ex(const UInt& icoor, const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const UInt& /*ic=0*/)
+    {
+        switch (icoor)
         {
         case 1: //der_x
             //            return 2*x; // Polynomial solution
@@ -88,18 +89,28 @@ public:
     // BEWARE: this is case dependent! (works for cubic domains)
     static Real fNeumann(const Real& t, const Real& x, const Real& y, const Real& z, const UInt& ic)
     {
-        Real n[2] = {0, 0}; Real out=0;
-        if        ( x == xMin ) {
+        Real n[2] = {0, 0};
+        Real out=0;
+        if        ( x == xMin )
+        {
             n[0] = -1.;
-        } else if ( x == xMax ) {
+        }
+        else if ( x == xMax )
+        {
             n[0] =  1.;
-        } else if ( y == yMin ) {
+        }
+        else if ( y == yMin )
+        {
             n[1] = -1.;
-        } else if ( y == yMax ) {
+        }
+        else if ( y == yMax )
+        {
             n[1] =  1.;
-        } else {
+        }
+        else
+        {
             std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
-                    << std::endl;
+                      << std::endl;
         }
 
         for (UInt k =0; k< 2; k++)  //mu gradu n
@@ -118,7 +129,7 @@ public:
         // We want a slash dividing the data file section from the variable name but only
         // when not provided by the user or when not looking in the root of the data file
         std::string corrected_section( section );
-        if( ( ! section.empty() ) && ( section[section.length()-1] != '/' ) )
+        if ( ( ! section.empty() ) && ( section[section.length()-1] != '/' ) )
             corrected_section = section + '/';
 
         xMin = dataFile( (corrected_section+"problem/xMin").data(), -1. ) ;
@@ -150,7 +161,7 @@ Real beta( const Real& /* t */,
            const Real& ,
            const ID& icomp )
 {
-    switch(icomp)
+    switch (icomp)
     {
     case 1:
         return 0;
@@ -180,7 +191,7 @@ public:
     // The exact solution to the problem
     static Real u_ex(const Real& t, const Real& x, const Real& y, const Real& z, const UInt& /*ic*/)
     {
-        switch( problemSolution )
+        switch ( problemSolution )
         {
         case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
         case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution
@@ -197,10 +208,10 @@ public:
     static Real grad_ex(const UInt& icoor,
                         const Real& /*t*/, const Real& x, const Real& y, const Real& z, const UInt& /*ic*/)
     {
-        switch(icoor)
+        switch (icoor)
         {
         case 1: //der_x
-            switch( problemSolution )
+            switch ( problemSolution )
             {
             case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution
@@ -210,7 +221,7 @@ public:
                 return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z); // Trigonometric solution
             }
         case 2: //der_y
-            switch( problemSolution )
+            switch ( problemSolution )
             {
             case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution
@@ -220,7 +231,7 @@ public:
                 return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y)*sin(2*Pi*z); // Trigonometric solution
             }
         case 3: //der_z
-            switch( problemSolution )
+            switch ( problemSolution )
             {
             case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution
@@ -237,7 +248,7 @@ public:
     static Real fSource(const Real& t, const Real& x, const Real& y, const Real& z, const UInt& ic)
     {
         Real value(0.);
-        switch( problemSolution )
+        switch ( problemSolution )
         {
         case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             return -diffusionCoeff*6.; // Polynomial solution
@@ -247,7 +258,7 @@ public:
             value += 2*t;
         case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution
             value += -diffusionCoeff*6 + reactionCoeff*u_ex(t, x, y, z, ic);
-            for(UInt icomp=1; icomp<=nDimensions; ++icomp)
+            for (UInt icomp=1; icomp<=nDimensions; ++icomp)
                 value += fAdvection(t, x, y, z, icomp)*grad_ex(icomp, t, x, y, z, ic);
             return value;
         default:
@@ -257,10 +268,10 @@ public:
     // The advection term
     static Real fAdvection(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const UInt& icomp)
     {
-        switch(icomp)
+        switch (icomp)
         {
         case 1:
-            switch( problemSolution )
+            switch ( problemSolution )
             {
             case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
@@ -270,7 +281,7 @@ public:
                 return 0.; //-0.1*x;
             }
         case 2:
-            switch( problemSolution )
+            switch ( problemSolution )
             {
             case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
@@ -280,7 +291,7 @@ public:
                 return 0.; //-0.1*y;
             }
         case 3:
-            switch( problemSolution )
+            switch ( problemSolution )
             {
             case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
@@ -297,22 +308,36 @@ public:
     // BEWARE: this is case dependent! (works for cubic domains)
     static Real fNeumann(const Real& t, const Real& x, const Real& y, const Real& z, const UInt& ic)
     {
-        Real n[3] = {0, 0, 0}; Real out=0;
-        if        ( x == xMin ) {
+        Real n[3] = {0, 0, 0};
+        Real out=0;
+        if        ( x == xMin )
+        {
             n[0] = -1.;
-        } else if ( x == xMax ) {
+        }
+        else if ( x == xMax )
+        {
             n[0] =  1.;
-        } else if ( y == yMin ) {
+        }
+        else if ( y == yMin )
+        {
             n[1] = -1.;
-        } else if ( y == yMax ) {
+        }
+        else if ( y == yMax )
+        {
             n[1] =  1.;
-        } else if ( z == zMin ) {
+        }
+        else if ( z == zMin )
+        {
             n[2] = -1.;
-        } else if ( z == zMax ) {
+        }
+        else if ( z == zMax )
+        {
             n[2] =  1.;
-        } else {
+        }
+        else
+        {
             std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
-                    << std::endl;
+                      << std::endl;
         }
 
         for (UInt icomp =0; icomp< nDimensions; ++icomp)  //mu grad_u n
@@ -335,7 +360,7 @@ public:
         // We want a slash dividing the data file section from the variable name but only
         // when not provided by the user or when not looking in the root of the data file
         std::string corrected_section( section );
-        if( ( ! section.empty() ) && ( section[section.length()-1] != '/' ) )
+        if ( ( ! section.empty() ) && ( section[section.length()-1] != '/' ) )
             corrected_section = section + '/';
 
         xMin = dataFile( (corrected_section+"problem/xMin").data(), -1. ) ;

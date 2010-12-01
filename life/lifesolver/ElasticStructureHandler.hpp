@@ -48,7 +48,7 @@ namespace LifeV
 
 template <typename Mesh>
 class ElasticStructureHandler:
-            public DataElasticStructure<Mesh>
+        public DataElasticStructure<Mesh>
 {
 
 public:
@@ -125,7 +125,7 @@ public:
     const bool setSolidBC() const {return M_setBC;}
     //! set the fluid BCs
     void setSolidBC(BCHandler &BCh_solid)
-        {M_BCh_solid = &BCh_solid; M_setBC = true;}
+    {M_BCh_solid = &BCh_solid; M_setBC = true;}
     BCHandler &BCh_solid() {return *M_BCh_solid;}
 
 private:
@@ -189,20 +189,20 @@ ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
                          const QuadRule&                   Qr,
                          const QuadRule&                   bdQr,
                          BCHandler&                        BCh ):
-    DataElasticStructure<Mesh>( data ),
-    _refFE                    ( refFE ),
-    _dof                      ( this->mesh(), _refFE ),
-    _dim                      ( _dof.numTotalDof() ),
-    _Qr                       ( Qr ),
-    _bdQr                     ( bdQr ),
-    _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
-    _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
-    _d                        ( _dim ),
-    _dRhs                     ( _dim ),
-    _w                        ( _dim ),
-    _time                     ( 0 ),
-    _count                    ( 0 ),
-    M_BCh_solid               ( &BCh )
+        DataElasticStructure<Mesh>( data ),
+        _refFE                    ( refFE ),
+        _dof                      ( this->mesh(), _refFE ),
+        _dim                      ( _dof.numTotalDof() ),
+        _Qr                       ( Qr ),
+        _bdQr                     ( bdQr ),
+        _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
+        _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
+        _d                        ( _dim ),
+        _dRhs                     ( _dim ),
+        _w                        ( _dim ),
+        _time                     ( 0 ),
+        _count                    ( 0 ),
+        M_BCh_solid               ( &BCh )
 {}
 
 template <typename Mesh>
@@ -211,21 +211,21 @@ ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
                          const RefFE&                      refFE,
                          const QuadRule&                   Qr,
                          const QuadRule&                   bdQr):
-    DataElasticStructure<Mesh>( data ),
-    _refFE                    ( refFE ),
-    _dof                      ( this->mesh(), _refFE ),
-    _dim                      ( _dof.numTotalDof() ),
-    _Qr                       ( Qr ),
-    _bdQr                     ( bdQr ),
-    _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
-    _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
-    _d                        ( _dim ),
-    _dRhs                     ( _dim ),
-    _w                        ( _dim ),
+        DataElasticStructure<Mesh>( data ),
+        _refFE                    ( refFE ),
+        _dof                      ( this->mesh(), _refFE ),
+        _dim                      ( _dof.numTotalDof() ),
+        _Qr                       ( Qr ),
+        _bdQr                     ( bdQr ),
+        _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
+        _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
+        _d                        ( _dim ),
+        _dRhs                     ( _dim ),
+        _w                        ( _dim ),
 //    _BCh( new BCHandler(0)),
-    _time                     ( 0 ),
-    _count                    ( 0 ),
-    M_BCh_solid               ( 0 )
+        _time                     ( 0 ),
+        _count                    ( 0 ),
+        M_BCh_solid               ( 0 )
 {}
 
 
@@ -264,15 +264,15 @@ ElasticStructureHandler<Mesh>::postProcess()
 
         switch ( index.str().size() )
         {
-            case 1:
-                name = "00" + index.str();
-                break;
-            case 2:
-                name = "0" + index.str();
-                break;
-            case 3:
-                name = index.str();
-                break;
+        case 1:
+            name = "00" + index.str();
+            break;
+        case 2:
+            name = "0" + index.str();
+            break;
+        case 3:
+            name = index.str();
+            break;
         }
 
         namedef = "defor." + name + ".mesh";
@@ -496,10 +496,10 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filex >> sdummy;
 
     for (UInt ix = 0; ix < nsx; ++ix)
-        {
-            filex >> unknown[ix + 0*nDof];
+    {
+        filex >> unknown[ix + 0*nDof];
 //            unknown[ix + 0*nDof] /= factor;
-        }
+    }
 
     filex.close();
 

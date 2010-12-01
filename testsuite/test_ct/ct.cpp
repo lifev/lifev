@@ -26,8 +26,8 @@ using namespace LifeV;
 
 CT::CT( int argc,
         char** argv )
-    :
-    C_case (new CTcaseUser)
+        :
+        C_case (new CTcaseUser)
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -38,7 +38,7 @@ CT::CT( int argc,
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
     std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID()
-	<< " among " << ntasks << " running." << std::endl;
+              << " among " << ntasks << " running." << std::endl;
 #else
     M_comm = new Epetra_SerialComm();
 #endif
@@ -56,9 +56,9 @@ CT::CT( int argc,
 void
 CT::run()
 {
-	Chrono chrono_exec;
-	chrono_exec.start();
-	std::cout << "\n\t t-  Begin execution time " << std::endl;
+    Chrono chrono_exec;
+    chrono_exec.start();
+    std::cout << "\n\t t-  Begin execution time " << std::endl;
     typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
@@ -96,9 +96,9 @@ CT::run()
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "  t-  Velocity time discretization order : "
-		<< uBdfOrder << std::endl;
+                               << uBdfOrder << std::endl;
     if (verbose) std::cout << "  t-  Pressure time discretization order : "
-		<< pBdfOrder << std::endl;
+                               << pBdfOrder << std::endl;
 
     dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
@@ -214,10 +214,10 @@ CT::run()
 
         chrono.start();
 
-	fluid.time_advance(time);
+        fluid.time_advance(time);
 
         fluid.iterate_u(*bcHu);
-	fluid.iterate_p(*bcHp);
+        fluid.iterate_p(*bcHp);
 
         *vel = fluid.solution_u();
         *press = fluid.solution_p();
@@ -228,7 +228,7 @@ CT::run()
         chrono.stop();
         if (verbose) std::cout << "\n l-  Total iteration time : " << chrono.diff() << " s." << std::endl;
     }
-	chrono_exec.stop();
-	if (verbose) std::cout << "\n\t t-  Total execution time : " << chrono_exec.diff() << " s." << std::endl;
+    chrono_exec.stop();
+    if (verbose) std::cout << "\n\t t-  Total execution time : " << chrono_exec.diff() << " s." << std::endl;
 }
 

@@ -74,10 +74,10 @@ using namespace LifeV;
 // const int SLIPWALL = 120;
 // const int OUTLET   = 103;
 
- const int INLET    = 2;
- const int WALL     = 1;
- const int SLIPWALL = 20;
- const int OUTLET   = 3;
+const int INLET    = 2;
+const int WALL     = 1;
+const int SLIPWALL = 20;
+const int OUTLET   = 3;
 
 
 Real zero_scalar( const Real& /* t */,
@@ -115,12 +115,12 @@ std::set<UInt> parseList( const std::string& list )
 struct MassTransport::Private
 {
     Private() :
-        nu       ( 1. ),
-        D        ( 1. ),
-        uBar     ( 1. ),
-        centered ( true ),
-        steady   ( false )
-        {}
+            nu       ( 1. ),
+            D        ( 1. ),
+            uBar     ( 1. ),
+            centered ( true ),
+            steady   ( false )
+    {}
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
@@ -156,42 +156,48 @@ struct MassTransport::Private
               const Real& y,
               const Real& z,
               const ID&   id ) const
+    {
+        if ( id == 3 )
         {
-            if ( id == 3 ) {
-                if ( centered ) {
-                    return 1.;
-                    return Um_3d() * (D + x)*(D - x) * (D + y)*(D - y) / pow(D,4);
-                } else {
-                    return 16 * Um_3d() * y * x * (D-y) * (D-x) / pow(D,4);
-                }
-            } else {
-                return 0;
+            if ( centered )
+            {
+                return 1.;
+                return Um_3d() * (D + x)*(D - x) * (D + y)*(D - y) / pow(D,4);
+            }
+            else
+            {
+                return 16 * Um_3d() * y * x * (D-y) * (D-x) / pow(D,4);
             }
         }
+        else
+        {
+            return 0;
+        }
+    }
 
     fct_type getU_3d()
-        {
-            fct_type f;
-            f = boost::bind(&MassTransport::Private::u3d, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&MassTransport::Private::u3d, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
     Real cc3d( const Real& /* t */,
                const Real& x,
                const Real& y,
                const Real& z,
                const ID&   id ) const
-        {
-            return 100.;
-        }
+    {
+        return 100.;
+    }
 
 
     fct_type getCC_3d()
-        {
-            fct_type f;
-            f = boost::bind(&MassTransport::Private::cc3d, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&MassTransport::Private::cc3d, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
 
 
@@ -206,7 +212,7 @@ struct MassTransport::Private
 
 MassTransport::MassTransport( int argc,
                               char** argv ):
-    d( new Private )
+        d( new Private )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -366,20 +372,19 @@ MassTransport::run()
     const QuadRule* bdQr_adr(0);
 
     if ( adrOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "P1 velocity " << std::flush;
-            refFE_adr = &feTetraP1;
-            qR_adr    = &quadRuleTetra4pt; // DoE 5
-            bdQr_adr  = &quadRuleTria3pt;   // DoE 2
-        }
-    else
-        if ( uOrder.compare("P2") == 0 )
-            {
-                if (verbose) std::cout << "P2 velocity ";
-                refFE_adr = &feTetraP2;
-                qR_adr    = &quadRuleTetra15pt;  // DoE 2
-                bdQr_adr  = &quadRuleTria3pt;   // DoE 2
-            }
+    {
+        if (verbose) std::cout << "P1 velocity " << std::flush;
+        refFE_adr = &feTetraP1;
+        qR_adr    = &quadRuleTetra4pt; // DoE 5
+        bdQr_adr  = &quadRuleTria3pt;   // DoE 2
+    }
+    else if ( uOrder.compare("P2") == 0 )
+    {
+        if (verbose) std::cout << "P2 velocity ";
+        refFE_adr = &feTetraP2;
+        qR_adr    = &quadRuleTetra15pt;  // DoE 2
+        bdQr_adr  = &quadRuleTria3pt;   // DoE 2
+    }
 
     dataADR.setMesh(meshPart.mesh());
 
@@ -444,10 +449,10 @@ MassTransport::run()
 
 
     if (L2proj)
-        {
-            fluid.updateSystem( 0., betaFluid, rhsFluid );
-            fluid.iterate(bcH);
-        }
+    {
+        fluid.updateSystem( 0., betaFluid, rhsFluid );
+        fluid.iterate(bcH);
+    }
 
 
     vector_type velpressure ( fluid.solution(), Repeated );

@@ -45,41 +45,41 @@ namespace LifeV
   Manages the "Unknown Type" error in an object factory.
 */
 template <
-    typename IdentifierType,
-    class AbstractProduct
-    >
+typename IdentifierType,
+class AbstractProduct
+>
 struct factoryDefaultError
 {
     class Exception
-        :
-        public std::exception
+            :
+            public std::exception
     {
     public:
         Exception( IdentifierType /*id*/ )
-            :
-            std::exception(),
-            _M_ex()
-            {
-                std::ostringstream __ex_str;
-                //__ex_str << "[factory] Unknown Type : " << id;
-                __ex_str << "[factory] Unknown Type : ";
-                _M_ex = __ex_str.str();
+                :
+                std::exception(),
+                _M_ex()
+        {
+            std::ostringstream __ex_str;
+            //__ex_str << "[factory] Unknown Type : " << id;
+            __ex_str << "[factory] Unknown Type : ";
+            _M_ex = __ex_str.str();
 
-            }
+        }
         ~Exception() throw()
-            {}
+        {}
         const char* what() const throw ()
-            {
-                return _M_ex.c_str();
-            }
+        {
+            return _M_ex.c_str();
+        }
     private:
         std::string _M_ex;
     };
 
     static AbstractProduct* onUnknownType(IdentifierType id )
-        {
-            throw Exception( id );
-        }
+    {
+        throw Exception( id );
+    }
 };
 
 /*!
@@ -92,13 +92,13 @@ struct factoryDefaultError
 */
 template
 <
-    class AbstractProduct,
-    typename IdentifierType,
-    typename ProductCreator = boost::function<AbstractProduct*()>,
-    template<typename, class> class factoryErrorPolicy = factoryDefaultError
+class AbstractProduct,
+typename IdentifierType,
+typename ProductCreator = boost::function<AbstractProduct*()>,
+template<typename, class> class factoryErrorPolicy = factoryDefaultError
 >
 class factory
-    :
+        :
         public factoryErrorPolicy<IdentifierType,AbstractProduct>
 {
 public:
@@ -134,10 +134,10 @@ public:
      * @return true if registration went fine, false otherwise
      */
     bool registerProduct( const identifier_type& id, creator_type creator )
-        {
-            LifeV::Debug( 2200 ) << "Registered type with id : " << id << "\n";
-            return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
-        }
+    {
+        LifeV::Debug( 2200 ) << "Registered type with id : " << id << "\n";
+        return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+    }
 
     /**
      * Unregister a product
@@ -147,10 +147,10 @@ public:
      * @return true if unregistration went fine, false otherwise
      */
     bool unregisterProduct( const identifier_type& id )
-        {
-            LifeV::Debug( 2200 ) << "Unregistered type with id : " << id << "\n";
-            return _M_associations.erase( id ) == 1;
-        }
+    {
+        LifeV::Debug( 2200 ) << "Unregistered type with id : " << id << "\n";
+        return _M_associations.erase( id ) == 1;
+    }
 
     /**
      * Create an object from a product registered in the factory using
@@ -161,16 +161,16 @@ public:
      * @return the object associate with \c id
      */
     product_type* createObject( const identifier_type& id )
+    {
+        typename id_to_product_type::const_iterator i = _M_associations.find( id );
+        if (i != _M_associations.end())
         {
-            typename id_to_product_type::const_iterator i = _M_associations.find( id );
-            if (i != _M_associations.end())
-            {
-                LifeV::Debug ( 2200 ) << "Creating type with id : " << id << "\n";
-                return (i->second)();
-            }
-            LifeV::Debug( 2200 ) << "Unknown type with id : " << id << "\n";
-            return super::onUnknownType( id );
+            LifeV::Debug ( 2200 ) << "Creating type with id : " << id << "\n";
+            return (i->second)();
         }
+        LifeV::Debug( 2200 ) << "Unknown type with id : " << id << "\n";
+        return super::onUnknownType( id );
+    }
 
 
 
@@ -190,83 +190,83 @@ private:
   \author Christophe Prud'homme
 */
 template <
-   class AbstractProduct,
-   class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
-   template<typename, class> class FactoryErrorPolicy = factoryDefaultError
+class AbstractProduct,
+class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
+template<typename, class> class FactoryErrorPolicy = factoryDefaultError
 >
 class factoryClone
-   :
-   public FactoryErrorPolicy<TypeInfo, AbstractProduct>
+        :
+        public FactoryErrorPolicy<TypeInfo, AbstractProduct>
 {
 public:
 
 
-   /** @name Typedefs
-    */
-   //@{
+    /** @name Typedefs
+     */
+    //@{
 
-   typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
+    typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
 
-   //@}
+    //@}
 
-   /** @name Constructors, destructor
-    */
-   //@{
+    /** @name Constructors, destructor
+     */
+    //@{
 
-   //@}
+    //@}
 
-   /** @name Operator overloads
-    */
-   //@{
-
-
-   //@}
-
-   /** @name Accessors
-    */
-   //@{
+    /** @name Operator overloads
+     */
+    //@{
 
 
-   //@}
+    //@}
 
-   /** @name  Mutators
-    */
-   //@{
+    /** @name Accessors
+     */
+    //@{
 
 
-   //@}
+    //@}
 
-   /** @name  Methods
-    */
-   //@{
+    /** @name  Mutators
+     */
+    //@{
 
-   bool registerProduct(const TypeInfo& id, ProductCreator creator)
-      {
-         return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
-      }
 
-   bool unregisterProduct( const TypeInfo& id )
-      {
-         return _M_associations.erase(id) == 1;
-      }
+    //@}
 
-   AbstractProduct* createObject( const AbstractProduct* model )
-      {
-         if ( model == 0 ) return 0;
+    /** @name  Methods
+     */
+    //@{
 
-         typename id_to_product_type::const_iterator i = _M_associations.find( typeid(*model) );
-         if ( i != _M_associations.end() )
-         {
+    bool registerProduct(const TypeInfo& id, ProductCreator creator)
+    {
+        return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+    }
+
+    bool unregisterProduct( const TypeInfo& id )
+    {
+        return _M_associations.erase(id) == 1;
+    }
+
+    AbstractProduct* createObject( const AbstractProduct* model )
+    {
+        if ( model == 0 ) return 0;
+
+        typename id_to_product_type::const_iterator i = _M_associations.find( typeid(*model) );
+        if ( i != _M_associations.end() )
+        {
             return (i->second)(model);
-         }
-         return super::onUnknownType(typeid(*model));
-      }
+        }
+        return super::onUnknownType(typeid(*model));
+    }
 
-   //@}
+    //@}
 
 private:
-   typedef std::map<TypeInfo, ProductCreator> id_to_product_type;
-   id_to_product_type _M_associations;
+    typedef std::map<TypeInfo, ProductCreator> id_to_product_type;
+    id_to_product_type _M_associations;
 };
 
 

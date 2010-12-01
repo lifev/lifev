@@ -23,7 +23,7 @@ namespace LifeV
 {
 bool
 Switch::set
-    ( std::string const & a )
+( std::string const & a )
 {
     iterator i = find( a );
     if ( i == end() )
@@ -40,11 +40,11 @@ Switch::set
 
 bool
 Switch::set
-    ( const char * a )
+( const char * a )
 {
     std::string temp( a );
     return set
-               ( temp );
+           ( temp );
 }
 
 

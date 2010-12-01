@@ -54,7 +54,8 @@
 #include <Epetra_FEVector.h>
 #include <Epetra_Export.h>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! EpetraVector - The Epetra Vector format Wrapper
 /*!
@@ -251,9 +252,9 @@ public:
     //@{
 
     //! Access operators
-          data_type& operator[]( const UInt row );
+    data_type& operator[]( const UInt row );
     const data_type& operator[]( const UInt row ) const;
-          data_type& operator()( const UInt row );
+    data_type& operator()( const UInt row );
     const data_type& operator()( const UInt row ) const;
 
     //! copies the value of a vector u. If the map is not the same,
@@ -428,7 +429,7 @@ public:
 
     int size() const
     {
-        if( M_epetraVector.get() )
+        if ( M_epetraVector.get() )
             return M_epetraVector->GlobalLength();
         return 0;
     }

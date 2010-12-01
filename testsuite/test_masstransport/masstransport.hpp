@@ -61,10 +61,10 @@ public:
     //@{
 
     MassTransport( int argc,
-              char** argv );
+                   char** argv );
 
     ~MassTransport()
-        {}
+    {}
 
     //@}
 

@@ -24,14 +24,14 @@ namespace LifeV
 Real QuadRule::exactnessTol=1e-8;
 
 QuadRule::QuadRule()
-:    M_pt(0), M_shape(NONE), M_name(""), M_nbQuadPt(0), M_degOfExact(0), M_dimension(0)
+        :    M_pt(0), M_shape(NONE), M_name(""), M_nbQuadPt(0), M_degOfExact(0), M_dimension(0)
 {}
 
-    QuadRule::QuadRule( const QuadPoint* pt, int /*id*/, std::string name,
+QuadRule::QuadRule( const QuadPoint* pt, int /*id*/, std::string name,
                     ReferenceShapes shape, UInt nbQuadPt, UInt degOfExact ) :
-    M_pt( nbQuadPt),
-    M_shape( shape ), M_name( name ),
-    M_nbQuadPt( nbQuadPt ), M_degOfExact( degOfExact )
+        M_pt( nbQuadPt),
+        M_shape( shape ), M_name( name ),
+        M_nbQuadPt( nbQuadPt ), M_degOfExact( degOfExact )
 {
     CONSTRUCTOR( "QuadRule" );
     M_dimension = 3;
@@ -63,12 +63,12 @@ QuadRule::QuadRule( const QuadRule& qr, const UInt dim) :
 }
 
 QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... ) :
-    M_pt( nbQuadPt),
-    M_shape( shape),
-    M_name( name),
-    M_nbQuadPt( nbQuadPt),
-    M_degOfExact( degreeOfExactness),
-    M_dimension( dimension)
+        M_pt( nbQuadPt),
+        M_shape( shape),
+        M_name( name),
+        M_nbQuadPt( nbQuadPt),
+        M_degOfExact( degreeOfExactness),
+        M_dimension( dimension)
 {
     ASSERT(dimension >= getReferenceDimension(shape)," Downgrading quadrature rule is forbidden ");
 
@@ -111,7 +111,7 @@ UInt QuadRule::checkExactness() const
     case LINE:
         return checkExactnessSegment();
         break;
-        
+
     case TRIANGLE:
         return checkExactnessTriangle();
         break;
@@ -200,12 +200,12 @@ UInt QuadRule::checkExactnessTetra() const
     }
 
     return 4;
-    
+
 }
 
 UInt QuadRule::checkExactnessTriangle() const
 {
-    
+
     // Degre 0: f=1 => exact value : 1/2
     Real partialSum(0.0);
 
@@ -225,7 +225,7 @@ UInt QuadRule::checkExactnessTriangle() const
     for (UInt iterQ(0); iterQ<M_nbQuadPt; ++iterQ)
     {
         partialSum += (quadPointCoor(iterQ,0) + quadPointCoor(iterQ,1))
-            * weight(iterQ);
+                      * weight(iterQ);
     }
 
     if ( std::abs(partialSum - 1.0/3.0) > exactnessTol)
@@ -238,9 +238,9 @@ UInt QuadRule::checkExactnessTriangle() const
 
     for (UInt iterQ(0); iterQ<M_nbQuadPt; ++iterQ)
     {
-        partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0) 
+        partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)
                        + 3*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,1))
-            * weight(iterQ);
+                      * weight(iterQ);
     }
 
     if ( std::abs(partialSum - 5.0/24.0) > exactnessTol)
@@ -255,7 +255,7 @@ UInt QuadRule::checkExactnessTriangle() const
     {
         partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,1)
                        - 5*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,1))
-            * weight(iterQ);
+                      * weight(iterQ);
     }
 
     if ( std::abs(partialSum + 23.0/120.0) > exactnessTol)
@@ -271,7 +271,7 @@ UInt QuadRule::checkExactnessTriangle() const
         partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,1)
                        - quadPointCoor(iterQ,0)*quadPointCoor(iterQ,1)*quadPointCoor(iterQ,1)
                        + quadPointCoor(iterQ,1)*quadPointCoor(iterQ,1)*quadPointCoor(iterQ,1)*quadPointCoor(iterQ,1) )
-            * weight(iterQ);
+                      * weight(iterQ);
     }
 
     if ( std::abs(partialSum - 1.0/40.0) > exactnessTol)
@@ -279,7 +279,7 @@ UInt QuadRule::checkExactnessTriangle() const
         return 3;
     }
 
-     // Degre 5: f= x^4*y - x*y^2 + y^5 => exact value : 1/84
+    // Degre 5: f= x^4*y - x*y^2 + y^5 => exact value : 1/84
     partialSum=0.0;
 
     for (UInt iterQ(0); iterQ<M_nbQuadPt; ++iterQ)
@@ -295,7 +295,7 @@ UInt QuadRule::checkExactnessTriangle() const
         return 4;
     }
 
-    
+
     return 5;
 }
 
@@ -355,7 +355,7 @@ UInt QuadRule::checkExactnessSegment() const
     for (UInt iterQ(0); iterQ<M_nbQuadPt; ++iterQ)
     {
         partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)
-            )*weight(iterQ);
+                      )*weight(iterQ);
     }
 
     if ( std::abs(partialSum - 1.0/5.0) > exactnessTol)
@@ -370,7 +370,7 @@ UInt QuadRule::checkExactnessSegment() const
         partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)
                        *quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)
                        *quadPointCoor(iterQ,0)
-                       )*weight(iterQ);
+                      )*weight(iterQ);
     }
 
     if ( std::abs(partialSum - 1.0/6.0) > exactnessTol)
@@ -385,21 +385,21 @@ void QuadRule::VTKexport( const std::string& filename) const
 {
     std::ofstream output(filename.c_str());
     ASSERT(!output.fail(), " Unable to open the file for the export of the quadrature ");
-    
+
     // Header
     output << "# vtk DataFile Version 3.0" << std::endl;
     output << "LifeV : Quadrature export" << std::endl;
     output << "ASCII" << std::endl;
     output << "DATASET POLYDATA" << std::endl;
     output << "POINTS " << M_nbQuadPt << " float" << std::endl;
-    
+
     for (UInt i(0); i< M_nbQuadPt; ++i)
     {
         output << M_pt[i].coor(0) << " " << M_pt[i].coor(1) << " " << M_pt[i].coor(2) << std::endl;
     };
 
     output << "VERTICES " << M_nbQuadPt << " " << 2*M_nbQuadPt << std::endl;
-    
+
     for (UInt i(0); i< M_nbQuadPt; ++i)
     {
         output << 1 << " " << i << std::endl;
@@ -414,7 +414,7 @@ std::ostream& operator << ( std::ostream& c, const QuadRule& qr )
     c << " shape:" << ( int ) qr.M_shape << std::endl;
     c << " nbQuadPt: " << qr.M_nbQuadPt << std::endl;
     c << " Points: \n";
-    for ( UInt i (0);i < qr.M_nbQuadPt;++i )
+    for ( UInt i (0); i < qr.M_nbQuadPt; ++i )
         c << qr.M_pt[ i ] << std::endl;
     return c;
 }
@@ -427,7 +427,7 @@ void QuadRule::setPoints(const std::vector<QuadPoint>& pts)
     {
         M_pt[i]=QuadPoint(pts[i],M_dimension);
     }
-    
+
     M_nbQuadPt=pts.size();
 }
 
@@ -441,7 +441,7 @@ void QuadRule::setPoints(const std::vector<GeoVector>& coordinates, const std::v
     {
         M_pt[i]=QuadPoint(coordinates[i],weights[i],M_dimension);
     }
-    
+
     M_nbQuadPt=M_pt.size();
 }
 
@@ -460,7 +460,7 @@ void QuadRule::setDimensionShape(const UInt& newDim, const ReferenceShapes& newS
     ASSERT(newDim >= getReferenceDimension(newShape)," Impossible shape-dimension combinaison ");
     M_dimension = newDim;
     M_shape = newShape;
-    
+
     // Change also the dimension of the points if they are already set!
     for (UInt i(0); i<M_pt.size(); ++i)
     {

@@ -1,7 +1,7 @@
 /**
- * Useful elemental operators for projection methods. 
- * __todo__ : merge with elemOper.hpp/elemOper.cpp. 
- */ 
+ * Useful elemental operators for projection methods.
+ * __todo__ : merge with elemOper.hpp/elemOper.cpp.
+ */
 
 #ifndef __ELEMOPER_CT_HH
 #define __ELEMOPER_CT_HH
@@ -14,7 +14,7 @@
 namespace LifeV
 {
 
-void source_pdivv(Real alpha, ElemVec& pLoc, ElemVec& elvec, 
+void source_pdivv(Real alpha, ElemVec& pLoc, ElemVec& elvec,
                   const CurrentFE& fe_p, const CurrentFE& fe_u, const int iblock)
 {
     int i, j, iq;
@@ -24,21 +24,21 @@ void source_pdivv(Real alpha, ElemVec& pLoc, ElemVec& elvec,
     for (i=0; i < fe_u.nbNode; i++)
     {
         s = 0;
-	for (iq = 0; iq < fe_u.nbQuadPt; ++iq)
-	    for (j = 0; j < fe_p.nbNode; ++j)
-	        s += pLoc[j]*fe_p.phi(j,iq)*fe_u.phiDer(i,iblock,iq)*fe_u.weightDet(iq);
-        vec( i ) += s*alpha; 
+        for (iq = 0; iq < fe_u.nbQuadPt; ++iq)
+            for (j = 0; j < fe_p.nbNode; ++j)
+                s += pLoc[j]*fe_p.phi(j,iq)*fe_u.phiDer(i,iblock,iq)*fe_u.weightDet(iq);
+        vec( i ) += s*alpha;
     }
 } // source_pdivv
 
 /**
- * Interior penalty term for convective stabilization: explicit case. 
- * On input elemental velocity uLoc on fe_u = fe1. 
+ * Interior penalty term for convective stabilization: explicit case.
+ * On input elemental velocity uLoc on fe_u = fe1.
  * On output elemental iblock elvec on fe = fe2.
  */
 
 void ipstab_grad_expl( const Real         coef,
-                       ElemVec&           uLoc,	
+                       ElemVec&           uLoc,
                        ElemVec&           elvec,
                        const CurrentFE&   fe1,
                        const CurrentFE&   fe2,
@@ -131,23 +131,23 @@ void ipstab_grad_expl( const Real         coef,
     // Compute i_th block of elemental stabilization vector
     for (j=0; j<fe2.nbNode; ++j)
     {
-    	sum = 0.0;
-	for (i=0; i<fe1.nbNode; ++i)
-	    sum += uLoc[iblock * fe1.nbNode + i ] * mat_tmp(i,j);
-	vec(j) += sum;
+        sum = 0.0;
+        for (i=0; i<fe1.nbNode; ++i)
+            sum += uLoc[iblock * fe1.nbNode + i ] * mat_tmp(i,j);
+        vec(j) += sum;
     }
 
 } // ipstab_grad_expl
 
 /**
- * Interior penalty term for convective stabilization: explicit case. 
- * On input elemental velocity uLoc on fe_u = fe1. 
+ * Interior penalty term for convective stabilization: explicit case.
+ * On input elemental velocity uLoc on fe_u = fe1.
  * On output elemental elvec on fe = fe2.
  * __note__: better use this overload as it avoids too many calls.
  */
 
 void ipstab_grad_expl( const Real         coef,
-                       ElemVec&           uLoc,	
+                       ElemVec&           uLoc,
                        ElemVec&           elvec,
                        const CurrentFE&   fe1,
                        const CurrentFE&   fe2,
@@ -237,19 +237,20 @@ void ipstab_grad_expl( const Real         coef,
     // Compute __all__ blocks of elemental stabilization vector
     for (j=0; j<fe2.nbNode; ++j)
     {
-    	for (jcoor=0; jcoor<fe2.nbCoor; ++jcoor) {
-	    sum = 0.0;
-	    for (i=0; i<fe1.nbNode; ++i)
-	        sum += uLoc[jcoor * fe1.nbNode + i ] * mat_tmp(i,j);
-	    elvec.vec()[j+jcoor*fe2.nbNode] += sum;
-	}
+        for (jcoor=0; jcoor<fe2.nbCoor; ++jcoor)
+        {
+            sum = 0.0;
+            for (i=0; i<fe1.nbNode; ++i)
+                sum += uLoc[jcoor * fe1.nbNode + i ] * mat_tmp(i,j);
+            elvec.vec()[j+jcoor*fe2.nbNode] += sum;
+        }
     }
 
 } // ipstab_grad_expl
 
 /**
- * Explicit local convective term - < v | u. \nabla u >, with a __minus__ sign. 
- * __note__: this version directly works for local vector fields (i.e. velocity) 
+ * Explicit local convective term - < v | u. \nabla u >, with a __minus__ sign.
+ * __note__: this version directly works for local vector fields (i.e. velocity)
  * and only one currentFE as one needs no more for pure NS and it reduces calls.
  * On input : uLoc elemental velocity on fe
  * On output : elvec elemental explicit convective term on the same fe.
@@ -266,57 +267,57 @@ void source_ugradu(const ElemVec& uLoc, ElemVec& elvec, const CurrentFE& fe)
 
     for (iCoor = 0; iCoor < nDimensions; ++iCoor)
     {
-      for (iQuad = 0; iQuad < fe.nbQuadPt; ++iQuad)
-      {
-        s = 0.;
-	// compute u.\nabla u at gauss point for each component
-	for (iNode = 0; iNode < fe.nbNode; ++iNode)
-	{
-	  for (jNode = 0; jNode < fe.nbNode; ++jNode)
-	  {
-	    for (jCoor = 0; jCoor < nDimensions; ++jCoor)
-	    {
-	      s += uLoc.vec()[jNode + jCoor * fe.nbNode] * fe.phi(jNode, iQuad) * 
-	            fe.phiDer(iNode, jCoor, iQuad) * uLoc.vec()[iNode+ iCoor * fe.nbNode];
-	    }
-	  }
-	}
-        
-        mat_tmp(iCoor, iQuad) = s;
+        for (iQuad = 0; iQuad < fe.nbQuadPt; ++iQuad)
+        {
+            s = 0.;
+            // compute u.\nabla u at gauss point for each component
+            for (iNode = 0; iNode < fe.nbNode; ++iNode)
+            {
+                for (jNode = 0; jNode < fe.nbNode; ++jNode)
+                {
+                    for (jCoor = 0; jCoor < nDimensions; ++jCoor)
+                    {
+                        s += uLoc.vec()[jNode + jCoor * fe.nbNode] * fe.phi(jNode, iQuad) *
+                             fe.phiDer(iNode, jCoor, iQuad) * uLoc.vec()[iNode+ iCoor * fe.nbNode];
+                    }
+                }
+            }
 
-      }
+            mat_tmp(iCoor, iQuad) = s;
+
+        }
     }
 
     // compute convective term
     for (iNode = 0; iNode < fe.nbNode; ++iNode)
     {
         for (iCoor = 0; iCoor < nDimensions; ++iCoor)
-	{
-	    s = 0.;
-	    for (iQuad=0; iQuad < fe.nbQuadPt; ++iQuad)
-	    {
-	        // here we put the minus sign
-		s -= mat_tmp(iCoor, iQuad) * fe.phi(iNode, iQuad) * fe.weightDet(iQuad);
-	    }
-	    elvec.vec()[iNode + iCoor * fe.nbNode] += s;
-	}
+        {
+            s = 0.;
+            for (iQuad=0; iQuad < fe.nbQuadPt; ++iQuad)
+            {
+                // here we put the minus sign
+                s -= mat_tmp(iCoor, iQuad) * fe.phi(iNode, iQuad) * fe.weightDet(iQuad);
+            }
+            elvec.vec()[iNode + iCoor * fe.nbNode] += s;
+        }
     }
 
 } // source_ugradu
 
 /**
- * Explicit local convective term - coef * < v | u1. \nabla 2 >. 
- * __note__: this version directly works for local vector fields (i.e. velocity) 
+ * Explicit local convective term - coef * < v | u1. \nabla 2 >.
+ * __note__: this version directly works for local vector fields (i.e. velocity)
  * and only one currentFE as one needs no more for pure NS and it reduces calls.
  * On input : uLoc1 and uLoc2  elemental velocities on fe
  * On output : elvec elemental explicit convective term on the same fe.
  *
  */
 
-void source_u1gradu2(const Real coef, const ElemVec& uLoc1, 
-                                      const ElemVec& uLoc2, 
-				      ElemVec& elvec, 
-				      const CurrentFE& fe)
+void source_u1gradu2(const Real coef, const ElemVec& uLoc1,
+                     const ElemVec& uLoc2,
+                     ElemVec& elvec,
+                     const CurrentFE& fe)
 {
     int iQuad, iCoor, jCoor, iNode, jNode;
     double s;
@@ -324,51 +325,51 @@ void source_u1gradu2(const Real coef, const ElemVec& uLoc1,
 
     for (iCoor = 0; iCoor < nDimensions; ++iCoor)
     {
-      for (iQuad = 0; iQuad < fe.nbQuadPt; ++iQuad)
-      {
-        s = 0.;
-	// compute u1.\nabla u2 at gauss point for each component
-	for (iNode = 0; iNode < fe.nbNode; ++iNode)
-	{
-	  for (jNode = 0; jNode < fe.nbNode; ++jNode)
-	  {
-	    for (jCoor = 0; jCoor < nDimensions; ++jCoor)
-	    {
-	      s += uLoc1.vec()[jNode + jCoor * fe.nbNode] * fe.phi(jNode, iQuad) * 
-	            fe.phiDer(iNode, jCoor, iQuad) * uLoc2.vec()[iNode+ iCoor * fe.nbNode];
-	    }
-	  }
-	}
-        
-        mat_tmp(iCoor, iQuad) = s;
+        for (iQuad = 0; iQuad < fe.nbQuadPt; ++iQuad)
+        {
+            s = 0.;
+            // compute u1.\nabla u2 at gauss point for each component
+            for (iNode = 0; iNode < fe.nbNode; ++iNode)
+            {
+                for (jNode = 0; jNode < fe.nbNode; ++jNode)
+                {
+                    for (jCoor = 0; jCoor < nDimensions; ++jCoor)
+                    {
+                        s += uLoc1.vec()[jNode + jCoor * fe.nbNode] * fe.phi(jNode, iQuad) *
+                             fe.phiDer(iNode, jCoor, iQuad) * uLoc2.vec()[iNode+ iCoor * fe.nbNode];
+                    }
+                }
+            }
 
-      }
+            mat_tmp(iCoor, iQuad) = s;
+
+        }
     }
 
     // compute convective term
     for (iNode = 0; iNode < fe.nbNode; ++iNode)
     {
         for (iCoor = 0; iCoor < nDimensions; ++iCoor)
-	{
-	    s = 0.;
-	    for (iQuad=0; iQuad < fe.nbQuadPt; ++iQuad)
-	    {
-		s += mat_tmp(iCoor, iQuad) * fe.phi(iNode, iQuad) * fe.weightDet(iQuad);
-	    }
-	    elvec.vec()[iNode + iCoor * fe.nbNode] += coef * s;
-	}
+        {
+            s = 0.;
+            for (iQuad=0; iQuad < fe.nbQuadPt; ++iQuad)
+            {
+                s += mat_tmp(iCoor, iQuad) * fe.phi(iNode, iQuad) * fe.weightDet(iQuad);
+            }
+            elvec.vec()[iNode + iCoor * fe.nbNode] += coef * s;
+        }
     }
 
 } // source_u1gradu2
 
 /**
  * Explicit stiffness strain for Crank-Nicholson step in RK2 like Chorin-Temam method
- * On input : uLoc elemental velocity vector on fe 
+ * On input : uLoc elemental velocity vector on fe
  * On output : all blocks elvec elemental stiff vector on fe
- * __note__: coef must be __minus one__ time the viscosity when used. 
+ * __note__: coef must be __minus one__ time the viscosity when used.
  */
 
-void source_stiff_strain( const Real coef, const ElemVec& uLoc, ElemVec& elvec, 
+void source_stiff_strain( const Real coef, const ElemVec& uLoc, ElemVec& elvec,
                           const CurrentFE& fe)
 {
     ASSERT_PRE( fe.hasFirstDeriv(),
@@ -415,21 +416,21 @@ void source_stiff_strain( const Real coef, const ElemVec& uLoc, ElemVec& elvec,
         }
     }
 
-    // get explicit term 
+    // get explicit term
     for (int icoor = 0; icoor < fe.nbCoor; ++icoor)
     {
         for (int i = 0; i<fe.nbNode; ++i)
         {
-  	    s = 0.0;
-	    for (int jcoor = 0; jcoor < fe.nbCoor; ++jcoor)
-	    {
-	        for (int j = 0; j<fe.nbNode; ++j)
-	        {
-	              // __todo__: double check the call to the KNM from .mat() below 
-		      s += uLoc[j+jcoor*fe.nbNode] * elmat.mat()(j+jcoor*fe.nbNode,i+icoor*fe.nbNode);
-	        }
+            s = 0.0;
+            for (int jcoor = 0; jcoor < fe.nbCoor; ++jcoor)
+            {
+                for (int j = 0; j<fe.nbNode; ++j)
+                {
+                    // __todo__: double check the call to the KNM from .mat() below
+                    s += uLoc[j+jcoor*fe.nbNode] * elmat.mat()(j+jcoor*fe.nbNode,i+icoor*fe.nbNode);
+                }
             }
-	    elvec.vec()[i+icoor*fe.nbNode] += s;
+            elvec.vec()[i+icoor*fe.nbNode] += s;
         }
     }
 

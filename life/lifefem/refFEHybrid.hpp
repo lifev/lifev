@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -39,7 +39,8 @@
 
 #include <life/lifefem/staticBdFE.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*!
   @class RefHybridFE
@@ -47,10 +48,10 @@ namespace LifeV {
   @author V. Martin
   @date 08/2002
 
-  This is an enrichment of RefFE in order to implement mixed hybrid finite elements, 
+  This is an enrichment of RefFE in order to implement mixed hybrid finite elements,
   which are based on a (RT0 - Q0) like discretization of \f$ H(div, \Omega) - L^2(\Omega) \f$.
 
-  This class contains a list of boundary elements; thanks to the Piola transform, the computations 
+  This class contains a list of boundary elements; thanks to the Piola transform, the computations
   are performed on the boundary of the reference element. But in general, the boundary of a 3D reference
   element is not a 2D reference element.
   <BR>
@@ -61,9 +62,9 @@ namespace LifeV {
   REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
   <BR>
   REFERENCE HEXA  -> 6 REFERENCE QUAD.
-	
+
   @par How to add a new finite element ?
-  
+
   @li In refFE.h: you add a new finite element flag in FE_TYPE enum with a command like:
   \code
 FE_PIPO = a_new_number
@@ -82,11 +83,11 @@ extern const RefHybridFE fePipo;
 
   @li In defQuadRuleFE.cc: you define a list of StaticBdFE with a command like:
   \code
-  #define NB_BDFE_PIPO 
+  #define NB_BDFE_PIPO
 static const StaticBdFE BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
 ...
   \endcode
-  
+
   @li In defQuadRuleFE.cc: you define a static array containing all the StaticBdFE
   with a command like
   \code
@@ -96,85 +97,85 @@ static const StaticBdFE HybPIPOList[ NB_BDFE_PIPO ] =
      ...
 };
   \endcode
-  
+
   @li In defQuadRuleFE.cc: you define your new element with a command like:
   \code
-const RefFEHybrid feTriaPipo("Pipo elements on a tetrahedron", FE_PIPO, TETRA, 
+const RefFEHybrid feTriaPipo("Pipo elements on a tetrahedron", FE_PIPO, TETRA,
 							 0, 0, 1, 0, 4, 3, NB_BDFE_PIPO, HybPIPOList, refcoor_PIPO, STANDARD_PATTERN );
   \endcode
   See documentation of RefFEHybrid::RefFEHybrid(...) for a precise description of all arguments.
 */
 class RefFEHybrid:
-            public RefFE
-{   
+        public RefFE
+{
 public:
 
     typedef RefFE::Fct Fct;
 
     //! @name Constructor & Destructor
     //@{
-    
+
     /*!
       Constructor of a reference hybrid finite element. The arguments are:
       @param name Name of the finite element
-	  @param type Type of the finite element (FE_P1_2D,... see the #define at the begining of refFE.h)
+      @param type Type of the finite element (FE_P1_2D,... see the #define at the begining of refFE.h)
       @param shape Geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
-	  @param nbDofPerVertex Number of degrees of freedom per vertex
-	  @param nbDofPerEdge Number of degrees of freedom per edge
+      @param nbDofPerVertex Number of degrees of freedom per vertex
+      @param nbDofPerEdge Number of degrees of freedom per edge
       @param nbDofPerFace Number of degrees of freedom per face
       @param nbDofPerVolume Number of degrees of freedom per volume
-	  @param nbDof Total number of degrees of freedom ( = nbDofPerVertex * nb vertex + nbDofPerEdge * nb edges + etc...)
+      @param nbDof Total number of degrees of freedom ( = nbDofPerVertex * nb vertex + nbDofPerEdge * nb edges + etc...)
       @param nbCoor Number of local coordinates
       @param refCoor Static array containing the coordinates of the nodes on the reference element
-	  @param numBoundaryFE Number of static boundary elements
-	  @param boundaryFEList List of static boundary elements
+      @param numBoundaryFE Number of static boundary elements
+      @param boundaryFEList List of static boundary elements
       @param refCoor Static array containing the coordinates of the nodes on
       the reference element (defined in refEle.h)
       @param patternType In most of cases is STANDARD_PATTERN, except for elements
       like P1isoP2 (to define a new pattern, add a new #define in refFE.h and
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
     */
-    RefFEHybrid( std::string        name, 
-                 FE_TYPE            type, 
+    RefFEHybrid( std::string        name,
+                 FE_TYPE            type,
                  ReferenceShapes    shape,
-                 UInt               nbDofPerVertex, 
-                 UInt               nbDofPerEdge, 
-                 UInt               nbDofPerFace, 
+                 UInt               nbDofPerVertex,
+                 UInt               nbDofPerEdge,
+                 UInt               nbDofPerFace,
                  UInt               nbDofPerVolume,
-                 UInt               nbDof, 
+                 UInt               nbDof,
                  UInt               nbCoor,
-                 const UInt&        numberBoundaryFE, 
-                 const StaticBdFE*  boundaryFEList,   
+                 const UInt&        numberBoundaryFE,
+                 const StaticBdFE*  boundaryFEList,
                  const Real*        refCoor,
                  DofPatternType     patternType = STANDARD_PATTERN );
-	    
+
     //! Destructor.
     ~RefFEHybrid();
 
-	//@}
+    //@}
 
     //! Extracting a StaticBdFE from the faces list.
     inline const StaticBdFE& operator[] ( const ID& i ) const
     {
         ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
-    	return M_boundaryFEList[ i ];
-	}
+        return M_boundaryFEList[ i ];
+    }
 
     //! Return the number of boundary elements of the reference element.
     inline const UInt& numberBoundaryFE() const
     {
         return M_numberBoundaryFE;
     }
-    
+
 private:
 
     //! No empty constructor.
     RefFEHybrid();
-    
-    //! No copy constructor.
-    RefFEHybrid( const RefFEHybrid& );    
 
-	//! Number of boundary elements to be stored.
+    //! No copy constructor.
+    RefFEHybrid( const RefFEHybrid& );
+
+    //! Number of boundary elements to be stored.
     const UInt M_numberBoundaryFE;
 
     /*! List holding the stored boundary elements that live on the boundary faces (3D),
@@ -235,14 +236,14 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 /* Not really useful(?). to be  removed? in this case, remove also xi, eta, zeta, etc. in the class.
    this info is included in Staticbdfe. */
 static const Real refcoor_RT0HYB_HEXA[ 18 ] =
-    {
-        0.5 , 0.5 , 0. ,
-        0.  , 0.5 , 0.5 ,
-        0.5 , 0.  , 0.5 ,
-        1.  , 0.5 , 0.5 ,
-        0.5 , 1.  , 0.5 ,
-        0.5 , 0.5 , 1.
-    };
+{
+    0.5 , 0.5 , 0. ,
+    0.  , 0.5 , 0.5 ,
+    0.5 , 0.  , 0.5 ,
+    1.  , 0.5 , 0.5 ,
+    0.5 , 1.  , 0.5 ,
+    0.5 , 0.5 , 1.
+};
 
 
 
@@ -250,54 +251,54 @@ static const Real refcoor_RT0HYB_HEXA[ 18 ] =
    Coordinates of the vertices of the 6 faces. They are used for the definition of the POINT in the bdfe.
    The same arrays can be used for all the Hybrid elements that have the same shape.
    E.g. refcoor_HYB_HEXA_FACE_I are used for all the HEXA Hybrid elements. */
-   
+
 static const Real refcoor_HYB_HEXA_FACE_1[ 12 ] =
-    {
-        0. , 0. , 0. ,
-        0. , 1. , 0. ,
-        1. , 1. , 0. ,
-        1. , 0. , 0.
-    };
+{
+    0. , 0. , 0. ,
+    0. , 1. , 0. ,
+    1. , 1. , 0. ,
+    1. , 0. , 0.
+};
 
 static const Real refcoor_HYB_HEXA_FACE_2[ 12 ] =
-    {
-        0. , 0. , 0. ,
-        0. , 0. , 1. ,
-        0. , 1. , 1. ,
-        0. , 1. , 0.
-    };
+{
+    0. , 0. , 0. ,
+    0. , 0. , 1. ,
+    0. , 1. , 1. ,
+    0. , 1. , 0.
+};
 
 static const Real refcoor_HYB_HEXA_FACE_3[ 12 ] =
-    {
-        0. , 0. , 0. ,
-        1. , 0. , 0. ,
-        1. , 0. , 1. ,
-        0. , 0. , 1.
-    };
+{
+    0. , 0. , 0. ,
+    1. , 0. , 0. ,
+    1. , 0. , 1. ,
+    0. , 0. , 1.
+};
 
 static const Real refcoor_HYB_HEXA_FACE_4[ 12 ] =
-    {
-        1. , 0. , 0. ,
-        1. , 1. , 0. ,
-        1. , 1. , 1. ,
-        1. , 0. , 1.
-    };
+{
+    1. , 0. , 0. ,
+    1. , 1. , 0. ,
+    1. , 1. , 1. ,
+    1. , 0. , 1.
+};
 
 static const Real refcoor_HYB_HEXA_FACE_5[ 12 ] =
-    {
-        1. , 1. , 0. ,
-        0. , 1. , 0. ,
-        0. , 1. , 1. ,
-        1. , 1. , 1.
-    };
+{
+    1. , 1. , 0. ,
+    0. , 1. , 0. ,
+    0. , 1. , 1. ,
+    1. , 1. , 1.
+};
 
 static const Real refcoor_HYB_HEXA_FACE_6[ 12 ] =
-    {
-        0. , 0. , 1. ,
-        1. , 0. , 1. ,
-        1. , 1. , 1. ,
-        0. , 1. , 1.
-    };
+{
+    0. , 0. , 1. ,
+    1. , 0. , 1. ,
+    1. , 1. , 1. ,
+    0. , 1. , 1.
+};
 
 
 //======================================================================
@@ -333,46 +334,46 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 /* Not really useful(?). to be  removed? in this case, remove also xi, eta, zeta, etc. in the class.
    this info is included in Staticbdfe. */
 static const Real refcoor_RT0HYB_TETRA[ 12 ] =
-    {
-        1. / 3 , 1. / 3. , 0. ,
-        1. / 3. , 0. , 1. / 3. ,
-        1. / 3. , 1. / 3. , 1. / 3. ,
-        0. , 1. / 3. , 1. / 3.
-    };
+{
+    1. / 3 , 1. / 3. , 0. ,
+    1. / 3. , 0. , 1. / 3. ,
+    1. / 3. , 1. / 3. , 1. / 3. ,
+    0. , 1. / 3. , 1. / 3.
+};
 
 
 /* refcoor_HYB_TETRA_FACE_I
    Coordinates of the vertices of the 6 faces. They are used for the definition of the POINT in the bdfe.
    The same arrays can be used for all the Hybrid elements that have the same shape.
    E.g. refcoor_HYB_TETRA_FACE_I are used for all the TETRA Hybrid elements. */
-   
+
 static const Real refcoor_HYB_TETRA_FACE_1[ 9 ] =
-    {
-        0. , 0. , 0. ,
-        0. , 1. , 0. ,
-        1. , 0. , 0.
-    };
+{
+    0. , 0. , 0. ,
+    0. , 1. , 0. ,
+    1. , 0. , 0.
+};
 
 static const Real refcoor_HYB_TETRA_FACE_2[ 9 ] =
-    {
-        0. , 0. , 0. ,
-        1. , 0. , 0. ,
-        0. , 0. , 1.
-    };
+{
+    0. , 0. , 0. ,
+    1. , 0. , 0. ,
+    0. , 0. , 1.
+};
 
 static const Real refcoor_HYB_TETRA_FACE_3[ 9 ] =
-    {
-        1. , 0. , 0. ,
-        0. , 1. , 0. ,
-        0. , 0. , 1.
-    };
+{
+    1. , 0. , 0. ,
+    0. , 1. , 0. ,
+    0. , 0. , 1.
+};
 
 static const Real refcoor_HYB_TETRA_FACE_4[ 9 ] =
-    {
-        0. , 0. , 0. ,
-        0. , 0. , 1. ,
-        0. , 1. , 0.
-    };
+{
+    0. , 0. , 0. ,
+    0. , 0. , 1. ,
+    0. , 1. , 0.
+};
 
 
 } // Namespace LifeV

@@ -40,7 +40,8 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 template <typename Mesh, typename SolverType = LifeV::SolverTrilinos >
 class LinearVenantKirchhofSolver : public VenantKirchhofSolver<Mesh, SolverType>
@@ -53,7 +54,7 @@ public:
     typedef typename super::bchandler_type bchandler_type;
 
     LinearVenantKirchhofSolver():
-        super()
+            super()
     {}
 
     void updateJacobian( vector_type& /*sol*/, matrix_ptrtype& /*jac*/ )
@@ -65,12 +66,12 @@ public:
     //! solves the tangent problem for newton iterations
     void solveJac( vector_type&       /*step*/,
                    const vector_type& /*res*/,
-                   Real&              /*linear_rel_tol*/){assert(false);}
+                   Real&              /*linear_rel_tol*/) {assert(false);}
 
     void solveJacobian( vector_type&       /*step*/,
-                           const vector_type& /*res*/,
-                           Real&            /*linear_rel_tol*/,
-                           bchandler_type&    /*BCd*/ ){assert(false);}
+                        const vector_type& /*res*/,
+                        Real&            /*linear_rel_tol*/,
+                        bchandler_type&    /*BCd*/ ) {assert(false);}
 
 };
 

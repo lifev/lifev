@@ -4,9 +4,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -36,13 +36,13 @@ main( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
-  Epetra_MpiComm Comm(MPI_COMM_WORLD);
-  if ( Comm.MyPID() == 0 )
-      cout << "  a-  Using MPI" << endl;
+    MPI_Init(&argc, &argv);
+    Epetra_MpiComm Comm(MPI_COMM_WORLD);
+    if ( Comm.MyPID() == 0 )
+        cout << "  a-  Using MPI" << endl;
 #else
-  Epetra_SerialComm Comm;
-  cout << "  a-  Using serial version" << endl;
+    Epetra_SerialComm Comm;
+    cout << "  a-  Using serial version" << endl;
 #endif
 
     CT ct( argc, argv );
@@ -51,5 +51,5 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-  return( EXIT_SUCCESS );
+    return( EXIT_SUCCESS );
 }

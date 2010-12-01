@@ -56,7 +56,8 @@
 #include <iostream>
 #include <fstream>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*! \page update_procedure Update of the current finite element
 
@@ -275,7 +276,7 @@ public:
     CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap);
 
     //! Destructor
-    ~CurrentFE(){ delete M_quadRule;}
+    ~CurrentFE() { delete M_quadRule;}
 
     //@}
 
@@ -681,20 +682,20 @@ public:
       compute the coordinate (xi,eta,zeta)=inv(F)(x,y,z)
     */
     void coorBackMap(const Real& x, const Real& y, const Real& z,
-		     Real & xi, Real & eta, Real& zeta) const;
+                     Real & xi, Real & eta, Real& zeta) const;
 
     /*!
       compute the jacobian at a given point : d x_compx / d zeta_compzeta
     */
     Real pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
-		  int compx, int compzeta) const;
+                       int compx, int compzeta) const;
 
     /*!
       compute the inverse jacobian
      */
 
     Real pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
-		  int compx, int compzeta) const;
+                              int compx, int compzeta) const;
 
     /*!
       compute the determinant of the Jacobian at a given point
@@ -799,7 +800,7 @@ void CurrentFE::update(const GeoElement& geoele, const flag_Type& upFlag)
 
     for ( UInt i(0); i < M_nbGeoNode; ++i )
     {
-        for( UInt icoor(0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor(0); icoor < M_nbCoor; ++icoor)
         {
             pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
         }
@@ -815,7 +816,7 @@ void CurrentFE::computeCellNodes(const GeoElement& geoele)
 
     for ( UInt i(0); i < M_nbGeoNode; ++i )
     {
-        for( UInt icoor(0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor(0); icoor < M_nbCoor; ++icoor)
         {
             pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
         }

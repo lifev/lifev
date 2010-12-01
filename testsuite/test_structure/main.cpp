@@ -34,9 +34,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -82,24 +82,24 @@ main( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
+    MPI_Init(&argc, &argv);
 
-  boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
-  if ( Comm->MyPID() == 0 )
-      cout << "% using MPI" << endl;
+    boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    if ( Comm->MyPID() == 0 )
+        cout << "% using MPI" << endl;
 #else
-  boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
-  cout << "% using serial Version" << endl;
+    boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
+    cout << "% using serial Version" << endl;
 #endif
 
 //**************** cylinder
 
-  Structure structure( argc, argv, Comm );
-  structure.run();
+    Structure structure( argc, argv, Comm );
+    structure.run();
 
 #ifdef HAVE_MPI
-  MPI_Finalize();
+    MPI_Finalize();
 #endif
-  return( EXIT_SUCCESS );
+    return( EXIT_SUCCESS );
 }
 

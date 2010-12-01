@@ -47,7 +47,8 @@
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 
-namespace LifeV{
+namespace LifeV
+{
 
 class MLPreconditioner:
         public EpetraPreconditioner
@@ -96,9 +97,9 @@ public:
 
     super::prec_raw_type*   getPrec();
 
-    super::prec_type   getPrecPtr(){return M_Prec;}
+    super::prec_type   getPrecPtr() {return M_Prec;}
 
-    std::string             precType(){return M_precType;}
+    std::string             precType() {return M_precType;}
 
     int                     buildPreconditioner(operator_type& A);
 
@@ -107,17 +108,18 @@ public:
     void                    testSmoothers(operator_type& A);
 
     //! returns true if prec exists
-    /*const*/ bool  set() const {return M_Prec;}
+    /*const*/
+    bool  set() const {return M_Prec;}
 
     virtual void createList(       list_Type&   list,
-                             const GetPot&      dataFile,
-                             const std::string& section,
-                             const std::string& subSection ) {createMLList( list, dataFile, section, subSection);}
+                                   const GetPot&      dataFile,
+                                   const std::string& section,
+                                   const std::string& subSection ) {createMLList( list, dataFile, section, subSection);}
 
     static void createMLList(       list_Type&   list,
-                              const GetPot&      dataFile,
-                              const std::string& section,
-                              const std::string& subSection = "ML" );
+                                    const GetPot&      dataFile,
+                                    const std::string& section,
+                                    const std::string& subSection = "ML" );
 
     int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
     bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
@@ -153,10 +155,10 @@ private:
 };
 
 
-inline EpetraPreconditioner* createML(){return new MLPreconditioner(); }
+inline EpetraPreconditioner* createML() {return new MLPreconditioner(); }
 namespace
 {
-	static bool registerML = PRECFactory::instance().registerProduct( "ML", &createML );
+static bool registerML = PRECFactory::instance().registerProduct( "ML", &createML );
 }
 
 

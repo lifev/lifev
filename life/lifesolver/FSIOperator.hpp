@@ -47,15 +47,16 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #define FLUID 1
 #define SOLID 0
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*!
   \class FSIOperator
@@ -159,7 +160,7 @@ public:
 
 #ifdef HAVE_HDF5
     /*!still not implemented*/
-    virtual void setupDOF( mesh_filtertype& /*filterMesh*/ ){}
+    virtual void setupDOF( mesh_filtertype& /*filterMesh*/ ) {}
 #endif
 
     virtual void setupFluidSolid();
@@ -199,9 +200,9 @@ public:
     }
 
 
-  //    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
+    //    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
 
-    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createLinearStructure(){ return new LinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
+    static VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >*    createLinearStructure() { return new LinearVenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >(); }
 
 
     void initializeBDF( const vector_type& un );
@@ -221,9 +222,9 @@ public:
 //     void solveLinearFluid();
 //     void solveLinearSolid();
 
-    virtual void setFluxBC             (fluid_bchandler_type /*bc_fluid*/){}
+    virtual void setFluxBC             (fluid_bchandler_type /*bc_fluid*/) {}
 
-    virtual void setRobinBC             (fluid_bchandler_type /*bc_solid*/){}
+    virtual void setRobinBC             (fluid_bchandler_type /*bc_solid*/) {}
 
     void transferFluidOnInterface( const vector_type& _vec1, vector_type& _vec2 );
 
@@ -236,8 +237,8 @@ public:
     //! MONOLITHIC Solver methods - Implemented there
     //     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
     virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
-    virtual const vector_ptrtype& un(){ return M_un; }
-    virtual void setupBDF( const vector_type& /*u0*/ ){ }
+    virtual const vector_ptrtype& un() { return M_un; }
+    virtual void setupBDF( const vector_type& /*u0*/ ) { }
 
     void bcManageVectorRHS( const fluid_bchandler_type& bch, vector_type& rhs );
 
@@ -328,7 +329,7 @@ public:
     virtual const vector_type& meshDisp()                         const { return M_meshMotion->disp(); }
     const         vector_type& dispFluidMeshOld()                 const { return *M_dispFluidMeshOld; }
     virtual       vector_type& veloFluidMesh()                          { return *M_veloFluidMesh; }
-                  vector_type& derVeloFluidMesh()                       { return *M_derVeloFluidMesh; }
+    vector_type& derVeloFluidMesh()                       { return *M_derVeloFluidMesh; }
 
     const dof_interface_type3D& dofFluidToStructure()             const { return M_dofFluidToStructure; }
     const dof_interface_type3D& dofStructureToSolid()             const { return M_dofStructureToSolid; }
@@ -460,7 +461,7 @@ public:
     {
         M_fluxes=numLM;
     }
-    void setRHS                              ( vector_ptrtype& rhs ){M_rhs = rhs;}
+    void setRHS                              ( vector_ptrtype& rhs ) {M_rhs = rhs;}
     vector_ptrtype const& getRHS       ( ) const {return M_rhs;}
 
     //! sets the solution vector by reference
@@ -474,16 +475,16 @@ public:
     //! sets the solution time derivative vector by copy
     //void setSolutionDerivative( vector_ptrtype& lambdaDot ) { M_lambdaDot = lambdaDot; }
     void setSolutionDerivative( const vector_type& solutionDerivative )         { M_lambdaDot.reset( new vector_type( solutionDerivative ) ); }
-    virtual void  setRestarts( bool restarts ){ /*M_restarts = restarts;*/ }
+    virtual void  setRestarts( bool restarts ) { /*M_restarts = restarts;*/ }
 
     virtual UInt imposeFlux();
 
     // to kill
-    virtual void mergeBCHandlers(){}
+    virtual void mergeBCHandlers() {}
 
-    virtual void updateRHS(){}
+    virtual void updateRHS() {}
 
-    virtual void applyBoundaryConditions(){}
+    virtual void applyBoundaryConditions() {}
 
 //     void setDerReducedFluidLoadToStructure   ( vector_type &dload, UInt type = 0 );
 //     void setDerStructureAccToReducedFluid    ( vector_type &acc,   UInt type = 0 );
@@ -508,10 +509,10 @@ protected:
     virtual void variablesInit( const std::string& dOrder );
 
     void transferMeshMotionOnFluid( const vector_type& _vec1,
-                                          vector_type& _vec2 );
+                                    vector_type& _vec2 );
 
     void interpolateVelocity(const vector_type& _vec1,
-                                   vector_type& _vec2);
+                             vector_type& _vec2);
 
 
     void interpolateInterfaceDofs(const FESpace<mesh_type, EpetraMap>& _fespace1,

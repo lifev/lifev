@@ -52,7 +52,7 @@ public:
     GetPot _dataFile;
     boost::shared_ptr<Epetra_Comm>   comm;
     // Epetra_Comm*   comm;
-	int stim_source;
+    int stim_source;
     Real stim_period_1;
     Real stim_period_2;
     Real stim_period_3;
@@ -139,12 +139,12 @@ public:
 
     Real Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& ) const
     {
-  		Real iapp=0.0;
+        Real iapp=0.0;
         double pi = acos(-1.0);
         double Angular_velocity_LV = (pi/2)/G_Iapp_stim_time_LV ; // rd/s
         double Angular_velocity_RV = (pi/2)/G_Iapp_stim_time_RV ;
         Real sumL1,sumL4,a_L,b_L,c_L,e1,e4;
-   		//exitation istantane' pi=0;
+        //exitation istantane' pi=0;
         a_L = 40;
         b_L = 40;
         c_L = 72;
@@ -152,19 +152,19 @@ public:
         e1  = 16*0.8;
 
         sumL1 = x*x/( (a_L-e1)*(a_L-e1) )*100
-			+  y*y/( (b_L-e1)*(b_L-e1) )*100
-            +  z*z/( (c_L-e1)*(c_L-e1) )*100 -1;
+                +  y*y/( (b_L-e1)*(b_L-e1) )*100
+                +  z*z/( (c_L-e1)*(c_L-e1) )*100 -1;
         sumL4 = x*x/( (a_L-e4)*(a_L-e4) ) *100
-            +  y*y/( (b_L-e4)*(b_L-e4) ) *100
-            +  z*z/( (c_L-e4)*(c_L-e4) )*100 -1;
+                +  y*y/( (b_L-e4)*(b_L-e4) ) *100
+                +  z*z/( (c_L-e4)*(c_L-e4) )*100 -1;
         Real sumR2,a_R,b_R,c_R,e2;
         a_R = 78;
         b_R = 40;
         c_R = 72* 0.95;
         e2  = 10*0.8;
-		sumR2 = x*x/( (a_R-e2)*(a_R-e2) )*100
-            +  y*y/( (b_R-e2)*(b_R-e2) )*100
-            +  z*z/( (c_R-e2)*(c_R-e2) )*100 -1;
+        sumR2 = x*x/( (a_R-e2)*(a_R-e2) )*100
+                +  y*y/( (b_R-e2)*(b_R-e2) )*100
+                +  z*z/( (c_R-e2)*(c_R-e2) )*100 -1;
         //============ Coment if BBG
         if ( (fmod(t,G_Time_period) >= 0) &&  (fmod(t,G_Time_period)<=  G_Iapp_stim_time_LV) )
         {
@@ -195,7 +195,7 @@ public:
 
 
 //! To convert function in boost functor
-	inline fct_type1 get_Iapp()
+    inline fct_type1 get_Iapp()
     {
         fct_type1 f;
         f = boost::bind(&HeartFunctors::Iapp, this, _1, _2, _3, _4, _5 );
@@ -208,8 +208,8 @@ public:
                const Real& z,
                const ID&   id) const
     {
-		Real returnvalue1;
-		Real returnvalue2;
+        Real returnvalue1;
+        Real returnvalue2;
         Real returnvalue3;
         Real returnvalue4;
         Real returnvalue5;
@@ -219,54 +219,54 @@ public:
         Real T_reset_3(t - static_cast<int>(t/stim_period_3) * stim_period_3);
         Real T_reset_4(t - static_cast<int>(t/stim_period_4) * stim_period_4);
         Real T_reset_5(t - static_cast<int>(t/stim_period_5) * stim_period_5);
-		Real T_reset_6(t - static_cast<int>(t/stim_period_6) * stim_period_6);
+        Real T_reset_6(t - static_cast<int>(t/stim_period_6) * stim_period_6);
 
-		if( (T_reset_1>=stim_start_1 && T_reset_1<=stim_stop_1) &&
-            ( ((x-stim_center_1(0))*(x-stim_center_1(0))+(y-stim_center_1(1))*(y-stim_center_1(1))+(z-stim_center_1(2))*(z-stim_center_1(2)))
-              <= (stim_radius_1*stim_radius_1)) )
+        if ( (T_reset_1>=stim_start_1 && T_reset_1<=stim_stop_1) &&
+                ( ((x-stim_center_1(0))*(x-stim_center_1(0))+(y-stim_center_1(1))*(y-stim_center_1(1))+(z-stim_center_1(2))*(z-stim_center_1(2)))
+                  <= (stim_radius_1*stim_radius_1)) )
         {
-		    returnvalue1=stim_value_1;
+            returnvalue1=stim_value_1;
         }
-		else returnvalue1=0.;
-		if( (T_reset_2>=stim_start_2 && T_reset_2<=stim_stop_2) &&
-            ( ((x-stim_center_2(0))*(x-stim_center_2(0))+(y-stim_center_2(1))*(y-stim_center_2(1))+(z-stim_center_2(2))*(z-stim_center_2(2)))
-              <= (stim_radius_2*stim_radius_2)) )
+        else returnvalue1=0.;
+        if ( (T_reset_2>=stim_start_2 && T_reset_2<=stim_stop_2) &&
+                ( ((x-stim_center_2(0))*(x-stim_center_2(0))+(y-stim_center_2(1))*(y-stim_center_2(1))+(z-stim_center_2(2))*(z-stim_center_2(2)))
+                  <= (stim_radius_2*stim_radius_2)) )
         {
-		    returnvalue2=stim_value_2;
+            returnvalue2=stim_value_2;
         }
-		else returnvalue2=0.;
+        else returnvalue2=0.;
 
-		if( (T_reset_3>=stim_start_3 && T_reset_1<=stim_stop_3) &&
-            ( ((x-stim_center_3(0))*(x-stim_center_3(0))+(y-stim_center_3(1))*(y-stim_center_3(1))+(z-stim_center_3(2))*(z-stim_center_3(2)))
-              <= (stim_radius_3*stim_radius_3)) )
+        if ( (T_reset_3>=stim_start_3 && T_reset_1<=stim_stop_3) &&
+                ( ((x-stim_center_3(0))*(x-stim_center_3(0))+(y-stim_center_3(1))*(y-stim_center_3(1))+(z-stim_center_3(2))*(z-stim_center_3(2)))
+                  <= (stim_radius_3*stim_radius_3)) )
         {
             returnvalue3=stim_value_3;
         }
-		else returnvalue3=0.;
-		if( (T_reset_4>=stim_start_4 && T_reset_4<=stim_stop_4) &&
-            ( ((x-stim_center_4(0))*(x-stim_center_4(0))+(y-stim_center_4(1))*(y-stim_center_4(1))+(z-stim_center_4(2))*(z-stim_center_4(2)))
-              <= (stim_radius_4*stim_radius_4)) )
+        else returnvalue3=0.;
+        if ( (T_reset_4>=stim_start_4 && T_reset_4<=stim_stop_4) &&
+                ( ((x-stim_center_4(0))*(x-stim_center_4(0))+(y-stim_center_4(1))*(y-stim_center_4(1))+(z-stim_center_4(2))*(z-stim_center_4(2)))
+                  <= (stim_radius_4*stim_radius_4)) )
         {
             returnvalue4=stim_value_4;
         }
-		else returnvalue4=0.;
-		if( (T_reset_5>=stim_start_5 && T_reset_5<=stim_stop_5) &&
-            ( ((x-stim_center_5(0))*(x-stim_center_5(0))+(y-stim_center_5(1))*(y-stim_center_5(1))+(z-stim_center_5(2))*(z-stim_center_5(2)))
-              <= (stim_radius_5*stim_radius_5)) )
+        else returnvalue4=0.;
+        if ( (T_reset_5>=stim_start_5 && T_reset_5<=stim_stop_5) &&
+                ( ((x-stim_center_5(0))*(x-stim_center_5(0))+(y-stim_center_5(1))*(y-stim_center_5(1))+(z-stim_center_5(2))*(z-stim_center_5(2)))
+                  <= (stim_radius_5*stim_radius_5)) )
         {
             returnvalue5=stim_value_5;
         }
-		else returnvalue5=0.;
-		if( (T_reset_6>=stim_start_6 && T_reset_6<=stim_stop_6) &&
-            ( ((x-stim_center_6(0))*(x-stim_center_6(0))+(y-stim_center_6(1))*(y-stim_center_6(1))+(z-stim_center_6(2))*(z-stim_center_6(2)))
-              <= (stim_radius_6*stim_radius_6)) )
+        else returnvalue5=0.;
+        if ( (T_reset_6>=stim_start_6 && T_reset_6<=stim_stop_6) &&
+                ( ((x-stim_center_6(0))*(x-stim_center_6(0))+(y-stim_center_6(1))*(y-stim_center_6(1))+(z-stim_center_6(2))*(z-stim_center_6(2)))
+                  <= (stim_radius_6*stim_radius_6)) )
         {
             returnvalue6=stim_value_6;
         }
-		else returnvalue6=0.;
+        else returnvalue6=0.;
         Real	returnvalue = returnvalue1+returnvalue2+returnvalue3+returnvalue4+returnvalue5+returnvalue6;
-        if(id == 0)
-	        return returnvalue;
+        if (id == 0)
+            return returnvalue;
         else return returnvalue;
     }
 
@@ -284,12 +284,12 @@ public:
                     const double& z,
                     const ID& /*i*/,
                     const EntityFlag& ref)
-	{
+    {
         // double pi = acos(-1.0);
-    	Real iapp=0.0;
-     	Real x_0= 3.316424,y_0 =  31.496351,z_0 = 5.799850;//APEX, node number: 80185 : 3.316424 31.496351 5.799850
-     	if (fmod(t,G_Time_period)<=25)
-       	{
+        Real iapp=0.0;
+        Real x_0= 3.316424,y_0 =  31.496351,z_0 = 5.799850;//APEX, node number: 80185 : 3.316424 31.496351 5.799850
+        if (fmod(t,G_Time_period)<=25)
+        {
             if (ref==2) // ventricule gauche if (atan( d1/d2) < pi* t/20 )
             {
                 if ( ((x-x_0)*(x-x_0) + (y-y_0)*(y-y_0) + (z-z_0)*(z-z_0)>=(fmod(t,G_Time_period))*(fmod(t,G_Time_period)) - 100 )   &&  ((x-x_0)*(x-x_0) + (y-y_0)*(y-y_0) + (z-z_0)*(z-z_0)<=3*(fmod(t,G_Time_period))*(fmod(t,G_Time_period)) ))
@@ -298,7 +298,7 @@ public:
             if ((ref==1)||(ref==20)) // if (ref==20) //BBD
             {
                 //venticule droit    if (atan( d1/d2) < pi* t/20 )
-	    		if ( ((x-x_0)*(x-x_0) + (y-y_0)*(y-y_0) + (z-z_0)*(z-z_0)>=(fmod(t,G_Time_period))*(fmod(t,G_Time_period)) - 100 )   &&  ((x-x_0)*(x-x_0) + (y-y_0)*(y-y_0) + (z-z_0)*(z-z_0)<=3*(fmod(t,G_Time_period))*(fmod(t,G_Time_period)) ))
+                if ( ((x-x_0)*(x-x_0) + (y-y_0)*(y-y_0) + (z-z_0)*(z-z_0)>=(fmod(t,G_Time_period))*(fmod(t,G_Time_period)) - 100 )   &&  ((x-x_0)*(x-x_0) + (y-y_0)*(y-y_0) + (z-z_0)*(z-z_0)<=3*(fmod(t,G_Time_period))*(fmod(t,G_Time_period)) ))
                     iapp=2 ;
             }
         }
@@ -348,16 +348,16 @@ public:
                                  const ID&   id,
                                  const Real& sigma ) const
     {
-    	Real distance2, distx, disty, distz;
-    	distx=((b_cylinder*b_cylinder+c_cylinder*c_cylinder)*(x_cylinder-x)-a_cylinder*c_cylinder*(z_cylinder-z)-a_cylinder*b_cylinder*(y_cylinder-y))/(a_cylinder*a_cylinder+b_cylinder*b_cylinder+c_cylinder*c_cylinder);
-    	disty=((a_cylinder*a_cylinder+c_cylinder*c_cylinder)*(y_cylinder-y)-b_cylinder*c_cylinder*(z_cylinder-z)-a_cylinder*b_cylinder*(x_cylinder-x))/(a_cylinder*a_cylinder+b_cylinder*b_cylinder+c_cylinder*c_cylinder);
-    	distz=((a_cylinder*a_cylinder+b_cylinder*b_cylinder)*(z_cylinder-z)-a_cylinder*c_cylinder*(x_cylinder-x)-c_cylinder*b_cylinder*(y_cylinder-y))/(a_cylinder*a_cylinder+b_cylinder*b_cylinder+c_cylinder*c_cylinder);
-    	distance2=pow(distx,2)+pow(disty,2)+pow(distz,2);
-    	if ((distance2<r_cylinder*r_cylinder)&&(x<xmax_cylinder)&&(x>xmin_cylinder))
+        Real distance2, distx, disty, distz;
+        distx=((b_cylinder*b_cylinder+c_cylinder*c_cylinder)*(x_cylinder-x)-a_cylinder*c_cylinder*(z_cylinder-z)-a_cylinder*b_cylinder*(y_cylinder-y))/(a_cylinder*a_cylinder+b_cylinder*b_cylinder+c_cylinder*c_cylinder);
+        disty=((a_cylinder*a_cylinder+c_cylinder*c_cylinder)*(y_cylinder-y)-b_cylinder*c_cylinder*(z_cylinder-z)-a_cylinder*b_cylinder*(x_cylinder-x))/(a_cylinder*a_cylinder+b_cylinder*b_cylinder+c_cylinder*c_cylinder);
+        distz=((a_cylinder*a_cylinder+b_cylinder*b_cylinder)*(z_cylinder-z)-a_cylinder*c_cylinder*(x_cylinder-x)-c_cylinder*b_cylinder*(y_cylinder-y))/(a_cylinder*a_cylinder+b_cylinder*b_cylinder+c_cylinder*c_cylinder);
+        distance2=pow(distx,2)+pow(disty,2)+pow(distz,2);
+        if ((distance2<r_cylinder*r_cylinder)&&(x<xmax_cylinder)&&(x>xmin_cylinder))
         {
             return sigma*sigma_reduction(id);
         }
-    	else return sigma;
+        else return sigma;
     }
     inline const fct_type get_reduced_sigma_cylinder()
     {
@@ -378,13 +378,13 @@ public:
                             const ID&   id,
                             const Real& sigma ) const
     {
-    	if  ((x>xmin_box)&&(x<xmax_box)
-             &&(y>ymin_box)&&(y<ymax_box)
-             &&(z>zmin_box)&&(z<zmax_box))
+        if  ((x>xmin_box)&&(x<xmax_box)
+                &&(y>ymin_box)&&(y<ymax_box)
+                &&(z>zmin_box)&&(z<zmax_box))
         {
             return sigma*sigma_reduction(id);
         }
-    	else return sigma;
+        else return sigma;
     }
 
     inline const fct_type get_reduced_sigma_box()
@@ -396,10 +396,10 @@ public:
 
 
     Real initial_scalar( const Real& /* t */,
-            const Real& /* x */,
-            const Real& /* y */,
-            const Real& /* z */,
-            const ID& /* i */ )
+                         const Real& /* x */,
+                         const Real& /* y */,
+                         const Real& /* z */,
+                         const ID& /* i */ )
     {
         return u0;
     }
@@ -411,10 +411,10 @@ public:
     }
 
     Real zero_scalar( const Real& /* t */,
-            const Real& /* x */,
-            const Real& /* y */,
-            const Real& /* z */,
-            const ID& /* i */ )
+                      const Real& /* x */,
+                      const Real& /* y */,
+                      const Real& /* z */,
+                      const ID& /* i */ )
     {
         return 0.;
     }

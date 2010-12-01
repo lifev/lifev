@@ -36,7 +36,8 @@
 #include <life/lifecore/singleton.hpp>
 #include <life/lifecore/factory.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*!
  \class BCFunctionBase
@@ -180,34 +181,34 @@ typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBC
 class BCFunctionUDepBase
 {
 public:
-  //Real g(t,x,y,z,ID,U)
-  typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& )> function_type;
+    //Real g(t,x,y,z,ID,U)
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& )> function_type;
 
-  BCFunctionUDepBase(function_type g );
-  BCFunctionUDepBase(const BCFunctionUDepBase& bcf );
+    BCFunctionUDepBase(function_type g );
+    BCFunctionUDepBase(const BCFunctionUDepBase& bcf );
 
-  void setFunction(function_type g);
-  Real operator()(const Real& t, const Real& x, const Real& y,
-                  const Real& z, const ID& i, const Real& U ) const;
+    void setFunction(function_type g);
+    Real operator()(const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i, const Real& U ) const;
 
 protected:
-  function_type _M_g;
+    function_type _M_g;
 };
 
 class BCFunctionUDepMixte: public BCFunctionUDepBase
 {
 public:
-  typedef BCFunctionUDepBase::function_type function_type;
+    typedef BCFunctionUDepBase::function_type function_type;
 
-  BCFunctionUDepMixte(function_type g,function_type coef);
-  BCFunctionUDepMixte(const BCFunctionUDepMixte& bcf);
+    BCFunctionUDepMixte(function_type g,function_type coef);
+    BCFunctionUDepMixte(const BCFunctionUDepMixte& bcf);
 
-  void setFunctions_Mixte(function_type g, function_type coef );
+    void setFunctions_Mixte(function_type g, function_type coef );
 
-  Real coef(const Real& t, const Real& x, const Real& y,
-            const Real& z, const ID& i, const Real& U ) const;
+    Real coef(const Real& t, const Real& x, const Real& y,
+              const Real& z, const ID& i, const Real& U ) const;
 private:
-  function_type _M_coef;
+    function_type _M_coef;
 };
 
 typedef LifeV::singleton< LifeV::factoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
@@ -222,8 +223,8 @@ typedef LifeV::singleton< LifeV::factoryClone< BCFunctionUDepBase > > FactoryClo
   Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
 */
 class BCFunctionDirectional
-    :
-    public BCFunctionBase
+        :
+        public BCFunctionBase
 {
 public:
 
@@ -273,7 +274,7 @@ public:
       \return i-component of the user defined fonction evaluted in (t,x,y,z)
     */
     Real vectFct( const Real& t, const Real& x, const Real& y,
-               const Real& z, const ID& i ) const;
+                  const Real& z, const ID& i ) const;
 private:
     //! user defined function
     function_type _M_vectFct;

@@ -26,10 +26,10 @@ namespace LifeV
 */
 StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                         const QuadRule& _qr ) :
-    nbGeoNode ( _geoMap.nbDof() ),
-    nbNode    ( _refFE.nbDof() ),
-    nbCoor    ( _refFE.nbCoor() ),
-    nbQuadPt  ( _qr.nbQuadPt() ),
+        nbGeoNode ( _geoMap.nbDof() ),
+        nbNode    ( _refFE.nbDof() ),
+        nbCoor    ( _refFE.nbCoor() ),
+        nbQuadPt  ( _qr.nbQuadPt() ),
         point     ( nbGeoNode, nbCoor + 1 ),
         refFE     ( _refFE ),
         geoMap    ( _geoMap ), qr( _qr ),
@@ -46,9 +46,9 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
         invArea   ( 1. )
 {
     CONSTRUCTOR( "StaticBdFE" );
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
     {
-        for ( int i = 0;i < nbNode;i++ )
+        for ( int i = 0; i < nbNode; i++ )
         {
             //phi( i, ig ) = refFE.phi( i, ig, qr );
             phi( i, ig ) = refFE.phi( i,
@@ -56,7 +56,7 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                                       qr.quadPointCoor(ig,1),
                                       qr.quadPointCoor(ig,2));
 
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            for ( int icoor = 0; icoor < nbCoor; icoor++ )
             {
                 //dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
                 dPhiRef( i, icoor, ig ) = refFE.dPhi( i,
@@ -66,14 +66,14 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                                                       qr.quadPointCoor(ig,2));
             }
         }
-        for ( int k = 0;k < nbGeoNode;k++ )
+        for ( int k = 0; k < nbGeoNode; k++ )
         {
             //phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
             phiGeo( k, ig ) = geoMap.phi( k,
                                           qr.quadPointCoor(ig,0),
                                           qr.quadPointCoor(ig,1),
                                           qr.quadPointCoor(ig,2));
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            for ( int icoor = 0; icoor < nbCoor; icoor++ )
             {
                 //dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
                 dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, qr.quadPointCoor(ig,0),
@@ -93,11 +93,11 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
  nodes on the current element)
 */
 StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap ) :
-    nbGeoNode( _geoMap.nbDof() ), nbNode( _refFE.nbDof() ), nbCoor( _refFE.nbCoor() ),
-    nbQuadPt( quadRuleDummy.nbQuadPt() ), point( nbGeoNode, nbCoor + 1 ),
+        nbGeoNode( _geoMap.nbDof() ), nbNode( _refFE.nbDof() ), nbCoor( _refFE.nbCoor() ),
+        nbQuadPt( quadRuleDummy.nbQuadPt() ), point( nbGeoNode, nbCoor + 1 ),
         refFE( _refFE ), geoMap( _geoMap ), qr( quadRuleDummy ),
         phi( ( int ) nbNode, ( int ) nbQuadPt ), dPhiRef( ( int ) nbNode, ( int ) nbCoor,
-                ( int ) nbQuadPt ),
+                                                          ( int ) nbQuadPt ),
         dPhi( ( int ) nbNode, ( int ) nbCoor, ( int ) nbQuadPt ),
         phiGeo( ( int ) nbGeoNode, ( int ) nbQuadPt ),
         dPhiGeo( ( int ) nbGeoNode, ( int ) nbCoor, ( int ) nbQuadPt ),
@@ -126,7 +126,7 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
         nbQuadPt( _qr.nbQuadPt() ), point( nbGeoNode, nbCoor + 1 ),
         refFE( _refFE ), geoMap( _geoMap ), qr( _qr ),
         phi( ( int ) nbNode, ( int ) nbQuadPt ), dPhiRef( ( int ) nbNode, ( int ) nbCoor,
-                ( int ) nbQuadPt ),
+                                                          ( int ) nbQuadPt ),
         dPhi( ( int ) nbNode, ( int ) nbCoor, ( int ) nbQuadPt ),
         phiGeo( ( int ) nbGeoNode, ( int ) nbQuadPt ),
         dPhiGeo( ( int ) nbGeoNode, ( int ) nbCoor, ( int ) nbQuadPt ),
@@ -137,17 +137,17 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
         invArea( _invarea )
 {
     CONSTRUCTOR( "StaticBdFE (with refCoor)" );
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
     {
-        for ( int i = 0;i < nbNode;i++ )
+        for ( int i = 0; i < nbNode; i++ )
         {
             //phi( i, ig ) = refFE.phi( i, ig, qr );
             phi( i, ig ) = invArea*refFE.phi( i,               // invArea added here
-                                      qr.quadPointCoor(ig,0),
-                                      qr.quadPointCoor(ig,1),
-                                      qr.quadPointCoor(ig,2));
+                                              qr.quadPointCoor(ig,0),
+                                              qr.quadPointCoor(ig,1),
+                                              qr.quadPointCoor(ig,2));
 
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            for ( int icoor = 0; icoor < nbCoor; icoor++ )
             {
                 //dPhiRef( i, icoor, ig ) = refFE.dPhi( i, icoor, ig, qr );
                 dPhiRef( i, icoor, ig ) = refFE.dPhi( i,
@@ -157,14 +157,14 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                                                       qr.quadPointCoor(ig,2));
             }
         }
-        for ( int k = 0;k < nbGeoNode;k++ )
+        for ( int k = 0; k < nbGeoNode; k++ )
         {
             //phiGeo( k, ig ) = geoMap.phi( k, ig, qr );
             phiGeo( k, ig ) = geoMap.phi( k,
                                           qr.quadPointCoor(ig,0),
                                           qr.quadPointCoor(ig,1),
                                           qr.quadPointCoor(ig,2));
-            for ( int icoor = 0;icoor < nbCoor;icoor++ )
+            for ( int icoor = 0; icoor < nbCoor; icoor++ )
             {
                 //dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, ig, qr );
                 dPhiGeo( k, icoor, ig ) = geoMap.dPhi( k, icoor, qr.quadPointCoor(ig,0),
@@ -174,7 +174,7 @@ StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
         }
     }
 
-    for ( int i = 0;i < nbGeoNode;i++ )
+    for ( int i = 0; i < nbGeoNode; i++ )
     {
         point( i, 0 ) = refcoor[ 3 * i ];
         point( i, 1 ) = refcoor[ 3 * i + 1 ];
@@ -223,11 +223,13 @@ void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
 void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
                           const Real & xi, const Real & eta ) const
 {
-	Vector coor = ZeroVector(3);
-	for( UInt icoor=0; icoor< nDimensions; icoor++)
-	        for ( UInt i = 0;i < (UInt)nbGeoNode;i++ )
-	        	coor[icoor] += point( i, icoor ) * geoMap.phi( i, xi, eta, 0. );
-    x = coor[0]; y=coor[1]; z=coor[2];
+    Vector coor = ZeroVector(3);
+    for ( UInt icoor=0; icoor< nDimensions; icoor++)
+        for ( UInt i = 0; i < (UInt)nbGeoNode; i++ )
+            coor[icoor] += point( i, icoor ) * geoMap.phi( i, xi, eta, 0. );
+    x = coor[0];
+    y=coor[1];
+    z=coor[2];
 }
 
 
@@ -236,7 +238,7 @@ Real StaticBdFE::measure() const
     ASSERT_PRE( _hasMeas, "Needs measure. Call an update function" )
 
     Real meas = 0.;
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
         meas += weightMeas( ig );
     return meas;
 }
@@ -247,7 +249,7 @@ Real StaticBdFE::measure() const
 void StaticBdFE::_comp_quad_point_coor()
 {
     ASSERT_PRE( _hasQR, "Needs a quadrature rule" )
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
     {
         coorMap( quadPt( ig, 0 ), quadPt( ig, 1 ), quadPt( ig, 2 ), qr.quadPointCoor( ig, 0 ), qr.quadPointCoor( ig, 1 ) );
     }
@@ -261,14 +263,14 @@ void StaticBdFE::_comp_meas()
     ASSERT_PRE( _hasQR, "Needs a quadrature rule" )
     Real s, fctDer;
 
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
     {
-        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
+        for ( int icoor = 0; icoor < (int)nDimensions; icoor++ )
         {
-            for ( int k = 0;k < (int)nDimensions-1;k++ )
+            for ( int k = 0; k < (int)nDimensions-1; k++ )
             {
                 fctDer = 0.;
-                for ( int i = 0;i < nbGeoNode;i++ )
+                for ( int i = 0; i < nbGeoNode; i++ )
                 {
                     fctDer += point( i, icoor ) * dPhiGeo( i, k, ig );
                 }
@@ -278,29 +280,29 @@ void StaticBdFE::_comp_meas()
         }
         // metric tensor
         s = 0.;
-        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
+        for ( int icoor = 0; icoor < (int)nDimensions; icoor++ )
             s += tangent( 0, icoor, ig ) * tangent( 0, icoor, ig );
         metric( 0, 0, ig ) = s;
 #if defined(TWODIM)
         meas( ig ) = sqrt( metric( 0, 0, ig ) );
         weightMeas( ig ) = meas( ig ) * qr.weight( ig );
-}
+    }
 #else
         s = 0.;
-        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
+        for ( int icoor = 0; icoor < (int)nDimensions; icoor++ )
             s += tangent( 1, icoor, ig ) * tangent( 1, icoor, ig );
         metric( 1, 1, ig ) = s;
         s = 0.;
-        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
+        for ( int icoor = 0; icoor < (int)nDimensions; icoor++ )
             s += tangent( 0, icoor, ig ) * tangent( 1, icoor, ig );
         metric( 0, 1, ig ) = metric( 1, 0, ig ) = s;
         meas( ig ) = sqrt( metric( 0, 0, ig ) * metric( 1, 1, ig )
                            - metric( 0, 1, ig ) * metric( 1, 0, ig ) );
         weightMeas( ig ) = meas( ig ) * qr.weight( ig );
-        for ( int icoor = 0;icoor < (int)nDimensions;icoor++ )
-            for ( int k = 0;k < (int)nDimensions-1;k++ )
-                    tangent( k, icoor, ig ) = tangent( k, icoor, ig )
-                    / sqrt( metric( k, k, ig ) );
+        for ( int icoor = 0; icoor < (int)nDimensions; icoor++ )
+            for ( int k = 0; k < (int)nDimensions-1; k++ )
+                tangent( k, icoor, ig ) = tangent( k, icoor, ig )
+                                          / sqrt( metric( k, k, ig ) );
     }
 #endif
 }
@@ -315,7 +317,7 @@ void StaticBdFE::_comp_meas_normal()
     _comp_meas();
 #if defined(TWODIM)
 
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
     {
         n1 = - tangent( 0, 1, ig );
         n2 = tangent( 0, 0, ig );
@@ -325,7 +327,7 @@ void StaticBdFE::_comp_meas_normal()
     }
 #else
     Real n3;
-    for ( int ig = 0;ig < nbQuadPt;ig++ )
+    for ( int ig = 0; ig < nbQuadPt; ig++ )
     {
         n1 = tangent( 0, 1, ig ) * tangent( 1, 2, ig )
              - tangent( 0, 2, ig ) * tangent( 1, 1, ig );

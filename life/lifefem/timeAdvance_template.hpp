@@ -13,7 +13,7 @@
   \author F. Nobile,  M. Pozzoli,  C. Vergara
 
   File containing a class for an easy handling of different order time
-  discretizations/extrapolations 
+  discretizations/extrapolations
 
 */
 #ifndef _TIMEADVANCE_TEMPLATE_H
@@ -27,7 +27,7 @@
 
 namespace LifeV
 {
-  
+
 /*!
 \class timeAdvance (templated)
 
@@ -37,7 +37,7 @@ that after space and time discretitation, and suitable linearization of non line
 we obtain a linear system to solve at each time step (or each iteration ):
 
 \f$ K U^{n+1} =F^{n+1}\f$
- 
+
 where K is an opportune matrix, U^{n+1} is the unknown vector and F^{n+1} is the
 right hand side vector at the time tn+1 .
 To determine F^{n+1} we deﬁne the state vector X^{n+1} that contained the infor-
@@ -87,12 +87,12 @@ At the time step $n+1$, we consider the following approssimations of V and W:
 
 \f$ V^{n+1}=\frac{\alpha_0}{\Delta t} U^{n+1}- f_V^{n+1}  \f$
 
-and 
+and
 
-\f$ W^{n+1}=\frac{\xi_0}{\Delta t^2} U^{n+1} - f_W^{n+1} \f$, 
+\f$ W^{n+1}=\frac{\xi_0}{\Delta t^2} U^{n+1} - f_W^{n+1} \f$,
 
 where $f_V^{n+1}$ and $f_W^{n+1}$ are  linear combinations of the previous  solutions with
-suitable coefficients alpha_i and  \xi_i, respectively. 
+suitable coefficients alpha_i and  \xi_i, respectively.
 If  A and D depend on  U and V we can linearize the
 problem using suitable extrapolations U^* V^* obtained   by linear combinations
  of previous solutions with coefficients  $\beta_i^U$ and $\beta_i^V$ respectively.
@@ -119,190 +119,190 @@ public:
     /*! Constructor
      *  @param n order of the BDF
      */
-     TimeAdvance();
+    TimeAdvance();
 
-  //  TimeAdvance( const UInt order);
-   
-  // TimeAdvance( const UInt order,  const  UInt orderDev );
-     
-  // TimeAdvance( const double* coefficients,  const UInt orderDev );
-    
+    //  TimeAdvance( const UInt order);
+
+    // TimeAdvance( const UInt order,  const  UInt orderDev );
+
+    // TimeAdvance( const double* coefficients,  const UInt orderDev );
+
     ~TimeAdvance();
-  
+
     //! Initialize all the entries of the unknown vector to be derived with the
     //! vector u0 (duplicated)
     virtual void initialize_unk( VectorType u0 ) = 0;
-  
+
     virtual void initialize_unk( VectorType u0, VectorType v0 ) = 0;
-  
+
     virtual  void initialize_unk( VectorType u0, VectorType v0, VectorType const & w0 ) = 0;
 
-  void initialize_rhs(const  VectorType & u0 ) ;
+    void initialize_rhs(const  VectorType & u0 ) ;
 
 
-  //! Initialize all the entries of the unknown vector to be derived with a
-  //! set of vectors uv0
-  //! note: this is taken as a copy (not a reference), since uv0 is resized inside the method.
-  virtual void initialize_unk(const  std::vector<VectorType> uv0 ) = 0;
+    //! Initialize all the entries of the unknown vector to be derived with a
+    //! set of vectors uv0
+    //! note: this is taken as a copy (not a reference), since uv0 is resized inside the method.
+    virtual void initialize_unk(const  std::vector<VectorType> uv0 ) = 0;
 
-  //!initialize parameters of time advance scheme
-  void setup ( const  UInt orderDev ) { _M_orderDev = orderDev;} 
+    //!initialize parameters of time advance scheme
+    void setup ( const  UInt orderDev ) { _M_orderDev = orderDev;}
 
-  virtual void setup ( const UInt order,  const  UInt orderDev ) = 0;
+    virtual void setup ( const UInt order,  const  UInt orderDev ) = 0;
 
-  virtual void setup ( const   std::vector<double>  coefficients, const  UInt orderDev ) = 0;
+    virtual void setup ( const   std::vector<double>  coefficients, const  UInt orderDev ) = 0;
 
-  /*! Update the vectors of the previous time steps by shifting on the right
-     *  the old values.
-     *  @param u_curr current (new) value of the state vector
-     */
-  virtual void shift_right(const VectorType & u_curr ) =0;
-  
-  //!spy unknown vector
-   void spy() ;
-  
-   //!spy rhs vector
-   void spy_rhs();
+    /*! Update the vectors of the previous time steps by shifting on the right
+       *  the old values.
+       *  @param u_curr current (new) value of the state vector
+       */
+    virtual void shift_right(const VectorType & u_curr ) =0;
 
-   //! initializa time step
-  void setDeltaT( Real dt )  { _M_dt = dt; };
+    //!spy unknown vector
+    void spy() ;
 
-  //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
-  //! formula
- virtual  VectorType time_der( Real dt = 1 ) /* const */= 0;
-  
-  //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
-  //! formula
-  virtual VectorType time_derOrder2( Real dt = 1 ) /*const*/ = 0;
-  
-  //! Compute the polynomial extrapolation approximation of order n-1 of
-  //! u^{n+1} defined by the n stored state vectors
-  virtual VectorType extrap() const  = 0;
-  
-  //! Compute the polynomial extrapolation approximation of order k-1 in iterative 
-  //! methods  u^{k+1} defined by the unk and the n  stored state vectors  
-  virtual VectorType extrap(const  VectorType unk ) = 0;
+    //!spy rhs vector
+    void spy_rhs();
 
-  //! Compute the polynomial extrapolation approximation of order n-1 of
-  //! u^{n+1} defined by the n stored state vectors
-   virtual VectorType extrapVelocity()  const = 0;
-  
-  //! Return the i-th coefficient of the time derivative alpha_i
-   double coeff_der( UInt i )  const;
-  
-  //! Return the i-th coefficient of the second time derivative xi_i
-  double coeff_derOrder2( UInt i ) const;
-  
-  //! Return the i-th coefficient of the time extrapolation beta_i
-  virtual double coeff_ext( UInt i )  const = 0;
-  
-  //! Return the i-th coefficient of the time extrapolation betaV_i
-  virtual double coeff_extVelocity( UInt i ) const =0;
-  
-  //! Return the last unknown vector
-  const  VectorType unk()  const;
+    //! initializa time step
+    void setDeltaT( Real dt )  { _M_dt = dt; };
 
- //! Return the last unknown vector
-  const  VectorType unk(const UInt i)  const;
+    //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
+    //! formula
+    virtual  VectorType time_der( Real dt = 1 ) /* const */= 0;
 
-  //! Return the velocity 
-   virtual  VectorType vnk() const = 0;
+    //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
+    //! formula
+    virtual VectorType time_derOrder2( Real dt = 1 ) /*const*/ = 0;
 
- //! Return the accelerate
-   virtual VectorType wnk() const = 0;
+    //! Compute the polynomial extrapolation approximation of order n-1 of
+    //! u^{n+1} defined by the n stored state vectors
+    virtual VectorType extrap() const  = 0;
 
-  // !Return velocity's right hand side 
-  const VectorType rhsV() ;
+    //! Compute the polynomial extrapolation approximation of order k-1 in iterative
+    //! methods  u^{k+1} defined by the unk and the n  stored state vectors
+    virtual VectorType extrap(const  VectorType unk ) = 0;
 
-  //! Return accelerate's right hand side
-  const VectorType rhsW() ;
+    //! Compute the polynomial extrapolation approximation of order n-1 of
+    //! u^{n+1} defined by the n stored state vectors
+    virtual VectorType extrapVelocity()  const = 0;
 
-  //! Return the velocity associated to u
- // used for example in FSI to return the value of solid
-  //  in the internal loop
-  const VectorType  vnk(const  VectorType & u);
-  
-  //! Return the accelerate associated to u;
-  // used for example in FSI to return the value of solid
-  //  in the internal loop
-  const VectorType  wnk(const  VectorType & u);
+    //! Return the i-th coefficient of the time derivative alpha_i
+    double coeff_der( UInt i )  const;
 
-  //show the proprities of temporal scheme
-  virtual void showMe()  const = 0;
-  
-  UInt order() const  {return _M_order;}
+    //! Return the i-th coefficient of the second time derivative xi_i
+    double coeff_derOrder2( UInt i ) const;
 
-  //protected:
+    //! Return the i-th coefficient of the time extrapolation beta_i
+    virtual double coeff_ext( UInt i )  const = 0;
+
+    //! Return the i-th coefficient of the time extrapolation betaV_i
+    virtual double coeff_extVelocity( UInt i ) const =0;
+
+    //! Return the last unknown vector
+    const  VectorType unk()  const;
+
+//! Return the last unknown vector
+    const  VectorType unk(const UInt i)  const;
+
+    //! Return the velocity
+    virtual  VectorType vnk() const = 0;
+
+//! Return the accelerate
+    virtual VectorType wnk() const = 0;
+
+    // !Return velocity's right hand side
+    const VectorType rhsV() ;
+
+    //! Return accelerate's right hand side
+    const VectorType rhsW() ;
+
+    //! Return the velocity associated to u
+// used for example in FSI to return the value of solid
+    //  in the internal loop
+    const VectorType  vnk(const  VectorType & u);
+
+    //! Return the accelerate associated to u;
+    // used for example in FSI to return the value of solid
+    //  in the internal loop
+    const VectorType  wnk(const  VectorType & u);
+
+    //show the proprities of temporal scheme
+    virtual void showMe()  const = 0;
+
+    UInt order() const  {return _M_order;}
+
+    //protected:
 public :
     //! Order of the BDF derivative/extrapolation: the time-derivative
     //! coefficients vector has size n+1, the extrapolation vector has size n
     UInt _M_order;
-   
+
     //! Order of temporal derivate: the time-derivative
     //! coefficients vector has size n+1, the extrapolation vector has size n
     UInt _M_orderDev;
-  
+
     //! time step
     Real _M_dt;
 
-   //! Size of the unknown vector
-   UInt _M_size;
+    //! Size of the unknown vector
+    UInt _M_size;
 
     //! Size for time_der loop (for bdf  equal M_order, for Newmark equal  _M_size/2)
-   UInt _M_sizeTimeDer;
+    UInt _M_sizeTimeDer;
 
-   //! Size for time_derOrder2 loop  (for bdf  equal M_order, for Newmark equal _M_size/2)
-   UInt _M_sizeTimeDer2;
-  
-  //!Size of coefficients (for bdf equal M_order+_M_orderDev, for theta-method is 3, and Newmark is 4)
-  UInt _M_sizeCoefficients;
+    //! Size for time_derOrder2 loop  (for bdf  equal M_order, for Newmark equal _M_size/2)
+    UInt _M_sizeTimeDer2;
 
-  //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
-  Vector _M_xi;
-  
-  //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
-  Vector _M_alpha;
-  
-  //! Coefficients \f$ \beta_i \f$ of the extrapolation
-  Vector _M_beta;
-  
- //! Coefficients \f$ \beta_i \f$ of the extrapolation
-  Vector _M_beta2;
+    //!Size of coefficients (for bdf equal M_order+_M_orderDev, for theta-method is 3, and Newmark is 4)
+    UInt _M_sizeCoefficients;
 
-  //! Last n state vectors
-  vector_type _M_unknowns;
-  
-  //! Vector of rhs (rhsV and rhsW)
-  vector_type _M_rhs;
-  
+    //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
+    Vector _M_xi;
+
+    //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
+    Vector _M_alpha;
+
+    //! Coefficients \f$ \beta_i \f$ of the extrapolation
+    Vector _M_beta;
+
+//! Coefficients \f$ \beta_i \f$ of the extrapolation
+    Vector _M_beta2;
+
+    //! Last n state vectors
+    vector_type _M_unknowns;
+
+    //! Vector of rhs (rhsV and rhsW)
+    vector_type _M_rhs;
+
 };
- 
 
- // ===================================================
+
+// ===================================================
 //! MACROS
 // ===================================================
- 
+
 typedef singleton< factory < TimeAdvance<>,  std::string> > TimeAdvanceFactory;
-  
+
 template<typename VectorType>
 TimeAdvance<VectorType>::TimeAdvance( )
-    :
-  _M_unknowns(),
-  _M_rhs()
+        :
+        _M_unknowns(),
+        _M_rhs()
 {
-  _M_unknowns.reserve( 1 );
-  _M_rhs.reserve(2);
+    _M_unknowns.reserve( 1 );
+    _M_rhs.reserve(2);
 }
-  
+
 template<typename VectorType>
 TimeAdvance<VectorType>::~TimeAdvance()
-  {
+{
     vector_type_iterator iter     = _M_unknowns.begin();
     vector_type_iterator iter_end = _M_unknowns.end();
-    
+
     for ( ; iter != iter_end; iter++ )
         delete *iter;
-  }
+}
 
 template<typename VectorType>
 double
@@ -319,62 +319,62 @@ double
 TimeAdvance<VectorType>::coeff_derOrder2( UInt i )  const
 {
     // Pay attention: i is c-based indexed
-  ASSERT( i < _M_sizeCoefficients,
+    ASSERT( i < _M_sizeCoefficients,
             "Error in specification of the time derivative coefficient for the time scheme" );
     return _M_xi[ i ];
 }
 
 template<typename VectorType>
-const VectorType 
+const VectorType
 TimeAdvance<VectorType>::unk() const
 {
-  VectorType u(*_M_unknowns[0]);
-  return u;
+    VectorType u(*_M_unknowns[0]);
+    return u;
 }
 
 template<typename VectorType>
-const VectorType 
+const VectorType
 TimeAdvance<VectorType>::unk(const UInt i) const
 {
 // Pay attention: i is c-based indexed
     ASSERT( i < _M_size,
             "Error there isn't unk(i), i must be shorter than M_size" );
 
-  VectorType u(*_M_unknowns[i]);
-  return u;
+    VectorType u(*_M_unknowns[i]);
+    return u;
 }
 
 //! Return the velocity associated to u
 template<typename VectorType>
-const VectorType 
+const VectorType
 TimeAdvance<VectorType>:: vnk(const  VectorType & u)
 {
-  VectorType v( u ); 
-  v  *= _M_alpha[ 0 ] / _M_dt;
-  v   -= (*this->_M_rhs[ 0 ]);
-  return v;
+    VectorType v( u );
+    v  *= _M_alpha[ 0 ] / _M_dt;
+    v   -= (*this->_M_rhs[ 0 ]);
+    return v;
 }
 
 //! Return the accelerate associated to u
 template<typename VectorType>
-const VectorType 
+const VectorType
 TimeAdvance<VectorType>:: wnk(const VectorType & u)
 {
- VectorType w(u); 
- w  *= _M_xi[ 0 ] / (_M_dt*_M_dt);
- w  -= (*this->_M_rhs[1]);
-  return w;
+    VectorType w(u);
+    w  *= _M_xi[ 0 ] / (_M_dt*_M_dt);
+    w  -= (*this->_M_rhs[1]);
+    return w;
 }
 
 template<typename VectorType>
 void
 TimeAdvance<VectorType>:: initialize_rhs(const  VectorType & u0 )
 {
-    for (UInt i=0; i<2; i++ ) 
-      { 
-	_M_rhs.push_back(new VectorType(u0.getMap(), Unique));
-	*_M_rhs[i] *=0;
-      }
+    for (UInt i=0; i<2; i++ )
+    {
+        _M_rhs.push_back(new VectorType(u0.getMap(), Unique));
+        *_M_rhs[i] *=0;
+    }
 }
 
 
@@ -393,19 +393,20 @@ void
 TimeAdvance<VectorType>::
 spy()
 {
-  static UInt saveUnknowns=0;
-  std::string unknowns="unknowns";
-  
-  for( UInt i=0 ; i< _M_size ; i++ )
+    static UInt saveUnknowns=0;
+    std::string unknowns="unknowns";
+
+    for ( UInt i=0 ; i< _M_size ; i++ )
     {
-      std::ostringstream ii;
-      ii<<saveUnknowns;     ii<<i;
-      
-      unknowns+ii.str();
-     
-      _M_unknowns[i]->spy(unknowns+ii.str());
+        std::ostringstream ii;
+        ii<<saveUnknowns;
+        ii<<i;
+
+        unknowns+ii.str();
+
+        _M_unknowns[i]->spy(unknowns+ii.str());
     }
-  saveUnknowns++;
+    saveUnknowns++;
 }
 
 
@@ -414,17 +415,18 @@ void
 TimeAdvance<VectorType>::
 spy_rhs()
 {
-  static UInt saveRhs=0;
-  std::string rhs="rhs";
-  for( UInt i=0 ; i< 2 ; i++ )
+    static UInt saveRhs=0;
+    std::string rhs="rhs";
+    for ( UInt i=0 ; i< 2 ; i++ )
     {
-      std::ostringstream ii;
-      ii<<saveRhs;     ii<<i;
-      
-      rhs+ii.str();
-      _M_rhs[i]->spy(rhs+ii.str());
+        std::ostringstream ii;
+        ii<<saveRhs;
+        ii<<i;
+
+        rhs+ii.str();
+        _M_rhs[i]->spy(rhs+ii.str());
     }
-  saveRhs++;
+    saveRhs++;
 }
 
 }

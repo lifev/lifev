@@ -61,10 +61,10 @@ public:
     //@{
 
     laplacian( int argc,
-              char** argv );
+               char** argv );
 
     ~laplacian()
-        {}
+    {}
 
     //@}
 

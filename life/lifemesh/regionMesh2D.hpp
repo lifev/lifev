@@ -55,18 +55,18 @@ namespace LifeV
  */
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
 class RegionMesh2D
-  :
-  public MeshEntity,
-  public MC::RegionMarker
+        :
+        public MeshEntity,
+        public MC::RegionMarker
 {
 
 public:
 
-	 /**
-	     * default constructor
-	     * @param id marker of the RegionMesh2D
-	     */
-	    explicit RegionMesh2D();
+    /**
+        * default constructor
+        * @param id marker of the RegionMesh2D
+        */
+    explicit RegionMesh2D();
     /**
      * default constructor
      * @param id marker of the RegionMesh2D
@@ -479,7 +479,7 @@ public:
     UInt numGlobalVertices() const;
     UInt & numVertices(); //!< Allows to change number of vertices in Region
     void setNumVertices(UInt const n); //!< Allows to change number of vertices in Region
-    void setNumGlobalVertices( UInt const n ){ M_numGlobalVertices = n; }
+    void setNumGlobalVertices( UInt const n ) { M_numGlobalVertices = n; }
     UInt numBVertices() const; //!< Number of boundary vertices in RegionMesh
     void setNumBVertices(UInt const n);
     UInt & numBVertices();
@@ -536,8 +536,8 @@ public:
     // \sa Switch
     Switch switches;
 
-    std::map<int,int> & globalToLocalNode(){return M_globalToLocalNode;}
-    std::map<int,int> & localToGlobalNode(){return M_localToGlobalNode;}
+    std::map<int,int> & globalToLocalNode() {return M_globalToLocalNode;}
+    std::map<int,int> & localToGlobalNode() {return M_localToGlobalNode;}
     void printLtGMap(std::ostream & os);
 
 protected:
@@ -659,8 +659,8 @@ INLINE
 void
 RegionMesh2D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
 {
-	std::ostringstream _err_msg;
-	_err_msg << "Switch named " << _s << " is not allowed";
+    std::ostringstream _err_msg;
+    _err_msg << "Switch named " << _s << " is not allowed";
     ASSERT0( switches.set( _s ), _err_msg.str().c_str() );
 };
 
@@ -677,8 +677,8 @@ INLINE
 void
 RegionMesh2D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
 {
-	std::ostringstream _err_msg;
-	_err_msg << "Switch named " << _s << " is not allowed";
+    std::ostringstream _err_msg;
+    _err_msg << "Switch named " << _s << " is not allowed";
     ASSERT0( switches.unset( _s ), _err_msg.str().c_str() );
 };
 
@@ -781,9 +781,9 @@ RegionMesh2D<GEOSHAPE, MC>::setMaxNumItems( SimpleVect< T> & list, UInt n, std::
         list.reserve( n );
     }
     else if ( list.capacity() < n )
-   {
-    	Debug(4000) << "Resetting " << title << " list size to " << n << "\n";
-    	Debug(4000) << "ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID\n";
+    {
+        Debug(4000) << "Resetting " << title << " list size to " << n << "\n";
+        Debug(4000) << "ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID\n";
 
         list.reserve( n );
     }
@@ -839,7 +839,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::setMaxNumGlobalFaces( UInt const n)
 {
-        M_numGlobalFaces = n;
+    M_numGlobalFaces = n;
 }
 
 // \todo use addItem
@@ -961,7 +961,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::setMaxNumGlobalEdges( UInt const n)
 {
-        M_numGlobalEdges = n;
+    M_numGlobalEdges = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1038,7 +1038,7 @@ INLINE
 typename RegionMesh2D<GEOSHAPE, MC>::EdgeType &
 RegionMesh2D<GEOSHAPE, MC>::edge( ID const i )
 {
-	if( i <= 0 || i > edgeList.size() ) std::cout<< "i: " << i << "edgeList.size(): " <<edgeList.size()<<std::endl;
+    if ( i <= 0 || i > edgeList.size() ) std::cout<< "i: " << i << "edgeList.size(): " <<edgeList.size()<<std::endl;
     ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
     return edgeList( i );
 }
@@ -1123,7 +1123,7 @@ RegionMesh2D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 #ifdef NOT_BDATA_FIRST
     //ASSERT(false,"In this version Boundary edges must be stored first");
     bool isboundary = true;
-    for ( UInt k = 1;k <= EdgeType::numVertices;++k )
+    for ( UInt k = 1; k <= EdgeType::numVertices; ++k )
     {
         isboundary = isboundary & e.point( k ).boundary();
     }
@@ -1228,7 +1228,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::setMaxNumGlobalPoints( UInt const n )
 {
-        M_numGlobalPoints = n;
+    M_numGlobalPoints = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1595,142 +1595,142 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges()
 */
 
 template <typename GEOSHAPE, typename MC>
-   void
-   RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
-   {
+void
+RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
+{
 //	std::cout<< "locEdge: " << localEdgeId( 1, 3 )<< std::endl;
-       std::cout << "     Updating element edges ... " << std::flush;
+    std::cout << "     Updating element edges ... " << std::flush;
 
-       ASSERT0( ! ce || M_numBEdges > 0, std::stringstream( std::string("Boundary Edges Must have been set") +
-                                                            std::string("in order to call updateElementEdges with createEdges=true") +
-                                                            std::string("\nUse buildBoundaryEdges(..) from mesh_util.h") ).str().c_str() );
-       // If the counter is set we trust it! Otherwise we use Euler formula
+    ASSERT0( ! ce || M_numBEdges > 0, std::stringstream( std::string("Boundary Edges Must have been set") +
+                                                         std::string("in order to call updateElementEdges with createEdges=true") +
+                                                         std::string("\nUse buildBoundaryEdges(..) from mesh_util.h") ).str().c_str() );
+    // If the counter is set we trust it! Otherwise we use Euler formula
 
-       if ( ce && ee == 0 )
-    	   //check!!!
-    	   ee = M_numEdges > M_numBEdges ? M_numEdges : M_numFaces + M_numVertices -1;
-       ASSERT( ce || numEdges() > 0 , "Mesh is not properly set!" );
+    if ( ce && ee == 0 )
+        //check!!!
+        ee = M_numEdges > M_numBEdges ? M_numEdges : M_numFaces + M_numVertices -1;
+    ASSERT( ce || numEdges() > 0 , "Mesh is not properly set!" );
 
-       if ( ce )
-           edgeList.reserve( ee );
+    if ( ce )
+        edgeList.reserve( ee );
 
-       EdgeType edg;
+    EdgeType edg;
 
 
-       BareItemsHandler<BareEdge> _be;
-       std::pair<UInt, bool> e;
-       _FToE.reshape( numLocalEdges(), numFaces() ); // DIMENSION ARRAY
+    BareItemsHandler<BareEdge> _be;
+    std::pair<UInt, bool> e;
+    _FToE.reshape( numLocalEdges(), numFaces() ); // DIMENSION ARRAY
 
-       UInt fid, i1, i2;
-       std::pair<BareEdge, bool>_edge;
-       GEOSHAPE ele;
-       // If we have all edges and the edges store all adjacency info
-       // everything is easier
-       if ( (edgeList.size() == numEdges()) & getLinkSwitch( "EDGES_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_EDGES" ) )
-       {
-    	   for ( typename Edges::iterator ite = edgeList.begin();ite != edgeList.end();++ite )
-           {
-               if ( ite->pos_first() != 0 )
-                   _FToE( ite->pos_first() , ite->ad_first() ) = ite->localId();
-               if ( ite->pos_second() != 0 )
-                   _FToE( ite->pos_second(), ite->ad_second() ) = ite->localId();
-              }
-           // we finish here
-           setLinkSwitch( "HAS_FACE_TO_EDGES" );
-           std::cout << " done." << std::endl;
-           return ;
-       }
+    UInt fid, i1, i2;
+    std::pair<BareEdge, bool>_edge;
+    GEOSHAPE ele;
+    // If we have all edges and the edges store all adjacency info
+    // everything is easier
+    if ( (edgeList.size() == numEdges()) & getLinkSwitch( "EDGES_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_EDGES" ) )
+    {
+        for ( typename Edges::iterator ite = edgeList.begin(); ite != edgeList.end(); ++ite )
+        {
+            if ( ite->pos_first() != 0 )
+                _FToE( ite->pos_first() , ite->ad_first() ) = ite->localId();
+            if ( ite->pos_second() != 0 )
+                _FToE( ite->pos_second(), ite->ad_second() ) = ite->localId();
+        }
+        // we finish here
+        setLinkSwitch( "HAS_FACE_TO_EDGES" );
+        std::cout << " done." << std::endl;
+        return ;
+    }
 
-       // If I have only boundary faces I need to process them first to keep the correct numbering
+    // If I have only boundary faces I need to process them first to keep the correct numbering
 
-       // First We check if we have already Faces stored
-       if ( ! edgeList.empty() )
-       {
-           // dump all faces in the container, to maintain the correct numbering
-           // if everything is correct the numbering in the bareface structure
-           // will reflect the actual face numbering However, if I want to create
-           // the internal faces I need to make sure that I am processing only the
-           // boundary ones. So I resize the container!
-           if ( ce )
-               edgeList.resize( M_numBEdges );
+    // First We check if we have already Faces stored
+    if ( ! edgeList.empty() )
+    {
+        // dump all faces in the container, to maintain the correct numbering
+        // if everything is correct the numbering in the bareface structure
+        // will reflect the actual face numbering However, if I want to create
+        // the internal faces I need to make sure that I am processing only the
+        // boundary ones. So I resize the container!
+        if ( ce )
+            edgeList.resize( M_numBEdges );
 
-           std::pair<UInt, bool> _check;
-           for ( UInt j = 0; j < edgeList.size();++j )
-           {
-               i1 = ( edgeList[ j ].point( 1 ) ).localId();
-               i2 = ( edgeList[ j ].point( 2 ) ).localId();
-               _edge = makeBareEdge( i1, i2);
-               _check = _be.addIfNotThere( _edge.first );
-           }
-       }
+        std::pair<UInt, bool> _check;
+        for ( UInt j = 0; j < edgeList.size(); ++j )
+        {
+            i1 = ( edgeList[ j ].point( 1 ) ).localId();
+            i2 = ( edgeList[ j ].point( 2 ) ).localId();
+            _edge = makeBareEdge( i1, i2);
+            _check = _be.addIfNotThere( _edge.first );
+        }
+    }
 
-       for ( typename Faces::iterator iface = faceList.begin();
-             iface != faceList.end(); ++iface )
-       {
-           fid = iface->localId();
-           for ( UInt j = 1;j <= numLocalEdges();j++ )
-           {
-               i1 = ele.eToP( j, 1 );
-               i2 = ele.eToP( j, 2 );
-               i1 = ( iface->point( i1 ) ).localId();
-               i2 = ( iface->point( i2 ) ).localId();
-               _edge = makeBareEdge( i1, i2);
-               e = _be.addIfNotThere( _edge.first );
-               _FToE( j, fid ) = e.first;
-               if ( ce )
-               {
-                   if ( e.second )
-                   {
-                       // a new face It must be internal.
-                       for ( UInt k = 1; k <= EdgeType::numPoints; ++k )//
-                    	   //iface->point( ele.eToP( j, k ) );
-                       edg.setPoint( k, iface->point( ele.eToP( j, k ) ) );
-                       edg.ad_first()  = fid;
-                       edg.pos_first() = j;
+    for ( typename Faces::iterator iface = faceList.begin();
+            iface != faceList.end(); ++iface )
+    {
+        fid = iface->localId();
+        for ( UInt j = 1; j <= numLocalEdges(); j++ )
+        {
+            i1 = ele.eToP( j, 1 );
+            i2 = ele.eToP( j, 2 );
+            i1 = ( iface->point( i1 ) ).localId();
+            i2 = ( iface->point( i2 ) ).localId();
+            _edge = makeBareEdge( i1, i2);
+            e = _be.addIfNotThere( _edge.first );
+            _FToE( j, fid ) = e.first;
+            if ( ce )
+            {
+                if ( e.second )
+                {
+                    // a new face It must be internal.
+                    for ( UInt k = 1; k <= EdgeType::numPoints; ++k )//
+                        //iface->point( ele.eToP( j, k ) );
+                        edg.setPoint( k, iface->point( ele.eToP( j, k ) ) );
+                    edg.ad_first()  = fid;
+                    edg.pos_first() = j;
 
-                       // gets the marker from the RegionMesh
+                    // gets the marker from the RegionMesh
 
-                       edg.setMarker( this->marker() );
-               //        inheritWeakerMarker( edg );
-                       addEdge( edg, false ); //The id should be correct
-                   }
-                   else
-                   {
-                       // We assume that BEdges have been already set so we have to do
-                       // nothing if the edge is on the boundary
-                       if ( e.first > M_numBEdges )
-                       {
-                           edgeList( e.first ).ad_second() = fid;
-                           edgeList( e.first ).pos_second() = j;
+                    edg.setMarker( this->marker() );
+                    //        inheritWeakerMarker( edg );
+                    addEdge( edg, false ); //The id should be correct
+                }
+                else
+                {
+                    // We assume that BEdges have been already set so we have to do
+                    // nothing if the edge is on the boundary
+                    if ( e.first > M_numBEdges )
+                    {
+                        edgeList( e.first ).ad_second() = fid;
+                        edgeList( e.first ).pos_second() = j;
 
-                       }
-                   }
-               }
-           }
-       }
+                    }
+                }
+            }
+        }
+    }
 
-       UInt n = _be.maxId();
-       // Fix _numfaces if it was not set or set to just the # of Bfaces
-       if (!ce)
-           {
-               if ( M_numEdges == 0 || M_numEdges == M_numBEdges )
-                   M_numEdges = n;
-           }
-       else
-           {
-                   M_numGlobalEdges = n;
-           }
+    UInt n = _be.maxId();
+    // Fix _numfaces if it was not set or set to just the # of Bfaces
+    if (!ce)
+    {
+        if ( M_numEdges == 0 || M_numEdges == M_numBEdges )
+            M_numEdges = n;
+    }
+    else
+    {
+        M_numGlobalEdges = n;
+    }
 
-       std::cout << n << " edges ";
-       ASSERT_POS( n == M_numEdges , "#Edges found inconsistent with that stored in RegionMesh" ) ;
-       setLinkSwitch( "HAS_FACE_TO_EDGES" );
-       if ( ce )
-           setLinkSwitch( "HAS_ALL_EDGES" );
-       if ( ce )
-           setLinkSwitch( "EDGES_HAVE_ADIACENCY" );
+    std::cout << n << " edges ";
+    ASSERT_POS( n == M_numEdges , "#Edges found inconsistent with that stored in RegionMesh" ) ;
+    setLinkSwitch( "HAS_FACE_TO_EDGES" );
+    if ( ce )
+        setLinkSwitch( "HAS_ALL_EDGES" );
+    if ( ce )
+        setLinkSwitch( "EDGES_HAVE_ADIACENCY" );
 
-       std::cout << " done." << std::endl;
-   }
+    std::cout << " done." << std::endl;
+}
 
 
 
@@ -1799,12 +1799,14 @@ RegionMesh2D<GEOSHAPE, MC>::check( int /*level*/, bool const fix, bool const ver
             out.flush();
         }
     }
-    if ( edgeList.size() == 0 ) {
+    if ( edgeList.size() == 0 )
+    {
         if ( verb )
             out << "Warning: No Edges Stored" << std::endl;
         severity = -1;
     }
-    if ( faceList.size() == 0 ) {
+    if ( faceList.size() == 0 )
+    {
         if ( verb )
             out << "Warning: No Faces Stored" << std::endl;
         severity = 1;
@@ -1814,7 +1816,7 @@ RegionMesh2D<GEOSHAPE, MC>::check( int /*level*/, bool const fix, bool const ver
 
         if ( i->boundary() )
             ++count;
-    if( !count ) severity = 4;
+    if ( !count ) severity = 4;
     if ( count != M_numBPoints )
     {
         out << " Num Boundary points " << count << " not equal to internal counter value "

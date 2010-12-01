@@ -1,7 +1,7 @@
 /**
- * Useful elemental oprators for projection methods. 
- * __todo__ : merge with elemOper.hpp/elemOper.cpp. 
- */ 
+ * Useful elemental oprators for projection methods.
+ * __todo__ : merge with elemOper.hpp/elemOper.cpp.
+ */
 
 #ifndef __ELEMOPER_CT_HH
 #define __ELEMOPER_CT_HH
@@ -14,7 +14,7 @@
 namespace LifeV
 {
 
-void source_pdivv(Real alpha, ElemVec& pLoc, ElemVec& elvec, 
+void source_pdivv(Real alpha, ElemVec& pLoc, ElemVec& elvec,
                   const CurrentFE& fe_p, const CurrentFE& fe_u, const int iblock)
 {
     int i, j, iq;
@@ -24,21 +24,21 @@ void source_pdivv(Real alpha, ElemVec& pLoc, ElemVec& elvec,
     for (i=0; i < fe_u.nbNode; i++)
     {
         s = 0;
-	for (iq = 0; iq < fe_u.nbQuadPt(); ++iq)
-	    for (j = 0; j < fe_p.nbNode; ++j)
-	        s += pLoc[j]*fe_p.phi(j,iq)*fe_u.phiDer(i,iblock,iq)*fe_u.weightDet(iq);
-        vec( i ) += s*alpha; 
+        for (iq = 0; iq < fe_u.nbQuadPt(); ++iq)
+            for (j = 0; j < fe_p.nbNode; ++j)
+                s += pLoc[j]*fe_p.phi(j,iq)*fe_u.phiDer(i,iblock,iq)*fe_u.weightDet(iq);
+        vec( i ) += s*alpha;
     }
 } // source_pdivv
 
 /**
- * Interior penalty term for convective stabilization: explicit case. 
- * On input elemental velocity uLoc on fe_u = fe1. 
+ * Interior penalty term for convective stabilization: explicit case.
+ * On input elemental velocity uLoc on fe_u = fe1.
  * On output elemental iblock elvec on fe = fe2.
  */
 
 void ipstab_grad_expl( const Real         coef,
-                       ElemVec&           uLoc,	
+                       ElemVec&           uLoc,
                        ElemVec&           elvec,
                        const CurrentFE&   fe1,
                        const CurrentFE&   fe2,
@@ -131,23 +131,23 @@ void ipstab_grad_expl( const Real         coef,
     // Compute i_th block of elemental stabilization vector
     for (j=0; j<fe2.nbNode; ++j)
     {
-    	sum = 0.0;
-	for (i=0; i<fe1.nbNode; ++i)
-	    sum += uLoc[iblock * fe1.nbNode + i ] * mat_tmp(i,j);
-	vec(j) += sum;
+        sum = 0.0;
+        for (i=0; i<fe1.nbNode; ++i)
+            sum += uLoc[iblock * fe1.nbNode + i ] * mat_tmp(i,j);
+        vec(j) += sum;
     }
 
 } // ipstab_grad_expl
 
 /**
- * Interior penalty term for convective stabilization: explicit case. 
- * On input elemental velocity uLoc on fe_u = fe1. 
+ * Interior penalty term for convective stabilization: explicit case.
+ * On input elemental velocity uLoc on fe_u = fe1.
  * On output elemental iblock elvec on fe = fe2.
  * __note__: better use this overload as it avoids too many calls.
  */
 
 void ipstab_grad_expl( const Real         coef,
-                       ElemVec&           uLoc,	
+                       ElemVec&           uLoc,
                        ElemVec&           elvec,
                        const CurrentFE&   fe1,
                        const CurrentFE&   fe2,
@@ -237,12 +237,13 @@ void ipstab_grad_expl( const Real         coef,
     // Compute __all__ blocks of elemental stabilization vector
     for (j=0; j<fe2.nbNode; ++j)
     {
-    	for (jcoor=0; jcoor<fe2.nbCoor(); ++jcoor) {
-	    sum = 0.0;
-	    for (i=0; i<fe1.nbNode; ++i)
-	        sum += uLoc[jcoor * fe1.nbNode + i ] * mat_tmp(i,j);
-	    elvec.vec()[j+jcoor*fe2.nbNode] += sum;
-	}
+        for (jcoor=0; jcoor<fe2.nbCoor(); ++jcoor)
+        {
+            sum = 0.0;
+            for (i=0; i<fe1.nbNode; ++i)
+                sum += uLoc[jcoor * fe1.nbNode + i ] * mat_tmp(i,j);
+            elvec.vec()[j+jcoor*fe2.nbNode] += sum;
+        }
     }
 
 } // ipstab_grad_expl

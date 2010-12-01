@@ -57,31 +57,31 @@ public:
              UInt nNode2, UInt nbr2, UInt nbc2,
              UInt nNode3, UInt nbr3, UInt nbc3 ); // constructor for 3 finite elements
     matrix_type& mat()
-        {
-            return _mat;
-        }
+    {
+        return _mat;
+    }
     UInt nBlockRow() const
-        {
-            return _nBlockRow;
-        }
+    {
+        return _nBlockRow;
+    }
     UInt nBlockCol() const
-        {
-            return _nBlockCol;
-        }
+    {
+        return _nBlockCol;
+    }
 
     //Tab2dView block( UInt i, UInt j )
     matrix_view block( UInt i, UInt j )
-        {
-            return _mat( SubArray( _nRow[ i ], _firstRow[ i ] ),
-                         SubArray( _nCol[ j ], _firstCol[ j ] ) );
-            //Tab2dView __mr (_mat, TabRange(_firstRow[i], _nRow[i]), TabRange(_firstCol[j], _nCol[j]));
-            //return __mr;
-        }
+    {
+        return _mat( SubArray( _nRow[ i ], _firstRow[ i ] ),
+                     SubArray( _nCol[ j ], _firstCol[ j ] ) );
+        //Tab2dView __mr (_mat, TabRange(_firstRow[i], _nRow[i]), TabRange(_firstCol[j], _nCol[j]));
+        //return __mr;
+    }
     void zero()
-        {
-            //_mat = ZeroMatrix( _mat.size1(), _mat.size2() );
-            _mat = 0.0;
-        };
+    {
+        //_mat = ZeroMatrix( _mat.size1(), _mat.size2() );
+        _mat = 0.0;
+    };
     void showMe( std::ostream& c = std::cout );
 
     void   operator *= (Real coef)

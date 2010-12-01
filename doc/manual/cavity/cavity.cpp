@@ -63,7 +63,8 @@ const int TOP    = 6;
 
 LifeV::Real lidBC(const LifeV::Real& t, const LifeV::Real& /*x*/, const LifeV::Real& /*y*/, const LifeV::Real& /*z*/, const LifeV::ID& i)
 {
-    switch(i) {
+    switch (i)
+    {
     case 2:
         return 1.0;
     default:
@@ -72,10 +73,10 @@ LifeV::Real lidBC(const LifeV::Real& t, const LifeV::Real& /*x*/, const LifeV::R
 }
 
 LifeV::Real fZero( const LifeV::Real& /* t */,
-                  const LifeV::Real& /* x */,
-                  const LifeV::Real& /* y */,
-                  const LifeV::Real& /* z */,
-                  const LifeV::ID& /* i */ )
+                   const LifeV::Real& /* x */,
+                   const LifeV::Real& /* y */,
+                   const LifeV::Real& /* z */,
+                   const LifeV::ID& /* i */ )
 {
     return 0.0;
 }
@@ -100,7 +101,8 @@ int main(int argc, char** argv)
 #endif
 
     bool verbose(false);
-    if(comm->MyPID() == 0){
+    if (comm->MyPID() == 0)
+    {
         verbose = true;
         std::cout
             << " +-----------------------------------------------+" << std::endl
@@ -155,7 +157,7 @@ int main(int argc, char** argv)
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P2");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
     if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
-			   << "FE for the pressure: " << pOrder << std::endl;
+                               << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
     LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::EpetraMap > uFESpace(meshPart, uOrder, 3, comm);
@@ -201,10 +203,10 @@ int main(int argc, char** argv)
     LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
 
     LifeV::UInt offset = uFESpace.map().getMap(LifeV::Unique)->NumGlobalElements()
-        + pFESpace.map().getMap(LifeV::Unique)->NumGlobalElements();
+                         + pFESpace.map().getMap(LifeV::Unique)->NumGlobalElements();
 
     for ( LifeV::UInt i = 0; i < numLM; ++i )
-    	bcH.setOffset( fluxVector[i], offset + i );
+        bcH.setOffset( fluxVector[i], offset + i );
 
     // +-----------------------------------------------+
     // |             Creating the problem              |
@@ -281,9 +283,9 @@ int main(int argc, char** argv)
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
-        exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
-        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), comm->MyPID() );
+    exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
+    exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setMeshProcId( meshPart.mesh(), comm->MyPID() );
 
     velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
 

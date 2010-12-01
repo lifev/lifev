@@ -35,24 +35,25 @@
 
 #include "EpetraPreconditioner.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 EpetraPreconditioner::EpetraPreconditioner( const comm_PtrType& comm ):
-    M_precType              ( "EpetraPreconditioner" ),
-    M_displayer             ( comm ),
-    M_List                  (),
-    M_preconditionerCreated ( false )
+        M_precType              ( "EpetraPreconditioner" ),
+        M_displayer             ( comm ),
+        M_List                  (),
+        M_preconditionerCreated ( false )
 {
 }
 
 EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm ):
-    M_precType              ( P.M_precType ),
-    M_displayer             ( comm ),
-    M_List                  ( P.getList() ),
-    M_preconditionerCreated ( P.M_preconditionerCreated )
+        M_precType              ( P.M_precType ),
+        M_displayer             ( comm ),
+        M_List                  ( P.getList() ),
+        M_preconditionerCreated ( P.M_preconditionerCreated )
 {
 }
 

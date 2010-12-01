@@ -107,8 +107,8 @@ makeAbout()
 using namespace LifeV;
 namespace
 {
-	static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-	static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
 
@@ -121,10 +121,10 @@ namespace
 int main(int argc, char** argv)
 {
 
-	#ifdef HAVE_MPI
-		MPI_Init(&argc, &argv);
-		std::cout << "MPI Initialization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
 
 
     LifeV::po::options_description desc("Specific options");
@@ -134,10 +134,10 @@ int main(int argc, char** argv)
     problem.run();
 
 
-	#ifdef HAVE_MPI
-		MPI_Finalize();
-		std::cout << "MPI Finalization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
 
     return( EXIT_SUCCESS );
 }

@@ -37,8 +37,8 @@ MarkerTraits_Base::EntityFlag MarkerTraits_Base::strongerFlag( EntityFlag const 
 
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::weakerFlag( EntityFlag const & a, EntityFlag const & b )
 {
-    if(a==NULLFLAG)return b;            
-    if(b==NULLFLAG)return a;            
+    if (a==NULLFLAG)return b;
+    if (b==NULLFLAG)return a;
     return a < b ? a : b ;
 }
 

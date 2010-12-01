@@ -34,7 +34,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <life/lifecore/life.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 /*! \file util_string.h
 \brief Special structures for handling mesh faces and sides
 \version 0.0 Experimental   5/2/00. Luca Formaggia
@@ -110,10 +111,10 @@ template <typename number>
 inline std::string
 number2string( const number& n )
 {
-	std::stringstream out;
-	out << n;
+    std::stringstream out;
+    out << n;
 
-	return out.str();
+    return out.str();
 }
 
 // @author Cristiano Malossi

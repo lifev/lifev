@@ -42,7 +42,8 @@
 
 #include <life/lifesolver/dataElasticStructure.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 DataElasticStructure::DataElasticStructure() :
         M_time                             ( ),
@@ -57,15 +58,15 @@ DataElasticStructure::DataElasticStructure() :
 }
 
 DataElasticStructure::DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
-    DataTime                           ( dataElasticStructure ),
-    M_time                             ( dataElasticStructure.M_time ),
-    M_density                          ( dataElasticStructure.M_density ),
-    M_thickness                        ( dataElasticStructure.M_thickness ),
-    M_poisson                          ( dataElasticStructure.M_poisson ),
-    M_young                            ( dataElasticStructure.M_young ),
-    M_order                            ( dataElasticStructure.M_order ),
-    M_factor                           ( dataElasticStructure.M_factor ),
-    M_verbose                          ( dataElasticStructure.M_verbose )
+        DataTime                           ( dataElasticStructure ),
+        M_time                             ( dataElasticStructure.M_time ),
+        M_density                          ( dataElasticStructure.M_density ),
+        M_thickness                        ( dataElasticStructure.M_thickness ),
+        M_poisson                          ( dataElasticStructure.M_poisson ),
+        M_young                            ( dataElasticStructure.M_young ),
+        M_order                            ( dataElasticStructure.M_order ),
+        M_factor                           ( dataElasticStructure.M_factor ),
+        M_verbose                          ( dataElasticStructure.M_verbose )
 {
 }
 
@@ -223,7 +224,7 @@ const Real&
 DataElasticStructure::poisson( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
-    if(IT != M_poisson.end())
+    if (IT != M_poisson.end())
         return M_poisson.find( material )->second;
     else
     {
@@ -236,7 +237,7 @@ const Real&
 DataElasticStructure::young( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_young.find( material );
-    if(IT != M_young.end())
+    if (IT != M_young.end())
         return IT->second;
     else
     {

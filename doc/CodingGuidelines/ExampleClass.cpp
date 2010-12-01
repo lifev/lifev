@@ -36,29 +36,30 @@
 
 #include <ExampleClass.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 ExampleClass::ExampleClass() :
-    M_variableOne (),
-    M_variableTwo ()
+        M_variableOne (),
+        M_variableTwo ()
 {
 
 }
 
 ExampleClass::ExampleClass( first_Type&  variableOne,
                             second_Type& variableTwo ) :
-    M_variableOne ( variableOne ),
-    M_variableTwo ( variableTwo )
+        M_variableOne ( variableOne ),
+        M_variableTwo ( variableTwo )
 {
 
 }
 
 ExampleClass::ExampleClass( const ExampleClass& example ) :
-    M_variableOne ( example.M_variableOne ),
-    M_variableTwo ( example.M_variableTwo )
+        M_variableOne ( example.M_variableOne ),
+        M_variableTwo ( example.M_variableTwo )
 {
 
 }
@@ -76,8 +77,8 @@ ExampleClass::operator=( const ExampleClass& example )
 {
     if ( this != &example )
     {
-    	M_variableOne = example.M_variableOne;
-    	M_variableTwo = example.M_variableTwo;
+        M_variableOne = example.M_variableOne;
+        M_variableTwo = example.M_variableTwo;
     }
 
     return *this;
@@ -90,7 +91,7 @@ void
 ExampleClass::methodOne( first_Type&  inputVariableOne,
                          second_Type& inputVariableTwo )
 {
-	//Do something
+    //Do something
 }
 
 void
@@ -102,9 +103,9 @@ ExampleClass::methodTwo()
 void
 ExampleClass::showMe( std::ostream& output ) const
 {
-	output << "ExampleClass::showMe()" << std::endl;
-	output << "Variable one: " << M_variableOne << std::endl;
-	output << "Variable two: " << M_variableTwo << std::endl;
+    output << "ExampleClass::showMe()" << std::endl;
+    output << "Variable one: " << M_variableOne << std::endl;
+    output << "Variable two: " << M_variableTwo << std::endl;
 }
 
 // ===================================================

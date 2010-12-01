@@ -29,7 +29,8 @@
 
 #include "IfpackPreconditioner.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 IfpackPreconditioner::IfpackPreconditioner():
         super (),
@@ -102,9 +103,9 @@ IfpackPreconditioner::precReset()
 
 void
 IfpackPreconditioner::createIfpackList(       list_Type&   list,
-                                        const GetPot&      dataFile,
-                                        const std::string& section,
-                                        const std::string& subSection )
+                                              const GetPot&      dataFile,
+                                              const std::string& section,
+                                              const std::string& subSection )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
@@ -163,26 +164,26 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     int combineMode              = dataFile((section + "/" + subSection + "/schwarz/combine_mode").data(),    0);
     Epetra_CombineMode schwarzCombineMode;
 
-     switch(combineMode)
-         {
-         case 0 :
-             schwarzCombineMode = Add;
-             break;
-         case 1 :
-             schwarzCombineMode = Zero;
-             break;
-         case 2 :
-             schwarzCombineMode = Insert;
-             break;
-         case 3 :
-             schwarzCombineMode = Average;
-             break;
-         case 4 :
-             schwarzCombineMode = AbsMax;
-             break;
-         default:
-             schwarzCombineMode = Zero;
-         }
+    switch (combineMode)
+    {
+    case 0 :
+        schwarzCombineMode = Add;
+        break;
+    case 1 :
+        schwarzCombineMode = Zero;
+        break;
+    case 2 :
+        schwarzCombineMode = Insert;
+        break;
+    case 3 :
+        schwarzCombineMode = Average;
+        break;
+    case 4 :
+        schwarzCombineMode = AbsMax;
+        break;
+    default:
+        schwarzCombineMode = Zero;
+    }
 
     bool schwarzComputeCondest          = dataFile((section + "/" + subSection + "/schwarz/compute_condest").data(),   true);
     std::string schwarzReorderingType   = dataFile((section + "/" + subSection + "/schwarz/reordering_type").data(),      "none");

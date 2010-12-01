@@ -196,9 +196,9 @@ namespace LifeV
   @todo Post process for the dual variable.
 */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class DarcySolverTransientNonLinear
-    :
+        :
         public DarcySolverNonLinear<Mesh, SolverType>,
         public DarcySolverTransient<Mesh, SolverType>
 {
@@ -345,15 +345,15 @@ DarcySolverTransientNonLinear ( const data_type&           dataFile,
                                 FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                                 bchandler_raw_type&        bcHandler,
                                 comm_ptrtype&              comm ):
-    // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
-    // Non-linear Darcy solver constructor.
-    DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
-    // Transient Darcy solver contructor.
-    DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm)
+        // Standard Darcy solver constructor.
+        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        // Non-linear Darcy solver constructor.
+        DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        // Transient Darcy solver contructor.
+        DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm)
 {
 
-	CONSTRUCTOR( "DarcySolverTransientNonLinear" );
+    CONSTRUCTOR( "DarcySolverTransientNonLinear" );
 
 } // Constructor
 
@@ -367,15 +367,15 @@ DarcySolverTransientNonLinear ( const data_type&           dataFile,
                                 FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                                 FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                                 comm_ptrtype&              comm ):
-    // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-    // Non-linear Darcy solver constructor.
-    DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-    // Transient Darcy solver contructor.
-    DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm)
+        // Standard Darcy solver constructor.
+        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+        // Non-linear Darcy solver constructor.
+        DarcySolverNonLinear<Mesh, SolverType>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+        // Transient Darcy solver contructor.
+        DarcySolverTransient<Mesh, SolverType>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm)
 {
 
-	CONSTRUCTOR( "DarcySolverTransientNonLinear" );
+    CONSTRUCTOR( "DarcySolverTransientNonLinear" );
 
 } // Constructor
 
@@ -386,7 +386,7 @@ DarcySolverTransientNonLinear<Mesh, SolverType>::
 ~DarcySolverTransientNonLinear ()
 {
 
-	DESTRUCTOR( "DarcySolverTransientNonLinear" );
+    DESTRUCTOR( "DarcySolverTransientNonLinear" );
 
 } // Destructor
 

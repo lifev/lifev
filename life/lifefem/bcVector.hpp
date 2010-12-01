@@ -78,9 +78,9 @@ public:
 
     //! Do nothing destructor
     virtual ~BCVectorBase()
-        {
-            // nothing to be done here
-        }
+    {
+        // nothing to be done here
+    }
 
     //@{
 
@@ -109,15 +109,15 @@ public:
 
     //! \return true if finalized, false otherwise
     bool isFinalized() const
-        {
-            return _M_finalized;
-        }
+    {
+        return _M_finalized;
+    }
 
     //! return the total number of DOF
     UInt nbTotalDOF() const
-        {
-            return _M_nbTotalDof;
-        }
+    {
+        return _M_nbTotalDof;
+    }
 
     /*!
       Return the type of the kind of information in BCVector
@@ -131,33 +131,33 @@ public:
       \warning (not yet implemented - AM 10/2004)
     */
     UInt type() const
-        {
-            return _M_type;
-        }
+    {
+        return _M_type;
+    }
 
 
     //! Return the value of the Mixte coefficient
     Real mixteCoef() const
-        {
-            return _M_mixteCoef;
-        }
+    {
+        return _M_mixteCoef;
+    }
 
     //! Return the value of the Mixte coefficient
     Real resistanceCoef() const
-        {
-            return _M_resistanceCoef;
-        }
+    {
+        return _M_resistanceCoef;
+    }
 
     //! Return the value of the beta coefficient
     Real betaCoef() const
-        {
-            return _M_betaCoef;
-        }
+    {
+        return _M_betaCoef;
+    }
     //! Return the value of the gamma coefficient
     Real gammaCoef() const
-        {
-            return _M_gammaCoef;
-        }
+    {
+        return _M_gammaCoef;
+    }
     //@}
 
 
@@ -165,9 +165,9 @@ public:
 
     //! finalize the BC
     void setFinalized( bool __v )
-        {
-            _M_finalized = __v;
-        }
+    {
+        _M_finalized = __v;
+    }
 
     //true if Mixte coefficient is a Vector
     bool ismixteVec()const  {return _M_ismixteVec;}
@@ -188,49 +188,49 @@ public:
 
     //! set the Mixte coefficient
     void setMixteCoef( const Real& coef )
-        {
-            _M_mixteCoef = coef;
-        }
+    {
+        _M_mixteCoef = coef;
+    }
 
     //! set the Resistance coefficient
     void setResistanceCoef( const Real& coef )
-        {
-            _M_resistanceCoef = coef;
-        }
+    {
+        _M_resistanceCoef = coef;
+    }
 
     //! set the Mixte coefficient data vector
     void setMixteVec( EpetraVector& vec_mixte )
-        {
-	    _M_ismixteVec = true;
-            _M_vec_mixte= &vec_mixte;
-        }
+    {
+        _M_ismixteVec = true;
+        _M_vec_mixte= &vec_mixte;
+    }
 
     //! set the Beta coefficient data vector
     void setBetaCoef( const Real& coef )
-        {
-            _M_betaCoef = coef;
-        }
+    {
+        _M_betaCoef = coef;
+    }
 
     //! set the Gamma coefficient data vector
     void setGammaCoef( const Real& coef )
-        {
-            _M_gammaCoef = coef;
-        }
+    {
+        _M_gammaCoef = coef;
+    }
 
 
     //! set the beta coefficient data vector
     void setBetaVec( EpetraVector& vec_beta )
-        {
-	  _M_isbetaVec = true;
-	  _M_vec_beta= &vec_beta;
-        }
+    {
+        _M_isbetaVec = true;
+        _M_vec_beta= &vec_beta;
+    }
 
     //! set the gamma coefficient data vector
     void setGammaVec( EpetraVector& vec_gamma )
-        {
-	  _M_isgammaVec = true;
-	  _M_vec_gamma= &vec_gamma;
-        }
+    {
+        _M_isgammaVec = true;
+        _M_vec_gamma= &vec_gamma;
+    }
 
     //! set the vector
     void setVector( EpetraVector& __vec, UInt nbDOF, UInt type=0 );
@@ -262,7 +262,7 @@ protected:
      */
     Real _M_mixteCoef;
 
-     //! Coefficient for mixte boundary conditions (Resistance)
+    //! Coefficient for mixte boundary conditions (Resistance)
     /*! For the moment, it is the same for all the entries of the data vector.
      */
     Real _M_resistanceCoef;
@@ -321,7 +321,7 @@ public:
     //! super class
     typedef BCVectorBase super;
 
-  //! Constructor
+    //! Constructor
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
@@ -361,8 +361,8 @@ const Real& z, const ID& icomp)
 */
 
 class BCVectorInterface
-    :
-    public BCVectorBase
+        :
+        public BCVectorBase
 {
 public:
 
@@ -418,9 +418,9 @@ public:
 
     //! getter
     DofInterfaceBase const & dofInterface() const
-        {
-            return *_M_dofIn;
-        }
+    {
+        return *_M_dofIn;
+    }
 
     //! Output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;

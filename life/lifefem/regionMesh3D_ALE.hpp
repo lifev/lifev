@@ -38,8 +38,8 @@ namespace LifeV
 {
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
 class RegionMesh3D_ALE
-            :
-            public RegionMesh3D<GEOSHAPE, MC>
+        :
+        public RegionMesh3D<GEOSHAPE, MC>
 {
 public:
     typedef typename RegionMesh3D<GEOSHAPE, MC>::ElementShape ElementShape;

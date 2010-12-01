@@ -53,10 +53,10 @@
 // ===================================================
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-    #include <mpi.h>
-	#include <Epetra_MpiComm.h>
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -76,8 +76,8 @@ using namespace LifeV;
 //Register products in the preconditioner factory, so we can use Ifpack and ML as preconditioners.
 namespace
 {
-	static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-	static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
 
@@ -90,19 +90,19 @@ namespace
 int main(int argc, char** argv)
 {
 
-	#ifdef HAVE_MPI
-		MPI_Init(&argc, &argv);
-		std::cout << "MPI Initialization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
 
     test_bdf bdf_t( argc, argv );
     bdf_t.run();
 
 
-	#ifdef HAVE_MPI
-		MPI_Finalize();
-		std::cout << "MPI Finalization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
 
     return( EXIT_SUCCESS );
 }

@@ -66,8 +66,8 @@ public:
     //@}
 
     // Constructors.
-	//! @name Constructors
-	//@{
+    //! @name Constructors
+    //@{
 
     //! Empty Constructor
     DataDarcy();
@@ -111,7 +111,7 @@ public:
     //! @name Get methods
     //@{
 
-	//! Get the level of verbosity of the problem.
+    //! Get the level of verbosity of the problem.
     inline const UInt verbose( void ) const
     {
         return M_verbose;
@@ -123,8 +123,8 @@ public:
         return M_section;
     }
 
-   	//! Get the data file of the problem.
-   	inline Data_ptrType dataFile( void ) const
+    //! Get the data file of the problem.
+    inline Data_ptrType dataFile( void ) const
     {
         return M_data;
     }
@@ -149,8 +149,8 @@ public:
     //@}
 
     // Methods.
-	//! @name Methods
-	//@{
+    //! @name Methods
+    //@{
 
     /*! Overloading of the operator =
         @param dataDarcy The DataDarcy to be copied.
@@ -163,7 +163,7 @@ public:
     */
     void setup( const Data_Type& dataFile, const std::string& section = "darcy"  );
 
-	//@}
+    //@}
 
 
 
@@ -186,13 +186,13 @@ protected:
 
 template < typename Mesh >
 DataDarcy<Mesh>::DataDarcy( ):
-    // Data containers
-    M_data          ( ),
-    M_time          ( ),
-    M_mesh          ( ),
-    // Miscellaneous
-    M_verbose       ( static_cast<UInt>(0) ),
-    M_section       ( )
+        // Data containers
+        M_data          ( ),
+        M_time          ( ),
+        M_mesh          ( ),
+        // Miscellaneous
+        M_verbose       ( static_cast<UInt>(0) ),
+        M_section       ( )
 {
     CONSTRUCTOR( "DataDarcy" );
 }
@@ -200,13 +200,13 @@ DataDarcy<Mesh>::DataDarcy( ):
 // Copy constructor
 template < typename Mesh >
 DataDarcy<Mesh>::DataDarcy( const DataDarcy &dataDarcy ):
-    // Data containers
-    M_data                ( dataDarcy.M_data ),
-	M_time                ( dataDarcy.M_time ),
-    M_mesh                ( dataDarcy.M_mesh ),
-    // Miscellaneous
-    M_verbose             ( dataDarcy.M_verbose ),
-    M_section             ( dataDarcy.M_section )
+        // Data containers
+        M_data                ( dataDarcy.M_data ),
+        M_time                ( dataDarcy.M_time ),
+        M_mesh                ( dataDarcy.M_mesh ),
+        // Miscellaneous
+        M_verbose             ( dataDarcy.M_verbose ),
+        M_section             ( dataDarcy.M_section )
 {
     CONSTRUCTOR( "DataDarcy" );
 }
@@ -239,7 +239,7 @@ void DataDarcy<Mesh>::setup( const Data_Type& dataFile, const std::string& secti
     M_section = section;
 
     // If data has not been set
-    if( !M_data.get() )
+    if ( !M_data.get() )
         M_data.reset( new Data_Type( dataFile ) );
 
     // If data time has not been set
@@ -258,7 +258,7 @@ void DataDarcy<Mesh>::setup( const Data_Type& dataFile, const std::string& secti
 /////////////////////////////////////////////////////////////////////////////////
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class inversePermeability
 {
 
@@ -271,7 +271,7 @@ public:
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real> & )>
-                                                  permeability_type;
+    permeability_type;
 
     typedef typename SolverType::vector_type      vector_type;
     typedef boost::shared_ptr<vector_type>        vector_ptrtype;
@@ -284,9 +284,9 @@ public:
 
     // Copy constructor
     inversePermeability ( const permeability_type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
-        M_inversePermeability ( invPerm ),
-        M_fESpace             ( fESpace ),
-        M_fields              ( std::vector< const vector_ptrtype* >(0) ) {};
+            M_inversePermeability ( invPerm ),
+            M_fESpace             ( fESpace ),
+            M_fields              ( std::vector< const vector_ptrtype* >(0) ) {};
 
     //! Virtual destructor.
     // virtual ~inversePermeability ();
@@ -334,7 +334,7 @@ operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const U
     ElemVec value ( M_fESpace.refFE().nbDof(), 1 );
 
     // Update the value of the current element
-    M_fESpace.fe().update( M_fESpace.mesh()->element( iElem ), 
+    M_fESpace.fe().update( M_fESpace.mesh()->element( iElem ),
                            UPDATE_QUAD_NODES | UPDATE_WDET );
 
     for ( UInt i(static_cast<UInt>(0)); i < values.size(); ++i )

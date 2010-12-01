@@ -24,13 +24,13 @@ namespace LifeV
 
 RefFE::RefFE( std::string name, FE_TYPE type, ReferenceShapes shape,
               int nbDofPerVertex, int nbDofPerEdge, int nbDofPerFace,
-                      int nbDofPerVolume, int nbDof, int nbCoor, int FEDim, const Fct* phi,
+              int nbDofPerVolume, int nbDof, int nbCoor, int FEDim, const Fct* phi,
               const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi , const Real* refCoor,
               DofPatternType patternType,
               const RefFE* bdRefFE ) :
-    RefEle( name, shape, nbDof, nbCoor, FEDim, phi, dPhi, d2Phi, divPhi, refCoor ),
-    LocalDofPattern( nbDof, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume, patternType ),
-    M_boundaryFE( bdRefFE ), M_type( type )
+        RefEle( name, shape, nbDof, nbCoor, FEDim, phi, dPhi, d2Phi, divPhi, refCoor ),
+        LocalDofPattern( nbDof, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume, patternType ),
+        M_boundaryFE( bdRefFE ), M_type( type )
 {
     CONSTRUCTOR( "RefFE" );
 }

@@ -42,22 +42,23 @@
 
 #include<life/lifecore/displayer.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 Displayer::Displayer( const comm_PtrType& comm ):
-    M_comm          ( comm ),
-    M_verbose       ( true )
+        M_comm          ( comm ),
+        M_verbose       ( true )
 {
-    if( M_comm )
+    if ( M_comm )
         M_verbose = M_comm->MyPID() == 0;
 }
 
 Displayer::Displayer( const Displayer& displayer ):
-    M_comm          ( displayer.M_comm ),
-    M_verbose       ( displayer.M_verbose )
+        M_comm          ( displayer.M_comm ),
+        M_verbose       ( displayer.M_verbose )
 {
 }
 

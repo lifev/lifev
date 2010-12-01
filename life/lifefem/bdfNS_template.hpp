@@ -61,12 +61,12 @@ private:
 
 template<typename VectorType>
 BdfTNS<VectorType>::BdfTNS( const UInt n )
-    :
-    _bdf_u( n ),
-    _bdf_p( std::max( UInt( 1 ), n - 1 ) )
+        :
+        _bdf_u( n ),
+        _bdf_p( std::max( UInt( 1 ), n - 1 ) )
 {
-  _bdf_u.setup(n,1);
-  _bdf_p.setup( std::max( UInt( 1 ), n - 1 ), 1 );
+    _bdf_u.setup(n,1);
+    _bdf_p.setup( std::max( UInt( 1 ), n - 1 ), 1 );
 }
 
 

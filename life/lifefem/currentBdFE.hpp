@@ -46,7 +46,7 @@ namespace LifeV
 */
 
 class CurrentBdFE:
-            public StaticBdFE
+        public StaticBdFE
 {
 public:
     CurrentBdFE( const RefFE& _refFE, const GeoMap& _geoMap );
@@ -68,9 +68,9 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
-        	for(UInt icoor=0; icoor<nDimensions; icoor++)
-        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+            for (UInt icoor=0; icoor<nDimensions; icoor++)
+                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
     }
     /*!
       Compute the arrays meas, weightMeas, tangent
@@ -90,9 +90,9 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
-        	for(UInt icoor=0; icoor<nDimensions; icoor++)
-        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+            for (UInt icoor=0; icoor<nDimensions; icoor++)
+                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 
         // compute the measure
         _comp_meas();
@@ -115,9 +115,9 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;i < nbGeoNode;i++ )
-        	for(UInt icoor=0; icoor<nDimensions; icoor++)
-        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+        for ( UInt i = 0; i < nbGeoNode; i++ )
+            for (UInt icoor=0; icoor<nDimensions; icoor++)
+                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 
         // compute the measure
         _comp_meas();
@@ -142,9 +142,9 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
-        	for(UInt icoor=0; icoor<nDimensions; icoor++)
-        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+            for (UInt icoor=0; icoor<nDimensions; icoor++)
+                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 
         // compute the measure and the normal
         _comp_meas_normal();
@@ -167,9 +167,9 @@ public:
         _currentId = geoele.id();
         // update the definition of the geo points
 
-        for ( UInt i = 0;(int)i < nbGeoNode;i++ )
-        	for(UInt icoor=0; icoor<nDimensions; icoor++)
-        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+            for (UInt icoor=0; icoor<nDimensions; icoor++)
+                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
 
         // compute the measure and the normal
         _comp_meas_normal();

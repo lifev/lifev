@@ -70,7 +70,7 @@ public:
            char** argv );
 
     ~darcy()
-        {}
+    {}
 
     //@}
 

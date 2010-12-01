@@ -27,10 +27,10 @@ compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
     UInt i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
-    for ( i = 0;i < fe.nbFEDof();i++ )
+    for ( i = 0; i < fe.nbFEDof(); i++ )
     {
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
             s += fe.phi( i, ig ) * fe.weightDet( ig );
         vec( i ) += constant * s;
     }

@@ -56,7 +56,7 @@ struct DarcyDefaultSource
                                   const LifeV::Real&, const LifeV::Real&,
                                   const LifeV::UInt&) const
     {
-    	return static_cast<LifeV::Real>( 0 );
+        return static_cast<LifeV::Real>( 0 );
     }
 };
 
@@ -228,7 +228,7 @@ namespace LifeV
   @bug If the save flag for the exporter is setted to 0 the program fails.
 */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class DarcySolver
 {
 
@@ -240,7 +240,7 @@ public:
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const UInt& )>
-                                                   Function;
+    Function;
 
     typedef inversePermeability<Mesh, SolverType>  permeability_type;
     typedef boost::shared_ptr<permeability_type>   permeability_ptrtype;
@@ -680,42 +680,42 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
               bchandler_raw_type&        bcHandler,
               comm_ptrtype&              comm ):
-    // Parallel stuff.
-    M_me                     ( comm->MyPID() ),
-    M_localMap               ( hybrid_FESpace.map() ),
-    M_displayer              ( comm ),
-    // Data of the problem.
-    M_data                   ( dataFile ),
-	M_source                 ( DarcyDefaultSource() ),
-    M_BCh                    ( &bcHandler ),
-    M_setBC                  ( true ),
-    // Finite element spaces.
-    M_primal_FESpace         ( primal_FESpace ),
-    M_dual_FESpace           ( dual_FESpace ),
-    M_hybrid_FESpace         ( hybrid_FESpace ),
-    M_VdotN_FESpace          ( VdotN_FESpace ),
-    // Algebraic stuff.
-    M_matrHybrid             ( new matrix_type ( M_localMap ) ),
-    M_rhs                    ( new vector_type ( M_localMap ) ),
-    M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
-    M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
-    M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
-    M_residual               ( new vector_type ( M_localMap ) ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
-    // Elementary matrices and vectors used for the static condensation.
-    M_elvecHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1 ),
-    M_elvecSource            ( M_primal_FESpace.refFE().nbDof(), 1 ),
-    M_elvecFlux              ( M_dual_FESpace.refFE().nbDof(), 1 ),
-    M_elmatMix               ( M_dual_FESpace.refFE().nbDof(), 1, 1, M_primal_FESpace.refFE().nbDof(), 0, 1,
-    						   M_hybrid_FESpace.refFE().nbDof(), 0, 1 ),
-    M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
-    M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
-    M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
+        // Parallel stuff.
+        M_me                     ( comm->MyPID() ),
+        M_localMap               ( hybrid_FESpace.map() ),
+        M_displayer              ( comm ),
+        // Data of the problem.
+        M_data                   ( dataFile ),
+        M_source                 ( DarcyDefaultSource() ),
+        M_BCh                    ( &bcHandler ),
+        M_setBC                  ( true ),
+        // Finite element spaces.
+        M_primal_FESpace         ( primal_FESpace ),
+        M_dual_FESpace           ( dual_FESpace ),
+        M_hybrid_FESpace         ( hybrid_FESpace ),
+        M_VdotN_FESpace          ( VdotN_FESpace ),
+        // Algebraic stuff.
+        M_matrHybrid             ( new matrix_type ( M_localMap ) ),
+        M_rhs                    ( new vector_type ( M_localMap ) ),
+        M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
+        M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
+        M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
+        M_residual               ( new vector_type ( M_localMap ) ),
+        M_linearSolver           ( ),
+        M_prec                   ( ),
+        // Elementary matrices and vectors used for the static condensation.
+        M_elvecHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1 ),
+        M_elvecSource            ( M_primal_FESpace.refFE().nbDof(), 1 ),
+        M_elvecFlux              ( M_dual_FESpace.refFE().nbDof(), 1 ),
+        M_elmatMix               ( M_dual_FESpace.refFE().nbDof(), 1, 1, M_primal_FESpace.refFE().nbDof(), 0, 1,
+                                   M_hybrid_FESpace.refFE().nbDof(), 0, 1 ),
+        M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
+        M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
+        M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
+        M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
 {
 
-	CONSTRUCTOR( "DarcySolver" );
+    CONSTRUCTOR( "DarcySolver" );
 
 } // Constructor
 
@@ -729,41 +729,41 @@ DarcySolver ( const data_type&           dataFile,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
               comm_ptrtype&              comm ):
-    // Parallel stuff.
-    M_me                     ( comm->MyPID() ),
-    M_localMap               ( hybrid_FESpace.map() ),
-    M_displayer              ( comm ),
-    // Data of the problem.
-    M_data                   ( dataFile ),
-	M_source                 ( DarcyDefaultSource() ),
-    M_setBC                  ( false ),
-    // Finite element spaces.
-    M_primal_FESpace         ( primal_FESpace ),
-    M_dual_FESpace           ( dual_FESpace ),
-    M_hybrid_FESpace         ( hybrid_FESpace ),
-    M_VdotN_FESpace          ( VdotN_FESpace ),
-    // Algebraic stuff.
-    M_matrHybrid             ( new matrix_type ( M_localMap ) ),
-    M_rhs                    ( new vector_type ( M_localMap ) ),
-    M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
-    M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
-    M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
-    M_residual               ( new vector_type ( M_localMap ) ),
-    M_linearSolver           ( ),
-    M_prec                   ( ),
-    // Local matrices and vectors.
-    M_elvecHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1 ),
-    M_elvecSource            ( M_primal_FESpace.refFE().nbDof(), 1 ),
-    M_elvecFlux              ( M_dual_FESpace.refFE().nbDof(), 1 ),
-    M_elmatMix               ( M_dual_FESpace.refFE().nbDof(), 1, 1, M_primal_FESpace.refFE().nbDof(), 0, 1,
-    						   M_hybrid_FESpace.refFE().nbDof(), 0, 1 ),
-    M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
-    M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
-    M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
-    M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
+        // Parallel stuff.
+        M_me                     ( comm->MyPID() ),
+        M_localMap               ( hybrid_FESpace.map() ),
+        M_displayer              ( comm ),
+        // Data of the problem.
+        M_data                   ( dataFile ),
+        M_source                 ( DarcyDefaultSource() ),
+        M_setBC                  ( false ),
+        // Finite element spaces.
+        M_primal_FESpace         ( primal_FESpace ),
+        M_dual_FESpace           ( dual_FESpace ),
+        M_hybrid_FESpace         ( hybrid_FESpace ),
+        M_VdotN_FESpace          ( VdotN_FESpace ),
+        // Algebraic stuff.
+        M_matrHybrid             ( new matrix_type ( M_localMap ) ),
+        M_rhs                    ( new vector_type ( M_localMap ) ),
+        M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
+        M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
+        M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
+        M_residual               ( new vector_type ( M_localMap ) ),
+        M_linearSolver           ( ),
+        M_prec                   ( ),
+        // Local matrices and vectors.
+        M_elvecHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1 ),
+        M_elvecSource            ( M_primal_FESpace.refFE().nbDof(), 1 ),
+        M_elvecFlux              ( M_dual_FESpace.refFE().nbDof(), 1 ),
+        M_elmatMix               ( M_dual_FESpace.refFE().nbDof(), 1, 1, M_primal_FESpace.refFE().nbDof(), 0, 1,
+                                   M_hybrid_FESpace.refFE().nbDof(), 0, 1 ),
+        M_elmatHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1, 1 ),
+        M_BtB                    ( M_primal_FESpace.refFE().nbDof(), M_primal_FESpace.refFE().nbDof() ),
+        M_CtC                    ( M_hybrid_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() ),
+        M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
 {
 
-	CONSTRUCTOR( "DarcySolver" );
+    CONSTRUCTOR( "DarcySolver" );
 
 } // Constructor
 
@@ -773,7 +773,7 @@ DarcySolver<Mesh, SolverType>::
 ~DarcySolver ( void )
 {
 
-	DESTRUCTOR( "DarcySolver" );
+    DESTRUCTOR( "DarcySolver" );
 
 } // Destructor
 
@@ -793,7 +793,7 @@ setup ()
     // Choose the preconditioner type.
     std::string precType = dataFile( "darcy/prec/prectype", "Ifpack");
 
-	// Create a preconditioner object.
+    // Create a preconditioner object.
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolver : Preconditioner not set" );
 
@@ -808,11 +808,11 @@ symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
 {
 
     // If the matrix is stored in the lower part
-    if( UPLO[0] == 'L')
+    if ( UPLO[0] == 'L')
     {
-        for(UInt i(0); i < static_cast<UInt>(N[0]); ++i)
+        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
         {
-            for(UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
+            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
             {
                 A(i, j) = A(j, i);
             }
@@ -821,9 +821,9 @@ symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
     // If the matrix is stored in the upper part
     else
     {
-        for(UInt i(0); i < static_cast<UInt>(N[0]); ++i)
+        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
         {
-            for(UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
+            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
             {
                 A(j, i) = A(i, j);
             }
@@ -852,7 +852,7 @@ computeConstantMatrices ()
        a FESpace object. In fact the method refFE return a const RefFE&, but the function
        TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const RefFE&
        to a const RefHybridFE&. The cast of type is static and uses pointers. */
-	TP_VdotN_Hdiv( static_cast<Real>(1.),
+    TP_VdotN_Hdiv( static_cast<Real>(1.),
                    M_elmatMix,
                    *static_cast<const RefFEHybrid*>(&M_hybrid_FESpace.refFE()),
                    *static_cast<const RefFEHybrid*>(&M_VdotN_FESpace.refFE()),
@@ -911,7 +911,7 @@ staticCondensation ()
     int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
     // Dual variable degrees of freedom.
     int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
-	// Hybrid variable degree of freedom.
+    // Hybrid variable degree of freedom.
     int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
 
     double ONE_[1]      = {1.0};
@@ -1066,11 +1066,11 @@ DarcySolver<Mesh, SolverType>::
 buildSystem ()
 {
 
-	// Chronos.
-	Chrono chronoStaticCondensation;
-	Chrono chronoConstantLocalMatrix;
-	Chrono chronoGlobalAssembleMatrix;
-	Chrono chronoGlobalAssembleVector;
+    // Chronos.
+    Chrono chronoStaticCondensation;
+    Chrono chronoConstantLocalMatrix;
+    Chrono chronoGlobalAssembleMatrix;
+    Chrono chronoGlobalAssembleVector;
 
     // The total number of elements in the mesh.
     UInt meshNumberOfElements = M_primal_FESpace.mesh()->numElements();
@@ -1084,7 +1084,7 @@ buildSystem ()
     M_elmatMix.zero();
     M_elmatHyb.zero();
 
-  	chronoConstantLocalMatrix.start();
+    chronoConstantLocalMatrix.start();
 
     // Compute all the constant matrices, e.g. the matrix B and C
     computeConstantMatrices();
@@ -1094,7 +1094,7 @@ buildSystem ()
     M_displayer.leaderPrintMax( "done in " , chronoConstantLocalMatrix.diff() );
 
     // If setted print the constant matrices computed.
-    if( M_displayer.isLeader() &&  M_data.verbose() > static_cast<UInt>(1) )
+    if ( M_displayer.isLeader() &&  M_data.verbose() > static_cast<UInt>(1) )
     {
         M_displayer.leaderPrint( "elmatHyb :\n\n" );
         M_elmatHyb.showMe();
@@ -1107,7 +1107,7 @@ buildSystem ()
     updateVariables();
 
     M_displayer.leaderPrint("                 Perform Static Condensation   ...          ");
-  	chronoStaticCondensation.start();
+    chronoStaticCondensation.start();
 
     //---------------------------------------
     //    LOOP ON ALL THE VOLUME ELEMENTS
@@ -1130,21 +1130,21 @@ buildSystem ()
                         M_hybrid_FESpace.dof(),
                         0,0,0,0);
 
-		/* Assemble the global hybrid right hand side.
+        /* Assemble the global hybrid right hand side.
            M_primal_FESpace is used instead of M_hybrid_FESpace for currentLocalId,
            because currentFE cannot store a RefFEHybrid. */
         assembleVector( *M_rhs,
-    	    			M_primal_FESpace.fe().currentLocalId(),
-       				    M_elvecHyb,
-       				    M_hybrid_FESpace.refFE().nbDof(),
-       				    M_hybrid_FESpace.dof(), 0 );
+                        M_primal_FESpace.fe().currentLocalId(),
+                        M_elvecHyb,
+                        M_hybrid_FESpace.refFE().nbDof(),
+                        M_hybrid_FESpace.dof(), 0 );
     }
 
     //-----------------------------------
     // END OF LOOP ON THE VOLUME ELEMENTS
     //-----------------------------------
 
-	chronoStaticCondensation.stop();
+    chronoStaticCondensation.stop();
     M_displayer.leaderPrintMax( "done in " , chronoStaticCondensation.diff() );
 
     // Apply boundary conditions to the hybrid global matrix and to the hybrid global right hand side.
@@ -1152,23 +1152,23 @@ buildSystem ()
 
     M_displayer.leaderPrint("                 Assemble Global Hybrid Matrix ...          ");
 
-	chronoGlobalAssembleMatrix.start();
+    chronoGlobalAssembleMatrix.start();
 
-	// Assemble the global hybrid matrix.
-	M_matrHybrid->GlobalAssemble();
+    // Assemble the global hybrid matrix.
+    M_matrHybrid->GlobalAssemble();
 
-	chronoGlobalAssembleMatrix.stop();
+    chronoGlobalAssembleMatrix.stop();
 
     M_displayer.leaderPrintMax( "done in " , chronoGlobalAssembleMatrix.diff() );
 
-	M_displayer.leaderPrint("                 Assemble Global Hybrid Vector ...          ");
+    M_displayer.leaderPrint("                 Assemble Global Hybrid Vector ...          ");
 
-	chronoGlobalAssembleVector.start();
+    chronoGlobalAssembleVector.start();
 
-	// Assemble the global hybrid vector.
+    // Assemble the global hybrid vector.
     M_rhs->GlobalAssemble();
 
-   	chronoGlobalAssembleVector.stop();
+    chronoGlobalAssembleVector.stop();
 
     M_displayer.leaderPrintMax( "done in " , chronoGlobalAssembleVector.diff() );
 
@@ -1183,7 +1183,7 @@ applyBoundaryConditions ()
     // Chrono.
     Chrono chronoBC;
 
-	// Check if the boundary conditions were updated.
+    // Check if the boundary conditions were updated.
     if ( !M_BCh->bdUpdateDone() )
     {
 
@@ -1211,14 +1211,14 @@ applyBoundaryConditions ()
               rhsFull,
               *M_dual_FESpace.mesh(),
               M_dual_FESpace.dof(),
-    		  *M_BCh,
+              *M_BCh,
               M_dual_FESpace.feBd(), 1.,
               M_data.dataTime()->getTime() );
 
     chronoBC.stop();
     M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
 
-	// Save the global hybrid right hand side.
+    // Save the global hybrid right hand side.
     *M_rhs = rhsFull;
 
 } // applyBoundaryConditions
@@ -1230,10 +1230,10 @@ DarcySolver<Mesh, SolverType>::
 solve ()
 {
 
-	// Set the matrix.
-	M_linearSolver.setMatrix( *M_matrHybrid );
+    // Set the matrix.
+    M_linearSolver.setMatrix( *M_matrHybrid );
 
-	// Solve the linear system, if used a iterative scheme numIter stores the number of iterations.
+    // Solve the linear system, if used a iterative scheme numIter stores the number of iterations.
     UInt numIter = M_linearSolver.solveSystem( *M_rhs, *M_hybrid, M_matrHybrid );
 
     M_displayer.leaderPrint( "                 Number of iterations  ", numIter, "\n" );
@@ -1254,11 +1254,11 @@ localComputePrimalAndDual ()
     int NBRHS[1]        = {1};
     // Increment := 1.
     int INC1[1]         = {1};
-	// Primal variable degrees of freedom.
+    // Primal variable degrees of freedom.
     int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
     // Dual variable degrees of freedom.
     int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
-	// Hybrid variable degree of freedom.
+    // Hybrid variable degree of freedom.
     int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
 
     double ONE_[1]      = {1.0};
@@ -1395,14 +1395,14 @@ DarcySolver<Mesh, SolverType>::
 computePrimalAndDual ()
 {
 
-	// Chrono.
-	Chrono chronoComputePrimalAndDual;
+    // Chrono.
+    Chrono chronoComputePrimalAndDual;
 
     // The total number of elements in the mesh.
     UInt meshNumberOfElements = M_primal_FESpace.mesh()->numElements();
 
-	M_displayer.leaderPrint("                 Compute pressure and flux     ...          ");
-	chronoComputePrimalAndDual.start();
+    M_displayer.leaderPrint("                 Compute pressure and flux     ...          ");
+    chronoComputePrimalAndDual.start();
 
     /*==========================================
       POST PROCESSING
@@ -1410,13 +1410,13 @@ computePrimalAndDual ()
       and the velocity (RTk / element) => 2 (opposite) velocities / face
       ==========================================*/
 
-	/* The vector H_hybrid is an unique epetra vector, so it does not share one layer elements.
-	   The reconstruction of the primal and dual variabile need this share, so we create a repeated
-	   epetra vector. This operation maximize the efficiency of send/receive time cost instead to
-	   send and receive each time a single datum. */
-	vector_type M_hybrid_Repeated( *M_hybrid, Repeated );
+    /* The vector H_hybrid is an unique epetra vector, so it does not share one layer elements.
+       The reconstruction of the primal and dual variabile need this share, so we create a repeated
+       epetra vector. This operation maximize the efficiency of send/receive time cost instead to
+       send and receive each time a single datum. */
+    vector_type M_hybrid_Repeated( *M_hybrid, Repeated );
 
-	//---------------------------------------
+    //---------------------------------------
     //    LOOP ON ALL THE VOLUME ELEMENTS
     //---------------------------------------
 
@@ -1440,17 +1440,17 @@ computePrimalAndDual ()
 
         /* Put the primal variable of the current finite element, stored in elvecSource,
            in the global vector M_primal. */
-		assembleVector( *M_primal,
-    	    			M_primal_FESpace.fe().currentLocalId(),
-       				    M_elvecSource,
-       				    M_primal_FESpace.refFE().nbDof(),
-       				    M_primal_FESpace.dof(), 0 );
+        assembleVector( *M_primal,
+                        M_primal_FESpace.fe().currentLocalId(),
+                        M_elvecSource,
+                        M_primal_FESpace.refFE().nbDof(),
+                        M_primal_FESpace.dof(), 0 );
 
 
-        for( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).numLocalFaces; ++iLocalFace )
+        for ( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).numLocalFaces; ++iLocalFace )
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFaceId( iElem, iLocalFace ) );
-            if( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 1 ) != iElem )
+            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 1 ) != iElem )
             {
                 M_elvecFlux[ iLocalFace - 1 ] = 0;
             }
@@ -1471,7 +1471,7 @@ computePrimalAndDual ()
     // END OF THE LOOP ON THE VOLUME ELEMENTS
     //---------------------------------------
 
-	// Assemble the primal variable.
+    // Assemble the primal variable.
     M_primal->GlobalAssemble();
 
     // It is wrong to assemble the dual variable, no communications required.

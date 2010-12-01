@@ -20,18 +20,18 @@
 
 namespace LifeV
 {
-  const EntityFlag InternalEntitySelector::defMarkFlag(EntityFlag(1000));
+const EntityFlag InternalEntitySelector::defMarkFlag(EntityFlag(1000));
 
 
-  InternalEntitySelector::InternalEntitySelector():waterMarkFlag(defMarkFlag)
-  {};
+InternalEntitySelector::InternalEntitySelector():waterMarkFlag(defMarkFlag)
+{};
 
-  InternalEntitySelector::InternalEntitySelector(const EntityFlag & w): waterMarkFlag(w)
-  {};
-  
-  bool
-  InternalEntitySelector::operator()(EntityFlag const & test) const
-  {
+InternalEntitySelector::InternalEntitySelector(const EntityFlag & w): waterMarkFlag(w)
+{};
+
+bool
+InternalEntitySelector::operator()(EntityFlag const & test) const
+{
     return (test==EntityFlag(0) || test > waterMarkFlag );
-  }
+}
 }

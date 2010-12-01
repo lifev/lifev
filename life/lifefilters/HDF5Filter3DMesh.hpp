@@ -38,7 +38,8 @@
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifefem/dofInterface3Dto3D.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Class derived from Hdf5exporter to provide I/O for the mesh partitions (RegionMesh3D only)
 /*!
@@ -236,14 +237,14 @@ private:
 
 template<typename Mesh>
 HDF5Filter3DMesh<Mesh>::HDF5Filter3DMesh(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
-                                             const int& procId) :
-    base                ( dfile, mesh, prefix, procId )
+                                         const int& procId) :
+        base                ( dfile, mesh, prefix, procId )
 {
 }
 
 template<typename Mesh>
 HDF5Filter3DMesh<Mesh>::HDF5Filter3DMesh(const GetPot& dfile, const std::string& prefix):
-    base                ( dfile, prefix )
+        base                ( dfile, prefix )
 {
 }
 
@@ -253,10 +254,10 @@ HDF5Filter3DMesh<Mesh>::HDF5Filter3DMesh(const GetPot& dfile, const std::string&
 
 template<typename Mesh>
 void HDF5Filter3DMesh<Mesh>::addDOFInterface(const interface_vector_ptrType& interfaces,
-                                              const std::string& type,
-                                              const Int& firstInterfaceFlag,
-                                              const Int& secondInterfaceFlag,
-                                              const boost::shared_ptr<Epetra_Comm>& comm)
+                                             const std::string& type,
+                                             const Int& firstInterfaceFlag,
+                                             const Int& secondInterfaceFlag,
+                                             const boost::shared_ptr<Epetra_Comm>& comm)
 {
     M_DOFInterfaces.push_back(interfaces);
     M_interfaceTypes.push_back(type);
@@ -284,7 +285,7 @@ void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, boost::shared_ptr<Ep
 
     std::vector<Int> partitionSizes(nPartitions);
     this->M_HDF5->Read("Graph", "partition_sizes", H5T_NATIVE_INT, nPartitions,
-                 &partitionSizes[0]);
+                       &partitionSizes[0]);
 
     graph->resize(0);
     graph->reserve(nPartitions);
@@ -297,8 +298,8 @@ void HDF5Filter3DMesh<Mesh>::loadGraph(graph_ptrtype graph, boost::shared_ptr<Ep
         partBuffer.resize(partitionSizes[i]);
         index << i;
         this->M_HDF5->Read("Graph", "partition_graph_" + index.str(),
-                     H5T_NATIVE_INT, partitionSizes[i],
-                     &partBuffer[0]);
+                           H5T_NATIVE_INT, partitionSizes[i],
+                           &partBuffer[0]);
         graph->push_back(partBuffer);
         index.str(std::string());
         index.clear();
@@ -631,7 +632,8 @@ void HDF5Filter3DMesh<Mesh>::postProcess(const Real& time)
 
         this->M_wr_Xdmf(time);
 
-        if (this->M_multimesh) {
+        if (this->M_multimesh)
+        {
             this->M_wr_geo(); // see also M_wr_geometry
         }
 
@@ -746,7 +748,7 @@ void HDF5Filter3DMesh<Mesh>::writeGraph()
     // sizes
     partitionSizes.reserve(M_graph->size());
     for (std::vector<std::vector<Int> >::iterator it = M_graph->begin();
-         it != M_graph->end(); ++it)
+            it != M_graph->end(); ++it)
     {
         size = it->size();
         if (size > maxSize)
@@ -757,7 +759,7 @@ void HDF5Filter3DMesh<Mesh>::writeGraph()
     }
 
     this->M_HDF5->Write("Graph", "partition_sizes", H5T_NATIVE_INT,
-                  M_graph->size(), &partitionSizes[0]);
+                        M_graph->size(), &partitionSizes[0]);
 
     // Write partition array size
     this->M_HDF5->Write("Graph", "number_partitions", static_cast<int>((M_graph->size())));
@@ -768,8 +770,8 @@ void HDF5Filter3DMesh<Mesh>::writeGraph()
     {
         index << i;
         this->M_HDF5->Write("Graph", "partition_graph_" + index.str(),
-                      H5T_NATIVE_INT, partitionSizes[i],
-                      &(*M_graph)[i][0]);
+                            H5T_NATIVE_INT, partitionSizes[i],
+                            &(*M_graph)[i][0]);
         index.str(std::string());
         index.clear();
     }
@@ -1038,7 +1040,7 @@ void HDF5Filter3DMesh<Mesh>::writeInterfaces()
 
             Int k = 0;
             for (std::map<UInt, UInt>::const_iterator it = locDofMap.begin();
-                 it != locDofMap.end(); ++it)
+                    it != locDofMap.end(); ++it)
             {
                 firstDOF[k] = it->first;
                 secondDOF[k] = it->second;

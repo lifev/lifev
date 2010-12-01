@@ -122,12 +122,12 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
     _oper.setStructureToFluid(_oper.veloFluidMesh());
     // _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
 
-    if(_oper.data().algorithm()=="RobinNeumann")
+    if (_oper.data().algorithm()=="RobinNeumann")
     {
         // _oper.setAlphafbcf(alpha); // if alpha is bcFunction define in ud_function.cpp
 
-      _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
-      _oper.setStructureToFluidParametres();
+        _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
+        _oper.setStructureToFluidParametres();
 
         BCh_fluid->addBC("Interface",   1,  Mixte, Full,
                          *_oper.bcvStructureToFluid(),  3);
@@ -201,10 +201,10 @@ FSIOperator::fluid_bchandler_type BCh_fluidLin(FSIOperator &_oper)
     }
     if (_oper.data().method() == "exactJacobian")
     {
-            exactJacobian* EJOper = dynamic_cast<exactJacobian *>(&_oper);
-            EJOper->setDerHarmonicExtensionVelToFluid(_oper.derVeloFluidMesh());
-            BCh_fluidLin->addBC("Interface", 1, Essential  , Full,
-                                *_oper.bcvDerHarmonicExtensionVelToFluid(), 3);
+        exactJacobian* EJOper = dynamic_cast<exactJacobian *>(&_oper);
+        EJOper->setDerHarmonicExtensionVelToFluid(_oper.derVeloFluidMesh());
+        BCh_fluidLin->addBC("Interface", 1, Essential  , Full,
+                            *_oper.bcvDerHarmonicExtensionVelToFluid(), 3);
     }
 
     return BCh_fluidLin;
@@ -250,7 +250,7 @@ FSIOperator::solid_bchandler_type BCh_solid(FSIOperator &_oper)
         EJOper->setFluidLoadToStructure(_oper.sigmaSolidRepeated());
 
         BCh_solid->addBC("Interface", 1, Natural,   Full,
-                   *EJOper->bcvFluidLoadToStructure(), 3);
+                         *EJOper->bcvFluidLoadToStructure(), 3);
     }
     else if (_oper.data().method() == "fixedPoint")
     {
@@ -294,13 +294,12 @@ FSIOperator::solid_bchandler_type BCh_solidLin(FSIOperator &_oper)
 //             BCh_solidLin->addBC("Interface", 1, Essential, Full,
 //                                 *SPOper->bcvSolidLinInterfaceDisp(), 3);
     }
-    else
-    if (_oper.data().method() == "exactJacobian")
+    else if (_oper.data().method() == "exactJacobian")
     {
-            exactJacobian  *EJOper = dynamic_cast<exactJacobian *>(&_oper);
-            EJOper->setDerFluidLoadToStructure(_oper.sigmaSolidRepeated());
-            BCh_solidLin->addBC("Interface", 1, Natural,   Full,
-                             *EJOper->bcvDerFluidLoadToStructure(), 3);
+        exactJacobian  *EJOper = dynamic_cast<exactJacobian *>(&_oper);
+        EJOper->setDerFluidLoadToStructure(_oper.sigmaSolidRepeated());
+        BCh_solidLin->addBC("Interface", 1, Natural,   Full,
+                            *EJOper->bcvDerFluidLoadToStructure(), 3);
     }
 
     return BCh_solidLin;

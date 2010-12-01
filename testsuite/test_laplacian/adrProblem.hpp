@@ -68,10 +68,10 @@ public:
     //@{
 
     ADRProblem( int argc,
-              char** argv );
+                char** argv );
 
     ~ADRProblem()
-        {}
+    {}
 
     //@}
 

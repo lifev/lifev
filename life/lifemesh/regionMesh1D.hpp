@@ -59,7 +59,8 @@
 #include <life/lifemesh/basisElSh.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 //! RegionMesh1D
 /*!
  * @author Luca Formaggia
@@ -71,7 +72,7 @@ namespace LifeV {
  */
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
 class RegionMesh1D : public MeshEntity,
-                     public MC::RegionMarker
+        public MC::RegionMarker
 {
 public:
 
@@ -504,7 +505,7 @@ public:
 //     UInt & numEdges();    //!<Number of total edges (uses counter, may modify)
 //     UInt storedEdges() const; //!< Number of stored edges
 //     UInt maxNumEdges() const;  //!< Max number of edges that can be stored
-     //! Set Maximum Number of Edges in the Edges container
+    //! Set Maximum Number of Edges in the Edges container
 //     void setMaxNumEdges( UInt const n, bool const setcounter = false );
     //! Adds a edge to list. Returns reference to it
     EdgeType & addEdge( bool const boundary = false );
@@ -601,7 +602,7 @@ public:
     UInt& numBVertices();
 
     UInt numGlobalVertices() const;
-    void setNumGlobalVertices( UInt const n ){ M_numGlobalVertices = n; }
+    void setNumGlobalVertices( UInt const n ) { M_numGlobalVertices = n; }
 
     bool isVertex        ( ID const & id )       const;  //<!Is this point a Vertex?
     bool isVertex        ( PointType const & p ) const;  //<!Is this point a Vertex?
@@ -642,7 +643,7 @@ public:
     void cleanElementEdges() {return;}
 
     //
-    void setNumGlobalEdges( UInt const n ){ M_numGlobalEdges = n; }
+    void setNumGlobalEdges( UInt const n ) { M_numGlobalEdges = n; }
 
     /*! \name RegionContainers
      *
@@ -795,21 +796,45 @@ void RegionMesh1D<GEOSHAPE, MC>::transformMesh( const VECTOR& scale, const VECTO
     //Create the 3 planar rotation matrix and the scale matrix
     boost::numeric::ublas::matrix<Real> R(3,3), R1(3,3), R2(3,3), R3(3,3), S(3,3);
 
-    R1(0,0) =  1.;             R1(0,1) =  0.;             R1(0,2) =  0.;
-    R1(1,0) =  0.;             R1(1,1) =  cos(rotate[0]); R1(1,2) = -sin(rotate[0]);
-    R1(2,0) =  0.;             R1(2,1) =  sin(rotate[0]); R1(2,2) =  cos(rotate[0]);
+    R1(0,0) =  1.;
+    R1(0,1) =  0.;
+    R1(0,2) =  0.;
+    R1(1,0) =  0.;
+    R1(1,1) =  cos(rotate[0]);
+    R1(1,2) = -sin(rotate[0]);
+    R1(2,0) =  0.;
+    R1(2,1) =  sin(rotate[0]);
+    R1(2,2) =  cos(rotate[0]);
 
-    R2(0,0) =  cos(rotate[1]); R2(0,1) =  0.;             R2(0,2) =  sin(rotate[1]);
-    R2(1,0) =  0.;             R2(1,1) =  1.;             R2(1,2) = 0.;
-    R2(2,0) = -sin(rotate[1]); R2(2,1) =  0.;             R2(2,2) =  cos(rotate[1]);
+    R2(0,0) =  cos(rotate[1]);
+    R2(0,1) =  0.;
+    R2(0,2) =  sin(rotate[1]);
+    R2(1,0) =  0.;
+    R2(1,1) =  1.;
+    R2(1,2) = 0.;
+    R2(2,0) = -sin(rotate[1]);
+    R2(2,1) =  0.;
+    R2(2,2) =  cos(rotate[1]);
 
-    R3(0,0) =  cos(rotate[2]); R3(0,1) = -sin(rotate[2]); R3(0,2) = 0.;
-    R3(1,0) =  sin(rotate[2]); R3(1,1) =  cos(rotate[2]); R3(1,2) = 0.;
-    R3(2,0) =  0;              R3(2,1) =  0.;             R3(2,2) = 1.;
+    R3(0,0) =  cos(rotate[2]);
+    R3(0,1) = -sin(rotate[2]);
+    R3(0,2) = 0.;
+    R3(1,0) =  sin(rotate[2]);
+    R3(1,1) =  cos(rotate[2]);
+    R3(1,2) = 0.;
+    R3(2,0) =  0;
+    R3(2,1) =  0.;
+    R3(2,2) = 1.;
 
-     S(0,0) = scale[0];         S(0,1) = 0.;               S(0,2) = 0.;
-     S(1,0) = 0.;               S(1,1) = scale[1];         S(1,2) = 0.;
-     S(2,0) = 0.;               S(2,1) = 0.;               S(2,2) = scale[2];
+    S(0,0) = scale[0];
+    S(0,1) = 0.;
+    S(0,2) = 0.;
+    S(1,0) = 0.;
+    S(1,1) = scale[1];
+    S(1,2) = 0.;
+    S(2,0) = 0.;
+    S(2,1) = 0.;
+    S(2,2) = scale[2];
 
     //The total rotation is: R = R1*R2*R3 (as in Paraview we rotate first around z, then around y, and finally around x).
     //We also post-multiply by S to apply the scale before the rotation.
@@ -819,7 +844,9 @@ void RegionMesh1D<GEOSHAPE, MC>::transformMesh( const VECTOR& scale, const VECTO
 
     //Create the 3D translate vector
     boost::numeric::ublas::vector<Real> P(3), T(3);
-    T(0) = translate[0]; T(1) = translate[1];  T(2) = translate[2];
+    T(0) = translate[0];
+    T(1) = translate[1];
+    T(2) = translate[2];
 
     //Apply the transformation
     for ( UInt i(0); i < pointList.size(); ++i )
@@ -924,7 +951,7 @@ void
 RegionMesh1D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
 {
     std::ostringstream _err_msg;
-	_err_msg << "Switch named " << _s << " is not allowed";
+    _err_msg << "Switch named " << _s << " is not allowed";
     ASSERT0( switches.set( _s ), _err_msg.str().c_str() );
 }
 
@@ -942,7 +969,7 @@ void
 RegionMesh1D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
 {
     std::ostringstream _err_msg;
-	_err_msg << "Switch named " << _s << " is not allowed";
+    _err_msg << "Switch named " << _s << " is not allowed";
     ASSERT0( switches.unset( _s ), _err_msg.str().c_str() );
 }
 
@@ -1342,7 +1369,7 @@ RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 #ifdef NOT_BDATA_FIRST
     //ASSERT(false,"In this version Boundary edges must be stored first");
     bool isboundary = true;
-    for ( UInt k = 1;k <= EdgeType::numVertices;++k )
+    for ( UInt k = 1; k <= EdgeType::numVertices; ++k )
     {
         isboundary = isboundary & e.point( k ).boundary();
     }

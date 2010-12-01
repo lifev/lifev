@@ -164,7 +164,7 @@ private:
 
 
 class Epetra_ExactJacobian:
-    public Epetra_Operator
+        public Epetra_Operator
 {
 
 public:
@@ -172,26 +172,26 @@ public:
     typedef exactJacobian::vector_type  vector_type;
 
     Epetra_ExactJacobian(exactJacobian* ej):
-        M_ej               (ej),
-        M_operatorDomainMap(*M_ej->solidInterfaceMap()->getMap(Repeated)),
-        M_operatorRangeMap (*M_ej->solidInterfaceMap()->getMap(Repeated)),
-        M_comm             (M_ej->worldComm())
-        {
+            M_ej               (ej),
+            M_operatorDomainMap(*M_ej->solidInterfaceMap()->getMap(Repeated)),
+            M_operatorRangeMap (*M_ej->solidInterfaceMap()->getMap(Repeated)),
+            M_comm             (M_ej->worldComm())
+    {
 //             std::cout << ej << std::endl;
 //             std::cout << M_ej->fluidInterfaceMap().getEpetra_Map() << std::endl;
 //             std::cout << M_ej->solidInterfaceMap().getEpetra_Map() << std::endl;
 //             std::cout << "ok" << std::endl;
-        };
+    };
 
-    virtual ~Epetra_ExactJacobian(){};
+    virtual ~Epetra_ExactJacobian() {};
 
     int 	SetUseTranspose (bool  /*UseTranspose*/)
-        {std::cout << "********* EJ : transpose not available\n"; return -1;}
+    {std::cout << "********* EJ : transpose not available\n"; return -1;}
     int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
     int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-        {std::cout << "********* EJ : inverse not available\n"; return -1;}
+    {std::cout << "********* EJ : inverse not available\n"; return -1;}
     double 	NormInf         () const
-        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
+    {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
     const char * Label      () const {return "exactJacobian";}
     bool 	UseTranspose    () const {return false;}
     bool 	HasNormInf      () const {return false;}
@@ -223,7 +223,7 @@ Real fzeroEJ(const Real& t,
              const ID& i);
 
 
-inline FSIOperator* createEJ(){ return new exactJacobian(); }
+inline FSIOperator* createEJ() { return new exactJacobian(); }
 
 namespace
 {

@@ -37,9 +37,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -84,18 +84,19 @@ Real zero_scalar( const Real& /* t */,
 
 Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  switch(i) {
-  case 1:
-    return 1.0;
-    break;
-  case 3:
-      return 0.0;
-      break;
-  case 2:
-      return 0.0;
-    break;
-  }
-  return 0;
+    switch (i)
+    {
+    case 1:
+        return 1.0;
+        break;
+    case 3:
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        break;
+    }
+    return 0;
 }
 
 
@@ -123,12 +124,12 @@ main( int argc, char** argv )
     MPI_Init(&argc, &argv);
     Epetra_MpiComm comm(MPI_COMM_WORLD);
     if ( comm.MyPID() == 0 )
-        {
-            cout << "% using MPI" << endl;
-            int ntasks;
-            int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-            std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
-        }
+    {
+        cout << "% using MPI" << endl;
+        int ntasks;
+        int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+        std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
+    }
 #else
     Epetra_SerialComm comm;
     cout << "% using serial Version" << endl;
@@ -243,7 +244,7 @@ main( int argc, char** argv )
 
     // finally, let's create an exporter in order to view the results
     // here, we use the ensight exporter
-     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cavity", comm.MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cavity", comm.MyPID());
     // we have to define a variable that will store the solution
     vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
 
@@ -251,13 +252,13 @@ main( int argc, char** argv )
 
 //     // and we add the variables to be saved
 //     // the velocity
-     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                          UInt(0), uFESpace.dof().numTotalDof() );
+    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
+                         UInt(0), uFESpace.dof().numTotalDof() );
 
 //     // and the pressure
-     ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                          UInt(3*uFESpace.dof().numTotalDof() ),
-                          UInt(  pFESpace.dof().numTotalDof() ) );
+    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
+                         UInt(3*uFESpace.dof().numTotalDof() ),
+                         UInt(  pFESpace.dof().numTotalDof() ) );
 
 
     if (verbose) std::cout << std::endl;
@@ -343,11 +344,11 @@ main( int argc, char** argv )
 
         // and we postprocess
 
-	*velAndPressure = fluid.solution();
-	ensight.postProcess( time );
+        *velAndPressure = fluid.solution();
+        ensight.postProcess( time );
 
         // a barrier to make sure everyone is here, and we start again
-	MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
 
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;

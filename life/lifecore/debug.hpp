@@ -120,8 +120,8 @@ public:
     //@{
     typedef int (*stprintf)( const char* format, ... );
 
-    NdebugStream(){}
-    ~NdebugStream(){}
+    NdebugStream() {}
+    ~NdebugStream() {}
 
     //@}
 

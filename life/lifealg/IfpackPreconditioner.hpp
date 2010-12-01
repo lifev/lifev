@@ -44,7 +44,8 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 class IfpackPreconditioner:
         public EpetraPreconditioner
@@ -83,15 +84,15 @@ public:
      */
 
     void                   setDataFromGetPot ( const GetPot&      dataFile,
-					                           const std::string& section );
+                                               const std::string& section );
 
     double                 Condest ();
 
     super::prec_raw_type*  getPrec();
 
-    super::prec_type  getPrecPtr(){return M_Prec;}
+    super::prec_type  getPrecPtr() {return M_Prec;}
 
-    std::string            precType(){return M_precType;}
+    std::string            precType() {return M_precType;}
 
 
     int                    buildPreconditioner(operator_type& A);
@@ -106,9 +107,9 @@ public:
                              const std::string& subSection ) { createIfpackList( list, dataFile, section, subSection );}
 
     static void createIfpackList(       list_Type&   list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& subSection = "ifpack" );
+                                        const GetPot&      dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection = "ifpack" );
 
     const int&
     getOverlapLevel() const
@@ -152,10 +153,10 @@ private:
 };
 
 
-inline EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
+inline EpetraPreconditioner* createIfpack() { return new IfpackPreconditioner(); }
 namespace
 {
-	static bool registerIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+static bool registerIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
 }
 
 } // namespace LifeV

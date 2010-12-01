@@ -34,54 +34,54 @@
 class A
 {
 public:
-   virtual ~A() {}
-   virtual const char* hello() const = 0;
+    virtual ~A() {}
+    virtual const char* hello() const = 0;
 };
 
 
 
 class B
-  : public A
+        : public A
 {
 public:
-   virtual ~B() {}
-   const char* hello() const { return "hello"; }
+    virtual ~B() {}
+    const char* hello() const { return "hello"; }
 };
 
 class C
-  : public A
+        : public A
 {
 public:
-   ~C() {}
-  const char* hello() const { return "hie"; }
+    ~C() {}
+    const char* hello() const { return "hie"; }
 };
 
 class D
-  : public B
+        : public B
 {
 public:
-  const char* hello() const { return "Yo"; }
+    const char* hello() const { return "Yo"; }
 };
 
 class E
-  : public C
+        : public C
 {
 public:
-  const char* hello() const { return "Ciao"; }
+    const char* hello() const { return "Ciao"; }
 };
 class F
-  : public D
+        : public D
 {
 public:
     F()
-        :str( "salut" )
-        {}
+            :str( "salut" )
+    {}
     F( const F& f )
-        :
-        str( f.str )
-        {
-            LifeV::Debug() << "calling F::copy constructor\n";
-        }
+            :
+            str( f.str )
+    {
+        LifeV::Debug() << "calling F::copy constructor\n";
+    }
     const char* hello() const { return str.c_str(); }
     std::string str;
 };
@@ -89,7 +89,8 @@ public:
 typedef LifeV::singleton< LifeV::factory< A, std::string > > AFactory;
 typedef LifeV::singleton< LifeV::factoryClone< A > > AFactoryClone;
 
-namespace {
+namespace
+{
 A* createB() { return new B; }
 A* createC() { return new C; }
 A* createD() { return new D; }
@@ -109,12 +110,12 @@ const bool regFc = AFactoryClone::instance().registerProduct( typeid(F), &create
 int
 main( int argc, char** argv )
 {
-  std::cerr << "B hello must be hello : " << AFactory::instance().createObject( "B" )->hello() << "\n";
-  std::cerr << "C hello must be hie   : " << AFactory::instance().createObject( "C" )->hello() << "\n";
-  std::cerr << "D hello must be Yo    : " << AFactory::instance().createObject( "D" )->hello() << "\n";
-  std::cerr << "E hello must be Ciao  : " << AFactory::instance().createObject( "E" )->hello() << "\n";
-  std::cerr << "F hello must be salut : " << AFactory::instance().createObject( "F" )->hello() << "\n";
+    std::cerr << "B hello must be hello : " << AFactory::instance().createObject( "B" )->hello() << "\n";
+    std::cerr << "C hello must be hie   : " << AFactory::instance().createObject( "C" )->hello() << "\n";
+    std::cerr << "D hello must be Yo    : " << AFactory::instance().createObject( "D" )->hello() << "\n";
+    std::cerr << "E hello must be Ciao  : " << AFactory::instance().createObject( "E" )->hello() << "\n";
+    std::cerr << "F hello must be salut : " << AFactory::instance().createObject( "F" )->hello() << "\n";
 
-  F f;
-  std::cerr << "Clone F hello must be salut : " << AFactoryClone::instance().createObject( &f )->hello() << "\n";
+    F f;
+    std::cerr << "Clone F hello must be salut : " << AFactoryClone::instance().createObject( &f )->hello() << "\n";
 }

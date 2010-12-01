@@ -37,54 +37,55 @@
 
 #include <life/lifesolver/DataFSI.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 DataFSI::DataFSI( ) :
-    M_dataFluid                     ( new dataFluid_Type() ),
-    M_dataSolid                     ( new dataSolid_Type() ),
-    M_maxSubIterationNumber         (),
-    M_absoluteTolerance             (),
-    M_relativeTolerance             (),
-    M_errorTolerance                (),
-    M_linesearch                    (),
-    M_preconditioner                (),
-    M_DDNpreconditioner             (),
-    M_method                        (),
-    M_algorithm                     (),
-    M_defaultOmega                  (),
-    M_rangeOmega                    (),
-    M_updateEvery                   (),
-    M_fluidInterfaceFlag            (),
-    M_structureInterfaceFlag        (),
-    M_fluidInterfaceVertexFlag      (),
-    M_structureInterfaceVertexFlag  (),
-    M_interfaceTolerance            ()
+        M_dataFluid                     ( new dataFluid_Type() ),
+        M_dataSolid                     ( new dataSolid_Type() ),
+        M_maxSubIterationNumber         (),
+        M_absoluteTolerance             (),
+        M_relativeTolerance             (),
+        M_errorTolerance                (),
+        M_linesearch                    (),
+        M_preconditioner                (),
+        M_DDNpreconditioner             (),
+        M_method                        (),
+        M_algorithm                     (),
+        M_defaultOmega                  (),
+        M_rangeOmega                    (),
+        M_updateEvery                   (),
+        M_fluidInterfaceFlag            (),
+        M_structureInterfaceFlag        (),
+        M_fluidInterfaceVertexFlag      (),
+        M_structureInterfaceVertexFlag  (),
+        M_interfaceTolerance            ()
 {
 }
 
 DataFSI::DataFSI( const DataFSI& DataFSI ) :
-    M_dataFluid                     ( DataFSI.M_dataFluid ),
-    M_dataSolid                     ( DataFSI.M_dataSolid ),
-    M_maxSubIterationNumber         ( DataFSI.M_maxSubIterationNumber ),
-    M_absoluteTolerance             ( DataFSI.M_absoluteTolerance ),
-    M_relativeTolerance             ( DataFSI.M_relativeTolerance ),
-    M_errorTolerance                ( DataFSI.M_errorTolerance ),
-    M_linesearch                    ( DataFSI.M_linesearch ),
-    M_preconditioner                ( DataFSI.M_preconditioner ),
-    M_DDNpreconditioner             ( DataFSI.M_DDNpreconditioner ),
-    M_method                        ( DataFSI.M_method ),
-    M_algorithm                     ( DataFSI.M_algorithm ),
-    M_defaultOmega                  ( DataFSI.M_defaultOmega ),
-    M_rangeOmega                    ( DataFSI.M_rangeOmega ),
-    M_updateEvery                   ( DataFSI.M_updateEvery ),
-    M_fluidInterfaceFlag            ( DataFSI.M_fluidInterfaceFlag ),
-    M_structureInterfaceFlag        ( DataFSI.M_structureInterfaceFlag ),
-    M_fluidInterfaceVertexFlag      ( new int const ( *DataFSI.M_fluidInterfaceVertexFlag ) ),
-    M_structureInterfaceVertexFlag  ( new int const ( *DataFSI.M_structureInterfaceVertexFlag ) ),
-    M_interfaceTolerance            ( DataFSI.M_interfaceTolerance )
+        M_dataFluid                     ( DataFSI.M_dataFluid ),
+        M_dataSolid                     ( DataFSI.M_dataSolid ),
+        M_maxSubIterationNumber         ( DataFSI.M_maxSubIterationNumber ),
+        M_absoluteTolerance             ( DataFSI.M_absoluteTolerance ),
+        M_relativeTolerance             ( DataFSI.M_relativeTolerance ),
+        M_errorTolerance                ( DataFSI.M_errorTolerance ),
+        M_linesearch                    ( DataFSI.M_linesearch ),
+        M_preconditioner                ( DataFSI.M_preconditioner ),
+        M_DDNpreconditioner             ( DataFSI.M_DDNpreconditioner ),
+        M_method                        ( DataFSI.M_method ),
+        M_algorithm                     ( DataFSI.M_algorithm ),
+        M_defaultOmega                  ( DataFSI.M_defaultOmega ),
+        M_rangeOmega                    ( DataFSI.M_rangeOmega ),
+        M_updateEvery                   ( DataFSI.M_updateEvery ),
+        M_fluidInterfaceFlag            ( DataFSI.M_fluidInterfaceFlag ),
+        M_structureInterfaceFlag        ( DataFSI.M_structureInterfaceFlag ),
+        M_fluidInterfaceVertexFlag      ( new int const ( *DataFSI.M_fluidInterfaceVertexFlag ) ),
+        M_structureInterfaceVertexFlag  ( new int const ( *DataFSI.M_structureInterfaceVertexFlag ) ),
+        M_interfaceTolerance            ( DataFSI.M_interfaceTolerance )
 {
 }
 
@@ -120,7 +121,7 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_interfaceTolerance            = DataFSI.M_interfaceTolerance;
     }
 
-	return *this;
+    return *this;
 }
 
 void

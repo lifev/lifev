@@ -65,8 +65,8 @@ public:
     //@}
 
     // Constructors.
-	//! @name Constructors
-	//@{
+    //! @name Constructors
+    //@{
 
     //! Empty Constructor
     DataHyperbolic();
@@ -110,7 +110,7 @@ public:
     //! @name Get methods
     //@{
 
-	//! Get the level of verbosity of the problem.
+    //! Get the level of verbosity of the problem.
     inline const UInt verbose( void ) const
     {
         return M_verbose;
@@ -122,8 +122,8 @@ public:
         return M_section;
     }
 
-   	//! Get the data file of the problem.
-   	inline Data_ptrType dataFile( void ) const
+    //! Get the data file of the problem.
+    inline Data_ptrType dataFile( void ) const
     {
         return M_data;
     }
@@ -155,8 +155,8 @@ public:
     //@}
 
     // Methods.
-	//! @name Methods
-	//@{
+    //! @name Methods
+    //@{
 
     /*! Overloading of the operator =
         @param dataDarcy The DataDarcy to be copied.
@@ -169,7 +169,7 @@ public:
     */
     void setup( const Data_Type& dataFile, const std::string& section = "hyperbolic"  );
 
-	//@}
+    //@}
 
 
 
@@ -195,15 +195,15 @@ protected:
 
 template < typename Mesh >
 DataHyperbolic<Mesh>::DataHyperbolic( ):
-    // Data containers
-    M_data          ( ),
-    M_time          ( ),
-    M_mesh          ( ),
-    // Miscellaneous
-    M_verbose       ( static_cast<UInt>(0) ),
-    M_section       ( ),
-    // CFL
-    M_relaxCFL      ( static_cast<Real>(0.) )
+        // Data containers
+        M_data          ( ),
+        M_time          ( ),
+        M_mesh          ( ),
+        // Miscellaneous
+        M_verbose       ( static_cast<UInt>(0) ),
+        M_section       ( ),
+        // CFL
+        M_relaxCFL      ( static_cast<Real>(0.) )
 {
     CONSTRUCTOR( "DataHyperbolic" );
 }
@@ -211,15 +211,15 @@ DataHyperbolic<Mesh>::DataHyperbolic( ):
 // Copy constructor
 template < typename Mesh >
 DataHyperbolic<Mesh>::DataHyperbolic( const DataHyperbolic &dataHyperbolic ):
-    // Data containers
-    M_data        ( dataHyperbolic.M_data ),
-	M_time        ( dataHyperbolic.M_time ),
-    M_mesh        ( dataHyperbolic.M_mesh ),
-    // Miscellaneous
-    M_verbose     ( dataHyperbolic.M_verbose ),
-    M_section     ( dataHyperbolic.M_section ),
-    // CFL
-    M_relaxCFL    ( dataHyperbolic.M_relaxCFL )
+        // Data containers
+        M_data        ( dataHyperbolic.M_data ),
+        M_time        ( dataHyperbolic.M_time ),
+        M_mesh        ( dataHyperbolic.M_mesh ),
+        // Miscellaneous
+        M_verbose     ( dataHyperbolic.M_verbose ),
+        M_section     ( dataHyperbolic.M_section ),
+        // CFL
+        M_relaxCFL    ( dataHyperbolic.M_relaxCFL )
 {
     CONSTRUCTOR( "DataHyperbolic" );
 }
@@ -254,7 +254,7 @@ void DataHyperbolic<Mesh>::setup( const Data_Type& dataFile, const std::string& 
     M_section = section;
 
     // If data has not been set
-    if( !M_data.get() )
+    if ( !M_data.get() )
         M_data.reset( new Data_Type( dataFile ) );
 
     // If data time has not been set

@@ -46,7 +46,8 @@
 #include <boost/scoped_ptr.hpp>
 
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ADRAssembler - This class add into given matrices terms corresponding to the space discretization of the ADR problem.
 /*!
@@ -186,7 +187,7 @@ public:
     ADRAssembler();
 
     //! Destructor
-    virtual ~ADRAssembler(){};
+    virtual ~ADRAssembler() {};
 
     //@}
 
@@ -240,7 +241,7 @@ public:
     {
         addAdvection(matrix,beta,0,0);
     }
-    
+
     //! Assembling for the advection using offsets
     /*!
       This method adds the advection in the given matrix. Additional arguements are provided
@@ -352,19 +353,19 @@ public:
     //@{
 
     //! Getter for the chrono of the assembly of the mass term
-    chrono_type& massAssemblyChrono(){return M_massAssemblyChrono; }
+    chrono_type& massAssemblyChrono() {return M_massAssemblyChrono; }
 
     //! Getter for the chrono of the assembly of the advection term
-    chrono_type& advectionAssemblyChrono(){return M_advectionAssemblyChrono; }
+    chrono_type& advectionAssemblyChrono() {return M_advectionAssemblyChrono; }
 
     //! Getter for the chrono of the assembly of the diffusion term
-    chrono_type& diffusionAssemblyChrono(){return M_diffusionAssemblyChrono; }
+    chrono_type& diffusionAssemblyChrono() {return M_diffusionAssemblyChrono; }
 
     //! Getter for the chrono of the setup of the assembler
-    chrono_type& setupChrono(){return M_setupChrono; }
+    chrono_type& setupChrono() {return M_setupChrono; }
 
     //! Getter for the chrono of the assembly of the rhs (mass)
-    chrono_type& massRhsAssemblyChrono(){ return M_massRhsAssemblyChrono; }
+    chrono_type& massRhsAssemblyChrono() { return M_massRhsAssemblyChrono; }
 
     //@}
 
@@ -437,25 +438,25 @@ template<typename mesh_type, typename matrix_type, typename vector_type>
 ADRAssembler< mesh_type, matrix_type, vector_type>::
 ADRAssembler():
 
-    M_fespace(),
-    M_betaFESpace(),
+        M_fespace(),
+        M_betaFESpace(),
 
-    M_massCFE(),
-    M_diffCFE(),
-    M_advCFE(),
-    M_advBetaCFE(),
-    M_massRhsCFE(),
+        M_massCFE(),
+        M_diffCFE(),
+        M_advCFE(),
+        M_advBetaCFE(),
+        M_massRhsCFE(),
 
-    M_localMass(),
-    M_localAdv(),
-    M_localDiff(),
-    M_localMassRhs(),
+        M_localMass(),
+        M_localAdv(),
+        M_localDiff(),
+        M_localMassRhs(),
 
-    M_diffusionAssemblyChrono(),
-    M_advectionAssemblyChrono(),
-    M_massAssemblyChrono(),
-    M_setupChrono(),
-    M_massRhsAssemblyChrono()
+        M_diffusionAssemblyChrono(),
+        M_advectionAssemblyChrono(),
+        M_massAssemblyChrono(),
+        M_setupChrono(),
+        M_massRhsAssemblyChrono()
 {};
 
 
@@ -507,13 +508,13 @@ template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
 setBetaFespace(const fespace_ptrType& betaFESpace)
-    {
-        ASSERT(M_fespace != 0," No FE space for the unknown! Use setFespace before setBetaFespace!");
-        ASSERT(M_advCFE != 0, " No current FE set for the advection of the unknown! Internal error.");
-        M_betaFESpace=betaFESpace;
+{
+    ASSERT(M_fespace != 0," No FE space for the unknown! Use setFespace before setBetaFespace!");
+    ASSERT(M_advCFE != 0, " No current FE set for the advection of the unknown! Internal error.");
+    M_betaFESpace=betaFESpace;
 
-        M_advBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),M_fespace->fe().geoMap(),M_advCFE->quadRule()));
-    }
+    M_advBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),M_fespace->fe().geoMap(),M_advCFE->quadRule()));
+}
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
@@ -605,7 +606,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
         // Assemble the advection
         ElemOper::advection(*M_localAdv,*M_advCFE,localBetaValue,fieldDim);
 
-        
+
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
         {
@@ -649,7 +650,7 @@ addDiffusion(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetL
 
         // local stiffness
         ElemOper::stiffness(*M_localDiff,*M_diffCFE,coefficient,fieldDim);
-        
+
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
         {
@@ -730,8 +731,8 @@ addMassRhs(vector_type& rhs, const vector_type& f)
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
                     localValue += fValues[iQuadPt]
-                        * M_massRhsCFE->phi(iDof,iQuadPt)
-                        * M_massRhsCFE->wDetJacobian(iQuadPt);
+                                  * M_massRhsCFE->phi(iDof,iQuadPt)
+                                  * M_massRhsCFE->wDetJacobian(iQuadPt);
                 }
 
                 // Add on the local matrix
@@ -809,8 +810,8 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
                     localValue += fValues[iQuadPt]
-                        * M_massRhsCFE->phi(iDof,iQuadPt)
-                        * M_massRhsCFE->wDetJacobian(iQuadPt);
+                                  * M_massRhsCFE->phi(iDof,iQuadPt)
+                                  * M_massRhsCFE->wDetJacobian(iQuadPt);
                 }
 
                 // Add on the local matrix

@@ -31,32 +31,33 @@
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 SolverTrilinos::SolverTrilinos() :
-    M_prec                 (),
-    M_solver               (),
-    M_TrilinosParameterList(),
-    M_displayer            (new Displayer()),
-    M_tol                  ( 0. ),
-    M_maxIter              ( 0 ),
-    M_maxIterForReuse      ( 0 ),
-    M_reusePreconditioner                (false)
+        M_prec                 (),
+        M_solver               (),
+        M_TrilinosParameterList(),
+        M_displayer            (new Displayer()),
+        M_tol                  ( 0. ),
+        M_maxIter              ( 0 ),
+        M_maxIterForReuse      ( 0 ),
+        M_reusePreconditioner                (false)
 {
 }
 
 SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
-    M_prec                 (),
-    M_solver               (),
-    M_TrilinosParameterList(),
-    M_displayer            ( new Displayer(comm) ),
-    M_tol                  ( 0. ),
-    M_maxIter              ( 0 ),
-    M_maxIterForReuse      ( 0 ),
-    M_reusePreconditioner                (false)
+        M_prec                 (),
+        M_solver               (),
+        M_TrilinosParameterList(),
+        M_displayer            ( new Displayer(comm) ),
+        M_tol                  ( 0. ),
+        M_maxIter              ( 0 ),
+        M_maxIterForReuse      ( 0 ),
+        M_reusePreconditioner                (false)
 {
 }
 
@@ -136,7 +137,7 @@ SolverTrilinos::setPreconditioner( prec_type& _prec )
 void
 SolverTrilinos::setPreconditioner( comp_prec_type& _prec )
 {
-     M_solver.SetPrecOperator(_prec.get());
+    M_solver.SetPrecOperator(_prec.get());
 }
 
 void
@@ -235,34 +236,34 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
 
 #ifdef DEBUG
 
-     M_displayer->comm().Barrier();
-     M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
-     M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
-     M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+    M_displayer->comm().Barrier();
+    M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
+    M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
+    M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
 
-     /* try to solve again (reason may be:
-       -2 "Aztec status AZ_breakdown: numerical breakdown"
-       -3 "Aztec status AZ_loss: loss of precision"
-       -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
-     */
-     if (status <= -2 )
-     {
-         maxiter = M_maxIter;
-         mytol = M_tol;
-         int olditer = M_solver.NumIters();
-         status = M_solver.Iterate(maxiter, mytol);
+    /* try to solve again (reason may be:
+      -2 "Aztec status AZ_breakdown: numerical breakdown"
+      -3 "Aztec status AZ_loss: loss of precision"
+      -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
+    */
+    if (status <= -2 )
+    {
+        maxiter = M_maxIter;
+        mytol = M_tol;
+        int olditer = M_solver.NumIters();
+        status = M_solver.Iterate(maxiter, mytol);
 
 #ifdef DEBUG
-         M_displayer->comm().Barrier();
-         M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
-         M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
-         M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+        M_displayer->comm().Barrier();
+        M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
+        M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
+        M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
-         return(M_solver.NumIters() + olditer);
-     }
+        return(M_solver.NumIters() + olditer);
+    }
 
-     return(M_solver.NumIters());
+    return(M_solver.NumIters());
 }
 
 double
@@ -292,11 +293,11 @@ SolverTrilinos::printStatus()
     double status[AZ_STATUS_SIZE];
     getAztecStatus( status );
 
-    if( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
-    else if( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
-    else if( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
-    else if( status[AZ_why] == AZ_ill_cond  ) stat << "Ill-conditioned       ";
-    else if( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
+    if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
+    else if ( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
+    else if ( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
+    else if ( status[AZ_why] == AZ_ill_cond  ) stat << "Ill-conditioned       ";
+    else if ( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
 
     stat << setw(12) << "res = " << status[AZ_scaled_r];
     stat << setw(4)  << " " << (int)status[AZ_its] << " iters. ";

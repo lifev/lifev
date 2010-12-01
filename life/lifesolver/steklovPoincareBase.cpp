@@ -32,12 +32,12 @@ Real fzeroSP(const Real& /*t*/,
 {return 0.0;}
 
 steklovPoincare::steklovPoincare():
-    super                                ( ),
-    dz                                   ( ),
-    M_defOmega                           ( 0.005 ),
-    M_defOmegaS                          ( 0.005 ),
-    M_defOmegaF                          ( 0.005 ),
-    M_aitkFS                             ( ),
+        super                                ( ),
+        dz                                   ( ),
+        M_defOmega                           ( 0.005 ),
+        M_defOmegaS                          ( 0.005 ),
+        M_defOmegaF                          ( 0.005 ),
+        M_aitkFS                             ( ),
 {
     this->setPreconditioner( NEWTON );
     this->setDDNPreconditioner( DDN_DIRICHLET_NEUMANN );
@@ -108,7 +108,7 @@ void steklovPoincare::eval(const vector_type& disp,
                            vector_type&       velo)
 {
 
-    if(status)
+    if (status)
     {
         this->M_fluid->resetPrec();
         //this->M_solid->resetPrec();
@@ -121,7 +121,7 @@ void steklovPoincare::eval(const vector_type& disp,
     *M_lambdaFluid       = _disp;
     *M_lambdaSolid       = _disp
 
-    *this->M_sigmaFluid *= 0.;
+                           *this->M_sigmaFluid *= 0.;
 
     if (this->isFluid())
     {
@@ -165,19 +165,19 @@ void steklovPoincare::eval(const vector_type& disp,
     }
 
 
-     if ( true && this->isFluid() )
-         {
-             vector_type vel  (this->fluid().velFESpace().map());
-             vector_type press(this->fluid().pressFESpace().map());
+    if ( true && this->isFluid() )
+    {
+        vector_type vel  (this->fluid().velFESpace().map());
+        vector_type press(this->fluid().pressFESpace().map());
 
-             vel.subset(this->M_fluid->solution());
-             press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+        vel.subset(this->M_fluid->solution());
+        press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
 
 
-             std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
-             std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
-             this->M_fluid->postProcess();
-         }
+        std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
+        std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
+        this->M_fluid->postProcess();
+    }
 
 
 
@@ -190,10 +190,10 @@ void steklovPoincare::eval(const vector_type& disp,
     }
 
 
-     if ( true && this->isSolid() )
-     {
-         this->solid().postProcess();
-     }
+    if ( true && this->isSolid() )
+    {
+        this->solid().postProcess();
+    }
 
 // possibly unsafe when using more cpus, since both has repeated maps
 
@@ -210,23 +210,23 @@ void steklovPoincare::eval(const vector_type& disp,
     if (this->isFluid())
         std::cout << "Max ResidualF        = " << M_fluid->residual().NormInf() << std::endl;
     if (this->isSolid())
-        {
-            std::cout << "NL2 DiplacementS     = " << M_solid->disp().Norm2() << std::endl;
-            std::cout << "Max ResidualS        = " << M_solid->residual().NormInf() << std::endl;
-        }
+    {
+        std::cout << "NL2 DiplacementS     = " << M_solid->disp().Norm2() << std::endl;
+        std::cout << "Max ResidualS        = " << M_solid->residual().NormInf() << std::endl;
+    }
 
 }
 
 void steklovPoincare::evalResidual(Vector       &res,
-                                      const Vector &disp,
-                                      const int     iter)
+                                   const Vector &disp,
+                                   const int     iter)
 {
     int status = 0;
 
 //     M_solid->postProcess();
 //     M_fluid->postProcess();
 
-    if(iter == 0) status = 1;
+    if (iter == 0) status = 1;
 
     std::cout << "*** Residual computation g(x_" << iter <<" )";
     if (status) std::cout << " [NEW TIME STEP] ";
@@ -250,7 +250,7 @@ void steklovPoincare::evalResidual(Vector       &res,
     std::cout << "max ResidualFSI = " << norm_inf(M_interfaceStress)
               << std::endl;
     std::cout << "max ResidualFSI = " << norm_inf(M_strongResidualFSI)
-               << std::endl;
+              << std::endl;
 }
 
 
@@ -270,37 +270,37 @@ void  steklovPoincare::solveJac(vector_type        &muk,
     Debug(  6215 ) << "steklovPoincare::solveJac _linearRelTol  : " << _linearRelTol << "\n";
     Debug(  6215 ) << "steklovPoincare::solveJac preconditioner : "  << this->preconditioner() << "\n";
 
-    switch(this->preconditioner())
+    switch (this->preconditioner())
     {
-        case NEUMANN_DIRICHLET:
-            // Neumann-Dirichlet preconditioner
-            invSfPrime(-1*_res, _linearRelTol, muF);
-            break;
-        case DIRICHLET_NEUMANN:
-            // Dirichlet-Neumann preconditioner
-            invSsPrime(-1*_res, _linearRelTol, muS);
-            break;
-        case NEUMANN_NEUMANN:
-            // Neumann-Neumann preconditioner
-        {
-            invSsPrime(-1*_res, _linearRelTol, muS);
-            invSfPrime(-1*_res, _linearRelTol, muF);
-            std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
-            std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
-        }
+    case NEUMANN_DIRICHLET:
+        // Neumann-Dirichlet preconditioner
+        invSfPrime(-1*_res, _linearRelTol, muF);
         break;
-        case NEWTON:
-            // Dirichlet-Neumann preconditioner
-            invSfSsPrime(_res, _linearRelTol, muS);
-            break;
-        case NO_PRECONDITIONER:
-        default:
-        {
-            std::ostringstream _ex;
-            _ex << "The steklovPoincare operator needs a preconditioner : \n"
-                << "NEUMANN_DIRICHLET, NEUMANN_NEUMANN, DIRICHLET_NEUMANN\n";
-            throw std::logic_error( _ex.str() );
-        }
+    case DIRICHLET_NEUMANN:
+        // Dirichlet-Neumann preconditioner
+        invSsPrime(-1*_res, _linearRelTol, muS);
+        break;
+    case NEUMANN_NEUMANN:
+        // Neumann-Neumann preconditioner
+    {
+        invSsPrime(-1*_res, _linearRelTol, muS);
+        invSfPrime(-1*_res, _linearRelTol, muF);
+        std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
+        std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
+    }
+    break;
+    case NEWTON:
+        // Dirichlet-Neumann preconditioner
+        invSfSsPrime(_res, _linearRelTol, muS);
+        break;
+    case NO_PRECONDITIONER:
+    default:
+    {
+        std::ostringstream _ex;
+        _ex << "The steklovPoincare operator needs a preconditioner : \n"
+        << "NEUMANN_DIRICHLET, NEUMANN_NEUMANN, DIRICHLET_NEUMANN\n";
+        throw std::logic_error( _ex.str() );
+    }
     }
 
     if (this->preconditioner() != NEWTON)
@@ -361,8 +361,8 @@ void steklovPoincare::solveInvLinearSolid()
 
 
 void  steklovPoincare::invSfPrime(const vector_type& res,
-                                     double /*linear_rel_tol*/,
-                                     vector_type& step)
+                                  double /*linear_rel_tol*/,
+                                  vector_type& step)
 {
     setResidualFSI(res);
 
@@ -394,8 +394,8 @@ void  steklovPoincare::invSfPrime(const vector_type& res,
 //
 
 void  steklovPoincare::invSsPrime(const vector_type& res,
-                                     double /*linear_rel_tol*/,
-                                     vector_type& step)
+                                  double /*linear_rel_tol*/,
+                                  vector_type& step)
 {
     setResidualFSI(res);
     solveLinearSolid();
@@ -408,8 +408,8 @@ void  steklovPoincare::invSsPrime(const vector_type& res,
 
 
 void steklovPoincare::invSfSsPrime(const vector_type& _res,
-                                      double _linearRelTol,
-                                      vector_type& _muk)
+                                   double _linearRelTol,
+                                   vector_type& _muk)
 {
     // AZTEC specifications for the second system
     int    data_org   [AZ_COMM_SIZE];     // data organisation for J
@@ -462,10 +462,10 @@ void steklovPoincare::invSfSsPrime(const vector_type& _res,
 //         res[3*M_interfaceNbreDof - ii - 1] = 0;
 //     }
 
-    for (UInt i=0;i<dim_res; ++i)
-        {
-            _muk[i]=0.0;
-        }
+    for (UInt i=0; i<dim_res; ++i)
+    {
+        _muk[i]=0.0;
+    }
     chrono.start();
 
 
@@ -500,14 +500,14 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     vector_type zSolid(dim);
 
     for (UInt ii = 0; ii < dim; ++ii)
-        {
-            zSolid[ii] = z[ii];
-        }
+    {
+        zSolid[ii] = z[ii];
+    }
     if ( xnorm == 0.0 )
         for (UInt i=0; i < dim; ++i)
-            {
-                Jz[i]     = 0.0;
-            }
+        {
+            Jz[i]     = 0.0;
+        }
     else
     {
         if (!my_data->M_pFS->reducedFluid())
@@ -582,68 +582,68 @@ vector_type steklovPoincare::DDNprecond(vector_type const &_z)
     M_dzSolid = Zerovector_type(M_dzSolid.size());
     M_dzFluid = Zerovector_type(M_dzFluid.size());
 
-    switch(this->DDNpreconditioner())
+    switch (this->DDNpreconditioner())
     {
-        case NEUMANN_DIRICHLET:
-            // Neumann-Dirichlet preconditioner
-            {
-                std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
+    case NEUMANN_DIRICHLET:
+        // Neumann-Dirichlet preconditioner
+    {
+        std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
 
-                M_reducedLinFluid->solveInvReducedLinearFluid();
+        M_reducedLinFluid->solveInvReducedLinearFluid();
 
-                //Vector deltaLambda = this->M_fluid->getDeltaLambda();
+        //Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
-                double dt  = this->M_fluid->getTimeStep();
-                double rho = this->M_fluid->density();
+        double dt  = this->M_fluid->getTimeStep();
+        double rho = this->M_fluid->density();
 
-                vector_type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
+        vector_type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
 
-                transferOnInterface(deltaLambda,
-                                    M_fluid->bcHandler(),
-                                    "Interface",
-                                    Pz);
+        transferOnInterface(deltaLambda,
+                            M_fluid->bcHandler(),
+                            "Interface",
+                            Pz);
 
-            }
-            break;
-        case DIRICHLET_NEUMANN:
-            // Dirichlet-Neumann preconditioner
-            std::cout << " Dirichlet-Neumann Precond ... \n" << std::flush << std::endl;
-            if(this->mpi())
-            {
-                if (this->solidMpi())
-                {
-                    solveInvLinearSolid();
-                    Pz = transferSolidOnInterface(M_dzSolid);
-                    MPI_Send(&Pz[0], Pz.size(), MPI_DOUBLE, FLUID, 0, MPI_COMM_WORLD);
-                }
-                if(this->fluidMpi())
-                {
-                    MPI_Status err;
-                    MPI_Recv(&Pz[0], Pz.size(), MPI_DOUBLE, SOLID, 0, MPI_COMM_WORLD, &err);
-                }
-            }
-            else
-            {
-                    solveInvLinearSolid();
-                    Pz = transferSolidOnInterface(M_dzSolid);
-            }
-            break;
-        case NEUMANN_NEUMANN:
-            // Neumann-Neumann preconditioner
+    }
+    break;
+    case DIRICHLET_NEUMANN:
+        // Dirichlet-Neumann preconditioner
+        std::cout << " Dirichlet-Neumann Precond ... \n" << std::flush << std::endl;
+        if (this->mpi())
         {
-            std::cout << " Neumann-Neumann Precond ... \n" << std::endl;
-            solveInvLinearFluid();
+            if (this->solidMpi())
+            {
+                solveInvLinearSolid();
+                Pz = transferSolidOnInterface(M_dzSolid);
+                MPI_Send(&Pz[0], Pz.size(), MPI_DOUBLE, FLUID, 0, MPI_COMM_WORLD);
+            }
+            if (this->fluidMpi())
+            {
+                MPI_Status err;
+                MPI_Recv(&Pz[0], Pz.size(), MPI_DOUBLE, SOLID, 0, MPI_COMM_WORLD, &err);
+            }
+        }
+        else
+        {
             solveInvLinearSolid();
-            Pz = 0.9*M_dzSolid  +
-                0.1*getFluidInterfaceOnSolid(M_dzFluid);
+            Pz = transferSolidOnInterface(M_dzSolid);
         }
         break;
-        case NO_PRECONDITIONER:
-        default:
-        {
-            std::cout << " no preconditioner ... " << std::endl;
-            Pz = _z;
-        }
+    case NEUMANN_NEUMANN:
+        // Neumann-Neumann preconditioner
+    {
+        std::cout << " Neumann-Neumann Precond ... \n" << std::endl;
+        solveInvLinearFluid();
+        solveInvLinearSolid();
+        Pz = 0.9*M_dzSolid  +
+             0.1*getFluidInterfaceOnSolid(M_dzFluid);
+    }
+    break;
+    case NO_PRECONDITIONER:
+    default:
+    {
+        std::cout << " no preconditioner ... " << std::endl;
+        Pz = _z;
+    }
     }
 
 //     for (UInt ii = 0; ii < Pz.size(); ++ii)
@@ -670,7 +670,7 @@ void steklovPoincare::computeStrongResidualFSI()
     std::cout << "        builing the mass matrix ... " << std::flush;
 
     FSIOperator::dof_interface_type3D dofReducedFluidToMesh
-        (new FSIOperator::dof_interface_type3D::element_type);
+    (new FSIOperator::dof_interface_type3D::element_type);
 
     //Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
@@ -756,7 +756,7 @@ void steklovPoincare::computeStrongResidualFSI()
 // Solid, Lin. Solid and inverses
 
 void steklovPoincare::setSolidInterfaceDisp(Vector& disp,
-                                               UInt type)
+                                            UInt type)
 {
     M_bcvSolidInterfaceDisp->setup(disp,
                                    M_interfaceNbreDof,
@@ -765,7 +765,7 @@ void steklovPoincare::setSolidInterfaceDisp(Vector& disp,
 }
 
 void steklovPoincare::setSolidLinInterfaceDisp(Vector& disp,
-                                                  UInt type)
+                                               UInt type)
 {
     M_bcvSolidLinInterfaceDisp->setup(disp,
                                       M_interfaceNbreDof,
@@ -774,7 +774,7 @@ void steklovPoincare::setSolidLinInterfaceDisp(Vector& disp,
 }
 
 void steklovPoincare::setSolidInvLinInterfaceStress(Vector &stress,
-                                                       UInt type)
+                                                    UInt type)
 {
     M_bcvSolidInvLinInterfaceStress->setup(stress,
                                            M_interfaceNbreDof,
@@ -804,7 +804,7 @@ void steklovPoincare::setSolidInvLinInterfaceStress(Vector &stress,
 // Fluid, Lin. and inverses
 
 void steklovPoincare::setFluidInterfaceDisp(Vector &disp,
-                                               UInt type)
+                                            UInt type)
 {
     M_bcvFluidInterfaceDisp->setup(disp,
                                    M_interfaceNbreDof,
@@ -825,7 +825,7 @@ void steklovPoincare::setFluidLinInterfaceVel(Vector &vel,
 
 
 void steklovPoincare::setReducedFluidInterfaceAcc(Vector &acc,
-                                                     UInt type)
+                                                  UInt type)
 {
     M_bcvReducedFluidInterfaceAcc->setup(acc,
                                          M_interfaceNbreDof,
@@ -834,7 +834,7 @@ void steklovPoincare::setReducedFluidInterfaceAcc(Vector &acc,
 }
 
 void steklovPoincare::setReducedFluidInvInterfaceAcc(Vector &acc,
-                                                        UInt type)
+                                                     UInt type)
 {
     M_bcvReducedFluidInvInterfaceAcc->setup(acc,
                                             M_interfaceNbreDof,
@@ -878,12 +878,12 @@ void steklovPoincare::computeResidualFSI()
         if (this->fluidMpi())
         {
             FOR_EACH_DOF_INTERFACE(residualFS[localS + jDim*M_interfaceNbreDof - 1] =
-                        this->M_residualF[dofF + jDim*totalDofFluid - 1]);
+                                       this->M_residualF[dofF + jDim*totalDofFluid - 1]);
         }
         if (this->solidMpi())
         {
             FOR_EACH_DOF_INTERFACE(residualFS[localS + jDim*M_interfaceNbreDof - 1] =
-                        - this->M_residualS[dofS + jDim*totalDofSolid - 1]);
+                                       - this->M_residualS[dofS + jDim*totalDofSolid - 1]);
         }
 
         MPI_Reduce( residualFS,
@@ -893,14 +893,14 @@ void steklovPoincare::computeResidualFSI()
                     MPI_SUM,
                     SOLID,
                     MPI_COMM_WORLD
-                    );
+                  );
 
         if (this->solidMpi())
         {
             for (UInt ii = 0; ii < size; ++ii)
-                {
-                    M_interfaceStress[ii] = residual[ii];
-                }
+            {
+                M_interfaceStress[ii] = residual[ii];
+            }
             MPI_Send(residual, size, MPI_DOUBLE, FLUID, 0, MPI_COMM_WORLD);
         }
         if (this->fluidMpi())
@@ -909,9 +909,9 @@ void steklovPoincare::computeResidualFSI()
             MPI_Recv(residual, size, MPI_DOUBLE, SOLID, 0, MPI_COMM_WORLD, &err);
 
             for (UInt ii = 0; ii < size; ++ii)
-                {
-                    M_interfaceStress[ii] = residual[ii];
-                }
+            {
+                M_interfaceStress[ii] = residual[ii];
+            }
         }
     }
     else
@@ -947,15 +947,15 @@ void steklovPoincare::computeResidualFSI()
 //                     this->M_residualS[dofS + jDim*totalDofSolid - 1]);
     }
 
-     for (UInt ii = 0; ii < 30; ++ii)
-     {
-         M_interfaceStress[ii] = 0;
-         M_interfaceStress[ii + M_interfaceNbreDof] = 0;
-         M_interfaceStress[ii + 2*M_interfaceNbreDof] = 0;
-         M_interfaceStress[M_interfaceNbreDof - ii - 1] = 0;
-         M_interfaceStress[2*M_interfaceNbreDof - ii - 1] = 0;
-         M_interfaceStress[3*M_interfaceNbreDof - ii - 1] = 0;
-     }
+    for (UInt ii = 0; ii < 30; ++ii)
+    {
+        M_interfaceStress[ii] = 0;
+        M_interfaceStress[ii + M_interfaceNbreDof] = 0;
+        M_interfaceStress[ii + 2*M_interfaceNbreDof] = 0;
+        M_interfaceStress[M_interfaceNbreDof - ii - 1] = 0;
+        M_interfaceStress[2*M_interfaceNbreDof - ii - 1] = 0;
+        M_interfaceStress[3*M_interfaceNbreDof - ii - 1] = 0;
+    }
 
 }
 
@@ -972,7 +972,7 @@ void steklovPoincare::computeResidualFSI()
 
 namespace
 {
-FSIOperator* createSP(){ return new steklovPoincare(); }
+FSIOperator* createSP() { return new steklovPoincare(); }
 static bool reg = FSIOperator::FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
 }
 

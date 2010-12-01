@@ -32,9 +32,9 @@ namespace LifeV
 */
 template <typename GEOSHAPE, typename POINTTYPE = Geo0D>
 class GeoND
-            :
-            public MeshEntity,
-            public GEOSHAPE
+        :
+        public MeshEntity,
+        public GEOSHAPE
 {
 public:
 
@@ -137,9 +137,9 @@ GeoND<GEOSHAPE, POINTTYPE>::GeoND( GeoND<GEOSHAPE, POINTTYPE> const & G ) :
         MeshEntity( G.id(), G.localId() )
 {
     for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints; ++i )
-        {
-            _points[ i ] = G._points[ i ];
-        }
+    {
+        _points[ i ] = G._points[ i ];
+    }
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
@@ -158,9 +158,9 @@ GeoND<GEOSHAPE, POINTTYPE>::operator=( GeoND<GEOSHAPE, POINTTYPE> const & G )
         this->setId     (G.id());
         this->setLocalId(G.localId());
         for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints; ++i )
-            {
-                _points[ i ] = G._points[ i ];
-            }
+        {
+            _points[ i ] = G._points[ i ];
+        }
     }
     return *this;
 }
@@ -270,11 +270,11 @@ template <typename GEOSHAPE, typename POINTTYPE>
 void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID otn[ GEOSHAPE::numPoints ] )
 {
     PointType const* tmp[ GEOSHAPE::numPoints ];
-    for ( unsigned int i = 0;i < GEOSHAPE::numPoints;++i )
+    for ( unsigned int i = 0; i < GEOSHAPE::numPoints; ++i )
     {
         tmp[ i ] = _points[ i ];
     }
-    for ( unsigned int i = 0;i < GEOSHAPE::numPoints;++i )
+    for ( unsigned int i = 0; i < GEOSHAPE::numPoints; ++i )
     {
         _points[ i ] = tmp[ otn[ i ] - 1 ];
     }

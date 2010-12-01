@@ -44,7 +44,8 @@ namespace LifeV
 {
 
 
-class reducedLinFluid{
+class reducedLinFluid
+{
 
     typedef FSIOperator::fluid_type           fluid_type;
     typedef FSIOperator::solid_type           solid_type;
@@ -55,8 +56,8 @@ public:
 
     //! constructor
     reducedLinFluid(FSIOperator* const _op,
-                       fluid_type _fluid,
-                       solid_type _solid);
+                    fluid_type _fluid,
+                    solid_type _solid);
 
     //! bondary conditions setup
 
@@ -70,8 +71,8 @@ public:
 
 
     Vector& dacc()    {return M_dacc;}
-    void setDacc(Vector const &_vec){M_dacc = _vec;}
-    void setComputedMatrix(bool pred){M_computedC = pred;}
+    void setDacc(Vector const &_vec) {M_dacc = _vec;}
+    void setComputedMatrix(bool pred) {M_computedC = pred;}
     Vector& minusdp() {return M_minusdp;}
 
     const Vector& residual();

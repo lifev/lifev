@@ -77,7 +77,8 @@ Heart::Heart( int argc,
     ion_model=dataFile("electric/physics/ion_model",1);
     M_heart_fct->comm.reset(new Epetra_MpiComm( MPI_COMM_WORLD ));
 
-    if (!M_heart_fct->comm->MyPID()) {
+    if (!M_heart_fct->comm->MyPID())
+    {
         std::cout << "My PID = " << M_heart_fct->comm->MyPID() << std::endl;
     }
 }
@@ -97,7 +98,7 @@ Heart::run()
     Real meanu;
     Real minu;
 
-   //! Construction of data classes
+    //! Construction of data classes
 
 #ifdef MONODOMAIN
     DataMonodomain _data(M_heart_fct);
@@ -199,21 +200,23 @@ Heart::run()
     if (verbose) std::cout << "ok." << std::endl;
     EpetraMap fullMap(electricModel.getMap());
     vector_type rhs ( fullMap);
-    electricModel.setUp( M_heart_fct->_dataFile );std::cout<<"setup ok"<<std::endl;
+    electricModel.setUp( M_heart_fct->_dataFile );
+    std::cout<<"setup ok"<<std::endl;
 
     if (verbose) std::cout << "Calling the ionic model constructor ... ";
     boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel;
-    if(ion_model==1)
+    if (ion_model==1)
     {
-    	if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
-    	ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic,
+        if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
+        ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic,
                                                                            *meshPart.mesh(),
                                                                            uFESpace,
                                                                            *M_heart_fct->comm));
-    }else if(ion_model==2)
+    }
+    else if (ion_model==2)
     {
-    	if (verbose) std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
-    	ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic,
+        if (verbose) std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
+        ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic,
                                                                    *meshPart.mesh(),
                                                                    uFESpace,
                                                                    *M_heart_fct->comm));
@@ -229,7 +232,8 @@ Heart::run()
     ionicModel->initialize( );
 
     //! Building time-independent part of the system
-    electricModel.buildSystem( );std::cout<<"buildsystem ok"<<std::endl;
+    electricModel.buildSystem( );
+    std::cout<<"buildsystem ok"<<std::endl;
     //! Initialization
     Real dt     = _data.getTimeStep();
     Real t0     = 0;
@@ -263,7 +267,9 @@ Heart::run()
                                                                        meshPart.mesh(),
                                                                        "heart",
                                                                        M_heart_fct->comm->MyPID()) );
-        } else {
+        }
+        else
+        {
             exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile,
                                                                       meshPart.mesh(),
                                                                       "heart",
@@ -275,17 +281,17 @@ Heart::run()
     vector_ptrtype Uptr( new vector_type(electricModel.solution_u(), Repeated ) );
 
     exporter->addVariable( ExporterData::Scalar,  "potential", Uptr,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+                           UInt(0), uFESpace.dof().numTotalDof() );
 
 #ifdef BIDOMAIN
     vector_ptrtype Ueptr( new vector_type(electricModel.solution_ue(), Repeated ) );
     exporter->addVariable( ExporterData::Scalar,  "potential_e", Ueptr,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+                           UInt(0), uFESpace.dof().numTotalDof() );
 #endif
 
     vector_ptrtype Fptr( new vector_type(electricModel.fiber_vector(), Repeated ) );
 
-    if(_data.has_fibers() )
+    if (_data.has_fibers() )
         exporter->addVariable( ExporterData::Vector, "fibers", Fptr, UInt(0), uFESpace.dof().numTotalDof(), 1 );
     exporter->postProcess( 0 );
 
@@ -359,7 +365,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
     elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
     elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
 
-    for(UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
+    for (UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
         electricModel.potentialFESpace().fe().updateJacQuadPt( electricModel.potentialFESpace().mesh()->volumeList( iVol ) );
         elvec_Iapp.zero();
@@ -413,9 +419,9 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
     ionicModel->updateRepeated();
 
     ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ),
-        elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
-        elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
-    for(UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
+    elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
+    elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
+    for (UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
         electricModel.potentialFESpace().fe().updateJacQuadPt( electricModel.potentialFESpace().mesh()->volumeList( iVol ) );
         elvec_u.zero();

@@ -19,11 +19,11 @@ namespace LifeV
 // ===================================================
 
 EpetraMap::EpetraMap():
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr()
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr()
 {}
 
 EpetraMap::EpetraMap(int                NumGlobalElements,
@@ -31,11 +31,11 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
                      int*               MyGlobalElements,
                      int                IndexBase,
                      const comm_ptrtype&  CommPtr):
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr(CommPtr)
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr(CommPtr)
 {
 
     //Sort MyGlobalElements to avoid a bug in Trilinos (9?) when multiplying two matrices (A * B^T)
@@ -78,11 +78,11 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
 EpetraMap::EpetraMap( const int          NumGlobalElements,
                       const int          IndexBase,
                       const comm_ptrtype& CommPtr ) :
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr(CommPtr)
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr(CommPtr)
 {
     std::vector<int> MyGlobalElements( NumGlobalElements );
 
@@ -95,11 +95,11 @@ EpetraMap::EpetraMap( const int          NumGlobalElements,
 
 EpetraMap::EpetraMap(const int          size,
                      const comm_ptrtype& CommPtr):
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr(CommPtr)
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr(CommPtr)
 {
     int NumGlobalElements(size);
     int NumMyElements    (NumGlobalElements);
@@ -126,21 +126,21 @@ EpetraMap::EpetraMap(const int          size,
     if (CommPtr->MyPID() != 0) NumMyElements = 0;
 
     M_uniqueEpetraMap.reset( new Epetra_Map(NumGlobalElements,
-                                               NumMyElements,
-                                               &MyGlobalElements[0],
-                                               IndexBase,
-                                               *CommPtr) );
+                                            NumMyElements,
+                                            &MyGlobalElements[0],
+                                            IndexBase,
+                                            *CommPtr) );
 
 
 
 }
 
 EpetraMap::EpetraMap( const map_type map ):
-    M_repeatedEpetra_Map(new map_type(map)),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr()
+        M_repeatedEpetra_Map(new map_type(map)),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr()
 {
     uniqueMap();
 }
@@ -153,10 +153,10 @@ EpetraMap::getMap( EpetraMapType maptype)   const
 {
     switch (maptype)
     {
-        case Unique:
-            return getUniqueMap();
-        case Repeated:
-            return getRepeatedMap();
+    case Unique:
+        return getUniqueMap();
+    case Repeated:
+        return getRepeatedMap();
     }
     return getUniqueMap();
 }
@@ -181,12 +181,12 @@ EpetraMap::createRootMap(int const root)   const
 */
 EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
                      int indexbase)
-     :
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr()
+        :
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer(),
+        M_commPtr()
 {
 
     if (indexbase < 0) indexbase = _blockMap.IndexBase();
@@ -220,16 +220,16 @@ EpetraMap &
 EpetraMap::operator = (const EpetraMap& _epetraMap)
 {
 
-   if (this != &_epetraMap)
-   {
-       M_repeatedEpetra_Map = _epetraMap.M_repeatedEpetra_Map;
-       M_uniqueEpetraMap    = _epetraMap.M_uniqueEpetraMap;
-       M_exporter           = _epetraMap.M_exporter;
-       M_importer           = _epetraMap.M_importer;
-       M_commPtr            = _epetraMap.M_commPtr;
-   }
+    if (this != &_epetraMap)
+    {
+        M_repeatedEpetra_Map = _epetraMap.M_repeatedEpetra_Map;
+        M_uniqueEpetraMap    = _epetraMap.M_uniqueEpetraMap;
+        M_exporter           = _epetraMap.M_exporter;
+        M_importer           = _epetraMap.M_importer;
+        M_commPtr            = _epetraMap.M_commPtr;
+    }
 
-   return *this;
+    return *this;
 }
 
 
@@ -255,7 +255,7 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
     }
 
     int numGlobalElements = getUniqueMap()->NumGlobalElements()
-                          + getUniqueMap()->IndexBase() - _epetraMap.getUniqueMap()->IndexBase();
+                            + getUniqueMap()->IndexBase() - _epetraMap.getUniqueMap()->IndexBase();
 
 //    std::cout << "NumGlobalElements = " << numGlobalElements << std::endl;
 
@@ -334,10 +334,10 @@ EpetraMap::operator += (int const size)
 
 
 EpetraMap::EpetraMap(const EpetraMap& _epetraMap):
-    M_repeatedEpetra_Map(),
-    M_uniqueEpetraMap(),
-    M_exporter(),
-    M_importer()
+        M_repeatedEpetra_Map(),
+        M_uniqueEpetraMap(),
+        M_exporter(),
+        M_importer()
 {
     this->operator=(_epetraMap);
 }
@@ -380,16 +380,16 @@ EpetraMap::uniqueMap()
 void
 EpetraMap::bubbleSort(Epetra_IntSerialDenseVector& Elements)
 {
-  int hold;
+    int hold;
 
-  for (int pass(0); pass < Elements.Length()-1; pass++)
-    for (int j(0); j < Elements.Length()-1; j++)
-      if (Elements[j] > Elements[j+1])
-      {
-          hold      = Elements[j];
-          Elements[j]  = Elements[j+1];
-          Elements[j+1]= hold;
-      }
+    for (int pass(0); pass < Elements.Length()-1; pass++)
+        for (int j(0); j < Elements.Length()-1; j++)
+            if (Elements[j] > Elements[j+1])
+            {
+                hold      = Elements[j];
+                Elements[j]  = Elements[j+1];
+                Elements[j+1]= hold;
+            }
 }
 
 void
@@ -418,14 +418,14 @@ EpetraMap::setUp(const RefFE&               refFE,
 
     if (refFE.nbDofPerFace())
     {
-    	int numFace = repeatedFaceVector.size();
+        int numFace = repeatedFaceVector.size();
         EpetraMap repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], indexBase, _commPtr);
         operator+=(repeatedFaceMap);
     }
 
     if (refFE.nbDofPerVolume())
     {
-    	int numElem = repeatedVolumeVector.size();
+        int numElem = repeatedVolumeVector.size();
         EpetraMap repeatedElemMap(-1, numElem, &repeatedVolumeVector[0], indexBase, _commPtr);
         operator+=(repeatedElemMap);
     }

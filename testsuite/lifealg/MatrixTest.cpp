@@ -34,10 +34,10 @@ namespace LifeV
 // Mass
 //
 MatrixMass::MatrixMass( int n )
-    :
-    _M_mat(0),
-    _M_pattern(0),
-    _M_val()
+        :
+        _M_mat(0),
+        _M_pattern(0),
+        _M_val()
 {
     // Defining constants.
 
@@ -55,20 +55,20 @@ MatrixMass::MatrixMass( int n )
     int __j = 0;
     for (int __i = 0; __i < n; ++__i)
     {
-    if (__i != 0)
-    {
-        _M_val[__j] =  sub;
-        __ja[__j++] = __i-1;
-    }
-    _M_val[__j] =  diag;
-    __ja[__j++] = __i;
+        if (__i != 0)
+        {
+            _M_val[__j] =  sub;
+            __ja[__j++] = __i-1;
+        }
+        _M_val[__j] =  diag;
+        __ja[__j++] = __i;
 
-    if ( __i != (n-1) )
-    {
-        _M_val[__j] =  sub;
-        __ja[__j++] = __i+1;
-    }
-    __ia[__i+1] = __j;
+        if ( __i != (n-1) )
+        {
+            _M_val[__j] =  sub;
+            __ja[__j++] = __i+1;
+        }
+        __ia[__i+1] = __j;
     }
 
     _M_pattern = new CSRPatt( nnz, n, n, __ia, __ja );
@@ -82,11 +82,11 @@ MatrixMass::MatrixMass( int n )
 //
 
 MatrixConvectionDiffusion::MatrixConvectionDiffusion( int nx, value_type __rho )
-    :
-    _M_rho( __rho ),
-    _M_mat(0),
-    _M_pattern(0),
-    _M_val()
+        :
+        _M_rho( __rho ),
+        _M_mat(0),
+        _M_pattern(0),
+        _M_val()
 {
 
     int N = nx*nx;
@@ -107,31 +107,31 @@ MatrixConvectionDiffusion::MatrixConvectionDiffusion( int nx, value_type __rho )
 
     for (int j = 0; j < N; j++)
     {
-    if (j >= nx)
-    {
-        _M_val[i] = df;
-        __ja[i++]=j-nx;
-    }
-    if ((j%nx) != 0)
-    {
-        _M_val[i] = du;
-        __ja[i++] = j-1;
-    }
+        if (j >= nx)
+        {
+            _M_val[i] = df;
+            __ja[i++]=j-nx;
+        }
+        if ((j%nx) != 0)
+        {
+            _M_val[i] = du;
+            __ja[i++] = j-1;
+        }
 
-    _M_val[i] = dd;
-    __ja[i++] = j;
+        _M_val[i] = dd;
+        __ja[i++] = j;
 
-    if (((j+1)%nx) != 0)
-    {
-        _M_val[i] = dl;
-        __ja[i++] = j+1;
-    }
-    if (j < N-nx)
-    {
-        _M_val[i] = df;
-        __ja[i++] = j+nx;
-    }
-    __ia[j+1]=i;
+        if (((j+1)%nx) != 0)
+        {
+            _M_val[i] = dl;
+            __ja[i++] = j+1;
+        }
+        if (j < N-nx)
+        {
+            _M_val[i] = df;
+            __ja[i++] = j+nx;
+        }
+        __ia[j+1]=i;
     }
     _M_pattern = new CSRPatt( nnz, N, N, __ia, __ja );
     _M_mat = new CSRMatr<CSRPatt, double>( *_M_pattern, _M_val );

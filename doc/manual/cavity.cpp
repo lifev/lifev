@@ -12,9 +12,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -59,18 +59,19 @@ Real zero_scalar( const Real& /* t */,
 
 Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  switch(i) {
-  case 1:
-    return 1.0;
-    break;
-  case 3:
-      return 0.0;
-      break;
-  case 2:
-      return 0.0;
-    break;
-  }
-  return 0;
+    switch (i)
+    {
+    case 1:
+        return 1.0;
+        break;
+    case 3:
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        break;
+    }
+    return 0;
 }
 
 
@@ -109,12 +110,12 @@ main( int argc, char** argv )
     bool verbose = comm.MyPID() == 0;
 
     if ( verbose )
-        {
-          cout << "% using MPI" << endl;
-            int ntasks;
-            int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-            std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
-        }
+    {
+        cout << "% using MPI" << endl;
+        int ntasks;
+        int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+        std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
+    }
 
 
     // We now proceed to the data file. Its name can be given using the

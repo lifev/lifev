@@ -60,7 +60,7 @@ namespace LifeV
 */
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos>
+typename SolverType = LifeV::SolverTrilinos>
 class HarmonicExtensionSolver
 {
 public:
@@ -98,7 +98,7 @@ public:
                              boost::shared_ptr<Epetra_Comm>              comm,
                              EpetraMap&                locMap  ,
                              UInt                      offset =0
-                             );
+                           );
     //! operators overload
 
 
@@ -128,8 +128,8 @@ public:
     vector_type const& disp()     const {return M_disp;}
 
 
-  void setDisplacement(const vector_type &disp) { M_disp = disp;}
-  void setDispOld(const vector_type &disp)  {    M_dispOld=disp;  }
+    void setDisplacement(const vector_type &disp) { M_disp = disp;}
+    void setDispOld(const vector_type &disp)  {    M_dispOld=disp;  }
 
 
     //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > _mesh.getRefFE().nbNodes)
@@ -159,8 +159,8 @@ public:
 
     void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
-    void rescaleMatrix(Real& dt){*M_matrHE *= dt;}
-    void setMatrix(matrix_ptrtype matr){*matr += *M_matrHE;}
+    void rescaleMatrix(Real& dt) {*M_matrHE *= dt;}
+    void setMatrix(matrix_ptrtype matr) {*matr += *M_matrHE;}
     void applyBoundaryConditions(vector_type& rhs, BCHandler& BCh);
     void computeMatrix();
     void updateDispDiff();
@@ -221,20 +221,20 @@ template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
                          boost::shared_ptr<Epetra_Comm>    comm ):
-    M_FESpace               ( mmFESpace ),
-    M_localMap              ( M_FESpace.map() ),
-    M_matrHE                ( new matrix_type (M_localMap ) ),
-    M_Displayer              ( comm ),
-    M_me                    ( comm->MyPID() ),
-    M_verbose               ( M_me == 0 ),
-    M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_disp                  ( M_localMap ),
-    M_dispOld               ( M_localMap ),
-    M_dispDiff              ( M_localMap ),
-    M_f                     ( M_localMap ),
-    M_linearSolver          ( comm ),
-    M_diffusion             ( 1. ),
-    M_offset                (0)
+        M_FESpace               ( mmFESpace ),
+        M_localMap              ( M_FESpace.map() ),
+        M_matrHE                ( new matrix_type (M_localMap ) ),
+        M_Displayer              ( comm ),
+        M_me                    ( comm->MyPID() ),
+        M_verbose               ( M_me == 0 ),
+        M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_disp                  ( M_localMap ),
+        M_dispOld               ( M_localMap ),
+        M_dispDiff              ( M_localMap ),
+        M_f                     ( M_localMap ),
+        M_linearSolver          ( comm ),
+        M_diffusion             ( 1. ),
+        M_offset                (0)
 {
 }
 
@@ -244,20 +244,20 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
                          boost::shared_ptr<Epetra_Comm>              comm ,
                          EpetraMap& localMap,
                          UInt offset):
-    M_FESpace               ( mmFESpace ),
-    M_localMap              ( localMap),
-    M_matrHE                ( new matrix_type (M_localMap ) ),
-    M_Displayer              ( comm ),
-    M_me                    ( comm->MyPID() ),
-    M_verbose               ( M_me == 0 ),
-    M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_disp                  ( mmFESpace.map() ),
-    M_dispOld               ( M_disp.getMap() ),
-    M_dispDiff              ( M_disp.getMap() ),
-    M_f                     ( M_disp.getMap() ),
-    M_linearSolver          ( comm ),
-    M_diffusion             ( 1. ),
-    M_offset                (offset)
+        M_FESpace               ( mmFESpace ),
+        M_localMap              ( localMap),
+        M_matrHE                ( new matrix_type (M_localMap ) ),
+        M_Displayer              ( comm ),
+        M_me                    ( comm->MyPID() ),
+        M_verbose               ( M_me == 0 ),
+        M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_disp                  ( mmFESpace.map() ),
+        M_dispOld               ( M_disp.getMap() ),
+        M_dispDiff              ( M_disp.getMap() ),
+        M_f                     ( M_disp.getMap() ),
+        M_linearSolver          ( comm ),
+        M_diffusion             ( 1. ),
+        M_offset                (offset)
 {
 }
 
@@ -327,7 +327,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
 }
 
 
-    template <typename Mesh, typename SolverType>
+template <typename Mesh, typename SolverType>
 void
 HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
 {
@@ -361,8 +361,8 @@ void
 HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_type& rhs, BCHandler& BCh)
 {
 
-  // CHANGED BY S. QUINODOZ !
-  // "if" exchanged
+    // CHANGED BY S. QUINODOZ !
+    // "if" exchanged
 
     if (  ! BCh.bdUpdateDone() )
     {
@@ -370,7 +370,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_type& 
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
-    if(M_offset)//mans that this is the fullMonolithic case
+    if (M_offset)//mans that this is the fullMonolithic case
     {
         BCh.setOffset(M_offset);
     }

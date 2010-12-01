@@ -60,18 +60,18 @@ namespace LifeV
 
 */
 class DofInterface3Dto3D:
-            public DofInterfaceBase
+        public DofInterfaceBase
 {
 public:
 
     //! default constructor
     DofInterface3Dto3D()
-        :
-        _refFE1( 0 ),
-        _dof1( 0 ),
-        _refFE2( 0 ),
-        _dof2( 0 )
-        {}
+            :
+            _refFE1( 0 ),
+            _dof1( 0 ),
+            _refFE2( 0 ),
+            _dof2( 0 )
+    {}
 
     //! Constructor for interfacing Dof of the same type (RefFE)
     /*!
@@ -203,7 +203,7 @@ bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, c
  */
 template <typename Mesh>
 void DofInterface3Dto3D::_updateFaceConnections( const Mesh& mesh1, const EntityFlag& flag1,
-        const Mesh& mesh2, const EntityFlag& flag2, const Real& tol )
+                                                 const Mesh& mesh2, const EntityFlag& flag2, const Real& tol )
 {
 
     UInt bdnF1 = mesh1.numBFaces(); // Number of boundary faces in mesh1
@@ -296,7 +296,7 @@ void DofInterface3Dto3D::_updateFaceConnections( const Mesh& mesh1, const Entity
 */
 template <typename Mesh>
 void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& dof1,
-        const Mesh& mesh2, const Dof& dof2, const Real& tol, int const* const flag1)
+                                                const Mesh& mesh2, const Dof& dof2, const Real& tol, int const* const flag1)
 {
 
     typedef typename Mesh::VolumeShape GeoShape;
@@ -360,7 +360,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
 
                 iVeEl1 = GeoShape::fToP( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
-                if( flag1 != 0 && mesh1.boundaryFace(i->first).point(iVeFa1).marker() != *flag1) continue;
+                if ( flag1 != 0 && mesh1.boundaryFace(i->first).point(iVeFa1).marker() != *flag1) continue;
 
                 // Loop number of Dof per vertex (mesh1)
                 for ( ID l = 1; l <= nDofpV1; ++l )
@@ -528,9 +528,9 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
   the accuracy of the unknowns on mesh1, i.e., when refFE1 is more accurate
   than refFE2
 */
-  template <typename Mesh>
-  void DofInterface3Dto3D::interpolate( Mesh& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
-  {
+template <typename Mesh>
+void DofInterface3Dto3D::interpolate( Mesh& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
+{
 
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
     typedef typename Mesh::FaceShape GeoBShape;  // Face Shape
@@ -601,7 +601,7 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
                             sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-            vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                        vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
                     }
                 }
             }

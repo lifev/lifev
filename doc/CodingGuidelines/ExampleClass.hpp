@@ -39,7 +39,8 @@
 
 #include <life/lifecore/life.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ExampleClass - Short description of the class
 /*!
@@ -91,9 +92,9 @@ public:
      */
     enum listOfTemplatesOptions
     {
-    	options1, /*!< This options means ... */
-    	options2, /*!< This options means ... */
-    	options3  /*!< This options means ... */
+        options1, /*!< This options means ... */
+        options2, /*!< This options means ... */
+        options3  /*!< This options means ... */
     };
 
     typedef int                                first_Type;

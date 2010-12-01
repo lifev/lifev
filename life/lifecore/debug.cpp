@@ -85,10 +85,10 @@ enum DebugLevels
 struct DebugStream::Private
 {
     Private()
-        :
-        debug( false ),
-        __flush_function( 0 )
-        {}
+            :
+            debug( false ),
+            __flush_function( 0 )
+    {}
     bool debug;
     std::ostringstream _M_output;
 
@@ -135,8 +135,8 @@ initDebugAreas ()
             if ( fin.fail() )
             {
                 Warning() << "The file debug.areas was not found.\n"
-                          << "                 searched at ../debug.areas and\n"
-                          << "                 " << __path.str() << "\n";
+                << "                 searched at ../debug.areas and\n"
+                << "                 " << __path.str() << "\n";
             }
         }
         while ( fin )
@@ -144,9 +144,9 @@ initDebugAreas ()
             char __line[256];
             fin.getline ( __line, 256 );
             if ( __line[ 0 ] == '\0' ||
-                 __line[ 0 ] == '\n' ||
-                 __line[ 0 ] == '#' ||
-                 isspace ( __line[ 0 ] ) )
+                    __line[ 0 ] == '\n' ||
+                    __line[ 0 ] == '#' ||
+                    isspace ( __line[ 0 ] ) )
                 continue;
             std::istringstream __sentry ( __line );
             std::vector<std::string> __l;
@@ -193,8 +193,8 @@ getDescription ( unsigned int __area )
 // DebugStream
 //
 DebugStream::DebugStream( int area, int /*level*/, bool print )
-    :
-    __p( new Private )
+        :
+        __p( new Private )
 {
     initDebugAreas ();
 
@@ -202,7 +202,7 @@ DebugStream::DebugStream( int area, int /*level*/, bool print )
     {
         __p->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
                         print ) ||
-                       ( !area );
+                      ( !area );
     }
     else
     {
@@ -213,15 +213,15 @@ DebugStream::DebugStream( int area, int /*level*/, bool print )
 
 }
 DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bool print )
-    :
-    __p( new Private )
+        :
+        __p( new Private )
 {
     initDebugAreas ();
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
         __p->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
                         print ) ||
-                        ( !area );
+                      ( !area );
     }
     else
     {
@@ -229,11 +229,11 @@ DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bo
     }
     if ( __p->debug )
         __p->_M_output << getDescription ( area ) << ": "
-                       << initialString;
+        << initialString;
 }
 DebugStream::DebugStream( const DebugStream& sd )
-    :
-    __p( new Private )
+        :
+        __p( new Private )
 {
     __p->debug = sd.__p->debug;
     __p->__flush_function = sd.__p->__flush_function;
@@ -490,16 +490,19 @@ backtrace ( int __levels )
 LifeV::DebugStream&
 perror( LifeV::DebugStream& s )
 {
-    s << " " << strerror( errno ); return s;
+    s << " " << strerror( errno );
+    return s;
 }
 LifeV::DebugStream&
 endl( LifeV::DebugStream& s )
 {
-    s << "\n"; return s;
+    s << "\n";
+    return s;
 }
 LifeV::DebugStream&
 flush( LifeV::DebugStream& s )
 {
-    s.flush(); return s;
+    s.flush();
+    return s;
 }
 

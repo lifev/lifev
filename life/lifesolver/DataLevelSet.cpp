@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Method definition 
+    @brief Method definition
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 10 Nov 2010
@@ -35,7 +35,8 @@
 
 #include <DataLevelSet.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -44,10 +45,10 @@ namespace LifeV {
 
 DataLevelSet::
 DataLevelSet():
-    M_dataTime(),
-    M_stabilization(),
-    M_IPTreatment(),
-    M_IPCoef()
+        M_dataTime(),
+        M_stabilization(),
+        M_IPTreatment(),
+        M_IPCoef()
 {};
 
 
@@ -75,7 +76,7 @@ showMe(std::ostream& out) const
     out << " Time data : " << std::endl;
     M_dataTime->showMe(out);
     out << " Stabilization : ";
-    
+
     if (M_stabilization == NONE) out << "none" << std::endl;
     if (M_stabilization == IP) out << "ip" << std::endl;
 
@@ -83,7 +84,7 @@ showMe(std::ostream& out) const
     if (M_IPTreatment == IMPLICIT) out << "implicit" << std::endl;
     if (M_IPTreatment == SEMI_IMPLICIT) out << "semi-implicit" << std::endl;
     if (M_IPTreatment == EXPLICIT) out << "explicit" << std::endl;
-    
+
     out << " IP coefficient : " << M_IPCoef << std::endl;
 };
 
@@ -94,7 +95,7 @@ showMe(std::ostream& out) const
 void
 DataLevelSet::
 setStabilization(const std::string& stab)
-{ 
+{
     if (stab.compare("ip") ==0)
     {
         M_stabilization = IP;

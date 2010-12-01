@@ -34,9 +34,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -84,7 +84,7 @@ int
 main( int argc, char** argv )
 {
 #ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
+    MPI_Init(&argc, &argv);
 #endif
 
 //**************** cylinder
@@ -96,7 +96,7 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-  return( EXIT_SUCCESS );
+    return( EXIT_SUCCESS );
 }
 
 

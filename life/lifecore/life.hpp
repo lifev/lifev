@@ -113,30 +113,30 @@ typedef double Real;
 */
 namespace detail
 {
-    template<int bit_size>
-    class no_int
-    {
-    private:
-        no_int();
-    };
+template<int bit_size>
+class no_int
+{
+private:
+    no_int();
+};
 
-    template< int bit_size >
-    struct integer
-    {
-        typedef boost::mpl::list<signed char,signed short, signed int, signed long int, signed long long> builtins_;
-        typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
-                boost::mpl::transform_view< builtins_, boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
-                >
-            , boost::mpl::integral_c<size_t, bit_size>
-            >::type >::type iter_;
+template< int bit_size >
+struct integer
+{
+    typedef boost::mpl::list<signed char,signed short, signed int, signed long int, signed long long> builtins_;
+    typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
+    boost::mpl::transform_view< builtins_, boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
+    >
+    , boost::mpl::integral_c<size_t, bit_size>
+    >::type >::type iter_;
 
-        typedef typename boost::mpl::end<builtins_>::type last_;
-        typedef typename boost::mpl::eval_if<
-              boost::is_same<iter_,last_>
-            , boost::mpl::identity< no_int<bit_size> >
-            , boost::mpl::deref<iter_>
-            >::type type;
-    };
+    typedef typename boost::mpl::end<builtins_>::type last_;
+    typedef typename boost::mpl::eval_if<
+    boost::is_same<iter_,last_>
+    , boost::mpl::identity< no_int<bit_size> >
+    , boost::mpl::deref<iter_>
+    >::type type;
+};
 }
 
 typedef detail::integer<1>::type  int1_type;
@@ -150,24 +150,24 @@ typedef detail::integer<64>::type int64_type;
 */
 namespace detail
 {
-    template< int bit_size >
-    struct unsigned_integer
-    {
-        typedef boost::mpl::list<unsigned char,unsigned short,unsigned int,unsigned long int, unsigned long long> builtins_;
-        typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
-            boost::mpl::transform_view< builtins_
-          , boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
-        >
-            , boost::mpl::integral_c<size_t, bit_size>
-        >::type >::type iter_;
+template< int bit_size >
+struct unsigned_integer
+{
+    typedef boost::mpl::list<unsigned char,unsigned short,unsigned int,unsigned long int, unsigned long long> builtins_;
+    typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
+    boost::mpl::transform_view< builtins_
+    , boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
+    >
+    , boost::mpl::integral_c<size_t, bit_size>
+    >::type >::type iter_;
 
-        typedef typename boost::mpl::end<builtins_>::type last_;
-        typedef typename boost::mpl::eval_if<
-            boost::is_same<iter_,last_>
-            , boost::mpl::identity< no_int<bit_size> >
-            , boost::mpl::deref<iter_>
-        >::type type;
-    };
+    typedef typename boost::mpl::end<builtins_>::type last_;
+    typedef typename boost::mpl::eval_if<
+    boost::is_same<iter_,last_>
+    , boost::mpl::identity< no_int<bit_size> >
+    , boost::mpl::deref<iter_>
+    >::type type;
+};
 }
 
 typedef detail::unsigned_integer<1>::type  uint1_type;

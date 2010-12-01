@@ -57,46 +57,46 @@
  */
 namespace LifeV
 {
-    /**
-     * Returns the encoded number of LIFEV's version, see the LIFEV_VERSION macro.
-     * In contrary to that macro this function returns the number of the actually
-     * installed LIFEV version, not the number of the LIFEV version that was
-     * installed when the program was compiled.
-     * @return the version number, encoded in a single uint
-     * @since 0.7
-     */
-    LIFEV_EXPORT unsigned int version();
+/**
+ * Returns the encoded number of LIFEV's version, see the LIFEV_VERSION macro.
+ * In contrary to that macro this function returns the number of the actually
+ * installed LIFEV version, not the number of the LIFEV version that was
+ * installed when the program was compiled.
+ * @return the version number, encoded in a single uint
+ * @since 0.7
+ */
+LIFEV_EXPORT unsigned int version();
 
-    /**
-     * Returns the major number of LIFEV's version, e.g.
-     * 0 for LIFEV 0.7
-     * @return the major version number
-     * @since 0.7
-     */
-    LIFEV_EXPORT unsigned int versionMajor();
+/**
+ * Returns the major number of LIFEV's version, e.g.
+ * 0 for LIFEV 0.7
+ * @return the major version number
+ * @since 0.7
+ */
+LIFEV_EXPORT unsigned int versionMajor();
 
-    /**
-     * Returns the minor number of LIFEV's version, e.g.
-     * 7 for LIFEV 0.7.0
-     * @return the minor version number
-     * @since 0.7
-     */
-    LIFEV_EXPORT unsigned int versionMinor();
+/**
+ * Returns the minor number of LIFEV's version, e.g.
+ * 7 for LIFEV 0.7.0
+ * @return the minor version number
+ * @since 0.7
+ */
+LIFEV_EXPORT unsigned int versionMinor();
 
-    /**
-     * Returns the micro number of LIFEV's version, e.g.
-     * 0 for LIFEV 0.7.0
-     * @return the extra information
-     * @since 0.7
-     */
-    LIFEV_EXPORT unsigned int versionMicro();
+/**
+ * Returns the micro number of LIFEV's version, e.g.
+ * 0 for LIFEV 0.7.0
+ * @return the extra information
+ * @since 0.7
+ */
+LIFEV_EXPORT unsigned int versionMicro();
 
-    /**
-     * Returns the LIFEV version as string, e.g. "0.7.0".
-     * @return the LIFEV version. You can keep the string forever
-     * @since 0.7
-     */
-    LIFEV_EXPORT char const* versionString();
+/**
+ * Returns the LIFEV version as string, e.g. "0.7.0".
+ * @return the LIFEV version. You can keep the string forever
+ * @since 0.7
+ */
+LIFEV_EXPORT char const* versionString();
 }
 
 #endif // _LIFEV_VERSION_H_

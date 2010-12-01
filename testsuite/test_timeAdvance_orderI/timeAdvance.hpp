@@ -61,12 +61,12 @@ public:
     /** @name Constructors, destructor
      */
     //@{
-  problem( int          argc,
-      char**                argv,
-      boost::shared_ptr<Epetra_Comm>        structComm );
+    problem( int          argc,
+             char**                argv,
+             boost::shared_ptr<Epetra_Comm>        structComm );
 
-  ~problem()
-        {}
+    ~problem()
+    {}
 
     //@}
 

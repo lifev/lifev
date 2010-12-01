@@ -37,7 +37,8 @@
 #include <sstream>
 #include <string>
 
-bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance) {
+bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance)
+{
     Epetra_SerialComm comm;
     EpetraExt::HDF5 HDF5input(comm);
 
@@ -48,7 +49,8 @@ bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance) {
 
     std::stringstream velocity_group_name, pressure_group_name;
 
-    for (int i = 0; i < timesteps; ++i) {
+    for (int i = 0; i < timesteps; ++i)
+    {
         HDF5input.Open(fileA, H5F_ACC_RDONLY);
 
         velocity_group_name << "velocity.0000" << i;
@@ -96,12 +98,15 @@ bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance) {
                   << error_norm_velocity[1] << " " << error_norm_velocity[2] << std::endl;
         std::cout << "Pressure error norm: " << error_norm_pressure << std::endl;
 
-        for (int k = 0; k < 3; ++k) {
-            if (error_norm_velocity[k] > tolerance) {
+        for (int k = 0; k < 3; ++k)
+        {
+            if (error_norm_velocity[k] > tolerance)
+            {
                 correct = false;
             }
         }
-        if (error_norm_pressure > tolerance) {
+        if (error_norm_pressure > tolerance)
+        {
             correct = false;
         }
 

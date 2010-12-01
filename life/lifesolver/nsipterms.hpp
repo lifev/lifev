@@ -72,7 +72,7 @@ public:
 
     void setGammaBeta (double gammaBeta) { M_gammaBeta  = gammaBeta;}
     void setGammaDiv  (double gammaDiv)  { M_gammaDiv   = gammaDiv;}
-    void setGammaPress(double gammaPress){ M_gammaPress = gammaPress;}
+    void setGammaPress(double gammaPress) { M_gammaPress = gammaPress;}
 private:
 
     typedef ID ( *FTOP )( ID const localFace, ID const point );
@@ -106,38 +106,38 @@ IPStabilization<MESH, DOF>::IPStabilization( const mesh_type mesh,
                                              Real            gammaDiv,
                                              Real            gammaPress,
                                              Real            viscosity ) :
-    M_mesh      ( mesh ),
-    M_dof       ( dof ),
-    M_fe1       ( refFE, getGeoMap(*mesh), quadRule ),
-    M_fe2       ( refFE, getGeoMap(*mesh), quadRule ),
-    M_feBd      ( feBd ),
-    M_gammaBeta ( gammaBeta ),
-    M_gammaDiv  ( gammaDiv ),
-    M_gammaPress( gammaPress ),
-    M_viscosity ( viscosity ),
-    M_elMatU    ( M_fe1.nbNode, nDimensions    , nDimensions   ),
-    M_elMatP    ( M_fe1.nbNode, nDimensions + 1, nDimensions+1 )
+        M_mesh      ( mesh ),
+        M_dof       ( dof ),
+        M_fe1       ( refFE, getGeoMap(*mesh), quadRule ),
+        M_fe2       ( refFE, getGeoMap(*mesh), quadRule ),
+        M_feBd      ( feBd ),
+        M_gammaBeta ( gammaBeta ),
+        M_gammaDiv  ( gammaDiv ),
+        M_gammaPress( gammaPress ),
+        M_viscosity ( viscosity ),
+        M_elMatU    ( M_fe1.nbNode, nDimensions    , nDimensions   ),
+        M_elMatP    ( M_fe1.nbNode, nDimensions + 1, nDimensions+1 )
 {
-    switch( M_fe1.nbNode )
+    switch ( M_fe1.nbNode )
     {
-        case 4:
-            M_fToP = LinearTetra::fToP;
-            break;
-        case 5:
-            M_fToP = LinearTetra::fToP;
-            break;
-        case 10:
-            M_fToP = QuadraticTetra::fToP;
-            break;
-        case 8:
-            M_fToP = LinearHexa::fToP;
-            break;
-        case 20:
-            M_fToP = QuadraticHexa::fToP;
-            break;
-        default:
+    case 4:
+        M_fToP = LinearTetra::fToP;
+        break;
+    case 5:
+        M_fToP = LinearTetra::fToP;
+        break;
+    case 10:
+        M_fToP = QuadraticTetra::fToP;
+        break;
+    case 8:
+        M_fToP = LinearHexa::fToP;
+        break;
+    case 20:
+        M_fToP = QuadraticHexa::fToP;
+        break;
+    default:
 //            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
-            break;
+        break;
     }
 }
 
@@ -179,7 +179,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
     chronoAssembly.start();
     // loop on interior faces
     for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
-          ++iFace )
+            ++iFace )
     {
         const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
         const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
@@ -245,13 +245,13 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             //Real coeffPress = M_gammaPress * sqrt( hK2 ); // P1 p nonsmooth (code)
 #else
             Real coeffPress = M_gammaPress * hK2 / // Pk (paper)
-                std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
+                              std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
 #endif
 
             M_elMatP.zero();
             chronoElemComp.start();
             ipstab_grad( coeffPress, M_elMatP, M_fe1, M_fe1, M_feBd,
-                        nDimensions, nDimensions);
+                         nDimensions, nDimensions);
 //            M_elMatP.showMe();
             chronoElemComp.stop();
             chronoAssembly1.start();
@@ -264,7 +264,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             M_elMatP.zero();
             chronoElemComp.start();
             ipstab_grad( coeffPress, M_elMatP, M_fe2, M_fe2, M_feBd,
-                        nDimensions, nDimensions);
+                         nDimensions, nDimensions);
             chronoElemComp.stop();
             chronoAssembly2.start();
 //             assemb_mat(matrix, M_elMatP, M_fe2, M_dof,
@@ -282,7 +282,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
 //             assemb_mat(matrix, M_elMatP, M_fe1, M_fe2, M_dof,
 //                        nDimensions, nDimensions);
             assembleMatrix(matrix, M_elMatP, M_fe1, M_fe2, M_dof, M_dof,
-                       nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly3.stop();
 
             M_elMatP.zero();
@@ -294,7 +294,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
 //             assemb_mat(matrix, M_elMatP, M_fe2, M_fe1, M_dof,
 //                        nDimensions, nDimensions);
             assembleMatrix(matrix, M_elMatP, M_fe2, M_fe1, M_dof, M_dof,
-                       nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly4.stop();
         }
 
@@ -317,16 +317,18 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             chronoBeta.start();
             Real bnmax = 0;
             Real bcmax = 0;
-            for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode ) {
+            for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode )
+            {
                 Real bn = 0;
-                for ( int iCoor=0; iCoor<M_fe1.nbCoor(); ++iCoor ) {
+                for ( int iCoor=0; iCoor<M_fe1.nbCoor(); ++iCoor )
+                {
                     bn += normal(iNode, iCoor) *
-                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
+                          beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
                     bcmax = std::max<Real>
-                        (bcmax, normal(iNode, (iCoor+1)%3) *
-                         beta.vec()[ (iCoor+2)%3*M_feBd.nbNode + iNode ] -
-                         normal(iNode, (iCoor+2)%3) *
-                         beta.vec()[ (iCoor+1)%3*M_feBd.nbNode + iNode ]);
+                            (bcmax, normal(iNode, (iCoor+1)%3) *
+                             beta.vec()[ (iCoor+2)%3*M_feBd.nbNode + iNode ] -
+                             normal(iNode, (iCoor+2)%3) *
+                             beta.vec()[ (iCoor+1)%3*M_feBd.nbNode + iNode ]);
                 }
                 bnmax = std::max<Real> (bnmax, bn);
             }
@@ -342,18 +344,18 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             ipstab_div( coeffDiv, M_elMatU, M_fe1, M_fe1, M_feBd );
 #else
             ipstab_grad( coeffGrad, M_elMatU, M_fe1, M_fe1, M_feBd, 0, 0,
-            nDimensions );
+                         nDimensions );
 #endif
             chronoElemComp.stop();
             chronoAssembly5.start();
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                    {
+                {
 //                         assemb_mat( matrix, M_elMatU, M_fe1, M_dof,
 //                                     iComp, jComp );
-                        assembleMatrix( matrix, M_elMatU, M_fe1, M_dof,
-                                         iComp, jComp, iComp*nDof, jComp*nDof );
-                    }
+                    assembleMatrix( matrix, M_elMatU, M_fe1, M_dof,
+                                    iComp, jComp, iComp*nDof, jComp*nDof );
+                }
             chronoAssembly5.stop();
 
             M_elMatU.zero();
@@ -364,18 +366,18 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             ipstab_div( coeffDiv, M_elMatU, M_fe2, M_fe2, M_feBd );
 #else
             ipstab_grad( coeffGrad, M_elMatU, M_fe2, M_fe2, M_feBd, 0, 0,
-            nDimensions );
+                         nDimensions );
 #endif
             chronoElemComp.stop();
             chronoAssembly6.start();
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                    {
+                {
 //                         assemb_mat( matrix, M_elMatU, M_fe2, M_dof,
 //                                     iComp, jComp );
-                        assembleMatrix( matrix, M_elMatU, M_fe2, M_dof,
-                                        iComp, jComp, iComp*nDof, jComp*nDof );
-                    }
+                    assembleMatrix( matrix, M_elMatU, M_fe2, M_dof,
+                                    iComp, jComp, iComp*nDof, jComp*nDof );
+                }
             chronoAssembly6.stop();
 
             M_elMatU.zero();
@@ -404,7 +406,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             ipstab_bgrad( -coeffBeta, M_elMatU, M_fe2, M_fe1, beta,
-                         M_feBd, 0, 0, nDimensions );
+                          M_feBd, 0, 0, nDimensions );
             ipstab_div( -coeffDiv, M_elMatU, M_fe2, M_fe1, M_feBd );
 #else
             ipstab_grad( -coeffGrad, M_elMatU, M_fe2, M_fe1, M_feBd, 0, 0,
@@ -418,7 +420,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
 //                     assemb_mat( matrix, M_elMatU, M_fe2, M_fe1, M_dof,
 //                                 iComp, jComp );
                     assembleMatrix( matrix, M_elMatU, M_fe2, M_fe1, M_dof, M_dof,
-                                     iComp, jComp, iComp*nDof, jComp*nDof );
+                                    iComp, jComp, iComp*nDof, jComp*nDof );
                 }
             chronoAssembly8.stop();
         }
@@ -426,35 +428,35 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
     } // loop on interior faces
     chronoAssembly.stop();
     if (verbose)
-        {
-            std::cout << std::endl;
-            std::cout << state.BlockMap().Comm().MyPID()
-                      <<  "  .   Updating of element   done in "
-                      << chronoUpdate.diff_cumul()   << " s." << std::endl;
-            std::cout << "   .   Determination of beta done in "
-                      << chronoBeta.diff_cumul()     << " s." << std::endl;
-            std::cout << "   .   Element computations  done in "
-                      << chronoElemComp.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 1              done in "
-                      << chronoAssembly1.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 2              done in "
-                      << chronoAssembly2.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 3              done in "
-                      << chronoAssembly3.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 4              done in "
-                      << chronoAssembly4.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 5              done in "
-                      << chronoAssembly5.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 6              done in "
-                      << chronoAssembly6.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 7              done in "
-                      << chronoAssembly7.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   chrono 8              done in "
-                      << chronoAssembly8.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   total                                   "
-                      << chronoAssembly.diff_cumul() << " s."
-                      << " myFaces = " << myFaces << std::endl;
-        }
+    {
+        std::cout << std::endl;
+        std::cout << state.BlockMap().Comm().MyPID()
+                  <<  "  .   Updating of element   done in "
+                  << chronoUpdate.diff_cumul()   << " s." << std::endl;
+        std::cout << "   .   Determination of beta done in "
+                  << chronoBeta.diff_cumul()     << " s." << std::endl;
+        std::cout << "   .   Element computations  done in "
+                  << chronoElemComp.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 1              done in "
+                  << chronoAssembly1.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 2              done in "
+                  << chronoAssembly2.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 3              done in "
+                  << chronoAssembly3.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 4              done in "
+                  << chronoAssembly4.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 5              done in "
+                  << chronoAssembly5.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 6              done in "
+                  << chronoAssembly6.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 7              done in "
+                  << chronoAssembly7.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   chrono 8              done in "
+                  << chronoAssembly8.diff_cumul() << " s." << std::endl;
+        std::cout << "   .   total                                   "
+                  << chronoAssembly.diff_cumul() << " s."
+                  << " myFaces = " << myFaces << std::endl;
+    }
 
 } // apply(...)
 

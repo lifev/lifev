@@ -34,10 +34,10 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
-	#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#include <mpi.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifearray/EpetraMatrix.hpp>
@@ -67,10 +67,10 @@ typedef boost::shared_ptr<vector_type> vector_ptrtype;
 template <class Mesh, class Map>
 void
 computeP0pressure(FESpace< Mesh, Map >& pFESpace,
-		  FESpace< Mesh, Map >& p0FESpace,
-		  const FESpace<Mesh, Map >& uFESpace,
-		  const vector_type& velAndPressureExport,
-		  vector_type& P0pres, Real time);
+                  FESpace< Mesh, Map >& p0FESpace,
+                  const FESpace<Mesh, Map >& uFESpace,
+                  const vector_type& velAndPressureExport,
+                  vector_type& P0pres, Real time);
 
 struct EnsightToHdf5::Private
 {
@@ -83,8 +83,8 @@ struct EnsightToHdf5::Private
 
 EnsightToHdf5::EnsightToHdf5( int argc,
                               char** argv )
-    :
-    d( new Private )
+        :
+        d( new Private )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -118,7 +118,7 @@ EnsightToHdf5::run()
 
     bool verbose = (d->comm->MyPID() == 0);
 
-	// Fluid solver
+    // Fluid solver
     boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
@@ -170,7 +170,7 @@ EnsightToHdf5::run()
     if (verbose) std::cout << "Building the P0 pressure FE space ... " << std::flush;
 
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > p0FESpace(meshPart, feTetraP0, quadRuleTetra1pt,
-							      quadRuleTria1pt, 1,d->comm);
+                                                              quadRuleTria1pt, 1,d->comm);
 
     if (verbose) std::cout << "ok." << std::endl;
 
@@ -269,13 +269,13 @@ EnsightToHdf5::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
-      std::cout << "Doing " << time << std::endl;
+        std::cout << "Doing " << time << std::endl;
         chrono.stop();
         importer->import( time );
 
         *velAndPressureExport = *velAndPressureImport;
-	MPI_Barrier(MPI_COMM_WORLD);
-	computeP0pressure(pFESpace, p0FESpace, uFESpace, *velAndPressureImport, *P0pres, time);
+        MPI_Barrier(MPI_COMM_WORLD);
+        computeP0pressure(pFESpace, p0FESpace, uFESpace, *velAndPressureImport, *P0pres, time);
 
         exporter->postProcess( time );
 
@@ -288,41 +288,41 @@ EnsightToHdf5::run()
 template<class Mesh, class Map>
 void
 computeP0pressure(FESpace< Mesh, Map >& pFESpace,
-		  FESpace< Mesh, Map >& p0FESpace,
-		  const FESpace< Mesh, Map >& uFESpace,
-		  const vector_type& velAndPressure,
-		  vector_type& P0pres, Real time)
+                  FESpace< Mesh, Map >& p0FESpace,
+                  const FESpace< Mesh, Map >& uFESpace,
+                  const vector_type& velAndPressure,
+                  vector_type& P0pres, Real time)
 {
 
-  int MyPID;
-  MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
-  UInt offset = 3*uFESpace.dof().numTotalDof();
+    int MyPID;
+    MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
+    UInt offset = 3*uFESpace.dof().numTotalDof();
 
-  std::vector<int> gid0Vec(0);
-  gid0Vec.reserve(p0FESpace.mesh()->numVolumes());
-  std::vector<Real> val0Vec(0);
-  val0Vec.reserve(p0FESpace.mesh()->numVolumes());
+    std::vector<int> gid0Vec(0);
+    gid0Vec.reserve(p0FESpace.mesh()->numVolumes());
+    std::vector<Real> val0Vec(0);
+    val0Vec.reserve(p0FESpace.mesh()->numVolumes());
 
-  for (UInt ivol=1; ivol<= pFESpace.mesh()->numVolumes(); ++ivol)
-  {
-
-    pFESpace.fe().update( pFESpace.mesh()->volumeList( ivol ), UPDATE_DPHI );
-    p0FESpace.fe().update( p0FESpace.mesh()->volumeList( ivol ) );
-
-    UInt eleID = pFESpace.fe().currentLocalId();
-
-    double tmpsum=0.;
-    for (UInt iNode=0; iNode < (UInt) pFESpace.fe().nbFEDof(); iNode++)
+    for (UInt ivol=1; ivol<= pFESpace.mesh()->numVolumes(); ++ivol)
     {
-      int ig = pFESpace.dof().localToGlobal( eleID, iNode + 1 );
-      tmpsum += velAndPressure(ig+offset);
-      gid0Vec.push_back( p0FESpace.fe().currentId() );
-      val0Vec.push_back( tmpsum / (double) pFESpace.fe().nbFEDof() );
-    }
-  }
 
-  P0pres.replaceGlobalValues(gid0Vec, val0Vec);
-  P0pres.GlobalAssemble();
-  MPI_Barrier(MPI_COMM_WORLD);
+        pFESpace.fe().update( pFESpace.mesh()->volumeList( ivol ), UPDATE_DPHI );
+        p0FESpace.fe().update( p0FESpace.mesh()->volumeList( ivol ) );
+
+        UInt eleID = pFESpace.fe().currentLocalId();
+
+        double tmpsum=0.;
+        for (UInt iNode=0; iNode < (UInt) pFESpace.fe().nbFEDof(); iNode++)
+        {
+            int ig = pFESpace.dof().localToGlobal( eleID, iNode + 1 );
+            tmpsum += velAndPressure(ig+offset);
+            gid0Vec.push_back( p0FESpace.fe().currentId() );
+            val0Vec.push_back( tmpsum / (double) pFESpace.fe().nbFEDof() );
+        }
+    }
+
+    P0pres.replaceGlobalValues(gid0Vec, val0Vec);
+    P0pres.GlobalAssemble();
+    MPI_Barrier(MPI_COMM_WORLD);
 
 }

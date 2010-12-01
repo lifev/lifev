@@ -64,10 +64,10 @@ Solve the problem
 // ===================================================
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
-	#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#include <mpi.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifealg/EpetraMap.hpp>
@@ -91,27 +91,27 @@ using namespace LifeV;
 
 #ifdef TWODIM
 
-	const int TOP    = 3;
-	const int BOTTOM = 1;
-	const int LEFT   = 4;
-	const int RIGHT  = 2;
+const int TOP    = 3;
+const int BOTTOM = 1;
+const int LEFT   = 4;
+const int RIGHT  = 2;
 
-    typedef RegionMesh2D<LinearTriangle> RegionMesh;
+typedef RegionMesh2D<LinearTriangle> RegionMesh;
 
-    const std::string discretization_section="adr/space_discretization2D";
+const std::string discretization_section="adr/space_discretization2D";
 
 #elif defined THREEDIM
 
-    const int TOP    = 6;
-    const int BOTTOM = 5;
-    const int LEFT   = 3;
-    const int RIGHT  = 4;
-    const int FRONT  = 2;
-    const int BACK   = 1;
+const int TOP    = 6;
+const int BOTTOM = 5;
+const int LEFT   = 3;
+const int RIGHT  = 4;
+const int FRONT  = 2;
+const int BACK   = 1;
 
-    typedef RegionMesh3D<LinearTetra> RegionMesh;
+typedef RegionMesh3D<LinearTetra> RegionMesh;
 
-    const std::string discretization_section="adr/space_discretization3D";
+const std::string discretization_section="adr/space_discretization3D";
 
 
 #endif
@@ -125,20 +125,22 @@ using namespace LifeV;
 class AnalyticalSol
 {
 public:
-	inline Real operator()(Real /*t*/, Real x,Real y,Real /*z*/, UInt /*ic*/=0) const {
-		return sin(2*Pi*x)*sin(2*Pi*y);
-	}
-	inline Real grad(UInt icoor, Real /*t*/, Real x,Real y,Real /*z*/, UInt /*ic*/=0) const {
-		switch(icoor)
-		{
-  	  	case 1: //der_x
-  	  		return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y);
-  	  	case 2: //der_y
-  	  		return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y);
-  	  	default:
-  	  		return 0;
-		}
-	}
+    inline Real operator()(Real /*t*/, Real x,Real y,Real /*z*/, UInt /*ic*/=0) const
+    {
+        return sin(2*Pi*x)*sin(2*Pi*y);
+    }
+    inline Real grad(UInt icoor, Real /*t*/, Real x,Real y,Real /*z*/, UInt /*ic*/=0) const
+    {
+        switch (icoor)
+        {
+        case 1: //der_x
+            return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y);
+        case 2: //der_y
+            return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y);
+        default:
+            return 0;
+        }
+    }
 };
 
 
@@ -153,10 +155,10 @@ Real source_in( const Real& /* t */,
 
 //solution on the boundary
 Real g( const Real& /* t */,
-           const Real& x,
-           const Real& y,
-           const Real& z,
-           const ID&   )
+        const Real& x,
+        const Real& y,
+        const Real& z,
+        const ID&   )
 {
     return sin(2*Pi*x)*sin(2*Pi*y);
 }
@@ -167,15 +169,15 @@ Real beta( const Real& /* t */,
            const Real& ,
            const ID& icomp )
 {
-	switch(icomp)
-	{
-		case 1:
-			return 0;
-		case 2:
-			return 0;
-		default:
-			return 0;
-	}
+    switch (icomp)
+    {
+    case 1:
+        return 0;
+    case 2:
+        return 0;
+    default:
+        return 0;
+    }
 }
 
 
@@ -184,30 +186,32 @@ Real beta( const Real& /* t */,
 class AnalyticalSol
 {
 public:
-	inline Real operator()(Real /*t*/, Real x,Real y,Real z, UInt /*ic*/=0) const {
-		return sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
-	}
-	inline Real grad(UInt icoor, Real /*t*/, Real x,Real y,Real z, UInt /*ic*/=0) const {
-		switch(icoor)
-		{
-  	  	case 1: //der_x
-  	  		return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
-  	  	case 2: //der_y
-  	  		return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y)*sin(2*Pi*z);
-  	  	case 3:
-  	  		return 2*Pi*sin(2*Pi*x)*sin(2*Pi*y)*cos(2*Pi*z);
-  	  	default:
-  	  		return 0;
-		}
-	}
+    inline Real operator()(Real /*t*/, Real x,Real y,Real z, UInt /*ic*/=0) const
+    {
+        return sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
+    }
+    inline Real grad(UInt icoor, Real /*t*/, Real x,Real y,Real z, UInt /*ic*/=0) const
+    {
+        switch (icoor)
+        {
+        case 1: //der_x
+            return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
+        case 2: //der_y
+            return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y)*sin(2*Pi*z);
+        case 3:
+            return 2*Pi*sin(2*Pi*x)*sin(2*Pi*y)*cos(2*Pi*z);
+        default:
+            return 0;
+        }
+    }
 };
 
 //solution on the boundary
 Real g( const Real& /* t */,
-           const Real& x,
-           const Real& y,
-           const Real& z,
-           const ID&   /*icomp*/)
+        const Real& x,
+        const Real& y,
+        const Real& z,
+        const ID&   /*icomp*/)
 {
     return sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
 }
@@ -228,17 +232,17 @@ Real beta( const Real& /* t */,
            const Real& ,
            const ID& icomp )
 {
-	switch(icomp)
-	{
-		case 1:
-			return 0;
-		case 2:
-			return 0;
-		case 3:
-			return 0;
-		default:
-			return 0;
-	}
+    switch (icomp)
+    {
+    case 1:
+        return 0;
+    case 2:
+        return 0;
+    case 3:
+        return 0;
+    default:
+        return 0;
+    }
 }
 #endif
 
@@ -253,10 +257,10 @@ Real UOne( const Real& /* t */,
 }
 
 Real UZero( const Real& /* t */,
-           const Real& ,
-           const Real& ,
-           const Real& ,
-           const ID&   )
+            const Real& ,
+            const Real& ,
+            const Real& ,
+            const ID&   )
 {
     return 0.;
 }
@@ -284,16 +288,16 @@ struct laplacian::Private
 
     fct_type getUOne()
     {
-    	fct_type f;
-    	f = boost::bind(&UOne, _1, _2, _3, _4, _5);
+        fct_type f;
+        f = boost::bind(&UOne, _1, _2, _3, _4, _5);
         return f;
-        }
+    }
 
     fct_type getUZero()
     {
-    	fct_type f;
-    	f = boost::bind(&UZero, _1, _2, _3, _4, _5);
-    	return f;
+        fct_type f;
+        f = boost::bind(&UZero, _1, _2, _3, _4, _5);
+        return f;
     }
 };
 
@@ -306,7 +310,7 @@ struct laplacian::Private
 // ===================================================
 laplacian::laplacian( int argc,
                       char** argv )
-  : Members( new Private )
+        : Members( new Private )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -314,12 +318,12 @@ laplacian::laplacian( int argc,
 
     Members->data_file_name = data_file_name;
 
-	#ifdef EPETRA_MPI
-		std::cout << "Epetra Initialization" << std::endl;
-		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-	#else
-		Members->comm.reset( new Epetra_SerialComm() );
-	#endif
+#ifdef EPETRA_MPI
+    std::cout << "Epetra Initialization" << std::endl;
+    Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+#else
+    Members->comm.reset( new Epetra_SerialComm() );
+#endif
 }
 
 
@@ -335,7 +339,7 @@ laplacian::run()
     typedef SolverTrilinos                                     solver_type;
     //typedef SolverAmesos                                     solver_type;
     typedef ADRSolver< RegionMesh, solver_type >             adr;
-	typedef adr::vector_type                                 vector_type;
+    typedef adr::vector_type                                 vector_type;
     typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
 
     // Reading from data file
@@ -357,7 +361,7 @@ laplacian::run()
 
 #ifdef TWODIM
 
-	BCHandler bcADR( 4, BCHandler::HINT_BC_ONLY_ESSENTIAL );
+    BCHandler bcADR( 4, BCHandler::HINT_BC_ONLY_ESSENTIAL );
 
     bcADR.addBC( "Top",     TOP,    Essential, Full,      g_Ess, 1 );
     bcADR.addBC( "Bottom",  BOTTOM, Essential, Full,      g_Ess, 1 );
@@ -366,7 +370,7 @@ laplacian::run()
 
 #elif defined THREEDIM
 
-	BCHandler bcADR( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
+    BCHandler bcADR( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
 
     bcADR.addBC( "Top",     TOP,    Essential, Full,      uZero, 1 );
     bcADR.addBC( "Bottom",  BOTTOM, Essential, Full,      uZero, 1 );
@@ -390,7 +394,7 @@ laplacian::run()
     partitionMesh< RegionMesh>   meshPart(fullMeshPtr, Members->comm);
     //dataADRPtr->setMesh(meshPart.mesh());
 
-    if(verbose) dataADRPtr->showMe();
+    if (verbose) dataADRPtr->showMe();
 
     // Advection coefficient Space: P1 interpolation
 
@@ -416,54 +420,53 @@ laplacian::run()
     const QuadRule* bdQr_adr(0);
 
     if ( adrOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "  Space order : P1" << std::flush;
+    {
+        if (verbose) std::cout << "  Space order : P1" << std::flush;
 #ifdef TWODIM
-            refFE_adr = &feTriaP1;
-            qR_adr    = &quadRuleTria6pt;
-            bdQr_adr  = &quadRuleSeg3pt;
+        refFE_adr = &feTriaP1;
+        qR_adr    = &quadRuleTria6pt;
+        bdQr_adr  = &quadRuleSeg3pt;
 #elif defined THREEDIM
-            refFE_adr = &feTetraP1;
-            qR_adr    = &quadRuleTetra15pt; // DoE 5
-            bdQr_adr  = &quadRuleTria4pt;   // DoE 2
+        refFE_adr = &feTetraP1;
+        qR_adr    = &quadRuleTetra15pt; // DoE 5
+        bdQr_adr  = &quadRuleTria4pt;   // DoE 2
 #endif
-        }
-    else
-        if ( adrOrder.compare("P2") == 0 )
-            {
-                if (verbose) std::cout << " Space order : P2";
+    }
+    else if ( adrOrder.compare("P2") == 0 )
+    {
+        if (verbose) std::cout << " Space order : P2";
 #ifdef TWODIM
-                refFE_adr = &feTriaP2;
-                qR_adr    = &quadRuleTria6pt;
-                bdQr_adr  = &quadRuleSeg3pt;
+        refFE_adr = &feTriaP2;
+        qR_adr    = &quadRuleTria6pt;
+        bdQr_adr  = &quadRuleSeg3pt;
 #elif defined THREEDIM
-                refFE_adr = &feTetraP2;
-                qR_adr    = &quadRuleTetra64pt; // DoE 6
-                bdQr_adr  = &quadRuleTria4pt;   // DoE 2
+        refFE_adr = &feTetraP2;
+        qR_adr    = &quadRuleTetra64pt; // DoE 6
+        bdQr_adr  = &quadRuleTria4pt;   // DoE 2
 #endif
-            }
+    }
     if (verbose) std::cout << std::endl;
 
 
     //finite element space of the solution
 
     boost::shared_ptr< FESpace< RegionMesh, EpetraMap > > adrFESpacePtr(
-            new FESpace< RegionMesh, EpetraMap >( meshPart,
-                                                  *refFE_adr,
-                                                  *qR_adr,
-                                                  *bdQr_adr,
-                                                  1,
-                                                  Members->comm) );
+        new FESpace< RegionMesh, EpetraMap >( meshPart,
+                                              *refFE_adr,
+                                              *qR_adr,
+                                              *bdQr_adr,
+                                              1,
+                                              Members->comm) );
 
     //finite element space of the advection term
 
     boost::shared_ptr< FESpace< RegionMesh, EpetraMap > > betaFESpacePtr(
-            new FESpace< RegionMesh, EpetraMap > (meshPart,
-                                                  *refFE_beta,
-                                                  *qR_beta,
-                                                  *bdQr_beta,
-                                                  nDimensions,
-                                                  Members->comm) );
+        new FESpace< RegionMesh, EpetraMap > (meshPart,
+                                              *refFE_beta,
+                                              *qR_beta,
+                                              *bdQr_beta,
+                                              nDimensions,
+                                              Members->comm) );
 
     //instantiation of the AdvectionDiffusionReactionSolver class
 
@@ -535,8 +538,8 @@ laplacian::run()
     H1_Error = adrFESpacePtr->H1Error(uExact, uComputed, 0 ,&H1_RelError);
 
     if (verbose)
-    	std::cout << "Error Norm L2: " << L2_Error <<
-		"\nRelative Error Norm L2: " << L2_RelError<<
-        "\nError Norm H1: " << H1_Error <<
-        "\nRelative Error Norm H1: " << H1_RelError<<std::endl;
+        std::cout << "Error Norm L2: " << L2_Error <<
+                  "\nRelative Error Norm L2: " << L2_RelError<<
+                  "\nError Norm H1: " << H1_Error <<
+                  "\nRelative Error Norm H1: " << H1_RelError<<std::endl;
 }

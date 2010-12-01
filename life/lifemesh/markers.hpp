@@ -27,10 +27,10 @@ namespace LifeV
   \brief A Simple implementation of Markers
   \author Luca Formaggia
   \Version $Revision: 1.8 $
- 
+
   This is the simplest implementation of the markers, which just adopts the
   basis marker classes defined in marker_base.h.
- 
+
   Specialised markers can be implemented using this "template" as
   reference.
 */

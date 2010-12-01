@@ -39,10 +39,12 @@
 
 #include <life/lifefilters/exporter.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 template<typename Mesh>
-class NoExport : public Exporter<Mesh> {
+class NoExport : public Exporter<Mesh>
+{
 
 public:
 
@@ -68,22 +70,22 @@ private:
 
 template<typename Mesh>
 NoExport<Mesh>::NoExport():
-    super()
+        super()
 {
 }
 
 template<typename Mesh>
 NoExport<Mesh>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
                          const int& procId)
-    :
-    super(dfile,prefix)
+        :
+        super(dfile,prefix)
 {
     setMeshProcId(mesh,procId);
 }
 
 template<typename Mesh>
 NoExport<Mesh>::NoExport(const GetPot& dfile, const std::string& prefix):
-    super(dfile,prefix)
+        super(dfile,prefix)
 {
 }
 

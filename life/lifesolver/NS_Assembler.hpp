@@ -83,10 +83,10 @@ public:
       \param communicator
     */
     NS_Assembler( const data_ptr&          dataType,
-           FESpace<Mesh, EpetraMap>& uFESpace,
-           FESpace<Mesh, EpetraMap>& pFESpace,
-           boost::shared_ptr<Epetra_Comm>& comm
-           );
+                  FESpace<Mesh, EpetraMap>& uFESpace,
+                  FESpace<Mesh, EpetraMap>& pFESpace,
+                  boost::shared_ptr<Epetra_Comm>& comm
+                );
 
     //! virtual destructor
     virtual ~NS_Assembler();
@@ -94,7 +94,7 @@ public:
     virtual void setUp        ( const GetPot& dataFile );
 
     virtual void updateMatrix(MatrixContainer<std::string> & matrixContainer,
-    						  const double       alpha,
+                              const double       alpha,
                               const vector_type& betaVec,
                               bchandler_raw_type& BCh,
                               Real time = 0);
@@ -124,7 +124,7 @@ protected:
     void buildSystem(MatrixContainer<std::string> & matrixContainer);
     void linearConvectiveTerm(const vector_type& betaVec, matrix_ptrtype A);
     void applyBoundaryConditions(  matrix_type&        C,
-								   matrix_type&        Bt,
+                                   matrix_type&        Bt,
                                    bchandler_raw_type& BCh,
                                    Real time);
 
@@ -150,7 +150,7 @@ protected:
 
     UInt                           M_count;
 
-  //private:
+    //private:
 
     //! Elementary matrices and vectors
     ElemMat                        M_elmatStiff;      // velocity Stokes
@@ -173,23 +173,23 @@ protected:
 template<typename Mesh>
 NS_Assembler<Mesh>::
 NS_Assembler( const data_ptr&          dataType,
-       FESpace<Mesh, EpetraMap>& uFESpace,
-       FESpace<Mesh, EpetraMap>& pFESpace,
-       boost::shared_ptr<Epetra_Comm>&              comm):
-    M_data                   ( dataType ),
-    M_uFESpace               ( uFESpace ),
-    M_pFESpace               ( pFESpace ),
-    M_Displayer              ( comm ),
-    M_stiffStrain            ( false),
-    M_recomputeConstantMatrices(true),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
-    M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
-    M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
-    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_tgv                    (1e0)
+              FESpace<Mesh, EpetraMap>& uFESpace,
+              FESpace<Mesh, EpetraMap>& pFESpace,
+              boost::shared_ptr<Epetra_Comm>&              comm):
+        M_data                   ( dataType ),
+        M_uFESpace               ( uFESpace ),
+        M_pFESpace               ( pFESpace ),
+        M_Displayer              ( comm ),
+        M_stiffStrain            ( false),
+        M_recomputeConstantMatrices(true),
+        M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
+        M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
+        M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
+        M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
+        M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+        M_tgv                    (1e0)
 {}
 
 
@@ -201,31 +201,31 @@ NS_Assembler<Mesh>::
 template<typename Mesh>
 void NS_Assembler<Mesh>::setUp( const GetPot& dataFile )
 {
-	//FIXME: This variable should be in DataNavierStokes!!!
+    //FIXME: This variable should be in DataNavierStokes!!!
     M_stiffStrain = dataFile( "fluid/space_discretization/stiff_strain",false); // Enable grad( u )^T in stress tensor
 }
 
 template<typename Mesh>
 void NS_Assembler<Mesh>::
 updateMatrix(MatrixContainer<std::string> & matrixContainer,
-			 const double       alpha,
+             const double       alpha,
              const vector_type& betaVec,
              bchandler_raw_type& BCh,
              Real time
-             )
+            )
 {
 
     matrixContainer.setParameter("sigma", alpha);
     matrixContainer.setParameter("recomputedConstantMatrix", M_recomputeConstantMatrices);
 
-	if(M_recomputeConstantMatrices)
-		buildSystem(matrixContainer);
+    if (M_recomputeConstantMatrices)
+        buildSystem(matrixContainer);
 
-	M_recomputeConstantMatrices = false;
+    M_recomputeConstantMatrices = false;
 
-	matrix_ptrtype A, C;
+    matrix_ptrtype A, C;
 
-	A.reset(new matrix_type(*matrixContainer.getMatrix("K")));
+    A.reset(new matrix_type(*matrixContainer.getMatrix("K")));
     M_Displayer.leaderPrint("A has been constructed\n");
     linearConvectiveTerm( betaVec, A);
 
@@ -241,11 +241,11 @@ updateMatrix(MatrixContainer<std::string> & matrixContainer,
 
 template<typename Mesh>
 void NS_Assembler<Mesh>::updateRHS(vector_type & rhs,
-                           bchandler_raw_type& BCh,
-                           Real time)
-                           {
-	applyBoundaryConditions(rhs, BCh, time);
-                           }
+                                   bchandler_raw_type& BCh,
+                                   Real time)
+{
+    applyBoundaryConditions(rhs, BCh, time);
+}
 
 
 //===================================================================================//
@@ -256,12 +256,12 @@ template<typename Mesh>
 void NS_Assembler<Mesh>::buildSystem(MatrixContainer<std::string> & matrixContainer)
 {
 
-	matrix_ptrtype M,K,Bt,B;
+    matrix_ptrtype M,K,Bt,B;
 
-	M.reset(new matrix_type(M_uFESpace.map()));
-	K.reset(new matrix_type(M_uFESpace.map()));
-	Bt.reset(new matrix_type(M_uFESpace.map()));
-	B.reset(new matrix_type(M_pFESpace.map()) );
+    M.reset(new matrix_type(M_uFESpace.map()));
+    K.reset(new matrix_type(M_uFESpace.map()));
+    Bt.reset(new matrix_type(M_uFESpace.map()));
+    B.reset(new matrix_type(M_pFESpace.map()) );
     M_Displayer.leaderPrint("  F-  Computing constant matrices ...          ");
 
     Chrono chrono;
@@ -324,39 +324,39 @@ void NS_Assembler<Mesh>::buildSystem(MatrixContainer<std::string> & matrixContai
             chronoStiffAssemble.start();
             if ( M_stiffStrain ) // sigma = 0.5 * mu (grad( u ) + grad ( u )^T)
             {
-            	for ( UInt jComp = 0; jComp < nbCompU; jComp++ )
-            		assembleMatrix( *K,
-                                 M_elmatStiff,
-                                 M_uFESpace.fe(),
-                                 M_uFESpace.fe(),
-                                 M_uFESpace.dof(),
-                                 M_uFESpace.dof(),
-                                 iComp, jComp,
-                                 iComp*velTotalDof, jComp*velTotalDof);
-             }
-             else // sigma = mu grad( u )
-             {
+                for ( UInt jComp = 0; jComp < nbCompU; jComp++ )
                     assembleMatrix( *K,
                                     M_elmatStiff,
                                     M_uFESpace.fe(),
                                     M_uFESpace.fe(),
                                     M_uFESpace.dof(),
                                     M_uFESpace.dof(),
-                                    iComp, iComp,
-                                    iComp*velTotalDof, iComp*velTotalDof);
-              }
-            chronoStiffAssemble.stop();
-
-            // mass
-            chronoMassAssemble.start();
-            assembleMatrix( *M,
-                                M_elmatMass,
+                                    iComp, jComp,
+                                    iComp*velTotalDof, jComp*velTotalDof);
+            }
+            else // sigma = mu grad( u )
+            {
+                assembleMatrix( *K,
+                                M_elmatStiff,
                                 M_uFESpace.fe(),
                                 M_uFESpace.fe(),
                                 M_uFESpace.dof(),
                                 M_uFESpace.dof(),
                                 iComp, iComp,
                                 iComp*velTotalDof, iComp*velTotalDof);
+            }
+            chronoStiffAssemble.stop();
+
+            // mass
+            chronoMassAssemble.start();
+            assembleMatrix( *M,
+                            M_elmatMass,
+                            M_uFESpace.fe(),
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            M_uFESpace.dof(),
+                            iComp, iComp,
+                            iComp*velTotalDof, iComp*velTotalDof);
             chronoMassAssemble.stop();
 
             // div
@@ -373,7 +373,7 @@ void NS_Assembler<Mesh>::buildSystem(MatrixContainer<std::string> & matrixContai
                             M_pFESpace.dof(),
                             iComp, 0,
                             iComp*velTotalDof, 0
-                            );
+                          );
             chronoGradAssemble.stop();
 
             chronoDivAssemble.start();
@@ -386,9 +386,9 @@ void NS_Assembler<Mesh>::buildSystem(MatrixContainer<std::string> & matrixContai
                                      M_uFESpace.dof(),
                                      0 , iComp,
                                      0, iComp*velTotalDof
-                                     );
+                                   );
             chronoDivAssemble.stop();
-    }
+        }
     }
 
     comm()->Barrier();
@@ -459,7 +459,7 @@ linearConvectiveTerm(const vector_type& betaVec, matrix_ptrtype A)
 
     if (normInf != 0.)
     {
-    	EpetraMatrix<double> N(M_uFESpace.map());
+        EpetraMatrix<double> N(M_uFESpace.map());
         M_Displayer.leaderPrint("  F-  Sharing convective term ...              ");
         chrono.start();
 
@@ -513,13 +513,13 @@ linearConvectiveTerm(const vector_type& betaVec, matrix_ptrtype A)
                                 M_uFESpace.dof(),
                                 iComp, iComp,
                                 iComp*velTotalDof, iComp*velTotalDof
-                                );
+                              );
 
             }
         }
         N.GlobalAssemble();
         *A += N;
-}
+    }
     chrono.stop();
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
@@ -527,29 +527,29 @@ linearConvectiveTerm(const vector_type& betaVec, matrix_ptrtype A)
 
 template<typename Mesh>
 void NS_Assembler<Mesh>::applyBoundaryConditions( matrix_type& C,
-										   matrix_type& Bt,
-                                           bchandler_raw_type& BCh,
-                                           Real time)
+                                                  matrix_type& Bt,
+                                                  bchandler_raw_type& BCh,
+                                                  Real time)
 {
     // BC manage for the velocity
     if ( !BCh.bdUpdateDone() )
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
 
     bcManageMatrix( C, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(),
-    		M_tgv, time );
+                    M_tgv, time );
 
 
-    for(bchandler_raw_type::BCBase_Iterator it = BCh.begin(); it != BCh.end(); ++it)
+    for (bchandler_raw_type::BCBase_Iterator it = BCh.begin(); it != BCh.end(); ++it)
     {
-    	if(it->type() == Essential)
-    		bcEssentialManageMatrix( Bt, M_uFESpace.dof(), *it, 0, 0 );
+        if (it->type() == Essential)
+            bcEssentialManageMatrix( Bt, M_uFESpace.dof(), *it, 0, 0 );
     }
 } // applyBoundaryCondition
 
 template<typename Mesh>
 void NS_Assembler<Mesh>::applyBoundaryConditions( vector_type & rhs,
-                                                    bchandler_raw_type& BCh,
-                                                    Real time)
+                                                  bchandler_raw_type& BCh,
+                                                  Real time)
 {
     // BC manage for the velocity
     if ( !BCh.bdUpdateDone() )

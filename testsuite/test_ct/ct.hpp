@@ -15,7 +15,7 @@ struct CTcaseBase;
 
 class CT
 {
-  public:
+public:
 
 
     /** @name Typedefs
@@ -32,7 +32,7 @@ class CT
         char** argv );
 
     ~CT()
-        {}
+    {}
 
     //@}
 
@@ -65,7 +65,7 @@ class CT
     //@}
 
 
-  private:
+private:
     Epetra_Comm *M_comm;
     boost::shared_ptr<CTcaseBase> C_case;
 

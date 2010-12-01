@@ -90,7 +90,7 @@ public:
     void set(ID key, ID value);
     void buildInverse( const DofInterfaceBase& dofBase);
 
-    const std::map<ID, ID> & locDofMap(){return _locDofMap;}
+    const std::map<ID, ID> & locDofMap() {return _locDofMap;}
 
 
 protected:

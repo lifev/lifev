@@ -24,14 +24,14 @@
 
 namespace LifeV
 {
-  //! \file selectMarker.hpp
-  //! This file contains the standard selector for internal entities
-  
-  
-  //! Functor class that tells whether an entity flag corresponds to an internal face
-  class InternalEntitySelector
-  {
-  public:
+//! \file selectMarker.hpp
+//! This file contains the standard selector for internal entities
+
+
+//! Functor class that tells whether an entity flag corresponds to an internal face
+class InternalEntitySelector
+{
+public:
     //! The default watermark used when standard contructor is adopted
     static const EntityFlag defMarkFlag;
     InternalEntitySelector();
@@ -41,10 +41,10 @@ namespace LifeV
       the associated geometry entity is internal
     */
     bool operator()(EntityFlag const &) const;
-  private:
+private:
     //! The current watermark
     EntityFlag waterMarkFlag;
-  };
+};
 }
 
 

@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -50,7 +50,7 @@ namespace LifeV
 
     When running the code in serial (1 processor), the identifiers
     are then the same.
-    
+
     This class provides the method and operators to handle easily
     the identifiers.
 
@@ -69,33 +69,33 @@ public:
        Using this constructor, both identifiers are set to 0.
      */
     MeshEntity():
-        M_id( 0 ),
-        M_localId( 0 )
+            M_id( 0 ),
+            M_localId( 0 )
     {};
-   
+
     //! Copy Constructor
     MeshEntity(const MeshEntity& meshEntity):
-        M_id     (meshEntity.M_id),
-        M_localId(meshEntity.M_localId)
+            M_id     (meshEntity.M_id),
+            M_localId(meshEntity.M_localId)
     {};
 
     //! Constructor with a single value for both identifiers.
     /*!
        @param id The value for both identifers.
-     */   
+     */
     MeshEntity( ID id ):
-        M_id( id ),
-        M_localId( id )
+            M_id( id ),
+            M_localId( id )
     {};
-    
+
     //! Full constructor, where both identifiers are specified.
     /*!
        @param id The value for the global ID.
        @param lid The value for the local ID.
-     */   
+     */
     MeshEntity( ID id, ID lid ):
-        M_id( id ),
-        M_localId( lid )
+            M_id( id ),
+            M_localId( lid )
     {};
 
     //! Destructor
@@ -104,21 +104,21 @@ public:
 
     //@}
 
-    
+
     //! @name Methods
     //@{
-    
-    
+
+
     //! Display the informations stored by this class
     void showMe( std::ostream& output = std::cout ) const
     {
         output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
     };
 
-    
+
     //@}
 
-    
+
     //! @name Operators
     //@{
 
@@ -140,7 +140,7 @@ public:
     {
         return M_id <= e.id();
     };
-   
+
     //! Relation operator that perform the same comparison on the GLOBAL identifier.
     /*!
       @param e The mesh entity to be compared with.
@@ -155,7 +155,7 @@ public:
 
     //! @name Set Methods
     //@{
-    
+
     //! Method to set the global identifier.
     /*!
       @param id The new global identifier.
@@ -173,7 +173,7 @@ public:
     {
         M_localId = id;
     };
-    
+
     //@}
 
 
@@ -197,18 +197,18 @@ public:
     {
         return M_localId;
     };
-    
+
     //@}
-    
+
 private:
     ID M_id;
-    ID M_localId;  
+    ID M_localId;
 };
 
 
 
 //! MeshEntityWithBoundary - This is a MeshEntity with an additional information on the boundary.
-/*! 
+/*!
   The additional boolean that is stored is used to know if the MeshEntity is on the boundary
   or not. This class provides all the methods needed to handle easily this additional information.
 
@@ -219,24 +219,24 @@ private:
 class MeshEntityWithBoundary : public MeshEntity
 {
 public:
-    
+
     //! @name Constructor & Destructor
     //@{
 
     //! Empty constructor
     /*!
-      This constructor calles the empty constructor of MeshEntity and 
+      This constructor calles the empty constructor of MeshEntity and
       set the boundary indicator to false.
     */
     MeshEntityWithBoundary() : MeshEntity(), M_boundary( false )
     {};
-   
+
     //! Copy constructor
     MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
-        MeshEntity( meshEntityWithBoundary ),
-        M_boundary( meshEntityWithBoundary.M_boundary )
+            MeshEntity( meshEntityWithBoundary ),
+            M_boundary( meshEntityWithBoundary.M_boundary )
     {};
-    
+
     //! Specific constructor
     /*!
       This is the "full" constructor for this class.
@@ -245,8 +245,8 @@ public:
       @param boundary The value of the boundary indicator.
     */
     MeshEntityWithBoundary( ID id, bool boundary = false ) :
-        MeshEntity( id ),
-        M_boundary( boundary )
+            MeshEntity( id ),
+            M_boundary( boundary )
     {};
 
     //! Destructor
@@ -258,7 +258,7 @@ public:
 
     //! @name Methods
     //@{
-    
+
 
     //! Display the informations stored by this class
     void showMe( std::ostream& output = std::cout ) const
@@ -278,7 +278,7 @@ public:
     //! @name Set Methods
     //@{
 
-    
+
     //! Set method for the boundary indicator
     /*!
       @param boundary The value to be set for the boundary indicator.
@@ -287,7 +287,7 @@ public:
     {
         M_boundary = boundary;
     };
-    
+
 
     //@}
 
@@ -300,7 +300,7 @@ public:
     {
         return M_boundary;
     };
-    
+
 
     //@}
 

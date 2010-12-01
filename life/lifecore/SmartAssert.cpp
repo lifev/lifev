@@ -38,14 +38,14 @@
 
 void breakIntoDebugger()
 {
-  // MSVC, BCB,
+    // MSVC, BCB,
 #if (defined _MSC_VER) || (defined __BORLANDC__)
-  __asm { int 3 };
+    __asm { int 3 };
 #elif defined(__GNUC__)
-  // GCC
-  __asm ("int $0x3");
+    // GCC
+    __asm ("int $0x3");
 #else
-    #  error Please supply instruction to break into code
+#  error Please supply instruction to break into code
 #endif
 }
 
@@ -58,11 +58,11 @@ struct stream_holder
 {
     stream_holder() : out_( 0), owns_( false) {}
     ~stream_holder()
-        {
-            if ( owns_)
-                delete out_;
-            out_ = 0;
-        }
+    {
+        if ( owns_)
+            delete out_;
+        out_ = 0;
+    }
     std::ostream * out_;
     bool owns_;
 };
@@ -74,9 +74,9 @@ stream_holder default_logger_info;
 struct assert_initializer
 {
     assert_initializer()
-        {
-            Private::initAssert();
-        }
+    {
+        Private::initAssert();
+    }
 }
 init;
 } // anonymous namespace
@@ -89,16 +89,20 @@ std::string getTypeofLevel( int nLevel)
 {
     switch ( nLevel)
     {
-        case lvl_warn: return "Warning";
-        case lvl_debug: return "Assertion failed";
-        case lvl_error: return "Assertion failed (Error)";
-        case lvl_fatal: return "Assertion failed (FATAL)";
-        default:
-        {
-            std::ostringstream out;
-            out << "Assertion failed (level=" << nLevel << ")";
-            return out.str();
-        }
+    case lvl_warn:
+        return "Warning";
+    case lvl_debug:
+        return "Assertion failed";
+    case lvl_error:
+        return "Assertion failed (Error)";
+    case lvl_fatal:
+        return "Assertion failed (FATAL)";
+    default:
+    {
+        std::ostringstream out;
+        out << "Assertion failed (level=" << nLevel << ")";
+        return out.str();
+    }
     };
 }
 
@@ -106,7 +110,7 @@ std::string getTypeofLevel( int nLevel)
 void dumpContextSummary( const AssertContext & context, std::ostream & out)
 {
     out << "\n" << getTypeofLevel( context.get_level() )
-        << " in " << context.getContextFile() << ":" << context.getContextLine() << '\n';
+    << " in " << context.getContextFile() << ":" << context.getContextLine() << '\n';
     if ( !context.get_level_msg().empty())
         // we have a user-friendly message
         out << context.get_level_msg();
@@ -118,7 +122,7 @@ void dumpContextSummary( const AssertContext & context, std::ostream & out)
 void dumpContextDetail( const AssertContext & context, std::ostream & out)
 {
     out << "\n" << getTypeofLevel( context.get_level() )
-        << " in " << context.getContextFile() << ":" << context.getContextLine() << '\n';
+    << " in " << context.getContextFile() << ":" << context.getContextLine() << '\n';
     if ( !context.get_level_msg().empty())
         out << "User-friendly msg: '" << context.get_level_msg() << "'\n";
     out << "\nExpression: '" << context.expression() << "'\n";
@@ -191,32 +195,37 @@ void defaultDebugHandler( const AssertContext & context)
         bContinue = false;
         switch ( ch)
         {
-            case 'i': case 'I':
-                // ignore
-                break;
+        case 'i':
+        case 'I':
+            // ignore
+            break;
 
-            case 'f': case 'F':
-                // ignore forever
-                ignorer.insert( file_and_line( context.getContextFile(), context.getContextLine()));
-                break;
+        case 'f':
+        case 'F':
+            // ignore forever
+            ignorer.insert( file_and_line( context.getContextFile(), context.getContextLine()));
+            break;
 
-            case 'a': case 'A':
-                // ignore all
-                ignore_all = true;
-                break;
+        case 'a':
+        case 'A':
+            // ignore all
+            ignore_all = true;
+            break;
 
-            case 'd': case 'D':
-                // break
-                breakIntoDebugger();
-                break;
+        case 'd':
+        case 'D':
+            // break
+            breakIntoDebugger();
+            break;
 
-            case 'b': case 'B':
-                abort();
-                break;
+        case 'b':
+        case 'B':
+            abort();
+            break;
 
-            default:
-                bContinue = true;
-                break;
+        default:
+            bContinue = true;
+            break;
         }
     }
 }

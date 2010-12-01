@@ -30,64 +30,69 @@
 
 #include <ESSteady_function.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 Real EthierSteinmanSteady::f(const Real& t, const Real& x, const Real& y,
-                             const Real& z, const ID& i) {
-    switch(i) {
-        case 1:
-            return
-                -2.0*nu*exp(a*x-a*z+b*y-b*z)*b*b*b
-                +2.0*nu*exp(a*z-a*y+b*x-b*y)*a*b*b
-                +2.0*nu*exp(a*z-a*y+b*x-b*y)*a*a*b
-                -2.0*nu*exp(a*x-a*z+b*y-b*z)*b*a*a
-                +2.0*nu*exp(a*z-a*y+b*x-b*y)*a*a*a
-                -2.0*nu*exp(a*x-a*z+b*y-b*z)*b*b*a
-                + sigma*uexact(t,x,y,z,i);
-            break;
-        case 2:
-            return
-                -2.0*nu*exp(a*y-a*x+b*z-b*x)*b*b*b
-                +2.0*nu*exp(a*x-a*z+b*y-b*z)*b*a*a
-                +2.0*nu*exp(a*x-a*z+b*y-b*z)*a*a*a
-                +2.0*nu*exp(a*x-a*z+b*y-b*z)*b*b*a
-                -2.0*nu*exp(a*y-a*x+b*z-b*x)*b*b*a
-                -2.0*nu*exp(a*y-a*x+b*z-b*x)*b*a*a
-                + sigma*uexact(t,x,y,z,i);
-            break;
-        case 3:
-            return
-                -2.0*nu*exp(a*z-a*y+b*x-b*y)*b*b*b
-                +2.0*nu*exp(a*y-a*x+b*z-b*x)*a*a*a
-                -2.0*nu*exp(a*z-a*y+b*x-b*y)*a*b*b
-                -2.0*nu*exp(a*z-a*y+b*x-b*y)*a*a*b
-                +2.0*nu*exp(a*y-a*x+b*z-b*x)*b*b*a
-                +2.0*nu*exp(a*y-a*x+b*z-b*x)*b*a*a
-                + sigma*uexact(t,x,y,z,i);
-            break;
+                             const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return
+            -2.0*nu*exp(a*x-a*z+b*y-b*z)*b*b*b
+            +2.0*nu*exp(a*z-a*y+b*x-b*y)*a*b*b
+            +2.0*nu*exp(a*z-a*y+b*x-b*y)*a*a*b
+            -2.0*nu*exp(a*x-a*z+b*y-b*z)*b*a*a
+            +2.0*nu*exp(a*z-a*y+b*x-b*y)*a*a*a
+            -2.0*nu*exp(a*x-a*z+b*y-b*z)*b*b*a
+            + sigma*uexact(t,x,y,z,i);
+        break;
+    case 2:
+        return
+            -2.0*nu*exp(a*y-a*x+b*z-b*x)*b*b*b
+            +2.0*nu*exp(a*x-a*z+b*y-b*z)*b*a*a
+            +2.0*nu*exp(a*x-a*z+b*y-b*z)*a*a*a
+            +2.0*nu*exp(a*x-a*z+b*y-b*z)*b*b*a
+            -2.0*nu*exp(a*y-a*x+b*z-b*x)*b*b*a
+            -2.0*nu*exp(a*y-a*x+b*z-b*x)*b*a*a
+            + sigma*uexact(t,x,y,z,i);
+        break;
+    case 3:
+        return
+            -2.0*nu*exp(a*z-a*y+b*x-b*y)*b*b*b
+            +2.0*nu*exp(a*y-a*x+b*z-b*x)*a*a*a
+            -2.0*nu*exp(a*z-a*y+b*x-b*y)*a*b*b
+            -2.0*nu*exp(a*z-a*y+b*x-b*y)*a*a*b
+            +2.0*nu*exp(a*y-a*x+b*z-b*x)*b*b*a
+            +2.0*nu*exp(a*y-a*x+b*z-b*x)*b*a*a
+            + sigma*uexact(t,x,y,z,i);
+        break;
     }
     exit(1);
 }
 
 Real EthierSteinmanSteady::uexact(const Real& /* t */,
                                   const Real& x, const Real& y,
-                                  const Real& z, const ID& i) {
-    switch(i) {
-        case 1:
-            return
-                b*exp(a*(x-z)+b*(y-z))-
-                a*exp(a*(z-y)+b*(x-y));
-            break;
-        case 2:
-            return
-                b*exp(a*(y-x)+b*(z-x))-
-                a*exp(a*(x-z)+b*(y-z));
-            break;
-        case 3:
-            return
-                b*exp(a*(z-y)+b*(x-y))-
-                a*exp(a*(y-x)+b*(z-x));
-            break;
+                                  const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return
+            b*exp(a*(x-z)+b*(y-z))-
+            a*exp(a*(z-y)+b*(x-y));
+        break;
+    case 2:
+        return
+            b*exp(a*(y-x)+b*(z-x))-
+            a*exp(a*(x-z)+b*(y-z));
+        break;
+    case 3:
+        return
+            b*exp(a*(z-y)+b*(x-y))-
+            a*exp(a*(y-x)+b*(z-x));
+        break;
     }
 
     exit(1);
@@ -95,23 +100,25 @@ Real EthierSteinmanSteady::uexact(const Real& /* t */,
 
 Real EthierSteinmanSteady::ux( const Real& /* t */,
                                const Real& x, const Real& y,
-                               const Real& z, const ID& i) {
-    switch(i) {
-        case 1:
-            return
-                a * b*exp(a*(x-z)+b*(y-z))-
-                b * a*exp(a*(z-y)+b*(x-y));
-            break;
-        case 2:
-            return
-                (-a-b) * b*exp(a*(y-x)+b*(z-x))-
-                 a * a*exp(a*(x-z)+b*(y-z));
-            break;
-        case 3:
-            return
-                b * b*exp(a*(z-y)+b*(x-y))-
-                (-a-b) * a*exp(a*(y-x)+b*(z-x));
-            break;
+                               const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return
+            a * b*exp(a*(x-z)+b*(y-z))-
+            b * a*exp(a*(z-y)+b*(x-y));
+        break;
+    case 2:
+        return
+            (-a-b) * b*exp(a*(y-x)+b*(z-x))-
+            a * a*exp(a*(x-z)+b*(y-z));
+        break;
+    case 3:
+        return
+            b * b*exp(a*(z-y)+b*(x-y))-
+            (-a-b) * a*exp(a*(y-x)+b*(z-x));
+        break;
     }
 
     exit(1);
@@ -119,23 +126,25 @@ Real EthierSteinmanSteady::ux( const Real& /* t */,
 
 Real EthierSteinmanSteady::uy( const Real& /* t */,
                                const Real& x, const Real& y,
-                               const Real& z, const ID& i) {
-    switch(i) {
-        case 1:
-            return
-                b * b*exp(a*(x-z)+b*(y-z))-
-                (-a-b) * a*exp(a*(z-y)+b*(x-y));
-            break;
-        case 2:
-            return
-                a * b*exp(a*(y-x)+b*(z-x))-
-                b * a*exp(a*(x-z)+b*(y-z));
-            break;
-        case 3:
-            return
-                (-a-b) * b*exp(a*(z-y)+b*(x-y))-
-                a * a*exp(a*(y-x)+b*(z-x));
-            break;
+                               const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return
+            b * b*exp(a*(x-z)+b*(y-z))-
+            (-a-b) * a*exp(a*(z-y)+b*(x-y));
+        break;
+    case 2:
+        return
+            a * b*exp(a*(y-x)+b*(z-x))-
+            b * a*exp(a*(x-z)+b*(y-z));
+        break;
+    case 3:
+        return
+            (-a-b) * b*exp(a*(z-y)+b*(x-y))-
+            a * a*exp(a*(y-x)+b*(z-x));
+        break;
     }
 
     exit(1);
@@ -143,23 +152,25 @@ Real EthierSteinmanSteady::uy( const Real& /* t */,
 
 Real EthierSteinmanSteady::uz( const Real& /* t */,
                                const Real& x, const Real& y,
-                               const Real& z, const ID& i) {
-    switch(i) {
-        case 1:
-            return
-                (-a-b) * b*exp(a*(x-z)+b*(y-z))-
-                a * a*exp(a*(z-y)+b*(x-y));
-            break;
-        case 2:
-            return
-                b * b*exp(a*(y-x)+b*(z-x))-
-                (-a-b) * a*exp(a*(x-z)+b*(y-z));
-            break;
-        case 3:
-            return
-                a * b*exp(a*(z-y)+b*(x-y))-
-                b * a*exp(a*(y-x)+b*(z-x));
-            break;
+                               const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return
+            (-a-b) * b*exp(a*(x-z)+b*(y-z))-
+            a * a*exp(a*(z-y)+b*(x-y));
+        break;
+    case 2:
+        return
+            b * b*exp(a*(y-x)+b*(z-x))-
+            (-a-b) * a*exp(a*(x-z)+b*(y-z));
+        break;
+    case 3:
+        return
+            a * b*exp(a*(z-y)+b*(x-y))-
+            b * a*exp(a*(y-x)+b*(z-x));
+        break;
     }
 
     exit(1);
@@ -168,7 +179,8 @@ Real EthierSteinmanSteady::uz( const Real& /* t */,
 
 Real EthierSteinmanSteady::pexact(const Real& /* t */,
                                   const Real& x, const Real& y,
-                                  const Real& z, const ID& /* i */) {
+                                  const Real& z, const ID& /* i */)
+{
     return (a*a+b*b+a*b)*(exp(a*(x-y)+b*(x-z))+
                           exp(a*(y-z)+b*(y-x))+
                           exp(a*(z-x)+b*(z-y)));
@@ -176,19 +188,21 @@ Real EthierSteinmanSteady::pexact(const Real& /* t */,
 }
 
 Real EthierSteinmanSteady::xexact(const Real& t, const Real& x, const Real& y,
-                                  const Real& z, const ID& i) {
+                                  const Real& z, const ID& i)
+{
 
-    switch(i) {
-        case 1:
-        case 2:
-        case 3:
-            return uexact(t, x, y, z, i);
-            break;
-        case 4:
-            return pexact(t, x, y, z, 1);
-            break;
-        default:
-            exit(1);
+    switch (i)
+    {
+    case 1:
+    case 2:
+    case 3:
+        return uexact(t, x, y, z, i);
+        break;
+    case 4:
+        return pexact(t, x, y, z, 1);
+        break;
+    default:
+        exit(1);
     }
 }
 
@@ -208,30 +222,31 @@ Real EthierSteinmanSteady::fNeumann(const Real& t, const Real& x,
     Real nx=0.;
     Real ny=0.;
     Real nz=-1.;
-    switch(i) {
-        case 1:
-            return pexact(t, x, y, z, 1) * nx
-                - mu * ( ux(t, x, y, z, 1) * nx * 2 +
-                         ux(t, x, y, z, 2) * ny +
-                         ux(t, x, y, z, 3) * nz +
-                         uy(t, x, y, z, 1) * ny +
-                         uz(t, x, y, z, 1) * nz );
-        case 2:
-            return pexact(t, x, y, z, 1) * ny
-                - mu * ( uy(t, x, y, z, 1) * nx +
-                         uy(t, x, y, z, 2) * ny * 2 +
-                         uy(t, x, y, z, 3) * nz +
-                         ux(t, x, y, z, 2) * nx +
-                         uz(t, x, y, z, 2) * nz );
-        case 3:
-            return pexact(t, x, y, z, 1) * nz
-                - mu * ( uz(t, x, y, z, 1) * nx +
-                         uz(t, x, y, z, 2) * ny +
-                         uz(t, x, y, z, 3) * nz * 2 +
-                         ux(t, x, y, z, 3) * nx +
-                         uy(t, x, y, z, 3) * ny);
-        default:
-            exit(1);
+    switch (i)
+    {
+    case 1:
+        return pexact(t, x, y, z, 1) * nx
+               - mu * ( ux(t, x, y, z, 1) * nx * 2 +
+                        ux(t, x, y, z, 2) * ny +
+                        ux(t, x, y, z, 3) * nz +
+                        uy(t, x, y, z, 1) * ny +
+                        uz(t, x, y, z, 1) * nz );
+    case 2:
+        return pexact(t, x, y, z, 1) * ny
+               - mu * ( uy(t, x, y, z, 1) * nx +
+                        uy(t, x, y, z, 2) * ny * 2 +
+                        uy(t, x, y, z, 3) * nz +
+                        ux(t, x, y, z, 2) * nx +
+                        uz(t, x, y, z, 2) * nz );
+    case 3:
+        return pexact(t, x, y, z, 1) * nz
+               - mu * ( uz(t, x, y, z, 1) * nx +
+                        uz(t, x, y, z, 2) * ny +
+                        uz(t, x, y, z, 3) * nz * 2 +
+                        ux(t, x, y, z, 3) * nx +
+                        uy(t, x, y, z, 3) * ny);
+    default:
+        exit(1);
     }
 }
 

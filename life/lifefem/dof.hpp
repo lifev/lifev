@@ -103,20 +103,20 @@ public:
 
     //! The total number of Dof
     inline UInt numTotalDof() const
-        {
-            return _totalDof;
-        }
+    {
+        return _totalDof;
+    }
 
     inline void setTotalDof(const UInt totalDof)
-        {
-            _totalDof = totalDof;
-        }
+    {
+        _totalDof = totalDof;
+    }
 
     //! The number of local Dof (nodes) in the finite element
     inline UInt numLocalDof() const
-        {
-            return fe.nbLocalDof();
-        }
+    {
+        return fe.nbLocalDof();
+    }
 
     //! Return the specified entries of the localToGlobal table
     /*!
@@ -126,44 +126,45 @@ public:
       \return The numbering of the DOF
     */
     inline ID localToGlobal( const ID ElId, const ID localNode) const
-        {
-            return _ltg( localNode, ElId );
-        }
+    {
+        return _ltg( localNode, ElId );
+    }
 
     //! Number of elements in mesh
     UInt numElements() const
-        {
-            return _nEl;
-        }
+    {
+        return _nEl;
+    }
 
     //! Number of faces in the mesh
     UInt numFaces() const
-        {
-            return _numFaces;
-        }
+    {
+        return _numFaces;
+    }
 
     //! Number of local vertices (in a elment)
     UInt numLocalVertices() const
-        {
-            return nlv;
-        }
+    {
+        return nlv;
+    }
 
     //! Number of local edges (in a elment)
     UInt numLocalEdges() const
-        {
-            return nle;
-        }
+    {
+        return nle;
+    }
 
     //! Number of local faces (in a elment)
     UInt numLocalFaces() const
-        {
-            return nlf;
-        }
+    {
+        return nlf;
+    }
 
     //Internal data
 
     //! Number of Local DofByFace
-    UInt numLocalDofByFace() const {
+    UInt numLocalDofByFace() const
+    {
         ASSERT_PRE( (_numLocalDofByFace>0) , "This data are not available for this reference element");
         return _numLocalDofByFace;
     }
@@ -196,10 +197,10 @@ private:
 
     std::vector<std::vector<ID> > _ltgByFace;
     //Container _ltgByFace;       // connection array that maps the local dof of
-                                // the face to the global dof
+    // the face to the global dof
     std::map<ID,ID> _gtlByFace; // connection between global dof and local numbering
     FTOP _fToP;                 // local array that maps the local dof of the
-                                // face to the local dof the the element
+    // face to the local dof the the element
     UInt _numLocalDofByFace;    // number of dof on a face
     UInt _ncount[ 5 ];
 };
@@ -226,36 +227,36 @@ Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) :
         _gtlByFace()
 {
     //Getting the face
-    switch( _fe.nbLocalDof() )
+    switch ( _fe.nbLocalDof() )
     {
-        case 2:
-            // No _fToP (it is 1D)
-            _numLocalDofByFace = 1;
-            break;
-        case 4:
-            _fToP = LinearTetra::fToP;
-            _numLocalDofByFace = 3;
-            break;
-        case 5:
-            _fToP = LinearTetraBubble::fToP;
-            _numLocalDofByFace = 3;
-            break;
-        case 10:
-            _fToP = QuadraticTetra::fToP;
-            _numLocalDofByFace = 6;
-            break;
-        case 8:
-            _fToP = LinearHexa::fToP;
-            _numLocalDofByFace = 4;
-            break;
-        case 27:
-            _fToP = QuadraticHexa::fToP;
-            _numLocalDofByFace = 27;
-            break;
-        default:
-            std::cout << "Warning: This refFE is not available for the dof by face." << std::endl;
-            _numLocalDofByFace = 0;
-            break;
+    case 2:
+        // No _fToP (it is 1D)
+        _numLocalDofByFace = 1;
+        break;
+    case 4:
+        _fToP = LinearTetra::fToP;
+        _numLocalDofByFace = 3;
+        break;
+    case 5:
+        _fToP = LinearTetraBubble::fToP;
+        _numLocalDofByFace = 3;
+        break;
+    case 10:
+        _fToP = QuadraticTetra::fToP;
+        _numLocalDofByFace = 6;
+        break;
+    case 8:
+        _fToP = LinearHexa::fToP;
+        _numLocalDofByFace = 4;
+        break;
+    case 27:
+        _fToP = QuadraticHexa::fToP;
+        _numLocalDofByFace = 27;
+        break;
+    default:
+        std::cout << "Warning: This refFE is not available for the dof by face." << std::endl;
+        _numLocalDofByFace = 0;
+        break;
     }
 
     for ( UInt i = 0; i < 5; ++i )
@@ -269,7 +270,7 @@ template <typename Mesh>
 void Dof::update( Mesh& M )
 {
 
-  typedef typename Mesh::ElementShape GeoShape;
+    typedef typename Mesh::ElementShape GeoShape;
 
     // Some useful local variables, to save some typing
     UInt nldpe = fe.nbDofPerEdge();
@@ -333,11 +334,11 @@ void Dof::update( Mesh& M )
             lc = 0;
             for ( i = 1; i <= nlv; ++i )//for each vertex in the element
                 for ( l = 0; l < nldpv; ++l )//for each degree of freedom per vertex
-                    {
-                        //                       label of the ith point of the mesh element-1
-                        _ltg( ++lc, ie ) = gcount + ( M.element( ie ).point( i ).id() - 1 ) * nldpv + l;
-                        //_ltg(++lc, ie) is the global label assigned to the ++lc dof of the element.
-                    }
+                {
+                    //                       label of the ith point of the mesh element-1
+                    _ltg( ++lc, ie ) = gcount + ( M.element( ie ).point( i ).id() - 1 ) * nldpv + l;
+                    //_ltg(++lc, ie) is the global label assigned to the ++lc dof of the element.
+                }
         }
     // Edge Based Dof
     gcount += nldpv * nv;//dof per vertex * total # vertices
@@ -372,7 +373,7 @@ void Dof::update( Mesh& M )
 #ifdef TWODIM
             // when working in 2D we simply iterate over the elements to have faces
             for ( l = 0; l < nldpf; ++l )
-              _ltg( ++lc, ie ) = gcount + ( ie - 1 ) * nldpf + l;
+                _ltg( ++lc, ie ) = gcount + ( ie - 1 ) * nldpf + l;
 #else // THREEDIM
             for ( i = 1; i <= nlf; ++i )
                 for ( l = 0; l < nldpf; ++l )
@@ -392,9 +393,9 @@ void Dof::update( Mesh& M )
         {
             lc = lcount;
             for ( l = 0; l < nldpV; ++l )
-                {
-                    _ltg( ++lc, ie ) = gcount + (M.element( ie ).id() - 1) * nldpV + l;
-                }
+            {
+                _ltg( ++lc, ie ) = gcount + (M.element( ie ).id() - 1) * nldpV + l;
+            }
         }
     gcount += nV * nldpV;
     _ncount[ 4 ] = gcount;
@@ -404,21 +405,22 @@ void Dof::update( Mesh& M )
         M.cleanElementEdges();
 #ifndef TWODIM
     if ( update_faces )
-      M.cleanElementFaces();
+        M.cleanElementFaces();
 #endif
 
     //UPDATE of the boundary face (add the 13th november 2009)
     _numFaces = M.numFaces();
 
-    if(_numLocalDofByFace>0){
+    if (_numLocalDofByFace>0)
+    {
         //UInt lfID = 0;
-        for(UInt k = 1; k <= _nEl; k++)
+        for (UInt k = 1; k <= _nEl; k++)
         {
-            for(UInt j = 1; j <= nlf; j++)
+            for (UInt j = 1; j <= nlf; j++)
             {
                 ID fID  = M.faceList( M.localFaceId( k, j ) ).id();
                 std::vector<ID> v(_numLocalDofByFace,0);
-                for(UInt i = 1; i <= _numLocalDofByFace; i++)
+                for (UInt i = 1; i <= _numLocalDofByFace; i++)
                 {
                     v[i-1] = _ltg( _fToP( j, i ), k );
                 }

@@ -100,7 +100,7 @@ int main( int argc, char** argv )
     readMesh(*uncutSolidMesh, *solidDataMesh);
 
     boost::shared_ptr<FSIOfflinePartitioner<Mesh> >
-        cutter(new FSIOfflinePartitioner<Mesh>);
+    cutter(new FSIOfflinePartitioner<Mesh>);
     cutter->setup(uncutFluidMesh, uncutSolidMesh, 4, 4, fluidOrder, solidOrder,
                   fluidInterfaceFlag, solidInterfaceFlag, interfaceTolerance,
                   fluidInterfaceVertexFlag, solidInterfaceVertexFlag, comm);

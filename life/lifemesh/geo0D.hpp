@@ -41,7 +41,7 @@ GeoShape!.  */
 
 //! Zero dimensional entity. It stores boundary information
 class Geo0D
-    :
+        :
         public MeshEntityWithBoundary
 {
 public:
@@ -68,68 +68,68 @@ public:
         };
     */
     Real const * coor() const
-        {
-            return _coor.data();
-        };
+    {
+        return _coor.data();
+    };
 
 
     //! Used to provide coords to object created using
     //! a constructor with no coordinates given, or to
     //! modify existing coordinates.
     Real & x()
-        {
-            return _coor[ 0 ];
-        }
+    {
+        return _coor[ 0 ];
+    }
     Real & y()
-        {
-            return _coor[ 1 ];
-        }
+    {
+        return _coor[ 1 ];
+    }
     Real & z()
-        {
+    {
 #ifdef TWODIM
-            ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
+        ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
 #else // THREEDIM
-            return _coor[ 2 ];
+        return _coor[ 2 ];
 #endif
 
-        }
+    }
     Real x() const
-        {
-            return _coor[ 0 ];
-        }
+    {
+        return _coor[ 0 ];
+    }
     Real y() const
-        {
-            return _coor[ 1 ];
-        };
+    {
+        return _coor[ 1 ];
+    };
     Real z() const
-        {
+    {
 #ifdef TWODIM
-            return 0;
+        return 0;
 #else // THREEDIM
-            return _coor[ 2 ];
+        return _coor[ 2 ];
 #endif
 
-        }
+    }
 
     //!Another way to access coordinate data and modify them!
     boost::array<Real,NDIM>& coordinate ( void )
-	{
-		return _coor;
-	}
+    {
+        return _coor;
+    }
 
     //!Another way to access coordinate data
     Real coordinate ( ID const i ) const
-	{
-		ASSERT_BD( i > 0 && i <= NDIM ) ;
-		return _coor[ i -1 ]; // indexing from 1
-	}
+    {
+        ASSERT_BD( i > 0 && i <= NDIM ) ;
+        return _coor[ i -1 ]; // indexing from 1
+    }
 
     //!Another way to modify coordinate data
     Real & coordinate ( ID const i )
-	{
-		ASSERT_BD( i > 0 && i <= NDIM ) ;
-		return _coor[ i -1 ];
-	}
+    {
+        ASSERT_BD( i > 0 && i <= NDIM ) ;
+        return _coor[ i -1 ];
+    }
 
     //! Useful for debugging
     std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;

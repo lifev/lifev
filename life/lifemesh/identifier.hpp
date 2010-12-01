@@ -69,14 +69,14 @@ public:
       \param i ussualy the id of the Dof, id of a boundary face, etc...
     */
     IdentifierBase( ID const & i ) : _id( i )
-        {
-            //nothing to be done here
-        }
+    {
+        //nothing to be done here
+    }
 
     virtual ~IdentifierBase()
-        {
-            //nothing to be done here
-        }
+    {
+        //nothing to be done here
+    }
 
     //! Returns the ID
     const ID& id() const

@@ -43,7 +43,8 @@
 
 #include <life/lifemesh/dataMesh.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor

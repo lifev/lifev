@@ -13,27 +13,29 @@
 
 namespace boost
 {
-  namespace inspect
-  {
-    class license_check : public source_inspector
-    {
-      long m_files_with_errors;
-    public:
+namespace inspect
+{
+class license_check : public source_inspector
+{
+    long m_files_with_errors;
+public:
 
-      license_check();
-      virtual const char * name() const { return "license-check"; }
-      virtual const char * desc() const { return "missing license info (LGPL or GPL)"; }
+    license_check();
+    virtual const char * name() const { return "license-check"; }
+    virtual const char * desc() const { return "missing license info (LGPL or GPL)"; }
 
-      virtual void inspect(
+    virtual void inspect(
         const std::string & library_name,
         const path & full_path,
         const std::string & contents );
 
-      virtual ~license_check()
-        { std::cout << "  "
-            << m_files_with_errors << " files missing license info (LGPL or GPL)\n"; }
-    };
-  }
+    virtual ~license_check()
+    {
+        std::cout << "  "
+                  << m_files_with_errors << " files missing license info (LGPL or GPL)\n";
+    }
+};
+}
 }
 
 #endif // BOOST_LICENSE_CHECK_HPP

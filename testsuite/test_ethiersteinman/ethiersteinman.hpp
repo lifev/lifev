@@ -81,10 +81,10 @@ public:
     //@{
 
     Ethiersteinman( int argc,
-              char** argv );
+                    char** argv );
 
     ~Ethiersteinman()
-        {}
+    {}
 
     //@}
 
@@ -124,7 +124,7 @@ private:
 
     struct RESULT_CHANGED_EXCEPTION
     {
-    public:
+public:
         RESULT_CHANGED_EXCEPTION()
         {
             std::cout << "Some modifications led to changes in the l2 norm of the solution" << std::endl;

@@ -54,7 +54,8 @@
 #include <life/lifecore/life.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Displayer - This class is used to display messages in parallel simulations.
 /*!
@@ -173,36 +174,36 @@ template <typename T1>
 void
 Displayer::leaderPrint( const T1& message1 ) const
 {
-	if ( M_verbose )
-		std::cout << message1 << std::flush;
+    if ( M_verbose )
+        std::cout << message1 << std::flush;
 }
 
 template <typename T1, typename T2>
 void
 Displayer::leaderPrint( const T1& message1, const T2& message2 ) const
 {
-	if ( M_verbose )
-		std::cout << message1 << message2 << std::flush;
+    if ( M_verbose )
+        std::cout << message1 << message2 << std::flush;
 }
 
 template <typename T1, typename T2, typename T3>
 void
 Displayer::leaderPrint( const T1& message1, const T2& message2, const T3& message3 ) const
 {
-	if ( M_verbose )
-		std::cout << message1 << message2 << message3 << std::flush;
+    if ( M_verbose )
+        std::cout << message1 << message2 << message3 << std::flush;
 }
 
 template <typename T1>
 void
 Displayer::leaderPrintMax( const T1& message1, const Real& localMax ) const
 {
-	if ( M_comm.get() )
+    if ( M_comm.get() )
     {
         Real num( localMax );
         Real globalMax;
 
-		M_comm->MaxAll( &num, &globalMax, 1 );
+        M_comm->MaxAll( &num, &globalMax, 1 );
         if ( M_verbose )
             std::cout << message1 << globalMax << std::endl;
     }

@@ -27,9 +27,9 @@ class Chrono
 {
 public:
     Chrono()
-        :
-        _t1(0), _t2(0), _dt(0),
-        running(false)
+            :
+            _t1(0), _t2(0), _dt(0),
+            running(false)
     {
     }
     void Reset()

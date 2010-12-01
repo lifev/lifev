@@ -46,15 +46,15 @@ double f2( double t, double x , double y, double z, LifeV::ID const& i)
 {
     switch ( i )
     {
-        case 1:
-            return x*x*cos( t );
-            break;
-        case 2:
-            return y*y*cos( t );
-            break;
-        case 3:
-            return z*z*cos( t );
-            break;
+    case 1:
+        return x*x*cos( t );
+        break;
+    case 2:
+        return y*y*cos( t );
+        break;
+    case 3:
+        return z*z*cos( t );
+        break;
     }
     return 0;
 };
@@ -64,7 +64,7 @@ test_function()
     const unsigned long TGV = 10000001;
     std::ofstream __out( "bench.txt" );
     __out.precision( 8 );
-    for ( unsigned long N = 10;N < TGV;N*=10 )
+    for ( unsigned long N = 10; N < TGV; N*=10 )
     {
         __out << N << " ";
         typedef boost::function<double ( double, double, double, double, LifeV::ID const& )> f_type;
@@ -73,7 +73,7 @@ test_function()
 
         std::cout << "testing dummy function with " << N << " calls\n";
         boost::timer __timer;
-        for ( unsigned long __i = 0;__i < N;++__i )
+        for ( unsigned long __i = 0; __i < N; ++__i )
         {
             f1(t, x, y, z, id);
         }
@@ -83,7 +83,7 @@ test_function()
         f_type myfunctor( f1 );
 
         __timer.restart();
-        for ( unsigned long __i = 0;__i < N;++__i )
+        for ( unsigned long __i = 0; __i < N; ++__i )
         {
             myfunctor(t, x, y, z, id);
         }
@@ -93,7 +93,7 @@ test_function()
         std::cout << "testing not so dummy function with " << N << " calls\n";
         __timer.restart();
 
-        for ( unsigned long __i = 0;__i < N;++__i )
+        for ( unsigned long __i = 0; __i < N; ++__i )
         {
             id = __i%3+1;
             f2(t, x, y, z, id);
@@ -104,7 +104,7 @@ test_function()
         f_type myfunctor2( f2 );
         __timer.restart();
 
-        for ( unsigned long __i = 0;__i < N;++__i )
+        for ( unsigned long __i = 0; __i < N; ++__i )
         {
             id = __i%3+1;
             myfunctor2(t, x, y, z, id);

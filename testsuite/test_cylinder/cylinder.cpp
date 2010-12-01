@@ -41,10 +41,10 @@
 //#include "Epetra_SerialComm.h"
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
-    #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#include <mpi.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
@@ -88,62 +88,64 @@ Real zero_scalar( const Real& /* t */,
 
 Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  switch(i) {
-  case 1:
-    return 0.0;
-    break;
-  case 3:
-       if ( t <= 0.003 )
-          return 1.3332e4;
+    switch (i)
+    {
+    case 1:
+        return 0.0;
+        break;
+    case 3:
+        if ( t <= 0.003 )
+            return 1.3332e4;
 //      return 0.01;
-      return 0.0;
-      break;
-  case 2:
-      return 0.0;
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
 //      return 1.3332e4;
 //    else
 //      return 0.0;
-    break;
-  }
-  return 0;
+        break;
+    }
+    return 0;
 }
 
 void
 postProcessFluxesPressures( Oseen< RegionMesh3D<LinearTetra> >& nssolver,
-    BCHandler& bcHandler,
-    const LifeV::Real& t, bool _verbose )
+                            BCHandler& bcHandler,
+                            const LifeV::Real& t, bool _verbose )
 {
-  LifeV::Real Q, P;
-  UInt flag;
+    LifeV::Real Q, P;
+    UInt flag;
 
-  for( BCHandler::BCBase_Iterator it = bcHandler.begin();
-  it != bcHandler.end(); ++it )
+    for ( BCHandler::BCBase_Iterator it = bcHandler.begin();
+            it != bcHandler.end(); ++it )
     {
-      flag = it->flag();
+        flag = it->flag();
 
-      Q = nssolver.flux(flag);
-      P = nssolver.pressure(flag);
+        Q = nssolver.flux(flag);
+        P = nssolver.pressure(flag);
 
-      if( _verbose ) {
-        std::ofstream outfile;
-        std::stringstream filenamess;
-        std::string filename;
+        if ( _verbose )
+        {
+            std::ofstream outfile;
+            std::stringstream filenamess;
+            std::string filename;
 
-        // file name contains the label
-        filenamess << flag;
-        // writing down fluxes
-        filename = "flux_label" + filenamess.str() + ".m";
-        outfile.open(filename.c_str(),std::ios::app);
-        outfile << Q << " " << t << "\n";
-        outfile.close();
-        // writing down pressures
-        filename = "pressure_label" + filenamess.str() + ".m";
-        outfile.open(filename.c_str(),std::ios::app);
-        outfile << P << " " << t << "\n";
-        outfile.close();
-        // reset ostringstream
-        filenamess.str("");
-      }
+            // file name contains the label
+            filenamess << flag;
+            // writing down fluxes
+            filename = "flux_label" + filenamess.str() + ".m";
+            outfile.open(filename.c_str(),std::ios::app);
+            outfile << Q << " " << t << "\n";
+            outfile.close();
+            // writing down pressures
+            filename = "pressure_label" + filenamess.str() + ".m";
+            outfile.open(filename.c_str(),std::ios::app);
+            outfile << P << " " << t << "\n";
+            outfile.close();
+            // reset ostringstream
+            filenamess.str("");
+        }
     }
 
 }
@@ -152,13 +154,13 @@ postProcessFluxesPressures( Oseen< RegionMesh3D<LinearTetra> >& nssolver,
 struct Cylinder::Private
 {
     Private() :
-        //check(false),
-        nu(1),
-        //rho(1),
-        H(1), D(1)
-        //H(20), D(1)
-        //H(0.41), D(0.1)
-        {}
+            //check(false),
+            nu(1),
+            //rho(1),
+            H(1), D(1)
+            //H(20), D(1)
+            //H(0.41), D(0.1)
+    {}
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
     double Re;
@@ -202,24 +204,30 @@ struct Cylinder::Private
               const Real& y,
               const Real& z,
               const ID&   id ) const
+    {
+        if ( id == 1 )
         {
-            if ( id == 1 ) {
-                if ( centered ) {
-                    return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / pow(H,4);
-                } else {
-                    return 16 * Um_3d() * y * z * (H-y) * (H-z) / pow(H,4);
-                }
-            } else {
-                return 0;
+            if ( centered )
+            {
+                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / pow(H,4);
+            }
+            else
+            {
+                return 16 * Um_3d() * y * z * (H-y) * (H-z) / pow(H,4);
             }
         }
+        else
+        {
+            return 0;
+        }
+    }
 
     fct_type getU_3d()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::u3d, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::u3d, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
     /**
      * u2d flat 2D velocity profile.
@@ -231,34 +239,35 @@ struct Cylinder::Private
               const Real& y,
               const Real& z,
               const ID&   id ) const
-        {
+    {
 
-            switch(id) {
-            case 1: // x component
-                return 0.0;
-                break;
-            case 3: // z component
-                if ( t <= 0.003 )
-                    return 1.3332e4;
-                //      return 0.01;
-                return 0.0;
-                break;
-            case 2: // y component
-                return 0.0;
-                //      return 1.3332e4;
-                //    else
-                //      return 0.0;
-                break;
-            }
-            return 0;
+        switch (id)
+        {
+        case 1: // x component
+            return 0.0;
+            break;
+        case 3: // z component
+            if ( t <= 0.003 )
+                return 1.3332e4;
+            //      return 0.01;
+            return 0.0;
+            break;
+        case 2: // y component
+            return 0.0;
+            //      return 1.3332e4;
+            //    else
+            //      return 0.0;
+            break;
         }
+        return 0;
+    }
 
     fct_type getU_2d()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::u2d, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::u2d, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
     /**
      * one flat (1,1,1)
@@ -266,10 +275,10 @@ struct Cylinder::Private
      * Define the velocity profile at the inlet for the 2D cylinder
      */
     Real poiseuille( const Real& t,
-                      const Real& x,
-                      const Real& y,
-                      const Real& z,
-                      const ID&   id ) const
+                     const Real& x,
+                     const Real& y,
+                     const Real& z,
+                     const ID&   id ) const
     {
         double r = std::sqrt(x*x + y*y);
 
@@ -280,11 +289,11 @@ struct Cylinder::Private
     }
 
     fct_type getU_pois()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
 
     Real oneU( const Real& /*t*/,
@@ -292,27 +301,27 @@ struct Cylinder::Private
                const Real& /*y*/,
                const Real& /*z*/,
                const ID&   id ) const
-        {
-            //            if (id == 3)
-                return 10.;
+    {
+        //            if (id == 3)
+        return 10.;
 
-            return -1.;
-        }
+        return -1.;
+    }
 
     fct_type getU_one()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::oneU, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::oneU, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
 
 };
 
 Cylinder::Cylinder( int argc,
                     char** argv )
-    :
-    d( new Private )
+        :
+        d( new Private )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -321,7 +330,7 @@ Cylinder::Cylinder( int argc,
 
     d->Re          = dataFile( "fluid/problem/Re", 1. );
     d->nu          = dataFile( "fluid/physics/viscosity", 1. ) /
-        dataFile( "fluid/physics/density", 1. );
+                     dataFile( "fluid/physics/density", 1. );
     d->H           = 20.;//dataFile( "fluid/problem/H", 20. );
     d->D           =               dataFile( "fluid/problem/D", 1. );
     d->centered    = (bool)        dataFile( "fluid/problem/centered", 0 );
@@ -336,7 +345,8 @@ Cylinder::Cylinder( int argc,
 
     int ntasks = 0;
     d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-    if (!d->comm->MyPID()) {
+    if (!d->comm->MyPID())
+    {
         std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
         std::cout << "Re = " << d->Re << std::endl
                   << "nu = " << d->nu << std::endl
@@ -481,26 +491,26 @@ Cylinder::run()
     // initialization with stokes solution
 
     if (d->initial_sol == "stokes")
-        {
-            if (verbose) std::cout << std::endl;
-            if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
+    {
+        if (verbose) std::cout << std::endl;
+        if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-            dataNavierStokes->dataTime()->setTime(t0);
+        dataNavierStokes->dataTime()->setTime(t0);
 
-            MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
 
-            beta *= 0.;
-            rhs  *= 0.;
+        beta *= 0.;
+        rhs  *= 0.;
 
-            fluid.updateSystem(0, beta, rhs );
-            fluid.iterate( bcH );
+        fluid.updateSystem(0, beta, rhs );
+        fluid.iterate( bcH );
 
 //    fluid.postProcess();
 
-            *velAndPressure = *fluid.solution();
-            ensight.postProcess( 0 );
-            fluid.resetPrec();
-        }
+        *velAndPressure = *fluid.solution();
+        ensight.postProcess( 0 );
+        fluid.resetPrec();
+    }
 
     bdf.bdf_u().initialize_unk( *fluid.solution() );
 

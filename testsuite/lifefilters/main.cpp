@@ -31,7 +31,7 @@
 */
 
 /* Mauro Meneghin: note, I've taken the test_p2 example and
-   I've modified it a bit to read netgen meshes too, 
+   I've modified it a bit to read netgen meshes too,
    this files recognizes old meshes too anyway, so you could
    use this file as a template instead of the old ones */
 
@@ -39,7 +39,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-//#include "bc_manage.hpp"    bc_manage.hpp changed to bcManage.hpp, 
+//#include "bc_manage.hpp"    bc_manage.hpp changed to bcManage.hpp,
 //BCFunction_Base to BCFunctionBase, BC_Handler to BCHandler
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifearray/elemMat.hpp>
@@ -50,10 +50,11 @@
 
 #undef  OPER_TEMPLATE
 //#define P1
-#define P2            
+#define P2
 #undef INRIA
 
-int main() {
+int main()
+{
     using namespace LifeV;
     using namespace std;
 
@@ -119,10 +120,11 @@ int main() {
         //  string fname=mesh_dir+"cube_48.m++";
         readMppFile(aMesh,fname,m);
     }
-    else if (mesh_type=="NETGEN"){
+    else if (mesh_type=="NETGEN")
+    {
         string mesh_dir = datafile( "mesh_dir", "." );
         string fname=mesh_dir+datafile( "mesh_file", "." );
-    std::cout<<"opening mesh file "<<fname<<std::endl;
+        std::cout<<"opening mesh file "<<fname<<std::endl;
         readNetgenMesh(aMesh,fname,m);
     }
     else
@@ -192,7 +194,8 @@ int main() {
 #else
     ElemMat elmat(fe.nbNode,1,1);
     ElemVec elvec(fe.nbNode,1);
-    for(UInt i = 1; i<=aMesh.numVolumes(); i++){
+    for (UInt i = 1; i<=aMesh.numVolumes(); i++)
+    {
         fe.updateFirstDerivQuadPt(aMesh.volumeList(i));
         elmat.zero();
         elvec.zero();
@@ -234,7 +237,7 @@ int main() {
     // indicating success or failure.
     // altre dichiarazioni per AZTEC
     int    *update,                  // vector elements updated on this node.
-        *external;                // vector elements needed by this node.
+    *external;                // vector elements needed by this node.
     int    *update_index;            // ordering of update[] and external[]
     int    *extern_index;            // locally on this processor.
     //  int    *bindx;                 // Sparse matrix to be solved is stored
@@ -324,7 +327,7 @@ int main() {
        cout << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
        << endl;
     */
-    for (UInt jj=0;jj<dim;jj++)
+    for (UInt jj=0; jj<dim; jj++)
         cout << U(jj) << " ** ";
 
     cout << " " << endl;

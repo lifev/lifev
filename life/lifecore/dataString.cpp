@@ -33,7 +33,7 @@ DataStringList::DataStringList( std::string title ) :
 {}
 
 void DataStringList::add
-    ( std::string str, int val, std::string help )
+( std::string str, int val, std::string help )
 {
     _list.push_back( DataString( str, val, help ) );
 }
@@ -42,7 +42,7 @@ void DataStringList::showMe( std::ostream& c, bool val ) const
 {
     c << _title << " : " << std::endl;
     for ( std::vector<DataString>::const_iterator ds = _list.begin();
-            ds != _list.end();ds++ )
+            ds != _list.end(); ds++ )
     {
         c << "   " << ds->str() << " : " << ds->help();
         if ( val )

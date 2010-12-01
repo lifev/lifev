@@ -32,20 +32,21 @@
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 FSISolver::FSISolver():
-    M_oper              ( ),
-    M_data              ( ),
-    M_fluidInterfaceMap ( ),
-    M_solidInterfaceMap ( ),
-    M_epetraComm        ( ),
-    M_epetraWorldComm   ( ),
-    M_localComm         ( new MPI_Comm ),
-    M_interComm         ( new MPI_Comm )
+        M_oper              ( ),
+        M_data              ( ),
+        M_fluidInterfaceMap ( ),
+        M_solidInterfaceMap ( ),
+        M_epetraComm        ( ),
+        M_epetraWorldComm   ( ),
+        M_localComm         ( new MPI_Comm ),
+        M_interComm         ( new MPI_Comm )
 {
 #ifdef DEBUG
     Debug( 6220 ) << "FSISolver::FSISolver constructor starts\n";
@@ -72,14 +73,14 @@ FSISolver::setData( const data_PtrType& data )
     int  fluidLeader(0);
     int  solidLeader(0);
 
-    if( ( data->method().compare("monolithicGE") && data->method().compare("monolithicGI") ) )
-	{
-		MPI_Group  originGroup, newGroup;
-		MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
+    if ( ( data->method().compare("monolithicGE") && data->method().compare("monolithicGI") ) )
+    {
+        MPI_Group  originGroup, newGroup;
+        MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
 
-		if ( numtasks == 1 )
-		{
-			std::cout << "Serial Fluid/Structure computation" << std::endl;
+        if ( numtasks == 1 )
+        {
+            std::cout << "Serial Fluid/Structure computation" << std::endl;
             fluid = true;
             solid = true;
             solidLeader = 0;
@@ -87,69 +88,70 @@ FSISolver::setData( const data_PtrType& data )
 
             M_epetraWorldComm.reset( new Epetra_MpiComm(MPI_COMM_WORLD));
             M_epetraComm = M_epetraWorldComm;
-		}
-		else
-		{
-			int members[numtasks];
+        }
+        else
+        {
+            int members[numtasks];
 
-			solidLeader = 0;
-			fluidLeader = 1-solidLeader;
+            solidLeader = 0;
+            fluidLeader = 1-solidLeader;
 
-			if (rank == solidLeader)
-			{
-				members[0] = solidLeader;
-				/* int ierr = */ MPI_Group_incl(originGroup, 1, members, &newGroup);
-				solid = true;
-			}
-			else
-			{
-				for (Int ii = 0; ii <= numtasks; ++ii)
-				{
-					if ( ii < solidLeader)
-						members[ii] = ii;
-					else if ( ii > solidLeader)
-						members[ii - 1] = ii;
-				}
+            if (rank == solidLeader)
+            {
+                members[0] = solidLeader;
+                /* int ierr = */
+                MPI_Group_incl(originGroup, 1, members, &newGroup);
+                solid = true;
+            }
+            else
+            {
+                for (Int ii = 0; ii <= numtasks; ++ii)
+                {
+                    if ( ii < solidLeader)
+                        members[ii] = ii;
+                    else if ( ii > solidLeader)
+                        members[ii - 1] = ii;
+                }
 
-				/* int ierr = */ MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
-				fluid = true;
-			}
+                /* int ierr = */ MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
+                fluid = true;
+            }
 
-			MPI_Comm* localComm = new MPI_Comm;
-			MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
-			M_localComm.reset(localComm);
+            MPI_Comm* localComm = new MPI_Comm;
+            MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
+            M_localComm.reset(localComm);
 
-			M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
-			M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
-		}
-	}
+            M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
+            M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+        }
+    }
     else // Monolithic or FullMonolithic
-	{
-		fluid = true;
-		solid = true;
-		solidLeader = 0;
-		fluidLeader = solidLeader;
+    {
+        fluid = true;
+        solid = true;
+        solidLeader = 0;
+        fluidLeader = solidLeader;
 
-		M_epetraWorldComm.reset( new Epetra_MpiComm(MPI_COMM_WORLD));
-		M_epetraComm = M_epetraWorldComm;
-	}
+        M_epetraWorldComm.reset( new Epetra_MpiComm(MPI_COMM_WORLD));
+        M_epetraComm = M_epetraWorldComm;
+    }
 
 #ifdef DEBUG
     if ( fluid )
     {
         Debug(6220) << M_epetraComm->MyPID()
-                    << " ( " << rank << " ) "
-                    << " out of " << M_epetraComm->NumProc()
-                    << " ( " << numtasks << " ) "
-                    << " is fluid." << std::endl;
+        << " ( " << rank << " ) "
+        << " out of " << M_epetraComm->NumProc()
+        << " ( " << numtasks << " ) "
+        << " is fluid." << std::endl;
     }
     if ( solid )
     {
         Debug(6220) << M_epetraComm->MyPID()
-                    << " ( " << rank << " ) "
-                    << " out of " << M_epetraComm->NumProc()
-                    << " ( " << numtasks << " ) "
-                    << " is solid." << std::endl;
+        << " ( " << rank << " ) "
+        << " out of " << M_epetraComm->NumProc()
+        << " ( " << numtasks << " ) "
+        << " is solid." << std::endl;
     }
 #endif
 
@@ -246,7 +248,7 @@ FSISolver::initialize( const std::string& /*velFName*/,
 void
 FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
 {
-    if(!u0.get())
+    if (!u0.get())
     {
         u0.reset(new vector_type(*M_oper->getCouplingVariableMap()));
         M_oper->setSolution(*u0); // couplingVariableMap()
@@ -257,7 +259,7 @@ FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
         M_oper->setSolution(*u0); // couplingVariableMap()//copy
         M_oper->initializeBDF(*u0);
     }
-    if(!v0.get())
+    if (!v0.get())
         M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
     //        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
     else
@@ -296,18 +298,18 @@ FSISolver::iterate()
     UInt maxiter = M_data->maxSubIterationNumber();
     UInt status = nonLinRichardson( *lambda,
                                     *M_oper,
-                                     M_data->absoluteTolerance(),
-                                     M_data->relativeTolerance(),
-                                     maxiter,
-                                     M_data->errorTolerance(),
-                                     M_data->linesearch(),
-                                     M_out_res,
-                                     M_data->dataFluid()->dataTime()->getTime() );
+                                    M_data->absoluteTolerance(),
+                                    M_data->relativeTolerance(),
+                                    maxiter,
+                                    M_data->errorTolerance(),
+                                    M_data->linesearch(),
+                                    M_out_res,
+                                    M_data->dataFluid()->dataTime()->getTime() );
 
     // We update the solution
     M_oper->setSolution( *lambda );
 
-    if(status == EXIT_FAILURE)
+    if (status == EXIT_FAILURE)
     {
         std::ostringstream __ex;
         __ex << "FSISolver::iterate ( " << M_data->dataFluid()->dataTime()->getTime() << " ) Inners iterations failed to converge\n";
@@ -338,15 +340,15 @@ void
 FSISolver::setSourceTerms( const fluid_source_type& fluidSource,
                            const solid_source_type& solidSource )
 {
-	M_oper->fluid().setSourceTerm( fluidSource );
-	M_oper->solid().setSourceTerm( solidSource );
+    M_oper->fluid().setSourceTerm( fluidSource );
+    M_oper->solid().setSourceTerm( solidSource );
 }
 
 void
 FSISolver::setFSIOperator( )
 {
-	Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
-	M_oper = oper_fsi_ptr_mpi( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
+    Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
+    M_oper = oper_fsi_ptr_mpi( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
 }
 
 void
@@ -398,17 +400,17 @@ FSISolver::setInvLinSolidBC( const solid_bchandler_type& bc_dsolid_inv )
         M_oper->setInvLinSolidBC( bc_dsolid_inv );
 }
 void FSISolver::setFluxBC(fluid_bchandler_type const& bc_fluid)
- {
-     if (this->isFluid())
-         M_oper->setFluxBC(bc_fluid);
- }
+{
+    if (this->isFluid())
+        M_oper->setFluxBC(bc_fluid);
+}
 
- void
- FSISolver::setRobinBC(fluid_bchandler_type const& bc_Robin)
- {
-     if (this->isFluid())
-         M_oper->setRobinBC(bc_Robin);
- }
+void
+FSISolver::setRobinBC(fluid_bchandler_type const& bc_Robin)
+{
+    if (this->isFluid())
+        M_oper->setRobinBC(bc_Robin);
+}
 
 // void
 // FSISolver::setReducedLinFluidBC( const fluid_bchandler_type& bc_dredfluid )

@@ -51,7 +51,7 @@ void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad)
         Real nxi=sqrt(ny*ny+nz*nz);
         Real nxj=sqrt(nx*nx+nz*nz);
         Real nxk=sqrt(nx*nx+ny*ny);
-        if((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
+        if ((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
         {
             //We create t1
             (*mapIt).second[0] = 0;
@@ -63,7 +63,7 @@ void bcCalculateTangentVectors(std::map< ID,std::vector< Real > > &triad)
             (*mapIt).second[4] = nx*ny/nxi;
             (*mapIt).second[5] = nx*nz/nxi;
         }
-        else if((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
+        else if ((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
         {
             //We create t1
             (*mapIt).second[0] = -nz/nxj;

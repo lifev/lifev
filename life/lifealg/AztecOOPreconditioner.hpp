@@ -39,7 +39,8 @@
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! AztecOOPreconditioner - The implementation of EpetraPreconditioner for AztecOO preconditioners
 /*!
@@ -160,7 +161,7 @@ inline EpetraPreconditioner* createAztecOOPreconditioner()
 
 namespace
 {
-	static bool registerAztecOO = PRECFactory::instance().registerProduct( "AztecOO", &createAztecOOPreconditioner );
+static bool registerAztecOO = PRECFactory::instance().registerProduct( "AztecOO", &createAztecOOPreconditioner );
 }
 
 } // namespace LifeV

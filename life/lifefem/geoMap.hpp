@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -54,11 +54,11 @@ class GeoMap:
 {
 public:
 
-     typedef RefEle::Fct Fct;
+    typedef RefEle::Fct Fct;
 
     //! @name Constructor & Destructor
     //@{
-    
+
     //! Full Constructor of a geo map
     /*!
       @param _name : the name of the f.e.
@@ -98,15 +98,15 @@ public:
     }
 
     //@}
-    
+
 private:
-    
+
     //! @name Private Methods
     //@{
-    
+
     //! No empty constructor
     GeoMap();
-    
+
     //! No copy constructor
     GeoMap(const GeoMap&);
 
@@ -135,7 +135,7 @@ const GeoMap& getGeoMap( RegionMesh & /*mesh*/ )
 {
 
     typedef typename RegionMesh::ElementShape ElementShape;
-    
+
     switch ( ElementShape::Shape )
     {
     case POINT:

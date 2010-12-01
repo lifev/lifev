@@ -71,7 +71,7 @@ Real analyticalSolution( const Real& t,
     //if ( ( x <= u1*(t+0.25)/2 && x >= u1*(t - 0.15)/2 ) && ( y >= 0.25 && y <= 0.75 )  && ( z >= 0.25 && z <= 0.75 ) )
     ///   return 1;
     //else
-     //   return 0;
+    //   return 0;
     return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
 }
 
@@ -132,7 +132,7 @@ Real dual( const Real& /*t*/,
            const Real& z,
            const ID&   ic )
 {
-    switch( ic )
+    switch ( ic )
     {
     case 1:
         return -2.*Pi;//5
@@ -141,7 +141,7 @@ Real dual( const Real& /*t*/,
         return 2.*Pi; //0
         break;
     case 3:
-      return 0.;
+        return 0.;
         break;
     }
 }
@@ -153,7 +153,7 @@ Real initialCondition( const Real& /*t*/,
                        const Real& z,
                        const ID&   ic )
 {
-      return analyticalSolution( 0., x, y, z, ic );
+    return analyticalSolution( 0., x, y, z, ic );
 }
 
 // Mass function
@@ -218,13 +218,13 @@ struct hyperbolic::Private
     // Policy for scalar functions
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>
-                                     fct_type;
+    fct_type;
 
     // Policy for the flux function
     typedef boost::function<Vector ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real>& )>
-                                     vectorFct_type;
+    vectorFct_type;
 
     std::string    data_file_name;
     std::string    discretization_section;
@@ -235,16 +235,16 @@ struct hyperbolic::Private
 
     fct_type getUOne()
     {
-    	fct_type f;
-    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
+        fct_type f;
+        f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero()
     {
-    	fct_type f;
-    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
-    	return f;
+        fct_type f;
+        f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
+        return f;
     }
 
     fct_type getAnalyticalSolution()
@@ -297,7 +297,7 @@ struct hyperbolic::Private
 
 hyperbolic::hyperbolic( int argc,
                         char** argv )
-  : Members( new Private )
+        : Members( new Private )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -306,14 +306,14 @@ hyperbolic::hyperbolic( int argc,
     Members->data_file_name = data_file_name;
     Members->discretization_section = "hyperbolic";
 
-	#ifdef EPETRA_MPI
-        std::cout << "Epetra Initialization" << std::endl;
-		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-        int ntasks;
-        MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-	#else
-		Members->comm.reset( new Epetra_SerialComm() );
-	#endif
+#ifdef EPETRA_MPI
+    std::cout << "Epetra Initialization" << std::endl;
+    Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    int ntasks;
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+#else
+    Members->comm.reset( new Epetra_SerialComm() );
+#endif
 
 }
 
@@ -382,9 +382,9 @@ hyperbolic::run()
     chronoReadAndPartitionMesh.stop();
 
     // The leader process print chronoReadAndPartitionMesh
-    if( isLeader )
+    if ( isLeader )
         std::cout << "Time for read and partition the mesh " <<
-                     chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
+                  chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
 
     // Create the boundary conditions
 
@@ -395,7 +395,7 @@ hyperbolic::run()
 
     dirichletBDfun.setFunction( dataProblem::dirichlet );
 
-	BCHandler bcHyperbolic( 6 );
+    BCHandler bcHyperbolic( 6 );
 
     bcHyperbolic.addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
     bcHyperbolic.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
@@ -411,7 +411,7 @@ hyperbolic::run()
     if ( isLeader )
     {
         std::cout << "Time for create the boundary conditions handler " <<
-                     chronoBoundaryCondition.diff() << std::endl << std::flush;
+                  chronoBoundaryCondition.diff() << std::endl << std::flush;
 
     }
 
@@ -429,8 +429,8 @@ hyperbolic::run()
     qR    = &quadRuleTetra15pt;
     bdQr  = &quadRuleTria1pt;
 
-	// Interpolate of dual solution parameters.
-	const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
+    // Interpolate of dual solution parameters.
+    const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
     const QuadRule* pressure_qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
     const QuadRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
 
@@ -461,7 +461,7 @@ hyperbolic::run()
     // The leader process print chronoFiniteElementSpace
     if ( isLeader )
         std::cout << "Time for create the finite element spaces " <<
-                      chronoFiniteElementSpace.diff() << std::endl << std::flush;
+                  chronoFiniteElementSpace.diff() << std::endl << std::flush;
 
     // Start chronoProblem for measure the total time for create the problem
     chronoProblem.start();
@@ -486,7 +486,7 @@ hyperbolic::run()
     // Setup phase
     hyperbolicSolver.setup();
 
-	// Set the source term
+    // Set the source term
     hyperbolicSolver.setSourceTerm( Members->getSource() );
 
     // Set the initial solution
@@ -604,8 +604,8 @@ hyperbolic::run()
             isLastTimeStep = true;
         }
 
-       // Set the last time step for the simulation.
-       dataHyperbolic.dataTime()->setTimeStep( timeStep );
+        // Set the last time step for the simulation.
+        dataHyperbolic.dataTime()->setTimeStep( timeStep );
 
         // The leader process prints the temporal data.
         if ( hyperbolicSolver.getDisplayer().isLeader() )

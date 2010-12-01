@@ -56,7 +56,7 @@ public:
                    char** argv );
 
     ~EnsightToHdf5()
-        {}
+    {}
 
     void run();
 

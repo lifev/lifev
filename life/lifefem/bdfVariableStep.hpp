@@ -95,8 +95,8 @@ class BdfVS
 {
 public:
 
-	typedef boost::shared_ptr<FeVector> FeVector_ptr;
-	typedef std::vector<FeVector_ptr>   BdfContainer;
+    typedef boost::shared_ptr<FeVector> FeVector_ptr;
+    typedef std::vector<FeVector_ptr>   BdfContainer;
 
     //! Empty constructor
     BdfVS();
@@ -119,14 +119,14 @@ public:
         initialized as follows: _unk=[ u0(t0), u0(t0-dt), u0(t0-2*dt), ...]
 
         When startup = true, only _unk[0] is initialized (with u_0).
-		At the first step, class Bfd computes the coefficients of BDF1,
-		at the second step, the coefficient of BDF2, and so on,
-		until it reaches the wanted method.
-		Second order of accuracy is obtained using this procedure to startup BDF2.
-		Using the startup procedure with BDF3, the accuracy order is limited to the second order;
-		anyway it is better to use the startup procedure instead of taking u_{-2} = u_{-1} = u_0.
-	*/
-   void initialize_unk( FeVector u0, Real const dt, bool startup = 0  );
+    	At the first step, class Bfd computes the coefficients of BDF1,
+    	at the second step, the coefficient of BDF2, and so on,
+    	until it reaches the wanted method.
+    	Second order of accuracy is obtained using this procedure to startup BDF2.
+    	Using the startup procedure with BDF3, the accuracy order is limited to the second order;
+    	anyway it is better to use the startup procedure instead of taking u_{-2} = u_{-1} = u_0.
+    */
+    void initialize_unk( FeVector u0, Real const dt, bool startup = 0  );
 
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors uv0
@@ -139,14 +139,14 @@ public:
         on:
         -# the function we want to interpolate
         -# a vector type u_vect, u_vect is a corrected mapped vector in input, and contains u0(t0) in output
-		-# a finite element space
+    	-# a finite element space
         -# which is the initial time (t0) and the time step (for solutions
            before the initial instant)
         Based on the NavierStokesHandler::initialize by M. Fernandez
     */
     template<typename FunctClass, typename FESpaceClass>
     void initialize_unk(  const FunctClass& u0, FeVector& u_vect,
-							FESpaceClass & feSpace, Real t0, Real dt  );
+                          FESpaceClass & feSpace, Real t0, Real dt  );
 
     //@}
 
@@ -172,7 +172,7 @@ public:
      */
     void shift_right( FeVector const& u_curr );
 
-    
+
     /*! Update the vectors of the previous time steps by shifting on the right
      *  the old values. Set the the new time step and shift right the old time steps.
      *  @param u_curr current (new) value of the state vector
@@ -181,7 +181,7 @@ public:
     void shift_right( FeVector const& u_curr, Real deltat_new);
 
     //@}
-    
+
     //! Getters
     //@{
     //! Return the i-th coefficient of the time derivative alpha_i
@@ -194,7 +194,7 @@ public:
     double coeff_ext( UInt i ) const;
 
     //! Return the vector of the time steps, ordered starting from the most recent one.
-    inline Vector vec_deltat(){return _M_deltat;};
+    inline Vector vec_deltat() {return _M_deltat;};
 
     //! Return a vector with the last n state vectors
     inline const BdfContainer& unk() const {return _M_unknowns;}
@@ -237,11 +237,11 @@ private:
 
     //! Coefficients \f$ \beta_i \f$ of the extrapolation
     Vector _M_beta;
-    
+
     //! Vector \f$ \delta_t \f$ of time intervals
     Vector _M_deltat;
     Vector _M_deltat_bk;
-    
+
 
     //! Last n state vectors
     BdfContainer _M_unknowns;
@@ -253,11 +253,11 @@ private:
 // Empty constructor
 template<typename FeVector>
 BdfVS<FeVector>::BdfVS()
-    :
-    _M_order( 0 ),
-    _M_alpha( _M_order + 1 ),
-    _M_beta( _M_order ),
-    _M_deltat(ScalarVector(_M_order, 1.))
+        :
+        _M_order( 0 ),
+        _M_alpha( _M_order + 1 ),
+        _M_beta( _M_order ),
+        _M_deltat(ScalarVector(_M_order, 1.))
 {}
 
 
@@ -278,17 +278,17 @@ template<typename FeVector>
 void BdfVS<FeVector>::initialize_unk( FeVector u0, Real const dt, bool startup )
 {
     _M_unknowns.resize(0);
-    for(UInt i=0; i<_M_order; i++)
+    for (UInt i=0; i<_M_order; i++)
     {
         FeVector_ptr feVectorPtr(new FeVector(u0));
-    	_M_unknowns.push_back(feVectorPtr);
-    	_M_deltat[i] = dt;
+        _M_unknowns.push_back(feVectorPtr);
+        _M_deltat[i] = dt;
     }
 
-    if(startup)
+    if (startup)
     {
-    for(UInt i=1; i<_M_order; i++)
-       _M_deltat[i] = 1e20;
+        for (UInt i=1; i<_M_order; i++)
+            _M_deltat[i] = 1e20;
     }
 
     comput_coeff();
@@ -299,16 +299,16 @@ void BdfVS<FeVector>::initialize_unk( FeVector u0, Real const dt, bool startup )
 template<typename FeVector>
 void BdfVS<FeVector>::initialize_unk(std::vector<FeVector> uv0, Real const dt)
 {
-	UInt n0(uv0.size());
+    UInt n0(uv0.size());
     // Check if uv0 has the right dimensions
     ASSERT( n0 >= _M_order, "Initial data are not enough for the selected BDF" );
 
-	_M_unknowns.resize(0);
-    for(UInt i=0; i<_M_order; i++)
+    _M_unknowns.resize(0);
+    for (UInt i=0; i<_M_order; i++)
     {
-    	FeVector_ptr tmp(new FeVector(uv0[i]));
-    	_M_unknowns.push_back(tmp);
-    	_M_deltat[i] = dt;
+        FeVector_ptr tmp(new FeVector(uv0[i]));
+        _M_unknowns.push_back(tmp);
+        _M_deltat[i] = dt;
     }
 
     comput_coeff();
@@ -317,9 +317,9 @@ void BdfVS<FeVector>::initialize_unk(std::vector<FeVector> uv0, Real const dt)
     if ( n0 > _M_order )
     {
         std::cout << "The initial data set is larger than needed by the BDF."
-        << std::endl;
+                  << std::endl;
         std::cout << "Only the first " << _M_order << " data will be considered. "
-        << std::endl;
+                  << std::endl;
     }
 
     return ;
@@ -334,8 +334,8 @@ void BdfVS<FeVector>::initialize_unk(  const FunctClass& u0, FeVector& u_vect, F
 
     for (UInt i = 0 ; i < _M_order; ++i )
     {
-    	FeVector_ptr tmp(new FeVector(u_vect));
-    	_M_unknowns.push_back(tmp);
+        FeVector_ptr tmp(new FeVector(u_vect));
+        _M_unknowns.push_back(tmp);
         feSpace.interpolate( u0, *_M_unknowns[i], t0-i*dt);
         _M_deltat[i] = dt;
     }
@@ -374,8 +374,8 @@ BdfVS<FeVector>::time_der_dt() const
     FeVector ut(*_M_unknowns[0]);
     ut *= _M_alpha[ 1 ]/_M_deltat[0];
 
-    for ( UInt i = 1;i < _M_order;++i )
-            ut += (_M_alpha[ i + 1 ]/_M_deltat[0]) * *_M_unknowns[ i ];
+    for ( UInt i = 1; i < _M_order; ++i )
+        ut += (_M_alpha[ i + 1 ]/_M_deltat[0]) * *_M_unknowns[ i ];
 
     return ut;
 }
@@ -387,8 +387,8 @@ BdfVS<FeVector>::time_der(Real dt) const
     FeVector ut(*_M_unknowns[0]);
     ut *= _M_alpha[ 1 ]/dt;
 
-    for ( UInt i = 1;i < _M_order;++i )
-            ut += (_M_alpha[ i + 1 ]/dt) * *_M_unknowns[ i ];
+    for ( UInt i = 1; i < _M_order; ++i )
+        ut += (_M_alpha[ i + 1 ]/dt) * *_M_unknowns[ i ];
 
     return ut;
 }
@@ -401,8 +401,8 @@ BdfVS<FeVector>::extrap() const
     FeVector ue(*_M_unknowns[0]);
     ue *= _M_beta[ 0 ];
 
-    for ( UInt i = 1; i < _M_order;++i )
-         ue += _M_beta[ i ] * *_M_unknowns[ i ];
+    for ( UInt i = 1; i < _M_order; ++i )
+        ue += _M_beta[ i ] * *_M_unknowns[ i ];
 
     return ue;
 }
@@ -411,10 +411,10 @@ template<typename FeVector>
 void
 BdfVS<FeVector>::shift_right( FeVector const& unk_curr )
 {
-	typedef typename BdfContainer::iterator BdfContIt;
-	BdfContIt it = _M_unknowns.end() - 1;
-	BdfContIt itm1 = _M_unknowns.end() - 1;
-	BdfContIt itb = _M_unknowns.begin();
+    typedef typename BdfContainer::iterator BdfContIt;
+    BdfContIt it = _M_unknowns.end() - 1;
+    BdfContIt itm1 = _M_unknowns.end() - 1;
+    BdfContIt itb = _M_unknowns.begin();
 
     for ( ; it != itb; --it )
     {
@@ -424,9 +424,9 @@ BdfVS<FeVector>::shift_right( FeVector const& unk_curr )
     FeVector_ptr tmp(new FeVector(unk_curr));
     *itb = tmp;
 
-   for (UInt i=_M_order-1; i>0;i--)
-      _M_deltat[i] = _M_deltat[i-1];
-   comput_coeff();
+    for (UInt i=_M_order-1; i>0; i--)
+        _M_deltat[i] = _M_deltat[i-1];
+    comput_coeff();
 }
 
 
@@ -435,24 +435,24 @@ void
 BdfVS<FeVector>::shift_right( FeVector const& unk_curr, Real deltat_new)
 {
 
-	typedef typename BdfContainer::iterator BdfContIt;
-	BdfContIt it = _M_unknowns.end() - 1;
-	BdfContIt itm1 = _M_unknowns.end() - 1;
-	BdfContIt itb = _M_unknowns.begin();
+    typedef typename BdfContainer::iterator BdfContIt;
+    BdfContIt it = _M_unknowns.end() - 1;
+    BdfContIt itm1 = _M_unknowns.end() - 1;
+    BdfContIt itb = _M_unknowns.begin();
 
     for ( ; it != itb; --it )
     {
-		itm1--;
+        itm1--;
         *it = *itm1;
     }
 
     FeVector_ptr tmp(new FeVector(unk_curr));
     *itb = tmp;
 
-   for (UInt i=_M_order-1; i>0;i--)
-	   _M_deltat[i] = _M_deltat[i-1];
-	_M_deltat[0] = deltat_new;
-   	comput_coeff();
+    for (UInt i=_M_order-1; i>0; i--)
+        _M_deltat[i] = _M_deltat[i-1];
+    _M_deltat[0] = deltat_new;
+    comput_coeff();
 }
 
 
@@ -485,7 +485,7 @@ BdfVS<FeVector>::coeff_ext( UInt i ) const
 {
     // Pay attention: i is c-based indexed
     ASSERT(  i < _M_order,
-            "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return _M_beta[ i ];
 }
 
@@ -503,41 +503,41 @@ void BdfVS<FeVector>::set_deltat(Real delta_t)
 template<typename FeVector>
 void BdfVS<FeVector>::store_unk()
 {
-	typedef typename BdfContainer::iterator BdfContIt;
+    typedef typename BdfContainer::iterator BdfContIt;
 
-	_M_unknowns_bk.resize(0);
-	for(BdfContIt it = _M_unknowns.begin(); it < _M_unknowns.end(); ++it)
-		_M_unknowns_bk.push_back(new FeVector_ptr(**it));
+    _M_unknowns_bk.resize(0);
+    for (BdfContIt it = _M_unknowns.begin(); it < _M_unknowns.end(); ++it)
+        _M_unknowns_bk.push_back(new FeVector_ptr(**it));
 
-   _M_deltat_bk = _M_deltat;
+    _M_deltat_bk = _M_deltat;
 }
 
 template<typename FeVector>
 void BdfVS<FeVector>::restore_unk()
 {
-	typedef typename BdfContainer::iterator BdfContIt;
+    typedef typename BdfContainer::iterator BdfContIt;
 
-	_M_unknowns.resize(0);
-	for(BdfContIt it = _M_unknowns_bk.begin(); it < _M_unknowns_bk.end(); ++it)
-		_M_unknowns.push_back(new FeVector_ptr(**it));
+    _M_unknowns.resize(0);
+    for (BdfContIt it = _M_unknowns_bk.begin(); it < _M_unknowns_bk.end(); ++it)
+        _M_unknowns.push_back(new FeVector_ptr(**it));
 
 
-   _M_deltat = _M_deltat_bk;
+    _M_deltat = _M_deltat_bk;
     comput_coeff();
 }
 
 template<typename FeVector>
 void BdfVS<FeVector>::restore_unk(Real delta_t)
 {
-	typedef typename BdfContainer::iterator BdfContIt;
+    typedef typename BdfContainer::iterator BdfContIt;
 
-	_M_unknowns.resize(0);
-	for(BdfContIt it = _M_unknowns_bk.begin(); it < _M_unknowns_bk.end(); ++it)
-		_M_unknowns.push_back(new FeVector_ptr(**it));
+    _M_unknowns.resize(0);
+    for (BdfContIt it = _M_unknowns_bk.begin(); it < _M_unknowns_bk.end(); ++it)
+        _M_unknowns.push_back(new FeVector_ptr(**it));
 
-	_M_deltat = _M_deltat_bk;
+    _M_deltat = _M_deltat_bk;
     _M_deltat[0] = delta_t;
-   comput_coeff();
+    comput_coeff();
 }
 
 
@@ -548,10 +548,10 @@ BdfVS<FeVector>::showMe() const
     std::cout << "*** BDF Time discretization of order " << _M_order << " ***"
               << std::endl;
     std::cout << "    Coefficients: " << std::endl;
-    for ( UInt i = 0;i < _M_order + 1;++i )
+    for ( UInt i = 0; i < _M_order + 1; ++i )
         std::cout << "       alpha(" << i << ") = " << _M_alpha[ i ]
                   << std::endl;
-    for ( UInt i = 0;i < _M_order;++i )
+    for ( UInt i = 0; i < _M_order; ++i )
         std::cout << "       beta (" << i << ") = " << _M_beta[ i ]
                   << std::endl;
 
@@ -586,38 +586,38 @@ end
 template<typename FeVector>
 void BdfVS<FeVector>::comput_coeff()
 {
-	Vector rho(ScalarVector(_M_order, _M_deltat[0]));
+    Vector rho(ScalarVector(_M_order, _M_deltat[0]));
 
-	Vector cumsum_dt(_M_order);
-	std::partial_sum(_M_deltat.begin(), _M_deltat.end(), cumsum_dt.begin());
+    Vector cumsum_dt(_M_order);
+    std::partial_sum(_M_deltat.begin(), _M_deltat.end(), cumsum_dt.begin());
 
-	// rho = _M_deltat[0]./cumsum_M_deltat;
-	std::transform(rho.begin(), rho.end(), cumsum_dt.begin(), rho.begin(), std::divides<double>());
+    // rho = _M_deltat[0]./cumsum_M_deltat;
+    std::transform(rho.begin(), rho.end(), cumsum_dt.begin(), rho.begin(), std::divides<double>());
 
-	_M_alpha[0] = boost::numeric::ublas::sum(rho);
+    _M_alpha[0] = boost::numeric::ublas::sum(rho);
 
-	for(UInt j=0; j<_M_order; ++j)
-	{
-		double tmp(1.0);
+    for (UInt j=0; j<_M_order; ++j)
+    {
+        double tmp(1.0);
 
-		if( rho[j]!=0 ) //rho[j] may be 0 with the start-up procedure
-		{
-			for(UInt kk=0; kk<_M_order;++kk)
-			{
-				if(kk!=j)
-				{
-					tmp *= (1-rho[kk]/rho[j]);
-				}
-			}
-			_M_alpha[j+1] = rho[j]/tmp;
-			_M_beta[j]    = 1./tmp;
-		}
-		else //we don't have enough initial data to start a higher order BDF.
-		{
-			_M_alpha[j+1] = 0;
-			_M_beta[j] = 0;
-		}
-	}
+        if ( rho[j]!=0 ) //rho[j] may be 0 with the start-up procedure
+        {
+            for (UInt kk=0; kk<_M_order; ++kk)
+            {
+                if (kk!=j)
+                {
+                    tmp *= (1-rho[kk]/rho[j]);
+                }
+            }
+            _M_alpha[j+1] = rho[j]/tmp;
+            _M_beta[j]    = 1./tmp;
+        }
+        else //we don't have enough initial data to start a higher order BDF.
+        {
+            _M_alpha[j+1] = 0;
+            _M_beta[j] = 0;
+        }
+    }
 }
 
 

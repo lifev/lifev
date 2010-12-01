@@ -12,26 +12,26 @@
 
 namespace boost
 {
-  namespace inspect
-  {
-    class tab_check : public inspector
-    {
-      long m_files_with_errors;
-    public:
+namespace inspect
+{
+class tab_check : public inspector
+{
+    long m_files_with_errors;
+public:
 
-      tab_check();
-      virtual const char * name() const { return "tab-check"; }
-      virtual const char * desc() const { return "tabs in file"; }
+    tab_check();
+    virtual const char * name() const { return "tab-check"; }
+    virtual const char * desc() const { return "tabs in file"; }
 
-      virtual void inspect(
+    virtual void inspect(
         const std::string & library_name,
         const path & full_path,
         const std::string & contents );
 
-      virtual ~tab_check()
-        { std::cout << "  " << m_files_with_errors << " files with tabs\n"; }
-    };
-  }
+    virtual ~tab_check()
+    { std::cout << "  " << m_files_with_errors << " files with tabs\n"; }
+};
+}
 }
 
 #endif // BOOST_TAB_CHECK_HPP

@@ -28,7 +28,7 @@ ElemVec::ElemVec( int nNode1, int nbr1 ) :
     _nRow.resize( _nBlockRow );
     _firstRow.resize( _nBlockRow );
     int first = 0, n;
-    for ( n = 0;n < nbr1;n++ )
+    for ( n = 0; n < nbr1; n++ )
     {
         _nRow[ n ] = nNode1;
         _firstRow[ n ] = first;
@@ -44,13 +44,13 @@ ElemVec::ElemVec( int nNode1, int nbr1,
     _nRow.resize( _nBlockRow );
     _firstRow.resize( _nBlockRow );
     int first = 0, n;
-    for ( n = 0;n < nbr1;n++ )
+    for ( n = 0; n < nbr1; n++ )
     {
         _nRow[ n ] = nNode1;
         _firstRow[ n ] = first;
         first += nNode1;
     }
-    for ( n = nbr1;n < nbr1 + nbr2;n++ )
+    for ( n = nbr1; n < nbr1 + nbr2; n++ )
     {
         _nRow[ n ] = nNode2;
         _firstRow[ n ] = first;
@@ -67,19 +67,19 @@ ElemVec::ElemVec( int nNode1, int nbr1,
     _nRow.resize( _nBlockRow );
     _firstRow.resize( _nBlockRow );
     int first = 0, n;
-    for ( n = 0;n < nbr1;n++ )
+    for ( n = 0; n < nbr1; n++ )
     {
         _nRow[ n ] = nNode1;
         _firstRow[ n ] = first;
         first += nNode1;
     }
-    for ( n = nbr1;n < nbr1 + nbr2;n++ )
+    for ( n = nbr1; n < nbr1 + nbr2; n++ )
     {
         _nRow[ n ] = nNode2;
         _firstRow[ n ] = first;
         first += nNode2;
     }
-    for ( n = nbr1 + nbr2;n < nbr1 + nbr2 + nbr3;n++ )
+    for ( n = nbr1 + nbr2; n < nbr1 + nbr2 + nbr3; n++ )
     {
         _nRow[ n ] = nNode3;
         _firstRow[ n ] = first;
@@ -90,7 +90,7 @@ ElemVec::ElemVec( int nNode1, int nbr1,
 
 void ElemVec::showMe( std::ostream& c )
 {
-    for ( int i = 0;i < _nBlockRow;i++ )
+    for ( int i = 0; i < _nBlockRow; i++ )
         c << "Block (" << i << "), " << block( i ) << std::endl;
 }
 }

@@ -44,7 +44,8 @@
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 enum Preconditioner
 {
@@ -84,19 +85,19 @@ public:
     //@}
 
 
-	//! @name Constructors & Destructor
-	//@{
+    //! @name Constructors & Destructor
+    //@{
 
     //! Empty Constructor
     DataFSI();
 
-	//! Copy constructor
-	/*!
-	 * @param DataFSI - DataFSI
-	 */
-	DataFSI( const DataFSI& DataFSI );
+    //! Copy constructor
+    /*!
+     * @param DataFSI - DataFSI
+     */
+    DataFSI( const DataFSI& DataFSI );
 
-	//@}
+    //@}
 
 
     //! @name Operators

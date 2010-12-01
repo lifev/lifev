@@ -64,11 +64,11 @@ public:
     //@{
 
     problem( int argc,
-              char** argv,
-	      boost::shared_ptr<Epetra_Comm>        structComm);
+             char** argv,
+             boost::shared_ptr<Epetra_Comm>        structComm);
 
     ~problem()
-        {}
+    {}
 
     //@}
 

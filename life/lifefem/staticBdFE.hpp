@@ -191,7 +191,7 @@ public:
         ASSERT_PRE( _hasMeas, "integral needs measure. Call an update function" )
         Real integ( 0.0 );
         Real x, y, z;
-        for ( int ig = 0;ig < nbQuadPt;ig++ )
+        for ( int ig = 0; ig < nbQuadPt; ig++ )
         {
             coorQuadPt( x, y, z, ig );
             integ += f( x, y, z ) * weightMeas( ig );
@@ -210,12 +210,12 @@ public:
         Real x, y, z;
         std::vector<Real> ret( nbCoor + 1 );
         Real tmp;
-        for ( int ig = 0;ig < nbQuadPt;++ig )
+        for ( int ig = 0; ig < nbQuadPt; ++ig )
         {
             coorQuadPt( x, y, z, ig );
             f( x, y, z, &ret.front() );
             tmp = 0;
-            for ( int d = 0;d <= nbCoor;++d )
+            for ( int d = 0; d <= nbCoor; ++d )
             {
                 tmp += ret[ d ] * normal( d, ig );
             }

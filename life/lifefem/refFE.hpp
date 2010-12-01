@@ -98,7 +98,7 @@ class RefFE:
 {
 
 public:
-    
+
     typedef RefEle::Fct Fct;
 
     //! Constructor of a reference Lagrangian finite element.
@@ -131,28 +131,28 @@ public:
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
     RefFE( std::string          name,
-               FE_TYPE              type,
-               ReferenceShapes      shape,
-               int                  nbDofPerVertex,
-               int                  nbDofPerEdge,
-               int                  nbDofPerFace,
-               int                  nbDofPerVolume,
-               int                  nbDof,
-               int                  nbCoor,
-               int                  FEDim,
-               const Fct*           phi,
-               const Fct*           dPhi,
-               const Fct*           d2Phi,
-               const Fct*           divPhi,
-               const Real*          refCoor,
-               DofPatternType       patternType,
-               const RefFE*         bdRefFE );
+           FE_TYPE              type,
+           ReferenceShapes      shape,
+           int                  nbDofPerVertex,
+           int                  nbDofPerEdge,
+           int                  nbDofPerFace,
+           int                  nbDofPerVolume,
+           int                  nbDof,
+           int                  nbCoor,
+           int                  FEDim,
+           const Fct*           phi,
+           const Fct*           dPhi,
+           const Fct*           d2Phi,
+           const Fct*           divPhi,
+           const Real*          refCoor,
+           DofPatternType       patternType,
+           const RefFE*         bdRefFE );
 
     //! Destructor
     ~RefFE();
 
     //! Check if the reference element has boundary elements
-    inline bool hasBoundaryFE() const{ return M_boundaryFE != NULL; }
+    inline bool hasBoundaryFE() const { return M_boundaryFE != NULL; }
 
     //! Getter for the boundary finite element
     /*
@@ -174,7 +174,7 @@ private:
 
     //! No empty constructor
     RefFE();
-    
+
     //! No copy constructor
     RefFE(const RefFE&);
 

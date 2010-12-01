@@ -36,32 +36,34 @@ typedef long  MarkerFlag;
 class process_marker_flag
 {
 public:
-  explicit process_marker_flag(unsigned int ndg, unsigned int ng);
-  process_marker_flag();
+    explicit process_marker_flag(unsigned int ndg, unsigned int ng);
+    process_marker_flag();
 
-  void set_number_digits_per_group(unsigned int const ndg);
-  void set_number_of_groups(unsigned int const ng);
-  inline unsigned int number_digits_per_group() const;
-  inline  unsigned int  number_of_groups() const;
-  unsigned int extract_group(MarkerFlag const & mf, unsigned int const & group) const;
-  inline  unsigned int
-  extract_digit_in_group(unsigned int const &  group , unsigned int const & digit) const;
+    void set_number_digits_per_group(unsigned int const ndg);
+    void set_number_of_groups(unsigned int const ng);
+    inline unsigned int number_digits_per_group() const;
+    inline  unsigned int  number_of_groups() const;
+    unsigned int extract_group(MarkerFlag const & mf, unsigned int const & group) const;
+    inline  unsigned int
+    extract_digit_in_group(unsigned int const &  group , unsigned int const & digit) const;
 private:
-  void set_factor();
-  unsigned int my_ndg;
-  unsigned int my_ng;
-  unsigned int factor;
-  unsigned int factor10;
+    void set_factor();
+    unsigned int my_ndg;
+    unsigned int my_ng;
+    unsigned int factor;
+    unsigned int factor10;
 };
 
 
 process_marker_flag::process_marker_flag(unsigned int ndg, unsigned int ng):
-  my_ndg(ndg),my_ng(ng){
-  set_factor();
+        my_ndg(ndg),my_ng(ng)
+{
+    set_factor();
 }
 
-process_marker_flag::process_marker_flag():  my_ndg(0),my_ng(0){
-  set_factor();
+process_marker_flag::process_marker_flag():  my_ndg(0),my_ng(0)
+{
+    set_factor();
 }
 
 void
@@ -71,23 +73,27 @@ process_marker_flag::set_factor()
     //cout << "FACTOR: "<<factor<<std::endl;
 }
 
-void process_marker_flag::set_number_digits_per_group(unsigned int const ndg){
-  my_ndg=ndg;
-  set_factor();
+void process_marker_flag::set_number_digits_per_group(unsigned int const ndg)
+{
+    my_ndg=ndg;
+    set_factor();
 }
 
 void
-process_marker_flag::set_number_of_groups(unsigned int const ng){
-  my_ng=ng;
+process_marker_flag::set_number_of_groups(unsigned int const ng)
+{
+    my_ng=ng;
 }
 
-unsigned int process_marker_flag::number_digits_per_group() const{
-  return my_ndg;
+unsigned int process_marker_flag::number_digits_per_group() const
+{
+    return my_ndg;
 }
 
 
-unsigned int  process_marker_flag::number_of_groups() const{
-  return my_ng;
+unsigned int  process_marker_flag::number_of_groups() const
+{
+    return my_ng;
 }
 
 
@@ -99,14 +105,16 @@ unsigned int process_marker_flag::extract_group(MarkerFlag const &  mf, unsigned
 }
 
 unsigned int
-process_marker_flag::extract_digit_in_group(unsigned int const &  group , unsigned int  const &  digit) const{
+process_marker_flag::extract_digit_in_group(unsigned int const &  group , unsigned int  const &  digit) const
+{
     unsigned int ff= ( unsigned int )std::pow(10.0,std::max(int(my_ndg-digit),int(0)));
-  //std::cout << "FF_DIGIT: "<<ff<<std::endl;
-  return (group/ff) % 10;
+    //std::cout << "FF_DIGIT: "<<ff<<std::endl;
+    return (group/ff) % 10;
 }
 
 int
-main(){
+main()
+{
     MarkerFlag flag(1);
     unsigned int groups=4;
     unsigned int group;
@@ -115,21 +123,27 @@ main(){
 
     process_marker_flag proc(ndg,groups);
 
-    do{
+    do
+    {
         std::cout<< " Gimme MarkerFlag (digits) "<<ndg*groups<<std::endl;
         std::cin >> flag;
         std::cout<<flag<<std::endl;
-        do{
+        do
+        {
             std::cout<< " Gimme Group"<<std::endl;
             std::cin >> group;
             digit=group;
             std::cout<<proc.extract_group(flag,group)<<std::endl;
-            do{
+            do
+            {
                 std::cout<< " Gimme Digit"<<std::endl;
                 std::cin >> digit;
                 std::cout<<proc.extract_digit_in_group(proc.extract_group(flag,group),digit)<<std::endl;
-            }while(digit!=0);
-        }while(group !=0);
-    }while(flag!=0);
+            }
+            while (digit!=0);
+        }
+        while (group !=0);
+    }
+    while (flag!=0);
 
 }

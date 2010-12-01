@@ -121,7 +121,7 @@ struct ADRProblem::Private
 // ===================================================
 ADRProblem::ADRProblem( int argc,
                         char** argv )
-  : Members( new Private )
+        : Members( new Private )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -220,18 +220,18 @@ ADRProblem::run()
     solution_type::setup( dataFile, "adr" );
 
     ADRProblemSolution solutionType = ADRProblemSolution(
-            solutionTypeList.value( dataFile( "adr/problem/solutionType", "steadyPolynomial") ) );
+                                          solutionTypeList.value( dataFile( "adr/problem/solutionType", "steadyPolynomial") ) );
     solution_type::problemSolution = solutionType;
     bool steadyProblem( solutionType == ADR_STEADY_POLYNOMIAL );
 
-    if(verbose)
+    if (verbose)
     {
         dataMesh.showMe();
         solution_type::showMe();
         dataTimePtr->showMe();
         dataADRPtr->showMe();
         // timeIntegratorBDFPtr->showMe();
-        if( steadyProblem )
+        if ( steadyProblem )
             std::cout << "  problem- STEADY problem" << std::endl;
         else
             std::cout << "  problem- UNSTEADY problem" << std::endl;
@@ -273,21 +273,23 @@ ADRProblem::run()
     // Boundary conditions definition
     // ===================================================
     std::string dirichletList = dataFile( "adr/problem/dirichletList", "" );
-    std::list<UInt> dirichletMarkers; parseList( dirichletList, dirichletMarkers );
+    std::list<UInt> dirichletMarkers;
+    parseList( dirichletList, dirichletMarkers );
     std::string neumannList = dataFile( "adr/problem/neumannList", "" );
-    std::list<UInt> neumannMarkers; parseList( neumannList, neumannMarkers );
+    std::list<UInt> neumannMarkers;
+    parseList( neumannList, neumannMarkers );
 
     BCHandler::BCHints hint(BCHandler::HINT_BC_NONE);
-    if( !neumannMarkers.size() )
+    if ( !neumannMarkers.size() )
     {
-        if( dirichletMarkers.size() ){
-            if(verbose)
+        if ( dirichletMarkers.size() )
+        {
+            if (verbose)
                 std::cout << "  problem - Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
             hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
         }
-        else
-            if(verbose)
-                std::cout << "  problem - Warning: NO boundary conditions have been imposed!" << std::endl;
+        else if (verbose)
+            std::cout << "  problem - Warning: NO boundary conditions have been imposed!" << std::endl;
     }
 
     BCHandler bcH( 0, hint );
@@ -346,10 +348,10 @@ ADRProblem::run()
 
     if (verbose)
         std::cout << "At time " << timeEval
-        << ",\nError Norm L2: " << L2_Error <<
-        "\nRelative Error Norm L2: " << L2_RelError<<
-        "\nError Norm H1: " << H1_Error <<
-        "\nRelative Error Norm H1: " << H1_RelError<<std::endl;
+                  << ",\nError Norm L2: " << L2_Error <<
+                  "\nRelative Error Norm L2: " << L2_RelError<<
+                  "\nError Norm H1: " << H1_Error <<
+                  "\nRelative Error Norm H1: " << H1_RelError<<std::endl;
 
 
     // Set advection and source terms
@@ -365,23 +367,23 @@ ADRProblem::run()
     adrSolver.computeConstantMatrices();
 
     // enter the time loop if the problem is time dependent
-    for( dataTimePtr->updateTime(); dataTimePtr->canAdvance(); dataTimePtr->updateTime() )
+    for ( dataTimePtr->updateTime(); dataTimePtr->canAdvance(); dataTimePtr->updateTime() )
     {
         if (verbose) std::cout << "\n  problem- We are now at time ... "
-                << dataTimePtr->getTime() << std::endl;
+                                   << dataTimePtr->getTime() << std::endl;
 
         // updating the time dependent coefficients
         dataADRPtr->setDiffusionCoefficient( Members->squareFunction( dataTimePtr->getTime() ) );
         solution_type::diffusionCoeff = dataADRPtr->diffusionCoefficient();
 
         // updating the system
-        if( steadyProblem )
+        if ( steadyProblem )
             adrSolver.updateMatrix();
         else
             adrSolver.updateMatrix( timeIntegratorBDFPtr );
 
         // computing the rhs
-        if( steadyProblem )
+        if ( steadyProblem )
             adrSolver.updateRHS();
         else
             adrSolver.updateRHS( timeIntegratorBDFPtr );
@@ -399,7 +401,7 @@ ADRProblem::run()
         exporter->postProcess( dataTimePtr->getTime() );
 #endif
 
-        if( steadyProblem ) break;
+        if ( steadyProblem ) break;
     }
     chrono.stop();
 
@@ -412,9 +414,9 @@ ADRProblem::run()
 
     if (verbose)
         std::cout << "At time " << timeEval
-        << ",\nError Norm L2: " << L2_Error <<
-        "\nRelative Error Norm L2: " << L2_RelError<<
-        "\nError Norm H1: " << H1_Error <<
-        "\nRelative Error Norm H1: " << H1_RelError<<std::endl;
+                  << ",\nError Norm L2: " << L2_Error <<
+                  "\nRelative Error Norm L2: " << L2_RelError<<
+                  "\nError Norm H1: " << H1_Error <<
+                  "\nRelative Error Norm H1: " << H1_RelError<<std::endl;
 
 }

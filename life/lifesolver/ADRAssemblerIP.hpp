@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -46,7 +46,8 @@
 #include <boost/scoped_ptr.hpp>
 
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! ADRAssemblerIP - This class is used to add IP stabilization to an Advection-Diffusion-Reaction problem.
 /*!
@@ -55,39 +56,39 @@ namespace LifeV {
 
   This is class has been designed to add the IP stabilization for the ADR problem (see in the ADRAssembler class
   for more detail about that problem). IP stands for Interior Penalty. Indeed, the idea of this stabililization
-  is to penalize the solutions that would exhibit oscillations. To quantify the smoothness of the solution, one 
+  is to penalize the solutions that would exhibit oscillations. To quantify the smoothness of the solution, one
   can rely on the computation of the jump of gradient across the faces:
-  
+
   \f[ \sum_K \sum_{F \subset K} \int_F [\![ \nabla u ]\!]  [\![ \nabla v ]\!]  \f]
 
   where K represents an element and F one of its faces. The IP stabilization consists then in adding
-  the new bilinear form 
+  the new bilinear form
 
   \f[ \sum_K \sum_{F \subset K} \int_F k [\![ \nabla u ]\!]  [\![ \nabla v ]\!]  \f]
 
   in the formulation of the ADR problem to force the solution to be smooth. The coefficient \f$ k \f$
-  is used to control the strength of the penalization as well as the good convergence behaviour of the 
+  is used to control the strength of the penalization as well as the good convergence behaviour of the
   stabilized scheme.
-  
+
   In this class, two choices are possible for \f$ k \f$
-  
-  <ul> 
+
+  <ul>
   <li> Usually, the choice is \f$ k = \gamma h_F^2 \f$ to ensure the near-optimal convergence of the scheme, \f$ \gamma \f$
   being a fixed parameter.
-  
+
   <li> For advection dominated flows, it might be easier to use the formula \f$ k = \gamma |\beta \cdot n_F| h_F^2 \f$.
   The choice for a suitable constant \f$ \gamma \f$ does not depend then on the magnitude of the field \f$ \beta \f$ and
   the penalization is somehow better balanced in the domain.
   </ul>
-  
+
   <b> Stencil problems </b>
-  
+
   One of the issues of the IP stabilization is the enlargement of the stencil with respect to the standard
-  Galerkin approximation. Indeed, the IP stabilization couples that would not be coupled otherwise: if we 
+  Galerkin approximation. Indeed, the IP stabilization couples that would not be coupled otherwise: if we
   consider a given face F, all the degrees of freedom of the two adjacent elements are coupled together, including
   degrees of freedom that do not belong to a common element.
-  
-  From the computational point of view, this can sometimes be not acceptable: the enlarged stencil increases the 
+
+  From the computational point of view, this can sometimes be not acceptable: the enlarged stencil increases the
   size of the matrix and (often) the size of the preconditioner (and so the time to compute it). For example, if
   the LU factorization of matrix is computed, the factors will have much more non-zero entries because the new
   entries in the matrix are usually "far" from the diagonal.
@@ -103,24 +104,24 @@ namespace LifeV {
   This allows to use the first matrix in the system and try to explicit the term corresponding to the second matrix
   (putting it in the right hand side). For example, when dealing with parabolic ADR problems,
   one can use the solution of the previous time step (or an extrapolation of the solution)
-  to explicit the stabilization by adding in the right hand side the 
+  to explicit the stabilization by adding in the right hand side the
   product of the extended matrix with the approximated solution.
 
   <b> Use </b>
 
   There are two main kind of method: setup methods and stabilization assembly methods.
-  
+
   The setup method is used to simply build the few internal data structures that are needed for the assembly.
   One should always start by setting up the FESpaces needed.
 
   Once this is done, the assembly can be performed. There are here 4 methods, distinguished by 2 options.
-  
-  The first option is whether the scaling of the stabilization should depend on the 
+
+  The first option is whether the scaling of the stabilization should depend on the
   advection field. If one wants to have a scaling \f$ |\beta \cdot n| \f$ in front of the
   stabilization, then \beta has to appear in the arguments of the function.
-  
+
   The second option (more advanced) is whether all the terms of the stabilization have to
-  be added to the same matrix. If one want to handle the stencil problem, then two 
+  be added to the same matrix. If one want to handle the stencil problem, then two
   distinct matrices have to be passed to the methods.
 
     @author Samuel Quinodoz
@@ -140,7 +141,7 @@ public:
 
     typedef FESpace<mesh_type, map_type> fespace_type;
     typedef boost::shared_ptr<fespace_type>              fespace_ptrType;
- 
+
     typedef boost::shared_ptr<matrix_type>               matrix_ptrType;
 
     //@}
@@ -153,7 +154,7 @@ public:
     ADRAssemblerIP();
 
     //! Destructor
-    ~ADRAssemblerIP(){};
+    ~ADRAssemblerIP() {};
 
     //@}
 
@@ -185,10 +186,10 @@ public:
     void addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                                    const matrix_ptrType& matrixExtended,
                                    const Real& coef);
-    
+
     //! This method builds the IP stabilization on a unique matrix (both stencils)
     /*!
-      This method takes also into account the transport field for wieghting the 
+      This method takes also into account the transport field for wieghting the
       stabilization.
      */
     void addIPStabilization(const matrix_ptrType& matrix,
@@ -208,7 +209,7 @@ public:
     {
         addIPStabilizationStencil(matrix,matrix,coef);
     }
-    
+
     //@}
 
 private:
@@ -218,7 +219,7 @@ private:
 
     typedef CurrentFE                             currentFE_type;
     typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
-    
+
     typedef CurrentBdFE                           currentBdFE_type;
     typedef boost::scoped_ptr<currentBdFE_type>          currentBdFE_ptrType;
 
@@ -236,7 +237,7 @@ private:
 
     currentFE_ptrType M_IP1CFE;
     currentFE_ptrType M_IP2CFE;
-    
+
     currentFE_ptrType M_IPBetaCFE;
 
     // local matrix for the Galerkin stencil entries
@@ -251,24 +252,24 @@ private:
 template<typename mesh_type, typename matrix_type, typename vector_type>
 ADRAssemblerIP< mesh_type, matrix_type, vector_type>::
 ADRAssemblerIP():
-    
-    M_fespace(),
-    M_betaFESpace(),
 
-    M_IPFaceCFE(),
+        M_fespace(),
+        M_betaFESpace(),
 
-    M_IPQuad1CFE(),
-    M_IPQuad2CFE(),
-    
-    M_IP1CFE(),
-    M_IP2CFE(),
-    
-    M_IPBetaCFE(),
-    
-    M_localIPGalerkin_11(),
-    M_localIPGalerkin_22(),
-    M_localIPExtended_12(),
-    M_localIPExtended_21()
+        M_IPFaceCFE(),
+
+        M_IPQuad1CFE(),
+        M_IPQuad2CFE(),
+
+        M_IP1CFE(),
+        M_IP2CFE(),
+
+        M_IPBetaCFE(),
+
+        M_localIPGalerkin_11(),
+        M_localIPGalerkin_22(),
+        M_localIPExtended_12(),
+        M_localIPExtended_21()
 {};
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
@@ -285,12 +286,12 @@ setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
     M_IPQuad1CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
     M_IPQuad2CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
 
-    // For the three next CurrentFEs, the quadrature will be replaced when computing the 
+    // For the three next CurrentFEs, the quadrature will be replaced when computing the
     // IP stabilization
     M_IP1CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
     M_IP2CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
     M_IPBetaCFE.reset(new CurrentFE(M_betaFESpace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
-    
+
     // Local matrices
     M_localIPGalerkin_11.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
                                                     ,M_fespace->fieldDim()
@@ -299,11 +300,11 @@ setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
                                                     ,M_fespace->fieldDim()
                                                     ,M_fespace->fieldDim()));
     M_localIPExtended_12.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
-                                                 ,M_fespace->fieldDim()
-                                                 ,M_fespace->fieldDim()));
+                                                    ,M_fespace->fieldDim()
+                                                    ,M_fespace->fieldDim()));
     M_localIPExtended_21.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
-                                                 ,M_fespace->fieldDim()
-                                                 ,M_fespace->fieldDim()));
+                                                    ,M_fespace->fieldDim()
+                                                    ,M_fespace->fieldDim()));
 }
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
@@ -319,7 +320,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         addIPStabilizationStencil(matrixGalerkin,matrixExtended,vector_type(beta,Repeated),coef);
         return;
     }
-    
+
     ASSERT(M_fespace != 0, "No FE space for building the IP stabilization! ");
     ASSERT(M_betaFESpace != 0, "No FE space (beta) for building the IP stabilization! ");
 
@@ -340,7 +341,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
     Real localValue_21(0.0);
     std::vector<Real> betaN(nbQuadPt,0.0);
     Real hFace2(0.0);
-    
+
     // Here instead of looping over the elements, we loop on the faces.
     for (UInt iFace(nbBoundaryFaces+1); iFace<= nbFaces; ++iFace)
     {
@@ -353,7 +354,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // stabilize there). We also cannot (not possible) stabilize
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
-        
+
         if ((adjacentElement1 == 0) || (adjacentElement2 == 0) || (adjacentElement1 == adjacentElement2))
         {
             continue;
@@ -366,12 +367,12 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 
         M_IPFaceCFE->updateMeasNormalQuadPt(M_fespace->mesh()->face(iFace));
         hFace2 = M_IPFaceCFE->measure();
-        
+
         // Second step, we take the quadrature back to the reference frame for both
         // adjacent elements
-        
+
         M_IPQuad1CFE->update( M_fespace->mesh()->element(adjacentElement1),UPDATE_ONLY_CELL_NODES );
-        
+
         QuadRule faceQR1("custom quad 1",TETRA,3,0,0);
         for (int iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
         {
@@ -396,7 +397,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
             QuadPoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
             faceQR2.addPoint(newPoint);
         }
-        
+
         // Third step, we change the quadrature in the CurrentFEs
 
         M_IP1CFE->setQuadRule(faceQR1);
@@ -405,14 +406,14 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 
         // Now the CurrentFEs are updated with a quadrature that is
         // actually only on the considered face (iterFace).
-        
+
         M_IP1CFE->update(M_fespace->mesh()->element(adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
         M_IP2CFE->update(M_fespace->mesh()->element(adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
         M_IPBetaCFE->update(M_fespace->mesh()->element(adjacentElement1), UPDATE_PHI );
 
         // Before starting the assembly, we compute the values of |beta n|
         // in the quadrature nodes
-        
+
         for (UInt iQuadPt(0); iQuadPt<nbQuadPt; ++iQuadPt)
         {
             betaN[iQuadPt]=0.0;
@@ -422,8 +423,8 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                 {
                     betaN[iQuadPt] += beta[M_betaFESpace->dof().localToGlobal(adjacentElement1,iDof+1)
                                            + betaTotalDof*iDim]
-                        * M_IPBetaCFE->phi(iDof,iQuadPt)
-                        * M_IPFaceCFE->normal(iDim,iQuadPt);
+                                      * M_IPBetaCFE->phi(iDof,iQuadPt)
+                                      * M_IPFaceCFE->normal(iDim,iQuadPt);
                 }
             }
             betaN[iQuadPt] = std::abs(betaN[iQuadPt]);
@@ -439,7 +440,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         M_localIPGalerkin_22->zero();
         M_localIPExtended_12->zero();
         M_localIPExtended_21->zero();
-     
+
         // Loop on the components
         for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
         {
@@ -448,7 +449,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
             localMatrix_type::matrix_view viewIPGalerkin_22 = M_localIPGalerkin_22->block(iFieldDim,iFieldDim);
             localMatrix_type::matrix_view viewIPExtended_12 = M_localIPExtended_12->block(iFieldDim,iFieldDim);
             localMatrix_type::matrix_view viewIPExtended_21 = M_localIPExtended_21->block(iFieldDim,iFieldDim);
-            
+
             for (UInt iDof(0); iDof< nbLocalDof; ++iDof)
             {
                 for (UInt jDof(0); jDof<nbLocalDof; ++jDof)
@@ -463,29 +464,29 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                         for (UInt iDim(0); iDim<3; ++iDim)
                         {
                             localValue_11 += betaN[iQuadPt]
-                                * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP1CFE->wDetJacobian(iQuadPt);
 
                             localValue_22 += betaN[iQuadPt]
-                                * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP2CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP2CFE->wDetJacobian(iQuadPt);
 
                             localValue_12 += betaN[iQuadPt]
-                                * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP1CFE->wDetJacobian(iQuadPt);
 
                             localValue_21 += betaN[iQuadPt]
-                                * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP1CFE->wDetJacobian(iQuadPt);
                         }
                     }
-                    
+
                     // Here we put the values in the local matrices
-                    // We care for sign (to get jumps) and for the 
+                    // We care for sign (to get jumps) and for the
                     // coefficient here.
                     viewIPGalerkin_11(iDof,jDof) += coef*hFace2*localValue_11;
                     viewIPGalerkin_22(iDof,jDof) += coef*hFace2*localValue_22;
@@ -499,7 +500,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // We separate here the assembly of the two
         // contributions for Galerkin and Extended
         // stencil.
-        
+
         for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
         {
             assembleMatrix( *matrixGalerkin,
@@ -565,7 +566,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
     Real localValue_12(0.0);
     Real localValue_21(0.0);
     Real hFace2(0.0);
-    
+
     // Here instead of looping over the elements, we loop on the faces.
     for (UInt iFace(nbBoundaryFaces+1); iFace<= nbFaces; ++iFace)
     {
@@ -578,7 +579,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // stabilize there). We also cannot (not possible) stabilize
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
-        
+
         if ((adjacentElement1 == 0) || (adjacentElement2 == 0) || (adjacentElement1 == adjacentElement2))
         {
             continue;
@@ -591,12 +592,12 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 
         M_IPFaceCFE->updateMeasNormalQuadPt(M_fespace->mesh()->face(iFace));
         hFace2 = M_IPFaceCFE->measure();
-        
+
         // Second step, we take the quadrature back to the reference frame for both
         // adjacent elements
-        
+
         M_IPQuad1CFE->update( M_fespace->mesh()->element(adjacentElement1),UPDATE_ONLY_CELL_NODES );
-        
+
         QuadRule faceQR1("custom quad 1",TETRA,3,0,0);
         for (int iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
         {
@@ -621,7 +622,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
             QuadPoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
             faceQR2.addPoint(newPoint);
         }
-        
+
         // Third step, we change the quadrature in the CurrentFEs
 
         M_IP1CFE->setQuadRule(faceQR1);
@@ -629,7 +630,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 
         // Now the CurrentFEs are updated with a quadrature that is
         // actually only on the considered face (iterFace).
-        
+
         M_IP1CFE->update(M_fespace->mesh()->element(adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
         M_IP2CFE->update(M_fespace->mesh()->element(adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
 
@@ -643,7 +644,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         M_localIPGalerkin_22->zero();
         M_localIPExtended_12->zero();
         M_localIPExtended_21->zero();
-     
+
         // Loop on the components
         for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
         {
@@ -652,7 +653,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
             localMatrix_type::matrix_view viewIPGalerkin_22 = M_localIPGalerkin_22->block(iFieldDim,iFieldDim);
             localMatrix_type::matrix_view viewIPExtended_12 = M_localIPExtended_12->block(iFieldDim,iFieldDim);
             localMatrix_type::matrix_view viewIPExtended_21 = M_localIPExtended_21->block(iFieldDim,iFieldDim);
-            
+
             for (UInt iDof(0); iDof< nbLocalDof; ++iDof)
             {
                 for (UInt jDof(0); jDof<nbLocalDof; ++jDof)
@@ -667,29 +668,29 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                         for (UInt iDim(0); iDim<3; ++iDim)
                         {
                             localValue_11 += 1.0
-                                * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP1CFE->wDetJacobian(iQuadPt);
 
                             localValue_22 += 1.0
-                                * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP2CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP2CFE->wDetJacobian(iQuadPt);
 
                             localValue_12 += 1.0
-                                * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP1CFE->wDetJacobian(iQuadPt);
 
                             localValue_21 += 1.0
-                                * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
+                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
+                                             * M_IP1CFE->wDetJacobian(iQuadPt);
                         }
                     }
-                    
+
                     // Here we put the values in the local matrices
-                    // We care for sign (to get jumps) and for the 
+                    // We care for sign (to get jumps) and for the
                     // coefficient here.
                     viewIPGalerkin_11(iDof,jDof) += coef*hFace2*localValue_11;
                     viewIPGalerkin_22(iDof,jDof) += coef*hFace2*localValue_22;
@@ -703,7 +704,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // We separate here the assembly of the two
         // contributions for Galerkin and Extended
         // stencil.
-        
+
         for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
         {
             assembleMatrix( *matrixGalerkin,

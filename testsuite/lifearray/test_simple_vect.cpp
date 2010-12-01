@@ -28,7 +28,7 @@ main()
     SimpleVect<int> a;
     SimpleVect<float> b(10);
 
-    for (SimpleVect<float>::iterator p=b.begin(); p!= b.end();++p)
+    for (SimpleVect<float>::iterator p=b.begin(); p!= b.end(); ++p)
     {
         *p=10.0;
     }

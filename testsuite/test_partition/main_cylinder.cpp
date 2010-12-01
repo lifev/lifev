@@ -35,9 +35,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -85,13 +85,13 @@ int
 main( int argc, char** argv )
 {
 #ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
+    MPI_Init(&argc, &argv);
 #endif
 
-  int rank;
-  int return_value = EXIT_SUCCESS;
+    int rank;
+    int return_value = EXIT_SUCCESS;
 
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 //**************** cylinder
 //    MPI_Init(&argc,&argv);
@@ -101,10 +101,14 @@ main( int argc, char** argv )
 
 // Test validity of solution
 
-    if (rank == 0) {
-        if (equalSolutions("cylinder_ref.h5", "cylinder.h5", 2, 1e-6)) {
+    if (rank == 0)
+    {
+        if (equalSolutions("cylinder_ref.h5", "cylinder.h5", 2, 1e-6))
+        {
             std::cout << "TEST PARTITION WAS SUCCESSFUL.\n";
-        } else {
+        }
+        else
+        {
             std::cout << "TEST PARTITION FAILED.\n";
             return_value = EXIT_FAILURE;
         }
@@ -114,6 +118,6 @@ main( int argc, char** argv )
     MPI_Finalize();
 #endif
 
-  return return_value;
+    return return_value;
 }
 

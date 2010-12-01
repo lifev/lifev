@@ -22,31 +22,31 @@
 namespace LifeV
 {
 reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
-                                       fluid_type _fluid,
-                                       solid_type _solid):
-    M_FSIOperator  ( _op ),
-    M_fluid           ( _fluid ),
-    M_solid           ( _solid ),
-    M_BCh_dp          ( new BCHandler ),
-    M_BCh_dp_inv      ( new BCHandler ),
+                                 fluid_type _fluid,
+                                 solid_type _solid):
+        M_FSIOperator  ( _op ),
+        M_fluid           ( _fluid ),
+        M_solid           ( _solid ),
+        M_BCh_dp          ( new BCHandler ),
+        M_BCh_dp_inv      ( new BCHandler ),
 //    M_dacc            ( M_solid->dDof().numTotalDof() ),
-    M_dacc            ( _op->displacement().size() ),
-    M_refFE           ( M_fluid->refFEp() ),
-    M_Qr              ( quadRuleTetra4pt ),
-    M_bdQr            ( quadRuleTria3pt ),
-    M_dof             ( M_fluid->mesh(), M_refFE ),
-    M_dim             ( M_dof.numTotalDof() ),
-    M_pattC           ( M_dof ),
-    M_C               ( M_pattC ),
-    M_CAux            ( M_pattC ),
-    M_fe              ( M_refFE, getGeoMap(M_fluid->mesh()), M_Qr ),
-    M_feBd            ( M_refFE.boundaryFE(), getGeoMap(M_fluid->mesh()  ).boundaryMap(), M_bdQr ),
-    M_elmatC          ( M_fe.nbNode, 1, 1 ),
-    M_dp              ( M_dim ),
-    M_residual_dp     ( 3*_fluid->uDof().numTotalDof() ),
-    M_f               ( M_dim ),
-    M_computedC       ( false ),
-    M_computedResidual( false )
+        M_dacc            ( _op->displacement().size() ),
+        M_refFE           ( M_fluid->refFEp() ),
+        M_Qr              ( quadRuleTetra4pt ),
+        M_bdQr            ( quadRuleTria3pt ),
+        M_dof             ( M_fluid->mesh(), M_refFE ),
+        M_dim             ( M_dof.numTotalDof() ),
+        M_pattC           ( M_dof ),
+        M_C               ( M_pattC ),
+        M_CAux            ( M_pattC ),
+        M_fe              ( M_refFE, getGeoMap(M_fluid->mesh()), M_Qr ),
+        M_feBd            ( M_refFE.boundaryFE(), getGeoMap(M_fluid->mesh()  ).boundaryMap(), M_bdQr ),
+        M_elmatC          ( M_fe.nbNode, 1, 1 ),
+        M_dp              ( M_dim ),
+        M_residual_dp     ( 3*_fluid->uDof().numTotalDof() ),
+        M_f               ( M_dim ),
+        M_computedC       ( false ),
+        M_computedResidual( false )
 {
 }
 
@@ -82,7 +82,8 @@ const Vector& reducedLinFluid::residual()
 
 void reducedLinFluid::solveReducedLinearFluid()
 {
-    if (!M_computedC) { // computing laplacien fe matrix (begining of the time step)
+    if (!M_computedC)   // computing laplacien fe matrix (begining of the time step)
+    {
 
         // Initializing matrix
         M_CAux.zeros();
@@ -170,7 +171,7 @@ void reducedLinFluid::evalResidual()
     BCHandler BCh;
 
     FSIOperator::dof_interface_type3D dofReducedFluidToMesh
-        (new FSIOperator::dof_interface_type3D::element_type);
+    (new FSIOperator::dof_interface_type3D::element_type);
 
     dofReducedFluidToMesh->setup(feTetraP1bubble, M_fluid->uDof(),
                                  feTetraP1, M_fluid->pDof());

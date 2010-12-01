@@ -337,9 +337,9 @@ struct norm_inf_adaptor
 {
     template<typename E>
     Real operator()( E const& __v ) const
-        {
-	  return  __v.NormInf();
-        }
+    {
+        return  __v.NormInf();
+    }
 };
 
 
@@ -348,7 +348,7 @@ inline
 std::ostream & operator << (std::ostream & s, const Vector& x)
 {
     for (UInt iz = 0; iz < x.size() ; iz ++ )
-      s << x[iz] << " " ;
+        s << x[iz] << " " ;
 
     return s;
 };

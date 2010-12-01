@@ -73,15 +73,15 @@ public:
     //! FE space order
     std::string uOrder() const {return M_uOrder;};
     //! Chi
-	inline   Real Chi() const {return M_Chi;}
-	 //! Chi
-	inline   string fibers_file() const {return M_fibers_file;}
+    inline   Real Chi() const {return M_Chi;}
+    //! Chi
+    inline   string fibers_file() const {return M_fibers_file;}
 
-	inline int heart_diff_fct() const {return M_heart_diff_fct;}
+    inline int heart_diff_fct() const {return M_heart_diff_fct;}
 
-	inline bool has_fibers() const {return M_has_fibers;}
+    inline bool has_fibers() const {return M_has_fibers;}
 
-	//! sigma_l
+    //! sigma_l
     inline   Real sigmal() const 	{return M_sigmal;}
 
     //! sigma_t
@@ -90,16 +90,16 @@ public:
     //! lambda
     inline   Real lambda() const 	{return M_lambda;}
 
-	//! Cm
-	inline   Real Cm() const 	{return M_Cm;}
-	//! D
-	inline   Real D() const 	{return M_D;}
-	//! Post_dir
-	inline   string Post_dir() const {return M_post_dir;}
+    //! Cm
+    inline   Real Cm() const 	{return M_Cm;}
+    //! D
+    inline   Real D() const 	{return M_D;}
+    //! Post_dir
+    inline   string Post_dir() const {return M_post_dir;}
 
-	 fct_type red_sigma_sphere;
-	 fct_type red_sigma_cyl;
-	 fct_type red_sigma_box;
+    fct_type red_sigma_sphere;
+    fct_type red_sigma_cyl;
+    fct_type red_sigma_box;
 
 protected:
     std::string  M_uOrder;

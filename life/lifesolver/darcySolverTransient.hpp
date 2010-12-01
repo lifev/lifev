@@ -228,9 +228,9 @@ namespace LifeV
   @todo Use a better mass assembler
 */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class DarcySolverTransient
-:
+        :
         virtual public DarcySolver<Mesh, SolverType>
 {
 
@@ -414,19 +414,19 @@ DarcySolverTransient ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                        bchandler_type&            bcHandler,
                        comm_ptrtype&              comm ):
-    // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
-    // Data of the problem
-    M_primalInitial          ( NULL ),
-    M_mass                   ( _One_ ),
-    // Linear solver.
-    M_primalOld              ( new vector_type ( this->M_primal_FESpace.map() ) ),
-    M_reusePrec              ( false ),
-    M_updated                ( false ),
-    M_maxIterSolver          ( static_cast<UInt>(0) ),
-    M_recomputeMatrix        ( false ),
-    // Local matrices and vectors
-    M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
+        // Standard Darcy solver constructor.
+        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        // Data of the problem
+        M_primalInitial          ( NULL ),
+        M_mass                   ( _One_ ),
+        // Linear solver.
+        M_primalOld              ( new vector_type ( this->M_primal_FESpace.map() ) ),
+        M_reusePrec              ( false ),
+        M_updated                ( false ),
+        M_maxIterSolver          ( static_cast<UInt>(0) ),
+        M_recomputeMatrix        ( false ),
+        // Local matrices and vectors
+        M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
 {
 
     CONSTRUCTOR( "DarcySolverTransient" );
@@ -442,22 +442,22 @@ DarcySolverTransient ( const data_type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                        comm_ptrtype&              comm ):
-    // Standard Darcy solver constructor.
-    DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-    // Data of the problem
-    M_primalInitial          ( NULL ),
-    M_mass                   ( _One_ ),
-    // Linear solver.
-    M_primalOld              ( new vector_type ( this->M_primal_FESpace.map() ) ),
-    M_reusePrec              ( false ),
-    M_updated                ( false ),
-    M_maxIterSolver          ( static_cast<UInt>(0) ),
-    M_recomputeMatrix        ( false ),
-    // Local matrices and vectors
-    M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
+        // Standard Darcy solver constructor.
+        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+        // Data of the problem
+        M_primalInitial          ( NULL ),
+        M_mass                   ( _One_ ),
+        // Linear solver.
+        M_primalOld              ( new vector_type ( this->M_primal_FESpace.map() ) ),
+        M_reusePrec              ( false ),
+        M_updated                ( false ),
+        M_maxIterSolver          ( static_cast<UInt>(0) ),
+        M_recomputeMatrix        ( false ),
+        // Local matrices and vectors
+        M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
 {
 
-  CONSTRUCTOR( "DarcySolverTransient" );
+    CONSTRUCTOR( "DarcySolverTransient" );
 
 } // Constructor
 
@@ -467,7 +467,7 @@ DarcySolverTransient<Mesh, SolverType>::
 ~DarcySolverTransient ( void )
 {
 
-	DESTRUCTOR( "DarcySolverTransient" );
+    DESTRUCTOR( "DarcySolverTransient" );
 
 } // Destructor
 
@@ -507,7 +507,7 @@ setInitialPrimal ( const Function& primalInitial )
     // Interpolate the primal initial value.
     this->M_primal_FESpace.interpolate( M_primalInitial,
                                         *(this->M_primal),
-                                         this->M_data.dataTime()->getInitialTime() );
+                                        this->M_data.dataTime()->getInitialTime() );
 
 } // setInitialPrimal
 
@@ -557,7 +557,7 @@ staticCondensation ()
     int NBP[1]          = { this->M_primal_FESpace.refFE().nbDof() };
     // Dual variable degrees of freedom.
     int NBU[1]          = { this->M_dual_FESpace.refFE().nbDof() };
-	// Hybrid variable degree of freedom.
+    // Hybrid variable degree of freedom.
     int NBL[1]          = { this->M_hybrid_FESpace.refFE().nbDof() };
 
     double ONE_[1]      = {1.0};
@@ -730,11 +730,11 @@ localComputePrimalAndDual ()
     int NBRHS[1]        = {1};
     // Increment := 1.
     int INC1[1]         = {1};
-	// Primal variable degrees of freedom.
+    // Primal variable degrees of freedom.
     int NBP[1]          = { this->M_primal_FESpace.refFE().nbDof() };
     // Dual variable degrees of freedom.
     int NBU[1]          = { this->M_dual_FESpace.refFE().nbDof() };
-	// Hybrid variable degree of freedom.
+    // Hybrid variable degree of freedom.
     int NBL[1]          = { this->M_hybrid_FESpace.refFE().nbDof() };
 
     double ONE_[1]      = {1.0};

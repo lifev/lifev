@@ -56,26 +56,31 @@ typedef EOExpr<Real,Stiff>  EOStiff;
 class SourceFct
 {
 public:
-  inline Real operator()(Real x,Real y,Real z,int ic=0) const {
-    return -6;
-  }
+    inline Real operator()(Real x,Real y,Real z,int ic=0) const
+    {
+        return -6;
+    }
 };
 
 class AnalyticalSol
 {
 public:
-  inline Real operator()(Real x,Real y,Real z) const {
-    return x*x+y*y+z*z;
-  }
-  inline Real der_x(Real x,Real y,Real z) const {
-    return 2*x;
-  }
-  inline Real der_y(Real x,Real y,Real z) const {
-    return 2*y;
-  }
-  inline Real der_z(Real x,Real y,Real z) const {
-    return 2*z;
-  }
+    inline Real operator()(Real x,Real y,Real z) const
+    {
+        return x*x+y*y+z*z;
+    }
+    inline Real der_x(Real x,Real y,Real z) const
+    {
+        return 2*x;
+    }
+    inline Real der_y(Real x,Real y,Real z) const
+    {
+        return 2*y;
+    }
+    inline Real der_z(Real x,Real y,Real z) const
+    {
+        return 2*z;
+    }
 };
 
 /////////////////
@@ -84,29 +89,29 @@ public:
 void init_options(int options[], double params[])
 {
 
-  /*
-   * Choose among AZTEC options (see User's Guide).
-   */
+    /*
+     * Choose among AZTEC options (see User's Guide).
+     */
 
- AZ_defaults(options, params);
+    AZ_defaults(options, params);
 
- options[AZ_solver]   = AZ_gmres;
- options[AZ_scaling]  = AZ_none;
- options[AZ_conv]     = AZ_r0;
- options[AZ_output]   = 1; //AZ_warnings;
- options[AZ_pre_calc] = AZ_calc;
- options[AZ_max_iter] = 1550;
- options[AZ_poly_ord] = 5;
- options[AZ_overlap]  = AZ_none;
- options[AZ_kspace]   = 40;
- options[AZ_aux_vec]  = AZ_resid;
- options[AZ_precond] =  AZ_dom_decomp;
- options[AZ_subdomain_solve] = AZ_ilut;
- options[AZ_keep_info] = 0;
- params[AZ_tol]       = 1.00e-10;
- params[AZ_drop]      = 1.00e-4;
- params[AZ_ilut_fill] = 5;
- params[AZ_omega]     = 1.;
+    options[AZ_solver]   = AZ_gmres;
+    options[AZ_scaling]  = AZ_none;
+    options[AZ_conv]     = AZ_r0;
+    options[AZ_output]   = 1; //AZ_warnings;
+    options[AZ_pre_calc] = AZ_calc;
+    options[AZ_max_iter] = 1550;
+    options[AZ_poly_ord] = 5;
+    options[AZ_overlap]  = AZ_none;
+    options[AZ_kspace]   = 40;
+    options[AZ_aux_vec]  = AZ_resid;
+    options[AZ_precond] =  AZ_dom_decomp;
+    options[AZ_subdomain_solve] = AZ_ilut;
+    options[AZ_keep_info] = 0;
+    params[AZ_tol]       = 1.00e-10;
+    params[AZ_drop]      = 1.00e-4;
+    params[AZ_ilut_fill] = 5;
+    params[AZ_omega]     = 1.;
 
 } /* init_options */
 //////////////////////////////////////////////////

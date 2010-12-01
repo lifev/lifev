@@ -228,7 +228,8 @@ private:
     also do import
  */
 template<typename Mesh>
-class Exporter {
+class Exporter
+{
 
 public:
 
@@ -268,8 +269,8 @@ public:
         @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
         @param size size of the stored array
     */
-  void addVariable(const ExporterData::Type& type, const std::string& variableName, const vector_ptrtype& vector,
-                   const UInt& start, const UInt& size, const UInt& steady = 0, const ExporterData::Where& where = ExporterData::Node );
+    void addVariable(const ExporterData::Type& type, const std::string& variableName, const vector_ptrtype& vector,
+                     const UInt& start, const UInt& size, const UInt& steady = 0, const ExporterData::Where& where = ExporterData::Node );
 
     //! Post-process the variables added to the list
     /*!
@@ -391,20 +392,20 @@ protected:
 // ===================================================
 template<typename Mesh>
 Exporter<Mesh>::Exporter():
-    M_prefix        ( "output"),
-    M_post_dir      ( "./" ),
-    M_count         ( 0 ),
-    M_save          ( 1 ),
-    M_multimesh     ( true )
+        M_prefix        ( "output"),
+        M_post_dir      ( "./" ),
+        M_count         ( 0 ),
+        M_save          ( 1 ),
+        M_multimesh     ( true )
 {}
 
 template<typename Mesh>
 Exporter<Mesh>::Exporter( const GetPot& dfile, const std::string& prefix ):
-    M_prefix        ( prefix ),
-    M_post_dir      ( dfile("exporter/post_dir", "./") ),
-    M_count         ( dfile("exporter/start",0) ),
-    M_save          ( dfile("exporter/save",1) ),
-    M_multimesh     ( dfile("exporter/multimesh",true) )
+        M_prefix        ( prefix ),
+        M_post_dir      ( dfile("exporter/post_dir", "./") ),
+        M_count         ( dfile("exporter/start",0) ),
+        M_save          ( dfile("exporter/save",1) ),
+        M_multimesh     ( dfile("exporter/multimesh",true) )
 {}
 
 // ===================================================
@@ -419,13 +420,13 @@ void Exporter<Mesh>::addVariable(const ExporterData::Type&  type,
                                  const UInt&                steady,
                                  const ExporterData::Where& where)
 {
-  M_listData.push_back( ExporterData(type,variableName, vr, start, size, steady, where) );
+    M_listData.push_back( ExporterData(type,variableName, vr, start, size, steady, where) );
 }
 
 template <typename Mesh>
 void Exporter<Mesh>::rd_var(ExporterData& dvar)
 {
-    switch( dvar.type() )
+    switch ( dvar.type() )
     {
     case ExporterData::Scalar:
         M_rd_scalar(dvar);

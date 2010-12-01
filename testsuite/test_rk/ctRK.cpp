@@ -25,8 +25,8 @@ using namespace LifeV;
 
 CTRK::CTRK( int argc,
             char** argv  )
-    :
-    C_case (new CTRKcaseUser)
+        :
+        C_case (new CTRKcaseUser)
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -37,7 +37,7 @@ CTRK::CTRK( int argc,
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
     std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID()
-	<< " among " << ntasks << " running." << std::endl;
+              << " among " << ntasks << " running." << std::endl;
 #else
     M_comm = new Epetra_SerialComm();
 #endif
@@ -96,22 +96,20 @@ CTRK::run()
         qR_vel    = &quadRuleTetra15pt; // DoE 5
         bdQr_vel  = &quadRuleTria3pt;   // DoE 2
     }
-    else
-        if ( uOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "  t-  P1 velocity ";
-            refFE_vel = &feTetraP1;
-            qR_vel    = &quadRuleTetra4pt;  // DoE 2
-            bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-        }
-        else
-            if ( uOrder.compare("P1Bubble") == 0 )
-            {
-                if (verbose) std::cout << "  t-  P1-bubble velocity " << std::flush;
-                refFE_vel = &feTetraP1bubble;
-                qR_vel    = &quadRuleTetra64pt;  // DoE 2
-                bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-            }
+    else if ( uOrder.compare("P1") == 0 )
+    {
+        if (verbose) std::cout << "  t-  P1 velocity ";
+        refFE_vel = &feTetraP1;
+        qR_vel    = &quadRuleTetra4pt;  // DoE 2
+        bdQr_vel  = &quadRuleTria3pt;   // DoE 2
+    }
+    else if ( uOrder.compare("P1Bubble") == 0 )
+    {
+        if (verbose) std::cout << "  t-  P1-bubble velocity " << std::flush;
+        refFE_vel = &feTetraP1bubble;
+        qR_vel    = &quadRuleTetra64pt;  // DoE 2
+        bdQr_vel  = &quadRuleTria3pt;   // DoE 2
+    }
 
     Dof uDof(*dataNavierStokes.dataMesh()->mesh(), *refFE_vel);
 
@@ -123,17 +121,16 @@ CTRK::run()
         qR_press    = &quadRuleTetra15pt; // DoE 5
         bdQr_press  = &quadRuleTria3pt;   // DoE 2
     }
-    else
-        if ( pOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "P1 pressure";
-            refFE_press = &feTetraP1;
-            // qR_press    = &quadRuleTetra4pt;  // DoE 2
-            qR_press    = qR_vel;    // test purpose
-	    // because we need same qrule for u and p wrt coupling CT terms
-	    // bdQr_press  = &quadRuleTria3pt;   // DoE 2
-            bdQr_press  = bdQr_vel;	 // test purpose
-        }
+    else if ( pOrder.compare("P1") == 0 )
+    {
+        if (verbose) std::cout << "P1 pressure";
+        refFE_press = &feTetraP1;
+        // qR_press    = &quadRuleTetra4pt;  // DoE 2
+        qR_press    = qR_vel;    // test purpose
+        // because we need same qrule for u and p wrt coupling CT terms
+        // bdQr_press  = &quadRuleTria3pt;   // DoE 2
+        bdQr_press  = bdQr_vel;	 // test purpose
+    }
 
     dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
 
@@ -175,11 +172,11 @@ CTRK::run()
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
     ChorinTemamRK< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
-                                              uFESpace,
-                                              pFESpace,
-                                              *bcHu,
-                      		              *bcHp,
-                                              *M_comm);
+                                                      uFESpace,
+                                                      pFESpace,
+                                                      *bcHu,
+                                                      *bcHp,
+                                                      *M_comm);
 
     EpetraMap fullMap_u(fluid.getMap_u());
     EpetraMap fullMap_p(fluid.getMap_p());
@@ -237,31 +234,32 @@ CTRK::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
-        if (verbose) {
+        if (verbose)
+        {
             std::cout << "\nl-  We are now at time "<< dataNavierStokes.dataTime()->getTime()
-	              << " s.\n" << std::endl;
-	}
+                      << " s.\n" << std::endl;
+        }
 
         chrono.start();
 
-	dataNavierStokes.dataTime()->setTime(time);
+        dataNavierStokes.dataTime()->setTime(time);
 
         if (verbose) std::cout << "\n  l-  Euler explicit step\n" << std::endl;
 
         // predictive velocity step (Euler explicit)
-	fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_1);
+        fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_1);
         fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_1);
 
         if (verbose) std::cout << "\n  l-  Crank-Nicholson step\n" << std::endl;
 
-	// corrective velocity step (Crank-Nicholson)
-	fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
-	fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
+        // corrective velocity step (Crank-Nicholson)
+        fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
+        fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
 
         if (verbose) std::cout << "\n  l-  Projection step\n" << std::endl;
 
-	// projection step
-	fluid.iterate_p(*bcHp);
+        // projection step
+        fluid.iterate_p(*bcHp);
 
         *vel = fluid.solution_u();
         *press = fluid.solution_p();
@@ -271,7 +269,7 @@ CTRK::run()
 
         chrono.stop();
         if (verbose) std::cout << "\n l-  Total iteration time : " << chrono.diff()
-	                       << " s." << std::endl;
+                                   << " s." << std::endl;
     }
 
 }

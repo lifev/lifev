@@ -41,7 +41,7 @@ namespace LifeV
  */
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class MLTester : public Oseen<Mesh, SolverType>
 {
 
@@ -86,7 +86,7 @@ public :
 
 
     // destructor
-    ~MLTester(){};
+    ~MLTester() {};
 
 
     //
@@ -110,7 +110,7 @@ MLTester( const data_type&          dataType,
           FESpace<Mesh, EpetraMap>& uFESpace,
           FESpace<Mesh, EpetraMap>& pFESpace,
           Epetra_Comm&              comm ):
-    super(dataType, uFESpace, pFESpace, comm)
+        super(dataType, uFESpace, pFESpace, comm)
 {};
 
 
@@ -123,7 +123,7 @@ MLTester( const data_type&          dataType,
           Epetra_Comm&              comm,
           const EpetraMap           monolithicMap,
           const UInt                offset):
-    super(dataType, uFESpace, pFESpace, comm, monolithicMap, offset)
+        super(dataType, uFESpace, pFESpace, comm, monolithicMap, offset)
 {};
 
 
@@ -275,30 +275,30 @@ testML( bchandler_raw_type& bch )
     std::ofstream ofile( "results.txt" );
 
     for (int smi = 0; smi < DefaultParamList.size(); smi++)
-    for (int cl = 0; cl < CoarseParamList.size(); cl++)
-        for (int sweeps = 1 ; sweeps < 2 ; sweeps += 2)
-            for (unsigned int i = 0; i < TestList.size(); ++i)
-                for (unsigned int j = 0; j < PreOrPost.size(); ++j)
-                    for (unsigned int k = 0; k < Damping.size(); ++k)
+        for (int cl = 0; cl < CoarseParamList.size(); cl++)
+            for (int sweeps = 1 ; sweeps < 2 ; sweeps += 2)
+                for (unsigned int i = 0; i < TestList.size(); ++i)
+                    for (unsigned int j = 0; j < PreOrPost.size(); ++j)
+                        for (unsigned int k = 0; k < Damping.size(); ++k)
                         {
                             if (this->M_comm->MyPID() == 0)
-                                {
-                                    std::cout << std::endl;
-                                    //                                    std::cout << "### Testing       " << DefaultParamList[smi];
-                                    std::cout << "### Testing       " << CoarseParamList[cl];
-                                    std::cout << " with " << TestList[i] << " ";
-                                    std::cout << "### sweeps      = " << sweeps << " ";
-                                    std::cout << "### pre or post = " << PreOrPost[j] << " ";
-                                    std::cout << "### damping     = " << Damping[k] << std::endl;
+                            {
+                                std::cout << std::endl;
+                                //                                    std::cout << "### Testing       " << DefaultParamList[smi];
+                                std::cout << "### Testing       " << CoarseParamList[cl];
+                                std::cout << " with " << TestList[i] << " ";
+                                std::cout << "### sweeps      = " << sweeps << " ";
+                                std::cout << "### pre or post = " << PreOrPost[j] << " ";
+                                std::cout << "### damping     = " << Damping[k] << std::endl;
 
-                                    ofile << std::endl;
-                                    //                                    ofile << "### Testing       " << DefaultParamList[smi];
-                                    ofile << "### Testing       " << CoarseParamList[cl];
-                                    ofile << " with " << TestList[i] << " ";
-                                    ofile << "### sweeps      = " << sweeps << " ";
-                                    ofile << "### pre or post = " << PreOrPost[j] << " ";
-                                    ofile << "### damping     = " << Damping[k] << std::endl;
-                                }
+                                ofile << std::endl;
+                                //                                    ofile << "### Testing       " << DefaultParamList[smi];
+                                ofile << "### Testing       " << CoarseParamList[cl];
+                                ofile << " with " << TestList[i] << " ";
+                                ofile << "### sweeps      = " << sweeps << " ";
+                                ofile << "### pre or post = " << PreOrPost[j] << " ";
+                                ofile << "### damping     = " << Damping[k] << std::endl;
+                            }
 
                             // ========================= //
                             // build ML with ML smoother //
@@ -314,10 +314,10 @@ testML( bchandler_raw_type& bch )
                             else if (TestList[i] == "symmetric Gauss-Seidel")
                                 mlSmootherType = "ML symmetric Gauss-Seidel";
                             else if (TestList[i] == "Chebyshev")
-                                {
-                                    mlSmootherType = TestList[i];
-                                    MLList.set("smoother: polynomial order", sweeps);
-                                }
+                            {
+                                mlSmootherType = TestList[i];
+                                MLList.set("smoother: polynomial order", sweeps);
+                            }
                             else
                                 mlSmootherType = TestList[i];
 
@@ -353,52 +353,52 @@ testML( bchandler_raw_type& bch )
                             double status[AZ_STATUS_SIZE];
                             this->M_linearSolver.getAztecStatus( status );
 
-                            if( status[AZ_why] == AZ_normal         ) AZstatus = "N";
-                            else if( status[AZ_why] == AZ_maxits    ) AZstatus = "M";
-                            else if( status[AZ_why] == AZ_loss      ) AZstatus = "L";
-                            else if( status[AZ_why] == AZ_ill_cond  ) AZstatus = "I";
-                            else if( status[AZ_why] == AZ_breakdown ) AZstatus = "B";
+                            if ( status[AZ_why] == AZ_normal         ) AZstatus = "N";
+                            else if ( status[AZ_why] == AZ_maxits    ) AZstatus = "M";
+                            else if ( status[AZ_why] == AZ_loss      ) AZstatus = "L";
+                            else if ( status[AZ_why] == AZ_ill_cond  ) AZstatus = "I";
+                            else if ( status[AZ_why] == AZ_breakdown ) AZstatus = "B";
 
                             int MLIters   = this->M_linearSolver.NumIters();
                             double MLTime = Time.ElapsedTime();
 
                             if (AZstatus == "N")
+                            {
+                                if (MLIters < bestIter)
                                 {
-                                    if (MLIters < bestIter)
-                                        {
-                                            bestIter          = MLIters;
-                                            bestIterPoP       = PreOrPost[j];
-                                            bestIterSmoother  = TestList[i];
-                                            bestIterDefParamList  = DefaultParamList[smi];
-                                            bestIterDamping   = Damping[k];
-                                            bestIterSweeps    = sweeps;
-                                        }
-
-                                    if (MLTime < bestTime)
-                                        {
-                                            bestTime          = MLTime;
-                                            bestTimePoP       = PreOrPost[j];
-                                            bestTimeSmoother  = TestList[i];
-                                            bestTimeDefParamList  = DefaultParamList[smi];
-                                            bestTimeDamping   = Damping[k];
-                                            bestTimeSweeps    = sweeps;
-                                        }
+                                    bestIter          = MLIters;
+                                    bestIterPoP       = PreOrPost[j];
+                                    bestIterSmoother  = TestList[i];
+                                    bestIterDefParamList  = DefaultParamList[smi];
+                                    bestIterDamping   = Damping[k];
+                                    bestIterSweeps    = sweeps;
                                 }
+
+                                if (MLTime < bestTime)
+                                {
+                                    bestTime          = MLTime;
+                                    bestTimePoP       = PreOrPost[j];
+                                    bestTimeSmoother  = TestList[i];
+                                    bestTimeDefParamList  = DefaultParamList[smi];
+                                    bestTimeDamping   = Damping[k];
+                                    bestTimeSweeps    = sweeps;
+                                }
+                            }
 
 
                             if (this->M_comm->MyPID() == 0)
-                                {
-                                    std::cout << "ML     : iters     = " << MLIters;
-                                    std::cout << " time      = " << MLTime << " (s) with "
-                                              << AZstatus << " status, residual = "
-                                              << status[AZ_scaled_r] << std::endl;
-                                    ofile << "ML     : iters     = " << MLIters;
-                                    ofile << " time      = " << MLTime << " (s) with "
+                            {
+                                std::cout << "ML     : iters     = " << MLIters;
+                                std::cout << " time      = " << MLTime << " (s) with "
                                           << AZstatus << " status, residual = "
                                           << status[AZ_scaled_r] << std::endl;
+                                ofile << "ML     : iters     = " << MLIters;
+                                ofile << " time      = " << MLTime << " (s) with "
+                                << AZstatus << " status, residual = "
+                                << status[AZ_scaled_r] << std::endl;
 
 
-                                }
+                            }
 
 
 
@@ -406,38 +406,38 @@ testML( bchandler_raw_type& bch )
 
 
     if (this->M_comm->MyPID() == 0)
-        {
-            std::cout << "Best time : " << bestTime << std::endl;
-            std::cout << "  Def. Param = " << bestTimeDefParamList;
+    {
+        std::cout << "Best time : " << bestTime << std::endl;
+        std::cout << "  Def. Param = " << bestTimeDefParamList;
 
-            std::cout << "  Smoother   = " << bestTimeSmoother << std::endl;
-            std::cout << "  PoP        = " << bestTimePoP << std::endl;
-            std::cout << "  Damping    = " << bestTimeDamping << std::endl;
-            std::cout << "  Sweeps     = " << bestTimeSweeps << std::endl;
+        std::cout << "  Smoother   = " << bestTimeSmoother << std::endl;
+        std::cout << "  PoP        = " << bestTimePoP << std::endl;
+        std::cout << "  Damping    = " << bestTimeDamping << std::endl;
+        std::cout << "  Sweeps     = " << bestTimeSweeps << std::endl;
 
-            std::cout << "Best iter : " << bestIter << std::endl;
-            std::cout << "  Def. Param = " << bestIterDefParamList;
-            std::cout << "  Smoother   = " << bestIterSmoother << std::endl;
-            std::cout << "  PoP        = " << bestIterPoP << std::endl;
-            std::cout << "  Damping    = " << bestIterDamping << std::endl;
-            std::cout << "  Sweeps     = " << bestIterSweeps << std::endl;
+        std::cout << "Best iter : " << bestIter << std::endl;
+        std::cout << "  Def. Param = " << bestIterDefParamList;
+        std::cout << "  Smoother   = " << bestIterSmoother << std::endl;
+        std::cout << "  PoP        = " << bestIterPoP << std::endl;
+        std::cout << "  Damping    = " << bestIterDamping << std::endl;
+        std::cout << "  Sweeps     = " << bestIterSweeps << std::endl;
 
 
-            ofile << "Best time : " << bestTime << std::endl;
-            ofile << "  Def. Param = " << bestTimeDefParamList;
+        ofile << "Best time : " << bestTime << std::endl;
+        ofile << "  Def. Param = " << bestTimeDefParamList;
 
-            ofile << "  Smoother   = " << bestTimeSmoother << std::endl;
-            ofile << "  PoP        = " << bestTimePoP << std::endl;
-            ofile << "  Damping    = " << bestTimeDamping << std::endl;
-            ofile << "  Sweeps     = " << bestTimeSweeps << std::endl;
+        ofile << "  Smoother   = " << bestTimeSmoother << std::endl;
+        ofile << "  PoP        = " << bestTimePoP << std::endl;
+        ofile << "  Damping    = " << bestTimeDamping << std::endl;
+        ofile << "  Sweeps     = " << bestTimeSweeps << std::endl;
 
-            ofile << "Best iter : " << bestIter << std::endl;
-            ofile << "  Def. Param = " << bestIterDefParamList;
-            ofile << "  Smoother   = " << bestIterSmoother << std::endl;
-            ofile << "  PoP        = " << bestIterPoP << std::endl;
-            ofile << "  Damping    = " << bestIterDamping << std::endl;
-            ofile << "  Sweeps     = " << bestIterSweeps << std::endl;
-        }
+        ofile << "Best iter : " << bestIter << std::endl;
+        ofile << "  Def. Param = " << bestIterDefParamList;
+        ofile << "  Smoother   = " << bestIterSmoother << std::endl;
+        ofile << "  PoP        = " << bestIterPoP << std::endl;
+        ofile << "  Damping    = " << bestIterDamping << std::endl;
+        ofile << "  Sweeps     = " << bestIterSweeps << std::endl;
+    }
 
 
 

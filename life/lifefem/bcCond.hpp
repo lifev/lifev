@@ -76,7 +76,7 @@ const BCName nullBCName; // The empty string!
 /** Boundary condition basic types
     Essential, Natural, Mixte, Flux, Resistance,
 */
-enum BCType{Essential, Natural, Mixte, Flux, Resistance};
+enum BCType {Essential, Natural, Mixte, Flux, Resistance};
 //    ,UDepEssential,UDepNatural,UDepMixte};
 
 /** Type for boundary conditions application modes
@@ -91,7 +91,7 @@ enum BCType{Essential, Natural, Mixte, Flux, Resistance};
 
 -# Tangential: for vector problems dealing with tangential components
 */
-enum BCMode{Scalar, Full, Component, Normal, Tangential,Directional};
+enum BCMode {Scalar, Full, Component, Normal, Tangential,Directional};
 
 /*!
   \class BCBase
@@ -252,7 +252,7 @@ public:
             BCVectorBase& bcv,
             const UInt& nComp );
 
-/* constructors for BCFunctionUDepBase ... */
+    /* constructors for BCFunctionUDepBase ... */
     BCBase( const std::string& name,
             const EntityFlag& flag,
             const BCType& type,
@@ -395,7 +395,7 @@ public:
     //! false is scalar (default gammaCoef=1);
     bool isgammaVec() const;
 
-     //! Returns the value of the mixte coefficient (in BC Vector)
+    //! Returns the value of the mixte coefficient (in BC Vector)
     Real mixteCoef() const;
 
     //! Returns the value of the mixte coefficient (in BC Vector)
@@ -423,17 +423,17 @@ public:
     //! Add a new indentifier in the list
     void addIdentifier( IdentifierBase* );
 
-   //! Add a new indentifier in the list of IdGlobal
-   void addIdentifierIdGlobal( IdentifierBase* );
+    //! Add a new indentifier in the list of IdGlobal
+    void addIdentifierIdGlobal( IdentifierBase* );
 
     //! Returns the liste size
     UInt list_size() const;
 
-   //! Returns the liste size of IdGlobal
-   UInt list_size_IdGlobal() const;
+    //! Returns the liste size of IdGlobal
+    UInt list_size_IdGlobal() const;
 
-   //! Returns element of list_IdGlobal
-   int IdGlobal( int id) const;
+    //! Returns element of list_IdGlobal
+    int IdGlobal( int id) const;
 
     //! Set the offset
     void setOffset(int offset) {_M_offset = offset;}
@@ -446,15 +446,15 @@ public:
 
     //! overloaded operator allowing decreasing ordering operations
     friend bool operator<( const BCBase& a, const BCBase& b )
-        {
-            return ( a.type() > b.type() );
-        }
+    {
+        return ( a.type() > b.type() );
+    }
 
     //! overloaded operator allowing finding operations
     friend bool operator==( const BCBase& a, const EntityFlag flag )
-        {
-            return a.flag() == flag;
-        }
+    {
+        return a.flag() == flag;
+    }
 
     //    static UInt M_fluxes;
 

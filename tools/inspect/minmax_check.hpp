@@ -13,29 +13,29 @@
 
 namespace boost
 {
-  namespace inspect
-  {
-    class minmax_check : public inspector
-    {
-      long m_errors;
+namespace inspect
+{
+class minmax_check : public inspector
+{
+    long m_errors;
 
-    public:
+public:
 
-      minmax_check();
-      virtual const char * name() const { return "minmax-check"; }
-      virtual const char * desc() const { return "uses of min and max that have not been protected from the min/max macros"; }
+    minmax_check();
+    virtual const char * name() const { return "minmax-check"; }
+    virtual const char * desc() const { return "uses of min and max that have not been protected from the min/max macros"; }
 
-      virtual void inspect(
+    virtual void inspect(
         const std::string & library_name,
         const path & full_path,
         const std::string & contents);
 
-      virtual ~minmax_check()
-      {
+    virtual ~minmax_check()
+    {
         std::cout << "  " << m_errors << " violations of the Boost min/max guidelines\n";
-      }
-    };
-  }
+    }
+};
+}
 }
 
 #endif // BOOST_MINMAX_CHECK_HPP

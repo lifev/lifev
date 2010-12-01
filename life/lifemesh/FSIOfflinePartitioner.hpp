@@ -46,7 +46,8 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/dofInterface3Dto3D.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! FSIOfflinePartitioner - Offline mesh partitioning for FSI
 /*!
@@ -199,32 +200,32 @@ public:
     {
         return M_solidMeshCutter->meshAllPartitions();
     }
-/*
-    const interface_vector_ptrType& dofFluidToStructure()
-    {
-        return M_dofFluidToStructure;
-    }
-*/
+    /*
+        const interface_vector_ptrType& dofFluidToStructure()
+        {
+            return M_dofFluidToStructure;
+        }
+    */
     const interface_vector_ptrType& dofStructureToHarmonicExtension() const
     {
         return M_dofStructureToHarmonicExtension;
     }
-/*
-    const interface_vector_ptrType& dofStructureToSolid()
-    {
-        return M_dofStructureToSolid;
-    }
+    /*
+        const interface_vector_ptrType& dofStructureToSolid()
+        {
+            return M_dofStructureToSolid;
+        }
 
-    const interface_vector_ptrType& dofStructureToFluid()
-    {
-        return M_dofStructureToFluid;
-    }
+        const interface_vector_ptrType& dofStructureToFluid()
+        {
+            return M_dofStructureToFluid;
+        }
 
-    const interface_vector_ptrType& dofHarmonicExtensionToFluid()
-    {
-        return M_dofHarmonicExtensionToFluid;
-    }
-*/
+        const interface_vector_ptrType& dofHarmonicExtensionToFluid()
+        {
+            return M_dofHarmonicExtensionToFluid;
+        }
+    */
     //@}
 
 private:
@@ -379,33 +380,33 @@ void FSIOfflinePartitioner<Mesh>::showMe(std::ostream& output) const
     output << std::endl;
 
     output << "Number of fluid partitions: " << M_fluidPartitionNumber
-           << std::endl;
+    << std::endl;
     output << "Number of solid partitions: " << M_solidPartitionNumber
-           << std::endl;
+    << std::endl;
     output << "Velocity order: " << M_velocityOrder
-           << std::endl;
+    << std::endl;
     output << "Displacement order: " << M_displacementOrder
-           << std::endl;
+    << std::endl;
     output << "Fluid interface flag: " << M_fluidInterfaceFlag
-           << std::endl;
+    << std::endl;
     output << "Solid interface flag: " << M_solidInterfaceFlag
-           << std::endl;
+    << std::endl;
     output << "Interface tolerance: " << M_interfaceTolerance
-           << std::endl;
+    << std::endl;
     if (M_fluidInterfaceVertexFlag.get())
     {
         output << "Fluid interface vertex flag: " << *M_fluidInterfaceVertexFlag
-               << std::endl;
+        << std::endl;
     }
     if (M_solidInterfaceVertexFlag.get())
     {
         output << "Solid interface vertex flag: " << *M_solidInterfaceVertexFlag
-               << std::endl;
+        << std::endl;
     }
     output << "Fluid mesh is stored at: " << M_uncutFluidMesh.get()
-           << std::endl;
+    << std::endl;
     output << "Solid mesh is stored at: " << M_uncutSolidMesh.get()
-           << std::endl;
+    << std::endl;
     output << "=======================================" << std::endl;
     output << std::endl;
 }
@@ -444,9 +445,9 @@ void FSIOfflinePartitioner<Mesh>::createSpaces()
     }
     else
     {
-    	if ( M_velocityOrder.compare("P1") == 0 )
-    	{
-			refFE_vel = &feTetraP1;
+        if ( M_velocityOrder.compare("P1") == 0 )
+        {
+            refFE_vel = &feTetraP1;
             qR_vel    = &quadRuleTetra4pt;
             bdQr_vel  = &quadRuleTria3pt;
         }
@@ -473,16 +474,16 @@ void FSIOfflinePartitioner<Mesh>::createSpaces()
     }
     else
     {
-    	if ( M_displacementOrder.compare("P1") == 0 )
-    	{
-    		refFE_disp = &feTetraP1;
-    		qR_disp    = &quadRuleTetra4pt;
-    		bdQr_disp  = &quadRuleTria3pt;
-    	}
-    	else
-		{
-			ERROR_MSG(M_displacementOrder + " structure FE not implemented yet.");
-		}
+        if ( M_displacementOrder.compare("P1") == 0 )
+        {
+            refFE_disp = &feTetraP1;
+            qR_disp    = &quadRuleTetra4pt;
+            bdQr_disp  = &quadRuleTria3pt;
+        }
+        else
+        {
+            ERROR_MSG(M_displacementOrder + " structure FE not implemented yet.");
+        }
     }
 
     // Create finite element spaces for velocity and displacement
@@ -492,11 +493,11 @@ void FSIOfflinePartitioner<Mesh>::createSpaces()
     for (int i = 0; i < M_fluidPartitionNumber; ++i)
     {
         (*M_velocityFESpaces)[i].reset(new feSpace_Type(M_fluidMeshCutter->mesh(i),
-                                                    *refFE_vel,
-                                                    *qR_vel,
-                                                    *bdQr_vel,
-                                                    3,
-                                                    M_comm));
+                                                        *refFE_vel,
+                                                        *qR_vel,
+                                                        *bdQr_vel,
+                                                        3,
+                                                        M_comm));
     }
     std::cout << "done." << std::endl;
     std::cout << "Creating displacement finite element space... ";

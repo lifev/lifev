@@ -49,7 +49,8 @@
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! generalizedAitken - LifeV class for Aitken method
 /*
@@ -91,21 +92,21 @@ public:
     void restart();
 
     //! Compute OmegaS * muS + OmegaF * muF
-	/*!
-	 * @param _lambda - vector of unknown
-	 * @param _muF - vector of residuals (Fluid for FSI problems)
-	 * @param _muS - vector of residuals (Solid for FSI problems)
-	 */
+    /*!
+     * @param _lambda - vector of unknown
+     * @param _muF - vector of residuals (Fluid for FSI problems)
+     * @param _muS - vector of residuals (Solid for FSI problems)
+     */
     VectorType computeDeltaLambdaFSI( const VectorType& _lambda,
                                       const VectorType& _muF,
                                       const VectorType& _muS);
 
     //! Compute Omega * residual - Paragraph 4.2.3 & 4.2.4 of S. Deparis PhD Thesis
-	/*!
-	 * @param solution - vector of unknown
-	 * @param residual - vector of residuals
-	 * @param invertedOmega - false (default): minimizing on omega; true: minimizing on omega^-1
-	 */
+    /*!
+     * @param solution - vector of unknown
+     * @param residual - vector of residuals
+     * @param invertedOmega - false (default): minimizing on omega; true: minimizing on omega^-1
+     */
     VectorType computeDeltaLambdaScalar( const VectorType& solution,
                                          const VectorType& residual );
 
@@ -227,15 +228,15 @@ private:
 // ===================================================
 template <class VectorType>
 generalizedAitken<VectorType>::generalizedAitken() :
-    M_oldSolution      ( ),
-    M_oldResidualS     ( ),
-    M_oldResidualF     ( ),
-    M_defaultOmegaS    ( 0.1 ),
-    M_defaultOmegaF    ( 0.1 ),
-    M_restart          ( true ),
-    M_useDefaultOmega  ( false ),
-    M_rangeOmega       ( ),
-    M_inverseOmega     ( false )
+        M_oldSolution      ( ),
+        M_oldResidualS     ( ),
+        M_oldResidualF     ( ),
+        M_defaultOmegaS    ( 0.1 ),
+        M_defaultOmegaF    ( 0.1 ),
+        M_restart          ( true ),
+        M_useDefaultOmega  ( false ),
+        M_rangeOmega       ( ),
+        M_inverseOmega     ( false )
 {
     // Initializing the array
     M_rangeOmega[0] = 0.;
@@ -373,7 +374,7 @@ VectorType
 generalizedAitken<VectorType>::computeDeltaLambdaScalar( const VectorType& solution,
                                                          const VectorType& residual )
 {
-	if ( M_restart || M_useDefaultOmega )
+    if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
@@ -385,38 +386,38 @@ generalizedAitken<VectorType>::computeDeltaLambdaScalar( const VectorType& solut
         return M_defaultOmegaS * residual;
     }
 
-	VectorType deltaX( solution );
-	VectorType deltaR( residual );
+    VectorType deltaX( solution );
+    VectorType deltaR( residual );
 
-	deltaX -= *M_oldSolution;
-	deltaR -= *M_oldResidualS;
+    deltaX -= *M_oldSolution;
+    deltaR -= *M_oldResidualS;
 
-	*M_oldSolution  = solution;
-	*M_oldResidualS = residual;
+    *M_oldSolution  = solution;
+    *M_oldResidualS = residual;
 
-	Real omega, norm;
-	if ( M_inverseOmega )
-	{
-	    // Minimization of the inverse omega
-	    omega = deltaX.Dot( deltaX );
-	    norm  = deltaR.Dot( deltaX );
-	}
-	else
-	{
+    Real omega, norm;
+    if ( M_inverseOmega )
+    {
+        // Minimization of the inverse omega
+        omega = deltaX.Dot( deltaX );
+        norm  = deltaR.Dot( deltaX );
+    }
+    else
+    {
         //Minimization of the original omega
         omega = deltaX.Dot( deltaR );
         norm  = deltaR.Dot( deltaR );
-	}
+    }
 
-	omega = - omega / norm ;
+    omega = - omega / norm ;
 
-	//Check omega limits
-	checkRange(omega);
+    //Check omega limits
+    checkRange(omega);
 
-	Debug(7020) << "generalizedAitken: omega = " << omega << "\n";
+    Debug(7020) << "generalizedAitken: omega = " << omega << "\n";
     //std::cout << "Omega" << std::endl;
 
-	return omega * residual;
+    return omega * residual;
 }
 
 template <class VectorType>
@@ -506,7 +507,8 @@ generalizedAitken<VectorType>::computeDeltaLambdaVectorBlock( const VectorType& 
     *M_oldSolution  = solution;
     *M_oldResidualS = residual;
 
-    VectorType omega( deltaX ); omega = 0.0;
+    VectorType omega( deltaX );
+    omega = 0.0;
     Real   tempOmega = 0;
 
     VectorType tempVector( blocksVector );
@@ -515,7 +517,8 @@ generalizedAitken<VectorType>::computeDeltaLambdaVectorBlock( const VectorType& 
 
     for ( UInt i = 0 ; i < blocksNumber ; ++i )
     {
-        tempVector = blocksVector - i; tempVector = !tempVector;
+        tempVector = blocksVector - i;
+        tempVector = !tempVector;
 
         tempDeltaX  = deltaX;
         tempDeltaX *= tempVector;

@@ -51,7 +51,7 @@ readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertic
             numVertices = atoi( node_s );
             done++;
             numBVertices = 0;
-            for ( i = 0;i < numVertices;i++ )
+            for ( i = 0; i < numVertices; i++ )
             {
                 mystream >> x >> y >> z >> ity >> ibc;
                 if ( ity != 3 )
@@ -71,7 +71,7 @@ readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertic
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             numBFaces = atoi( node_s );
             done++;
-            for ( i = 0;i < numBFaces;i++ )
+            for ( i = 0; i < numBFaces; i++ )
             {
 #ifdef OLDMPPFILE
                 mystream >> p1 >> p2 >> p3 >> ity >> ibc;
@@ -87,7 +87,7 @@ readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertic
         {
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             numBEdges = atoi( node_s );
-            for ( i = 0;i < numBEdges;i++ )
+            for ( i = 0; i < numBEdges; i++ )
             {
 #ifdef OLDMPPFILE
                 mystream >> p1 >> p2 >> ity >> ibc;
@@ -180,10 +180,11 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             numBVertices = 0;
             isboundary.resize(numVertices,false);
 
-            for ( i = 0;i < numVertices;++i )
+            for ( i = 0; i < numVertices; ++i )
             {
                 mystream >> x >> y >> z >> ibc;
-                if ( ! iSelect(EntityFlag(ibc))){
+                if ( ! iSelect(EntityFlag(ibc)))
+                {
                     numBVertices++;
                     isboundary[i]=true;
                 }
@@ -201,16 +202,21 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
                 mystream >> p1 >> p2 >> p3 >> ibc;
-                if(isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]){
-                    if (iSelect(EntityFlag(ibc))){
+                if (isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1])
+                {
+                    if (iSelect(EntityFlag(ibc)))
+                    {
                         std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<
-                            " has all vertices on the boundary yet is marked as interior: "<<ibc<<std::endl;
+                                 " has all vertices on the boundary yet is marked as interior: "<<ibc<<std::endl;
                     }
                     ++numBFaces;
-                } else {
-                    if (!iSelect(EntityFlag(ibc))){
+                }
+                else
+                {
+                    if (!iSelect(EntityFlag(ibc)))
+                    {
                         std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<
-                            " has vertices in the interior yet is marked as boundary: "<<ibc<<std::endl;
+                                 " has vertices in the interior yet is marked as boundary: "<<ibc<<std::endl;
                     }
                 }
             }
@@ -225,15 +231,17 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             numReadFaces= nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             done++;
             numBFaces = 0;
-            for ( UInt k = 0;k < numReadFaces;k++ )
+            for ( UInt k = 0; k < numReadFaces; k++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
-                if(isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]&&isboundary[p4-1]
-                   ){
-                    if (iSelect(EntityFlag(ibc))){
+                if (isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]&&isboundary[p4-1]
+                   )
+                {
+                    if (iSelect(EntityFlag(ibc)))
+                    {
                         std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<" "<<p4<<
-                            " has all vertices on the boundary yet is marked as interior: "<<
-                            ibc<<std::endl;
+                                 " has all vertices on the boundary yet is marked as interior: "<<
+                                 ibc<<std::endl;
                     }
                     ++numBFaces;
                 }
@@ -248,7 +256,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             shape = TETRA;
             numVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
             done++;
-            for ( i = 0;i < numVolumes;i++ )
+            for ( i = 0; i < numVolumes; i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
             }
@@ -260,7 +268,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             shape = HEXA;
             numVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
             done++;
-            for ( i = 0;i < numVolumes;i++ )
+            for ( i = 0; i < numVolumes; i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> p5 >> p6 >> p7 >> p8 >> ibc;
             }
@@ -270,7 +278,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             numBEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
             done++;
-            for ( i = 0;i < numBEdges;i++ )
+            for ( i = 0; i < numBEdges; i++ )
             {
                 mystream >> p1 >> p2 >> ibc;
             }

@@ -26,39 +26,39 @@ namespace LifeV
 {
 /*            ************************ MARKER BASE **************************/
 /*! \file marker_base.h Basic definition of markers
- 
+
 Here we define the basic markers. Markers have two purposes:
- 
+
 <ul>
- 
+
   <li> To add an indicator (EntityFlag) to all geometry entities. In the
   base MarkerTrait this indicator is a long integer (aliased to
   EntityFLAG). The main purpose of the Entity flag is to associate
   boundary conditions or material properties to the Geometry
   entity. </li>
- 
- 
+
+
   <li> There is a mechanism, via the MarkerCommon class template, to
   extend the mesh enitities definitions by adding user defined data
   and methods. It this case the user should create its own marker
   class (maybe by inheriting from the Marker_Base class, which
   provides the same interfaces of Marker_Base + the user defined
   stuff.  </li>
- 
+
 </ul>
- 
+
 The flag in the base class+some utilities to select between two flags
 is provided by traits. In particular, <ul>
- 
+
 <li> The MarkerTraits_Base define the basic (compulsory) interface of
 any user defined Marker class.
- 
+
   <li> The Marker is a class template whose template argument is a
   MarkerTrait, defaulted to MarkerTraits_Base.
- 
+
 <li>A user may change some basic behaviour of the Marker class by providing a special Traits.
 </ul>
- 
+
 */
 
 
@@ -70,9 +70,9 @@ class MarkerTraits_Base
 public:
     //! EntityFlag is the type used to store the geometric entity flags
 
-	/*!  It is a signed long int so that we have a lot of room */
+    /*!  It is a signed long int so that we have a lot of room */
     // typedef signed long int EntityFlag;
-	/*!  Let's use standard LifeV types. TP 11/2009 */
+    /*!  Let's use standard LifeV types. TP 11/2009 */
     typedef ID EntityFlag;
 
     /*! Nullflag is the value indicating a null flag, i.e a flag not yet
@@ -101,12 +101,12 @@ public:
     */
     static EntityFlag weakerFlag( EntityFlag const & a, EntityFlag const & b );
 
-    //! Equality operator. 
+    //! Equality operator.
     /* It is needed in order to select markers with the same entity flag
 
     */
-  static bool EqualFlags(const EntityFlag& a, const EntityFlag& b);
-  
+    static bool EqualFlags(const EntityFlag& a, const EntityFlag& b);
+
 };
 
 // const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG=LONG_MIN;
@@ -177,17 +177,17 @@ public:
     inline bool isMarkerUnset() const;
 
     //! Put marker to nullflag
-    inline void unsetMarker() const;    
-                    
+    inline void unsetMarker() const;
+
     //! Put marker to nullflag
-    inline void markerUnset() const;    
+    inline void markerUnset() const;
 
     //! Necessary to compare markers
     /*!
     It returns true if the marker flag is equal to the argument
     */
     inline bool hasEqualEntityFlag(EntityFlag const & p ) const;
-      
+
     //! Helper function that prints a marker Flag
     std::ostream & printFlag( EntityFlag const f, std::ostream & out ) const;
 
@@ -301,7 +301,7 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setWeakerMarker( En
 template <typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setStrongerMarker( EntityFlag const & p )
 {
-    if ( isMarkerUnset() )    
+    if ( isMarkerUnset() )
         return flag = p;
     return setMarker( MarkerTraits::strongerFlag( this->marker(), p ) );
 }
@@ -309,7 +309,7 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setStrongerMarker( 
 template <typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setWeakerMarker( EntityFlag const & p )
 {
-    if ( isMarkerUnset() )    
+    if ( isMarkerUnset() )
         return flag = p;
     return setMarker( MarkerTraits::weakerFlag( this->marker(), p ) );
 }
@@ -327,7 +327,7 @@ bool Marker_Base<MarkerTraits>::isMarkerUnset() const
 }
 
 template <typename MarkerTraits>
-void Marker_Base<MarkerTraits>::unsetMarker() const    
+void Marker_Base<MarkerTraits>::unsetMarker() const
 {
     flag=nullFlag();
 }

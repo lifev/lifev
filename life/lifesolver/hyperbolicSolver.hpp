@@ -65,7 +65,7 @@ namespace LifeV
 /*!
 */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 class HyperbolicSolver
 {
 
@@ -77,7 +77,7 @@ public:
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const UInt& )>
-                                                     Function;
+    Function;
 
     typedef DataHyperbolic<Mesh>                     data_type;
 
@@ -392,27 +392,27 @@ HyperbolicSolver ( const data_type&          dataFile,
                    FESpace<Mesh, EpetraMap>& fESpace,
                    bchandler_raw_type&       bcHandler,
                    comm_ptrtype&             comm ):
-    // Parallel stuff.
-    M_me              ( comm->MyPID() ),
-    M_localMap        ( fESpace.map() ),
-    M_displayer       ( comm ),
-    // Data of the problem.
-    M_data            ( dataFile ),
-	M_source          ( NULL ),
-    M_mass            ( NULL ),
-    M_BCh             ( &bcHandler ),
-    M_setBC           ( true ),
-    // Finite element spaces.
-    M_FESpace         ( fESpace ),
-    // Algebraic stuff.
-    M_rhs             ( new vector_type ( M_localMap ) ),
-    M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-    M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-    M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
-    // Local matrices and vectors.
-    M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
-    M_elmatMass       ( ),
-    M_initialSolution ( NULL )
+        // Parallel stuff.
+        M_me              ( comm->MyPID() ),
+        M_localMap        ( fESpace.map() ),
+        M_displayer       ( comm ),
+        // Data of the problem.
+        M_data            ( dataFile ),
+        M_source          ( NULL ),
+        M_mass            ( NULL ),
+        M_BCh             ( &bcHandler ),
+        M_setBC           ( true ),
+        // Finite element spaces.
+        M_FESpace         ( fESpace ),
+        // Algebraic stuff.
+        M_rhs             ( new vector_type ( M_localMap ) ),
+        M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        // Local matrices and vectors.
+        M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
+        M_elmatMass       ( ),
+        M_initialSolution ( NULL )
 {
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
@@ -428,26 +428,26 @@ HyperbolicSolver<Mesh, SolverType>::
 HyperbolicSolver ( const data_type&          dataFile,
                    FESpace<Mesh, EpetraMap>& fESpace,
                    comm_ptrtype&             comm ):
-    // Parallel stuff.
-    M_me              ( comm->MyPID() ),
-    M_localMap        ( fESpace.map() ),
-    M_displayer       ( comm ),
-    // Data of the problem.
-    M_data            ( dataFile ),
-	M_source          ( NULL ),
-    M_mass            ( NULL ),
-    M_setBC           ( false ),
-    // Finite element spaces.
-    M_FESpace         ( fESpace ),
-    // Algebraic stuff.
-    M_rhs             ( new vector_type ( M_localMap ) ),
-    M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-    M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-    M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
-    // Local matrices and vectors.
-    M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
-    M_elmatMass       ( ),
-    M_initialSolution ( NULL )
+        // Parallel stuff.
+        M_me              ( comm->MyPID() ),
+        M_localMap        ( fESpace.map() ),
+        M_displayer       ( comm ),
+        // Data of the problem.
+        M_data            ( dataFile ),
+        M_source          ( NULL ),
+        M_mass            ( NULL ),
+        M_setBC           ( false ),
+        // Finite element spaces.
+        M_FESpace         ( fESpace ),
+        // Algebraic stuff.
+        M_rhs             ( new vector_type ( M_localMap ) ),
+        M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        // Local matrices and vectors.
+        M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
+        M_elmatMass       ( ),
+        M_initialSolution ( NULL )
 {
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
@@ -462,7 +462,7 @@ HyperbolicSolver<Mesh, SolverType>::
 ~HyperbolicSolver ()
 {
 
-	DESTRUCTOR( "HyperbolicSolver" );
+    DESTRUCTOR( "HyperbolicSolver" );
 
 } // Destructor
 
@@ -630,9 +630,9 @@ localEvolve ( const UInt& iElem )
                     const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
 
                     const  Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
-                                                                                                           iElem,
-                                                                                                           M_data.dataTime()->getTime(),
-                                                                                                           x, y, z, rightValue[ 0 ] );
+                                                iElem,
+                                                M_data.dataTime()->getTime(),
+                                                x, y, z, rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
                     localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
                 }
@@ -871,10 +871,10 @@ solveOneStep ()
 
         // Put the total flux of the current element in the global vector of fluxes
         assembleVector( *M_globalFlux,
-    	    			M_FESpace.fe().currentLocalId(),
-       				    M_localFlux,
-       				    M_FESpace.refFE().nbDof(),
-       				    M_FESpace.dof(), 0 );
+                        M_FESpace.fe().currentLocalId(),
+                        M_localFlux,
+                        M_FESpace.refFE().nbDof(),
+                        M_FESpace.dof(), 0 );
 
         // Average step of the current element
         localAverage( iElem );

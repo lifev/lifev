@@ -60,19 +60,20 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
     if (t == 0)
     {
-        switch(i) {
-            case 1:
-	      return -z*(z - 5.)*x/50.;
-               break;
-            case 2:
-	      return -z*(z - 5.)*y/50.;
-	      break;
-            case 3:
-                return 0.0;
-                break;
-            default:
-                ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-                break;
+        switch (i)
+        {
+        case 1:
+            return -z*(z - 5.)*x/50.;
+            break;
+        case 2:
+            return -z*(z - 5.)*y/50.;
+            break;
+        case 3:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+            break;
         }
     }
 
@@ -82,21 +83,22 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
 
-  switch(i) {
-  case 1:
+    switch (i)
+    {
+    case 1:
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        break;
+    case 3:
+        return 0.0;
+        break;
+    default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        break;
+    }
     return 0.0;
-    break;
-  case 2:
-    return 0.0;
-    break;
-  case 3:
-    return 0.0;
-    break;
-  default:
-    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-    break;
-  }
-  return 0.0;
 
 }
 
@@ -113,8 +115,8 @@ Real zero_scalar( const Real& /* t */,
 struct Structure::Private
 {
     Private() :
-        rho(1), poisson(1), young(1)
-        {}
+            rho(1), poisson(1), young(1)
+    {}
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
     double rho, poisson, young;
 
@@ -128,7 +130,7 @@ struct Structure::Private
 Structure::Structure( int                                   argc,
                       char**                                argv,
                       boost::shared_ptr<Epetra_Comm>        structComm):
-    parameters( new Private() )
+        parameters( new Private() )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -205,7 +207,7 @@ Structure::run3d()
 
     for (UInt ii = 0; ii < nDimensions; ++ii)
     {
-         fullMap += structMap;
+        fullMap += structMap;
     }
 
     LinearVenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid;
@@ -290,13 +292,13 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 
-      dataStructure->dataTime()->setTime(time);
+        dataStructure->dataTime()->setTime(time);
 
         if (verbose)
-            {
-                std::cout << std::endl;
-                std::cout << "S- Now we are at time " << dataStructure->dataTime()->getTime() << " s." << std::endl;
-            }
+        {
+            std::cout << std::endl;
+            std::cout << "S- Now we are at time " << dataStructure->dataTime()->getTime() << " s." << std::endl;
+        }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side
         solid.updateSystem();    // Computes the rigth hand side

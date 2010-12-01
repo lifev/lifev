@@ -39,38 +39,38 @@ namespace LifeV
 //! Constructors
 DataIonic::
 DataIonic( const GetPot& dfile ) :
-    DataMesh( dfile, "electric/space_discretization" ),
-    DataTime( dfile, "electric/time_discretization" )
+        DataMesh( dfile, "electric/space_discretization" ),
+        DataTime( dfile, "electric/time_discretization" )
 {
     setup(dfile);
 }
 
 DataIonic::
 DataIonic( const DataIonic& dataIonic ) :
-    DataMesh		              ( dataIonic ),
-    DataTime                     ( dataIonic ),
-    a(dataIonic.a),
-    b(dataIonic.b),
-    c1(dataIonic.c1),
-    c2(dataIonic.c2),
-    d(dataIonic.d),
-    T(dataIonic.T),
-    A(dataIonic.A),
-    u0(dataIonic.u0),
-    winit(dataIonic.winit),
-	// Mitchell & Schaeffer
-    tau_in(dataIonic.tau_in),
-    tau_out(dataIonic.tau_out),
-    tau_open(dataIonic.tau_open),
-    tau_close(dataIonic.tau_close),
-    vcrit(dataIonic.vcrit),
-    v_min(dataIonic.v_min),
-    v_max(dataIonic.v_max),
-    reac_amp(dataIonic.reac_amp),
-    tinit(dataIonic.tinit),
-    tend(dataIonic.tend),
-    order_bdf(dataIonic.order_bdf),
-    has_HeteroTauClose(dataIonic.has_HeteroTauClose)
+        DataMesh		              ( dataIonic ),
+        DataTime                     ( dataIonic ),
+        a(dataIonic.a),
+        b(dataIonic.b),
+        c1(dataIonic.c1),
+        c2(dataIonic.c2),
+        d(dataIonic.d),
+        T(dataIonic.T),
+        A(dataIonic.A),
+        u0(dataIonic.u0),
+        winit(dataIonic.winit),
+        // Mitchell & Schaeffer
+        tau_in(dataIonic.tau_in),
+        tau_out(dataIonic.tau_out),
+        tau_open(dataIonic.tau_open),
+        tau_close(dataIonic.tau_close),
+        vcrit(dataIonic.vcrit),
+        v_min(dataIonic.v_min),
+        v_max(dataIonic.v_max),
+        reac_amp(dataIonic.reac_amp),
+        tinit(dataIonic.tinit),
+        tend(dataIonic.tend),
+        order_bdf(dataIonic.order_bdf),
+        has_HeteroTauClose(dataIonic.has_HeteroTauClose)
 {
 }
 
@@ -88,7 +88,7 @@ setup(  const GetPot& dfile )
     A   		= dfile("electric/physics/A",110);    //130mV    //RogersMcCulloch1994
     u0   		= dfile("electric/physics/u0",-84.0);	  //-84mV    //RogersMcCulloch1994
     winit		= dfile("electric/physics/winit", 0);
-	// Mitchell & Schaeffer
+    // Mitchell & Schaeffer
     tau_in    = dfile("electric/physics/tau_in",0.8);
     v_min    = dfile("electric/physics/v_min",-80.0);
     v_max    = dfile("electric/physics/v_max", 20.0);

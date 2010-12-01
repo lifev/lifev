@@ -97,37 +97,37 @@ The analytical solutions are
 using namespace LifeV;
 
 enum BCNAME
-    {
-        /*
-          FLUX0            = 0,
-          INLETPRESSURE1   = 1,
-          INLETPRESSURE2   = 2,
-          OUTLETPRESSURE   = 3,
-          FLUX1            = 4*/
+{
+    /*
+      FLUX0            = 0,
+      INLETPRESSURE1   = 1,
+      INLETPRESSURE2   = 2,
+      OUTLETPRESSURE   = 3,
+      FLUX1            = 4*/
 
-          BACK   = 1,
-          FRONT  = 2,
-          LEFT   = 3,
-          RIGHT  = 4,
-          BOTTOM = 5,
-          TOP    = 6
+    BACK   = 1,
+    FRONT  = 2,
+    LEFT   = 3,
+    RIGHT  = 4,
+    BOTTOM = 5,
+    TOP    = 6
 
 
-        /*        LEFT   = 4,
-        RIGHT  = 2,
-        FRONT  = 1,
-        BACK   = 3,
-        TOP    = 6,
-        BOTTOM = 5*/
-    };
+    /*        LEFT   = 4,
+    RIGHT  = 2,
+    FRONT  = 1,
+    BACK   = 3,
+    TOP    = 6,
+    BOTTOM = 5*/
+};
 
 enum DARCY_SOLVER_TYPE
-    {
-        DARCY_LINEAR               = 1,
-        DARCY_NON_LINEAR           = 2,
-        DARCY_TRANSIENT            = 3,
-        DARCY_TRANSIENT_NON_LINEAR = 4
-    };
+{
+    DARCY_LINEAR               = 1,
+    DARCY_NON_LINEAR           = 2,
+    DARCY_TRANSIENT            = 3,
+    DARCY_TRANSIENT_NON_LINEAR = 4
+};
 
 // ===================================================
 //!              Standard functions
@@ -163,13 +163,13 @@ struct darcy::Private
     // Policy for scalar functions
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>
-                                                   fct_type;
+    fct_type;
 
     // Policy for matrices
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real>& )>
-                                                   matrix_type;
+    matrix_type;
 
     std::string    data_file_name;
     std::string    discretization_section;
@@ -180,16 +180,16 @@ struct darcy::Private
 
     fct_type getUOne ( )
     {
-    	fct_type f;
-    	f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
+        fct_type f;
+        f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero ( )
     {
-    	fct_type f;
-    	f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
-    	return f;
+        fct_type f;
+        f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
+        return f;
     }
 
     fct_type getAnalyticalSolution ( )
@@ -249,7 +249,7 @@ struct darcy::Private
 
 darcy::darcy( int argc,
               char** argv )
-  : Members( new Private )
+        : Members( new Private )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -258,14 +258,14 @@ darcy::darcy( int argc,
     Members->data_file_name = data_file_name;
     Members->discretization_section = "darcy";
 
-	#ifdef EPETRA_MPI
-		std::cout << "Epetra Initialization" << std::endl;
-		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-        int ntasks;
-        MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-	#else
-		Members->comm.reset( new Epetra_SerialComm() );
-	#endif
+#ifdef EPETRA_MPI
+    std::cout << "Epetra Initialization" << std::endl;
+    Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    int ntasks;
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+#else
+    Members->comm.reset( new Epetra_SerialComm() );
+#endif
 
 }
 
@@ -288,7 +288,7 @@ darcy::run()
 
     typedef boost::shared_ptr< darcyLinearSolver_type >               darcyLinearSolver_ptrtype;
 
-	typedef darcyLinearSolver_type::vector_type                       vector_type;
+    typedef darcyLinearSolver_type::vector_type                       vector_type;
     typedef boost::shared_ptr< vector_type >                          vector_ptrtype;
 
     Chrono chronoTotal;
@@ -326,7 +326,7 @@ darcy::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file
-	DataDarcy<RegionMesh> dataDarcy;
+    DataDarcy<RegionMesh> dataDarcy;
 
     // Set up the data
     dataDarcy.setup( dataFile );
@@ -362,9 +362,9 @@ darcy::run()
     chronoReadAndPartitionMesh.stop();
 
     // The leader process print chronoReadAndPartitionMesh
-    if( isLeader )
+    if ( isLeader )
         std::cout << "Time for read and partition the mesh " <<
-                     chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
+                  chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
 
     // Create the boundary conditions
 
@@ -387,19 +387,19 @@ darcy::run()
     bcDarcy.addBC( "InletPressure",  INLETPRESSURE1, Essential, Scalar,  dirichletBDfun1  );
     bcDarcy.addBC( "InletPressure1", INLETPRESSURE2, Essential, Scalar,  dirichletBDfun3  );
     bcDarcy.addBC( "OutletPressure", OUTLETPRESSURE, Essential, Scalar,  dirichletBDfun2  );
-*/
+    */
 
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
-   	BCFunctionMixte mixteBDfun;
+    BCFunctionMixte mixteBDfun;
 
     dirichletBDfun.setFunction ( dataProblem::dirichlet );
-	neumannBDfun1.setFunction  ( dataProblem::neumann1 );
-	neumannBDfun2.setFunction  ( dataProblem::neumann2 );
-	// dp/dn = first_parameter + second_parameter * p
-	mixteBDfun.setFunctions_Mixte( dataProblem::mixte,
+    neumannBDfun1.setFunction  ( dataProblem::neumann1 );
+    neumannBDfun2.setFunction  ( dataProblem::neumann2 );
+    // dp/dn = first_parameter + second_parameter * p
+    mixteBDfun.setFunctions_Mixte( dataProblem::mixte,
                                    Members->getUOne() );
 
-	BCHandler bcDarcy( 6 );
+    BCHandler bcDarcy( 6 );
 
     bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
     bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun      );
@@ -419,7 +419,7 @@ darcy::run()
     if ( isLeader )
     {
         std::cout << "Time for create the boundary conditions handler " <<
-                     chronoBoundaryCondition.diff() << std::endl << std::flush;
+                  chronoBoundaryCondition.diff() << std::endl << std::flush;
 
     }
 
@@ -437,8 +437,8 @@ darcy::run()
     qR_primal    = &quadRuleTetra15pt;
     bdQr_primal  = &quadRuleTria4pt;
 
-	// Dual solution parameters
-	const RefFE*    refFE_dual ( static_cast<RefFE*>(NULL) );
+    // Dual solution parameters
+    const RefFE*    refFE_dual ( static_cast<RefFE*>(NULL) );
     const QuadRule* qR_dual    ( static_cast<QuadRule*>(NULL) );
     const QuadRule* bdQr_dual  ( static_cast<QuadRule*>(NULL) );
 
@@ -446,8 +446,8 @@ darcy::run()
     qR_dual    = &quadRuleTetra15pt;
     bdQr_dual  = &quadRuleTria4pt;
 
-	// Interpolate of dual solution parameters
-	const RefFE*    refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
+    // Interpolate of dual solution parameters
+    const RefFE*    refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
     const QuadRule* qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
     const QuadRule* bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
 
@@ -477,7 +477,7 @@ darcy::run()
 
     // Finite element space of the primal variable
     FESpace< RegionMesh, EpetraMap > p_FESpace( meshPart,
-												*refFE_primal,
+                                                *refFE_primal,
                                                 *qR_primal,
                                                 *bdQr_primal,
                                                 1,
@@ -504,11 +504,11 @@ darcy::run()
 
     // Finite element space of the hybrid variable
     FESpace< RegionMesh, EpetraMap > hybrid_FESpace( meshPart,
-                                                    *refFE_hybrid,
-                                                    *qR_hybrid,
-                                                    *bdQr_hybrid,
-                                                    1,
-                                                    Members->comm );
+                                                     *refFE_hybrid,
+                                                     *qR_hybrid,
+                                                     *bdQr_hybrid,
+                                                     1,
+                                                     Members->comm );
 
     // Finite element space of the  outward unit normal variable
     FESpace< RegionMesh, EpetraMap > VdotN_FESpace( meshPart,
@@ -524,7 +524,7 @@ darcy::run()
     // The leader process print chronoFiniteElementSpace
     if ( isLeader )
         std::cout << "Time for create the finite element spaces " <<
-                      chronoFiniteElementSpace.diff() << std::endl << std::flush;
+                  chronoFiniteElementSpace.diff() << std::endl << std::flush;
 
     // Start chronoProblem for measure the total time for create the problem
     chronoProblem.start();
@@ -587,7 +587,7 @@ darcy::run()
     // Setup phase for the linear solver
     darcySolver->setup();
 
-	// Set the source term
+    // Set the source term
     darcySolver->setSourceTerm( Members->getSource() );
 
     // Create the inverse permeability
@@ -600,7 +600,7 @@ darcy::run()
     // Set the boudary conditions
     darcySolver->setBC( bcDarcy );
 
-    switch( solverType )
+    switch ( solverType )
     {
     case DARCY_LINEAR:
         break;
@@ -698,7 +698,7 @@ darcy::run()
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
                                              hybrid_FESpace.map().getMap(Unique)->NumGlobalElements(), "\n" );
 
-    switch( solverType )
+    switch ( solverType )
     {
     case DARCY_LINEAR:
 
@@ -767,7 +767,7 @@ darcy::run()
         exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        while( !dataDarcy.dataTime()->isLastTimeStep() )
+        while ( !dataDarcy.dataTime()->isLastTimeStep() )
         {
 
             // Advance the current time of \Delta t.
@@ -820,7 +820,7 @@ darcy::run()
         exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        while( !dataDarcy.dataTime()->isLastTimeStep() )
+        while ( !dataDarcy.dataTime()->isLastTimeStep() )
         {
             // Update the primal old solution for the fixed point scheme
             ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->updatePrimalOldSolution();

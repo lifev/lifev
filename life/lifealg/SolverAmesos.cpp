@@ -41,17 +41,18 @@
 
 #include <Epetra_Comm.h>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 SolverAmesos::SolverAmesos( const comm_PtrType& comm ) :
-    M_matrix               (),
-    M_problem              (),
-    M_solver               (),
-    M_TrilinosParameterList(),
-    M_displayer            ( comm )
+        M_matrix               (),
+        M_problem              (),
+        M_solver               (),
+        M_TrilinosParameterList(),
+        M_displayer            ( comm )
 {
 }
 

@@ -56,16 +56,16 @@ namespace LifeV
   The connections may be built by calling the update method.
 */
 class DofInterface3Dto2D:
-            public DofInterfaceBase
+        public DofInterfaceBase
 {
 public:
 
 
     //! default constructor
     DofInterface3Dto2D():
-        _refFE1( 0 ),
-        _dof1( 0 )
-        {}
+            _refFE1( 0 ),
+            _dof1( 0 )
+    {}
 
     //! Constructor for interfacing Dof of the same type (LocalDofPattern)
     /*!

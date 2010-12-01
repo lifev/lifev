@@ -24,25 +24,25 @@ namespace LifeV
                                  Geo0D
   ---------------------------------------------------------------*/
 Geo0D::Geo0D()
-    :
-    MeshEntityWithBoundary( 0 ),
-    _coor()
+        :
+        MeshEntityWithBoundary( 0 ),
+        _coor()
 {
     _coor.assign( 0 );
 }
 
 Geo0D::Geo0D( ID id, bool boundary )
-    :
-    MeshEntityWithBoundary( id, boundary ),
-    _coor()
+        :
+        MeshEntityWithBoundary( id, boundary ),
+        _coor()
 {
     _coor.assign( 0 );
 }
 
 Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary )
-    :
-    MeshEntityWithBoundary( id, boundary ),
-    _coor()
+        :
+        MeshEntityWithBoundary( id, boundary ),
+        _coor()
 {
     _coor[ 0 ] = x;
     _coor[ 1 ] = y;
@@ -50,9 +50,9 @@ Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary )
 }
 
 Geo0D::Geo0D( Geo0D const & G )
-    :
-    MeshEntityWithBoundary( G.id(), G.boundary() ),
-    _coor( G._coor )
+        :
+        MeshEntityWithBoundary( G.id(), G.boundary() ),
+        _coor( G._coor )
 {
 }
 

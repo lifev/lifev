@@ -72,7 +72,7 @@ public:
                boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
-        {}
+    {}
 
     //@}
 
@@ -102,14 +102,14 @@ public:
     //@{
 
     void run()
-        {
+    {
 //             if ( vm().count( "help" ) )
 //             {
 //                 std::cout << optionsDescription() << "\n";
 //                 return;
 //             }
-            run3d();
-        }
+        run3d();
+    }
 
     //@}
 

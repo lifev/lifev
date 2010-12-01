@@ -16,7 +16,7 @@ struct CTRKcaseBase;
 
 class CTRK
 {
-  public:
+public:
 
 
     /** @name Typedefs
@@ -33,7 +33,7 @@ class CTRK
           char** argv );
 
     ~CTRK()
-        {}
+    {}
 
     //@}
 
@@ -66,7 +66,7 @@ class CTRK
     //@}
 
 
-  private:
+private:
     Epetra_Comm *M_comm;
     boost::shared_ptr<CTRKcaseBase> C_case;
 

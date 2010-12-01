@@ -39,7 +39,8 @@
 
 #include <life/lifefem/bcCond.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*! @page bc_page Boundary Conditions
 
@@ -161,7 +162,7 @@ public:
     BCHandler& operator= ( const BCHandler& BCh );
 
     //! extracting a BC in the list
-          BCBase& operator[] ( const ID& );
+    BCBase& operator[] ( const ID& );
 
     //! extracting a BC in the list
     const BCBase& operator[] ( const ID& ) const;
@@ -409,7 +410,7 @@ private:
     public:
         EssentialStatus() : M_normal( false ), M_tangential( false )
         {
-            for(UInt iComp=0; iComp<nDimensions; ++iComp)
+            for (UInt iComp=0; iComp<nDimensions; ++iComp)
                 M_components[iComp] = false;
         }
 
@@ -417,7 +418,7 @@ private:
 
         void setAllComponents()
         {
-            for(UInt iComp=0; iComp<nDimensions; ++iComp)
+            for (UInt iComp=0; iComp<nDimensions; ++iComp)
                 M_components[iComp] = true;
         }
 
@@ -465,12 +466,12 @@ template <typename Mesh>
 void
 BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 {
-	typedef typename Mesh::ElementShape GeoShape;
+    typedef typename Mesh::ElementShape GeoShape;
 
     // Some useful local variables, to save some typing
-        UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
-        UInt nDofPerEdge = dof.fe.nbDofPerEdge();   // number of Dof per edges
-        UInt nDofPerFace = dof.fe.nbDofPerFace();   // number of Dof per faces
+    UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
+    UInt nDofPerEdge = dof.fe.nbDofPerEdge();   // number of Dof per edges
+    UInt nDofPerFace = dof.fe.nbDofPerFace();   // number of Dof per faces
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
@@ -510,418 +511,418 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     // Loop on boundary faces
     // ===================================================
     for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
+    {
+        iElAd = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
+        iBElEl = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
+
+        feBd.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
+        elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker (added by Gwenol Grandperrin)
+
+        // ===================================================
+        // Vertex based Dof
+        // ===================================================
+        if ( nDofPerVert )
         {
-            iElAd = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
-            iBElEl = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
 
-            feBd.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
-            elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker (added by Gwenol Grandperrin)
+            // loop on boundary elements vertices
+            for ( ID iVeBEl = 1; iVeBEl <= nBElementV; ++iVeBEl )
+            {
 
-            // ===================================================
-            // Vertex based Dof
-            // ===================================================
-            if ( nDofPerVert )
-                {
-
-                    // loop on boundary elements vertices
-                    for ( ID iVeBEl = 1; iVeBEl <= nBElementV; ++iVeBEl )
-                        {
-
-                            marker = mesh.bElement( iBoundaryElement ).point( iVeBEl ).marker(); // vertex marker
+                marker = mesh.bElement( iBoundaryElement ).point( iVeBEl ).marker(); // vertex marker
 #ifdef TWODIM
-                            iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
+                iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
 #else // THREEDIM
-                            iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
+                iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
 #endif
 
-                            // Finding this marker on the BC list
-                            whereList.clear();
-                            where = M_bcList.begin();
-                            while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
-                                {
-                                    whereList.push_back( where );
-                                    ++where;
-                                }
-                            if ( whereList.size() == 0 )
-                                {
-                                    notFoundMarkersCurrent.insert(marker);
-                                }
-
-                            // Loop number of Dof per vertex
-                            for ( ID l = 1; l <= nDofPerVert; ++l )
-                                {
-
-                                    lDof = ( iVeBEl - 1 ) * nDofPerVert + l ; // local Dof
-
-                                    // global Dof
-                                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofPerVert + l );
-                                    bdltg( lDof ) = gDof; // local to global on this face
-
-                                    // Adding identifier
-                                    for ( UInt i = 0 ; i < whereList.size(); ++i )
-                                        {
-                                            where = whereList[ i ];
-                                            //                         std::cout << "type = " << where->type() << std::endl;
-                                            switch ( where->type() )
-                                                {
-                                                case Essential:
-                                                    // Which kind of data ?
-                                                    if ( where->dataVector() )
-                                                        { // With data vector
-                                                            where->addIdentifier( new IdentifierBase( gDof ) ); // We only need the dof number
-                                                        }
-                                                    else
-                                                        { // With user defined functions
-                                                            feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                                            where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
-                                                        }
-                                                    break;
-                                                case Natural:
-                                                    if ( where->dataVector() )
-                                                        { // With data
-                                                            switch ( where->pointerToBCVector() ->type() )
-                                                                {
-                                                                case 0:
-                                                                    // if the BC is a function or a vector which values
-                                                                    // don't need to be integrated
-                                                                    //std::cout << "adding natural identifier" << std::endl;
-                                                                    where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                                    break;
-                                                                case 1:  // if the BC is a vector of values to be integrated
-                                                                    break;
-                                                                case 2:  // if the BC is a vector of values to be integrated
-                                                                    break;
-                                                                default:
-                                                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
-                                                                }
-                                                        }
-                                                    else
-                                                        {}
-                                                    break;
-                                                case Mixte:
-                                                    // Why kind of data ?
-                                                    // vincent please check again for your Mixte-FE it doesn't work for Q1
-                                                    //       if ( where->dataVector()  ) { // With data vector
-                                                    //        where->addIdentifier( new IdentifierNatural(gDof) );
-                                                    //       }
-                                                    break;
-                                                case Flux:
-                                                    if ( where->dataVector() )
-                                                        { // With data
-                                                            switch ( where->pointerToBCVector() ->type() )
-                                                                {
-                                                                case 0:
-                                                                    // if the BC is a function or a vector which values
-                                                                    // don't need to be integrated
-                                                                    where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                                    break;
-                                                                case 1:  // if the BC is a vector of values to be integrated
-                                                                    where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                                    break;
-                                                                case 2:  // if the BC is a vector of values to be integrated
-                                                                    break;
-                                                                default:
-                                                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
-                                                                }
-                                                        }
-                                                    else
-                                                        {
-                                                            //                                        feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                                            //                                        where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
-//                                                             std::cout << "adding flux identifier " << gDof << std::endl;
-//                                                             where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                        }
-                                                  break;
-						case Resistance:
-
-						  if ( where->dataVector() )
-
-						  where->addIdentifierIdGlobal( new IdentifierNatural( gDof ) );
-
-						  else
-						    { // With user defined functions
-						      // feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-						      //where->addIdentifierIdGlobal( new IdentifierEssential( gDof, x, y, z ) );
-						    }
-                                                    break;
-						default:
-					            ERROR_MSG( "This boundary condition type is not yet implemented" );
-						}
-					}
-                                }
-                        }
-                }
-
-
-            // ===================================================
-            // Edge based Dof
-            // ===================================================
-            if ( nDofPerEdge )
-                {
-                    // loop on boundary element's edges
-                    for ( ID iLocalBElement = 1; iLocalBElement <= nBElementE; ++iLocalBElement )
-                        {
-#ifdef TWODIM
-                            iEdEl = iBElEl; // local edge number (in element)
-#else // THREEDIM
-                            iEdEl = GeoShape::fToE( iBElEl, iLocalBElement ).first; // local edge number (in element)
-#endif
-                            marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
-                            //if(marker!= elementMarker){continue;}
-                            // Finding this marker on the BC list
-                            whereList.clear();
-                            where = M_bcList.begin();
-                            while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
-                                {
-                                    whereList.push_back( where );
-                                    ++where;
-                                }
-                            if ( whereList.size() == 0 )
-                                {
-                                    notFoundMarkersCurrent.insert(marker);
-                                }
-
-                            // Loop number of Dof per edge
-                            for ( ID l = 1; l <= nDofPerEdge; ++l )
-                                {
-
-                                    lDof = nDofBElV + ( iLocalBElement - 1 ) * nDofPerEdge + l ; // local Dof
-                                    gDof = dof.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofPerEdge + l ); // global Dof
-                                    bdltg( lDof ) = gDof; // local to global on this face
-
-                                    // Adding identifier
-                                    for ( UInt i = 0 ; i < whereList.size(); ++i )
-                                        {
-                                            where = whereList[ i ];
-                                            switch ( where->type() )
-                                                {
-                                                case Essential:
-                                                    // Which kind of data ?
-                                                    if ( where->dataVector() )
-                                                        { // With data vector
-                                                            where->addIdentifier( new IdentifierBase( gDof ) );
-                                                        }
-                                                    else
-                                                        { // With user defined functions
-                                                            feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                                            where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
-                                                        }
-                                                    break;
-                                                case Natural:
-                                                    // Which kind of data ?
-                                                    if ( where->dataVector() )
-                                                        { // With data vector
-                                                            switch ( where->pointerToBCVector() ->type() )
-                                                                {
-                                                                case 0:
-                                                                    // if the BC is a function or a vector which values
-                                                                    // don't need to be integrated
-                                                                    where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                                    break;
-                                                                case 1:  // if the BC is a vector of values to be integrated
-                                                                    break;
-                                                                case 2:  // if the BC is a vector of values to be integrated
-                                                                    break;
-                                                                default:
-                                                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
-                                                                }
-                                                        }
-                                                    break;
-                                                case Mixte:
-                                                    // Which kind of data ?
-                                                    if ( where->dataVector() )
-                                                        { // With data vector
-                                                            where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                        }
-                                                    break;
-                                                case Flux:
-						  break;
-						case Resistance:
-						  // Which kind of data ?
-						  if ( where->dataVector() )
-						    { // With data vector
-						      where->addIdentifier( new IdentifierNatural( gDof ) );
-
-						      where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
-						    }
-						  break;
-                                                default:
-						  ERROR_MSG( "This boundary condition type is not yet implemented" );
-                                                }
-                                        }
-                                }
-                        }
-                }
-
-
-#ifndef TWODIM
-            // ===================================================
-            // Face based Dof
-            // ===================================================
-            marker = mesh.bElement( iBoundaryElement ).marker(); // edge marker
-
-            // Finding this marker on the BC list
-            whereList.clear();
-            where = M_bcList.begin();
-
-            while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
+                // Finding this marker on the BC list
+                whereList.clear();
+                where = M_bcList.begin();
+                while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
                 {
                     whereList.push_back( where );
                     ++where;
                 }
-            if ( whereList.size() == 0 )
+                if ( whereList.size() == 0 )
                 {
                     notFoundMarkersCurrent.insert(marker);
                 }
 
-            // Adding identifier
-            for ( UInt i = 0 ; i < whereList.size(); ++i )
+                // Loop number of Dof per vertex
+                for ( ID l = 1; l <= nDofPerVert; ++l )
                 {
-                    where = whereList[ i ];
-                    switch ( where->type() )
+
+                    lDof = ( iVeBEl - 1 ) * nDofPerVert + l ; // local Dof
+
+                    // global Dof
+                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofPerVert + l );
+                    bdltg( lDof ) = gDof; // local to global on this face
+
+                    // Adding identifier
+                    for ( UInt i = 0 ; i < whereList.size(); ++i )
+                    {
+                        where = whereList[ i ];
+                        //                         std::cout << "type = " << where->type() << std::endl;
+                        switch ( where->type() )
                         {
                         case Essential:
-                            // Loop on number of Dof per face
-                            for ( ID l = 1; l <= nDofPerFace; ++l )
-                                {
-                                    lDof = nDofBElE + nDofBElV + l; // local Dof
-                                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-                                    // Why kind of data ?
-                                    if ( where->dataVector() )
-                                        { // With data vector
-                                            where->addIdentifier( new IdentifierBase( gDof ) );
-                                        }
-                                    else
-                                        { // With user defined functions
-                                            feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                            where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
-                                        }
-                                }
+                            // Which kind of data ?
+                            if ( where->dataVector() )
+                            { // With data vector
+                                where->addIdentifier( new IdentifierBase( gDof ) ); // We only need the dof number
+                            }
+                            else
+                            { // With user defined functions
+                                feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                            }
                             break;
                         case Natural:
-
-                            // Why kind of data ?
-                            // vincent please check again for your Mixte-FE it doesn't work for Q1
                             if ( where->dataVector() )
-                                { // With data vector
-                                    UInt type = where->pointerToBCVector()->type() ;
-                                    if ( type == 0 )
-                                        {
-                                            // if the BC is a vector which values don't need to be integrated
-                                            for ( ID l = 1; l <= nDofPerFace; ++l )
-                                                {
-                                                    lDof = nDofBElE + nDofBElV + l; // local Dof
-                                                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-                                                    where->addIdentifier( new IdentifierNatural( gDof ) );
-                                                }
-                                        }
-                                    else if ( (type == 1) || (type == 2) )
-                                        {
-                                            // Loop on number of Dof per face
-                                            for ( ID l = 1; l <= nDofPerFace; ++l )
-                                                {
-                                                    lDof = nDofBElE + nDofBElV + l; // local Dof
-                                                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-                                                    std::cout << lDof << " to " << gDof << std::endl;
-                                                    bdltg( lDof ) = gDof; // local to global on this face
-                                                }
-                                            where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
-                                        }
-
-                                    else
-                                        ERROR_MSG( "This BCVector type is not yet implemented" );
-
-                                }
-                            else
+                            { // With data
+                                switch ( where->pointerToBCVector() ->type() )
                                 {
-                                    // Loop on number of Dof per face
-                                    for ( ID l = 1; l <= nDofPerFace; ++l )
-                                        {
-                                            lDof = nDofBElE + nDofBElV + l; // local Dof
-                                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-                                            bdltg( lDof ) = gDof; // local to global on this face
-                                        }
-                                    where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                                case 0:
+                                    // if the BC is a function or a vector which values
+                                    // don't need to be integrated
+                                    //std::cout << "adding natural identifier" << std::endl;
+                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    break;
+                                case 1:  // if the BC is a vector of values to be integrated
+                                    break;
+                                case 2:  // if the BC is a vector of values to be integrated
+                                    break;
+                                default:
+                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
                                 }
+                            }
+                            else
+                                {}
                             break;
                         case Mixte:
                             // Why kind of data ?
                             // vincent please check again for your Mixte-FE it doesn't work for Q1
-                            // if ( where->dataVector()  ) { // With data vector
-                            //   for (ID l=1; l<=nDofPerFace; ++l) {
-                            //     lDof = nDofBElE + nDofBElV + l; // local Dof
-                            //     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
-                            //     where->addIdentifier( new IdentifierNatural(gDof) );
-                            //   }
-                            // }
-                            // else {
-                            // Loop on number of Dof per face
-                            for ( ID l = 1; l <= nDofPerFace; ++l )
-                                {
-                                    lDof = nDofBElE + nDofBElV + l; // local Dof
-                                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-                                    bdltg( lDof ) = gDof; // local to global on this face
-                                }
-                            where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
-                            // }
+                            //       if ( where->dataVector()  ) { // With data vector
+                            //        where->addIdentifier( new IdentifierNatural(gDof) );
+                            //       }
                             break;
                         case Flux:
+                            if ( where->dataVector() )
+                            { // With data
+                                switch ( where->pointerToBCVector() ->type() )
+                                {
+                                case 0:
+                                    // if the BC is a function or a vector which values
+                                    // don't need to be integrated
+                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    break;
+                                case 1:  // if the BC is a vector of values to be integrated
+                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    break;
+                                case 2:  // if the BC is a vector of values to be integrated
+                                    break;
+                                default:
+                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
+                                }
+                            }
+                            else
+                            {
+                                //                                        feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                //                                        where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+//                                                             std::cout << "adding flux identifier " << gDof << std::endl;
+//                                                             where->addIdentifier( new IdentifierNatural( gDof ) );
+                            }
+                            break;
+                        case Resistance:
+
+                            if ( where->dataVector() )
+
+                                where->addIdentifierIdGlobal( new IdentifierNatural( gDof ) );
+
+                            else
+                            { // With user defined functions
+                                // feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                //where->addIdentifierIdGlobal( new IdentifierEssential( gDof, x, y, z ) );
+                            }
+                            break;
+                        default:
+                            ERROR_MSG( "This boundary condition type is not yet implemented" );
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // ===================================================
+        // Edge based Dof
+        // ===================================================
+        if ( nDofPerEdge )
+        {
+            // loop on boundary element's edges
+            for ( ID iLocalBElement = 1; iLocalBElement <= nBElementE; ++iLocalBElement )
+            {
+#ifdef TWODIM
+                iEdEl = iBElEl; // local edge number (in element)
+#else // THREEDIM
+                iEdEl = GeoShape::fToE( iBElEl, iLocalBElement ).first; // local edge number (in element)
+#endif
+                marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
+                //if(marker!= elementMarker){continue;}
+                // Finding this marker on the BC list
+                whereList.clear();
+                where = M_bcList.begin();
+                while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
+                {
+                    whereList.push_back( where );
+                    ++where;
+                }
+                if ( whereList.size() == 0 )
+                {
+                    notFoundMarkersCurrent.insert(marker);
+                }
+
+                // Loop number of Dof per edge
+                for ( ID l = 1; l <= nDofPerEdge; ++l )
+                {
+
+                    lDof = nDofBElV + ( iLocalBElement - 1 ) * nDofPerEdge + l ; // local Dof
+                    gDof = dof.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofPerEdge + l ); // global Dof
+                    bdltg( lDof ) = gDof; // local to global on this face
+
+                    // Adding identifier
+                    for ( UInt i = 0 ; i < whereList.size(); ++i )
+                    {
+                        where = whereList[ i ];
+                        switch ( where->type() )
+                        {
+                        case Essential:
+                            // Which kind of data ?
+                            if ( where->dataVector() )
+                            { // With data vector
+                                where->addIdentifier( new IdentifierBase( gDof ) );
+                            }
+                            else
+                            { // With user defined functions
+                                feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                            }
+                            break;
+                        case Natural:
+                            // Which kind of data ?
+                            if ( where->dataVector() )
+                            { // With data vector
+                                switch ( where->pointerToBCVector() ->type() )
+                                {
+                                case 0:
+                                    // if the BC is a function or a vector which values
+                                    // don't need to be integrated
+                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    break;
+                                case 1:  // if the BC is a vector of values to be integrated
+                                    break;
+                                case 2:  // if the BC is a vector of values to be integrated
+                                    break;
+                                default:
+                                    ERROR_MSG( "This boundary condition type is not yet implemented" );
+                                }
+                            }
+                            break;
+                        case Mixte:
+                            // Which kind of data ?
+                            if ( where->dataVector() )
+                            { // With data vector
+                                where->addIdentifier( new IdentifierNatural( gDof ) );
+                            }
+                            break;
+                        case Flux:
+                            break;
+                        case Resistance:
+                            // Which kind of data ?
+                            if ( where->dataVector() )
+                            { // With data vector
+                                where->addIdentifier( new IdentifierNatural( gDof ) );
+
+                                where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
+                            }
+                            break;
+                        default:
+                            ERROR_MSG( "This boundary condition type is not yet implemented" );
+                        }
+                    }
+                }
+            }
+        }
+
+
+#ifndef TWODIM
+        // ===================================================
+        // Face based Dof
+        // ===================================================
+        marker = mesh.bElement( iBoundaryElement ).marker(); // edge marker
+
+        // Finding this marker on the BC list
+        whereList.clear();
+        where = M_bcList.begin();
+
+        while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
+        {
+            whereList.push_back( where );
+            ++where;
+        }
+        if ( whereList.size() == 0 )
+        {
+            notFoundMarkersCurrent.insert(marker);
+        }
+
+        // Adding identifier
+        for ( UInt i = 0 ; i < whereList.size(); ++i )
+        {
+            where = whereList[ i ];
+            switch ( where->type() )
+            {
+            case Essential:
+                // Loop on number of Dof per face
+                for ( ID l = 1; l <= nDofPerFace; ++l )
+                {
+                    lDof = nDofBElE + nDofBElV + l; // local Dof
+                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                    // Why kind of data ?
+                    if ( where->dataVector() )
+                    { // With data vector
+                        where->addIdentifier( new IdentifierBase( gDof ) );
+                    }
+                    else
+                    { // With user defined functions
+                        feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                        where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                    }
+                }
+                break;
+            case Natural:
+
+                // Why kind of data ?
+                // vincent please check again for your Mixte-FE it doesn't work for Q1
+                if ( where->dataVector() )
+                { // With data vector
+                    UInt type = where->pointerToBCVector()->type() ;
+                    if ( type == 0 )
+                    {
+                        // if the BC is a vector which values don't need to be integrated
+                        for ( ID l = 1; l <= nDofPerFace; ++l )
+                        {
+                            lDof = nDofBElE + nDofBElV + l; // local Dof
+                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                            where->addIdentifier( new IdentifierNatural( gDof ) );
+                        }
+                    }
+                    else if ( (type == 1) || (type == 2) )
+                    {
+                        // Loop on number of Dof per face
+                        for ( ID l = 1; l <= nDofPerFace; ++l )
+                        {
+                            lDof = nDofBElE + nDofBElV + l; // local Dof
+                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                            std::cout << lDof << " to " << gDof << std::endl;
+                            bdltg( lDof ) = gDof; // local to global on this face
+                        }
+                        where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                    }
+
+                    else
+                        ERROR_MSG( "This BCVector type is not yet implemented" );
+
+                }
+                else
+                {
+                    // Loop on number of Dof per face
+                    for ( ID l = 1; l <= nDofPerFace; ++l )
+                    {
+                        lDof = nDofBElE + nDofBElV + l; // local Dof
+                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                        bdltg( lDof ) = gDof; // local to global on this face
+                    }
+                    where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                }
+                break;
+            case Mixte:
+                // Why kind of data ?
+                // vincent please check again for your Mixte-FE it doesn't work for Q1
+                // if ( where->dataVector()  ) { // With data vector
+                //   for (ID l=1; l<=nDofPerFace; ++l) {
+                //     lDof = nDofBElE + nDofBElV + l; // local Dof
+                //     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
+                //     where->addIdentifier( new IdentifierNatural(gDof) );
+                //   }
+                // }
+                // else {
+                // Loop on number of Dof per face
+                for ( ID l = 1; l <= nDofPerFace; ++l )
+                {
+                    lDof = nDofBElE + nDofBElV + l; // local Dof
+                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                    bdltg( lDof ) = gDof; // local to global on this face
+                }
+                where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                // }
+                break;
+            case Flux:
 //                             std::cout << iBoundaryElement << " = ";
 //                             for (Int ii = 0; ii < bdltg.size(); ++ii)
 //                                 std::cout << bdltg[ii] << " ";
 //                             std::cout << std::endl;
-                            where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
-                            break;
+                where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                break;
 
-			case Resistance:
-                          if ( where->dataVector()  )
-			  {
+            case Resistance:
+                if ( where->dataVector()  )
+                {
 
-			   for ( ID l = 1; l <= nDofPerFace; ++l )
-			     {
-			       lDof = nDofBElE + nDofBElV + l; // local Dof
-			       gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-			       where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
-			       bdltg( lDof ) = gDof; // local to global on this face
-			     }
-			   where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
-			  }
-			  break;
-			default:
-			  ERROR_MSG( "This boundary condition type is not yet implemented" );
-                        }
+                    for ( ID l = 1; l <= nDofPerFace; ++l )
+                    {
+                        lDof = nDofBElE + nDofBElV + l; // local Dof
+                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                        where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
+                        bdltg( lDof ) = gDof; // local to global on this face
+                    }
+                    where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                 }
+                break;
+            default:
+                ERROR_MSG( "This boundary condition type is not yet implemented" );
+            }
+        }
 
 #endif
-        }
+    }
 
     std::set<EntityFlag> notFoundMarkersNew;
 
-    for( std::set<EntityFlag>::iterator it = notFoundMarkersCurrent.begin(); it != notFoundMarkersCurrent.end(); ++it )
+    for ( std::set<EntityFlag>::iterator it = notFoundMarkersCurrent.begin(); it != notFoundMarkersCurrent.end(); ++it )
+    {
+        if ( M_notFoundMarkers.find( *it ) == M_notFoundMarkers.end() )
         {
-	  if ( M_notFoundMarkers.find( *it ) == M_notFoundMarkers.end() )
-	    {
-	      notFoundMarkersNew.insert( *it );
-	    }
+            notFoundMarkersNew.insert( *it );
         }
+    }
 
 
-    if( notFoundMarkersNew.size() > 0 )
-      {
+    if ( notFoundMarkersNew.size() > 0 )
+    {
 
 #ifdef DEBUG
-          Debug(5010) <<
-              "WARNING -- BCHandler::bdUpdate()\n" <<
-              "  boundary degrees of freedom with the following markers\n" <<
-              "  have no boundary condition set: ";
-	for( std::set<EntityFlag>::iterator it = notFoundMarkersNew.begin();
-	     it != notFoundMarkersNew.end(); ++it )
-                {
-                    Debug(5010) << *it << " ";
-                }
-            Debug(5010) << "\n";
-#endif
+        Debug(5010) <<
+        "WARNING -- BCHandler::bdUpdate()\n" <<
+        "  boundary degrees of freedom with the following markers\n" <<
+        "  have no boundary condition set: ";
+        for ( std::set<EntityFlag>::iterator it = notFoundMarkersNew.begin();
+                it != notFoundMarkersNew.end(); ++it )
+        {
+            Debug(5010) << *it << " ";
         }
+        Debug(5010) << "\n";
+#endif
+    }
 
     M_notFoundMarkers = notFoundMarkersCurrent;
 
@@ -931,10 +932,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     // We finalise de set of identifiers by transfering it elements to a std::vector
     // ============================================================================
     for ( Iterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
-        {
-            it->finalise();
-	    it->finaliseIdGlobal();
-        }
+    {
+        it->finalise();
+        it->finaliseIdGlobal();
+    }
 
     M_bdUpdateDone = true;
 } // bdUpdate

@@ -41,10 +41,10 @@
 // ===================================================
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <mpi.h>
-	#include <Epetra_MpiComm.h>
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/GetPot.hpp>
@@ -64,10 +64,10 @@ using namespace LifeV;
 int main(int argc, char** argv)
 {
 
-	#ifdef HAVE_MPI
-		MPI_Init(&argc, &argv);
-		std::cout << "MPI Initialization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
 
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow( "data", 2, "-f", "--file" );
@@ -90,10 +90,10 @@ int main(int argc, char** argv)
     std::cout << "E: " << E << std::endl;
 
 
-	#ifdef HAVE_MPI
-		MPI_Finalize();
-		std::cout << "MPI Finalization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
 
     return( EXIT_SUCCESS );
 }

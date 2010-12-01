@@ -55,9 +55,9 @@ SUBROUTINE_F77 F77NAME( readmesh2d ) ( I_F77 & ne, I_F77 & np,
 // subroutine read_mesh2d_head(filename,ne,np,nptot,npe,nb,nx,npc,ierr)
 
 SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
-        I_F77 & nptot, I_F77 & npe, I_F77 & nb,
-        I_F77 & nps, I_F77 & nx,
-        I_F77 & npc, I_F77 & ierr, CHARACTER filename );
+                                           I_F77 & nptot, I_F77 & npe, I_F77 & nb,
+                                           I_F77 & nps, I_F77 & nx,
+                                           I_F77 & npc, I_F77 & ierr, CHARACTER filename );
 //! Reeads a mesh in MEsh2d (LF) format.
 template <typename RegionMesh2D>
 bool
@@ -195,14 +195,14 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
 
 
     // first the vertices
-    for ( i = 0;i < nVe;i++ )
+    for ( i = 0; i < nVe; i++ )
     {
         pp = &mesh.addPoint( i < nBVe );
         pp->x() = Real( coor( 0, i ) );
         pp->y() = Real( coor( 1, i ) );
     }
     // now the points
-    for ( i = nVe;i < nPo;i++ )
+    for ( i = nVe; i < nPo; i++ )
     {
         pp = &mesh.addPoint( i - nVe < nBPo );
         pp->x() = Real( coor( 0, i ) );
@@ -213,7 +213,7 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
     ID ia1;
     long int test;
     EntityFlag ibc;
-    for ( i = 0;i < nBEd;i++ )
+    for ( i = 0; i < nBEd; i++ )
     {
         pe = &mesh.addEdge( true ); // Only boundary edges.
         p1 = ID( ib( 0, i ) ); // Explicit conversion to ID
@@ -245,7 +245,7 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
     std::cout << "Boundary Edges Created " << std::endl;
 
     // Finally the triangular faces!
-    for ( i = 0;i < nFa;i++ )
+    for ( i = 0; i < nFa; i++ )
     {
         p1 = ID( iel( 0, i ) );
         p2 = ID( iel( 1, i ) );
@@ -285,8 +285,8 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
 template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
-             const std::string & filename,
-             EntityFlag regionFlag )
+              const std::string & filename,
+              EntityFlag regionFlag )
 {
     std::ifstream __is ( filename.c_str() );
 
@@ -306,13 +306,13 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<UInt> __whichboundary(__n);
     Debug() << "reading "<< __n << " nodes\n";
     std::map<int,int> itoii;
-    for( UInt __i = 0; __i < __n;++__i )
+    for ( UInt __i = 0; __i < __n; ++__i )
     {
         UInt __ni;
         __is >> __ni
-             >> __x[3*__i]
-             >> __x[3*__i+1]
-             >> __x[3*__i+2];
+        >> __x[3*__i]
+        >> __x[3*__i+1]
+        >> __x[3*__i+2];
 
         itoii[__ni-1] = __i;
     }
@@ -333,14 +333,14 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<int> __gt(16);
     __gt.assign( 16, 0 );
 
-    for( UInt __i = 0; __i < __nele;++__i )
+    for ( UInt __i = 0; __i < __nele; ++__i )
     {
         int __ne, __t, __tag, __np, __dummy;
         __is >> __ne
-             >> __t
-             >> __tag
-             >> __dummy
-             >> __np;
+        >> __t
+        >> __tag
+        >> __dummy
+        >> __np;
 
 
         ++__gt[ __t ];
@@ -380,21 +380,21 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
 
     __isonboundary.assign( __n, false );
     __whichboundary.assign( __n, 0 );
-    for( UInt __i = 0; __i < __nele;++__i )
+    for ( UInt __i = 0; __i < __nele; ++__i )
     {
-        switch( __etype[__i] )
+        switch ( __etype[__i] )
         {
             // triangular faces (linear)
-            case 2:
-            {
-                __isonboundary[ __e[__i][0]-1 ] = true;
-                __isonboundary[ __e[__i][1]-1 ] = true;
-                __isonboundary[ __e[__i][2]-1 ] = true;
+        case 2:
+        {
+            __isonboundary[ __e[__i][0]-1 ] = true;
+            __isonboundary[ __e[__i][1]-1 ] = true;
+            __isonboundary[ __e[__i][2]-1 ] = true;
 
-                __whichboundary[__e[__i][0]-1 ] = __et[__i];
-                __whichboundary[__e[__i][1]-1 ] = __et[__i];
-                __whichboundary[__e[__i][2]-1 ] = __et[__i];
-            }
+            __whichboundary[__e[__i][0]-1 ] = __et[__i];
+            __whichboundary[__e[__i][1]-1 ] = __et[__i];
+            __whichboundary[__e[__i][2]-1 ] = __et[__i];
+        }
         }
     }
     // add the point to the mesh
@@ -410,7 +410,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     Debug() << "number of vertices : " << mesh.numVertices() << "\n";
     Debug() << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 
-    for( UInt __i = 0; __i < __n;++__i )
+    for ( UInt __i = 0; __i < __n; ++__i )
     {
         pp = &mesh.addPoint( __isonboundary[ __i ] );
         pp->setMarker( __whichboundary[__i] );
@@ -419,44 +419,44 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     }
 
     // add the element to the mesh
-    for( UInt __i = 0; __i < __nele;++__i )
+    for ( UInt __i = 0; __i < __nele; ++__i )
     {
-        switch( __etype[__i] )
+        switch ( __etype[__i] )
         {
             // segment(linear)
-            case 1:
-            {
-                pe = &( mesh.addEdge( true ) );
-                pe->setMarker( EntityFlag( __et[__i] ) );
-                pe->setPoint( 1, mesh.point( __e[__i][0] ) );
-                pe->setPoint( 2, mesh.point( __e[__i][1] ) );
+        case 1:
+        {
+            pe = &( mesh.addEdge( true ) );
+            pe->setMarker( EntityFlag( __et[__i] ) );
+            pe->setPoint( 1, mesh.point( __e[__i][0] ) );
+            pe->setPoint( 2, mesh.point( __e[__i][1] ) );
 
 
 
-            }
-            break;
-            // triangular faces (linear)
-            case 2:
-            {
-                pf = &( mesh.addFace() );
-                pf->setMarker( EntityFlag( __et[__i] ) );
-                pf->setPoint( 1, mesh.point( __e[__i][0] ) );
-                pf->setPoint( 2, mesh.point( __e[__i][1] ) );
-                pf->setPoint( 3, mesh.point( __e[__i][2] ) );
+        }
+        break;
+        // triangular faces (linear)
+        case 2:
+        {
+            pf = &( mesh.addFace() );
+            pf->setMarker( EntityFlag( __et[__i] ) );
+            pf->setPoint( 1, mesh.point( __e[__i][0] ) );
+            pf->setPoint( 2, mesh.point( __e[__i][1] ) );
+            pf->setPoint( 3, mesh.point( __e[__i][2] ) );
 
-            }
-            break;
-            // quadrangular faces(linear)
-            case 3:
-            {
-                pf = &( mesh.addFace() );
-                pf->setMarker( EntityFlag( __et[__i] ) );
-                pf->setPoint( 1, mesh.point( __e[__i][0] ) );
-                pf->setPoint( 2, mesh.point( __e[__i][1] ) );
-                pf->setPoint( 3, mesh.point( __e[__i][2] ) );
-                pf->setPoint( 4, mesh.point( __e[__i][3] ) );
-            }
-            break;
+        }
+        break;
+        // quadrangular faces(linear)
+        case 3:
+        {
+            pf = &( mesh.addFace() );
+            pf->setMarker( EntityFlag( __et[__i] ) );
+            pf->setPoint( 1, mesh.point( __e[__i][0] ) );
+            pf->setPoint( 2, mesh.point( __e[__i][1] ) );
+            pf->setPoint( 3, mesh.point( __e[__i][2] ) );
+            pf->setPoint( 4, mesh.point( __e[__i][3] ) );
+        }
+        break;
         }
     }
     return true;
@@ -464,25 +464,25 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
 
 
 
-  //
-  // FREEFEM
-  //
+//
+// FREEFEM
+//
 
-  /**
-  read a freefem mesh (2D) file and store it in a RegionMesh2D
+/**
+read a freefem mesh (2D) file and store it in a RegionMesh2D
 
-  @param mesh mesh data structure to fill in
-  @param filename name of the freefem mesh file  to read
-  @param regionFlag identifier for the region
-  @return true if everything went fine, false otherwise
-   */
+@param mesh mesh data structure to fill in
+@param filename name of the freefem mesh file  to read
+@param regionFlag identifier for the region
+@return true if everything went fine, false otherwise
+ */
 template <typename GeoShape, typename MC>
 bool
-  readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
-      const std::string & filename,
-      EntityFlag regionFlag,
-      bool )
-  {
+readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
+                 const std::string & filename,
+                 EntityFlag regionFlag,
+                 bool )
+{
     BareItemsHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
 
@@ -509,12 +509,12 @@ bool
     // count the number of nodes on the boundary
     UInt __nbv(0);
     // reading vertices
-    for( UInt __i = 0; __i < __nv;++__i )
-      {
+    for ( UInt __i = 0; __i < __nv; ++__i )
+    {
         __is >> __x[2*__i] >> __x[2*__i+1] >> __whichboundary[__i];
         __isonboundary[__i] = __whichboundary[__i];
         __nbv += __isonboundary[__i];
-      }
+    }
 
     // second section: read the list of triangles
     // on each row find the three nodes and the label for each triangle
@@ -525,8 +525,8 @@ bool
     std::map<UInt,UInt> edge_to_ad_first, edge_to_pos_first;
 
     // reading vertices
-    for( UInt __i = 0; __i < __nt;++__i )
-      {
+    for ( UInt __i = 0; __i < __nt; ++__i )
+    {
         __is >> __triangle_nodes[3*__i]
         >> __triangle_nodes[3*__i+1]
         >> __triangle_nodes[3*__i+2]
@@ -554,7 +554,7 @@ bool
         edge_to_ad_first[_check.first] = __i+1;
         edge_to_pos_first[_check.first] = 3;
 
-      }
+    }
 
     //    (__triangle[3*i+2] > __triangle[3*i+1])
 
@@ -564,10 +564,10 @@ bool
     std::vector<int> __edge_nodes(2*__ne);
     std::vector<int> __edge_label(__ne);
     // reading edges
-    for( UInt __i = 0; __i < __ne;++__i )
-      {
+    for ( UInt __i = 0; __i < __ne; ++__i )
+    {
         __is >> __edge_nodes[2*__i] >> __edge_nodes[2*__i+1] >> __edge_label[__i];
-      }
+    }
 
     // Set mesh properties
     // Add Marker to list of Markers
@@ -598,8 +598,8 @@ bool
     Debug() << "number of vertices : " << mesh.numVertices() << "\n";
     Debug() << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 
-    for( UInt __i = 0; __i < __nv;++__i )
-      {
+    for ( UInt __i = 0; __i < __nv; ++__i )
+    {
         pp = &mesh.addPoint( __isonboundary[ __i ] );
         pp->setMarker( __whichboundary[__i] );
         pp->x() = __x[2*__i];
@@ -609,11 +609,11 @@ bool
 
         mesh.localToGlobalNode().insert(std::make_pair(__i+1, __i+1));
         mesh.globalToLocalNode().insert(std::make_pair(__i+1, __i+1));
-      }
+    }
 
     // add the edges to the mesh
-    for( UInt __i = 0; __i < __ne;++__i )
-      {
+    for ( UInt __i = 0; __i < __ne; ++__i )
+    {
         pe = &( mesh.addEdge( true ) );
         pe->setMarker( EntityFlag( __edge_label[__i] ) );
         pe->setPoint( 1, mesh.point( __edge_nodes[2*__i] ) );
@@ -622,11 +622,11 @@ bool
         UInt map_it( _be.id(_edge.first) );
         pe->ad_first()=edge_to_ad_first[map_it];
         pe->pos_first()=edge_to_pos_first[map_it];
-      }
+    }
 
     // add the triangles to the mesh
-    for( UInt __i = 0; __i < __nt;++__i )
-      {
+    for ( UInt __i = 0; __i < __nt; ++__i )
+    {
         pf = &( mesh.addFace() );
         pf->setId     ( __i + 1 );
         pf->setLocalId( __i + 1);
@@ -634,10 +634,10 @@ bool
         pf->setPoint( 1, mesh.point( __triangle_nodes[3*__i] ) );
         pf->setPoint( 2, mesh.point( __triangle_nodes[3*__i+1] ) );
         pf->setPoint( 3, mesh.point( __triangle_nodes[3*__i+2] ) );
-      }
+    }
 
     return true;
-  }
+}
 
 }
 #endif

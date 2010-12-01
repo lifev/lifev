@@ -55,7 +55,7 @@ class DataTime
 public:
 
     //! @name Constructors & Destructor
-	//@{
+    //@{
 
     //! Empty Constructor
     DataTime();
@@ -168,7 +168,7 @@ public:
 
 
     //! @name Get Methods
-	//@{
+    //@{
 
     //! Get the initial time step
     /*!

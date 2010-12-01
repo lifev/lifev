@@ -169,43 +169,45 @@ Real dirichlet( const Real& /* t */,
 
 // Boundary condition of Neumann
 Real neumann1( const Real& /* t */,
-              const Real& x,
-              const Real& y,
-              const Real& z,
-              const ID&   icomp)
+               const Real& x,
+               const Real& y,
+               const Real& z,
+               const ID&   icomp)
 {
-	switch(icomp){
-  		case 1:   //! Dx
-            return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
-		break;
-		case 2:   //! Dy
-            return 0.;
-	 	break;
-  		case 3:   //! Dz
-    		return 0.;
-    	break;
-  	}
-	return 0.;
+    switch (icomp)
+    {
+    case 1:   //! Dx
+        return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
+        break;
+    case 2:   //! Dy
+        return 0.;
+        break;
+    case 3:   //! Dz
+        return 0.;
+        break;
+    }
+    return 0.;
 }
 
 Real neumann2( const Real& /* t */,
-              const Real& x,
-              const Real& y,
-              const Real& z,
-              const ID&   icomp)
+               const Real& x,
+               const Real& y,
+               const Real& z,
+               const ID&   icomp)
 {
-	switch(icomp){
-  		case 1:   //! Dx
-            return  4.*x*y*y + 2.*x*x*y + 12.;
-		break;
-		case 2:   //! Dy
-            return 0.;
-	 	break;
-  		case 3:   //! Dz
-    		return 0.;
-    	break;
-  	}
-	return 0.;
+    switch (icomp)
+    {
+    case 1:   //! Dx
+        return  4.*x*y*y + 2.*x*x*y + 12.;
+        break;
+    case 2:   //! Dy
+        return 0.;
+        break;
+    case 3:   //! Dz
+        return 0.;
+        break;
+    }
+    return 0.;
 }
 
 // Boundary condition of Robin
@@ -242,7 +244,7 @@ Real analyticalFlux( const Real& /*t*/,
                      const ID& icomp)
 {
 
-    switch( icomp )
+    switch ( icomp )
     {
     case 1:
         return -1. * (4.*x*y*y + 12. + 2.*x*x*y);

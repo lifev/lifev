@@ -71,7 +71,8 @@
 #include <string>
 #include <iostream>
 
-namespace LifeV {
+namespace LifeV
+{
 
 enum NSStabilization
 {
@@ -102,19 +103,19 @@ public:
     //@}
 
 
-	//! @name Constructors & Destructor
-	//@{
+    //! @name Constructors & Destructor
+    //@{
 
     //! Empty Constructor
     DataNavierStokes();
 
-	//! Copy constructor
-	/*!
-	 * @param dataNavierStokes DataNavierStokes
-	 */
-	DataNavierStokes( const DataNavierStokes& dataNavierStokes );
+    //! Copy constructor
+    /*!
+     * @param dataNavierStokes DataNavierStokes
+     */
+    DataNavierStokes( const DataNavierStokes& dataNavierStokes );
 
-	//@}
+    //@}
 
 
     //! @name Operators
@@ -129,7 +130,7 @@ public:
     //@}
 
 
-	//! @name Methods
+    //! @name Methods
     //@{
 
     //! Read the dataFile and set all the quantities
@@ -175,11 +176,12 @@ public:
 
     void setStokes             ( const bool Stokes )     { M_Stokes = Stokes; }
 
-    void setSemiImplicit       ( const bool SI )         {
-                                                           M_semiImplicit = SI;
-                                                           if ( M_semiImplicit )
-                                                        	   setUseShapeDerivatives(false);
-                                                         }
+    void setSemiImplicit       ( const bool SI )
+    {
+        M_semiImplicit = SI;
+        if ( M_semiImplicit )
+            setUseShapeDerivatives(false);
+    }
 
     void setUseShapeDerivatives( const bool SD )         { M_shapeDerivatives = SD; }
 

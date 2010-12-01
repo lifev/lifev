@@ -24,14 +24,14 @@
 namespace LifeV
 {
 fixedPoint::fixedPoint():
-    super(),
-    M_aitkFS(),
-    //    M_displacement(),
-    //    M_stress(),
-    //    M_velocity(),
-    //    M_residualFSI(),
-    M_rhsNew(),
-    M_beta()
+        super(),
+        M_aitkFS(),
+        //    M_displacement(),
+        //    M_stress(),
+        //    M_velocity(),
+        //    M_residualFSI(),
+        M_rhsNew(),
+        M_beta()
 {
 }
 
@@ -48,7 +48,7 @@ fixedPoint::setDataFile( GetPot const& dataFile )
     M_aitkFS.setDefaultOmega(M_data->defaultOmega(), 0.001);
     M_aitkFS.setOmegaRange( M_data->OmegaRange() );
 
-    if( M_data->algorithm() == "RobinNeumann" )
+    if ( M_data->algorithm() == "RobinNeumann" )
         M_aitkFS.setDefaultOmega(-1, 1);
 
 }
@@ -76,10 +76,10 @@ fixedPoint::setupFluidSolid()
     super::setupFluidSolid();
 
     if ( this->isFluid() )
-        {
-            M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
-            M_beta.reset(new vector_type(this->M_fluid->getMap()));
-        }
+    {
+        M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
+        M_beta.reset(new vector_type(this->M_fluid->getMap()));
+    }
 
 //@    setUpBC();
 }
@@ -98,7 +98,7 @@ void fixedPoint::eval( const vector_type& _disp,
 
     if (iter == 0 && this->isFluid())
     {
-    this->M_fluid->resetPrec();
+        this->M_fluid->resetPrec();
         //this->M_solid->resetPrec();
     }
 
@@ -111,7 +111,7 @@ void fixedPoint::eval( const vector_type& _disp,
 
     //Change in sign in the residual for RN:
     // if(this->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( sigmaSolidUnique );
-    if(M_data->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
+    if (M_data->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
 
 
     vector_type sigmaFluidUnique (this->sigmaFluid().getMap(), Unique);
@@ -151,14 +151,14 @@ void fixedPoint::eval( const vector_type& _disp,
 
 
         if (recomputeMatrices)
-            {
+        {
 
-                this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
-            }
+            this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
+        }
         else
-            {
-                this->M_fluid->updateRHS( *M_rhs );
-            }
+        {
+            this->M_fluid->updateRHS( *M_rhs );
+        }
 
         //	if(this->algorithm()=="RobinNeumann") this->updatealphaf(this->veloFluidMesh());// this->setAlphaf();
 
@@ -173,22 +173,22 @@ void fixedPoint::eval( const vector_type& _disp,
     MPI_Barrier(MPI_COMM_WORLD);
 
     if ( true && this->isFluid() )
-        {
-            vector_type vel  (this->fluid().velFESpace().map());
-            vector_type press(this->fluid().pressFESpace().map());
+    {
+        vector_type vel  (this->fluid().velFESpace().map());
+        vector_type press(this->fluid().pressFESpace().map());
 
-            vel.subset(*this->M_fluid->solution());
-            press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+        vel.subset(*this->M_fluid->solution());
+        press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
 
-            std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
-            std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
+        std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
+        std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
 
-        }
+    }
 
 
 
-     this->setSigmaFluid( sigmaFluidUnique );
-     this->setSigmaSolid( sigmaFluidUnique );
+    this->setSigmaFluid( sigmaFluidUnique );
+    this->setSigmaSolid( sigmaFluidUnique );
     //*this->M_sigmaSolid = -1.0 * *this->M_sigmaFluid;
 
 //    this->M_sigmaSolid->spy("sigmasolid");
@@ -294,7 +294,7 @@ void  fixedPoint::solveJac(vector_type        &muk,
 {
     M_aitkFS.restart();
 
-    if(M_data->algorithm()=="RobinNeumann")
+    if (M_data->algorithm()=="RobinNeumann")
     {
         muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
     }
@@ -306,8 +306,8 @@ void  fixedPoint::solveJac(vector_type        &muk,
 
 void fixedPoint::registerMyProducts( )
 {
-FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
-solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
+    FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+    solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
 //solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 }
 

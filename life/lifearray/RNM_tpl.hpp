@@ -47,10 +47,10 @@ void MatMul( KNM_<R> & ab, KNM_<R> & a, KNM_<R> & b )
     K_assert( b.v != ab.v );
     K_assert( a.v != ab.v );
     KN_<R> ai = a( 0 );
-    for ( int i = 1;i < N;i++, ++ai )
+    for ( int i = 1; i < N; i++, ++ai )
     {
         KN_<R> bj = b[ 0 ];
-        for ( int j = 1;j < M;j++, ++bj )
+        for ( int j = 1; j < M; j++, ++bj )
             ab( i, j ) = ( ai , bj ) ;
     }
 }
@@ -72,7 +72,7 @@ template <class R>
 std::ostream & operator<<( std::ostream & f, const KN_<const_R> & v )
 { //f <<  " KN_ : " << (ShapeOfArray) v << " "   <<  (const_R *) v << " :\n\t"  ;
     f << v.N() << "\t:\t" ;
-    for ( int i = 0;i < v.N();i++ )
+    for ( int i = 0; i < v.N(); i++ )
         std::cout << std::setw( 3 ) << v[ i ] << ( ( i % 10 ) == 9 ? "\n\t" : "\t" );
     return f;
 }
@@ -84,9 +84,9 @@ std::ostream & operator<<( std::ostream & f, const KNM_<const_R> & v )
     // << " j "  << v.shapej
     // << " " << &v(0,0) << " :\n\t";
     f << v.N() << 'x' << v.M()  /*<< "  n" << v.next<<" :"<< v.shapei.next << "," << v.shapej.next */ << "\t:\n\t" ;
-    for ( int i = 0;i < v.N();i++ )
+    for ( int i = 0; i < v.N(); i++ )
     {
-        for ( int j = 0;j < v.M();j++ )
+        for ( int j = 0; j < v.M(); j++ )
             std::cout << " " << std::setw( 3 ) << v( i, j );
         std::cout << "\n\t";
     }
@@ -102,11 +102,11 @@ std::ostream & operator<<( std::ostream & f, const KNMK_<const_R> & v )
     // << " k "  << v.shapek << std::endl;
     // << " " << (void *) & v(0,0,0) << "\n\t" ;
     f << v.N() << 'x' << v.M() << 'x' << v.K() << "\t:\n\t" ;
-    for ( int i = 0;i < v.shapei.n;i++ )
+    for ( int i = 0; i < v.shapei.n; i++ )
     {
-        for ( int j = 0;j < v.shapej.n;j++ )
+        for ( int j = 0; j < v.shapej.n; j++ )
         {
-            for ( int k = 0;k < v.shapek.n;k++ )
+            for ( int k = 0; k < v.shapek.n; k++ )
                 std::cout << " " << std::setw( 3 ) << v( i, j, k );
             std::cout << "\n\t";
         }
@@ -123,7 +123,7 @@ R KN_<R>::operator,( const KN_<const_R> & u ) const
     double s = 0;
     R * l( v );
     R *r( u.v );
-    for ( int i = 0;i < n;i++, l += step, r += u.step )
+    for ( int i = 0; i < n; i++, l += step, r += u.step )
         s += *l * *r;
     return s;
 }
@@ -133,7 +133,7 @@ template <class R>
 R KN_<R>::KNMmin() const
 {
     R minv = v[ index( 0 ) ];
-    for ( int i = 1;i < n;i++ )
+    for ( int i = 1; i < n; i++ )
         minv = minv < v[ index( i ) ] ? minv : v[ index( i ) ];
     return minv;
 }
@@ -141,7 +141,7 @@ template <class R>
 R KN_<R>::KNMmax() const
 {
     R maxv = v[ index( 0 ) ];
-    for ( int i = 1;i < n;i++ )
+    for ( int i = 1; i < n; i++ )
         maxv = maxv > v[ index( i ) ] ? maxv : v[ index( i ) ];
     return maxv;
 }
@@ -150,14 +150,14 @@ template <class R>
 R KN_<R>::sum() const
 {
     R s = v[ index( 0 ) ];
-    for ( int i = 1;i < n;i++ )
+    for ( int i = 1; i < n; i++ )
         s += v[ index( i ) ];
     return s;
 }
 template <class R>
 KN_<R>& KN_<R>::map( R ( *f ) ( R ) )
 {
-    for ( int i = 0;i < n;i++ )
+    for ( int i = 0; i < n; i++ )
     {
         R & x( v[ index( i ) ] );
         x = f( x );

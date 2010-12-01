@@ -81,18 +81,18 @@ public:
     Real u0;
     Real winit;
     string mesh_dir;
-	//Mitchell & Schaeffer
-	Real		tau_in;   // = 0.8
-	Real		tau_out;  // = 18.0
-	Real		tau_open; // = 300.0
-	Real		tau_close;// = 100.0
-	Real		vcrit;    // =  -67.0
-	Real 		v_min;
-	Real 		v_max;
-	Real 		reac_amp;
-	Real 		tinit;
-	Real 		tend;
-	Real 		order_bdf;       //= 1
+    //Mitchell & Schaeffer
+    Real		tau_in;   // = 0.8
+    Real		tau_out;  // = 18.0
+    Real		tau_open; // = 300.0
+    Real		tau_close;// = 100.0
+    Real		vcrit;    // =  -67.0
+    Real 		v_min;
+    Real 		v_max;
+    Real 		reac_amp;
+    Real 		tinit;
+    Real 		tend;
+    Real 		order_bdf;       //= 1
     bool		has_HeteroTauClose;
 private:
 

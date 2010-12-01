@@ -117,8 +117,8 @@ private:
  */
 template<typename MeshType,typename MatrixType>
 BCNormalManager<MeshType,MatrixType>::BCNormalManager(const MeshType& mesh)
-    :M_dataBuilt(false),M_mesh(&mesh),M_rotMat(0),M_idMap(0),M_tangent1(0),M_tangent2(0)
-    ,M_normal(0),M_coordinates(0),M_numDof(0),M_numImposedDof(0),M_flags()
+        :M_dataBuilt(false),M_mesh(&mesh),M_rotMat(0),M_idMap(0),M_tangent1(0),M_tangent2(0)
+        ,M_normal(0),M_coordinates(0),M_numDof(0),M_numImposedDof(0),M_flags()
 {
 
 }
@@ -127,7 +127,7 @@ BCNormalManager<MeshType,MatrixType>::BCNormalManager(const MeshType& mesh)
 template<typename MeshType,typename MatrixType>
 BCNormalManager<MeshType,MatrixType>::~BCNormalManager()
 {
-    if(M_tangent1!=NULL) //check if the pointers have been initialized
+    if (M_tangent1!=NULL) //check if the pointers have been initialized
     {
         delete M_tangent1;
         delete M_tangent2;
@@ -135,7 +135,7 @@ BCNormalManager<MeshType,MatrixType>::~BCNormalManager()
         delete M_coordinates;
         delete M_idMap;
     }
-    if(M_rotMat!=NULL)
+    if (M_rotMat!=NULL)
     {
         delete M_rotMat;
     }
@@ -156,7 +156,8 @@ void BCNormalManager<MeshType,MatrixType>::init(const BCBase& BCb,const DataType
     {
         const IdentifierEssential* pId = static_cast< const IdentifierEssential* >( BCb( i ) );
 
-        if(BCb.mode()==Directional){
+        if (BCb.mode()==Directional)
+        {
             const BCFunctionDirectional* pBcF = static_cast<const BCFunctionDirectional*>( BCb.pointerToFunctor() );
             Real nx(pBcF->vectFct(t,pId->x(),pId->y(),pId->z(),1));
             Real ny(pBcF->vectFct(t,pId->x(),pId->y(),pId->z(),2));
@@ -210,7 +211,7 @@ void BCNormalManager<MeshType,MatrixType>::addNormalPoint(const ID& idof,const R
 template<typename MeshType,typename MatrixType>
 void BCNormalManager<MeshType,MatrixType>::build(const Dof& dof,CurrentBdFE& bdfem,MatrixType& A, UInt offset,EpetraMap::comm_ptrtype& commPtr)
 {
-    if(M_dataBuilt)
+    if (M_dataBuilt)
     {
         //-----------------------------------------------------
         // STEP 1: Building the map
@@ -297,13 +298,13 @@ void BCNormalManager<MeshType,MatrixType>::M_createRotationMatrix(MatrixType& A,
     M_idMap->getMap(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
-	for ( int i(0);i<NumMyElements;++i )
+    for ( int i(0); i<NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
 
         //The id must be smaller than M_numDof
         //(the larger values are the y and z components)
-        if(id<=M_numDof)
+        if (id<=M_numDof)
         {
             //...Except for the nodes where we make the rotation
             //Global Dof
@@ -371,7 +372,7 @@ void BCNormalManager<MeshType,MatrixType>::M_createRotationMatrix(MatrixType& A,
 template<typename MeshType,typename MatrixType>
 void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName) const
 {
-    if(M_dataBuilt)
+    if (M_dataBuilt)
     {
         fileName.append("_proc");
         fileName.append( M_toString( M_idMap->Comm().MyPID() ) );
@@ -399,13 +400,13 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
             //Writing the points
             file << "DATASET POLYDATA" << std::endl;
             file << "POINTS " << M_numImposedDof << " float" << std::endl;
-            for ( int i(0);i<NumMyElements;++i )
+            for ( int i(0); i<NumMyElements; ++i )
             {
                 idof = MyGlobalElements[i];
 
                 //The id must be smaller than M_numDof
                 //(the larger values are the y and z components)
-                if(idof<=M_numDof)
+                if (idof<=M_numDof)
                 {
                     file << (*M_coordinates)[idof] << "\t";
                     file << (*M_coordinates)[idof+M_numDof] << "\t";
@@ -418,13 +419,13 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 
             //Writing t1
             file << "VECTORS cell_tangent_1 float" << std::endl;
-            for ( int i(0);i<NumMyElements;++i )
+            for ( int i(0); i<NumMyElements; ++i )
             {
                 idof = MyGlobalElements[i];
 
                 //The id must be smaller than M_numDof
                 //(the larger values are the y and z components)
-                if(idof<=M_numDof)
+                if (idof<=M_numDof)
                 {
                     file << (*M_tangent1)[idof] << "\t";
                     file << (*M_tangent1)[idof+M_numDof] << "\t";
@@ -434,13 +435,13 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 
             //Writing t2
             file << "VECTORS cell_tangent_2 float" << std::endl;
-            for ( int i(0);i<NumMyElements;++i )
+            for ( int i(0); i<NumMyElements; ++i )
             {
                 idof = MyGlobalElements[i];
 
                 //The id must be smaller than M_numDof
                 //(the larger values are the y and z components)
-                if(idof<=M_numDof)
+                if (idof<=M_numDof)
                 {
                     file << (*M_tangent2)[idof] << "\t";
                     file << (*M_tangent2)[idof+M_numDof] << "\t";
@@ -450,13 +451,13 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 
             //Writing n
             file << "VECTORS cell_normals float" << std::endl;
-            for ( int i(0);i<NumMyElements;++i )
+            for ( int i(0); i<NumMyElements; ++i )
             {
                 idof = MyGlobalElements[i];
 
                 //The id must be smaller than M_numDof
                 //(the larger values are the y and z components)
-                if(idof<=M_numDof)
+                if (idof<=M_numDof)
                 {
                     file << (*M_normal)[idof] << "\t";
                     file << (*M_normal)[idof+M_numDof] << "\t";
@@ -483,17 +484,17 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateCoordinates()
     M_idMap->getMap(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
-	for ( int i(0);i<NumMyElements;++i )
+    for ( int i(0); i<NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
 
         //The id must be smaller than M_numDof
         //(the larger values are the y and z components)
-        if(id<=M_numDof)
+        if (id<=M_numDof)
         {
-            for(UInt j(0);j<M_mesh->pointList.size();++j)
+            for (UInt j(0); j<M_mesh->pointList.size(); ++j)
             {
-                if(id==M_mesh->pointList[j].id())
+                if (id==M_mesh->pointList[j].id())
                 {
                     (*M_coordinates)[id]            = M_mesh->pointList[j].x();
                     (*M_coordinates)[id+M_numDof]   = M_mesh->pointList[j].y();
@@ -552,13 +553,13 @@ void BCNormalManager<MeshType,MatrixType>::M_saveImposedNormals()
     //We normalize the normal
     Real norm;
     UInt id;
-	for ( int i(0);i<NumMyElements;++i )
+    for ( int i(0); i<NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
 
         //The id must be smaller than M_numDof
         //(the larger values are the y and z components)
-        if(id<=M_numDof && M_imposedNormals.find(id)!=M_imposedNormals.end())
+        if (id<=M_numDof && M_imposedNormals.find(id)!=M_imposedNormals.end())
         {
             Real nx( (M_imposedNormals)[id][0] );
             Real ny( (M_imposedNormals)[id][1] );
@@ -607,13 +608,13 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
 
     // Real norm;
     UInt id;
-	for ( int i(0);i<NumMyElements;++i )
+    for ( int i(0); i<NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
 
         //The id must be smaller than M_numDof
         //(the larger values are the y and z components)
-        if(id<=M_numDof)
+        if (id<=M_numDof)
         {
             //Counting the number of DOF
             M_numImposedDof++;
@@ -628,7 +629,7 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
             Real nxj=sqrt(nx*nx+nz*nz);
             Real nxk=sqrt(nx*nx+ny*ny);
 
-            if((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
+            if ((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
             {
                 //We create t1
                 (*M_tangent1)[id]            = 0;
@@ -640,7 +641,7 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
                 (*M_tangent2)[id+M_numDof]   = nx*ny/nxi;
                 (*M_tangent2)[id+2*M_numDof] = nx*nz/nxi;
             }
-            else if((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
+            else if ((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
             {
                 //We create t1
                 (*M_tangent1)[id]            = -nz/nxj;
@@ -688,7 +689,7 @@ std::string BCNormalManager<MeshType,MatrixType>::M_toString(const int& n) const
 template<typename MeshType,typename MatrixType> template <typename VectorType>
 void BCNormalManager<MeshType,MatrixType>::bcShiftToNormalTangentialCoordSystem(MatrixType& A, VectorType& b)
 {
-    if(M_dataBuilt)
+    if (M_dataBuilt)
     {
         //std::cout << "Shift to tangential system" << std::endl;
 
@@ -728,7 +729,7 @@ void BCNormalManager<MeshType,MatrixType>::bcShiftToNormalTangentialCoordSystem(
 template<typename MeshType,typename MatrixType> template <typename VectorType>
 void BCNormalManager<MeshType,MatrixType>::bcShiftToCartesianCoordSystem(MatrixType& A, VectorType& b)
 {
-    if(M_dataBuilt)
+    if (M_dataBuilt)
     {
         //std::cout << "Shift to cartesian system" << std::endl;
 
@@ -787,7 +788,7 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
             //std::cout << "idf = " << idf << std::endl;
 
             //If the face exists and the point is on this processor
-            if(idFaceExist && (M_flags.find(idf) != M_flags.end()))
+            if (idFaceExist && (M_flags.find(idf) != M_flags.end()))
             {
                 ID flag = M_flags[idf];
 
@@ -795,7 +796,7 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                if((flag == mesh.bElement(iFace).marker())||(flag == 0))
+                if ((flag == mesh.bElement(iFace).marker())||(flag == 0))
                 {
                     //Warning we take the normal in the first gauss point
                     //since the normal is the same over the triangle
@@ -834,13 +835,13 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
     Real norm;
     UInt id;
 
-	for ( int i(0); i<NumMyElements; ++i )
+    for ( int i(0); i<NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
 
         //The id must be smaller than M_numDof
         //(the larger values are the y and z components)
-        if(id <= dof.numTotalDof())
+        if (id <= dof.numTotalDof())
         {
             Real nx( (normals)[id] );
             Real ny( (normals)[id+dof.numTotalDof()] );

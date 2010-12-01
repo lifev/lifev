@@ -31,21 +31,22 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcFunction.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //
 // BCFunctionBase
 //
 BCFunctionBase::BCFunctionBase( const BCFunctionBase& bcf )
-    :
-    _M_g( bcf._M_g )
+        :
+        _M_g( bcf._M_g )
 {
 }
 
 //! Constructor for BCFuncion_Base from a user defined function
 BCFunctionBase::BCFunctionBase( function_type g )
-    :
-    _M_g( g )
+        :
+        _M_g( g )
 {
 }
 
@@ -83,16 +84,16 @@ const bool __bcbase = FactoryCloneBCFunction::instance().registerProduct( typeid
 // BCFunctionMixte
 //
 BCFunctionMixte::BCFunctionMixte( const BCFunctionMixte& bcf )
-    :
-    BCFunctionBase( bcf ),
-    _M_coef( bcf._M_coef )
+        :
+        BCFunctionBase( bcf ),
+        _M_coef( bcf._M_coef )
 {
 }
 
 BCFunctionMixte::BCFunctionMixte( function_type g, function_type coef )
-    :
-    BCFunctionBase( g ),
-    _M_coef( coef )
+        :
+        BCFunctionBase( g ),
+        _M_coef( coef )
 
 {
 }
@@ -132,74 +133,74 @@ BCFunctionUDepBase::BCFunctionUDepBase(function_type g ):_M_g(g)
 {
 }
 BCFunctionUDepBase::BCFunctionUDepBase(const BCFunctionUDepBase& bcf ):
-                _M_g(bcf._M_g)
+        _M_g(bcf._M_g)
 {
 }
 void
 BCFunctionUDepBase::setFunction(function_type g)
 {
-  _M_g=g;
+    _M_g=g;
 }
 Real
 BCFunctionUDepBase::operator()(const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i, const Real& u ) const
+                               const Real& z, const ID& i, const Real& u ) const
 {
-  return _M_g(t,x,y,z,i,u);
+    return _M_g(t,x,y,z,i,u);
 }
 
 BCFunctionUDepBase*
 createBCFunctionUDep( BCFunctionUDepBase const* __bc )
 {
-  return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )*__bc );
+    return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )*__bc );
 }
 const bool __bcUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct(
-        typeid(BCFunctionUDepBase), &createBCFunctionUDep );
+                              typeid(BCFunctionUDepBase), &createBCFunctionUDep );
 
 BCFunctionUDepMixte::BCFunctionUDepMixte(function_type g,function_type coef):
-                BCFunctionUDepBase(g),_M_coef(coef)
+        BCFunctionUDepBase(g),_M_coef(coef)
 {
 }
 
 BCFunctionUDepMixte::BCFunctionUDepMixte(const BCFunctionUDepMixte& bcf):
-                BCFunctionUDepBase(bcf),_M_coef(bcf._M_coef)
+        BCFunctionUDepBase(bcf),_M_coef(bcf._M_coef)
 {
 }
 void
 BCFunctionUDepMixte::setFunctions_Mixte(function_type g, function_type coef )
 {
-  setFunction(g);
-  _M_coef=coef;
+    setFunction(g);
+    _M_coef=coef;
 }
 Real
 BCFunctionUDepMixte::coef(const Real& t, const Real& x, const Real& y,
-            const Real& z, const ID& icomp, const Real& u ) const
+                          const Real& z, const ID& icomp, const Real& u ) const
 {
-  return _M_coef( t, x, y, z, icomp, u );
+    return _M_coef( t, x, y, z, icomp, u );
 }
 
 BCFunctionUDepBase*
 createBCFunctionUDepMixte( BCFunctionUDepBase const* __bc )
 {
-  return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )*__bc );
+    return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )*__bc );
 }
 const bool __bcUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct(
-        typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
+                               typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
 
 
 //
 // BCFunctionDirectional
 //
 BCFunctionDirectional::BCFunctionDirectional( const BCFunctionDirectional& bcf )
-    :
-    BCFunctionBase( bcf ),
-    _M_vectFct( bcf._M_vectFct )
+        :
+        BCFunctionBase( bcf ),
+        _M_vectFct( bcf._M_vectFct )
 {
 }
 
 BCFunctionDirectional::BCFunctionDirectional( function_type g, function_type vectFct )
-    :
-    BCFunctionBase( g ),
-    _M_vectFct( vectFct )
+        :
+        BCFunctionBase( g ),
+        _M_vectFct( vectFct )
 
 {
 }
@@ -221,7 +222,7 @@ BCFunctionDirectional::Functions_Directional()
 
 Real
 BCFunctionDirectional::vectFct( const Real& t, const Real& x, const Real& y,
-                       const Real& z, const ID& icomp ) const
+                                const Real& z, const ID& icomp ) const
 {
     return _M_vectFct( t, x, y, z, icomp );
 }

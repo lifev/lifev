@@ -36,17 +36,17 @@ namespace LifeV
 
 RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt FEDim,
                 const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi, const Real* refCoor ) :
-    M_phi( phi ),
-    M_dPhi( dPhi ),
-    M_d2Phi( d2Phi ),
-    M_divPhi( divPhi),
-    M_refCoor( refCoor ),
+        M_phi( phi ),
+        M_dPhi( dPhi ),
+        M_d2Phi( d2Phi ),
+        M_divPhi( divPhi),
+        M_refCoor( refCoor ),
 
-    M_name( name ),
-    M_shape( shape ),
-    M_nbDof( nbDof ),
-    M_nbCoor( nbCoor ),
-    M_FEDim( FEDim )
+        M_name( name ),
+        M_shape( shape ),
+        M_nbDof( nbDof ),
+        M_nbCoor( nbCoor ),
+        M_FEDim( FEDim )
 {
     CONSTRUCTOR( "RefEle" );
 }

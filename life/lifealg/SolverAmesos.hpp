@@ -47,7 +47,8 @@
 
 class GetPot;
 
-namespace LifeV {
+namespace LifeV
+{
 
 class SolverAmesos
 {

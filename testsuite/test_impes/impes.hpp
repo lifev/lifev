@@ -72,7 +72,7 @@ public:
            char** argv );
 
     ~impes()
-        {}
+    {}
 
     //@}
 

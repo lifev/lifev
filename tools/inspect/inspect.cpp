@@ -27,8 +27,8 @@
 #include <cstring>
 
 #include "inspector.hpp" // includes <string>, <boost/filesystem/path.hpp>,
-                         // <iostream>, <set>
-                         // and gives using for string and path.
+// <iostream>, <set>
+// and gives using for string and path.
 #include "copyright_check.hpp"
 #include "crlf_check.hpp"
 #include "license_check.hpp"
@@ -43,146 +43,146 @@ std::string
 css_style()
 {
     return "BODY {\n"
-        "       color: #000;\n"
-        "       font: 100% \"Lucida Grande\", Verdana, Lucida, Helvetica, Arial, sans-serif;\n"
-        "       background-color: White;\n"
-        "       color: Black;\n"
-        "       margin: 0;\n"
-        "       padding: 0;\n"
-        "       /*  background: #eeeeee;*/\n"
-        "       /*background: #FFE;\n"
-        "          margin-left: 0em;\n"
-        "          margin-right: 0em;\n"
-        "          font-family: \"Arial\", \"Helvetica\", sans-serif;*/\n"
-        "       /* line-height: 1.35; */  /* This would break MacIE 3 */\n"
-        "       }\n"
-        "\n"
-        "p {\n"
-        "    margin: 1em 1em 1em 1em;\n"
-        "    line-height: 1.5em;\n"
-        "    }\n"
-        "p a {\n"
-        "      text-decoration: underline;\n"
-        "      }\n"
-        "p a:visited {\n"
-        "    color: Purple;\n"
-        "    background-color: transparent;\n"
-        "}\n"
-        "p a:active {\n"
-        "    color: Red;\n"
-        "    background-color: transparent;\n"
-        "}\n"
-        "p img {\n"
-        "    border: 0;\n"
-        "    margin: 0;\n"
-        "}\n"
-        "h1, h2, h3, h4, h5, h6 {\n"
-        "    color: Black;\n"
-        "    background-color: transparent;\n"
-        "    font-family: \"Lucida Grande\", Verdana, Lucida, Helvetica, Arial, sans-serif;\n"
-        "    font-size: 100%;\n"
-        "    font-weight: normal;\n"
-        "    margin: 0;\n"
-        "    padding-top: 0.5em;\n"
-        "    border-bottom: 1px solid #8cacbb;\n"
-        "}\n"
-        "\n"
-        "h1 a,\n"
-        "h2 a,\n"
-        "h3 a,\n"
-        "h4 a,\n"
-        "h5 a,\n"
-        "h6 a {\n"
-        "    color: Black ! important; \n"
-        "}\n"
-        "\n"
-        "h1 {\n"
-        "    font-size: 180%;\n"
-        "}\n"
-        "\n"
-        "h2 {\n"
-        "    font-size: 160%;\n"
-        "}\n"
-        "\n"
-        "h3 {\n"
-        "    font-size: 130%;\n"
-        "    border-bottom: none;\n"
-        "     /*font-weight: bold;*/\n"
-        "     margin-left: 1em;\n"
-        "}\n"
-        "\n"
-        "h4 {\n"
-        "    font-size: 120%;\n"
-        "    border-bottom: none;\n"
-        "    font-weight: bold;\n"
-        "     text-align: right;\n"
-        "     text-transform: capitalize\n"
-        "}\n"
-        "\n"
-        "h5 {\n"
-        "    font-size: 100%;\n"
-        "    border-bottom: none;\n"
-        "    font-weight: bold;\n"
-        "}\n"
-        "\n"
-        "h6 {\n"
-        "    font-size: 85%;\n"
-        "    border-bottom: none;\n"
-        "    font-weight: bold;\n"
-        "}\n"
-        "\n"
-        "pre {\n"
-        "    font-size: 90%;\n"
-        "    padding: 1em;\n"
-        "    border: 1px dashed #8cacbb;\n"
-        "    color: Black;\n"
-        "    background-color: #dee7ec;\n"
-        "    overflow: auto;\n"
-        "}\n"
-        ".pre a {\n"
-        "    text-decoration: underline;\n"
-        "}\n"
-        "\n"
-        "div.error{ color: #ff0000;font-size: 120%;font-weight: bold }\n"
-        "div.command{ margin-left:2em;margin-right:2em}\n"
-        "\n"
-        "#topmenu {position: absolute; top: 2em; right: 0; width: 15em; margin: 0; padding: 0; font-family: Arial, sans-serif;}\n"
-        "#topmenu ul {padding: 0; margin: 0; border-bottom: 1px solid silver; font: 1em sans-serif;}\n"
-        "#topmenu ul li {list-style-type: none; border: 1px solid silver; border-width: 1px 1px 0 3px;  position: relative; margin: 0; padding: 0;}\n"
-        "#topmenu ul ul {display: none;}\n"
-        "#topmenu ul li:hover > ul {display: block; position: absolute; top: -1px; left: 100%;}\n"
-        "#topmenu li > a {display: block; padding: 5px 7px; text-decoration: none;  background: #ffff00; margin-left: -10.2em; }\n"
-        "/*\n"
-        "#topmenu li:hover {background-color: #EED;display: block; }\n"
-        "#topmenu li.sub:hover {margin-left: -10.2em; border: 1px solid gray; background: #DDB;}\n"
-        "#topmenu li.sub:hover > a {color: #330;}\n"
-        "#topmenu li.sub:hover > ul {top: 1.75em; left: -1px; background: #FEFEFC;}*/\n"
-        "#topmenu ul li a:hover {background: #DDB;display:block;}\n"
-        "#topmenu li.sub > a {font-weight: bold; background: #DDB;}\n"
-        "#topmenu ul {width: 15em;}\n"
-        "#topmenu ul > li:hover > ul {width: 10em; top: 1.5em; left: -3px;}\n"
-        "\n"
-        "#rtnv { position: absolute; top: 2em; right: 0; width: 15em; \n"
-        "        margin: 0; padding: 0; font-family: Arial, sans-serif;background: #dddddd fixed;\n"
-        "        position: fixed; float:right; border: 1px solid black; border-width:\n"
-        "1px; /*opacity: .5;-khtml-opacity: .5*/\n"
-        "        }\n"
-        "/*#rtnv > ul {width: 9em; margin-left: -1px; font-size: 85%;}\n"
-        "#rtnv ul {border: 1px solid silver; border-width: 0 0 0 1px}*/\n"
-        "#rtnv ul {padding: 0; margin: 0; border-bottom: 1px solid silver; font: 1em sans-serif;}\n"
-        "#rtnv ul li {list-style-type: none; border: 1px solid silver; border-width:\n"
-        "1px 1px 0 3px;  position: relative; margin: 0; padding:\n"
-        "0;text-align=left;}\n"
-        "#rtnv ul ul {display: none;}\n"
-        "/*#rtnv ul li {list-style-type: none; border-width: 1px 0; border-color: white; padding: 0 0 0 5px; line-height: 1.25em;}\n"
-        "#rtnv ul ul {border-width: 0 1px 1px 1px; border-color: gray silver gray gray;}*/\n"
-        "#rtnv ul ul li {border-color: #FEFEFC;}\n"
-        "#rtnv ul li:hover > ul {display: block; position: absolute; top: -1px; left: 100%;}\n"
-        "#rtnv li > a {background-color: transparent; padding: 3px;display: block; }\n"
-        "#rtnv li a:hover {background-color: #EED;display: block; }\n"
-        "#rtnv li.sub:hover {margin-left: -15em; border: 1px solid gray; background: #DDB;}\n"
-        "#rtnv li.sub:hover > a {color: #330;}\n"
-        "#rtnv li.sub:hover > ul {top: 1.75em; left: -1px; background: #DDA;}\n";
+           "       color: #000;\n"
+           "       font: 100% \"Lucida Grande\", Verdana, Lucida, Helvetica, Arial, sans-serif;\n"
+           "       background-color: White;\n"
+           "       color: Black;\n"
+           "       margin: 0;\n"
+           "       padding: 0;\n"
+           "       /*  background: #eeeeee;*/\n"
+           "       /*background: #FFE;\n"
+           "          margin-left: 0em;\n"
+           "          margin-right: 0em;\n"
+           "          font-family: \"Arial\", \"Helvetica\", sans-serif;*/\n"
+           "       /* line-height: 1.35; */  /* This would break MacIE 3 */\n"
+           "       }\n"
+           "\n"
+           "p {\n"
+           "    margin: 1em 1em 1em 1em;\n"
+           "    line-height: 1.5em;\n"
+           "    }\n"
+           "p a {\n"
+           "      text-decoration: underline;\n"
+           "      }\n"
+           "p a:visited {\n"
+           "    color: Purple;\n"
+           "    background-color: transparent;\n"
+           "}\n"
+           "p a:active {\n"
+           "    color: Red;\n"
+           "    background-color: transparent;\n"
+           "}\n"
+           "p img {\n"
+           "    border: 0;\n"
+           "    margin: 0;\n"
+           "}\n"
+           "h1, h2, h3, h4, h5, h6 {\n"
+           "    color: Black;\n"
+           "    background-color: transparent;\n"
+           "    font-family: \"Lucida Grande\", Verdana, Lucida, Helvetica, Arial, sans-serif;\n"
+           "    font-size: 100%;\n"
+           "    font-weight: normal;\n"
+           "    margin: 0;\n"
+           "    padding-top: 0.5em;\n"
+           "    border-bottom: 1px solid #8cacbb;\n"
+           "}\n"
+           "\n"
+           "h1 a,\n"
+           "h2 a,\n"
+           "h3 a,\n"
+           "h4 a,\n"
+           "h5 a,\n"
+           "h6 a {\n"
+           "    color: Black ! important; \n"
+           "}\n"
+           "\n"
+           "h1 {\n"
+           "    font-size: 180%;\n"
+           "}\n"
+           "\n"
+           "h2 {\n"
+           "    font-size: 160%;\n"
+           "}\n"
+           "\n"
+           "h3 {\n"
+           "    font-size: 130%;\n"
+           "    border-bottom: none;\n"
+           "     /*font-weight: bold;*/\n"
+           "     margin-left: 1em;\n"
+           "}\n"
+           "\n"
+           "h4 {\n"
+           "    font-size: 120%;\n"
+           "    border-bottom: none;\n"
+           "    font-weight: bold;\n"
+           "     text-align: right;\n"
+           "     text-transform: capitalize\n"
+           "}\n"
+           "\n"
+           "h5 {\n"
+           "    font-size: 100%;\n"
+           "    border-bottom: none;\n"
+           "    font-weight: bold;\n"
+           "}\n"
+           "\n"
+           "h6 {\n"
+           "    font-size: 85%;\n"
+           "    border-bottom: none;\n"
+           "    font-weight: bold;\n"
+           "}\n"
+           "\n"
+           "pre {\n"
+           "    font-size: 90%;\n"
+           "    padding: 1em;\n"
+           "    border: 1px dashed #8cacbb;\n"
+           "    color: Black;\n"
+           "    background-color: #dee7ec;\n"
+           "    overflow: auto;\n"
+           "}\n"
+           ".pre a {\n"
+           "    text-decoration: underline;\n"
+           "}\n"
+           "\n"
+           "div.error{ color: #ff0000;font-size: 120%;font-weight: bold }\n"
+           "div.command{ margin-left:2em;margin-right:2em}\n"
+           "\n"
+           "#topmenu {position: absolute; top: 2em; right: 0; width: 15em; margin: 0; padding: 0; font-family: Arial, sans-serif;}\n"
+           "#topmenu ul {padding: 0; margin: 0; border-bottom: 1px solid silver; font: 1em sans-serif;}\n"
+           "#topmenu ul li {list-style-type: none; border: 1px solid silver; border-width: 1px 1px 0 3px;  position: relative; margin: 0; padding: 0;}\n"
+           "#topmenu ul ul {display: none;}\n"
+           "#topmenu ul li:hover > ul {display: block; position: absolute; top: -1px; left: 100%;}\n"
+           "#topmenu li > a {display: block; padding: 5px 7px; text-decoration: none;  background: #ffff00; margin-left: -10.2em; }\n"
+           "/*\n"
+           "#topmenu li:hover {background-color: #EED;display: block; }\n"
+           "#topmenu li.sub:hover {margin-left: -10.2em; border: 1px solid gray; background: #DDB;}\n"
+           "#topmenu li.sub:hover > a {color: #330;}\n"
+           "#topmenu li.sub:hover > ul {top: 1.75em; left: -1px; background: #FEFEFC;}*/\n"
+           "#topmenu ul li a:hover {background: #DDB;display:block;}\n"
+           "#topmenu li.sub > a {font-weight: bold; background: #DDB;}\n"
+           "#topmenu ul {width: 15em;}\n"
+           "#topmenu ul > li:hover > ul {width: 10em; top: 1.5em; left: -3px;}\n"
+           "\n"
+           "#rtnv { position: absolute; top: 2em; right: 0; width: 15em; \n"
+           "        margin: 0; padding: 0; font-family: Arial, sans-serif;background: #dddddd fixed;\n"
+           "        position: fixed; float:right; border: 1px solid black; border-width:\n"
+           "1px; /*opacity: .5;-khtml-opacity: .5*/\n"
+           "        }\n"
+           "/*#rtnv > ul {width: 9em; margin-left: -1px; font-size: 85%;}\n"
+           "#rtnv ul {border: 1px solid silver; border-width: 0 0 0 1px}*/\n"
+           "#rtnv ul {padding: 0; margin: 0; border-bottom: 1px solid silver; font: 1em sans-serif;}\n"
+           "#rtnv ul li {list-style-type: none; border: 1px solid silver; border-width:\n"
+           "1px 1px 0 3px;  position: relative; margin: 0; padding:\n"
+           "0;text-align=left;}\n"
+           "#rtnv ul ul {display: none;}\n"
+           "/*#rtnv ul li {list-style-type: none; border-width: 1px 0; border-color: white; padding: 0 0 0 5px; line-height: 1.25em;}\n"
+           "#rtnv ul ul {border-width: 0 1px 1px 1px; border-color: gray silver gray gray;}*/\n"
+           "#rtnv ul ul li {border-color: #FEFEFC;}\n"
+           "#rtnv ul li:hover > ul {display: block; position: absolute; top: -1px; left: 100%;}\n"
+           "#rtnv li > a {background-color: transparent; padding: 3px;display: block; }\n"
+           "#rtnv li a:hover {background-color: #EED;display: block; }\n"
+           "#rtnv li.sub:hover {margin-left: -15em; border: 1px solid gray; background: #DDB;}\n"
+           "#rtnv li.sub:hover > a {color: #330;}\n"
+           "#rtnv li.sub:hover > ul {top: 1.75em; left: -1px; background: #DDA;}\n";
 }
 
 namespace
@@ -213,13 +213,13 @@ struct error_msg
     string msg;
 
     bool operator<( const error_msg & rhs ) const
-        {
-            if ( library < rhs.library ) return true;
-            if ( library > rhs.library ) return false;
-            if ( rel_path < rhs.rel_path ) return true;
-            if ( rel_path > rhs.rel_path ) return false;
-            return msg < rhs.msg;
-        }
+    {
+        if ( library < rhs.library ) return true;
+        if ( library > rhs.library ) return false;
+        if ( rel_path < rhs.rel_path ) return true;
+        if ( rel_path > rhs.rel_path ) return false;
+        return msg < rhs.msg;
+    }
 };
 
 typedef std::vector< error_msg > error_msg_vector;
@@ -273,8 +273,8 @@ bool find_signature( const path & file_path,
     {
         string::size_type pos( name.rfind( '.' ) );
         if ( pos == string::npos
-             || signatures.find( name.substr( pos ) )
-             == signatures.end() ) return false;
+                || signatures.find( name.substr( pos ) )
+                == signatures.end() ) return false;
     }
     return true;
 }
@@ -300,7 +300,7 @@ void check( const string & lib,
 {
     // invoke each inspector
     for ( inspector_list::const_iterator itr = insp_list.begin();
-          itr != insp_list.end(); ++itr )
+            itr != insp_list.end(); ++itr )
     {
         itr->inspector->inspect( lib, pth ); // always call two-argument form
         if ( find_signature( pth, itr->inspector->signatures() ) )
@@ -358,17 +358,17 @@ void display_summary_helper( const string & current_library, int err_count )
 void display_summary()
 {
     std::cout << "</pre>\n"
-        "<h2>Summary</h2>\n"
-        "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\">\n"
-        "  <tr>\n"
-        "    <td><b>Library</b></td>\n"
-        "    <td><b>Problems</b></td>\n"
-        "  </tr>\n"
-        ;
+              "<h2>Summary</h2>\n"
+              "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\">\n"
+              "  <tr>\n"
+              "    <td><b>Library</b></td>\n"
+              "    <td><b>Problems</b></td>\n"
+              "  </tr>\n"
+              ;
     string current_library( msgs.begin()->library );
     int err_count = 0;
     for ( error_msg_vector::iterator itr ( msgs.begin() );
-          itr != msgs.end(); ++itr )
+            itr != msgs.end(); ++itr )
     {
         if ( current_library != itr->library )
         {
@@ -395,7 +395,7 @@ void display_details()
     string sep;
     bool first = true;
     for ( error_msg_vector::iterator itr ( msgs.begin() );
-          itr != msgs.end(); ++itr )
+            itr != msgs.end(); ++itr )
     {
         if ( current.library != itr->library )
         {
@@ -404,15 +404,15 @@ void display_details()
                       << "\">" << itr->library << "</a></h3>\n<pre>";
         }
         if ( current.library != itr->library
-             || current.rel_path != itr->rel_path )
+                || current.rel_path != itr->rel_path )
         {
             std::cout << "\n";
             std::cout << itr->rel_path;
             sep = ": ";
         }
         if ( current.library != itr->library
-             || current.rel_path != itr->rel_path
-             || current.msg != itr->msg )
+                || current.rel_path != itr->rel_path
+                || current.msg != itr->msg )
         {
             std::cout << sep << itr->msg;
             sep = ", ";
@@ -541,7 +541,7 @@ string impute_library( const path & full_dir_path )
         return second.empty() ? string( "unknown" ) : second;
 
     return (( first == "testsuite" || first == "tools" ) && !second.empty())
-        ? second : first;
+           ? second : first;
 }
 
 } // namespace inspect
@@ -559,8 +559,8 @@ int cpp_main( int argc, char * argv[] )
                       || std::strcmp( argv[1], "--help" ) == 0 ) )
     {
         std::clog << "Usage: inspect [-cvs] [options...]\n"
-            "options:\n"
-                  << options();
+        "options:\n"
+        << options();
         return 1;
     }
 
@@ -576,7 +576,8 @@ int cpp_main( int argc, char * argv[] )
     if ( argc > 1 && std::strcmp( argv[1], "-cvs" ) == 0 )
     {
         cvs = true;
-        --argc; ++argv;
+        --argc;
+        ++argv;
     }
 
     if ( argc > 1 && *argv[1] == '-' )
@@ -590,7 +591,7 @@ int cpp_main( int argc, char * argv[] )
         minmax_ck = false;
     }
 
-    for(; argc > 1; --argc, ++argv )
+    for (; argc > 1; --argc, ++argv )
     {
         if ( std::strcmp( argv[1], "-license" ) == 0 )
             license_ck = true;
@@ -642,7 +643,7 @@ int cpp_main( int argc, char * argv[] )
 
     // close
     for ( inspector_list::iterator itr = inspectors.begin();
-          itr != inspectors.end(); ++itr )
+            itr != inspectors.end(); ++itr )
     {
         itr->inspector->close();
     }
@@ -654,29 +655,29 @@ int cpp_main( int argc, char * argv[] )
                    "%X UTC, %A %d %B %Y", std::gmtime( &tod ) );
 
     std::cout << "<html>\n"
-        "<head>\n"
-        "<title>LifeV Inspection Report</title>\n"
-        "<style type=\"text/css\">\n"
+              "<head>\n"
+              "<title>LifeV Inspection Report</title>\n"
+              "<style type=\"text/css\">\n"
               << css_style() <<
-        "</style>\n"
-        "</head>\n"
-        "<body bgcolor=\"#ffffff\" text=\"#000000\">\n"
-        "<h1>LifeV Inspection Report(95% based on Boost Inspection tool)</h1>\n"
-        "<p><b>Run Date:</b> " << run_date  << "</p>\n"
-        "<h2>Introduction</h2>\n"
-        "<p>The <a href=\"http://www.boost.org/tools/inspect/index.html\">inspection\n"
-        "program</a> checks each file in the current Life CVS for various problems,\n"
-        "generating this web page as output. Problems detected include tabs in files,\n"
-        "missing copyrights, broken URL's, and similar misdemeanors.</p>\n";
+              "</style>\n"
+              "</head>\n"
+              "<body bgcolor=\"#ffffff\" text=\"#000000\">\n"
+              "<h1>LifeV Inspection Report(95% based on Boost Inspection tool)</h1>\n"
+              "<p><b>Run Date:</b> " << run_date  << "</p>\n"
+              "<h2>Introduction</h2>\n"
+              "<p>The <a href=\"http://www.boost.org/tools/inspect/index.html\">inspection\n"
+              "program</a> checks each file in the current Life CVS for various problems,\n"
+              "generating this web page as output. Problems detected include tabs in files,\n"
+              "missing copyrights, broken URL's, and similar misdemeanors.</p>\n";
 
     std::cout <<
-        "<p> Differences between <tt>LifeV::inspect</tt> and <tt>boost::inspect</tt>\n"
-        "<ul>\n"
-        "<li>LifeV::inspect is good looking thanks to proper css usage :)</li>\n"
-        "<li>LifeV::inspect does not check in admin, Templates and autom4te.cache</li>\n"
-        "<li>LifeV::inspect checks for GPL and LGPL presence in header and not Boost License</li>\n"
-        "<li>LifeV::inspect does not check for links</li>\n"
-        "</ul>\n";
+              "<p> Differences between <tt>LifeV::inspect</tt> and <tt>boost::inspect</tt>\n"
+              "<ul>\n"
+              "<li>LifeV::inspect is good looking thanks to proper css usage :)</li>\n"
+              "<li>LifeV::inspect does not check in admin, Templates and autom4te.cache</li>\n"
+              "<li>LifeV::inspect checks for GPL and LGPL presence in header and not Boost License</li>\n"
+              "<li>LifeV::inspect does not check for links</li>\n"
+              "</ul>\n";
 
     std::cout << "<h2>Totals</h2>\n<pre>"
               << file_count << " files scanned\n"
@@ -686,7 +687,7 @@ int cpp_main( int argc, char * argv[] )
     std::cout << "\nproblem counts:\n";
 
     for ( inspector_list::iterator itr = inspectors.begin();
-          itr != inspectors.end(); ++itr )
+            itr != inspectors.end(); ++itr )
     {
         itr->inspector.reset();
     }
@@ -700,6 +701,6 @@ int cpp_main( int argc, char * argv[] )
     }
 
     std::cout << "</body>\n"
-        "</html>\n";
+              "</html>\n";
     return 0;
 }

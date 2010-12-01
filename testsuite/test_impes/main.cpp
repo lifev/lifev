@@ -87,8 +87,8 @@ makeAbout()
 using namespace LifeV;
 namespace
 {
-	static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-	static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
 // ===================================================

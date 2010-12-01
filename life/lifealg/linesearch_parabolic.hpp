@@ -46,7 +46,7 @@ namespace LifeV
 
 template <class Fct, class Vector>
 Int lineSearch_parab( Fct& fonctional, Vector& residual, Vector& sol, Vector& step, Real& normRes,
-                       Real& lambda, UInt iter, bool const verbose = true)
+                      Real& lambda, UInt iter, bool const verbose = true)
 {
     //----------------------------------------------------------------------
     if (verbose)

@@ -38,11 +38,11 @@ namespace LifeV
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareFace, std::pair<ID, ID >,
-                 cmpBareItem<BareFace> > TempFaceContainer;
+cmpBareItem<BareFace> > TempFaceContainer;
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareEdge, std::pair<ID, ID>,
-                 cmpBareItem<BareEdge> > TempEdgeContainer;
+cmpBareItem<BareEdge> > TempEdgeContainer;
 
 /*
 *******************************************************************************
@@ -72,7 +72,7 @@ public:
     bool operator() ( FaceType & face )
     {
         bool isboundary = true;
-        for ( UInt k = 1;k <= FaceType::numVertices;++k )
+        for ( UInt k = 1; k <= FaceType::numVertices; ++k )
         {
             isboundary = isboundary & face.point( k ).boundary();
         }
@@ -82,7 +82,7 @@ public:
     bool operator() ( EdgeType & edge )
     {
         bool isboundary = true;
-        for ( UInt k = 1;k <= EdgeType::numVertices;++k )
+        for ( UInt k = 1; k <= EdgeType::numVertices; ++k )
         {
             isboundary = isboundary & edge.point( k ).boundary();
         }
@@ -281,7 +281,7 @@ UInt findFaces( const RegionMesh3D & mesh, TempFaceContainer & bfaces,
     for ( typename Volumes::const_iterator iv = mesh.volumeList.begin();
             iv != mesh.volumeList.end(); ++iv )
     {
-        for ( ID j = 1;j <= mesh.numLocalFaces();++j )
+        for ( ID j = 1; j <= mesh.numLocalFaces(); ++j )
         {
             i1 = ele.fToP( j, 1 );
             i2 = ele.fToP( j, 2 );
@@ -309,7 +309,7 @@ UInt findFaces( const RegionMesh3D & mesh, TempFaceContainer & bfaces,
             {
                 if ( allFaces && i1 > i2 )
                     intfaces.insert
-                        ( ( std::make_pair( bface, std::make_pair( iv->id(), j ) ) ) );
+                    ( ( std::make_pair( bface, std::make_pair( iv->id(), j ) ) ) );
                 bfaces.erase( fi ); // counted twice: internal face
                 ++numInternalFaces;
             }
@@ -373,7 +373,7 @@ UInt findBoundaryEdges( const RegionMesh3D & mesh, TempEdgeContainer & bedges )
     for ( typename Faces::const_iterator ifa = mesh.faceList.begin();
             ifa != mesh.faceList.begin() + mesh.numBFaces(); ++ifa )
     {
-        for ( ID j = 1;j <= mesh.numLocalEdgesOfFace();++j )
+        for ( ID j = 1; j <= mesh.numLocalEdgesOfFace(); ++j )
         {
             i1 = FaceShape::eToP( j, 1 );
             i2 = FaceShape::eToP( j, 2 );
@@ -420,7 +420,7 @@ UInt findInternalEdges( const RegionMesh3D & mesh,
     for ( typename Volumes::const_iterator ifa = mesh.volumeList.begin();
             ifa != mesh.volumeList.end(); ++ifa )
     {
-        for ( ID j = 1;j <= mesh.numLocalEdges();++j )
+        for ( ID j = 1; j <= mesh.numLocalEdges(); ++j )
         {
             i1 = VolumeShape::eToP( j, 1 );
             i2 = VolumeShape::eToP( j, 2 );
@@ -430,7 +430,7 @@ UInt findInternalEdges( const RegionMesh3D & mesh,
             bedge = ( makeBareEdge( i1, i2 ) ).first;
             if ( boundary_edges.find( bedge ) == boundary_edges.end() )
                 internal_edges.insert
-                    ( std::make_pair( bedge, std::make_pair( ifa->id(), j ) ) );
+                ( std::make_pair( bedge, std::make_pair( ifa->id(), j ) ) );
         }
     }
     return internal_edges.size();
@@ -460,7 +460,7 @@ EntityFlag inheritStrongerMarker( GeoElement & fp )
                 "A GeoElement with ndim<1 cannot inherit marker flags" );
 
     fp.setMarker( fp.point( 1 ).marker() );
-    for ( ID j = 2;j <= GeoElement::numVertices;++j )
+    for ( ID j = 2; j <= GeoElement::numVertices; ++j )
         fp.setStrongerMarker( fp.point( j ).marker() );
     return fp.marker();
 
@@ -483,7 +483,7 @@ EntityFlag inheritWeakerMarker( GeoElement & fp )
     ASSERT_PRE( GeoElement::nDim > 0,
                 "A GeoElement with ndim<1 cannot inherit marker flags" );
     fp.setMarker( fp.point( 1 ).marker() );
-    for ( ID j = 2;j <= GeoElement::numVertices;++j )
+    for ( ID j = 2; j <= GeoElement::numVertices; ++j )
         fp.setWeakerMarker( fp.point( j ).marker() );
     return fp.marker();
 
@@ -503,7 +503,7 @@ UInt testClosedDomain_Top( RegionMesh3D const & mesh, UInt & numBEdges )
 {
 
     typedef std::set
-        <BareEdge, cmpBareItem<BareEdge> > TempEdgeContainer2;
+    <BareEdge, cmpBareItem<BareEdge> > TempEdgeContainer2;
     TempEdgeContainer2 bedges;
     UInt i1, i2;
     BareEdge bedge;
@@ -517,14 +517,14 @@ UInt testClosedDomain_Top( RegionMesh3D const & mesh, UInt & numBEdges )
 
     typename Faces::const_iterator iv = mesh.faceList.begin();
 
-    for ( UInt k = 0;k < mesh.numBFaces();++k )
+    for ( UInt k = 0; k < mesh.numBFaces(); ++k )
     {
-    	std::ostringstream _err_msg;
-    	_err_msg << " Trying to get not existing face"
-      << k << " " << mesh.numBFaces();
+        std::ostringstream _err_msg;
+        _err_msg << " Trying to get not existing face"
+        << k << " " << mesh.numBFaces();
         ASSERT( iv != mesh.faceList.end(), _err_msg.str().c_str() );
 
-        for ( ID j = 1;j <= FaceType::numEdges;++j )
+        for ( ID j = 1; j <= FaceType::numEdges; ++j )
         {
             i1 = ele.eToP( j, 1 );
             i2 = ele.eToP( j, 2 );
@@ -559,7 +559,7 @@ bool checkMarkerSet( const MeshEntityList & list )
 {
     typedef typename MeshEntityList::const_iterator C_Iter;
     bool ok( true );
-    for ( C_Iter l = list.begin();l != list.end();++l )
+    for ( C_Iter l = list.begin(); l != list.end(); ++l )
         ok = ( ok & l->isMarkerSet() );
     return ok;
 }
@@ -588,7 +588,7 @@ setBEdgesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
 
     if ( verbose )
         clog << "NEW EDGE MARKER MAP" << std::endl
-             << " ID->New Marker" << std::endl;
+        << " ID->New Marker" << std::endl;
 
     for ( ID k = 1; k <= mesh.numBEdges(); ++k )
     {
@@ -630,9 +630,9 @@ setBFacesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
 
     if ( verbose )
         clog << "NEW FACE MARKER MAP" << std::endl
-             << " ID->New Marker" << std::endl;
+        << " ID->New Marker" << std::endl;
 
-    for ( UInt k = 1;k <= mesh.numBFaces();++k )
+    for ( UInt k = 1; k <= mesh.numBFaces(); ++k )
     {
         fp = &( mesh.face( k ) );
         if ( fp->isMarkerUnset() )
@@ -672,16 +672,16 @@ setBPointsMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
     std::vector<bool>::iterator pm = markset.begin();
 
     for ( PointIterator p = mesh.pointList.begin();
-          p != mesh.pointList.end(); ++p )
+            p != mesh.pointList.end(); ++p )
         *( pm++ ) = p->isMarkerSet();
 
     typename RegionMesh::BElementType * fp = 0;
-    for ( UInt k = 1;k <= mesh.numBElements();++k )
+    for ( UInt k = 1; k <= mesh.numBElements(); ++k )
     {
         fp = &( mesh.bElement( k ) );
         if ( fp->isMarkerSet() )
         {
-            for ( UInt j = 1;j <= BElementShape::numPoints;++j )
+            for ( UInt j = 1; j <= BElementShape::numPoints; ++j )
             {
                 if ( !markset[ ( fp->point( j ).id() ) - 1 ] )
                     fp->setStrongerMarkerAtPoint( j, fp->marker() );
@@ -696,7 +696,7 @@ setBPointsMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
         clog << "id->marker    id->marker     id->marker" << std::endl;
         pm = markset.begin();
         for ( PointIterator p = mesh.pointList.begin();
-              p != mesh.pointList.end(); ++p )
+                p != mesh.pointList.end(); ++p )
         {
             if ( *pm++ )
             {
@@ -728,7 +728,7 @@ bool checkIdnumber( const MeshEntityList & list )
     typedef typename MeshEntityList::const_iterator C_Iter;
     bool ok( true );
     unsigned int count( 1 );
-    for ( C_Iter l = list.begin();l != list.end() && ok;++l, ++count )
+    for ( C_Iter l = list.begin(); l != list.end() && ok; ++l, ++count )
         ok = ( l->id() == count );
     return ok;
 }
@@ -746,7 +746,7 @@ void fixIdnumber( MeshEntityList & list )
 {
     unsigned int count( 0 );
     typedef typename MeshEntityList::iterator Iter;
-    for ( Iter l = list.begin() ;l != list.end(); ++l )
+    for ( Iter l = list.begin() ; l != list.end(); ++l )
         l->setId( ++count );
 }
 
@@ -768,7 +768,7 @@ setBPointsCounters( RegionMesh & mesh )
 
     mesh._bPoints.clear();
 
-    for ( UInt k = 1;k <= mesh.numVertices();++k )
+    for ( UInt k = 1; k <= mesh.numVertices(); ++k )
     {
         if ( mesh.isBoundaryPoint( k ) )
         {
@@ -777,7 +777,7 @@ setBPointsCounters( RegionMesh & mesh )
         }
     }
 
-    for ( UInt k = mesh.numVertices() + 1;k <= mesh.storedPoints();++k )
+    for ( UInt k = mesh.numVertices() + 1; k <= mesh.storedPoints(); ++k )
     {
         if ( mesh.isBoundaryPoint( k ) )
         {
@@ -790,10 +790,10 @@ setBPointsCounters( RegionMesh & mesh )
     mesh._bPoints.clear();
     mesh._bPoints.reserve( countBP );
 
-    for ( UInt k = 1;k <= mesh.storedPoints();++k )
+    for ( UInt k = 1; k <= mesh.storedPoints(); ++k )
     {
-      if ( mesh.isBoundaryPoint( k ) )
-	mesh._bPoints.push_back( &mesh.point( k ) );
+        if ( mesh.isBoundaryPoint( k ) )
+            mesh._bPoints.push_back( &mesh.point( k ) );
     }
 }
 
@@ -816,34 +816,37 @@ void
 fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
             std::ostream & /* err */ = std::cerr, bool verbose = true )
 {
-  ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
-  ASSERT_PRE( mesh.numBElements() > 0,
-	      "The BElements list should not be empty" );
+    ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
+    ASSERT_PRE( mesh.numBElements() > 0,
+                "The BElements list should not be empty" );
 
-  typedef typename RegionMesh::BElements BElements;
-  typedef typename RegionMesh::BElementShape BElementShape;
+    typedef typename RegionMesh::BElements BElements;
+    typedef typename RegionMesh::BElementShape BElementShape;
 
-  if ( verbose ) clog << "Fixing BPoints" << std::endl;
-  std::vector<bool>bpts(mesh.numPoints());
-  // I may have launched the program for a P2 mesh
-  // yet not all the points are there
-  unsigned int numitems;
-  if(mesh.storedPoints()==mesh.numVertices()){
-    numitems=BElementShape::numVertices;
-  } else {
-    numitems=BElementShape::numPoints;
-  }
+    if ( verbose ) clog << "Fixing BPoints" << std::endl;
+    std::vector<bool>bpts(mesh.numPoints());
+    // I may have launched the program for a P2 mesh
+    // yet not all the points are there
+    unsigned int numitems;
+    if (mesh.storedPoints()==mesh.numVertices())
+    {
+        numitems=BElementShape::numVertices;
+    }
+    else
+    {
+        numitems=BElementShape::numPoints;
+    }
 
-  for ( UInt k = 1;k <= mesh.numBElements();++k )
-    for ( UInt j = 1;j <= numitems;++j )
-      bpts[mesh.bElement(k).point(j).id()-1]=true;
-  for (ID  k = 1; k <= mesh.storedPoints() ;++k )
-      mesh.point(k).setBoundary(bpts[k-1]);
+    for ( UInt k = 1; k <= mesh.numBElements(); ++k )
+        for ( UInt j = 1; j <= numitems; ++j )
+            bpts[mesh.bElement(k).point(j).id()-1]=true;
+    for (ID  k = 1; k <= mesh.storedPoints() ; ++k )
+        mesh.point(k).setBoundary(bpts[k-1]);
     bpts.clear();
     std::vector<bool> temp;
     bpts.swap(temp);
-  // Fix now the number of vertices/points
-  setBPointsCounters( mesh );
+    // Fix now the number of vertices/points
+    setBPointsCounters( mesh );
 }
 
 //!It makes sure that boundary edges are stored first
@@ -893,9 +896,9 @@ bool checkBoundaryFacesFirst( const RegionMesh & mesh )
     EnquireBEntity<RegionMesh> enquireBFace( mesh );
     bool ok( true );
 
-    for ( UInt k = 1;k <= mesh.numBElements();++k )
+    for ( UInt k = 1; k <= mesh.numBElements(); ++k )
         ok = ok && enquireBFace( mesh.boundaryFace( k ) );
-    for ( UInt k = mesh.numBElements() + 1;k <= mesh.storedFaces();++k )
+    for ( UInt k = mesh.numBElements() + 1; k <= mesh.storedFaces(); ++k )
         ok = ok && ! enquireBFace( mesh.face( k ) );
 
     return ok;
@@ -914,9 +917,9 @@ bool checkBoundaryEdgesFirst( const RegionMesh & mesh )
     EnquireBEntity<RegionMesh> enquireBEdge( mesh );
     bool ok( true );
 
-    for ( UInt k = 1;k <= mesh.numBEdges();++k )
+    for ( UInt k = 1; k <= mesh.numBEdges(); ++k )
         ok = ok && enquireBEdge( mesh.boundaryEdge( k ) );
-    for ( UInt k = mesh.numBEdges() + 1;k <= mesh.storedEdges();++k )
+    for ( UInt k = mesh.numBEdges() + 1; k <= mesh.storedEdges(); ++k )
         ok = ok && ! enquireBEdge( mesh.edge( k ) );
     return ok;
 }
@@ -1012,10 +1015,10 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
 
 
     if ( notEnough )
-      {
+    {
         err << "WARNING: number of B. Faces stored smaller" << std::endl;
         err << "         than the number of bfaces found  and build is not set"
-            << std::endl;
+        << std::endl;
         err << "POSSIBLE ERROR" << std::endl;
         sw.create( "BFACE_STORED_MISMATCH", true );
     }
@@ -1024,7 +1027,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
     {
         err << "ERROR: Boundary Element counter was not set" << std::endl;
         err << "I Cannot proceed because the situation is ambiguous"
-            << std::endl;
+        << std::endl;
         err << "Please check and eventually either: (a) call buildBoundaryFaces()" << std::endl;
         err << "or (b) set the correct number of bfaces in the mesh using mesh.numBElements()" << std::endl;
         err << "ABORT" << std::endl;
@@ -1034,9 +1037,9 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
     if ( mesh.numBFaces() != bfaces_found )
     {
         err << "WARNING: Boundary face counter in mesh is set to "
-            << mesh.numBFaces() << std::endl;
+        << mesh.numBFaces() << std::endl;
         err << "         while I have found " << bfaces_found
-            << " boundary elements in mesh." << std::endl;
+        << " boundary elements in mesh." << std::endl;
         err << "         Please check... I continue anyway" << std::endl;
         sw.create( "BFACE_COUNTER_MISMATCH", true );
     }
@@ -1045,14 +1048,14 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
     {
         clog << "**** Fixed Marker Flags for Boundary Faces ***" << std::endl;
         clog << " (it only contains those that were fixed because unset !"
-             << std::endl;
+        << std::endl;
         clog << "id->marker   id->marker  id->marker" << std::endl;
     }
 
     UInt count( 0 );
 
     fit = mesh.faceList.begin();
-    for ( UInt facid = 0;facid < mesh.numBElements();++facid )
+    for ( UInt facid = 0; facid < mesh.numBElements(); ++facid )
     {
         i1 = ( fit->point( 1 ) ).id();
         i2 = ( fit->point( 2 ) ).id();
@@ -1063,30 +1066,34 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
             bface = ( makeBareFace( i1, i2, i3, i4 ) ).first;
         }
         else
-	  {
+        {
             bface = ( makeBareFace( i1, i2, i3 ) ).first;
-	  }
+        }
         fi = bfaces->find( bface );
         if ( fi == bfaces->end() )
-	  {
-	    if(verbose){
-	      if ( RegionMesh3D::FaceShape::numVertices == 3 ){
-		err<<"Face "<<i1<<" "<<i2<<" "<<i3;
-	      } else {
-		err<<"Face "<<i1<<" "<<i2<<" "<<i3<<" " <<i4;
-	      }
-	      err<<" stored as boundary face, it's not!"<< std::endl;
-	    }
-	    notfound = true;
-	  }
+        {
+            if (verbose)
+            {
+                if ( RegionMesh3D::FaceShape::numVertices == 3 )
+                {
+                    err<<"Face "<<i1<<" "<<i2<<" "<<i3;
+                }
+                else
+                {
+                    err<<"Face "<<i1<<" "<<i2<<" "<<i3<<" " <<i4;
+                }
+                err<<" stored as boundary face, it's not!"<< std::endl;
+            }
+            notfound = true;
+        }
         else
-	  {
+        {
             info = fi->second;
             vol = info.first; // Element ID
             pv = &mesh.volume( vol ); // Element
             j = info.second;       // The local ID of face on element
             // Reset face point definition to be consistent with face.
-            for ( UInt k = 1;k <= FaceType::numPoints;++k )
+            for ( UInt k = 1; k <= FaceType::numPoints; ++k )
             {
                 fit->setPoint( k, pv->point( ele.fToP( j, k ) ) );
             }
@@ -1130,7 +1137,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
     if ( mesh.numFaces() != numFaces )
     {
         err << "WARNING: faces counter in mesh should be " << numFaces
-            << std::endl;
+        << std::endl;
         err << "         (bfaces->size()+numInternalFaces)" << std::endl;
         err << "         it is instead " << mesh.numFaces() << std::endl;
         sw.create( "NUM_FACES_MISMATCH", true );
@@ -1232,18 +1239,18 @@ bool buildFaces( RegionMesh3D & mesh,
         if ( verbose )
         {
             clog << "**** Marker Flags for Newly Created Boundary Faces ***"
-                 << std::endl;
+            << std::endl;
             clog << "id->marker   id->marker  id->marker" << std::endl;
         }
 
-        for ( fi = bfaces->begin();fi != bfaces->end();++fi )
+        for ( fi = bfaces->begin(); fi != bfaces->end(); ++fi )
         {
             info = fi->second;
             vol = info.first; // Element ID
             pv = &mesh.volume( vol ); // Element
             j = info.second;       // The local ID of face on element
 
-            for ( UInt k = 1;k <= FaceType::numPoints;++k )
+            for ( UInt k = 1; k <= FaceType::numPoints; ++k )
                 face.setPoint( k, pv->point( ele.fToP( j, k ) ) );
             // Add extra info
             face.ad_first() = vol;
@@ -1301,7 +1308,7 @@ bool buildFaces( RegionMesh3D & mesh,
     std::pair<UInt, bool> e;
     std::pair<BareFace, bool> _face;
 
-    for ( UInt j = 0; j < mesh.faceList.size();++j )
+    for ( UInt j = 0; j < mesh.faceList.size(); ++j )
     {
         i1 = ( mesh.faceList[ j ].point( 1 ) ).id();
         i2 = ( mesh.faceList[ j ].point( 2 ) ).id();
@@ -1326,7 +1333,7 @@ bool buildFaces( RegionMesh3D & mesh,
     {
         vid = iv->id();
         // REMEMBER: numbering from 1
-        for ( UInt j = 1;j <= mesh.numLocalFaces();j++ )
+        for ( UInt j = 1; j <= mesh.numLocalFaces(); j++ )
         {
             i1 = ele.fToP( j, 1 );
             i2 = ele.fToP( j, 2 );
@@ -1349,7 +1356,7 @@ bool buildFaces( RegionMesh3D & mesh,
             if ( e.second )
             {
                 // a new face It must be internal.
-                for ( UInt k = 1;k <= FaceType::numPoints;++k )
+                for ( UInt k = 1; k <= FaceType::numPoints; ++k )
                     face.setPoint( k, iv->point( ele.fToP( j, k ) ) );
                 face.ad_first() = vid;
                 face.pos_first() = j;
@@ -1487,19 +1494,19 @@ bool buildEdges( RegionMesh3D & mesh,
         if ( verbose )
         {
             clog << "**** Marker Flags for Newly Created Boundary Edges ***"
-                 << std::endl;
+            << std::endl;
             clog << "Edgeid->marker" << std::endl;
         }
 
         // First boundary.
         for ( TempEdgeContainer::iterator ei = bedges->begin();
-                ei != bedges->end();++ei )
+                ei != bedges->end(); ++ei )
         {
             info = ei->second;
             facID = info.first; // Face ID
             pf = &mesh.face( facID ); // Face
             j = info.second;       // The local ID of edge on face
-            for ( UInt k = 1;k <= EdgeType::numPoints;++k )
+            for ( UInt k = 1; k <= EdgeType::numPoints; ++k )
             {
                 edge.setPoint( k, pf->point( FaceShape::eToP( j, k ) ) );
             }
@@ -1520,7 +1527,7 @@ bool buildEdges( RegionMesh3D & mesh,
 
         if ( verbose )
             clog << std::endl << "  *****  END OF LIST OF BOUNDARY EDGES ****"
-                 << std::endl;
+            << std::endl;
 
         mesh.setLinkSwitch( std::string( "HAS_BOUNDARY_EDGES" ) );
     }
@@ -1540,13 +1547,13 @@ bool buildEdges( RegionMesh3D & mesh,
     // free some memory
 
     for ( TempEdgeContainer::iterator ei = iedges.begin();
-            ei != iedges.end();++ei )
+            ei != iedges.end(); ++ei )
     {
         info = ei->second;
         facID = info.first; // Volume ID
         pv = &mesh.volume( facID ); // Volume that generated the edge
         j = info.second;       // The local ID of edge on volume
-        for ( UInt k = 1;k <= EdgeType::numPoints;++k )
+        for ( UInt k = 1; k <= EdgeType::numPoints; ++k )
             edge.setPoint( k, pv->point( VolumeShape::eToP( j, k ) ) );
         edge.setMarker( mesh.marker() ); // Get marker value: that of the mesh
         mesh.addEdge( edge, false );
@@ -1581,7 +1588,7 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
     ASSERT_PRE( GeoShape::numPoints > 4, "p1top2 ERROR: we need a P2 mesh" );
 
     out << "Building P2 mesh points and connectivities from P1 data"
-        << std::endl;
+    << std::endl;
 
 
     typename RegionMesh::PointType * pp = 0;
@@ -1598,7 +1605,7 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
     typename RegionMesh::ElementShape ele;
     out << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
     UInt nbe = mesh.numBEdges();
-    for ( UInt j = 1; j <= mesh.storedEdges();++j )
+    for ( UInt j = 1; j <= mesh.storedEdges(); ++j )
     {
         pe = & mesh.edge( j );
         i1 = ( pe->point( 1 ) ).id();
@@ -1652,11 +1659,11 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
         UInt nbf = mesh.numBFaces();
         UInt nbv = GeoBShape::numVertices;
         out << "Processing " << mesh.storedFaces() << " Face Edges"
-            << std::endl;
+        << std::endl;
         for ( UInt k = 1; k <= mesh.storedFaces(); ++k )
         {
             pbe = &mesh.face( k );
-            for ( UInt j = 1;j <= mesh.numLocalEdgesOfFace();j++ )
+            for ( UInt j = 1; j <= mesh.numLocalEdgesOfFace(); j++ )
             {
                 i1 = GeoBShape::eToP( j, 1 );
                 i2 = GeoBShape::eToP( j, 2 );
@@ -1689,12 +1696,12 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
     }
 
     out << "Processing " << mesh.numElements() << " Mesh Elements"
-        << std::endl;
+    << std::endl;
     UInt nev = GeoShape::numVertices;
     for ( UInt k = 1; k <= mesh.numElements(); ++k )
     {
         pv = &mesh.element( k );
-        for ( UInt j = 1;j <= mesh.numLocalEdges();j++ )
+        for ( UInt j = 1; j <= mesh.numLocalEdges(); j++ )
         {
             i1 = ele.eToP( j, 1 );
             i2 = ele.eToP( j, 2 );
@@ -1724,7 +1731,7 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
     }
     /*=============================*/
     out << " ******* Done Construction of P2 Mmesh *******"
-        << std::endl << std::endl;
+    << std::endl << std::endl;
 }
 
 //! Fix mesh switches

@@ -46,15 +46,16 @@
 #include <life/lifecore/life.hpp>
 
 #ifdef TWODIM
-    #include <life/lifemesh/regionMesh2D.hpp>
-    #include <life/lifefilters/readMesh2D.hpp>
+#include <life/lifemesh/regionMesh2D.hpp>
+#include <life/lifefilters/readMesh2D.hpp>
 #else // THREEDIM
-	#include <life/lifemesh/regionMesh3D.hpp>
-	#include <life/lifefilters/readMesh3D.hpp>
-    #include <life/lifemesh/structuredMesh3D.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifemesh/structuredMesh3D.hpp>
 #endif
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! DataTime - Class for handling temporal discretization.
 /*!
@@ -180,7 +181,8 @@ void readMesh( Mesh& mesh, const DataMesh& data )
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
     //Update Edges & Faces
-    if(updateEdgesAndFaces){
+    if (updateEdgesAndFaces)
+    {
         mesh.updateElementEdges( true, data.verbose() );
         mesh.updateElementFaces( true, data.verbose() );
     }

@@ -13,26 +13,26 @@
 
 namespace boost
 {
-  namespace inspect
-  {
-    class copyright_check : public source_inspector
-    {
-      long m_files_with_errors;
-    public:
+namespace inspect
+{
+class copyright_check : public source_inspector
+{
+    long m_files_with_errors;
+public:
 
-      copyright_check();
-      virtual const char * name() const { return "copyright-check"; }
-      virtual const char * desc() const { return "missing copyright"; }
+    copyright_check();
+    virtual const char * name() const { return "copyright-check"; }
+    virtual const char * desc() const { return "missing copyright"; }
 
-      virtual void inspect(
+    virtual void inspect(
         const std::string & library_name,
         const path & full_path,
         const std::string & contents );
 
-      virtual ~copyright_check()
-        { std::cout << "  " << m_files_with_errors << " files missing copyrights\n"; }
-    };
-  }
+    virtual ~copyright_check()
+    { std::cout << "  " << m_files_with_errors << " files missing copyrights\n"; }
+};
+}
 }
 
 #endif // BOOST_COPYRIGHT_CHECK_HPP

@@ -63,7 +63,7 @@ namespace LifeV
   \brief
 This class solves the following waves equation:
 
- M \frac{d^2 u}{d t^2} + D(u,\frac{d u}{d t} ) \frac{\partial u}{\partial t} + A(u, frac{d u}{dt}) = f 
+ M \frac{d^2 u}{d t^2} + D(u,\frac{d u}{d t} ) \frac{\partial u}{\partial t} + A(u, frac{d u}{dt}) = f
 
 where M is mass matrix, A  stiffness matrix and D is  damping matrix given by alpha M + beta A.
 
@@ -72,7 +72,7 @@ see timeAdvance.pdf notes.
 */
 
 template <typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverTrilinos >
 
 class SecondOrderSolver
 {
@@ -108,10 +108,10 @@ public:
     */
 
     SecondOrderSolver( const data_type& data,
-                          FESpace<Mesh, EpetraMap>&   FESpace,
-                          BCHandler&       BCh,
-                          boost::shared_ptr<Epetra_Comm>&     comm,
-                          UInt             offset=0);
+                       FESpace<Mesh, EpetraMap>&   FESpace,
+                       BCHandler&       BCh,
+                       boost::shared_ptr<Epetra_Comm>&     comm,
+                       UInt             offset=0);
 
     /*!
       \param data_file GetPot data file
@@ -121,11 +121,11 @@ public:
     */
 
     SecondOrderSolver( const data_type& data,
-                          FESpace<Mesh, EpetraMap>&   FESpace,
-                          boost::shared_ptr<Epetra_Comm>&     comm,
-                          UInt       offset=0);
+                       FESpace<Mesh, EpetraMap>&   FESpace,
+                       boost::shared_ptr<Epetra_Comm>&     comm,
+                       UInt       offset=0);
 
-     //! Update the right  hand side  for time advancing
+    //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
       \param time present time
@@ -133,30 +133,30 @@ public:
 
     void updateSystem();
 
-  //updateSystem with time depend term 
- 
-  void updateSystem( double coefficient,
-		     const vector_type& sourceVec
-		     );
-  
-   void buildSystem();
+    //updateSystem with time depend term
+
+    void updateSystem( double coefficient,
+                       const vector_type& sourceVec
+                     );
+
+    void buildSystem();
 
     //! Solve the non-linear system
 
     void iterate( vector_type& sol );
     void iterate( bchandler_raw_type& bch );
- 
-     //! getters
+
+    //! getters
     EpetraMap   const& getMap()       const { return M_localMap; }
     Displayer   const& getDisplayer() const { return M_Displayer; }
     matrix_ptrtype const matrMassStiff() const { return M_massStiff; }
-   
+
     matrix_type&  matrMass()         { return *M_mass; }
     matrix_type&  matrDamping()      { return *M_damping; }
     matrix_type&  matrLinearStiff()  { return *M_linearStiff; }
 
     //! BCHandler getter and setter
-    FESpace<Mesh, EpetraMap>& uFESpace(){return M_FESpace;}
+    FESpace<Mesh, EpetraMap>& uFESpace() {return M_FESpace;}
     BCHandler const & BChandler() const {return M_BCh;}
     //! residual getter
     vector_type& residual()             {return *M_residual_d;}
@@ -166,36 +166,36 @@ public:
     void setBC(BCHandler& BCd)   {M_BCh = &BCd;}
     void setSourceTerm( source_type const& __s ) { M_source = __s; }
     void resetPrec() {M_resetPrec = true;}
-   
+
     //! evaluates residual for newton interations
     void evalResidual( vector_type &res, const vector_type& sol, int iter);
 
     source_type const& sourceTerm() const { return M_source; }
 
     vector_type& u()        { return M_u; }
- 
+
     vector_ptrtype& rhsWithoutBC() { return M_rhsNoBC; }
 
     void setUp( const GetPot& dataFile );
 
     void initialize( const Function& u0);
- 
-  
-   // Matteo
+
+
+    // Matteo
     void solver0( vector_type& sol0,  bchandler_raw_type& bch, vector_type  rhs0);
 
 
     void postProcess();
 
 
-  //Matteo: updateRHS
-  virtual void updateRHS(vector_type const& rhs)
-  {
-    *M_rhsNoBC = rhs;
-    M_rhsNoBC->GlobalAssemble();
-  }
+    //Matteo: updateRHS
+    virtual void updateRHS(vector_type const& rhs)
+    {
+        *M_rhsNoBC = rhs;
+        M_rhsNoBC->GlobalAssemble();
+    }
 
-   //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
     boost::shared_ptr<Epetra_Comm> const& comm()         const {return M_Displayer.comm();}
 
@@ -228,9 +228,9 @@ private:
     //! Matrix C: mass + linear stiffness
     matrix_ptrtype                    M_massStiff;
 
-  //! Matrix D: alpha* mass + beta * linear stiffness
+    //! Matrix D: alpha* mass + beta * linear stiffness
     matrix_ptrtype                    M_damping;
-  
+
     //! Elementary matrices and vectors
     ElemMat                        M_elmatK; // stiffnes
     ElemMat                        M_elmatM; // mass
@@ -239,11 +239,11 @@ private:
 
     //! unknowns vector
     vector_type                    M_u;
-   
+
     //! right  hand  side displacement
     vector_ptrtype                    M_rhs;
 
-      //! right  hand  side
+    //! right  hand  side
     vector_ptrtype                    M_rhsNoBC;
 
     //! right  hand  side
@@ -294,41 +294,41 @@ private:
 template <typename Mesh, typename SolverType>
 SecondOrderSolver<Mesh, SolverType>::
 SecondOrderSolver( const data_type&          data,
-                      FESpace<Mesh, EpetraMap>& FESpace,
-                      BCHandler&                BCh,
-                      boost::shared_ptr<Epetra_Comm>&              comm,
-                     UInt                      offset
-                      ) :
-    M_data                       ( data ),
-    M_FESpace                    ( FESpace ),
-    M_BCh                        ( &BCh ),
-    M_Displayer                  ( comm ),
-    M_me                         ( comm->MyPID() ),
-    M_linearSolver               ( new SolverType( comm ) ),
-    M_localMap                   ( M_FESpace.map() ),
-    M_mass                       ( new matrix_type(M_localMap) ),
-    M_linearStiff                ( new matrix_type(M_localMap) ),
-    M_stiff                      ( new matrix_type(M_localMap) ),
-    M_massStiff                  ( new matrix_type(M_localMap) ),
-    M_damping                    ( new matrix_type(M_localMap) ),
-    M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatD                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_u                          ( M_localMap ),
-    M_rhs                        ( new vector_type(M_localMap) ),
-    M_rhsNoBC                    ( new vector_type(M_localMap) ),
-    M_f                          ( new vector_type(M_localMap)),
-    M_residual_d                 (  new vector_type(M_localMap)),
-    M_out_iter                   ( "out_iter_problem" ),
-    M_out_res                    ( "out_res_problem" ),
-    M_reusePrec                  ( true ),
-    M_maxIterForReuse            ( -1 ),
-    M_resetPrec                  ( true ),
-    M_maxIterSolver              ( -1 ),
-    M_offset                     (offset),
+                   FESpace<Mesh, EpetraMap>& FESpace,
+                   BCHandler&                BCh,
+                   boost::shared_ptr<Epetra_Comm>&              comm,
+                   UInt                      offset
+                 ) :
+        M_data                       ( data ),
+        M_FESpace                    ( FESpace ),
+        M_BCh                        ( &BCh ),
+        M_Displayer                  ( comm ),
+        M_me                         ( comm->MyPID() ),
+        M_linearSolver               ( new SolverType( comm ) ),
+        M_localMap                   ( M_FESpace.map() ),
+        M_mass                       ( new matrix_type(M_localMap) ),
+        M_linearStiff                ( new matrix_type(M_localMap) ),
+        M_stiff                      ( new matrix_type(M_localMap) ),
+        M_massStiff                  ( new matrix_type(M_localMap) ),
+        M_damping                    ( new matrix_type(M_localMap) ),
+        M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatD                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_u                          ( M_localMap ),
+        M_rhs                        ( new vector_type(M_localMap) ),
+        M_rhsNoBC                    ( new vector_type(M_localMap) ),
+        M_f                          ( new vector_type(M_localMap)),
+        M_residual_d                 (  new vector_type(M_localMap)),
+        M_out_iter                   ( "out_iter_problem" ),
+        M_out_res                    ( "out_res_problem" ),
+        M_reusePrec                  ( true ),
+        M_maxIterForReuse            ( -1 ),
+        M_resetPrec                  ( true ),
+        M_maxIterSolver              ( -1 ),
+        M_offset                     (offset),
 
-    M_matrFull                   ( )
+        M_matrFull                   ( )
 {
     //    M_BCh->setOffset(M_offset);
 }
@@ -336,41 +336,41 @@ SecondOrderSolver( const data_type&          data,
 template <typename Mesh, typename SolverType>
 SecondOrderSolver<Mesh, SolverType>::
 SecondOrderSolver( const data_type& data,
-                      FESpace<Mesh, EpetraMap>&   FESpace,
-                     boost::shared_ptr<Epetra_Comm>&     comm,
-                      UInt             /*offset*/
-                      ) :
-    M_data                        ( data ),
-    M_FESpace                 ( FESpace ),
-    M_Displayer               ( comm ),
-    M_me                          ( comm->MyPID() ),
-    M_localMap                ( M_FESpace.map() ),
-    M_mass                       ( new matrix_type(M_localMap) ),
-    M_linearStiff               ( new matrix_type(M_localMap) ),
-    M_stiff                         ( new matrix_type(M_localMap) ),
-    M_massStiff               ( new matrix_type(M_localMap) ),
-    M_damping                ( new matrix_type(M_localMap) ),
-    M_elmatK                   ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatM                  ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatC                   ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatD                   ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_u                              ( M_localMap),
-    M_rhs                           ( new vector_type(M_localMap) ),
-    M_rhsNoBC                 ( new vector_type(M_localMap) ),
-    M_f                               ( new vector_type(M_localMap)),
-    M_residual_d              ( new vector_type(M_localMap)),
-    M_out_iter                   ( "out_iter_problem" ),
-    M_out_res                    ( "out_res_problem" ),
-    M_linearSolver               ( new SolverType( comm ) ),
-    //M_prec                       ( ),//new prec_raw_type() ),
-    M_reusePrec                  ( true ),
-    M_maxIterForReuse            ( -1 ),
-    M_resetPrec                  ( true ),
-    M_maxIterSolver              ( -1 ),
-    M_count                      ( 0 ),
-    M_offset                     ( 0 ),
-    M_rescaleFactor            (1.),
-    M_matrFull                   ( )
+                   FESpace<Mesh, EpetraMap>&   FESpace,
+                   boost::shared_ptr<Epetra_Comm>&     comm,
+                   UInt             /*offset*/
+                 ) :
+        M_data                        ( data ),
+        M_FESpace                 ( FESpace ),
+        M_Displayer               ( comm ),
+        M_me                          ( comm->MyPID() ),
+        M_localMap                ( M_FESpace.map() ),
+        M_mass                       ( new matrix_type(M_localMap) ),
+        M_linearStiff               ( new matrix_type(M_localMap) ),
+        M_stiff                         ( new matrix_type(M_localMap) ),
+        M_massStiff               ( new matrix_type(M_localMap) ),
+        M_damping                ( new matrix_type(M_localMap) ),
+        M_elmatK                   ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatM                  ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatC                   ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_elmatD                   ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+        M_u                              ( M_localMap),
+        M_rhs                           ( new vector_type(M_localMap) ),
+        M_rhsNoBC                 ( new vector_type(M_localMap) ),
+        M_f                               ( new vector_type(M_localMap)),
+        M_residual_d              ( new vector_type(M_localMap)),
+        M_out_iter                   ( "out_iter_problem" ),
+        M_out_res                    ( "out_res_problem" ),
+        M_linearSolver               ( new SolverType( comm ) ),
+        //M_prec                       ( ),//new prec_raw_type() ),
+        M_reusePrec                  ( true ),
+        M_maxIterForReuse            ( -1 ),
+        M_resetPrec                  ( true ),
+        M_maxIterSolver              ( -1 ),
+        M_count                      ( 0 ),
+        M_offset                     ( 0 ),
+        M_rescaleFactor            (1.),
+        M_matrFull                   ( )
 {
     //    M_BCh->setOffset(0);
 }
@@ -406,29 +406,29 @@ buildSystem()
 
     Chrono chrono;
     chrono.start();
- 
+
     // Number of displacement components
     UInt nc = nDimensions;
 
-     // Elementary computation and matrix assembling
+    // Elementary computation and matrix assembling
     // Loop on elements
 
     for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
-      {
+    {
         M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) );
 
-	int marker    = M_FESpace.mesh()->volumeList( iVol ).marker();
-	
-	//	chrono.start();
+        int marker    = M_FESpace.mesh()->volumeList( iVol ).marker();
+
+        //	chrono.start();
         M_elmatK.zero();
         M_elmatM.zero();
 
-	// building stiffness matrix
- 	stiff_strain( 2.0, M_elmatK, M_FESpace.fe() );
+        // building stiffness matrix
+        stiff_strain( 2.0, M_elmatK, M_FESpace.fe() );
 
         // building mass matrix
-	mass( 1., M_elmatM, M_FESpace.fe(), 0, 0);
-      
+        mass( 1., M_elmatM, M_FESpace.fe(), 0, 0);
+
         assembleMatrix( *M_linearStiff,
                         M_elmatK,
                         M_FESpace.fe(),
@@ -437,44 +437,44 @@ buildSystem()
                         M_FESpace.dof(),
                         0, 0, 0, 0);
 
-	assembleMatrix( *M_mass,
-			M_elmatM,
-			M_FESpace.fe(),
-			M_FESpace.fe(),
-			M_FESpace.dof(),
-			M_FESpace.dof(),
-			0, 0, 0, 0);
-      }
+        assembleMatrix( *M_mass,
+                        M_elmatM,
+                        M_FESpace.fe(),
+                        M_FESpace.fe(),
+                        M_FESpace.dof(),
+                        M_FESpace.dof(),
+                        0, 0, 0, 0);
+    }
 
-    if(M_data.isDamping())
-      {
-	M_Displayer.leaderPrint( "P-  Building the system   Damping matrix          ... ");
-	
-	for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
-	  {
-	    M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) );
-	    
-	    int marker    = M_FESpace.mesh()->volumeList( iVol ).marker();
-	    
-	    double alpha = M_data.alpha(marker);
-	    double beta  = M_data.beta(marker);
-	    //building damping matrix
-	    
-	    M_elmatD.zero();
- 
-	    stiff_strain( 2.0 * beta, M_elmatD, M_FESpace.fe() );
-	    mass( alpha, M_elmatD, M_FESpace.fe(), 0, 0);
-	    
-	    assembleMatrix( *M_damping,
-			    M_elmatD,
-			    M_FESpace.fe(),
-			    M_FESpace.fe(),
-			    M_FESpace.dof(),
-			    M_FESpace.dof(),
-			    0, 0, 0, 0);
-	  }
-      }
-    
+    if (M_data.isDamping())
+    {
+        M_Displayer.leaderPrint( "P-  Building the system   Damping matrix          ... ");
+
+        for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
+        {
+            M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) );
+
+            int marker    = M_FESpace.mesh()->volumeList( iVol ).marker();
+
+            double alpha = M_data.alpha(marker);
+            double beta  = M_data.beta(marker);
+            //building damping matrix
+
+            M_elmatD.zero();
+
+            stiff_strain( 2.0 * beta, M_elmatD, M_FESpace.fe() );
+            mass( alpha, M_elmatD, M_FESpace.fe(), 0, 0);
+
+            assembleMatrix( *M_damping,
+                            M_elmatD,
+                            M_FESpace.fe(),
+                            M_FESpace.fe(),
+                            M_FESpace.dof(),
+                            M_FESpace.dof(),
+                            0, 0, 0, 0);
+        }
+    }
+
     //M_comm->Barrier();
 
     //Global Assemble :
@@ -489,23 +489,23 @@ template <typename Mesh, typename SolverType>
 void SecondOrderSolver<Mesh, SolverType>::
 solver0( vector_type& sol0,  bchandler_raw_type& bch, vector_type  rhs0 )
 {
-  vector_type rhsFull(rhs0);
-  
-  prec_type prec;
-  
-  std::string precType ="Ifpack" ;
-  
-  prec.reset( PRECFactory::instance().createObject(precType) );
-  
-  prec->buildPreconditioner(M_mass);
-  
-  Real condest = prec->Condest();
-  
-  M_linearSolver->setPreconditioner(prec);
-  
-  M_linearSolver->setMatrix(*M_mass);
-  
-  int numIter =  M_linearSolver->solve(sol0, rhs0);
+    vector_type rhsFull(rhs0);
+
+    prec_type prec;
+
+    std::string precType ="Ifpack" ;
+
+    prec.reset( PRECFactory::instance().createObject(precType) );
+
+    prec->buildPreconditioner(M_mass);
+
+    Real condest = prec->Condest();
+
+    M_linearSolver->setPreconditioner(prec);
+
+    M_linearSolver->setMatrix(*M_mass);
+
+    int numIter =  M_linearSolver->solve(sol0, rhs0);
 
 }
 
@@ -514,33 +514,33 @@ template <typename Mesh, typename SolverType>
 void SecondOrderSolver<Mesh, SolverType>::
 initialize( const Function& u0)
 {
-  M_FESpace.interpolate(u0, M_u, 0.0);
+    M_FESpace.interpolate(u0, M_u, 0.0);
 }
 
 template <typename Mesh, typename SolverType>
 void SecondOrderSolver<Mesh, SolverType>::
 updateSystem(const      double  coefficient,
-	     const vector_type& sourceVec   )
+             const vector_type& sourceVec   )
 {
-  M_Displayer.leaderPrint("  P-  Updating mass term on right hand side... "); 
-  
-  Chrono chrono;
-  chrono.start();
-  
-  updateRHS(sourceVec);
-  
-  *M_stiff *=0;
-  *M_massStiff *=0;
-   
-  *M_massStiff += *M_linearStiff;
-  
-  if (coefficient!= 0. )
-    *M_massStiff += *M_mass * coefficient;
-   
-  M_massStiff->GlobalAssemble();
-  chrono.stop();
- 
-  M_Displayer.leaderPrintMax("done in ", chrono.diff()); 
+    M_Displayer.leaderPrint("  P-  Updating mass term on right hand side... ");
+
+    Chrono chrono;
+    chrono.start();
+
+    updateRHS(sourceVec);
+
+    *M_stiff *=0;
+    *M_massStiff *=0;
+
+    *M_massStiff += *M_linearStiff;
+
+    if (coefficient!= 0. )
+        *M_massStiff += *M_mass * coefficient;
+
+    M_massStiff->GlobalAssemble();
+    chrono.stop();
+
+    M_Displayer.leaderPrintMax("done in ", chrono.diff());
 }
 
 
@@ -548,44 +548,44 @@ template <typename Mesh, typename SolverType>
 void SecondOrderSolver<Mesh, SolverType>::
 iterate( bchandler_raw_type& bch )
 {
-  Chrono chrono;
-  
-  // matrix and vector assembling communication
-  M_Displayer.leaderPrint("  P-  Solving the system ... \n");
-  
-  chrono.start();
-  
+    Chrono chrono;
+
+    // matrix and vector assembling communication
+    M_Displayer.leaderPrint("  P-  Solving the system ... \n");
+
+    chrono.start();
+
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff->getMeanNumEntries()));
-   *matrFull += *M_massStiff;
-  
-   if (M_data.isDamping())
-      *matrFull += *M_damping;
-    
+    *matrFull += *M_massStiff;
+
+    if (M_data.isDamping())
+        *matrFull += *M_damping;
+
     M_rhsNoBC->GlobalAssemble();
-    
+
 
     vector_type rhsFull (*M_rhsNoBC);
-    
+
     // boundary conditions update
     M_Displayer.leaderPrint("  P-  Applying boundary conditions ...         ");
 
     chrono.start();
     applyBoundaryConditions( *matrFull, rhsFull, bch);
-    
+
     chrono.stop();
-    
+
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
-    
+
     M_linearSolver->precReset();
     M_resetPrec = false;
-    
+
     // solving the system
     M_linearSolver->setMatrix(*matrFull);
     int numIter = M_linearSolver->solveSystem( rhsFull, M_u, matrFull);
 
     numIter = abs(numIter);
 
-    if(numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
+    if (numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
     {
         resetPrec();
     }
@@ -632,7 +632,7 @@ applyBoundaryConditions(matrix_type&        matrix,
 {
 
     // BC manage for the velocity
-    if(offset)
+    if (offset)
         BCh.setOffset(offset);
     if ( !BCh.bdUpdateDone() )
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );

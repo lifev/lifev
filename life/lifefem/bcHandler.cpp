@@ -43,27 +43,28 @@
 
 #include <life/lifefem/bcHandler.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 BCHandler::BCHandler( const ID& nbc, const BCHints& hint ):
-    M_bdUpdateDone    ( 0 ),
-    M_hint            ( hint ),
-    M_offset          ( 0 ),
-    M_notFoundMarkers ( )
+        M_bdUpdateDone    ( 0 ),
+        M_hint            ( hint ),
+        M_offset          ( 0 ),
+        M_notFoundMarkers ( )
 {
     if ( nbc > 0 )
         M_bcList.reserve( nbc );
 }
 
 BCHandler::BCHandler( const BCHandler& BCh ):
-    M_bdUpdateDone    ( false ), // BCBase is not a true copy -> we need this false!
-    M_hint            ( BCh.M_hint ),
-    M_bcList          ( BCh.M_bcList ),
-    M_offset          ( BCh.M_offset ),
-    M_notFoundMarkers ( BCh.M_notFoundMarkers )
+        M_bdUpdateDone    ( false ), // BCBase is not a true copy -> we need this false!
+        M_hint            ( BCh.M_hint ),
+        M_bcList          ( BCh.M_bcList ),
+        M_offset          ( BCh.M_offset ),
+        M_notFoundMarkers ( BCh.M_notFoundMarkers )
 {
 }
 
@@ -256,12 +257,12 @@ BCHandler::setOffset( const UInt& offset )
 void
 BCHandler::setOffset( std::string const& name, Int offset )
 {
-  BCBase* bc = findBC( name );
+    BCBase* bc = findBC( name );
 
-  if (bc == 0)
-      std::cout << "BCHandler::setOffset : BC " << name << " not found ... ";
+    if (bc == 0)
+        std::cout << "BCHandler::setOffset : BC " << name << " not found ... ";
 
-  bc->setOffset(offset);
+    bc->setOffset(offset);
 }
 
 // ===================================================
@@ -272,14 +273,16 @@ BCHandler::boundaryType(const EntityFlag& aFlag) const
 {
     BCType CurrType(Natural);
 
-    for(UInt i = 0; i <= M_bcList.size(); i++){
-        if(aFlag == M_bcList[i].flag()){
+    for (UInt i = 0; i <= M_bcList.size(); i++)
+    {
+        if (aFlag == M_bcList[i].flag())
+        {
             CurrType = M_bcList[i].type();
             break;
         }
     }
 
-  return CurrType;
+    return CurrType;
 }
 
 BCBase&
@@ -287,8 +290,8 @@ BCHandler::GetBCWithFlag(const EntityFlag& aFlag)
 {
     ID i;
 
-    for(i = 0; i <= M_bcList.size(); i++)
-        if(aFlag == M_bcList[i].flag())
+    for (i = 0; i <= M_bcList.size(); i++)
+        if (aFlag == M_bcList[i].flag())
             break;
 
     return M_bcList[i];
@@ -299,8 +302,8 @@ BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const
 {
     ID i;
 
-    for(i = 0; i <= M_bcList.size(); i++)
-        if(aFlag == M_bcList[i].flag())
+    for (i = 0; i <= M_bcList.size(); i++)
+        if (aFlag == M_bcList[i].flag())
             break;
 
     return M_bcList[i];
@@ -311,8 +314,8 @@ BCHandler::getBCWithType( const BCType& type )
 {
     std::vector<BCName> vectorName;
 
-    for( std::size_t i = 0; i < M_bcList.size(); ++i )
-        if( M_bcList[i].type() == type)
+    for ( std::size_t i = 0; i < M_bcList.size(); ++i )
+        if ( M_bcList[i].type() == type)
             vectorName.push_back( M_bcList[i].name() );
 
     return vectorName;
@@ -323,8 +326,8 @@ BCHandler::getNumberBCWithType( const BCType& type )
 {
     UInt typeNumber = 0;
 
-    for( std::size_t i = 0; i < M_bcList.size(); ++i )
-        if( M_bcList[i].type() == type)
+    for ( std::size_t i = 0; i < M_bcList.size(); ++i )
+        if ( M_bcList[i].type() == type)
             ++typeNumber;
 
     return typeNumber;
@@ -343,7 +346,7 @@ BCHandler::getBCbyName(const std::string __BCName) const
     {
         std::ostringstream __ex;
         __ex << __BCName << " was not found in this Boundary conditions set\n"
-             << "This set contains \n";
+        << "This set contains \n";
         for ( UInt i = 0; i < M_bcList.size(); ++i )
         {
             M_bcList[ i ].showMe( true, __ex );
@@ -401,8 +404,8 @@ BCHandler::hasOnlyEssential() const
         {
             std::ostringstream __ex;
             __ex << "BCHandler::hasOnlyEssential(): state is not consistent:"
-                 << "\nhint from constructor says:    yes"
-                 << "\nadded boundary conditions say: no";
+            << "\nhint from constructor says:    yes"
+            << "\nadded boundary conditions say: no";
             std::cerr << std::endl << "Throwing exception:\n"
                       << __ex.str() << std::endl;
             throw std::logic_error( __ex.str() );
@@ -430,11 +433,11 @@ BCHandler::findBC( const std::string& __name )
     {
         std::ostringstream __ex;
         __ex << "Invalid name for BC to be modified : " << __name << "\n"
-             << "The list of available BCs is:\n";
+        << "The list of available BCs is:\n";
         std::for_each( M_bcList.begin(),
                        M_bcList.end(),
                        std::cout << boost::lambda::bind( &BCBase::name, boost::lambda::_1 )
-                       << boost::lambda::constant( "\n" ) );
+                                 << boost::lambda::constant( "\n" ) );
         throw std::invalid_argument( __ex.str() );
     }
     return __bc;
@@ -456,7 +459,7 @@ bool
 BCHandler::listHasOnlyEssential() const
 {
     std::map<EntityFlag, EssentialStatus> statusMap;
-    for( BCBase_ConstIterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
+    for ( BCBase_ConstIterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
     {
         // make sure that this flag is in the map
         EssentialStatus& status = statusMap[it->flag()];
@@ -464,47 +467,47 @@ BCHandler::listHasOnlyEssential() const
         {
             switch ( it->mode() )
             {
-                case Scalar:
-                    status.setAllComponents();
-                    break;
-                case Full:
-                    status.setAllComponents();
-                    break;
-                case Component:
+            case Scalar:
+                status.setAllComponents();
+                break;
+            case Full:
+                status.setAllComponents();
+                break;
+            case Component:
+            {
+                UInt nComp = it->numberOfComponents();
+                for (UInt iComp=1; iComp<=nComp; ++iComp)
                 {
-                    UInt nComp = it->numberOfComponents();
-                    for (UInt iComp=1; iComp<=nComp; ++iComp)
-                    {
-                        status.setComponent( it->component(iComp) );
-                    }
+                    status.setComponent( it->component(iComp) );
                 }
-                    break;
-                case Normal:
-                    status.setNormal();
-                    break;
-                case Tangential:
-                    status.setTangential();
-                    break;
-                case Directional:
-                    status.setDirectional();
-                    break;
-                default:
-                {
-                    std::ostringstream __ex;
-                    __ex << "BCHandler::hasOnlyEssential(): BC mode "
-                         << "unknown\n";
-                    std::cerr << std::endl << "Throwing exception:\n"
-                              << __ex.str() << std::endl;
-                    throw std::logic_error( __ex.str() );
-                }
-                    break;
+            }
+            break;
+            case Normal:
+                status.setNormal();
+                break;
+            case Tangential:
+                status.setTangential();
+                break;
+            case Directional:
+                status.setDirectional();
+                break;
+            default:
+            {
+                std::ostringstream __ex;
+                __ex << "BCHandler::hasOnlyEssential(): BC mode "
+                << "unknown\n";
+                std::cerr << std::endl << "Throwing exception:\n"
+                          << __ex.str() << std::endl;
+                throw std::logic_error( __ex.str() );
+            }
+            break;
             }
         }
     }
 
     bool listOnlyEssential = true;
     for (std::map<EntityFlag, EssentialStatus>::const_iterator
-             it = statusMap.begin(); it != statusMap.end(); ++it)
+            it = statusMap.begin(); it != statusMap.end(); ++it)
     {
         listOnlyEssential &= it->second.isEssential();
     }

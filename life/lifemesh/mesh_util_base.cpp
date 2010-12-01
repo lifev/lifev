@@ -31,17 +31,17 @@ void GetCoordComponent::operator() ( Real const x, Real const y, Real const z, R
     switch ( comp )
     {
     case( 0 ) :
-                    ret[ 0 ] = x;
+        ret[ 0 ] = x;
         ret[ 1 ] = 0.0;
         ret[ 2 ] = 0.0;
         break;
     case( 1 ) :
-                    ret[ 0 ] = 0.0;
+        ret[ 0 ] = 0.0;
         ret[ 1 ] = y;
         ret[ 2 ] = 0.0;
         break;
     case( 2 ) :
-                    ret[ 0 ] = 0.0;
+        ret[ 0 ] = 0.0;
         ret[ 1 ] = 0.0;
         ret[ 2 ] = z;
         break;

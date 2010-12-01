@@ -63,10 +63,10 @@ using namespace LifeV;
 #define TUBE20_MESH_SETTINGS
 
 #ifdef TUBE20_MESH_SETTINGS
- const int INLET    = 2;
- const int WALL     = 1;
- const int SLIPWALL = 20;
- const int OUTLET   = 3;
+const int INLET    = 2;
+const int WALL     = 1;
+const int SLIPWALL = 20;
+const int OUTLET   = 3;
 #endif
 
 
@@ -87,7 +87,8 @@ Real flux(const Real& t, const ID& i)
     // here : n = ( 0, 0, 1)
     Real const pi(3.14159265);
 
-    switch(i) {
+    switch (i)
+    {
     case 1:
         return 0.0;
         break;
@@ -108,9 +109,9 @@ Real flux(const Real& t, const ID& i)
 struct Cylinder::Private
 {
     Private() :
-        nu(1), D(1), period(1),
-        lambda()
-        {}
+            nu(1), D(1), period(1),
+            lambda()
+    {}
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
@@ -133,16 +134,16 @@ struct Cylinder::Private
     Real Ubar() const { return nu*Re/D; }
 
     double Um_2d() const { return 3*Ubar()/2; }
-     /**
-     * Poiseuille inflow
-     *
-     * Define the velocity profile at the inlet for the 3D cylinder
-     */
+    /**
+    * Poiseuille inflow
+    *
+    * Define the velocity profile at the inlet for the 3D cylinder
+    */
     Real poiseuille( const Real& t,
-                      const Real& x,
-                      const Real& y,
-                      const Real& z,
-                      const ID&   id ) const
+                     const Real& x,
+                     const Real& y,
+                     const Real& z,
+                     const ID&   id ) const
     {
         double r = std::sqrt(x*x + y*y);
 
@@ -153,11 +154,11 @@ struct Cylinder::Private
     }
 
     fct_type getU_pois()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
 
     /**
@@ -166,16 +167,16 @@ struct Cylinder::Private
      * Define the velocity profile at the inlet for the 3D cylinder
      */
     Real flux3d( const ID&   id, const Real t  ) const
-        {
-            return (Ubar() * flux( period*t, id ));
-        }
+    {
+        return (Ubar() * flux( period*t, id ));
+    }
 
     fct_type get_flux3d()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::flux3d, this, _1, _2);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::flux3d, this, _1, _2);
+        return f;
+    }
 
     /**
      * u3d 3D lagrabge multiplier.
@@ -183,29 +184,29 @@ struct Cylinder::Private
      * Define the velocity profile at the inlet for the 3D cylinder
      */
     Real lambda3d( const Real& t,
-                 const Real& /* x */,
-                 const Real& /* y */,
-                 const Real& /* z */,
-                 const ID&   id ) const
-        {
-            return ( 1.33333 );
-            //            return ( (*lambda)[0] );
-        }
+                   const Real& /* x */,
+                   const Real& /* y */,
+                   const Real& /* z */,
+                   const ID&   id ) const
+    {
+        return ( 1.33333 );
+        //            return ( (*lambda)[0] );
+    }
 
     fct_type get_lambda3d()
-        {
-            fct_type f;
-            f = boost::bind(&Cylinder::Private::lambda3d, this, _1, _2, _3, _4, _5);
-            return f;
-        }
+    {
+        fct_type f;
+        f = boost::bind(&Cylinder::Private::lambda3d, this, _1, _2, _3, _4, _5);
+        return f;
+    }
 
 
 };
 
 Cylinder::Cylinder( int argc,
                     char** argv )
-    :
-    d( new Private )
+        :
+        d( new Private )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -214,7 +215,7 @@ Cylinder::Cylinder( int argc,
 
     d->Re = dataFile( "fluid/problem/Re", 1. );
     d->nu = dataFile( "fluid/physics/viscosity", 1. ) /
-        dataFile( "fluid/physics/density", 1. );
+            dataFile( "fluid/physics/density", 1. );
     d->period  = dataFile( "fluid/problem/period", 20. );
     d->D  = dataFile( "fluid/problem/D", 1. );
 
@@ -335,13 +336,13 @@ Cylinder::run()
 
 
     if  (d->comm->MyPID() == 0) // Adding lagrange multipliers in the first processor
-        {
+    {
 
-            lagrangeMultipliers.resize(1); // just one flux to impose (n);
-            lagrangeMultipliers[0] = 1;    // just take a numbering of the lagrange multipliers [1:n];
-            //            lagrangeMultipliers[1] = 2;    // just take a numbering of the lagrange multipliers [1:n];
+        lagrangeMultipliers.resize(1); // just one flux to impose (n);
+        lagrangeMultipliers[0] = 1;    // just take a numbering of the lagrange multipliers [1:n];
+        //            lagrangeMultipliers[1] = 2;    // just take a numbering of the lagrange multipliers [1:n];
 
-        }
+    }
 
 
     if (verbose) std::cout << "Total Velocity Dofs = " << totalVelDofs << std::endl;
@@ -424,10 +425,10 @@ Cylinder::run()
     double fluxout = fluid.flux(3);
 
     if (verbose)
-        {
-            std::cout << " Inlet Flux  = " << fluxin  << std::endl;
-            std::cout << " Outlet Flux = " << fluxout << std::endl;
-        }
+    {
+        std::cout << " Inlet Flux  = " << fluxin  << std::endl;
+        std::cout << " Outlet Flux = " << fluxout << std::endl;
+    }
 
 //    fluid.postProcess();
 

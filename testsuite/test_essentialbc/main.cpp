@@ -185,7 +185,7 @@ int main()
     // indicating success or failure.
     // altre dichiarazioni per AZTEC
     int    *update,                  // vector elements updated on this node.
-        *external;                // vector elements needed by this node.
+    *external;                // vector elements needed by this node.
     int    *update_index;            // ordering of update[] and external[]
     int    *extern_index;            // locally on this processor.
     //  int    *bindx;                 // Sparse matrix to be solved is stored
@@ -232,7 +232,7 @@ int main()
     Real normL2=0., normL2diff=0., normL2sol=0.;
     Real normH1=0., normH1diff=0., normH1sol=0.;
 
-    for(UInt i=1; i<=aMesh.numVolumes(); ++i)
+    for (UInt i=1; i<=aMesh.numVolumes(); ++i)
     {
         fe.updateFirstDeriv(aMesh.volumeList(i));
 
@@ -257,7 +257,7 @@ int main()
     std::cout << "|| sol     ||_{L^2}                   = " << normL2sol << std::endl;
     std::cout << "|| U - sol ||_{L^2}                   = " << normL2diff<< std::endl;
     std::cout << "|| U - sol ||_{L^2} / || sol ||_{L^2} = " << normL2diff/normL2sol
-         << std::endl;
+              << std::endl;
 
     std::cout << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
     std::cout << "|| sol     ||_{H^1}                   = " << normH1sol << std::endl;

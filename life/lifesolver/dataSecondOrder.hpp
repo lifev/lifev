@@ -41,23 +41,23 @@ namespace LifeV
   \class DataSecondOrder
 */
 class DataSecondOrder:
-            public DataTime
+        public DataTime
 {
 public:
-   //! @name Type definitions
+    //! @name Type definitions
     //@{
 
     typedef DataTime                                                  Time_Type;
     typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
 
-  //@}
+    //@}
 
     //! Constructor
     DataSecondOrder();
     DataSecondOrder( const GetPot& dfile );
     DataSecondOrder( const DataSecondOrder& dataSecondOrder);
 
- //! @name Operators
+//! @name Operators
     //@{
 
     //! Operator=
@@ -68,7 +68,7 @@ public:
 
     //@}
 
- //! @name Methods
+//! @name Methods
     //@{
 
     //! Read the dataFile and set all the quantities
@@ -91,29 +91,29 @@ public:
     /*!
      * @param DataTime shared_ptr to dataTime container
      */
-     void setDataTime( const Time_ptrType DataTime );
+    void setDataTime( const Time_ptrType DataTime );
 
     //! Set density
     /*!
      * @param density solid density value
      */
-     void setDensity( const Real& density );
+    void setDensity( const Real& density );
 
     //! Set alpha
     /*!
      * @param alpha damping coefficient.
      */
-     void setAlpha( const Real& alpha );
+    void setAlpha( const Real& alpha );
 
-     void setAlpha( const Real& alpha, const UInt& material );
+    void setAlpha( const Real& alpha, const UInt& material );
 
     //! Set beta
     /*!
-     * @param beta damping coefficient. 
+     * @param beta damping coefficient.
      */
-     void setBeta( const Real& beta);
+    void setBeta( const Real& beta);
 
-  void setBeta( const Real& beta, const UInt& material);
+    void setBeta( const Real& beta, const UInt& material);
 
     //@}
 
@@ -131,52 +131,52 @@ public:
     /*!
      * @return Solid density
      */
-     const Real& rho() const;
+    const Real& rho() const;
 
     //! Get damping coefficients
     /*!
      * @return alpha damping coefficient
      */
-     const Real& alpha( const UInt& material = 1 ) const;
+    const Real& alpha( const UInt& material = 1 ) const;
 
-     /*!
-     * @return beta damping coefficient
-     */
-     const Real& beta( const UInt& material = 1 ) const;
+    /*!
+    * @return beta damping coefficient
+    */
+    const Real& beta( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
      * @return FE order
      */
-     const std::string& order()     const;
+    const std::string& order()     const;
 
     //! Get solid amplification factor
     /*!
      * @return Solid amplification factor
      */
-     const Real& factor()    const;
+    const Real& factor()    const;
 
     //! Get verbose level
     /*!
      * @return verbose level
      */
-     const UInt& verbose()   const;
+    const UInt& verbose()   const;
 
- 
 
-    
-  //!
-  /*
-   * @ return true if Damping coefficient is not zero.
-  */
 
-   bool  isDamping() const
-  {
-    if (M_beta.size() == 1 || M_alpha.size()==1)
-      return  _beta +_alpha;
-    return false;
-  }
-   //@}
+
+    //!
+    /*
+     * @ return true if Damping coefficient is not zero.
+    */
+
+    bool  isDamping() const
+    {
+        if (M_beta.size() == 1 || M_alpha.size()==1)
+            return  _beta +_alpha;
+        return false;
+    }
+    //@}
 
 private:
 
@@ -218,12 +218,12 @@ DataSecondOrder::DataSecondOrder() :
 
 // Constructor
 DataSecondOrder::DataSecondOrder( const GetPot& dfile ) :
-         DataTime( dfile, "problem/time_discretization" )
+        DataTime( dfile, "problem/time_discretization" )
 {
     // physics
-       M_density        = dfile( "problem/physics/density", 1. );
-       _alpha    = dfile( "problem/physics/alpha" , 0.0 );
-       _beta     = dfile( "problem/physics/beta" , 0.0 );
+    M_density        = dfile( "problem/physics/density", 1. );
+    _alpha    = dfile( "problem/physics/alpha" , 0.0 );
+    _beta     = dfile( "problem/physics/beta" , 0.0 );
 
     // miscellaneous
     M_factor  = dfile( "problem/miscellaneous/factor", 1.0 );
@@ -239,16 +239,16 @@ DataSecondOrder::DataSecondOrder( const GetPot& dfile ) :
 }
 
 DataSecondOrder::DataSecondOrder( const DataSecondOrder& dataSecondOrder):
-  DataTime               ( dataSecondOrder),
-  M_density               ( dataSecondOrder.M_density ),
-  _alpha                     ( dataSecondOrder._alpha ),
-  _beta                       ( dataSecondOrder._beta ),
-  M_isDamping         ( dataSecondOrder.M_isDamping),
-  M_alpha                  ( dataSecondOrder.M_alpha ),
-  M_beta                    ( dataSecondOrder.M_beta ),
-  M_factor                  ( dataSecondOrder.M_factor ),
-  M_verbose              ( dataSecondOrder.M_verbose ),
-  M_order                   ( dataSecondOrder.M_order )
+        DataTime               ( dataSecondOrder),
+        M_density               ( dataSecondOrder.M_density ),
+        _alpha                     ( dataSecondOrder._alpha ),
+        _beta                       ( dataSecondOrder._beta ),
+        M_isDamping         ( dataSecondOrder.M_isDamping),
+        M_alpha                  ( dataSecondOrder.M_alpha ),
+        M_beta                    ( dataSecondOrder.M_beta ),
+        M_factor                  ( dataSecondOrder.M_factor ),
+        M_verbose              ( dataSecondOrder.M_verbose ),
+        M_order                   ( dataSecondOrder.M_order )
 {
 }
 
@@ -259,11 +259,11 @@ DataSecondOrder::operator=( const DataSecondOrder& dataSecondOrder )
     {
         M_time                       = dataSecondOrder.M_time;
         M_density                  = dataSecondOrder.M_density;
-	M_isDamping            = dataSecondOrder.M_isDamping;
+        M_isDamping            = dataSecondOrder.M_isDamping;
         M_alpha                     = dataSecondOrder.M_alpha;
         M_beta                       = dataSecondOrder.M_beta;
         _alpha                        = dataSecondOrder._alpha;
-	_beta                          = dataSecondOrder._beta;
+        _beta                          = dataSecondOrder._beta;
         M_order                      = dataSecondOrder.M_order;
         M_factor                     = dataSecondOrder.M_factor;
         M_verbose                 = dataSecondOrder.M_verbose;
@@ -286,10 +286,10 @@ DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
     // physics
     M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
 
-   M_alpha[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
-   M_beta[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+    M_alpha[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
+    M_beta[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
 
-     
+
     // space_discretization
     M_order     = dataFile( "solid/space_discretization/order", "P1" );
 
@@ -299,43 +299,43 @@ DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
 }
 
 
- 
+
 // ===================================================
 // Set Method
 // ===================================================
 
- void
+void
 DataSecondOrder::setDataTime( const Time_ptrType DataTime )
 {
     M_time = DataTime;
 }
 
- void
+void
 DataSecondOrder::setDensity( const Real& density )
 {
     M_density = density;
 }
 
 void
- DataSecondOrder::setAlpha( const Real& alpha )
+DataSecondOrder::setAlpha( const Real& alpha )
 {
     _alpha = alpha;
 }
 
- void
- DataSecondOrder::setAlpha( const Real& alpha, const UInt& material )
+void
+DataSecondOrder::setAlpha( const Real& alpha, const UInt& material )
 {
     M_alpha[material] = alpha;
 }
 
 void
- DataSecondOrder::setBeta( const Real& beta )
+DataSecondOrder::setBeta( const Real& beta )
 {
     _beta = beta;
 }
 
 
- void
+void
 DataSecondOrder::setBeta( const Real& beta, const UInt& material )
 {
     M_beta[material] = beta;
@@ -359,21 +359,21 @@ DataSecondOrder::rho() const
     return M_density;
 }
 
- const Real&
+const Real&
 DataSecondOrder::alpha( const UInt& material ) const
 {
     return M_alpha.find( material )->second;
 }
 
 
- const Real&
+const Real&
 DataSecondOrder::beta( const UInt& material ) const
 {
     return M_beta.find( material )->second;
 }
 
 
- const Real&
+const Real&
 DataSecondOrder::factor() const
 {
     return M_factor;
@@ -386,8 +386,8 @@ DataSecondOrder::order() const
 }
 
 
- 
-  // Output
+
+// Output
 void DataSecondOrder::showMe( std::ostream& c ) const
 {
 
@@ -396,13 +396,13 @@ void DataSecondOrder::showMe( std::ostream& c ) const
     c << "density                          = " << M_density << std::endl;
     c << "alpha                            = " << _alpha << std::endl;
     c << "beta                             = " << _beta << std::endl;
-    
+
     c << "\n*** Values for data [problem/miscellaneous]\n\n";
     c << "deformation factor               = " << M_factor << std::endl;
     c << "verbose                          = " << M_verbose << std::endl;
 
     c << "\n*** Values for data [problem/space_discretization]\n\n";
-   
+
     c << "\n*** Values for data [problem/time_discretization]\n\n";
     DataTime::showMe( c );
 }

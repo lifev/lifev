@@ -68,21 +68,21 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
     Real normResOld = 1, lambda, slope;
     f.evalResidual( residual, sol, iter);
     Real normRes = norm( residual ), normStep = 0,
-                   stop_tol = abstol + reltol * normRes,
-                              ratio;
+                                                stop_tol = abstol + reltol * normRes,
+                                                           ratio;
     Real eta_old, eta_new, linear_rel_tol = fabs( eta_max );
     //
     std::cout << "------------------------------------------------------------------"
-    << std::endl;
+              << std::endl;
     std::cout << "    Newton 0: residual=" << normRes << ", stoping tolerance = "
-    << stop_tol << std::endl;
+              << stop_tol << std::endl;
     std::cout << "------------------------------------------------------------------"
-    << std::endl;
+              << std::endl;
 
     out_res << std::scientific;
     out_res << "# time = ";
     out_res << time << "   " << "initial norm_res " <<  normRes
-            << " stop tol = " << stop_tol << std::endl;
+    << " stop tol = " << stop_tol << std::endl;
     out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
 
     f.updateJacobian( sol , 1);
@@ -117,25 +117,25 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         //
         switch ( linesearch )
         {
-            case 0: // no linesearch
-                sol += step;
-                f.evalResidual( residual, sol, iter);
-                normRes = norm( residual );
-                break;
-            case 1:
-                lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
-                break;
-            case 2:  // recommended
-                lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
-                break;
-            default:
-                std::cout << "Unknown linesearch \n";
-                exit( 1 );
+        case 0: // no linesearch
+            sol += step;
+            f.evalResidual( residual, sol, iter);
+            normRes = norm( residual );
+            break;
+        case 1:
+            lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+            break;
+        case 2:  // recommended
+            lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+            break;
+        default:
+            std::cout << "Unknown linesearch \n";
+            exit( 1 );
         }
 
         out_res   << std::setw(5) << iter
-                  << std::setw(15) << norm_2  (sol)
-                  << std::setw(15) << norm_2  (step);
+        << std::setw(15) << norm_2  (sol)
+        << std::setw(15) << norm_2  (step);
         //
         //-- end of line search
         //
@@ -151,7 +151,7 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
             if ( increase_res == max_increase_res )
             {
                 std::cout << "!!! Newton:" << max_increase_res
-                << " consecutive increases in residual" << std::endl;
+                          << " consecutive increases in residual" << std::endl;
                 maxit = iter;
                 return 1;
             }
@@ -161,11 +161,11 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
             increase_res = 0;
         }
         std::cout << "------------------------------------------------------------------"
-        << std::endl;
+                  << std::endl;
         std::cout << "    Newton " << iter << ": residual=" << normRes << ",  step="
-        << normStep << std::endl;
+                  << normStep << std::endl;
         std::cout << "------------------------------------------------------------------"
-        << std::endl;
+                  << std::endl;
 
 //         out_res << time << " " << iter << " "
 //                 << std::setw(15) << normRes << " "

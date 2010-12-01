@@ -43,9 +43,9 @@
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 #ifdef MONODOMAIN
-	#include <life/lifesolver/monodomainSolver.hpp>
+#include <life/lifesolver/monodomainSolver.hpp>
 #else
-	#include <life/lifesolver/bidomainSolver.hpp>
+#include <life/lifesolver/bidomainSolver.hpp>
 #endif
 #include <life/lifesolver/ionicSolver.hpp>
 #include <life/lifefilters/ensight.hpp>
@@ -78,8 +78,8 @@ public:
     //@{
 
 #ifdef MONODOMAIN
-	typedef MonodomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
-	typedef MonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
+    typedef MonodomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
+    typedef MonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
 #else
     typedef BidomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
     typedef BidomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
@@ -93,10 +93,10 @@ public:
     //@{
 
     Heart( int argc,
-              char** argv );
+           char** argv );
 
     ~Heart()
-        {}
+    {}
 
     //@}
 
@@ -110,21 +110,21 @@ public:
     //! To compute the righthand side of the system
 #ifdef MONODOMAIN
     void computeRhs( vector_type& rhs,
-    		MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-    		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
-    		DataMonodomain& dataMonodomain );
+                     MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
+                     boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
+                     DataMonodomain& dataMonodomain );
 #else
     void computeRhs( vector_type& rhs,
-    		BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-    		boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
-    		DataBidomain& dataBidomain );
+                     BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
+                     boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
+                     DataBidomain& dataBidomain );
 #endif
     //@}
 
 
 private:
-	UInt ion_model;
-	UInt nbeq;
+    UInt ion_model;
+    UInt nbeq;
     boost::shared_ptr<HeartFunctors> M_heart_fct;
 
 };

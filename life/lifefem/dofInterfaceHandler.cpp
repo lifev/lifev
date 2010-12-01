@@ -217,9 +217,10 @@ BCVectorInterface & DofInterfaceHandler::BCvec( const UInt & i )
 UInt DofInterfaceHandler::IndexOfInterfaceRef( const Int& interfref ) const
 {
     std::map<Int, UInt>::const_iterator it = _indexInterfRefMap.find( interfref );
-    if ( it == _indexInterfRefMap.end() ) {
-    	std::ostringstream _err_msg;
-    	_err_msg << "Dof number " << interfref << " not found";
+    if ( it == _indexInterfRefMap.end() )
+    {
+        std::ostringstream _err_msg;
+        _err_msg << "Dof number " << interfref << " not found";
         ERROR_MSG( _err_msg.str().c_str() );
     }
     return it->second;

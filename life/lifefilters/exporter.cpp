@@ -34,7 +34,8 @@
 
 #include <life/lifefilters/exporter.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 ExporterData::ExporterData( const  ExporterData::Type& type,
                             const std::string& variableName,
@@ -43,13 +44,13 @@ ExporterData::ExporterData( const  ExporterData::Type& type,
                             const UInt& size,
                             const UInt& steady,
                             const ExporterData::Where& where):
-    M_variableName  ( variableName ),
-    M_vr            ( vr ),
-    M_size          ( size ),
-    M_start         ( start ),
-    M_type          ( type ),
-    M_steady        ( steady ),
-    M_where         ( where )
+        M_variableName  ( variableName ),
+        M_vr            ( vr ),
+        M_size          ( size ),
+        M_start         ( start ),
+        M_type          ( type ),
+        M_steady        ( steady ),
+        M_where         ( where )
 {}
 
 const std::string&
@@ -86,10 +87,10 @@ std::string ExporterData::typeName() const
 {
     switch (M_type)
     {
-        case Scalar:
-            return "Scalar";
-        case Vector:
-            return "Vector";
+    case Scalar:
+        return "Scalar";
+    case Vector:
+        return "Vector";
     }
 
     return "ERROR string";
@@ -100,10 +101,10 @@ ExporterData::typeDim() const
 {
     switch ( M_type )
     {
-        case Scalar:
-            return 1;
-        case Vector:
-            return 3;
+    case Scalar:
+        return 1;
+    case Vector:
+        return 3;
     }
 
     return 0;
@@ -119,10 +120,10 @@ std::string ExporterData::whereName() const
 {
     switch (M_where)
     {
-        case Node:
-            return "Node";
-        case Cell:
-            return "Cell";
+    case Node:
+        return "Node";
+    case Cell:
+        return "Cell";
     }
 
     return "ERROR string";

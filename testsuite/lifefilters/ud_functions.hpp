@@ -18,25 +18,28 @@
 */
 namespace LifeV
 {
-Real g1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
-  printf("g1:ID=%d ",i);
-  return 0.0;
+Real g1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    printf("g1:ID=%d ",i);
+    return 0.0;
 }
-Real g3(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
-  printf("g3:ID=%d ",i);
-  return 0.0;
-/*
-  switch(i){
-  case 1:
-    return x*x+y*y+z*z;
-    break;
-  }
-  return x*x+y*y+z*z;
-  */
+Real g3(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    printf("g3:ID=%d ",i);
+    return 0.0;
+    /*
+      switch(i){
+      case 1:
+        return x*x+y*y+z*z;
+        break;
+      }
+      return x*x+y*y+z*z;
+      */
 }
-Real g2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
-  printf("g2:ID=%d ",i);
-  return 10.0;
+Real g2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    printf("g2:ID=%d ",i);
+    return 10.0;
 }
 
 }

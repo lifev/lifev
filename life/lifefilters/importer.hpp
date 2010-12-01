@@ -38,8 +38,9 @@ namespace LifeV
 /**
   \enum MeshFormat
 */
-enum MeshFormat {
-    MESHPP, 
+enum MeshFormat
+{
+    MESHPP,
     INRIA,
     GMSH,
     NETGEN
@@ -47,9 +48,9 @@ enum MeshFormat {
 
 /**
   \class importer
-  
+
   import mesh data formats into Life mesh data structure.
-  
+
   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 */
 class importer
@@ -60,27 +61,28 @@ public:
      * default constructor. use GMSH as default mesh format
      */
     importer()
-        :
-        _M_filename(),
-        _M_format(GMSH)
-        {}
-        
+            :
+            _M_filename(),
+            _M_format(GMSH)
+    {}
+
     /**
      * constructor
      * @param filename mesh filename to import
      * @param format format of the file
      */
     importer( std::string const& filename,  MeshFormat const& format )
-        :
-        _M_filename( filename ),
-        _M_format( format )
-        {}
+            :
+            _M_filename( filename ),
+            _M_format( format )
+    {}
 
     /**
-     * set the file name 
-     * @param __filename 
+     * set the file name
+     * @param __filename
      */
-    void setFilename( std::string const& __filename ) {
+    void setFilename( std::string const& __filename )
+    {
         _M_filename = __filename;
     }
 
@@ -88,7 +90,8 @@ public:
      * set the format of the mesh file
      * @param __format  format
      */
-    void setFormat( MeshFormat const& __format ) {
+    void setFormat( MeshFormat const& __format )
+    {
         _M_format = __format;
     }
 
@@ -99,7 +102,7 @@ public:
      */
     void import( RegionMesh3D<LinearTetra> & mesh, EntityFlag regionFlag );
 
-    
+
     /**
      * import mesh with hexahedras
      * @param mesh mesh data structure to fill in
@@ -114,14 +117,14 @@ public:
      */
     void import( RegionMesh2D<LinearTriangle> & mesh, EntityFlag regionFlag );
 
-    
+
     /**
      * import mesh with quadrangles
      * @param mesh mesh data structure to fill in
      * @param regionFlag marker for the region to load
      */
     void import( RegionMesh2D<LinearQuad> & mesh, EntityFlag regionFlag );
-    
+
 private:
 
     //! name of the file to import

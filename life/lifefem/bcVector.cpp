@@ -38,32 +38,32 @@ namespace LifeV
 
 //! Default Constructor (the user must call setBCVector(..))
 BCVectorBase::BCVectorBase()
-    :
-   _M_mixteCoef( 0.0 ),
-   _M_resistanceCoef( 0.0 ),
-   _M_betaCoef(1.0),
-   _M_gammaCoef(1.0),
-   _M_ismixteVec( false ),
-   _M_isbetaVec( false  ),
-   _M_isgammaVec( false ),
-   _M_type( 0 ),
-   _M_finalized( false )
+        :
+        _M_mixteCoef( 0.0 ),
+        _M_resistanceCoef( 0.0 ),
+        _M_betaCoef(1.0),
+        _M_gammaCoef(1.0),
+        _M_ismixteVec( false ),
+        _M_isbetaVec( false  ),
+        _M_isgammaVec( false ),
+        _M_type( 0 ),
+        _M_finalized( false )
 {}
 
 //! Constructor
 BCVectorBase::BCVectorBase( const EpetraVector& vec, const UInt nbTotalDof, UInt type )
-    :
-    _M_vec       ( &vec ),
-    _M_nbTotalDof( nbTotalDof ),
-    _M_mixteCoef ( 0.0 ),
-    _M_resistanceCoef( 0.0 ),
-    _M_betaCoef(1.0),
-    _M_gammaCoef(1.0),
-    _M_ismixteVec( false ),
-    _M_isbetaVec( false  ),
-    _M_isgammaVec( false ),
-    _M_type      ( type ),
-    _M_finalized ( false )
+        :
+        _M_vec       ( &vec ),
+        _M_nbTotalDof( nbTotalDof ),
+        _M_mixteCoef ( 0.0 ),
+        _M_resistanceCoef( 0.0 ),
+        _M_betaCoef(1.0),
+        _M_gammaCoef(1.0),
+        _M_ismixteVec( false ),
+        _M_isbetaVec( false  ),
+        _M_isgammaVec( false ),
+        _M_type      ( type ),
+        _M_finalized ( false )
 {}
 
 BCVectorBase&
@@ -118,7 +118,7 @@ BCVectorBase::BetaVec ( const ID& iDof, const ID& iComp ) const
 Real
 BCVectorBase::GammaVec ( const ID& iDof, const ID& iComp ) const
 {
-  //setgamma(true);
+    //setgamma(true);
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *_M_vec_beta ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof );
 }
@@ -142,8 +142,8 @@ BCVector::BCVector()
 
 //! Constructor
 BCVector::BCVector( EpetraVector& vec, UInt const nbTotalDof, UInt type )
-    :
-    BCVectorBase( vec, nbTotalDof, type )
+        :
+        BCVectorBase( vec, nbTotalDof, type )
 {
     this->setFinalized( true );
 }
@@ -194,9 +194,9 @@ BCVectorInterface::BCVectorInterface()
 //! Constructor
 BCVectorInterface::BCVectorInterface( const EpetraVector& vec, UInt nbTotalDof,
                                       dof_interface_type dofIn, UInt type )
-    :
-    BCVectorBase( vec, nbTotalDof, type ),
-    _M_dofIn( dofIn )
+        :
+        BCVectorBase( vec, nbTotalDof, type ),
+        _M_dofIn( dofIn )
 {
     this->setFinalized( true );
 }
@@ -256,8 +256,8 @@ BCVectorInterface::MixteVec( const ID& iDof, const ID& iComp ) const
 Real
 BCVectorInterface::BetaVec( const ID& iDof, const ID& iComp ) const
 {
-     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-     return ( *_M_vec_beta ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec_beta ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
 }
 
 
@@ -265,8 +265,8 @@ BCVectorInterface::BetaVec( const ID& iDof, const ID& iComp ) const
 Real
 BCVectorInterface::GammaVec( const ID& iDof, const ID& iComp ) const
 {
-     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-     return ( *_M_vec_gamma ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec_gamma ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
 }
 
 //! Assignment operator for BCVectorInterface

@@ -861,7 +861,7 @@ public:
     {}
     KN( const int nn, R ( *f ) ( int i ) ) : KN_<R>( new R[ nn ], nn )
     {
-        for ( int i = 0;i < this->n;i++ )
+        for ( int i = 0; i < this->n; i++ )
             this->v[ i ] = f( i );
     }
     KN( const int nn, const R & a ) : KN_<R>( new R[ nn ], nn )
@@ -875,13 +875,13 @@ public:
     template <class S>
     KN( const KN_<S> & s ) : KN_<R>( new R[ s.n ], s.n )
     {
-        for ( int i = 0;i < this->n;i++ )
+        for ( int i = 0; i < this->n; i++ )
             this->v[ i ] = s[ i ];
     }
     template <class S>
     KN( const KN_<S> & s, R ( *f ) ( S ) ) : KN_<R>( new R[ s.n ], s.n )
     {
-        for ( int i = 0;i < this->n;i++ )
+        for ( int i = 0; i < this->n; i++ )
             this->v[ i ] = f( s[ i ] );
     }
     explicit KN( const KN<R> & u ) : KN_<R>( new R[ u.n ], u.n )

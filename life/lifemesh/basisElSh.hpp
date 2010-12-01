@@ -175,7 +175,7 @@ class QuadraticHexa;
 
 //! \ingroup GeoShape
 class GeoPoint:
-            public Point
+        public Point
 {
 public:
     typedef Point BasRefSha;
@@ -184,7 +184,7 @@ public:
 
 //! \ingroup GeoShape
 class LinearLine:
-            public Line
+        public Line
 {
 public:
     typedef Line BasRefSha;
@@ -196,7 +196,7 @@ public:
 
 //! \ingroup GeoShape
 class QuadraticLine:
-            public Line
+        public Line
 {
 public:
     typedef Line BasRefSha;
@@ -209,7 +209,7 @@ public:
 
 //! \ingroup GeoShape
 class LinearTriangle:
-            public Triangle
+        public Triangle
 {
 public:
     typedef Triangle BasRefSha;
@@ -223,7 +223,7 @@ public:
 
 //! \ingroup GeoShape
 class QuadraticTriangle:
-            public Triangle
+        public Triangle
 {
 public:
     typedef Triangle BasRefSha;
@@ -237,7 +237,7 @@ public:
 
 //! \ingroup GeoShape
 class LinearQuad:
-            public Quad
+        public Quad
 {
 public:
     typedef Quad BasRefSha;
@@ -251,7 +251,7 @@ public:
 
 //! \ingroup GeoShape
 class QuadraticQuad:
-            public Quad
+        public Quad
 {
 public:
     typedef Quad BasRefSha;
@@ -265,7 +265,7 @@ public:
 
 //! \ingroup GeoShape
 class LinearTetra:
-            public Tetra
+        public Tetra
 {
 public:
     typedef Tetra BasRefSha;
@@ -281,7 +281,7 @@ public:
 };
 //! \ingroup GeoShape
 class LinearTetraBubble:
-            public Tetra
+        public Tetra
 {
 public:
     typedef Tetra BasRefSha;
@@ -298,7 +298,7 @@ public:
 
 //! \ingroup GeoShape
 class QuadraticTetra:
-            public Tetra
+        public Tetra
 {
 public:
     typedef Tetra BasRefSha;
@@ -315,7 +315,7 @@ public:
 
 //! \ingroup GeoShape
 class LinearHexa:
-            public Hexa
+        public Hexa
 {
 public:
     typedef Hexa BasRefSha;
@@ -332,7 +332,7 @@ public:
 
 //! \ingroup GeoShape
 class QuadraticHexa:
-            public Hexa
+        public Hexa
 {
 public:
     typedef Hexa BasRefSha;

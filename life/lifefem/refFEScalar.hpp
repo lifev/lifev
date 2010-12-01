@@ -40,14 +40,15 @@
 
 #include <life/lifefem/refFE.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! refFEScalar - Short description of the class
 /*!
 
  */
 class RefFEScalar
-    : public RefFE
+        : public RefFE
 {
 public:
 

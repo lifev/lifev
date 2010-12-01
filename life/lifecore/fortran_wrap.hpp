@@ -50,30 +50,30 @@ typedef int L_F77; // LOGICAL 4 bytes
 
 //!  A matrix class for interfacing with fortran
 /*!
- 
+
   A minimal class used when passing multi-dimensional array arguments from
   C++ to FORTRAN 77 (received as FORTRAN arrays), and subsequently returned
   back to C++ as properly aranged C++ arrays.
- 
+
   \paragraph Problem
- 
+
   FORTRAN organises data in a "column-first" order,
   while C++ organises data in a "row-first" order.
- 
+
   \paragraph Solution
- 
+
   (1) The FMATRIX class can take a C++ array as a constructor
   parameter. A FORTRAN compatible copy of the array is
   then made. The destructor will then copy the result back
   to the original c++ array.
- 
- 
+
+
   (2) The FMATRIX class provides "subscript operators" allowing
   the programmer to read and write from the array, using
   FORTRAN-like syntax and indexing semantics.
- 
+
   /author Carsten A. Arnholm, 04-MAR-1996 (Modified by L. Formaggia MAR 2002)
- 
+
 */
 
 
@@ -101,29 +101,29 @@ public:
  A minimal class used when passing string arguments from C++ to FORTRAN 77
  (received as FORTRAN 77 CHARACTER strings), and subsequently returned back
  to C++ as properly zero terminated strings.
- 
+
  \paragraph Method used for zero-termination:
- 
+
  When the CHARACTER destructor is activated the zero-termination of the
  c-string is automatically managed. Zero termination is also done each time
  a string array is subscripted using
- 
+
  \verbatim
      CHARACTER::operator()(size_t index)
      \endverbatim
- 
+
      \paragraph FORTRAN Assumptions:
- 
+
      (1) F77 truncates strings when CHARACTER variable is short
- 
+
      (2) F77 pads variable with blanks when assigned string is short
- 
+
      (3) F77 represents a string as a pointer followed by a length
- 
+
      (4) A string array is stored in contiguous memory
- 
+
      \author: Carsten A. Arnholm, 20-AUG-1995
- 
+
 */
 
 
@@ -176,9 +176,9 @@ FMATRIX<T>::FMATRIX( T* cpparr, size_t dim1, size_t dim2 )
     // make a FORTRAN-compatible copy of the array
     size_t index_cpp = 0;
     size_t index_f77;
-    for ( size_t i = 0;i < dim[ 0 ];i++ )
+    for ( size_t i = 0; i < dim[ 0 ]; i++ )
     {
-        for ( size_t j = 0;j < dim[ 1 ];j++ )
+        for ( size_t j = 0; j < dim[ 1 ]; j++ )
         {
             index_f77 = j * dim[ 0 ] + i;
             f77rep[ index_f77 ] = cpprep[ index_cpp++ ];
@@ -212,9 +212,9 @@ FMATRIX<T>::~FMATRIX()
         // copy back from FORTRAN to C++ array
         size_t index_cpp;
         size_t index_f77 = 0;
-        for ( size_t j = 0;j < dim[ 1 ];j++ )
+        for ( size_t j = 0; j < dim[ 1 ]; j++ )
         {
-            for ( size_t i = 0;i < dim[ 0 ];i++ )
+            for ( size_t i = 0; i < dim[ 0 ]; i++ )
             {
                 index_cpp = i * dim[ 1 ] + j;
                 cpprep[ index_cpp ] = f77rep[ index_f77++ ];
@@ -237,7 +237,7 @@ inline CHARACTER::CHARACTER( char* cstring, const size_t lstr )
     // find position from where to start padding
     size_t slen = strlen( rep ); // upper limit
     size_t actual = ( slen < len ) ? slen : len; // actual <= len.
-    for ( size_t i = actual;i < len;i++ )
+    for ( size_t i = actual; i < len; i++ )
         rep[ i ] = ' '; // Do the padding.
 }
 
@@ -245,7 +245,7 @@ inline CHARACTER::~CHARACTER()
 {
     if ( rep[ len ] == '\0' )
         return ; // catches string constants
-    for ( int i = len - 1;i >= 0;i-- )
+    for ( int i = len - 1; i >= 0; i-- )
     {
         if ( rep[ i ] == '\0' )
             break; // already zero terminated
@@ -274,7 +274,7 @@ inline void CHARACTER::pad( size_t first, size_t howmany )
         pos = index * len;
         size_t slen = strlen( rep + pos ); // upper limit
         size_t actual = ( slen < len ) ? slen : len;
-        for ( i = pos + actual;i < pos + len;i++ )
+        for ( i = pos + actual; i < pos + len; i++ )
             rep[ i ] = ' '; // Do the padding.
     }
 }
@@ -285,7 +285,7 @@ inline void CHARACTER::operator=( char* str )
     rep[ len - 1 ] = '\0'; // zero terminate in case strncpy did not
     size_t slen = strlen( rep ); // upper limit
     size_t actual = ( slen < len ) ? slen : len; // actual <= len.
-    for ( size_t i = actual;i < len;i++ )
+    for ( size_t i = actual; i < len; i++ )
         rep[ i ] = ' '; // Do the padding.
 }
 

@@ -37,9 +37,9 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-	#include <Epetra_MpiComm.h>
+#include <Epetra_MpiComm.h>
 #else
-	#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -84,18 +84,19 @@ Real zero_scalar( const Real& /* t */,
 
 Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  switch(i) {
-  case 1:
-    return 1.0;
-    break;
-  case 3:
-      return 0.0;
-      break;
-  case 2:
-      return 0.0;
-    break;
-  }
-  return 0;
+    switch (i)
+    {
+    case 1:
+        return 1.0;
+        break;
+    case 3:
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        break;
+    }
+    return 0;
 }
 
 
@@ -124,12 +125,12 @@ main( int argc, char** argv )
     MPI_Init(&argc, &argv);
     Epetra_MpiComm comm(MPI_COMM_WORLD);
     if ( comm.MyPID() == 0 )
-        {
-            cout << "% using MPI" << endl;
-            int ntasks;
-            int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-            std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
-        }
+    {
+        cout << "% using MPI" << endl;
+        int ntasks;
+        int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+        std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
+    }
 #else
     Epetra_SerialComm comm;
     cout << "% using serial Version" << endl;

@@ -9,12 +9,12 @@
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -43,7 +43,8 @@
 
 #include <iostream>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! quadPoint - Simple container for a point of a quadrature rule.
 /*!
@@ -55,33 +56,33 @@ namespace LifeV {
     <b> Definition </b>
 
     The QuadPoint class consists basically in a real number (the weight of the point) and a vector of real numbers (the coordinates of the point). To enable fast computations if needed, blas vectors (look in the file /lifearray/tab.hpp to know precisely the type) are used internally.
-    
+
     <b> Create a QuadPoint </b>
-    
+
     A QuadPoint can be defined using directly 1,2 or 3 coordinates and the weight.
-    
+
     \code
     QuadPoint myPoint(1,0,1,0.5); // Point(1,0,1) with weight 0.5
     \endcode
 
     However, this use should be avoided if possible, because it assumes (for backward compatibility purpose) that the dimension of the QuadPoint is 3, even if only 1 or 2 coordinates are passed!
-    
+
     \code
     QuadPoint myPoint(1,0.3); // Point(1,0,0) with weight 0.3
     \endcode
 
     To create properly a QuadPoint, one should use the native vector (GeoVector):
-    
+
     \code
     GeoVector myCoordinates(1); // Create a vector with 1 component
     myCoordinates[0]=1;         // Put 1 in the first component
     QuadPoint myPoint(myCoordinates,0.3);   // Point(1) with weight 0.3
     \endcode
-    
+
     This makes the code "surprise-free" and also easier to generalize to any dimension.
 
     <b> Dimension of the QuadPoint </b>
-    
+
     The QuadPoint has naturally a dimension, the number of coordinates of the point. To change the dimension of the QuadPoint, use the copy constructor where you can specify the new dimension.
 
     If you intend to use your code for different dimensions, take care of the methods that you call: avoid using x(),y(),z() and replace them by the coor() method.
@@ -102,7 +103,7 @@ public:
       that are all set to zero
      */
     QuadPoint();
-    
+
     //! Full constructor for 3D
     /*!
       This builds a quadrature with 3D coordinates.
@@ -112,7 +113,7 @@ public:
       @param weight Weight of the point
      */
     QuadPoint( Real x, Real y, Real z, Real weight );
-    
+
     //! Full constructor for 2D
     /*!
       @param x First coordinate of the point
@@ -120,7 +121,7 @@ public:
       @param weight Weight of the point
      */
     QuadPoint( Real x, Real y, Real weight );
-    
+
     //! Full constructor for 1D
     /*!
       @param x First coordinate of the point
@@ -156,8 +157,8 @@ public:
 
     //! Import from another dimension
     /*!
-      With this constructor, one can change the dimension of the 
-      space where the quadrature point is living. For example, we can see a 
+      With this constructor, one can change the dimension of the
+      space where the quadrature point is living. For example, we can see a
       2D quadrature point as a 3D quadrature point with 0 for the third component.
       @param qp The quadrature point to import
       @param spaceDim The dimension of the space where the quadrature point is defined
@@ -165,7 +166,7 @@ public:
     QuadPoint(const QuadPoint& qp, const UInt spaceDim);
 
     //! Destructor
-    ~QuadPoint(){};
+    ~QuadPoint() {};
 
     //@}
 
@@ -198,7 +199,7 @@ public:
     }
 
     //@}
-    
+
 
     //! @name Get Methods
     //@{
@@ -208,7 +209,7 @@ public:
     {
         return M_weight;
     }
-    
+
     //! Getter for the first coordinate
     inline const Real& x() const
     {

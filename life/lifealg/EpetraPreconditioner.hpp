@@ -47,7 +47,8 @@
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // Forward declaration
 class SolverTrilinos;

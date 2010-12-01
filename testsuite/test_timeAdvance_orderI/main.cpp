@@ -58,10 +58,10 @@ nonlinear_function.hpp:
 // ===================================================
 #include "Epetra_config.h"
 #ifdef HAVE_MPI
-	#include "mpi.h"
-	#include "Epetra_MpiComm.h"
+#include "mpi.h"
+#include "Epetra_MpiComm.h"
 #else
-	#include "Epetra_SerialComm.h"
+#include "Epetra_SerialComm.h"
 #endif
 
 #include <life/lifecore/life.hpp>
@@ -82,8 +82,8 @@ using namespace LifeV;
 
 namespace
 {
-	static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-	static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
 
@@ -114,26 +114,26 @@ std::set<UInt> parseList( const std::string& list )
 int
 main( int argc, char** argv )
 {
-   #ifdef HAVE_MPI
-      MPI_Init(&argc, &argv);
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
 
-      boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
-      if ( Comm->MyPID() == 0 )
-	cout << "% using MPI" << endl;
-    #else
-      boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
-      cout << "% using serial Version" << endl;
-   #endif
+    boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    if ( Comm->MyPID() == 0 )
+        cout << "% using MPI" << endl;
+#else
+    boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
+    cout << "% using serial Version" << endl;
+#endif
 
 
     problem ProblemOrderI( argc, argv, Comm );
     ProblemOrderI.run();
 
 
-	#ifdef HAVE_MPI
-		MPI_Finalize();
-		std::cout << "MPI Finalization" << std::endl;
-	#endif
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
 
     return( EXIT_SUCCESS );
 }

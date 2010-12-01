@@ -58,13 +58,13 @@ public:
     /** @name Constructors, destructor
      */
     //@{
-  ResistanceProblem( int argc,
-                     char** argv );
+    ResistanceProblem( int argc,
+                       char** argv );
 
-  ~ResistanceProblem()
-  {}
+    ~ResistanceProblem()
+    {}
 
-  //@}
+    //@}
 
     /** @name Operator overloads
      */

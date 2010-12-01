@@ -34,21 +34,22 @@ namespace LifeV
 // ============ BCBase ================
 //! Constructor for BC
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-                  const BCType& type, const BCMode& mode,
-                  BCFunctionBase& bcf, const std::vector<ID>& comp )
-    :
-    _M_isUDep(false),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
-    _M_dataVector( false ),
-    _M_comp( comp ),
-    _M_offset( -1 ),
-    _M_finalised( false )
+                const BCType& type, const BCMode& mode,
+                BCFunctionBase& bcf, const std::vector<ID>& comp )
+        :
+        _M_isUDep(false),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
+        _M_dataVector( false ),
+        _M_comp( comp ),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
-    if ( _M_mode != Component ) {
+    if ( _M_mode != Component )
+    {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
@@ -59,59 +60,59 @@ BCBase::BCBase( const std::string& name,
                 const BCType&      type,
                 const BCMode&      mode,
                 BCFunctionBase&    bcf ):
-    _M_isUDep(false),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
-    _M_dataVector( false ),
-    _M_comp(),
-    _M_offset( -1 ),
-    _M_finalised( false )
+        _M_isUDep(false),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
+        _M_dataVector( false ),
+        _M_comp(),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
     //if(type==3)//flux
     //{
-          //	++BCBase::M_fluxes;
+    //	++BCBase::M_fluxes;
     //}
     UInt nComp;
     switch ( _M_mode = mode )
+    {
+    case Scalar:
+        nComp = 1;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( 1 );
+        break;
+    case Tangential:
+        nComp = nDimensions;
+        _M_comp.reserve( nComp );
+        for ( ID i = 1; i <= nComp; ++i )
+            _M_comp.push_back( i );
+        break;
+    case Normal:
+        // Normal Essential boundary condition (cf Gwenol Grandperrin Master Thesis)
+        if (type == Essential)
         {
-        case Scalar:
             nComp = 1;
             _M_comp.reserve( nComp );
-            _M_comp.push_back( 1 );
-            break;
-        case Tangential:
+            _M_comp.push_back( nDimensions );
+        }
+        else
+        {
             nComp = nDimensions;
             _M_comp.reserve( nComp );
             for ( ID i = 1; i <= nComp; ++i )
                 _M_comp.push_back( i );
-            break;
-        case Normal:
-        	// Normal Essential boundary condition (cf Gwenol Grandperrin Master Thesis)
-        	if(type == Essential)
-            {
-        		nComp = 1;
-        		_M_comp.reserve( nComp );
-        		_M_comp.push_back( nDimensions );
-            }
-        	else
-            {
-            	nComp = nDimensions;
-            	_M_comp.reserve( nComp );
-            	for ( ID i = 1; i <= nComp; ++i )
-                	_M_comp.push_back( i );
-            }
-            break;
-        case Directional:
-            nComp = 1;
-            _M_comp.reserve( nComp );
-            _M_comp.push_back( nDimensions );
-            break;
-        default:
-            ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
         }
+        break;
+    case Directional:
+        nComp = 1;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( nDimensions );
+        break;
+    default:
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
+    }
 }
 
 
@@ -123,19 +124,20 @@ BCBase::BCBase( const std::string& name,
                 BCFunctionBase&    bcf,
                 const UInt&        nComp )
 
-    :
-    _M_isUDep(false),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
-    _M_dataVector( false ),
-    _M_comp(),
-    _M_offset( -1 ),
-    _M_finalised( false )
+        :
+        _M_isUDep(false),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
+        _M_dataVector( false ),
+        _M_comp(),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
-    if ( _M_mode != Full ) {
+    if ( _M_mode != Full )
+    {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
     _M_comp.reserve( nComp );
@@ -158,20 +160,21 @@ BCBase::BCBase( const std::string& name,
                 const BCMode& mode,
                 BCVectorBase& bcv,
                 const std::vector<ID>& comp )
-    :
-    _M_isUDep(false),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcf(),_M_bcfUDep(),
-    _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv )  ),
-    _M_dataVector( true ),
-    _M_comp(comp),
-    _M_offset( -1 ),
-    _M_finalised( false )
+        :
+        _M_isUDep(false),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcf(),_M_bcfUDep(),
+        _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv )  ),
+        _M_dataVector( true ),
+        _M_comp(comp),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
-    if ( mode != Component ) {
+    if ( mode != Component )
+    {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 //     if(type==3)//flux
@@ -186,17 +189,17 @@ BCBase::BCBase( const std::string& name,
                 const BCType& type,
                 const BCMode& mode,
                 BCVectorBase& bcv )
-    :
-    _M_isUDep(false),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcf(),_M_bcfUDep(),
-    _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
-    _M_dataVector( true ),
-    _M_comp(),
-    _M_finalised( false )
+        :
+        _M_isUDep(false),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcf(),_M_bcfUDep(),
+        _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
+        _M_dataVector( true ),
+        _M_comp(),
+        _M_finalised( false )
 {
     UInt nComp;
     switch ( _M_mode = mode )
@@ -242,20 +245,21 @@ BCBase::BCBase( const std::string& name,
                 const BCMode& mode,
                 BCVectorBase& bcv,
                 const UInt& nComp )
-    :
-    _M_isUDep(false),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcf(),_M_bcfUDep(),
-    _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
-    _M_dataVector( true ),
-    _M_comp(),
-    _M_offset( -1 ),
-    _M_finalised( false )
+        :
+        _M_isUDep(false),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcf(),_M_bcfUDep(),
+        _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
+        _M_dataVector( true ),
+        _M_comp(),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
-    if ( mode != Full ) {
+    if ( mode != Full )
+    {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 
@@ -275,17 +279,18 @@ BCBase::BCBase( const std::string&     name,
                 const BCMode&          mode,
                 BCFunctionUDepBase&    bcf,
                 const std::vector<ID>& comp ):
-    _M_isUDep(true),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
-    _M_dataVector( false ),
-    _M_comp( comp ),
-    _M_finalised( false )
+        _M_isUDep(true),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
+        _M_dataVector( false ),
+        _M_comp( comp ),
+        _M_finalised( false )
 {
-    if ( _M_mode != Component ) {
+    if ( _M_mode != Component )
+    {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 //     if(type==3)//flux
@@ -298,44 +303,44 @@ BCBase::BCBase( const std::string&  name,
                 const BCType&       type,
                 const BCMode&       mode,
                 BCFunctionUDepBase& bcf):
-    _M_isUDep(true),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
-    _M_dataVector( false ),
-    _M_comp(),
-    _M_offset( -1 ),
-    _M_finalised( false )
+        _M_isUDep(true),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
+        _M_dataVector( false ),
+        _M_comp(),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
 
     UInt nComp;
     switch ( _M_mode = mode )
     {
-        case Scalar:
-            nComp = 1;
-            _M_comp.reserve( nComp );
-            _M_comp.push_back( 1 );
-            break;
-        case Tangential:
-            nComp = nDimensions - 1;
-            _M_comp.reserve( nComp );
-            for ( ID i = 1; i <= nComp; ++i )
-                _M_comp.push_back( i );
-            break;
-        case Normal:
-            nComp = 1;
-            _M_comp.reserve( nComp );
-            _M_comp.push_back( nDimensions );
-            break;
-        case Directional:
-            nComp = 1;
-            _M_comp.reserve( nComp );
-            _M_comp.push_back( nDimensions );
-            break;
-        default:
-            ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
+    case Scalar:
+        nComp = 1;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( 1 );
+        break;
+    case Tangential:
+        nComp = nDimensions - 1;
+        _M_comp.reserve( nComp );
+        for ( ID i = 1; i <= nComp; ++i )
+            _M_comp.push_back( i );
+        break;
+    case Normal:
+        nComp = 1;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( nDimensions );
+        break;
+    case Directional:
+        nComp = 1;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( nDimensions );
+        break;
+    default:
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 //     if(type==3)//flux
 //       {
@@ -348,19 +353,20 @@ BCBase::BCBase( const std::string&  name,
                 const BCMode&       mode,
                 BCFunctionUDepBase& bcf,
                 const UInt&         nComp )
-    :
-    _M_isUDep(true),
-    _M_name( name ),
-    _M_flag( flag ),
-    _M_type( type ),
-    _M_mode( mode ),
-    _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
-    _M_dataVector( false ),
-    _M_comp(),
-    _M_offset( -1 ),
-    _M_finalised( false )
+        :
+        _M_isUDep(true),
+        _M_name( name ),
+        _M_flag( flag ),
+        _M_type( type ),
+        _M_mode( mode ),
+        _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
+        _M_dataVector( false ),
+        _M_comp(),
+        _M_offset( -1 ),
+        _M_finalised( false )
 {
-    if ( _M_mode != Full ) {
+    if ( _M_mode != Full )
+    {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 
@@ -408,7 +414,8 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     // the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_M_idList.empty() || !BCb._M_idList.empty() ) {
+    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
+    {
         ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
     }
 
@@ -417,31 +424,32 @@ BCBase & BCBase::operator=( const BCBase& BCb )
 
 //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
 BCBase::BCBase( const BCBase& BCb )
-    :
-    _M_isUDep(BCb._M_isUDep),
-    _M_name( BCb._M_name ),
-    _M_flag( BCb._M_flag ),
-    _M_type( BCb._M_type ),
-    _M_mode( BCb._M_mode ),
-    _M_bcf( BCb._M_bcf ),           // Ptr copy
-    _M_bcfUDep(BCb._M_bcfUDep),     // Ptr copy
-    _M_bcv( BCb._M_bcv ),           // Ptr copy
-    _M_dataVector( BCb._M_dataVector ),
-    _M_comp( BCb._M_comp ),
-    list0( ),
-    listIdGlobal( ),
-    _M_IdGlobal( ),
-    _M_idList( ),
-    _M_IdGlobalList( ),
-    _M_offset   ( BCb._M_offset ),
-    _M_finalised( BCb._M_finalised ),
-    _M_finalisedIdGlobal()
+        :
+        _M_isUDep(BCb._M_isUDep),
+        _M_name( BCb._M_name ),
+        _M_flag( BCb._M_flag ),
+        _M_type( BCb._M_type ),
+        _M_mode( BCb._M_mode ),
+        _M_bcf( BCb._M_bcf ),           // Ptr copy
+        _M_bcfUDep(BCb._M_bcfUDep),     // Ptr copy
+        _M_bcv( BCb._M_bcv ),           // Ptr copy
+        _M_dataVector( BCb._M_dataVector ),
+        _M_comp( BCb._M_comp ),
+        list0( ),
+        listIdGlobal( ),
+        _M_IdGlobal( ),
+        _M_idList( ),
+        _M_IdGlobalList( ),
+        _M_offset   ( BCb._M_offset ),
+        _M_finalised( BCb._M_finalised ),
+        _M_finalisedIdGlobal()
 {
     // Important!!: The set member list0 is always empty at this point, it is just
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_M_idList.empty() || !BCb._M_idList.empty() ) {
+    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
+    {
         ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work with list of identifiers which are not empty" );
     }
 }
@@ -471,7 +479,7 @@ BCMode BCBase::mode() const
 }
 bool BCBase::isUDep() const
 {
-  return _M_isUDep;
+    return _M_isUDep;
 }
 
 //! Returns the number of components involved in this boundary condition
@@ -496,14 +504,14 @@ bool BCBase::finalised() const
 //! Returns wether the list is finalised and the vector of IdGlobal's is then accessible
 bool BCBase::finalisedIdGlobal() const
 {
-  return _M_finalisedIdGlobal;
+    return _M_finalisedIdGlobal;
 }
 
 
 
 //! Overloading function operator by calling the (*_M_bcf)() user specified function
 Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
-                           const Real& z, const ID& i ) const
+                          const Real& z, const ID& i ) const
 {
     return _M_bcf->operator() ( t,x, y, z, i );
 }
@@ -511,12 +519,12 @@ Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
 //! Overloading function operator by calling the (*_M_bcf)() user specified function
 /* new overloading for BCFunctionUDepending */
 Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
-                           const Real& z, const ID& i, const Real& u ) const
+                          const Real& z, const ID& i, const Real& u ) const
 {
     /* is there a better way ? */
-Debug(800)<<"debug800 in BCBase::operator(6x)\n";
-   return _M_bcfUDep->operator()(t,x, y, z, i, u);
-Debug(800)<<"debug800 out BCBase::operator(6x)\n";
+    Debug(800)<<"debug800 in BCBase::operator(6x)\n";
+    return _M_bcfUDep->operator()(t,x, y, z, i, u);
+    Debug(800)<<"debug800 out BCBase::operator(6x)\n";
 }
 
 
@@ -584,9 +592,9 @@ Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
 bool  BCBase::ismixteVec()  const
 {
     if ( _M_dataVector )
-      {
-     	return  (*_M_bcv).ismixteVec();
-      }
+    {
+        return  (*_M_bcv).ismixteVec();
+    }
     else
     {
         ERROR_MSG( "BCBase::mixte : A data vector must be specified before calling this method" );
@@ -613,10 +621,10 @@ Real BCBase::resistanceCoef() const
 bool BCBase::isbetaVec()   const
 {
     if ( _M_dataVector )
-      {
+    {
 
-	return   (*_M_bcv).isbetaVec();
-      }
+        return   (*_M_bcv).isbetaVec();
+    }
     else
     {
         ERROR_MSG( "BCBase::beta: A data vector must be specified before calling this method" );
@@ -628,10 +636,10 @@ bool BCBase::isbetaVec()   const
 bool BCBase::isgammaVec()  const
 {
     if ( _M_dataVector )
-      {
+    {
 
-	return (*_M_bcv).isgammaVec();
-      }
+        return (*_M_bcv).isgammaVec();
+    }
     else
     {
         ERROR_MSG( "BCBase::gamma : A data vector must be specified before calling this method" );
@@ -750,17 +758,18 @@ BCBase::addIdentifier( IdentifierBase* iden )
 void
 BCBase::addIdentifierIdGlobal( IdentifierBase* iden )
 {
-  UInt temp = listIdGlobal.size();
-  listIdGlobal.insert( boost::shared_ptr<IdentifierBase>( iden ) );
+    UInt temp = listIdGlobal.size();
+    listIdGlobal.insert( boost::shared_ptr<IdentifierBase>( iden ) );
 
-  if( temp==0 )
+    if ( temp==0 )
     {
-      _M_IdGlobal.push_back(0);
-      _M_IdGlobal.push_back((iden ) -> id());
-      temp ++ ;
+        _M_IdGlobal.push_back(0);
+        _M_IdGlobal.push_back((iden ) -> id());
+        temp ++ ;
     }
-    if( temp != listIdGlobal.size()){
-      _M_IdGlobal.push_back((iden ) -> id());
+    if ( temp != listIdGlobal.size())
+    {
+        _M_IdGlobal.push_back((iden ) -> id());
     }
 }
 
@@ -815,7 +824,7 @@ BCBase::list_size_IdGlobal() const
 int
 BCBase::IdGlobal( int id) const
 {
-  return _M_IdGlobal[id];
+    return _M_IdGlobal[id];
 }
 
 
@@ -836,17 +845,17 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
     out << "Offset               : " << _M_offset << std::endl;
     out << "Number of stored ID's: " << _M_idList.size() << std::endl;
 
-    if( _M_type== Resistance)
-      {
-	out << "Number of stored IdGlobal's: " << _M_IdGlobalList.size() << std::endl;
-      }
+    if ( _M_type== Resistance)
+    {
+        out << "Number of stored IdGlobal's: " << _M_IdGlobalList.size() << std::endl;
+    }
 
     if ( verbose && _M_finalised )
     {
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
         for ( std::vector<boost::shared_ptr<IdentifierBase> >::const_iterator i = _M_idList.begin();
-              i != _M_idList.end(); i++ )
+                i != _M_idList.end(); i++ )
         {
             if ( count++ % lines == 0 )
             {

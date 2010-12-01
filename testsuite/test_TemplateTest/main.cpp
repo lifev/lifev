@@ -42,10 +42,10 @@
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-    #include <mpi.h>
-    #include <Epetra_MpiComm.h>
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
-    #include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 #include <life/lifecore/life.hpp>

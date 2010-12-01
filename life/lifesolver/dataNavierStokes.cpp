@@ -78,29 +78,29 @@ DataNavierStokes::DataNavierStokes( ) :
 
 //template <typename Mesh>
 DataNavierStokes::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
-    M_time                             ( dataNavierStokes.M_time ),
-    //M_mesh                             ( dataNavierStokes.M_mesh ),
-    M_fluid_number                     ( dataNavierStokes.M_fluid_number ),
-    M_density                          ( dataNavierStokes.M_density ),
-    M_viscosity                        ( dataNavierStokes.M_viscosity ),
-    M_uOrder                           ( dataNavierStokes.M_uOrder ),
-    M_pOrder                           ( dataNavierStokes.M_pOrder ),
-    M_verbose                          ( dataNavierStokes.M_verbose ),
-    M_dump_init                        ( dataNavierStokes.M_dump_init ),
-    M_dump_period                      ( dataNavierStokes.M_dump_period ),
-    M_factor                           ( dataNavierStokes.M_factor ),
-    M_Stokes                           ( dataNavierStokes.M_Stokes ),
-    M_stab_method                      ( dataNavierStokes.M_stab_method ),
-    M_semiImplicit                     ( false ),
-    M_shapeDerivatives                 ( false ),
-    M_computeMeanValuesPerSection      ( dataNavierStokes.M_computeMeanValuesPerSection ),
-    M_NbZSections                      ( dataNavierStokes.M_NbZSections ),
-    M_ToleranceSection                 ( dataNavierStokes.M_ToleranceSection ),
-    M_XSectionFrontier                 ( dataNavierStokes.M_XSectionFrontier ),
-    M_ZSectionInit                     ( dataNavierStokes.M_ZSectionInit ),
-    M_ZSectionFinal                    ( dataNavierStokes.M_ZSectionFinal ),
-    M_NbPolygonEdges                   ( dataNavierStokes.M_NbPolygonEdges ),
-    M_stabilization_list               ( dataNavierStokes.M_stabilization_list )
+        M_time                             ( dataNavierStokes.M_time ),
+        //M_mesh                             ( dataNavierStokes.M_mesh ),
+        M_fluid_number                     ( dataNavierStokes.M_fluid_number ),
+        M_density                          ( dataNavierStokes.M_density ),
+        M_viscosity                        ( dataNavierStokes.M_viscosity ),
+        M_uOrder                           ( dataNavierStokes.M_uOrder ),
+        M_pOrder                           ( dataNavierStokes.M_pOrder ),
+        M_verbose                          ( dataNavierStokes.M_verbose ),
+        M_dump_init                        ( dataNavierStokes.M_dump_init ),
+        M_dump_period                      ( dataNavierStokes.M_dump_period ),
+        M_factor                           ( dataNavierStokes.M_factor ),
+        M_Stokes                           ( dataNavierStokes.M_Stokes ),
+        M_stab_method                      ( dataNavierStokes.M_stab_method ),
+        M_semiImplicit                     ( false ),
+        M_shapeDerivatives                 ( false ),
+        M_computeMeanValuesPerSection      ( dataNavierStokes.M_computeMeanValuesPerSection ),
+        M_NbZSections                      ( dataNavierStokes.M_NbZSections ),
+        M_ToleranceSection                 ( dataNavierStokes.M_ToleranceSection ),
+        M_XSectionFrontier                 ( dataNavierStokes.M_XSectionFrontier ),
+        M_ZSectionInit                     ( dataNavierStokes.M_ZSectionInit ),
+        M_ZSectionFinal                    ( dataNavierStokes.M_ZSectionFinal ),
+        M_NbPolygonEdges                   ( dataNavierStokes.M_NbPolygonEdges ),
+        M_stabilization_list               ( dataNavierStokes.M_stabilization_list )
 {
 }
 
@@ -144,7 +144,7 @@ DataNavierStokes::operator=( const DataNavierStokes& dataNavierStokes )
         M_stabilization_list               = dataNavierStokes.M_stabilization_list;
     }
 
-	return *this;
+    return *this;
 }
 
 // template <typename Mesh>
@@ -202,7 +202,7 @@ DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
     M_Stokes       = dataFile( ( section + "/miscellaneous/Stokes" ).data(), false );
 
     M_stab_method  = NSStabilization ( M_stabilization_list.value(
-                                       dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
+                                           dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
 
     // Semi-implicit and shape derivatives
     M_semiImplicit     = dataFile( ( section + "/semiImplicit" ).data(), false ) ;
@@ -252,23 +252,23 @@ DataNavierStokes::showMe( std::ostream& output ) const
     M_time->showMe( output );
 
     output << "stabilization = ";
-    switch( M_stab_method )
+    switch ( M_stab_method )
     {
-        case NO_STABILIZATION:
-            output << "none" ;
-            break;
-        case IP_STABILIZATION:
-            output << "ip" ;
-            break;
-        case SD_STABILIZATION:
-            output << "sd" ;
-            break;
+    case NO_STABILIZATION:
+        output << "none" ;
+        break;
+    case IP_STABILIZATION:
+        output << "ip" ;
+        break;
+    case SD_STABILIZATION:
+        output << "sd" ;
+        break;
     }
     output << std::endl;
 
     output << "\n*** Values for data [fluid/valuespersection]\n\n";
     output << "computeMeanValuesPerSection (switch 0: don't compute, 1: compute)  = "
-           << M_computeMeanValuesPerSection << std::endl;
+    << M_computeMeanValuesPerSection << std::endl;
     output << "nb_z_section       = " << M_NbZSections << std::endl;
     output << "tol_section        = " << M_ToleranceSection << std::endl;
     output << "x_section_frontier = " << M_XSectionFrontier << std::endl;

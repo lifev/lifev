@@ -30,12 +30,12 @@ namespace LifeV
 */
 DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
                                         const Dof& dof2 )
-    :
-    _refFE1( &refFE ),
-    _dof1( &dof1 ),
-    _refFE2( &refFE ),
-    _dof2( &dof2 ),
-    _dof( new Dof( refFE ) )
+        :
+        _refFE1( &refFE ),
+        _dof1( &dof1 ),
+        _refFE2( &refFE ),
+        _dof2( &dof2 ),
+        _dof( new Dof( refFE ) )
 {}
 
 //! Constructor for interfacing Dof of different type (RefFE)
@@ -47,12 +47,12 @@ DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
 */
 DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2,
                                         const Dof& dof2 )
-    :
-    _refFE1( &refFE1 ),
-    _dof1( &dof1 ),
-    _refFE2( &refFE2 ),
-    _dof2( &dof2 ),
-    _dof( new Dof( refFE1 ) )
+        :
+        _refFE1( &refFE1 ),
+        _dof1( &dof1 ),
+        _refFE2( &refFE2 ),
+        _dof2( &dof2 ),
+        _dof( new Dof( refFE1 ) )
 {}
 
 void

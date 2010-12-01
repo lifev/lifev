@@ -81,7 +81,7 @@ const Real Dk_rn ( const Real& S_n )
 
     return ( 2.*barS_n * (1 - pow( 1 - barS_n, (2. + lambda) / lambda)) -
              pow( barS_n, 2.) * (2. + lambda) / lambda * pow(1 - barS_n, (2. + lambda) / lambda - 1.) ) /
-        (1. - S_wr - S_nr);
+           (1. - S_wr - S_nr);
 }
 
 // Capillary pressure
@@ -113,8 +113,8 @@ const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z )
     Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
 
     if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
-         || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
-         || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
+            || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
+            || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
     {
         // First row
         Entry00 = highInvPermeability;
@@ -228,25 +228,26 @@ Real pressureDirichlet3( const Real& /* t */,
 
 // Boundary condition of Neumann
 Real pressureNeumann( const Real& /* t */,
-                       const Real& x,
-                       const Real& y,
-                       const Real& z,
-                       const ID&   icomp)
+                      const Real& x,
+                      const Real& y,
+                      const Real& z,
+                      const ID&   icomp)
 {
     return 0.;
 
-	switch(icomp){
-  		case 1:   //! Dx
-            return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
-		break;
-		case 2:   //! Dy
-            return 0.;
-	 	break;
-  		case 3:   //! Dz
-    		return 0.;
-    	break;
-  	}
-	return 0.;
+    switch (icomp)
+    {
+    case 1:   //! Dx
+        return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
+        break;
+    case 2:   //! Dy
+        return 0.;
+        break;
+    case 3:   //! Dz
+        return 0.;
+        break;
+    }
+    return 0.;
 }
 
 // Boundary condition of Robin
@@ -314,10 +315,10 @@ Vector saturationPhysicalFlux( const Real& t,
 
     // Compute the denominator of the last column of the inverse of the inverse permeability
     const Real denominator = invK(0, 0) * invK(1, 1) * invK(2, 2)
-                           - invK(0, 0) * invK(1, 2) * invK(1, 2)
-                           - invK(0, 1) * invK(0, 1) * invK(2, 2)
-                      + 2. * invK(0, 1) * invK(0, 2) * invK(1, 2)
-                           - invK(0, 2) * invK(0, 2) * invK(1, 1);
+                             - invK(0, 0) * invK(1, 2) * invK(1, 2)
+                             - invK(0, 1) * invK(0, 1) * invK(2, 2)
+                             + 2. * invK(0, 1) * invK(0, 2) * invK(1, 2)
+                             - invK(0, 2) * invK(0, 2) * invK(1, 1);
 
     // Compute the first component of the last column of the inverse of the inverse permeability
     const Real K02 = ( invK(0, 1) * invK(1, 2) - invK(0, 2) * invK(1, 1) ) / denominator;
@@ -379,10 +380,10 @@ Vector saturationFirstDerivativePhysicalFlux( const Real& t,
 
     // Compute the denominator of the last column of the inverse of the inverse permeability
     const Real denominator = invK(0, 0) * invK(1, 1) * invK(2, 2)
-                           - invK(0, 0) * invK(1, 2) * invK(1, 2)
-                           - invK(0, 1) * invK(0, 1) * invK(2, 2)
-                      + 2. * invK(0, 1) * invK(0, 2) * invK(1, 2)
-                           - invK(0, 2) * invK(0, 2) * invK(1, 1);
+                             - invK(0, 0) * invK(1, 2) * invK(1, 2)
+                             - invK(0, 1) * invK(0, 1) * invK(2, 2)
+                             + 2. * invK(0, 1) * invK(0, 2) * invK(1, 2)
+                             - invK(0, 2) * invK(0, 2) * invK(1, 1);
 
     // Compute the first component of the last column of the inverse of the inverse permeability
     const Real K02 = ( invK(0, 1) * invK(1, 2) - invK(0, 2) * invK(1, 1) ) / denominator;
@@ -484,18 +485,19 @@ Real saturationNeumann( const Real& /* t */,
 {
     return 0.;
 
-	switch(icomp){
-  		case 1:   //! Dx
-            return 0.;
-		break;
-		case 2:   //! Dy
-            return 0.;
-	 	break;
-  		case 3:   //! Dz
-    		return 0.;
-    	break;
-  	}
-	return 0.;
+    switch (icomp)
+    {
+    case 1:   //! Dx
+        return 0.;
+        break;
+    case 2:   //! Dy
+        return 0.;
+        break;
+    case 3:   //! Dz
+        return 0.;
+        break;
+    }
+    return 0.;
 }
 
 // Boundary condition of Robin

@@ -35,7 +35,8 @@
 
 #include "AztecOOPreconditioner.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 AztecOOPreconditioner::AztecOOPreconditioner():
         super                   ( ),

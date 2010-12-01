@@ -41,58 +41,59 @@
 #include <life/lifearray/EpetraVector.hpp>
 #include <EpetraExt_MultiVectorOut.h>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors
 // ===================================================
 EpetraVector::EpetraVector( const EpetraMapType& maptype ):
-    M_epetraMap   (),
-    M_maptype     ( maptype ),
-    M_epetraVector(),
-    M_combineMode ( Add )
+        M_epetraMap   (),
+        M_maptype     ( maptype ),
+        M_epetraVector(),
+        M_combineMode ( Add )
 {
 }
 
 EpetraVector::EpetraVector( const EpetraMap& map, const EpetraMapType& maptype ):
-    M_epetraMap   ( new EpetraMap( map ) ),
-    M_maptype     ( maptype ),
-    M_epetraVector( new vector_type( *M_epetraMap->getMap(M_maptype) )),
-    M_combineMode ( Add )
+        M_epetraMap   ( new EpetraMap( map ) ),
+        M_maptype     ( maptype ),
+        M_epetraVector( new vector_type( *M_epetraMap->getMap(M_maptype) )),
+        M_combineMode ( Add )
 {
 }
 
 EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& map, const EpetraMapType& maptype ):
-    M_epetraMap   ( map ),
-    M_maptype     ( maptype ),
-    M_epetraVector( new vector_type( *M_epetraMap->getMap(M_maptype) ) ),
-    M_combineMode ( Add )
+        M_epetraMap   ( map ),
+        M_maptype     ( maptype ),
+        M_epetraVector( new vector_type( *M_epetraMap->getMap(M_maptype) ) ),
+        M_combineMode ( Add )
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector):
-    M_epetraMap   ( vector.M_epetraMap ),
-    M_maptype     ( vector.M_maptype ),
-    M_epetraVector( new vector_type( vector.getEpetraVector() ) ), //This make a true copy!
-    M_combineMode ( vector.M_combineMode )
+        M_epetraMap   ( vector.M_epetraMap ),
+        M_maptype     ( vector.M_maptype ),
+        M_epetraVector( new vector_type( vector.getEpetraVector() ) ), //This make a true copy!
+        M_combineMode ( vector.M_combineMode )
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& maptype):
-    M_epetraMap   ( vector.M_epetraMap ),
-    M_maptype     ( maptype ),
-    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
-    M_combineMode ( Add )
+        M_epetraMap   ( vector.M_epetraMap ),
+        M_maptype     ( maptype ),
+        M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+        M_combineMode ( Add )
 {
     operator = (vector);
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& maptype,
                             const Epetra_CombineMode& combineMode ):
-    M_epetraMap   ( vector.M_epetraMap ),
-    M_maptype     ( maptype ),
-    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
-    M_combineMode ( Add )
+        M_epetraMap   ( vector.M_epetraMap ),
+        M_maptype     ( maptype ),
+        M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+        M_combineMode ( Add )
 {
     if (maptype == vector.M_maptype)
     {
@@ -116,20 +117,20 @@ EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& map
 EpetraVector::EpetraVector( const Epetra_MultiVector&           vector,
                             const boost::shared_ptr<EpetraMap>  map,
                             const EpetraMapType&                maptype ):
-    M_epetraMap   ( map ),
-    M_maptype     ( maptype ),
-    M_epetraVector( new vector_type( *map->getMap( maptype ) ) ),
-    M_combineMode ( Add )
+        M_epetraMap   ( map ),
+        M_maptype     ( maptype ),
+        M_epetraVector( new vector_type( *map->getMap( maptype ) ) ),
+        M_combineMode ( Add )
 {
     assert( this->BlockMap().SameAs(vector.Map()) );
     M_epetraVector->Update(1., vector, 0.);
 }
 
 EpetraVector::EpetraVector( const EpetraVector& vector, const int& reduceToProc):
-    M_epetraMap   ( vector.M_epetraMap->createRootMap( reduceToProc ) ),
-    M_maptype     ( Unique ),
-    M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
-    M_combineMode ( Add )
+        M_epetraMap   ( vector.M_epetraMap->createRootMap( reduceToProc ) ),
+        M_maptype     ( Unique ),
+        M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
+        M_combineMode ( Add )
 {
     operator = ( vector );
 }
@@ -451,7 +452,7 @@ void EpetraVector::matrixMarket( std::string const &filename, const bool headers
                                              nome.c_str(),
                                              desc.c_str(),
                                              headers
-                                             );
+                                            );
 }
 
 
@@ -554,7 +555,7 @@ EpetraVector::operator=( const EpetraVector& vector )
 
     // vector have the same underlying EpetraMap, we then use the existing importer/exporter
     if ( M_epetraMap.get()  && vector.M_epetraMap.get() &&
-         M_epetraMap->MapsAreSimilar( *vector.M_epetraMap ) )
+            M_epetraMap->MapsAreSimilar( *vector.M_epetraMap ) )
     {
         // we shouldn't get here if we have the same maptype!
         assert(M_maptype != vector.M_maptype);
@@ -565,7 +566,7 @@ EpetraVector::operator=( const EpetraVector& vector )
             M_epetraVector->Export(vector.getEpetraVector(), M_epetraMap->getImporter(), M_combineMode);
             return *this;
         case Repeated:
-             M_epetraVector->Import(vector.getEpetraVector(), M_epetraMap->getExporter(), M_combineMode);
+            M_epetraVector->Import(vector.getEpetraVector(), M_epetraMap->getExporter(), M_combineMode);
             return *this;
         }
     }
@@ -576,7 +577,7 @@ EpetraVector::operator=( const EpetraVector& vector )
         if (M_maptype != Repeated)
             return Export(vector.getEpetraVector(), M_combineMode);
     case Unique:
-            return Import(vector.getEpetraVector(), M_combineMode);
+        return Import(vector.getEpetraVector(), M_combineMode);
     }
 
     // if we get here, it means that we have two different repeated maps.
@@ -661,10 +662,10 @@ EpetraVector::operator*=( const EpetraVector& vector )
 
     return *this;
     /*
-  int numMyEntries;
-  const int*  gids;
+    int numMyEntries;
+    const int*  gids;
 
-  if (M_maptype == Unique)
+    if (M_maptype == Unique)
     {
       numMyEntries = this->M_epetraVector->MyLength();
       gids  = this->BlockMap().MyGlobalElements();
@@ -677,7 +678,7 @@ EpetraVector::operator*=( const EpetraVector& vector )
     }
     }
 
-  if (M_maptype == Repeated)
+    if (M_maptype == Repeated)
     {
       numMyEntries = vector.M_epetraVector->MyLength();
       gids   = vector.BlockMap().MyGlobalElements();
@@ -696,8 +697,8 @@ EpetraVector::operator*=( const EpetraVector& vector )
     }
 
 
-  return *this;
-  */
+    return *this;
+    */
 }
 
 // Element by element division

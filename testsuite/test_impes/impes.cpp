@@ -92,20 +92,20 @@ struct impes::Private
     // Policy for scalar functions
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>
-                                     fct_type;
+    fct_type;
 
     // Policy for vector function
     typedef boost::function<Vector ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real>& )>
-                                     Vfct_type;
+    Vfct_type;
 
 
     // Policy for matrix function
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real> & )>
-                                     Mfct_type;
+    Mfct_type;
 
     std::string data_file_name;
 
@@ -127,16 +127,16 @@ struct impes::Private
 
     fct_type getUOne()
     {
-    	fct_type f;
-    	f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
+        fct_type f;
+        f = boost::bind( &dataProblem::UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getUZero()
     {
-    	fct_type f;
-    	f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
-    	return f;
+        fct_type f;
+        f = boost::bind( &dataProblem::UZero, _1, _2, _3, _4, _5 );
+        return f;
     }
 
     fct_type getPressureSource()
@@ -203,7 +203,7 @@ struct impes::Private
 
 impes::impes( int argc,
               char** argv )
-  : Members( new Private )
+        : Members( new Private )
 {
     GetPot command_line(argc, argv);
     const string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -215,14 +215,14 @@ impes::impes( int argc,
     Members->discretization_section_hyperbolic = Members->discretization_section + "/hyperbolic";
     Members->discretization_section_darcy_nonlin_trans =  Members->discretization_section + "/darcy_transient_non_linear";
 
-	#ifdef EPETRA_MPI
-		std::cout << "Epetra Initialization" << std::endl;
-		Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-        int ntasks;
-        MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-	#else
-		Members->comm.reset( new Epetra_SerialComm() );
-	#endif
+#ifdef EPETRA_MPI
+    std::cout << "Epetra Initialization" << std::endl;
+    Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    int ntasks;
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+#else
+    Members->comm.reset( new Epetra_SerialComm() );
+#endif
 
 }
 
@@ -269,7 +269,7 @@ impes::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file for the pressure equation.
-	DataDarcy<RegionMesh> dataPressure;
+    DataDarcy<RegionMesh> dataPressure;
 
     // Create the data file for the hyperbolic solver in the saturation equation.
     DataHyperbolic<RegionMesh> dataSaturationHyperbolic;
@@ -305,9 +305,9 @@ impes::run()
     chronoReadAndPartitionMesh.stop();
 
     // The leader process print chronoReadAndPartitionMesh.
-    if( isLeader )
+    if ( isLeader )
         std::cout << "Time for read and partition the mesh " <<
-                     chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
+                  chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
 
     // Create the boundary conditions.
 
@@ -315,26 +315,26 @@ impes::run()
     chronoBoundaryCondition.start();
 
     BCFunctionBase pressureDirichletBDfun1,
-        pressureDirichletBDfun2,
-        pressureDirichletBDfun3,
-        pressureNeumannBDfun;
+    pressureDirichletBDfun2,
+    pressureDirichletBDfun3,
+    pressureNeumannBDfun;
 
     BCFunctionBase saturationDirichletBDfun1,
-        saturationDirichletBDfun2,
-        saturationDirichletBDfun3,
-        saturationNeumannBDfun;
+    saturationDirichletBDfun2,
+    saturationDirichletBDfun3,
+    saturationNeumannBDfun;
 
-   	//BCFunctionMixte pressureMixteBDfun, saturationMixteBDfun;
+    //BCFunctionMixte pressureMixteBDfun, saturationMixteBDfun;
 
     // Set pressure bounday data.
     pressureDirichletBDfun1.setFunction ( dataProblem::pressureDirichlet1 );
     pressureDirichletBDfun2.setFunction ( dataProblem::pressureDirichlet2 );
     pressureDirichletBDfun3.setFunction ( dataProblem::pressureDirichlet3 );
 
-	pressureNeumannBDfun.setFunction    ( dataProblem::pressureNeumann );
+    pressureNeumannBDfun.setFunction    ( dataProblem::pressureNeumann );
 
-	// dp/dn = first_parameter + second_parameter * p.
-	//pressureMixteBDfun.setFunctions_Mixte ( dataProblem::pressureMixte,
+    // dp/dn = first_parameter + second_parameter * p.
+    //pressureMixteBDfun.setFunctions_Mixte ( dataProblem::pressureMixte,
     //                                         Members->getUOne() );
 
     // Set pressure bounday data.
@@ -342,16 +342,16 @@ impes::run()
     saturationDirichletBDfun2.setFunction ( dataProblem::saturationDirichlet2 );
     saturationDirichletBDfun3.setFunction ( dataProblem::saturationDirichlet3 );
 
-	saturationNeumannBDfun.setFunction    ( dataProblem::saturationNeumann );
-	// dp/dn = first_parameter + second_parameter * p.
-	//pressureMixteBDfun.setFunctions_Mixte ( dataProblem::saturationMixte,
+    saturationNeumannBDfun.setFunction    ( dataProblem::saturationNeumann );
+    // dp/dn = first_parameter + second_parameter * p.
+    //pressureMixteBDfun.setFunctions_Mixte ( dataProblem::saturationMixte,
     //                                      Members->getUOne() );
 
     // Total number of different boundary contitions.
     const UInt bcNumber( 5 );
 
     // Boundary condition handler for the pressure equation.
-	BCHandler bcPressure( bcNumber );
+    BCHandler bcPressure( bcNumber );
 
     // Boundary condition handler for the saturation equation.
     BCHandler bcSaturation( bcNumber );
@@ -391,7 +391,7 @@ impes::run()
     if ( isLeader )
     {
         std::cout << "Time for create the boundary conditions handler " <<
-                     chronoBoundaryCondition.diff() << std::endl << std::flush;
+                  chronoBoundaryCondition.diff() << std::endl << std::flush;
 
     }
 
@@ -556,7 +556,7 @@ impes::run()
     // The leader process print chronoFiniteElementSpace.
     if ( isLeader )
         std::cout << "Time for create the finite element spaces " <<
-                      chronoFiniteElementSpace.diff() << std::endl << std::flush;
+                  chronoFiniteElementSpace.diff() << std::endl << std::flush;
 
     // Start chronoProblem for measure the total time for create the problem.
     chronoProblem.start();

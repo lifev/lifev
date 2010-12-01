@@ -42,7 +42,8 @@
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <fstream>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*
 namespace structuredMeshFlags {
@@ -130,7 +131,8 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                     const Real& t_x=0.0,
                     const Real& t_y=0.0,
                     const Real& t_z=0.0
-                    ){
+                  )
+{
     // output stream
     std::stringstream discardedLog;
     std::ostream& oStr = verbose ? std::cout : discardedLog;
@@ -164,23 +166,23 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     UInt verticesNumber(n_x*n_y*n_z);
     UInt boundaryVerticesNumber(verticesNumber-(n_x-2)*(n_y-2)*(n_z-2)); //Total-inside points
     UInt boundaryEdgesNumber(
-                             2*(m_x*(n_y-2)+m_y*(n_x-2) + m_x*m_y) +
-                             2*(m_x*(n_z-2)+m_z*(n_x-2) + m_x*m_z) +
-                             2*(m_y*(n_z-2)+m_z*(n_y-2) + m_y*m_z) +
-                             4*(m_x+m_y+m_z)
-                             );
+        2*(m_x*(n_y-2)+m_y*(n_x-2) + m_x*m_y) +
+        2*(m_x*(n_z-2)+m_z*(n_x-2) + m_x*m_z) +
+        2*(m_y*(n_z-2)+m_z*(n_y-2) + m_y*m_z) +
+        4*(m_x+m_y+m_z)
+    );
     UInt edgesNumber(
-                     // Edges that draws the cuboids
-                     m_x*n_y*n_z +
-                     n_x*m_y*n_z +
-                     n_x*n_y*m_z +
-                     // Edges that divide into two faces the face of the cuboids
-                     m_x*m_y*n_z +
-                     n_x*m_y*m_z +
-                     m_x*n_y*m_z +
-                     // Edges that go accross the cuboids
-                     m_x*m_y*m_z
-                     );
+        // Edges that draws the cuboids
+        m_x*n_y*n_z +
+        n_x*m_y*n_z +
+        n_x*n_y*m_z +
+        // Edges that divide into two faces the face of the cuboids
+        m_x*m_y*n_z +
+        n_x*m_y*m_z +
+        m_x*n_y*m_z +
+        // Edges that go accross the cuboids
+        m_x*m_y*m_z
+    );
     UInt boundaryFacesNumber(2*2*(m_x*m_y+m_y*m_z+m_x*m_z));
     // Faces per cuboids = 12 + 6 internal
     UInt facesNumber( (m_x*m_y*m_z*12+boundaryFacesNumber)/2 + 6*m_x*m_y*m_z);
@@ -188,12 +190,15 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
 
     UInt pointsNumber(0);
     UInt boundaryPointsNumber(0);
-    if(GeoShape::numPoints>4){
+    if (GeoShape::numPoints>4)
+    {
         std::cout<< "Quadratic Tetra Mesh (from Linear geometry)" << std::endl;
         // In this case there is one extra points on each edge
         pointsNumber = verticesNumber + edgesNumber;
         boundaryPointsNumber = boundaryVerticesNumber + boundaryEdgesNumber;
-    }else{
+    }
+    else
+    {
         std::cout<< "Linear Tetra Mesh" << std::endl;
         pointsNumber = verticesNumber;
         boundaryPointsNumber = boundaryVerticesNumber;
@@ -251,23 +256,26 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     UInt nodeID(0);
     UInt P0(0),P1(0),P2(0),P3(0),P4(0),P5(0),P6(0),P7(0);
 
-    for(UInt k(0);k<n_z;++k)
+    for (UInt k(0); k<n_z; ++k)
     {
         zPosition = dz*k;
 
-        for(UInt j(0);j<n_y;++j)
+        for (UInt j(0); j<n_y; ++j)
         {
             yPosition = dy*j;
 
-            for(UInt i(0);i<n_x;++i)
+            for (UInt i(0); i<n_x; ++i)
             {
                 xPosition = dx*i;
                 nodeFlag = regularMeshPointPosition(i,j,k,n_x,n_y,n_z);
 
                 // We create the point
-                if(nodeFlag>0){
+                if (nodeFlag>0)
+                {
                     pointPtr = &mesh.addPoint(true); //it is a boundary point
-                }else{
+                }
+                else
+                {
                     pointPtr = &mesh.addPoint(false);
                 }
 
@@ -819,20 +827,21 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
         }
     }
     std::cout<<"done"<<std::endl;
-*/
+    */
 
     // Build the volumes
     std::cout<<"building the volumes...";
     UInt volumeID(0);
-    for(UInt k(0);k<m_z;++k)
+    for (UInt k(0); k<m_z; ++k)
     {
-        for(UInt j(0);j<m_y;++j)
+        for (UInt j(0); j<m_y; ++j)
         {
-            for(UInt i(0);i<m_x;++i)
+            for (UInt i(0); i<m_x; ++i)
             {
                 volumeID=(k*m_y*m_x+j*m_y+i)*6 ;
 
-                if((i+1<=mid_x && j+1<=mid_y && k+1<=mid_z)||(i+1>mid_x && j+1>mid_y && k+1>mid_z)){
+                if ((i+1<=mid_x && j+1<=mid_y && k+1<=mid_z)||(i+1>mid_x && j+1>mid_y && k+1>mid_z))
+                {
                     // Zone 0,7
                     nodeID = k*N_z+j*N_y+i;
                     P4=nodeID+1;
@@ -843,7 +852,9 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                     P2=nodeID+N_x+N_z+1;
                     P1=nodeID+N_y+N_z+1;
                     P3=nodeID+N_x+N_y+N_z+1;
-                }else if((i+1>mid_x && j+1<=mid_y && k+1<=mid_z)||(i+1<=mid_x && j+1>mid_y && k+1>mid_z)){
+                }
+                else if ((i+1>mid_x && j+1<=mid_y && k+1<=mid_z)||(i+1<=mid_x && j+1>mid_y && k+1>mid_z))
+                {
                     // Zone 1,6
                     nodeID = k*N_z+j*N_y+i;
                     P1=nodeID+1;
@@ -854,7 +865,9 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                     P7=nodeID+N_x+N_z+1;
                     P4=nodeID+N_y+N_z+1;
                     P6=nodeID+N_x+N_y+N_z+1;
-                }else if((i+1<=mid_x && j+1>mid_y && k+1<=mid_z)||(i+1>mid_x && j+1<=mid_y && k+1>mid_z)){
+                }
+                else if ((i+1<=mid_x && j+1>mid_y && k+1<=mid_z)||(i+1>mid_x && j+1<=mid_y && k+1>mid_z))
+                {
                     // Zone 2,5
                     nodeID = k*N_z+j*N_y+i;
                     P2=nodeID+1;
@@ -865,7 +878,9 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                     P4=nodeID+N_x+N_z+1;
                     P7=nodeID+N_y+N_z+1;
                     P5=nodeID+N_x+N_y+N_z+1;
-                }else if((i+1<=mid_x && j+1<=mid_y && k+1>mid_z)||(i+1>mid_x && j+1>mid_y && k+1<=mid_z)){
+                }
+                else if ((i+1<=mid_x && j+1<=mid_y && k+1>mid_z)||(i+1>mid_x && j+1>mid_y && k+1<=mid_z))
+                {
                     // Zone 3,4
                     nodeID = k*N_z+j*N_y+i;
                     P0=nodeID+1;
@@ -943,27 +958,27 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     std::cout<<"done"<<std::endl;
 
     // Build a P2 mesh from a P1 geometry
-    if(GeoShape::numPoints > 4) p1top2(mesh);
+    if (GeoShape::numPoints > 4) p1top2(mesh);
 
     // Test mesh
     Switch sw;
 
     // Correction JFG
-    if(!checkMesh3D(mesh, sw, true, false, oStr, std::cerr, oStr)) abort();
+    if (!checkMesh3D(mesh, sw, true, false, oStr, std::cerr, oStr)) abort();
 
     Real vols[3];
     getVolumeFromFaces(mesh, vols,oStr);
     oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON"<<
-        " BOUNDARY FACES"<<std::endl;
+    " BOUNDARY FACES"<<std::endl;
     oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"
-         << std::endl
-         << "                                 the volume enclosed by the mesh "
-         << std::endl;
+    << std::endl
+    << "                                 the volume enclosed by the mesh "
+    << std::endl;
     oStr << vols[0] << " " << vols[1] << " " << vols[2] << std::endl;
 
     oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "
-         << testClosedDomain(mesh,oStr) << std::endl
-         << " IS (ALMOST) ZERO" << std::endl;
+    << testClosedDomain(mesh,oStr) << std::endl
+    << " IS (ALMOST) ZERO" << std::endl;
 
     // Updates the connectivity of the mesh
     mesh.updateElementEdges( true, verbose );

@@ -64,9 +64,9 @@ public:
               char** argv );
 
     ~Cylinder()
-        {}
+    {}
 
-     //@}
+    //@}
 
     /** @name Operator overloads
      */

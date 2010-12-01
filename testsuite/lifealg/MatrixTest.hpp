@@ -42,10 +42,10 @@ public:
     MatrixMass( int n );
 
     ~MatrixMass()
-        {
-            delete _M_mat;
-            delete _M_pattern;
-        }
+    {
+        delete _M_mat;
+        delete _M_pattern;
+    }
     uint const * iaData()const { return _M_mat->Patt()->giveRawCSR_ia(); }
     uint const * jaData()const { return _M_mat->Patt()->giveRawCSR_ja(); }
     double* valueData() { return _M_mat->giveRawCSR_value(); }
@@ -85,10 +85,10 @@ public:
     MatrixConvectionDiffusion( int nx, value_type __rho = 0.0 );
 
     ~MatrixConvectionDiffusion()
-        {
-            delete _M_mat;
-            delete _M_pattern;
-        }
+    {
+        delete _M_mat;
+        delete _M_pattern;
+    }
     uint const * iaData()const  { return _M_mat->Patt()->giveRawCSR_ia(); }
     uint const * jaData()const  { return _M_mat->Patt()->giveRawCSR_ja(); }
     double* valueData() { return _M_mat->giveRawCSR_value(); }
