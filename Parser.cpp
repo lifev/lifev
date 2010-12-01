@@ -35,16 +35,17 @@
 
 #include "Parser.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 Parser::Parser() :
-    M_strings       (),
-    M_results       (),
-    M_calculator    (),
-    M_evaluate      ( true )
+        M_strings       (),
+        M_results       (),
+        M_calculator    (),
+        M_evaluate      ( true )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -55,10 +56,10 @@ Parser::Parser() :
 }
 
 Parser::Parser( const std::string& String ) :
-    M_strings       (),
-    M_results       (),
-    M_calculator    (),
-    M_evaluate      ( true )
+        M_strings       (),
+        M_results       (),
+        M_calculator    (),
+        M_evaluate      ( true )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -70,10 +71,10 @@ Parser::Parser( const std::string& String ) :
 }
 
 Parser::Parser( const Parser& parser ) :
-    M_strings       ( parser.M_strings ),
-    M_results       ( parser.M_results ),
-    M_calculator    ( parser.M_calculator ),
-    M_evaluate      ( parser.M_evaluate )
+        M_strings       ( parser.M_strings ),
+        M_results       ( parser.M_results ),
+        M_calculator    ( parser.M_calculator ),
+        M_evaluate      ( parser.M_evaluate )
 {
 }
 
@@ -114,8 +115,11 @@ Parser::Evaluate( const UInt& ID )
 #else
             std::cout << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
             // This generate an error ---------
-            int *a = new int(0); int *b; b = a;
-            delete a; delete b;
+            int *a = new int(0);
+            int *b;
+            b = a;
+            delete a;
+            delete b;
             // --------------------------------
 #endif
         }

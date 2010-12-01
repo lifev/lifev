@@ -39,7 +39,8 @@
 #include <lifemc/lifecore/Parser_Definitions.hpp>
 #include <lifemc/lifecore/Parser_SpiritGrammar.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Parser - A string parser for algebraic expressions
 /*!

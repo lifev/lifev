@@ -37,7 +37,8 @@
 
 #include <lifemc/lifecore/Parser_Definitions.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 #ifdef HAVE_BOOST_SPIRIT_QI
 
@@ -122,10 +123,10 @@ public:
     //! Clear all the variables.
     void ClearVariables();
 
-/*
-    //! Show all the variables
-    void ShowMe();
-*/
+    /*
+        //! Show all the variables
+        void ShowMe();
+    */
 
     //@}
 
@@ -262,137 +263,137 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
         Variable                            ()
 {
     Start
-        =
+    =
         (
-           Assignment
+            Assignment
 //        |  Command
-        |  ( -qi::lit('[') >> Expression % ',' >> -qi::lit(']') )
+            |  ( -qi::lit('[') >> Expression % ',' >> -qi::lit(']') )
         )
-    ;
+        ;
 
     Assignment
-       =
-       (    qi::raw[qi::lexeme[(qi::alpha | '_') >> *(qi::alnum | '_')]]
-       >>   qi::lit('=')
-       >>   Expression
-       )              [phoenix::bind(&Parser_SpiritGrammar::AssignVariable,this, qi::_1, qi::_2)]
-    ;
-/*
-    Command
-        =  qi::lit("ShowMe")[phoenix::bind(&Parser_SpiritGrammar::ShowMe, this)]
-    ;
-*/
+    =
+        (    qi::raw[qi::lexeme[(qi::alpha | '_') >> *(qi::alnum | '_')]]
+             >>   qi::lit('=')
+             >>   Expression
+        )              [phoenix::bind(&Parser_SpiritGrammar::AssignVariable,this, qi::_1, qi::_2)]
+        ;
+    /*
+        Command
+            =  qi::lit("ShowMe")[phoenix::bind(&Parser_SpiritGrammar::ShowMe, this)]
+        ;
+    */
 
     Expression
-        =  *Compare                                    [qi::_val = qi::_1]
-    ;
+    =  *Compare                                    [qi::_val = qi::_1]
+       ;
 
     Compare
-        =   PlusMinus                                  [qi::_val = qi::_1]
+    =   PlusMinus                                  [qi::_val = qi::_1]
         >> *(
             qi::lit('>') >> PlusMinus                  [qi::_val = qi::_val > qi::_1]
-        |   qi::lit('<') >> PlusMinus                  [qi::_val = qi::_val < qi::_1]
-            )
-    ;
+            |   qi::lit('<') >> PlusMinus                  [qi::_val = qi::_val < qi::_1]
+        )
+        ;
 
     PlusMinus
-        =   MultiplyDivide                             [qi::_val = qi::_1]
+    =   MultiplyDivide                             [qi::_val = qi::_1]
         >> *(
             qi::lit('+') >> MultiplyDivide             [qi::_val += qi::_1]
-        |   qi::lit('-') >> MultiplyDivide             [qi::_val -= qi::_1]
-            )
-    ;
+            |   qi::lit('-') >> MultiplyDivide             [qi::_val -= qi::_1]
+        )
+        ;
 
     MultiplyDivide
-        =   Elevate                                    [qi::_val = qi::_1]
+    =   Elevate                                    [qi::_val = qi::_1]
         >> *(
             qi::lit('*') >> Elevate                    [qi::_val *= qi::_1]
-        |   qi::lit('/') >> Elevate                    [qi::_val /= qi::_1]
-            )
-    ;
+            |   qi::lit('/') >> Elevate                    [qi::_val /= qi::_1]
+        )
+        ;
 
     Elevate
-        =
+    =
         (
             qi::lit('-') >> Element                    [qi::_val = qi::_1]
-        >>  (
-            qi::lit('^') >> Element                    [qi::_val = -phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+            >>  (
+                qi::lit('^') >> Element                    [qi::_val = -phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
-        >> *(
-            qi::lit('^') >> Element                    [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+            >> *(
+                qi::lit('^') >> Element                    [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
         )
         |
         (
             Element                                    [qi::_val = qi::_1]
-        >> *(
-            qi::lit('^') >> Element                    [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+            >> *(
+                qi::lit('^') >> Element                    [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
         )
-    ;
+        ;
 
     Element
-        =
+    =
         (
-        qi::lit('-') >> Element                        [qi::_val = -qi::_1]
+            qi::lit('-') >> Element                        [qi::_val = -qi::_1]
         )
         |
         (
             Number                                     [qi::_val = qi::_1]
-        |   Function                                   [qi::_val = qi::_1]
-        |   Variable                                   [qi::_val = qi::_1]
-        |   Group                                      [qi::_val = qi::_1]
+            |   Function                                   [qi::_val = qi::_1]
+            |   Variable                                   [qi::_val = qi::_1]
+            |   Group                                      [qi::_val = qi::_1]
         )
-    ;
+        ;
 
     Number
-        =
+    =
         (
             qi::double_
 //            ||   ('.' >> qi::double_)
 //            >>   -('.' >> qi::double_) | ('.' >> qi::double_)
         )
-    ;
+        ;
 
     Function
-        =
+    =
         (
             qi::lit("sin")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sin, this,   qi::_1)]
-        |   qi::lit("cos")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::cos, this,   qi::_1)]
-        |   qi::lit("tan")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::tan, this,   qi::_1)]
-        |   qi::lit("sqrt")  >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sqrt, this,  qi::_1)]
-        |   qi::lit("exp")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::exp, this,   qi::_1)]
-        |   qi::lit("log")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log, this,   qi::_1)]
-        |   qi::lit("log10") >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log10, this, qi::_1)]
+            |   qi::lit("cos")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::cos, this,   qi::_1)]
+            |   qi::lit("tan")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::tan, this,   qi::_1)]
+            |   qi::lit("sqrt")  >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sqrt, this,  qi::_1)]
+            |   qi::lit("exp")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::exp, this,   qi::_1)]
+            |   qi::lit("log")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log, this,   qi::_1)]
+            |   qi::lit("log10") >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log10, this, qi::_1)]
         )
-    ;
+        ;
 
     Group
-        =
+    =
         (
             '('
-        >>  Expression                                 [qi::_val = qi::_1]
-        >>  ')'
+            >>  Expression                                 [qi::_val = qi::_1]
+            >>  ')'
         )
-    ;
+        ;
 }
 
 template <typename iterator>
 Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar( const Parser_SpiritGrammar& SpiritGrammar ) :
-    Parser_SpiritGrammar::base_type     ( SpiritGrammar.Start ),
-    Start                               ( SpiritGrammar.Start ),
-    Assignment                          ( SpiritGrammar.Assignment ),
+        Parser_SpiritGrammar::base_type     ( SpiritGrammar.Start ),
+        Start                               ( SpiritGrammar.Start ),
+        Assignment                          ( SpiritGrammar.Assignment ),
 //    Command                             ( SpiritGrammar.Command ),
-    Expression                          ( SpiritGrammar.Expression ),
-    Compare                             ( SpiritGrammar.Compare ),
-    PlusMinus                           ( SpiritGrammar.PlusMinus ),
-    MultiplyDivide                      ( SpiritGrammar.MultiplyDivide ),
-    Elevate                             ( SpiritGrammar.Elevate ),
-    Element                             ( SpiritGrammar.Element ),
-    Number                              ( SpiritGrammar.Number ),
-    Function                            ( SpiritGrammar.Function ),
-    Group                               ( SpiritGrammar.Group ),
-    Variable                            ( SpiritGrammar.Variable )
+        Expression                          ( SpiritGrammar.Expression ),
+        Compare                             ( SpiritGrammar.Compare ),
+        PlusMinus                           ( SpiritGrammar.PlusMinus ),
+        MultiplyDivide                      ( SpiritGrammar.MultiplyDivide ),
+        Elevate                             ( SpiritGrammar.Elevate ),
+        Element                             ( SpiritGrammar.Element ),
+        Number                              ( SpiritGrammar.Number ),
+        Function                            ( SpiritGrammar.Function ),
+        Group                               ( SpiritGrammar.Group ),
+        Variable                            ( SpiritGrammar.Variable )
 {
 }
 

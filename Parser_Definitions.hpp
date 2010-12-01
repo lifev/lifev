@@ -50,19 +50,20 @@
 #include <boost/shared_ptr.hpp>
 
 #ifdef HAVE_BOOST_SPIRIT_QI
-    // BOOST Spirit Classes
-    #include <boost/spirit/include/qi.hpp>
-    #include <boost/spirit/include/phoenix_bind.hpp>
-    #include <boost/spirit/include/phoenix_operator.hpp>
+// BOOST Spirit Classes
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
-    // BOOST Spirit Namespaces
-    namespace spirit  = boost::spirit;
-    namespace qi      = spirit::qi;
-    namespace ascii   = spirit::ascii;
-    namespace phoenix = boost::phoenix;
+// BOOST Spirit Namespaces
+namespace spirit  = boost::spirit;
+namespace qi      = spirit::qi;
+namespace ascii   = spirit::ascii;
+namespace phoenix = boost::phoenix;
 #endif /* HAVE_BOOST_SPIRIT_QI */
 
-namespace LifeV {
+namespace LifeV
+{
 
 typedef std::vector< std::string >               Strings_Type;
 typedef std::string::const_iterator              String_Iterator;
