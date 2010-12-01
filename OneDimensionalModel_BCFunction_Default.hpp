@@ -47,7 +47,8 @@
 #include <lifemc/lifesolver/OneDimensionalModel_Flux.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Source.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_BCDefaultFunction - Base class for default BC functions
 /*!
@@ -322,7 +323,7 @@ public:
 
 protected:
 
-   virtual void resistance( Real& /*resistance*/ );
+    virtual void resistance( Real& /*resistance*/ );
 
 };
 
@@ -368,9 +369,9 @@ public:
 
 protected:
 
-   void resistance( Real& resistance );
+    void resistance( Real& resistance );
 
-   Real M_resistance;
+    Real M_resistance;
 
 };
 

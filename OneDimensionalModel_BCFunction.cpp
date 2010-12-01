@@ -40,21 +40,22 @@
 
 #include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BCFunction::OneDimensionalModel_BCFunction() :
-    M_function  ()
+        M_function  ()
 {}
 
 OneDimensionalModel_BCFunction::OneDimensionalModel_BCFunction( const Function_Type& function ) :
-    M_function  ( function )
+        M_function  ( function )
 {}
 
 OneDimensionalModel_BCFunction::OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& BCFunction ) :
-    M_function  ( BCFunction.M_function )
+        M_function  ( BCFunction.M_function )
 {}
 
 // ===================================================

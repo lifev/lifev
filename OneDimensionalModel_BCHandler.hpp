@@ -45,7 +45,8 @@
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
 #include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_BCHandler - Class featuring methods to handle boundary conditions.
 /*!
@@ -100,8 +101,8 @@ public:
                    const Real&             timeStep,
                    const Solution_Type&    solution,
                    const Flux_PtrType&     flux,
-                         Container2D_Type& leftBC,
-                         Container2D_Type& rightBC );
+                   Container2D_Type& leftBC,
+                   Container2D_Type& rightBC );
 
     //@}
 

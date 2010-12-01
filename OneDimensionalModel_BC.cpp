@@ -40,30 +40,31 @@
 
 #include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
-    M_bcType                    (),
-    M_bcSide                    ( side ),
-    M_bcFunction                (),
-    M_isInternal                ( false ),
-    M_bcMatrix                  (),
-    M_bcRHS                     ()
+        M_bcType                    (),
+        M_bcSide                    ( side ),
+        M_bcFunction                (),
+        M_isInternal                ( false ),
+        M_bcMatrix                  (),
+        M_bcRHS                     ()
 {
     M_bcMatrix[ OneD_first ]  = Container2D_Type();
     M_bcMatrix[ OneD_second ] = Container2D_Type();
 }
 
 OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& BC ) :
-    M_bcType                    ( BC.M_bcType ),
-    M_bcSide                    ( BC.M_bcSide ),
-    M_bcFunction                ( BC.M_bcFunction ),
-    M_isInternal                ( BC.M_isInternal ),
-    M_bcMatrix                  ( BC.M_bcMatrix ),
-    M_bcRHS                     ( BC.M_bcRHS )
+        M_bcType                    ( BC.M_bcType ),
+        M_bcSide                    ( BC.M_bcSide ),
+        M_bcFunction                ( BC.M_bcFunction ),
+        M_isInternal                ( BC.M_isInternal ),
+        M_bcMatrix                  ( BC.M_bcMatrix ),
+        M_bcRHS                     ( BC.M_bcRHS )
 {}
 
 // ===================================================
@@ -74,11 +75,11 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
                                  const Real&             timeStep,
                                  const Solution_Type&    solution,
                                  const Flux_PtrType&     flux,
-                                       Container2D_Type& BC )
+                                 Container2D_Type& BC )
 {
     ASSERT_PRE( BC.size() == 2, "applyBC works only for 2D vectors");
 
-    if( M_isInternal )
+    if ( M_isInternal )
         Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] found internal boundary\n";
     else
     {
@@ -108,7 +109,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
     }
 
     Debug(6311) << "[OneDimensionalModel_BC::applyBC] on side " << M_bcSide
-                << " imposing [ A, Q ] = [ " << BC[0] << ", " << BC[1] << " ]\n";
+    << " imposing [ A, Q ] = [ " << BC[0] << ", " << BC[1] << " ]\n";
 }
 
 // ===================================================
@@ -178,36 +179,39 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
 
     // Compute Matrix & RHS
     rhs = M_bcFunction[ line ](time, timeStep);
-    switch( M_bcType[line] )
+    switch ( M_bcType[line] )
     {
-        case OneD_W1:
-            M_bcMatrix[line] = leftEigenvector1;
+    case OneD_W1:
+        M_bcMatrix[line] = leftEigenvector1;
         break;
-        case OneD_W2:
-            M_bcMatrix[line] = leftEigenvector2;
+    case OneD_W2:
+        M_bcMatrix[line] = leftEigenvector2;
         break;
-        case OneD_A:
-            M_bcMatrix[line][0] = 1.; M_bcMatrix[line][1] = 0.;
+    case OneD_A:
+        M_bcMatrix[line][0] = 1.;
+        M_bcMatrix[line][1] = 0.;
         break;
-        case OneD_P:
-            rhs = flux->Physics()->A_from_P( rhs, dof );
-            M_bcMatrix[line][0] = 1.; M_bcMatrix[line][1] = 0.;
+    case OneD_P:
+        rhs = flux->Physics()->A_from_P( rhs, dof );
+        M_bcMatrix[line][0] = 1.;
+        M_bcMatrix[line][1] = 0.;
         break;
-        case OneD_Q:
-            // Flow rate is positive with respect to the outgoing normal
-            if ( M_bcSide == OneD_left )
-                rhs *= -1;
-            M_bcMatrix[line][0] = 0.; M_bcMatrix[line][1] = 1.;
+    case OneD_Q:
+        // Flow rate is positive with respect to the outgoing normal
+        if ( M_bcSide == OneD_left )
+            rhs *= -1;
+        M_bcMatrix[line][0] = 0.;
+        M_bcMatrix[line][1] = 1.;
         break;
-        default:
-            std::cout << "\n[OneDimensionalModel_BC::compute_resBC] Wrong boundary variable as " << line
-                      << " condition on side " << M_bcSide;
+    default:
+        std::cout << "\n[OneDimensionalModel_BC::compute_resBC] Wrong boundary variable as " << line
+                  << " condition on side " << M_bcSide;
     }
 
     Debug(6311) << "[OneDimensionalModel_BC::compute_MatrixAndRHS] to impose variable "
-                << M_bcType[line] << ", " << line << " line = "
-                << M_bcMatrix[line][0] << ", "
-                << M_bcMatrix[line][1] << "\n";
+    << M_bcType[line] << ", " << line << " line = "
+    << M_bcMatrix[line][0] << ", "
+    << M_bcMatrix[line][1] << "\n";
 }
 
 Container2D_Type

@@ -45,7 +45,8 @@
 #include <lifemc/lifefem/OneDimensionalModel_BCFunction_Default.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! OneDimensionalModel_BC - Class featuring methods to handle boundary conditions.
 /*!
