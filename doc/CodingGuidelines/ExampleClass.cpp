@@ -29,6 +29,9 @@
     @brief A short description of the file content
 
     @author Name Surname <name.surname@email.org>
+    @contributor Name Surname <name.surname@email.org>
+    @maintainer Name Surname <name.surname@email.org>
+
     @date 00-00-0000
 
     A more detailed description of the file (if necessary)
