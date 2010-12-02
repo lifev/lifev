@@ -30,7 +30,7 @@ EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configur
 
 MAINTAINERCLEANFILES = configure.files subdirs
 
-
+DOX_FILES   = Doxyfile.am
 
 include $(top_srcdir)/Doxyfile.am
 include $(top_srcdir)/admin/deps.am
