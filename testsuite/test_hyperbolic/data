@@ -15,8 +15,8 @@
     [hyperbolic]
 
         [./space_discretization]
-    	mesh_dir      = ./Mesh/old/ # the directory where the mesh file is
-    	mesh_file     = cartesian_cube64.mesh
+    	mesh_dir      = ./Mesh/ # the directory where the mesh file is
+    	mesh_file     = cartesian_cube8.mesh
     	mesh_type     = .mesh #structured #.mesh
         mesh_faces    = all
 	    verbose       = 0                        # verbose during mesh-reading

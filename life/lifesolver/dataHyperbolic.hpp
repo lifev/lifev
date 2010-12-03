@@ -1,35 +1,40 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-
-   Autor(s): Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
-       Date:
-
-   Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
-   Copyright (C) 2006-2010 EPFL, Politecnico di Milano
-
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//@HEADER
+/*
+*******************************************************************************
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+    This file is part of LifeV.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV. If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************************
 */
-/**
-  @file dataDarcy.hpp
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @date 05/2010
+//@HEADER
+/*!
+ * @file
+ * @brief Data for hyperbolic scalar equations.
+ *
+ *
+ * @date 30-09-2010
+ *
+ * @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+ *         Michel Kern       <michel.kern@inria.fr>
+ *
+ * @contributor
+ *
+ * @mantainer Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+ *
+ */
 
-  @brief This file contains the data for all the Darcy solver
-*/
 #ifndef _DATAHYPERBOLIC_H_
-#define _DATAHYPERBOLIC_H_
+#define _DATAHYPERBOLIC_H_ 1
 
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifearray/tab.hpp>
@@ -49,136 +54,150 @@ class DataHyperbolic
 {
 public:
 
-    // Policies
-    //! @name Policies
+    //! @name Public Types
     //@{
 
     typedef GetPot                          Data_Type;
-    typedef boost::shared_ptr< Data_Type >  Data_ptrType;
+    typedef boost::shared_ptr< Data_Type >  DataPtr_Type;
 
     typedef DataTime                        Time_Type;
-    typedef boost::shared_ptr< Time_Type >  Time_ptrType;
+    typedef boost::shared_ptr< Time_Type >  TimePtr_Type;
 
     typedef DataMesh                        Mesh_Type;
-    typedef boost::shared_ptr< Mesh_Type >  Mesh_ptrType;
+    typedef boost::shared_ptr< Mesh_Type >  MeshPtr_Type;
 
     //@}
 
-    // Constructors.
-    //! @name Constructors
+    //! @name Constructor & Destructor
     //@{
 
     //! Empty Constructor
     DataHyperbolic();
 
+    //! Constructor using a data file.
     /*!
-    Constructor using a data file.
       @param dataFile GetPot data file for setup the problem
       @param section the section for the Darcy data
     */
     DataHyperbolic( const GetPot& dataFile, const std::string& section = "hyperbolic" );
 
+    //! Copy constructor.
     /*!
-    Copy constructor.
       @param dataDarcy object to take a copy
     */
     DataHyperbolic( const DataHyperbolic &dataHyperbolic );
 
+    //! Virtual destructor
+    virtual ~DataHyperbolic();
+
     //@}
 
-    // Set methods
-    //! @name Set methods
+    //! @name Operators
     //@{
 
-    /*! Set data time container
-        @param DataTime Boost shared_ptr to dataTime container
+    //! Assign operator overloading
+    /*!
+      @param dataDarcy The DataDarcy to be copied
     */
-    inline void setDataTime( const Time_ptrType DataTime )
+    DataHyperbolic& operator=( const DataHyperbolic& dataHyperbolic );
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! External setup
+    /*!
+      @param dataFile The data file with all the data.
+      @param section The global section.
+    */
+    void setup( const Data_Type& dataFile, const std::string& section = "hyperbolic"  );
+
+    //! Print attributes of the class
+    /*!
+      @param output Stream to put the output
+    */
+    void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    //! Set data time container
+    /*!
+      @param DataTime Boost shared_ptr to dataTime container
+    */
+    inline void setDataTime( const TimePtr_Type DataTime )
     {
         M_time = DataTime;
     }
 
-    /*! Set mesh container
-        @param DataMesh Boost shared_ptr to dataMesh container
+    //! Set mesh container
+    /*!
+      @param DataMesh Boost shared_ptr to dataMesh container
     */
-    inline void setDataMesh( const Mesh_ptrType DataMesh )
+    inline void setDataMesh( const MeshPtr_Type DataMesh )
     {
         M_mesh = DataMesh;
     }
 
-    // Get methods.
-    //! @name Get methods
+    //! @name Get Methods
     //@{
 
     //! Get the level of verbosity of the problem.
-    inline const UInt verbose( void ) const
+    inline UInt verbose () const
     {
         return M_verbose;
     }
 
     //! Get the main section of the data file.
-    inline const std::string section( void ) const
+    inline const std::string section () const
     {
         return M_section;
     }
 
     //! Get the data file of the problem.
-    inline Data_ptrType dataFile( void ) const
+    inline DataPtr_Type dataFile () const
     {
         return M_data;
     }
 
-    /*! Get data time container.
-        @return shared_ptr to dataTime container
+    //! Get data time container.
+    /*!
+      @return shared_ptr to dataTime container
     */
-    inline Time_ptrType dataTime( void ) const
+    inline TimePtr_Type dataTime () const
     {
         return M_time;
     }
 
-    /*! Get mesh container
-       @return shared_ptr to dataMesh container
+    //! Get mesh container
+    /*!
+      @return shared_ptr to dataMesh container
     */
-    inline Mesh_ptrType dataMesh( void ) const
+    inline MeshPtr_Type dataMesh () const
     {
         return M_mesh;
     }
 
-    /*! Get the relaxation paramether for the CFL condition
-      @return CFL relaxation paramether
+    //! Get the relaxation parameter for the CFL condition
+    /* Get the parameter to compute \f$ CFL_{\rm used} = \alpha CFL_{\rm computed} \f$
+       @return CFL relaxation parameter
     */
-    inline const Real getCFLrelax( void ) const
+    inline Real getCFLrelax () const
     {
         return M_relaxCFL;
     }
 
     //@}
 
-    // Methods.
-    //! @name Methods
-    //@{
-
-    /*! Overloading of the operator =
-        @param dataDarcy The DataDarcy to be copied.
-    */
-    DataHyperbolic& operator=( const DataHyperbolic& dataHyperbolic );
-
-    /*! External setup
-        @param dataFile The data file with all the data.
-        @param section The global section.
-    */
-    void setup( const Data_Type& dataFile, const std::string& section = "hyperbolic"  );
-
-    //@}
-
-
-
 protected:
 
     //! Data containers for time and mesh
-    Data_ptrType      M_data;
-    Time_ptrType      M_time;
-    Mesh_ptrType      M_mesh;
+    DataPtr_Type      M_data;
+    TimePtr_Type      M_time;
+    MeshPtr_Type      M_mesh;
 
     //! Miscellaneous
     UInt              M_verbose;
@@ -190,7 +209,7 @@ protected:
 };
 
 // ===================================================
-// Constructors
+// Constructors & Destructor
 // ===================================================
 
 template < typename Mesh >
@@ -205,7 +224,7 @@ DataHyperbolic<Mesh>::DataHyperbolic( ):
         // CFL
         M_relaxCFL      ( static_cast<Real>(0.) )
 {
-    CONSTRUCTOR( "DataHyperbolic" );
+
 }
 
 // Copy constructor
@@ -221,9 +240,19 @@ DataHyperbolic<Mesh>::DataHyperbolic( const DataHyperbolic &dataHyperbolic ):
         // CFL
         M_relaxCFL    ( dataHyperbolic.M_relaxCFL )
 {
-    CONSTRUCTOR( "DataHyperbolic" );
+
 }
 
+// Virtual destructor
+template < typename Mesh >
+DataHyperbolic<Mesh>::~DataHyperbolic()
+{
+
+}
+
+// ===================================================
+// Operators
+// ===================================================
 // Overloading of the operator =
 template < typename Mesh >
 DataHyperbolic<Mesh>&
@@ -246,11 +275,16 @@ DataHyperbolic<Mesh>::operator=( const DataHyperbolic& dataHyperbolic )
 
 }
 
-
+// ===================================================
+// Methods
+// ===================================================
 // External set up method
 template < typename Mesh >
-void DataHyperbolic<Mesh>::setup( const Data_Type& dataFile, const std::string& section )
+void
+DataHyperbolic<Mesh>::setup( const Data_Type& dataFile,
+                             const std::string& section )
 {
+
     M_section = section;
 
     // If data has not been set
@@ -273,5 +307,20 @@ void DataHyperbolic<Mesh>::setup( const Data_Type& dataFile, const std::string& 
 
 }
 
+// Print attiributes of the class
+template < typename Mesh >
+void
+DataHyperbolic<Mesh>::showMe( std::ostream& output ) const
+{
+    output << "Class DataHyperbolic:" << std::endl;
+    M_time->showMe( output );
+    M_mesh->showMe( output );
+    output << "Verbosity level     " << M_verbose << std::endl
+           << "Section of GetPot   " << M_section << std::endl
+           << "Relax CFL parameter " << M_relaxCFL << std::endl
+           << std::flush;
 }
-#endif
+
+} // Namespace LifeV
+
+#endif /* _DATAHYPERBOLIC_H_ */

@@ -327,7 +327,7 @@ hyperbolic::run()
     typedef RegionMesh3D<LinearTetra>                   RegionMesh;
     typedef SolverTrilinos                              solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
-    typedef hyper::vector_type                          vector_type;
+    typedef hyper::vector_Type                          vector_type;
     typedef boost::shared_ptr<vector_type>              vector_ptrtype;
 
     Chrono chronoTotal;

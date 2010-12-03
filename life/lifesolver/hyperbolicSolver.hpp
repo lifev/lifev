@@ -1,58 +1,56 @@
-/* -*- mode: c++ -*-
-
- This file is part of the LifeV library
-
- Author(s): A. Fumagalli  <alessio.fumagalli@mail.polimi.it>
-            M. Kern       <michel.kern@inria.fr>
-      Date: 2010-09
-
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
- Copyright (C) 2006-2010 EPFL, Politecnico di Milano
-
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//@HEADER
+/*
+*******************************************************************************
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+    This file is part of LifeV.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV. If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************************
 */
-/**
-  @file hyperbolicSolver.hpp
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @author M. Kern <michel.kern@inria.fr>
-  @date 09/2010
+//@HEADER
+/*!
+ * @file
+ * @brief Solver class for hyperbolic scalar equations.
+ *
+ *
+ * @date 30-09-2010
+ *
+ * @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+ *         Michel Kern       <michel.kern@inria.fr>
+ *
+ * @contributor
+ *
+ * @mantainer Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+ *
+ */
 
-  @brief This file contains a solver class for hyperbolic equations
-*/
-#ifndef _hyperbolicSolver_H_
-#define _hyperbolicSolver_H_
+#ifndef _HYPERBOLICSOLVER_H_
+#define _HYPERBOLICSOLVER_H_ 1
 
 #include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 
-#include <life/lifealg/clapack.hpp>
 #include <life/lifesolver/dataHyperbolic.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
-//
-#include <life/lifefem/geoMap.hpp>
+#include <Epetra_LAPACK.h>
+
 #include <life/lifefem/NumericalFluxes.hpp>
-//
-#include <life/lifecore/displayer.hpp>
 
 namespace
 {
 
-const LifeV::Real _ZeroFun( const LifeV::Real&, const LifeV::Real&,
-                            const LifeV::Real&, const LifeV::Real&,
-                            const LifeV::UInt& )
+LifeV::Real _ZeroFun( const LifeV::Real&, const LifeV::Real&,
+                      const LifeV::Real&, const LifeV::Real&,
+                      const LifeV::UInt& )
 {
     return static_cast<LifeV::Real>( 0. );
 }
@@ -71,27 +69,26 @@ class HyperbolicSolver
 
 public:
 
-    // Policies.
-    //! @name Policies
+    //! @name Public Types
     //@{
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
                                    const Real&, const UInt& )>
-    Function;
+    Function_Type;
 
-    typedef DataHyperbolic<Mesh>                     data_type;
+    typedef DataHyperbolic<Mesh>                     data_Type;
 
-    typedef BCHandler                                bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type>    bchandler_type;
+    typedef BCHandler                                bchandler_Type;
+    typedef boost::shared_ptr<bchandler_Type>        bchandlerPtr_Type;
 
-    typedef typename SolverType::vector_type         vector_type;
-    typedef boost::shared_ptr<vector_type>           vector_ptrtype;
+    typedef typename SolverType::vector_type         vector_Type;
+    typedef boost::shared_ptr<vector_Type>           vectorPtr_Type;
 
-    typedef Epetra_Comm                              comm_type;
-    typedef boost::shared_ptr< comm_type >           comm_ptrtype;
+    typedef Epetra_Comm                              comm_Type;
+    typedef boost::shared_ptr< comm_Type >           commPtr_Type;
 
-    typedef AbstractNumericalFlux<Mesh, SolverType>  flux_type;
-    typedef boost::shared_ptr< flux_type >           flux_ptrtype;
+    typedef AbstractNumericalFlux<Mesh, SolverType>  flux_Type;
+    typedef boost::shared_ptr< flux_Type >           fluxPtr_Type;
 
     //@}
 
@@ -106,10 +103,10 @@ public:
       @param bcHandler Boundary conditions for the problem.
       @param comm Shared pointer of the Epetra communicator.
     */
-    HyperbolicSolver ( const data_type&          dataFile,
+    HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, EpetraMap>& fESpace,
-                       bchandler_raw_type&       bcHandler,
-                       comm_ptrtype&             comm );
+                       bchandler_Type&           bcHandler,
+                       commPtr_Type&             comm );
 
     /*!
       Constructor for the class without the definition of the boundary handler.
@@ -117,9 +114,9 @@ public:
       @param fESpace Discontinuous finite element space.
       @param comm Shared pointer of the Epetra communicator.
     */
-    HyperbolicSolver ( const data_type&          dataFile,
+    HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, EpetraMap>& fESpace,
-                       comm_ptrtype&             comm );
+                       commPtr_Type&             comm );
 
     //! Virtual destructor.
     virtual ~HyperbolicSolver ();
@@ -141,7 +138,7 @@ public:
       initial solution.
       @param initialSolution The initial solution function.
     */
-    inline void setInitialSolution ( const Function& initialSolution )
+    inline void setInitialSolution ( const Function_Type& initialSolution )
     {
 
         // Interpolate the initial solution.
@@ -149,86 +146,90 @@ public:
                                *M_uOld,
                                M_data.dataTime()->getInitialTime() );
 
+        // Update the solution
         *M_u = *M_uOld;
     }
 
+    //! Set the boundary conditions.
     /*!
-      Set the boundary conditions.
       @param bcHandler Boundary condition handler for the problem.
     */
-    inline void setBC ( bchandler_raw_type& bcHandler )
+    inline void setBC ( bchandler_Type& bcHandler )
     {
-        M_BCh   = &bcHandler;
+        M_BCh.reset( new bchandler_Type( bcHandler ) );
         M_setBC = true;
     }
 
-    /*!
-      Set the source term, the default setted source term is the zero function.
+    //! Set the source term.
+    /*
+      The default setted source term is the zero function.
       @param source Source term for the problem.
     */
-    inline void setSourceTerm ( const Function& source )
+    inline void setSourceTerm ( const Function_Type& source )
     {
         M_source = source;
     }
 
+    //! Set the mass term.
     /*!
-      Set the mass term, the default setted source term is the one function.
-      By defaul it does not depend on time.
+      The default setted source term is the one function, it does not depend on time.
       @param mass Mass term for the problem.
     */
-    inline void setMassTerm ( const Function& mass )
+    inline void setMassTerm ( const Function_Type& mass )
     {
         M_mass = mass;
     }
 
-    inline void setNumericalFlux ( const GodunovNumericalFlux<Mesh, SolverType>& flux )
+    //! Set the numerical flux.
+    /*!
+      @param flux The numerical flux class
+    */
+    inline void setNumericalFlux ( const flux_Type& flux )
     {
-
-        M_numericalFlux.reset ( new GodunovNumericalFlux<Mesh, SolverType>( flux ) );
+        typedef GodunovNumericalFlux<Mesh, SolverType> godunov_Type;
+        M_numericalFlux.reset ( new godunov_Type( dynamic_cast<const godunov_Type&>( flux ) ) );
     }
 
+    //! Set the solution vector.
     /*!
-      Set the solution vector.
       @param solution Constant vector_type reference of the solution.
     */
-    inline void setSolution ( const vector_ptrtype& solution )
+    inline void setSolution ( const vectorPtr_Type& solution )
     {
         // Set both the final step solution and beginning step solution.
         M_u    = solution;
         M_uOld = solution;
     }
 
-
     //@}
 
-    // Get methods.
-    //! @name Get methods
+    //! @name Get Methods
     //@{
 
+    //! Returns the solution vector.
     /*!
-      Returns the local hybrid solution vector.
-      @return Constant vector_type reference of the hybrid vector.
-     */
-    inline const vector_ptrtype& solution () const
+      @return Constant vector_type reference of the solution vector.
+    */
+    inline const vectorPtr_Type& solution () const
     {
         return M_u;
     }
 
+    //! Return if the bounday conditions is setted or not.
     /*!
-      Return if the bounday conditions is setted or not.
       @return Constant boolean with value true if the boundary condition is setted,
       false otherwise
     */
-    inline const bool BCset () const
+    inline bool BCset () const
     {
         return M_setBC;
     }
 
+    //! Return the boundary conditions handler.
     /*!
-      Return the boundary conditions handler.
       @return Reference of boundary conditions handler.
     */
-    inline bchandler_type& bcHandler ()
+    inline bchandlerPtr_Type& bcHandler ()
     {
         return M_BCh;
     }
@@ -242,17 +243,9 @@ public:
         return M_localMap;
     }
 
+    //! Return the displayer.
     /*!
-      Return the Epetra communicator.
-      @return Constant of the shared pointer of the communicator of the problem.
-    */
-    inline const comm_ptrtype& comm () const
-    {
-        return M_displayer.comm();
-    }
-
-    /*!
-      Return the displayer.
+      Useful for parallel print in programs.
       @return Constant reference of the displayer of the problem.
     */
     inline Displayer const & getDisplayer() const
@@ -266,30 +259,16 @@ public:
     //! @name Solve functions
     //@{
 
-    /*!
-      Solve one time step of the hyperbolic problem.
-     */
+    //! Solve one time step of the hyperbolic problem.
     void solveOneStep();
 
-    /*!
-      Compute the global CFL condition.
-    */
+    //! Compute the global CFL condition.
     Real CFL() const;
 
     //@}
 
 protected:
 
-    /*!
-      Return the number of total degrees of freem of the problem.
-      @return The number of total degrees of freedom as a constant UInt.
-    */
-    inline const UInt dim () const
-    {
-        return M_FESpace.dim();
-    }
-
-    // Local solve functions.
     //! @name Local solve functions
     //@{
 
@@ -311,6 +290,9 @@ protected:
     //! Local map.
     EpetraMap           M_localMap;
 
+    //! Parallel displayer
+    Displayer M_displayer;
+
     //@}
 
     // Data of the problem.
@@ -318,24 +300,25 @@ protected:
     //@{
 
     //! Data for Darcy solvers.
-    const data_type&    M_data;
+    const data_Type&    M_data;
 
     //! Source function.
-    Function            M_source;
+    Function_Type       M_source;
 
     //! Mass function, it does not depend on time
-    Function            M_mass;
-
-    //! Initial solution.
-    Function            M_initialSolution;
-
-    boost::shared_ptr< GodunovNumericalFlux<Mesh, SolverType> > M_numericalFlux;
+    Function_Type       M_mass;
 
     //! Bondary conditions handler.
-    bchandler_raw_type* M_BCh;
+    bchandlerPtr_Type   M_BCh;
 
     //! Flag if the boundary conditions are setted or not.
     bool                M_setBC;
+
+    //! Function of initial solution.
+    Function_Type       M_initialSolution;
+
+    //! Class of type AbstractNumericalFlux for local flux computations.
+    fluxPtr_Type        M_numericalFlux;
 
     //@}
 
@@ -343,7 +326,7 @@ protected:
     //! @name Finite element spaces
     //@{
 
-    //! Primal finite element space.
+    //! Finite element space.
     FESpace<Mesh, EpetraMap>& M_FESpace;
 
     //@}
@@ -353,16 +336,16 @@ protected:
     //@{
 
     //! Right hand side.
-    vector_ptrtype M_rhs;
+    vectorPtr_Type M_rhs;
 
-    //! Primal solution.
-    vector_ptrtype M_u;
+    //! Solution at current time step.
+    vectorPtr_Type M_u;
 
-    vector_ptrtype M_uOld;
+    //! Solution at previous time step.
+    vectorPtr_Type M_uOld;
 
-    vector_ptrtype M_globalFlux;
-
-    Real           M_CFLrelax;
+    //! Computed numerical flux.
+    vectorPtr_Type M_globalFlux;
 
     //@}
 
@@ -370,14 +353,12 @@ protected:
     //! @name Elementary matrices and vectors used for the static condensation.
     //@{
 
-
-    std::vector<ElemMat> M_elmatMass;
-
     ElemVec              M_localFlux;
 
-    //@}
+    //! Vector of all local mass matrices, possibly with mass function.
+    std::vector<ElemMat> M_elmatMass;
 
-    Displayer M_displayer;
+    //@}
 
 }; // class HyperbolicSolver
 
@@ -388,10 +369,10 @@ protected:
 // Complete constructor.
 template<typename Mesh, typename SolverType>
 HyperbolicSolver<Mesh, SolverType>::
-HyperbolicSolver ( const data_type&          dataFile,
+HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, EpetraMap>& fESpace,
-                   bchandler_raw_type&       bcHandler,
-                   comm_ptrtype&             comm ):
+                   bchandler_Type&           bcHandler,
+                   commPtr_Type&             comm ):
         // Parallel stuff.
         M_me              ( comm->MyPID() ),
         M_localMap        ( fESpace.map() ),
@@ -400,24 +381,23 @@ HyperbolicSolver ( const data_type&          dataFile,
         M_data            ( dataFile ),
         M_source          ( NULL ),
         M_mass            ( NULL ),
-        M_BCh             ( &bcHandler ),
+        M_BCh             ( new bchandler_Type ( bcHandler ) ),
         M_setBC           ( true ),
+        M_initialSolution ( NULL ),
+        M_numericalFlux   ( ),
         // Finite element spaces.
         M_FESpace         ( fESpace ),
         // Algebraic stuff.
-        M_rhs             ( new vector_type ( M_localMap ) ),
-        M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-        M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        M_rhs             ( new vector_Type ( M_localMap ) ),
+        M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
-        M_elmatMass       ( ),
-        M_initialSolution ( NULL )
+        M_elmatMass       ( )
 {
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
-
-    CONSTRUCTOR( "HyperbolicSolver" );
 
 } // Constructor
 
@@ -425,9 +405,9 @@ HyperbolicSolver ( const data_type&          dataFile,
 // Constructor without boundary condition handler.
 template<typename Mesh, typename SolverType>
 HyperbolicSolver<Mesh, SolverType>::
-HyperbolicSolver ( const data_type&          dataFile,
+HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, EpetraMap>& fESpace,
-                   comm_ptrtype&             comm ):
+                   commPtr_Type&             comm ):
         // Parallel stuff.
         M_me              ( comm->MyPID() ),
         M_localMap        ( fESpace.map() ),
@@ -436,23 +416,23 @@ HyperbolicSolver ( const data_type&          dataFile,
         M_data            ( dataFile ),
         M_source          ( NULL ),
         M_mass            ( NULL ),
+        M_BCh             ( ),
         M_setBC           ( false ),
+        M_initialSolution ( NULL ),
+        M_numericalFlux   ( ),
         // Finite element spaces.
         M_FESpace         ( fESpace ),
         // Algebraic stuff.
-        M_rhs             ( new vector_type ( M_localMap ) ),
-        M_u    			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_type ( M_FESpace.map(), Repeated ) ),
-        M_globalFlux      ( new vector_type ( M_FESpace.map(), Repeated ) ),
+        M_rhs             ( new vector_Type ( M_localMap ) ),
+        M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
-        M_elmatMass       ( ),
-        M_initialSolution ( NULL )
+        M_elmatMass       ( )
 {
 
     M_elmatMass.reserve( M_FESpace.mesh()->numElements() );
-
-    CONSTRUCTOR( "HyperbolicSolver" );
 
 } // Constructor
 
@@ -462,8 +442,6 @@ HyperbolicSolver<Mesh, SolverType>::
 ~HyperbolicSolver ()
 {
 
-    DESTRUCTOR( "HyperbolicSolver" );
-
 } // Destructor
 
 // Set up the linear solver, the preconditioner and the exporter.
@@ -472,19 +450,21 @@ void
 HyperbolicSolver<Mesh, SolverType>::
 setup ()
 {
+    // Epetra LAPACK wrapper
+    Epetra_LAPACK lapack;
 
-    // Flags for the BLAS and LAPACK routine.
-    int INFO[1]      = {0};
-    int NB[1]        = { M_FESpace.refFE().nbDof() };
+    // Flags for LAPACK routines.
+    Int INFO[1]  = {0};
+    const Int NB =  M_FESpace.refFE().nbDof();
 
     // Parameter that indicate the Lower storage of matrices.
-    char _param_L[1] = {'L'};
+    const char param_L = 'L';
 
     // Total number of elements.
-    UInt meshNumberOfElements = M_FESpace.mesh()->numElements();
+    const UInt meshNumberOfElements = M_FESpace.mesh()->numElements();
 
     // Vector of interpolation of the mass function
-    vector_type vectorMass( M_FESpace.map(), Repeated );
+    vector_Type vectorMass( M_FESpace.map(), Repeated );
 
     // If the mass function is given take it, otherwise use one as a value.
     if ( M_mass != NULL )
@@ -514,7 +494,7 @@ setup ()
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-        dpotrf_( _param_L, NB, matElem.mat(), NB, INFO );
+        lapack.POTRF ( param_L, NB, matElem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
 
         // Save the local mass matrix in the global vector of mass matrices
@@ -540,20 +520,22 @@ void
 HyperbolicSolver<Mesh, SolverType>::
 localEvolve ( const UInt& iElem )
 {
+    // Epetra LAPACK wrapper
+    Epetra_LAPACK lapack;
 
-    // Flags for the BLAS and LAPACK routine.
-    int INFO[1]      = {0};
-    int NB[1]        = { M_FESpace.refFE().nbDof() };
+    // Flags for LAPACK routines.
+    Int INFO[1]  = {0};
+    const Int NB = M_FESpace.refFE().nbDof();
 
     // Parameter that indicate the Lower storage of matrices.
-    char _param_L[1] = {'L'};
-    char _param_N[1] = {'N'};
+    const char param_L = 'L';
+    const char param_N = 'N';
 
     // Paramater that indicate the Transpose of matrices.
-    char _param_T[1] = {'T'};
+    const char param_T = 'T';
 
     // Numbers of columns of the right hand side := 1.
-    int NBRHS[1]     = {1};
+    const Int NBRHS = 1;
 
     // Clean the local flux
     M_localFlux.zero();
@@ -565,10 +547,10 @@ localEvolve ( const UInt& iElem )
         const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
 
         // Take the left element to the face, see regionMesh for the meaning of left element
-        UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
+        const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
         // Take the right element to the face, see regionMesh for the meaning of right element
-        UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
+        const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
 
         // Update the normal vector of the current face in each quadrature point
         M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
@@ -604,7 +586,7 @@ localEvolve ( const UInt& iElem )
             }
 
             // Take the boundary marker for the current boundary face
-            const Index_t faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+            const ID faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
 
             // Take the corrispective boundary function
             const BCBase& bcBase ( M_BCh->GetBCWithFlag( faceMarker ) );
@@ -629,10 +611,10 @@ localEvolve ( const UInt& iElem )
                     // Compute the outward unit normal of the boundary
                     const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
 
-                    const  Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
-                                                iElem,
-                                                M_data.dataTime()->getTime(),
-                                                x, y, z, rightValue[ 0 ] );
+                    const Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
+                                                                                                          iElem,
+                                                                                                          M_data.dataTime()->getTime(),
+                                                                                                          x, y, z, rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
                     localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
                 }
@@ -709,12 +691,12 @@ localEvolve ( const UInt& iElem )
 
         /* Put in localFlux the vector L^{-1} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        dtrtrs_( _param_L, _param_N, _param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        lapack.TRTRS( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         /* Put in localFlux the vector L^{-T} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        dtrtrs_( _param_L, _param_T, _param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        lapack.TRTRS( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         // Add to the local flux the local flux of the current face
@@ -767,10 +749,10 @@ CFL() const
             M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
 
             // Take the left element to the face, see regionMesh for the meaning of left element
-            UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
+            const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
             // Take the right element to the face, see regionMesh for the meaning of right element
-            UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
+            const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
 
             // Solution in the left element
             ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
@@ -815,7 +797,7 @@ CFL() const
                 y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
                 z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
 
-                KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
+                const KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
 
                 // Compute the local CFL without the time step
                 localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
@@ -888,7 +870,7 @@ solveOneStep ()
     (*M_u) = (*M_uOld) - M_data.dataTime()->getTimeStep() * (*M_globalFlux);
 
     // Clean the vector of fluxes
-    M_globalFlux.reset( new vector_type( M_FESpace.map(), Repeated ) );
+    M_globalFlux.reset( new vector_Type( M_FESpace.map(), Repeated ) );
 
     // Update the solution at previous time step
     *M_uOld = *M_u;
@@ -898,7 +880,7 @@ solveOneStep ()
 } // namespace LifeV
 
 
-#endif //_hyperbolicSolver_H_
+#endif /*_HYPERBOLICSOLVER_H_ */
 
 
 /*

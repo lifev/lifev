@@ -1,41 +1,41 @@
-/* -*- mode: c++ -*-
-
- This file is part of the LifeV library
-
- Author(s): A. Fumagalli  <alessio.fumagalli@mail.polimi.it>
-            M. Kern       <michel.kern@inria.fr>
-      Date: 2010-09
-
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
- Copyright (C) 2006-2010 Politecnico di Milano
-
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
-
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//@HEADER
+/*
+*******************************************************************************
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+    This file is part of LifeV.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV. If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************************
 */
-/**
-  @file NumericalFluxes.hpp
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @author M. Kern <michel.kern@inria.fr>
-  @date 09/2010
+//@HEADER
+/*!
+ * @file
+ * @brief Numerical fluxes for hyperbolic scalar equations.
+ *
+ *
+ * @date 30-09-2010
+ *
+ * @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+ *         Michel Kern       <michel.kern@inria.fr>
+ *
+ * @contributor
+ *
+ * @mantainer Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+ *
+ */
 
-  @brief This file contains the numerical fluxes for hyperbolic equations.
-*/
-#ifndef _numericalFluxes_H_
-#define _numericalFluxes_H_
+#ifndef _NUMERICALFLUXES_H_
+#define _NUMERICALFLUXES_H_ 1
 
-#include <life/lifearray/tab.hpp>
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
@@ -51,7 +51,7 @@ typedef boost::function<LifeV::Vector ( const LifeV::Real&, const LifeV::Real&,
                                         const std::vector<LifeV::Real>& )>
 vectorFunction;
 
-LifeV::Real functionDotNormal ( const LifeV::Real&              u,
+LifeV::Real functionDotNormal ( const LifeV::Real&              unknown,
                                 const vectorFunction&           function,
                                 const LifeV::KN<LifeV::Real>&   normal,
                                 const LifeV::Real&              t,
@@ -61,23 +61,24 @@ LifeV::Real functionDotNormal ( const LifeV::Real&              u,
                                 const LifeV::Real&              plusMinus,
                                 const std::vector<LifeV::Real>& fieldsValues )
 {
-    LifeV::Real value(0);
-    const LifeV::UInt dimProblem( normal.size() );
-    std::vector<LifeV::Real> uAndFields( 1, 0. );
+    LifeV::Real valueFunctionDotNormal(0);
+    const LifeV::UInt problemDimension( normal.size() );
+    std::vector<LifeV::Real> unknownAndFields( 1, 0. );
 
-    uAndFields[0] = u;
-    uAndFields.insert ( uAndFields.begin() + 1, fieldsValues.begin(), fieldsValues.end() );
+    unknownAndFields[0] = unknown;
+    unknownAndFields.insert ( unknownAndFields.begin() + 1,
+                              fieldsValues.begin(), fieldsValues.end() );
 
     // Compute \sum_{i} physicalFlux(i) * n(i)
-    for ( LifeV::UInt nDim(0); nDim < dimProblem; ++nDim )
+    for ( LifeV::UInt nDim(0); nDim < problemDimension; ++nDim )
     {
-        value += plusMinus * function( t, x, y, z, uAndFields )[nDim] * normal[nDim];
+        valueFunctionDotNormal += plusMinus * function( t, x, y, z, unknownAndFields )[nDim] * normal[nDim];
     }
 
-    return value;
+    return valueFunctionDotNormal;
 }
 
-LifeV::Real absFunctionDotNormal ( const LifeV::Real&              u,
+LifeV::Real absFunctionDotNormal ( const LifeV::Real&              unknown,
                                    const vectorFunction&           function,
                                    const LifeV::KN<LifeV::Real>&   normal,
                                    const LifeV::Real&              t,
@@ -87,20 +88,21 @@ LifeV::Real absFunctionDotNormal ( const LifeV::Real&              u,
                                    const LifeV::Real&              plusMinus,
                                    const std::vector<LifeV::Real>& fieldsValues)
 {
-    LifeV::Real value(0);
-    const LifeV::UInt dimProblem( normal.size() );
-    std::vector<LifeV::Real> uAndFields( fieldsValues.size() + 1, 0. );
+    LifeV::Real valueFunctionDotNormal(0);
+    const LifeV::UInt problemDimension( normal.size() );
+    std::vector<LifeV::Real> unknownAndFields( fieldsValues.size() + 1, 0. );
 
-    uAndFields[0] = u;
-    uAndFields.insert ( uAndFields.begin() + 1, fieldsValues.begin(), fieldsValues.end() );
+    unknownAndFields[0] = unknown;
+    unknownAndFields.insert ( unknownAndFields.begin() + 1,
+                              fieldsValues.begin(), fieldsValues.end() );
 
     // Compute \sum_{i} physicalFlux(i) * n(i)
-    for ( LifeV::UInt nDim(0); nDim < dimProblem; ++nDim )
+    for ( LifeV::UInt nDim(0); nDim < problemDimension; ++nDim )
     {
-        value += function( t, x, y, z, uAndFields )[nDim] * normal[nDim];
+        valueFunctionDotNormal += function( t, x, y, z, unknownAndFields )[nDim] * normal[nDim];
     }
 
-    return plusMinus * fabs( value );
+    return plusMinus * fabs( valueFunctionDotNormal );
 }
 
 }
@@ -118,21 +120,21 @@ class AbstractNumericalFlux
 
 public:
 
-    // Policies.
-    //! @name Policies
+    //! @name Public Types
     //@{
 
     typedef boost::function<Vector ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real>& )>
-    vectorFunction;
+    vectorFunction_Type;
 
-    typedef boost::function<Real ( const Real& )> scalarFunction;
+    typedef boost::function<Real ( const Real& )> scalarFunction_Type;
 
-    typedef typename SolverType::vector_type      vector_type;
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+    typedef typename SolverType::vector_type      vector_Type;
+    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
 
-    typedef GetPot                                dataFile;
+    typedef GetPot                                dataFile_Type;
+    typedef KN<Real>                              normal_Type;
 
     //@}
 
@@ -140,10 +142,10 @@ public:
     //! @name Constructors and destructor
     //@{
 
-    AbstractNumericalFlux ( const vectorFunction&            physicalFlux,
-                            const vectorFunction&            firstDerivativePhysicalFlux,
+    AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
+                            const vectorFunction_Type&       firstDerivativePhysicalFlux,
                             const FESpace<Mesh, EpetraMap>&  fESpace,
-                            const dataFile&                  data,
+                            const dataFile_Type&             data,
                             const std::string&               section = "numerical_flux/");
 
 
@@ -152,113 +154,114 @@ public:
     //@}
 
     // Add one field
-    inline void setField ( const vector_ptrtype & field ) { M_fields.push_back( &field ); };
+    inline void setField ( const vectorPtr_Type & field )
+    {
+        M_fields.push_back( &field );
+    };
 
-    virtual Real operator() ( const Real&     leftState,
-                              const Real&     rightState,
-                              const KN<Real>& normal,
-                              const UInt&     iElem,
-                              const Real&     t = 0,
-                              const Real&     x = 0,
-                              const Real&     y = 0,
-                              const Real&     z = 0 ) = 0;
+    virtual Real operator() ( const Real&        leftState,
+                              const Real&        rightState,
+                              const normal_Type& normal,
+                              const UInt&        iElem,
+                              const Real&        t = 0,
+                              const Real&        x = 0,
+                              const Real&        y = 0,
+                              const Real&        z = 0 ) const = 0;
 
-    inline vectorFunction getPhysicalFlux () const
+    inline vectorFunction_Type getPhysicalFlux () const
     {
         return M_physicalFlux;
     }
 
-    inline vectorFunction getFirstDerivativePhysicalFlux () const
+    inline vectorFunction_Type getFirstDerivativePhysicalFlux () const
     {
         return M_firstDerivativePhysicalFlux;
     }
 
-    inline Real getPhysicalFluxDotNormal ( const KN<Real>& normal,
-                                           const UInt&     iElem,
-                                           const Real&     t,
-                                           const Real&     x,
-                                           const Real&     y,
-                                           const Real&     z,
-                                           const Real&     u )
+    inline Real getPhysicalFluxDotNormal ( const normal_Type& normal,
+                                           const UInt&        iElem,
+                                           const Real&        t,
+                                           const Real&        x,
+                                           const Real&        y,
+                                           const Real&        z,
+                                           const Real&        unknown ) const
     {
-        return computeFunctionDotNormal ( M_physicalFlux, normal, iElem, t, x, y, z, +1 ) ( u );
+        return computeFunctionDotNormal ( M_physicalFlux, normal, iElem, t, x, y, z, +1 ) ( unknown );
     }
 
-    inline Real getFirstDerivativePhysicalFluxDotNormal ( const KN<Real>& normal,
-                                                          const UInt&     iElem,
-                                                          const Real&     t,
-                                                          const Real&     x,
-                                                          const Real&     y,
-                                                          const Real&     z,
-                                                          const Real&     u )
+    inline Real getFirstDerivativePhysicalFluxDotNormal ( const normal_Type& normal,
+                                                          const UInt&        iElem,
+                                                          const Real&        t,
+                                                          const Real&        x,
+                                                          const Real&        y,
+                                                          const Real&        z,
+                                                          const Real&        unknown ) const
     {
-        return computeFunctionDotNormal ( M_firstDerivativePhysicalFlux, normal, iElem, t, x, y, z, +1 ) ( u );
+        return computeFunctionDotNormal ( M_firstDerivativePhysicalFlux, normal, iElem, t, x, y, z, +1 ) ( unknown );
     }
 
-    Real getNormInfty ( const Real&     leftState,
-                        const Real&     rightState,
-                        const KN<Real>& normal,
-                        const UInt&     iElem,
-                        const Real&     t = 0,
-                        const Real&     x = 0,
-                        const Real&     y = 0,
-                        const Real&     z = 0 );
+    Real getNormInfty ( const Real&        leftState,
+                        const Real&        rightState,
+                        const normal_Type& normal,
+                        const UInt&        iElem,
+                        const Real&        t = 0,
+                        const Real&        x = 0,
+                        const Real&        y = 0,
+                        const Real&        z = 0 ) const;
 
 protected:
 
-    scalarFunction computeFunctionDotNormal ( const vectorFunction& function,
-                                              const KN<Real>&       normal,
-                                              const UInt&           iElem,
-                                              const Real&           t,
-                                              const Real&           x,
-                                              const Real&           y,
-                                              const Real&           z,
-                                              const Real&           plusMinus );
+    scalarFunction_Type computeFunctionDotNormal ( const vectorFunction_Type& function,
+                                                   const normal_Type&         normal,
+                                                   const UInt&                iElem,
+                                                   const Real&                t,
+                                                   const Real&                x,
+                                                   const Real&                y,
+                                                   const Real&                z,
+                                                   const Real&                plusMinus ) const;
 
-    scalarFunction computeAbsFunctionDotNormal ( const vectorFunction& function,
-                                                 const KN<Real>&       normal,
-                                                 const UInt&           iElem,
-                                                 const Real&           t,
-                                                 const Real&           x,
-                                                 const Real&           y,
-                                                 const Real&           z,
-                                                 const Real&           plusMinus );
+    scalarFunction_Type computeAbsFunctionDotNormal ( const vectorFunction_Type& function,
+                                                      const normal_Type&         normal,
+                                                      const UInt&                iElem,
+                                                      const Real&                t,
+                                                      const Real&                x,
+                                                      const Real&                y,
+                                                      const Real&                z,
+                                                      const Real&                plusMinus ) const;
 
-    vectorFunction M_physicalFlux;
+    vectorFunction_Type                  M_physicalFlux;
 
-    vectorFunction M_firstDerivativePhysicalFlux;
+    vectorFunction_Type                  M_firstDerivativePhysicalFlux;
 
     // Tollerance for the brent algorithm for computing the CFL condition
-    Real M_CFLBrentToll;
+    Real                                 M_CFLBrentToll;
 
     // Maxiter for the brent algorithm for computing the CFL condition
-    UInt M_CFLBrentMaxIter;
+    UInt                                 M_CFLBrentMaxIter;
 
     // Finite element space
-    const FESpace<Mesh, EpetraMap>&     M_fESpace;
+    const FESpace<Mesh, EpetraMap>&      M_fESpace;
 
     // Vector of pointers for the dependences of the permeability to an external field.
-    std::vector< const vector_ptrtype* > M_fields;
+    std::vector< const vectorPtr_Type* > M_fields;
 
 }; // AbstractNumericalFlux
 
 // Constructor of the abstract class
 template < typename Mesh, typename SolverType >
 AbstractNumericalFlux<Mesh, SolverType>::
-AbstractNumericalFlux ( const vectorFunction&            physicalFlux,
-                        const vectorFunction&            firstDerivativePhysicalFlux,
+AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
+                        const vectorFunction_Type&       firstDerivativePhysicalFlux,
                         const FESpace<Mesh, EpetraMap>&  fESpace,
-                        const dataFile&                  data,
+                        const dataFile_Type&             data,
                         const std::string&               section ):
         M_physicalFlux                ( physicalFlux ),
         M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux ),
-        M_fESpace                     ( fESpace ),
-        M_fields                      ( std::vector< const vector_ptrtype* >(0) ),
         M_CFLBrentToll                ( data( ( section + "CFL/brent_toll" ).data(), 1e-4 ) ),
-        M_CFLBrentMaxIter             ( data( ( section + "CFL/brent_maxIter" ).data(), 20 ) )
+        M_CFLBrentMaxIter             ( data( ( section + "CFL/brent_maxIter" ).data(), 20 ) ),
+        M_fESpace                     ( fESpace ),
+        M_fields                      ( std::vector< const vectorPtr_Type* >(0) )
 {
-
-    CONSTRUCTOR( "AbstractNumericalFlux" );
 
 } // constructor
 
@@ -268,21 +271,19 @@ AbstractNumericalFlux<Mesh, SolverType>::
 ~AbstractNumericalFlux ()
 {
 
-    DESTRUCTOR( "AbstractNumericalFlux" );
-
 } // destructor
 
 template < typename Mesh, typename SolverType >
 Real
 AbstractNumericalFlux<Mesh, SolverType>::
-getNormInfty ( const Real& leftState, const Real& rightState, const KN<Real>& normal, const UInt& iElem,
-               const Real& t, const Real& x, const Real& y, const Real& z )
+getNormInfty ( const Real& leftState, const Real& rightState, const normal_Type& normal, const UInt& iElem,
+               const Real& t, const Real& x, const Real& y, const Real& z ) const
 {
 
     std::vector<Real> values ( M_fields.size() * M_fESpace.fieldDim(), 0 );
-    UInt totalDofsPresent( M_fESpace.dof().numTotalDof() );
-    UInt fieldDim( M_fESpace.fieldDim() );
-    scalarFunction absFunctionDotNormalBound;
+    const UInt totalDofsPresent( M_fESpace.dof().numTotalDof() );
+    const UInt fieldDim( M_fESpace.fieldDim() );
+    scalarFunction_Type absFunctionDotNormalBound;
 
     for ( UInt i(0); i < M_fields.size(); ++i )
     {
@@ -309,14 +310,14 @@ getNormInfty ( const Real& leftState, const Real& rightState, const KN<Real>& no
 template < typename Mesh, typename SolverType >
 boost::function<Real ( const Real& )>
 AbstractNumericalFlux<Mesh, SolverType>::
-computeFunctionDotNormal ( const vectorFunction& function, const KN<Real>& normal, const UInt& iElem,
-                           const Real& t, const Real& x, const Real& y, const Real& z, const Real& plusMinus )
+computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Type& normal, const UInt& iElem,
+                           const Real& t, const Real& x, const Real& y, const Real& z, const Real& plusMinus ) const
 {
 
     std::vector<Real> values ( M_fields.size() * M_fESpace.fieldDim(), 0 );
-    UInt totalDofsPresent( M_fESpace.dof().numTotalDof() );
-    UInt fieldDim( M_fESpace.fieldDim() );
-    scalarFunction functionDotNormalBound;
+    const UInt totalDofsPresent( M_fESpace.dof().numTotalDof() );
+    const UInt fieldDim( M_fESpace.fieldDim() );
+    scalarFunction_Type functionDotNormalBound;
 
     for ( UInt i(0); i < M_fields.size(); ++i )
     {
@@ -344,26 +345,27 @@ class GodunovNumericalFlux : public AbstractNumericalFlux<Mesh, SolverType>
 
 public:
 
-    typedef typename AbstractNumericalFlux<Mesh, SolverType>::vectorFunction vectorFunction;
-    typedef typename AbstractNumericalFlux<Mesh, SolverType>::scalarFunction scalarFunction;
-    typedef typename AbstractNumericalFlux<Mesh, SolverType>::dataFile dataFile;
+    typedef typename AbstractNumericalFlux<Mesh, SolverType>::vectorFunction_Type vectorFunction_Type;
+    typedef typename AbstractNumericalFlux<Mesh, SolverType>::scalarFunction_Type scalarFunction_Type;
+    typedef typename AbstractNumericalFlux<Mesh, SolverType>::dataFile_Type       dataFile_Type;
+    typedef typename AbstractNumericalFlux<Mesh, SolverType>::normal_Type         normal_Type;
 
-    GodunovNumericalFlux ( const vectorFunction&           physicalFlux,
-                           const vectorFunction&           firstDerivativePhysicalFlux,
+    GodunovNumericalFlux ( const vectorFunction_Type&      physicalFlux,
+                           const vectorFunction_Type&      firstDerivativePhysicalFlux,
                            const FESpace<Mesh, EpetraMap>& fESpace,
-                           const dataFile&                 data,
+                           const dataFile_Type&            data,
                            const std::string&              section = "numerical_flux/" );
 
     virtual ~GodunovNumericalFlux ();
 
-    virtual Real operator() ( const Real&     leftState,
-                              const Real&     rightState,
-                              const KN<Real>& normal,
-                              const UInt&     iElem,
-                              const Real&     t = 0,
-                              const Real&     x = 0,
-                              const Real&     y = 0,
-                              const Real&     z = 0 );
+    virtual Real operator() ( const Real&        leftState,
+                              const Real&        rightState,
+                              const normal_Type& normal,
+                              const UInt&        iElem,
+                              const Real&        t = 0,
+                              const Real&        x = 0,
+                              const Real&        y = 0,
+                              const Real&        z = 0 ) const;
 
 protected:
 
@@ -377,18 +379,18 @@ protected:
 
 template < typename Mesh, typename SolverType >
 GodunovNumericalFlux<Mesh, SolverType>::
-GodunovNumericalFlux ( const vectorFunction&            physicalFlux,
-                       const vectorFunction&            firstDerivativePhysicalFlux,
+GodunovNumericalFlux ( const vectorFunction_Type&       physicalFlux,
+                       const vectorFunction_Type&       firstDerivativePhysicalFlux,
                        const FESpace<Mesh, EpetraMap>&  fESpace,
-                       const dataFile&                  data,
+                       const dataFile_Type&             data,
                        const std::string&               section ):
-        AbstractNumericalFlux<Mesh, SolverType>::AbstractNumericalFlux  ( physicalFlux,
-                                                                          firstDerivativePhysicalFlux,
-                                                                          fESpace,
-                                                                          data,
-                                                                          section ),
-        M_brentToll                                   ( data( ( section + "godunov/brent_toll" ).data(), 1e-4 ) ),
-        M_brentMaxIter                                ( data( ( section + "godunov/brent_maxIter" ).data(), 20) )
+    AbstractNumericalFlux<Mesh, SolverType>::AbstractNumericalFlux  ( physicalFlux,
+                                                                      firstDerivativePhysicalFlux,
+                                                                      fESpace,
+                                                                      data,
+                                                                      section ),
+    M_brentToll                                   ( data( ( section + "godunov/brent_toll" ).data(), 1e-4 ) ),
+    M_brentMaxIter                                ( data( ( section + "godunov/brent_maxIter" ).data(), 20) )
 {
 
     CONSTRUCTOR( "GodunovNumericalFlux" );
@@ -401,16 +403,13 @@ GodunovNumericalFlux<Mesh, SolverType>::
 ~GodunovNumericalFlux ()
 {
 
-    DESTRUCTOR( "GodunovNumericalFlux" );
-
 } // destructor
 
 template < typename Mesh, typename SolverType >
 Real
 GodunovNumericalFlux<Mesh, SolverType>::
-operator() ( const Real& leftState, const Real& rightState, const KN<Real>& normal,
-             const UInt& iElem,
-             const Real& t, const Real& x, const Real& y, const Real& z )
+operator() ( const Real& leftState, const Real& rightState, const normal_Type& normal,
+             const UInt& iElem, const Real& t, const Real& x, const Real& y, const Real& z ) const
 {
 
     // The value of the flux
@@ -420,7 +419,7 @@ operator() ( const Real& leftState, const Real& rightState, const KN<Real>& norm
     Real minMax( static_cast<Real>(0) );
 
     // The normal flux function
-    scalarFunction normalFlux;
+    scalarFunction_Type normalFlux;
 
     if ( rightState > leftState )
     {
@@ -449,6 +448,6 @@ operator() ( const Real& leftState, const Real& rightState, const KN<Real>& norm
 
 } // operator()
 
-}
+} // Namespace LifeV
 
-#endif //_numericalFluxes_H_
+#endif //_NUMERICALFLUXES_H_
