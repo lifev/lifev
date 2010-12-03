@@ -135,6 +135,21 @@ public:
     //@}
 
 
+    //! @name Operators
+    //@{
+
+    //! The equivalence operator
+    /*!
+        Add more details about the method.
+        NOTE: short description is automatically added before this part.
+        @param example ExampleClass
+        @return Reference to a new ExampleClass with the same
+                content of ExampleClass example
+     */
+    ExampleClass& operator=( const ExampleClass& example );
+
+    //@}
+
 
     //! @name Methods
     //@{
@@ -161,23 +176,6 @@ public:
         @param output specify the output format (std::cout by default)
      */
     void showMe( std::ostream& output = std::cout ) const;
-
-    //@}
-
-
-
-    //! @name Operators
-    //@{
-
-    //! The equivalence operator
-    /*!
-        Add more details about the method.
-        NOTE: short description is automatically added before this part.
-        @param example ExampleClass
-        @return Reference to a new ExampleClass with the same
-                content of ExampleClass example
-     */
-    ExampleClass& operator=( const ExampleClass& example );
 
     //@}
 

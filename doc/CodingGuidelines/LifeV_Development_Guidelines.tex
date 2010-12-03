@@ -43,7 +43,7 @@
 
 \title{\texttt{LifeV} Development Guidelines}
 \author{C. Malossi, S. Deparis}
-\date{Last updated: November 24th, 2010}
+\date{Last updated: December 3rd, 2010}
 
 \begin{document}
 
@@ -196,7 +196,7 @@ This is a short list of programming and general conventions that should be used 
   \item the classes should always have an empty constructor and a virtual empty destructor, being filled by specific calls to setters or methods. The copy constructor, if not required / implemented, should exist as a private method without implementation. Declare explicit all constructors which may take only one argument, unless there is the very need of having implicit conversion (it may be required in certain constructs). In addition, avoid to assign member in the body of the constructors if you can just initialize them (of course in the intialization list).
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 3000 ) << "MyClass::myFunction  myVariable = "
                   << M_myVariable << "\n";
 #endif
