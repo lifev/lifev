@@ -339,7 +339,7 @@ inline void
 BCInterface1D_FunctionFile< Operator >::DataInterpolation()
 {
     //Get variable
-    Real X = super::M_parser->GetVariable( M_variables[0] );
+    Real X = super::M_parser->variable( M_variables[0] );
 
     //If it is a loop scale the variable: X = X - (ceil( X / Xmax ) -1) * Xmax
     if ( M_loop )

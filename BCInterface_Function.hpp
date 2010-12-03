@@ -265,7 +265,7 @@ BCInterface_Function< Operator >::SetData( const Data_Type& data )
      * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
      */
 
-    UInt arguments = M_parser->CountSubstring( "," ) + 1;
+    UInt arguments = M_parser->countSubstring( "," ) + 1;
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "BCInterface_Function::setFunction            arguments: " << arguments << "\n";
