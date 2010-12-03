@@ -90,6 +90,11 @@ void
 (>>>FILE_SANS<<<)::methodOne( first_Type&  inputVariableOne,
                           second_Type& inputVariableTwo )
 {
+    // Example of debug
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 0000 ) << "ExampleClass::methodOne inputVariableOne = " << inputVariableOne << " inputVariableTwo = " << inputVariableTwo << "\n";
+#endif
+
 	//Do something
 }
 

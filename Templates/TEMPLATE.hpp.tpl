@@ -131,6 +131,21 @@ public:
     //@}
 
 
+    //! @name Operators
+    //@{
+
+    //! The equivalence operator
+    /*!
+        Add more details about the method.
+        NOTE: short description is automatically added before this part.
+        @param T (>>>FILE_SANS<<<)
+        @return Reference to a new (>>>FILE_SANS<<<) with the same
+                content of (>>>FILE_SANS<<<) T
+     */
+    (>>>FILE_SANS<<<)& operator=( const (>>>FILE_SANS<<<)& T );
+
+    //@}
+
 
     //! @name Methods
     //@{
@@ -157,23 +172,6 @@ public:
         @param output specify the output format (std::cout by default)
      */
     void showMe( std::ostream& output = std::cout ) const;
-
-    //@}
-
-
-
-    //! @name Operators
-    //@{
-
-    //! The equivalence operator
-    /*!
-        Add more details about the method.
-        NOTE: short description is automatically added before this part.
-        @param T (>>>FILE_SANS<<<)
-        @return Reference to a new (>>>FILE_SANS<<<) with the same
-                content of (>>>FILE_SANS<<<) T
-     */
-    (>>>FILE_SANS<<<)& operator=( const (>>>FILE_SANS<<<)& T );
 
     //@}
 
