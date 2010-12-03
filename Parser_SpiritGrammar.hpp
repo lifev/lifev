@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  * @file
- * @brief Parser_SpiritGrammar
+ * @brief File containing the Parser grammar
  *
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  * @date 05-02-2010
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ * @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef Parser_SpiritGrammar_H
@@ -76,9 +78,17 @@ namespace LifeV
  *
  */
 template <typename iterator>
-class Parser_SpiritGrammar : public qi::grammar< iterator, Results_Type(), ascii::space_type >
+class Parser_SpiritGrammar : public qi::grammar< iterator, results_Type(), ascii::space_type >
 {
 public:
+
+    //! @name Public Types
+    //@{
+
+    typedef boost::iterator_range< stringIterator_Type >        iteratorRange_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -90,7 +100,7 @@ public:
     /*!
      * @param Parser_SpiritGrammar Parser_SpiritGrammar
      */
-    Parser_SpiritGrammar( const Parser_SpiritGrammar& SpiritGrammar );
+    Parser_SpiritGrammar( const Parser_SpiritGrammar& spiritGrammar );
 
     //! Destructor
     ~Parser_SpiritGrammar() {}
@@ -105,7 +115,7 @@ public:
      * @param SpiritGrammar Parser_SpiritGrammar
      * @return reference to a copy of the class
      */
-    Parser_SpiritGrammar& operator=( const Parser_SpiritGrammar& SpiritGrammar );
+    Parser_SpiritGrammar& operator=( const Parser_SpiritGrammar& spiritGrammar );
 
     //@}
 
@@ -115,17 +125,17 @@ public:
 
     /*! Assign a variable using a \c boost::iterator_range
      *
-     * @param StringIteratorRange name of the parameter
-     * @param Value value of the parameter
+     * @param stringIteratorRange name of the parameter
+     * @param value value of the parameter
      */
-    void AssignVariable( const boost::iterator_range< String_Iterator >& StringIteratorRange, const Real& Value );
+    void assignVariable( const iteratorRange_Type& stringIteratorRange, const Real& value ) { setVariable( std::string( stringIteratorRange.begin(), stringIteratorRange.end() ), value ); }
 
     //! Clear all the variables.
-    void ClearVariables();
+    void clearVariables() { Variable.clear(); }
 
     /*
         //! Show all the variables
-        void ShowMe();
+        void ShowMe() { std::cout << "ShowMe called!" << std::endl; }
     */
 
     //@}
@@ -135,14 +145,14 @@ public:
     //@{
 
     //! Set default variables
-    void SetDefaultVariables();
+    void setDefaultVariables();
 
     /*! Set/replace a variable
      *
      * @param name name of the parameter
      * @param value value of the parameter
      */
-    void SetVariable( const std::string& Name, const Real& Value );
+    void setVariable( const std::string& name, const Real& value );
 
     //@}
 
@@ -154,7 +164,7 @@ public:
      * @param name name of the parameter
      * @return value of the variable
      */
-    Real& GetVariable( const std::string& Name );
+    Real& variable( const std::string& name ) { return Variable.at( name ); }
 
     //@}
 
@@ -165,24 +175,24 @@ private:
 
     /*! Phoenix wrapper for \c std::sin
      *
-     * @param Value input value
-     * @return sin( Value )
+     * @param value input value
+     * @return sin( value )
      */
-    Real sin( const Real& Value ) const;
+    Real sin( const Real& value ) const { return std::sin( value ); }
 
     /*! Phoenix wrapper for \c std::cos
      *
-     * @param Value input value
-     * @return cos( Value )
+     * @param value input value
+     * @return cos( value )
      */
-    Real cos( const Real& Value ) const;
+    Real cos( const Real& value ) const { return std::cos( value ); }
 
     /*! Phoenix wrapper for \c std::tan
      *
-     * @param Value input value
-     * @return tan( Value )
+     * @param value input value
+     * @return tan( value )
      */
-    Real tan( const Real& Value ) const;
+    Real tan( const Real& value ) const { return std::tan( value ); }
 
     /*! Phoenix wrapper for \c std::pow
      *
@@ -190,39 +200,39 @@ private:
      * @param exponent input exponent
      * @return pow( base, exponent )
      */
-    Real pow( const Real& Base, const Real& Exponent ) const;
+    Real pow( const Real& Base, const Real& Exponent ) const { return std::pow( Base, Exponent ); }
 
     /*! Phoenix wrapper for \c std::sqrt
      *
-     * @param Value input value
-     * @return sqrt( Value )
+     * @param value input value
+     * @return sqrt( value )
      */
-    Real sqrt( const Real& Value ) const;
+    Real sqrt( const Real& value ) const { return std::sqrt( value ); }
 
     /*! Phoenix wrapper for \c std::exp
      *
-     * @param Value input value
-     * @return exp( Value )
+     * @param value input value
+     * @return exp( value )
      */
-    Real exp( const Real& Value ) const;
+    Real exp( const Real& value ) const { return std::exp( value ); }
 
     /*! Phoenix wrapper for \c std::log
      *
-     * @param Value input value
-     * @return log( Value )
+     * @param value input value
+     * @return log( value )
      */
-    Real log( const Real& Value ) const;
+    Real log( const Real& value ) const { return std::log( value ); }
 
     /*! Phoenix wrapper for \c std::log10
      *
-     * @param Value input value
-     * @return log10( Value )
+     * @param value input value
+     * @return log10( value )
      */
-    Real log10( const Real& Value ) const;
+    Real log10( const Real& value ) const { return std::log10( value ); }
 
     //@}
 
-    qi::rule< iterator, Results_Type(), ascii::space_type > Start;
+    qi::rule< iterator, results_Type(), ascii::space_type > Start;
 
     qi::rule< iterator, void(), ascii::space_type >         Assignment;
 //    qi::rule< iterator, void(), ascii::space_type >         Command;
@@ -267,16 +277,16 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
         (
             Assignment
 //        |  Command
-            |  ( -qi::lit('[') >> Expression % ',' >> -qi::lit(']') )
+        |  ( -qi::lit('[') >> Expression % ',' >> -qi::lit(']') )
         )
         ;
 
     Assignment
     =
         (    qi::raw[qi::lexeme[(qi::alpha | '_') >> *(qi::alnum | '_')]]
-             >>   qi::lit('=')
-             >>   Expression
-        )              [phoenix::bind(&Parser_SpiritGrammar::AssignVariable,this, qi::_1, qi::_2)]
+        >>   qi::lit('=')
+        >>   Expression
+        )              [phoenix::bind(&Parser_SpiritGrammar::assignVariable,this, qi::_1, qi::_2)]
         ;
     /*
         Command
@@ -285,30 +295,30 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
     */
 
     Expression
-    =  *Compare                                    [qi::_val = qi::_1]
+    =  *Compare                                        [qi::_val = qi::_1]
        ;
 
     Compare
-    =   PlusMinus                                  [qi::_val = qi::_1]
+    =   PlusMinus                                      [qi::_val = qi::_1]
         >> *(
             qi::lit('>') >> PlusMinus                  [qi::_val = qi::_val > qi::_1]
-            |   qi::lit('<') >> PlusMinus                  [qi::_val = qi::_val < qi::_1]
+        |   qi::lit('<') >> PlusMinus                  [qi::_val = qi::_val < qi::_1]
         )
         ;
 
     PlusMinus
-    =   MultiplyDivide                             [qi::_val = qi::_1]
+    =   MultiplyDivide                                 [qi::_val = qi::_1]
         >> *(
             qi::lit('+') >> MultiplyDivide             [qi::_val += qi::_1]
-            |   qi::lit('-') >> MultiplyDivide             [qi::_val -= qi::_1]
+        |   qi::lit('-') >> MultiplyDivide             [qi::_val -= qi::_1]
         )
         ;
 
     MultiplyDivide
-    =   Elevate                                    [qi::_val = qi::_1]
+    =   Elevate                                        [qi::_val = qi::_1]
         >> *(
             qi::lit('*') >> Elevate                    [qi::_val *= qi::_1]
-            |   qi::lit('/') >> Elevate                    [qi::_val /= qi::_1]
+        |   qi::lit('/') >> Elevate                    [qi::_val /= qi::_1]
         )
         ;
 
@@ -317,17 +327,17 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
         (
             qi::lit('-') >> Element                    [qi::_val = qi::_1]
             >>  (
-                qi::lit('^') >> Element                    [qi::_val = -phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> Element                [qi::_val = -phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
             >> *(
-                qi::lit('^') >> Element                    [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> Element                [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
         )
         |
         (
             Element                                    [qi::_val = qi::_1]
             >> *(
-                qi::lit('^') >> Element                    [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> Element                [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
         )
         ;
@@ -335,14 +345,14 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
     Element
     =
         (
-            qi::lit('-') >> Element                        [qi::_val = -qi::_1]
+            qi::lit('-') >> Element                    [qi::_val = -qi::_1]
         )
         |
         (
             Number                                     [qi::_val = qi::_1]
-            |   Function                                   [qi::_val = qi::_1]
-            |   Variable                                   [qi::_val = qi::_1]
-            |   Group                                      [qi::_val = qi::_1]
+        |   Function                                   [qi::_val = qi::_1]
+        |   Variable                                   [qi::_val = qi::_1]
+        |   Group                                      [qi::_val = qi::_1]
         )
         ;
 
@@ -359,12 +369,12 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
     =
         (
             qi::lit("sin")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sin, this,   qi::_1)]
-            |   qi::lit("cos")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::cos, this,   qi::_1)]
-            |   qi::lit("tan")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::tan, this,   qi::_1)]
-            |   qi::lit("sqrt")  >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sqrt, this,  qi::_1)]
-            |   qi::lit("exp")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::exp, this,   qi::_1)]
-            |   qi::lit("log")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log, this,   qi::_1)]
-            |   qi::lit("log10") >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log10, this, qi::_1)]
+        |   qi::lit("cos")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::cos, this,   qi::_1)]
+        |   qi::lit("tan")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::tan, this,   qi::_1)]
+        |   qi::lit("sqrt")  >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sqrt, this,  qi::_1)]
+        |   qi::lit("exp")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::exp, this,   qi::_1)]
+        |   qi::lit("log")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log, this,   qi::_1)]
+        |   qi::lit("log10") >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log10, this, qi::_1)]
         )
         ;
 
@@ -372,28 +382,28 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
     =
         (
             '('
-            >>  Expression                                 [qi::_val = qi::_1]
-            >>  ')'
+        >>  Expression                                 [qi::_val = qi::_1]
+        >>  ')'
         )
         ;
 }
 
 template <typename iterator>
-Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar( const Parser_SpiritGrammar& SpiritGrammar ) :
-        Parser_SpiritGrammar::base_type     ( SpiritGrammar.Start ),
-        Start                               ( SpiritGrammar.Start ),
-        Assignment                          ( SpiritGrammar.Assignment ),
-//    Command                             ( SpiritGrammar.Command ),
-        Expression                          ( SpiritGrammar.Expression ),
-        Compare                             ( SpiritGrammar.Compare ),
-        PlusMinus                           ( SpiritGrammar.PlusMinus ),
-        MultiplyDivide                      ( SpiritGrammar.MultiplyDivide ),
-        Elevate                             ( SpiritGrammar.Elevate ),
-        Element                             ( SpiritGrammar.Element ),
-        Number                              ( SpiritGrammar.Number ),
-        Function                            ( SpiritGrammar.Function ),
-        Group                               ( SpiritGrammar.Group ),
-        Variable                            ( SpiritGrammar.Variable )
+Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar( const Parser_SpiritGrammar& spiritGrammar ) :
+        Parser_SpiritGrammar::base_type     ( spiritGrammar.Start ),
+        Start                               ( spiritGrammar.Start ),
+        Assignment                          ( spiritGrammar.Assignment ),
+//    Command                             ( spiritGrammar.Command ),
+        Expression                          ( spiritGrammar.Expression ),
+        Compare                             ( spiritGrammar.Compare ),
+        PlusMinus                           ( spiritGrammar.PlusMinus ),
+        MultiplyDivide                      ( spiritGrammar.MultiplyDivide ),
+        Elevate                             ( spiritGrammar.Elevate ),
+        Element                             ( spiritGrammar.Element ),
+        Number                              ( spiritGrammar.Number ),
+        Function                            ( spiritGrammar.Function ),
+        Group                               ( spiritGrammar.Group ),
+        Variable                            ( spiritGrammar.Variable )
 {
 }
 
@@ -402,62 +412,36 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar( const Parser_SpiritGramm
 // ===================================================
 template <typename iterator>
 Parser_SpiritGrammar< iterator >&
-Parser_SpiritGrammar< iterator >::operator=( const Parser_SpiritGrammar& SpiritGrammar )
+Parser_SpiritGrammar< iterator >::operator=( const Parser_SpiritGrammar& spiritGrammar )
 {
-    if ( this != &SpiritGrammar )
+    if ( this != &spiritGrammar )
     {
-        Parser_SpiritGrammar::base_type::operator=( SpiritGrammar.Start );
-        //Parser_SpiritGrammar< iterator >::operator=( SpiritGrammar );
-        Start                               = SpiritGrammar.Start;
-        Assignment                          = SpiritGrammar.Assignment;
-//        Command                             = SpiritGrammar.Command;
-        Expression                          = SpiritGrammar.Expression;
-        Compare                             = SpiritGrammar.Compare;
-        PlusMinus                           = SpiritGrammar.PlusMinus;
-        MultiplyDivide                      = SpiritGrammar.MultiplyDivide;
-        Elevate                             = SpiritGrammar.Elevate;
-        Element                             = SpiritGrammar.Element;
-        Number                              = SpiritGrammar.Number;
-        Function                            = SpiritGrammar.Function;
-        Group                               = SpiritGrammar.Group;
-        Variable                            = SpiritGrammar.Variable;
+        Parser_SpiritGrammar::base_type::operator=( spiritGrammar.Start );
+        //Parser_SpiritGrammar< iterator >::operator=( spiritGrammar );
+        Start                               = spiritGrammar.Start;
+        Assignment                          = spiritGrammar.Assignment;
+//        Command                             = spiritGrammar.Command;
+        Expression                          = spiritGrammar.Expression;
+        Compare                             = spiritGrammar.Compare;
+        PlusMinus                           = spiritGrammar.PlusMinus;
+        MultiplyDivide                      = spiritGrammar.MultiplyDivide;
+        Elevate                             = spiritGrammar.Elevate;
+        Element                             = spiritGrammar.Element;
+        Number                              = spiritGrammar.Number;
+        Function                            = spiritGrammar.Function;
+        Group                               = spiritGrammar.Group;
+        Variable                            = spiritGrammar.Variable;
     }
 
     return *this;
 }
 
 // ===================================================
-// Methods
-// ===================================================
-template <typename iterator>
-void
-Parser_SpiritGrammar< iterator >::AssignVariable( const boost::iterator_range< String_Iterator >& StringIteratorRange, const Real& Value )
-{
-    SetVariable( std::string( StringIteratorRange.begin(), StringIteratorRange.end() ), Value );
-}
-
-template <typename iterator>
-void
-Parser_SpiritGrammar< iterator >::ClearVariables()
-{
-    Variable.clear();
-}
-
-/*
-template <typename iterator>
-void
-Parser_SpiritGrammar< iterator >::ShowMe()
-{
-    std::cout << "ShowMe called!" << std::endl;
-}
-*/
-
-// ===================================================
 // Set Methods
 // ===================================================
 template <typename iterator>
-void
-Parser_SpiritGrammar< iterator >::SetDefaultVariables()
+inline void
+Parser_SpiritGrammar< iterator >::setDefaultVariables()
 {
     Variable.add( "pi" , 3.141592653589793 );
     Variable.add( "e", 2.718281828459046 );
@@ -466,83 +450,14 @@ Parser_SpiritGrammar< iterator >::SetDefaultVariables()
 }
 
 template <typename iterator>
-void
-Parser_SpiritGrammar< iterator >::SetVariable( const std::string& Name, const Real& Value )
+inline void
+Parser_SpiritGrammar< iterator >::setVariable( const std::string& name, const Real& value )
 {
-    Real *p = Variable.find( Name );
+    Real *p = Variable.find( name );
     if ( p != 0 )
-        *p = Value;
+        *p = value;
     else
-        Variable.add( Name, Value );
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-template <typename iterator>
-Real&
-Parser_SpiritGrammar< iterator >::GetVariable( const std::string& Name )
-{
-    return Variable.at( Name );
-}
-
-// ===================================================
-// Private Methods
-// ===================================================
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::sin( const Real& Value ) const
-{
-    return std::sin( Value );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::cos( const Real& Value ) const
-{
-    return std::cos( Value );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::tan( const Real& Value ) const
-{
-    return std::tan( Value );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::pow( const Real& Base, const Real& Exponent ) const
-{
-    return std::pow( Base, Exponent );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::sqrt( const Real& Value ) const
-{
-    return std::sqrt( Value );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::exp( const Real& Value ) const
-{
-    return std::exp( Value );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::log( const Real& Value ) const
-{
-    return std::log( Value );
-}
-
-template <typename iterator>
-Real
-Parser_SpiritGrammar< iterator >::log10( const Real& Value ) const
-{
-    return std::log10( Value );
+        Variable.add( name, value );
 }
 
 //qi::rule< iterator, double(double), ascii::space_type > Power, MultiplyDivide, PlusMinus, Compare;
@@ -588,12 +503,12 @@ public:
 
     Parser_SpiritGrammar& operator=( const Parser_SpiritGrammar& ) { return *this; }
 
-    void ClearVariables() {}
+    void clearVariables() {}
 
-    void SetDefaultVariables() {}
-    void SetVariable( const std::string&, const Real& ) {}
+    void setDefaultVariables() {}
+    void setVariable( const std::string&, const Real& ) {}
 
-    Real& GetVariable( const std::string& ) { return M_real; }
+    Real& variable( const std::string& ) { return M_real; }
 
     Real M_real;
 };

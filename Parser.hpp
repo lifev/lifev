@@ -1,36 +1,38 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  * @file
- * @brief Parser
+ * @brief File containing the Parser interface
  *
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- * @author Gilles Fourestey  <gilles.fourestey@epfl.ch>
  * @date 07-04-2009
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ * @contributor Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ * @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef Parser_H
@@ -45,12 +47,20 @@ namespace LifeV
 //! Parser - A string parser for algebraic expressions
 /*!
  *  @author(s) Cristiano Malossi, Gilles Fourestey
+ *
+ *  See \c ParserSpiritGrammar class for more details.
  */
 class Parser
 {
 public:
 
-    typedef Parser_SpiritGrammar<String_Iterator>        Calculator_Type;
+    //! @name Public Types
+    //@{
+
+    typedef Parser_SpiritGrammar< stringIterator_Type >      calculator_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -60,15 +70,15 @@ public:
 
     //! Constructor
     /*!
-     * @param String expression to parse
+     * @param string expression to parse
      */
-    Parser( const std::string& String );
+    Parser( const std::string& string );
 
     //! Copy constructor
     /*!
-     * @param Parser Parser
+     * @param parser Parser
      */
-    Parser( const Parser& Parser );
+    Parser( const Parser& parser );
 
     //! Destructor
     ~Parser() {}
@@ -81,10 +91,10 @@ public:
 
     //! Operator =
     /*!
-     * @param Parser Parser
+     * @param parser Parser
      * @return reference to a copy of the class
      */
-    Parser& operator=( const Parser& Parser );
+    Parser& operator=( const Parser& parser );
 
     //@}
 
@@ -93,39 +103,40 @@ public:
     //@{
 
     /*! Evaluate the expression
-     * @param ID expression index (starting from 1)
+     * @param id expression index (starting from 1)
      * @return computed value
      */
-    const Real& Evaluate( const UInt& ID = 1 );
+    const Real& Evaluate( const ID& id = 1 );
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
-     * @param Substring string to find
+     * @param substring string to find
      * @return number of substring
      */
-    UInt CountSubstring( const std::string& Substring );
+    UInt countSubstring( const std::string& substring );
 
     //! Clear all the variables.
-    void ClearVariables();
+    void clearVariables();
 
     //@}
+
 
     //! @name Set Methods
     //@{
 
     /*! Set string function
      *
-     * @param String Expression to evaluate
-     * @param StringSeparator Separator identifier (default -> ";")
+     * @param string Expression to evaluate
+     * @param stringSeparator Separator identifier (default -> ";")
      */
-    void SetString( const std::string& String, const std::string& StringSeparator = ";" );
+    void SetString( const std::string& string, const std::string& stringSeparator = ";" );
 
     /*! Set/replace a variable
      *
-     * @param Name name of the parameter
-     * @param Value value of the parameter
+     * @param name name of the parameter
+     * @param value value of the parameter
      */
-    void SetVariable( const std::string& Name, const Real& Value );
+    void SetVariable( const std::string& name, const Real& value );
 
     //@}
 
@@ -135,21 +146,21 @@ public:
 
     /*! Get variable
      *
-     * @param Name name of the parameter
+     * @param name name of the parameter
      * @return value of the variable
      */
-    const Real& GetVariable( const std::string& Name );
+    const Real& variable( const std::string& name );
 
     //@}
+
 private:
 
-    Strings_Type        M_strings;
-    Results_Type        M_results;
+    strings_Type        M_strings;
+    results_Type        M_results;
 
-    Calculator_Type     M_calculator;
+    calculator_Type     M_calculator;
 
     bool                M_evaluate;
-
 };
 
 } // Namespace LifeV
