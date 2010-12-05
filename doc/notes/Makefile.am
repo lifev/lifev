@@ -23,5 +23,6 @@
 # DESCRIP-END.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
+SUBDIRS = timeAdvance
