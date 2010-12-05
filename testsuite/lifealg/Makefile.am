@@ -20,7 +20,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 INCLUDES		= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray  -I$(top_srcdir)/life/lifealg -I$(top_srcdir)/life/lifemesh
 
@@ -30,12 +30,10 @@ check_HEADERS		= MatrixTest.hpp
 check_LTLIBRARIES	= liblifealg_testsuite.la
 
 liblifealg_testsuite_la_SOURCES	= MatrixTest.cpp
-liblifealg_testsuite_la_LIBADD	= $(top_builddir)/life/lifealg/liblifealg.la 
+liblifealg_testsuite_la_LIBADD	= $(top_builddir)/life/lifealg/liblifealg.la
 
-check_PROGRAMS	= test_petsc test_linearsolvers test_umfpack
+check_PROGRAMS	= test_linearsolvers test_umfpack
 
-test_petsc_SOURCES	= test_petsc.cpp
-test_petsc_LDADD    = $(top_builddir)/life/lifecore/liblifecore.la  $(top_builddir)/life/lifealg/liblifealg.la  $(boost_unit_test_framework_lib)
 
 test_umfpack_SOURCES	= test_umfpack.cpp
 test_umfpack_LDADD    = $(top_builddir)/life/lifealg/liblifealg.la $(boost_unit_test_framework_lib)
