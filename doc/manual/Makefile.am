@@ -25,6 +25,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
+SUBDIRS = cavity
 
 PDF		= lifev-dev.pdf lifev-manual.pdf
 
