@@ -29,7 +29,7 @@ check_HEADERS =
 check_PROGRAMS = cavity_example
 cavity_example_SOURCES = cavity.cpp
 
-EXTRA_DIST = data testsuite.at
+EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data
