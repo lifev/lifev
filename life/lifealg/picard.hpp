@@ -42,7 +42,7 @@ namespace LifeV
   Fixed point algorithms with relaxation
 
   input: f  : operator that must have a function
-              eval(double fx0,double gx0,double x0,int status)
+              eval(Real fx0,Real gx0,Real x0,int status)
        where fx0 = f(x0), gx0 is not used here, and status
        indicate whether it is the first iterate (status=1)
        or not (status=0).
@@ -62,18 +62,18 @@ namespace LifeV
          the first iteration. x0 is the only initial guess
 */
 template <typename Vector, typename Oper, typename Norm>
-int picard( Oper* f, Norm norm, Vector& fx1, Vector& fx0,
+Int picard( Oper* f, Norm norm, Vector& fx1, Vector& fx0,
             Vector& gx1, Vector& gx0, Vector& x1, Vector& x0,
-            double abstol, double reltol, int& maxit, int method, double omega )
+            Real abstol, Real reltol, Int& maxit, Int method, Real omega )
 {
-    double xxnorm;
-    double mu = 0;
-    int iter = 1;
+    Real xxnorm;
+    Real mu = 0;
+    Int iter = 1;
     Vector tmp = x0;
     f->eval( fx0, gx0, x0, 1 );
     x1 = fx0; // the first iteration is not relaxed
-    double normRes = norm( fx0 - x0 );
-    double stop_tol = abstol + reltol * normRes;
+    Real normRes = norm( fx0 - x0 );
+    Real stop_tol = abstol + reltol * normRes;
     std::string methodName;
     switch ( method )
     {

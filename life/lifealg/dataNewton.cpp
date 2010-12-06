@@ -35,6 +35,7 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
+#include <life/lifecore/lifeconfig.h>
 #include <life/lifealg/dataNewton.hpp>
 
 namespace LifeV

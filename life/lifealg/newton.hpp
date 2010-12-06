@@ -45,8 +45,8 @@
 namespace LifeV
 {
 template <class Fct, class Vector, class Real, class Norm>
-int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
-            int& maxit, Real eta_max, int linesearch, std::ofstream& out_res,
+Int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
+            Int& maxit, Real eta_max, Int linesearch, std::ofstream& out_res,
             const Real& time )
 {
     /*
@@ -68,7 +68,7 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
       max_increase_res: maximum number of successive increases in residual
                         before failure is reported
     */
-    const int max_increase_res = 5;
+    const Int max_increase_res = 5;
     /*
        Parameters for the linear solver, gamma: Default value = 0.9
     */
@@ -76,7 +76,7 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
     //----------------------------------------------------------------------
     Real linres;
 
-    int iter = 0, increase_res = 0;
+    Int iter = 0, increase_res = 0;
     Vector residual = sol;
 
     Vector step(  sol.size() );

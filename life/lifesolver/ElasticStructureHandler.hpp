@@ -66,9 +66,9 @@ public:
     //@{
   
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
-    typedef BCHandler                                bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type>    bchandler_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
+    typedef BCHandler                                bchandlerRaw_Type;
+    typedef boost::shared_ptr<bchandlerRaw_type>     bchandler_Type;
 
     //@}
 
@@ -107,7 +107,7 @@ public:
       \param source volumic force
       \param time present time
     */
-    virtual void timeAdvance( source_type const& , const Real& time ) = 0;
+    virtual void timeAdvance( source_Type const& , const Real& time ) = 0;
 
     //! Solve the non-linear problem
     virtual void iterate() = 0;
@@ -119,7 +119,7 @@ public:
     void initialize( const Function& d0, const Function& w0 );
     void initialize( const std::string& depName,
                      const std::string& velName,
-                     double             startT = 0.);
+                     Real             startT = 0.);
 
     //@}
 
@@ -477,11 +477,11 @@ template <typename Mesh>
 void
 ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
                                            const std::string& velName,
-                                           double             startT)
+                                           Real             startT)
 {
     std::cout << "  S- restarting at time = " << startT << std::endl;
 
-    M_count = (int) (startT/this->timestep() - 0.5);
+    M_count = (Int) (startT/this->timestep() - 0.5);
 
     // Loop on elements of the mesh
     for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
@@ -501,9 +501,9 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     std::string sdummy;
     std::string ext;
     UInt nsx, nsy, nsz;
-    int ndim;
+    Int ndim;
 
-    int nDof = M_dim;
+    Int nDof = M_dim;
 
     std::string filenamex = name;
     ext = "_x.bb";
