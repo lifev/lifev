@@ -1,31 +1,45 @@
+//@HEADER
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    This file is part of LifeV.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
 /*!
-  \file VenantKirchhofSolver.h
-  \author M.A. Fernandez
-  \date 6/2003
-  \version 1.0
+ *  @file
+ *  @brief This file contains solvers for St. Venant-Kirchhof materials (linear for the moment)
+ *
+ *  @version 1.0
+ *  @date 01-06-2003
+ *  @author Miguel Angel Fernandez
+ *
+ *  @version 1.1
+ *  @date 01-09-2010
+ *  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
+ *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ */
 
-  \brief
-  This file contains solvers for St. Venant-Kirchhof materials (linear for the moment)
-
-*/
 #ifndef _VENANTKIRCHHOFSOLVER_H_
 #define _VENANTKIRCHHOFSOLVER_H_
 
@@ -72,6 +86,8 @@ class VenantKirchhofSolver
 {
 public:
 
+    //!@name Type definitions
+    //@{
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
@@ -94,9 +110,18 @@ public:
 
     typedef singleton<factory<VenantKirchhofSolver,  std::string> >  StructureSolverFactory;
 
+    //@}
 
-    //! Constructor
+
+    //! @name Constructor
+    //@{
+
     VenantKirchhofSolver();
+
+    //@}
+
+    //!@name Methods
+    //@{
 
     /*!
       \param data_file GetPot data file
@@ -137,7 +162,7 @@ public:
       \param source volumic source
       \param time present time
     */
-//    void updateSystem( source_type const& source );
+    //    void updateSystem( source_type const& source );
     void updateSystem();
 
     virtual void updateSystem(matrix_ptrtype& stiff);
@@ -155,32 +180,8 @@ public:
     //! Output
     //void showMe( std::ostream& c = std::cout ) const;
 
-    //! getters
-    EpetraMap   const& getMap()       const { return *M_localMap; }
-    Displayer   const& getDisplayer() const { return *M_Displayer; }
-    matrix_ptrtype const getMassStiff() const {return M_massStiff; }
-    matrix_ptrtype const getMass() const {return M_mass; }
-    matrix_ptrtype const getLinearStiff() const {return M_linearStiff; }
-    //! BCHandler getter and setter
-//    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
-    FESpace<Mesh, EpetraMap>& dFESpace() {return M_FESpace;}
-    bchandler_type const & BChandler() const {return M_BCh;}
-    //! residual getter
-    vector_type& residual()             {return *M_residual_d;}
-    // end of getters
-
-    //!setters
-    void setBC(bchandler_type& BCd)   {M_BCh = BCd;}
-    void setSourceTerm( source_type const& __s ) { M_source = __s; }
-
-    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
-
-    virtual void setDisp(const vector_type& disp) {*M_disp = disp;} // used for monolithic
-    //! recur setter
-    void setRecur(UInt recur) {_recur = recur;}
-
     virtual void updateJacobian( vector_type& sol, matrix_ptrtype& jac )=0;
-
+  
     //! solves the tangent problem for newton iterations
     virtual void solveJac( vector_type&       step,
                            const vector_type& res,
@@ -194,11 +195,78 @@ public:
                                 bchandler_type&    BCd )=0 ;
 
 
-//! evaluates residual for newton interations
+    //! evaluates residual for newton interations
     void evalResidual( vector_type &res, const vector_type& sol, int iter);
 
     void evalConstraintTensor();
 
+    virtual void initialize( const Function& d0, const Function& w0, const Function& a0 = Function() );
+    void initialize( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype(),  vector_ptrtype a0 = vector_ptrtype() );
+    void initializeVel( const vector_type& w0);
+
+    virtual void updateVel();
+
+    void reduceSolution( Vector& disp, Vector& vel );
+
+    void rescaleMatrices(); // used for monolithic
+
+    /**
+       in the linear case the solid matrix is constant, thus it does not need to be recomputed.
+     */
+
+    void computeMatrix( matrix_ptrtype& stiff, const vector_type& sol, Real const& factor )
+    {
+    }
+
+    void computeMatrix( const vector_type& sol, Real const& factor )
+    {
+    }
+  
+    //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
+    //void updateCoupling(matrix_type couplingMatrix);// used for monolithic
+
+    //@}
+
+    //! @name Set Methods
+    //@{
+    //!setters
+    void setBC(bchandler_type& BCd)   {M_BCh = BCd;}
+    void setSourceTerm( source_type const& __s ) { M_source = __s; }
+
+    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
+
+    virtual void setDisp(const vector_type& disp) {*M_disp = disp;} // used for monolithic
+    //! recur setter
+    void setRecur(UInt recur) {_recur = recur;}
+
+     void setDataFromGetPot( const GetPot& dataFile );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! getters
+    EpetraMap   const& getMap()       const { return *M_localMap; }
+
+    Displayer   const& getDisplayer() const { return *M_Displayer; }
+
+    matrix_ptrtype const getMassStiff() const {return M_massStiff; }
+
+    matrix_ptrtype const getMass() const {return M_mass; }
+
+    matrix_ptrtype const getLinearStiff() const {return M_linearStiff; }
+
+    //! BCHandler getter and setter
+//    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
+
+    FESpace<Mesh, EpetraMap>& dFESpace() {return M_FESpace;}
+
+    bchandler_type const & BChandler() const {return M_BCh;}
+
+    //! residual getter
+    vector_type& residual()             {return *M_residual_d;}
 
     source_type const& sourceTerm() const { return M_source; }
 
@@ -206,38 +274,17 @@ public:
     vector_type& vel()         { return *M_vel; }
     vector_ptrtype& rhsWithoutBC() { return M_rhsNoBC; }
 
-    void setDataFromGetPot( const GetPot& dataFile );
-
-    virtual void initialize( const Function& d0, const Function& w0, const Function& a0 = Function() );
-    void initialize( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype(),  vector_ptrtype a0 = vector_ptrtype() );
-    void initializeVel( const vector_type& w0);
-
-
     //const Dof& dDof() const { return M_FESpace.dof(); }
 
     //const Mesh& mesh() const { return M_FESpace.mesh(); }
-    void reduceSolution( Vector& disp,
-                         Vector& vel );
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
     boost::shared_ptr<Epetra_Comm> const& comm()         const {return M_Displayer->comm();}
 
-    void rescaleMatrices(); // used for monolithic
-    //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
-    //void updateCoupling(matrix_type couplingMatrix);// used for monolithic
     Real rescaleFactor() {return M_rescaleFactor;}
-    virtual void updateVel();
+
     const UInt& offset() const { return M_offset; }
-
-
-    // Physic constant
-    const Real& thickness() const { return M_data->thickness(); }
-    const Real& density()   const { return M_data->rho(); }
-    const Real& young()     const { return M_data->young(); }
-    const Real& poisson()   const { return M_data->poisson(); }
-    const Real& rho()       const { return M_data->rho(); }
-
 
     /**
        Do nothing in the linear case: the matrix remains constant. Otherwise substitute the matrix with an updated one
@@ -246,19 +293,26 @@ public:
     {
     }
 
-    /**
-       in the linear case the solid matrix is constant, thus it does not need to be recomputed.
-     */
-    void computeMatrix( matrix_ptrtype& stiff, const vector_type& sol, Real const& factor )
-    {
-    }
+    // Physic constant
+    const Real& thickness() const { return M_data->thickness(); }
+    const Real& density()   const { return M_data->rho(); }
+    const Real& young()     const { return M_data->young(); }
+    const Real& poisson()   const { return M_data->poisson(); }
+    const Real& rho()       const { return M_data->rho(); }
 
-    void computeMatrix( const vector_type& sol, Real const& factor )
-    {
-    }
-
+    //@}
 
 protected:
+
+    virtual void applyBoundaryConditions(matrix_type &matrix,
+                                         vector_type &rhs,
+                                         bchandler_type& BCh,
+                                         UInt         offset=0);
+
+    UInt dim() const { return M_FESpace->dim(); }
+
+
+    //!Protected Members
 
     boost::shared_ptr<data_type>   M_data;
 
@@ -346,12 +400,6 @@ protected:
 
     matrix_ptrtype                  M_matrFull;
 
-    virtual void applyBoundaryConditions(matrix_type &matrix,
-                                         vector_type &rhs,
-                                         bchandler_type& BCh,
-                                         UInt         offset=0);
-
-    UInt dim() const { return M_FESpace->dim(); }
 };
 
 

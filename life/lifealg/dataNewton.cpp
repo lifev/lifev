@@ -1,21 +1,40 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief File containing a class for handling temporal discretization with GetPot.
+ *
+ *  @date 01-10-2003
+ *  @author Miguel Angel Fernandez
+ *
+ *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ */
+
 #include <life/lifealg/dataNewton.hpp>
 
 namespace LifeV
@@ -23,11 +42,11 @@ namespace LifeV
 // Constructor
 DataNewton::DataNewton( const GetPot& dfile, const std::string& section )
 {
-    _maxiter = dfile( ( section + "/maxiter" ).data(), 100 );
-    _abstol = dfile( ( section + "/abstol" ).data(), 0.0 );
-    _reltol = dfile( ( section + "/reltol" ).data(), 0.0 );
-    _etamax = dfile( ( section + "/etamax" ).data(), 1.e-3 );
-    _linesearch = dfile( ( section + "/linesearch" ).data(), 2 );
+    M_maxiter = dfile( ( section + "/maxiter" ).data(), 100 );
+    M_abstol = dfile( ( section + "/abstol" ).data(), 0.0 );
+    M_reltol = dfile( ( section + "/reltol" ).data(), 0.0 );
+    M_etamax = dfile( ( section + "/etamax" ).data(), 1.e-3 );
+    M_linesearch = dfile( ( section + "/linesearch" ).data(), 2 );
 }
 
 // Destructor
@@ -38,41 +57,41 @@ DataNewton::~DataNewton()
 // The max number of interations
 UInt DataNewton::maxiter() const
 {
-    return _maxiter;
+    return M_maxiter;
 }
 
 // The absolute tolerance
 Real DataNewton::abstol() const
 {
-    return _abstol;
+    return M_abstol;
 }
 
 // The relative tolerance
 Real DataNewton::reltol() const
 {
-    return _reltol;
+    return M_reltol;
 }
 
 // The relative tolerance
 Real DataNewton::etamax() const
 {
-    return _etamax;
+    return M_etamax;
 }
 
 // The linesearch option
 UInt DataNewton::linesearch() const
 {
-    return _linesearch;
+    return M_linesearch;
 }
 
 // Output
 void DataNewton::showMe( std::ostream& c ) const
 {
     //
-    c << "maxiter        = " << _maxiter << std::endl;
-    c << "abstol         = " << _abstol << std::endl;
-    c << "reltol         = " << _reltol << std::endl;
-    c << "etamax         = " << _reltol << std::endl;
-    c << "linesearch     = " << _linesearch << std::endl;
+    c << "maxiter        = " << M_maxiter << std::endl;
+    c << "abstol         = " << M_abstol << std::endl;
+    c << "reltol         = " << M_reltol << std::endl;
+    c << "etamax         = " << M_reltol << std::endl;
+    c << "linesearch     = " << M_linesearch << std::endl;
 }
 }

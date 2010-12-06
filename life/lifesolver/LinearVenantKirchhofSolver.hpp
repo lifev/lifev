@@ -1,37 +1,38 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
-    @file
-    @brief A short description of the file content
-
-    @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-    @date 01 Sep 2010
-
-    A more detailed description of the file (if necessary)
+ *  @file
+ *  @brief This class implements the Linear St. Venant-kirchhoff solver.
+ *
+ *  @date 01-09-2010
+ *  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
+ *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
 #ifndef LINEARVENANTKIRCHHOFSOLVER_H
@@ -48,15 +49,28 @@ class LinearVenantKirchhofSolver : public VenantKirchhofSolver<Mesh, SolverType>
 {
 public:
 
-    typedef VenantKirchhofSolver<Mesh, SolverType> super;
-    typedef typename super::vector_type vector_type;
-    typedef typename super::matrix_ptrtype matrix_ptrtype;
-    typedef typename super::bchandler_type bchandler_type;
+    //! @name Type definitions
+    //@{
 
+    typedef VenantKirchhofSolver<Mesh, SolverType>     super;
+    typedef typename super::vector_type                vector_type;
+    typedef typename super::matrix_ptrtype             matrix_ptrtype;
+    typedef typename super::bchandler_type             bchandler_type;
+
+    //@}
+
+    //! @name Constructor
+    //@{
+    
     LinearVenantKirchhofSolver():
             super()
     {}
 
+    //@}
+
+    //! @name Methods
+    //@{
+  
     void updateJacobian( vector_type& /*sol*/, matrix_ptrtype& /*jac*/ )
     {
         this->M_Displayer->leaderPrint("  Linear S-  Doing nothing (updating jacobian of a linear system) ...                    ");
@@ -73,6 +87,7 @@ public:
                         Real&            /*linear_rel_tol*/,
                         bchandler_type&    /*BCd*/ ) {assert(false);}
 
+    //@}
 };
 
 
