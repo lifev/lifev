@@ -214,13 +214,9 @@ private:
 };
 
 
-/*  
-//==================================================
-// IMPLEMENTATION
-//=================================================
-
-
+//=========================================
 // Constructor
+//=========================================
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
 ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
@@ -229,18 +225,18 @@ ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
                          const QuadRule&                   bdQr,
                          BCHandler&                        BCh ):
         DataElasticStructure<Mesh>( data ),
-        _refFE                    ( refFE ),
-        _dof                      ( this->mesh(), _refFE ),
-        _dim                      ( _dof.numTotalDof() ),
-        _Qr                       ( Qr ),
-        _bdQr                     ( bdQr ),
-        _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
-        _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
-        _d                        ( _dim ),
-        _dRhs                     ( _dim ),
-        _w                        ( _dim ),
-        _time                     ( 0 ),
-        _count                    ( 0 ),
+        M_refFE                    ( refFE ),
+        M_dof                      ( this->mesh(), M_refFE ),
+        M_dim                      ( M_dof.numTotalDof() ),
+        M_Qr                       ( Qr ),
+        M_bdQr                     ( bdQr ),
+        M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr ),
+        M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr ),
+        M_d                        ( M_dim ),
+        M_dRhs                     ( M_dim ),
+        M_w                        ( M_dim ),
+        M_time                     ( 0 ),
+        M_count                    ( 0 ),
         M_BCh_solid               ( &BCh )
 {}
 
@@ -251,19 +247,19 @@ ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
                          const QuadRule&                   Qr,
                          const QuadRule&                   bdQr):
         DataElasticStructure<Mesh>( data ),
-        _refFE                    ( refFE ),
-        _dof                      ( this->mesh(), _refFE ),
-        _dim                      ( _dof.numTotalDof() ),
-        _Qr                       ( Qr ),
-        _bdQr                     ( bdQr ),
-        _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
-        _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
-        _d                        ( _dim ),
-        _dRhs                     ( _dim ),
-        _w                        ( _dim ),
+        M_refFE                    ( refFE ),
+        M_dof                      ( this->mesh(), M_refFE ),
+        M_dim                      ( M_dof.numTotalDof() ),
+        M_Qr                       ( Qr ),
+        M_bdQr                     ( bdQr ),
+        M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr ),
+        M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr ),
+        M_d                        ( M_dim ),
+        M_dRhs                     ( M_dim ),
+        M_w                        ( M_dim ),
 //    _BCh( new BCHandler(0)),
-        _time                     ( 0 ),
-        _count                    ( 0 ),
+        M_time                     ( 0 ),
+        M_count                    ( 0 ),
         M_BCh_solid               ( 0 )
 {}
 
@@ -273,7 +269,7 @@ template <typename Mesh>
 PhysVectUnknown<Vector> &
 ElasticStructureHandler<Mesh>::disp()
 {
-    return _d;
+    return M_d;
 }
 
 
@@ -282,7 +278,7 @@ template <typename Mesh>
 PhysVectUnknown<Vector> &
 ElasticStructureHandler<Mesh>::w()
 {
-    return _w;
+    return M_w;
 }
 
 
@@ -294,12 +290,12 @@ ElasticStructureHandler<Mesh>::postProcess()
     std::ostringstream index;
     std::string name, namedef;
 
-    ++_count;
+    ++M_count;
 
-    if ( fmod( float( _count ), float( this->_verbose ) ) == 0.0 )
+    if ( fmod( float( M_count ), float( this->_verbose ) ) == 0.0 )
     {
         std::cout << "  S-  Post-processing \n";
-        index << ( _count / this->_verbose );
+        index << ( M_count / this->_verbose );
 
         switch ( index.str().size() )
         {
@@ -315,10 +311,10 @@ ElasticStructureHandler<Mesh>::postProcess()
         }
 
         namedef = "defor." + name + ".mesh";
-        wr_medit_ascii_scalar( "dep_x." + name + ".bb", _d.giveVec(), this->mesh().numVertices() );
-        wr_medit_ascii_scalar( "dep_y." + name + ".bb", _d.giveVec() + _dim, this->mesh().numVertices() );
-        wr_medit_ascii_scalar( "dep_z." + name + ".bb", _d.giveVec() + 2 * _dim, this->mesh().numVertices() );
-        wr_medit_ascii2( namedef, this->mesh(), _d, this->_factor );
+        wr_medit_ascii_scalar( "dep_x." + name + ".bb", M_d.giveVec(), this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "dep_y." + name + ".bb", M_d.giveVec() + M_dim, this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "dep_z." + name + ".bb", M_d.giveVec() + 2 * M_dim, this->mesh().numVertices() );
+        wr_medit_ascii2( namedef, this->mesh(), M_d, this->_factor );
 
         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
 
@@ -328,9 +324,9 @@ ElasticStructureHandler<Mesh>::postProcess()
 
         // system(("ln -s "+this->mesh()_file+" veloc."+name+".mesh").data());
 
-        wr_medit_ascii_scalar( "veld_x." + name + ".bb", _w.giveVec(), this->mesh().numVertices() );
-        wr_medit_ascii_scalar( "veld_y." + name + ".bb", _w.giveVec() + _dim, this->mesh().numVertices() );
-        wr_medit_ascii_scalar( "veld_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "veld_x." + name + ".bb", M_w.giveVec(), this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "veld_y." + name + ".bb", M_w.giveVec() + M_dim, this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "veld_z." + name + ".bb", M_w.giveVec() + 2 * M_dim, this->mesh().numVertices() );
 
         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
 
@@ -353,10 +349,10 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
 
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
 
-    UInt nDofpV = _refFE.nbDofPerVertex; // number of Dof per vertex
-    UInt nDofpE = _refFE.nbDofPerEdge;   // number of Dof per edge
-    UInt nDofpF = _refFE.nbDofPerFace;   // number of Dof per face
-    UInt nDofpEl = _refFE.nbDofPerVolume; // number of Dof per Volume
+    UInt nDofpV = M_refFE.nbDofPerVertex; // number of Dof per vertex
+    UInt nDofpE = M_refFE.nbDofPerEdge;   // number of Dof per edge
+    UInt nDofpF = M_refFE.nbDofPerFace;   // number of Dof per face
+    UInt nDofpEl = M_refFE.nbDofPerVolume; // number of Dof per Volume
 
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
@@ -366,7 +362,7 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
     UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
 
-    ID nbComp = _d.nbcomp(); // Number of components of the mesh velocity
+    ID nbComp = M_d.nbcomp(); // Number of components of the mesh velocity
 
     Real x, y, z;
 
@@ -376,7 +372,7 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
     for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
     {
 
-        _fe.updateJac( this->mesh().volume( iElem ) );
+        M_fe.updateJac( this->mesh().volume( iElem ) );
 
         // Vertex based Dof
         if ( nDofpV )
@@ -392,13 +388,13 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
                     lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
 
                     // Nodal coordinates
-                    _fe.coorMap( x, y, z, _fe.refFE.xi( lDof - 1 ), _fe.refFE.eta( lDof - 1 ), _fe.refFE.zeta( lDof - 1 ) );
+                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
-                        _d( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        _w( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                        M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
+                        M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
                     }
                 }
             }
@@ -418,13 +414,13 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
                     lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    _fe.coorMap( x, y, z, _fe.refFE.xi( lDof - 1 ), _fe.refFE.eta( lDof - 1 ), _fe.refFE.zeta( lDof - 1 ) );
+                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
-                        _d( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        _w( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                        M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
+                        M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
                     }
                 }
             }
@@ -445,13 +441,13 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
                     lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    _fe.coorMap( x, y, z, _fe.refFE.xi( lDof - 1 ), _fe.refFE.eta( lDof - 1 ), _fe.refFE.zeta( lDof - 1 ) );
+                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
-                        _d( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        _w( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                        M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
+                        M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
                     }
                 }
             }
@@ -463,13 +459,13 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
 
             // Nodal coordinates
-            _fe.coorMap( x, y, z, _fe.refFE.xi( lDof - 1 ), _fe.refFE.eta( lDof - 1 ), _fe.refFE.zeta( lDof - 1 ) );
+            M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
             {
-                _d( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                _w( icmp * _dim + _dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
+                M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
             }
         }
     }
@@ -485,12 +481,12 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
 {
     std::cout << "  S- restarting at time = " << startT << std::endl;
 
-    _count = (int) (startT/this->timestep() - 0.5);
+    M_count = (int) (startT/this->timestep() - 0.5);
 
     // Loop on elements of the mesh
     for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
     {
-        _fe.updateJac( this->mesh().volume( iElem ) );
+        M_fe.updateJac( this->mesh().volume( iElem ) );
     }
     readUnknown(depName, _d);
     readUnknown(velName, _w);
@@ -507,7 +503,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     UInt nsx, nsy, nsz;
     int ndim;
 
-    int nDof = _dim;
+    int nDof = M_dim;
 
     std::string filenamex = name;
     ext = "_x.bb";
@@ -526,7 +522,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filex >> sdummy;
     filex >> nsx;
 
-    if (nsx != _dim)
+    if (nsx != M_dim)
     {
         std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
         exit(1);
@@ -559,7 +555,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filey >> sdummy;
     filey >> nsy;
 
-    if (nsy != _dim)
+    if (nsy != M_dim)
     {
         std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
         exit(1);
@@ -595,7 +591,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filez >> sdummy;
     filez >> nsz;
 
-    if (nsz != _dim)
+    if (nsz != M_dim)
     {
         std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
         exit(1);
@@ -610,7 +606,9 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     }
 
     filez.close();
-}*/
+}
+
+
 }
 
 #endif
