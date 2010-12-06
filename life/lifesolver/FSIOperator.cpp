@@ -27,88 +27,94 @@ namespace LifeV
 //! Constructors & Destructors
 // ===================================================
 FSIOperator::FSIOperator():
-        M_uFESpace                           ( ),
-        M_pFESpace                           ( ),
-        M_dFESpace                           ( ),
-        M_mmFESpace                          ( ),
-        M_fluidMesh                          ( ),
-        M_solidMesh                          ( ),
-        M_fluidMeshPart                      ( ),
-        M_solidMeshPart                      ( ),
-        M_BCh_u                              ( ),
-        M_BCh_d                              ( ),
-        M_BCh_mesh                           ( ),
-        M_BCh_du                             ( ),
-        M_BCh_du_inv                         ( ),
-        M_BCh_dz                             ( ),
-        M_BCh_dz_inv                         ( ),
-        M_BCh_dp                             ( ),
-        M_BCh_dp_inv                         ( ),
-        M_fluid                              ( ),
-        M_solid                              ( ),
-        M_meshMotion                         ( ),
-        //     M_fluidLin                           ( ),
-        //     M_solidLin                           ( ),
-        M_bdf                                ( ),
-        M_dataFile                           ( ),
-        M_dataMeshFluid                      ( new DataMesh()),
-        M_dataMeshSolid                      ( new DataMesh()),
-        M_fluidInterfaceMap                  ( ),
-        M_solidInterfaceMap                  ( ),
-        M_fluidInterfaceMapOnZero            ( ),
-        M_solidInterfaceMapOnZero            ( ),
-        M_dofFluidToStructure                ( ),
-        M_dofStructureToFluid                ( ),
-        M_dofStructureToSolid                ( ),
-        M_dofStructureToHarmonicExtension    ( ),
-        M_dofHarmonicExtensionToFluid        ( ),
-        M_dofFluid                           ( ),
-        M_dofSolid                           ( ),
-        M_dofFluidInv                        ( ),
-        M_dofSolidInv                        ( ),
-        M_bcvFluidInterfaceDisp              ( ),
-        M_bcvFluidLoadToStructure            ( ),
-        M_bcvSolidLoadToStructure            ( ),
-        M_bcvStructureToFluid                ( ),
-        M_bcvStructureDispToFluid            ( ),
-        M_bcvStructureDispToSolid            ( ),
-        M_bcvStructureDispToHarmonicExtension( ),
-        M_bcvHarmonicExtensionVelToFluid     ( ),
-        M_bcvDerHarmonicExtensionVelToFluid  ( ),
-        M_bcvDerFluidLoadToStructure         ( ),
-        M_bcvDerFluidLoadToFluid             ( ),
-        M_bcvDerStructureDispToSolid         ( ),
-        M_lambdaFluid                        ( ),
-        M_lambdaFluidRepeated                ( ),
-        M_lambdaSolid                        ( ),
-        M_lambdaSolidRepeated                ( ),
-        M_lambdaSolidOld                     ( ),
-        M_lambdaDotSolid                     ( ),
-        M_lambdaDotSolidRepeated             ( ),
-        M_sigmaFluid                         ( ),
-        M_sigmaSolid                         ( ),
-        M_sigmaFluidRepeated                 ( ),
-        M_sigmaSolidRepeated                 ( ),
-        M_minusSigmaFluid                    ( ), //sigmafluid: auxiliary variable for Robin.
-        M_minusSigmaFluidRepeated            ( ), //sigmafluid: auxiliary variable for Robin.
-        M_dispFluidMeshOld                   ( ),
-        M_veloFluidMesh                      ( ),
-        M_derVeloFluidMesh                   ( ),
-        M_un                                 ( ),
-        M_rhs                                ( ),
-        M_Alphaf                             ( ), //vector_type, for alphaf robin
-        M_AlphafCoef                         ( 0 ),
-        M_betamedio                          ( ),
-        M_fluxes                             ( 0 ),
-        M_epetraComm                         ( ),
-        M_epetraWorldComm                    ( ),
-        M_mpi                                ( true ),
-        M_isFluid                            ( false ),
-        M_isSolid                            ( false ),
-        M_linearFluid                        ( ),
-        M_linearSolid                        ( ),
-        M_fluidLeader                        ( ),
-        M_solidLeader                        ( )
+    M_mesh                               ( ),
+    M_uFESpace                           ( ),
+    M_pFESpace                           ( ),
+    M_dFESpace                           ( ),
+    M_mmFESpace                          ( ),
+    M_fluidMesh                          ( ),
+    M_solidMesh                          ( ),
+    M_fluidMeshPart                      ( ),
+    M_solidMeshPart                      ( ),
+    M_BCh_u                              ( ),
+    M_BCh_d                              ( ),
+    M_BCh_mesh                           ( ),
+    M_BCh_du                             ( ),
+    M_BCh_du_inv                         ( ),
+    M_BCh_dz                             ( ),
+    M_BCh_dz_inv                         ( ),
+    M_BCh_dp                             ( ),
+    M_BCh_dp_inv                         ( ),
+    M_fluid                              ( ),
+    M_solid                              ( ),
+    M_meshMotion                         ( ),
+    //     M_fluidLin                           ( ),
+    //     M_solidLin                           ( ),
+    M_bdf                                ( ),
+    M_dataFile                           ( ),
+    M_dataMeshFluid                      ( new DataMesh()),
+    M_dataMeshSolid                      ( new DataMesh()),
+    M_data                               ( ),
+    M_fluidInterfaceMap                  ( ),
+    M_solidInterfaceMap                  ( ),
+    M_fluidInterfaceMapOnZero            ( ),
+    M_solidInterfaceMapOnZero            ( ),
+    M_dofFluidToStructure                ( ),
+    M_dofStructureToFluid                ( ),
+    M_dofStructureToSolid                ( ),
+    M_dofStructureToHarmonicExtension    ( ),
+    M_dofHarmonicExtensionToFluid        ( ),
+    M_dofFluid                           ( ),
+    M_dofSolid                           ( ),
+    M_dofFluidInv                        ( ),
+    M_dofSolidInv                        ( ),
+    M_bcvFluidInterfaceDisp              ( ),
+    M_bcvFluidLoadToStructure            ( ),
+    M_bcvSolidLoadToStructure            ( ),
+    M_bcvStructureToFluid                ( ),
+    M_bcvStructureDispToFluid            ( ),
+    M_bcvStructureDispToSolid            ( ),
+    M_bcvStructureDispToHarmonicExtension( ),
+    M_bcvHarmonicExtensionVelToFluid     ( ),
+    M_bcvDerHarmonicExtensionVelToFluid  ( ),
+    M_bcvDerFluidLoadToStructure         ( ),
+    M_bcvDerFluidLoadToFluid             ( ),
+    M_bcvDerStructureDispToSolid         ( ),
+    M_bcfMixteOuterWall                  ( ),
+    M_lambdaFluid                        ( ),
+    M_lambdaFluidRepeated                ( ),
+    M_lambda                             ( ),
+    M_lambdaDot                          ( ),
+    M_un                                 ( ),
+    M_rhs                                ( ),
+    M_Alphaf                             ( ), //vector_type, for alphaf robin
+    M_AlphafCoef                         ( 0 ),
+    M_betamedio                          ( ),
+    M_fluxes                             ( 0 ),
+    M_epetraComm                         ( ),
+    M_epetraWorldComm                    ( ),
+    //begin of private members
+    M_lambdaSolid                        ( ),
+    M_lambdaSolidRepeated                ( ),
+    M_lambdaSolidOld                     ( ),
+    M_lambdaDotSolid                     ( ),
+    M_lambdaDotSolidRepeated             ( ),
+    M_sigmaFluid                         ( ),
+    M_sigmaSolid                         ( ),
+    M_sigmaFluidRepeated                 ( ),
+    M_sigmaSolidRepeated                 ( ),
+    M_minusSigmaFluid                    ( ), //sigmafluid: auxiliary variable for Robin.
+    M_minusSigmaFluidRepeated            ( ), //sigmafluid: auxiliary variable for Robin.
+    M_dispFluidMeshOld                   ( ),
+    M_veloFluidMesh                      ( ),
+    M_derVeloFluidMesh                   ( ),
+    M_mpi                                ( true ),
+    M_isFluid                            ( false ),
+    M_isSolid                            ( false ),
+    M_linearFluid                        ( false ),
+    M_linearSolid                        ( false ),
+    M_fluidLeader                        ( ),
+    M_solidLeader                        ( )
 {
 }
 
@@ -135,21 +141,6 @@ FSIOperator::setDataFile( const GetPot& dataFile )
     readMesh(*M_solidMesh, *M_dataMeshSolid);
 
     M_dataFile = dataFile;
-}
-
-
-void
-FSIOperator::partitionMeshes()
-{
-    if (this->isFluid())
-    {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (M_fluidMesh, M_epetraComm));
-    }
-    if (this->isSolid())
-    {
-        M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( M_solidMesh, M_epetraComm ) );
-    }
-
 }
 
 void
@@ -313,6 +304,31 @@ FSIOperator::setupFEspace()
     M_epetraWorldComm->Barrier();
 }
 
+
+void
+FSIOperator::partitionMeshes()
+{
+    if (this->isFluid())
+    {
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (M_fluidMesh, M_epetraComm));
+    }
+    if (this->isSolid())
+    {
+        M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( M_solidMesh, M_epetraComm ) );
+    }
+
+}
+
+#ifdef HAVE_HDF5
+void
+FSIOperator::partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter )
+{
+    M_fluidMesh = fluidMeshFilter.getMeshPartition();
+    M_solidMesh = solidMeshFilter.getMeshPartition();
+}
+#endif
+
+
 void
 FSIOperator::setupDOF( void )
 {
@@ -385,6 +401,174 @@ FSIOperator::setupDOF( void )
     createInterfaceMaps( M_dofStructureToHarmonicExtension->locDofMap() );
 }
 
+void
+FSIOperator::setupFluidSolid( void )
+{
+    setupFluidSolid(imposeFlux());
+}
+
+void
+FSIOperator::setupFluidSolid( UInt const fluxes )
+{
+    if ( this->isFluid() )
+    {
+        //M_fluxes = imposeFlux();
+
+        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
+        M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
+        M_solid.reset( solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
+        M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
+
+//         if ( M_linearFluid )
+//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
+
+//         if ( M_linearSolid )
+//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
+
+        //Vector initialization
+        M_rhs.reset( new vector_type( M_fluid->getMap() ) );
+    }
+
+    if ( this->isSolid() )
+    {
+//         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
+        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
+        M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
+        M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
+
+//         if ( M_linearFluid )
+//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
+
+//         if ( M_linearSolid )
+//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
+    }
+
+    M_epetraWorldComm->Barrier();
+}
+
+void
+FSIOperator::setupSystem( void )
+{
+    if ( this->isFluid() )
+    {
+        //Data
+        M_fluid->setUp( M_dataFile );
+        M_meshMotion->setUp( M_dataFile );
+//         if (M_linearFluid)
+//             M_fluidLin->setUp(dataFile);
+    }
+
+    if ( this->isSolid() )
+    {
+        M_solid->setDataFromGetPot( M_dataFile );
+//         if (M_linearSolid)
+//             M_solidLin->setUp( dataFile );
+    }
+
+    M_epetraWorldComm->Barrier();
+}
+
+
+void
+FSIOperator::buildSystem()
+{
+    if ( this->isFluid() )
+    {
+        M_fluid->buildSystem();
+//         if (M_linearFluid)
+//             M_fluidLin->buildSystem();
+    }
+
+    if ( this->isSolid() )
+    {
+        M_solid->buildSystem();
+//         if (M_linearSolid)
+//             M_solidLin->buildSystem();
+    }
+
+    M_epetraWorldComm->Barrier();
+}
+
+
+
+void
+FSIOperator::updateSystem( )
+{
+    shiftSolution();
+
+    if ( this->isFluid() )
+    {
+        M_meshMotion->updateSystem();
+
+        transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
+
+        if ( M_fluid->solution().get() )
+            M_un.reset( new vector_type( *M_fluid->solution() ) );
+        *M_rhs = M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+    }
+
+    if ( this->isSolid() )
+    {
+        this->M_solid->updateSystem();
+    }
+    couplingVariableExtrap();
+}
+
+
+
+void FSIOperator::couplingVariableExtrap( )
+{
+    *M_lambda      = lambdaSolid();
+    if (!M_lambdaDot.get())
+    {
+        M_lambdaDot.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
+        *M_lambda     += M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid();
+    }
+    else
+    {
+        *M_lambda     += 1.5*M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid(); // *1.5
+        *M_lambda     -= M_data->dataFluid()->dataTime()->getTimeStep()*0.5*(*M_lambdaDot);
+    }
+
+    *M_lambdaDot   = lambdaDotSolid();
+    displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->NormInf(), "\n" );
+    displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->NormInf(), "\n");
+}
+
+void
+FSIOperator::shiftSolution()
+{
+    if ( this->isFluid() )
+    {
+        this->M_bdf->shift_right( *M_fluid->solution() );
+    }
+}
+
+UInt
+FSIOperator::imposeFlux( void )
+{
+    if ( this->isFluid() )
+    {
+        std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
+        UInt numLM = static_cast<UInt>( fluxVector.size() );
+
+        UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
+                      + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
+
+        for ( UInt i = 0; i < numLM; ++i )
+            M_BCh_u->setOffset( fluxVector[i], offset + i );
+        return numLM;
+    }
+    else
+        return 0;
+}
+
+void FSIOperator::initializeBDF( const vector_type& un )
+{
+    M_bdf.reset( new BdfT<vector_type>( M_data->dataFluid()->dataTime()->getBDF_order() ) );
+    M_bdf->initialize_unk( un );
+}
+
 void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 {
     Displayer disp(M_epetraWorldComm);
@@ -454,163 +638,6 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     variablesInit( M_data->dataSolid()->order() );
 
     M_epetraWorldComm->Barrier();
-}
-
-#ifdef HAVE_HDF5
-void
-FSIOperator::partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter )
-{
-    M_fluidMesh = fluidMeshFilter.getMeshPartition();
-    M_solidMesh = solidMeshFilter.getMeshPartition();
-}
-#endif
-
-void
-FSIOperator::setupFluidSolid( void )
-{
-    setupFluidSolid(imposeFlux());
-}
-
-void
-FSIOperator::setupFluidSolid( UInt const fluxes )
-{
-    if ( this->isFluid() )
-    {
-        //M_fluxes = imposeFlux();
-
-        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
-        M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
-        M_solid.reset( solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
-        M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
-
-//         if ( M_linearFluid )
-//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-
-//         if ( M_linearSolid )
-//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
-
-        //Vector initialization
-        M_rhs.reset( new vector_type( M_fluid->getMap() ) );
-    }
-
-    if ( this->isSolid() )
-    {
-//         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
-        M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
-
-//         if ( M_linearFluid )
-//             M_fluidLin.reset( new FSIOperator::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-
-//         if ( M_linearSolid )
-//             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
-    }
-
-    M_epetraWorldComm->Barrier();
-}
-
-
-
-void
-FSIOperator::setupSystem( void )
-{
-    if ( this->isFluid() )
-    {
-        //Data
-        M_fluid->setUp( M_dataFile );
-        M_meshMotion->setUp( M_dataFile );
-//         if (M_linearFluid)
-//             M_fluidLin->setUp(dataFile);
-    }
-
-    if ( this->isSolid() )
-    {
-        M_solid->setDataFromGetPot( M_dataFile );
-//         if (M_linearSolid)
-//             M_solidLin->setUp( dataFile );
-    }
-
-    M_epetraWorldComm->Barrier();
-}
-
-
-
-void
-FSIOperator::buildSystem()
-{
-    if ( this->isFluid() )
-    {
-        M_fluid->buildSystem();
-//         if (M_linearFluid)
-//             M_fluidLin->buildSystem();
-    }
-
-    if ( this->isSolid() )
-    {
-        M_solid->buildSystem();
-//         if (M_linearSolid)
-//             M_solidLin->buildSystem();
-    }
-
-    M_epetraWorldComm->Barrier();
-}
-
-
-
-void
-FSIOperator::updateSystem( )
-{
-    shiftSolution();
-
-    if ( this->isFluid() )
-    {
-        M_meshMotion->updateSystem();
-
-        transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
-
-        if ( M_fluid->solution().get() )
-            M_un.reset( new vector_type( *M_fluid->solution() ) );
-        *M_rhs = M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
-    }
-
-    if ( this->isSolid() )
-    {
-        this->M_solid->updateSystem();
-    }
-    couplingVariableExtrap();
-}
-
-
-
-void FSIOperator::couplingVariableExtrap( )
-{
-    *M_lambda      = lambdaSolid();
-    if (!M_lambdaDot.get())
-    {
-        M_lambdaDot.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
-        *M_lambda     += M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid();
-    }
-    else
-    {
-        *M_lambda     += 1.5*M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid(); // *1.5
-        *M_lambda     -= M_data->dataFluid()->dataTime()->getTimeStep()*0.5*(*M_lambdaDot);
-    }
-
-    *M_lambdaDot   = lambdaDotSolid();
-    displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->NormInf(), "\n" );
-    displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->NormInf(), "\n");
-}
-
-
-
-void
-FSIOperator::shiftSolution()
-{
-    if ( this->isFluid() )
-    {
-        this->M_bdf->shift_right( *M_fluid->solution() );
-    }
 }
 
 
@@ -828,7 +855,34 @@ FSIOperator::bcManageVectorRHS( const fluid_bchandler_type& bch, vector_type& rh
     bcManageVector( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bch, M_uFESpace->feBd(), 1., 0. );
 }
 
+void
+FSIOperator::setAlphafCoef( )
+{
+    Real h=0.1, R=0.5;
 
+    M_AlphafCoef  = 2*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->getTimeStep();
+    M_AlphafCoef += h*this->dataSolid()->young(0)*this->dataFluid()->dataTime()->getTimeStep() /
+                    (2*pow(R,2) *(1-pow(dataSolid()->poisson(0),2)));
+}
+
+void
+FSIOperator::setStructureToFluidParametres()
+{
+    this->setAlphafCoef();
+    this->setAlphaf();
+
+    if (M_Alphaf.get()==0)
+    {
+        this->setAlphafCoef();
+        M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
+        M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
+    }
+    else
+    {
+        M_bcvStructureToFluid->setMixteVec(this->Alphaf());
+        M_bcvStructureToFluid->setBetaVec(this->Alphaf());
+    }
+}
 
 // ===================================================
 //! Display Methods
@@ -1019,6 +1073,18 @@ FSIOperator::setLambdaDotSolid( const vector_type& lambda )
 
 
 void
+FSIOperator::setSigmaSolid( const vector_type& sigma )
+{
+    if ( sigma.getMaptype() == Unique )
+        *M_sigmaSolid = sigma;
+    else // to be coded, I am not sure we need this functionality.
+        assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
+
+    *M_sigmaSolidRepeated = *M_sigmaSolid;
+}
+
+
+void
 FSIOperator::setSigmaFluid( const vector_type& sigma )
 {
     if ( sigma.getMaptype() == Unique )
@@ -1028,18 +1094,6 @@ FSIOperator::setSigmaFluid( const vector_type& sigma )
 
     *M_sigmaFluidRepeated = *M_sigmaFluid;
 
-}
-
-
-void
-FSIOperator::setSigmaSolid( const vector_type& sigma )
-{
-    if ( sigma.getMaptype() == Unique )
-        *M_sigmaSolid = sigma;
-    else // to be coded, I am not sure we need this functionality.
-        assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
-
-    *M_sigmaSolidRepeated = *M_sigmaSolid;
 }
 
 
@@ -1060,17 +1114,6 @@ FSIOperator::setMinusSigmaFluid( const vector_type& sigma )
 
 
 
-void
-FSIOperator::setAlphafCoef( )
-{
-    Real h=0.1, R=0.5;
-
-    M_AlphafCoef  = 2*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->getTimeStep();
-    M_AlphafCoef += h*this->dataSolid()->young(0)*this->dataFluid()->dataTime()->getTimeStep() /
-                    (2*pow(R,2) *(1-pow(dataSolid()->poisson(0),2)));
-}
-
-
 
 void
 FSIOperator::setAlphafbcf( const bc_function_type& alphafbcf )
@@ -1078,27 +1121,6 @@ FSIOperator::setAlphafbcf( const bc_function_type& alphafbcf )
     vector_type vec( M_fluid->velFESpace().map());
     M_fluid->velFESpace().interpolate(alphafbcf, vec, 0.0);
     *M_Alphaf = vec ;
-}
-
-
-
-void
-FSIOperator::setStructureToFluidParametres()
-{
-    this->setAlphafCoef();
-    this->setAlphaf();
-
-    if (M_Alphaf.get()==0)
-    {
-        this->setAlphafCoef();
-        M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
-        M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
-    }
-    else
-    {
-        M_bcvStructureToFluid->setMixteVec(this->Alphaf());
-        M_bcvStructureToFluid->setBetaVec(this->Alphaf());
-    }
 }
 
 
@@ -1275,24 +1297,6 @@ void FSIOperator::setMixteOuterWall(function_type const& dload, function_type co
 // ===================================================
 //! Protected Methods
 // ===================================================
-UInt
-FSIOperator::imposeFlux( void )
-{
-    if ( this->isFluid() )
-    {
-        std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
-        UInt numLM = static_cast<UInt>( fluxVector.size() );
-
-        UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
-                      + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
-
-        for ( UInt i = 0; i < numLM; ++i )
-            M_BCh_u->setOffset( fluxVector[i], offset + i );
-        return numLM;
-    }
-    else
-        return 0;
-}
 
 
 
@@ -1328,12 +1332,6 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
     M_lambdaSolidRepeated.reset   ( new vector_type(*M_solidInterfaceMap, Repeated) );
     M_lambdaDotSolidRepeated.reset( new vector_type(*M_solidInterfaceMap, Repeated) );
     M_sigmaSolidRepeated.reset    ( new vector_type(*M_solidInterfaceMap, Repeated) );
-}
-
-void FSIOperator::initializeBDF( const vector_type& un )
-{
-    M_bdf.reset( new BdfT<vector_type>( M_data->dataFluid()->dataTime()->getBDF_order() ) );
-    M_bdf->initialize_unk( un );
 }
 
 
@@ -1612,11 +1610,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fes
 
     //Real x, y, z;
     Real value;
-
-
     //    Vector wLoc( nDofElemMesh1 * nDimensions );
-
-
     // Loop on elements of the mesh
     if (nDofPerVert1 && nDofPerVert2)
     {
