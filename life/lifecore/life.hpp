@@ -1,32 +1,45 @@
+//@HEADER
 /*
-This file is part of the LifeV library
-Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+    This file is part of LifeV.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
 /*!
-  \file life.hpp
+    @file
+    @brief LifeV main header file
 
-  LifeV main header file
 
-  \author Luca Formaggia
-  \author Jean-Fred Gerbeau.
-  \author Christophe Prud'homme
+    @author Luca Formaggia
+    @author Jean-Fred Gerbeau.
+    @author Christophe Prud'homme
 
-  #Purposes Defines typedefs and macros common to ALL lifeV.h software
-  it must be includes in all translation units.
+    @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @maintainer Simone Deparis <simone.deparis@epfl.ch>
+
+    @date 01-01-2004, 01-12-2010
+
+    Defines typedefs and macros common to ALL lifeV.h software
+    it must be includes in all translation units.
 */
 
 #ifndef __cplusplus
@@ -65,7 +78,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
 
-/*!  \page types_page LifeV Types
+/*!
+  \page types_page LifeV Types
   \section types Types
   \subsection real Real Numbers
 
@@ -123,21 +137,26 @@ private:
 template< int bit_size >
 struct integer
 {
-    typedef boost::mpl::list<signed char,signed short, signed int, signed long int, signed long long> builtins_;
-    typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
-    boost::mpl::transform_view< builtins_, boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
-    >
-    , boost::mpl::integral_c<size_t, bit_size>
-    >::type >::type iter_;
+    typedef boost::mpl::list<signed char, signed short,
+                             signed int, signed long int,
+                             signed long long>                builtins_;
+    typedef typename boost::mpl::base<
+        typename boost::mpl::lower_bound<
+            boost::mpl::transform_view< builtins_,
+                 boost::mpl::multiplies<
+                     boost::mpl::sizeof_<boost::mpl::placeholders::_1>,
+                     boost::mpl::int_<8> > >,
+            boost::mpl::integral_c<size_t, bit_size>
+            >::type >::type                                   iter_;
 
     typedef typename boost::mpl::end<builtins_>::type last_;
     typedef typename boost::mpl::eval_if<
-    boost::is_same<iter_,last_>
-    , boost::mpl::identity< no_int<bit_size> >
-    , boost::mpl::deref<iter_>
-    >::type type;
+        boost::is_same<iter_,last_>,
+        boost::mpl::identity< no_int<bit_size> >,
+        boost::mpl::deref<iter_>
+        >::type                                               type;
 };
-}
+} // end namespace detail
 
 typedef detail::integer<1>::type  int1_type;
 typedef detail::integer<8>::type  int8_type;
@@ -153,22 +172,29 @@ namespace detail
 template< int bit_size >
 struct unsigned_integer
 {
-    typedef boost::mpl::list<unsigned char,unsigned short,unsigned int,unsigned long int, unsigned long long> builtins_;
-    typedef typename boost::mpl::base< typename boost::mpl::lower_bound<
-    boost::mpl::transform_view< builtins_
-    , boost::mpl::multiplies< boost::mpl::sizeof_<boost::mpl::placeholders::_1>, boost::mpl::int_<8> >
-    >
-    , boost::mpl::integral_c<size_t, bit_size>
+    typedef boost::mpl::list<unsigned char,
+                             unsigned short,
+                             unsigned int,
+                             unsigned long int,
+                             unsigned long long>         builtins_;
+    typedef typename boost::mpl::base<
+        typename boost::mpl::lower_bound<
+            boost::mpl::transform_view< builtins_,
+                boost::mpl::multiplies<
+                    boost::mpl::sizeof_<boost::mpl::placeholders::_1>,
+                    boost::mpl::int_<8> > >,
+                boost::mpl::integral_c<size_t, bit_size>
     >::type >::type iter_;
 
     typedef typename boost::mpl::end<builtins_>::type last_;
     typedef typename boost::mpl::eval_if<
-    boost::is_same<iter_,last_>
-    , boost::mpl::identity< no_int<bit_size> >
-    , boost::mpl::deref<iter_>
-    >::type type;
+        boost::is_same<iter_,last_>
+        , boost::mpl::identity< no_int<bit_size> >
+        , boost::mpl::deref<iter_>
+        >::type type;
 };
-}
+} // end namespace detail
+
 
 typedef detail::unsigned_integer<1>::type  uint1_type;
 typedef detail::unsigned_integer<8>::type  uint8_type;
