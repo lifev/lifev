@@ -1,36 +1,38 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
-               2006-2010 EPFL, Politecnico di Milano
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief AztecOO preconditioner
- *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 17-11-2009
+    @file
+    @brief AztecOO preconditioner
+
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 17-11-2009
  */
 
 #include "AztecOOPreconditioner.hpp"
@@ -38,6 +40,9 @@
 namespace LifeV
 {
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 AztecOOPreconditioner::AztecOOPreconditioner():
         super                   ( ),
         M_solver                ( )
@@ -49,16 +54,56 @@ AztecOOPreconditioner::AztecOOPreconditioner():
 
 }
 
-void
-AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
-                                          const std::string& section )
+
+// ===================================================
+// Methods
+// ===================================================
+int
+AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::setDataFromGetPot(dataFile, section) \n";
+    Debug( 7100 ) << "AztecOOPreconditioner::buildPreconditioner( Operator ) \n";
 #endif
 
-    createList( M_List, dataFile, section, "AztecOO" );
+    if ( this->M_preconditionerCreated )
+        precReset();
+
+    M_solver->getSolver().SetPrecMatrix( Operator->getMatrixPtr().get() );
+
+    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
+    M_solver->getSolver().SetAztecOption( AZ_keep_info, 1 );
+
+    Real estimateConditionNumber;
+    M_solver->getSolver().ConstructPreconditioner( estimateConditionNumber );
+
+    this->M_preconditionerCreated = true;
+
+    return ( EXIT_SUCCESS );
+}
+
+void
+AztecOOPreconditioner::precReset()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::precReset() \n";
+#endif
+
+    M_solver->getSolver().SetAztecOption( AZ_keep_info, 0 );
+    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
+
+    // Perform one "fake" iteration to delete the preconditioner
+    int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
+    M_solver->getSolver().SetAztecOption( AZ_output, AZ_none );
+    //M_solver->getSolver().GetRHS()->PutScalar( 1.0 );
+    //M_solver->getSolver().GetLHS()->PutScalar( 0.0 );
+    M_solver->getSolver().Iterate( 0, 1.e14 );
+    M_solver->getSolver().SetAztecOption( AZ_output, AZoutputOption );
+
+    //M_solver->getSolver().DestroyPreconditioner();
+
+    this->M_preconditionerCreated = false;
 }
 
 void
@@ -120,30 +165,25 @@ AztecOOPreconditioner::createList( list_Type& /*list*/, const GetPot& dataFile, 
         M_solver->getParameterList().print(std::cout);
 }
 
-int
-AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
+// ===================================================
+// Set Methods
+// ===================================================
+void
+AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+                                          const std::string& section )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::buildPreconditioner( Operator ) \n";
+    Debug( 7100 ) << "AztecOOPreconditioner::setDataFromGetPot(dataFile, section) \n";
 #endif
 
-    if ( this->M_preconditionerCreated )
-        precReset();
-
-    M_solver->getSolver().SetPrecMatrix( Operator->getMatrixPtr().get() );
-
-    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
-    M_solver->getSolver().SetAztecOption( AZ_keep_info, 1 );
-
-    Real estimateConditionNumber;
-    M_solver->getSolver().ConstructPreconditioner( estimateConditionNumber );
-
-    this->M_preconditionerCreated = true;
-
-    return ( EXIT_SUCCESS );
+    createList( M_List, dataFile, section, "AztecOO" );
 }
 
+
+// ===================================================
+// Get Methods
+// ===================================================
 Real
 AztecOOPreconditioner::Condest()
 {
@@ -184,30 +224,6 @@ AztecOOPreconditioner::getPrecPtr()
         return  prec;
     }
     return EpetraPreconditioner::prec_type();
-}
-
-void
-AztecOOPreconditioner::precReset()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::precReset() \n";
-#endif
-
-    M_solver->getSolver().SetAztecOption( AZ_keep_info, 0 );
-    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
-
-    // Perform one "fake" iteration to delete the preconditioner
-    int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
-    M_solver->getSolver().SetAztecOption( AZ_output, AZ_none );
-    //M_solver->getSolver().GetRHS()->PutScalar( 1.0 );
-    //M_solver->getSolver().GetLHS()->PutScalar( 0.0 );
-    M_solver->getSolver().Iterate( 0, 1.e14 );
-    M_solver->getSolver().SetAztecOption( AZ_output, AZoutputOption );
-
-    //M_solver->getSolver().DestroyPreconditioner();
-
-    this->M_preconditionerCreated = false;
 }
 
 } // namespace LifeV

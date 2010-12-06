@@ -1,32 +1,39 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Simone Deparis <simone.deparis@epfl.ch>
-       Date: 2006-11-09
+    This file is part of LifeV.
 
-  Copyright (C) 2006 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file EpetraPreconditioner.hpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \date 2006-11-09
- */
+//@HEADER
 
+/*!
+    @file
+    @brief ML preconditioner
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 09-11-0006
+ */
 
 #ifndef _MLPRECONDITIONER_HPP_
 #define _MLPRECONDITIONER_HPP_
@@ -55,10 +62,9 @@ class MLPreconditioner:
 {
 public:
 
-    /** @name Typedefs
-     */
+    //! @name Public Types
     //@{
-    //$$    typedef Ifpack_Preconditioner prec_raw_type;
+
     typedef EpetraPreconditioner                 super;
 
     typedef ML_Epetra::MultiLevelPreconditioner  prec_raw_type;
@@ -66,18 +72,16 @@ public:
 
     typedef super::operator_raw_type             operator_raw_type;
     typedef super::operator_type                 operator_type;
+
     //@}
 
 
-    /** @name Constructors, destructor
-     */
+    //! @name Constructors & Destructor
     //@{
     //! default constructor.
     MLPreconditioner();
 
-    //@{
     //! destructor.
-
     ~MLPreconditioner();
 
     //! constructor from matrix A.
@@ -86,20 +90,8 @@ public:
 
     //@}
 
-
-    /** @name  Methods
-     */
-
-    void                    setDataFromGetPot ( const GetPot&      dataFile,
-                                                const std::string& section );
-
-    double                  Condest ();
-
-    super::prec_raw_type*   getPrec();
-
-    super::prec_type   getPrecPtr() {return M_Prec;}
-
-    std::string             precType() {return M_precType;}
+    //! @name Methods
+    //@{
 
     int                     buildPreconditioner(operator_type& A);
 
@@ -121,9 +113,6 @@ public:
                                     const std::string& section,
                                     const std::string& subSection = "ML" );
 
-    int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
-    bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
-
     virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     {
         return M_Prec->ApplyInverse(X, Y);
@@ -134,11 +123,40 @@ public:
         return M_Prec->Apply(X, Y);
     }
 
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    void                    setDataFromGetPot ( const GetPot&      dataFile,
+                                                const std::string& section );
+
+    int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    double                  Condest ();
+
+    super::prec_raw_type*   getPrec();
+
+    super::prec_type   getPrecPtr() {return M_Prec;}
+
+    std::string             precType() {return M_precType;}
+
+    bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
+
     const Epetra_Map & OperatorRangeMap() const
     {return M_Prec->OperatorRangeMap();}
 
     const Epetra_Map & OperatorDomainMap() const
     {return M_Prec->OperatorDomainMap();}
+
+    //@}
 
 protected:
 

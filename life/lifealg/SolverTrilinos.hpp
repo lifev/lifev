@@ -1,33 +1,40 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
- This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- Author(s): Simone Deparis   <simone.deparis@epfl.ch>
-            Gilles Fourestey <gilles.fourestey@epfl.ch>
-      Date: 2006-11-08
+    This file is part of LifeV.
 
- Copyright (C) 2006 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file SolverTrilinos.hpp
-   \author Simone Deparis   <simone.deparis@epfl.ch>
-   \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-   \date 2006-11-08
-*/
+//@HEADER
+
+/*!
+    @file
+    @brief SolverTrilinos
+
+    @author Simone Deparis   <simone.deparis@epfl.ch>
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 08-11-2006
+ */
 
 #ifndef __SolverTrilinos_H
 #define __SolverTrilinos_H 1
@@ -77,6 +84,9 @@ class SolverTrilinos
 {
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef double                           value_type;
 
     typedef SolverTrilinos                   solver_type;
@@ -90,6 +100,7 @@ public:
     typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
     typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
 
+    //@}
 
     //! @name Constructors & Destructor
     //@{
@@ -99,63 +110,7 @@ public:
 
     //@}
 
-
-    //! @name Get Method
-    //@{
-
-    //! Total number of iterations
-    int NumIters() const;
-
-    //! Maximum Total number of iterations
-    int MaxIter() const;
-
-    //! True Residual
-    double TrueResidual();
-
-    /** Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
-    prec_type& getPrec();
-
-    void getAztecStatus( double status[AZ_STATUS_SIZE]);
-
-    Teuchos::ParameterList& getParameterList();
-
-    AztecOO& getSolver();
-
-    //@}
-
-
-    //! @name Set Method
-    //@{
-
-    //! Method to set communicator for Displayer (for empty constructor)
-    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm);
-
-    //! Method to set matrix from EpetraMatrix
-    void setMatrix(matrix_type& m);
-
-    /** Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system*/
-    void setOperator(Epetra_Operator& op);
-
-    //! Method to set an EpetraPreconditioner preconditioner
-    void setPreconditioner( prec_type& _prec );
-
-    /** Method to set a general Epetra_Operator as preconditioner*/
-    void setPreconditioner( comp_prec_type& _prec );
-
-    void setDataFromGetPot( const GetPot& dfile, const std::string& section );
-
-    void setParameters( bool cerr_warning_if_unused = false );
-
-    void setTolMaxiter( const double tol, const int maxiter = -1 );
-
-    //! if set to true,  do not recompute the preconditioner
-    void setReusePreconditioner( const bool reuse );
-
-    boost::shared_ptr<Displayer> displayer() {return M_displayer;}
-    //@}
-
-
-    //! @name Methods
+   //! @name Methods
     //@{
 
     //! solve
@@ -208,14 +163,65 @@ public:
     */
     void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner);
 
-
-    //@}
-
+    void precReset();
 
     // Return if preconditioner has been setted
     bool isPrecSet() const;
 
-    void precReset() { M_prec->precReset(); }
+    //@}
+
+    //! @name Set Method
+    //@{
+
+    //! Method to set communicator for Displayer (for empty constructor)
+    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm);
+
+    //! Method to set matrix from EpetraMatrix
+    void setMatrix(matrix_type& m);
+
+    /** Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system*/
+    void setOperator(Epetra_Operator& op);
+
+    //! Method to set an EpetraPreconditioner preconditioner
+    void setPreconditioner( prec_type& _prec );
+
+    /** Method to set a general Epetra_Operator as preconditioner*/
+    void setPreconditioner( comp_prec_type& _prec );
+
+    void setDataFromGetPot( const GetPot& dfile, const std::string& section );
+
+    void setParameters( bool cerr_warning_if_unused = false );
+
+    void setTolMaxiter( const double tol, const int maxiter = -1 );
+
+    //! if set to true,  do not recompute the preconditioner
+    void setReusePreconditioner( const bool reuse );
+
+    boost::shared_ptr<Displayer> displayer();
+    //@}
+
+    //! @name Get Method
+    //@{
+
+    //! Total number of iterations
+    int NumIters() const;
+
+    //! Maximum Total number of iterations
+    int MaxIter() const;
+
+    //! True Residual
+    double TrueResidual();
+
+    /** Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
+    prec_type& getPrec();
+
+    void getAztecStatus( double status[AZ_STATUS_SIZE]);
+
+    Teuchos::ParameterList& getParameterList();
+
+    AztecOO& getSolver();
+
+    //@}
 
 private:
 

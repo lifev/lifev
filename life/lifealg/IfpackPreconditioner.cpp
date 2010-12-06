@@ -1,30 +1,38 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Simone Deparis <simone.deparis@epfl.ch>
-       Date: 2006-11-09
+    This file is part of LifeV.
 
-  Copyright (C) 2006 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file EpetraPreconditioner.cpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \date 2006-11-09
+//@HEADER
+
+/*!
+    @file
+    @brief Ifpack preconditioner
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 09-11-2006
  */
 
 #include "IfpackPreconditioner.hpp"
@@ -32,6 +40,9 @@
 namespace LifeV
 {
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 IfpackPreconditioner::IfpackPreconditioner():
         super (),
         M_Prec(),
@@ -43,13 +54,10 @@ IfpackPreconditioner::IfpackPreconditioner():
 IfpackPreconditioner::~IfpackPreconditioner()
 {}
 
-void
-IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
-                                         const std::string& section )
-{
-    createIfpackList( this->M_List, dataFile, section, "ifpack" );
-}
 
+// ===================================================
+// Methods
+// ===================================================
 int
 IfpackPreconditioner::buildPreconditioner(operator_type& _oper)
 {
@@ -79,18 +87,6 @@ IfpackPreconditioner::buildPreconditioner(operator_type& _oper)
     return ( EXIT_SUCCESS );
 }
 
-Real
-IfpackPreconditioner::Condest()
-{
-    return M_Prec->Condest();
-}
-
-EpetraPreconditioner::prec_raw_type*
-IfpackPreconditioner::getPrec()
-{
-    return M_Prec.get();
-}
-
 void
 IfpackPreconditioner::precReset()
 {
@@ -100,6 +96,14 @@ IfpackPreconditioner::precReset()
     this->M_preconditionerCreated = false;
 }
 
+void
+IfpackPreconditioner::createList( list_Type&         list,
+                             const GetPot&      dataFile,
+                             const std::string& section,
+                             const std::string& subSection )
+{
+    createIfpackList( list, dataFile, section, subSection );
+}
 
 void
 IfpackPreconditioner::createIfpackList(       list_Type&   list,
@@ -195,6 +199,90 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     list.set("schwarz: filter singletons",  schwarzFilterSingletons);
 
     if (displayList) list.print(std::cout);
+}
+
+int
+IfpackPreconditioner::ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+{
+    return M_Prec->ApplyInverse(X, Y);
+}
+
+int
+IfpackPreconditioner::Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+{
+    return M_Prec->Apply(X, Y);
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+                                         const std::string& section )
+{
+    createIfpackList( this->M_List, dataFile, section, "ifpack" );
+}
+
+int
+IfpackPreconditioner::SetUseTranspose( bool useTranspose )
+{
+    return M_Prec->SetUseTranspose(useTranspose);
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+bool
+IfpackPreconditioner::set() const
+{
+    return M_Prec;
+}
+
+Real
+IfpackPreconditioner::Condest()
+{
+    return M_Prec->Condest();
+}
+
+EpetraPreconditioner::prec_raw_type*
+IfpackPreconditioner::getPrec()
+{
+    return M_Prec.get();
+}
+
+IfpackPreconditioner::super::prec_type
+IfpackPreconditioner::getPrecPtr()
+{
+    return M_Prec;
+}
+
+std::string
+IfpackPreconditioner::precType()
+{
+    return M_precType;
+}
+
+const int&
+IfpackPreconditioner::getOverlapLevel() const
+{
+    return M_overlapLevel;
+}
+
+bool
+IfpackPreconditioner::UseTranspose(  ) {
+    return M_Prec->UseTranspose();
+}
+
+const Epetra_Map &
+IfpackPreconditioner::OperatorRangeMap() const
+{
+    return M_Prec->OperatorRangeMap();
+}
+
+const Epetra_Map &
+IfpackPreconditioner::OperatorDomainMap() const
+{
+    return M_Prec->OperatorDomainMap();
 }
 
 } // namespace LifeV

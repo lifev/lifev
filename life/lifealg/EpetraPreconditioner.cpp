@@ -1,36 +1,38 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
-               2006-2010 EPFL, Politecnico di Milano
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief Epetra preconditioner
- *
- *  @author Simone Deparis <simone.deparis@epfl.ch>
- *  @date 09-11-2006
+    @file
+    @brief Epetra preconditioner
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 09-11-2006
  */
 
 #include "EpetraPreconditioner.hpp"
@@ -64,14 +66,7 @@ EpetraPreconditioner::~EpetraPreconditioner()
 // ===================================================
 // Methods
 // ===================================================
-//void
-//EpetraPreconditioner::createList(       list_Type&   list,
-//                                  const GetPot&      dataFile,
-//                                  const std::string& section,
-//                                  const std::string& subSection )
-//{
-//    createPreconditionerList( list, dataFile, section, subSection );
-//}
+
 
 // ===================================================
 // Epetra Operator Interface Methods
@@ -138,6 +133,12 @@ EpetraPreconditioner::setSolver( SolverTrilinos& /*solver*/ )
 // ===================================================
 // Get Methods
 // ===================================================
+const bool&
+EpetraPreconditioner::preconditionerCreated()
+{
+    return M_preconditionerCreated;
+}
+
 const EpetraPreconditioner::list_Type&
 EpetraPreconditioner::getList() const
 {
@@ -148,12 +149,6 @@ EpetraPreconditioner::list_Type&
 EpetraPreconditioner::list()
 {
     return M_List;
-}
-
-const bool&
-EpetraPreconditioner::preconditionerCreated()
-{
-    return M_preconditionerCreated;
 }
 
 } // namespace LifeV

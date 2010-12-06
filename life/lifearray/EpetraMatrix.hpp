@@ -1,36 +1,40 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-   This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
-   Simone Deparis <simone.deparis@epfl.ch>
-   Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   Date: 2006-10-04, 2009-11-03
+    This file is part of LifeV.
 
-   Copyright (C) 2006,2009 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file EpetraMatrix.hpp
-   \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date   2009-11-03
+//@HEADER
 
-*/
+/*!
+    @file
+    @brief EpetraMatrix
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 03-11-2009
+ */
 
 #ifndef _EPETRAMATRIX_HPP_
 #define _EPETRAMATRIX_HPP_
@@ -65,9 +69,18 @@ class EpetraMatrix
 {
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef Epetra_FECrsMatrix             matrix_type;
     typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
     typedef EpetraVector                   vector_type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
 
     //! Constructor for square and rectangular matrices
     /*!
@@ -92,22 +105,49 @@ public:
 
     ~EpetraMatrix() {};
 
-    //! Return the shared_pointer of the Epetra_FECrsMatrix
-    matrix_ptrtype& getMatrixPtr() {return M_epetraCrs;}
-    //! Return the const shared_pointer of the Epetra_FECrsMatrix
-    const matrix_ptrtype& getMatrixPtr() const {return M_epetraCrs;}
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! Unary operator+
+    EpetraMatrix& operator += (const EpetraMatrix& _matrix);
+
+    //! Assignment operator
+    EpetraMatrix&   operator=   (const EpetraMatrix& _matrix);
+
+    //! Matrix-Vector multiplication
+    vector_type     operator *  (const vector_type& vec) const;
+
+    //! Unary operator* (it scales the matrix by the factor val)
+    EpetraMatrix&   operator *= (const DataType     val);
+
+    //! const operator* (it returns a rescaled matrix this)
+    EpetraMatrix    operator *  (const DataType     val) const;
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
     //! If the matrix has been filled, this function will reopen the Matrix
     void openCrsMatrix();
+
     //! This function removes all the zeros in the matrix and add zero on the diagonal
     void removeZeros();
+
     /*! Swap the given shared pointer with the one of the matrix
      *  @param p pointer on the matrix
      */
     void swapCrsMatrix(matrix_ptrtype& p);
+
     /*! Swap the matrix with the one given as argument
      *  @param B matrix which is swapped
      */
     void swapCrsMatrix(EpetraMatrix<DataType>& B);
+
     /*! Multiply the EpetraMatrix by the first given matrix and put the result in the second given matrix
      *  @param transposeA if true, it transposes the EpetraMatrix
      *  @param B matrix that multiply the EpetraMatrix
@@ -118,6 +158,7 @@ public:
     int Multiply(bool transposeA,
                  const EpetraMatrix<DataType> &B, bool transposeB,
                  EpetraMatrix<DataType> &C, bool call_FillComplete_on_result=true) const;
+
     /*! Multiply the first EpetraVector given as a parameter by the EpetraMatrix and put the result into the second given EpetraVector
      *  @param transposeA if true, it transposes the EpetraMatrix
      *  @param x vector that will be multiply by the EpetraMatrix
@@ -125,18 +166,8 @@ public:
      */
     int Multiply(bool transposeA, const vector_type& x, vector_type &y) const;
 
-    //! Unary operator+
-    EpetraMatrix& operator += (const EpetraMatrix& _matrix);
     //! Add a multiple of a given matrix:  *this += val*_matrix
     void add(const DataType val, const EpetraMatrix& _matrix);
-    //! Assignment operator
-    EpetraMatrix&   operator=   (const EpetraMatrix& _matrix);
-    //! Matrix-Vector multiplication
-    vector_type     operator *  (const vector_type& vec) const;
-    //! Unary operator* (it scales the matrix by the factor val)
-    EpetraMatrix&   operator *= (const DataType     val);
-    //! const operator* (it returns a rescaled matrix this)
-    EpetraMatrix    operator *  (const DataType     val) const;
 
     //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
     void diagonalize ( std::vector<UInt> rVec, DataType const coeff, UInt offset=0 );
@@ -155,6 +186,7 @@ public:
                       vector_type &b,
                       std::vector<DataType> datumVec,
                       UInt offset=0 );
+
     /*! apply constraint on row r
      *  @param r row number
      *  @param coeff value to set entry (r,r) at
@@ -164,19 +196,6 @@ public:
     void diagonalize( UInt const r, DataType const coeff, vector_type &b,
                       DataType datum,
                       UInt offset=0 );
-
-
-    int getMeanNumEntries() const ;
-    void set_mat( UInt row, UInt col, DataType loc_val );
-
-    void set_mat_inc( int const numRows, int const numCols,
-                      std::vector<int> const row, std::vector<int> const col,
-                      DataType* const* const loc_val,
-                      int format = Epetra_FECrsMatrix::COLUMN_MAJOR);
-
-    void set_mat_inc( UInt row, UInt col, DataType loc_val );
-
-
 
     /*! Save the matrix into a MatrixMarket (.mtx) file
      *  @param filename file where the matrix will be saved
@@ -216,6 +235,93 @@ public:
     int GlobalAssemble(const boost::shared_ptr<const EpetraMap> & domainMap,
                        const boost::shared_ptr<const EpetraMap> & rangeMap);
 
+    //! insert the given value into the diagonal
+    /*! Pay intention that this will add values to the diagonal,
+        so for later added values with set_mat_inc, the one
+        will be added
+        Inserts Value on the local diagonal for diagonal elements specified by the input EpetraMap;
+        This methods works only if matrix is not closed.
+
+        \param entry: the entry that is inserted in the diagonal
+        \param Map: the EpetraMap
+        \param offset: an offset for the insertion of the diagonal entries
+        \param replace: if the matrix is filled and the diagonal entries are present this bool should be set to true.
+        Otherwise is the matrix is not filled it should be set to false.
+    */
+    void insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset = 0 );
+
+    //! insert the given value into the diagonal
+    /*! Pay intention that this will add values to the diagonal,
+        so for later added values with set_mat_inc, the one
+    will be added
+    Inserts Value on the local diagonal for diagonal elements >= from and < to;
+    If from > to, process all diagonal entries entries
+    If from = to, do nothing
+    This methods works only if matrix is not closed.
+    */
+    void insertValueDiagonal(const DataType& value, int from = -1, int to = -2);
+
+    //! insert ones into the diagonal to ensure the matrix' graph has a entry there
+    //! Pay intention that this will add ones to the diagonal,
+    //! so for later added values with set_mat_inc, the one
+    //! will be added
+    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
+    If from > to, process all diagonal entries entries
+    If from = to, do nothing
+    This methods works only if matrix is not closed.
+    */
+    void insertOneDiagonal(int from = -1, int to = -2);
+
+    //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
+    //! This method does not remove non zero entries in the diagonal.
+    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
+    If from > to, process all diagonal entries entries
+    If from = to, do nothing
+    This methods works only if matrix is not closed.
+    */
+    void insertZeroDiagonal(int from = -1, int to = -2);
+
+    //! Compute the norm 1 of the global matrix
+    /*!
+     * @return norm 1
+     */
+    double NormOne() const;
+
+    //! Compute the norm inf of the global matrix
+    /*!
+     * @return norm inf
+     */
+    double NormInf() const;
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    void set_mat( UInt row, UInt col, DataType loc_val );
+
+    void set_mat_inc( int const numRows, int const numCols,
+                      std::vector<int> const row, std::vector<int> const col,
+                      DataType* const* const loc_val,
+                      int format = Epetra_FECrsMatrix::COLUMN_MAJOR);
+
+    void set_mat_inc( UInt row, UInt col, DataType loc_val );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Return the shared_pointer of the Epetra_FECrsMatrix
+    matrix_ptrtype& getMatrixPtr() {return M_epetraCrs;}
+
+    //! Return the const shared_pointer of the Epetra_FECrsMatrix
+    const matrix_ptrtype& getMatrixPtr() const {return M_epetraCrs;}
+
+    int getMeanNumEntries() const ;
+
     int MyPID() { return  M_epetraCrs->Comm().MyPID(); }
 
     //! Return the row EpetraMap of the EpetraMatrix used in the assembling
@@ -250,63 +356,7 @@ public:
         return *M_rangeMap;
     }
 
-    //! insert ones into the diagonal to ensure the matrix' graph has a entry there
-    //! Pay intention that this will add ones to the diagonal,
-    //! so for later added values with set_mat_inc, the one
-    //! will be added
-    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
-    If from > to, process all diagonal entries entries
-    If from = to, do nothing
-    This methods works only if matrix is not closed.
-    */
-    void insertOneDiagonal(int from = -1, int to = -2);
-
-    //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
-    //! This method does not remove non zero entries in the diagonal.
-    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
-    If from > to, process all diagonal entries entries
-    If from = to, do nothing
-    This methods works only if matrix is not closed.
-    */
-    void insertZeroDiagonal(int from = -1, int to = -2);
-
-    //! insert the given value into the diagonal
-    /*! Pay intention that this will add values to the diagonal,
-        so for later added values with set_mat_inc, the one
-        will be added
-        Inserts Value on the local diagonal for diagonal elements specified by the input EpetraMap;
-        This methods works only if matrix is not closed.
-
-        \param entry: the entry that is inserted in the diagonal
-        \param Map: the EpetraMap
-        \param offset: an offset for the insertion of the diagonal entries
-        \param replace: if the matrix is filled and the diagonal entries are present this bool should be set to true.
-        Otherwise is the matrix is not filled it should be set to false.
-    */
-    void insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset = 0 );
-
-    //! Compute the norm 1 of the global matrix
-    /*!
-     * @return norm 1
-     */
-    double NormOne() const;
-
-    //! Compute the norm inf of the global matrix
-    /*!
-     * @return norm inf
-     */
-    double NormInf() const;
-
-    //! insert the given value into the diagonal
-    /*! Pay intention that this will add values to the diagonal,
-        so for later added values with set_mat_inc, the one
-    will be added
-    Inserts Value on the local diagonal for diagonal elements >= from and < to;
-    If from > to, process all diagonal entries entries
-    If from = to, do nothing
-    This methods works only if matrix is not closed.
-    */
-    void insertValueDiagonal(const DataType& value, int from = -1, int to = -2);
+    //@}
 
 private:
 
@@ -344,9 +394,17 @@ private:
 
 };
 
-//-------------------------------------------------------------------------------------------------------
-// CSR - VALUES
-//------------------------------------------------------------------------------------------------------
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+template <typename DataType>
+EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int indexBase ):
+        M_map      ( new EpetraMap  (_map)),
+        M_epetraCrs   ( new matrix_type( Copy, *M_map->getMap(Unique), numEntries, false)),
+        M_indexBase   ( indexBase )
+{
+}
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
@@ -355,14 +413,6 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& _matrix):
         M_rangeMap(_matrix.M_rangeMap),
         M_epetraCrs(new matrix_type(*_matrix.M_epetraCrs)),
         M_indexBase(_matrix.M_indexBase )
-{
-}
-
-template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries, int indexBase ):
-        M_map      ( new EpetraMap  (_map)),
-        M_epetraCrs   ( new matrix_type( Copy, *M_map->getMap(Unique), numEntries, false)),
-        M_indexBase   ( indexBase )
 {
 }
 
@@ -414,6 +464,9 @@ EpetraMatrix<DataType>::EpetraMatrix( matrix_ptrtype CRSMatrixPtr ):
 }
 
 
+// ===================================================
+// Operators
+// ===================================================
 template <typename DataType>
 EpetraMatrix<DataType>&
 EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
@@ -430,17 +483,6 @@ EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
 
     return *this;
     //     return matrix;
-}
-
-template <typename DataType>
-void EpetraMatrix<DataType>::add (const DataType val, const EpetraMatrix& _matrix)
-{
-    //    EpetraMatrix matrix(Copy, _matrix.RowMap(), _matrix.GlobalMaxNumEntries());
-#if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
-    EpetraExt::MatrixMatrix::Add(*_matrix.getMatrixPtr(), false, val, *this->getMatrixPtr(), 1.);
-#else
-#error error: do not have nor EpetraExt  8+
-#endif
 }
 
 template<typename DataType>
@@ -487,174 +529,127 @@ EpetraMatrix<DataType>::operator * (const DataType val) const
     return matr *= val;
 }
 
+// ===================================================
+// Methods
+// ===================================================
+//Method to open again a matrix
 template <typename DataType>
-void EpetraMatrix<DataType>::
-set_mat( UInt row, UInt col, DataType loc_val )
+void EpetraMatrix<DataType>::openCrsMatrix()
 {
-    //     if (M_epetraCrs->RowMap()
-
-    // incrementing row and cols by indexBase;
-    int irow(row + M_indexBase);
-    int icol(col + M_indexBase);
-
-    //    if (M_epetraCrs->RowMap().MyGID (row))
-    int ierr=M_epetraCrs->ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
-    if (ierr!=0)
-        { std::cout << " error in matrix replacement " << ierr << std::endl;}
-
-}
-
-template <typename DataType>
-void EpetraMatrix<DataType>::
-set_mat_inc( UInt row, UInt col, DataType loc_val )
-{
-
-    // incrementing row and cols by indexBase;
-    int irow(row + M_indexBase);
-    int icol(col + M_indexBase);
-
-    //    int  me    = M_epetraCrs->Comm().MyPID();
-
-    //       std::cout << " -> ";
-    //       std::cout << irow << " " << icol << " " << loc_val << std::endl;
-    int ierr = M_epetraCrs->InsertGlobalValues (1, &irow, 1, &icol, &loc_val);
-
-    if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
-    //    std::cout << ierr << std::endl;
-}
-
-template <typename DataType>
-void EpetraMatrix<DataType>::
-set_mat_inc( int const numRows, int const numCols,
-             std::vector<int> const row, std::vector<int> const col,
-             DataType* const* const loc_val,
-             int format)
-{
-
-    // incrementing row and cols by indexBase;
-    std::vector<int> irow(numRows);
-    std::vector<int> icol(numCols);
-
-    std::vector<int>::const_iterator pt;
-
-    pt = row.begin();
-    for (std::vector<int>::iterator i(irow.begin()); i !=  irow.end() && pt != row.end(); ++i, ++pt)
-        *i = *pt + M_indexBase;
-
-    pt = col.begin();
-    for (std::vector<int>::iterator i(icol.begin()); i !=  icol.end() && pt != col.end(); ++i, ++pt)
-        *i = *pt + M_indexBase;
-
-
-    int ierr = M_epetraCrs->InsertGlobalValues (numRows, &irow[0], numCols, &icol[0], loc_val, format);
-
-    if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
-    //    std::cout << ierr << std::endl;
-}
-
-template <typename DataType>
-int EpetraMatrix<DataType>::GlobalAssemble()
-{
-    if ( M_epetraCrs->Filled ())
+    if (M_epetraCrs->Filled())
     {
-        //         if (M_epetraCrs->Comm().MyPID() == 0)
-        //             std::cout << "Matrix is already filled" << std::endl;
-        return -1;
-    }
+        int meanNumEntries = this->getMeanNumEntries();
+        matrix_ptrtype tmp(M_epetraCrs);
+        M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
 
-    insertZeroDiagonal();
-    M_domainMap = M_map;
-    M_rangeMap  = M_map;
-    return  M_epetraCrs->GlobalAssemble();
-}
+#ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
+        EpetraExt::MatrixMatrix::Add(*tmp, false, 1., *M_epetraCrs, 1., false);
+#elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
+        EpetraExt::MatrixMatrix::Add(*tmp, false, 1., *M_epetraCrs, 1.);
+#else
+#error error: do not have nor EpetraExt 6 nor 7 or 8
+#endif
+        M_domainMap.reset();
+        M_rangeMap.reset();
 
-template <typename DataType>
-int EpetraMatrix<DataType>::GlobalAssemble(const boost::shared_ptr<const EpetraMap> & domainMap,
-                                           const boost::shared_ptr<const EpetraMap> & rangeMap)
-{
-    if ( M_epetraCrs->Filled ())
-    {
-        //         if (M_epetraCrs->Comm().MyPID() == 0)
-        //             std::cout << "Matrix is already filled" << std::endl;
-        return -1;
-    }
-
-    M_domainMap = domainMap;
-    M_rangeMap  = rangeMap;
-    return  M_epetraCrs->GlobalAssemble(*domainMap->getMap(Unique), *rangeMap->getMap(Unique));
-}
-
-
-//! insert the given value into the diagonal according to a specified EpetraMap
-//! Pay intention that this will add values to the diagonal,
-//! so for later added values with set_mat_inc, the value
-//! will be added
-template <typename DataType>
-void
-EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset )
-{
-    for (UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)//num from 1
-    {
-        set_mat_inc(  offset + Map.getMap(Unique)->GID(i)-1 ,   offset + Map.getMap(Unique)->GID(i)-1, entry);
     }
 }
 
 
-//! insert the given value into the diagonal
-//! Pay intention that this will add values to the diagonal,
-//! so for later added values with set_mat_inc, the value
-//! will be added
+//Method to remove all the zeros contain in the matrix
 template <typename DataType>
-void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, int from, int to)
+void EpetraMatrix<DataType>::removeZeros()
 {
-    if ( M_epetraCrs->Filled ())
+    if (M_epetraCrs->Filled())
     {
-        if (M_epetraCrs->Comm().MyPID() == 0)
-            std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
-        return;
-    }
+        int meanNumEntries = this->getMeanNumEntries();
+        matrix_ptrtype tmp(M_epetraCrs);
+        M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
 
-    if (to == from) return;
+        //Variables to store the informations
+        int NumEntries;
+        double* Values;
+        int* Indices;
+        int row(0);
 
-    if (to < from) // do all entries
-    {
-        from = M_epetraCrs->RowMap().MinMyGID ();
-        to = M_epetraCrs->RowMap().MaxMyGID () + 1;
-    }
+        for (int i(0); i<tmp->NumGlobalRows(); ++i)
+        {
+            row = tmp->LRID(i+M_indexBase);
+            tmp->ExtractMyRowView(row, NumEntries, Values, Indices);
 
-    int* p =  M_epetraCrs->RowMap().MyGlobalElements();
-    int ierr;
+            int Indices2[NumEntries];
+            double Values2[NumEntries];
+            int NumEntries2(0);
 
-    for (int i(0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p)
-    {
-        if (*p < from || *p >= to) continue;
-
-        ierr = M_epetraCrs->InsertGlobalValues (1, p, 1, p, &value);
-
-        if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
+            for (int j(0); j<NumEntries; ++j)
+            {
+                if (Values[j] != 0.0)
+                {
+                    Indices2[NumEntries2] = tmp->GCID(Indices[j]);
+                    Values2[NumEntries2] = Values[j];
+                    NumEntries2++;
+                }
+            }
+            M_epetraCrs->InsertGlobalValues(row,NumEntries2,Values2,Indices2);
+        }
+        insertZeroDiagonal();
+        M_epetraCrs->GlobalAssemble();
     }
 }
 
-//! insert ones into the diagonal to ensure the matrix' graph has a entry there
-//! Pay intention that this will add ones to the diagonal,
-//! so for later added values with set_mat_inc, the one
-//! will be added
+//Swap the matrix with a new one
+
 template <typename DataType>
-void EpetraMatrix<DataType>::insertOneDiagonal(int from, int to)
+void EpetraMatrix<DataType>::swapCrsMatrix(matrix_ptrtype& p)
 {
-    insertValueDiagonal(1.0, from, to);
+    M_epetraCrs.swap(p);
 }
 
 
-
-// Adds zeros into the diagonal to ensure the matrix' graph has a entry there
-// This method does not remove non zero entries in the diagonal.
 template <typename DataType>
-void EpetraMatrix<DataType>::insertZeroDiagonal( int from, int to)
+void EpetraMatrix<DataType>::swapCrsMatrix(EpetraMatrix<DataType>& B)
 {
-    insertValueDiagonal(0.0, from, to);
+    M_epetraCrs.swap(B.M_epetraCrs);
 }
 
+template <typename DataType>
+int EpetraMatrix<DataType>::Multiply(bool transposeA,
+                                     const EpetraMatrix<DataType> &B, bool transposeB,
+                                     EpetraMatrix<DataType> &C, bool call_FillComplete_on_result) const
+{
+    //return EpetraExt::MatrixMatrix::Multiply(*M_epetraCrs,transposeA,*B.getMatrixPtr(),transposeB,*C.getMatrixPtr(),call_FillComplete_on_result);
+    int errCode = EpetraExt::MatrixMatrix::Multiply(*M_epetraCrs,transposeA,*B.getMatrixPtr(),transposeB,*C.getMatrixPtr(),false);
+    if (call_FillComplete_on_result)
+        C.GlobalAssemble();
+
+    return errCode;
+}
+
+
+template <typename DataType>
+int EpetraMatrix<DataType>::Multiply(bool transposeA, const vector_type& x, vector_type &y) const
+{
+    ASSERT_PRE(M_epetraCrs->Filled(),
+               "EpetraMatrix<DataType>::Multiply: GlobalAssemble(...) must be called first");
+    ASSERT_PRE(x.getMap().MapsAreSimilar(*M_domainMap),
+               "EpetraMatrix<DataType>::Multiply: x map is different from M_domainMap");
+    ASSERT_PRE(y.getMap().MapsAreSimilar(*M_rangeMap),
+               "EpetraMatrix<DataType>::Multiply: y map is different from M_rangeMap");
+
+
+    return M_epetraCrs->Multiply(transposeA,x.getEpetraVector(),y.getEpetraVector());
+}
+
+template <typename DataType>
+void EpetraMatrix<DataType>::add (const DataType val, const EpetraMatrix& _matrix)
+{
+    //    EpetraMatrix matrix(Copy, _matrix.RowMap(), _matrix.GlobalMaxNumEntries());
+#if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
+    EpetraExt::MatrixMatrix::Add(*_matrix.getMatrixPtr(), false, val, *this->getMatrixPtr(), 1.);
+#else
+#error error: do not have nor EpetraExt  8+
+#endif
+}
 
 //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
 template <typename DataType>
@@ -1050,21 +1045,6 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 
 }
 
-
-template <typename DataType>
-int EpetraMatrix<DataType>::getMeanNumEntries() const
-{
-    const int minEntries = M_epetraCrs->MaxNumEntries ()/2;
-    if ( M_epetraCrs->NumMyRows() )
-        return minEntries;
-
-    int meanNumEntries = M_epetraCrs->NumMyNonzeros()/M_epetraCrs->NumMyRows();
-    if ( meanNumEntries < minEntries || meanNumEntries > 2*minEntries )
-        return minEntries;
-    return meanNumEntries;
-}
-
-
 template <typename DataType>
 void EpetraMatrix<DataType>::matrixMarket( std::string const &filename, const bool headers)
 {
@@ -1111,112 +1091,105 @@ void EpetraMatrix<DataType>::spy( std::string const &filename)
 
 }
 
-//Method to open again a matrix
 template <typename DataType>
-void EpetraMatrix<DataType>::openCrsMatrix()
+int EpetraMatrix<DataType>::GlobalAssemble()
 {
-    if (M_epetraCrs->Filled())
+    if ( M_epetraCrs->Filled ())
     {
-        int meanNumEntries = this->getMeanNumEntries();
-        matrix_ptrtype tmp(M_epetraCrs);
-        M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
+        //         if (M_epetraCrs->Comm().MyPID() == 0)
+        //             std::cout << "Matrix is already filled" << std::endl;
+        return -1;
+    }
 
-#ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
-        EpetraExt::MatrixMatrix::Add(*tmp, false, 1., *M_epetraCrs, 1., false);
-#elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
-        EpetraExt::MatrixMatrix::Add(*tmp, false, 1., *M_epetraCrs, 1.);
-#else
-#error error: do not have nor EpetraExt 6 nor 7 or 8
-#endif
-        M_domainMap.reset();
-        M_rangeMap.reset();
+    insertZeroDiagonal();
+    M_domainMap = M_map;
+    M_rangeMap  = M_map;
+    return  M_epetraCrs->GlobalAssemble();
+}
 
+template <typename DataType>
+int EpetraMatrix<DataType>::GlobalAssemble(const boost::shared_ptr<const EpetraMap> & domainMap,
+                                           const boost::shared_ptr<const EpetraMap> & rangeMap)
+{
+    if ( M_epetraCrs->Filled ())
+    {
+        //         if (M_epetraCrs->Comm().MyPID() == 0)
+        //             std::cout << "Matrix is already filled" << std::endl;
+        return -1;
+    }
+
+    M_domainMap = domainMap;
+    M_rangeMap  = rangeMap;
+    return  M_epetraCrs->GlobalAssemble(*domainMap->getMap(Unique), *rangeMap->getMap(Unique));
+}
+
+
+//! insert the given value into the diagonal according to a specified EpetraMap
+//! Pay intention that this will add values to the diagonal,
+//! so for later added values with set_mat_inc, the value
+//! will be added
+template <typename DataType>
+void
+EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset )
+{
+    for (UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)//num from 1
+    {
+        set_mat_inc(  offset + Map.getMap(Unique)->GID(i)-1 ,   offset + Map.getMap(Unique)->GID(i)-1, entry);
     }
 }
 
 
-//Method to remove all the zeros contain in the matrix
+//! insert the given value into the diagonal
+//! Pay intention that this will add values to the diagonal,
+//! so for later added values with set_mat_inc, the value
+//! will be added
 template <typename DataType>
-void EpetraMatrix<DataType>::removeZeros()
+void EpetraMatrix<DataType>::insertValueDiagonal(const DataType& value, int from, int to)
 {
-    if (M_epetraCrs->Filled())
+    if ( M_epetraCrs->Filled ())
     {
-        int meanNumEntries = this->getMeanNumEntries();
-        matrix_ptrtype tmp(M_epetraCrs);
-        M_epetraCrs.reset(new matrix_type(Copy,M_epetraCrs->RowMap(), meanNumEntries ));
+        if (M_epetraCrs->Comm().MyPID() == 0)
+            std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
+        return;
+    }
 
-        //Variables to store the informations
-        int NumEntries;
-        double* Values;
-        int* Indices;
-        int row(0);
+    if (to == from) return;
 
-        for (int i(0); i<tmp->NumGlobalRows(); ++i)
-        {
-            row = tmp->LRID(i+M_indexBase);
-            tmp->ExtractMyRowView(row, NumEntries, Values, Indices);
+    if (to < from) // do all entries
+    {
+        from = M_epetraCrs->RowMap().MinMyGID ();
+        to = M_epetraCrs->RowMap().MaxMyGID () + 1;
+    }
 
-            int Indices2[NumEntries];
-            double Values2[NumEntries];
-            int NumEntries2(0);
+    int* p =  M_epetraCrs->RowMap().MyGlobalElements();
+    int ierr;
 
-            for (int j(0); j<NumEntries; ++j)
-            {
-                if (Values[j] != 0.0)
-                {
-                    Indices2[NumEntries2] = tmp->GCID(Indices[j]);
-                    Values2[NumEntries2] = Values[j];
-                    NumEntries2++;
-                }
-            }
-            M_epetraCrs->InsertGlobalValues(row,NumEntries2,Values2,Indices2);
-        }
-        insertZeroDiagonal();
-        M_epetraCrs->GlobalAssemble();
+    for (int i(0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p)
+    {
+        if (*p < from || *p >= to) continue;
+
+        ierr = M_epetraCrs->InsertGlobalValues (1, p, 1, p, &value);
+
+        if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
     }
 }
 
-//Swap the matrix with a new one
-
+//! insert ones into the diagonal to ensure the matrix' graph has a entry there
+//! Pay intention that this will add ones to the diagonal,
+//! so for later added values with set_mat_inc, the one
+//! will be added
 template <typename DataType>
-void EpetraMatrix<DataType>::swapCrsMatrix(matrix_ptrtype& p)
+void EpetraMatrix<DataType>::insertOneDiagonal(int from, int to)
 {
-    M_epetraCrs.swap(p);
+    insertValueDiagonal(1.0, from, to);
 }
 
-
+// Adds zeros into the diagonal to ensure the matrix' graph has a entry there
+// This method does not remove non zero entries in the diagonal.
 template <typename DataType>
-void EpetraMatrix<DataType>::swapCrsMatrix(EpetraMatrix<DataType>& B)
+void EpetraMatrix<DataType>::insertZeroDiagonal( int from, int to)
 {
-    M_epetraCrs.swap(B.M_epetraCrs);
-}
-
-template <typename DataType>
-int EpetraMatrix<DataType>::Multiply(bool transposeA,
-                                     const EpetraMatrix<DataType> &B, bool transposeB,
-                                     EpetraMatrix<DataType> &C, bool call_FillComplete_on_result) const
-{
-    //return EpetraExt::MatrixMatrix::Multiply(*M_epetraCrs,transposeA,*B.getMatrixPtr(),transposeB,*C.getMatrixPtr(),call_FillComplete_on_result);
-    int errCode = EpetraExt::MatrixMatrix::Multiply(*M_epetraCrs,transposeA,*B.getMatrixPtr(),transposeB,*C.getMatrixPtr(),false);
-    if (call_FillComplete_on_result)
-        C.GlobalAssemble();
-
-    return errCode;
-}
-
-
-template <typename DataType>
-int EpetraMatrix<DataType>::Multiply(bool transposeA, const vector_type& x, vector_type &y) const
-{
-    ASSERT_PRE(M_epetraCrs->Filled(),
-               "EpetraMatrix<DataType>::Multiply: GlobalAssemble(...) must be called first");
-    ASSERT_PRE(x.getMap().MapsAreSimilar(*M_domainMap),
-               "EpetraMatrix<DataType>::Multiply: x map is different from M_domainMap");
-    ASSERT_PRE(y.getMap().MapsAreSimilar(*M_rangeMap),
-               "EpetraMatrix<DataType>::Multiply: y map is different from M_rangeMap");
-
-
-    return M_epetraCrs->Multiply(transposeA,x.getEpetraVector(),y.getEpetraVector());
+    insertValueDiagonal(0.0, from, to);
 }
 
 template <typename DataType>
@@ -1231,7 +1204,92 @@ double EpetraMatrix<DataType>::NormInf() const
     return M_epetraCrs->NormInf();
 }
 
+
+// ===================================================
+// Set Methods
+// ===================================================
+template <typename DataType>
+void EpetraMatrix<DataType>::
+set_mat( UInt row, UInt col, DataType loc_val )
+{
+    //     if (M_epetraCrs->RowMap()
+
+    // incrementing row and cols by indexBase;
+    int irow(row + M_indexBase);
+    int icol(col + M_indexBase);
+
+    //    if (M_epetraCrs->RowMap().MyGID (row))
+    int ierr=M_epetraCrs->ReplaceGlobalValues (1, &irow, 1, &icol, &loc_val);
+    if (ierr!=0)
+        { std::cout << " error in matrix replacement " << ierr << std::endl;}
+
 }
+
+template <typename DataType>
+void EpetraMatrix<DataType>::
+set_mat_inc( UInt row, UInt col, DataType loc_val )
+{
+
+    // incrementing row and cols by indexBase;
+    int irow(row + M_indexBase);
+    int icol(col + M_indexBase);
+
+    //    int  me    = M_epetraCrs->Comm().MyPID();
+
+    //       std::cout << " -> ";
+    //       std::cout << irow << " " << icol << " " << loc_val << std::endl;
+    int ierr = M_epetraCrs->InsertGlobalValues (1, &irow, 1, &icol, &loc_val);
+
+    if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
+    //    std::cout << ierr << std::endl;
+}
+
+template <typename DataType>
+void EpetraMatrix<DataType>::
+set_mat_inc( int const numRows, int const numCols,
+             std::vector<int> const row, std::vector<int> const col,
+             DataType* const* const loc_val,
+             int format)
+{
+
+    // incrementing row and cols by indexBase;
+    std::vector<int> irow(numRows);
+    std::vector<int> icol(numCols);
+
+    std::vector<int>::const_iterator pt;
+
+    pt = row.begin();
+    for (std::vector<int>::iterator i(irow.begin()); i !=  irow.end() && pt != row.end(); ++i, ++pt)
+        *i = *pt + M_indexBase;
+
+    pt = col.begin();
+    for (std::vector<int>::iterator i(icol.begin()); i !=  icol.end() && pt != col.end(); ++i, ++pt)
+        *i = *pt + M_indexBase;
+
+
+    int ierr = M_epetraCrs->InsertGlobalValues (numRows, &irow[0], numCols, &icol[0], loc_val, format);
+
+    if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
+    //    std::cout << ierr << std::endl;
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+template <typename DataType>
+int EpetraMatrix<DataType>::getMeanNumEntries() const
+{
+    const int minEntries = M_epetraCrs->MaxNumEntries ()/2;
+    if ( M_epetraCrs->NumMyRows() )
+        return minEntries;
+
+    int meanNumEntries = M_epetraCrs->NumMyNonzeros()/M_epetraCrs->NumMyRows();
+    if ( meanNumEntries < minEntries || meanNumEntries > 2*minEntries )
+        return minEntries;
+    return meanNumEntries;
+}
+
+} // end namespace LifeV
 //@@
 //#undef OFFSET
 

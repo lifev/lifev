@@ -1,12 +1,42 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  <short description here>
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+    This file is part of LifeV.
 
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/** \file EpetraMap.cpp
-*/
+//@HEADER
+
+/*!
+    @file
+    @brief EpetraMap
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 26-10-2006
+
+    This class manages the distribution of elements of matrices or vectors on a parallel machine
+ */
 
 #include <life/lifealg/EpetraMap.hpp>
 #include <Epetra_Util.h>
@@ -15,9 +45,8 @@ namespace LifeV
 {
 
 // ===================================================
-//! Constructors
+// Constructors & Destructor
 // ===================================================
-
 EpetraMap::EpetraMap():
         M_repeatedEpetra_Map(),
         M_uniqueEpetraMap(),
@@ -145,32 +174,6 @@ EpetraMap::EpetraMap( const map_type map ):
     uniqueMap();
 }
 
-
-
-
-EpetraMap::map_ptrtype const &
-EpetraMap::getMap( EpetraMapType maptype)   const
-{
-    switch (maptype)
-    {
-    case Unique:
-        return getUniqueMap();
-    case Repeated:
-        return getRepeatedMap();
-    }
-    return getUniqueMap();
-}
-
-
-boost::shared_ptr<EpetraMap>
-EpetraMap::createRootMap(int const root)   const
-{
-
-    boost::shared_ptr<EpetraMap> rootMap(new EpetraMap(Epetra_Util::Create_Root_Map(*getUniqueMap(), root) ));
-    return rootMap;
-}
-
-
 /*! Builds a submap of map _epetraMap with a given positive offset and
   the maximum id to consider (in the new count)
   eg: offset = 2, maxid = 6;
@@ -215,7 +218,9 @@ EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const i
 
 }
 
-
+// ===================================================
+// Operators
+// ===================================================
 EpetraMap &
 EpetraMap::operator = (const EpetraMap& _epetraMap)
 {
@@ -292,10 +297,6 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
     return *this;
 }
 
-
-//
-
-
 /*
 EpetraMap &
 EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
@@ -313,8 +314,6 @@ EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
 }
 */
 
-//
-
 EpetraMap &
 EpetraMap::operator += (int const size)
 {
@@ -330,9 +329,65 @@ EpetraMap::operator += (int const size)
     return *this;
 }
 
-//
+
+// ===================================================
+// Methods
+// ===================================================
+boost::shared_ptr<EpetraMap>
+EpetraMap::createRootMap(int const root)   const
+{
+
+    boost::shared_ptr<EpetraMap> rootMap(new EpetraMap(Epetra_Util::Create_Root_Map(*getUniqueMap(), root) ));
+    return rootMap;
+}
+
+bool
+EpetraMap::MapsAreSimilar( EpetraMap const& _epetraMap) const
+{
+
+    if ( this == &_epetraMap )
+        return true;
+
+    return( getUniqueMap()->SameAs( *_epetraMap.getUniqueMap()) &&
+            getRepeatedMap()->SameAs( *_epetraMap.getRepeatedMap()) );
 
 
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+EpetraMap::map_ptrtype const &
+EpetraMap::getMap( EpetraMapType maptype)   const
+{
+    switch (maptype)
+    {
+    case Unique:
+        return getUniqueMap();
+    case Repeated:
+        return getRepeatedMap();
+    }
+    return getUniqueMap();
+}
+
+Epetra_Export const&
+EpetraMap::getExporter()
+{
+    createImportExport();
+    return **M_exporter;
+}
+
+Epetra_Import const&
+EpetraMap::getImporter()
+{
+    createImportExport();
+    return **M_importer;
+}
+
+
+// ===================================================
+// Private Methods
+// ===================================================
 EpetraMap::EpetraMap(const EpetraMap& _epetraMap):
         M_repeatedEpetra_Map(),
         M_uniqueEpetraMap(),
@@ -376,6 +431,26 @@ EpetraMap::uniqueMap()
     return;
 }
 
+void
+EpetraMap::createImportExport()
+{
+
+    if ( !getRepeatedMap() || !getUniqueMap() ) return;
+
+    // The exporter is needed to import to a repeated vector
+    if ( M_exporter.get() == 0 )
+        M_exporter.reset( new boost::shared_ptr<Epetra_Export> );
+
+    if ( M_exporter->get() == 0 )
+        M_exporter->reset( new Epetra_Export(*getRepeatedMap(), *getUniqueMap()) );
+
+    if ( M_importer.get() == 0 )
+        M_importer.reset( new boost::shared_ptr<Epetra_Import> );
+
+    if ( M_importer->get() == 0 )
+        M_importer->reset( new Epetra_Import(*getRepeatedMap(), *getUniqueMap()) );
+
+}
 
 void
 EpetraMap::bubbleSort(Epetra_IntSerialDenseVector& Elements)
@@ -432,57 +507,6 @@ EpetraMap::setUp(const RefFE&               refFE,
 
     createImportExport();
 }
-
-
-Epetra_Export const&
-EpetraMap::getExporter()
-{
-    createImportExport();
-    return **M_exporter;
-}
-
-Epetra_Import const&
-EpetraMap::getImporter()
-{
-    createImportExport();
-    return **M_importer;
-}
-
-
-void
-EpetraMap::createImportExport()
-{
-
-    if ( !getRepeatedMap() || !getUniqueMap() ) return;
-
-    // The exporter is needed to import to a repeated vector
-    if ( M_exporter.get() == 0 )
-        M_exporter.reset( new boost::shared_ptr<Epetra_Export> );
-
-    if ( M_exporter->get() == 0 )
-        M_exporter->reset( new Epetra_Export(*getRepeatedMap(), *getUniqueMap()) );
-
-    if ( M_importer.get() == 0 )
-        M_importer.reset( new boost::shared_ptr<Epetra_Import> );
-
-    if ( M_importer->get() == 0 )
-        M_importer->reset( new Epetra_Import(*getRepeatedMap(), *getUniqueMap()) );
-
-}
-
-bool
-EpetraMap::MapsAreSimilar( EpetraMap const& _epetraMap) const
-{
-
-    if ( this == &_epetraMap )
-        return true;
-
-    return( getUniqueMap()->SameAs( *_epetraMap.getUniqueMap()) &&
-            getRepeatedMap()->SameAs( *_epetraMap.getRepeatedMap()) );
-
-
-}
-
 
 } // end namespace LifeV
 

@@ -1,32 +1,42 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Gilles Fourestey gilles.fourestey@epfl.ch
-             Simone Deparis   simone.deparis@epfl.ch
-       Date: 2006-10-26
+    This file is part of LifeV.
 
-  Copyright (C) 2006 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-
+*******************************************************************************
 */
-/** \file EpetraMap.hpp
-*/
+//@HEADER
 
+/*!
+    @file
+    @brief EpetraMap
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 26-10-2006
+
+    This class manages the distribution of elements of matrices or vectors on a parallel machine
+ */
 
 #ifndef _EPETRAMAP_
 #define _EPETRAMAP_
@@ -59,19 +69,19 @@ class EpetraMap
 {
 public:
 
-
-    /** @name Typedefs
-     */
+    //! @name Public Types
     //@{
+
     typedef Epetra_Map map_type;
     typedef boost::shared_ptr<map_type> map_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
     typedef Epetra_Comm comm_type;
     typedef boost::shared_ptr<comm_type> comm_ptrtype;
+
     //@}
 
-    //! @name Constructors
+    //! @name Constructors & Destructor
     //@{
 
     //! Default Constructor
@@ -100,7 +110,7 @@ public:
      *  @param CommPtr - a pointer to the Epetra communicator
      */
     EpetraMap( const int NumGlobalElements, const int IndexBase, const comm_ptrtype& CommPtr );
-    //!
+
     EpetraMap(const int               size,
               const comm_ptrtype&     CommPtr);
 
@@ -136,10 +146,15 @@ public:
      */
 private:
     EpetraMap(const map_type map);
+
 public:
     ~EpetraMap() {}
 
     //@}
+
+
+    //! @name Operators
+    //@{
 
     // The copy operator will copy the pointers of the maps, exporter and importer
     EpetraMap&         operator  = (const EpetraMap& _epetraMap);
@@ -174,17 +189,10 @@ public:
         return map;
     }
 
+    //@}
 
-
-
-
-//    comm_type const& Comm() const { return M_uniqueEpetraMap->Comm(); }
-    comm_type const& Comm() const { return *M_commPtr; }
-    comm_ptrtype& CommPtr() { return M_commPtr; }
-
-//    Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetra_Map;}
-
-    map_ptrtype const & getMap  ( EpetraMapType maptype) const;
+    //! @name Methods
+    //@{
 
     //! This methods create a pointer to a EpetraMap that has points only on processor root
     /*!
@@ -193,18 +201,33 @@ public:
      */
     boost::shared_ptr<EpetraMap>         createRootMap( int const     root)    const;
 
-    Epetra_Export const& getExporter();
-    Epetra_Import const& getImporter();
-
-
     bool MapsAreSimilar( EpetraMap const& _epetraMap) const;
 
+    //EpetraMap&          uniqueMap();
 
-//    EpetraMap&          uniqueMap();
+    //@}
 
+    //! @name Get Methods
+    //@{
 
+    //comm_type const& Comm() const { return M_uniqueEpetraMap->Comm(); }
+    comm_type const& Comm() const { return *M_commPtr; }
+    comm_ptrtype& CommPtr() { return M_commPtr; }
+
+    //Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetra_Map;}
+
+    map_ptrtype const & getMap  ( EpetraMapType maptype) const;
+
+    Epetra_Export const& getExporter();
+
+    Epetra_Import const& getImporter();
+
+    //@}
 
 private:
+
+    //! @name Private Methods
+    //@{
 
     // createMap does not call createImportExport
     void               createMap(int   NumGlobalElements,
@@ -235,6 +258,8 @@ private:
                std::vector<int>& repeatedFaceVector,
                std::vector<int>& repeatedVolumeVector);
 
+    //@}
+
     map_ptrtype        M_repeatedEpetra_Map;
     map_ptrtype        M_uniqueEpetraMap;
     exporter_ptrtype   M_exporter;
@@ -243,6 +268,10 @@ private:
 
 };
 
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 template<typename Mesh>
 EpetraMap::
 EpetraMap(const RefFE&               refFE,

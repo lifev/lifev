@@ -1,33 +1,40 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
- This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
-      Date: 2004-08-29
+    This file is part of LifeV.
 
- Copyright (C) 2004 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file SolverTrilinos.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
-   \date 2004-08-29
-*/
+//@HEADER
+
+/*!
+    @file
+    @brief SolverTrilinos
+
+    @author Simone Deparis   <simone.deparis@epfl.ch>
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 08-11-2006
+ */
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
@@ -35,7 +42,7 @@ namespace LifeV
 {
 
 // ===================================================
-// Constructors
+// Constructors & Destructor
 // ===================================================
 SolverTrilinos::SolverTrilinos() :
         M_prec                 (),
@@ -62,49 +69,191 @@ SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 }
 
 // ===================================================
-// Get Methods
+// Methods
 // ===================================================
 int
-SolverTrilinos::NumIters() const
+SolverTrilinos::solve( vector_type& x, const vector_type& b )
 {
-    return M_solver.NumIters();
-}
+    M_solver.SetLHS( &x.getEpetraVector() );
+    // The Solver from Aztecoo takes a non const (because of rescaling?)
+    // We should be careful if you use scaling
+    Epetra_FEVector* bVectorPtr ( const_cast<Epetra_FEVector*> (&b.getEpetraVector()) );
+    M_solver.SetRHS( bVectorPtr );
 
-int
-SolverTrilinos::MaxIter() const
-{
-    return M_maxIter;
-}
+    int    maxiter(M_maxIter);
+    double mytol  (M_tol);
+    int status;
 
+    if ( isPrecSet() && M_prec->precType().compare("AztecOO") )
+        M_solver.SetPrecOperator(M_prec->getPrec());
+
+    status = M_solver.Iterate(maxiter, mytol);
+
+#ifdef DEBUG
+
+    M_displayer->comm().Barrier();
+    M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
+    M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
+    M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+#endif
+
+    /* try to solve again (reason may be:
+      -2 "Aztec status AZ_breakdown: numerical breakdown"
+      -3 "Aztec status AZ_loss: loss of precision"
+      -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
+    */
+    if (status <= -2 )
+    {
+        maxiter = M_maxIter;
+        mytol = M_tol;
+        int olditer = M_solver.NumIters();
+        status = M_solver.Iterate(maxiter, mytol);
+
+#ifdef DEBUG
+        M_displayer->comm().Barrier();
+        M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
+        M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
+        M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+#endif
+        return(M_solver.NumIters() + olditer);
+    }
+
+    return(M_solver.NumIters());
+}
 
 double
-SolverTrilinos::TrueResidual()
+SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 {
-    return M_solver.TrueResidual();
+    vector_type Ax(x.getMap());
+    vector_type res(b);
+
+    M_solver.GetUserMatrix()->Apply(x.getEpetraVector(),Ax.getEpetraVector());
+
+    res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
+
+    double residual;
+
+    res.Norm2(&residual);
+
+    return residual;
 }
 
-SolverTrilinos::prec_type&
-SolverTrilinos::getPrec()
+std::string
+SolverTrilinos::printStatus()
 {
-    return M_prec;
+
+    std::ostringstream stat;
+    std::string str;
+
+    double status[AZ_STATUS_SIZE];
+    getAztecStatus( status );
+
+    if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
+    else if ( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
+    else if ( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
+    else if ( status[AZ_why] == AZ_ill_cond  ) stat << "Ill-conditioned       ";
+    else if ( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
+
+    stat << setw(12) << "res = " << status[AZ_scaled_r];
+    stat << setw(4)  << " " << (int)status[AZ_its] << " iters. ";
+    stat << std::endl;
+
+    str = stat.str();
+    return str;
 }
 
-Teuchos::ParameterList&
-SolverTrilinos::getParameterList()
+int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
+                                 vector_type&      sol,
+                                 matrix_ptrtype&   baseMatrixForPreconditioner)
+
 {
-    return M_TrilinosParameterList;
+
+    bool retry(true);
+
+    Chrono chrono;
+
+    M_displayer->leaderPrint("      Setting up the solver ...                \n");
+
+    if (baseMatrixForPreconditioner.get() == 0)
+        M_displayer->leaderPrint("      Warning: baseMatrixForPreconditioner is empty     \n");
+
+    if ( !isPrecSet() || !M_reusePreconditioner  )
+    {
+        buildPreconditioner(baseMatrixForPreconditioner);
+        // do not retry if I am recomputing the preconditioner
+        retry = false;
+    }
+    else
+    {
+        M_displayer->leaderPrint("      Reusing precond ...                 \n");
+    }
+
+    int numIter = solveSystem(rhsFull, sol, M_prec);
+
+    // If we do not want to retry, return now.
+    // otherwise rebuild the preconditioner and solve again:
+    if ( numIter < 0  && retry )
+    {
+        chrono.start();
+
+        M_displayer->leaderPrint("     Iterative solver failed, numiter = " , - numIter);
+        M_displayer->leaderPrint("     maxIterSolver = " , M_maxIter );
+        M_displayer->leaderPrint("     retrying:          ");
+
+        buildPreconditioner(baseMatrixForPreconditioner);
+
+        chrono.stop();
+        M_displayer->leaderPrintMax( "done in " , chrono.diff() );
+        // Solving again, but only once (retry = false)
+        numIter = solveSystem(rhsFull, sol, M_prec);
+
+        if (numIter < 0)
+            M_displayer->leaderPrint(" ERROR: Iterative solver failed again.\n");
+    }
+
+    if ( abs(numIter) > M_maxIterForReuse)
+        precReset();
+
+    return numIter;
 }
 
-AztecOO&
-SolverTrilinos::getSolver()
+void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)
 {
-    return M_solver;
+    std::string precType = dataFile( (section + "/prectype").data(), "Ifpack");
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+
+    ASSERT(M_prec.get() != 0, " Preconditioner not set");
+    M_prec->setSolver( *this );
+    M_prec->setDataFromGetPot( dataFile, section );
 }
 
-void
-SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
+void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
 {
-    M_solver.GetAllAztecStatus( status );
+    Chrono chrono;
+    double condest(-1);
+
+    chrono.start();
+
+    M_displayer->leaderPrint("      Computing the precond ...                ");
+
+    M_prec->buildPreconditioner(prec);
+
+    condest = M_prec->Condest();
+    chrono.stop();
+
+    M_displayer->leaderPrintMax( "done in " , chrono.diff() );
+    M_displayer->leaderPrint("      Estimated condition number               " , condest, "\n" );
+}
+
+void SolverTrilinos::precReset()
+{
+    M_prec->precReset();
+}
+
+bool
+SolverTrilinos::isPrecSet() const
+{
+    return ( M_prec.get() !=0 && M_prec->preconditionerCreated() );
 }
 
 // ===================================================
@@ -212,189 +361,56 @@ SolverTrilinos::setReusePreconditioner( const bool reuse )
     M_reusePreconditioner = reuse;
 }
 
+boost::shared_ptr<Displayer>
+SolverTrilinos::displayer()
+{
+    return M_displayer;
+}
 
 // ===================================================
-// Methods
+// Get Methods
 // ===================================================
 int
-SolverTrilinos::solve( vector_type& x, const vector_type& b )
+SolverTrilinos::NumIters() const
 {
-    M_solver.SetLHS( &x.getEpetraVector() );
-    // The Solver from Aztecoo takes a non const (because of rescaling?)
-    // We should be careful if you use scaling
-    Epetra_FEVector* bVectorPtr ( const_cast<Epetra_FEVector*> (&b.getEpetraVector()) );
-    M_solver.SetRHS( bVectorPtr );
-
-    int    maxiter(M_maxIter);
-    double mytol  (M_tol);
-    int status;
-
-    if ( isPrecSet() && M_prec->precType().compare("AztecOO") )
-        M_solver.SetPrecOperator(M_prec->getPrec());
-
-    status = M_solver.Iterate(maxiter, mytol);
-
-#ifdef DEBUG
-
-    M_displayer->comm().Barrier();
-    M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
-    M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
-    M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
-#endif
-
-    /* try to solve again (reason may be:
-      -2 "Aztec status AZ_breakdown: numerical breakdown"
-      -3 "Aztec status AZ_loss: loss of precision"
-      -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
-    */
-    if (status <= -2 )
-    {
-        maxiter = M_maxIter;
-        mytol = M_tol;
-        int olditer = M_solver.NumIters();
-        status = M_solver.Iterate(maxiter, mytol);
-
-#ifdef DEBUG
-        M_displayer->comm().Barrier();
-        M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
-        M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
-        M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
-#endif
-        return(M_solver.NumIters() + olditer);
-    }
-
-    return(M_solver.NumIters());
+    return M_solver.NumIters();
 }
+
+int
+SolverTrilinos::MaxIter() const
+{
+    return M_maxIter;
+}
+
 
 double
-SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
+SolverTrilinos::TrueResidual()
 {
-    vector_type Ax(x.getMap());
-    vector_type res(b);
-
-    M_solver.GetUserMatrix()->Apply(x.getEpetraVector(),Ax.getEpetraVector());
-
-    res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
-
-    double residual;
-
-    res.Norm2(&residual);
-
-    return residual;
+    return M_solver.TrueResidual();
 }
 
-std::string
-SolverTrilinos::printStatus()
+SolverTrilinos::prec_type&
+SolverTrilinos::getPrec()
 {
-
-    std::ostringstream stat;
-    std::string str;
-
-    double status[AZ_STATUS_SIZE];
-    getAztecStatus( status );
-
-    if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
-    else if ( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
-    else if ( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
-    else if ( status[AZ_why] == AZ_ill_cond  ) stat << "Ill-conditioned       ";
-    else if ( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
-
-    stat << setw(12) << "res = " << status[AZ_scaled_r];
-    stat << setw(4)  << " " << (int)status[AZ_its] << " iters. ";
-    stat << std::endl;
-
-    str = stat.str();
-    return str;
+    return M_prec;
 }
 
-bool
-SolverTrilinos::isPrecSet() const
+void
+SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
 {
-    return ( M_prec.get() !=0 && M_prec->preconditionerCreated() );
+    M_solver.GetAllAztecStatus( status );
 }
 
-void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
+Teuchos::ParameterList&
+SolverTrilinos::getParameterList()
 {
-    Chrono chrono;
-    double condest(-1);
-
-    chrono.start();
-
-    M_displayer->leaderPrint("      Computing the precond ...                ");
-
-    M_prec->buildPreconditioner(prec);
-
-    condest = M_prec->Condest();
-    chrono.stop();
-
-    M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-    M_displayer->leaderPrint("      Estimated condition number               " , condest, "\n" );
+    return M_TrilinosParameterList;
 }
 
-void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)
+AztecOO&
+SolverTrilinos::getSolver()
 {
-    std::string precType = dataFile( (section + "/prectype").data(), "Ifpack");
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-
-    ASSERT(M_prec.get() != 0, " Preconditioner not set");
-    M_prec->setSolver( *this );
-    M_prec->setDataFromGetPot( dataFile, section );
-}
-
-
-int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
-                                 vector_type&      sol,
-                                 matrix_ptrtype&   baseMatrixForPreconditioner)
-
-{
-
-    bool retry(true);
-
-    Chrono chrono;
-
-    M_displayer->leaderPrint("      Setting up the solver ...                \n");
-
-    if (baseMatrixForPreconditioner.get() == 0)
-        M_displayer->leaderPrint("      Warning: baseMatrixForPreconditioner is empty     \n");
-
-    if ( !isPrecSet() || !M_reusePreconditioner  )
-    {
-        buildPreconditioner(baseMatrixForPreconditioner);
-        // do not retry if I am recomputing the preconditioner
-        retry = false;
-    }
-    else
-    {
-        M_displayer->leaderPrint("      Reusing precond ...                 \n");
-    }
-
-    int numIter = solveSystem(rhsFull, sol, M_prec);
-
-    // If we do not want to retry, return now.
-    // otherwise rebuild the preconditioner and solve again:
-    if ( numIter < 0  && retry )
-    {
-        chrono.start();
-
-        M_displayer->leaderPrint("     Iterative solver failed, numiter = " , - numIter);
-        M_displayer->leaderPrint("     maxIterSolver = " , M_maxIter );
-        M_displayer->leaderPrint("     retrying:          ");
-
-        buildPreconditioner(baseMatrixForPreconditioner);
-
-        chrono.stop();
-        M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-        // Solving again, but only once (retry = false)
-        numIter = solveSystem(rhsFull, sol, M_prec);
-
-        if (numIter < 0)
-            M_displayer->leaderPrint(" ERROR: Iterative solver failed again.\n");
-    }
-
-    if ( abs(numIter) > M_maxIterForReuse)
-        precReset();
-
-    return numIter;
+    return M_solver;
 }
 
 } // namespace LifeV

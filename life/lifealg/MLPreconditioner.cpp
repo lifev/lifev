@@ -1,30 +1,38 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Simone Deparis <simone.deparis@epfl.ch>
-       Date: 2006-11-09
+    This file is part of LifeV.
 
-  Copyright (C) 2006 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file EpetraPreconditioner.cpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \date 2006-11-09
+//@HEADER
+
+/*!
+    @file
+    @brief ML preconditioner
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 09-11-0006
  */
 
 #include "MLPreconditioner.hpp"
@@ -32,6 +40,9 @@
 namespace LifeV
 {
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 MLPreconditioner::MLPreconditioner():
         super(),
         M_Oper(),
@@ -42,20 +53,10 @@ MLPreconditioner::MLPreconditioner():
 MLPreconditioner::~MLPreconditioner()
 {}
 
-void
-MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
-                                     const std::string&     section )
-{
-    M_analyze = dataFile((section + "/" + "ML" + "/analyze_smoother").data(), false); // To be moved in createMLList
 
-    // ML List
-    createMLList(M_List, dataFile, section, "ML" );
-
-    // IfPack list
-    list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
-    IfpackPreconditioner::createIfpackList(SmootherIFSubList, dataFile, section, "ML");
-}
-
+// ===================================================
+// Methods
+// ===================================================
 int
 MLPreconditioner::buildPreconditioner(operator_type& oper)
 {
@@ -94,18 +95,6 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
     return ( EXIT_SUCCESS );
 }
 
-Real
-MLPreconditioner::Condest()
-{
-    return 0.;
-}
-
-EpetraPreconditioner::prec_raw_type*
-MLPreconditioner::getPrec()
-{
-    return M_Prec.get();
-}
-
 void
 MLPreconditioner::precReset()
 {
@@ -117,7 +106,6 @@ MLPreconditioner::precReset()
 
     this->M_preconditionerCreated = false;
 }
-
 
 void
 MLPreconditioner::createMLList(       list_Type&    list,
@@ -317,6 +305,39 @@ MLPreconditioner::createMLList(       list_Type&    list,
         list.print(std::cout);
         std::cout << std::endl;
     }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
+                                     const std::string&     section )
+{
+    M_analyze = dataFile((section + "/" + "ML" + "/analyze_smoother").data(), false); // To be moved in createMLList
+
+    // ML List
+    createMLList(M_List, dataFile, section, "ML" );
+
+    // IfPack list
+    list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
+    IfpackPreconditioner::createIfpackList(SmootherIFSubList, dataFile, section, "ML");
+}
+
+
+// ===================================================
+// Get Methods
+// ===================================================
+Real
+MLPreconditioner::Condest()
+{
+    return 0.;
+}
+
+EpetraPreconditioner::prec_raw_type*
+MLPreconditioner::getPrec()
+{
+    return M_Prec.get();
 }
 
 } // namespace LifeV

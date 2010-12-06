@@ -1,48 +1,40 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief MultiScale Model 1D
- *
- *  @version 1.0
- *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- *  @author Simone Deparis <simone.deparis@epfl.ch>
- *  @date 04-10-2006
- *
- *  @version 1.10
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 15-10-2009
- *
- *  - Added new operators: (+=, -=, *=, /=) and (+ - * /) for Element By Element and Vector-Scalar operations;
- *  - Added new logic operators: &&, ||, ! ;
- *  - Added new comparison operators: >=, <=, >, <, ==, != ;
- *  - Added Abs() method, and renamed scalar product to Dot() ;
- *  - Added ShowMe() method;
- *  - Added some doxygen (not finished yet) and reordered functions and methods;
+    @file
+    @brief EpetraVector
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 04-10-2006
  */
 
 #ifndef _EPETRAVECTOR_HPP_
@@ -69,7 +61,7 @@ class EpetraVector
 {
 public:
 
-    //! @name Type definitions
+    //! @name Public Types
     //@{
 
     typedef Epetra_FEVector                      vector_type;
@@ -113,137 +105,6 @@ public:
 
     //! Destructor
     ~EpetraVector() {}
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-    int GlobalAssemble( Epetra_CombineMode mode = Add )
-    {
-        return M_epetraVector->GlobalAssemble( mode );
-    }
-
-    //! if row is mine returns the LID
-    //! if row is not mine and if the numCpus > 1, returns -1
-    //! if row is not mine and if the numCpus == 1, asserts
-    int checkLID( const UInt row ) const;
-
-    //! if row is mine sets this[row] = value and return true
-    //! if row is not mine and if the numCpus > 1, returns false
-    //! if row is not mine and if the numCpus == 1, asserts
-    bool checkAndSet( const UInt row, const data_type& value, UInt offset = 0 );
-
-    //! Set the row row of the vector to value. If it isn't on this processor,
-    //! store it and send it and send it at next GlobalAssemble
-    int replaceGlobalValues( std::vector< int >& rVec, std::vector< double >& datumVec );
-
-    //! insert a global value. After insertion, you will have to call global assemble.
-    int sumIntoGlobalValues( const int GID, const double value );
-
-    /* adds to this the vector vector with an offset.
-     typically to do: (u,p) += p or (u,p) += u.
-     Note: the nodes to add are taken by the map of vector, hence:
-     a) if this has a unique map: then vector should also (otherwise run time error)
-     b) if this has a repeated map: then vector should also. (otherwise wrong)
-     */
-    EpetraVector& add( const EpetraVector& vector, const int offset = 0 );
-
-    /* set this to a subset of  vector with an offset.
-     typically to do: p = (u,p) or u = (u,p).
-     Note: the nodes to add are taken by the map of this, hence:
-     a) if vector has a unique map: then this should also (otherwise run time error)
-     b) if vector has a repeated map: then this should also. (otherwise wrong)
-     */
-    EpetraVector& subset( const EpetraVector& vector, const UInt offset = 0 );
-
-    //! set this to a subset of  vector with an offset.
-    /*!
-        similar to subset( const EpetraVector& , const int ), but with
-        additional parameters:
-        @param vector  vector from which to copy data
-        @param map     map from which to select indeces to copy
-        @param offset1 offset to apply to input vector
-        @param offset2 offset to apply to this vector
-    */
-    EpetraVector& subset( const EpetraVector& vector,
-                          const EpetraMap& map,
-                          const UInt offset1,
-                          const UInt offset2 );
-
-    //! set this to a subset of  vector with an offset.
-    /*!
-        similar to subset( const EpetraVector& , const int ), but with
-        additional parameters:
-        @param vector  Epetra_MultiVector, instead of EpetraVector, from which to copy data
-        @param map     map from which to select indeces to copy
-        @param offset1 offset to apply to input vector
-        @param offset2 offset to apply to this vector
-        @param column  column of the multivector from which to extract the data
-    */
-    EpetraVector& subset(const Epetra_MultiVector& vector,
-                         const EpetraMap&    map,
-                         const UInt          offset1,
-                         const UInt          offset2,
-                         const UInt          column = 0);
-
-
-    double Norm1   () const;
-    double Norm2   () const;
-    double NormInf () const;
-    double MinValue() const;
-    double MaxValue() const;
-
-    void MeanValue ( double* res ) const;
-    void Norm1     ( double* res ) const;
-    void Norm2     ( double* res ) const;
-    void NormInf   ( double* res ) const;
-    void MinValue  ( double* res ) const;
-    void MaxValue  ( double* res ) const;
-
-    void Norm1     ( double& res ) const;
-    void Norm2     ( double& res ) const;
-    void NormInf   ( double& res ) const;
-    void MinValue  ( double& res ) const;
-    void MaxValue  ( double& res ) const;
-
-    //! spy - save the values of the matrix into a file
-    /*!
-     * \param filename - File where to save the EpetraVector
-     *
-     * To read the file in Matlab type load filename;
-     */
-    void matrixMarket( std::string const &filename, const bool headers = true ) const;
-
-    void spy( std::string const &filename ) const;
-
-    void ShowMe( std::ostream& output = std::cout ) const;
-
-    //! Abs - Replace the vector with his abs.
-    /*!
-     * \param dataFile - Name and path of data file
-     */
-    void Abs( void );
-
-    //! Abs - Compute the abs of a vector
-    /*!
-     * \param vector - Output vector with the abs of the EpetraVector
-     */
-    void Abs( EpetraVector& vector );
-
-    //! Dot - Compute the scalar product of two vectors
-    /*!
-     * \param vector - Second vector for the scalar product
-     */
-    data_type Dot( const EpetraVector& vector ) const;
-
-    //! Dot - Compute the scalar product of two vectors
-    /*!
-     * \param vector - Second vector for the scalar product
-     * \param scalarProduct - results
-     */
-    void Dot( const EpetraVector& vector, data_type& scalarProduct );
 
     //@}
 
@@ -356,6 +217,139 @@ public:
     //@}
 
 
+    //! @name Methods
+    //@{
+
+    int GlobalAssemble( Epetra_CombineMode mode = Add )
+    {
+        return M_epetraVector->GlobalAssemble( mode );
+    }
+
+    //! if row is mine returns the LID
+    //! if row is not mine and if the numCpus > 1, returns -1
+    //! if row is not mine and if the numCpus == 1, asserts
+    int checkLID( const UInt row ) const;
+
+    //! if row is mine sets this[row] = value and return true
+    //! if row is not mine and if the numCpus > 1, returns false
+    //! if row is not mine and if the numCpus == 1, asserts
+    bool checkAndSet( const UInt row, const data_type& value, UInt offset = 0 );
+
+    //! Set the row row of the vector to value. If it isn't on this processor,
+    //! store it and send it and send it at next GlobalAssemble
+    int replaceGlobalValues( std::vector< int >& rVec, std::vector< double >& datumVec );
+
+    //! insert a global value. After insertion, you will have to call global assemble.
+    int sumIntoGlobalValues( const int GID, const double value );
+
+    /* adds to this the vector vector with an offset.
+     typically to do: (u,p) += p or (u,p) += u.
+     Note: the nodes to add are taken by the map of vector, hence:
+     a) if this has a unique map: then vector should also (otherwise run time error)
+     b) if this has a repeated map: then vector should also. (otherwise wrong)
+     */
+    EpetraVector& add( const EpetraVector& vector, const int offset = 0 );
+
+    /* set this to a subset of  vector with an offset.
+     typically to do: p = (u,p) or u = (u,p).
+     Note: the nodes to add are taken by the map of this, hence:
+     a) if vector has a unique map: then this should also (otherwise run time error)
+     b) if vector has a repeated map: then this should also. (otherwise wrong)
+     */
+    EpetraVector& subset( const EpetraVector& vector, const UInt offset = 0 );
+
+    //! set this to a subset of  vector with an offset.
+    /*!
+        similar to subset( const EpetraVector& , const int ), but with
+        additional parameters:
+        @param vector  vector from which to copy data
+        @param map     map from which to select indeces to copy
+        @param offset1 offset to apply to input vector
+        @param offset2 offset to apply to this vector
+    */
+    EpetraVector& subset( const EpetraVector& vector,
+                          const EpetraMap& map,
+                          const UInt offset1,
+                          const UInt offset2 );
+
+    //! set this to a subset of  vector with an offset.
+    /*!
+        similar to subset( const EpetraVector& , const int ), but with
+        additional parameters:
+        @param vector  Epetra_MultiVector, instead of EpetraVector, from which to copy data
+        @param map     map from which to select indeces to copy
+        @param offset1 offset to apply to input vector
+        @param offset2 offset to apply to this vector
+        @param column  column of the multivector from which to extract the data
+    */
+    EpetraVector& subset(const Epetra_MultiVector& vector,
+                         const EpetraMap&    map,
+                         const UInt          offset1,
+                         const UInt          offset2,
+                         const UInt          column = 0);
+
+   void MeanValue ( double* res ) const;
+
+    double Norm1   () const;
+    void   Norm1   ( double* res ) const;
+    void   Norm1   ( double& res ) const;
+
+    double Norm2   () const;
+    void   Norm2   ( double* res ) const;
+    void   Norm2   ( double& res ) const;
+
+    double NormInf () const;
+    void   NormInf ( double* res ) const;
+    void   NormInf ( double& res ) const;
+
+    double MinValue() const;
+    void   MinValue( double* res ) const;
+    void   MinValue( double& res ) const;
+
+    double MaxValue() const;
+    void   MaxValue( double* res ) const;
+    void   MaxValue( double& res ) const;
+
+    //! Abs - Replace the vector with his abs.
+    /*!
+     * \param dataFile - Name and path of data file
+     */
+    void Abs( void );
+
+    //! Abs - Compute the abs of a vector
+    /*!
+     * \param vector - Output vector with the abs of the EpetraVector
+     */
+    void Abs( EpetraVector& vector );
+
+    //! Dot - Compute the scalar product of two vectors
+    /*!
+     * \param vector - Second vector for the scalar product
+     */
+    data_type Dot( const EpetraVector& vector ) const;
+
+    //! Dot - Compute the scalar product of two vectors
+    /*!
+     * \param vector - Second vector for the scalar product
+     * \param scalarProduct - results
+     */
+    void Dot( const EpetraVector& vector, data_type& scalarProduct );
+
+    //! spy - save the values of the matrix into a file
+    /*!
+     * \param filename - File where to save the EpetraVector
+     *
+     * To read the file in Matlab type load filename;
+     */
+    void matrixMarket( std::string const &filename, const bool headers = true ) const;
+
+    void spy( std::string const &filename ) const;
+
+    void ShowMe( std::ostream& output = std::cout ) const;
+
+    //@}
+
+
     //! @name Set Methods
     //@{
 
@@ -438,6 +432,9 @@ public:
 
 private:
 
+    //! @name Private Methods
+    //@{
+
     //! copies the value of a vector u. If the map is not the same,
     //! try to import the values. Let you decide wether to add or replace shared nodes:
     //! note:
@@ -466,6 +463,8 @@ private:
      */
     EpetraVector& Export( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
+    //@}
+
     boost::shared_ptr< EpetraMap >   M_epetraMap;
     EpetraMapType                    M_maptype;
     Vector_PtrType                   M_epetraVector;
@@ -474,7 +473,6 @@ private:
 };
 
 EpetraVector operator-( const EpetraVector& vector );
-
 EpetraVector operator+( const EpetraVector::data_type& scalar, const EpetraVector& vector );
 EpetraVector operator-( const EpetraVector::data_type& scalar, const EpetraVector& vector );
 EpetraVector operator*( const EpetraVector::data_type& scalar, const EpetraVector& vector );

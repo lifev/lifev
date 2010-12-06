@@ -1,26 +1,26 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2009-2010 EPFL, Politecnico di Milano
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -29,14 +29,17 @@
     @brief Contains methods which generate structured meshes.
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-    @date 16 April 2010
+    @contributor -
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 16-04-2010
 
     Such methods will be usefull in order to test problems at different
     scales.
  */
 
-#ifndef STRUCTUREDMESH3D_H
-#define STRUCTUREDMESH3D_H 1
+#ifndef STRUCTUREDMESH3D_HPP
+#define STRUCTUREDMESH3D_HPP 1
 
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
@@ -988,7 +991,6 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
 //@}
 
 
-
 } // Namespace LifeV
 
-#endif /* STRUCTUREDMESH3D_H */
+#endif /* STRUCTUREDMESH3D_HPP */
