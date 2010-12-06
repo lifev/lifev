@@ -166,10 +166,11 @@ public:
     void updateSystem();
 
     virtual void updateSystem(matrix_ptrtype& stiff);
-
+  
+    void buildSystem();
     //void buildSystem(matrix_type & bigMatrixStokes); // used for monolithic
     virtual void buildSystem(matrix_ptrtype matrix, const Real& factor=1.);
-    void buildSystem();
+
 
     //! Solve the non-linear system
 
@@ -201,8 +202,8 @@ public:
     void evalConstraintTensor();
 
     virtual void initialize( const Function& d0, const Function& w0, const Function& a0 = Function() );
-    void initialize( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype(),  vector_ptrtype a0 = vector_ptrtype() );
     void initializeVel( const vector_type& w0);
+    void initialize( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype(),  vector_ptrtype a0 = vector_ptrtype() );
 
     virtual void updateVel();
 
