@@ -53,7 +53,7 @@ public:
     //@{
 
     typedef VenantKirchhofSolver<Mesh, SolverType>     super;
-    typedef typename super::vector_type                vector_Type;
+    typedef typename super::vector_Type                vector_Type;
     typedef typename super::matrixPtr_Type             matrixPtr_Type;
     typedef typename super::bchandler_Type             bchandler_Type;
 

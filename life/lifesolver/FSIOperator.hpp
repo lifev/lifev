@@ -132,7 +132,7 @@ public:
     typedef boost::shared_ptr<vector_type>         vector_ptrtype;
 
     typedef fluid_raw_type::source_type            fluid_source_type;
-    typedef solid_raw_type::source_type            solid_source_type;
+    typedef solid_raw_type::source_Type            solid_source_type;
 
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )> function_type;

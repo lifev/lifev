@@ -89,7 +89,7 @@ public:
     typedef solid_value_type::Function								solid_function;
 
     typedef fluid_value_type::source_type							fluid_source_type;
-    typedef solid_value_type::source_type							solid_source_type;
+    typedef solid_value_type::source_Type							solid_source_type;
 
     typedef FSIOperator::fluid_bchandler_type						fluid_bchandler_type;
     typedef FSIOperator::solid_bchandler_type						solid_bchandler_type;
@@ -98,7 +98,7 @@ public:
     typedef FSIOperator::solid_bchandler_raw_type					solid_bchandler_raw_type;
 
     typedef fluid_value_type::data_type								data_fluid;
-    typedef solid_value_type::data_type								data_solid;
+    typedef solid_value_type::data_Type								data_solid;
 
     typedef FSIOperator::data_PtrType                               data_PtrType;
 

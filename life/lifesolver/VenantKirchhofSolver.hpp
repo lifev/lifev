@@ -92,7 +92,7 @@ public:
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
     typedef BCHandler                             bchandlerRaw_Type;
-    typedef boost::shared_ptr<bchandlerRaw_type>  bchandler_Type;
+    typedef boost::shared_ptr<bchandlerRaw_Type>  bchandler_Type;
 
 
     typedef SolverType                            solver_Type;
@@ -100,7 +100,7 @@ public:
     typedef typename solver_Type::matrix_type      matrix_Type;
     typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
     typedef typename solver_Type::vector_type      vector_Type;
-    typedef boost::shared_ptr<vector_type>         vectorPtr_Type;
+    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
 
     typedef typename SolverType::prec_raw_type     precRaw_Type;
@@ -130,7 +130,7 @@ public:
       \param bdQr surface quadrature rule
       \param BCh boundary conditions for the displacement
     */
-    void setup( boost::shared_ptr<data_type> data,
+    void setup( boost::shared_ptr<data_Type> data,
                 const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   FESpace,
                 bchandler_Type&       BCh,
                 boost::shared_ptr<Epetra_Comm>&     comm
@@ -203,7 +203,7 @@ public:
 
     virtual void initialize( const Function& d0, const Function& w0, const Function& a0 = Function() );
     void initializeVel( const vector_Type& w0);
-    void initialize( vectorPtr_Type d0,  vectorPtr_Type w0 = vector_ptrtype(),  vectorPtr_Type a0 = vector_ptrtype() );
+    void initialize( vectorPtr_Type d0,  vectorPtr_Type w0 = vectorPtr_Type(),  vectorPtr_Type a0 = vectorPtr_Type() );
 
     virtual void updateVel();
 
@@ -335,17 +335,17 @@ protected:
 
     //! linearized velocity
 
-    vector_ptrtype                    M_disp;
-    vector_ptrtype                    M_vel;
+    vectorPtr_Type                    M_disp;
+    vectorPtr_Type                    M_vel;
 
     //! right  hand  side displacement
-    vector_ptrtype                    M_rhs;
+    vectorPtr_Type                    M_rhs;
 
     //! right  hand  side velocity
-    vector_ptrtype                    M_rhsW;
+    vectorPtr_Type                    M_rhsW;
 
     //! right  hand  side
-    vector_ptrtype                    M_rhsNoBC;
+    vectorPtr_Type                    M_rhsNoBC;
 
     //! right  hand  side
     boost::shared_ptr<vector_Type>                    M_f;
@@ -355,9 +355,9 @@ protected:
 
 //    vector_Type*                   M_sxx;
 
-    vector_ptrtype                    M_sxx;
-    vector_ptrtype                    M_syy;
-    vector_ptrtype                    M_szz;
+    vectorPtr_Type                    M_sxx;
+    vectorPtr_Type                    M_syy;
+    vectorPtr_Type                    M_szz;
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream                  M_out_iter;
@@ -907,7 +907,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::initialize( vector_ptrtype disp, vector_ptrtype vel, vector_ptrtype /*acc*/)
+VenantKirchhofSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type vel, vectorPtr_Type /*acc*/)
 {
     *M_disp = *disp;
     if (vel.get())
