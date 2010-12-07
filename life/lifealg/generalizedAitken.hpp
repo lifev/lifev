@@ -1,105 +1,119 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
 /*!
-  @file
-
-  @version 1.0
-  @date 23/09/2004
-  @author Simone Deparis <simone.deparis@epfl.ch>
-  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
-
-  @brief Compute the acceleration with the vector variant of Aitken.
-
-  @version 1.48
-  @date 15/10/2009
-  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-  - Added three new differen Aitken methods for Scalar (inverted omega),
-    Vector, and Block relaxations;
-  - Added some Get and Set Methods;
-  - Added Doxygen to the class.
-
-  TODO Modify computeDeltaLambdaFSI - we should have only one defaultOmega parameter
-       to be more general, and the same for M_oldResidualS & M_oldResidualF.
-*/
+ *  @file
+ *  @brief File containing the generalized Aitken algorithm
+ *
+ *  @date 23-09-2004
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ */
 
 #ifndef _GENERALIZEDAITKEN_HPP
 #define _GENERALIZEDAITKEN_HPP
 
-#include <life/lifecore/life.hpp>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <cstdlib>
 
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifecore/life.hpp>
+
 namespace LifeV
 {
 
-//! generalizedAitken - LifeV class for Aitken method
+//! generalizedAitken - LifeV class for generalized Aitken algorithm
 /*
  *  @author Simone Deparis, Gilles Fourestey, Cristiano Malossi
  *  @see S. Deparis, M. Discacciati and A. Quarteroni, A domain decompostion framework for fluid/structure interaction problems.
  *
  *  Compute the acceleration with the vector variant of Aitken.
+ *
+ *  TODO Modify computeDeltaLambdaFSI - we should have only one defaultOmega parameter
+ *  to be more general, and the same for M_oldResidualSolid & M_oldResidualFluid.
  */
-template< typename VectorType >
+template< typename vector_Type >
 class generalizedAitken
 {
-    typedef boost::shared_ptr<VectorType>      Vector_PtrType;
 
 public:
 
-    /** @name Constructors, destructor
-     */
+    //! @name Public Types
+    //@{
+
+    typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
     //@{
 
     //! Constructor
     generalizedAitken();
 
-    ~generalizedAitken() {}
+    //! Destructor
+    virtual ~generalizedAitken() {}
 
     //@}
 
 
-    /** @name Methods
-     */
+    //! @name Methods
     //@{
 
     //! Use default omega
     /*!
      * @param useDefaultOmega true: use always default Omega (relaxed fixed-point method)
      */
-    void UseDefaultOmega( const bool useDefaultOmega = true );
+    void useDefaultOmega( const bool useDefaultOmega = true ) { M_useDefaultOmega = useDefaultOmega; }
 
     //! Reinitialize Omega to the default value
-    void restart();
+    void restart() { M_restart = true; }
 
-    //! Compute OmegaS * muS + OmegaF * muF
+    //! Compute OmegaS * deltaRSolid + OmegaF * deltaRFluid
     /*!
-     * @param _lambda - vector of unknown
-     * @param _muF - vector of residuals (Fluid for FSI problems)
-     * @param _muS - vector of residuals (Solid for FSI problems)
+     * @param solution - vector of unknown
+     * @param residualFluid - vector of residuals (Fluid for FSI problems)
+     * @param residualSolid - vector of residuals (Solid for FSI problems)
      */
-    VectorType computeDeltaLambdaFSI( const VectorType& _lambda,
-                                      const VectorType& _muF,
-                                      const VectorType& _muS);
+    vector_Type computeDeltaLambdaFSI( const vector_Type& solution,
+                                       const vector_Type& residualFluid,
+                                       const vector_Type& residualSolid );
 
     //! Compute Omega * residual - Paragraph 4.2.3 & 4.2.4 of S. Deparis PhD Thesis
     /*!
@@ -107,17 +121,17 @@ public:
      * @param residual - vector of residuals
      * @param invertedOmega - false (default): minimizing on omega; true: minimizing on omega^-1
      */
-    VectorType computeDeltaLambdaScalar( const VectorType& solution,
-                                         const VectorType& residual );
+    vector_Type computeDeltaLambdaScalar( const vector_Type& solution,
+                                          const vector_Type& residual );
 
     //! Compute Omega * residual - Paragraph 4.2.6 of S. Deparis PhD Thesis
     /*!
      * @param solution - vector of unknown
      * @param residual - vector of residuals
      */
-    VectorType computeDeltaLambdaVector( const VectorType& solution,
-                                         const VectorType& residual,
-                                         const bool        independentOmega = false );
+    vector_Type computeDeltaLambdaVector( const vector_Type& solution,
+                                          const vector_Type& residual,
+                                          const bool&        independentOmega = false );
 
     //! Compute Omega * residual - Paragraph 4.2.6 of S. Deparis PhD Thesis
     /*!
@@ -126,85 +140,97 @@ public:
      * @param blocksVector - vector identifying the different blocks ( ID start from 1 )
      * @param blocksNumber - number of different blocks == higher ID (if = 1, it equal to the scalar case)
      */
-    VectorType computeDeltaLambdaVectorBlock( const VectorType& solution,
-                                              const VectorType& residual,
-                                              const VectorType& blocksVector,
-                                              const UInt        blocksNumber  = 1);
+    vector_Type computeDeltaLambdaVectorBlock( const vector_Type& solution,
+                                               const vector_Type& residual,
+                                               const vector_Type& blocksVector,
+                                               const UInt&        blocksNumber = 1);
 
     //@}
 
 
-    /** @name Set Methods
-     */
+    //! @name Set Methods
     //@{
 
     //! Set starting values for Omega
     /*!
-     * @param defaultOmegaS - First  Omega (Solid for FSI problems)
-     * @param defaultOmegaF - Second Omega (Fluid for FSI problems)
+     * @param defaultOmegaFluid default value for the omega fluid parameter
+     * @param defaultOmegaSolid default value for the omega solid parameter
      */
-    void setDefaultOmega( const Real& defaultOmegaS = 0.1,
-                          const Real& defaultOmegaF = 0.1 );
+    void setDefaultOmega( const Real& defaultOmegaFluid = 0.1, const Real& defaultOmegaSolid = 0.1 );
 
     //! Set the range of Omega.
     /*!
      * The range of Omega is defined as: OmegaMin < Omega < OmegaMax.
      *
-     * @param OmegaRange array with the minimum and the maximum of Omega
+     * @param omegaRange array with the minimum and the maximum of Omega
      */
-    void setOmegaRange( const boost::array< Real, 2 >& OmegaRange );
+    void setOmegaRange( const boost::array< Real, 2 >& omegaRange ) { M_rangeOmega = omegaRange; }
 
     //! Set the minimum of Omega.
     /*!
-     * @param OmegaMin minimum of Omega
+     * @param omegaMin minimum of Omega
      */
-    void setOmegaMin( const Real& OmegaMin );
+    void setOmegaMin( const Real& omegaMin ) { M_rangeOmega[0] = std::abs( omegaMin ); }
 
     //! Set the maximum of Omega.
     /*!
-     * @param OmegaMax maximum of Omega
+     * @param omegaMax maximum of Omega
      */
-    void setOmegaMax( const Real& OmegaMax );
+    void setOmegaMax( const Real& omegaMax ) { M_rangeOmega[1] = std::abs( omegaMax ); }
 
     //! Set minimization type.
     /*!
      * @param inverseOmega false: minimizing on omega; true: minimizing on omega^-1
      */
-    void setMinimizationType( const bool& inverseOmega );
+    void setMinimizationType( const bool& inverseOmega ) { M_inverseOmega = inverseOmega; }
 
     //@}
 
 
-    /** @name Get Methods
-     */
+    //! @name Get Methods
     //@{
 
-    //! Get the default value of OmegaS
-    const Real& GetDefaultOmegaS()  const;
+    //! Get the default value of omega fluid.
+    /*!
+     * @return default value of omega fluid
+     */
+    const Real& defaultOmegaFluid()  const { return M_defaultOmegaFluid; }
 
-    //! Get the default value of OmegaF
-    const Real& GetDefaultOmegaF()  const;
+    //! Get the default value of omega solid.
+    /*!
+     * @return default value of omega solid
+     */
+    const Real& defaultOmegaSolid()  const { return M_defaultOmegaSolid; }
 
     //@}
 
 private:
 
-    /** @name Private Methods
-     */
+    //! @name Private unimplemented Methods
     //@{
 
-    void checkRange( Real& Omega );
+    generalizedAitken( const generalizedAitken& aitken );
+
+    generalizedAitken& operator=( const generalizedAitken& aitken );
+
+    //@}
+
+
+    //! @name Private Methods
+    //@{
+
+    void checkRange( Real& omega );
 
     //@}
 
     // fluid/structure interface dof count
-    Vector_PtrType M_oldSolution;   // \lambda^{k - 1}
-    Vector_PtrType M_oldResidualS;  // \mu_s^{k - 1}
-    Vector_PtrType M_oldResidualF;  // \mu_f^{k - 1}
+    vectorPtr_Type M_oldSolution;   // \lambda^{k - 1}
+    vectorPtr_Type M_oldResidualFluid;  // \mu_f^{k - 1}
+    vectorPtr_Type M_oldResidualSolid;  // \mu_s^{k - 1}
 
     // defaults \omega_s and \omega_f
-    Real M_defaultOmegaS;
-    Real M_defaultOmegaF;
+    Real M_defaultOmegaFluid;
+    Real M_defaultOmegaSolid;
 
     // first time call boolean
     bool M_restart;
@@ -226,13 +252,13 @@ private:
 // ===================================================
 // Constructors
 // ===================================================
-template <class VectorType>
-generalizedAitken<VectorType>::generalizedAitken() :
+template <class vector_Type>
+generalizedAitken<vector_Type>::generalizedAitken() :
         M_oldSolution      ( ),
-        M_oldResidualS     ( ),
-        M_oldResidualF     ( ),
-        M_defaultOmegaS    ( 0.1 ),
-        M_defaultOmegaF    ( 0.1 ),
+        M_oldResidualFluid ( ),
+        M_oldResidualSolid ( ),
+        M_defaultOmegaFluid( 0.1 ),
+        M_defaultOmegaSolid( 0.1 ),
         M_restart          ( true ),
         M_useDefaultOmega  ( false ),
         M_rangeOmega       ( ),
@@ -246,154 +272,113 @@ generalizedAitken<VectorType>::generalizedAitken() :
 // ===================================================
 // Methods
 // ===================================================
-template <class VectorType>
-void
-generalizedAitken<VectorType>::UseDefaultOmega( const bool useDefaultOmega )
-{
-    M_useDefaultOmega = useDefaultOmega;
-}
-
-template <class VectorType>
-void
-generalizedAitken<VectorType>::restart()
-{
-    M_restart = true;
-}
-
-template <class VectorType>
-VectorType
-generalizedAitken<VectorType>::computeDeltaLambdaFSI( const VectorType& _lambda,
-                                                      const VectorType& _muF,
-                                                      const VectorType& _muS )
-{
-    VectorType deltaLambda(_lambda.Map());
-
-    if (( !M_restart ) && ( !M_useDefaultOmega ))
-    {
-        Real a11 = 0.;
-        Real a21 = 0.;
-        Real a22 = 0.;
-        Real b1  = 0.;
-        Real b2  = 0.;
-
-        Real muS( 0 );
-        Real muF( 0 );
-
-        /*! bulding the matrix and the right hand side
-          see eq. (16) page 10
-        */
-
-        muS = (_muS - M_oldResidualS);
-        muF = (_muF - M_oldResidualF);
-
-        a11 = muF*muF;
-        a21 = muF*muS;
-        a22 = muS*muS;
-
-        b1 = muF * ( _lambda - *M_oldSolution);
-        b2 = muS * ( _lambda - *M_oldSolution);
-
-        /*
-        for ( UInt ii = 0; ii < M_nDof; ++ii )
-        {
-            muS = _muS[ ii ] - *M_oldResidualS[ ii ];
-            muF = _muF[ ii ] - *M_oldResidualF[ ii ];
-
-            a11 += muF * muF;
-            a21 += muF * muS;
-            a22 += muS * muS;
-
-            b1 += muF * ( _lambda[ ii ] - *M_oldSolution[ ii ] );
-            b2 += muS * ( _lambda[ ii ] - *M_oldSolution[ ii ] );
-        }
-        */
-
-        Real omegaS ( M_defaultOmegaS );
-        Real omegaF ( M_defaultOmegaF );
-
-        Real det ( a22 * a11 - a21 * a21 );
-
-        if ( std::fabs(det) != 0. )  //! eq. (12) page 8
-        {
-            omegaF = - ( a22 * b1 - a21 * b2 ) / det;
-            omegaS = - ( a11 * b2 - a21 * b1 ) / det; // !
-
-            if (omegaS == 0.) omegaS = M_defaultOmegaS;
-            if (omegaF == 0.) omegaF = M_defaultOmegaF;
-        }
-        else if (  std::fabs(a22) == 0. )
-        {
-            Debug(7020) << "generalizedAitken:  a22 = " << std::fabs(a22) << "\n";
-            omegaS = 0.;
-            omegaF = -b1 / a11;
-        }
-        else if (  std::fabs(a11) == 0. )
-        {
-            Debug(7020) << "generalizedAitken:  a11 = " << std::fabs(a11) << "\n";
-            omegaS = -b2 / a22;
-            omegaF = 0.;
-        }
-        else
-        {
-            Debug(7020) << "generalizedAitken: Failure: Det=0!!" << fabs(det) << "\n";
-        }
-
-        Debug(7020) << " --------------- generalizedAitken: \n";
-        Debug(7020) << " omegaS = " << omegaS << " omegaF = " << omegaF << "\n";
-
-        deltaLambda = omegaF * _muF + omegaS * _muS;
-
-        *M_oldSolution = _lambda;
-        *M_oldResidualF = _muF;
-        *M_oldResidualS = _muS;
-    }
-    else
-    {
-        /*! first time aitken is called, the coefficients must be
-          set to their default values
-        */
-
-        Debug(7020) << " --------------- generalizedAitken: first call\n";
-        M_restart = false;
-
-        deltaLambda = M_defaultOmegaF * _muF + M_defaultOmegaS * _muS ;
-
-        Debug(7020) << "generalizedAitken: omegaS = " << M_defaultOmegaS << " omegaF = " << M_defaultOmegaF << "\n";
-
-        M_oldSolution.reset( new VectorType(_lambda) );
-        M_oldResidualF.reset( new VectorType(_muF) );
-        M_oldResidualS.reset( new VectorType(_muS) );
-    }
-
-    return deltaLambda;
-}
-
-/*! one parameter version of the generalized aitken method. cf page 85 S. Deparis, PhD thesis */
-template <class VectorType>
-VectorType
-generalizedAitken<VectorType>::computeDeltaLambdaScalar( const VectorType& solution,
-                                                         const VectorType& residual )
+template <class vector_Type>
+vector_Type
+generalizedAitken<vector_Type>::computeDeltaLambdaFSI( const vector_Type& solution,
+                                                       const vector_Type& residualFluid,
+                                                       const vector_Type& residualSolid )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset ( new VectorType( solution ) );
-        M_oldResidualS.reset( new VectorType( residual ) );
+        M_oldSolution.reset ( new vector_Type( solution ) );
+        M_oldResidualSolid.reset( new vector_Type( residualSolid ) );
+        M_oldResidualFluid.reset( new vector_Type( residualFluid) );
 
-        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaS << "\n";
+#ifdef HAVE_LIFEV_DEBUG
+        Debug(7020) << "generalizedAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
+#endif
+        return M_defaultOmegaFluid * residualFluid + M_defaultOmegaSolid * residualSolid;
+    }
+    else
+    {
+        Real deltaRSolid ( residualSolid - M_oldResidualSolid );
+        Real deltaRFluid ( residualFluid - M_oldResidualFluid );
 
-        return M_defaultOmegaS * residual;
+        Real a11 = deltaRFluid * deltaRFluid;
+        Real a21 = deltaRFluid * deltaRSolid;
+        Real a22 = deltaRSolid * deltaRSolid;
+
+        Real b1  = deltaRFluid * ( solution - *M_oldSolution);
+        Real b2  = deltaRSolid * ( solution - *M_oldSolution);
+
+        Real det ( a22 * a11 - a21 * a21 );
+
+        Real omegaFluid ( M_defaultOmegaFluid );
+        Real omegaSolid ( M_defaultOmegaSolid );
+
+        if ( std::fabs( det ) != 0. )  //! eq. (12) page 8
+        {
+            omegaFluid = - ( a22 * b1 - a21 * b2 ) / det;
+            omegaSolid = - ( a11 * b2 - a21 * b1 ) / det;
+
+            if ( omegaFluid == 0. )
+                omegaFluid = M_defaultOmegaFluid;
+
+            if ( omegaSolid == 0. )
+                omegaSolid = M_defaultOmegaSolid;
+        }
+        else if ( std::fabs( a22 ) == 0. )
+        {
+#ifdef HAVE_LIFEV_DEBUG
+            Debug(7020) << "generalizedAitken:  a22 = " << std::fabs(a22) << "\n";
+#endif
+            omegaFluid = -b1 / a11;
+            omegaSolid = 0.;
+        }
+        else if ( std::fabs(a11) == 0. )
+        {
+#ifdef HAVE_LIFEV_DEBUG
+            Debug(7020) << "generalizedAitken:  a11 = " << std::fabs(a11) << "\n";
+#endif
+            omegaFluid = 0.;
+            omegaSolid = -b2 / a22;
+        }
+#ifdef HAVE_LIFEV_DEBUG
+        else
+            Debug(7020) << "generalizedAitken: Failure: Det=0!!" << fabs(det) << "\n";
+
+        Debug(7020) << " --------------- generalizedAitken: \n";
+        Debug(7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";
+#endif
+
+        *M_oldSolution = solution;
+        *M_oldResidualFluid = residualFluid;
+        *M_oldResidualSolid = residualSolid;
+
+        return omegaFluid * residualFluid + omegaSolid * residualSolid;
+    }
+}
+
+/*! one parameter version of the generalized aitken method. cf page 85 S. Deparis, PhD thesis */
+template <class vector_Type>
+vector_Type
+generalizedAitken<vector_Type>::computeDeltaLambdaScalar( const vector_Type& solution,
+                                                          const vector_Type& residual )
+{
+    if ( M_restart || M_useDefaultOmega )
+    {
+        M_restart = false;
+
+        M_oldSolution.reset ( new vector_Type( solution ) );
+        M_oldResidualFluid.reset( new vector_Type( residual ) );
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaFluid << "\n";
+#endif
+
+        return M_defaultOmegaFluid * residual;
     }
 
-    VectorType deltaX( solution );
-    VectorType deltaR( residual );
+    vector_Type deltaX( solution );
+    vector_Type deltaR( residual );
 
     deltaX -= *M_oldSolution;
-    deltaR -= *M_oldResidualS;
+    deltaR -= *M_oldResidualFluid;
 
     *M_oldSolution  = solution;
-    *M_oldResidualS = residual;
+    *M_oldResidualFluid = residual;
 
     Real omega, norm;
     if ( M_inverseOmega )
@@ -414,40 +399,43 @@ generalizedAitken<VectorType>::computeDeltaLambdaScalar( const VectorType& solut
     //Check omega limits
     checkRange(omega);
 
+#ifdef HAVE_LIFEV_DEBUG
     Debug(7020) << "generalizedAitken: omega = " << omega << "\n";
-    //std::cout << "Omega" << std::endl;
+#endif
 
     return omega * residual;
 }
 
-template <class VectorType>
-VectorType
-generalizedAitken<VectorType>::computeDeltaLambdaVector( const VectorType& solution,
-                                                         const VectorType& residual,
-                                                         const bool        independentOmega )
+template <class vector_Type>
+vector_Type
+generalizedAitken<vector_Type>::computeDeltaLambdaVector( const vector_Type& solution,
+                                                          const vector_Type& residual,
+                                                          const bool&        independentOmega )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset ( new VectorType( solution ) );
-        M_oldResidualS.reset( new VectorType( residual ) );
+        M_oldSolution.reset ( new vector_Type( solution ) );
+        M_oldResidualFluid.reset( new vector_Type( residual ) );
 
-        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaS << "\n";
+#ifdef HAVE_LIFEV_DEBUG
+        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaFluid << "\n";
+#endif
 
-        return M_defaultOmegaS * residual;
+        return M_defaultOmegaFluid * residual;
     }
 
-    VectorType deltaX( solution );
-    VectorType deltaR( residual );
+    vector_Type deltaX( solution );
+    vector_Type deltaR( residual );
 
     deltaX -= *M_oldSolution;
-    deltaR -= *M_oldResidualS;
+    deltaR -= *M_oldResidualFluid;
 
     *M_oldSolution  = solution;
-    *M_oldResidualS = residual;
+    *M_oldResidualFluid = residual;
 
-    VectorType omega( deltaX );
+    vector_Type omega( deltaX );
     Real   norm = 1;
     if ( independentOmega )
     {
@@ -471,49 +459,53 @@ generalizedAitken<VectorType>::computeDeltaLambdaVector( const VectorType& solut
     for ( UInt i(0) ; i < omega.size() ; ++i )
         checkRange(omega[i]);
 
-    //Debug(7020) << "generalizedAitken: omega = " << "\n";
-    //omega.ShowMe();
+#ifdef HAVE_LIFEV_DEBUG
+    Debug(7020) << "generalizedAitken: omega = " << "\n";
+    omega.ShowMe();
+#endif
 
     omega *= residual;
 
     return omega;
 }
 
-template <class VectorType>
-VectorType
-generalizedAitken<VectorType>::computeDeltaLambdaVectorBlock( const VectorType& solution,
-                                                              const VectorType& residual,
-                                                              const VectorType& blocksVector,
-                                                              const UInt        blocksNumber )
+template <class vector_Type>
+vector_Type
+generalizedAitken<vector_Type>::computeDeltaLambdaVectorBlock( const vector_Type& solution,
+                                                               const vector_Type& residual,
+                                                               const vector_Type& blocksVector,
+                                                               const UInt&        blocksNumber )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset(  new VectorType( solution ) );
-        M_oldResidualS.reset( new VectorType( residual ) );
+        M_oldSolution.reset(  new vector_Type( solution ) );
+        M_oldResidualFluid.reset( new vector_Type( residual ) );
 
-        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaS << "\n";
+#ifdef HAVE_LIFEV_DEBUG
+        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaFluid << "\n";
+#endif
 
-        return M_defaultOmegaS * residual;
+        return M_defaultOmegaFluid * residual;
     }
 
-    VectorType deltaX( solution );
-    VectorType deltaR( residual );
+    vector_Type deltaX( solution );
+    vector_Type deltaR( residual );
 
     deltaX -= *M_oldSolution;
-    deltaR -= *M_oldResidualS;
+    deltaR -= *M_oldResidualFluid;
 
     *M_oldSolution  = solution;
-    *M_oldResidualS = residual;
+    *M_oldResidualFluid = residual;
 
-    VectorType omega( deltaX );
+    vector_Type omega( deltaX );
     omega = 0.0;
     Real   tempOmega = 0;
 
-    VectorType tempVector( blocksVector );
-    VectorType tempDeltaX ( deltaX );
-    VectorType tempDeltaR ( deltaR );
+    vector_Type tempVector( blocksVector );
+    vector_Type tempDeltaX ( deltaX );
+    vector_Type tempDeltaR ( deltaR );
 
     for ( UInt i = 0 ; i < blocksNumber ; ++i )
     {
@@ -543,8 +535,10 @@ generalizedAitken<VectorType>::computeDeltaLambdaVectorBlock( const VectorType& 
         omega += tempOmega * tempVector;
     }
 
-    //Debug(7020) << "generalizedAitken: omega = " << "\n";
-    //omega.ShowMe();
+#ifdef HAVE_LIFEV_DEBUG
+    Debug(7020) << "generalizedAitken: omega = " << "\n";
+    omega.ShowMe();
+#endif
 
     return omega * residual;
 }
@@ -552,75 +546,34 @@ generalizedAitken<VectorType>::computeDeltaLambdaVectorBlock( const VectorType& 
 // ===================================================
 // Set Methods
 // ===================================================
-template <class VectorType>
-void generalizedAitken<VectorType>::setDefaultOmega( const Real& defaultOmegaS,
-                                                     const Real& defaultOmegaF )
+template <class vector_Type>
+inline void
+generalizedAitken<vector_Type>::setDefaultOmega( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
 {
-    M_defaultOmegaS = defaultOmegaS;
-    M_defaultOmegaF = defaultOmegaF;
-}
-
-template <class VectorType>
-void generalizedAitken<VectorType>::setOmegaRange( const boost::array< Real, 2 >& OmegaRange )
-{
-    M_rangeOmega = OmegaRange;
-}
-
-template <class VectorType>
-void generalizedAitken<VectorType>::setOmegaMin( const Real& OmegaMin )
-{
-    M_rangeOmega[0] = std::abs( OmegaMin );
-}
-
-template <class VectorType>
-void generalizedAitken<VectorType>::setOmegaMax( const Real& OmegaMax )
-{
-    M_rangeOmega[1] = std::abs( OmegaMax );
-}
-
-template <class VectorType>
-void generalizedAitken<VectorType>::setMinimizationType( const bool& inverseOmega )
-{
-    M_inverseOmega = inverseOmega;
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-template <class VectorType>
-const Real&
-generalizedAitken<VectorType>::GetDefaultOmegaS()  const
-{
-    return M_defaultOmegaS;
-}
-
-template <class VectorType>
-const Real&
-generalizedAitken<VectorType>::GetDefaultOmegaF()  const
-{
-    return M_defaultOmegaF;
+    M_defaultOmegaFluid = defaultOmegaFluid;
+    M_defaultOmegaSolid = defaultOmegaSolid;
 }
 
 // ===================================================
 // Private Methods
 // ===================================================
-template <class VectorType>
-void
-generalizedAitken<VectorType>::checkRange( Real& Omega )
+template <class vector_Type>
+inline void
+generalizedAitken<vector_Type>::checkRange( Real& omega )
 {
-    if ( std::abs(Omega) < std::abs(M_rangeOmega[0]) )
+    if ( std::abs(omega) < std::abs(M_rangeOmega[0]) )
     {
-        if ( Omega < 0 )
-            Omega = -M_rangeOmega[0];
+        if ( omega < 0 )
+            omega = -M_rangeOmega[0];
         else
-            Omega = M_rangeOmega[0];
+            omega = M_rangeOmega[0];
     }
-    else if ( std::abs(Omega) > std::abs(M_rangeOmega[1]) )
+    else if ( std::abs(omega) > std::abs(M_rangeOmega[1]) )
     {
-        if ( Omega < 0 )
-            Omega = -M_rangeOmega[1];
+        if ( omega < 0 )
+            omega = -M_rangeOmega[1];
         else
-            Omega = M_rangeOmega[1];
+            omega = M_rangeOmega[1];
     }
 }
 
