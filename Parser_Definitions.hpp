@@ -25,13 +25,13 @@
 //@HEADER
 
 /*!
- * @file
- * @brief File containing the Parser definitions
+ *  @file
+ *  @brief File containing the Parser definitions
  *
- * @date 29-01-2010
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 29-01-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- * @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef Parser_Definitions_H

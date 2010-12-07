@@ -25,13 +25,13 @@
 //@HEADER
 
 /*!
- * @file
- * @brief File containing the Parser grammar
+ *  @file
+ *  @brief File containing the Parser grammar
  *
- * @date 05-02-2010
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 05-02-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- * @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef Parser_SpiritGrammar_H
@@ -103,7 +103,7 @@ public:
     Parser_SpiritGrammar( const Parser_SpiritGrammar& spiritGrammar );
 
     //! Destructor
-    ~Parser_SpiritGrammar() {}
+    virtual ~Parser_SpiritGrammar() {}
     //@}
 
 

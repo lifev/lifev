@@ -25,14 +25,14 @@
 //@HEADER
 
 /*!
- * @file
- * @brief File containing the Parser interface
+ *  @file
+ *  @brief File containing the Parser interface
  *
- * @date 07-04-2009
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 07-04-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- * @contributor Gilles Fourestey  <gilles.fourestey@epfl.ch>
- * @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributor Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include "Parser.hpp"
