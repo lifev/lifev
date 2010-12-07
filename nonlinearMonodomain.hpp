@@ -41,9 +41,7 @@
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
-
 #include <life/lifemesh/regionMesh3D.hpp>
-
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
@@ -57,13 +55,7 @@
 namespace LifeV
 {
 
-/*!
-  \class Nonlinearmonodomain
-
-  This class implements a nonlinear monodomain solver.
-*/
-
-
+//!class Nonlinearmonodomain - implements a nonlinear monodomain solver.
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
@@ -71,6 +63,9 @@ class Nonlinearmonodomain
 {
 
 public:
+
+   //! @name Type definitions
+    //@{
 
     typedef DataMonodomain data_type;
 
@@ -92,29 +87,33 @@ public:
     typedef typename SolverType::prec_type        prec_type;
 
 
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
     //! Constructor
     /*!
-      \param dataType
-      \param potential FE space
-      \param bcHandler boundary conditions for potential
-      \param Epetra communicator
-    */
+     * @param dataType
+     * @param potential FE space
+     * @param bcHandler boundary conditions for potential
+     * @param Epetra communicator
+     */
+
     Nonlinearmonodomain( const data_type&          dataType,
                          FESpace<Mesh, EpetraMap>& uFESpace,
                          BCHandler&                bcHandler,
                          boost::shared_ptr<Epetra_Comm> comm );
 
-    /*!
-      \param dataType
-      \param potential FE space
-      \param Epetra communicator
-    */
-    /*  Nonlinearmonodomain( const data_type&          dataType,
-                         FESpace<Mesh, EpetraMap>& uFESpace,
-                         boost::shared_ptr<Epetra_Comm> comm );
-    */
+
     //! virtual destructor
     virtual ~Nonlinearmonodomain();
+
+    //@}
+
+    //! @name Methods
+    //@{
 
     //! Updates sources, bc treatment and solve the monodomain system
     virtual void PDEiterate( bchandler_raw_type& bch );
@@ -184,7 +183,7 @@ public:
         {
             return *M_matrMass;
         }
-
+    //@}
 
 protected:
 
@@ -233,7 +232,6 @@ protected:
     vector_type                    M_disp;
 
     //! Local fibers vector
-    //!****************************************************
     vector_type                    M_fiber_vector;
 
     //! residual
@@ -280,14 +278,13 @@ private:
 // IMPLEMENTATION
 // ************************************************
 
-
 //! Constructors
 template<typename Mesh, typename SolverType>
 Nonlinearmonodomain<Mesh, SolverType>::
 Nonlinearmonodomain( const data_type&          dataType,
-		     FESpace<Mesh, EpetraMap>& uFESpace,
-		     BCHandler&                BCh_u,
-		     boost::shared_ptr<Epetra_Comm>       comm ):
+                     FESpace<Mesh, EpetraMap>& uFESpace,
+                     BCHandler&                BCh_u,
+                     boost::shared_ptr<Epetra_Comm> comm):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_BCh_electric           ( &BCh_u ),
