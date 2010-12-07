@@ -29,7 +29,7 @@
  *  @brief fixed point algorithms with relaxation
  *
  *  @date 00-00-0000
- *  @author Name Surname <name.surname@email.org>
+ *  @author 
  *
  *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>

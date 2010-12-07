@@ -70,7 +70,9 @@ public:
 
     //! @name Methods
     //@{
-  
+    /**
+       These methods are derived from the base class VenantKirchhoff 
+     */
     void updateJacobian( vector_Type& /*sol*/, matrixPtr_Type& /*jac*/ )
     {
         this->M_Displayer->leaderPrint("  Linear S-  Doing nothing (updating jacobian of a linear system) ...                    ");
