@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface1D_Function
+ *  @brief File containing the BCInterface1D_Function class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 10-05-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef BCInterface1D_Function_H
@@ -47,13 +49,12 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
+ *  This class is an interface between BCInterface1D and the grammar parser. It allows to construct LifeV
  *  functions type for boundary conditions, using a functions string loaded from a GetPot file.
  *
  *  <b>DETAILS:</b>
  *
- *  The constructor of the class takes a string contains the GetPot file function. By default the stringSeparator
- *  is set to semicolon ";".
+ *  By default the stringSeparator is set to semicolon ";".
  *
  *  The function string has to be in this form:
  *
@@ -69,7 +70,7 @@ namespace LifeV
  *
  *  function = 'a=5.67436; (a*sin(2*pi*t))'
  */
-template< typename Operator >
+template< typename PhysicalSolver >
 class BCInterface1D_Function
 {
 public:
@@ -77,8 +78,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Data                                                    Data_Type;
-    typedef OneDimensionalModel_BCFunction                                        BCFunction_Type;
+    typedef BCInterface1D_Data                                                    data_Type;
+    typedef OneDimensionalModel_BCFunction                                        bcFunction_Type;
 
     //@}
 
@@ -93,7 +94,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_Function( const Data_Type& data );
+    BCInterface1D_Function( const data_Type& data );
 
     //! Copy constructor
     /*!
@@ -121,7 +122,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const Data_Type& data );
+    virtual void setData( const data_Type& data );
 
     //@}
 
@@ -130,7 +131,10 @@ public:
     //@{
 
     //! Get the base of the boundary condition
-    BCFunction_Type& GetBase();
+    /*!
+     * @return boundary condition base
+     */
+    bcFunction_Type& base() { return M_base; }
 
     //@}
 
@@ -140,7 +144,7 @@ protected:
     //@{
 
     //! dataInterpolation
-    virtual inline void DataInterpolation() {}
+    virtual void dataInterpolation() {}
 
     //@}
 
@@ -151,30 +155,33 @@ private:
     //! @name Private Methods
     //@{
 
-    //! SetFunction
-    inline void SetFunction();
+    //! setFunction
+    void setFunction() { M_base.setFunction( boost::bind( &BCInterface1D_Function::function, this, _1 ) ); }
 
-    //! Function
-    Real Function( const Real& t );
+    //! function
+    Real function( const Real& t );
 
     //@}
 
-    BCFunction_Type                   M_base;
+    bcFunction_Type                   M_base;
 
 };
 
+// ===================================================
+// Factory
+// ===================================================
 //! Factory create function
-template< typename Operator >
-inline BCInterface1D_Function< Operator >* BCInterface1D_CreateFunction()
+template< typename PhysicalSolver >
+inline BCInterface1D_Function< PhysicalSolver >* createBCInterface1D_Function()
 {
-    return new BCInterface1D_Function< Operator > ();
+    return new BCInterface1D_Function< PhysicalSolver > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
-template< typename Operator >
-BCInterface1D_Function< Operator >::BCInterface1D_Function() :
+template< typename PhysicalSolver >
+BCInterface1D_Function< PhysicalSolver >::BCInterface1D_Function() :
         M_parser    (),
         M_base      ()
 {
@@ -185,8 +192,8 @@ BCInterface1D_Function< Operator >::BCInterface1D_Function() :
 
 }
 
-template< typename Operator >
-BCInterface1D_Function< Operator >::BCInterface1D_Function( const Data_Type& data ) :
+template< typename PhysicalSolver >
+BCInterface1D_Function< PhysicalSolver >::BCInterface1D_Function( const data_Type& data ) :
         M_parser    (),
         M_base      ()
 {
@@ -195,11 +202,11 @@ BCInterface1D_Function< Operator >::BCInterface1D_Function( const Data_Type& dat
     Debug( 5021 ) << "BCInterface1D_Function::BCInterface1D_Function( data )" << "\n";
 #endif
 
-    this->SetData( data );
+    this->setData( data );
 }
 
-template< typename Operator >
-BCInterface1D_Function< Operator >::BCInterface1D_Function( const BCInterface1D_Function& function ) :
+template< typename PhysicalSolver >
+BCInterface1D_Function< PhysicalSolver >::BCInterface1D_Function( const BCInterface1D_Function& function ) :
         M_parser    ( function.M_parser ),
         M_base      ( function.M_base )
 {
@@ -208,9 +215,9 @@ BCInterface1D_Function< Operator >::BCInterface1D_Function( const BCInterface1D_
 // ===================================================
 // Methods
 // ===================================================
-template< typename Operator >
-BCInterface1D_Function< Operator >&
-BCInterface1D_Function< Operator >::operator=( const BCInterface1D_Function& function )
+template< typename PhysicalSolver >
+BCInterface1D_Function< PhysicalSolver >&
+BCInterface1D_Function< PhysicalSolver >::operator=( const BCInterface1D_Function& function )
 {
     if ( this != &function )
     {
@@ -221,9 +228,9 @@ BCInterface1D_Function< Operator >::operator=( const BCInterface1D_Function& fun
     return *this;
 }
 
-template< typename Operator >
+template< typename PhysicalSolver >
 void
-BCInterface1D_Function< Operator >::SetData( const Data_Type& data )
+BCInterface1D_Function< PhysicalSolver >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -231,41 +238,19 @@ BCInterface1D_Function< Operator >::SetData( const Data_Type& data )
 #endif
 
     if ( M_parser )
-        M_parser->SetString( data.GetBaseString() );
+        M_parser->SetString( data.baseString() );
     else
-        M_parser.reset( new Parser( data.GetBaseString() ) );
+        M_parser.reset( new Parser( data.baseString() ) );
 
-    SetFunction();
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-template< typename Operator >
-typename BCInterface1D_Function< Operator >::BCFunction_Type&
-BCInterface1D_Function< Operator >::GetBase()
-{
-    return M_base;
+    setFunction();
 }
 
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename Operator >
-inline void
-BCInterface1D_Function< Operator >::SetFunction()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface1D_Function::setFunction\n";
-#endif
-
-    M_base.setFunction( boost::bind( &BCInterface1D_Function::Function, this, _1 ) );
-}
-
-template< typename Operator >
+template< typename PhysicalSolver >
 Real
-BCInterface1D_Function< Operator >::Function( const Real& t )
+BCInterface1D_Function< PhysicalSolver >::function( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -275,7 +260,7 @@ BCInterface1D_Function< Operator >::Function( const Real& t )
 
     M_parser->SetVariable( "t", t );
 
-    this->DataInterpolation();
+    this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->Evaluate( 1 ) << "\n";

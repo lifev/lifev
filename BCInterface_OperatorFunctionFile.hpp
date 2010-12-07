@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface_OperatorFunctionFile
+ *  @brief File containing the BCInterface_OperatorFunctionFile class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 26-08-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef BCInterface_OperatorFunctionFile_H
@@ -51,20 +53,20 @@ namespace LifeV
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *  The function string can contain Operator parameters.
  */
-template< class Operator >
-class BCInterface_OperatorFunctionFile: public virtual BCInterface_FunctionFile< Operator > ,
-        public virtual BCInterface_OperatorFunction< Operator >
+template< class PhysicalSolver >
+class BCInterface_OperatorFunctionFile: public virtual BCInterface_FunctionFile< PhysicalSolver > ,
+        public virtual BCInterface_OperatorFunction< PhysicalSolver >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Function< Operator >                        super0;
-    typedef BCInterface_FunctionFile< Operator >                    super1;
-    typedef BCInterface_OperatorFunction< Operator >                super2;
+    typedef BCInterface_Function< PhysicalSolver >                  super0;
+    typedef BCInterface_FunctionFile< PhysicalSolver >              super1;
+    typedef BCInterface_OperatorFunction< PhysicalSolver >          super2;
 
-    typedef BCInterface_Data                                        Data_Type;
+    typedef BCInterface_Data                                        data_Type;
 
     //@}
 
@@ -79,7 +81,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_OperatorFunctionFile( const Data_Type& data );
+    BCInterface_OperatorFunctionFile( const data_Type& data );
 
     //! Copy constructor
     /*!
@@ -107,24 +109,27 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const Data_Type& data );
+    virtual void setData( const data_Type& data );
 
     //@}
 
 };
 
+// ===================================================
+// Factory
+// ===================================================
 //! Factory create function
-template< typename Operator >
-inline BCInterface_Function< Operator >* BCInterface_CreateOperatorFunctionFile()
+template< typename PhysicalSolver >
+inline BCInterface_Function< PhysicalSolver >* createBCInterface_OperatorFunctionFile()
 {
-    return new BCInterface_OperatorFunctionFile< Operator > ();
+    return new BCInterface_OperatorFunctionFile< PhysicalSolver > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< class Operator >
-BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile() :
+template< class PhysicalSolver >
+BCInterface_OperatorFunctionFile< PhysicalSolver >::BCInterface_OperatorFunctionFile() :
         super0      (),
         super1      (),
         super2      ()
@@ -136,8 +141,8 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile()
 
 }
 
-template< class Operator >
-BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const Data_Type& data ) :
+template< class PhysicalSolver >
+BCInterface_OperatorFunctionFile< PhysicalSolver >::BCInterface_OperatorFunctionFile( const data_Type& data ) :
         super0      (),
         super1      (),
         super2      ()
@@ -147,11 +152,11 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( 
     Debug( 5024 ) << "BCInterface_OperatorFunctionFile::BCInterface_OperatorFunctionFile( data )" << "\n";
 #endif
 
-    this->SetData( data );
+    this->setData( data );
 }
 
-template< class Operator >
-BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( const BCInterface_OperatorFunctionFile& function ) :
+template< class PhysicalSolver >
+BCInterface_OperatorFunctionFile< PhysicalSolver >::BCInterface_OperatorFunctionFile( const BCInterface_OperatorFunctionFile& function ) :
         super0      ( function ),
         super1      ( function ),
         super2      ( function )
@@ -161,9 +166,9 @@ BCInterface_OperatorFunctionFile< Operator >::BCInterface_OperatorFunctionFile( 
 // ===================================================
 // Methods
 // ===================================================
-template< class Operator >
-BCInterface_OperatorFunctionFile< Operator >&
-BCInterface_OperatorFunctionFile< Operator >::operator=( const BCInterface_OperatorFunctionFile& function )
+template< class PhysicalSolver >
+BCInterface_OperatorFunctionFile< PhysicalSolver >&
+BCInterface_OperatorFunctionFile< PhysicalSolver >::operator=( const BCInterface_OperatorFunctionFile& function )
 {
     if ( this != &function )
     {
@@ -174,20 +179,20 @@ BCInterface_OperatorFunctionFile< Operator >::operator=( const BCInterface_Opera
     return *this;
 }
 
-template< class Operator >
+template< class PhysicalSolver >
 void
-BCInterface_OperatorFunctionFile< Operator >::SetData( const Data_Type& data )
+BCInterface_OperatorFunctionFile< PhysicalSolver >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterface_OperatorFunctionFile::setData" << "\n";
 #endif
-    super1::SetData( data );
+    super1::setData( data );
 
-    //super2::SetData( data ); Cannot call directly, because it call again BCInterface_Function::setup( data )
-    super2::M_flag     = data.GetFlag();
+    //super2::setData( data ); Cannot call directly, because it call again BCInterface_Function::setup( data )
+    super2::M_flag = data.flag();
 
-    super2::CreateAccessList( data );
+    super2::createAccessList( data );
 }
 
 } // Namespace LifeV

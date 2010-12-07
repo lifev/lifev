@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface_FSI
+ *  @brief File containing the BCInterface_FSI class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 23-04-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/BCInterface_FSI.hpp>
@@ -56,7 +58,7 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI() :
 
 }
 
-BCInterface_FSI< FSIOperator >::BCInterface_FSI( const Data_Type& data ) :
+BCInterface_FSI< FSIOperator >::BCInterface_FSI( const data_Type& data ) :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -70,7 +72,7 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI( const Data_Type& data ) :
     Debug( 5025 ) << "BCInterface_FSI::BCInterface_FSI( data )" << "\n";
 #endif
 
-    this->SetData( data );
+    this->setData( data );
 }
 
 BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_FSI& fsi ) :
@@ -105,7 +107,7 @@ BCInterface_FSI< FSIOperator >::operator=( const BCInterface_FSI& fsi )
 }
 
 void
-BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
+BCInterface_FSI< FSIOperator >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -127,32 +129,32 @@ BCInterface_FSI< FSIOperator >::SetData( const Data_Type& data )
     mapFunction["StructureToFluid"]                 = StructureToFluid;
 
     // Retrieving the strings
-    M_FSIFunction = mapFunction[ data.GetBaseString() ];
+    M_FSIFunction = mapFunction[ data.baseString() ];
 
-    M_name = data.GetName();
-    M_flag = data.GetFlag();
-    M_type = data.GetType();
-    M_mode = data.GetMode();
-    M_comV = data.GetComV();
+    M_name = data.name();
+    M_flag = data.flag();
+    M_type = data.type();
+    M_mode = data.mode();
+    M_comV = data.comV();
 }
 
 void
-BCInterface_FSI< FSIOperator >::ExportData( Data_Type& data )
+BCInterface_FSI< FSIOperator >::exportData( data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5025 ) << "BCInterface_FSIFunctionFile::ExportData" << "\n";
 #endif
 
-    data.SetName( M_name );
-    data.SetFlag( M_flag );
-    data.SetType( M_type );
-    data.SetMode( M_mode );
-    data.SetComV( M_comV );
+    data.setName( M_name );
+    data.setFlag( M_flag );
+    data.setType( M_type );
+    data.setMode( M_mode );
+    data.setComV( M_comV );
 }
 
 void
-BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperator >& Oper )
+BCInterface_FSI< FSIOperator >::checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -163,7 +165,7 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
     mapMethod["monolithicGI"]    = MONOLITHIC_GI;
     mapMethod["steklovPoincare"] = STEKLOVPOINCARE;
 
-    switch ( mapMethod[Oper->data().method()] )
+    switch ( mapMethod[physicalSolver->data().method()] )
     {
     case EXACTJACOBIAN:
 
@@ -171,7 +173,7 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
         Debug( 5025 ) << "BCInterface_FSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
-        CheckFunction< exactJacobian > ( Oper );
+        checkFunction< exactJacobian > ( physicalSolver );
 
         break;
 
@@ -181,7 +183,7 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
         Debug( 5025 ) << "BCInterface_FSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
-        CheckFunction< fixedPoint > ( Oper );
+        checkFunction< fixedPoint > ( physicalSolver );
 
         break;
 
@@ -191,7 +193,7 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
         Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithicGE" << "\n";
 #endif
 
-        CheckFunction< MonolithicGE >( Oper );
+        checkFunction< MonolithicGE >( physicalSolver );
 
         break;
 
@@ -201,7 +203,7 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
         Debug( 5025 ) << "BCInterface_FSI::checkMethod                            monolithicGI" << "\n";
 #endif
 
-        CheckFunction< MonolithicGI >( Oper );
+        checkFunction< MonolithicGI >( physicalSolver );
 
         break;
 
@@ -211,19 +213,10 @@ BCInterface_FSI< FSIOperator >::CheckMethod( const boost::shared_ptr< FSIOperato
         Debug( 5025 ) << "BCInterface_FSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
-        //CheckFunction< steklovPoincare >( Oper );
+        //checkFunction< steklovPoincare >( physicalSolver );
 
         break;
     }
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-BCInterface_FSI< FSIOperator >::BCFunction_Type&
-BCInterface_FSI< FSIOperator >::GetBase()
-{
-    return *M_base;
 }
 
 } // Namespace LifeV

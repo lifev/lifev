@@ -1,50 +1,45 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface1D Definitions
+ *  @brief File containing the BCInterface1D definitions
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 10-05-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef BCInterface1D_Definitions_H
 #define BCInterface1D_Definitions_H 1
 
-//#define DEBUG 1;
-
-// LifeV classes
-#include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/displayer.hpp>
-#include <life/lifecore/factory.hpp>
-#include <life/lifecore/singleton.hpp>
-
-#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Boost classes
 #include <boost/shared_ptr.hpp>
@@ -54,6 +49,19 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+// Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+// LifeV classes
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/displayer.hpp>
+#include <life/lifecore/factory.hpp>
+#include <life/lifecore/singleton.hpp>
+
+#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
 
 namespace LifeV
 {
@@ -67,9 +75,6 @@ enum BCInterface1D_BaseList
     BCInterface1D_OPERfunctionFile,
     BCInterface1D_Default
 };
-
-// Type definitions
-typedef std::string       BCName;
 
 } // Namespace LifeV
 
