@@ -1,46 +1,50 @@
+//@HEADER
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    This file is part of LifeV.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
 /*!
-  \file dataMonodomain.h
-  \author L. Mirabella M. Perego
-  \date 11/2007
-  \version 1.0
+    @file
+    @brief File containing a class for handling Bidomain data with GetPot
 
-  \brief File containing a class for handling Monodomain data with GetPot
-  \mantainer R. Ruiz
-   \date 2010-04
-*/
+    @date 11−2007
+    @author Lucia Mirabella <lucia.mirabella@gmail.com>, Mauro Perego <perego.mauro@gmail.com>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+    @mantainer Simone Rossi <simone.rossi@epfl.ch>
+ */
+
 #ifndef _DATABIDOMAIN_H_
 #define _DATABIDOMAIN_H_
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/life.hpp>
+
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <life/lifecore/dataString.hpp>
-#include <life/lifearray/tab.hpp>
 #include <life/lifesolver/heartFunctors.hpp>
 
 
 namespace LifeV
 {
-using namespace std;
-
 /*!
   \class DataBidomain
 
@@ -49,88 +53,138 @@ using namespace std;
 */
 
 class DataBidomain:
-        public DataMesh,
-        public DataTime
+    public DataMesh,
+    public DataTime
 {
 public:
 
+
+    //! @name Public Types
+    //@{
+
+    /*! @enum listOfTemplatesOptions
+        Description of the purpose of the enumerator list.
+    */
+
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> region_Type;
+
+    //@}
+
+
+
+    //! @name Constructor & Destructor
+    //@{
+
     //! Constructors
-    DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct );
+    DataBidomain();
+
+    DataBidomain( boost::shared_ptr<HeartFunctors> heart);
+
     DataBidomain( const DataBidomain& dataBidomain );
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> fct_type;
+    //@}
 
 
-    //! Ouptut
-    void showMe( std::ostream& c = std::cout );
+    //! @name Operators
+    //@{
+
+    DataBidomain& operator=( const DataBidomain& dataBidomain );
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! Output: show the data used for the simulation
+    void showMe( std::ostream& output = std::cout );
+
+    //@}
 
 
-    //! external setup
-    void setup( const GetPot& dfile );
+
+    //! @name Set Methods
+    //@{
+
+    //! external setup: set all the data for the simulation
+    void setup( const GetPot& dataFile );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
 
     //! verbose
-    Real verbose() const {return M_verbose;};
-
+    Real        verbose()        const {return M_verbose;};
 
     //! FE space order
-    std::string uOrder() const {return M_uOrder;};
-    //! Chi
-    inline   Real Chi() const {return M_Chi;}
-    //! Chi
-    inline   string fibers_file() const {return M_fibers_file;}
+    std::string uOrder()         const {return M_uOrder;};
 
-    inline int heart_diff_fct() const {return M_heart_diff_fct;}
+    //! Chi
+    Real        Chi()            const {return M_volumeSurfaceRatio;}
+    //! fiber File
+    std::string fibers_file()    const {return M_fibersFile;}
 
-    inline bool has_fibers() const {return M_has_fibers;}
+    Int         heart_diff_fct() const {return M_heartDiffusionFactor;}
+
+    bool        has_fibers()     const {return M_hasFibers;}
 
     //! format vct
-    inline bool fibers_format() const {return M_fibers_format;}
+    bool        fibers_format()  const {return M_fibersFormat;}
 
     //! sigma_l
-    inline   Real sigmal_i() const 	{return M_sigmal_i;}
-    inline   Real sigmal_e() const 	{return M_sigmal_e;}
+    Real        sigmal_i()       const 	{return M_longitudinalInternalConductivity;}
+    Real        sigmal_e()       const 	{return M_longitudinalExternalConductivity;}
 
     //! sigma_t
-    inline   Real sigmat_i() const 	{return M_sigmat_i;}
-    inline   Real sigmat_e() const 	{return M_sigmat_e;}
+    Real        sigmat_i()       const 	{return M_transversalInternalConductivity;}
+    Real        sigmat_e()       const 	{return M_transversalExternalConductivity;}
 
     //! Cm
-    inline   Real Cm() const 	{return M_Cm;}
+    Real        Cm()             const 	{return M_membraneCapacitance;}
     //! D
-    inline   Real D_i() const 	{return M_D_i;}
+    Real        D_i()            const 	{return M_internalDiffusivity;}
     //! Post_dir
-    inline   Real D_e() const 	{return M_D_e;}
+    Real        D_e()            const 	{return M_externalDiffusivity;}
     //! Post_dir
-    inline   string Post_dir() const {return M_post_dir;}
+    std::string Post_dir()       const {return M_postProcessingDirectory;}
 
-    inline	 UInt order_bdf() const {return M_order_bdf;}
+    UInt        order_bdf()      const {return M_BDForder;}
 
-    fct_type red_sigma_sphere;
-    fct_type red_sigma_cyl;
-    fct_type red_sigma_box;
+    //@}
 
 
 protected:
 
-    std::string  M_uOrder;
-    string M_fibers_file;
-    Real M_Chi;
-    Real M_Cm;
-    Real M_D_i;
-    Real M_D_e;
-    Real M_sigmal_i;
-    Real M_sigmat_i;
-    Real M_sigmal_e;
-    Real M_sigmat_e;
-    int M_heart_diff_fct;
-    UInt M_verbose;
-    string M_post_dir; //! full name
-    string M_fibers_dir;
-    bool M_has_fibers;
     // format of fibers file
-    bool M_fibers_format;
+    bool        M_fibersFormat;
+    bool        M_hasFibers;
+
     // order of time discretization BDF order
-    UInt M_order_bdf;
+    UInt        M_BDForder;
+    UInt        M_verbose;
+
+    Int         M_heartDiffusionFactor;
+
+    Real        M_externalDiffusivity;
+    Real        M_internalDiffusivity;
+    Real        M_longitudinalExternalConductivity;
+    Real        M_longitudinalInternalConductivity;
+    Real        M_membraneCapacitance;
+    Real        M_transversalExternalConductivity;
+    Real        M_transversalInternalConductivity;
+    Real        M_volumeSurfaceRatio;
+
+    std::string M_fibersDirectory;
+    std::string M_fibersFile;
+    std::string M_postProcessingDirectory; //! full name
+    std::string M_uOrder;
+
+    region_Type M_reducedConductivityBox;
+    region_Type M_reducedConductivityCylinder;
+    region_Type M_reducedConductivitySphere;
+
+
 
 private:
 
