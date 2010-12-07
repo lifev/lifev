@@ -101,10 +101,10 @@ public:
 
     typedef SolverType                                      solver_Type;
 
-    typedef typename solver_Type::matrix_type               matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                  matrixPtr_Type;
-    typedef typename solver_Type::vector_type               vector_Type;
-    typedef boost::shared_ptr<vector_Type>                  vectorPtr_Type;
+    typedef typename solver_Type::matrix_type               matrix_type;
+    typedef boost::shared_ptr<matrix_type>                  matrix_ptrtype;
+    typedef typename solver_Type::vector_type               vector_type;
+    typedef boost::shared_ptr<vector_type>                  vector_ptrtype;
 
 
     typedef typename SolverType::prec_raw_type              precRaw_Type;
@@ -154,7 +154,7 @@ public:
       \param matrix the matrix containing the mass and the linear part of the stiffness matrix
       \param factor scaling factor
      */
-    void buildSystem(matrixPtr_Type matrix, Real const& factor =1.);
+    void buildSystem(matrix_ptrtype matrix, Real const& factor =1.);
 
     //! Computes the Linear part of the Jacobian and the Mass Matrix
     void buildSystem( );
@@ -171,7 +171,7 @@ public:
     /*!
       \param w0 space function describing the initial velocity
     */
-    void initialize   ( vectorPtr_Type d0,  vectorPtr_Type w0 = vectorPtr_Type());
+    void initialize   ( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype());
 
     //! Sets the initial displacement, velocity, acceleration
     /*!
@@ -179,13 +179,13 @@ public:
       \param w0 empty vector
       \param a0 empty vector
     */
-    void initializeVel( const vector_Type& w0);
+    void initializeVel( const vector_type& w0);
 
     //! Updates the system at the end of each time step when the matrix is passed from outside
     /*!
       \param stiff stiffness matrix provided from outside
      */
-    void updateSystem( matrixPtr_Type& stiff );
+    void updateSystem( matrix_ptrtype& stiff );
 
     //! Updates the system at the end of each time step when the matrix is passed from outside
     void updateSystem( );
@@ -201,13 +201,13 @@ public:
     /*!
       \param stiff stiffness matrix provided from outside
      */
-    void updateNonlinearMatrix( matrixPtr_Type& stiff );
+    void updateNonlinearMatrix( matrix_ptrtype& stiff );
 
     //! Updates the nonlinear terms on the stiffness matrix at the end of each time step
     /*!
       \param stiff stiffness matrix provided from outside
      */
-    void updateNonlinearTerms( matrixPtr_Type& stiff );
+    void updateNonlinearTerms( matrix_ptrtype& stiff );
 
     //! Solve the non-linear system
 
@@ -227,14 +227,14 @@ public:
       \param solution vector
       \param factor scaling factor
     */
-    void computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor );
+    void computeMatrix( matrix_ptrtype& stiff, const vector_type& sol, Real const& factor );
 
     //! computes the global matrix for the residual computation (calls updateNonlinearMatrix)
     /*!
       \param solution vector
       \param factor scaling factor
     */
-    void computeMatrix( const vector_Type& sol, Real const& factor );
+    void computeMatrix( const vector_type& sol, Real const& factor );
 
     //! evaluates residual for newton interations
     /*!
@@ -242,14 +242,14 @@ public:
       \param sol solution vector from which the residual is computed
       \param iter iteration of the nonLinearRichardson method
     */
-    void evalResidual( vector_Type &res, const vector_Type& sol, Int iter);
+    void evalResidual( vector_type &res, const vector_type& sol, Int iter);
 
     //! Update Jacobian at each nonLinearRichardson iteration
     /*!
       \param sol the current solution at the k-th iteration of Newton method
       \param jac the Jacobian matrix that must be updated
     */
-    void updateJacobian( vector_Type& sol, matrixPtr_Type& jacobian  );
+    void updateJacobian( vector_type& sol, matrix_ptrtype& jacobian  );
 
     //! It is called by the NonLinear Richarson method. It calls the solveJacobian method
     /*!
@@ -259,8 +259,8 @@ public:
       \param linear_rel_tol send for the relative tolerance to the linear solver is therefore eta. eta is determined
              by the modified Eisenstat-Walker formula
      */
-    void solveJac( vector_Type&       step,
-                   const vector_Type& res,
+    void solveJac( vector_type&       step,
+                   const vector_type& res,
                    Real&            linear_rel_tol);
 
     //! solves the tangent problem with custom BC
@@ -269,8 +269,8 @@ public:
     /*!
       \param BCd BCHandler object
     */
-    void solveJacobian( vector_Type&       step,
-                        const vector_Type& res,
+    void solveJacobian( vector_type&       step,
+                        const vector_type& res,
                         Real&            linear_rel_tol,
                         bchandler_Type&    BCd);
 
@@ -280,18 +280,18 @@ public:
     //@{
 
     //! Get the acceleration
-    vector_Type& acc()         { return *M_acc; }
+    vector_type& acc()         { return *M_acc; }
 
     //! Get the solidMatrix
-    void getSolidMatrix( matrixPtr_Type& matrix);
+    void getSolidMatrix( matrix_ptrtype& matrix);
 
     //@}
 
 private:
 
     //!It applies the boundary conditions before solving the linear system J*step=-Res. It is called in solveJacobian
-    void applyBoundaryConditions(matrix_Type &matrix,
-                                 vector_Type &rhs,
+    void applyBoundaryConditions(matrix_type &matrix,
+                                 vector_type &rhs,
                                  bchandler_Type& BCh,
                                  UInt         offset=0);
   
@@ -303,11 +303,11 @@ private:
     Real                            M_pressure;
 
     //! acceleration
-    vectorPtr_Type                    M_acc;
+    vector_ptrtype                    M_acc;
 
 
     //! right  hand  side acceleration
-    vectorPtr_Type                    M_rhsA;
+    vector_ptrtype                    M_rhsA;
 
 };
 
@@ -348,8 +348,8 @@ setup(
 {
     super::setup(data, dFESpace, comm, monolithicMap, offset);
 
-    M_acc.reset(new vector_Type(*this->M_localMap));
-    M_rhsA.reset(new vector_Type(*this->M_localMap));
+    M_acc.reset(new vector_type(*this->M_localMap));
+    M_rhsA.reset(new vector_type(*this->M_localMap));
 
 }
 
@@ -367,7 +367,7 @@ setup(
 template <typename Mesh, typename SolverType>
 void
 NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-buildSystem(matrixPtr_Type massStiff, Real const & factor)
+buildSystem(matrix_ptrtype massStiff, Real const & factor)
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
 
@@ -456,7 +456,7 @@ initialize( const Function& d0, const Function& w0, const Function& a0 )
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrtype& stiff )
 {
     this->M_Displayer->leaderPrint(" NonLin S-  Updating mass term on right hand side... ");
 
@@ -472,9 +472,9 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Ty
 #ifdef nonlinear
 
 
-    stiff.reset(new matrix_Type(*this->M_localMap));
+    stiff.reset(new matrix_type(*this->M_localMap));
 
-    matrixPtr_Type tmp( new matrix_Type(*this->M_localMap, 1) );
+    matrix_ptrtype tmp( new matrix_type(*this->M_localMap, 1) );
     updateNonlinearTerms(tmp);
     tmp->GlobalAssemble();
     *stiff += *tmp;
@@ -490,7 +490,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Ty
     //Computation of the right hand sides
 
     Real DeltaT    = this->M_data->dataTime()->getTimeStep();
-    vector_Type z = *this->M_disp;
+    vector_type z = *this->M_disp;
 
      z            +=  DeltaT*(*this->M_vel);
 
@@ -548,13 +548,13 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 #ifdef nonlinear
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
 
-    vector_Type disp(*this->M_disp);
+    vector_type disp(*this->M_disp);
 
-    vector_Type dRep(disp, Repeated);
+    vector_type dRep(disp, Repeated);
 
-    this->M_stiff.reset(new matrix_Type(*this->M_localMap));
+    this->M_stiff.reset(new matrix_type(*this->M_localMap));
 
-    matrixPtr_Type tmp(new matrix_Type(*this->M_localMap, 1));
+    matrix_ptrtype tmp(new matrix_type(*this->M_localMap, 1));
     updateNonlinearTerms( tmp );
     //updateNonlinearMatrix( tmp );
     tmp->GlobalAssemble();
@@ -593,7 +593,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
     //Computation of the right hand sides
 
     Real DeltaT    = this->M_data->dataTime()->getTimeStep();
-    vector_Type z  = *this->M_disp;
+    vector_type z  = *this->M_disp;
 
     z             +=  DeltaT * (*this->M_vel);
 
@@ -623,14 +623,14 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( matrixPtr_Type& stiff )
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( matrix_ptrtype& stiff )
 {
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
 
-    vector_Type disp(*this->M_disp);
+    vector_type disp(*this->M_disp);
 
-    vector_Type dRep(disp, Repeated);
+    vector_type dRep(disp, Repeated);
 
     for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
     {
@@ -692,14 +692,14 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( mat
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearTerms( matrixPtr_Type& stiff )
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearTerms( matrix_ptrtype& stiff )
 {
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
-    vector_Type disp(*this->M_disp);
+    vector_type disp(*this->M_disp);
 
-    vector_Type dRep(disp, Repeated);
+    vector_type dRep(disp, Repeated);
 
     for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
     {
@@ -822,7 +822,7 @@ updateVel()
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& factor)
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrix_ptrtype& stiff, const vector_type& sol,  Real const& factor)
 {
     this->M_Displayer->leaderPrint( "    NonLin S- Computing residual ... \t\t\t");
 
@@ -831,7 +831,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrixPtr_T
 
     // Matrices initialization
 
-    stiff.reset(new matrix_Type(*this->M_localMap));
+    stiff.reset(new matrix_type(*this->M_localMap));
     *stiff += *this->M_linearStiff;
 
     Real coef;
@@ -841,12 +841,12 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrixPtr_T
 
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
 
-    vector_Type dRep(sol, Repeated);
+    vector_type dRep(sol, Repeated);
 
 
 #ifdef nonlinear
 
-    matrixPtr_Type tmp(new matrix_Type(*this->M_localMap, 1));
+    matrix_ptrtype tmp(new matrix_type(*this->M_localMap, 1));
     updateNonlinearMatrix( tmp );
     tmp->GlobalAssemble();
     *tmp *= factor;
@@ -864,15 +864,15 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrixPtr_T
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol,  Real const& factor)
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( const vector_type& sol,  Real const& factor)
 {
     computeMatrix(this->M_stiff, sol, factor);
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type &res, const vector_Type& sol, Int /*iter*/)
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type &res, const vector_type& sol, Int /*iter*/)
 {
-    //this->M_stiff.reset(new matrix_Type(this->M_localMap));
+    //this->M_stiff.reset(new matrix_type(this->M_localMap));
     computeMatrix(this->M_stiff, sol, 1.);
 
     this->M_Displayer->leaderPrint("    NonLin S- Updating the boundary conditions ... \t");
@@ -883,7 +883,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type 
 
     bcManageMatrix( *this->M_stiff, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), 1.0 );
 
-    vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->dataTime()->getTime(), 1.0 );
     *this->M_rhs = rhsFull;
@@ -898,7 +898,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type 
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matrixPtr_Type& jacobian  )
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_type & sol, matrix_ptrtype& jacobian  )
 {
     this->M_Displayer->leaderPrint("  NonLin S-  Solid: Updating JACOBIAN... ");
 
@@ -909,7 +909,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_Typ
     // copy of the linear part
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
 
-    jacobian.reset(new matrix_Type(*this->M_localMap));
+    jacobian.reset(new matrix_type(*this->M_localMap));
 
     *jacobian += *this->M_linearStiff;
 
@@ -922,7 +922,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_Typ
 
     ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
 
-    vector_Type dRep(sol, Repeated);
+    vector_type dRep(sol, Repeated);
 
     // Number of displacement components
     UInt nc = nDimensions;
@@ -1017,7 +1017,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_Typ
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-solveJac( vector_Type &step, const vector_Type& res, Real& linear_rel_tol)
+solveJac( vector_type &step, const vector_type& res, Real& linear_rel_tol)
 {
     solveJacobian(step,  res, linear_rel_tol, this->M_BCh);
 }
@@ -1026,8 +1026,8 @@ solveJac( vector_Type &step, const vector_Type& res, Real& linear_rel_tol)
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-solveJacobian( vector_Type&           step,
-               const vector_Type&     res,
+solveJacobian( vector_type&           step,
+               const vector_type&     res,
                Real&                /*linear_rel_tol*/,
                bchandler_Type&        BCh)
 {
@@ -1047,7 +1047,7 @@ solveJacobian( vector_Type&           step,
     this->M_rhsNoBC->GlobalAssemble();
     this->M_rhsW->GlobalAssemble();
 
-    vector_Type rhsFull (res);
+    vector_type rhsFull (res);
 
 
 //    bcManageMatrix( *this->M_jacobian, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), tgv );
@@ -1075,8 +1075,8 @@ solveJacobian( vector_Type&           step,
 
 template<typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-applyBoundaryConditions(matrix_Type&        matrix,
-                        vector_Type&        rhs,
+applyBoundaryConditions(matrix_type&        matrix,
+                        vector_type&        rhs,
                         bchandler_Type&     BCh,
                         UInt                offset)
 {
@@ -1087,8 +1087,8 @@ applyBoundaryConditions(matrix_Type&        matrix,
     if ( !BCh->bdUpdateDone() )
         BCh->bdUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
 
-    // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
-    //    vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
+    // vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    //    vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
 
     //In the original versione it was not commented, modified by Paolo Tricerri
@@ -1106,10 +1106,10 @@ applyBoundaryConditions(matrix_Type&        matrix,
 
 template<typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-getSolidMatrix( matrixPtr_Type& matrix)
+getSolidMatrix( matrix_ptrtype& matrix)
 {
     //updateSystem(/*matrix*/);
-    matrix.reset(new matrix_Type(*this->M_localMap));
+    matrix.reset(new matrix_type(*this->M_localMap));
     //*this->M_stiff *= this->M_data->dataTime()->getTimeStep() * this->M_rescaleFactor;
     *matrix  += *this->M_stiff;
     matrix->GlobalAssemble();
