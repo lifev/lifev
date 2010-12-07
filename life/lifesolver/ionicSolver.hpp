@@ -220,7 +220,7 @@ IonicSolver<Mesh, SolverType>::
 
 template< typename Mesh,
 	  typename SolverType = LifeV::SolverTrilinos >
-class Mitchell_Schaeffer : public virtual IonicSolver<Mesh, SolverType>
+class MitchellSchaeffer : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
 	typedef typename IonicSolver<Mesh, SolverType>::data_type	data_type;
@@ -228,12 +228,12 @@ public:
 	typedef typename IonicSolver<Mesh, SolverType>::Function 	Function;
 	typedef typename IonicSolver<Mesh, SolverType>::fct_TauClose	fct_TauClose;
 
-    Mitchell_Schaeffer( const data_type& dataType,
+    MitchellSchaeffer( const data_type& dataType,
                         const Mesh& mesh,
                         FESpace<Mesh, EpetraMap>& uFEspace,
                         Epetra_Comm& comm );
 
-    virtual ~Mitchell_Schaeffer();
+    virtual ~MitchellSchaeffer();
 
     void updateRepeated( );
 
@@ -278,8 +278,8 @@ private:
 
 //! Constructor
 template<typename Mesh, typename SolverType>
-Mitchell_Schaeffer<Mesh, SolverType>::
-Mitchell_Schaeffer( const data_type& dataType,
+MitchellSchaeffer<Mesh, SolverType>::
+MitchellSchaeffer( const data_type& dataType,
                     const Mesh& mesh,
                     FESpace<Mesh, EpetraMap>& uFEspace,
                     Epetra_Comm& comm ):
@@ -294,19 +294,19 @@ Mitchell_Schaeffer( const data_type& dataType,
 }
 
 template<typename Mesh, typename SolverType>
-Mitchell_Schaeffer<Mesh, SolverType>::
-~Mitchell_Schaeffer()
+MitchellSchaeffer<Mesh, SolverType>::
+~MitchellSchaeffer()
 {
 }
 
 template<typename Mesh, typename SolverType>
-void Mitchell_Schaeffer<Mesh, SolverType>::updateRepeated( )
+void MitchellSchaeffer<Mesh, SolverType>::updateRepeated( )
 {
 	M_wVecRep=M_sol_w;
 }
 
 template<typename Mesh, typename SolverType>
-void Mitchell_Schaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
+void MitchellSchaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
 {
 	M_elvec.zero();
 	UInt ig;
@@ -319,19 +319,19 @@ void Mitchell_Schaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
 }
 
 template<typename Mesh, typename SolverType>
-void Mitchell_Schaeffer<Mesh, SolverType>::setHeteroTauClose(fct_TauClose fct)
+void MitchellSchaeffer<Mesh, SolverType>::setHeteroTauClose(fct_TauClose fct)
 {
     M_TauClose = fct;
 }
 
 template<typename Mesh, typename SolverType>
-Real Mitchell_Schaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const
+Real MitchellSchaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const
 {
     return M_TauClose(ref, x, y, z, i);
 }
 
 template<typename Mesh, typename SolverType>
-void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
+void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
 {
     //! Solving :
 	//!           ((v_max-v_min)^{-2}  - w )/tau_open  if u < vcrit
@@ -368,7 +368,7 @@ void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, 
 }
 
 template<typename Mesh, typename SolverType>
-void Mitchell_Schaeffer<Mesh, SolverType>::computeIion(  Real,
+void MitchellSchaeffer<Mesh, SolverType>::computeIion(  Real,
                                                          ElemVec& elvec,
                                                          ElemVec& elvec_u,
                                                          FESpace<Mesh, EpetraMap>& uFESpace )
@@ -386,7 +386,7 @@ void Mitchell_Schaeffer<Mesh, SolverType>::computeIion(  Real,
 }
 
 template<typename Mesh, typename SolverType>
-void Mitchell_Schaeffer<Mesh, SolverType>::
+void MitchellSchaeffer<Mesh, SolverType>::
 initialize( )
 {
 	M_sol_w.getEpetraVector().PutScalar (1.0/((this->M_data.v_max-this->M_data.v_min)*(this->M_data.v_max-this->M_data.v_min)));
@@ -396,18 +396,18 @@ initialize( )
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class Rogers_McCulloch : public virtual IonicSolver<Mesh, SolverType>
+class RogersMcCulloch : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
 	typedef typename IonicSolver<Mesh, SolverType>::data_type data_type;
 	typedef typename IonicSolver<Mesh, SolverType>::vector_type vector_type;
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
-    Rogers_McCulloch( const data_type& dataType,
+    RogersMcCulloch( const data_type& dataType,
                       const Mesh& mesh,
                       FESpace<Mesh, EpetraMap>& uFEspace,
                       Epetra_Comm& comm );
-    virtual ~Rogers_McCulloch();
+    virtual ~RogersMcCulloch();
 
     void updateRepeated( );
 
@@ -440,8 +440,8 @@ private:
 
 //! Constructor
 template<typename Mesh, typename SolverType>
-Rogers_McCulloch<Mesh, SolverType>::
-Rogers_McCulloch( const data_type& dataType,
+RogersMcCulloch<Mesh, SolverType>::
+RogersMcCulloch( const data_type& dataType,
                   const Mesh& mesh,
                   FESpace<Mesh, EpetraMap>& uFEspace,
                   Epetra_Comm& comm ):
@@ -453,19 +453,19 @@ Rogers_McCulloch( const data_type& dataType,
 }
 
 template<typename Mesh, typename SolverType>
-Rogers_McCulloch<Mesh, SolverType>::
-~Rogers_McCulloch()
+RogersMcCulloch<Mesh, SolverType>::
+~RogersMcCulloch()
 {
 }
 
 template<typename Mesh, typename SolverType>
-void Rogers_McCulloch<Mesh, SolverType>::updateRepeated( )
+void RogersMcCulloch<Mesh, SolverType>::updateRepeated( )
 {
 	M_wVecRep=M_sol_w;
 }
 
 template<typename Mesh, typename SolverType>
-void Rogers_McCulloch<Mesh, SolverType>::updateElvec( UInt eleID )
+void RogersMcCulloch<Mesh, SolverType>::updateElvec( UInt eleID )
 {
 	M_elvec.zero();
 	UInt ig;
@@ -479,7 +479,7 @@ void Rogers_McCulloch<Mesh, SolverType>::updateElvec( UInt eleID )
 }
 
 template<typename Mesh, typename SolverType>
-void Rogers_McCulloch<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
+void RogersMcCulloch<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
 {
 	//! Solving dw/dt= b/(A*T) (u - u0 - A d w)
 	Real G = this->M_data.b/this->M_data.A/this->M_data.T;
@@ -500,7 +500,7 @@ void Rogers_McCulloch<Mesh, SolverType>::ionModelSolve( const vector_type& u, co
 }
 
 template<typename Mesh, typename SolverType>
-void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real Cm,
+void RogersMcCulloch<Mesh, SolverType>::computeIion(  Real Cm,
                                                        ElemVec& elvec,
                                                        ElemVec& elvec_u,
                                                        FESpace<Mesh, EpetraMap>& uFESpace )
@@ -526,7 +526,7 @@ void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real Cm,
 }
 
 template<typename Mesh, typename SolverType>
-void Rogers_McCulloch<Mesh, SolverType>::
+void RogersMcCulloch<Mesh, SolverType>::
 initialize( )
 {
 	M_sol_w.getEpetraVector().PutScalar (0.);
@@ -534,18 +534,18 @@ initialize( )
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class Luo_Rudy : public virtual IonicSolver<Mesh, SolverType>
+class LuoRudy : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
 	typedef typename IonicSolver<Mesh, SolverType>::data_type data_type;
 	typedef typename IonicSolver<Mesh, SolverType>::vector_type vector_type;
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
-    Luo_Rudy( const data_type&          dataType,
+    LuoRudy( const data_type&          dataType,
     		const Mesh&          mesh,
            FESpace<Mesh, EpetraMap>& uFEspace,
            Epetra_Comm&              comm );
-    virtual ~Luo_Rudy();
+    virtual ~LuoRudy();
 
     void updateRepeated( );
 
@@ -643,8 +643,8 @@ private:
 
 //! Constructor
 template<typename Mesh, typename SolverType>
-Luo_Rudy<Mesh, SolverType>::
-Luo_Rudy( const data_type& dataType,
+LuoRudy<Mesh, SolverType>::
+LuoRudy( const data_type& dataType,
 		const Mesh& mesh,
 		FESpace<Mesh, EpetraMap>& uFEspace,
 		Epetra_Comm& comm ):
@@ -692,20 +692,20 @@ Luo_Rudy( const data_type& dataType,
 
 //! Destructor
 template<typename Mesh, typename SolverType>
-Luo_Rudy<Mesh, SolverType>::
-~Luo_Rudy()
+LuoRudy<Mesh, SolverType>::
+~LuoRudy()
 {
 }
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::updateRepeated( )
+void LuoRudy<Mesh, SolverType>::updateRepeated( )
 {
 
 	M_Iion_VecRep=Iion;
 }
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::updateElvec( UInt eleID)
+void LuoRudy<Mesh, SolverType>::updateElvec( UInt eleID)
 {
 	M_elvec_Iion.zero();
 	UInt ig;
@@ -720,7 +720,7 @@ void Luo_Rudy<Mesh, SolverType>::updateElvec( UInt eleID)
 
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
+void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
 {
 	//! Solving dw/dt=eta2 (u/vp -  eta3 w)
 	Chrono chronoionmodelsolve;
@@ -822,7 +822,7 @@ void Luo_Rudy<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real
 
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
+void LuoRudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 {
 	   if (u_ig>=-40.)
 	       {
@@ -879,7 +879,7 @@ void Luo_Rudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 }
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::computeIion(  Real /*Cm*/,
+void LuoRudy<Mesh, SolverType>::computeIion(  Real /*Cm*/,
                                                ElemVec& elvec,
                                                ElemVec& /*elvec_u*/,
                                                FESpace<Mesh, EpetraMap>& uFESpace )
@@ -899,7 +899,7 @@ void Luo_Rudy<Mesh, SolverType>::computeIion(  Real /*Cm*/,
 }
 
 template<typename Mesh, typename SolverType>
-void Luo_Rudy<Mesh, SolverType>::
+void LuoRudy<Mesh, SolverType>::
 initialize( )
 {
 	 M_sol_h.getEpetraVector().PutScalar(1.);
