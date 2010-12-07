@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface_DefaultFunctions
+ *  @brief File containing the BCInterface1D_DefaultFunctions class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 10-05-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef BCInterface1D_DefaultFunctions_H
@@ -43,26 +45,26 @@
 namespace LifeV
 {
 
-//! BCInterface1D_DefaultFunctions - Interface with the default boundary conditions of the OneDimensionalModel
+//! BCInterface1D_DefaultFunctions - Interface with the default boundary conditions of the 1D model
 /*!
  *  @author Cristiano Malossi
  *
  *  The BCInterface1D_DefaultFunctions class provides a general interface between the
- *  BCInterface1D and the default BC for the One Dimensional Model.
+ *  BCInterface1D and the default BC for the 1D Model.
  *
  *  <b>DETAILS:</b>
  *
- *  The constructor of the class takes a string contains the ID of the BC to impose,
- *  and the Operator. The list of available conditions is described by DefaultFunctions. They are:
+ *  The list of available conditions is described by the \c defaultFunctions enum type.
+ *  They are:
  *
  *	- Riemann,
  *	- Compatibility,
  *	- Absorbing,
  *	- Resistance
  *
- *	To get the base for the boundary condition, call the GetBase function.
+ *	To get the base for the boundary condition, call the \c base() method.
  */
-template< class Operator >
+template< class PhysicalSolver >
 class BCInterface1D_DefaultFunctions
 {
 public:
@@ -70,15 +72,15 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Data                                                    Data_Type;
+    typedef BCInterface1D_Data                                                    data_Type;
 
-    typedef OneDimensionalModel_BC::BCFunction_Type                               BCFunction_Type;
-    typedef OneDimensionalModel_BC::BCFunction_PtrType                            BCFunction_PtrType;
-    typedef OneDimensionalModel_BC::BCFunction_Default_PtrType                    BCFunction_Default_PtrType;
+    typedef OneDimensionalModel_BC::BCFunction_Type                               bcFunction_Type;
+    typedef OneDimensionalModel_BC::BCFunction_PtrType                            bcFunction_PtrType;
+    typedef OneDimensionalModel_BC::BCFunction_Default_PtrType                    bcFunction_Default_PtrType;
 
-    typedef OneDimensionalModel_BC::Flux_PtrType                                  Flux_PtrType;
-    typedef OneDimensionalModel_BC::Source_PtrType                                Source_PtrType;
-    typedef OneDimensionalModel_BC::Solution_PtrType                              Solution_PtrType;
+    typedef OneDimensionalModel_BC::Flux_PtrType                                  fluxPtr_Type;
+    typedef OneDimensionalModel_BC::Source_PtrType                                sourcePtr_Type;
+    typedef OneDimensionalModel_BC::Solution_PtrType                              solutionPtr_Type;
 
     //@}
 
@@ -93,13 +95,13 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_DefaultFunctions( const Data_Type& data );
+    BCInterface1D_DefaultFunctions( const data_Type& data );
 
     //! Copy constructor
     /*!
      * @param Default BCInterface1D_DefaultFunctions
      */
-    BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& Default );
+    BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& defaultFunctions );
 
     //! Destructor
     ~BCInterface1D_DefaultFunctions() {}
@@ -115,26 +117,26 @@ public:
      * @param Default BCInterface1D_DefaultFunctions
      * @return reference to a copy of the class
      */
-    BCInterface1D_DefaultFunctions& operator=( const BCInterface1D_DefaultFunctions& Default );
+    BCInterface1D_DefaultFunctions& operator=( const BCInterface1D_DefaultFunctions& defaultFunctions );
 
     //! Set data
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void SetData( const Data_Type& data );
+    void setData( const data_Type& data );
 
     //! Set solution
     /*!
      * @param solution solution container of the 1D model
      */
-    inline void SetSolution( const Solution_PtrType solution );
+    void setSolution( const solutionPtr_Type solution ) { M_defaultFunction->setSolution( solution ); }
 
     //! Set flux and source
     /*!
      * @param flux flux object of the 1D model
      * @param source source object of the 1D model
      */
-    inline void SetFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
+    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source ) { M_defaultFunction->setFluxSource( flux, source ); }
 
     //@}
 
@@ -143,16 +145,16 @@ public:
     //@{
 
     //! Get the base of the boundary condition
-    BCFunction_Type& GetBase()
-    {
-        return *M_base;
-    }
+    /*!
+     * @return boundary condition base
+     */
+    bcFunction_Type& base() { return *M_base; }
 
     //@}
 
 private:
 
-    enum DefaultFunctions
+    enum defaultFunctions
     {
         Riemann,
         Compatibility,
@@ -160,16 +162,16 @@ private:
         Resistance
     };
 
-    BCFunction_PtrType          M_base;
-    BCFunction_Default_PtrType  M_defaultFunction;
+    bcFunction_PtrType          M_base;
+    bcFunction_Default_PtrType  M_defaultFunction;
 };
 
 // ===================================================
 // Constructors
 // ===================================================
-template< class Operator >
-BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions() :
-        M_base              ( new BCFunction_Type() ),
+template< class PhysicalSolver >
+BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions() :
+        M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
 
@@ -179,9 +181,9 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions() :
 
 }
 
-template< class Operator >
-BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( const Data_Type& data ) :
-        M_base              ( new BCFunction_Type() ),
+template< class PhysicalSolver >
+BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions( const data_Type& data ) :
+        M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
 
@@ -189,12 +191,12 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( cons
     Debug( 5025 ) << "BCInterface1D_DefaultFunctions::BCInterface1D_DefaultFunctions( data )" << "\n";
 #endif
 
-    this->SetData( data );
+    this->setData( data );
 }
 
-template< class Operator >
-BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& Default ) :
-        M_base              ( Default.M_base ),
+template< class PhysicalSolver >
+BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& defaultFunctions ) :
+        M_base              ( defaultFunctions.M_base ),
         M_defaultFunction   ()
 {
 }
@@ -202,20 +204,22 @@ BCInterface1D_DefaultFunctions< Operator >::BCInterface1D_DefaultFunctions( cons
 // ===================================================
 // Methods
 // ===================================================
-template< class Operator >
-BCInterface1D_DefaultFunctions< Operator >&
-BCInterface1D_DefaultFunctions< Operator >::operator=( const BCInterface1D_DefaultFunctions& Default )
+template< class PhysicalSolver >
+BCInterface1D_DefaultFunctions< PhysicalSolver >&
+BCInterface1D_DefaultFunctions< PhysicalSolver >::operator=( const BCInterface1D_DefaultFunctions& defaultFunctions )
 {
-    if ( this != &Default )
+    if ( this != &defaultFunctions )
     {
-        M_base        = Default.M_base;
+        M_base            = defaultFunctions.M_base;
+        M_defaultFunction = defaultFunctions.M_defaultFunctions;
     }
 
     return *this;
 }
 
-template< class Operator >
-void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data )
+template< class PhysicalSolver >
+inline void
+BCInterface1D_DefaultFunctions< PhysicalSolver >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -223,19 +227,17 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 #endif
 
     //Set mapFunction
-    std::map< std::string, DefaultFunctions > mapFunction;
+    std::map< std::string, defaultFunctions > mapFunction;
     mapFunction["Riemann"]             = Riemann;
     mapFunction["Compatibility"]       = Compatibility;
     mapFunction["Absorbing"]           = Absorbing;
     mapFunction["Resistance"]          = Resistance;
 
-    switch ( mapFunction[data.GetBaseString()] )
+    switch ( mapFunction[data.baseString()] )
     {
     case Riemann:
 
-        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Riemann( data.GetSide(),
-                                                                             data.GetQuantity()
-                                                                           ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Riemann( data.side(), data.quantity() ) );
 
         M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
                                           dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunction ) ), _1, _2 ) );
@@ -244,9 +246,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 
     case Compatibility:
 
-        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Compatibility( data.GetSide(),
-                                                                                   data.GetQuantity()
-                                                                                 ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Compatibility( data.side(), data.quantity() ) );
 
         M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
                                           dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunction ) ), _1, _2 ) );
@@ -259,9 +259,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
         Debug( 5025 ) << "BCInterface1D_DefaultFunctions::checkFunction                          Absorbing" << "\n";
 #endif
 
-        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.GetSide(),
-                                                                               data.GetQuantity()
-                                                                             ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.side(), data.quantity() ) );
 
         M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
                                           dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *M_defaultFunction ) ), _1, _2 ) );
@@ -270,10 +268,7 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
 
     case Resistance:
 
-        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Resistance( data.GetSide(),
-                                                                                data.GetQuantity(),
-                                                                                data.GetResistance()[0]
-                                                                              ) );
+        M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Resistance( data.side(), data.quantity(), data.resistance()[0] ) );
 
         M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
                                           dynamic_cast<OneDimensionalModel_BCFunction_Resistance *> ( &( *M_defaultFunction ) ), _1, _2 ) );
@@ -282,20 +277,6 @@ void BCInterface1D_DefaultFunctions< Operator >::SetData( const Data_Type& data 
         break;
 
     }
-}
-
-template< class Operator >
-inline void
-BCInterface1D_DefaultFunctions< Operator >::SetSolution( const Solution_PtrType solution )
-{
-    M_defaultFunction->setSolution( solution );
-}
-
-template< class Operator >
-inline void
-BCInterface1D_DefaultFunctions< Operator >::SetFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
-{
-    M_defaultFunction->setFluxSource( flux, source );
 }
 
 } // Namespace LifeV

@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface_FSI
+ *  @brief File containing the BCInterface_FSI class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 23-04-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef BCInterface_FSI_H
@@ -51,7 +53,7 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  */
-template< class Operator >
+template< class PhysicalSolver >
 class BCInterface_FSI
 {
 public:
@@ -59,8 +61,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCVectorInterface                                                     BCFunction_Type;
-    typedef BCInterface_Data                                                      Data_Type;
+    typedef BCVectorInterface                                                     bcFunction_Type;
+    typedef BCInterface_Data                                                      data_Type;
 
     //@}
 
@@ -69,10 +71,10 @@ public:
     //@{
 
     BCInterface_FSI() {}
-    BCInterface_FSI( const Data_Type& /*data*/) {}
+    BCInterface_FSI( const data_Type& /*data*/) {}
     BCInterface_FSI( const BCInterface_FSI& /*fsi*/) {}
 
-    ~BCInterface_FSI() {}
+    virtual ~BCInterface_FSI() {}
 
     //@}
 
@@ -81,9 +83,9 @@ public:
     //@{
 
     BCInterface_FSI& operator=( const BCInterface_FSI& /*fsi*/) {}
-    void SetData( const Data_Type& /*data*/) {}
-    void ExportData( Data_Type& /*data*/ ) {}
-    void CheckMethod( const boost::shared_ptr< Operator >& /*Oper*/ ) {}
+    void setData( const data_Type& /*data*/) {}
+    void exportData( data_Type& /*data*/ ) {}
+    void checkMethod( const boost::shared_ptr< PhysicalSolver >& /*physicalSolver*/ ) {}
 
     //@}
 
@@ -91,16 +93,13 @@ public:
     //! @name Get functions
     //@{
 
-    BCFunction_Type& GetBase()
-    {
-        return *M_base;
-    }
+    bcFunction_Type& base() { return *M_base; }
 
     //@}
 
 private:
 
-    boost::shared_ptr< BCFunction_Type > M_base;
+    boost::shared_ptr< bcFunction_Type > M_base;
 };
 
 //! BCInterface_FSI - specialized template implementation for FSI problems.
@@ -146,8 +145,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Data                                                      Data_Type;
-    typedef BCVectorInterface                                                     BCFunction_Type;
+    typedef BCInterface_Data                                                      data_Type;
+    typedef BCVectorInterface                                                     bcFunction_Type;
 
     //@}
 
@@ -162,7 +161,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_FSI( const Data_Type& data );
+    BCInterface_FSI( const data_Type& data );
 
     //! Copy constructor
     /*!
@@ -171,7 +170,7 @@ public:
     BCInterface_FSI( const BCInterface_FSI& fsi );
 
     //! Destructor
-    ~BCInterface_FSI() {}
+    virtual ~BCInterface_FSI() {}
 
     //@}
 
@@ -190,19 +189,19 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void SetData( const Data_Type& data );
+    void setData( const data_Type& data );
 
     //! Copy the stored parameters in the data container
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void ExportData( Data_Type& data );
+    void exportData( data_Type& data );
 
     //! Check method passing the operator
     /*!
-     * @param Oper FSIOperator
+     * @param physicalSolver FSIOperator
      */
-    void CheckMethod( const boost::shared_ptr< FSIOperator >& Oper );
+    void checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver );
 
     //@}
 
@@ -211,7 +210,7 @@ public:
     //@{
 
     //! Get the base of the boundary condition
-    BCFunction_Type& GetBase();
+    bcFunction_Type& base() { return *M_base; }
 
     //@}
 
@@ -221,7 +220,7 @@ private:
     //@{
 
     template< class method >
-    inline void CheckFunction( const boost::shared_ptr< FSIOperator >& Oper );
+    void checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver );
 
     //@}
 
@@ -254,16 +253,16 @@ private:
     BCMode                                    M_mode;
     BCComV                                    M_comV;
 
-    boost::shared_ptr< BCFunction_Type >      M_base;
+    boost::shared_ptr< bcFunction_Type >      M_base;
 };
 
 // ===================================================
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_ptr< FSIOperator >& Oper )
+inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver )
 {
-    method *operMethod = dynamic_cast< method * > ( &*Oper );
+    method *operMethod = dynamic_cast< method * > ( &*physicalSolver );
 
     switch ( M_FSIFunction )
     {
@@ -280,10 +279,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
-        if ( !Oper->isSolid() )
+        if ( !physicalSolver->isSolid() )
             return;
 
-        operMethod->setDerFluidLoadToStructure( Oper->sigmaSolidRepeated() );
+        operMethod->setDerFluidLoadToStructure( physicalSolver->sigmaSolidRepeated() );
 
         M_base = operMethod->bcvDerFluidLoadToStructure();
 
@@ -295,10 +294,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
-        if ( !Oper->isFluid() )
+        if ( !physicalSolver->isFluid() )
             return;
 
-        operMethod->setDerHarmonicExtensionVelToFluid( Oper->derVeloFluidMesh() );
+        operMethod->setDerHarmonicExtensionVelToFluid( physicalSolver->derVeloFluidMesh() );
 
         M_base = operMethod->bcvDerHarmonicExtensionVelToFluid();
 
@@ -318,7 +317,7 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
-        //operMethod->FluidInterfaceDisp( (LifeV::Vector&) Oper->lambdaFluidRepeated() );
+        //operMethod->FluidInterfaceDisp( (LifeV::Vector&) physicalSolver->lambdaFluidRepeated() );
 
         //M_base = operMethod->bcvFluidInterfaceDisp();
 
@@ -330,10 +329,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
-        if ( !Oper->isSolid() )
+        if ( !physicalSolver->isSolid() )
             return;
 
-        operMethod->setFluidLoadToStructure( Oper->sigmaSolidRepeated() );
+        operMethod->setFluidLoadToStructure( physicalSolver->sigmaSolidRepeated() );
 
         M_base = operMethod->bcvFluidLoadToStructure();
 
@@ -345,12 +344,12 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
-        if ( !Oper->isFluid() )
+        if ( !physicalSolver->isFluid() )
             return;
 
-        Oper->setHarmonicExtensionVelToFluid( Oper->veloFluidMesh() );
+        physicalSolver->setHarmonicExtensionVelToFluid( physicalSolver->veloFluidMesh() );
 
-        M_base = Oper->bcvHarmonicExtensionVelToFluid();
+        M_base = physicalSolver->bcvHarmonicExtensionVelToFluid();
 
         break;
 
@@ -359,12 +358,12 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
-        if ( !Oper->isFluid() )
+        if ( !physicalSolver->isFluid() )
             return;
 
-        Oper->setSolidLoadToStructure( Oper->minusSigmaFluidRepeated() );
+        physicalSolver->setSolidLoadToStructure( physicalSolver->minusSigmaFluidRepeated() );
 
-        M_base = Oper->bcvSolidLoadToStructure();
+        M_base = physicalSolver->bcvSolidLoadToStructure();
 
         break;
 
@@ -374,10 +373,10 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
-        if ( !Oper->isFluid() )
+        if ( !physicalSolver->isFluid() )
             return;
 
-        operMethod->setStructureDispToHarmonicExtension( Oper->lambdaFluidRepeated() );
+        operMethod->setStructureDispToHarmonicExtension( physicalSolver->lambdaFluidRepeated() );
 
         M_base = operMethod->bcvStructureDispToHarmonicExtension();
 
@@ -397,13 +396,13 @@ inline void BCInterface_FSI< FSIOperator >::CheckFunction( const boost::shared_p
         Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
-        if ( !Oper->isFluid() )
+        if ( !physicalSolver->isFluid() )
             return;
 
-        Oper->setStructureToFluid( Oper->veloFluidMesh() );
-        Oper->setStructureToFluidParametres();
+        physicalSolver->setStructureToFluid( physicalSolver->veloFluidMesh() );
+        physicalSolver->setStructureToFluidParametres();
 
-        M_base = Oper->bcvStructureToFluid();
+        M_base = physicalSolver->bcvStructureToFluid();
 
         break;
     }

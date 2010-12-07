@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface1D_FunctionFile
+ *  @brief File containing the BCInterface1D_FunctionFile class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 10-05-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 #ifndef BCInterface1D_FunctionFile_H
 #define BCInterface1D_FunctionFile_H 1
@@ -43,15 +45,12 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface1D and SpiritParser. It allows to construct LifeV
+ *  This class is an interface between BCInterface1D and the grammar parser. It allows to construct LifeV
  *  functions type for boundary conditions, using a GetPot file containing a function string and a
- *  table of discrete data (for example a discrete Flux or Pressure depending on time).
- *
- *
+ *  table of discrete data (for example a discrete flow rate or pressure as a function of the time).
  *
  *  <b>DETAILS:</b>
  *
- *  The constructor of the class takes a string contains the GetPot file name.
  *  The GetPot file has the following structure:
  *
  *  function:  contains the expression of the function to use (as described in the BCInterface1DFunction class).
@@ -71,7 +70,7 @@ namespace LifeV
  *
  *	NOTE:
  *	During the execution, if the value of the variable (usually the time) is not present in the 'data' table,
- *	the class linearly interpolates the value between the two closest one. Moreover, if the value of the variable is higher
+ *	the class linearly interpolates the value between the two closest values. Moreover, if the value of the variable is higher
  *	than anyone present in the 'data' table, the class linearly extrapolates the value using the last two values in the table.
  *
  *   <b>EXAMPLE OF DATAFILE</b>
@@ -84,16 +83,16 @@ namespace LifeV
  *  				0.666666666		3.00
  *  				1.000000000		4.00'
  */
-template< typename Operator >
-class BCInterface1D_FunctionFile: public virtual BCInterface1D_Function< Operator >
+template< typename PhysicalSolver >
+class BCInterface1D_FunctionFile: public virtual BCInterface1D_Function< PhysicalSolver >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Function< Operator >                      super;
-    typedef BCInterface1D_Data                                      Data_Type;
+    typedef BCInterface1D_Function< PhysicalSolver >                super;
+    typedef BCInterface1D_Data                                      data_Type;
 
     //@}
 
@@ -108,7 +107,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_FunctionFile( const Data_Type& data );
+    BCInterface1D_FunctionFile( const data_Type& data );
 
     //! Copy constructor
     /*!
@@ -136,7 +135,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const Data_Type& data );
+    virtual void setData( const data_Type& data ) { loadData( data ); }
 
     //@}
 
@@ -146,10 +145,10 @@ private:
     //@{
 
     //! loadData
-    inline void LoadData( Data_Type data );
+    void loadData( data_Type data );
 
     //! Linear interpolation (extrapolation) between two values of the data.
-    inline void DataInterpolation();
+    void dataInterpolation();
 
     //@}
 
@@ -159,18 +158,21 @@ private:
     std::vector< Real >::iterator                M_dataIterator;
 };
 
+// ===================================================
+// Factory
+// ===================================================
 //! Factory create function
-template< typename Operator >
-inline BCInterface1D_Function< Operator >* BCInterface1D_CreateFunctionFile()
+template< typename PhysicalSolver >
+inline BCInterface1D_Function< PhysicalSolver >* createBCInterface1D_FunctionFile()
 {
-    return new BCInterface1D_FunctionFile< Operator > ();
+    return new BCInterface1D_FunctionFile< PhysicalSolver > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< typename Operator >
-BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile() :
+template< typename PhysicalSolver >
+BCInterface1D_FunctionFile< PhysicalSolver >::BCInterface1D_FunctionFile() :
         super                            (),
         M_variables                      (),
         M_loop                           (),
@@ -184,8 +186,8 @@ BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile() :
 
 }
 
-template< typename Operator >
-BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const Data_Type& data ) :
+template< typename PhysicalSolver >
+BCInterface1D_FunctionFile< PhysicalSolver >::BCInterface1D_FunctionFile( const data_Type& data ) :
         super                            (),
         M_variables                      (),
         M_loop                           (),
@@ -197,11 +199,11 @@ BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const Data_T
     Debug( 5022 ) << "BCInterface1D_FunctionFile::BCInterface1D_FunctionFile( data )" << "\n";
 #endif
 
-    this->SetData( data );
+    this->setData( data );
 }
 
-template< typename Operator >
-BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const BCInterface1D_FunctionFile& function ) :
+template< typename PhysicalSolver >
+BCInterface1D_FunctionFile< PhysicalSolver >::BCInterface1D_FunctionFile( const BCInterface1D_FunctionFile& function ) :
         super                            ( function ),
         M_variables                      ( function.M_variables ),
         M_loop                           ( function.M_loop ),
@@ -213,9 +215,9 @@ BCInterface1D_FunctionFile< Operator >::BCInterface1D_FunctionFile( const BCInte
 // ===================================================
 // Methods
 // ===================================================
-template< typename Operator >
-BCInterface1D_FunctionFile< Operator >&
-BCInterface1D_FunctionFile< Operator >::operator=( const BCInterface1D_FunctionFile& function )
+template< typename PhysicalSolver >
+BCInterface1D_FunctionFile< PhysicalSolver >&
+BCInterface1D_FunctionFile< PhysicalSolver >::operator=( const BCInterface1D_FunctionFile& function )
 {
     if ( this != &function )
     {
@@ -229,27 +231,20 @@ BCInterface1D_FunctionFile< Operator >::operator=( const BCInterface1D_FunctionF
     return *this;
 }
 
-template< typename Operator >
-void
-BCInterface1D_FunctionFile< Operator >::SetData( const Data_Type& data )
-{
-    LoadData( data );
-}
-
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename Operator >
+template< typename PhysicalSolver >
 inline void
-BCInterface1D_FunctionFile< Operator >::LoadData( Data_Type data )
+BCInterface1D_FunctionFile< PhysicalSolver >::loadData( data_Type data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface1D_FunctionFile::setData             fileName: " << data.GetBaseString() << "\n";
+    Debug( 5022 ) << "BCInterface1D_FunctionFile::setData             fileName: " << data.baseString() << "\n";
 #endif
 
     std::vector< std::string > stringsVector;
-    boost::split( stringsVector, data.GetBaseString(), boost::is_any_of( "[" ) );
+    boost::split( stringsVector, data.baseString(), boost::is_any_of( "[" ) );
 
     //Load data from file
     GetPot dataFile( stringsVector[0] );
@@ -318,25 +313,25 @@ BCInterface1D_FunctionFile< Operator >::LoadData( Data_Type data )
 
     //Update the data container (IT IS A COPY!) with the correct base string for the BCInterface1D_Function
     if ( stringsVector.size() < 2 )
-        data.SetBaseString( dataFile( "function", "Undefined" ) );
+        data.setBaseString( dataFile( "function", "Undefined" ) );
     else
     {
         boost::replace_all( stringsVector[1], "]", "" );
-        data.SetBaseString( dataFile( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
+        data.setBaseString( dataFile( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
     }
 
     // Now data contains the real base string
-    super::SetData( data );
+    super::setData( data );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "                                             function: " << data.GetBaseString() << "\n";
+    Debug( 5022 ) << "                                             function: " << data.baseString() << "\n";
 #endif
 
 }
 
-template< typename Operator >
+template< typename PhysicalSolver >
 inline void
-BCInterface1D_FunctionFile< Operator >::DataInterpolation()
+BCInterface1D_FunctionFile< PhysicalSolver >::dataInterpolation()
 {
     //Get variable
     Real X = super::M_parser->variable( M_variables[0] );

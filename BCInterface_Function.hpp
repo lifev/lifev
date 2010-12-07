@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief BCInterface_Function
+ *  @brief File containing the BCInterface_Function class
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 06-04-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef BCInterface_Function_H
@@ -82,7 +84,7 @@ namespace LifeV
  *  The only difference is that the second kind of instruction is more efficient during execution.
  *
  */
-template< typename Operator >
+template< typename PhysicalSolver >
 class BCInterface_Function
 {
 public:
@@ -90,8 +92,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCFunctionBase                                                        BCFunction_Type;
-    typedef BCInterface_Data                                                      Data_Type;
+    typedef BCFunctionBase                                                        bcFunction_Type;
+    typedef BCInterface_Data                                                      data_Type;
 
     //@}
 
@@ -106,7 +108,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_Function( const Data_Type& data );
+    BCInterface_Function( const data_Type& data );
 
     //! Copy constructor
     /*!
@@ -134,7 +136,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void SetData( const Data_Type& data );
+    virtual void setData( const data_Type& data );
 
     //@}
 
@@ -143,7 +145,7 @@ public:
     //@{
 
     //! Get the base of the boundary condition
-    BCFunction_Type& GetBase();
+    bcFunction_Type& base() { return M_base; }
 
     //@}
 
@@ -153,7 +155,7 @@ protected:
     //@{
 
     //! dataInterpolation
-    virtual inline void DataInterpolation() {}
+    virtual inline void dataInterpolation() {}
 
     //@}
 
@@ -164,31 +166,34 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Function
-    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
+    //! function
+    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
 
-    //! FunctionID
-    Real FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+    //! functionID
+    Real functionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
 
-    BCFunction_Type                  M_base;
+    bcFunction_Type                  M_base;
     std::map< ID, ID >               M_mapID;
 
 };
 
+// ===================================================
+// Factory
+// ===================================================
 //! Factory create function
-template< typename Operator >
-inline BCInterface_Function< Operator >* BCInterface_CreateFunction()
+template< typename PhysicalSolver >
+inline BCInterface_Function< PhysicalSolver >* createBCInterface_Function()
 {
-    return new BCInterface_Function< Operator > ();
+    return new BCInterface_Function< PhysicalSolver > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
-template< typename Operator >
-BCInterface_Function< Operator >::BCInterface_Function() :
+template< typename PhysicalSolver >
+BCInterface_Function< PhysicalSolver >::BCInterface_Function() :
         M_parser    (),
         M_base      (),
         M_mapID     ()
@@ -200,8 +205,8 @@ BCInterface_Function< Operator >::BCInterface_Function() :
 
 }
 
-template< typename Operator >
-BCInterface_Function< Operator >::BCInterface_Function( const Data_Type& data ) :
+template< typename PhysicalSolver >
+BCInterface_Function< PhysicalSolver >::BCInterface_Function( const data_Type& data ) :
         M_parser    (),
         M_base      (),
         M_mapID     ()
@@ -211,11 +216,11 @@ BCInterface_Function< Operator >::BCInterface_Function( const Data_Type& data ) 
     Debug( 5021 ) << "BCInterface_Function::BCInterface_Function( data )" << "\n";
 #endif
 
-    this->SetData( data );
+    this->setData( data );
 }
 
-template< typename Operator >
-BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Function& function ) :
+template< typename PhysicalSolver >
+BCInterface_Function< PhysicalSolver >::BCInterface_Function( const BCInterface_Function& function ) :
         M_parser    ( function.M_parser ),
         M_base      ( function.M_base ),
         M_mapID     ( function.M_mapID )
@@ -225,9 +230,9 @@ BCInterface_Function< Operator >::BCInterface_Function( const BCInterface_Functi
 // ===================================================
 // Methods
 // ===================================================
-template< typename Operator >
-BCInterface_Function< Operator >&
-BCInterface_Function< Operator >::operator=( const BCInterface_Function& function )
+template< typename PhysicalSolver >
+BCInterface_Function< PhysicalSolver >&
+BCInterface_Function< PhysicalSolver >::operator=( const BCInterface_Function& function )
 {
     if ( this != &function )
     {
@@ -239,9 +244,9 @@ BCInterface_Function< Operator >::operator=( const BCInterface_Function& functio
     return *this;
 }
 
-template< typename Operator >
+template< typename PhysicalSolver >
 void
-BCInterface_Function< Operator >::SetData( const Data_Type& data )
+BCInterface_Function< PhysicalSolver >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -249,20 +254,20 @@ BCInterface_Function< Operator >::SetData( const Data_Type& data )
 #endif
 
     if ( M_parser )
-        M_parser->SetString( data.GetBaseString() );
+        M_parser->SetString( data.baseString() );
     else
-        M_parser.reset( new Parser( data.GetBaseString() ) );
+        M_parser.reset( new Parser( data.baseString() ) );
 
     /*
      * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
      * ------------------------------------------|---------------------------------------------------
      *                                           |
-     * COMPONENT     2             x*y*z         |      1             1             Function
-     * FULL          3             x*y*z         |      1             1             Function
-     * FULL          1             x*y*z         |      1             1             Function
-     * FULL          3             (y*z,x*z,x*y) |      1             3             FunctionID
-     * FULL          2             (x,y)         |      1             2             FunctionID
-     * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
+     * COMPONENT     2             x*y*z         |      1             1             function
+     * FULL          3             x*y*z         |      1             1             function
+     * FULL          1             x*y*z         |      1             1             function
+     * FULL          3             (y*z,x*z,x*y) |      1             3             functionID
+     * FULL          2             (x,y)         |      1             2             functionID
+     * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
      */
 
     UInt arguments = M_parser->countSubstring( "," ) + 1;
@@ -272,35 +277,28 @@ BCInterface_Function< Operator >::SetData( const Data_Type& data )
 #endif
 
     if ( arguments == 1 )
-        M_base.setFunction( boost::bind( &BCInterface_Function::Function, this, _1, _2, _3, _4, _5 ) );
+        M_base.setFunction( boost::bind( &BCInterface_Function::function, this, _1, _2, _3, _4, _5 ) );
     else
     {
         //Create the ID map
-        if ( data.GetComV().size() > 1 ) // Component
-            for ( ID i( 0 ); i < static_cast< ID > ( data.GetComV().size() ); ++i )
-                M_mapID[data.GetComV()[i]] = i + 1;
+        if ( data.comV().size() > 1 ) // Component
+            for ( ID i( 0 ); i < static_cast< ID > ( data.comV().size() ); ++i )
+                M_mapID[data.comV()[i]] = i + 1;
         else
-            // if ( data.GetComV().front() == arguments )  Full
-            for ( ID i( 1 ); i <= data.GetComV().front(); ++i )
+            // if ( data.comV().front() == arguments )  Full
+            for ( ID i( 1 ); i <= data.comV().front(); ++i )
                 M_mapID[i] = i;
 
-        M_base.setFunction( boost::bind( &BCInterface_Function::FunctionID, this, _1, _2, _3, _4, _5 ) );
+        M_base.setFunction( boost::bind( &BCInterface_Function::functionID, this, _1, _2, _3, _4, _5 ) );
     }
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
-template< typename Operator >
-typename BCInterface_Function< Operator >::BCFunction_Type&
-BCInterface_Function< Operator >::GetBase()
-{
-    return M_base;
-}
-
-template< typename Operator >
+template< typename PhysicalSolver >
 Real
-BCInterface_Function< Operator >::Function( const Real& t,
+BCInterface_Function< PhysicalSolver >::function( const Real& t,
                                             const Real& x,
                                             const Real& y,
                                             const Real& z,
@@ -320,7 +318,7 @@ BCInterface_Function< Operator >::Function( const Real& t,
     M_parser->SetVariable( "y", y );
     M_parser->SetVariable( "z", z );
 
-    this->DataInterpolation();
+    this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->Evaluate( 1 ) << "\n";
@@ -329,9 +327,9 @@ BCInterface_Function< Operator >::Function( const Real& t,
     return M_parser->Evaluate( 1 );
 }
 
-template< typename Operator >
+template< typename PhysicalSolver >
 Real
-BCInterface_Function< Operator >::FunctionID( const Real& t,
+BCInterface_Function< PhysicalSolver >::functionID( const Real& t,
                                               const Real& x,
                                               const Real& y,
                                               const Real& z,
@@ -352,7 +350,7 @@ BCInterface_Function< Operator >::FunctionID( const Real& t,
     M_parser->SetVariable( "y", y );
     M_parser->SetVariable( "z", z );
 
-    this->DataInterpolation();
+    this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->Evaluate( M_mapID[id] ) << "\n";
