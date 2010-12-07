@@ -54,7 +54,7 @@ public:
 
     typedef VenantKirchhofSolver<Mesh, SolverType>     super;
     typedef typename super::vector_type                vector_type;
-    typedef typename super::matrix_ptrtype             matrix_ptrype;
+    typedef typename super::matrix_ptrtype             matrix_ptrtype;
     typedef typename super::bchandler_Type             bchandler_Type;
 
     //@}
@@ -73,19 +73,19 @@ public:
     /**
        These methods are derived from the base class VenantKirchhoff 
      */
-    void updateJacobian( vector_Type& /*sol*/, matrixPtr_Type& /*jac*/ )
+    void updateJacobian( vector_type& /*sol*/, matrix_ptrtype& /*jac*/ )
     {
         this->M_Displayer->leaderPrint("  Linear S-  Doing nothing (updating jacobian of a linear system) ...                    ");
     }
 
 
     //! solves the tangent problem for newton iterations
-    void solveJac( vector_Type&       /*step*/,
-                   const vector_Type& /*res*/,
+    void solveJac( vector_type&       /*step*/,
+                   const vector_type& /*res*/,
                    Real&              /*linear_rel_tol*/) {assert(false);}
 
-    void solveJacobian( vector_Type&       /*step*/,
-                        const vector_Type& /*res*/,
+  void solveJacobian( vector_type&       /*step*/,
+                        const vector_type& /*res*/,
                         Real&            /*linear_rel_tol*/,
                         bchandler_Type&    /*BCd*/ ) {assert(false);}
 

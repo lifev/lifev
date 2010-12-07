@@ -98,9 +98,9 @@ public:
   typedef SolverType                            solver_Type;
 
   typedef typename solver_Type::matrix_type      matrix_type;
-  typedef boost::shared_ptr<matrix_type>         matrixPtr_Type;
+  typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
   typedef typename solver_Type::vector_type      vector_type;
-  typedef boost::shared_ptr<vector_type>         vectorPtr_Type;
+  typedef boost::shared_ptr<vector_type>         vector_ptrtype;
 
   typedef typename SolverType::prec_raw_type     precRaw_Type;
   typedef typename SolverType::prec_type         prec_Type;
@@ -175,7 +175,7 @@ public:
   /*!
     \param stiff stiffness matrix provided from outside
   */
-  virtual void updateSystem(matrixPtr_Type& stiff);
+  virtual void updateSystem(matrix_ptrtype& stiff);
   
   //! Compute the mass matrix and the linear part of the stiffness matrix
   void buildSystem();
@@ -187,7 +187,7 @@ public:
     \param matrix the matrix containing the mass matrix and the linear part of he stiffness matrix
     \param factor rescale matrices factor used in monolithic
   */
-  virtual void buildSystem(matrixPtr_Type matrix, const Real& factor=1.);
+  virtual void buildSystem(matrix_ptrtype matrix, const Real& factor=1.);
 
   //! Solve the non-linear system
   /*! They compute the solution solving the non linear system
@@ -218,7 +218,7 @@ public:
     \param sol the current solution at each iteration of the nonLinearRichardson method
     \param jac the Jacobian matrix that must be updated
   */
-  virtual void updateJacobian( vector_type& sol, matrixPtr_Type& jac )=0;
+  virtual void updateJacobian( vector_type& sol, matrix_ptrtype& jac )=0;
   
   //! Solves the tangent problem for newton iterations
   /*!
@@ -276,7 +276,7 @@ public:
     \param w0 empty vector
     \param a0 empty vector
   */
-  void initialize( vectorPtr_Type d0,  vectorPtr_Type w0 = vectorPtr_Type(),  vectorPtr_Type a0 = vectorPtr_Type() );
+  void initialize( vector_ptrtype d0,  vector_ptrtype w0 = vector_ptrtype(),  vector_ptrtype a0 = vector_ptrtype() );
 
   //! Computes the velocity vector at the n-th time step
   virtual void updateVel();
@@ -301,7 +301,7 @@ public:
     \param sol the current solution
     \param factor the rescaleFactor
   */
-  void computeMatrix( matrixPtr_Type& stiff, const vector_type& sol, Real const& factor )
+  void computeMatrix( matrix_ptrtype& stiff, const vector_type& sol, Real const& factor )
   {
   }
   //! Update (in the case of nonlinear material) the solid matrix
@@ -354,13 +354,13 @@ public:
   Displayer   const& getDisplayer() const { return *M_Displayer; }
 
   //! Get the matrix containing the mass mtrix and the linear part of the stiffness matrix
-  matrixPtr_Type const getMassStiff() const {return M_massStiff; }
+  matrix_ptrtype const getMassStiff() const {return M_massStiff; }
 
   //! Get the mass matrix
-  matrixPtr_Type const getMass() const {return M_mass; }
+  matrix_ptrtype const getMass() const {return M_mass; }
 
   //! Get the linear part of the stiffness matrix
-  matrixPtr_Type const getLinearStiff() const {return M_linearStiff; }
+  matrix_ptrtype const getLinearStiff() const {return M_linearStiff; }
 
   //! BCHandler getter and setter
   //    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
@@ -384,7 +384,7 @@ public:
   vector_type& vel()         { return *M_vel; }
   
   //! Get the right hand sde without BC
-  vectorPtr_Type& rhsWithoutBC() { return M_rhsNoBC; }
+  vector_ptrtype& rhsWithoutBC() { return M_rhsNoBC; }
 
   //const Dof& dDof() const { return M_FESpace.dof(); }
   
@@ -407,7 +407,7 @@ public:
      Do nothing in the linear case: the matrix remains constant. Otherwise substitute the matrix with an updated one
   */
   //! Get the Solid Matrix
-  void getSolidMatrix( matrixPtr_Type& matrix)
+  void getSolidMatrix( matrix_ptrtype& matrix)
   {
   }
 
@@ -464,17 +464,17 @@ protected:
 
   //! linearized velocity
 
-  vectorPtr_Type                    M_disp;
-  vectorPtr_Type                    M_vel;
+  vector_ptrtype                    M_disp;
+  vector_ptrtype                    M_vel;
     
   //! right  hand  side displacement
-  vectorPtr_Type                    M_rhs;
+  vector_ptrtype                    M_rhs;
 
   //! right  hand  side velocity
-  vectorPtr_Type                    M_rhsW;
+  vector_ptrtype                    M_rhsW;
     
   //! right  hand  side
-  vectorPtr_Type                    M_rhsNoBC;
+  vector_ptrtype                    M_rhsNoBC;
     
   //! right  hand  side
   boost::shared_ptr<vector_type>                    M_f;
@@ -484,9 +484,9 @@ protected:
     
   //    vector_type*                   M_sxx;
 
-  vectorPtr_Type                    M_sxx;
-  vectorPtr_Type                    M_syy;
-  vectorPtr_Type                    M_szz;
+  vector_ptrtype                    M_sxx;
+  vector_ptrtype                    M_syy;
+  vector_ptrtype                    M_szz;
     
   //! files for lists of iterations and residuals per timestep
   std::ofstream                  M_out_iter;
@@ -497,19 +497,19 @@ protected:
   boost::shared_ptr<const EpetraMap>                      M_localMap;
 
   //! Matrix M: mass
-  matrixPtr_Type                    M_mass;
+  matrix_ptrtype                    M_mass;
   
   //! Matrix C: mass + linear stiffness
-  matrixPtr_Type                    M_massStiff;
+  matrix_ptrtype                    M_massStiff;
     
   //! Matrix Knl: stiffness non-linear
-  matrixPtr_Type                    M_stiff;
+  matrix_ptrtype                    M_stiff;
     
   //! Matrix Kl: stiffness linear
-  matrixPtr_Type                    M_linearStiff;
+  matrix_ptrtype                    M_linearStiff;
     
   //! Matrix J: jacobian
-  matrixPtr_Type                    M_jacobian;
+  matrix_ptrtype                    M_jacobian;
     
   //! level of recursion for Aztec (has a sens with FSI coupling)
   UInt                              M_recur;
@@ -521,7 +521,7 @@ protected:
   UInt                           M_offset;
   Real                           M_rescaleFactor;
   
-  matrixPtr_Type                  M_matrFull;
+  matrix_ptrtype                  M_matrFull;
     
 };
 
@@ -632,7 +632,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem(  )
 }
   
 template <typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*stiff*/ )
+void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrtype& /*stiff*/ )
 {
   M_Displayer->leaderPrint("  S-  Updating mass term on right hand side... ");
     
@@ -689,7 +689,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem()
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, const Real& factor)
+VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff, const Real& factor)
 {
   UInt totalDof = M_FESpace->dof().numTotalDof();
     
@@ -766,7 +766,7 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 {
   // matrix and vector assembling communication
-  matrixPtr_Type matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrix_ptrtype matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
   *matrFull += *M_massStiff;
 
   M_rhsNoBC->GlobalAssemble();
@@ -806,7 +806,7 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
     
-  matrixPtr_Type matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrix_ptrtype matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
   *matrFull += *M_massStiff;
     
   M_rhsNoBC->GlobalAssemble();
@@ -1019,7 +1019,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type vel, vectorPtr_Type /*acc*/)
+VenantKirchhofSolver<Mesh, SolverType>::initialize( vector_ptrtype disp, vector_ptrtype vel, vector_ptrtype /*acc*/)
 {
   *M_disp = *disp;
   if (vel.get())
