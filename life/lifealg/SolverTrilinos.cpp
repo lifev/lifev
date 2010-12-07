@@ -72,7 +72,7 @@ SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 // ===================================================
 // Methods
 // ===================================================
-int
+Int
 SolverTrilinos::solve( vector_type& x, const vector_type& b )
 {
     M_solver.SetLHS( &x.getEpetraVector() );
@@ -81,9 +81,9 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
     Epetra_FEVector* bVectorPtr ( const_cast<Epetra_FEVector*> (&b.getEpetraVector()) );
     M_solver.SetRHS( bVectorPtr );
 
-    int    maxiter(M_maxIter);
-    double mytol  (M_tol);
-    int status;
+    Int    maxiter(M_maxIter);
+    Real mytol  (M_tol);
+    Int status;
 
     if ( isPrecSet() && M_prec->precType().compare("AztecOO") )
         M_solver.SetPrecOperator(M_prec->getPrec());
@@ -107,7 +107,7 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
     {
         maxiter = M_maxIter;
         mytol = M_tol;
-        int olditer = M_solver.NumIters();
+        Int olditer = M_solver.NumIters();
         status = M_solver.Iterate(maxiter, mytol);
 
 #ifdef DEBUG
@@ -122,7 +122,7 @@ SolverTrilinos::solve( vector_type& x, const vector_type& b )
     return(M_solver.NumIters());
 }
 
-double
+Real
 SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 {
     vector_type Ax(x.getMap());
@@ -132,7 +132,7 @@ SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 
     res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
 
-    double residual;
+    Real residual;
 
     res.Norm2(&residual);
 
@@ -146,7 +146,7 @@ SolverTrilinos::printStatus()
     std::ostringstream stat;
     std::string str;
 
-    double status[AZ_STATUS_SIZE];
+    Real status[AZ_STATUS_SIZE];
     getAztecStatus( status );
 
     if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
@@ -156,14 +156,14 @@ SolverTrilinos::printStatus()
     else if ( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
 
     stat << setw(12) << "res = " << status[AZ_scaled_r];
-    stat << setw(4)  << " " << (int)status[AZ_its] << " iters. ";
+    stat << setw(4)  << " " << (Int)status[AZ_its] << " iters. ";
     stat << std::endl;
 
     str = stat.str();
     return str;
 }
 
-int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
+Int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
                                  vector_type&      sol,
                                  matrix_ptrtype&   baseMatrixForPreconditioner)
 
@@ -189,7 +189,7 @@ int SolverTrilinos::solveSystem( const vector_type&      rhsFull,
         M_displayer->leaderPrint("      Reusing precond ...                 \n");
     }
 
-    int numIter = solveSystem(rhsFull, sol, M_prec);
+    Int numIter = solveSystem(rhsFull, sol, M_prec);
 
     // If we do not want to retry, return now.
     // otherwise rebuild the preconditioner and solve again:
@@ -231,7 +231,7 @@ void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& secti
 void SolverTrilinos::buildPreconditioner( matrix_ptrtype& prec)
 {
     Chrono chrono;
-    double condest(-1);
+    Real condest(-1);
 
     chrono.start();
 
@@ -313,7 +313,7 @@ SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& secti
 
     // Maximum Number of iterations
     M_maxIter         = dfile( ( section + "/max_iter"      ).data(), 200 );
-    M_maxIterForReuse = dfile( ( section + "/max_iter_reuse").data(), static_cast<int> ( M_maxIter*8./10.) );
+    M_maxIterForReuse = dfile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( M_maxIter*8./10.) );
     M_reusePreconditioner = dfile( (section + "/reuse").data(), M_reusePreconditioner);
 
     M_TrilinosParameterList.set("max_iter", M_maxIter);
@@ -341,7 +341,7 @@ SolverTrilinos::setParameters(bool cerr_warning_if_unused)
 }
 
 void
-SolverTrilinos::setTolMaxiter(const double tol, const int maxiter)
+SolverTrilinos::setTolMaxiter(const Real tol, const Int maxiter)
 {
     if ( tol > 0 )
     {
@@ -371,20 +371,20 @@ SolverTrilinos::displayer()
 // ===================================================
 // Get Methods
 // ===================================================
-int
+Int
 SolverTrilinos::NumIters() const
 {
     return M_solver.NumIters();
 }
 
-int
+Int
 SolverTrilinos::MaxIter() const
 {
     return M_maxIter;
 }
 
 
-double
+Real
 SolverTrilinos::TrueResidual()
 {
     return M_solver.TrueResidual();
@@ -397,7 +397,7 @@ SolverTrilinos::getPrec()
 }
 
 void
-SolverTrilinos::getAztecStatus( double status[AZ_STATUS_SIZE] )
+SolverTrilinos::getAztecStatus( Real status[AZ_STATUS_SIZE] )
 {
     M_solver.GetAllAztecStatus( status );
 }

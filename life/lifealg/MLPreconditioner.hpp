@@ -85,7 +85,7 @@ public:
     ~MLPreconditioner();
 
     //! constructor from matrix A.
-    //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
+    //! @param A EpetraMatrix<Real> matrix upon which construct the preconditioner
     MLPreconditioner(operator_type& A);
 
     //@}
@@ -93,7 +93,7 @@ public:
     //! @name Methods
     //@{
 
-    int                     buildPreconditioner(operator_type& A);
+    Int                     buildPreconditioner(operator_type& A);
 
     void                    precReset();
 
@@ -113,12 +113,12 @@ public:
                                     const std::string& section,
                                     const std::string& subSection = "ML" );
 
-    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    virtual Int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     {
         return M_Prec->ApplyInverse(X, Y);
     }
 
-    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    virtual Int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     {
         return M_Prec->Apply(X, Y);
     }
@@ -132,7 +132,7 @@ public:
     void                    setDataFromGetPot ( const GetPot&      dataFile,
                                                 const std::string& section );
 
-    int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
+    Int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
 
     //@}
 
@@ -140,7 +140,7 @@ public:
     //! @name Get Methods
     //@{
 
-    double                  Condest ();
+    Real                  Condest ();
 
     super::prec_raw_type*   getPrec();
 

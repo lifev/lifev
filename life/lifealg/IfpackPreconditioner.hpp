@@ -80,7 +80,7 @@ public:
     IfpackPreconditioner();
 
     //! constructor from matrix A.
-    //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
+    //! @param A EpetraMatrix<Real> matrix upon which construct the preconditioner
     //    IfpackPreconditioner(operator_type& A);
 
     //! default destructor
@@ -92,7 +92,7 @@ public:
     //! @name Methods
     //@{
 
-    int                    buildPreconditioner(operator_type& A);
+    Int                    buildPreconditioner(operator_type& A);
 
     void                   precReset();
 
@@ -108,9 +108,9 @@ public:
                                         const std::string& section,
                                         const std::string& subSection = "ifpack" );
 
-    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual Int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
-    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual Int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
     //@}
 
@@ -121,7 +121,7 @@ public:
     void                   setDataFromGetPot ( const GetPot&      dataFile,
                                                const std::string& section );
 
-    int            SetUseTranspose( bool useTranspose=false );
+    Int            SetUseTranspose( bool useTranspose=false );
 
     //@}
 
@@ -131,7 +131,7 @@ public:
 
     bool                   set() const;
 
-    double                 Condest ();
+    Real                   Condest ();
 
     super::prec_raw_type*  getPrec();
 
@@ -139,7 +139,7 @@ public:
 
     std::string            precType();
 
-    const int& getOverlapLevel() const;
+    const Int& getOverlapLevel() const;
 
     bool            UseTranspose(  );
 
@@ -155,7 +155,7 @@ protected:
 
 private:
 
-    int                                 M_overlapLevel;
+    Int                                 M_overlapLevel;
     operator_raw_type::matrix_ptrtype   M_Oper;
 
 };

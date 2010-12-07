@@ -59,7 +59,7 @@ AztecOOPreconditioner::AztecOOPreconditioner():
 // ===================================================
 // Methods
 // ===================================================
-int
+Int
 AztecOOPreconditioner::buildPreconditioner( operator_type& Operator )
 {
 
@@ -95,7 +95,7 @@ AztecOOPreconditioner::precReset()
     M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
 
     // Perform one "fake" iteration to delete the preconditioner
-    int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
+    Int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
     M_solver->getSolver().SetAztecOption( AZ_output, AZ_none );
     //M_solver->getSolver().GetRHS()->PutScalar( 1.0 );
     //M_solver->getSolver().GetLHS()->PutScalar( 0.0 );

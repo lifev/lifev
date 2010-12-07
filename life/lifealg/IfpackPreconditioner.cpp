@@ -59,7 +59,7 @@ IfpackPreconditioner::~IfpackPreconditioner()
 // ===================================================
 // Methods
 // ===================================================
-int
+Int
 IfpackPreconditioner::buildPreconditioner(operator_type& _oper)
 {
     M_Oper = _oper->getMatrixPtr();
@@ -115,7 +115,7 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    int overlapLevel = dataFile((section + "/" + subSection + "/overlap").data(),     0);
+    Int overlapLevel = dataFile((section + "/" + subSection + "/overlap").data(),     0);
 
     std::string precType     = dataFile((section + "/" + subSection + "/prectype").data(),"Amesos");
 
@@ -125,9 +125,9 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     bool displayList = dataFile((section + "/displayList").data(),     false);
 
     std::string relaxationType              = dataFile((section + "/" + subSection + "/relaxation/type").data(), "Jacobi");
-    int         relaxationSweeps            = dataFile((section + "/" + subSection + "/relaxation/sweeps").data(), 1);
-    double      relaxationDampingFactor     = dataFile((section + "/" + subSection + "/relaxation/damping_factor").data(), 1.0);
-    double      relaxationMinDiagValue      = dataFile((section + "/" + subSection + "/relaxation/min_diagonal_value").data(), 0.0);
+    Int         relaxationSweeps            = dataFile((section + "/" + subSection + "/relaxation/sweeps").data(), 1);
+    Real        relaxationDampingFactor     = dataFile((section + "/" + subSection + "/relaxation/damping_factor").data(), 1.0);
+    Real        relaxationMinDiagValue      = dataFile((section + "/" + subSection + "/relaxation/min_diagonal_value").data(), 0.0);
     bool        relaxationZeroStartSolution = dataFile((section + "/" + subSection + "/relaxation/zero_starting_solution").data(), true);
 
     list.set("relaxation: type",                    relaxationType);
@@ -137,9 +137,9 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     list.set("relaxation: zero starting solution",  relaxationZeroStartSolution);
 
     std::string partitionerType             = dataFile((section + "/" + subSection + "/partitioner/type").data(), "metis");
-    int         partitionerOverlap          = dataFile((section + "/" + subSection + "/partitioner/overlap").data(), 0);
-    int         partitionerLocalParts       = dataFile((section + "/" + subSection + "/partitioner/local_parts").data(), 1);
-    int         partitionerRootNode         = dataFile((section + "/" + subSection + "/partitioner/root_node").data(), 0);
+    Int         partitionerOverlap          = dataFile((section + "/" + subSection + "/partitioner/overlap").data(), 0);
+    Int         partitionerLocalParts       = dataFile((section + "/" + subSection + "/partitioner/local_parts").data(), 1);
+    Int         partitionerRootNode         = dataFile((section + "/" + subSection + "/partitioner/root_node").data(), 0);
     bool        partitionerUseSymmGraph     = dataFile((section + "/" + subSection + "/partitioner/use_symmetric_graph").data(), true);
 
     list.set("partitioner: type",                partitionerType);
@@ -152,12 +152,12 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
 
     list.set("amesos: solver type", amesosSolverType);
 
-    double levelOfFill     = dataFile((section + "/" + subSection + "/fact/level-of-fill").data(),      4.);
-    double ILUTlevelOfFill = dataFile((section + "/" + subSection + "/fact/ilut_level-of-fill").data(), 4.);
-    double athr            = dataFile((section + "/" + subSection + "/fact/absolute_threshold").data(), 0.);
-    double rthr            = dataFile((section + "/" + subSection + "/fact/relative_threshold").data(), 1.);
-    double relaxValue      = dataFile((section + "/" + subSection + "/fact/relax_value").data(),        0.);
-    double dropTolerance   = dataFile((section + "/" + subSection + "/fact/drop_tolerance").data(),     1e-5);
+    Real   levelOfFill     = dataFile((section + "/" + subSection + "/fact/level-of-fill").data(),      4.);
+    Real   ILUTlevelOfFill = dataFile((section + "/" + subSection + "/fact/ilut_level-of-fill").data(), 4.);
+    Real   athr            = dataFile((section + "/" + subSection + "/fact/absolute_threshold").data(), 0.);
+    Real   rthr            = dataFile((section + "/" + subSection + "/fact/relative_threshold").data(), 1.);
+    Real   relaxValue      = dataFile((section + "/" + subSection + "/fact/relax_value").data(),        0.);
+    Real   dropTolerance   = dataFile((section + "/" + subSection + "/fact/drop_tolerance").data(),     1e-5);
 
     list.set("fact: drop tolerance",     dropTolerance);
     list.set("fact: level-of-fill",      levelOfFill);
@@ -166,7 +166,7 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     list.set("fact: relative threshold", rthr);
     list.set("fact: relax value",        relaxValue);
 
-    int combineMode              = dataFile((section + "/" + subSection + "/schwarz/combine_mode").data(),    0);
+    Int combineMode              = dataFile((section + "/" + subSection + "/schwarz/combine_mode").data(),    0);
     Epetra_CombineMode schwarzCombineMode;
 
     switch (combineMode)
@@ -202,13 +202,13 @@ IfpackPreconditioner::createIfpackList(       list_Type&   list,
     if (displayList) list.print(std::cout);
 }
 
-int
+Int
 IfpackPreconditioner::ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
     return M_Prec->ApplyInverse(X, Y);
 }
 
-int
+Int
 IfpackPreconditioner::Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
     return M_Prec->Apply(X, Y);
@@ -224,7 +224,7 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
     createIfpackList( this->M_List, dataFile, section, "ifpack" );
 }
 
-int
+Int
 IfpackPreconditioner::SetUseTranspose( bool useTranspose )
 {
     return M_Prec->SetUseTranspose(useTranspose);
@@ -263,7 +263,7 @@ IfpackPreconditioner::precType()
     return M_precType;
 }
 
-const int&
+const Int&
 IfpackPreconditioner::getOverlapLevel() const
 {
     return M_overlapLevel;

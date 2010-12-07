@@ -54,34 +54,34 @@ namespace structuredMeshFlags {
 // is composed by 26 labels.
 
 // Walls
-const int LEFTWALL   = 4;
-const int RIGHTWALL  = 2;
-const int FRONTWALL  = 1;
-const int BACKWALL   = 3;
-const int TOPWALL    = 6;
-const int BOTTOMWALL = 5;
+const Int LEFTWALL   = 4;
+const Int RIGHTWALL  = 2;
+const Int FRONTWALL  = 1;
+const Int BACKWALL   = 3;
+const Int TOPWALL    = 6;
+const Int BOTTOMWALL = 5;
 // Edges
-const int BOTTOMEDGE1 =  7;
-const int BOTTOMEDGE2 =  8;
-const int BOTTOMEDGE3 =  9;
-const int BOTTOMEDGE4 = 10;
-const int SIDEEDGE1   = 11;
-const int SIDEEDGE2   = 12;
-const int SIDEEDGE3   = 13;
-const int SIDEEDGE4   = 14;
-const int TOPEDGE1    = 15;
-const int TOPEDGE2    = 16;
-const int TOPEDGE3    = 17;
-const int TOPEDGE4    = 18;
+const Int BOTTOMEDGE1 =  7;
+const Int BOTTOMEDGE2 =  8;
+const Int BOTTOMEDGE3 =  9;
+const Int BOTTOMEDGE4 = 10;
+const Int SIDEEDGE1   = 11;
+const Int SIDEEDGE2   = 12;
+const Int SIDEEDGE3   = 13;
+const Int SIDEEDGE4   = 14;
+const Int TOPEDGE1    = 15;
+const Int TOPEDGE2    = 16;
+const Int TOPEDGE3    = 17;
+const Int TOPEDGE4    = 18;
 // Corners
-const int BOTTOMCORNER1 = 19;
-const int BOTTOMCORNER2 = 20;
-const int BOTTOMCORNER3 = 21;
-const int BOTTOMCORNER4 = 22;
-const int TOPCORNER1    = 23;
-const int TOPCORNER2    = 24;
-const int TOPCORNER3    = 25;
-const int TOPCORNER4    = 26;
+const Int BOTTOMCORNER1 = 19;
+const Int BOTTOMCORNER2 = 20;
+const Int BOTTOMCORNER3 = 21;
+const Int BOTTOMCORNER4 = 22;
+const Int TOPCORNER1    = 23;
+const Int TOPCORNER2    = 24;
+const Int TOPCORNER3    = 25;
+const Int TOPCORNER4    = 26;
 }
 */
 

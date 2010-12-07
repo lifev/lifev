@@ -87,10 +87,10 @@ public:
     //! Default Constructor
     EpetraMap();
     // epetra map constructor. To define a linear map, set MyGlobalElements = 0
-    EpetraMap(int                NumGlobalElements,
-              int                NumMyElements,
-              int*               MyGlobalElements,
-              int                IndexBase,
+    EpetraMap(Int                NumGlobalElements,
+              Int                NumMyElements,
+              Int*               MyGlobalElements,
+              Int                IndexBase,
               const comm_ptrtype&  CommPtr);
 
     //! construct a map with entries lagrangeMultipliers.
@@ -98,7 +98,7 @@ public:
     //! Again: it is not necessary that the lagrangeMltiplier vector is the same on all
     //!       processors nor that it is different
     /*
-    EpetraMap(std::vector<int> const& lagrangeMultipliers,
+    EpetraMap(std::vector<Int> const& lagrangeMultipliers,
               comm_ptrtype&      CommPtr);
     */
 
@@ -109,9 +109,9 @@ public:
      *  @param indexBase - Starting index base (typically 0 or 1)
      *  @param CommPtr - a pointer to the Epetra communicator
      */
-    EpetraMap( const int NumGlobalElements, const int IndexBase, const comm_ptrtype& CommPtr );
+    EpetraMap( const Int NumGlobalElements, const Int IndexBase, const comm_ptrtype& CommPtr );
 
-    EpetraMap(const int               size,
+    EpetraMap(const Int               size,
               const comm_ptrtype&     CommPtr);
 
     // Calls createImportExport from setUp()
@@ -136,8 +136,8 @@ public:
 
       if needed, indexBase may be changed (default values < 0 means "same as original map")
     */
-    EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
-              int indexbase = -1);
+    EpetraMap(const Epetra_BlockMap& _blockMap, const Int offset, const Int maxid,
+              Int indexbase = -1);
 
     //! Constructor from raw Epetra_Map. This constructor should be used only inside this class,
     //! therefore it is private
@@ -169,8 +169,8 @@ public:
     }
 
     /*
-    EpetraMap&         operator += (std::vector<int> const&   lagrangeMultipliers);
-    EpetraMap          operator +  (std::vector<int> const&   lagrangeMultipliers)
+    EpetraMap&         operator += (std::vector<Int> const&   lagrangeMultipliers);
+    EpetraMap          operator +  (std::vector<Int> const&   lagrangeMultipliers)
         {
             EpetraMap map( *this );
             map += lagrangeMultipliers;
@@ -179,10 +179,10 @@ public:
         }
     */
 
-    EpetraMap&         operator += (int const size);
-    EpetraMap          operator +  (int const size)
+    EpetraMap&         operator += (Int const size);
+    EpetraMap          operator +  (Int const size)
     {
-        //int me =  M_uniqueEpetraMap->Comm().MyPID();
+        //Int me =  M_uniqueEpetraMap->Comm().MyPID();
         EpetraMap map( *this );
         map += size;
         createImportExport();
@@ -199,7 +199,7 @@ public:
      * \param this: EpetraMap that selects the relevant points
      * \param root: processor on which to export all the points
      */
-    boost::shared_ptr<EpetraMap>         createRootMap( int const     root)    const;
+    boost::shared_ptr<EpetraMap>         createRootMap( Int const     root)    const;
 
     bool MapsAreSimilar( EpetraMap const& _epetraMap) const;
 
@@ -230,10 +230,10 @@ private:
     //@{
 
     // createMap does not call createImportExport
-    void               createMap(int   NumGlobalElements,
-                                 int   NumMyElements,
-                                 int*  MyGlobalElements,
-                                 int   IndexBase,
+    void               createMap(Int   NumGlobalElements,
+                                 Int   NumMyElements,
+                                 Int*  MyGlobalElements,
+                                 Int   IndexBase,
                                  const comm_type& Comm)  ;
 
     /*
@@ -253,10 +253,10 @@ private:
     // Calls createImportExport
     void setUp(const RefFE&               refFE,
                const comm_ptrtype&       _commPtr,
-               std::vector<int>& repeatedNodeVector,
-               std::vector<int>& repeatedEdgeVector,
-               std::vector<int>& repeatedFaceVector,
-               std::vector<int>& repeatedVolumeVector);
+               std::vector<Int>& repeatedNodeVector,
+               std::vector<Int>& repeatedEdgeVector,
+               std::vector<Int>& repeatedFaceVector,
+               std::vector<Int>& repeatedVolumeVector);
 
     //@}
 
@@ -289,10 +289,10 @@ EpetraMap(const RefFE&               refFE,
 
     setUp( refFE,
            _commPtr,
-           const_cast<std::vector<int>&>(meshPart.repeatedNodeVector()),
-           const_cast<std::vector<int>&>(meshPart.repeatedEdgeVector()),
-           const_cast<std::vector<int>&>(meshPart.repeatedFaceVector()),
-           const_cast<std::vector<int>&>(meshPart.repeatedVolumeVector()) );
+           const_cast<std::vector<Int>&>(meshPart.repeatedNodeVector()),
+           const_cast<std::vector<Int>&>(meshPart.repeatedEdgeVector()),
+           const_cast<std::vector<Int>&>(meshPart.repeatedFaceVector()),
+           const_cast<std::vector<Int>&>(meshPart.repeatedVolumeVector()) );
 
 }
 
@@ -309,10 +309,10 @@ EpetraMap(const RefFE&               refFE,
         M_commPtr(_commPtr)
 {
 
-    std::vector<int> repeatedNodeVector;
-    std::vector<int> repeatedEdgeVector;
-    std::vector<int> repeatedFaceVector;
-    std::vector<int> repeatedVolumeVector;
+    std::vector<Int> repeatedNodeVector;
+    std::vector<Int> repeatedEdgeVector;
+    std::vector<Int> repeatedFaceVector;
+    std::vector<Int> repeatedVolumeVector;
 
     if (refFE.nbDofPerVertex())
     {

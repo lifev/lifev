@@ -65,7 +65,7 @@ public:
     typedef Epetra_Operator                      prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
 
-    typedef EpetraMatrix<double>                 operator_raw_type;
+    typedef EpetraMatrix<Real>                 operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type> operator_type;
 
     typedef Displayer::comm_Type                 comm_Type;
@@ -100,7 +100,7 @@ public:
     /*!
      *  @param A the base matrix for computing the preconditioner
      */
-    virtual int buildPreconditioner( operator_type& A ) = 0;
+    virtual Int buildPreconditioner( operator_type& A ) = 0;
 
     virtual void precReset() = 0;
 
@@ -108,7 +108,7 @@ public:
     /*!
      *  @return Condition number of the preconditioner
      */
-    virtual double Condest() = 0;
+    virtual Real Condest() = 0;
 
     //@}
 
@@ -116,11 +116,11 @@ public:
     //! @name Epetra Operator Interface Methods
     //@{
 
-    virtual int SetUseTranspose( const bool useTranspose = false );
+    virtual Int SetUseTranspose( const bool useTranspose = false );
 
-    virtual int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual Int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
-    virtual int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual Int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
     virtual bool UseTranspose();
 

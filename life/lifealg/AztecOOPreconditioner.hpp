@@ -86,7 +86,7 @@ public:
     /*!
      *  @param A the base matrix for computing the preconditioner
      */
-    int buildPreconditioner( operator_type& A );
+    Int buildPreconditioner( operator_type& A );
 
     //! Reset the preconditioner
     void precReset();

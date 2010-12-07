@@ -72,21 +72,21 @@ EpetraPreconditioner::~EpetraPreconditioner()
 // ===================================================
 // Epetra Operator Interface Methods
 // ===================================================
-int
+Int
 EpetraPreconditioner::SetUseTranspose( const bool /*useTranspose=false*/ )
 {
     assert( false );
     return 0;
 }
 
-int
+Int
 EpetraPreconditioner::Apply( const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/ ) const
 {
     assert( false );
     return 0;
 }
 
-int
+Int
 EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/ ) const
 {
     assert( false );

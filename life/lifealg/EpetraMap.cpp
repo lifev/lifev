@@ -56,10 +56,10 @@ EpetraMap::EpetraMap():
         M_commPtr()
 {}
 
-EpetraMap::EpetraMap(int                NumGlobalElements,
-                     int                NumMyElements,
-                     int*               MyGlobalElements,
-                     int                IndexBase,
+EpetraMap::EpetraMap(Int                NumGlobalElements,
+                     Int                NumMyElements,
+                     Int*               MyGlobalElements,
+                     Int                IndexBase,
                      const comm_ptrtype&  CommPtr):
         M_repeatedEpetra_Map(),
         M_uniqueEpetraMap(),
@@ -80,19 +80,19 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
 
 /*
 //! construct a map with entries [1:lagrangeMultipliers] distributed on all the processors
-EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
+EpetraMap::EpetraMap(std::vector<Int> const& lagrangeMultipliers,
                      const Epetra_Comm& Comm):
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
     M_importer()
 {
-    int NumGlobalElements(lagrangeMultipliers.size());
-    int NumMyElements    (NumGlobalElements);
-    std::vector<int>  MyGlobalElements(lagrangeMultipliers);
-    int IndexBase = 1;
+    Int NumGlobalElements(lagrangeMultipliers.size());
+    Int NumMyElements    (NumGlobalElements);
+    std::vector<Int>  MyGlobalElements(lagrangeMultipliers);
+    Int IndexBase = 1;
 
-    for (int i(0); i < NumGlobalElements; ++i)
+    for (Int i(0); i < NumGlobalElements; ++i)
         MyGlobalElements[i] = i + 1;
 
 
@@ -105,8 +105,8 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
 }
 */
 
-EpetraMap::EpetraMap( const int          NumGlobalElements,
-                      const int          IndexBase,
+EpetraMap::EpetraMap( const Int          NumGlobalElements,
+                      const Int          IndexBase,
                       const comm_ptrtype& CommPtr ) :
         M_repeatedEpetra_Map(),
         M_uniqueEpetraMap(),
@@ -114,16 +114,16 @@ EpetraMap::EpetraMap( const int          NumGlobalElements,
         M_importer(),
         M_commPtr(CommPtr)
 {
-    std::vector<int> MyGlobalElements( NumGlobalElements );
+    std::vector<Int> MyGlobalElements( NumGlobalElements );
 
-    for ( int i = 0; i < NumGlobalElements; ++i )
+    for ( Int i = 0; i < NumGlobalElements; ++i )
         MyGlobalElements[i] = i + IndexBase;
 
     M_repeatedEpetra_Map.reset( new Epetra_Map( -1, NumGlobalElements, &MyGlobalElements[0], IndexBase, *CommPtr) );
     M_uniqueEpetraMap.reset( new Epetra_Map( NumGlobalElements, IndexBase, *CommPtr) );
 }
 
-EpetraMap::EpetraMap(const int          size,
+EpetraMap::EpetraMap(const Int          size,
                      const comm_ptrtype& CommPtr):
         M_repeatedEpetra_Map(),
         M_uniqueEpetraMap(),
@@ -131,12 +131,12 @@ EpetraMap::EpetraMap(const int          size,
         M_importer(),
         M_commPtr(CommPtr)
 {
-    int NumGlobalElements(size);
-    int NumMyElements    (NumGlobalElements);
-    std::vector<int>  MyGlobalElements(size);
-    int IndexBase = 1;
+    Int NumGlobalElements(size);
+    Int NumMyElements    (NumGlobalElements);
+    std::vector<Int>  MyGlobalElements(size);
+    Int IndexBase = 1;
 
-    for (int i(0); i < NumGlobalElements; ++i)
+    for (Int i(0); i < NumGlobalElements; ++i)
         MyGlobalElements[i] = i + 1;
 
     /*
@@ -183,8 +183,8 @@ EpetraMap::EpetraMap( const map_type map ):
 
   if needed, indexBase may be changed (default values < 0 means "same as original map")
 */
-EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
-                     int indexbase)
+EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const Int offset, const Int maxid,
+                     Int indexbase)
         :
         M_repeatedEpetra_Map(),
         M_uniqueEpetraMap(),
@@ -195,18 +195,18 @@ EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const i
 
     if (indexbase < 0) indexbase = _blockMap.IndexBase();
 
-    std::vector<int> MyGlobalElements;
-    int* sourceGlobalElements(_blockMap.MyGlobalElements());
-    int const startIdOrig(offset + indexbase );
-    int const endIdOrig  (startIdOrig + maxid );
-    const int maxMyElements = std::min(maxid, _blockMap.NumMyElements());
+    std::vector<Int> MyGlobalElements;
+    Int* sourceGlobalElements(_blockMap.MyGlobalElements());
+    Int const startIdOrig(offset + indexbase );
+    Int const endIdOrig  (startIdOrig + maxid );
+    const Int maxMyElements = std::min(maxid, _blockMap.NumMyElements());
     MyGlobalElements.reserve(maxMyElements);
 
     //Sort MyGlobalElements to avoid a bug in Trilinos (9?) when multiplying two matrices (A * B^T)
     std::sort (MyGlobalElements.begin(), MyGlobalElements.end());
 
     // We consider that the source Map may not be ordered
-    for (int i(0); i < _blockMap.NumMyElements(); ++i)
+    for (Int i(0); i < _blockMap.NumMyElements(); ++i)
         if (sourceGlobalElements[i] < endIdOrig && sourceGlobalElements[i] >= startIdOrig)
             MyGlobalElements.push_back(sourceGlobalElements[i] - offset);
 
@@ -251,41 +251,41 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
         return *this;
     }
 
-    int*             pointer;
-    std::vector<int> map;
+    Int*             pointer;
+    std::vector<Int> map;
 
     pointer = getRepeatedMap()->MyGlobalElements();
-    for (int ii = 0; ii < getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
+    for (Int ii = 0; ii < getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
     {
         map.push_back(*pointer);
     }
 
-    int numGlobalElements = getUniqueMap()->NumGlobalElements()
+    Int numGlobalElements = getUniqueMap()->NumGlobalElements()
                             + getUniqueMap()->IndexBase() - _epetraMap.getUniqueMap()->IndexBase();
 
 //    std::cout << "NumGlobalElements = " << numGlobalElements << std::endl;
 
     pointer = _epetraMap.getRepeatedMap()->MyGlobalElements();
-    for (int ii = 0; ii < _epetraMap.getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
+    for (Int ii = 0; ii < _epetraMap.getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
     {
 //        std::cout << "pointer = " << *pointer << std::endl;
         map.push_back(*pointer + numGlobalElements);
     }
 
-    int IndexBase = getRepeatedMap()->IndexBase();
+    Int IndexBase = getRepeatedMap()->IndexBase();
 
     M_repeatedEpetra_Map.reset( new Epetra_Map(-1, map.size(), &map[0], IndexBase, _epetraMap.getRepeatedMap()->Comm()) );
 
     map.resize(0);
     pointer = getUniqueMap()->MyGlobalElements();
 
-    for (int ii = 0; ii < getUniqueMap()->NumMyElements(); ++ii, ++pointer)
+    for (Int ii = 0; ii < getUniqueMap()->NumMyElements(); ++ii, ++pointer)
     {
         map.push_back(*pointer);
     }
 
     pointer = _epetraMap.getUniqueMap()->MyGlobalElements();
-    for (int ii = 0; ii < _epetraMap.getUniqueMap()->NumMyElements(); ++ii, ++pointer)
+    for (Int ii = 0; ii < _epetraMap.getUniqueMap()->NumMyElements(); ++ii, ++pointer)
     {
         map.push_back(*pointer + numGlobalElements);
     }
@@ -300,12 +300,12 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
 
 /*
 EpetraMap &
-EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
+EpetraMap::operator += (std::vector<Int> const& lagrangeMultipliers)
 {
     if ( lagrangeMultipliers.size() <= 0)
         return *this;
 
-    ASSERT(this->getUniqueMap(), "operator+=(const int) works only for an existing EpetraMap");
+    ASSERT(this->getUniqueMap(), "operator+=(const Int) works only for an existing EpetraMap");
 
     EpetraMap  lagrMap(lagrangeMultipliers, Comm());
 
@@ -316,12 +316,12 @@ EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
 */
 
 EpetraMap &
-EpetraMap::operator += (int const size)
+EpetraMap::operator += (Int const size)
 {
 
     EpetraMap  lagrMap(size, CommPtr());
 
-    ASSERT(this->getUniqueMap(), "operator+=(const int) works only for an existing EpetraMap");
+    ASSERT(this->getUniqueMap(), "operator+=(const Int) works only for an existing EpetraMap");
 
 //     if ( size <= 0)
 //         return *this;
@@ -335,7 +335,7 @@ EpetraMap::operator += (int const size)
 // Methods
 // ===================================================
 boost::shared_ptr<EpetraMap>
-EpetraMap::createRootMap(int const root)   const
+EpetraMap::createRootMap(Int const root)   const
 {
 
     boost::shared_ptr<EpetraMap> rootMap(new EpetraMap(Epetra_Util::Create_Root_Map(*getUniqueMap(), root) ));
@@ -400,10 +400,10 @@ EpetraMap::EpetraMap(const EpetraMap& _epetraMap):
 
 
 void
-EpetraMap::createMap(int  NumGlobalElements,
-                     int  NumMyElements,
-                     int* MyGlobalElements,
-                     int  IndexBase,
+EpetraMap::createMap(Int  NumGlobalElements,
+                     Int  NumMyElements,
+                     Int* MyGlobalElements,
+                     Int  IndexBase,
                      const comm_type& Comm)
 {
 
@@ -456,10 +456,10 @@ EpetraMap::createImportExport()
 void
 EpetraMap::bubbleSort(Epetra_IntSerialDenseVector& Elements)
 {
-    int hold;
+    Int hold;
 
-    for (int pass(0); pass < Elements.Length()-1; pass++)
-        for (int j(0); j < Elements.Length()-1; j++)
+    for (Int pass(0); pass < Elements.Length()-1; pass++)
+        for (Int j(0); j < Elements.Length()-1; j++)
             if (Elements[j] > Elements[j+1])
             {
                 hold      = Elements[j];
@@ -471,37 +471,37 @@ EpetraMap::bubbleSort(Epetra_IntSerialDenseVector& Elements)
 void
 EpetraMap::setUp(const RefFE&               refFE,
                  const comm_ptrtype&       _commPtr,
-                 std::vector<int>& repeatedNodeVector,
-                 std::vector<int>& repeatedEdgeVector,
-                 std::vector<int>& repeatedFaceVector,
-                 std::vector<int>& repeatedVolumeVector)
+                 std::vector<Int>& repeatedNodeVector,
+                 std::vector<Int>& repeatedEdgeVector,
+                 std::vector<Int>& repeatedFaceVector,
+                 std::vector<Int>& repeatedVolumeVector)
 {
-    int indexBase = 1;
+    Int indexBase = 1;
 
     if (refFE.nbDofPerVertex())
     {
-        int numNode = repeatedNodeVector.size();
+        Int numNode = repeatedNodeVector.size();
         EpetraMap repeatedNodeMap(-1, numNode, &repeatedNodeVector[0], indexBase, _commPtr);
         operator+=(repeatedNodeMap);
     }
 
     if (refFE.nbDofPerEdge())
     {
-        int numEdge = repeatedEdgeVector.size();
+        Int numEdge = repeatedEdgeVector.size();
         EpetraMap repeatedEdgeMap(-1, numEdge, &repeatedEdgeVector[0], indexBase, _commPtr);
         operator+=(repeatedEdgeMap);
     }
 
     if (refFE.nbDofPerFace())
     {
-        int numFace = repeatedFaceVector.size();
+        Int numFace = repeatedFaceVector.size();
         EpetraMap repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], indexBase, _commPtr);
         operator+=(repeatedFaceMap);
     }
 
     if (refFE.nbDofPerVolume())
     {
-        int numElem = repeatedVolumeVector.size();
+        Int numElem = repeatedVolumeVector.size();
         EpetraMap repeatedElemMap(-1, numElem, &repeatedVolumeVector[0], indexBase, _commPtr);
         operator+=(repeatedElemMap);
     }

@@ -101,7 +101,7 @@ public:
                   const EpetraMapType& maptype );
 
     //! Constructor - Copies vector to a vector which resides only on the processor "reduceToProc"
-    EpetraVector( const EpetraVector& vector, const int& reduceToProc );
+    EpetraVector( const EpetraVector& vector, const Int& reduceToProc );
 
     //! Destructor
     ~EpetraVector() {}
@@ -220,7 +220,7 @@ public:
     //! @name Methods
     //@{
 
-    int GlobalAssemble( Epetra_CombineMode mode = Add )
+    Int GlobalAssemble( Epetra_CombineMode mode = Add )
     {
         return M_epetraVector->GlobalAssemble( mode );
     }
@@ -228,7 +228,7 @@ public:
     //! if row is mine returns the LID
     //! if row is not mine and if the numCpus > 1, returns -1
     //! if row is not mine and if the numCpus == 1, asserts
-    int checkLID( const UInt row ) const;
+    Int checkLID( const UInt row ) const;
 
     //! if row is mine sets this[row] = value and return true
     //! if row is not mine and if the numCpus > 1, returns false
@@ -237,10 +237,10 @@ public:
 
     //! Set the row row of the vector to value. If it isn't on this processor,
     //! store it and send it and send it at next GlobalAssemble
-    int replaceGlobalValues( std::vector< int >& rVec, std::vector< double >& datumVec );
+    Int replaceGlobalValues( std::vector< Int >& rVec, std::vector< Real >& datumVec );
 
     //! insert a global value. After insertion, you will have to call global assemble.
-    int sumIntoGlobalValues( const int GID, const double value );
+    Int sumIntoGlobalValues( const Int GID, const Real value );
 
     /* adds to this the vector vector with an offset.
      typically to do: (u,p) += p or (u,p) += u.
@@ -248,7 +248,7 @@ public:
      a) if this has a unique map: then vector should also (otherwise run time error)
      b) if this has a repeated map: then vector should also. (otherwise wrong)
      */
-    EpetraVector& add( const EpetraVector& vector, const int offset = 0 );
+    EpetraVector& add( const EpetraVector& vector, const Int offset = 0 );
 
     /* set this to a subset of  vector with an offset.
      typically to do: p = (u,p) or u = (u,p).
@@ -260,7 +260,7 @@ public:
 
     //! set this to a subset of  vector with an offset.
     /*!
-        similar to subset( const EpetraVector& , const int ), but with
+        similar to subset( const EpetraVector& , const Int ), but with
         additional parameters:
         @param vector  vector from which to copy data
         @param map     map from which to select indeces to copy
@@ -274,7 +274,7 @@ public:
 
     //! set this to a subset of  vector with an offset.
     /*!
-        similar to subset( const EpetraVector& , const int ), but with
+        similar to subset( const EpetraVector& , const Int ), but with
         additional parameters:
         @param vector  Epetra_MultiVector, instead of EpetraVector, from which to copy data
         @param map     map from which to select indeces to copy
@@ -288,27 +288,27 @@ public:
                          const UInt          offset2,
                          const UInt          column = 0);
 
-   void MeanValue ( double* res ) const;
+   void MeanValue ( Real* res ) const;
 
-    double Norm1   () const;
-    void   Norm1   ( double* res ) const;
-    void   Norm1   ( double& res ) const;
+    Real Norm1   () const;
+    void Norm1   ( Real* res ) const;
+    void Norm1   ( Real& res ) const;
 
-    double Norm2   () const;
-    void   Norm2   ( double* res ) const;
-    void   Norm2   ( double& res ) const;
+    Real Norm2   () const;
+    void Norm2   ( Real* res ) const;
+    void Norm2   ( Real& res ) const;
 
-    double NormInf () const;
-    void   NormInf ( double* res ) const;
-    void   NormInf ( double& res ) const;
+    Real NormInf () const;
+    void NormInf ( Real* res ) const;
+    void NormInf ( Real& res ) const;
 
-    double MinValue() const;
-    void   MinValue( double* res ) const;
-    void   MinValue( double& res ) const;
+    Real MinValue() const;
+    void MinValue( Real* res ) const;
+    void MinValue( Real& res ) const;
 
-    double MaxValue() const;
-    void   MaxValue( double* res ) const;
-    void   MaxValue( double& res ) const;
+    Real MaxValue() const;
+    void   MaxValue( Real* res ) const;
+    void   MaxValue( Real& res ) const;
 
     //! Abs - Replace the vector with his abs.
     /*!
@@ -421,7 +421,7 @@ public:
         return *( M_epetraMap->getMap( M_maptype ) );
     }
 
-    int size() const
+    Int size() const
     {
         if ( M_epetraVector.get() )
             return M_epetraVector->GlobalLength();

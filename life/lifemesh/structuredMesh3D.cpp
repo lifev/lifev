@@ -60,7 +60,7 @@ EntityFlag regularMeshPointPosition(const UInt& i_x,
     // 001000 = on the plane y-z   ( 8)
     // 010000 = on the plane x-y   (16)
     // 100000 = on the plane z=n_z (32)
-    unsigned int pointPosition(0);
+    UInt pointPosition(0);
     if (i_y==0)    {pointPosition=pointPosition|1;}
     if (i_x==n_x-1) {pointPosition=pointPosition|2;}
     if (i_y==n_y-1) {pointPosition=pointPosition|4;}

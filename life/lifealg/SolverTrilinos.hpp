@@ -87,11 +87,11 @@ public:
     //! @name Public Types
     //@{
 
-    typedef double                           value_type;
+    typedef Real                             value_type;
 
     typedef SolverTrilinos                   solver_type;
 
-    typedef EpetraMatrix<double>             matrix_type;
+    typedef EpetraMatrix<Real>               matrix_type;
     typedef EpetraVector                     vector_type;
 
     typedef EpetraPreconditioner             prec_raw_type;
@@ -118,9 +118,9 @@ public:
      *  return the number of iterations, M_maxIter+1 if solve failed.
      * \param algorithm - MS_Algorithm
      */
-    int solve( vector_type& x, const vector_type& b );
+    Int solve( vector_type& x, const vector_type& b );
 
-    double computeResidual( vector_type& __X, vector_type& __B );
+    Real computeResidual( vector_type& __X, vector_type& __B );
 
     // return the Aztec status
     std::string printStatus();
@@ -137,7 +137,7 @@ public:
         returns number of iterations. If negative, the solver did not converge,
         the preconditioner has been recomputed, and a second solution is tried
     */
-    int solveSystem(  const vector_type& rhsFull,
+    Int solveSystem(  const vector_type& rhsFull,
                       vector_type&       sol,
                       matrix_ptrtype&    baseMatrixForPreconditioner );
 
@@ -150,7 +150,7 @@ public:
     EpetraPreconditioner class or from Epetra_Operator)
     */
     template <typename PrecPtrOperator>
-    int solveSystem(  const vector_type& rhsFull,
+    Int solveSystem(  const vector_type& rhsFull,
                       vector_type&       sol,
                       PrecPtrOperator         prec );
 
@@ -192,7 +192,7 @@ public:
 
     void setParameters( bool cerr_warning_if_unused = false );
 
-    void setTolMaxiter( const double tol, const int maxiter = -1 );
+    void setTolMaxiter( const Real tol, const Int maxiter = -1 );
 
     //! if set to true,  do not recompute the preconditioner
     void setReusePreconditioner( const bool reuse );
@@ -204,18 +204,18 @@ public:
     //@{
 
     //! Total number of iterations
-    int NumIters() const;
+    Int NumIters() const;
 
     //! Maximum Total number of iterations
-    int MaxIter() const;
+    Int MaxIter() const;
 
     //! True Residual
-    double TrueResidual();
+    Real TrueResidual();
 
     /** Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
     prec_type& getPrec();
 
-    void getAztecStatus( double status[AZ_STATUS_SIZE]);
+    void getAztecStatus( Real status[AZ_STATUS_SIZE]);
 
     Teuchos::ParameterList& getParameterList();
 
@@ -233,14 +233,14 @@ private:
     Teuchos::ParameterList      M_TrilinosParameterList;
     boost::shared_ptr<Displayer> M_displayer;
 
-    double                      M_tol;
-    int                         M_maxIter;
-    int                         M_maxIterForReuse;
+    Real                        M_tol;
+    Int                         M_maxIter;
+    Int                         M_maxIterForReuse;
     bool                        M_reusePreconditioner;
 };
 
 template <typename PrecPtrOperator>
-int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
+Int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
                                  vector_type&        sol,
                                  PrecPtrOperator          prec )
 
@@ -250,7 +250,7 @@ int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
 
     Chrono chrono;
     chrono.start();
-    int numIter = solve( sol, rhsFull );
+    Int numIter = solve( sol, rhsFull );
     chrono.stop();
     M_displayer->leaderPrintMax( "      done in " , chrono.diff() );
 

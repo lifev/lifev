@@ -126,7 +126,7 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&           vector,
     M_epetraVector->Update(1., vector, 0.);
 }
 
-EpetraVector::EpetraVector( const EpetraVector& vector, const int& reduceToProc):
+EpetraVector::EpetraVector( const EpetraVector& vector, const Int& reduceToProc):
         M_epetraMap   ( vector.M_epetraMap->createRootMap( reduceToProc ) ),
         M_maptype     ( Unique ),
         M_epetraVector( new vector_type( *M_epetraMap->getMap( M_maptype ) ) ),
@@ -142,9 +142,9 @@ EpetraVector::EpetraVector( const EpetraVector& vector, const int& reduceToProc)
 EpetraVector::data_type&
 EpetraVector::operator[]( const UInt row )
 {
-    int lrow = BlockMap().LID(row); // BASEINDEX + 1, row + 1
+    Int lrow = BlockMap().LID(row); // BASEINDEX + 1, row + 1
 
-    // hint: with gdb: break LifeV::EpetraVector<double>::operator[](unsigned int)
+    // hint: with gdb: break LifeV::EpetraVector<Real>::operator[](unsigned Int)
     if (lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
@@ -157,7 +157,7 @@ EpetraVector::operator[]( const UInt row )
 const EpetraVector::data_type&
 EpetraVector::operator[]( const UInt row ) const
 {
-    int lrow = BlockMap().LID(row); // BASEINDEX + 1 row+1
+    Int lrow = BlockMap().LID(row); // BASEINDEX + 1 row+1
 
     if (lrow < 0 )
     {
@@ -307,8 +307,8 @@ EpetraVector::operator*=( const EpetraVector& vector )
 
     return *this;
     /*
-    int numMyEntries;
-    const int*  gids;
+    Int numMyEntries;
+    const Int*  gids;
 
     if (M_maptype == Unique)
     {
@@ -336,7 +336,7 @@ EpetraVector::operator*=( const EpetraVector& vector )
     }
 
 
-    for (int i = 0; i < numMyEntries; ++i)
+    for (Int i = 0; i < numMyEntries; ++i)
     {
       (*this)[gids[i]] *= vector(gids[i]);
     }
@@ -409,7 +409,7 @@ EpetraVector::operator/( const EpetraVector& vector ) const
 EpetraVector&
 EpetraVector::operator+=( const data_type& scalar )
 {
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             (*M_epetraVector)[i][j] += scalar;
@@ -494,7 +494,7 @@ EpetraVector::operator==( const Real& scalar )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] == scalar ? true : false;
@@ -508,7 +508,7 @@ EpetraVector::operator!=( const Real& scalar )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] != scalar ? true : false;
@@ -522,7 +522,7 @@ EpetraVector::operator<( const Real& scalar )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] < scalar ? true : false;
@@ -536,7 +536,7 @@ EpetraVector::operator>( const Real& scalar )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] > scalar ? true : false;
@@ -550,7 +550,7 @@ EpetraVector::operator<=( const Real& scalar )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] <= scalar ? true : false;
@@ -564,7 +564,7 @@ EpetraVector::operator>=( const Real& scalar )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] >= scalar ? true : false;
@@ -578,7 +578,7 @@ EpetraVector::operator&&( const EpetraVector& vector )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] && vector.getEpetraVector()[i][j];
@@ -592,7 +592,7 @@ EpetraVector::operator||( const EpetraVector& vector )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = (*M_epetraVector)[i][j] || vector.getEpetraVector()[i][j];
@@ -606,7 +606,7 @@ EpetraVector::operator!( void )
 {
     EpetraVector comparisonVector( *M_epetraMap, M_maptype );
 
-    int i, j;
+    Int i, j;
     for ( i=0; i < M_epetraVector->NumVectors(); ++i )
         for ( j=0; j < M_epetraVector->MyLength(); ++j )
             comparisonVector.getEpetraVector()[i][j] = !(*M_epetraVector)[i][j];
@@ -618,9 +618,9 @@ EpetraVector::operator!( void )
 // ===================================================
 // Methods
 // ===================================================
-int EpetraVector::checkLID( const UInt row ) const
+Int EpetraVector::checkLID( const UInt row ) const
 {
-    int lrow = BlockMap().LID(row); // BASEINDEX + 1, row + 1
+    Int lrow = BlockMap().LID(row); // BASEINDEX + 1, row + 1
 
     if (lrow < 0 && BlockMap().Comm().NumProc() == 1)
     {
@@ -633,7 +633,7 @@ int EpetraVector::checkLID( const UInt row ) const
 
 bool EpetraVector::checkAndSet(const UInt row, const data_type& value, UInt offset)
 {
-    int lrow = checkLID(row + offset);
+    Int lrow = checkLID(row + offset);
     if (lrow < 0)
         return false;
 
@@ -641,7 +641,7 @@ bool EpetraVector::checkAndSet(const UInt row, const data_type& value, UInt offs
     return true;
 }
 
-int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double>& datumVec)
+Int EpetraVector::replaceGlobalValues(std::vector<Int>& rVec, std::vector<Real>& datumVec)
 {
     ASSERT( rVec.size() == datumVec.size(), "Error: rVec and datumVec should have the same size" );
     ASSERT( M_maptype == Unique, "Error: Vector must have a unique map" );
@@ -650,21 +650,21 @@ int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double
     // return M_epetraVector->ReplaceGlobalValues(rVec.size(), &rVec.front(), &datumVec.front());
 
     const Epetra_Comm&  Comm(M_epetraVector->Comm());
-    int numProcs(Comm.NumProc());
-    int MyPID   (Comm.MyPID()   );
-    int i;
+    Int numProcs(Comm.NumProc());
+    Int MyPID   (Comm.MyPID()   );
+    Int i;
 
     // Note: Epetra_Comm::broadcast does not support passing of uint, hence
     //       I define an int pointer to make the broadcast but then come back to an
     //       UInt pointer to insert the data
-    int*       r;
+    Int*       r;
     data_type* datum;
 
     // loop on all proc
-    for ( int p(0); p < numProcs; p++)
+    for ( Int p(0); p < numProcs; p++)
     {
-        int sizeVec( static_cast<int>( rVec.size() ) );
-        if ( sizeVec != static_cast<int>( datumVec.size() ) )
+        Int sizeVec( static_cast<Int>( rVec.size() ) );
+        if ( sizeVec != static_cast<Int>( datumVec.size() ) )
         { //! vectors must be of the same size
             ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
         }
@@ -678,7 +678,7 @@ int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double
         }
         else
         {
-            r    = new int     [sizeVec];
+            r    = new Int     [sizeVec];
             datum = new data_type[sizeVec];
         }
 
@@ -700,21 +700,21 @@ int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double
 
 }
 
-int
-EpetraVector::sumIntoGlobalValues ( const int GID, const double value )
+Int
+EpetraVector::sumIntoGlobalValues ( const Int GID, const Real value )
 {
     return M_epetraVector->SumIntoGlobalValues(1, &GID, &value);
 }
 
 EpetraVector&
-EpetraVector::add( const EpetraVector& vector, const int offset )
+EpetraVector::add( const EpetraVector& vector, const Int offset )
 {
 
-    int numMyEntries = vector.M_epetraVector->MyLength ();
-    const int*    gids       = vector.BlockMap().MyGlobalElements();
+    Int numMyEntries = vector.M_epetraVector->MyLength ();
+    const Int*    gids       = vector.BlockMap().MyGlobalElements();
 
     // eg: (u,p) += p or (u,p) += u
-    for (int i = 0; i < numMyEntries; ++i)
+    for (Int i = 0; i < numMyEntries; ++i)
     {
         //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
         (*this)[gids[i]+offset] += vector(gids[i]);
@@ -750,11 +750,11 @@ EpetraVector::subset( const Epetra_MultiVector& vector,
                       const UInt          offset2,
                       const UInt          column )
 {
-    const int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
+    const Int*    gids        = map.getMap(M_maptype)->MyGlobalElements();
     const UInt    numMyEntries = map.getMap(M_maptype)->NumMyElements();
 
-    int lid1 ;
-    int lid2 ;
+    Int lid1 ;
+    Int lid2 ;
 
     // eg:  p = (u,p) or u = (u,p)
     for (UInt i = 0; i < numMyEntries; ++i)
@@ -770,107 +770,107 @@ EpetraVector::subset( const Epetra_MultiVector& vector,
 }
 
 void
-EpetraVector::MeanValue(double* res) const
+EpetraVector::MeanValue(Real* res) const
 {
     M_epetraVector->MeanValue(res);
 }
 
-double
+Real
 EpetraVector::Norm1() const
 {
-    double res;
+    Real res;
     M_epetraVector->Norm1(&res);
     return res;
 }
 
 void
-EpetraVector::Norm1(double* res) const
+EpetraVector::Norm1(Real* res) const
 {
     M_epetraVector->Norm1(res);
 }
 
 void
-EpetraVector::Norm1(double& res) const
+EpetraVector::Norm1(Real& res) const
 {
     M_epetraVector->Norm1(&res);
 }
 
-double
+Real
 EpetraVector::Norm2() const
 {
-    double res;
+    Real res;
     M_epetraVector->Norm2(&res);
     return res;
 }
 
 void
-EpetraVector::Norm2(double* res) const
+EpetraVector::Norm2(Real* res) const
 {
     M_epetraVector->Norm2(res);
 }
 
 void
-EpetraVector::Norm2( double& res ) const
+EpetraVector::Norm2( Real& res ) const
 {
     M_epetraVector->Norm2( &res );
 }
 
-double
+Real
 EpetraVector::NormInf() const
 {
-    double res;
+    Real res;
     M_epetraVector->NormInf(&res);
     return res;
 }
 
 void
-EpetraVector::NormInf(double* res) const
+EpetraVector::NormInf(Real* res) const
 {
     M_epetraVector->NormInf(res);
 }
 
 void
-EpetraVector::NormInf(double& res) const
+EpetraVector::NormInf(Real& res) const
 {
     M_epetraVector->NormInf(&res);
 }
 
-double
+Real
 EpetraVector::MinValue() const
 {
-    double res;
+    Real res;
     M_epetraVector->MinValue(&res);
     return res;
 }
 
-double
+Real
 EpetraVector::MaxValue() const
 {
-    double res;
+    Real res;
     M_epetraVector->MaxValue(&res);
     return res;
 }
 
 void
-EpetraVector::MinValue(double* res) const
+EpetraVector::MinValue(Real* res) const
 {
     M_epetraVector->MinValue(res);
 }
 
 void
-EpetraVector::MaxValue(double* res) const
+EpetraVector::MaxValue(Real* res) const
 {
     M_epetraVector->MaxValue(res);
 }
 
 void
-EpetraVector::MinValue(double& res) const
+EpetraVector::MinValue(Real& res) const
 {
     M_epetraVector->MinValue(&res);
 }
 
 void
-EpetraVector::MaxValue(double& res) const
+EpetraVector::MaxValue(Real& res) const
 {
     M_epetraVector->MaxValue(&res);
 }
@@ -912,7 +912,7 @@ void EpetraVector::matrixMarket( std::string const &filename, const bool headers
     std::string nome = filename;
     std::string desc = "Created by LifeV";
 
-    // int  me    = M_epetraVector->Comm().MyPID();
+    // Int  me    = M_epetraVector->Comm().MyPID();
 
     if (M_maptype == Repeated)
     {
@@ -941,7 +941,7 @@ void EpetraVector::spy( std::string const &filename ) const
     // Purpose: Matlab dumping and spy
     std::string nome = filename, uti = " , ";
 
-    int  me    = M_epetraVector->Comm().MyPID();
+    Int  me    = M_epetraVector->Comm().MyPID();
 
     if (M_maptype == Repeated)
     {
@@ -966,8 +966,8 @@ void EpetraVector::ShowMe( std::ostream& output ) const
     if ( redVec.M_epetraVector->Comm().MyPID() )
         return; // do not need other CPUs now
 
-    const double* Values = redVec.getEpetraVector()[0];
-    for ( int i = 0; i < redVec.M_epetraVector->GlobalLength () ; ++i )
+    const Real* Values = redVec.getEpetraVector()[0];
+    for ( Int i = 0; i < redVec.M_epetraVector->GlobalLength () ; ++i )
         output << Values[i] << std::endl;
 }
 
