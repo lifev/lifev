@@ -39,16 +39,18 @@
 #ifndef _HEARTFUNCTORS_H_
 #define _HEARTFUNCTORS_H_
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
-#include <fstream>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefilters/ensight.hpp>
 
 namespace LifeV
 {
@@ -60,8 +62,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> region_Type;
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&)> region1_Type;
+    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id , Real const&)> region_Type;
+    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id)> region1_Type;
 
     //@}
 

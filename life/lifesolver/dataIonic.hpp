@@ -101,6 +101,8 @@ public:
     std::string wOrder() const;
 */
 
+private:
+
     bool        M_hasHeterogeneousTauClose;
 
     UInt        M_verbose;
@@ -131,7 +133,7 @@ public:
     std::string M_meshFile;
     std::string M_meshDirectory;
 
-private:
+
 
 
 };

@@ -57,8 +57,8 @@ DataIonic::DataIonic( const GetPot& dataFile ) :
 DataIonic::DataIonic() :
         DataMesh                      ( ),
         DataTime                      ( ),
-        M_verbose                     ( ),
         M_hasHeterogeneousTauClose    ( ),
+        M_verbose                     ( ),
         M_a                           ( ),
         M_b                           ( ),
         M_c1                          ( ),
@@ -181,7 +181,7 @@ DataIonic::setup(  const GetPot& dataFile )
 // Output
 void DataIonic::showMe( std::ostream& output )
 {
-
+ output << " The output is still to be coded! \n" << std::endl;
 }
 
 }

@@ -66,7 +66,7 @@ public:
         Description of the purpose of the enumerator list.
     */
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> region_Type;
+    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const& t, ID const& id, Real const&)> region_Type;
 
     //@}
 
@@ -121,31 +121,31 @@ public:
     std::string uOrder()         const {return M_uOrder;};
 
     //! Chi
-    Real        Chi()            const {return M_volumeSurfaceRatio;}
+    const Real&        Chi()            const {return M_volumeSurfaceRatio;}
     //! fiber File
     std::string fibers_file()    const {return M_fibersFile;}
 
-    Int         heart_diff_fct() const {return M_heartDiffusionFactor;}
+    const Int&         heart_diff_fct() const {return M_heartDiffusionFactor;}
 
-    bool        has_fibers()     const {return M_hasFibers;}
+    const bool&        has_fibers()     const {return M_hasFibers;}
 
     //! format vct
-    bool        fibers_format()  const {return M_fibersFormat;}
+    const bool&        fibers_format()  const {return M_fibersFormat;}
 
     //! sigma_l
-    Real        sigmal_i()       const 	{return M_longitudinalInternalConductivity;}
-    Real        sigmal_e()       const 	{return M_longitudinalExternalConductivity;}
+    const Real&        sigmal_i()       const 	{return M_longitudinalInternalConductivity;}
+    const Real&        sigmal_e()       const 	{return M_longitudinalExternalConductivity;}
 
     //! sigma_t
-    Real        sigmat_i()       const 	{return M_transversalInternalConductivity;}
-    Real        sigmat_e()       const 	{return M_transversalExternalConductivity;}
+    const Real&        sigmat_i()       const 	{return M_transversalInternalConductivity;}
+    const Real&        sigmat_e()       const 	{return M_transversalExternalConductivity;}
 
     //! Cm
-    Real        Cm()             const 	{return M_membraneCapacitance;}
+    const Real&        Cm()             const 	{return M_membraneCapacitance;}
     //! D
-    Real        D_i()            const 	{return M_internalDiffusivity;}
+    const Real&        D_i()            const 	{return M_internalDiffusivity;}
     //! Post_dir
-    Real        D_e()            const 	{return M_externalDiffusivity;}
+    const Real&        D_e()            const 	{return M_externalDiffusivity;}
     //! Post_dir
     std::string Post_dir()       const {return M_postProcessingDirectory;}
 
@@ -155,7 +155,7 @@ public:
 
 
 protected:
-
+private:
     // format of fibers file
     bool        M_fibersFormat;
     bool        M_hasFibers;
@@ -186,7 +186,7 @@ protected:
 
 
 
-private:
+
 
 
 };

@@ -61,7 +61,7 @@ public:
     //@{
 
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> region_Type;
+    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const& t, ID const& id, Real const&)> region_Type;
 
     //@}
 
@@ -117,31 +117,28 @@ public:
     std::string uOrder()         const {return M_uOrder;};
 
     //! Chi
-    Real        Chi()            const {return M_volumeSurfaceRatio;}
+    const Real&        Chi()            const {return M_volumeSurfaceRatio;}
 
     //! fiber File
     string      fibers_file()    const {return M_fibersFile;}
 
     //local change of the diffusivity
-    Int         heart_diff_fct() const {return M_heartDiffusionFactor;}
+    const Int&         heart_diff_fct() const {return M_heartDiffusionFactor;}
 
     //would you consider the fibers?
     bool        has_fibers()     const {return M_hasFibers;}
 
     //! sigma_l
-    Real        sigmal()         const 	{return M_longitudinalConductivity;}
+    const Real&        sigmal()         const 	{return M_longitudinalConductivity;}
 
     //! sigma_t
-    Real        sigmat()         const 	{return M_transversalConductivity;}
-
-    //! lambda
-    //Real lambda() const 	{return M_lambda;}//not used?????
+    const Real&        sigmat()         const 	{return M_transversalConductivity;}
 
     //! Cm
-    Real        Cm()             const 	{return M_membraneCapacitance;}
+    const Real&        Cm()             const 	{return M_membraneCapacitance;}
 
     //! D
-    Real        D()              const 	{return M_diffusivity;}
+    const Real&        D()              const 	{return M_diffusivity;}
 
     //! Post_dir
     std::string post_dir()       const {return M_postProcessingDirectory;}
