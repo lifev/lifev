@@ -35,6 +35,7 @@
     @date 29-08-2004
  */
 
+#include <lifeconfig.h>
 #include <life/lifealg/SolverAmesos.hpp>
 
 #include <life/lifecore/debug.hpp>

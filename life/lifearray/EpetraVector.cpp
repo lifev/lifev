@@ -37,6 +37,7 @@
     @date 04-10-2006
  */
 
+#include <lifeconfig.h>
 #include <life/lifearray/EpetraVector.hpp>
 #include <EpetraExt_MultiVectorOut.h>
 

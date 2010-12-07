@@ -39,7 +39,6 @@
 #ifndef _EPETRAMATRIX_HPP_
 #define _EPETRAMATRIX_HPP_
 
-
 #include <lifeconfig.h>
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>

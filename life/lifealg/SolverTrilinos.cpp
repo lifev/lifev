@@ -36,6 +36,7 @@
     @date 08-11-2006
  */
 
+#include <lifeconfig.h>
 #include <life/lifealg/SolverTrilinos.hpp>
 
 namespace LifeV

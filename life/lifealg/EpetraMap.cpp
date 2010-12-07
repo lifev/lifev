@@ -38,6 +38,7 @@
     This class manages the distribution of elements of matrices or vectors on a parallel machine
  */
 
+#include <lifeconfig.h>
 #include <life/lifealg/EpetraMap.hpp>
 #include <Epetra_Util.h>
 
