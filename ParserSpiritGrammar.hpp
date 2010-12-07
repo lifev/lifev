@@ -37,18 +37,18 @@
 #ifndef Parser_SpiritGrammar_H
 #define Parser_SpiritGrammar_H 1
 
-#include <lifemc/lifecore/Parser_Definitions.hpp>
+#include <lifemc/lifecore/ParserDefinitions.hpp>
 
 namespace LifeV
 {
 
 #ifdef HAVE_BOOST_SPIRIT_QI
 
-//! Parser_SpiritGrammar - A string parser grammar based on \c boost::spirit::qi
+//! ParserSpiritGrammar - A string parser grammar based on \c boost::spirit::qi
 /*!
  *  @author(s) Cristiano Malossi
  *
- *  \c Parser_SpiritGrammar is a \c boost::spirit::qi based class to perform
+ *  \c ParserSpiritGrammar is a \c boost::spirit::qi based class to perform
  *  evaluation of \c std::string expressions.
  *
  *  <b>EXAMPLE - HOW TO USE</b>
@@ -71,14 +71,14 @@ namespace LifeV
  *  where semicolons (";") separate constants and commas (",") separate output functions.
  *
  *  NOTE:
- *  Currently Parser_SpiritGrammar works with the following operators:
+ *  Currently ParserSpiritGrammar works with the following operators:
  *  \verbatim
  *  +, -, *, /, ^, sqrt(), sin(), cos(), tan(), exp(), log(), log10(), >, <.
  *  \endverbatim
  *
  */
 template <typename iterator>
-class Parser_SpiritGrammar : public qi::grammar< iterator, results_Type(), ascii::space_type >
+class ParserSpiritGrammar : public qi::grammar< iterator, results_Type(), ascii::space_type >
 {
 public:
 
@@ -94,16 +94,16 @@ public:
     //@{
 
     //! Constructor
-    Parser_SpiritGrammar();
+    ParserSpiritGrammar();
 
     //! Copy constructor
     /*!
-     * @param Parser_SpiritGrammar Parser_SpiritGrammar
+     * @param ParserSpiritGrammar ParserSpiritGrammar
      */
-    Parser_SpiritGrammar( const Parser_SpiritGrammar& spiritGrammar );
+    ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar );
 
     //! Destructor
-    virtual ~Parser_SpiritGrammar() {}
+    virtual ~ParserSpiritGrammar() {}
     //@}
 
 
@@ -112,10 +112,10 @@ public:
 
     //! Operator =
     /*!
-     * @param SpiritGrammar Parser_SpiritGrammar
+     * @param SpiritGrammar ParserSpiritGrammar
      * @return reference to a copy of the class
      */
-    Parser_SpiritGrammar& operator=( const Parser_SpiritGrammar& spiritGrammar );
+    ParserSpiritGrammar& operator=( const ParserSpiritGrammar& spiritGrammar );
 
     //@}
 
@@ -256,8 +256,8 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename iterator>
-Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
-        Parser_SpiritGrammar::base_type( Start ),
+ParserSpiritGrammar< iterator >::ParserSpiritGrammar() :
+        ParserSpiritGrammar::base_type( Start ),
         Start                               (),
         Assignment                          (),
 //        Command                             (),
@@ -286,11 +286,11 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
         (    qi::raw[qi::lexeme[(qi::alpha | '_') >> *(qi::alnum | '_')]]
         >>   qi::lit('=')
         >>   Expression
-        )              [phoenix::bind(&Parser_SpiritGrammar::assignVariable,this, qi::_1, qi::_2)]
+        )              [phoenix::bind(&ParserSpiritGrammar::assignVariable,this, qi::_1, qi::_2)]
         ;
     /*
         Command
-            =  qi::lit("ShowMe")[phoenix::bind(&Parser_SpiritGrammar::ShowMe, this)]
+            =  qi::lit("ShowMe")[phoenix::bind(&ParserSpiritGrammar::ShowMe, this)]
         ;
     */
 
@@ -327,17 +327,17 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
         (
             qi::lit('-') >> Element                    [qi::_val = qi::_1]
             >>  (
-                qi::lit('^') >> Element                [qi::_val = -phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> Element                [qi::_val = -phoenix::bind(&ParserSpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
             >> *(
-                qi::lit('^') >> Element                [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> Element                [qi::_val = phoenix::bind(&ParserSpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
         )
         |
         (
             Element                                    [qi::_val = qi::_1]
             >> *(
-                qi::lit('^') >> Element                [qi::_val = phoenix::bind(&Parser_SpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> Element                [qi::_val = phoenix::bind(&ParserSpiritGrammar::pow, this, qi::_val, qi::_1)]
             )
         )
         ;
@@ -368,13 +368,13 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
     Function
     =
         (
-            qi::lit("sin")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sin, this,   qi::_1)]
-        |   qi::lit("cos")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::cos, this,   qi::_1)]
-        |   qi::lit("tan")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::tan, this,   qi::_1)]
-        |   qi::lit("sqrt")  >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::sqrt, this,  qi::_1)]
-        |   qi::lit("exp")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::exp, this,   qi::_1)]
-        |   qi::lit("log")   >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log, this,   qi::_1)]
-        |   qi::lit("log10") >> Group                  [qi::_val = phoenix::bind(&Parser_SpiritGrammar::log10, this, qi::_1)]
+            qi::lit("sin")   >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::sin, this,   qi::_1)]
+        |   qi::lit("cos")   >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::cos, this,   qi::_1)]
+        |   qi::lit("tan")   >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::tan, this,   qi::_1)]
+        |   qi::lit("sqrt")  >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::sqrt, this,  qi::_1)]
+        |   qi::lit("exp")   >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::exp, this,   qi::_1)]
+        |   qi::lit("log")   >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::log, this,   qi::_1)]
+        |   qi::lit("log10") >> Group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::log10, this, qi::_1)]
         )
         ;
 
@@ -389,8 +389,8 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar() :
 }
 
 template <typename iterator>
-Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar( const Parser_SpiritGrammar& spiritGrammar ) :
-        Parser_SpiritGrammar::base_type     ( spiritGrammar.Start ),
+ParserSpiritGrammar< iterator >::ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar ) :
+        ParserSpiritGrammar::base_type     ( spiritGrammar.Start ),
         Start                               ( spiritGrammar.Start ),
         Assignment                          ( spiritGrammar.Assignment ),
 //    Command                             ( spiritGrammar.Command ),
@@ -411,13 +411,13 @@ Parser_SpiritGrammar< iterator >::Parser_SpiritGrammar( const Parser_SpiritGramm
 // Operators
 // ===================================================
 template <typename iterator>
-Parser_SpiritGrammar< iterator >&
-Parser_SpiritGrammar< iterator >::operator=( const Parser_SpiritGrammar& spiritGrammar )
+ParserSpiritGrammar< iterator >&
+ParserSpiritGrammar< iterator >::operator=( const ParserSpiritGrammar& spiritGrammar )
 {
     if ( this != &spiritGrammar )
     {
-        Parser_SpiritGrammar::base_type::operator=( spiritGrammar.Start );
-        //Parser_SpiritGrammar< iterator >::operator=( spiritGrammar );
+        ParserSpiritGrammar::base_type::operator=( spiritGrammar.Start );
+        //ParserSpiritGrammar< iterator >::operator=( spiritGrammar );
         Start                               = spiritGrammar.Start;
         Assignment                          = spiritGrammar.Assignment;
 //        Command                             = spiritGrammar.Command;
@@ -441,7 +441,7 @@ Parser_SpiritGrammar< iterator >::operator=( const Parser_SpiritGrammar& spiritG
 // ===================================================
 template <typename iterator>
 inline void
-Parser_SpiritGrammar< iterator >::setDefaultVariables()
+ParserSpiritGrammar< iterator >::setDefaultVariables()
 {
     Variable.add( "pi" , 3.141592653589793 );
     Variable.add( "e", 2.718281828459046 );
@@ -451,7 +451,7 @@ Parser_SpiritGrammar< iterator >::setDefaultVariables()
 
 template <typename iterator>
 inline void
-Parser_SpiritGrammar< iterator >::setVariable( const std::string& name, const Real& value )
+ParserSpiritGrammar< iterator >::setVariable( const std::string& name, const Real& value )
 {
     Real *p = Variable.find( name );
     if ( p != 0 )
@@ -491,17 +491,17 @@ Parser_SpiritGrammar< iterator >::setVariable( const std::string& name, const Re
 
 #else
 
-//! Parser_SpiritGrammar - An empty implementation for boost version < 1.41
+//! ParserSpiritGrammar - An empty implementation for boost version < 1.41
 template <typename iterator>
-class Parser_SpiritGrammar
+class ParserSpiritGrammar
 {
 public:
 
-    Parser_SpiritGrammar() : M_real(0.) {}
-    Parser_SpiritGrammar( const Parser_SpiritGrammar& ) : M_real(0.) {}
-    ~Parser_SpiritGrammar() {}
+    ParserSpiritGrammar() : M_real(0.) {}
+    ParserSpiritGrammar( const ParserSpiritGrammar& ) : M_real(0.) {}
+    ~ParserSpiritGrammar() {}
 
-    Parser_SpiritGrammar& operator=( const Parser_SpiritGrammar& ) { return *this; }
+    ParserSpiritGrammar& operator=( const ParserSpiritGrammar& ) { return *this; }
 
     void clearVariables() {}
 

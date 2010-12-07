@@ -38,8 +38,8 @@
 #ifndef Parser_H
 #define Parser_H 1
 
-#include <lifemc/lifecore/Parser_Definitions.hpp>
-#include <lifemc/lifecore/Parser_SpiritGrammar.hpp>
+#include <lifemc/lifecore/ParserDefinitions.hpp>
+#include <lifemc/lifecore/ParserSpiritGrammar.hpp>
 
 namespace LifeV
 {
@@ -57,7 +57,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Parser_SpiritGrammar< stringIterator_Type >      calculator_Type;
+    typedef ParserSpiritGrammar< stringIterator_Type >       calculator_Type;
 
     //@}
 
