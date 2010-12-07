@@ -212,8 +212,8 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_Solver->setLinearSolver( M_LinearSolver );
 
     //BC - We need to create the BCHandler before using it
-    M_BC->CreateHandler();
-    //M_BC->FillHandler( FileName, "1D_Model" );
+    M_BC->createHandler();
+    //M_BC->fillHandler( FileName, "1D_Model" );
 
     //Exporters
     M_Data->setPostprocessingDirectory( MS_ProblemFolder );
@@ -249,10 +249,10 @@ MS_Model_1D::SetupModel()
     M_Solver->setupSolution( *M_Solution_tn );
 
     //Set default BC (has to be called after setting other BC)
-    M_BC->GetHandler()->setDefaultBC();
-    M_BC->SetOperator( M_Solver );
-    M_BC->SetSolution( M_Solution );
-    M_BC->SetFluxSource( M_Flux, M_Source );
+    M_BC->handler()->setDefaultBC();
+    M_BC->setPhysicalSolver( M_Solver );
+    M_BC->setSolution( M_Solution );
+    M_BC->setFluxSource( M_Flux, M_Source );
 
 #ifdef HAVE_HDF5
     //Post-processing
@@ -332,7 +332,7 @@ MS_Model_1D::SolveSystem()
     Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
 #endif
 
-    Solve( *M_BC->GetHandler(), *M_Solution );
+    Solve( *M_BC->handler(), *M_Solution );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
     if ( M_couplings.size() > 0 )
@@ -395,14 +395,14 @@ MS_Model_1D::SetupLinearModel()
     M_BCBaseDelta.setFunction( boost::bind( &MS_Model_1D::BCFunctionDelta, this, _1 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with the LinearSolution instead of the true solution
-    //M_LinearBC.reset( new BC_Type( *M_BC->GetHandler() ) ); // COPY CONSTRUCTOR NOT WORKING
+    //M_LinearBC.reset( new BC_Type( *M_BC->handler() ) ); // COPY CONSTRUCTOR NOT WORKING
 
     //Set left and right BC + default BC
-    M_LinearBC->setBC( OneD_left, OneD_first, M_BC->GetHandler()->BC( OneD_left )->type( OneD_first ),
-                       M_BC->GetHandler()->BC( OneD_left )->BCFunction( OneD_first ) );
+    M_LinearBC->setBC( OneD_left, OneD_first, M_BC->handler()->BC( OneD_left )->type( OneD_first ),
+                       M_BC->handler()->BC( OneD_left )->BCFunction( OneD_first ) );
 
-    M_LinearBC->setBC( OneD_right, OneD_first, M_BC->GetHandler()->BC( OneD_right )->type( OneD_first ),
-                       M_BC->GetHandler()->BC( OneD_right )->BCFunction( OneD_first ) );
+    M_LinearBC->setBC( OneD_right, OneD_first, M_BC->handler()->BC( OneD_right )->type( OneD_first ),
+                       M_BC->handler()->BC( OneD_right )->BCFunction( OneD_first ) );
 
     M_LinearBC->setDefaultBC();
 
@@ -663,7 +663,7 @@ MS_Model_1D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem
 MS_Model_1D::BC_Type&
 MS_Model_1D::GetBC() const
 {
-    return *(M_BC->GetHandler());
+    return *(M_BC->handler());
 }
 
 
@@ -867,7 +867,7 @@ MS_Model_1D::Solve( BC_Type& bc, Solution_Type& solution, const std::string& sol
             std::cout << solverType << "  Subiteration                             " << i << "/" << SubiterationNumber << std::endl;
             std::cout << solverType << "  Time                                     " <<  M_Data->dataTime()->getPreviousTime() + i*timeStep << std::endl;
         }
-        //bc.UpdateOperatorVariables();
+        //bc.updateOperatorVariables();
 
         M_Solver->updateRHS( solution, timeStep );
         M_Solver->iterate( bc, solution, M_Data->dataTime()->getPreviousTime() + i*timeStep, timeStep );
@@ -980,7 +980,7 @@ MS_Model_1D::ResetPerturbation()
     Debug( 8130 ) << "MS_Model_1D::ResetPerturbation() \n";
 #endif
 
-    M_LinearBC->BC( M_BCDeltaSide )->setBCFunction( OneD_first, M_BC->GetHandler()->BC( M_BCDeltaSide )->BCFunction( OneD_first ) );
+    M_LinearBC->BC( M_BCDeltaSide )->setBCFunction( OneD_first, M_BC->handler()->BC( M_BCDeltaSide )->BCFunction( OneD_first ) );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
     // Restoring the original BC
@@ -1034,7 +1034,7 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
         if ( ( *i )->IsPerturbed() )
         {
             // Find the perturbed side
-            OneD_BCSide bcSide = FlagConverter( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) );
+            OneD_BCSide bcSide = FlagConverter( ( *i )->flag( ( *i )->GetModelLocalID( M_ID ) ) );
 
             // Perturbation has no effect on the other sides (which also means that dQ/dQ and dP/dP are always zero)
             if ( bcSide != bcOutputSide )

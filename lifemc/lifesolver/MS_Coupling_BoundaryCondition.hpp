@@ -188,11 +188,11 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions1D( const UInt& i )
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
+        Model->GetBCInterface().readBC( M_FileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetBCInterface().GetDataContainer().SetSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
+        Model->GetBCInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
 
-        Model->GetBCInterface().InsertBC();
+        Model->GetBCInterface().insertBC();
     }
 }
 
@@ -204,12 +204,12 @@ MS_Coupling_BoundaryCondition::ApplyBoundaryConditions3D( const UInt& i )
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetBCInterface().ReadBC( M_FileName, "boundary_conditions/", M_list[j] );
+        Model->GetBCInterface().readBC( M_FileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetBCInterface().GetDataContainer().SetName( "CouplingBC_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
-        Model->GetBCInterface().GetDataContainer().SetFlag( M_flags[i] );
+        Model->GetBCInterface().dataContainer().setName( "CouplingBC_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
+        Model->GetBCInterface().dataContainer().setFlag( M_flags[i] );
 
-        Model->GetBCInterface().InsertBC();
+        Model->GetBCInterface().insertBC();
     }
 }
 

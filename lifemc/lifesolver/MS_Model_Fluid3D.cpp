@@ -73,68 +73,6 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
     M_type = Fluid3D;
 }
 
-MS_Model_Fluid3D::MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D ) :
-        super                          ( Fluid3D ),
-        M_exporter                     ( Fluid3D.M_exporter ),
-        M_importer                     ( Fluid3D.M_importer ),
-        M_fileName                     ( Fluid3D.M_fileName ),
-        M_fluid                        ( Fluid3D.M_fluid ),
-        M_BC                           ( Fluid3D.M_BC ),
-        M_BDF                          ( Fluid3D.M_BDF ),
-        M_data                         ( Fluid3D.M_data ),
-        M_dataMesh                     ( Fluid3D.M_dataMesh ),
-        M_mesh                         ( Fluid3D.M_mesh ),
-        M_map                          ( Fluid3D.M_map ),
-        M_solution                     ( Fluid3D.M_solution ),
-        M_linearBC                     ( Fluid3D.M_linearBC ),
-        M_updateLinearModel            ( Fluid3D.M_updateLinearModel ),
-        M_uFESpace                     ( Fluid3D.M_uFESpace ),
-        M_pFESpace                     ( Fluid3D.M_pFESpace ),
-        M_lmDOF                        ( Fluid3D.M_lmDOF ),
-        M_alpha                        ( Fluid3D.M_alpha ),
-        M_beta                         ( Fluid3D.M_beta ),
-        M_RHS                          ( Fluid3D.M_RHS ),
-        M_subiterationsMaximumNumber   ( Fluid3D.M_subiterationsMaximumNumber ),
-        M_tolerance                    ( Fluid3D.M_tolerance ),
-        M_generalizedAitken            ( Fluid3D.M_generalizedAitken )
-{
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Model_Fluid3D&
-MS_Model_Fluid3D::operator=( const MS_Model_Fluid3D& Fluid3D )
-{
-    if ( this != &Fluid3D )
-    {
-        super::operator=( Fluid3D );
-        M_exporter                     = Fluid3D.M_exporter;
-        M_importer                     = Fluid3D.M_importer;
-        M_fileName                     = Fluid3D.M_fileName;
-        M_fluid                        = Fluid3D.M_fluid;
-        M_BC                           = Fluid3D.M_BC;
-        M_BDF                          = Fluid3D.M_BDF;
-        M_dataMesh                     = Fluid3D.M_dataMesh;
-        M_mesh                         = Fluid3D.M_mesh;
-        M_map                          = Fluid3D.M_map;
-        M_solution                     = Fluid3D.M_solution;
-        M_linearBC                     = Fluid3D.M_linearBC;
-        M_updateLinearModel            = Fluid3D.M_updateLinearModel;
-        M_uFESpace                     = Fluid3D.M_uFESpace;
-        M_pFESpace                     = Fluid3D.M_pFESpace;
-        M_lmDOF                        = Fluid3D.M_lmDOF;
-        M_alpha                        = Fluid3D.M_alpha;
-        M_beta                         = Fluid3D.M_beta;
-        M_RHS                          = Fluid3D.M_RHS;
-        M_subiterationsMaximumNumber   = Fluid3D.M_subiterationsMaximumNumber;
-        M_tolerance                    = Fluid3D.M_tolerance;
-        M_generalizedAitken            = Fluid3D.M_generalizedAitken;
-    }
-
-    return *this;
-}
-
 // ===================================================
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
@@ -163,13 +101,13 @@ MS_Model_Fluid3D::SetupData( const std::string& FileName )
     M_tolerance                  = DataFile( "fluid/miscellaneous/Tolerance", 1.e-6 );
 
     M_generalizedAitken.setDefaultOmega(     DataFile( "fluid/miscellaneous/Omega",        1.e-3 ) );
-    M_generalizedAitken.setOmegaMin(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.GetDefaultOmegaS()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.GetDefaultOmegaS()*1024, 1 ) );
-    M_generalizedAitken.UseDefaultOmega(     DataFile( "fluid/miscellaneous/fixedOmega",   false ) );
+    M_generalizedAitken.setOmegaMin(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
+    M_generalizedAitken.useDefaultOmega(     DataFile( "fluid/miscellaneous/fixedOmega",   false ) );
     M_generalizedAitken.setMinimizationType( DataFile( "fluid/miscellaneous/inverseOmega", true ) );
 
     //Boundary Conditions for the problem
-    M_BC->FillHandler( FileName, "fluid" );
+    M_BC->fillHandler( FileName, "fluid" );
 
     //Setup Exporter & Importer
     SetupExporterImporter( FileName );
@@ -190,12 +128,12 @@ MS_Model_Fluid3D::SetupModel()
     SetupFEspace();
 
     //Add flow rate offset to BC
-    M_lmDOF = M_BC->GetHandler()->getNumberBCWithType( Flux );
-    SetupBCOffset( M_BC->GetHandler() );
+    M_lmDOF = M_BC->handler()->getNumberBCWithType( Flux );
+    SetupBCOffset( M_BC->handler() );
 
     //Fluid
     M_fluid.reset( new Fluid_Type( M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
-    M_BC->SetOperator( M_fluid );
+    M_BC->setPhysicalSolver( M_fluid );
 
     GetPot DataFile( M_fileName );
     M_fluid->setUp( DataFile ); //Remove Preconditioner and Solver if possible!
@@ -279,7 +217,7 @@ MS_Model_Fluid3D::UpdateSystem()
     M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
 
     //Update operator BC
-    M_BC->UpdateOperatorVariables();
+    M_BC->updatePhysicalSolverVariables();
 
     //Recompute preconditioner
     M_fluid->resetPrec( true );
@@ -297,7 +235,7 @@ MS_Model_Fluid3D::SolveSystem()
 #endif
 
     //Solve the problem
-    M_fluid->iterate( *M_BC->GetHandler() );
+    M_fluid->iterate( *M_BC->handler() );
 
     if ( M_subiterationsMaximumNumber > 0 )
     {
@@ -317,11 +255,11 @@ MS_Model_Fluid3D::SolveSystem()
 
             //Linear model need to be updated!
             M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
-            M_BC->UpdateOperatorVariables();
+            M_BC->updatePhysicalSolverVariables();
             M_updateLinearModel = true;
 
             //Solve system
-            M_fluid->iterate( *M_BC->GetHandler() );
+            M_fluid->iterate( *M_BC->handler() );
 
             // Check the new residual
             residual = ( *M_beta - *M_fluid->solution() ).Norm2(); // Residual is computed on the whole solution vector
@@ -394,7 +332,7 @@ MS_Model_Fluid3D::SetupLinearModel()
     M_BCBaseDelta_One.setFunction(  boost::bind( &MS_Model_Fluid3D::BCFunctionDelta_One,  this, _1, _2, _3, _4, _5 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    BC_PtrType LinearBCHandler ( new BC_Type( *M_BC->GetHandler() ) );
+    BC_PtrType LinearBCHandler ( new BC_Type( *M_BC->handler() ) );
     M_linearBC = LinearBCHandler;
 
     // Set all te BCFunctions to zero
@@ -457,7 +395,7 @@ MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
 // Set Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetSolution( const FluidVector_PtrType& Solution )
+MS_Model_Fluid3D::setSolution( const FluidVector_PtrType& Solution )
 {
     M_solution = Solution;
 
@@ -513,7 +451,7 @@ MS_Model_Fluid3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 Real
 MS_Model_Fluid3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
 {
-    return M_fluid->LagrangeMultiplier(Flag, *M_BC->GetHandler() );
+    return M_fluid->LagrangeMultiplier(Flag, *M_BC->handler() );
 }
 
 Real
@@ -762,7 +700,7 @@ MS_Model_Fluid3D::SetupDOF()
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupDOF \n";
 #endif
 
-    M_lmDOF = M_BC->GetHandler()->getNumberBCWithType( Flux );
+    M_lmDOF = M_BC->handler()->getNumberBCWithType( Flux );
 
     //M_uDOF = M_uFESpace->map().getMap(Unique)->NumGlobalElements();
     //M_pFESpace->dof().numTotalDof() = M_pFESpace->map().getMap(Unique)->NumGlobalElements();

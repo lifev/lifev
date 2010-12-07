@@ -157,9 +157,9 @@ MS_Model_FSI3D::SetupModel()
     M_FSIoperator->setupDOF();
 
     // Setup FSI Interface Boundary Conditions (by giving the operator to BCInterface)
-    M_fluidBC->SetOperator( M_FSIoperator );
-    M_solidBC->SetOperator( M_FSIoperator );
-    M_harmonicExtensionBC->SetOperator( M_FSIoperator );
+    M_fluidBC->setPhysicalSolver( M_FSIoperator );
+    M_solidBC->setPhysicalSolver( M_FSIoperator );
+    M_harmonicExtensionBC->setPhysicalSolver( M_FSIoperator );
 
     // Setup Fluid & Solid solver
     int numLM = M_FSIoperator->imposeFlux();
@@ -380,7 +380,7 @@ MS_Model_FSI3D::SetupLinearModel()
     M_BCBaseDelta_One.setFunction(  boost::bind( &MS_Model_FSI3D::BCFunctionDelta_One,  this, _1, _2, _3, _4, _5 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    BC_PtrType LinearBCHandler ( new BC_Type( *M_fluidBC->GetHandler() ) );
+    BC_PtrType LinearBCHandler ( new BC_Type( *M_fluidBC->handler() ) );
     M_linearBC = LinearBCHandler;
 
     // Set all the BCFunctions to zero
@@ -478,7 +478,7 @@ MS_Model_FSI3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
 Real
 MS_Model_FSI3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
 {
-    return M_FSIoperator->fluid().LagrangeMultiplier(Flag, *M_fluidBC->GetHandler(), M_FSIoperator->getSolution() );
+    return M_FSIoperator->fluid().LagrangeMultiplier(Flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() );
 }
 
 Real
@@ -683,23 +683,23 @@ MS_Model_FSI3D::setupBC( const std::string& fileName )
 {
     if ( M_FSIoperator->isFluid() )
     {
-        M_fluidBC->CreateHandler();
-        M_fluidBC->FillHandler( fileName, "fluid" );
+        M_fluidBC->createHandler();
+        M_fluidBC->fillHandler( fileName, "fluid" );
 
-        M_FSIoperator->setFluidBC( M_fluidBC->GetHandler() );
+        M_FSIoperator->setFluidBC( M_fluidBC->handler() );
 
-        M_harmonicExtensionBC->CreateHandler();
-        M_harmonicExtensionBC->FillHandler( fileName, "mesh_motion" );
+        M_harmonicExtensionBC->createHandler();
+        M_harmonicExtensionBC->fillHandler( fileName, "mesh_motion" );
 
-        M_FSIoperator->setHarmonicExtensionBC( M_harmonicExtensionBC->GetHandler() );
+        M_FSIoperator->setHarmonicExtensionBC( M_harmonicExtensionBC->handler() );
     }
 
     if ( M_FSIoperator->isSolid() )
     {
-        M_solidBC->CreateHandler();
-        M_solidBC->FillHandler( fileName, "solid" );
+        M_solidBC->createHandler();
+        M_solidBC->fillHandler( fileName, "solid" );
 
-        M_FSIoperator->setSolidBC( M_solidBC->GetHandler() );
+        M_FSIoperator->setSolidBC( M_solidBC->handler() );
     }
 }
 
@@ -712,20 +712,20 @@ MS_Model_FSI3D::setupSegregatedBC( const std::string& fileName )
      M_linearizedSolidBC.reset( new BCInterface_Type() );
      M_lineardBC.reset( new BCInterface_Type() );
 
-     M_linearizedFluidBC->SetOperator( M_FSIoperator );
-     M_linearizedSolidBC->SetOperator( M_FSIoperator );
+     M_linearizedFluidBC->setPhysicalSolver( M_FSIoperator );
+     M_linearizedSolidBC->setPhysicalSolver( M_FSIoperator );
 
      if ( M_FSIoperator->isFluid() )
-         M_linearBC->FillHandler( fileName, "lin_fluid" );
+         M_linearBC->fillHandler( fileName, "lin_fluid" );
 
      if ( M_FSIoperator->isFluid() )
-         M_linearizedFluidBC->FillHandler( fileName, "lin_fluid" );
+         M_linearizedFluidBC->fillHandler( fileName, "lin_fluid" );
 
      if ( M_FSIoperator->isSolid() )
-         M_linearizedSolidBC->FillHandler( fileName, "lin_solid" );
+         M_linearizedSolidBC->fillHandler( fileName, "lin_solid" );
 
-     M_solver->setLinFluidBC( M_linearizedFluidBC->GetHandler() );
-     M_solver->setLinSolidBC( M_linearizedSolidBC->GetHandler() );
+     M_solver->setLinFluidBC( M_linearizedFluidBC->handler() );
+     M_solver->setLinSolidBC( M_linearizedSolidBC->handler() );
 }
 */
 
@@ -734,18 +734,18 @@ MS_Model_FSI3D::updateBC()
 {
     if ( M_FSIoperator->isFluid() )
     {
-        M_fluidBC->UpdateOperatorVariables();
-        M_harmonicExtensionBC->UpdateOperatorVariables();
+        M_fluidBC->updatePhysicalSolverVariables();
+        M_harmonicExtensionBC->updatePhysicalSolverVariables();
 
 //        if( !M_data->isMonolithic() )
-//            M_linearBC->UpdateOperatorVariables();
+//            M_linearBC->updateOperatorVariables();
     }
     else
     {
-        M_solidBC->UpdateOperatorVariables();
+        M_solidBC->updatePhysicalSolverVariables();
 
 //        if( !M_data->isMonolithic() )
-//            M_linearizedSolidBC->UpdateOperatorVariables();
+//            M_linearizedSolidBC->updateOperatorVariables();
     }
 }
 
