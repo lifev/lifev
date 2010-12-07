@@ -97,10 +97,10 @@ public:
 
   typedef SolverType                            solver_Type;
 
-  typedef typename solver_Type::matrix_type      matrix_Type;
-  typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-  typedef typename solver_Type::vector_type      vector_Type;
-  typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+  typedef typename solver_Type::matrix_type      matrix_type;
+  typedef boost::shared_ptr<matrix_type>         matrixPtr_Type;
+  typedef typename solver_Type::vector_type      vector_type;
+  typedef boost::shared_ptr<vector_type>         vectorPtr_Type;
 
   typedef typename SolverType::prec_raw_type     precRaw_Type;
   typedef typename SolverType::prec_type         prec_Type;
@@ -193,7 +193,7 @@ public:
   /*! They compute the solution solving the non linear system
     \param sol vector containing the solution at the current time
   */
-  void iterate( vector_Type& sol );
+  void iterate( vector_type& sol );
 
   //! Solve the non-linear system
   /*!
@@ -218,7 +218,7 @@ public:
     \param sol the current solution at each iteration of the nonLinearRichardson method
     \param jac the Jacobian matrix that must be updated
   */
-  virtual void updateJacobian( vector_Type& sol, matrixPtr_Type& jac )=0;
+  virtual void updateJacobian( vector_type& sol, matrixPtr_Type& jac )=0;
   
   //! Solves the tangent problem for newton iterations
   /*!
@@ -227,8 +227,8 @@ public:
     \param lin_res_tol linear_rel_tol send for the relative tolerance to the linear solver is therefore eta.
            eta is determined by the modified Eisenstat-Walker formula
   */
-  virtual void solveJac( vector_Type&       step,
-			 const vector_Type& res,
+  virtual void solveJac( vector_type&       step,
+			 const vector_type& res,
 			 Real&            linear_rel_tol)=0 ;
   //    void solveJac( const Vector& res, Real& linear_rel_tol, Vector &step);
 
@@ -240,8 +240,8 @@ public:
            eta is determined by the modified Eisenstat-Walker formula
     \param BCd BCHandler object containing the boundary condition
   */
-  virtual void solveJacobian( vector_Type&       step,
-			      const vector_Type& res,
+  virtual void solveJacobian( vector_type&       step,
+			      const vector_type& res,
 			      Real&            linear_rel_tol,
 			      bchandler_Type&    BCd )=0 ;
 
@@ -252,7 +252,7 @@ public:
     \param sol solution vector from which the residual is computed
     \param iter iteration of the nonLinearRichardson method
   */
-  void evalResidual( vector_Type &res, const vector_Type& sol, Int iter);
+  void evalResidual( vector_type &res, const vector_type& sol, Int iter);
 
   void evalConstraintTensor();
 
@@ -268,7 +268,7 @@ public:
   /*!
     \param w0 space function describing the initial velocity
   */
-  void initializeVel( const vector_Type& w0);
+  void initializeVel( const vector_type& w0);
 
   //! Sets the initial displacement, velocity, acceleration
   /*!
@@ -301,7 +301,7 @@ public:
     \param sol the current solution
     \param factor the rescaleFactor
   */
-  void computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor )
+  void computeMatrix( matrixPtr_Type& stiff, const vector_type& sol, Real const& factor )
   {
   }
   //! Update (in the case of nonlinear material) the solid matrix
@@ -309,12 +309,12 @@ public:
     \param sol the current solution
     \param factor the rescaleFactor
   */
-  void computeMatrix( const vector_Type& sol, Real const& factor )
+  void computeMatrix( const vector_type& sol, Real const& factor )
   {
   }
     
-  //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
-  //void updateCoupling(matrix_Type couplingMatrix);// used for monolithic
+  //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
+  //void updateCoupling(matrix_type couplingMatrix);// used for monolithic
   
   //@}
     
@@ -332,7 +332,7 @@ public:
   void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
   
   //! Set the displacement
-  virtual void setDisp(const vector_Type& disp) {*M_disp = disp;} // used for monolithic
+  virtual void setDisp(const vector_type& disp) {*M_disp = disp;} // used for monolithic
 
   //! Set the recur parameter
   void setRecur(UInt recur) {M_recur = recur;}
@@ -372,16 +372,16 @@ public:
   bchandler_Type const & BChandler() const {return M_BCh;}
 
   //! Get the residual
-  vector_Type& residual()             {return *M_residual_d;}
+  vector_type& residual()             {return *M_residual_d;}
 
   //! Get the source term
   source_Type const& sourceTerm() const { return M_source; }
 
   //! Get the displacement
-  vector_Type& disp()        { return *M_disp; }
+  vector_type& disp()        { return *M_disp; }
 
   //! Get the velocity
-  vector_Type& vel()         { return *M_vel; }
+  vector_type& vel()         { return *M_vel; }
   
   //! Get the right hand sde without BC
   vectorPtr_Type& rhsWithoutBC() { return M_rhsNoBC; }
@@ -421,7 +421,7 @@ public:
   //! Get the Poisson coefficient
   const Real& poisson()   const { return M_data->poisson(); }
   //! Get the density
-  //const Real& rho()       const { return M_data->rho(); }
+  const Real& rho()       const { return M_data->rho(); }
 
   //@}
   
@@ -434,8 +434,8 @@ protected:
     \param BCh BCHandler object
     \param offset the offset parameter
   */
-  virtual void applyBoundaryConditions(matrix_Type &matrix,
-				       vector_Type &rhs,
+  virtual void applyBoundaryConditions(matrix_type &matrix,
+				       vector_type &rhs,
 				       bchandler_Type& BCh,
 				       UInt         offset=0);
     
@@ -477,12 +477,12 @@ protected:
   vectorPtr_Type                    M_rhsNoBC;
     
   //! right  hand  side
-  boost::shared_ptr<vector_Type>                    M_f;
+  boost::shared_ptr<vector_type>                    M_f;
     
   //! residual
-  boost::shared_ptr<vector_Type>                    M_residual_d;
+  boost::shared_ptr<vector_type>                    M_residual_d;
     
-  //    vector_Type*                   M_sxx;
+  //    vector_type*                   M_sxx;
 
   vectorPtr_Type                    M_sxx;
   vectorPtr_Type                    M_syy;
@@ -543,7 +543,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( ):
   M_elmatC                     ( ),
   M_disp                       ( ),
   M_vel                        ( ),
-  M_rhs                        ( /*new vector_Type(M_localMap)*/),//useful
+  M_rhs                        ( /*new vector_type(M_localMap)*/),//useful
   M_rhsW                       ( ),
   M_rhsNoBC                    ( ),
   M_f                          ( ),//useless
@@ -587,15 +587,15 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
 					      boost::shared_ptr<Epetra_Comm>&     comm)
 {
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
-  M_stiff.reset                      ( new matrix_Type(*M_localMap) );
-  M_massStiff.reset                  ( new matrix_Type(*M_localMap) );
-  M_jacobian.reset                   ( new matrix_Type(*M_localMap) );
-  M_rhs.reset                        ( new vector_Type(*M_localMap));
-  M_f.reset                          ( new vector_Type(*M_localMap));
-  M_residual_d.reset                 ( new vector_Type(*M_localMap));
-  M_sxx.reset                        ( new vector_Type(*M_localMap) );
-  M_syy.reset                        ( new vector_Type(*M_localMap) );
-  M_szz.reset                        ( new vector_Type(*M_localMap) );
+  M_stiff.reset                      ( new matrix_type(*M_localMap) );
+  M_massStiff.reset                  ( new matrix_type(*M_localMap) );
+  M_jacobian.reset                   ( new matrix_type(*M_localMap) );
+  M_rhs.reset                        ( new vector_type(*M_localMap));
+  M_f.reset                          ( new vector_type(*M_localMap));
+  M_residual_d.reset                 ( new vector_type(*M_localMap));
+  M_sxx.reset                        ( new vector_type(*M_localMap) );
+  M_syy.reset                        ( new vector_type(*M_localMap) );
+  M_szz.reset                        ( new vector_type(*M_localMap) );
   M_linearSolver.reset               ( new SolverType( comm ) );
     
 }
@@ -616,12 +616,12 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
   M_elmatM.reset                    ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );
   M_elmatC.reset                    ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );
   M_localMap                        = monolithicMap;
-  M_disp.reset                      (new vector_Type(*M_localMap));
-  M_vel.reset                       (new vector_Type(*M_localMap));
-  M_rhsW.reset                      ( new vector_Type(*M_localMap) );
-  M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
-  M_mass.reset                      (new matrix_Type(*M_localMap));
-  M_linearStiff.reset               (new matrix_Type(*M_localMap));
+  M_disp.reset                      (new vector_type(*M_localMap));
+  M_vel.reset                       (new vector_type(*M_localMap));
+  M_rhsW.reset                      ( new vector_type(*M_localMap) );
+  M_rhsNoBC.reset                   ( new vector_type(*M_localMap) );
+  M_mass.reset                      (new matrix_type(*M_localMap));
+  M_linearStiff.reset               (new matrix_type(*M_localMap));
   M_offset                          = offset;
 }
 
@@ -648,7 +648,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*sti
 
   coef = (Real) M_data->dataTime()->getTimeStep();
 
-  vector_Type z = *M_disp;
+  vector_type z = *M_disp;
   z             += coef*(*M_vel);
     
   std::cout<< "M_disp in solid" << M_disp->Norm2()<<std::endl;
@@ -679,7 +679,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem()
   Chrono chrono;
   chrono.start();
 
-  M_massStiff.reset(new matrix_Type(*M_localMap));
+  M_massStiff.reset(new matrix_type(*M_localMap));
   buildSystem(M_massStiff);
   M_massStiff->GlobalAssemble();
     
@@ -746,11 +746,11 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, co
 }
 
 template <typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_Type &_sol)
+void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_type &_sol)
 {
   Int status;
   
-  vector_Type sol(*M_localMap);
+  vector_type sol(*M_localMap);
     
   *M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
@@ -766,13 +766,13 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 {
   // matrix and vector assembling communication
-  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrixPtr_Type matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
   *matrFull += *M_massStiff;
 
   M_rhsNoBC->GlobalAssemble();
   M_rhsW->GlobalAssemble();
 
-  vector_Type rhsFull (*M_rhsNoBC);
+  vector_type rhsFull (*M_rhsNoBC);
 
   // boundary conditions update
   //M_comm->Barrier();
@@ -806,13 +806,13 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
     
-  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrixPtr_Type matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
   *matrFull += *M_massStiff;
     
   M_rhsNoBC->GlobalAssemble();
   M_rhsW->GlobalAssemble();
     
-  vector_Type rhsFull (M_rhsNoBC->getMap());
+  vector_type rhsFull (M_rhsNoBC->getMap());
 
   M_Displayer->leaderPrint(" LS-  Applying boundary conditions ...         ");
   Chrono chrono;
@@ -845,7 +845,7 @@ VenantKirchhofSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
   c << "\n*** VenantKirchhof::showMe method" << std::endl;
   c << "****** Data of the Material************" << std::endl;
   c << "Thickness:   " << M_data->thickness(); 
-  c << "Density:   " << M_data-rho(); 
+  c << "Density:   " << M_data->rho(); 
   c << "Young:   " << M_data->young(); 
   c << "Poisson:   " << M_data->poisson(); 
   c << "***************************************" << std::endl;  
@@ -853,7 +853,7 @@ VenantKirchhofSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
   
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type &res, const vector_Type& sol, Int /*iter*/)
+VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type &res, const vector_type& sol, Int /*iter*/)
 {
   M_Displayer->leaderPrint("  S-  Computing residual ...                   ");
   Chrono chrono;
@@ -883,7 +883,7 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 {
-  vector_Type count(*M_localMap);
+  vector_type count(*M_localMap);
 
   *M_sxx *= 0.;
   *M_syy *= 0.;
@@ -1028,7 +1028,7 @@ VenantKirchhofSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorP
   
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::initializeVel( const vector_Type& vel)
+VenantKirchhofSolver<Mesh, SolverType>::initializeVel( const vector_type& vel)
 {
   *M_vel = vel;
 }
@@ -1054,8 +1054,8 @@ template<typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::reduceSolution( Vector& disp, Vector& vel )
 {
-  vector_Type displacement(*M_disp, 0);
-  vector_Type velocity    (*M_vel , 0);
+  vector_type displacement(*M_disp, 0);
+  vector_type velocity    (*M_vel , 0);
     
   if ( comm()->MyPID() == 0 )
     {
@@ -1092,8 +1092,8 @@ VenantKirchhofSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFil
   
 template<typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
-								 vector_Type&        rhs,
+VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
+								 vector_type&        rhs,
 								 bchandler_Type&     BCh,
 								 UInt                offset)
 {
@@ -1103,8 +1103,8 @@ VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&   
   if ( !BCh->bdUpdateDone() )
     BCh->bdUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
   
-  // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
-  vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
+  // vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+  vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
   
   bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1.,
               M_data->dataTime()->getTime() );
