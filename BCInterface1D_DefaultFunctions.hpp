@@ -64,7 +64,7 @@ namespace LifeV
  *
  *	To get the base for the boundary condition, call the \c base() method.
  */
-template< class PhysicalSolver >
+template< class physicalSolver_Type >
 class BCInterface1D_DefaultFunctions
 {
 public:
@@ -97,27 +97,14 @@ public:
      */
     BCInterface1D_DefaultFunctions( const data_Type& data );
 
-    //! Copy constructor
-    /*!
-     * @param Default BCInterface1D_DefaultFunctions
-     */
-    BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& defaultFunctions );
-
     //! Destructor
     ~BCInterface1D_DefaultFunctions() {}
 
     //@}
 
 
-    //! @name Methods
+    //! @name Set Methods
     //@{
-
-    //! Operator =
-    /*!
-     * @param Default BCInterface1D_DefaultFunctions
-     * @return reference to a copy of the class
-     */
-    BCInterface1D_DefaultFunctions& operator=( const BCInterface1D_DefaultFunctions& defaultFunctions );
 
     //! Set data
     /*!
@@ -141,7 +128,7 @@ public:
     //@}
 
 
-    //! @name Get functions
+    //! @name Get Methods
     //@{
 
     //! Get the base of the boundary condition
@@ -153,6 +140,15 @@ public:
     //@}
 
 private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& defaultFunctions );
+
+    BCInterface1D_DefaultFunctions& operator=( const BCInterface1D_DefaultFunctions& defaultFunctions );
+
+    //@}
 
     enum defaultFunctions
     {
@@ -169,8 +165,8 @@ private:
 // ===================================================
 // Constructors
 // ===================================================
-template< class PhysicalSolver >
-BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions() :
+template< class physicalSolver_Type >
+BCInterface1D_DefaultFunctions< physicalSolver_Type >::BCInterface1D_DefaultFunctions() :
         M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
@@ -181,8 +177,8 @@ BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions
 
 }
 
-template< class PhysicalSolver >
-BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions( const data_Type& data ) :
+template< class physicalSolver_Type >
+BCInterface1D_DefaultFunctions< physicalSolver_Type >::BCInterface1D_DefaultFunctions( const data_Type& data ) :
         M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
@@ -194,32 +190,12 @@ BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions
     this->setData( data );
 }
 
-template< class PhysicalSolver >
-BCInterface1D_DefaultFunctions< PhysicalSolver >::BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& defaultFunctions ) :
-        M_base              ( defaultFunctions.M_base ),
-        M_defaultFunction   ()
-{
-}
-
 // ===================================================
-// Methods
+// Set Methods
 // ===================================================
-template< class PhysicalSolver >
-BCInterface1D_DefaultFunctions< PhysicalSolver >&
-BCInterface1D_DefaultFunctions< PhysicalSolver >::operator=( const BCInterface1D_DefaultFunctions& defaultFunctions )
-{
-    if ( this != &defaultFunctions )
-    {
-        M_base            = defaultFunctions.M_base;
-        M_defaultFunction = defaultFunctions.M_defaultFunctions;
-    }
-
-    return *this;
-}
-
-template< class PhysicalSolver >
+template< class physicalSolver_Type >
 inline void
-BCInterface1D_DefaultFunctions< PhysicalSolver >::setData( const data_Type& data )
+BCInterface1D_DefaultFunctions< physicalSolver_Type >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

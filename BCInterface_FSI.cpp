@@ -75,69 +75,9 @@ BCInterface_FSI< FSIOperator >::BCInterface_FSI( const data_Type& data ) :
     this->setData( data );
 }
 
-BCInterface_FSI< FSIOperator >::BCInterface_FSI( const BCInterface_FSI& fsi ) :
-        M_FSIFunction   ( fsi.M_FSIFunction ),
-        M_name          ( fsi.M_name ),
-        M_flag          ( fsi.M_flag ),
-        M_type          ( fsi.M_type ),
-        M_mode          ( fsi.M_mode ),
-        M_comV          ( fsi.M_comV ),
-        M_base          ( fsi.M_base )
-{
-}
-
 // ===================================================
 // Methods
 // ===================================================
-BCInterface_FSI< FSIOperator >&
-BCInterface_FSI< FSIOperator >::operator=( const BCInterface_FSI& fsi )
-{
-    if ( this != &fsi )
-    {
-        M_FSIFunction   = fsi.M_FSIFunction;
-        M_name          = fsi.M_name;
-        M_flag          = fsi.M_flag;
-        M_type          = fsi.M_type;
-        M_mode          = fsi.M_mode;
-        M_comV          = fsi.M_comV;
-        M_base          = fsi.M_base;
-    }
-
-    return *this;
-}
-
-void
-BCInterface_FSI< FSIOperator >::setData( const data_Type& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface_FSIFunctionFile::setData" << "\n";
-#endif
-
-    //Set mapFunction
-    std::map< std::string, FSIFunction > mapFunction;
-    mapFunction["DerFluidLoadToFluid"]              = DerFluidLoadToFluid;
-    mapFunction["DerFluidLoadToStructure"]          = DerFluidLoadToStructure;
-    mapFunction["DerHarmonicExtensionVelToFluid"]   = DerHarmonicExtensionVelToFluid;
-    mapFunction["DerStructureDispToSolid"]          = DerStructureDispToSolid;
-    mapFunction["FluidInterfaceDisp"]               = FluidInterfaceDisp;
-    mapFunction["FluidLoadToStructure"]             = FluidLoadToStructure;
-    mapFunction["HarmonicExtensionVelToFluid"]      = HarmonicExtensionVelToFluid;
-    mapFunction["SolidLoadToStructure"]             = SolidLoadToStructure;
-    mapFunction["StructureDispToHarmonicExtension"] = StructureDispToHarmonicExtension;
-    mapFunction["StructureDispToSolid"]             = StructureDispToSolid;
-    mapFunction["StructureToFluid"]                 = StructureToFluid;
-
-    // Retrieving the strings
-    M_FSIFunction = mapFunction[ data.baseString() ];
-
-    M_name = data.name();
-    M_flag = data.flag();
-    M_type = data.type();
-    M_mode = data.mode();
-    M_comV = data.comV();
-}
-
 void
 BCInterface_FSI< FSIOperator >::exportData( data_Type& data )
 {
@@ -217,6 +157,41 @@ BCInterface_FSI< FSIOperator >::checkMethod( const boost::shared_ptr< FSIOperato
 
         break;
     }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+BCInterface_FSI< FSIOperator >::setData( const data_Type& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5025 ) << "BCInterface_FSIFunctionFile::setData" << "\n";
+#endif
+
+    //Set mapFunction
+    std::map< std::string, FSIFunction > mapFunction;
+    mapFunction["DerFluidLoadToFluid"]              = DerFluidLoadToFluid;
+    mapFunction["DerFluidLoadToStructure"]          = DerFluidLoadToStructure;
+    mapFunction["DerHarmonicExtensionVelToFluid"]   = DerHarmonicExtensionVelToFluid;
+    mapFunction["DerStructureDispToSolid"]          = DerStructureDispToSolid;
+    mapFunction["FluidInterfaceDisp"]               = FluidInterfaceDisp;
+    mapFunction["FluidLoadToStructure"]             = FluidLoadToStructure;
+    mapFunction["HarmonicExtensionVelToFluid"]      = HarmonicExtensionVelToFluid;
+    mapFunction["SolidLoadToStructure"]             = SolidLoadToStructure;
+    mapFunction["StructureDispToHarmonicExtension"] = StructureDispToHarmonicExtension;
+    mapFunction["StructureDispToSolid"]             = StructureDispToSolid;
+    mapFunction["StructureToFluid"]                 = StructureToFluid;
+
+    // Retrieving the strings
+    M_FSIFunction = mapFunction[ data.baseString() ];
+
+    M_name = data.name();
+    M_flag = data.flag();
+    M_type = data.type();
+    M_mode = data.mode();
+    M_comV = data.comV();
 }
 
 } // Namespace LifeV

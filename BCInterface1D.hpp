@@ -147,27 +147,8 @@ public:
     //! Constructor
     BCInterface1D();
 
-    //! Copy constructor
-    /*!
-     * @param interface	- BCInterface1D
-     */
-    BCInterface1D( const BCInterface1D& interface );
-
     //! Destructor
     virtual ~BCInterface1D() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator =
-    /*!
-     * @param interface BCInterface1D
-     * @return reference to a copy of the class
-     */
-    BCInterface1D& operator=( const BCInterface1D& interface );
 
     //@}
 
@@ -268,6 +249,16 @@ public:
 
 private:
 
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterface1D( const BCInterface1D& interface1D );
+
+    BCInterface1D& operator=( const BCInterface1D& interface1D );
+
+    //@}
+
+
     //! @name Private Methods
     //@{
 
@@ -317,33 +308,6 @@ BCInterface1D< PhysicalSolver >::BCInterface1D( ) :
     factoryFunction_Type::instance().registerProduct( BCInterface1D_functionFile,     &createBCInterface1D_FunctionFile< PhysicalSolver > );
     factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunction,     &createBCInterface1D_OperatorFunction< PhysicalSolver > );
     factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunctionFile, &createBCInterface1D_OperatorFunctionFile< PhysicalSolver > );
-}
-
-template< class PhysicalSolver >
-BCInterface1D< PhysicalSolver >::BCInterface1D( const BCInterface1D& interface ) :
-        M_handler                 ( interface.M_handler ),
-        M_data                    ( interface.M_data ),
-        M_vectorFunction          ( interface.M_vectorFunction ),
-        M_vectorDefaultFunction1D ( interface.M_vectorDefaultFunction1D )
-{
-}
-
-// ===================================================
-// Operators
-// ===================================================
-template< class PhysicalSolver >
-BCInterface1D< PhysicalSolver >&
-BCInterface1D< PhysicalSolver >::operator=( const BCInterface1D& interface )
-{
-    if ( this != &interface )
-    {
-        M_handler                 = interface.M_handler;
-        M_data                    = interface.M_data;
-        M_vectorFunction          = interface.M_vectorFunction;
-        M_vectorDefaultFunction1D = interface.M_vectorDefaultFunction1D;
-    }
-
-    return *this;
 }
 
 // ===================================================

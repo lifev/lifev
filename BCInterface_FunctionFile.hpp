@@ -86,15 +86,15 @@ namespace LifeV
  *  				0.666666666		3.00
  *  				1.000000000		4.00'
  */
-template< typename PhysicalSolver >
-class BCInterface_FunctionFile: public virtual BCInterface_Function< PhysicalSolver >
+template< typename physicalSolver_Type >
+class BCInterface_FunctionFile: public virtual BCInterface_Function< physicalSolver_Type >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Function< PhysicalSolver >                  super;
+    typedef BCInterface_Function< physicalSolver_Type >             super;
     typedef BCInterface_Data                                        data_Type;
 
     //@}
@@ -112,27 +112,14 @@ public:
      */
     BCInterface_FunctionFile( const data_Type& data );
 
-    //! Copy constructor
-    /*!
-     * @param function BCInterface_FunctionFile
-     */
-    BCInterface_FunctionFile( const BCInterface_FunctionFile& function );
-
     //! Destructor
     virtual ~BCInterface_FunctionFile() {}
 
     //@}
 
 
-    //! @name Methods
+    //! @name Set Methods
     //@{
-
-    //! Operator =
-    /*!
-     * @param function BCInterface_FunctionFile
-     * @return reference to a copy of the class
-     */
-    virtual BCInterface_FunctionFile& operator=( const BCInterface_FunctionFile& function );
 
     //! Set data
     /*!
@@ -144,7 +131,17 @@ public:
 
 private:
 
-    //! @name Private functions
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterface_FunctionFile( const BCInterface_FunctionFile& function );
+
+    virtual BCInterface_FunctionFile& operator=( const BCInterface_FunctionFile& function );
+
+    //@}
+
+
+    //! @name Private methods
     //@{
 
     //! loadData
@@ -165,17 +162,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolver >
-inline BCInterface_Function< PhysicalSolver >* createBCInterface_FunctionFile()
+template< typename physicalSolver_Type >
+inline BCInterface_Function< physicalSolver_Type >* createBCInterface_FunctionFile()
 {
-    return new BCInterface_FunctionFile< PhysicalSolver > ();
+    return new BCInterface_FunctionFile< physicalSolver_Type > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< typename PhysicalSolver >
-BCInterface_FunctionFile< PhysicalSolver >::BCInterface_FunctionFile() :
+template< typename physicalSolver_Type >
+BCInterface_FunctionFile< physicalSolver_Type >::BCInterface_FunctionFile() :
         super                            (),
         M_variables                      (),
         M_loop                           (),
@@ -189,8 +186,8 @@ BCInterface_FunctionFile< PhysicalSolver >::BCInterface_FunctionFile() :
 
 }
 
-template< typename PhysicalSolver >
-BCInterface_FunctionFile< PhysicalSolver >::BCInterface_FunctionFile( const data_Type& data ) :
+template< typename physicalSolver_Type >
+BCInterface_FunctionFile< physicalSolver_Type >::BCInterface_FunctionFile( const data_Type& data ) :
         super                            (),
         M_variables                      (),
         M_loop                           (),
@@ -205,41 +202,12 @@ BCInterface_FunctionFile< PhysicalSolver >::BCInterface_FunctionFile( const data
     this->setData( data );
 }
 
-template< typename PhysicalSolver >
-BCInterface_FunctionFile< PhysicalSolver >::BCInterface_FunctionFile( const BCInterface_FunctionFile& function ) :
-        super                            ( function ),
-        M_variables                      ( function.M_variables ),
-        M_loop                           ( function.M_loop ),
-        M_data                           ( function.M_data ),
-        M_dataIterator                   ( function.M_dataIterator )
-{
-}
-
-// ===================================================
-// Methods
-// ===================================================
-template< typename PhysicalSolver >
-BCInterface_FunctionFile< PhysicalSolver >&
-BCInterface_FunctionFile< PhysicalSolver >::operator=( const BCInterface_FunctionFile& function )
-{
-    if ( this != &function )
-    {
-        super::operator=( function );
-        M_variables    = function.M_variables;
-        M_loop         = function.M_loop;
-        M_data         = function.M_data;
-        M_dataIterator = function.M_dataIterator;
-    }
-
-    return *this;
-}
-
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename PhysicalSolver >
+template< typename physicalSolver_Type >
 inline void
-BCInterface_FunctionFile< PhysicalSolver >::loadData( data_Type data )
+BCInterface_FunctionFile< physicalSolver_Type >::loadData( data_Type data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -332,9 +300,9 @@ BCInterface_FunctionFile< PhysicalSolver >::loadData( data_Type data )
 
 }
 
-template< typename PhysicalSolver >
+template< typename physicalSolver_Type >
 inline void
-BCInterface_FunctionFile< PhysicalSolver >::dataInterpolation()
+BCInterface_FunctionFile< physicalSolver_Type >::dataInterpolation()
 {
     //Get variable
     Real X = super::M_parser->variable( M_variables[0] );
