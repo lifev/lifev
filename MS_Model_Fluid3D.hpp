@@ -183,7 +183,7 @@ public:
     /*!
      * @param Solution Solution vector
      */
-    void SetSolution( const FluidVector_PtrType& Solution );
+    void setSolution( const FluidVector_PtrType& Solution );
 
     //@}
 
