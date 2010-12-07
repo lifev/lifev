@@ -125,17 +125,28 @@ public:
     //! @name Methods
     //@{
   
+    /*!
+      \param data_file GetPot data file
+      \param refFE reference FE for the displacement
+      \param comm the comunicator parameter
+      \param monolithicMap the EpetraMap
+      \param offset the offset parameter
+    */
     void setup( boost::shared_ptr<data_Type> data,
                 const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
                 boost::shared_ptr<Epetra_Comm>&     comm,
                 const boost::shared_ptr<const EpetraMap>&   monolithicMap,
                 UInt       offset=0
-              );
-    void setup(
-        boost::shared_ptr<data_Type>        data,
-        const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
-        boost::shared_ptr<Epetra_Comm>&     comm
-    );
+		);
+    /*!
+      \param data_file GetPot data file
+      \param refFE reference FE for the displacement
+      \param comm
+    */  
+    void setup(boost::shared_ptr<data_Type>        data,
+	       const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+	       boost::shared_ptr<Epetra_Comm>&     comm
+	       );
 
     //! Computes the Linear part of the Jacobian and the Mass Matrix
     /*!
@@ -148,9 +159,26 @@ public:
     //! Computes the Linear part of the Jacobian and the Mass Matrix
     void buildSystem( );
 
-    //!Initializers of the initial displacement, velocity and acceleration
+    //! Sets the initial displacement, velocity, acceleration
+    /*!
+      \param d0 space function describing the initial displacement
+      \param w0 space function describing the initial velocity
+      \param a0 space function describing the initial acceleration
+    */
     void initialize   ( const Function& d0, const Function& w0, const Function& a0 );
+
+    //! Sets the initial displacement, velocity, acceleration
+    /*!
+      \param w0 space function describing the initial velocity
+    */
     void initialize   ( vectorPtr_Type d0,  vectorPtr_Type w0 = vectorPtr_Type());
+
+    //! Sets the initial displacement, velocity, acceleration
+    /*!
+      \param d0 space function describing the initial displacement
+      \param w0 empty vector
+      \param a0 empty vector
+    */
     void initializeVel( const vector_Type& w0);
 
     //! Updates the system at the end of each time step when the matrix is passed from outside
@@ -209,11 +237,17 @@ public:
     void computeMatrix( const vector_Type& sol, Real const& factor );
 
     //! evaluates residual for newton interations
+    /*!
+      \param res residal vector that is update every time the method is called
+      \param sol solution vector from which the residual is computed
+      \param iter iteration of the nonLinearRichardson method
+    */
     void evalResidual( vector_Type &res, const vector_Type& sol, Int iter);
 
-    //! Update Jacobian at each Newton iteration
+    //! Update Jacobian at each nonLinearRichardson iteration
     /*!
       \param sol the current solution at the k-th iteration of Newton method
+      \param jac the Jacobian matrix that must be updated
     */
     void updateJacobian( vector_Type& sol, matrixPtr_Type& jacobian  );
 
@@ -245,10 +279,10 @@ public:
     //! @name Get Methods
     //@{
 
-    //! returns the acceleration
+    //! Get the acceleration
     vector_Type& acc()         { return *M_acc; }
 
-    //!Getter of the Offset parameter. It is taken into account when the boundary conditions are applied and the matrices are assembled.
+    //! Get the solidMatrix
     void getSolidMatrix( matrixPtr_Type& matrix);
 
     //@}
@@ -268,8 +302,7 @@ private:
 
     Real                            M_pressure;
 
-
-    //! linearized velocity
+    //! acceleration
     vectorPtr_Type                    M_acc;
 
 
@@ -306,12 +339,12 @@ NonLinearVenantKirchhofSolver( ) :
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 setup(
-    boost::shared_ptr<data_Type>        data,
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
-    boost::shared_ptr<Epetra_Comm>&     comm,
-    const boost::shared_ptr<const EpetraMap>&  monolithicMap,
-    UInt                                offset
-)
+      boost::shared_ptr<data_Type>        data,
+      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+      boost::shared_ptr<Epetra_Comm>&     comm,
+      const boost::shared_ptr<const EpetraMap>&  monolithicMap,
+      UInt                                offset
+      )
 {
     super::setup(data, dFESpace, comm, monolithicMap, offset);
 
@@ -323,21 +356,13 @@ setup(
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 setup(
-    boost::shared_ptr<data_Type>        data,
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
-    boost::shared_ptr<Epetra_Comm>&     comm
-)
+      boost::shared_ptr<data_Type>        data,
+      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+      boost::shared_ptr<Epetra_Comm>&     comm
+      )
 {
     super::setup(data, dFESpace, comm);
 }
-
-template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-buildSystem( )
-{
-    super::buildSystem( );
-}
-
 
 template <typename Mesh, typename SolverType>
 void
@@ -404,7 +429,7 @@ buildSystem(matrixPtr_Type massStiff, Real const & factor)
 
     this->M_linearStiff->GlobalAssemble();
     massStiff->GlobalAssemble();
-    //*M_massStiff *= factor;
+    //*M_massStiff *= factor; //Used in monolithic
     this->M_mass->GlobalAssemble();
 
     chrono.stop();
@@ -412,6 +437,12 @@ buildSystem(matrixPtr_Type massStiff, Real const & factor)
     this->M_Displayer->leaderPrintMax( " done in ", chrono.diff() );
 }
 
+template <typename Mesh, typename SolverType>
+void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+buildSystem( )
+{
+    super::buildSystem( );
+}
 
 template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
@@ -459,18 +490,18 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Ty
     //Computation of the right hand sides
 
     Real DeltaT    = this->M_data->dataTime()->getTimeStep();
-    vector_Type _z = *this->M_disp;
+    vector_Type z = *this->M_disp;
 
-    _z            +=  DeltaT*(*this->M_vel);
+     z            +=  DeltaT*(*this->M_vel);
 
     coef= (1.0-this->M_zeta);
 
-    *this->M_rhsNoBC  = *this->M_mass*_z;
+    *this->M_rhsNoBC  = *this->M_mass * z;
 
-    *this->M_rhsNoBC -= (*stiff)*coef*(*this->M_disp);
+    *this->M_rhsNoBC -= (*stiff) * coef * (*this->M_disp);
 
     // acceleration rhs
-    *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * _z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
+    *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
 
     // velocity rhs
     *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
@@ -562,18 +593,18 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
     //Computation of the right hand sides
 
     Real DeltaT    = this->M_data->dataTime()->getTimeStep();
-    vector_Type _z = *this->M_disp;
+    vector_Type z  = *this->M_disp;
 
-    _z            +=  DeltaT*(*this->M_vel);
+    z             +=  DeltaT * (*this->M_vel);
 
-    coef= (1.0-M_zeta);
+    coef= ( 1.0-M_zeta );
 
-    *this->M_rhsNoBC += *this->M_mass*_z;
+    *this->M_rhsNoBC += *this->M_mass * z;
 
-    *this->M_rhsNoBC -= (*this->M_stiff)*coef*(*this->M_disp);
+    *this->M_rhsNoBC -= (*this->M_stiff) * coef * (*this->M_disp);
 
     // acceleration rhs
-    *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * _z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
+    *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
 
     // velocity rhs
     *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
@@ -628,41 +659,25 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( mat
         // must be done after the GlobalAssemble() and NOT BEFORE!!
 
         // 3) 1/2 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-
         stiff_derdiv( this->M_zeta * 0.5 * this->M_data->lambda(), dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_derdiv( 0.5 * this->M_data.lambda(), dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
 
         //4)  \mu * ( [\grad d^k]^T \grad d : \grad v  )
-
         stiff_dergradbis( this->M_zeta* this->M_data->mu() , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_dergradbis( this->M_data.mu() , dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
 
         //  5):\lambda * (div u_k) \grad d : \grad v
-
         stiff_divgrad( this->M_zeta * this->M_data->lambda(), dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_divgrad( this->M_data->lambda(), dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
 
         // 6)  \lambda * ( \grad u_k : \grad u_k) *( \grad u : \grad v  )
-
         stiff_gradgrad( this->M_zeta *  0.5 * this->M_data->lambda() , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_gradgrad( 0.5 * this->M_data->lambda() , dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
-
 
         // 7A) \mu *  ( \grad d^k \grad d : \grad v  )
-
         stiff_dergrad_gradbis( this->M_zeta * this->M_data->mu(), dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_dergrad_gradbis( this->M_data->mu(), dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
 
         // 7B) \mu *  ( \grad d^k [\grad d]^T : \grad v  )
-
         stiff_dergrad_gradbis_Tr( this->M_zeta * this->M_data->mu(), dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_dergrad_gradbis_Tr( this->M_data->mu(), dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
-
 
         // 8) // \mu * (  \grad d^k [\grad d^k]^T \grad d : \grad v  )
-
         stiff_gradgradTr_gradbis( this->M_zeta * this->M_data->mu() , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
-//        stiff_gradgradTr_gradbis(  this->M_data->mu() , dk_loc, this->M_elmatK,  this->M_FESpace->fe() );
 
         UInt totalDof   = this->M_FESpace->dof().numTotalDof();
 
@@ -757,7 +772,6 @@ iterate( bchandler_Type& bch )
     Real etamax  = 0;
     Int linesearch = 0;
 
-
     Real time = this->M_data->getTime();
 
     Int status = 0;
@@ -765,12 +779,11 @@ iterate( bchandler_Type& bch )
     status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, linesearch, this->M_out_res, this->M_data->dataTime()->getTime() );
 
 
-
     if ( status == 1 )
     {
-        std::ostringstream __ex;
-        __ex << "VenantKirchhofSolver::iterate() Inners nonLinearRichardson iterations failed to converge\n";
-        throw std::logic_error( __ex.str() );
+        std::ostringstream ex;
+        ex << "VenantKirchhofSolver::iterate() Inners nonLinearRichardson iterations failed to converge\n";
+        throw std::logic_error( ex.str() );
     }
     else // if status == 0 NonLinearrRichardson converges
     {
