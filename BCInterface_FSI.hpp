@@ -53,7 +53,7 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  */
-template< class PhysicalSolver >
+template< class physicalSolver_Type >
 class BCInterface_FSI
 {
 public:
@@ -72,7 +72,6 @@ public:
 
     BCInterface_FSI() {}
     BCInterface_FSI( const data_Type& /*data*/) {}
-    BCInterface_FSI( const BCInterface_FSI& /*fsi*/) {}
 
     virtual ~BCInterface_FSI() {}
 
@@ -82,15 +81,21 @@ public:
     //! @name Methods
     //@{
 
-    BCInterface_FSI& operator=( const BCInterface_FSI& /*fsi*/) {}
-    void setData( const data_Type& /*data*/) {}
     void exportData( data_Type& /*data*/ ) {}
-    void checkMethod( const boost::shared_ptr< PhysicalSolver >& /*physicalSolver*/ ) {}
+    void checkMethod( const boost::shared_ptr< physicalSolver_Type >& /*physicalSolver*/ ) {}
 
     //@}
 
 
-    //! @name Get functions
+    //! @name Set Methods
+    //@{
+
+    void setData( const data_Type& /*data*/) {}
+
+    //@}
+
+
+    //! @name Get Methods
     //@{
 
     bcFunction_Type& base() { return *M_base; }
@@ -98,6 +103,15 @@ public:
     //@}
 
 private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterface_FSI( const BCInterface_FSI& fsi);
+
+    BCInterface_FSI& operator=( const BCInterface_FSI& fsi );
+
+    //@}
 
     boost::shared_ptr< bcFunction_Type > M_base;
 };
@@ -163,12 +177,6 @@ public:
      */
     BCInterface_FSI( const data_Type& data );
 
-    //! Copy constructor
-    /*!
-     * @param fsiOperator BCInterface_FSI
-     */
-    BCInterface_FSI( const BCInterface_FSI& fsi );
-
     //! Destructor
     virtual ~BCInterface_FSI() {}
 
@@ -177,19 +185,6 @@ public:
 
     //! @name Methods
     //@{
-
-    //! Operator =
-    /*!
-     * @param fsiOperator BCInterface_FSI
-     * @return reference to a copy of the class
-     */
-    BCInterface_FSI& operator=( const BCInterface_FSI& fsi );
-
-    //! Set data
-    /*!
-     * @param data BC data loaded from GetPot file
-     */
-    void setData( const data_Type& data );
 
     //! Copy the stored parameters in the data container
     /*!
@@ -206,6 +201,18 @@ public:
     //@}
 
 
+    //! @name Set methods
+    //@{
+
+    //! Set data
+    /*!
+     * @param data BC data loaded from GetPot file
+     */
+    void setData( const data_Type& data );
+
+    //@}
+
+
     //! @name Get methods
     //@{
 
@@ -216,7 +223,17 @@ public:
 
 private:
 
-    //! @name Private functions
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterface_FSI( const BCInterface_FSI& fsi);
+
+    BCInterface_FSI& operator=( const BCInterface_FSI& fsi );
+
+    //@}
+
+
+    //! @name Private Methods
     //@{
 
     template< class method >

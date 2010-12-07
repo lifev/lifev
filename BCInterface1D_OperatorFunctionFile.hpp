@@ -53,18 +53,18 @@ namespace LifeV
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *  The function string can contain Operator parameters.
  */
-template< class PhysicalSolver >
-class BCInterface1D_OperatorFunctionFile: public virtual BCInterface1D_FunctionFile< PhysicalSolver > ,
-        public virtual BCInterface1D_OperatorFunction< PhysicalSolver >
+template< class physicalSolver_Type >
+class BCInterface1D_OperatorFunctionFile: public virtual BCInterface1D_FunctionFile< physicalSolver_Type > ,
+        public virtual BCInterface1D_OperatorFunction< physicalSolver_Type >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Function< PhysicalSolver >                super0;
-    typedef BCInterface1D_FunctionFile< PhysicalSolver >            super1;
-    typedef BCInterface1D_OperatorFunction< PhysicalSolver >        super2;
+    typedef BCInterface1D_Function< physicalSolver_Type >           super0;
+    typedef BCInterface1D_FunctionFile< physicalSolver_Type >       super1;
+    typedef BCInterface1D_OperatorFunction< physicalSolver_Type >   super2;
 
     typedef BCInterface1D_Data                                      Data_Type;
 
@@ -83,27 +83,14 @@ public:
      */
     BCInterface1D_OperatorFunctionFile( const Data_Type& data );
 
-    //! Copy constructor
-    /*!
-     * @param function BCInterface1D_OperatorFunctionFile
-     */
-    BCInterface1D_OperatorFunctionFile( const BCInterface1D_OperatorFunctionFile& function );
-
     //! Destructor
     virtual ~BCInterface1D_OperatorFunctionFile() {}
 
     //@}
 
 
-    //! @name Methods
+    //! @name Set Methods
     //@{
-
-    //! Operator =
-    /*!
-     * @param function BCInterface1D_OperatorFunctionFile
-     * @return reference to a copy of the class
-     */
-    virtual BCInterface1D_OperatorFunctionFile& operator=( const BCInterface1D_OperatorFunctionFile& function );
 
     //! Set data
     /*!
@@ -113,23 +100,34 @@ public:
 
     //@}
 
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterface1D_OperatorFunctionFile( const BCInterface1D_OperatorFunctionFile& function );
+
+    virtual BCInterface1D_OperatorFunctionFile& operator=( const BCInterface1D_OperatorFunctionFile& function );
+
+    //@}
+
 };
 
 // ===================================================
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolver >
-inline BCInterface1D_Function< PhysicalSolver >* createBCInterface1D_OperatorFunctionFile()
+template< typename physicalSolver_Type >
+inline BCInterface1D_Function< physicalSolver_Type >* createBCInterface1D_OperatorFunctionFile()
 {
-    return new BCInterface1D_OperatorFunctionFile< PhysicalSolver > ();
+    return new BCInterface1D_OperatorFunctionFile< physicalSolver_Type > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< class PhysicalSolver >
-BCInterface1D_OperatorFunctionFile< PhysicalSolver >::BCInterface1D_OperatorFunctionFile() :
+template< class physicalSolver_Type >
+BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_OperatorFunctionFile() :
         super0      (),
         super1      (),
         super2      ()
@@ -141,8 +139,8 @@ BCInterface1D_OperatorFunctionFile< PhysicalSolver >::BCInterface1D_OperatorFunc
 
 }
 
-template< class PhysicalSolver >
-BCInterface1D_OperatorFunctionFile< PhysicalSolver >::BCInterface1D_OperatorFunctionFile( const Data_Type& data ) :
+template< class physicalSolver_Type >
+BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_OperatorFunctionFile( const Data_Type& data ) :
         super0      (),
         super1      (),
         super2      ()
@@ -155,33 +153,12 @@ BCInterface1D_OperatorFunctionFile< PhysicalSolver >::BCInterface1D_OperatorFunc
     this->setData( data );
 }
 
-template< class PhysicalSolver >
-BCInterface1D_OperatorFunctionFile< PhysicalSolver >::BCInterface1D_OperatorFunctionFile( const BCInterface1D_OperatorFunctionFile& function ) :
-        super0      ( function ),
-        super1      ( function ),
-        super2      ( function )
-{
-}
-
 // ===================================================
-// Methods
+// Set Methods
 // ===================================================
-template< class PhysicalSolver >
-BCInterface1D_OperatorFunctionFile< PhysicalSolver >&
-BCInterface1D_OperatorFunctionFile< PhysicalSolver >::operator=( const BCInterface1D_OperatorFunctionFile& function )
-{
-    if ( this != &function )
-    {
-        super1::operator=( function );
-        super2::operator=( function );
-    }
-
-    return *this;
-}
-
-template< class PhysicalSolver >
+template< class physicalSolver_Type >
 void
-BCInterface1D_OperatorFunctionFile< PhysicalSolver >::setData( const Data_Type& data )
+BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::setData( const Data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
