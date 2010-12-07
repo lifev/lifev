@@ -43,7 +43,7 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-//#include <life/lifecore/lifeconfig.h>
+#include <lifeconfig.h>
 #include <life/lifesolver/dataElasticStructure.hpp>
 
 //=====================================================
