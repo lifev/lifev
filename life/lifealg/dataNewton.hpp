@@ -54,48 +54,59 @@ namespace LifeV
 class DataNewton
 {
 public:
+    
+  //! @name Constructor & Destructor
+  //@{
+  //! Constructor
+  DataNewton( const GetPot& dfile, const std::string& section = "newton" );
 
-    //! Constructor
-    DataNewton( const GetPot& dfile, const std::string& section = "newton" );
+  //! Virtual destructor
+  virtual ~DataNewton();
+  //@}
+  
+  //! @name Methods
+  //@{
+  
+  //! Ouptut
+  virtual void showMe( std::ostream& c = std::cout ) const;
 
-    //! Virtual destructor
-    virtual ~DataNewton();
+  //@}
 
-    // The max number of interations
+  //! @name Get Methods
+  //@{
 
-    //! The max number of interations
-    UInt maxiter() const;
+  //! The max number of interations
+  UInt maxiter() const;
+  
+  //! The absolute tolerance
+  Real abstol() const;
+  
+  //! The relative tolerance
+  Real reltol() const;
+  
+  //! The maximum error tolerance for residual in linear solver.
+  Real etamax() const;
+  
+  //! The linesearch option
+  UInt linesearch() const;
 
-    //! The absolute tolerance
-    Real abstol() const;
-
-    //! The relative tolerance
-    Real reltol() const;
-
-    //! The maximum error tolerance for residual in linear solver.
-    Real etamax() const;
-
-    //! The linesearch option
-    UInt linesearch() const;
-
-    //! Ouptut
-    virtual void showMe( std::ostream& c = std::cout ) const;
+  //@}
 
 protected:
-
-    UInt M_maxiter;      // max number of iterations
-    Real M_abstol;       // the stopping criteria is abstol+reltol*norm(residual_0)
-    Real M_reltol;       //
-    Real M_etamax;       // Maximum error tolerance for residual in linear solver.
-    // The linear solver terminates when the relative
-    // linear residual is smaller than eta*| f(sol) |.
-    // The value linear_rel_tol send for the relative tolerance
-    // to the linear solver is therefore eta. eta is determined
-    // by the modified Eisenstat-Walker formula if etamax > 0.
-    // If eta_max < 0, then eta = |etamax| for the entire
-    // iteration (e.g. etamax = -1e-6 ensures that the linear
-    // tolerance would be always 1e-6).
-    UInt M_linesearch;   // 0 (no linesearch) 1 (parabolic) 2 (cubic: recommended)
+  
+  UInt M_maxiter;      // max number of iterations
+  Real M_abstol;       // the stopping criteria is abstol+reltol*norm(residual_0)
+  Real M_reltol;       //
+  Real M_etamax;       // Maximum error tolerance for residual in linear solver.
+  // The linear solver terminates when the relative
+  // linear residual is smaller than eta*| f(sol) |.
+  // The value linear_rel_tol send for the relative tolerance
+  // to the linear solver is therefore eta. eta is determined
+  // by the modified Eisenstat-Walker formula if etamax > 0.
+  // If eta_max < 0, then eta = |etamax| for the entire
+  // iteration (e.g. etamax = -1e-6 ensures that the linear
+  // tolerance would be always 1e-6).
+  UInt M_linesearch;   // 0 (no linesearch) 1 (parabolic) 2 (cubic: recommended)
 };
 }
 #endif

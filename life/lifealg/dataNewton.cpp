@@ -40,59 +40,64 @@
 
 namespace LifeV
 {
-// Constructor
-DataNewton::DataNewton( const GetPot& dfile, const std::string& section )
-{
+  //====================================
+  // Constructor & Destructor
+  //===================================
+
+  DataNewton::DataNewton( const GetPot& dfile, const std::string& section )
+  {
     M_maxiter = dfile( ( section + "/maxiter" ).data(), 100 );
     M_abstol = dfile( ( section + "/abstol" ).data(), 0.0 );
     M_reltol = dfile( ( section + "/reltol" ).data(), 0.0 );
     M_etamax = dfile( ( section + "/etamax" ).data(), 1.e-3 );
     M_linesearch = dfile( ( section + "/linesearch" ).data(), 2 );
-}
+  }
+  
+  DataNewton::~DataNewton()
+  {}
 
-// Destructor
-DataNewton::~DataNewton()
-{}
-
-
-// The max number of interations
-UInt DataNewton::maxiter() const
-{
+  //=====================================
+  // Get Methods
+  //=====================================
+  
+  // The max number of interations
+  UInt DataNewton::maxiter() const
+  {
     return M_maxiter;
-}
+  }
 
-// The absolute tolerance
-Real DataNewton::abstol() const
-{
+  // The absolute tolerance
+  Real DataNewton::abstol() const
+  {
     return M_abstol;
-}
-
-// The relative tolerance
-Real DataNewton::reltol() const
-{
+  }
+  
+  // The relative tolerance
+  Real DataNewton::reltol() const
+  {
     return M_reltol;
-}
-
-// The relative tolerance
-Real DataNewton::etamax() const
-{
+  }
+  
+  // The relative tolerance
+  Real DataNewton::etamax() const
+  {
     return M_etamax;
-}
-
-// The linesearch option
-UInt DataNewton::linesearch() const
-{
+  }
+  
+  // The linesearch option
+  UInt DataNewton::linesearch() const
+  {
     return M_linesearch;
-}
+  }
 
-// Output
-void DataNewton::showMe( std::ostream& c ) const
-{
+  // Output
+  void DataNewton::showMe( std::ostream& c ) const
+  {
     //
     c << "maxiter        = " << M_maxiter << std::endl;
     c << "abstol         = " << M_abstol << std::endl;
     c << "reltol         = " << M_reltol << std::endl;
     c << "etamax         = " << M_reltol << std::endl;
     c << "linesearch     = " << M_linesearch << std::endl;
-}
+  }
 }
