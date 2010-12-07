@@ -49,13 +49,12 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
+ *  This class is an interface between BCInterface and grammar parser. It allows to construct LifeV
  *  functions type for boundary conditions, using a functions string loaded from a GetPot file.
  *
  *  <b>DETAILS:</b>
  *
- *  The constructor of the class takes a string contains the GetPot file function. By default the stringSeparator
- *  is set to semicolon ";".
+ *  By default the stringSeparator is set to semicolon ";".
  *
  *  The function string has to be in this form:
  *
@@ -92,8 +91,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCFunctionBase                                                        bcFunction_Type;
     typedef BCInterface_Data                                                      data_Type;
+    typedef BCFunctionBase                                                        bcFunction_Type;
 
     //@}
 
@@ -132,6 +131,9 @@ public:
     //@{
 
     //! Get the base of the boundary condition
+    /*!
+     * @return boundary condition base
+     */
     bcFunction_Type& base() { return M_base; }
 
     //@}
@@ -142,7 +144,7 @@ protected:
     //@{
 
     //! dataInterpolation
-    virtual inline void dataInterpolation() {}
+    virtual void dataInterpolation() {}
 
     //@}
 

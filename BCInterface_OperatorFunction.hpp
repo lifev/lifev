@@ -49,10 +49,10 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface, SpiritParser and a general
- *  LifeV operator (such as Oseen or FSIOperator). It allows to construct LifeV
+ *  This class is an interface between BCInterface, the grammar parser and a general
+ *  LifeV solver (such as Oseen or FSIOperator). It allows to construct LifeV
  *  functions type for boundary conditions, using a functions string loaded from
- *  a GetPot file in which are present some operator parameters.
+ *  a GetPot file in which are present some "solver" parameters.
  *
  *  The class can be used in two ways:
  *
