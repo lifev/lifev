@@ -79,9 +79,9 @@ public:
     typedef BCHandler                             bchandler_raw_type;
     typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
 
-    typedef typename SolverType::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
-    typedef typename SolverType::vector_type      vector_type;
+    typedef typename SolverType::matrix_type      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>        matrixPtr_Type;
+    typedef typename SolverType::vector_type      vector_Type;
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
@@ -126,30 +126,30 @@ public:
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(Real       alpha,
-                              vector_type& sourceVec
+                              vector_Type& sourceVec
                               );
 
     //! Updates time dependent parts of PDE system
-    virtual void updatePDESystem( vector_type& sourceVec );
+    virtual void updatePDESystem( vector_Type& sourceVec );
 
     //! Initialize
     void initialize( const source_type& );
     void initialize( const Function&  );
-    void initialize( const vector_type& );
+    void initialize( const vector_Type& );
 
     //! Returns the local solution vector
-    const vector_type& solution_u() const {return M_sol_u;}
+    const vector_Type& solution_u() const {return M_sol_u;}
 
-     const vector_type& fiber_vector() const {return M_fiber_vector;}
+     const vector_Type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local displacements vector
-    vector_type& disp()        { return M_disp; }
+    vector_Type& disp()        { return M_disp; }
 
     //! Returns the local residual vector
-    const vector_type& residual() const {return M_residual;}
+    const vector_Type& residual() const {return M_residual;}
 
     //! Moves the mesh
-    void moveMesh(vector_type const &dep);
+    void moveMesh(vector_Type const &dep);
 
 
 
@@ -179,7 +179,7 @@ public:
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
-    matrix_type& matrMass()
+    matrix_Type& matrMass()
         {
             return *M_matrMass;
         }
@@ -188,12 +188,12 @@ public:
 protected:
 
 	//! Solves PDE system
-    void solveSystem            (  matrix_ptrtype matrFull,
-                                   vector_type&   rhsFull );
+    void solveSystem            (  matrixPtr_Type matrFull,
+                                   vector_Type&   rhsFull );
 
     //! Apply BC
-    void applyBoundaryConditions(  matrix_type&        matrix,
-                                   vector_type&        rhs,
+    void applyBoundaryConditions(  matrix_Type&        matrix,
+                                   vector_Type&        rhs,
                                    bchandler_raw_type& BCh);
 
     //! Data
@@ -215,27 +215,27 @@ protected:
     EpetraMap                      M_localMapVec;
 
     //! mass matrix
-    matrix_ptrtype                 M_matrMass;
+    matrixPtr_Type                 M_matrMass;
 
     //! Stiff matrix: D*stiff
-    matrix_ptrtype                 M_matrStiff;
+    matrixPtr_Type                 M_matrStiff;
 
-    matrix_ptrtype                 M_matrNoBC;
+    matrixPtr_Type                 M_matrNoBC;
 
     //! Right hand side for the PDE
-    vector_type                    M_rhsNoBC;
+    vector_Type                    M_rhsNoBC;
 
     //! Global solution _u
-    vector_type                    M_sol_u;
+    vector_Type                    M_sol_u;
 
     //! Displacement
-    vector_type                    M_disp;
+    vector_Type                    M_disp;
 
     //! Local fibers vector
-    vector_type                    M_fiber_vector;
+    vector_Type                    M_fiber_vector;
 
     //! residual
-    vector_type                    M_residual;
+    vector_Type                    M_residual;
 
     //! Solver
     SolverType                     M_linearSolver;
@@ -367,8 +367,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::setUp( const GetPot& dataFile )
 template<typename Mesh, typename SolverType>
 void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
 {
-    M_matrMass.reset  ( new matrix_type(M_localMap) );
-    M_matrStiff.reset( new matrix_type(M_localMap) );
+    M_matrMass.reset  ( new matrix_Type(M_localMap) );
+    M_matrStiff.reset( new matrix_Type(M_localMap) );
 
     if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
 
@@ -384,7 +384,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
     Chrono chronoZero;
 
     // vector with repeated nodes over the processors
-    vector_type M_sol_uRep(M_sol_u, Repeated );
+    vector_Type M_sol_uRep(M_sol_u, Repeated );
 
     M_comm->Barrier();
 
@@ -462,7 +462,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
 
     M_comm->Barrier();
 
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     //! Computing chi*Cm/dt * M + K
 
@@ -492,7 +492,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::
 initialize( const source_type& u0 )
 {
 
-    vector_type u(M_uFESpace.map());
+    vector_Type u(M_uFESpace.map());
 
     M_uFESpace.interpolate(u0, u, 0.);
 
@@ -505,7 +505,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::
 initialize( const Function& u0 )
 {
 
-     vector_type u(M_uFESpace.map());
+     vector_Type u(M_uFESpace.map());
      M_uFESpace.interpolate(u0, u, 0.);
 
      initialize(u);
@@ -514,7 +514,7 @@ initialize( const Function& u0 )
 
 template<typename Mesh, typename SolverType>
 void Nonlinearmonodomain<Mesh, SolverType>::
-initialize( const vector_type& u0 )
+initialize( const vector_Type& u0 )
 {
 
     M_sol_u = u0;
@@ -524,7 +524,7 @@ initialize( const vector_type& u0 )
 
 template<typename Mesh, typename SolverType>
 void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
-                                                            vector_type& sourceVec)
+                                                            vector_Type& sourceVec)
 {
     Chrono chrono;
 
@@ -553,7 +553,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
 
     chrono.start();
 
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     //! Computing alpha * M + K
     *M_matrNoBC += *M_matrStiff;
@@ -574,7 +574,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
 
 template<typename Mesh, typename SolverType>
 void Nonlinearmonodomain<Mesh, SolverType>::
-updatePDESystem(vector_type& sourceVec )
+updatePDESystem(vector_Type& sourceVec )
 {
 
     Chrono chrono;
@@ -607,8 +607,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch 
     chrono.start();
 
 
-    matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
-    vector_type    rhsFull = M_rhsNoBC;
+    matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
+    vector_Type    rhsFull = M_rhsNoBC;
 
     chrono.stop();
 
@@ -642,8 +642,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch 
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull )
+void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
+                                           vector_Type&    rhsFull )
 {
     Chrono chrono;
     for ( Int i = 0 ; i < rhsFull.getEpetraVector().MyLength() ; i++ )
@@ -715,7 +715,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFul
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::moveMesh(vector_type const &dep)
+void Nonlinearmonodomain<Mesh, SolverType>::moveMesh(vector_Type const &dep)
 {
     std::cout <<"  Moving the mesh ... "<< std::endl;
     M_uFESpace.mesh()->moveMesh(dep, this->M_uFESpace.dof().numTotalDof());
@@ -727,8 +727,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::moveMesh(vector_type const &dep)
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
-                                                                     vector_type&        rhs,
+void Nonlinearmonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+                                                                     vector_Type&        rhs,
                                                                      bchandler_raw_type& BCh )
 {
     if ( !BCh.bdUpdateDone() )
@@ -736,7 +736,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_type
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_type rhsFull(M_rhsNoBC,Repeated,Zero);
+    vector_Type rhsFull(M_rhsNoBC,Repeated,Zero);
 
     bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
               M_data.getTime() );
