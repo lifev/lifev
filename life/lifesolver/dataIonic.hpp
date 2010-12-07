@@ -1,49 +1,50 @@
+//@HEADER
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    This file is part of LifeV.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
 /*!
-  \file dataMonodomain.h
-  \author L. Mirabella M. Perego
-  \date 11/2007
-  \version 1.0
+    @file
+    @brief File containing a class for handling Ionic model data with GetPot
 
-  \brief File containing a class for handling Monodomain data with GetPot
+    @date 11−2007
+    @author Lucia Mirabella <lucia.mirabella@gmail.com>, Mauro Perego <perego.mauro@gmail.com>
 
-	\modif J.Castelneau (INRIA)
-	\date 06/09
-*/
+    @contributor Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>, J.Castelneau (INRIA)
+    @mantainer Simone Rossi <simone.rossi@epfl.ch>
+ */
+
 #ifndef _DATAIONIC_H_
 #define _DATAIONIC_H_
-#include <string>
-#include <iostream>
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/life.hpp>
+
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <life/lifecore/dataString.hpp>
-#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {
-using namespace std;
-
 /*!
-  \class DataMonodomain
+  \class DataIonic
 
   Base class which holds usual data for the ionic model solvers
 
@@ -53,47 +54,83 @@ class DataIonic:
         public DataTime
 {
 public:
+
+    //! @name Constructor & Destructor
+    //@{
+
     //! Constructors
-    DataIonic( const GetPot& dfile );
+    DataIonic();
+
+    DataIonic( const GetPot& dataFile );
+
     DataIonic( const DataIonic& dataIonic );
 
-    //! Ouptut
-    void showMe( std::ostream& c = std::cout );
+    //@}
 
-    //! external setup
-    void setup( const GetPot& dfile );
 
-    //! End time
+    //! @name Operators
+    //@{
+
+
+
+    DataIonic& operator=( const DataIonic& dataIonic );
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! output: show the data used for the simulation
+    void showMe( std::ostream& output = std::cout );
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //!external setup: set all the data for the simulation
+    void setup( const GetPot& dataFile );
+
+    //@}
+
+    /*//! End time
     Real endtime() const;
 
     //! FE space order
     std::string wOrder() const;
+*/
 
-    UInt verbose;
-    string mesh_file;
-    Real a;
-    Real b;
-    Real c1;
-    Real c2;
-    Real d;
-    Real T;
-    Real A;
-    Real u0;
-    Real winit;
-    string mesh_dir;
+    bool        M_hasHeterogeneousTauClose;
+
+    UInt        M_verbose;
+
+    //! RogersMcCulloch 1994 Ionic Model parameters
+    Real        M_a;
+    Real        M_b;
+    Real        M_c1;
+    Real        M_c2;
+    Real        M_d;
+    Real        M_timeUnit;
+    Real        M_potentialAmplitude;
+    Real        M_restPotential;
+    Real        M_initialRepolarization;
     //Mitchell & Schaeffer
-    Real		tau_in;   // = 0.8
-    Real		tau_out;  // = 18.0
-    Real		tau_open; // = 300.0
-    Real		tau_close;// = 100.0
-    Real		vcrit;    // =  -67.0
-    Real 		v_min;
-    Real 		v_max;
-    Real 		reac_amp;
-    Real 		tinit;
-    Real 		tend;
-    Real 		order_bdf;       //= 1
-    bool		has_HeteroTauClose;
+    Real        M_tau_in;   // = 0.8
+    Real        M_tau_out;  // = 18.0
+    Real        M_tau_open; // = 300.0
+    Real        M_tau_close;// = 100.0
+    Real        M_criticalPotential;    // =  -67.0
+    Real        M_potentialMinimum;
+    Real        M_potentialMaximum;
+    Real        M_reactionAmplitude;
+    Real        M_initialTime;
+    Real        M_tend;
+    Real        M_BDForder;       //= 1
+
+    std::string M_meshFile;
+    std::string M_meshDirectory;
+
 private:
 
 
