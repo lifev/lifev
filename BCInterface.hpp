@@ -489,11 +489,11 @@ template< class physicalSolver_Type > template< class BCInterfaceBase >
 inline void
 BCInterface< physicalSolver_Type >::addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBase > Function( factoryFunction_Type::instance().createObject( physicalSolver ) );
+    boost::shared_ptr< BCInterfaceBase > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
 
-    Function->setData( M_data );
+    function->setData( M_data );
 
-    baseVector.push_back( Function );
+    baseVector.push_back( function );
 }
 
 template< class physicalSolver_Type >

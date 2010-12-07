@@ -45,9 +45,9 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
+ *  This class is an interface between BCInterface and the grammar parser. It allows to construct LifeV
  *  functions type for boundary conditions, using a GetPot file containing a function string and a
- *  table of discrete data (for example a discrete Flux or Pressure depending on time).
+ *  table of discrete data (for example a discrete flow rate or pressure as a function of the time).
  *
  *
  *
@@ -73,7 +73,7 @@ namespace LifeV
  *
  *	NOTE:
  *	During the execution, if the value of the variable (usually the time) is not present in the 'data' table,
- *	the class linearly interpolates the value between the two closest one. Moreover, if the value of the variable is higher
+ *	the class linearly interpolates the value between the two closest values. Moreover, if the value of the variable is higher
  *	than anyone present in the 'data' table, the class linearly extrapolates the value using the last two values in the table.
  *
  *   <b>EXAMPLE OF DATAFILE</b>

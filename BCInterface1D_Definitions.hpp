@@ -41,14 +41,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-// Boost classes
-#include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string.hpp>
-
 // STL classes
 #include <sstream>
 #include <string>
 #include <vector>
+
+// Boost classes
+#include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"

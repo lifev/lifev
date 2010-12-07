@@ -160,7 +160,7 @@ private:
 
     //@}
 
-    bcFunction_Type                   M_base;
+    bcFunction_Type                  M_base;
 
 };
 

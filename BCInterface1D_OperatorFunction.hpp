@@ -55,7 +55,7 @@ namespace LifeV
  *
  *  The class can be used in two ways:
  *
- *  1) hereditating it and implementing the template specialization of createAccessList() and updateOperatorVariables();
+ *  1) hereditating it and implementing the template specialization of createAccessList() and updatePhysicalSolverVariables();
  *  2) manually setting the variables by using the setVariable() function.
  *
  *	<b>AVAILABLE OPERATORS</b>

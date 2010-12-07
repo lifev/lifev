@@ -138,7 +138,7 @@ private:
     //@}
 
 
-    //! @name Private functions
+    //! @name Private methods
     //@{
 
     //! loadData

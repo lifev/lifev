@@ -66,7 +66,7 @@ public:
     typedef BCInterface1D_FunctionFile< physicalSolver_Type >       super1;
     typedef BCInterface1D_OperatorFunction< physicalSolver_Type >   super2;
 
-    typedef BCInterface1D_Data                                      Data_Type;
+    typedef BCInterface1D_Data                                      data_Type;
 
     //@}
 
@@ -81,7 +81,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_OperatorFunctionFile( const Data_Type& data );
+    BCInterface1D_OperatorFunctionFile( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface1D_OperatorFunctionFile() {}
@@ -96,7 +96,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void setData( const Data_Type& data );
+    virtual void setData( const data_Type& data );
 
     //@}
 
@@ -140,7 +140,7 @@ BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_Operato
 }
 
 template< class physicalSolver_Type >
-BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_OperatorFunctionFile( const Data_Type& data ) :
+BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_OperatorFunctionFile( const data_Type& data ) :
         super0      (),
         super1      (),
         super2      ()
@@ -158,7 +158,7 @@ BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_Operato
 // ===================================================
 template< class physicalSolver_Type >
 void
-BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::setData( const Data_Type& data )
+BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
