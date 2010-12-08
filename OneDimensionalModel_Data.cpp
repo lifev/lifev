@@ -1,28 +1,29 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
+
 
 /*!
  *  @file
@@ -46,68 +47,68 @@ namespace LifeV
 // Constructors
 // ===================================================
 OneDimensionalModel_Data::OneDimensionalModel_Data():
-        M_PhysicsType               (),
-        M_FluxType                  (),
-        M_SourceType                (),
-        M_Time                      (),
-        M_Mesh                      ( new Mesh_Type() ),
-        M_postprocessingDirectory   (),
-        M_postprocessingFile        (),
-        M_verbose                   (),
-        M_UW                        (),
-        M_inertial_wall             (),
-        M_viscoelastic_wall         (),
-        M_linearize_string_model    (),
-        M_linearize_equations       (),
-        M_longitudinal_wall         (),
-        M_flux_second_der           (),
-        M_dP_dt_steps               (),
-        M_CFLmax                    (),
-        M_JacobianPerturbationArea  (),
-        M_JacobianPerturbationFlowRate(),
-        M_JacobianPerturbationPressure(),
+    M_PhysicsType               (),
+    M_FluxType                  (),
+    M_SourceType                (),
+    M_Time                      (),
+    M_Mesh                      ( new Mesh_Type() ),
+    M_postprocessingDirectory   (),
+    M_postprocessingFile        (),
+    M_verbose                   (),
+    M_UW                        (),
+    M_inertialWall             (),
+    M_viscoelasticWall         (),
+    M_linearizeStringModel    (),
+    M_linearizeEquations       (),
+    M_longitudinalWall         (),
+    M_fluxSecondDer           (),
+    M_dP_dt_steps               (),
+    M_CFLmax                    (),
+    M_JacobianPerturbationArea  (),
+    M_JacobianPerturbationFlowRate(),
+    M_JacobianPerturbationPressure(),
 //    M_initialVariable           (),
 //    M_initialValue              (),
 //    M_restValue                 (),
 //    M_multiplier                (),
-        M_ComputeCoefficients       (),
-        M_PowerlawCoefficient       (),
-        M_Density                   (),
-        M_Viscosity                 (),
-        M_DensityWall               (),
-        M_ThickVessel               (),
-        M_Young                     (),
-        M_Poisson                   (),
-        M_externalPressure          (),
-        M_ViscoelasticModulus       (),
-        M_InertialModulus           (),
-        M_RobertsonCorrection       (),
-        M_Thickness                 (),
-        M_Friction                  (),
-        M_Area0                     (),
-        M_Alpha                     (),
-        M_Beta0                     (),
-        M_Beta1                     (),
-        M_dArea0dz                  (),
-        M_dAlphadz                  (),
-        M_dBeta0dz                  (),
-        M_dBeta1dz                  (),
-        M_Flux11                    (),
-        M_Flux12                    (),
-        M_Flux21                    (),
-        M_Flux22                    (),
-        M_Celerity1                 (),
-        M_Celerity2                 (),
-        M_Celerity1LeftEigenvector1 (),
-        M_Celerity1LeftEigenvector2 (),
-        M_Celerity2LeftEigenvector1 (),
-        M_Celerity2LeftEigenvector2 (),
-        M_Source10                  (),
-        M_Source20                  (),
-        M_Source11                  (),
-        M_Source12                  (),
-        M_Source21                  (),
-        M_Source22                  ()
+    M_ComputeCoefficients       (),
+    M_PowerlawCoefficient       (),
+    M_Density                   (),
+    M_Viscosity                 (),
+    M_DensityWall               (),
+    M_ThickVessel               (),
+    M_Young                     (),
+    M_Poisson                   (),
+    M_externalPressure          (),
+    M_ViscoelasticModulus       (),
+    M_InertialModulus           (),
+    M_RobertsonCorrection       (),
+    M_Thickness                 (),
+    M_Friction                  (),
+    M_Area0                     (),
+    M_Alpha                     (),
+    M_Beta0                     (),
+    M_Beta1                     (),
+    M_dArea0dz                  (),
+    M_dAlphadz                  (),
+    M_dBeta0dz                  (),
+    M_dBeta1dz                  (),
+    M_Flux11                    (),
+    M_Flux12                    (),
+    M_Flux21                    (),
+    M_Flux22                    (),
+    M_Celerity1                 (),
+    M_Celerity2                 (),
+    M_Celerity1LeftEigenvector1 (),
+    M_Celerity1LeftEigenvector2 (),
+    M_Celerity2LeftEigenvector1 (),
+    M_Celerity2LeftEigenvector2 (),
+    M_Source10                  (),
+    M_Source20                  (),
+    M_Source11                  (),
+    M_Source12                  (),
+    M_Source21                  (),
+    M_Source22                  ()
 {
 }
 
@@ -138,12 +139,12 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
     M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
-    M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
-    M_viscoelastic_wall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_linearize_string_model = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
-    M_linearize_equations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
-    M_longitudinal_wall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
-    M_flux_second_der        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
+    M_inertialWall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
+    M_viscoelasticWall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
+    M_linearizeStringModel = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
+    M_linearizeEquations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
+    M_longitudinalWall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
+    M_fluxSecondDer        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
     M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
     M_CFLmax                 = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
 
@@ -358,12 +359,12 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
     M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
-    M_inertial_wall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
-    M_viscoelastic_wall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_linearize_string_model = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
-    M_linearize_equations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
-    M_longitudinal_wall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
-    M_flux_second_der        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
+    M_inertialWall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
+    M_viscoelasticWall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
+    M_linearizeStringModel = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
+    M_linearizeEquations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
+    M_longitudinalWall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
+    M_fluxSecondDer        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
     M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
     M_CFLmax                 = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
 
@@ -579,12 +580,12 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Postprocessing File    = " << M_postprocessingFile << std::endl;
     output << "verbose                = " << M_verbose << std::endl;
     output << "UW                     = " << M_UW << std::endl;
-    output << "Use Inertial Wall      = " << M_inertial_wall << std::endl;
-    output << "Use Viscoelastic Wall  = " << M_viscoelastic_wall << std::endl;
-    output << "Linearize Model        = " << M_linearize_string_model << std::endl;
-    output << "Linearize Equations    = " << M_linearize_equations << std::endl;
-    output << "Longitudinal Wall      = " << M_longitudinal_wall << std::endl;
-    output << "Flux Second Derivative = " << M_flux_second_der << std::endl;
+    output << "Use Inertial Wall      = " << M_inertialWall << std::endl;
+    output << "Use Viscoelastic Wall  = " << M_viscoelasticWall << std::endl;
+    output << "Linearize Model        = " << M_linearizeStringModel << std::endl;
+    output << "Linearize Equations    = " << M_linearizeEquations << std::endl;
+    output << "Longitudinal Wall      = " << M_longitudinalWall << std::endl;
+    output << "Flux Second Derivative = " << M_fluxSecondDer << std::endl;
     output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
     output << "Maximum admissible CFL = " << M_CFLmax << std::endl;
 
@@ -793,7 +794,7 @@ OneDimensionalModel_Data::postprocessingFile() const
     return M_postprocessingFile;
 }
 
-const int&
+const Int&
 OneDimensionalModel_Data::verbose() const
 {
     return M_verbose;
@@ -808,40 +809,40 @@ OneDimensionalModel_Data::UW() const
 const bool&
 OneDimensionalModel_Data::inertialWall() const
 {
-    return M_inertial_wall;
+    return M_inertialWall;
 }
 
 const bool&
 OneDimensionalModel_Data::viscoelasticWall() const
 {
-    return M_viscoelastic_wall;
+    return M_viscoelasticWall;
 }
 
 const bool&
 OneDimensionalModel_Data::linearizeStringModel() const
 {
-    return M_linearize_string_model;
+    return M_linearizeStringModel;
 }
 
 const bool&
 OneDimensionalModel_Data::linearizeEquations() const
 {
-    return M_linearize_equations;
+    return M_linearizeEquations;
 }
 
 const bool&
 OneDimensionalModel_Data::longitudinalWall() const
 {
-    return M_longitudinal_wall;
+    return M_longitudinalWall;
 }
 
 const bool&
 OneDimensionalModel_Data::fluxSecondDer() const
 {
-    return M_flux_second_der;
+    return M_fluxSecondDer;
 }
 
-const int&
+const Int&
 OneDimensionalModel_Data::DPdtSteps() const
 {
     return M_dP_dt_steps;
@@ -853,23 +854,6 @@ OneDimensionalModel_Data::CFLmax() const
     return M_CFLmax;
 }
 
-const Real&
-OneDimensionalModel_Data::JacobianPerturbationArea() const
-{
-    return M_JacobianPerturbationArea;
-}
-
-const Real&
-OneDimensionalModel_Data::JacobianPerturbationFlowRate() const
-{
-    return M_JacobianPerturbationFlowRate;
-}
-
-const Real&
-OneDimensionalModel_Data::JacobianPerturbationPressure() const
-{
-    return M_JacobianPerturbationPressure;
-}
 
 /*
 const OneD_Initialize&
@@ -1014,6 +998,25 @@ const Real&
 OneDimensionalModel_Data::dBeta1dz( const UInt& i ) const
 {
     return M_dBeta1dz[i];
+}
+
+
+const Real&
+OneDimensionalModel_Data::JacobianPerturbationArea() const
+{
+    return M_JacobianPerturbationArea;
+}
+
+const Real&
+OneDimensionalModel_Data::JacobianPerturbationFlowRate() const
+{
+    return M_JacobianPerturbationFlowRate;
+}
+
+const Real&
+OneDimensionalModel_Data::JacobianPerturbationPressure() const
+{
+    return M_JacobianPerturbationPressure;
 }
 
 // ===================================================
