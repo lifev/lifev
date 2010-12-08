@@ -1,35 +1,36 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
+
 /*!
- * @file heart.cpp
- * @brief Cardiac Electrophysiology Test
- * @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
- * @date 11-2007
- * @contributors Ricardo Ruiz-Baier
- * @last update 11-2010
+  @file
+  @brief Cardiac Electrophysiology Test
+  @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
+  @date 11-2007
+  @contributors Simone Rossi
+  @last update 11-2010
  */
 
 #include <Epetra_ConfigDefs.h>
@@ -39,9 +40,9 @@
 using namespace LifeV;
 
 //! Identifiers for heart boundaries
-const int EPICARDIUM    = 40;
-const int ENDOCARDIUM   = 60;
-const int TRUNC_SEC 	= 50;
+const Int EPICARDIUM    = 40;
+const Int ENDOCARDIUM   = 60;
+const Int TRUNC_SEC 	= 50;
 
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
@@ -52,20 +53,11 @@ Real zero_scalar( const Real& /* t */,
     return 0.;
 }
 
-Real minus84_scalar( const Real& /* t */,
-                     const Real& /* x */,
-                     const Real& /* y */,
-                     const Real& /* z */,
-                     const ID& /* i */ )
-{
-    return  -84.0;
-}
-
 // ===================================================
 //! Constructors
 // ===================================================
 
-Heart::Heart( int argc,
+Heart::Heart( Int argc,
               char** argv )
 {
     GetPot command_line(argc, argv);
@@ -75,11 +67,11 @@ Heart::Heart( int argc,
     //! Pointer to access functors
     M_heart_fct.reset(new HeartFunctors( dataFile));
     ion_model=dataFile("electric/physics/ion_model",1);
-    M_heart_fct->comm.reset(new Epetra_MpiComm( MPI_COMM_WORLD ));
+    M_heart_fct->M_comm.reset(new Epetra_MpiComm( MPI_COMM_WORLD ));
 
-    if (!M_heart_fct->comm->MyPID())
+    if (!M_heart_fct->M_comm->MyPID())
     {
-        std::cout << "My PID = " << M_heart_fct->comm->MyPID() << std::endl;
+        std::cout << "My PID = " << M_heart_fct->M_comm->MyPID() << std::endl;
     }
 }
 
@@ -105,13 +97,13 @@ Heart::run()
 #else
     DataBidomain _data(M_heart_fct);
 #endif
-    DataIonic _dataIonic(M_heart_fct->_dataFile);
+    DataIonic _dataIonic(M_heart_fct->M_dataFile);
 
     DataMesh dataMesh;
-    dataMesh.setup(M_heart_fct->_dataFile, "electric/space_discretization");
+    dataMesh.setup(M_heart_fct->M_dataFile, "electric/space_discretization");
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
-    bool verbose = (M_heart_fct->comm->MyPID() == 0);
+    bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
 
     //! Boundary conditions handler and function
     BCFunctionBase uZero( zero_scalar );
@@ -130,8 +122,8 @@ Heart::run()
 
 
     //! Construction of the partitioned mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, M_heart_fct->comm);
-    std::string uOrder =  M_heart_fct->_dataFile( "electric/space_discretization/u_order", "P1");
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, M_heart_fct->M_comm);
+    std::string uOrder =  M_heart_fct->M_dataFile( "electric/space_discretization/u_order", "P1");
 
     //! Initialization of the FE type and quadrature rules for both the variables
     if ( uOrder.compare("P1") == 0 )
@@ -147,7 +139,7 @@ Heart::run()
         exit(1);
     }
 
-    std::string wOrder =  M_heart_fct->_dataFile( "electric/space_discretization/w_order", "P1");
+    std::string wOrder =  M_heart_fct->M_dataFile( "electric/space_discretization/w_order", "P1");
     if ( wOrder.compare("P1") == 0 )
     {
         if (verbose) std::cout << "P1 recovery variable " << std::flush;
@@ -170,7 +162,7 @@ Heart::run()
                                                              *qR_u,
                                                              *bdQr_u,
                                                              1,
-                                                             M_heart_fct->comm);
+                                                             M_heart_fct->M_comm);
 
 #ifdef BIDOMAIN
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > _FESpace(meshPart,
@@ -178,7 +170,7 @@ Heart::run()
                                                              *qR_u,
                                                              *bdQr_u,
                                                              2,
-                                                             M_heart_fct->comm);
+                                                             M_heart_fct->M_comm);
 #endif
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -192,15 +184,15 @@ Heart::run()
     if (verbose) std::cout << "Calling the electric model constructor ... ";
 
 #ifdef MONODOMAIN
-    MonodomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, uFESpace, bcH, *M_heart_fct->comm);
+    MonodomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, uFESpace, bcH, *M_heart_fct->M_comm);
 #else
-    BidomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, _FESpace, uFESpace, bcH, *M_heart_fct->comm);
+    BidomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, _FESpace, uFESpace, bcH, *M_heart_fct->M_comm);
 #endif
 
     if (verbose) std::cout << "ok." << std::endl;
     EpetraMap fullMap(electricModel.getMap());
     vector_type rhs ( fullMap);
-    electricModel.setUp( M_heart_fct->_dataFile );
+    electricModel.setUp( M_heart_fct->M_dataFile );
     std::cout<<"setup ok"<<std::endl;
 
     if (verbose) std::cout << "Calling the ionic model constructor ... ";
@@ -208,19 +200,28 @@ Heart::run()
     if (ion_model==1)
     {
         if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
-        ionicModel.reset(new Rogers_McCulloch< RegionMesh3D<LinearTetra> >(_dataIonic,
+        ionicModel.reset(new RogersMcCulloch< RegionMesh3D<LinearTetra> >(_dataIonic,
                                                                            *meshPart.mesh(),
                                                                            uFESpace,
-                                                                           *M_heart_fct->comm));
+                                                                           *M_heart_fct->M_comm));
     }
     else if (ion_model==2)
     {
         if (verbose) std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
-        ionicModel.reset(new Luo_Rudy< RegionMesh3D<LinearTetra> >(_dataIonic,
+        ionicModel.reset(new LuoRudy< RegionMesh3D<LinearTetra> >(_dataIonic,
                                                                    *meshPart.mesh(),
                                                                    uFESpace,
-                                                                   *M_heart_fct->comm));
+                                                                   *M_heart_fct->M_comm));
     }
+    else if (ion_model==3)
+    {
+        if (verbose) std::cout<<"Ion Model = Mitchell-Schaeffer"<<std::endl<<std::flush;
+        ionicModel.reset(new MitchellSchaeffer< RegionMesh3D<LinearTetra> >(_dataIonic,
+                                                                   *meshPart.mesh(),
+                                                                   uFESpace,
+                                                                   *M_heart_fct->M_comm));
+    }
+
 #ifdef MONODOMAIN
     electricModel.initialize( M_heart_fct->get_initial_scalar());
 #else
@@ -245,35 +246,32 @@ Heart::run()
     electricModel.resetPrec();
     if (verbose) std::cout << " ok "<< std::endl;
 
-    //! Setting Ensight postprocessing
-    //Ensight<RegionMesh3D<LinearTetra> > ensight( M_heart_fct->_dataFile, _data.mesh(), "heart", M_heart_fct->comm->MyPID());
-
     //! Setting generic Exporter postprocessing
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
-    std::string const exporterType =  M_heart_fct->_dataFile( "exporter/type", "ensight");
+    std::string const exporterType =  M_heart_fct->M_dataFile( "exporter/type", "ensight");
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile, "heart" ) );
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile, "heart" ) );
         exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), M_heart_fct->comm->MyPID() );
+        exporter->setMeshProcId( meshPart.mesh(), M_heart_fct->M_comm->MyPID() );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile,
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                        meshPart.mesh(),
                                                                        "heart",
-                                                                       M_heart_fct->comm->MyPID()) );
+                                                                       M_heart_fct->M_comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( M_heart_fct->_dataFile,
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                       meshPart.mesh(),
                                                                       "heart",
-                                                                      M_heart_fct->comm->MyPID()) );
+                                                                      M_heart_fct->M_comm->MyPID()) );
         }
     }
 
@@ -300,7 +298,7 @@ Heart::run()
 
     //! Temporal loop
     Chrono chrono;
-    int iter = 1;
+    Int iter = 1;
     chronototaliterations.start();
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
@@ -352,7 +350,7 @@ Heart::run()
 void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
                         boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, DataMonodomain& data )
 {
-    bool verbose = (M_heart_fct->comm->MyPID() == 0);
+    bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
     Real lambda = data.lambda();
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;
     Chrono chrono;
@@ -371,7 +369,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
         elvec_Iapp.zero();
         elvec_u.zero();
         elvec_Iion.zero();
-        int ig;
+        Int ig;
         UInt eleIDu = electricModel.potentialFESpace().fe().currentLocalId();
         UInt nbNode = ( UInt ) electricModel.potentialFESpace().fe().nbNode;
 
@@ -390,7 +388,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
         source(M_heart_fct->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 1);
 
         //! Assembling the righthand side
-        for ( int i = 0 ; i < electricModel.potentialFESpace().fe().nbNode ; i++ )
+        for ( Int i = 0 ; i < electricModel.potentialFESpace().fe().nbNode ; i++ )
         {
             ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, i + 1 );
             rhs.sumIntoGlobalValues (ig, (lambda*elvec_Iapp.vec()[i]+elvec_Iapp.vec()[i+nbNode])/(1+lambda)+data.Chi()*elvec_Iion.vec()[i] );
@@ -409,7 +407,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
 void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
                         boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel, DataBidomain& data )
 {
-    bool verbose = (M_heart_fct->comm->MyPID() == 0);
+    bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;
     Chrono chrono;
     chrono.start();
@@ -432,7 +430,7 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
         UInt nbNode = ( UInt ) electricModel.potentialFESpace().fe().nbNode;
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
         {
-            int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
+            Int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
             elvec_u.vec()[ iNode ] = uVecRep[ig];
         }
 
@@ -447,7 +445,7 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
 
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
         {
-            int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
+            Int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );
             rhs.sumIntoGlobalValues (ig, elvec_Iapp.vec()[iNode]+data.Chi()*elvec_Iion.vec()[iNode] ); // or
             rhs.sumIntoGlobalValues (ig+totalUDof, -elvec_Iapp.vec()[iNode+nbNode]-data.Chi()*elvec_Iion.vec()[iNode] );
         }

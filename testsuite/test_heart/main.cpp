@@ -1,43 +1,42 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV Applications.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2005-04-16
+    This file is part of LifeV.
 
-  Copyright (C) 2005 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
+*******************************************************************************
 */
-/**
-   \file main.cpp
-   \author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
-   \date 2005-04-16
+//@HEADER
+
+/*!
+    @file
+    @brief main for the test_heart
+
+    @date 11−2007
+    @author Lucia Mirabella <lucia.mirabella@gmail.com>, Mauro Perego <perego.mauro@gmail.com>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+    @mantainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#ifdef TWODIM
-#error test_heart cannot be compiled in 2D
-#endif
-
 #include <Epetra_ConfigDefs.h>
-#ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
-#else
-#include <Epetra_SerialComm.h>
-#endif
 
 #include <life/lifecore/life.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
@@ -53,7 +52,6 @@ static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIf
 static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
 }
 }
-
 
 
 using namespace LifeV;
@@ -77,29 +75,17 @@ std::set<UInt> parseList( const std::string& list )
     return setList;
 }
 
-int
-main( int argc, char** argv )
+Int main( Int argc, char** argv )
 {
-//! Initializing Epetra communicator
-#ifdef HAVE_MPI
+    //! Initializing Epetra communicator
     MPI_Init(&argc, &argv);
     Epetra_MpiComm Comm(MPI_COMM_WORLD);
     if ( Comm.MyPID() == 0 )
         cout << "% using MPI" << endl;
-#else
-    Epetra_SerialComm Comm;
-    cout << "% using serial Version" << endl;
-#endif
-
-
-    Heart heart( argc, argv, makeAbout() );
+    Heart heart( argc, argv );
     heart.run();
 
-//! Finalizing Epetra communicator
-#ifdef HAVE_MPI
+    //! Finalizing Epetra communicator
     MPI_Finalize();
-#endif
     return( EXIT_SUCCESS );
 }
-
-

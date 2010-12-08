@@ -102,10 +102,10 @@ heart_diff_fct = 0
 # case 2: reduced diffusion in cyl region
 # case 3: reduced diffusion in box region
 
-stim_center_1 	= '-0.137 0.64 -3.27'  
-stim_radius_1 	= 1.5 
+stim_center_1 	= '-0.137 0.64 -3.27'
+stim_radius_1 	= 1.5
 stim_start_1 	= 0
-stim_stop_1 	= 1 
+stim_stop_1 	= 1
 stim_value_1 	= 100
 stim_period_1 	= 500 #350
 
@@ -128,11 +128,11 @@ BDF_order		= 1
 
 [../space_discretization]
 mesh_dir        = ./Mesh/
-mesh_file       = ellipsoid5272.mesh 
+mesh_file       = ellipsoid5272.mesh
 mesh_type       = .mesh
 has_fibers = 1
 fibers_dir = ./Mesh/
-fibers_file = ellipsoid5272fibers 
+fibers_file = ellipsoid5272fibers
 fibers_format =  0  # 1 Ensight 0 BB
 
 verbose         = 1                     # verbose during mesh-reading
@@ -155,7 +155,7 @@ overlap         = 1
 ilut_fill       = 5 #2
 graph_fill      = 0
 drop            = 1.e-5 #1.e-4
-tol             = 1.00e-7 #1.00e-5 
+tol             = 1.00e-7 #1.00e-5
 keep_info       = 1
 
 [../prec]
