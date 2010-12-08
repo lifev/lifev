@@ -1,40 +1,40 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a class for 1D model data handling.
- *
- *  @version 1.0
- *  @author Vincent Martin
- *  @date 01-07-2004
- *
- *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 12-04-2010
+    @file
+    @brief File containing a class for 1D model data handling.
+
+    @version 1.0
+    @author Vincent Martin
+    @date 01-07-2004
+
+    @version 2.0
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+    @date 12-04-2010
  */
 
 #ifndef ONEDIMENSIONALMODEL_DATA_H
@@ -144,7 +144,7 @@ public:
     OneDimensionalModel_Data();
 
     //! Destructor
-    ~OneDimensionalModel_Data() {}
+    virtual ~OneDimensionalModel_Data() {}
 
     //@}
 
@@ -250,7 +250,7 @@ public:
     const std::string& postprocessingDirectory() const;
     const std::string& postprocessingFile() const;
 
-    const int&         verbose() const;
+    const Int&         verbose() const;
 
     const bool&        UW() const;
     const bool&        inertialWall() const;
@@ -261,7 +261,7 @@ public:
 
     const bool&        fluxSecondDer() const;
 
-    const int&         DPdtSteps() const;
+    const Int&         DPdtSteps() const;
     const Real&        CFLmax() const;
 
 //    const OneD_Initialize& initialVariable() const;
@@ -355,18 +355,18 @@ private:
     //! Miscellaneous
     std::string       M_postprocessingDirectory; //! full directory name (including path)
     std::string       M_postprocessingFile;      //! output file name
-    int               M_verbose;
+    Int               M_verbose;
     bool              M_UW;
     //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
-    bool              M_inertial_wall;
-    bool              M_viscoelastic_wall;
-    bool              M_linearize_string_model;
-    bool              M_linearize_equations;
-    bool              M_longitudinal_wall;
+    bool              M_inertialWall;
+    bool              M_viscoelasticWall;
+    bool              M_linearizeStringModel;
+    bool              M_linearizeEquations;
+    bool              M_longitudinalWall;
     //! boolean: compute second spatial derivative of flux?
-    bool              M_flux_second_der;
+    bool              M_fluxSecondDer;
     //! approximation of pressure temporal derivative: how many time steps?
-    int               M_dP_dt_steps;
+    Int               M_dP_dt_steps;
     Real              M_CFLmax;
 
     //! initialize
