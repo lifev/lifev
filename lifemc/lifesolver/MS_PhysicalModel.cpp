@@ -73,50 +73,6 @@ MS_PhysicalModel::MS_PhysicalModel() :
     }
 }
 
-MS_PhysicalModel::MS_PhysicalModel( const MS_PhysicalModel& model ) :
-        M_ID                ( model.M_ID ),
-        M_type              ( model.M_type ),
-        M_couplings         ( model.M_couplings ),
-        M_modelName         ( model.M_modelName ),
-        M_flags             ( model.M_flags ),
-        M_globalData        ( model.M_globalData ),
-        M_geometryScale     ( model.M_geometryScale ),
-        M_geometryRotate    ( model.M_geometryRotate ),
-        M_geometryTranslate ( model.M_geometryTranslate ),
-        M_comm              ( model.M_comm ),
-        M_displayer         ( model.M_displayer )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::MS_PhysicalModel( model ) \n";
-#endif
-
-    M_ID = M_modelsNumber++;
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_PhysicalModel&
-MS_PhysicalModel::operator=( const MS_PhysicalModel& model )
-{
-    if ( this != &model )
-    {
-        M_ID                = model.M_ID;
-        M_type              = model.M_type;
-        M_couplings         = model.M_couplings;
-        M_modelName         = model.M_modelName;
-        M_flags             = model.M_flags;
-        M_globalData        = model.M_globalData;
-        M_geometryScale     = model.M_geometryScale;
-        M_geometryRotate    = model.M_geometryRotate;
-        M_geometryTranslate = model.M_geometryTranslate;
-        M_comm              = model.M_comm;
-        M_displayer         = model.M_displayer;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================

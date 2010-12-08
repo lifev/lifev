@@ -66,29 +66,8 @@ public:
      */
     MS_PhysicalModel();
 
-    //! Copy constructor
-    /*!
-     * Should not be used in classical situations.
-     * @param model MS_PhysicalModel
-     */
-    MS_PhysicalModel( const MS_PhysicalModel& model );
-
     //! Destructor
     virtual ~MS_PhysicalModel() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Copy operator.
-    /*!
-     * Should not be used in classical situations.
-     * @param model MS_PhysicalModel
-     * @return reference to a copy of the class
-     */
-    MS_PhysicalModel& operator=( const MS_PhysicalModel& model );
 
     //@}
 

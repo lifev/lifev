@@ -67,27 +67,8 @@ public:
     //! Constructor
     MS_Coupling_FluxStress();
 
-    //! Copy constructor
-    /*!
-     * @param FluxStress MS_Coupling_FluxStress
-     */
-    MS_Coupling_FluxStress( const MS_Coupling_FluxStress& FluxStress );
-
     //! Destructor
     ~MS_Coupling_FluxStress() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param FluxStress MS_Coupling_FluxStress
-     * @return reference to a copy of the class
-     */
-    MS_Coupling_FluxStress& operator=( const MS_Coupling_FluxStress& FluxStress );
 
     //@}
 

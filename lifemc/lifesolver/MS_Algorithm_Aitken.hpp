@@ -61,27 +61,8 @@ public:
     //! Constructor
     MS_Algorithm_Aitken();
 
-    //! Copy constructor
-    /*!
-     * @param algorithm MS_Algorithm_Aitken
-     */
-    MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm );
-
     //! Destructor
     ~MS_Algorithm_Aitken() {}
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-    //! Operator=
-    /*!
-     * @param algorithm MS_Algorithm
-     * @return reference to a copy of the class
-     */
-    MS_Algorithm_Aitken& operator=( const MS_Algorithm_Aitken& algorithm );
 
     //@}
 

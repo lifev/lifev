@@ -75,45 +75,6 @@ MS_Solver::MS_Solver() :
     MS_Algorithm_Factory::instance().registerProduct( Newton,              &MS_createNewton );
 }
 
-MS_Solver::MS_Solver( const MS_Solver& solver ) :
-        M_model             ( solver.M_model ),
-        M_algorithm         ( solver.M_algorithm ),
-        M_globalData        ( solver.M_globalData ),
-        M_comm              ( solver.M_comm ),
-        M_displayer         ( solver.M_displayer ),
-        M_chrono            ( solver.M_chrono )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::MS_Solver( solver ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Solver&
-MS_Solver::operator=( const MS_Solver& solver )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::operator=( solver ) \n";
-#endif
-
-    if ( this != &solver )
-    {
-        M_model             = solver.M_model;
-        M_algorithm         = solver.M_algorithm;
-        M_globalData        = solver.M_globalData;
-        M_comm              = solver.M_comm;
-        M_displayer         = solver.M_displayer;
-        M_chrono            = solver.M_chrono;
-    }
-
-    return *this;
-}
-
 // ===================================================
 // Methods
 // ===================================================

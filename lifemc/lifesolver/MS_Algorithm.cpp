@@ -59,43 +59,6 @@ MS_Algorithm::MS_Algorithm() :
 
 }
 
-MS_Algorithm::MS_Algorithm( const MS_Algorithm& algorithm ) :
-        M_type                       ( algorithm.M_type ),
-        M_multiscale                 ( algorithm.M_multiscale ),
-        M_couplingVariables          ( algorithm.M_couplingVariables ),
-        M_couplingResiduals          ( algorithm.M_couplingResiduals ),
-        M_comm                       ( algorithm.M_comm ),
-        M_displayer                  ( algorithm.M_displayer ),
-        M_SubiterationsMaximumNumber ( algorithm.M_SubiterationsMaximumNumber ),
-        M_Tolerance                  ( algorithm.M_Tolerance )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MS_Algorithm::MS_Algorithm( algorithm ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Algorithm&
-MS_Algorithm::operator=( const MS_Algorithm& algorithm )
-{
-    if ( this != &algorithm )
-    {
-        M_type                       = algorithm.M_type;
-        M_multiscale                 = algorithm.M_multiscale;
-        M_couplingVariables          = algorithm.M_couplingVariables;
-        M_couplingResiduals          = algorithm.M_couplingResiduals;
-        M_comm                       = algorithm.M_comm;
-        M_displayer                  = algorithm.M_displayer;
-        M_SubiterationsMaximumNumber = algorithm.M_SubiterationsMaximumNumber;
-        M_Tolerance                  = algorithm.M_Tolerance;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale Algorithm Virtual Methods
 // ===================================================

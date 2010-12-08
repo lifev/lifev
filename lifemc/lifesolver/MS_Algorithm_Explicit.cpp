@@ -51,29 +51,6 @@ MS_Algorithm_Explicit::MS_Algorithm_Explicit() :
     M_type = Explicit;
 }
 
-MS_Algorithm_Explicit::MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algorithm ) :
-        super               ( algorithm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Explicit::MS_Algorithm_Explicit( algorithm ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Algorithm_Explicit&
-MS_Algorithm_Explicit::operator=( const MS_Algorithm_Explicit& algorithm )
-{
-    if ( this != &algorithm )
-    {
-        super::operator=( algorithm );
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale Algorithm Virtual Methods
 // ===================================================

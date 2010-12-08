@@ -64,27 +64,8 @@ public:
     //! Constructor
     MS_Solver();
 
-    //! Copy constructor
-    /*!
-     * @param algorithm MS_Solver
-     */
-    MS_Solver( const MS_Solver& solver );
-
     //! Destructor
     ~MS_Solver() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param solver MS_solver
-     * @return reference to a copy of the class
-     */
-    MS_Solver& operator=( const MS_Solver& solver );
 
     //@}
 

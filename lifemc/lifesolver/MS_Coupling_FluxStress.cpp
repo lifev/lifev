@@ -56,39 +56,6 @@ MS_Coupling_FluxStress::MS_Coupling_FluxStress() :
     M_type = FluxStress;
 }
 
-MS_Coupling_FluxStress::MS_Coupling_FluxStress( const MS_Coupling_FluxStress& FluxStress ) :
-        super                ( FluxStress ),
-        M_baseFlux3D         ( FluxStress.M_baseFlux3D ),
-        M_baseStress3D       ( FluxStress.M_baseStress3D ),
-        M_baseFlux1D         ( FluxStress.M_baseFlux1D ),
-        M_baseStress1D       ( FluxStress.M_baseStress1D ),
-        M_stressType         ( FluxStress.M_stressType )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MS_Coupling_FluxStress::MS_Coupling_FluxStress( FluxStress ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Coupling_FluxStress&
-MS_Coupling_FluxStress::operator=( const MS_Coupling_FluxStress& FluxStress )
-{
-    if ( this != &FluxStress )
-    {
-        super::operator=( FluxStress );
-        M_baseFlux3D         = FluxStress.M_baseFlux3D;
-        M_baseStress3D       = FluxStress.M_baseStress3D;
-        M_baseFlux1D         = FluxStress.M_baseFlux1D;
-        M_baseStress1D       = FluxStress.M_baseStress1D;
-        M_stressType         = FluxStress.M_stressType;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale PhysicalCoupling Implementation
 // ===================================================

@@ -56,35 +56,6 @@ MS_Coupling_Stress::MS_Coupling_Stress() :
     M_type = Stress;
 }
 
-MS_Coupling_Stress::MS_Coupling_Stress( const MS_Coupling_Stress& Stress ) :
-        super               ( Stress ),
-        M_baseStress3D      ( Stress.M_baseStress3D ),
-        M_baseStress1D      ( Stress.M_baseStress1D ),
-        M_stressType        ( Stress.M_stressType )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MS_Coupling_Stress::MS_Coupling_Stress( Stress ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Coupling_Stress&
-MS_Coupling_Stress::operator=( const MS_Coupling_Stress& Stress )
-{
-    if ( this != &Stress )
-    {
-        super::operator=( Stress );
-        M_baseStress3D      = Stress.M_baseStress3D;
-        M_baseStress1D      = Stress.M_baseStress1D;
-        M_stressType        = Stress.M_stressType;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale PhysicalCoupling Implementation
 // ===================================================
