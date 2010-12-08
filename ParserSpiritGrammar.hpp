@@ -77,14 +77,15 @@ namespace LifeV
  *  \endverbatim
  *
  */
-template <typename iterator>
-class ParserSpiritGrammar : public qi::grammar< iterator, results_Type(), ascii::space_type >
+template < typename IteratorType >
+class ParserSpiritGrammar : public qi::grammar< IteratorType, results_Type(), ascii::space_type >
 {
 public:
 
     //! @name Public Types
     //@{
 
+    typedef IteratorType                                        iterator_Type;
     typedef boost::iterator_range< stringIterator_Type >        iteratorRange_Type;
 
     //@}
@@ -232,20 +233,20 @@ private:
 
     //@}
 
-    qi::rule< iterator, results_Type(), ascii::space_type > Start;
+    qi::rule< iterator_Type, results_Type(), ascii::space_type > Start;
 
-    qi::rule< iterator, void(), ascii::space_type >         Assignment;
-//    qi::rule< iterator, void(), ascii::space_type >         Command;
+    qi::rule< iterator_Type, void(), ascii::space_type >         Assignment;
+//    qi::rule< iterator_Type, void(), ascii::space_type >         Command;
 
-    qi::rule< iterator, double(), ascii::space_type >       Expression;
-    qi::rule< iterator, double(), ascii::space_type >       Compare;
-    qi::rule< iterator, double(), ascii::space_type >       PlusMinus;
-    qi::rule< iterator, double(), ascii::space_type >       MultiplyDivide;
-    qi::rule< iterator, double(), ascii::space_type >       Elevate;
-    qi::rule< iterator, double(), ascii::space_type >       Element;
-    qi::rule< iterator, double(), ascii::space_type >       Number;
-    qi::rule< iterator, double(), ascii::space_type >       Function;
-    qi::rule< iterator, double(), ascii::space_type >       Group;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Expression;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Compare;
+    qi::rule< iterator_Type, double(), ascii::space_type >       PlusMinus;
+    qi::rule< iterator_Type, double(), ascii::space_type >       MultiplyDivide;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Elevate;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Element;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Number;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Function;
+    qi::rule< iterator_Type, double(), ascii::space_type >       Group;
 
     qi::symbols<char, Real >                                Variable;
 };
@@ -255,8 +256,8 @@ private:
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-template <typename iterator>
-ParserSpiritGrammar< iterator >::ParserSpiritGrammar() :
+template < typename IteratorType >
+ParserSpiritGrammar< IteratorType >::ParserSpiritGrammar() :
         ParserSpiritGrammar::base_type( Start ),
         Start                               (),
         Assignment                          (),
@@ -388,8 +389,8 @@ ParserSpiritGrammar< iterator >::ParserSpiritGrammar() :
         ;
 }
 
-template <typename iterator>
-ParserSpiritGrammar< iterator >::ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar ) :
+template < typename IteratorType >
+ParserSpiritGrammar< IteratorType >::ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar ) :
         ParserSpiritGrammar::base_type     ( spiritGrammar.Start ),
         Start                               ( spiritGrammar.Start ),
         Assignment                          ( spiritGrammar.Assignment ),
@@ -410,14 +411,14 @@ ParserSpiritGrammar< iterator >::ParserSpiritGrammar( const ParserSpiritGrammar&
 // ===================================================
 // Operators
 // ===================================================
-template <typename iterator>
-ParserSpiritGrammar< iterator >&
-ParserSpiritGrammar< iterator >::operator=( const ParserSpiritGrammar& spiritGrammar )
+template < typename IteratorType >
+ParserSpiritGrammar< IteratorType >&
+ParserSpiritGrammar< IteratorType >::operator=( const ParserSpiritGrammar& spiritGrammar )
 {
     if ( this != &spiritGrammar )
     {
         ParserSpiritGrammar::base_type::operator=( spiritGrammar.Start );
-        //ParserSpiritGrammar< iterator >::operator=( spiritGrammar );
+        //ParserSpiritGrammar< IteratorType >::operator=( spiritGrammar );
         Start                               = spiritGrammar.Start;
         Assignment                          = spiritGrammar.Assignment;
 //        Command                             = spiritGrammar.Command;
@@ -439,9 +440,9 @@ ParserSpiritGrammar< iterator >::operator=( const ParserSpiritGrammar& spiritGra
 // ===================================================
 // Set Methods
 // ===================================================
-template <typename iterator>
+template < typename IteratorType >
 inline void
-ParserSpiritGrammar< iterator >::setDefaultVariables()
+ParserSpiritGrammar< IteratorType >::setDefaultVariables()
 {
     Variable.add( "pi" , 3.141592653589793 );
     Variable.add( "e", 2.718281828459046 );
@@ -449,9 +450,9 @@ ParserSpiritGrammar< iterator >::setDefaultVariables()
     //add( "pi", 3.1415926535897932384626433832795 ); //Better only with long Real!
 }
 
-template <typename iterator>
+template < typename IteratorType >
 inline void
-ParserSpiritGrammar< iterator >::setVariable( const std::string& name, const Real& value )
+ParserSpiritGrammar< IteratorType >::setVariable( const std::string& name, const Real& value )
 {
     Real *p = Variable.find( name );
     if ( p != 0 )
@@ -460,7 +461,7 @@ ParserSpiritGrammar< iterator >::setVariable( const std::string& name, const Rea
         Variable.add( name, value );
 }
 
-//qi::rule< iterator, double(double), ascii::space_type > Power, MultiplyDivide, PlusMinus, Compare;
+//qi::rule< IteratorType, double(double), ascii::space_type > Power, MultiplyDivide, PlusMinus, Compare;
 /*
         Expression
             =   ExpressionLevel_1                          [qi::_val = qi::_1]
@@ -492,7 +493,7 @@ ParserSpiritGrammar< iterator >::setVariable( const std::string& name, const Rea
 #else
 
 //! ParserSpiritGrammar - An empty implementation for boost version < 1.41
-template <typename iterator>
+template < typename IteratorType >
 class ParserSpiritGrammar
 {
 public:
