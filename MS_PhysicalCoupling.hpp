@@ -68,27 +68,8 @@ public:
     //! Constructor
     MS_PhysicalCoupling();
 
-    //! Copy constructor
-    /*!
-     * @param coupling MS_PhysicalCoupling
-     */
-    MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling );
-
     //! Destructor
     virtual ~MS_PhysicalCoupling() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param coupling MS_PhysicalCoupling
-     * @return reference to a copy of the class
-     */
-    MS_PhysicalCoupling& operator=( const MS_PhysicalCoupling& coupling );
 
     //@}
 

@@ -59,27 +59,8 @@ public:
     //! Constructor
     MS_Algorithm();
 
-    //! Copy constructor
-    /*!
-     * @param algorithm MS_Algorithm
-     */
-    MS_Algorithm( const MS_Algorithm& algorithm );
-
     //! Destructor
     virtual ~MS_Algorithm() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param algorithm MS_Algorithm
-     * @return reference to a copy of the class
-     */
-    MS_Algorithm& operator=( const MS_Algorithm& algorithm );
 
     //@}
 

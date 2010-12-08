@@ -65,27 +65,8 @@ public:
     //! Constructor
     MS_Coupling_BoundaryCondition();
 
-    //! Copy constructor
-    /*!
-     * @param BoundaryCondition MS_Coupling_BoundaryCondition
-     */
-    MS_Coupling_BoundaryCondition( const MS_Coupling_BoundaryCondition& BoundaryCondition );
-
     //! Destructor
     ~MS_Coupling_BoundaryCondition() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param boundaryCondition MS_Coupling_BoundaryCondition
-     * @return reference to a copy of the class
-     */
-    MS_Coupling_BoundaryCondition& operator=( const MS_Coupling_BoundaryCondition& boundaryCondition );
 
     //@}
 

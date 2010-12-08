@@ -53,33 +53,6 @@ MS_Algorithm_Newton::MS_Algorithm_Newton() :
     M_type = Newton;
 }
 
-MS_Algorithm_Newton::MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm ) :
-        super               ( algorithm ),
-        M_solver            ( algorithm.M_solver ),
-        M_Jacobian          ( algorithm.M_Jacobian )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton( algorithm ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Algorithm_Newton&
-MS_Algorithm_Newton::operator=( const MS_Algorithm_Newton& algorithm )
-{
-    if ( this != &algorithm )
-    {
-        super::operator=( algorithm );
-        M_solver          = algorithm.M_solver;
-        M_Jacobian        = algorithm.M_Jacobian;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale Algorithm Virtual Methods
 // ===================================================

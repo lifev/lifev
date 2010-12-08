@@ -123,27 +123,8 @@ public:
     //! Constructor
     MS_Model_1D();
 
-    //! Copy constructor
-    /*!
-     * @param OneDimensionalModel MS_Model_1D
-     */
-    MS_Model_1D( const MS_Model_1D& OneDimensionalModel );
-
     //! Destructor
     ~MS_Model_1D() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param OneDimensionalModel MS_Model_1D
-     * @return reference to a copy of the class
-     */
-    MS_Model_1D& operator = ( const MS_Model_1D& OneDimensionalModel );
 
     //@}
 

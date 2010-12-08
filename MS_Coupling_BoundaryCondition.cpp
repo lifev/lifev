@@ -54,35 +54,6 @@ MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
     M_type = BoundaryCondition;
 }
 
-MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition( const MS_Coupling_BoundaryCondition& BoundaryCondition ) :
-        super       ( BoundaryCondition ),
-        M_FileName  ( BoundaryCondition.M_FileName ),
-        M_list      ( BoundaryCondition.M_list ),
-        M_listSize  ( BoundaryCondition.M_listSize )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition( BoundaryCondition ) \n";
-#endif
-
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Coupling_BoundaryCondition&
-MS_Coupling_BoundaryCondition::operator=( const MS_Coupling_BoundaryCondition& boundaryCondition )
-{
-    if ( this != &boundaryCondition )
-    {
-        super::operator=( boundaryCondition );
-        M_FileName     = boundaryCondition.M_FileName;
-        M_list         = boundaryCondition.M_list;
-        M_listSize     = boundaryCondition.M_listSize;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale PhysicalCoupling Implementation
 // ===================================================

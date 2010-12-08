@@ -59,27 +59,8 @@ public:
     //! Constructor
     MS_Algorithm_Explicit();
 
-    //! Copy constructor
-    /*!
-     * @param algorithm MS_Algorithm_Explicit
-     */
-    MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algorithm );
-
     //! Destructor
     ~MS_Algorithm_Explicit() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param algorithm MS_Algorithm
-     * @return reference to a copy of the class
-     */
-    MS_Algorithm_Explicit& operator=( const MS_Algorithm_Explicit& algorithm );
 
     //@}
 

@@ -67,55 +67,6 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
     M_ID = M_couplingsNumber++;
 }
 
-MS_PhysicalCoupling::MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling ) :
-        M_ID                          ( coupling.M_ID ),
-        M_type                        ( coupling.M_type ),
-        M_models                      ( coupling.M_models ),
-        M_couplingName                ( coupling.M_couplingName ),
-        M_flags                       ( coupling.M_flags ),
-        M_globalData                  ( coupling.M_globalData ),
-        M_couplingIndex               ( coupling.M_couplingIndex ),
-        M_LocalCouplingVariables      ( coupling.M_LocalCouplingVariables ),
-        M_LocalCouplingResiduals      ( coupling.M_LocalCouplingResiduals ),
-        M_timeInterpolationOrder      ( coupling.M_timeInterpolationOrder ),
-        M_perturbedCoupling           ( coupling.M_perturbedCoupling ),
-        M_comm                        ( coupling.M_comm ),
-        M_displayer                   ( coupling.M_displayer )
-
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::MS_PhysicalCoupling( coupling ) \n";
-#endif
-
-    M_ID = M_couplingsNumber++;
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_PhysicalCoupling&
-MS_PhysicalCoupling::operator=( const MS_PhysicalCoupling& coupling )
-{
-    if ( this != &coupling )
-    {
-        M_ID                          = coupling.M_ID;
-        M_type                        = coupling.M_type;
-        M_models                      = coupling.M_models;
-        M_couplingName                = coupling.M_couplingName;
-        M_flags                       = coupling.M_flags;
-        M_globalData                  = coupling.M_globalData;
-        M_couplingIndex               = coupling.M_couplingIndex;
-        M_LocalCouplingVariables      = coupling.M_LocalCouplingVariables;
-        M_LocalCouplingResiduals      = coupling.M_LocalCouplingResiduals;
-        M_timeInterpolationOrder      = coupling.M_timeInterpolationOrder;
-        M_perturbedCoupling           = coupling.M_perturbedCoupling;
-        M_comm                        = coupling.M_comm;
-        M_displayer                   = coupling.M_displayer;
-    }
-    return *this;
-}
-
 // ===================================================
 // MultiScale PhysicalCoupling Virtual Methods
 // ===================================================

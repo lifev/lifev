@@ -52,18 +52,6 @@ MS_Model_MultiScale::MS_Model_MultiScale() :
     M_type = MultiScale;
 }
 
-MS_Model_MultiScale::MS_Model_MultiScale( const MS_Model_MultiScale& multiscale ) :
-        super               ( multiscale ),
-        M_modelsList        ( multiscale.M_modelsList ),
-        M_couplingsList     ( multiscale.M_couplingsList )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::MS_Model_MultiScale( multiscale ) \n";
-#endif
-
-}
-
 MS_Model_MultiScale::~MS_Model_MultiScale()
 {
 
@@ -77,26 +65,6 @@ MS_Model_MultiScale::~MS_Model_MultiScale()
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->ClearModelsList();
-}
-
-// ===================================================
-// Operators
-// ===================================================
-MS_Model_MultiScale&
-MS_Model_MultiScale::operator=( const MS_Model_MultiScale& multiscale )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::operator=( multiscale ) \n";
-#endif
-
-    if ( this != &multiscale )
-    {
-        super::operator=( multiscale );
-        M_modelsList      = multiscale.M_modelsList;
-        M_couplingsList   = multiscale.M_couplingsList;
-    }
-    return *this;
 }
 
 // ===================================================

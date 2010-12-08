@@ -64,27 +64,8 @@ public:
     //! Constructor
     MS_Algorithm_Newton();
 
-    //! Copy constructor
-    /*!
-     * @param algorithm MS_Algorithm_Newton
-     */
-    MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm );
-
     //! Destructor
     ~MS_Algorithm_Newton() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param algorithm MS_Algorithm
-     * @return reference to a copy of the class
-     */
-    MS_Algorithm_Newton& operator=( const MS_Algorithm_Newton& algorithm );
 
     //@}
 

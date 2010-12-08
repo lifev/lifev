@@ -62,27 +62,8 @@ public:
     //! Constructor
     MS_Coupling_Stress();
 
-    //! Copy constructor
-    /*!
-     * @param Stress MS_Coupling_Stress
-     */
-    MS_Coupling_Stress( const MS_Coupling_Stress& Stress );
-
     //! Destructor
     ~MS_Coupling_Stress() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param Stress MS_Coupling_Stress
-     * @return reference to a copy of the class
-     */
-    MS_Coupling_Stress& operator=( const MS_Coupling_Stress& Stress );
 
     //@}
 

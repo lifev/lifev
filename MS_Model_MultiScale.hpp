@@ -73,27 +73,8 @@ public:
     //! Constructor
     MS_Model_MultiScale();
 
-    //! Copy constructor
-    /*!
-     * @param multiscale MS_Model_MultiScale
-     */
-    MS_Model_MultiScale( const MS_Model_MultiScale& multiscale );
-
     //! Destructor
     ~MS_Model_MultiScale();
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param multiscale MS_Model_MultiScale
-     * @return reference to a copy of the class
-     */
-    MS_Model_MultiScale& operator=( const MS_Model_MultiScale& multiscale );
 
     //@}
 
