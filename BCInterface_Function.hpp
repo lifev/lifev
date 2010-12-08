@@ -83,7 +83,7 @@ namespace LifeV
  *  The only difference is that the second kind of instruction is more efficient during execution.
  *
  */
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 class BCInterface_Function
 {
 public:
@@ -91,6 +91,7 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface_Data                                                      data_Type;
     typedef BCFunctionBase                                                        bcFunction_Type;
 
@@ -157,7 +158,7 @@ private:
 
     BCInterface_Function( const BCInterface_Function& function );
 
-    virtual BCInterface_Function& operator=( const BCInterface_Function& function );
+    BCInterface_Function& operator=( const BCInterface_Function& function );
 
     //@}
 
@@ -182,17 +183,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename physicalSolver_Type >
-inline BCInterface_Function< physicalSolver_Type >* createBCInterface_Function()
+template< typename PhysicalSolverType >
+inline BCInterface_Function< PhysicalSolverType >* createBCInterface_Function()
 {
-    return new BCInterface_Function< physicalSolver_Type > ();
+    return new BCInterface_Function< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
-template< typename physicalSolver_Type >
-BCInterface_Function< physicalSolver_Type >::BCInterface_Function() :
+template< typename PhysicalSolverType >
+BCInterface_Function< PhysicalSolverType >::BCInterface_Function() :
         M_parser    (),
         M_base      (),
         M_mapID     ()
@@ -204,8 +205,8 @@ BCInterface_Function< physicalSolver_Type >::BCInterface_Function() :
 
 }
 
-template< typename physicalSolver_Type >
-BCInterface_Function< physicalSolver_Type >::BCInterface_Function( const data_Type& data ) :
+template< typename PhysicalSolverType >
+BCInterface_Function< PhysicalSolverType >::BCInterface_Function( const data_Type& data ) :
         M_parser    (),
         M_base      (),
         M_mapID     ()
@@ -221,9 +222,9 @@ BCInterface_Function< physicalSolver_Type >::BCInterface_Function( const data_Ty
 // ===================================================
 // Set Methods
 // ===================================================
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 void
-BCInterface_Function< physicalSolver_Type >::setData( const data_Type& data )
+BCInterface_Function< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -273,9 +274,9 @@ BCInterface_Function< physicalSolver_Type >::setData( const data_Type& data )
 // ===================================================
 // Get Methods
 // ===================================================
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 Real
-BCInterface_Function< physicalSolver_Type >::function( const Real& t,
+BCInterface_Function< PhysicalSolverType >::function( const Real& t,
                                             const Real& x,
                                             const Real& y,
                                             const Real& z,
@@ -304,9 +305,9 @@ BCInterface_Function< physicalSolver_Type >::function( const Real& t,
     return M_parser->Evaluate( 1 );
 }
 
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 Real
-BCInterface_Function< physicalSolver_Type >::functionID( const Real& t,
+BCInterface_Function< PhysicalSolverType >::functionID( const Real& t,
                                               const Real& x,
                                               const Real& y,
                                               const Real& z,

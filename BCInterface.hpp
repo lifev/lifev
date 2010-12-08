@@ -118,7 +118,7 @@ namespace LifeV
  *     In this case you have to manually set the TOTAL number of boundary conditions
  *     by using setHandlerParameters() function BEFORE building the handler.
  */
-template< class physicalSolver_Type >
+template< class PhysicalSolverType  >
 class BCInterface
 {
 public:
@@ -126,14 +126,15 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef PhysicalSolverType                                                                      physicalSolver_Type;
+    typedef BCInterface_Data                                                                        data_Type;
+
     typedef BCInterface_BaseList                                                                    bcBaseList_Type;
 
     typedef singleton< factory< BCInterface_Function< physicalSolver_Type > , bcBaseList_Type > >   factoryFunction_Type;
 
     typedef BCHandler                                                                               bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                     bcHandlerPtr_Type;
-
-    typedef BCInterface_Data                                                                        data_Type;
 
     typedef std::vector< boost::shared_ptr< BCInterface_Function< physicalSolver_Type > > >         vectorFunction_Type;
     typedef std::vector< boost::shared_ptr< BCFunctionDirectional > >                               vectorFunctionDirectional_Type;
@@ -195,12 +196,12 @@ public:
      * @param mode mode of the condition
      * @param base base of the condition
      */
-    template< class BCBase >
+    template< class BCBaseType >
     void addBC( const BCName& name,
                 const BCFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCBase& base );
+                BCBaseType& base );
 
     //! Add a Boundary Condition with component using the standard interface of the BCHandler
     /*!
@@ -211,13 +212,13 @@ public:
      * @param base base of the condition
      * @param comp component of the condition
      */
-    template< class BCBase, class BCComp >
+    template< class BCBaseType, class BCCompType >
     void addBC( const BCName& name,
                 const BCFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCBase& base,
-                const BCComp& comp );
+                BCBaseType& base,
+                const BCCompType& comp );
 
     //@}
 
@@ -279,19 +280,19 @@ private:
     //! @name Private Methods
     //@{
 
-    inline void buildBase();
+    void buildBase();
 
-    template< class BCInterfaceBase >
-    inline void addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector );
+    template< class BCInterfaceBaseType >
+    void addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
-    template< class BCInterfaceBase >
-    inline void addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector, const bcBaseList_Type& physicalSolver );
+    template< class BCInterfaceBaseType >
+    void addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver );
 
     // This method should be removed: it is a workaround due to legacy of LifeV BC.
-    inline void addBCManager( BCVectorInterface& base );
+    void addBCManager( BCVectorInterface& base );
 
-    template< class BCBase >
-    inline void addBCManager( BCBase& base );
+    template< class BCBaseType >
+    void addBCManager( BCBaseType& base );
 
     //@}
 
@@ -316,8 +317,8 @@ private:
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-template< class physicalSolver_Type >
-BCInterface< physicalSolver_Type >::BCInterface( ) :
+template< class PhysicalSolverType >
+BCInterface< PhysicalSolverType >::BCInterface( ) :
         M_bcNumber                ( 0 ),
         M_hint                    ( bcHandler_Type::HINT_BC_NONE ),
         M_handler                 (),
@@ -341,9 +342,9 @@ BCInterface< physicalSolver_Type >::BCInterface( ) :
 // ===================================================
 // Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface< physicalSolver_Type >::fillHandler( const std::string& fileName, const std::string& dataSection )
+BCInterface< PhysicalSolverType >::fillHandler( const std::string& fileName, const std::string& dataSection )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -362,9 +363,9 @@ BCInterface< physicalSolver_Type >::fillHandler( const std::string& fileName, co
     }
 }
 
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface< physicalSolver_Type >::updatePhysicalSolverVariables()
+BCInterface< PhysicalSolverType >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -381,9 +382,9 @@ BCInterface< physicalSolver_Type >::updatePhysicalSolverVariables()
     }
 }
 
-template< class physicalSolver_Type > template< class BCBase >
+template< class PhysicalSolverType > template< class BCBaseType >
 void
-BCInterface< physicalSolver_Type >::addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBase& base )
+BCInterface< PhysicalSolverType >::addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBaseType& base )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -393,9 +394,9 @@ BCInterface< physicalSolver_Type >::addBC( const BCName& name, const BCFlag& fla
     M_handler->addBC( name, flag, type, mode, base );
 }
 
-template< class physicalSolver_Type > template< class BCBase, class BCComp >
+template< class PhysicalSolverType > template< class BCBaseType, class BCCompType >
 void
-BCInterface< physicalSolver_Type >::addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBase& base, const BCComp& comp )
+BCInterface< PhysicalSolverType >::addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBaseType& base, const BCCompType& comp )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -408,9 +409,9 @@ BCInterface< physicalSolver_Type >::addBC( const BCName& name, const BCFlag& fla
 // ===================================================
 // Set Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType  >
 void
-BCInterface< physicalSolver_Type >::setPhysicalSolver( const boost::shared_ptr< physicalSolver_Type >& physicalSolver )
+BCInterface< PhysicalSolverType  >::setPhysicalSolver( const boost::shared_ptr< physicalSolver_Type >& physicalSolver )
 {
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
@@ -430,9 +431,9 @@ BCInterface< physicalSolver_Type >::setPhysicalSolver( const boost::shared_ptr< 
     }
 }
 
-template< class physicalSolver_Type >
+template< class PhysicalSolverType  >
 inline void
-BCInterface< physicalSolver_Type >::setHandlerParameters( const ID& bcNumber, const bcHandler_Type::BCHints& hint )
+BCInterface< PhysicalSolverType  >::setHandlerParameters( const ID& bcNumber, const bcHandler_Type::BCHints& hint )
 {
     M_bcNumber = bcNumber;
     M_hint     = hint;
@@ -447,9 +448,9 @@ BCInterface< physicalSolver_Type >::setHandlerParameters( const ID& bcNumber, co
 // ===================================================
 // Private Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType  >
 inline void
-BCInterface< physicalSolver_Type >::buildBase()
+BCInterface< PhysicalSolverType  >::buildBase()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -477,28 +478,28 @@ BCInterface< physicalSolver_Type >::buildBase()
     }
 }
 
-template< class physicalSolver_Type > template< class BCInterfaceBase >
+template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface< physicalSolver_Type >::addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector )
+BCInterface< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-    boost::shared_ptr< BCInterfaceBase > Function( new BCInterfaceBase( M_data ) );
+    boost::shared_ptr< BCInterfaceBaseType > Function( new BCInterfaceBaseType( M_data ) );
     baseVector.push_back( Function );
 }
 
-template< class physicalSolver_Type > template< class BCInterfaceBase >
+template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface< physicalSolver_Type >::addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector, const bcBaseList_Type& physicalSolver )
+BCInterface< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBase > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
 
     function->setData( M_data );
 
     baseVector.push_back( function );
 }
 
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 inline void
-BCInterface< physicalSolver_Type >::addBCManager( BCVectorInterface& base )
+BCInterface< PhysicalSolverType >::addBCManager( BCVectorInterface& base )
 {
     if ( !M_handler.get() ) // If BCHandler has not been created yet, we do it now
         createHandler();
@@ -530,9 +531,9 @@ BCInterface< physicalSolver_Type >::addBCManager( BCVectorInterface& base )
     }
 }
 
-template< class physicalSolver_Type > template< class BCBase >
+template< class PhysicalSolverType > template< class BCBaseType >
 inline void
-BCInterface< physicalSolver_Type >::addBCManager( BCBase& base )
+BCInterface< PhysicalSolverType >::addBCManager( BCBaseType& base )
 {
     if ( !M_handler.get() ) // If BCHandler has not been created yet, we do it now
         createHandler();

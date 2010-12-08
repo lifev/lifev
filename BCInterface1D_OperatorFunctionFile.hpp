@@ -53,21 +53,20 @@ namespace LifeV
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *  The function string can contain Operator parameters.
  */
-template< class physicalSolver_Type >
-class BCInterface1D_OperatorFunctionFile: public virtual BCInterface1D_FunctionFile< physicalSolver_Type > ,
-        public virtual BCInterface1D_OperatorFunction< physicalSolver_Type >
+template< class PhysicalSolverType >
+class BCInterface1D_OperatorFunctionFile: public virtual BCInterface1D_FunctionFile< PhysicalSolverType > ,
+        public virtual BCInterface1D_OperatorFunction< PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Function< physicalSolver_Type >           super0;
-    typedef BCInterface1D_FunctionFile< physicalSolver_Type >       super1;
-    typedef BCInterface1D_OperatorFunction< physicalSolver_Type >   super2;
-
-    typedef BCInterface1D_Data                                      data_Type;
-
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
+    typedef BCInterface1D_Data                                                    data_Type;
+    typedef BCInterface1D_Function< physicalSolver_Type >                         function_Type;
+    typedef BCInterface1D_FunctionFile< physicalSolver_Type >                     functionFile_Type;
+    typedef BCInterface1D_OperatorFunction< physicalSolver_Type >                 functionSolver_Type;
     //@}
 
 
@@ -107,7 +106,7 @@ private:
 
     BCInterface1D_OperatorFunctionFile( const BCInterface1D_OperatorFunctionFile& function );
 
-    virtual BCInterface1D_OperatorFunctionFile& operator=( const BCInterface1D_OperatorFunctionFile& function );
+    BCInterface1D_OperatorFunctionFile& operator=( const BCInterface1D_OperatorFunctionFile& function );
 
     //@}
 
@@ -117,20 +116,20 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename physicalSolver_Type >
-inline BCInterface1D_Function< physicalSolver_Type >* createBCInterface1D_OperatorFunctionFile()
+template< typename PhysicalSolverType >
+inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_OperatorFunctionFile()
 {
-    return new BCInterface1D_OperatorFunctionFile< physicalSolver_Type > ();
+    return new BCInterface1D_OperatorFunctionFile< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< class physicalSolver_Type >
-BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_OperatorFunctionFile() :
-        super0      (),
-        super1      (),
-        super2      ()
+template< class PhysicalSolverType >
+BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::BCInterface1D_OperatorFunctionFile() :
+        function_Type          (),
+        functionFile_Type      (),
+        functionSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -139,11 +138,11 @@ BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_Operato
 
 }
 
-template< class physicalSolver_Type >
-BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_OperatorFunctionFile( const data_Type& data ) :
-        super0      (),
-        super1      (),
-        super2      ()
+template< class PhysicalSolverType >
+BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::BCInterface1D_OperatorFunctionFile( const data_Type& data ) :
+        function_Type          (),
+        functionFile_Type      (),
+        functionSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -156,20 +155,20 @@ BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::BCInterface1D_Operato
 // ===================================================
 // Set Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface1D_OperatorFunctionFile< physicalSolver_Type >::setData( const data_Type& data )
+BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::setData" << "\n";
 #endif
-    super1::setData( data );
+    functionFile_Type::setData( data );
 
-    //super2::setData( data ); Cannot call directly, because it call again BCInterface1D1D_Function::setup( data )
-    super2::M_side = data.side();
+    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterface1D1D_Function::setup( data )
+    functionSolver_Type::M_side = data.side();
 
-    super2::createAccessList( data );
+    functionSolver_Type::createAccessList( data );
 }
 
 } // Namespace LifeV

@@ -70,7 +70,7 @@ namespace LifeV
  *
  *  function = 'a=5.67436; (a*sin(2*pi*t))'
  */
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 class BCInterface1D_Function
 {
 public:
@@ -78,6 +78,7 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface1D_Data                                                    data_Type;
     typedef OneDimensionalModel_BCFunction                                        bcFunction_Type;
 
@@ -144,7 +145,7 @@ private:
 
     BCInterface1D_Function( const BCInterface1D_Function& function );
 
-    virtual BCInterface1D_Function& operator=( const BCInterface1D_Function& function );
+    BCInterface1D_Function& operator=( const BCInterface1D_Function& function );
 
     //@}
 
@@ -168,17 +169,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename physicalSolver_Type >
-inline BCInterface1D_Function< physicalSolver_Type >* createBCInterface1D_Function()
+template< typename PhysicalSolverType >
+inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_Function()
 {
-    return new BCInterface1D_Function< physicalSolver_Type > ();
+    return new BCInterface1D_Function< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
-template< typename physicalSolver_Type >
-BCInterface1D_Function< physicalSolver_Type >::BCInterface1D_Function() :
+template< typename PhysicalSolverType >
+BCInterface1D_Function< PhysicalSolverType >::BCInterface1D_Function() :
         M_parser    (),
         M_base      ()
 {
@@ -189,8 +190,8 @@ BCInterface1D_Function< physicalSolver_Type >::BCInterface1D_Function() :
 
 }
 
-template< typename physicalSolver_Type >
-BCInterface1D_Function< physicalSolver_Type >::BCInterface1D_Function( const data_Type& data ) :
+template< typename PhysicalSolverType >
+BCInterface1D_Function< PhysicalSolverType >::BCInterface1D_Function( const data_Type& data ) :
         M_parser    (),
         M_base      ()
 {
@@ -205,9 +206,9 @@ BCInterface1D_Function< physicalSolver_Type >::BCInterface1D_Function( const dat
 // ===================================================
 // Set Methods
 // ===================================================
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 void
-BCInterface1D_Function< physicalSolver_Type >::setData( const data_Type& data )
+BCInterface1D_Function< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -225,9 +226,9 @@ BCInterface1D_Function< physicalSolver_Type >::setData( const data_Type& data )
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 Real
-BCInterface1D_Function< physicalSolver_Type >::function( const Real& t )
+BCInterface1D_Function< PhysicalSolverType >::function( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

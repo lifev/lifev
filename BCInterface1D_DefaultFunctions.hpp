@@ -64,7 +64,7 @@ namespace LifeV
  *
  *	To get the base for the boundary condition, call the \c base() method.
  */
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 class BCInterface1D_DefaultFunctions
 {
 public:
@@ -72,6 +72,7 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface1D_Data                                                    data_Type;
 
     typedef OneDimensionalModel_BC::BCFunction_Type                               bcFunction_Type;
@@ -165,8 +166,8 @@ private:
 // ===================================================
 // Constructors
 // ===================================================
-template< class physicalSolver_Type >
-BCInterface1D_DefaultFunctions< physicalSolver_Type >::BCInterface1D_DefaultFunctions() :
+template< class PhysicalSolverType >
+BCInterface1D_DefaultFunctions< PhysicalSolverType >::BCInterface1D_DefaultFunctions() :
         M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
@@ -177,8 +178,8 @@ BCInterface1D_DefaultFunctions< physicalSolver_Type >::BCInterface1D_DefaultFunc
 
 }
 
-template< class physicalSolver_Type >
-BCInterface1D_DefaultFunctions< physicalSolver_Type >::BCInterface1D_DefaultFunctions( const data_Type& data ) :
+template< class PhysicalSolverType >
+BCInterface1D_DefaultFunctions< PhysicalSolverType >::BCInterface1D_DefaultFunctions( const data_Type& data ) :
         M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
@@ -193,9 +194,9 @@ BCInterface1D_DefaultFunctions< physicalSolver_Type >::BCInterface1D_DefaultFunc
 // ===================================================
 // Set Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 inline void
-BCInterface1D_DefaultFunctions< physicalSolver_Type >::setData( const data_Type& data )
+BCInterface1D_DefaultFunctions< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -231,10 +232,6 @@ BCInterface1D_DefaultFunctions< physicalSolver_Type >::setData( const data_Type&
 
     case Absorbing:
 
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface1D_DefaultFunctions::checkFunction                          Absorbing" << "\n";
-#endif
-
         M_defaultFunction.reset( new OneDimensionalModel_BCFunction_Absorbing( data.side(), data.quantity() ) );
 
         M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
@@ -248,7 +245,6 @@ BCInterface1D_DefaultFunctions< physicalSolver_Type >::setData( const data_Type&
 
         M_base->setFunction( boost::bind( &OneDimensionalModel_BCFunction_Resistance::operator(),
                                           dynamic_cast<OneDimensionalModel_BCFunction_Resistance *> ( &( *M_defaultFunction ) ), _1, _2 ) );
-
 
         break;
 
