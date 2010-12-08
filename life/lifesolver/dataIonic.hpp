@@ -101,12 +101,6 @@ public:
     std::string wOrder() const;
 */
 
-private:
-
-    bool        M_hasHeterogeneousTauClose;
-
-    UInt        M_verbose;
-
     //! RogersMcCulloch 1994 Ionic Model parameters
     Real        M_a;
     Real        M_b;
@@ -117,7 +111,8 @@ private:
     Real        M_potentialAmplitude;
     Real        M_restPotential;
     Real        M_initialRepolarization;
-    //Mitchell & Schaeffer
+
+    //!Mitchell & Schaeffer
     Real        M_tau_in;   // = 0.8
     Real        M_tau_out;  // = 18.0
     Real        M_tau_open; // = 300.0
@@ -130,10 +125,13 @@ private:
     Real        M_tend;
     Real        M_BDForder;       //= 1
 
+    bool        M_hasHeterogeneousTauClose;
+private:
+
+    UInt        M_verbose;
+
     std::string M_meshFile;
     std::string M_meshDirectory;
-
-
 
 
 };

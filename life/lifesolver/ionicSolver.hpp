@@ -66,6 +66,8 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef DataIonic data_Type;
+
     typedef Real ( *Function ) ( const Real&,
                                  const Real&,
                                  const Real&,
@@ -200,7 +202,7 @@ template< typename Mesh,
 class MitchellSchaeffer : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_type	data_Type;
+	typedef typename IonicSolver<Mesh, SolverType>::data_Type	data_Type;
 	typedef typename IonicSolver<Mesh, SolverType>::vector_type	vector_Type;
 	typedef typename IonicSolver<Mesh, SolverType>::Function 	Function;
 	typedef typename IonicSolver<Mesh, SolverType>::fct_TauClose	fct_TauClose;
@@ -264,7 +266,7 @@ MitchellSchaeffer( const data_Type& dataType,
     M_sol_w ( IonicSolver<Mesh, SolverType>::M_localMap ),
     M_wVecRep( M_sol_w, Repeated ),
     M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
-    order_bdf ( IonicSolver<Mesh, SolverType>::M_data.order_bdf ),
+    order_bdf ( IonicSolver<Mesh, SolverType>::M_data.M_BDForder ),
     bdf_w( order_bdf )
 {
 	setHeteroTauClose(this->M_data.M_ShdPtr->get_heterotauclose());
@@ -315,9 +317,9 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 	//! dw/dt ={
 	//!            -w/tau_close   if u > vcrit
 
-	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/this->M_data.tau_open );
-	Real aux = 1.0/((this->M_data.v_max - this->M_data.v_min)*(this->M_data.v_max- this->M_data.v_min)* this->M_data.tau_open);
-	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/this->M_data.tau_close);
+	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/this->M_data.M_tau_open );
+	Real aux = 1.0/((this->M_data.M_potentialMaximum - this->M_data.M_potentialMinimum)*(this->M_data.M_potentialMaximum- this->M_data.M_potentialMinimum)* this->M_data.M_tau_open);
+	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/this->M_data.M_tau_close);
 	vector_Type M_time_der=bdf_w.time_der(timeStep);
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
@@ -332,9 +334,9 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 		x 	= this->M_mesh->point(ig).x();
         y 	= this->M_mesh->point(ig).y();
         z 	= this->M_mesh->point(ig).z();
-   		if (u[ig] < this->M_data.vcrit)
+   		if (u[ig] < this->M_data.M_criticalPotential)
             M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
-        else if (this->M_data.has_HeteroTauClose)
+        else if (this->M_data.M_hasHeterogeneousTauClose)
             M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/fct_Tau_Close(ref,x,y,z,ID))) *  M_time_der[ig];//aux2 * M_time_der[ig];
         else
             M_sol_w[ig] = aux2 *  M_time_der[ig];
@@ -352,13 +354,14 @@ void MitchellSchaeffer<Mesh, SolverType>::computeIion(  Real,
 {
 	for ( Int i = 0;i < uFESpace.fe().nbNode;i++ )
     {
-        elvec( i ) =  this->M_data.reac_amp*(((M_elvec( i ) / this->M_data.tau_in)
-                                              * (elvec_u( i ) - this->M_data.v_min)
-                                              * (elvec_u( i ) - this->M_data.v_min)
-                                              * (this->M_data.v_max - elvec_u( i ))
-                                              / (this->M_data.v_max - this->M_data.v_min) )
-                                             - (( elvec_u( i ) - this->M_data.v_min )
-                                                /(  this->M_data.tau_out * (this->M_data.v_max - this->M_data.v_min)))) ;
+        elvec( i ) =  this->M_reactionAmplitude*(((M_elvec( i ) / this->M_data.M_tau_in)
+                                              * (elvec_u( i ) - this->M_data.M_potentialMinimum)
+                                              * (elvec_u( i ) - this->M_data.M_potentialMinimum)
+                                              * (this->M_data.M_potentialMaximum - elvec_u( i ))
+                                              / (this->M_data.M_potentialMaximum - this->M_data.M_potentialMinimum) )
+                                             - (( elvec_u( i ) - this->M_data.M_potentialMinimum )
+                                                /(  this->M_data.M_tau_out * (this->M_data.M_potentialMaximum
+                                                                              - this->M_data.M_potentialMinimum)))) ;
     }
 }
 
@@ -366,7 +369,7 @@ template<typename Mesh, typename SolverType>
 void MitchellSchaeffer<Mesh, SolverType>::
 initialize( )
 {
-	M_sol_w.getEpetraVector().PutScalar (1.0/((this->M_data.v_max-this->M_data.v_min)*(this->M_data.v_max-this->M_data.v_min)));
+	M_sol_w.getEpetraVector().PutScalar (1.0/((this->M_data.M_potentialMaximum-this->M_data.M_potentialMinimum)*(this->M_data.M_potentialMaximum-this->M_data.M_potentialMinimum)));
 	bdf_w.initialize_unk(M_sol_w);
 	bdf_w.showMe();
 }
@@ -376,8 +379,8 @@ template< typename Mesh,
 class RogersMcCulloch : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_type data_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_type vector_Type;
+	typedef typename IonicSolver<Mesh, SolverType>::data_Type data_Type;
+	typedef typename IonicSolver<Mesh, SolverType>::vector_Type vector_Type;
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
     RogersMcCulloch( const data_Type& dataType,
@@ -459,15 +462,15 @@ template<typename Mesh, typename SolverType>
 void RogersMcCulloch<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real timeStep )
 {
 	//! Solving dw/dt= b/(A*T) (u - u0 - A d w)
-	Real G = this->M_data.b/this->M_data.A/this->M_data.T;
+	Real G = this->M_data.M_b/this->M_data.M_potentialAmplitude/this->M_data.M_timeUnit;
 
-	Real alpha = 1/timeStep + G*this->M_data.A*this->M_data.d;
+	Real alpha = 1/timeStep + G*this->M_data.M_potentialAmplitude*this->M_data.M_d;
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 	M_sol_w*=1/timeStep;
 	vector_Type temp(u);
-	temp.getEpetraVector().PutScalar (G*this->M_data.u0);
+	temp.getEpetraVector().PutScalar (G*this->M_data.M_restPotential);
 	M_sol_w+= G*u;
 	M_sol_w-= temp;
 	M_sol_w*=1/alpha;
@@ -484,8 +487,8 @@ void RogersMcCulloch<Mesh, SolverType>::computeIion(  Real Capacitance,
 {
 	Real u_ig, w_ig;
 
-	Real G1 = this->M_data.c1/this->M_data.T/pow(this->M_data.A,2.0);
-	Real G2 = this->M_data.c2/this->M_data.T;
+	Real G1 = this->M_data.M_c1/this->M_data.M_timeUnit/pow(this->M_data.M_potentialAmplitude,2.0);
+	Real G2 = this->M_data.M_c2/this->M_data.M_timeUnit;
 
         for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
@@ -497,7 +500,10 @@ void RogersMcCulloch<Mesh, SolverType>::computeIion(  Real Capacitance,
 
         for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
         {
-            elvec( i ) -= Capacitance*(G1*(u_ig- this->M_data.u0)*(u_ig - this->M_data.u0 - this->M_data.a*this->M_data.A)*(u_ig - this->M_data.u0 - this->M_data.A) + G2 * (u_ig - this->M_data.u0) * w_ig) * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
+            elvec( i ) -= Capacitance*(G1*(u_ig- this->M_data.M_restPotential)*
+(u_ig - this->M_data.M_restPotential - this->M_data.M_a*this->M_data.M_potentialAmplitude)*
+(u_ig - this->M_data.M_restPotential - this->M_data.M_potentialAmplitude) + G2 * (u_ig - this->M_data.M_restPotential) * w_ig) *
+ uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
         }
     }
 }
@@ -514,8 +520,8 @@ template< typename Mesh,
 class LuoRudy : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_type data_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_type vector_Type;
+	typedef typename IonicSolver<Mesh, SolverType>::data_Type data_Type;
+	typedef typename IonicSolver<Mesh, SolverType>::vector_Type vector_Type;
 	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
     LuoRudy( const data_Type&          dataType,

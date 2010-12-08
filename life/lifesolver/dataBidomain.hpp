@@ -153,6 +153,10 @@ public:
 
     //@}
 
+    region_Type M_reducedConductivityBox;
+    region_Type M_reducedConductivityCylinder;
+    region_Type M_reducedConductivitySphere;
+
 
 protected:
 private:
@@ -179,10 +183,6 @@ private:
     std::string M_fibersFile;
     std::string M_postProcessingDirectory; //! full name
     std::string M_uOrder;
-
-    region_Type M_reducedConductivityBox;
-    region_Type M_reducedConductivityCylinder;
-    region_Type M_reducedConductivitySphere;
 
 
 
