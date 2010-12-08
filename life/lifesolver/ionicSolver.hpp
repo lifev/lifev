@@ -1,34 +1,39 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with LifeV. If not, see <http://www.gnu.org/licences/>.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
+
 /*!
- * @file
- * @brief Class for choosing and solving ionic models in electrophysiology. Mitchel-Schaeffer, Rogers-McCulloch, Luo-Rudy I
- * @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
- * @date 11-2007
- * @contributors J.Castelneau (INRIA), Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- * @mantainer Lucia Mirabella <lucia.mirabella@mail.polimi.it>
- * @last update 11-2010
+  @file
+  @brief Class for choosing and solving ionic models in electrophysiology. Mitchel-Schaeffer, Rogers-McCulloch, Luo-Rudy I
+
+  @date 11-2007
+  @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
+
+  @contributors J.Castelneau (INRIA), Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+  @mantainer Lucia Mirabella <lucia.mirabella@mail.polimi.it>
+  @last update 11-2010
  */
 
 #ifndef _IONICSOLVER_H_
@@ -304,7 +309,10 @@ void MitchellSchaeffer<Mesh, SolverType>::setHeteroTauClose(fct_TauClose fct)
 }
 
 template<typename Mesh, typename SolverType>
-Real MitchellSchaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const
+Real MitchellSchaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref,
+                                                        const Real& x,
+                                                        const Real& y,
+                                                        const Real& z, const ID& i) const
 {
     return M_TauClose(ref, x, y, z, i);
 }
@@ -317,9 +325,16 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 	//! dw/dt ={
 	//!            -w/tau_close   if u > vcrit
 
-	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/this->M_data.M_tau_open );
-	Real aux = 1.0/((this->M_data.M_potentialMaximum - this->M_data.M_potentialMinimum)*(this->M_data.M_potentialMaximum- this->M_data.M_potentialMinimum)* this->M_data.M_tau_open);
-	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/this->M_data.M_tau_close);
+	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timeStep +
+                       1.0/this->M_data.M_tau_open );
+	Real aux = 1.0/((this->M_data.M_potentialMaximum -
+                     this->M_data.M_potentialMinimum) *
+                    (this->M_data.M_potentialMaximum -
+                     this->M_data.M_potentialMinimum) *
+                    this->M_data.M_tau_open);
+	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timeStep +
+                       1.0/this->M_data.M_tau_close);
+
 	vector_Type M_time_der=bdf_w.time_der(timeStep);
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
@@ -337,7 +352,9 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
    		if (u[ig] < this->M_data.M_criticalPotential)
             M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
         else if (this->M_data.M_hasHeterogeneousTauClose)
-            M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/*fct_Tau_Close(ref,x,y,z,ID)*/)) *  M_time_der[ig];//aux2 * M_time_der[ig];
+            M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timeStep  +
+                                  1.0/*fct_Tau_Close(ref,x,y,z,ID)*/)) *
+                M_time_der[ig];//aux2 * M_time_der[ig];
         else
             M_sol_w[ig] = aux2 *  M_time_der[ig];
 	}
@@ -354,14 +371,15 @@ void MitchellSchaeffer<Mesh, SolverType>::computeIion(  Real,
 {
 	for ( Int i = 0;i < uFESpace.fe().nbNode;i++ )
     {
-        elvec( i ) =  this->M_data.M_reactionAmplitude*(((M_elvec( i ) / this->M_data.M_tau_in)
-                                              * (elvec_u( i ) - this->M_data.M_potentialMinimum)
-                                              * (elvec_u( i ) - this->M_data.M_potentialMinimum)
-                                              * (this->M_data.M_potentialMaximum - elvec_u( i ))
-                                              / (this->M_data.M_potentialMaximum - this->M_data.M_potentialMinimum) )
-                                             - (( elvec_u( i ) - this->M_data.M_potentialMinimum )
-                                                /(  this->M_data.M_tau_out * (this->M_data.M_potentialMaximum
-                                                                              - this->M_data.M_potentialMinimum)))) ;
+        elvec( i ) =  this->M_data.M_reactionAmplitude*
+            (((M_elvec( i ) / this->M_data.M_tau_in) *
+              (elvec_u( i ) - this->M_data.M_potentialMinimum) *
+              (elvec_u( i ) - this->M_data.M_potentialMinimum) *
+              (this->M_data.M_potentialMaximum - elvec_u( i )) /
+              (this->M_data.M_potentialMaximum - this->M_data.M_potentialMinimum) ) -
+             (( elvec_u( i ) - this->M_data.M_potentialMinimum ) /
+              (  this->M_data.M_tau_out * (this->M_data.M_potentialMaximum -
+                                           this->M_data.M_potentialMinimum)))) ;
     }
 }
 
@@ -369,7 +387,11 @@ template<typename Mesh, typename SolverType>
 void MitchellSchaeffer<Mesh, SolverType>::
 initialize( )
 {
-	M_sol_w.getEpetraVector().PutScalar (1.0/((this->M_data.M_potentialMaximum-this->M_data.M_potentialMinimum)*(this->M_data.M_potentialMaximum-this->M_data.M_potentialMinimum)));
+	M_sol_w.getEpetraVector().PutScalar(1.0 /
+                                        ((this->M_data.M_potentialMaximum-
+                                          this->M_data.M_potentialMinimum)*
+                                         (this->M_data.M_potentialMaximum-
+                                          this->M_data.M_potentialMinimum)));
 	bdf_w.initialize_unk(M_sol_w);
 	bdf_w.showMe();
 }
@@ -501,9 +523,12 @@ void RogersMcCulloch<Mesh, SolverType>::computeIion(  Real Capacitance,
         for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
         {
             elvec( i ) -= Capacitance*(G1*(u_ig- this->M_data.M_restPotential)*
-(u_ig - this->M_data.M_restPotential - this->M_data.M_a*this->M_data.M_potentialAmplitude)*
-(u_ig - this->M_data.M_restPotential - this->M_data.M_potentialAmplitude) + G2 * (u_ig - this->M_data.M_restPotential) * w_ig) *
- uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
+                                       (u_ig - this->M_data.M_restPotential -
+                                        this->M_data.M_a*this->M_data.M_potentialAmplitude)*
+                                       (u_ig - this->M_data.M_restPotential -
+                                        this->M_data.M_potentialAmplitude) + G2 *
+                                       (u_ig - this->M_data.M_restPotential) * w_ig) *
+                uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
         }
     }
 }
@@ -560,11 +585,12 @@ public:
 
     const vector_Type& solution_Ca() const {return M_sol_Ca;}
 
-    Real k_0, k_i, na_0, na_i, R, T, F, PR, c, e_na, g_k, e_k, g_k1, e_k1, e_kp, e_si;
-    Real a_h, b_h, a_j, b_j, x_ii, a_m, b_m, a_d, b_d, a_f, b_f, a_X, b_X, ak1, bk1;
-    Real k_p, k_1inf, h_inf, tau_h, j_inf, tau_j, m_inf, tau_m, d_inf, tau_d, f_inf,
-    		tau_f, X_inf, tau_X;
-	//fast sodium current
+    Real M_K0, M_Ki, M_Na0, M_Nai, M_R, M_temperature, M_F, M_permeabilityRatio, M_c,
+        M_Ena, M_Gk, M_Ek, M_Gk1, M_Ek1, M_Ekp, M_Esi, M_ah, M_bh, M_aj, M_bj, M_xii,
+        M_am, M_bm, M_ad, M_bd, M_af, M_bf, M_aX, M_bX, M_ak1, M_bk1, M_Kp, M_K1inf,
+        M_hinf, M_tauh, M_jinf, M_tauj, M_minf, M_taum, M_dinf, M_taud, M_finf, M_tauf, M_Xinf, M_tauX;
+
+    //fast sodium current
 	Real M_Ina;
 	//slow inward current
 	Real M_Islow;
@@ -579,19 +605,19 @@ public:
     //Total time independent potassium current
     Real M_Ik1t;
 
-	vector_Type exp_vec_h;
-	vector_Type exp_vec_j;
-	vector_Type exp_vec_m;
-	vector_Type exp_vec_d;
-	vector_Type exp_vec_f;
-	vector_Type exp_vec_X;
-	vector_Type inf_vec_h;
-	vector_Type inf_vec_j;
-	vector_Type inf_vec_m;
-	vector_Type inf_vec_d;
-	vector_Type inf_vec_f;
-	vector_Type inf_vec_X;
-	vector_Type	dca_i_vec;
+	vector_Type M_vectorExponentialh;
+	vector_Type M_vectorExponentialj;
+	vector_Type M_vectorExponentialm;
+	vector_Type M_vectorExponentiald;
+	vector_Type M_vectorExponentialf;
+	vector_Type M_vectorExponentialX;
+	vector_Type M_vectorInfimumh;
+	vector_Type M_vectorInfimumj;
+	vector_Type M_vectorInfimumm;
+	vector_Type M_vectorInfimumd;
+	vector_Type M_vectorInfimumf;
+	vector_Type M_vectorInfimumX;
+	vector_Type	M_vectorIonicChange;
 
 protected:
     //! Global solution h
@@ -642,34 +668,35 @@ LuoRudy( const data_Type& dataType,
 			Iion( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_Iion_VecRep( Iion, Repeated ),
 			M_elvec_Iion ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
-			k_0(5.4),
-			k_i(145.),
-			na_0(140.),
-			na_i(18.),
-			R(8.314472), //% Joules/(Kelvin*mole)
-			T(307.7532), //%kelvins
-			F(96485.33838), //% coulumbs/mole
-			PR(0.01833), //% Na/K permeability ratio
-			c(1.), //% membrane capacitance set as 1 mui-F/cm^2
-			e_na(1000.*(R*T/F)*log(na_0/na_i)),
-			g_k(0.282*sqrt(k_0/5.4)),
-			e_k(1000.*(R*T/F)*log((k_0+PR*na_0) / (k_i+PR*na_i))),
-			g_k1(0.6047*sqrt(k_0/5.4)),
-			e_k1(1000.*(R*T/F)*log(k_0/k_i)),
-			e_kp(e_k1),
-			exp_vec_h(IonicSolver<Mesh, SolverType>::M_localMap),
-			exp_vec_j(IonicSolver<Mesh, SolverType>::M_localMap),
-			exp_vec_m(IonicSolver<Mesh, SolverType>::M_localMap),
-			exp_vec_d(IonicSolver<Mesh, SolverType>::M_localMap),
-			exp_vec_f(IonicSolver<Mesh, SolverType>::M_localMap),
-			exp_vec_X(IonicSolver<Mesh, SolverType>::M_localMap),
-			inf_vec_h(IonicSolver<Mesh, SolverType>::M_localMap),
-			inf_vec_j(IonicSolver<Mesh, SolverType>::M_localMap),
-			inf_vec_m(IonicSolver<Mesh, SolverType>::M_localMap),
-			inf_vec_d(IonicSolver<Mesh, SolverType>::M_localMap),
-			inf_vec_f(IonicSolver<Mesh, SolverType>::M_localMap),
-			inf_vec_X(IonicSolver<Mesh, SolverType>::M_localMap),
-			dca_i_vec(IonicSolver<Mesh, SolverType>::M_localMap)
+			M_K0(5.4),
+			M_Ki(145.),
+			M_Na0(140.),
+			M_Nai(18.),
+			M_R(8.314472), //% Joules/(Kelvin*mole)
+			M_temperature(307.7532), //%kelvins
+			M_F(96485.33838), //% coulumbs/mole
+			M_permeabilityRatio(0.01833), //% Na/K permeability ratio
+			M_c(1.), //% membrane capacitance set as 1 mui-F/cm^2
+			M_Ena(1000. * (M_R * M_temperature / M_F ) * log(M_Na0 / M_Nai) ),
+			M_Gk(0.282 * sqrt(M_K0 / 5.4)),
+			M_Ek(1000. * (M_R * M_temperature / M_F) * log((M_K0 + M_permeabilityRatio * M_Na0)
+                                                           / (M_Ki + M_permeabilityRatio * M_Nai))),
+			M_Gk1(0.6047 * sqrt(M_K0 / 5.4)),
+			M_Ek1(1000.* (M_R * M_temperature / M_F)* log(M_K0 / M_Ki)),
+			M_Ekp(M_Ek1),
+			M_vectorExponentialh(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialj(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialm(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentiald(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialf(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialX(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumh(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumj(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumm(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumd(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumf(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumX(IonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorIonicChange(IonicSolver<Mesh, SolverType>::M_localMap)
 {
 }
 
@@ -715,78 +742,122 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 		Int ig=u.BlockMap().MyGlobalElements()[i];
 		Real u_ig=u[ig];
 		compute_coeff(u_ig);
-        e_si = 7.7-13.0287*log(M_sol_Ca[ig]);
+        M_Esi = 7.7 - 13.0287 * log(M_sol_Ca[ig]);
 		//fast sodium current
-		M_Ina = 23.*M_sol_m[ig]*M_sol_m[ig]*M_sol_m[ig]*M_sol_h[ig]*M_sol_j[ig]*(u_ig-e_na);
+		M_Ina = 23.* M_sol_m[ig] * M_sol_m[ig] * M_sol_m[ig] * M_sol_h[ig] * M_sol_j[ig] * (u_ig - M_Ena);
 		//slow inward current
-		M_Islow = 0.09*M_sol_d[ig]*M_sol_f[ig]*(u_ig-e_si);
+		M_Islow = 0.09 * M_sol_d[ig] * M_sol_f[ig] * (u_ig - M_Esi);
         //change in ioniq concentration
-        dca_i_vec.getEpetraVector().ReplaceGlobalValue(ig,0,-1e-4*M_Islow+0.07*(1e-4-M_sol_Ca[ig]));
+        M_vectorIonicChange.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                 0,
+                                                                 -1e-4 * M_Islow + 0.07*(1e-4 - M_sol_Ca[ig]));
         //time dependent potassium current
-        M_Ik = g_k*M_sol_X[ig]*x_ii*(u_ig-e_k);
+        M_Ik = M_Gk * M_sol_X[ig] * M_xii*(u_ig - M_Ek);
         //time independent potassium current
-        M_Ik1 = g_k1*k_1inf*(u_ig-e_k1);
+        M_Ik1 = M_Gk1 * M_K1inf * (u_ig - M_Ek1);
         //plateau potassium current
-        M_Ikp = 0.0183*k_p*(u_ig-e_kp);
+        M_Ikp = 0.0183 * M_Kp * (u_ig - M_Ekp);
         //background current
-        M_Iback = 0.03921*(u_ig+59.87);
+        M_Iback = 0.03921 * (u_ig + 59.87);
         //Total time independent potassium current
         M_Ik1t = M_Ik1 + M_Ikp + M_Iback;
         // adding up the six ionic currents
-        Iion.getEpetraVector().ReplaceGlobalValue(ig,0,M_Ina + M_Islow + M_Ik + M_Ik1t);
-		exp_vec_h.getEpetraVector().ReplaceGlobalValue(ig,0,exp(-timeStep/tau_h));
-		exp_vec_j.getEpetraVector().ReplaceGlobalValue(ig,0,exp(-timeStep/tau_j));
-		exp_vec_m.getEpetraVector().ReplaceGlobalValue(ig,0,exp(-timeStep/tau_m));
-		exp_vec_d.getEpetraVector().ReplaceGlobalValue(ig,0,exp(-timeStep/tau_d));
-		exp_vec_f.getEpetraVector().ReplaceGlobalValue(ig,0,exp(-timeStep/tau_f));
-		exp_vec_X.getEpetraVector().ReplaceGlobalValue(ig,0,exp(-timeStep/tau_X));
-		inf_vec_h.getEpetraVector().ReplaceGlobalValue(ig,0,h_inf);
-		inf_vec_j.getEpetraVector().ReplaceGlobalValue(ig,0,j_inf);
-		inf_vec_m.getEpetraVector().ReplaceGlobalValue(ig,0,m_inf);
-		inf_vec_d.getEpetraVector().ReplaceGlobalValue(ig,0,d_inf);
-		inf_vec_f.getEpetraVector().ReplaceGlobalValue(ig,0,f_inf);
-		inf_vec_X.getEpetraVector().ReplaceGlobalValue(ig,0,X_inf);
+        Iion.getEpetraVector().ReplaceGlobalValue(ig,
+                                                  0,
+                                                  M_Ina + M_Islow + M_Ik + M_Ik1t);
+		M_vectorExponentialh.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                  0,
+                                                                  exp(-timeStep / M_tauh));
+		M_vectorExponentialj.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                  0,
+                                                                  exp(-timeStep / M_tauj));
+		M_vectorExponentialm.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                  0,
+                                                                  exp(-timeStep / M_taum));
+		M_vectorExponentiald.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                  0,
+                                                                  exp(-timeStep / M_taud));
+		M_vectorExponentialf.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                  0,
+                                                                  exp(-timeStep / M_tauf));
+		M_vectorExponentialX.getEpetraVector().ReplaceGlobalValue(ig,
+                                                                  0,
+                                                                  exp(-timeStep / M_tauX));
+		M_vectorInfimumh.getEpetraVector().ReplaceGlobalValue(ig,
+                                                              0,
+                                                              M_hinf);
+		M_vectorInfimumj.getEpetraVector().ReplaceGlobalValue(ig,
+                                                              0,
+                                                              M_jinf);
+		M_vectorInfimumm.getEpetraVector().ReplaceGlobalValue(ig,
+                                                              0,
+                                                              M_minf);
+		M_vectorInfimumd.getEpetraVector().ReplaceGlobalValue(ig,
+                                                              0,
+                                                              M_dinf);
+		M_vectorInfimumf.getEpetraVector().ReplaceGlobalValue(ig,
+                                                              0,
+                                                              M_finf);
+		M_vectorInfimumX.getEpetraVector().ReplaceGlobalValue(ig,
+                                                              0,
+                                                              M_Xinf);
 	}
-	exp_vec_h.GlobalAssemble();
-	exp_vec_j.GlobalAssemble();
-	exp_vec_m.GlobalAssemble();
-	exp_vec_d.GlobalAssemble();
-	exp_vec_f.GlobalAssemble();
-	exp_vec_X.GlobalAssemble();
-	inf_vec_h.GlobalAssemble();
-	inf_vec_j.GlobalAssemble();
-	inf_vec_m.GlobalAssemble();
-	inf_vec_d.GlobalAssemble();
-	inf_vec_f.GlobalAssemble();
-	inf_vec_X.GlobalAssemble();
+	M_vectorExponentialh.GlobalAssemble();
+	M_vectorExponentialj.GlobalAssemble();
+	M_vectorExponentialm.GlobalAssemble();
+	M_vectorExponentiald.GlobalAssemble();
+	M_vectorExponentialf.GlobalAssemble();
+	M_vectorExponentialX.GlobalAssemble();
+	M_vectorInfimumh.GlobalAssemble();
+	M_vectorInfimumj.GlobalAssemble();
+	M_vectorInfimumm.GlobalAssemble();
+	M_vectorInfimumd.GlobalAssemble();
+	M_vectorInfimumf.GlobalAssemble();
+	M_vectorInfimumX.GlobalAssemble();
 	Iion.GlobalAssemble();
-	dca_i_vec.GlobalAssemble();
+	M_vectorIonicChange.GlobalAssemble();
 
-	M_sol_h-=inf_vec_h;
-	M_sol_h.getEpetraVector().Multiply(1., M_sol_h.getEpetraVector(), exp_vec_h.getEpetraVector(), 0.);
-	M_sol_h+=inf_vec_h;
+	M_sol_h-=M_vectorInfimumh;
+	M_sol_h.getEpetraVector().Multiply(1.,
+                                       M_sol_h.getEpetraVector(),
+                                       M_vectorExponentialh.getEpetraVector(),
+                                       0.);
+	M_sol_h+=M_vectorInfimumh;
+	M_sol_j-=M_vectorInfimumj;
 
-	M_sol_j-=inf_vec_j;
-	M_sol_j.getEpetraVector().Multiply(1, M_sol_j.getEpetraVector(), exp_vec_j.getEpetraVector(), 0);
-	M_sol_j+=inf_vec_j;
+	M_sol_j.getEpetraVector().Multiply(1.,
+                                       M_sol_j.getEpetraVector(),
+                                       M_vectorExponentialj.getEpetraVector(),
+                                       0.);
+	M_sol_j+=M_vectorInfimumj;
+	M_sol_m-=M_vectorInfimumm;
+	M_sol_m.getEpetraVector().Multiply(1.,
+                                       M_sol_m.getEpetraVector(),
+                                       M_vectorExponentialm.getEpetraVector(),
+                                       0.);
+	M_sol_m+=M_vectorInfimumm;
+	M_sol_d-=M_vectorInfimumd;
 
-	M_sol_m-=inf_vec_m;
-	M_sol_m.getEpetraVector().Multiply(1, M_sol_m.getEpetraVector(), exp_vec_m.getEpetraVector(), 0);
-	M_sol_m+=inf_vec_m;
+	M_sol_d.getEpetraVector().Multiply(1.,
+                                       M_sol_d.getEpetraVector(),
+                                       M_vectorExponentiald.getEpetraVector(),
+                                       0.);
+	M_sol_d+=M_vectorInfimumd;
+	M_sol_f-=M_vectorInfimumf;
 
-	M_sol_d-=inf_vec_d;
-	M_sol_d.getEpetraVector().Multiply(1, M_sol_d.getEpetraVector(), exp_vec_d.getEpetraVector(), 0);
-	M_sol_d+=inf_vec_d;
+	M_sol_f.getEpetraVector().Multiply(1.,
+                                       M_sol_f.getEpetraVector(),
+                                       M_vectorExponentialf.getEpetraVector(),
+                                       0.);
+	M_sol_f+=M_vectorInfimumf;
+	M_sol_X-=M_vectorInfimumX;
 
-	M_sol_f-=inf_vec_f;
-	M_sol_f.getEpetraVector().Multiply(1, M_sol_f.getEpetraVector(), exp_vec_f.getEpetraVector(), 0);
-	M_sol_f+=inf_vec_f;
-
-	M_sol_X-=inf_vec_X;
-	M_sol_X.getEpetraVector().Multiply(1, M_sol_X.getEpetraVector(), exp_vec_X.getEpetraVector(), 0);
-	M_sol_X+=inf_vec_X;
-
-	M_sol_Ca+=timeStep*dca_i_vec;
+	M_sol_X.getEpetraVector().Multiply(1.,
+                                       M_sol_X.getEpetraVector(),
+                                       M_vectorExponentialX.getEpetraVector(),
+                                       0.);
+	M_sol_X+=M_vectorInfimumX;
+	M_sol_Ca+=timeStep*M_vectorIonicChange;
 
 	M_sol_h.GlobalAssemble();
 	M_sol_j.GlobalAssemble();
@@ -799,7 +870,8 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 	chronoionmodelsolve.stop();
-    if (IonicSolver<Mesh, SolverType>::M_comm->MyPID()==0) std::cout << "Total ionmodelsolve time " << chronoionmodelsolve.diff() << " s." << std::endl;
+    if (IonicSolver<Mesh, SolverType>::M_comm->MyPID()==0)
+        std::cout << "Total ionmodelsolve time " << chronoionmodelsolve.diff() << " s." << std::endl;
 }
 
 
@@ -807,65 +879,64 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 {
-	   if (u_ig>=-40.)
-	       {
-	       a_h=0.;
-	       b_h = 1./(0.13*(1.+exp( (u_ig+10.66)/(-11.1) )));
-	       a_j=0.;
-	       b_j = 0.3*exp(-2.535e-7*u_ig)/(1.+exp(-0.1*(u_ig+32.)));
-	       }
-	   else
-	       {
-	       a_h = 0.135*exp((80.+u_ig)/-6.8);
-	       b_h = 3.56*exp(0.079*u_ig)+3.1e5*exp(0.35*u_ig);
-	       a_j = (-1.2714e5*exp(0.2444*u_ig)-3.474e-5*exp(-0.04391*u_ig))*(u_ig+37.78)/(1+exp(0.311*(u_ig+79.23)));
-	       b_j = 0.1212*exp(-0.01052*u_ig)/(1.+exp(-0.1378*(u_ig+40.14)));
-	       }
-	      a_m = 0.32*(u_ig+47.13)/(1.-exp(-0.1*(u_ig+47.13)));
-	      b_m = 0.08*exp(-u_ig/11.);
+    if (u_ig>=-40.)
+    {
+        M_ah=0.;
+        M_bh = 1. / (0.13 * (1. + exp( (u_ig + 10.66) / (-11.1) )));
+        M_aj=0.;
+        M_bj = 0.3 * exp(-2.535e-7 * u_ig) / (1. + exp(-0.1 * (u_ig + 32.)));
+    }
+    else
+    {
+        M_ah = 0.135 * exp((80. + u_ig) / -6.8);
+        M_bh = 3.56 * exp(0.079 *u_ig) + 3.1e5 * exp(0.35 * u_ig);
+        M_aj = (-1.2714e5 * exp(0.2444 * u_ig)-3.474e-5 * exp(-0.04391 * u_ig))*
+            (u_ig + 37.78) / (1 + exp(0.311 * (u_ig + 79.23)));
+        M_bj = 0.1212 * exp(-0.01052 * u_ig) / (1. + exp(-0.1378 * (u_ig + 40.14)));
+    }
+    M_am = 0.32 * (u_ig + 47.13) / (1. - exp(-0.1 * (u_ig + 47.13)));
+    M_bm = 0.08*exp(-u_ig/11.);
 
-	      //slow inward current
-	      a_d = 0.095*exp(-0.01*(u_ig-5.))/(1.+exp(-0.072*(u_ig-5.)));
-	      b_d = 0.07*exp(-0.017*(u_ig+44.))/(1.+exp(0.05*(u_ig+44.)));
-	      a_f = 0.012*exp(-0.008*(u_ig+28.))/(1.+exp(0.15*(u_ig+28.)));
-	      b_f = 0.0065*exp(-0.02*(u_ig+30.))/(1.+exp(-0.2*(u_ig+30.)));
+    //slow inward current
+    M_ad = 0.095 * exp(-0.01 *(u_ig - 5.)) / (1. + exp(-0.072*(u_ig - 5.)));
+    M_bd = 0.07  * exp(-0.017*(u_ig + 44.))/ (1. + exp( 0.05 *(u_ig + 44.)));
+    M_af = 0.012 * exp(-0.008*(u_ig + 28.))/ (1. + exp( 0.15 *(u_ig + 28.)));
+    M_bf = 0.0065* exp(-0.02 *(u_ig + 30.))/ (1. + exp( -0.2 *(u_ig + 30.)));
 
-	      //Time dependent potassium outward current
-	      a_X = 0.0005*exp(0.083*(u_ig+50.))/(1.+exp(0.057*(u_ig+50.)));
-	      b_X = 0.0013*exp(-0.06*(u_ig+20.))/(1.+exp(-0.04*(u_ig+20.)));
+    //Time dependent potassium outward current
+    M_aX = 0.0005 * exp(0.083 * (u_ig +50.)) / (1. + exp(0.057 * (u_ig + 50.)));
+    M_bX = 0.0013 * exp(-0.06 * (u_ig +20.)) / (1. + exp(-0.04 * (u_ig + 20.)));
 
-	      if(u_ig<=-100)
-	    	  x_ii=1.;
-	      else
-	    	  x_ii=2.837*(exp(0.04*(u_ig+77.))-1.)/((u_ig+77.)*exp(0.04*(u_ig+35.)));
+    if(u_ig<=-100)
+        M_xii = 1.;
+    else
+        M_xii = 2.837 * (exp (0.04 * (u_ig + 77.)) -1.) / ((u_ig + 77.) * exp(0.04 * (u_ig + 35.)));
+    M_ak1 = 1.02 / (1. + exp(0.2385 * (u_ig - M_Ek1 - 59.215)));
+    M_bk1 = (0.49124 * exp(0.08032 * (u_ig - M_Ek1 + 5.476)) +
+             exp(0.06175 * (u_ig - M_Ek1 - 594.31))) / (1. + exp(-0.5143 * (u_ig - M_Ek1 + 4.753)));
+    //Plateau potassium outward current
+    M_Kp = 1. / (1. + exp((7.488 - u_ig) / 5.98));
 
-
-	      ak1 = 1.02/(1.+exp(0.2385*(u_ig-e_k1-59.215)));
-	      bk1 = (0.49124*exp(0.08032*(u_ig-e_k1+5.476))+exp(0.06175*(u_ig-e_k1-594.31)))/(1.+exp(-0.5143*(u_ig-e_k1+4.753))); //%bk1
-
-          //Plateau potassium outward current
-	      k_p = 1./(1.+exp((7.488-u_ig)/5.98));
-
-	      k_1inf = ak1/(ak1+bk1);
-	      h_inf = a_h/(a_h + b_h);
-	      tau_h = 1./(a_h + b_h);
-	      j_inf = a_j/(a_j + b_j);
-	      tau_j = 1./(a_j + b_j);
-	      m_inf = a_m/(a_m + b_m);
-	      tau_m = 1./(a_m + b_m);
-	      d_inf = a_d/(a_d + b_d);
-	      tau_d = 1./(a_d + b_d);
-	      f_inf = a_f/(a_f + b_f);
-	      tau_f = 1./(a_f + b_f);
-	      X_inf = a_X/(a_X + b_X);
-	      tau_X = 1./(a_X + b_X);
+    M_K1inf = M_ak1 / (M_ak1 + M_bk1);
+    M_hinf = M_ah   / (M_ah  + M_bh);
+    M_tauh = 1.   / (M_ah + M_bh);
+    M_jinf = M_aj / (M_aj + M_bj);
+    M_tauj = 1.   / (M_aj + M_bj);
+    M_minf = M_am / (M_am + M_bm);
+    M_taum = 1.   / (M_am + M_bm);
+    M_dinf = M_ad / (M_ad + M_bd);
+    M_taud = 1.   / (M_ad + M_bd);
+    M_finf = M_af / (M_af + M_bf);
+    M_tauf = 1.   / (M_af + M_bf);
+    M_Xinf = M_aX / (M_aX + M_bX);
+    M_tauX = 1.   / (M_aX + M_bX);
 }
 
 template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::computeIion(  Real Capacitance,
-                                               ElemVec& elvec,
-                                               ElemVec& /*elvec_u*/,
-                                               FESpace<Mesh, EpetraMap>& uFESpace )
+                                              ElemVec& elvec,
+                                              ElemVec& /*elvec_u*/,
+                                              FESpace<Mesh, EpetraMap>& uFESpace )
 {
    	Real Iion_ig;
     for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
@@ -876,7 +947,8 @@ void LuoRudy<Mesh, SolverType>::computeIion(  Real Capacitance,
         for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
         {
             // divide by 1000 to convert microA in mA
-            elvec( i ) -= Iion_ig/1000 * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
+            elvec( i ) -= Iion_ig * Capacitance *
+                uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
         }
     }
 }
@@ -885,20 +957,20 @@ template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::
 initialize( )
 {
-	 M_sol_h.getEpetraVector().PutScalar(1.);
-     M_sol_j.getEpetraVector().PutScalar(1.);
-     M_sol_m.getEpetraVector().PutScalar(0.);
-     M_sol_d.getEpetraVector().PutScalar(0.);
-     M_sol_f.getEpetraVector().PutScalar(1.);
-     M_sol_X.getEpetraVector().PutScalar(0.);
-     M_sol_Ca.getEpetraVector().PutScalar(0.0002);
-	 M_sol_h.GlobalAssemble();
-     M_sol_j.GlobalAssemble();
-     M_sol_m.GlobalAssemble();
-     M_sol_d.GlobalAssemble();
-     M_sol_f.GlobalAssemble();
-     M_sol_X.GlobalAssemble();
-     M_sol_Ca.GlobalAssemble();
+    M_sol_h.getEpetraVector().PutScalar(1.);
+    M_sol_j.getEpetraVector().PutScalar(1.);
+    M_sol_m.getEpetraVector().PutScalar(0.);
+    M_sol_d.getEpetraVector().PutScalar(0.);
+    M_sol_f.getEpetraVector().PutScalar(1.);
+    M_sol_X.getEpetraVector().PutScalar(0.);
+    M_sol_Ca.getEpetraVector().PutScalar(0.0002);
+    M_sol_h.GlobalAssemble();
+    M_sol_j.GlobalAssemble();
+    M_sol_m.GlobalAssemble();
+    M_sol_d.GlobalAssemble();
+    M_sol_f.GlobalAssemble();
+    M_sol_X.GlobalAssemble();
+    M_sol_Ca.GlobalAssemble();
 }
 
 } // namespace LifeV
