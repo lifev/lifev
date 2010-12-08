@@ -203,7 +203,7 @@ class MitchellSchaeffer : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
 	typedef typename IonicSolver<Mesh, SolverType>::data_Type	data_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_type	vector_Type;
+	typedef typename IonicSolver<Mesh, SolverType>::vector_Type	vector_Type;
 	typedef typename IonicSolver<Mesh, SolverType>::Function 	Function;
 	typedef typename IonicSolver<Mesh, SolverType>::fct_TauClose	fct_TauClose;
 
@@ -259,9 +259,9 @@ private:
 template<typename Mesh, typename SolverType>
 MitchellSchaeffer<Mesh, SolverType>::
 MitchellSchaeffer( const data_Type& dataType,
-                    const Mesh& mesh,
-                    FESpace<Mesh, EpetraMap>& uFEspace,
-                    Epetra_Comm& comm ):
+                   const Mesh& mesh,
+                   FESpace<Mesh, EpetraMap>& uFEspace,
+                   Epetra_Comm& comm ):
     IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     M_sol_w ( IonicSolver<Mesh, SolverType>::M_localMap ),
     M_wVecRep( M_sol_w, Repeated ),
@@ -269,7 +269,7 @@ MitchellSchaeffer( const data_Type& dataType,
     order_bdf ( IonicSolver<Mesh, SolverType>::M_data.M_BDForder ),
     bdf_w( order_bdf )
 {
-	setHeteroTauClose(this->M_data.M_ShdPtr->get_heterotauclose());
+
 }
 
 template<typename Mesh, typename SolverType>
@@ -330,14 +330,14 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 	{
         Int ig=u.BlockMap().MyGlobalElements()[i];
 		ID 	= ig;
-		ref = this->M_mesh->point(ig).marker();
+		/*ref = this->M_mesh->point(ig).marker();
 		x 	= this->M_mesh->point(ig).x();
         y 	= this->M_mesh->point(ig).y();
-        z 	= this->M_mesh->point(ig).z();
+        z 	= this->M_mesh->point(ig).z();*/
    		if (u[ig] < this->M_data.M_criticalPotential)
             M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
         else if (this->M_data.M_hasHeterogeneousTauClose)
-            M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/fct_Tau_Close(ref,x,y,z,ID))) *  M_time_der[ig];//aux2 * M_time_der[ig];
+            M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timeStep  + 1.0/*fct_Tau_Close(ref,x,y,z,ID)*/)) *  M_time_der[ig];//aux2 * M_time_der[ig];
         else
             M_sol_w[ig] = aux2 *  M_time_der[ig];
 	}
@@ -354,7 +354,7 @@ void MitchellSchaeffer<Mesh, SolverType>::computeIion(  Real,
 {
 	for ( Int i = 0;i < uFESpace.fe().nbNode;i++ )
     {
-        elvec( i ) =  this->M_reactionAmplitude*(((M_elvec( i ) / this->M_data.M_tau_in)
+        elvec( i ) =  this->M_data.M_reactionAmplitude*(((M_elvec( i ) / this->M_data.M_tau_in)
                                               * (elvec_u( i ) - this->M_data.M_potentialMinimum)
                                               * (elvec_u( i ) - this->M_data.M_potentialMinimum)
                                               * (this->M_data.M_potentialMaximum - elvec_u( i ))
