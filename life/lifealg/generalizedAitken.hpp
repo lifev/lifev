@@ -67,7 +67,7 @@ namespace LifeV
  *  TODO Modify computeDeltaLambdaFSI - we should have only one defaultOmega parameter
  *  to be more general, and the same for M_oldResidualSolid & M_oldResidualFluid.
  */
-template< typename vector_Type >
+template< typename VectorType >
 class generalizedAitken
 {
 
@@ -76,6 +76,7 @@ public:
     //! @name Public Types
     //@{
 
+    typedef VectorType                            vector_Type;
     typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
 
     //@}
@@ -252,8 +253,8 @@ private:
 // ===================================================
 // Constructors
 // ===================================================
-template <class vector_Type>
-generalizedAitken<vector_Type>::generalizedAitken() :
+template < class VectorType >
+generalizedAitken< VectorType >::generalizedAitken() :
         M_oldSolution      ( ),
         M_oldResidualFluid ( ),
         M_oldResidualSolid ( ),
@@ -272,11 +273,11 @@ generalizedAitken<vector_Type>::generalizedAitken() :
 // ===================================================
 // Methods
 // ===================================================
-template <class vector_Type>
-vector_Type
-generalizedAitken<vector_Type>::computeDeltaLambdaFSI( const vector_Type& solution,
-                                                       const vector_Type& residualFluid,
-                                                       const vector_Type& residualSolid )
+template < class VectorType >
+typename generalizedAitken< VectorType >::vector_Type
+generalizedAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solution,
+                                                        const vector_Type& residualFluid,
+                                                        const vector_Type& residualSolid )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -352,10 +353,10 @@ generalizedAitken<vector_Type>::computeDeltaLambdaFSI( const vector_Type& soluti
 }
 
 /*! one parameter version of the generalized aitken method. cf page 85 S. Deparis, PhD thesis */
-template <class vector_Type>
-vector_Type
-generalizedAitken<vector_Type>::computeDeltaLambdaScalar( const vector_Type& solution,
-                                                          const vector_Type& residual )
+template < class VectorType >
+typename generalizedAitken< VectorType >::vector_Type
+generalizedAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solution,
+                                                           const vector_Type& residual )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -406,11 +407,11 @@ generalizedAitken<vector_Type>::computeDeltaLambdaScalar( const vector_Type& sol
     return omega * residual;
 }
 
-template <class vector_Type>
-vector_Type
-generalizedAitken<vector_Type>::computeDeltaLambdaVector( const vector_Type& solution,
-                                                          const vector_Type& residual,
-                                                          const bool&        independentOmega )
+template < class VectorType >
+typename generalizedAitken< VectorType >::vector_Type
+generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solution,
+                                                           const vector_Type& residual,
+                                                           const bool&        independentOmega )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -469,12 +470,12 @@ generalizedAitken<vector_Type>::computeDeltaLambdaVector( const vector_Type& sol
     return omega;
 }
 
-template <class vector_Type>
-vector_Type
-generalizedAitken<vector_Type>::computeDeltaLambdaVectorBlock( const vector_Type& solution,
-                                                               const vector_Type& residual,
-                                                               const vector_Type& blocksVector,
-                                                               const UInt&        blocksNumber )
+template < class VectorType >
+typename generalizedAitken< VectorType >::vector_Type
+generalizedAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type& solution,
+                                                                const vector_Type& residual,
+                                                                const vector_Type& blocksVector,
+                                                                const UInt&        blocksNumber )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -546,9 +547,9 @@ generalizedAitken<vector_Type>::computeDeltaLambdaVectorBlock( const vector_Type
 // ===================================================
 // Set Methods
 // ===================================================
-template <class vector_Type>
+template < class VectorType >
 inline void
-generalizedAitken<vector_Type>::setDefaultOmega( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
+generalizedAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
 {
     M_defaultOmegaFluid = defaultOmegaFluid;
     M_defaultOmegaSolid = defaultOmegaSolid;
@@ -557,9 +558,9 @@ generalizedAitken<vector_Type>::setDefaultOmega( const Real& defaultOmegaFluid, 
 // ===================================================
 // Private Methods
 // ===================================================
-template <class vector_Type>
+template < class VectorType >
 inline void
-generalizedAitken<vector_Type>::checkRange( Real& omega )
+generalizedAitken< VectorType >::checkRange( Real& omega )
 {
     if ( std::abs(omega) < std::abs(M_rangeOmega[0]) )
     {
