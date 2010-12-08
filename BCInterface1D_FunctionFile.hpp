@@ -83,16 +83,17 @@ namespace LifeV
  *  				0.666666666		3.00
  *  				1.000000000		4.00'
  */
-template< typename physicalSolver_Type >
-class BCInterface1D_FunctionFile: public virtual BCInterface1D_Function< physicalSolver_Type >
+template< typename PhysicalSolverType >
+class BCInterface1D_FunctionFile: public virtual BCInterface1D_Function< PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_Function< physicalSolver_Type >           super;
-    typedef BCInterface1D_Data                                      data_Type;
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
+    typedef BCInterface1D_Data                                                    data_Type;
+    typedef BCInterface1D_Function< physicalSolver_Type >                         function_Type;
 
     //@}
 
@@ -133,7 +134,7 @@ private:
 
     BCInterface1D_FunctionFile( const BCInterface1D_FunctionFile& function );
 
-    virtual BCInterface1D_FunctionFile& operator=( const BCInterface1D_FunctionFile& function );
+    BCInterface1D_FunctionFile& operator=( const BCInterface1D_FunctionFile& function );
 
     //@}
 
@@ -159,18 +160,18 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename physicalSolver_Type >
-inline BCInterface1D_Function< physicalSolver_Type >* createBCInterface1D_FunctionFile()
+template< typename PhysicalSolverType >
+inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_FunctionFile()
 {
-    return new BCInterface1D_FunctionFile< physicalSolver_Type > ();
+    return new BCInterface1D_FunctionFile< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< typename physicalSolver_Type >
-BCInterface1D_FunctionFile< physicalSolver_Type >::BCInterface1D_FunctionFile() :
-        super                            (),
+template< typename PhysicalSolverType >
+BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile() :
+        function_Type                    (),
         M_variables                      (),
         M_loop                           (),
         M_data                           (),
@@ -183,9 +184,9 @@ BCInterface1D_FunctionFile< physicalSolver_Type >::BCInterface1D_FunctionFile() 
 
 }
 
-template< typename physicalSolver_Type >
-BCInterface1D_FunctionFile< physicalSolver_Type >::BCInterface1D_FunctionFile( const data_Type& data ) :
-        super                            (),
+template< typename PhysicalSolverType >
+BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile( const data_Type& data ) :
+        function_Type                    (),
         M_variables                      (),
         M_loop                           (),
         M_data                           (),
@@ -202,9 +203,9 @@ BCInterface1D_FunctionFile< physicalSolver_Type >::BCInterface1D_FunctionFile( c
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 inline void
-BCInterface1D_FunctionFile< physicalSolver_Type >::loadData( data_Type data )
+BCInterface1D_FunctionFile< PhysicalSolverType >::loadData( data_Type data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -289,7 +290,7 @@ BCInterface1D_FunctionFile< physicalSolver_Type >::loadData( data_Type data )
     }
 
     // Now data contains the real base string
-    super::setData( data );
+    function_Type::setData( data );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "                                             function: " << data.baseString() << "\n";
@@ -297,12 +298,12 @@ BCInterface1D_FunctionFile< physicalSolver_Type >::loadData( data_Type data )
 
 }
 
-template< typename physicalSolver_Type >
+template< typename PhysicalSolverType >
 inline void
-BCInterface1D_FunctionFile< physicalSolver_Type >::dataInterpolation()
+BCInterface1D_FunctionFile< PhysicalSolverType >::dataInterpolation()
 {
     //Get variable
-    Real X = super::M_parser->variable( M_variables[0] );
+    Real X = function_Type::M_parser->variable( M_variables[0] );
 
     //If it is a loop scale the variable: X = X - (ceil( X / Xmax ) -1) * Xmax
     if ( M_loop )
@@ -351,7 +352,7 @@ BCInterface1D_FunctionFile< physicalSolver_Type >::dataInterpolation()
         A  = M_data[M_variables[j]][position];
         B  = M_data[M_variables[j]][position + 1];
 
-        super::M_parser->SetVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
+        function_Type::M_parser->SetVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";

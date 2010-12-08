@@ -114,7 +114,7 @@ namespace LifeV
  *     In this case you have to manually set the TOTAL number of boundary conditions
  *     by using setHandlerParameters() function BEFORE building the handler.
  */
-template< class physicalSolver_Type = OneDimensionalModel_Solver >
+template< class PhysicalSolverType = OneDimensionalModel_Solver >
 class BCInterface1D
 {
 public:
@@ -122,6 +122,7 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef PhysicalSolverType                                                                        physicalSolver_Type;
     typedef BCInterface1D_BaseList                                                                    bcBaseList_Type;
 
     typedef singleton< factory< BCInterface1D_Function< physicalSolver_Type > , bcBaseList_Type > >   factoryFunction_Type;
@@ -193,8 +194,8 @@ public:
      * @param type type of the condition
      * @param base base of the condition
      */
-    template< class BCBase >
-    void setBC( const OneD_BCSide& bcSide, const OneD_BCLine& bcLine, const OneD_BC& bcType, const BCBase& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
+    template< class BCBaseType >
+    void setBC( const OneD_BCSide& bcSide, const OneD_BCLine& bcLine, const OneD_BC& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
 
     //@}
 
@@ -262,16 +263,16 @@ private:
     //! @name Private Methods
     //@{
 
-    inline void buildBase();
+    void buildBase();
 
-    template< class BCInterfaceBase >
-    inline void addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector );
+    template< class BCInterfaceBaseType >
+    void addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
-    template< class BCInterfaceBase >
-    inline void addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector, const bcBaseList_Type& physicalSolver );
+    template< class BCInterfaceBaseType >
+    void addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver );
 
-    template< class BCBase >
-    inline void addBCManager( BCBase& base );
+    template< class BCBaseType >
+    void addBCManager( BCBaseType& base );
 
     //@}
 
@@ -291,8 +292,8 @@ private:
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-template< class physicalSolver_Type >
-BCInterface1D< physicalSolver_Type >::BCInterface1D( ) :
+template< class PhysicalSolverType >
+BCInterface1D< PhysicalSolverType >::BCInterface1D( ) :
         M_handler                 (),
         M_data                    (),
         M_vectorFunction          (),
@@ -313,9 +314,9 @@ BCInterface1D< physicalSolver_Type >::BCInterface1D( ) :
 // ===================================================
 // Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface1D< physicalSolver_Type >::fillHandler( const std::string& fileName, const std::string& dataSection )
+BCInterface1D< PhysicalSolverType >::fillHandler( const std::string& fileName, const std::string& dataSection )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -334,9 +335,9 @@ BCInterface1D< physicalSolver_Type >::fillHandler( const std::string& fileName, 
     }
 }
 
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface1D< physicalSolver_Type >::updatePhysicalSolverVariables()
+BCInterface1D< PhysicalSolverType >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -356,9 +357,9 @@ BCInterface1D< physicalSolver_Type >::updatePhysicalSolverVariables()
 // ===================================================
 // Set Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface1D< physicalSolver_Type >::setPhysicalSolver( const boost::shared_ptr< physicalSolver_Type >& physicalSolver )
+BCInterface1D< PhysicalSolverType >::setPhysicalSolver( const boost::shared_ptr< physicalSolver_Type >& physicalSolver )
 {
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
@@ -371,9 +372,9 @@ BCInterface1D< physicalSolver_Type >::setPhysicalSolver( const boost::shared_ptr
     }
 }
 
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface1D< physicalSolver_Type >::setSolution( const solutionPtr_Type solution )
+BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type solution )
 {
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
@@ -391,9 +392,9 @@ BCInterface1D< physicalSolver_Type >::setSolution( const solutionPtr_Type soluti
     M_handler->setSolution( solution );
 }
 
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 void
-BCInterface1D< physicalSolver_Type >::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+BCInterface1D< PhysicalSolverType >::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
 {
     for ( typename vectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
         ( *i )->setFluxSource( flux, source );
@@ -404,9 +405,9 @@ BCInterface1D< physicalSolver_Type >::setFluxSource( const fluxPtr_Type& flux, c
 // ===================================================
 // Private Methods
 // ===================================================
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 inline void
-BCInterface1D< physicalSolver_Type >::buildBase()
+BCInterface1D< PhysicalSolverType >::buildBase()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -436,29 +437,29 @@ BCInterface1D< physicalSolver_Type >::buildBase()
     }
 }
 
-template< class physicalSolver_Type > template< class BCInterfaceBase >
+template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface1D< physicalSolver_Type >::addBase( std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector )
+BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-    boost::shared_ptr< BCInterfaceBase > Function( new BCInterfaceBase( M_data ) );
+    boost::shared_ptr< BCInterfaceBaseType > Function( new BCInterfaceBaseType( M_data ) );
     baseVector.push_back( Function );
 }
 
-template< class physicalSolver_Type > template< class BCInterfaceBase >
+template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface1D< physicalSolver_Type >::addBase(       std::vector< boost::shared_ptr< BCInterfaceBase > >& baseVector,
+BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector,
                                           const bcBaseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBase > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
 
     function->setData( M_data );
 
     baseVector.push_back( function );
 }
 
-template< class physicalSolver_Type > template< class BCBase >
+template< class PhysicalSolverType > template< class BCBaseType >
 inline void
-BCInterface1D< physicalSolver_Type >::addBCManager( BCBase& base )
+BCInterface1D< PhysicalSolverType >::addBCManager( BCBaseType& base )
 {
     if ( !M_handler.get() ) // If BCHandler has not been created yet, we do it now
         createHandler();

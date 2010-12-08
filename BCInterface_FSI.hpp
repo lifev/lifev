@@ -53,7 +53,7 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  */
-template< class physicalSolver_Type >
+template< class PhysicalSolverType >
 class BCInterface_FSI
 {
 public:
@@ -61,8 +61,9 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCVectorInterface                                                     bcFunction_Type;
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface_Data                                                      data_Type;
+    typedef BCVectorInterface                                                     bcFunction_Type;
 
     //@}
 
