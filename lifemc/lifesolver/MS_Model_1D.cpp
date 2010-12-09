@@ -85,14 +85,14 @@ MS_Model_1D::MS_Model_1D() :
     OneDimensionalModel_MapsDefinition();
 
     //Register the objects
-    Factory_OneDimensionalModel_Physics::instance().registerProduct( OneD_LinearPhysics,    &Create_OneDimensionalModel_Physics_Linear );
-    Factory_OneDimensionalModel_Physics::instance().registerProduct( OneD_NonLinearPhysics, &Create_OneDimensionalModel_Physics_NonLinear );
+    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_LinearPhysics,    &Create_OneDimensionalModel_Physics_Linear );
+    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_NonLinearPhysics, &Create_OneDimensionalModel_Physics_NonLinear );
 
-    Factory_OneDimensionalModel_Flux::instance().registerProduct(    OneD_LinearFlux,       &Create_OneDimensionalModel_Flux_Linear );
-    Factory_OneDimensionalModel_Flux::instance().registerProduct(    OneD_NonLinearFlux,    &Create_OneDimensionalModel_Flux_NonLinear );
+    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_LinearFlux,       &Create_OneDimensionalModel_Flux_Linear );
+    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_NonLinearFlux,    &Create_OneDimensionalModel_Flux_NonLinear );
 
-    Factory_OneDimensionalModel_Source::instance().registerProduct(  OneD_LinearSource,     &Create_OneDimensionalModel_Source_Linear );
-    Factory_OneDimensionalModel_Source::instance().registerProduct(  OneD_NonLinearSource,  &Create_OneDimensionalModel_Source_NonLinear );
+    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_LinearSource,     &Create_OneDimensionalModel_Source_Linear );
+    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_NonLinearSource,  &Create_OneDimensionalModel_Source_NonLinear );
 }
 
 // ===================================================
@@ -124,15 +124,15 @@ MS_Model_1D::SetupData( const std::string& FileName )
         SetupGlobalData( FileName );
 
     //1D Model Physics
-    M_Physics = Physics_PtrType( Factory_OneDimensionalModel_Physics::instance().createObject( M_Data->PhysicsType() ) );
+    M_Physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( M_Data->PhysicsType() ) );
     M_Physics->SetData( M_Data );
 
     //1D Model Flux
-    M_Flux = Flux_PtrType( Factory_OneDimensionalModel_Flux::instance().createObject( M_Data->FluxType() ) );
+    M_Flux = Flux_PtrType( factoryOneDimensionalFlux_Type::instance().createObject( M_Data->FluxType() ) );
     M_Flux->SetPhysics( M_Physics );
 
     //1D Model Source
-    M_Source = Source_PtrType( Factory_OneDimensionalModel_Source::instance().createObject( M_Data->SourceType() ) );
+    M_Source = Source_PtrType( factoryOneDimensionalSource_Type::instance().createObject( M_Data->SourceType() ) );
     M_Source->SetPhysics( M_Physics );
 
     //Linear Solver
