@@ -341,7 +341,7 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 	Real x, y, z;
 	EntityFlag ref;
 	UInt ID;
-	for ( Int i = 0 ; i < u.getEpetraVector().MyLength() ; ++i )
+	for ( UInt i = 0 ; i < u.getEpetraVector().MyLength() ; ++i )
 	{
         Int ig=u.BlockMap().MyGlobalElements()[i];
 		ID 	= ig;
@@ -369,7 +369,7 @@ void MitchellSchaeffer<Mesh, SolverType>::computeIion(  Real,
                                                          ElemVec& elvec_u,
                                                          FESpace<Mesh, EpetraMap>& uFESpace )
 {
-	for ( Int i = 0;i < uFESpace.fe().nbNode;i++ )
+	for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
     {
         elvec( i ) =  this->M_data.M_reactionAmplitude*
             (((M_elvec( i ) / this->M_data.M_tau_in) *
@@ -879,7 +879,7 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::compute_coeff( const Real& u_ig )
 {
-    if (u_ig>=-40.)
+    if (u_ig >= -40.)
     {
         M_ah=0.;
         M_bh = 1. / (0.13 * (1. + exp( (u_ig + 10.66) / (-11.1) )));
