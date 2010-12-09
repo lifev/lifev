@@ -568,13 +568,13 @@ private:
     std::vector<vector_Type>           M_fluxVector;
 
     //! diffFlux = dF(U)/dU (in P0)
-    std::vector<scalVec_Type>               M_diffFlux;
+    std::vector<scalVec_Type>          M_diffFlux;
 
     //! Source term S (in P1)
     std::vector<vector_Type>           M_sourceVector;
 
     //! diffSrc = dSource(U)/dU (in P0)
-    std::vector<scalVec_Type>               M_diffSrc;
+    std::vector<scalVec_Type>          M_diffSrc;
 
     //! tridiagonal mass matrix
     matrixPtr_Type                     M_massMatrix;
