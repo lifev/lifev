@@ -78,9 +78,9 @@ public:
     typedef BCHandler                             bchandler_raw_type;
     typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
 
-    typedef typename SolverType::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
-    typedef typename SolverType::vector_type      vector_type;
+    typedef typename SolverType::matrix_type      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>        matrixPtr_Type;
+    typedef typename SolverType::vector_type      vector_Type;
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
@@ -125,24 +125,24 @@ public:
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(Real       alpha,
-                              vector_type& sourceVec
+                              vector_Type& sourceVec
                               );
 
     //! Updates time dependent parts of PDE system
-    virtual void updatePDESystem( vector_type& sourceVec );
+    virtual void updatePDESystem( vector_Type& sourceVec );
 
     //! Initialize
     void initialize( const source_type& );
     void initialize( const Function&  );
-    void initialize( const vector_type& );
+    void initialize( const vector_Type& );
 
     //! Returns the local solution vector
-    const vector_type& solution_u() const {return M_sol_u;}
+    const vector_Type& solution_u() const {return M_sol_u;}
 
-    const vector_type& fiber_vector() const {return M_fiber_vector;}
+    const vector_Type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local residual vector
-    const vector_type& residual() const {return M_residual;}
+    const vector_Type& residual() const {return M_residual;}
 
     //! Returns u FE space
     FESpace<Mesh, EpetraMap>& potentialFESpace() {return M_uFESpace;}
@@ -167,7 +167,7 @@ public:
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
-    matrix_type& matrMass()
+    matrix_Type& matrMass()
         {
             return *M_matrMass;
         }
@@ -176,12 +176,12 @@ public:
 protected:
 
 	//! Solves PDE system
-    void solveSystem            (  matrix_ptrtype matrFull,
-                                   vector_type&   rhsFull );
+    void solveSystem            (  matrixPtr_Type matrFull,
+                                   vector_Type&   rhsFull );
 
     //! Apply BC
-    void applyBoundaryConditions(  matrix_type&        matrix,
-                                   vector_type&        rhs,
+    void applyBoundaryConditions(  matrix_Type&        matrix,
+                                   vector_Type&        rhs,
                                    bchandler_raw_type& BCh);
 
     //! Data
@@ -203,24 +203,24 @@ protected:
     EpetraMap                      M_localMapVec;
 
     //! mass matrix
-    matrix_ptrtype                 M_matrMass;
+    matrixPtr_Type                 M_matrMass;
 
     //! Stiff matrix: D*stiff
-    matrix_ptrtype                 M_matrStiff;
+    matrixPtr_Type                 M_matrStiff;
 
-    matrix_ptrtype                 M_matrNoBC;
+    matrixPtr_Type                 M_matrNoBC;
 
     //! Right hand side for the PDE
-    vector_type                    M_rhsNoBC;
+    vector_Type                    M_rhsNoBC;
 
     //! Global solution _u
-    vector_type                    M_sol_u;
+    vector_Type                    M_sol_u;
 
     //! Local fibers vector
-    vector_type                    M_fiber_vector;
+    vector_Type                    M_fiber_vector;
 
     //! residual
-    vector_type                    M_residual;
+    vector_Type                    M_residual;
 
     //! Solver
     SolverType                     M_linearSolver;
@@ -350,8 +350,8 @@ void MonodomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::buildSystem()
 {
-    M_matrMass.reset  ( new matrix_type(M_localMap) );
-    M_matrStiff.reset( new matrix_type(M_localMap) );
+    M_matrMass.reset  ( new matrix_Type(M_localMap) );
+    M_matrStiff.reset( new matrix_Type(M_localMap) );
 
     if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
 
@@ -385,51 +385,64 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         chronoStiff.start();
         switch(M_data.heart_diff_fct() )
         {
-        	case 0:
-        		M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-        		if (M_data.has_fibers() )
-        		{
-        			stiff( M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
-        		}
-        		else
-        		{
-        			stiff( M_data.D(), M_elmatStiff,  M_uFESpace.fe(), 0, 0 );
-        		}
+        case 0:
+            M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
+            if (M_data.has_fibers() )
+            {
+                stiff( M_data.sigmal(),
+                       M_data.sigmat(),
+                       M_fiber_vector,
+                       M_elmatStiff,
+                       M_uFESpace.fe(),
+                       M_uFESpace.dof(),
+                       0,
+                       0);
+            }
+            else
+            {
+                stiff( M_data.D(), M_elmatStiff,  M_uFESpace.fe(), 0, 0 );
+            }
 	        break;
 
         	case 1:
         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
         	    if (M_data.has_fibers() )
         	    {
-        	        stiff( M_data.red_sigma_sphere, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
+        	        stiff( M_data.red_sigma_sphere,
+                           M_data.sigmal(),
+                           M_data.sigmat(),
+                           M_fiber_vector,
+                           M_elmatStiff,
+                           M_uFESpace.fe(),
+                           M_uFESpace.dof(), 0, 0);
         	    }
         	    else
         	    {
         	        stiff( M_data.red_sigma_sphere, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
         	    }
         		break;
-        	case 2:
-        	    M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	    if (M_data.has_fibers() )
-        	    {
-        	        stiff( M_data.red_sigma_cyl, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
-        	    }
-        	    else
-        	    {
-        	        stiff( M_data.red_sigma_cyl, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-        	    }
-        	    break;
-        	case 3:
-        	    M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	    if (M_data.has_fibers() )
-        	    {
-        	        stiff( M_data.red_sigma_box, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
-        	    }
-        	    else
-        	    {
-        	        stiff( M_data.red_sigma_box, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-        	    }
-        	    break;
+        case 2:
+            M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
+            if (M_data.has_fibers() )
+            {
+                stiff( M_data.red_sigma_cyl, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
+            }
+            else
+            {
+                stiff( M_data.red_sigma_cyl, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+            }
+            break;
+        case 3:
+            M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
+            if (M_data.has_fibers() )
+            {
+                stiff( M_data.red_sigma_box, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
+            }
+            else
+            {
+                stiff( M_data.red_sigma_box, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+            }
+            break;
         }
         chronoStiff.stop();
 
@@ -478,7 +491,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
     M_comm->Barrier();
 
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     //! Computing 1/dt * M + K
 
@@ -508,7 +521,7 @@ void MonodomainSolver<Mesh, SolverType>::
 initialize( const source_type& u0 )
 {
 
-    vector_type u(M_uFESpace.map());
+    vector_Type u(M_uFESpace.map());
 
     M_uFESpace.interpolate(u0, u, 0.);
 
@@ -522,7 +535,7 @@ void MonodomainSolver<Mesh, SolverType>::
 initialize( const Function& u0 )
 {
 
-     vector_type u(M_uFESpace.map());
+     vector_Type u(M_uFESpace.map());
      M_uFESpace.interpolate(u0, u, 0.);
 
      initialize(u);
@@ -531,7 +544,7 @@ initialize( const Function& u0 )
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::
-initialize( const vector_type& u0 )
+initialize( const vector_Type& u0 )
 {
 
     M_sol_u = u0;
@@ -542,7 +555,7 @@ initialize( const vector_type& u0 )
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::
 updatePDESystem(Real       alpha,
-             vector_type& sourceVec
+             vector_Type& sourceVec
              )
 {
 
@@ -573,7 +586,7 @@ updatePDESystem(Real       alpha,
 
     chrono.start();
 
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     *M_matrNoBC += *M_matrStiff;
 
@@ -593,7 +606,7 @@ updatePDESystem(Real       alpha,
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::
-updatePDESystem(vector_type& sourceVec )
+updatePDESystem(vector_Type& sourceVec )
 {
 
     Chrono chrono;
@@ -626,8 +639,8 @@ void MonodomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
     chrono.start();
 
 
-    matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
-    vector_type    rhsFull = M_rhsNoBC;
+    matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
+    vector_Type    rhsFull = M_rhsNoBC;
 
     chrono.stop();
 
@@ -661,8 +674,8 @@ void MonodomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull )
+void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
+                                           vector_Type&    rhsFull )
 {
     Chrono chrono;
 
@@ -735,8 +748,8 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
-                                                       vector_type&        rhs,
+void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+                                                       vector_Type&        rhs,
                                                        bchandler_raw_type& BCh )
 {
 

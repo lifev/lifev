@@ -29,7 +29,7 @@
   @brief Cardiac Electrophysiology Test
   @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
   @date 11-2007
-  @contributors Ricardo Ruiz-Baier
+  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
   @last update 11-2010
  */
 
@@ -72,14 +72,14 @@ public:
     //@{
 
 #ifdef MONODOMAIN
-    typedef MonodomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
-    typedef MonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
+    typedef MonodomainSolver< RegionMesh3D<LinearTetra> >::vector_Type  	vector_Type;
+    typedef MonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_Type      	matrix_Type;
 #else
-    typedef BidomainSolver< RegionMesh3D<LinearTetra> >::vector_type  	vector_type;
-    typedef BidomainSolver<RegionMesh3D<LinearTetra> >::matrix_type      	matrix_type;
+    typedef BidomainSolver< RegionMesh3D<LinearTetra> >::vector_Type  	vector_Type;
+    typedef BidomainSolver<RegionMesh3D<LinearTetra> >::matrix_Type    	matrix_Type;
 #endif
-    typedef boost::shared_ptr<vector_type> 					vector_ptrtype;
-    typedef boost::shared_ptr<matrix_type>        				matrix_ptrtype;
+    typedef boost::shared_ptr<vector_Type> 					vectorPtr_Type;
+    typedef boost::shared_ptr<matrix_Type>     				matrixPtr_Type;
     //@}
 
     /** @name Constructors, destructor
@@ -103,12 +103,12 @@ public:
 
     //! To compute the righthand side of the system
 #ifdef MONODOMAIN
-    void computeRhs( vector_type& rhs,
+    void computeRhs( vector_Type& rhs,
                      MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
                      boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
                      DataMonodomain& dataMonodomain );
 #else
-    void computeRhs( vector_type& rhs,
+    void computeRhs( vector_Type& rhs,
                      BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
                      boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
                      DataBidomain& dataBidomain );

@@ -79,9 +79,9 @@ public:
     typedef BCHandler                             bchandler_raw_type;
     typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
 
-    typedef typename SolverType::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
-    typedef typename SolverType::vector_type      vector_type;
+    typedef typename SolverType::matrix_type      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>        matrixPtr_Type;
+    typedef typename SolverType::vector_type      vector_Type;
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
@@ -126,26 +126,26 @@ public:
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(Real       alpha,
-            vector_type& sourceVec
+            vector_Type& sourceVec
     );
 
     //! Updates time dependent parts of PDE system
-    virtual void updatePDESystem( vector_type& sourceVec );
+    virtual void updatePDESystem( vector_Type& sourceVec );
 
     //! Initialize
     void initialize( const source_type&, const source_type&  );
     void initialize( const Function&, const Function&  );
-    void initialize( const vector_type&, const vector_type& );
+    void initialize( const vector_Type&, const vector_Type& );
 
     //! Returns the local solution vector
-    const vector_type& solution_u() const {return M_sol_u;}
-    const vector_type& solution_ue() const {return M_sol_ue;}
-    const vector_type& solution_uiue() const {return M_sol_uiue;}
-    const vector_type& solution_u_extrap() const {return M_sol_u_extrap;}
-    const vector_type& fiber_vector() const {return M_fiber_vector;}
+    const vector_Type& solution_u() const {return M_sol_u;}
+    const vector_Type& solution_ue() const {return M_sol_ue;}
+    const vector_Type& solution_uiue() const {return M_sol_uiue;}
+    const vector_Type& solution_u_extrap() const {return M_sol_u_extrap;}
+    const vector_Type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local residual vector
-    const vector_type& residual() const {return M_residual;}
+    const vector_Type& residual() const {return M_residual;}
 
     //! Returns u FE space
     FESpace<Mesh, EpetraMap>& potentialFESpace() {return M_uFESpace;}
@@ -167,31 +167,31 @@ public:
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
-    matrix_type& matrMass()
+    matrix_Type& matrMass()
     {
         return *M_matrMass;
     }
 
-    BdfT<vector_type>& bdf_uiue() {return M_bdf_uiue;}
+    BdfT<vector_Type>& bdf_uiue() {return M_bdf_uiue;}
 
     //@}
 
 protected:
 
     //! Solves PDE system
-    void solveSystem            (  matrix_ptrtype matrFull,
-            vector_type&   rhsFull );
+    void solveSystem            (  matrixPtr_Type matrFull,
+            vector_Type&   rhsFull );
 
     //! Apply BC
-    void applyBoundaryConditions(  matrix_type&        matrix,
-            vector_type&        rhs,
+    void applyBoundaryConditions(  matrix_Type&        matrix,
+            vector_Type&        rhs,
             bchandler_raw_type& BCh);
 
     //! compute mean of vector x
-    Real computeMean( vector_type& x );
+    Real computeMean( vector_Type& x );
 
     //! removes a scalar from each entry of vector x
-    void removeValue( vector_type& x, Real& value );
+    void removeValue( vector_Type& x, Real& value );
 
     //! Data
     const data_type&               M_data;
@@ -214,32 +214,32 @@ protected:
     EpetraMap                      M_localMapVec;
 
     //! mass matrix
-    matrix_ptrtype                 M_matrMass;
+    matrixPtr_Type                 M_matrMass;
 
     //! Stiff matrix: D*stiff
-    matrix_ptrtype                 M_matrStiff;
+    matrixPtr_Type                 M_matrStiff;
 
-    matrix_ptrtype                 M_matrNoBC;
+    matrixPtr_Type                 M_matrNoBC;
 
     //! Right hand side for the PDE
-    vector_type                    M_rhsNoBC;
+    vector_Type                    M_rhsNoBC;
 
     //! Global solution _u
-    vector_type                    M_sol_uiue;
+    vector_Type                    M_sol_uiue;
 
-    vector_type                    M_sol_u;
+    vector_Type                    M_sol_u;
 
-    vector_type                    M_sol_ue;
+    vector_Type                    M_sol_ue;
 
-    vector_type                    M_sol_uiue_extrap;
+    vector_Type                    M_sol_uiue_extrap;
 
-    vector_type                    M_sol_u_extrap;
+    vector_Type                    M_sol_u_extrap;
 
     //! Local fibers vector
-    vector_type                    M_fiber_vector;
+    vector_Type                    M_fiber_vector;
 
     //! residual
-    vector_type                    M_residual;
+    vector_Type                    M_residual;
 
     //! Solver
     SolverType                     M_linearSolver;
@@ -264,7 +264,7 @@ protected:
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
 
-    BdfT<vector_type>		M_bdf_uiue;
+    BdfT<vector_Type>		M_bdf_uiue;
 private:
 
     //! Elementary matrices
@@ -384,8 +384,8 @@ BidomainSolver( const data_type&          dataType,
             template<typename Mesh, typename SolverType>
             void BidomainSolver<Mesh, SolverType>::buildSystem()
             {
-                M_matrMass.reset  ( new matrix_type(M_localMap) );
-                M_matrStiff.reset( new matrix_type(M_localMap) );
+                M_matrMass.reset  ( new matrix_Type(M_localMap) );
+                M_matrStiff.reset( new matrix_Type(M_localMap) );
 
                 if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
 
@@ -537,7 +537,7 @@ BidomainSolver( const data_type&          dataType,
                 M_matrMass->GlobalAssemble();
                 M_comm->Barrier();
 
-                M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+                M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
                 //! Computing 1.0/dt * M + K
 
@@ -567,8 +567,8 @@ BidomainSolver( const data_type&          dataType,
             initialize( const source_type& ui0, const source_type& ue0 )
             {
 
-                vector_type ui(M_uFESpace.map());
-                vector_type ue(M_uFESpace.map());
+                vector_Type ui(M_uFESpace.map());
+                vector_Type ue(M_uFESpace.map());
 
                 M_uFESpace.interpolate(ui0, ui, 0.);
                 M_uFESpace.interpolate(ue0, ue, 0.);
@@ -581,8 +581,8 @@ BidomainSolver( const data_type&          dataType,
             initialize( const Function& ui0, const Function& ue0 )
             {
 
-                vector_type ui(M_uFESpace.map());
-                vector_type ue(M_uFESpace.map());
+                vector_Type ui(M_uFESpace.map());
+                vector_Type ue(M_uFESpace.map());
 
                 M_uFESpace.interpolate(ui0, ui, 0.);
                 M_uFESpace.interpolate(ue0, ue, 0.);
@@ -593,7 +593,7 @@ BidomainSolver( const data_type&          dataType,
 
             template<typename Mesh, typename SolverType>
             void BidomainSolver<Mesh, SolverType>::
-            initialize( const vector_type& ui0, const vector_type& ue0 )
+            initialize( const vector_Type& ui0, const vector_Type& ue0 )
             {
                 M_sol_uiue = ui0;
                 M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
@@ -614,7 +614,7 @@ BidomainSolver( const data_type&          dataType,
             template<typename Mesh, typename SolverType>
             void BidomainSolver<Mesh, SolverType>::
             updatePDESystem(Real       alpha,
-                    vector_type& sourceVec
+                    vector_Type& sourceVec
             )
             {
 
@@ -645,7 +645,7 @@ BidomainSolver( const data_type&          dataType,
 
                 chrono.start();
 
-                M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+                M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
                 *M_matrNoBC += *M_matrStiff;
 
@@ -665,7 +665,7 @@ BidomainSolver( const data_type&          dataType,
 
             template<typename Mesh, typename SolverType>
             void BidomainSolver<Mesh, SolverType>::
-            updatePDESystem(vector_type& sourceVec )
+            updatePDESystem(vector_Type& sourceVec )
             {
 
                 Chrono chrono;
@@ -698,8 +698,8 @@ BidomainSolver( const data_type&          dataType,
                 chrono.start();
 
 
-                matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
-                vector_type    rhsFull = M_rhsNoBC;
+                matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
+                vector_Type    rhsFull = M_rhsNoBC;
 
                 chrono.stop();
 
@@ -733,8 +733,8 @@ BidomainSolver( const data_type&          dataType,
 
 
             template<typename Mesh, typename SolverType>
-            void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                    vector_type&    rhsFull )
+            void BidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
+                    vector_Type&    rhsFull )
                     {
                 Chrono chrono;
 
@@ -829,8 +829,8 @@ BidomainSolver( const data_type&          dataType,
 
 
             template<typename Mesh, typename SolverType>
-            void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matrix,
-                    vector_type&        rhs,
+            void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+                    vector_Type&        rhs,
                     bchandler_raw_type& BCh )
                     {
 
@@ -840,7 +840,7 @@ BidomainSolver( const data_type&          dataType,
                     BCh.bdUpdate( *M_pFESpace.mesh(), M_pFESpace.feBd(), M_pFESpace.dof() );
                 }
 
-                vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
+                vector_Type rhsFull(M_rhsNoBC,Repeated, Zero);
 
 
                 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
@@ -862,7 +862,7 @@ BidomainSolver( const data_type&          dataType,
                     } // applyBoundaryCondition
 
             template<typename Mesh, typename SolverType>
-            Real BidomainSolver<Mesh, SolverType>::computeMean( vector_type& x )
+            Real BidomainSolver<Mesh, SolverType>::computeMean( vector_Type& x )
             {
                 Real mean_ue(0.);
                 x.getEpetraVector().MeanValue(&mean_ue);
@@ -871,7 +871,7 @@ BidomainSolver( const data_type&          dataType,
             } // computeMean()
 
             template<typename Mesh, typename SolverType>
-            void BidomainSolver<Mesh, SolverType>::removeValue( vector_type& x, Real& value )
+            void BidomainSolver<Mesh, SolverType>::removeValue( vector_Type& x, Real& value )
             {
                 for ( Int i = 0 ; i < x.getEpetraVector().MyLength() ; i++ )
                 {
