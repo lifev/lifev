@@ -60,7 +60,7 @@ public:
     MS_Algorithm_Explicit();
 
     //! Destructor
-    ~MS_Algorithm_Explicit() {}
+    virtual ~MS_Algorithm_Explicit() {}
 
     //@}
 
@@ -85,10 +85,21 @@ public:
 
     //@}
 
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algorithm );
+
+    MS_Algorithm_Explicit& operator=( const MS_Algorithm_Explicit& algorithm );
+
+    //@}
+
 };
 
 //! Factory create function
-inline MS_Algorithm* MS_createExplicit()
+inline MS_Algorithm* createMultiscaleAlgorithmExplicit()
 {
     return new MS_Algorithm_Explicit();
 }

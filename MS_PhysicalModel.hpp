@@ -280,6 +280,17 @@ protected:
 
     MS_Comm_PtrType                      M_comm;               // Communicator
     boost::shared_ptr< Displayer >       M_displayer;          // Displayer
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_PhysicalModel( const MS_PhysicalModel& model );
+
+    MS_PhysicalModel& operator=( const MS_PhysicalModel& model );
+
+    //@}
 };
 
 } // Namespace LifeV

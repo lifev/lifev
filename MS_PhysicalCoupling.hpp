@@ -374,6 +374,17 @@ protected:
 
     MS_Comm_PtrType                      M_comm;
     boost::shared_ptr< Displayer >       M_displayer;
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling );
+
+    MS_PhysicalCoupling& operator=( const MS_PhysicalCoupling& coupling );
+
+    //@}
 };
 
 } // Namespace LifeV

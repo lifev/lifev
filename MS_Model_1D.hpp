@@ -126,7 +126,7 @@ public:
     MS_Model_1D();
 
     //! Destructor
-    ~MS_Model_1D() {}
+    virtual ~MS_Model_1D() {}
 
     //@}
 
@@ -337,6 +337,16 @@ public:
 
 private:
 
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Model_1D( const MS_Model_1D& model );
+
+    MS_Model_1D& operator=( const MS_Model_1D& model );
+
+    //@}
+
+
     //! @name Private Methods
     //@{
 
@@ -446,7 +456,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* MS_createOneDimensional()
+inline MS_PhysicalModel* createMultiscaleModelOneDimensional()
 {
     return new MS_Model_1D();
 }

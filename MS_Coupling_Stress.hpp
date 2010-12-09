@@ -65,7 +65,7 @@ public:
     MS_Coupling_Stress();
 
     //! Destructor
-    ~MS_Coupling_Stress() {}
+    virtual ~MS_Coupling_Stress() {}
 
     //@}
 
@@ -94,6 +94,16 @@ public:
     //@}
 
 private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Coupling_Stress( const MS_Coupling_Stress& coupling );
+
+    MS_Coupling_Stress& operator=( const MS_Coupling_Stress& coupling );
+
+    //@}
+
 
     //! @name Private MultiScale PhysicalCoupling Implementation
     //@{
@@ -150,7 +160,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* MS_createStress()
+inline MS_PhysicalCoupling* createMultiscaleCouplingStress()
 {
     return new MS_Coupling_Stress();
 }

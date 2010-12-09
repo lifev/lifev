@@ -80,7 +80,7 @@ public:
     MS_PhysicalData( const MS_PhysicalData& PhysicalData );
 
     //! Destructor
-    ~MS_PhysicalData() {}
+    virtual ~MS_PhysicalData() {}
 
     //@}
 

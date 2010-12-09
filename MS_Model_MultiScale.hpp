@@ -76,7 +76,7 @@ public:
     MS_Model_MultiScale();
 
     //! Destructor
-    ~MS_Model_MultiScale();
+    virtual ~MS_Model_MultiScale();
 
     //@}
 
@@ -157,13 +157,22 @@ public:
 
 private:
 
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Model_MultiScale( const MS_Model_MultiScale& model );
+
+    MS_Model_MultiScale& operator=( const MS_Model_MultiScale& model );
+
+    //@}
+
     // Models & Couplings
     MS_ModelsVector_Type        M_modelsList;
     MS_CouplingsVector_Type     M_couplingsList;
 };
 
 //! Factory create function
-inline MS_PhysicalModel* MS_createMultiScale()
+inline MS_PhysicalModel* createMultiscaleModelMultiscale()
 {
     return new MS_Model_MultiScale();
 }

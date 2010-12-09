@@ -70,7 +70,7 @@ public:
     MS_Coupling_FluxStress();
 
     //! Destructor
-    ~MS_Coupling_FluxStress() {}
+    virtual ~MS_Coupling_FluxStress() {}
 
     //@}
 
@@ -102,6 +102,16 @@ public:
     //@}
 
 private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Coupling_FluxStress( const MS_Coupling_FluxStress& coupling );
+
+    MS_Coupling_FluxStress& operator=( const MS_Coupling_FluxStress& coupling );
+
+    //@}
+
 
     //! @name Private MultiScale PhysicalCoupling Implementation
     //@{
@@ -167,7 +177,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* MS_createFluxStress()
+inline MS_PhysicalCoupling* createMultiscaleCouplingFluxStress()
 {
     return new MS_Coupling_FluxStress();
 }

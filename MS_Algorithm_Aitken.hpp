@@ -62,7 +62,7 @@ public:
     MS_Algorithm_Aitken();
 
     //! Destructor
-    ~MS_Algorithm_Aitken() {}
+    virtual ~MS_Algorithm_Aitken() {}
 
     //@}
 
@@ -100,10 +100,20 @@ protected:
     methodType                                     M_method;
     generalizedAitken< MS_Vector_Type >            M_generalizedAitken;
 
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm );
+
+    MS_Algorithm_Aitken& operator=( const MS_Algorithm_Aitken& algorithm );
+
+    //@}
 };
 
 //! Factory create function
-inline MS_Algorithm* MS_createAitken()
+inline MS_Algorithm* createMultiscaleAlgorithmAitken()
 {
     return new MS_Algorithm_Aitken();
 }
