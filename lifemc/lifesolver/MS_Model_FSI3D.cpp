@@ -1,35 +1,38 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief MultiScale Model FSI3D
+ *  @brief File containing the MultiScale Model FSI3D
  *
- *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>
  *  @date 19-04-2010
+ *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
@@ -162,7 +165,7 @@ MS_Model_FSI3D::SetupModel()
     M_harmonicExtensionBC->setPhysicalSolver( M_FSIoperator );
 
     // Setup Fluid & Solid solver
-    int numLM = M_FSIoperator->imposeFlux();
+    Int numLM = M_FSIoperator->imposeFlux();
     M_FSIoperator->setFluxesNumber( numLM );
     M_FSIoperator->setupFluidSolid( numLM );
 
@@ -601,8 +604,8 @@ MS_Model_FSI3D::setupCommunicator()
     bool fluid = false;
     bool solid = false;
 
-    int  fluidLeader( 0 );
-    int  solidLeader( 0 );
+    Int  fluidLeader( 0 );
+    Int  solidLeader( 0 );
 
     boost::shared_ptr<Epetra_Comm> epetraComm;
 
@@ -635,7 +638,7 @@ MS_Model_FSI3D::setupCommunicator()
                 }
                 else
                 {
-                    int members[M_comm->NumProc()];
+                    Int members[M_comm->NumProc()];
 
                     solidLeader = 0;
                     fluidLeader = 1-solidLeader;
