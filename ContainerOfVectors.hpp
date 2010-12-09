@@ -1,41 +1,44 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- * @file
- * @brief Containers Of Vectors
- *
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- * @date 29-09-2009
+    @file
+    @brief Containers Of Vectors
+
+    @date 29-09-2009
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
+
 
 #ifndef ContainerOfVectors_H
 #define ContainerOfVectors_H 1
-
-#include <life/lifecore/life.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -84,8 +87,11 @@ class ContainerOfVectors
 {
 public:
 
-    typedef typename ContainerType::iterator IT;
-    typedef typename ContainerType::const_iterator constIT;
+    typedef VectorType                               vector_Type;
+    typedef boost::shared_ptr < vector_Type >        vectorPtr_Type;
+    typedef ContainerType                            container_Type;
+    typedef typename container_Type::iterator        iterator_Type;
+    typedef typename container_Type::const_iterator  constIterator_Type;
 
     //! @name Constructors & Destructor
     //@{
@@ -101,7 +107,7 @@ public:
     ContainerOfVectors( const ContainerOfVectors& containerOfVectors );
 
     //! Destructor
-    ~ContainerOfVectors() {}
+    virtual ~ContainerOfVectors() {}
 
     //@}
 
@@ -114,7 +120,7 @@ public:
      * Make a true copy of all the objects contained in the shared_ptr(s)
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& operator=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& operator=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Operator=
     /*!
@@ -129,7 +135,7 @@ public:
      * Make a copy of the shared_ptr(s), without duplicates the objects contained in them.
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& operator&=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& operator&=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Operator[]
     /*!
@@ -146,59 +152,59 @@ public:
      *
      * @param ID - Vector ID
      */
-    boost::shared_ptr< VectorType >& operator()( const UInt& ID );
+    vectorPtr_Type& operator()( const UInt& ID );
 
     //! Operator+=
     /*!
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& operator+=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& operator+=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Operator-=
     /*!
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& operator-=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& operator-=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Operator*=
     /*!
      * Multiplication element by element of two vectors.
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& operator*=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& operator*=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Operator/=
     /*!
      * Division element by element of two vectors.
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& operator/=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& operator/=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Operator+
     /*!
      * @param containerOfVectors - ContainerOfVectors
      */
-    const ContainerOfVectors operator+( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
+    const ContainerOfVectors operator+( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
 
     //! Operator-
     /*!
      * @param containerOfVectors - ContainerOfVectors
      */
-    const ContainerOfVectors operator-( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
+    const ContainerOfVectors operator-( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
 
     //! Operator*
     /*!
      * Multiplication element by element of two vectors.
      * @param containerOfVectors - ContainerOfVectors
      */
-    const ContainerOfVectors operator*( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
+    const ContainerOfVectors operator*( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
 
     //! Operator/
     /*!
      * Division element by element of two vectors.
      * @param containerOfVectors - ContainerOfVectors
      */
-    const ContainerOfVectors operator/( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
+    const ContainerOfVectors operator/( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
 
     //! Operator+=
     /*!
@@ -303,14 +309,14 @@ public:
      * Return a vector containing one where both the elements are different from zero;
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors operator&&( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors operator&&( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Logic operator||
     /*!
      * Return a vector containing one if one of the two elements is different from zero;
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors operator||( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors operator||( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Logic operator!
     /*!
@@ -329,7 +335,7 @@ public:
      * Scalar product of the vectors
      * @param containerOfVectors - ContainerOfVectors
      */
-    Real Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const;
+    Real Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
 
     //! Dot - Scalar product
     /*!
@@ -337,7 +343,7 @@ public:
      * @param containerOfVectors - ContainerOfVectors
      * @param scalarProduct - result
      */
-    void Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors, Real& scalarProduct );
+    void Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors, Real& scalarProduct );
 
     //! Abs
     /*!
@@ -349,7 +355,7 @@ public:
      * Compute the abs of the ContainerOfVectors and return it in a new container.
      * @param containerOfVectors - The output containerOfVectors containing the abs of the vector.
      */
-    void Abs( ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    void Abs( ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Norm2
     /*!
@@ -362,35 +368,35 @@ public:
      * Concatenate a ContainerOfVectors to another
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& push_back( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& push_back( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! push_back
     /*!
      * Add a vector at the end of the ContainerOfVectors
      * @param vector_ptr - Shared pointer to a vector
      */
-    ContainerOfVectors& push_back( const boost::shared_ptr< VectorType >& vector_ptr );
+    ContainerOfVectors& push_back( const vectorPtr_Type& vector_ptr );
 
     //! push_front
     /*!
      * Concatenate a ContainerOfVectors to another inserting it at the beginning
      * @param containerOfVectors - ContainerOfVectors
      */
-    ContainerOfVectors& push_front( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors );
+    ContainerOfVectors& push_front( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! push_front
     /*!
      * Add a vector at the begin of the ContainerOfVectors
      * @param vector_ptr - Shared pointer to a vector
      */
-    ContainerOfVectors& push_front( const boost::shared_ptr< VectorType >& vector_ptr );
+    ContainerOfVectors& push_front( const vectorPtr_Type& vector_ptr );
 
     //! Replace
     /*!
      * @param vector_ptr - Shared pointer to the new vector
      * @param ID - ID of the vector that has to be replaced
      */
-    void Replace( const boost::shared_ptr< VectorType >& vector_ptr, const UInt& ID );
+    void Replace( const vectorPtr_Type& vector_ptr, const UInt& ID );
 
     //! resize
     /*!
@@ -423,7 +429,7 @@ public:
 
 private:
 
-    ContainerType M_container;
+    container_Type M_container;
 };
 
 // ===================================================
@@ -457,7 +463,7 @@ ContainerOfVectors< VectorType, ContainerType >::ContainerOfVectors( const Conta
 // ===================================================
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::operator=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -468,10 +474,10 @@ ContainerOfVectors< VectorType, ContainerType >::operator=( const ContainerOfVec
     {
         M_container.resize( containerOfVectors.vectorsNumber() );
 
-        boost::shared_ptr< VectorType > MyVectorCopy;
+        vectorPtr_Type MyVectorCopy;
         for ( UInt i( 0 ); i < containerOfVectors.vectorsNumber(); ++i )
         {
-            MyVectorCopy.reset( new VectorType( *( containerOfVectors.M_container[i] ) ) );
+            MyVectorCopy.reset( new vector_Type( *( containerOfVectors.M_container[i] ) ) );
             this->operator()( i ) = MyVectorCopy;
         }
     }
@@ -487,7 +493,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator=( const Real& scalar )
     Debug( 3100 ) << "ContainerOfVectors::operator=( scalar )" << "\n";
 #endif
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         ( *i )->operator=( scalar );
 
     return *this;
@@ -495,7 +501,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator=( const Real& scalar )
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::operator&=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator&=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -520,7 +526,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator[]( const UInt& ID ) co
 #endif
 
     UInt k( 0 );
-    constIT i = M_container.begin();
+    constIterator_Type i = M_container.begin();
     for ( ; i < M_container.end(); ++i )
     {
         if ( ID <= k + ( *i )->size() - 1 )
@@ -533,7 +539,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator[]( const UInt& ID ) co
 }
 
 template< class VectorType, class ContainerType >
-boost::shared_ptr< VectorType >&
+typename ContainerOfVectors< VectorType, ContainerType >::vectorPtr_Type&
 ContainerOfVectors< VectorType, ContainerType >::operator()( const UInt& ID )
 {
 
@@ -546,7 +552,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator()( const UInt& ID )
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::operator+=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator+=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -561,7 +567,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator+=( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::operator-=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator-=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -576,7 +582,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator-=( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::operator*=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator*=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -591,7 +597,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator*=( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::operator/=( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator/=( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -606,7 +612,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator/=( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 const ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator+( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
+ContainerOfVectors< VectorType, ContainerType >::operator+( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -622,7 +628,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator+( const ContainerOfVec
 
 template< class VectorType, class ContainerType >
 const ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator-( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
+ContainerOfVectors< VectorType, ContainerType >::operator-( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -638,7 +644,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator-( const ContainerOfVec
 
 template< class VectorType, class ContainerType >
 const ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator*( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
+ContainerOfVectors< VectorType, ContainerType >::operator*( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -654,7 +660,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator*( const ContainerOfVec
 
 template< class VectorType, class ContainerType >
 const ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator/( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
+ContainerOfVectors< VectorType, ContainerType >::operator/( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -677,7 +683,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator+=( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator+=( scalar )" << "\n";
 #endif
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         ( *i )->operator+=( scalar );
 
     return *this;
@@ -692,7 +698,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator-=( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator-=( scalar )" << "\n";
 #endif
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         ( *i )->operator+=( -scalar );
 
     return *this;
@@ -707,7 +713,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator*=( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator*=( scalar )" << "\n";
 #endif
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         ( *i )->operator*=( scalar );
 
     return *this;
@@ -816,12 +822,12 @@ ContainerOfVectors< VectorType, ContainerType >::operator==( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator==( scalar )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy( *this );
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy( *this );
+    vectorPtr_Type MyVectorCopy;
 
-    for ( IT i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
+    for ( iterator_Type i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( ( *i )->operator==( scalar ) ) );
+        MyVectorCopy.reset( new vector_Type( ( *i )->operator==( scalar ) ) );
         ( *i ) = MyVectorCopy;
     }
 
@@ -837,12 +843,12 @@ ContainerOfVectors< VectorType, ContainerType >::operator!=( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator!=( scalar )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy( *this );
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy( *this );
+    vectorPtr_Type MyVectorCopy;
 
-    for ( IT i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
+    for ( iterator_Type i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( ( *i )->operator!=( scalar ) ) );
+        MyVectorCopy.reset( new vector_Type( ( *i )->operator!=( scalar ) ) );
         ( *i ) = MyVectorCopy;
     }
 
@@ -858,12 +864,12 @@ ContainerOfVectors< VectorType, ContainerType >::operator>( const Real& scalar )
     Debug( 3100 ) << "ContainerOfVectors::operator>( scalar )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy( *this );
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy( *this );
+    vectorPtr_Type MyVectorCopy;
 
-    for ( IT i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
+    for ( iterator_Type i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( ( *i )->operator>( scalar ) ) );
+        MyVectorCopy.reset( new vector_Type( ( *i )->operator>( scalar ) ) );
         ( *i ) = MyVectorCopy;
     }
 
@@ -879,12 +885,12 @@ ContainerOfVectors< VectorType, ContainerType >::operator<( const Real& scalar )
     Debug( 3100 ) << "ContainerOfVectors::operator<( scalar )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy( *this );
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy( *this );
+    vectorPtr_Type MyVectorCopy;
 
-    for ( IT i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
+    for ( iterator_Type i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( ( *i )->operator<( scalar ) ) );
+        MyVectorCopy.reset( new vector_Type( ( *i )->operator<( scalar ) ) );
         ( *i ) = MyVectorCopy;
     }
 
@@ -900,12 +906,12 @@ ContainerOfVectors< VectorType, ContainerType >::operator>=( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator>=( scalar )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy( *this );
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy( *this );
+    vectorPtr_Type MyVectorCopy;
 
-    for ( IT i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
+    for ( iterator_Type i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( ( *i )->operator>=( scalar ) ) );
+        MyVectorCopy.reset( new vector_Type( ( *i )->operator>=( scalar ) ) );
         ( *i ) = MyVectorCopy;
     }
 
@@ -921,12 +927,12 @@ ContainerOfVectors< VectorType, ContainerType >::operator<=( const Real& scalar 
     Debug( 3100 ) << "ContainerOfVectors::operator<=( scalar )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy( *this );
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy( *this );
+    vectorPtr_Type MyVectorCopy;
 
-    for ( IT i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
+    for ( iterator_Type i = containerOfVectorsCopy.M_container.begin(); i < containerOfVectorsCopy.M_container.end(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( ( *i )->operator<=( scalar ) ) );
+        MyVectorCopy.reset( new vector_Type( ( *i )->operator<=( scalar ) ) );
         ( *i ) = MyVectorCopy;
     }
 
@@ -935,20 +941,20 @@ ContainerOfVectors< VectorType, ContainerType >::operator<=( const Real& scalar 
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator&&( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator&&( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator&&( containerOfVectors )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy;
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy;
+    vectorPtr_Type MyVectorCopy;
 
     containerOfVectorsCopy.resize( containerOfVectors.vectorsNumber() );
     for ( UInt i( 0 ); i < containerOfVectors.vectorsNumber(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( M_container[i]->operator&&( *( containerOfVectors.M_container[i] ) ) ) );
+        MyVectorCopy.reset( new vector_Type( M_container[i]->operator&&( *( containerOfVectors.M_container[i] ) ) ) );
         containerOfVectorsCopy.operator()(i) = MyVectorCopy;
     }
 
@@ -957,20 +963,20 @@ ContainerOfVectors< VectorType, ContainerType >::operator&&( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >
-ContainerOfVectors< VectorType, ContainerType >::operator||( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::operator||( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::operator||( containerOfVectors )" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy;
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy;
+    vectorPtr_Type MyVectorCopy;
 
     containerOfVectorsCopy.resize( containerOfVectors.vectorsNumber() );
     for ( UInt i( 0 ); i < containerOfVectors.vectorsNumber(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( M_container[i]->operator||( *( containerOfVectors.M_container[i] ) ) ) );
+        MyVectorCopy.reset( new vector_Type( M_container[i]->operator||( *( containerOfVectors.M_container[i] ) ) ) );
         containerOfVectorsCopy.operator()(i) = MyVectorCopy;
     }
 
@@ -986,13 +992,13 @@ ContainerOfVectors< VectorType, ContainerType >::operator!()
     Debug( 3100 ) << "ContainerOfVectors::operator!()" << "\n";
 #endif
 
-    ContainerOfVectors< VectorType, ContainerType > containerOfVectorsCopy;
-    boost::shared_ptr< VectorType > MyVectorCopy;
+    ContainerOfVectors< vector_Type, container_Type > containerOfVectorsCopy;
+    vectorPtr_Type MyVectorCopy;
 
     containerOfVectorsCopy.resize( vectorsNumber() );
     for ( UInt i( 0 ); i < vectorsNumber(); ++i )
     {
-        MyVectorCopy.reset( new VectorType( M_container[i]->operator!() ) );
+        MyVectorCopy.reset( new vector_Type( M_container[i]->operator!() ) );
         containerOfVectorsCopy.operator()(i) = MyVectorCopy;
     }
 
@@ -1004,7 +1010,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator!()
 // ===================================================
 template< class VectorType, class ContainerType >
 Real
-ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors ) const
+ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1021,7 +1027,7 @@ ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< 
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors,
+ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors,
                                                       Real& scalarProduct )
 {
 
@@ -1042,14 +1048,14 @@ ContainerOfVectors< VectorType, ContainerType >::Abs()
     Debug( 3100 ) << "ContainerOfVectors::Abs()" << "\n";
 #endif
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         ( *i )->Abs();
 }
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< VectorType,
-                                                      ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< vector_Type,
+                                                      container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1072,7 +1078,7 @@ ContainerOfVectors< VectorType, ContainerType >::WeightNorm2()
 
     Real PartialNorm, TotalNorm = 0;
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
     {
         ( *i )->Norm2( PartialNorm );
         TotalNorm += PartialNorm * ( *i )->size();
@@ -1083,14 +1089,14 @@ ContainerOfVectors< VectorType, ContainerType >::WeightNorm2()
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::push_back( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::push_back( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::push_back( vector_ptr )" << "\n";
 #endif
 
-    for ( constIT i = containerOfVectors.M_container.begin(); i < containerOfVectors.M_container.end(); ++i )
+    for ( constIterator_Type i = containerOfVectors.M_container.begin(); i < containerOfVectors.M_container.end(); ++i )
         this->push_back( *i );
 
     return *this;
@@ -1098,7 +1104,7 @@ ContainerOfVectors< VectorType, ContainerType >::push_back( const ContainerOfVec
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::push_back( const boost::shared_ptr< VectorType >& vector_ptr )
+ContainerOfVectors< VectorType, ContainerType >::push_back( const vectorPtr_Type& vector_ptr )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1112,14 +1118,14 @@ ContainerOfVectors< VectorType, ContainerType >::push_back( const boost::shared_
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::push_front( const ContainerOfVectors< VectorType, ContainerType >& containerOfVectors )
+ContainerOfVectors< VectorType, ContainerType >::push_front( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 3100 ) << "ContainerOfVectors::push_front( vector_ptr )" << "\n";
 #endif
 
-    for ( constIT i = containerOfVectors.M_container.begin(); i < containerOfVectors.M_container.end(); ++i )
+    for ( constIterator_Type i = containerOfVectors.M_container.begin(); i < containerOfVectors.M_container.end(); ++i )
         this->push_front( *i );
 
     return *this;
@@ -1127,7 +1133,7 @@ ContainerOfVectors< VectorType, ContainerType >::push_front( const ContainerOfVe
 
 template< class VectorType, class ContainerType >
 ContainerOfVectors< VectorType, ContainerType >&
-ContainerOfVectors< VectorType, ContainerType >::push_front( const boost::shared_ptr< VectorType >& vector_ptr )
+ContainerOfVectors< VectorType, ContainerType >::push_front( const vectorPtr_Type& vector_ptr )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1141,7 +1147,7 @@ ContainerOfVectors< VectorType, ContainerType >::push_front( const boost::shared
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Replace( const boost::shared_ptr< VectorType >& vector_ptr,
+ContainerOfVectors< VectorType, ContainerType >::Replace( const vectorPtr_Type& vector_ptr,
                                                           const UInt& ID )
 {
 
@@ -1188,7 +1194,7 @@ ContainerOfVectors< VectorType, ContainerType >::ShowMe( std::ostream& output ) 
     output << "Number of vectors:  " << vectorsNumber() << std::endl;
     output << "Global vector size: " << size() << std::endl;
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         ( *i )->ShowMe( output );
 //    for ( UInt i( 0 ); i < size(); ++i )
 //        output << "V[" << i << "] = " << this->operator[]( i ) << std::endl;
@@ -1210,7 +1216,7 @@ ContainerOfVectors< VectorType, ContainerType >::size() const
 
     UInt size = 0;
 
-    for ( constIT i = M_container.begin(); i < M_container.end(); ++i )
+    for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
         size += static_cast< UInt > ( ( *i )->size() );
 
     return size;
