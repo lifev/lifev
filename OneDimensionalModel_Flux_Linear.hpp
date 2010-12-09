@@ -71,7 +71,7 @@ public:
     //! Constructor
     OneDimensionalModel_Flux_Linear();
 
-    OneDimensionalModel_Flux_Linear( const physicsPtr_Type Physics );
+    OneDimensionalModel_Flux_Linear( const physicsPtr_Type physics );
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux_Linear() {}
@@ -120,7 +120,7 @@ public:
      * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
      * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
      */
-    void EigenValuesEigenVectors( const Real& U1, const Real& U2,
+    void eigenValuesEigenVectors( const Real& U1, const Real& U2,
                                   container2D_Type& eigenvalues,
                                   container2D_Type& leftEigenvector1,
                                   container2D_Type& leftEigenvector2,
@@ -138,7 +138,7 @@ public:
 };
 
 //! Factory create function
-inline OneDimensionalModel_Flux* Create_OneDimensionalModel_Flux_Linear()
+inline OneDimensionalModel_Flux* createOneDimensionalFluxLinear()
 {
     return new OneDimensionalModel_Flux_Linear();
 }

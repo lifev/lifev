@@ -42,7 +42,7 @@
     @date 21-04-2010
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
 
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
+    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
 
     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
@@ -576,7 +576,7 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, solutio
             // compute the eigenvalues at node
             Ainode = (*solution["A"])( ii );
             Qinode = (*solution["Q"])( ii );
-            M_flux -> EigenValuesEigenVectors( Ainode, Qinode,
+            M_flux -> eigenValuesEigenVectors( Ainode, Qinode,
                                              eigenvalues,
                                              leftEigenvector1,
                                              leftEigenvector2,
@@ -666,7 +666,7 @@ OneDimensionalModel_Solver::ComputeCFL( const solution_Type& solution, const Rea
     for ( UInt inode(0); inode < M_FESpace -> dim() ; ++inode )
     {
         // compute the eigenvalues at node
-        M_flux -> EigenValuesEigenVectors( ( *solution.find("A") -> second ) ( inode + 1 ),
+        M_flux -> eigenValuesEigenVectors( ( *solution.find("A") -> second ) ( inode + 1 ),
                                            ( *solution.find("Q") -> second ) ( inode + 1 ),
                                              eigenvalues, leftEigenvector1, leftEigenvector2, inode );
 
@@ -1003,7 +1003,7 @@ OneDimensionalModel_Solver::BoundaryValue( const solution_Type& solution, const 
         boundaryDof = 1;
         break;
     case OneD_right:
-        boundaryDof = M_flux -> Physics() -> Data() -> NumberOfElements() + 1;
+        boundaryDof = M_flux -> physics() -> Data() -> NumberOfElements() + 1;
         break;
     default:
         std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
@@ -1045,14 +1045,14 @@ OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& 
         boundaryDof = 0;
         break;
     case OneD_right:
-        boundaryDof = M_flux -> Physics() -> Data() -> NumberOfElements();
+        boundaryDof = M_flux -> physics() -> Data() -> NumberOfElements();
         break;
     default:
         std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
         return;
     }
 
-    M_flux -> EigenValuesEigenVectors( (*solution.find("A") -> second)( boundaryDof + 1 ),
+    M_flux -> eigenValuesEigenVectors( (*solution.find("A") -> second)( boundaryDof + 1 ),
                                      (*solution.find("Q") -> second)( boundaryDof + 1 ),
                                      eigenvalues, leftEigenvector1, leftEigenvector2,
                                      boundaryDof );

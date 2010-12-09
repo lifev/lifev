@@ -31,7 +31,7 @@
     @date 15-04-2010
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
 
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
+    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
 
     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
@@ -64,7 +64,7 @@ public:
     //! Constructor
     OneDimensionalModel_Flux();
 
-    OneDimensionalModel_Flux( const physicsPtr_Type Physics );
+    OneDimensionalModel_Flux( const physicsPtr_Type physics );
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux() {}
@@ -114,7 +114,7 @@ public:
      * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
      * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
      */
-    virtual void EigenValuesEigenVectors( const Real& A, const Real& Q,
+    virtual void eigenValuesEigenVectors( const Real& A, const Real& Q,
                                           container2D_Type& eigenvalues,
                                           container2D_Type& leftEigenvector1,
                                           container2D_Type& leftEigenvector2,
@@ -133,7 +133,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void SetPhysics( const physicsPtr_Type& Physics );
+    void SetPhysics( const physicsPtr_Type& physics );
 
     //@}
 
@@ -141,13 +141,23 @@ public:
     //! @name Get Methods
     //@{
 
-    physicsPtr_Type Physics() const ;
+    physicsPtr_Type physics() const ;
 
     //@}
 
 protected:
 
     physicsPtr_Type                 M_physics;
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_Flux& operator=( const physicsPtr_Type& physics);
+
+    //@}
+
 };
 
 }

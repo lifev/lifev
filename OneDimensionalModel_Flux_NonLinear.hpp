@@ -35,7 +35,7 @@
     @date 15-04-2010
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
 
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
+    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
 
     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
@@ -69,7 +69,7 @@ public:
     //! Constructor
     OneDimensionalModel_Flux_NonLinear();
 
-    OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type Physics );
+    OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type physics );
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux_NonLinear() {}
@@ -119,7 +119,7 @@ public:
      * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
      * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
      */
-    void EigenValuesEigenVectors( const Real& A, const Real& Q,
+    void eigenValuesEigenVectors( const Real& A, const Real& Q,
                                   container2D_Type& eigenvalues,
                                   container2D_Type& leftEigenvector1,
                                   container2D_Type& leftEigenvector2,
@@ -136,7 +136,7 @@ public:
 };
 
 //! Factory create function
-inline OneDimensionalModel_Flux* Create_OneDimensionalModel_Flux_NonLinear()
+inline OneDimensionalModel_Flux* createOneDimensionalFluxNonLinear()
 {
     return new OneDimensionalModel_Flux_NonLinear();
 }
