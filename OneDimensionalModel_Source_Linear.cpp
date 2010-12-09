@@ -52,28 +52,28 @@ OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear() :
     super    ()
 {}
 
-OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear( const physicsPtr_Type Physics ) :
-    super    ( Physics )
+OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear( const physicsPtr_Type physics ) :
+    super    ( physics )
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Source_Linear::operator()( const Real& _U1, const Real& _U2,
+OneDimensionalModel_Source_Linear::operator()( const Real& U1, const Real& U2,
                                                const ID& ii,    const UInt& indz ) const
 {
     if ( ii == 1 ) // S1
     {
-        return M_physics->Data()->Source10( indz ) +
-               M_physics->Data()->Source11( indz ) * _U1 +
-               M_physics->Data()->Source12( indz ) * _U2;
+        return M_physics->data()->source10( indz ) +
+               M_physics->data()->source11( indz ) * U1 +
+               M_physics->data()->source12( indz ) * U2;
     }
     if ( ii == 2 ) // S2
     {
-        return M_physics->Data()->Source20( indz ) +
-               M_physics->Data()->Source21( indz ) * _U1 +
-               M_physics->Data()->Source22( indz ) * _U2;
+        return M_physics->data()->source20( indz ) +
+               M_physics->data()->source21( indz ) * U1 +
+               M_physics->data()->source22( indz ) * U2;
     }
     ERROR_MSG("The flux function has only 2 components.");
     return -1.;
@@ -86,19 +86,19 @@ OneDimensionalModel_Source_Linear::diff( const Real& /*_U1*/, const Real& /*_U2*
 {
     if ( ii == 1 && jj == 1) // dS1/dU1 = 0
     {
-        return M_physics->Data()->Source11( indz );
+        return M_physics->data()->source11( indz );
     }
     if ( ii == 1 && jj == 2) // dS1/dU2 = 0
     {
-        return M_physics->Data()->Source12( indz );
+        return M_physics->data()->source12( indz );
     }
     if ( ii == 2 && jj == 1 ) // dS2/dU1
     {
-        return M_physics->Data()->Source21( indz );
+        return M_physics->data()->source21( indz );
     }
     if ( ii == 2 && jj == 2 ) // dS2/dU2
     {
-        return M_physics->Data()->Source22( indz );
+        return M_physics->data()->source22( indz );
     }
     ERROR_MSG("Source's differential function has only 4 components.");
     return -1.;
@@ -118,11 +118,11 @@ OneDimensionalModel_Source_Linear::diff( const Real& /*_U1*/, const Real& /*_U2*
 //}
 
 Real
-OneDimensionalModel_Source_Linear::interpolatedQuasiLinearSource( const Real& _U1, const Real& _U2,
+OneDimensionalModel_Source_Linear::interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
                                                                   const ID& ii,    const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
 {
     //TODO Implement the interpolation as done for the non-linear case
-    return this->operator()(_U1, _U2, ii, bcNodes[0]);
+    return this->operator()(U1, U2, ii, bcNodes[0]);
 }
 
 }

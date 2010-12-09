@@ -76,7 +76,7 @@ public :
     //! Constructor
     OneDimensionalModel_Physics_NonLinear();
 
-    OneDimensionalModel_Physics_NonLinear( const dataPtr_Type Data );
+    OneDimensionalModel_Physics_NonLinear( const dataPtr_Type data );
 
     //! Destructor
     virtual ~OneDimensionalModel_Physics_NonLinear() {}
@@ -93,8 +93,8 @@ public :
      *  W1,2 = (Q / A) +- (2 / beta1) * sqrt(chi) * (celerity - celerity0)
      *  being chi the correction coefficient proposed by A. Robertson and H. Zakaria
      */
-    void W_from_U( Real& _W1, Real& _W2,
-                   const Real& _U1, const Real& _U2,
+    void fromUToW( Real& W1, Real& W2,
+                   const Real& U1, const Real& U2,
                    const UInt& indz ) const;
 
     //! Compute U from W
@@ -105,15 +105,15 @@ public :
      *
      *  Q = A (W1 + W2) / 2
      */
-    void U_from_W( Real& _U1, Real& _U2,
-                   const Real& _W1, const Real& _W2,
+    void fromWToU( Real& U1, Real& U2,
+                   const Real& W1, const Real& W2,
                    const UInt& indz ) const;
 
     //! Compute the pressure as a fuction of W1, W2
     /*!
      *  P = beta0 * ( rho / (beta0 * beta1) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )^2 - 1 )
      */
-    Real pressure_W( const Real& _W1, const Real& _W2, const UInt& indz = 0 ) const;
+    Real fromWToP( const Real& W1, const Real& W2, const UInt& indz = 0 ) const;
 
     //! Compute the derivative of pressure with respect to W1 and W2
     /*!
@@ -121,7 +121,7 @@ public :
      *  dP(W1,W2)/dW_1 = rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
      *  dP(W1,W2)/dW_2 = - rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
      */
-    Real pressure_WDiff( const Real& _W1, const Real& _W2,
+    Real dPdW( const Real& W1, const Real& W2,
                          const ID& i,
                          const UInt& indz = 0) const;
 
@@ -130,7 +130,7 @@ public :
      *  W1 - W2 = (4 * sqrt(chi) / beta1) * sqrt( beta0 * beta1 / rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
      *  W1 - W2 = 4 * sqrt( beta0 / (beta1 * rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
      */
-    Real W_from_P( const Real& _P, const Real& _W, const ID& i, const UInt& indz ) const;
+    Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const;
 
     //! Compute W1 or W2 given the flux: fixed point problem
     /*!
@@ -141,14 +141,23 @@ public :
      *  K0 = beta1 / ( 4 * sqrt(chi) )
      *  K1 = A0 / 2 * ( rho / (beta0*beta1) )^(1/beta1) * K0^(2/beta1)
      */
-    Real W_from_Q( const Real& _Q, const Real& _W_n, const Real& _W, const ID& i, const UInt& indz ) const;
+    Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const;
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_Physics_NonLinear& operator=( const dataPtr_Type data );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalModel_Physics* Create_OneDimensionalModel_Physics_NonLinear()
+inline OneDimensionalModel_Physics* createOneDimensionalPhysicsNonLinear()
 {
     return new OneDimensionalModel_Physics_NonLinear();
 }

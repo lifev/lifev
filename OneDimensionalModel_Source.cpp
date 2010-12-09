@@ -49,24 +49,24 @@ OneDimensionalModel_Source::OneDimensionalModel_Source() :
     M_physics   ()
 {}
 
-OneDimensionalModel_Source::OneDimensionalModel_Source( const physicsPtr_Type Physics ) :
-    M_physics   ( Physics )
+OneDimensionalModel_Source::OneDimensionalModel_Source( const physicsPtr_Type physics ) :
+    M_physics   ( physics )
 {}
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Source::SetPhysics( const physicsPtr_Type& Physics )
+OneDimensionalModel_Source::setPhysics( const physicsPtr_Type& physics )
 {
-    M_physics = Physics;
+    M_physics = physics;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 OneDimensionalModel_Source::physicsPtr_Type
-OneDimensionalModel_Source::Physics() const
+OneDimensionalModel_Source::physics() const
 {
     return M_physics;
 }

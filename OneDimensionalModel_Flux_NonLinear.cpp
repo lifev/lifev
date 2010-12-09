@@ -70,12 +70,12 @@ OneDimensionalModel_Flux_NonLinear::operator()( const Real& A, const Real& Q,
 
     if ( ii == 2 ) // F2
     {
-        return ( M_physics -> Data() -> Alpha(i) * Q * Q / A + M_physics
-                           -> Data() -> Beta0(i) * M_physics -> Data() -> Beta1(i) * M_physics
-                           -> Data() -> Area0(i) / ( ( M_physics -> Data() -> Beta1(i) + 1 ) * M_physics
-                           -> Data() -> DensityRho() ) * ( std::pow( A / M_physics -> Data() -> Area0(i), M_physics
-                           -> Data() -> Beta1(i) + 1 ) - 1 ) ) * M_physics
-                           -> Data() -> RobertsonCorrection();
+        return ( M_physics -> data() -> alpha(i) * Q * Q / A + M_physics
+                           -> data() -> beta0(i) * M_physics -> data() -> beta1(i) * M_physics
+                           -> data() -> area0(i) / ( ( M_physics -> data() -> beta1(i) + 1 ) * M_physics
+                           -> data() -> densityRho() ) * ( std::pow( A / M_physics -> data() -> area0(i), M_physics
+                           -> data() -> beta1(i) + 1 ) - 1 ) ) * M_physics
+                           -> data() -> robertsonCorrection();
     }
 
     ERROR_MSG("The flux function has only 2 components.");
@@ -99,17 +99,17 @@ OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
 
     if ( ii == 2 && jj == 1 ) // dF2/dA
     {
-        return ( M_physics -> Data() -> Beta0(i) * M_physics
-                           -> Data() -> Beta1(i) / M_physics
-                           -> Data() -> DensityRho() * std::pow( A / M_physics
-                           -> Data() -> Area0(i), M_physics
-                           -> Data() -> Beta1(i) ) - M_physics
-                           -> Data() -> Alpha(i) * Q * Q / A / A ) * M_physics
-                           -> Data() -> RobertsonCorrection();
+        return ( M_physics -> data() -> beta0(i) * M_physics
+                           -> data() -> beta1(i) / M_physics
+                           -> data() -> densityRho() * std::pow( A / M_physics
+                           -> data() -> area0(i), M_physics
+                           -> data() -> beta1(i) ) - M_physics
+                           -> data() -> alpha(i) * Q * Q / A / A ) * M_physics
+                           -> data() -> robertsonCorrection();
     }
     if ( ii == 2 && jj == 2 ) // dF2/dQ
     {
-        return M_physics -> Data() -> RobertsonCorrection() * 2 * M_physics -> Data() -> Alpha(i) * Q / A;
+        return M_physics -> data() -> robertsonCorrection() * 2 * M_physics -> data() -> alpha(i) * Q / A;
     }
 
     ERROR_MSG("Flux's differential function has only 4 components.");
@@ -132,19 +132,19 @@ OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
 //    {
 //        if( jj == 1 && kk == 1 )  // d2F2/dA2
 //        {
-//            return M_physics->Data()->RobertsonCorrection()
-//                       * M_physics->Data()->Beta0(i) * M_physics->Data()->Beta1(i) * M_physics->Data()->Beta1(i)
-//                       / ( M_physics->Data()->DensityRho() * M_physics->Data()->Area0(i) )
-//                       * std::pow( A / M_physics->Data()->Area0(i), M_physics->Data()->Beta1(i) - 1);
+//            return M_physics->data()->robertsonCorrection()
+//                       * M_physics->data()->beta0(i) * M_physics->data()->beta1(i) * M_physics->data()->beta1(i)
+//                       / ( M_physics->data()->densityRho() * M_physics->data()->area0(i) )
+//                       * std::pow( A / M_physics->data()->area0(i), M_physics->data()->beta1(i) - 1);
 //        }
 //        // cross terms (equal)
 //        if( (jj == 1 && kk == 2) || (jj == 2 && kk == 1) ) // d2F2/dAdQ=d2F2/dQdA
 //        {
-//            return -M_physics->Data()->RobertsonCorrection() * M_physics->Data()->Alpha(i) * Q / ( A * A );
+//            return -M_physics->data()->robertsonCorrection() * M_physics->data()->alpha(i) * Q / ( A * A );
 //        }
 //        if( jj == 2 && kk == 2 ) // d2F2/dQ2
 //        {
-//            return M_physics->Data()->RobertsonCorrection() * 2 * M_physics->Data()->Alpha(i) / A;
+//            return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha(i) / A;
 //        }
 //    }
 //    ERROR_MSG("Flux's second differential function has only 8 components.");
@@ -163,16 +163,16 @@ OneDimensionalModel_Flux_NonLinear::eigenValuesEigenVectors( const Real& A,
     Debug(6312) << "[OneDimensionalModel_Flux_NonLinear]::jabocian_EigenValues_Vectors\n";
 
     Real celerity;
-    celerity       = std::sqrt( M_physics -> Data() -> Alpha(i) * ( M_physics
-                                          -> Data() -> Alpha(i) - 1) * Q * Q / ( A * A ) + M_physics
-                                          -> Data() -> Beta0(i) * M_physics
-                                          -> Data() -> Beta1(i) / M_physics
-                                          -> Data() -> DensityRho() * std::pow( A / M_physics
-                                          -> Data() -> Area0(i), M_physics
-                                          -> Data() -> Beta1(i) ) );
+    celerity       = std::sqrt( M_physics -> data() -> alpha(i) * ( M_physics
+                                          -> data() -> alpha(i) - 1) * Q * Q / ( A * A ) + M_physics
+                                          -> data() -> beta0(i) * M_physics
+                                          -> data() -> beta1(i) / M_physics
+                                          -> data() -> densityRho() * std::pow( A / M_physics
+                                          -> data() -> area0(i), M_physics
+                                          -> data() -> beta1(i) ) );
 
-    eigenvalues[0] = M_physics -> Data() -> Alpha(i) * Q / A + celerity;
-    eigenvalues[1] = M_physics -> Data() -> Alpha(i) * Q / A - celerity;
+    eigenvalues[0] = M_physics -> data() -> alpha(i) * Q / A + celerity;
+    eigenvalues[1] = M_physics -> data() -> alpha(i) * Q / A - celerity;
 
     leftEigenvector1[0] = - eigenvalues[1] / A;
     leftEigenvector1[1] = 1. / A;
@@ -190,28 +190,28 @@ OneDimensionalModel_Flux_NonLinear::deltaEigenValuesEigenVectors( const Real& A,
 {
     Real deltaCelerity;
 
-    Real AoverA0( A / M_physics -> Data() -> Area0(i) );
-    Real C ( std::pow(  AoverA0, M_physics -> Data() -> Beta1(i) ) / M_physics -> Data() -> DensityRho() );
+    Real AoverA0( A / M_physics -> data() -> area0(i) );
+    Real C ( std::pow(  AoverA0, M_physics -> data() -> beta1(i) ) / M_physics -> data() -> densityRho() );
 
-    deltaCelerity  = 0.5 / std::sqrt( M_physics -> Data() -> Alpha(i) * ( M_physics
-                                                -> Data() -> Alpha(i) - 1) * Q * Q / ( A * A )+ M_physics
-                                                -> Data() -> Beta0(i) * M_physics
-                                                -> Data() -> Beta1(i) * C ) * ( C * (  M_physics
-                                                -> Data() -> Beta1(i) * M_physics
-                                                -> Data() -> dBeta0dz(i) - M_physics
-                                                -> Data() -> Beta0(i) * M_physics
-                                                -> Data() -> Beta1(i) * M_physics
-                                                -> Data() -> Beta1(i) /  M_physics
-                                                -> Data() -> Area0(i) * M_physics
-                                                -> Data() -> dArea0dz(i) + M_physics
-                                                -> Data() -> Beta0(i) * ( 1 + M_physics
-                                                -> Data() -> Beta0(i) * std::log( AoverA0 ) ) * M_physics
-                                                -> Data() -> dBeta1dz(i) ) + ( 2 * M_physics
-                                                -> Data() -> Alpha(i) - 1 ) * Q * Q / ( A * A ) * M_physics
-                                                -> Data() -> dAlphadz(i) );
+    deltaCelerity  = 0.5 / std::sqrt( M_physics -> data() -> alpha(i) * ( M_physics
+                                                -> data() -> alpha(i) - 1) * Q * Q / ( A * A )+ M_physics
+                                                -> data() -> beta0(i) * M_physics
+                                                -> data() -> beta1(i) * C ) * ( C * (  M_physics
+                                                -> data() -> beta1(i) * M_physics
+                                                -> data() -> dBeta0dz(i) - M_physics
+                                                -> data() -> beta0(i) * M_physics
+                                                -> data() -> beta1(i) * M_physics
+                                                -> data() -> beta1(i) /  M_physics
+                                                -> data() -> area0(i) * M_physics
+                                                -> data() -> dArea0dz(i) + M_physics
+                                                -> data() -> beta0(i) * ( 1 + M_physics
+                                                -> data() -> beta0(i) * std::log( AoverA0 ) ) * M_physics
+                                                -> data() -> dBeta1dz(i) ) + ( 2 * M_physics
+                                                -> data() -> alpha(i) - 1 ) * Q * Q / ( A * A ) * M_physics
+                                                -> data() -> dAlphadz(i) );
 
-    deltaEigenvalues[0] = M_physics -> Data() -> dAlphadz(i) * Q / A + deltaCelerity;
-    deltaEigenvalues[1] = M_physics -> Data() -> dAlphadz(i) * Q / A - deltaCelerity;
+    deltaEigenvalues[0] = M_physics -> data() -> dAlphadz(i) * Q / A + deltaCelerity;
+    deltaEigenvalues[1] = M_physics -> data() -> dAlphadz(i) * Q / A - deltaCelerity;
 
     deltaLeftEigenvector1[0] = - deltaEigenvalues[1] / A;
     deltaLeftEigenvector1[1] = 0;

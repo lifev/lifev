@@ -235,9 +235,9 @@ public:
      *  This method compute the value of the pressure (elastic and if necessary also viscoelastic)
      *  adding it to the solution.
      *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
-     *  @param TimeStep time step
+     *  @param timeStep time step
      */
-    void computePressure( solution_Type& solution, const Real& TimeStep );
+    void computePressure( solution_Type& solution, const Real& timeStep );
 
     //! Update the ratio between A and A0.
     /*!
@@ -288,24 +288,24 @@ public:
 
     //! Compute the right hand side
     /*!
-     *  @param TimeStep The time step.
+     *  @param timeStep The time step.
      */
-    void updateRHS( const solution_Type& solution, const Real& TimeStep );
+    void updateRHS( const solution_Type& solution, const Real& timeStep );
 
     //! Update convective term and BC. Then solve the linearized NS system
     /*!
      * @param bcH The BC handler
-     * @param Time the time
-     * @param TimeStep the time step
+     * @param time the time
+     * @param timeStep the time step
      */
-    void iterate( OneDimensionalModel_BCHandler& bcH, solution_Type& solution, const Real& Time, const Real& TimeStep );
+    void iterate( OneDimensionalModel_BCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
     //! CFL computation (correct for constant mesh)
     /*!
-     * @param TimeStep the time step
+     * @param timeStep the time step
      * @return CFL
      */
-    Real ComputeCFL( const solution_Type& solution, const Real& timeStep ) const;
+    Real computeCFL( const solution_Type& solution, const Real& timeStep ) const;
 
     //! Save the solution for the next timestep
     //void savesol();
@@ -344,12 +344,12 @@ public:
     //@{
 
     //! Set problem elements
-    void setProblem( const physicsPtr_Type Physics,
-                     const fluxPtr_Type    Flux,
-                     const sourcePtr_Type  Source );
+    void setProblem( const physicsPtr_Type physics,
+                     const fluxPtr_Type    flux,
+                     const sourcePtr_Type  source );
 
     //! Set the communicator
-    void setCommunicator( const commPtr_Type Comm );
+    void setCommunicator( const commPtr_Type comm );
 
     //! Set the FEspace
     void setFESpace( const FESpacePtr_Type FESpace );
@@ -369,38 +369,38 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the Physics function
-    const physicsPtr_Type& Physics() const;
+    //! Get the physics function
+    const physicsPtr_Type& physics() const;
 
     //! Get the flux function
-    const fluxPtr_Type& Flux() const;
+    const fluxPtr_Type& flux() const;
 
     //! Get the source function
-    const sourcePtr_Type& Source() const;
+    const sourcePtr_Type& source() const;
 
     //! Get the left node identifier
-    const UInt& LeftNodeId() const;
+    const UInt& leftNodeId() const;
 
     //! Get the left internal node (neighboring node)
-    const UInt& LeftInternalNodeId() const;
+    const UInt& leftInternalNodeId() const;
 
     //! Get the right node identifier
-    const UInt& RightNodeId() const;
+    const UInt& rightNodeId() const;
 
     //! Get the right internal node (neighboring node)
-    const UInt& RightInternalNodeId() const;
+    const UInt& rightInternalNodeId() const;
 
     //! Get the Dirichlet boundary conditions (left)
-    container2D_Type BCValuesLeft( const solution_Type& solution ) const;
+    container2D_Type bcValuesLeft( const solution_Type& solution ) const;
 
     //! Get the value at neighboring node (left)
-    container2D_Type BCValuesInternalLeft( const solution_Type& solution ) const;
+    container2D_Type bcValuesInternalLeft( const solution_Type& solution ) const;
 
     //! Get the Dirichlet boundary conditions (right)
-    container2D_Type BCValuesRight( const solution_Type& solution ) const;
+    container2D_Type bcValuesRight( const solution_Type& solution ) const;
 
     //! Get the value at neighboring node (right)
-    container2D_Type BCValuesInternalRight( const solution_Type& solution ) const;
+    container2D_Type bcValuesInternalRight( const solution_Type& solution ) const;
 
     //! Return the value of a quantity (P, A, Q, W1, W2) on a specified boundary.
     /*!
@@ -409,7 +409,7 @@ public:
      *  @param bcSide Side of the boundary.
      *  @return value of the quantity on the specified side.
      */
-    Real BoundaryValue( const solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
+    Real boundaryValue( const solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
 
     //! Return the value of the eigenvalues and eigenvectors on a specified boundary.
     /*!
@@ -419,7 +419,7 @@ public:
      *  @param leftEigenvector1 output left eigenvector associated to the first eigenvalue.
      *  @param leftEigenvector1 output left eigenvector associated to the second eigenvalue.
      */
-    void BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const solution_Type& solution,
+    void boundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const solution_Type& solution,
                                           container2D_Type& eigenvalues,
                                           container2D_Type& leftEigenvector1,
                                           container2D_Type& leftEigenvector2 );
@@ -517,7 +517,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    vector_Type viscoelasticFluxCorrection( const vector_Type&, const Real& TimeStep );
+    vector_Type viscoelasticFluxCorrection( const vector_Type&, const Real& timeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -599,6 +599,16 @@ private:
 
     container2D_Type                     M_bcDirLeft;  //! first -> U1, second ->U2
     container2D_Type                     M_bcDirRight; //
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_Solver( const physicsPtr_Type physics );
+    OneDimensionalModel_Solver& operator=( const physicsPtr_Type physics);
+
+    //@}
 };
 
 }

@@ -53,8 +53,8 @@ OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear()
 {
 }
 
-OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear( const dataPtr_Type Data ) :
-    super   ( Data )
+OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear( const dataPtr_Type data ) :
+    super   ( data )
 {
 }
 
@@ -62,49 +62,49 @@ OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear( const da
 // Methods
 // ===================================================
 void
-OneDimensionalModel_Physics_Linear::W_from_U(       Real& _W1,       Real& _W2,
-                                                    const Real& _U1, const Real& _U2, const UInt& indz ) const
+OneDimensionalModel_Physics_Linear::fromUToW(       Real& W1,       Real& W2,
+                                                    const Real& U1, const Real& U2, const UInt& indz ) const
 {
-    _W1 = _U2 + Celerity0(indz) * ( _U1 - M_data->Area0(indz) );
+    W1 = U2 + celerity0(indz) * ( U1 - M_data->area0(indz) );
 
-    _W2 = _U2 - Celerity0(indz) * ( _U1 - M_data->Area0(indz) );
+    W2 = U2 - celerity0(indz) * ( U1 - M_data->area0(indz) );
 
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::W_from_U] Q " << _U2 << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::W_from_U] W1 " << _W1 << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::W_from_U] W2 " << _W2 << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::W_from_U] Celerity " << Celerity0(indz) << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::W_from_U] ( _U1 - Area0(indz) ) " << ( _U1 - M_data->Area0(indz) ) << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] Q " << U2 << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] W1 " << W1 << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] W2 " << W2 << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] celerity " << celerity0(indz) << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] ( _U1 - area0(indz) ) " << ( U1 - M_data->area0(indz) ) << "\n";
 }
 
 void
-OneDimensionalModel_Physics_Linear::U_from_W(       Real& _U1,       Real& _U2,
-                                                    const Real& _W1, const Real& _W2, const UInt& indz ) const
+OneDimensionalModel_Physics_Linear::fromWToU(       Real& U1,       Real& U2,
+                                                    const Real& W1, const Real& W2, const UInt& indz ) const
 {
-    _U1 = M_data -> Area0(indz) + (_W1 - _W2) / ( 2 * Celerity0(indz) );
+    U1 = M_data -> area0(indz) + ( W1 - W2) / ( 2 * celerity0(indz) );
 
-    _U2 = ( _W1 + _W2 ) / 2;
+    U2 = ( W1 + W2 ) / 2;
 }
 
 Real
-OneDimensionalModel_Physics_Linear::pressure_W( const Real& _W1, const Real& _W2, const UInt& indz ) const
+OneDimensionalModel_Physics_Linear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
 {
-    return ( M_data -> Beta0(indz)
-             * ( std::pow( 1 / M_data->Area0(indz), M_data -> Beta1(indz) )
-                 * std::pow( (_W1 - _W2 ) / ( 2 * Celerity0(indz) ) + M_data -> Area0(indz), M_data -> Beta1(indz) )
+    return ( M_data -> beta0(indz)
+             * ( std::pow( 1 / M_data->area0(indz), M_data -> beta1(indz) )
+                 * std::pow( (W1 - W2 ) / ( 2 * celerity0(indz) ) + M_data -> area0(indz), M_data -> beta1(indz) )
                  - 1 )
            );
 }
 
 Real
-OneDimensionalModel_Physics_Linear::pressure_WDiff( const Real& _W1, const Real& _W2,
+OneDimensionalModel_Physics_Linear::dPdW( const Real& W1, const Real& W2,
                                                     const ID& i,     const UInt& indz ) const
 {
-    Real beta0beta1overA0beta1 ( M_data->Beta0(indz) * M_data -> Beta1(indz) / std::pow( M_data -> Area0(indz), M_data -> Beta1(indz) ) );
+    Real beta0beta1overA0beta1 ( M_data->beta0(indz) * M_data -> beta1(indz) / std::pow( M_data -> area0(indz), M_data -> beta1(indz) ) );
 
-    Real oneover2celerity( 1 / ( 2 * Celerity0(indz) ) );
+    Real oneover2celerity( 1 / ( 2 * celerity0(indz) ) );
 
     Real result( beta0beta1overA0beta1 * oneover2celerity );
-    result *= ( ( _W1 - _W2 ) * oneover2celerity + M_data -> Area0(indz) );
+    result *= ( ( W1 - W2 ) * oneover2celerity + M_data -> area0(indz) );
 
     if ( i == 1 ) //! dP/dW1
         return result;
@@ -117,35 +117,35 @@ OneDimensionalModel_Physics_Linear::pressure_WDiff( const Real& _W1, const Real&
 }
 
 Real
-OneDimensionalModel_Physics_Linear::W_from_P( const Real& _P, const Real& _W, const ID& i, const UInt& indz ) const
+OneDimensionalModel_Physics_Linear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
 {
-    Real add( 2 * Celerity0(indz) * M_data -> Area0(indz) * ( pow( ( _P / M_data -> Beta0(indz) + 1 ), 1 / M_data -> Beta1(indz) ) - 1 ) );
+    Real add( 2 * celerity0(indz) * M_data -> area0(indz) * ( pow( ( P / M_data -> beta0(indz) + 1 ), 1 / M_data -> beta1(indz) ) - 1 ) );
 
-    Debug(6320) << "[W_from_P] "
-    << "2 * Celerity0(indz) * Area0(indz) = " << 2 * Celerity0(indz) * M_data -> Area0(indz)
-    << ", pow( ( _P / Beta0(indz) + 1 ), 1 / Beta1(indz) ) = "
-    << pow( ( _P / M_data -> Beta0(indz) + 1 ), 1 / M_data -> Beta1(indz) ) << "\n";
-    Debug(6320) << "[W_from_P] add term = " << add << "\n";
+    Debug(6320) << "[fromPToW] "
+    << "2 * celerity0(indz) * area0(indz) = " << 2 * celerity0(indz) * M_data -> area0(indz)
+    << ", pow( ( P / beta0(indz) + 1 ), 1 / beta1(indz) ) = "
+    << pow( ( P / M_data -> beta0(indz) + 1 ), 1 / M_data -> beta1(indz) ) << "\n";
+    Debug(6320) << "[fromPToW] add term = " << add << "\n";
 
     if ( i == 1 )
-        return _W - add;
+        return W - add;
     if ( i == 2 )
-        return _W + add;
+        return W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
     return -1.;
 }
 
 Real
-OneDimensionalModel_Physics_Linear::W_from_Q( const Real& _Q, const Real& /*_W_n*/, const Real& _W, const ID& i, const UInt& /*indz*/ ) const
+OneDimensionalModel_Physics_Linear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*indz*/ ) const
 {
-    Real add( 2 * _Q );
+    Real add( 2 * Q );
 
     if ( i == 1 ) // W1 given
-        return add - _W;
+        return add - W;
 
     if ( i == 2 ) // W2 given
-        return add - _W;
+        return add - W;
 
     ERROR_MSG("You can only find W1 or W2 as function of Q");
     return -1.;

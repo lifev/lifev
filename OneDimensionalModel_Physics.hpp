@@ -67,7 +67,7 @@ public :
     //! Constructor
     OneDimensionalModel_Physics();
 
-    OneDimensionalModel_Physics( const dataPtr_Type Data );
+    OneDimensionalModel_Physics( const dataPtr_Type data );
 
     //! Destructor
     virtual ~OneDimensionalModel_Physics() {}
@@ -79,22 +79,22 @@ public :
     //@{
 
     //! Compute U from W
-    virtual void U_from_W( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const = 0;
+    virtual void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const = 0;
 
     //! Compute W from U
-    virtual void W_from_U( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const = 0;
+    virtual void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const = 0;
 
     //! Compute the pressure as a function of W1, W2:
-    virtual Real pressure_W( const Real& W1, const Real& W2, const UInt& indz = 0 ) const = 0;
+    virtual Real fromWToP( const Real& W1, const Real& W2, const UInt& indz = 0 ) const = 0;
 
     //! Compute the derivative of pressure with respect to W1 and W2
-    virtual Real pressure_WDiff( const Real& W1, const Real& W2, const ID& i, const UInt& indz = 0 ) const = 0;
+    virtual Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz = 0 ) const = 0;
 
     //! Compute W1 or W2 given the pressure:
-    virtual Real W_from_P( const Real& P, const Real& W, const ID& i, const UInt& indz ) const = 0;
+    virtual Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const = 0;
 
     //! Compute W1 or W2 given the flux
-    virtual Real W_from_Q( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const = 0;
+    virtual Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const = 0;
 
     //@}
 
@@ -102,7 +102,7 @@ public :
     //! @name Methods
     //@{
 
-    Real Celerity0( const UInt& i ) const;
+    Real celerity0( const UInt& i ) const;
 
     //! Compute the elastic pressure.
     /*!
@@ -140,7 +140,7 @@ public :
      *  To be used in initialization, when time derivative of A is supposed null
      *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
      */
-    Real A_from_P( const Real& P, const UInt& i=0 ) const;
+    Real fromPToA( const Real& P, const UInt& i=0 ) const;
 
     //! Compute the total pressure (P is the elastic pressure)
     /*!
@@ -172,7 +172,7 @@ public :
     void stiffenVesselLeft( const Real& xl,           const Real& xr,
                             const Real& factor,       const Real& alpha,
                             const Real& delta,        const Real& n,
-                            const Real& min_deltax=1, const UInt& yesAdaptive=0 );
+                            const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
 
     //! Make the vessel stiffer on the right side of interval [xl, xr]
     /*!
@@ -181,7 +181,7 @@ public :
     void stiffenVesselRight( const Real& xl,           const Real& xr,
                              const Real& factor,       const Real& alpha,
                              const Real& delta,        const Real& n,
-                             const Real& min_deltax=1, const UInt& yesAdaptive=0  );
+                             const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
 
     //@}
 
@@ -189,14 +189,14 @@ public :
     //! @name Set Methods
     //@{
 
-    void SetData( const dataPtr_Type& Data );
+    void setData( const dataPtr_Type& data );
 
     //@}
 
     //! @name Get Methods
     //@{
 
-    dataPtr_Type Data() const ;
+    dataPtr_Type data() const ;
 
     //@}
 
@@ -204,6 +204,15 @@ protected:
 
     dataPtr_Type                      M_data;
 
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_Physics& operator=( const dataPtr_Type data );
+
+    //@}
 };
 
 }
