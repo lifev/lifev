@@ -87,7 +87,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         //Container2D_Type leftEigenvector_first, leftEigenvector_second;
 
         UInt dof;
-        ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->physics()->Data()->NumberOfNodes() - 1;
+        ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->physics()->data()->numberOfNodes() - 1;
 
         container2D_Type U_boundary;
         U_boundary[0] = (*solution.find("A")->second)(dof + 1);
@@ -193,7 +193,7 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
         M_bcMatrix[line][1] = 0.;
         break;
     case OneD_P:
-        rhs = flux->physics()->A_from_P( rhs, dof );
+        rhs = flux->physics()->fromPToA( rhs, dof );
         M_bcMatrix[line][0] = 1.;
         M_bcMatrix[line][1] = 0.;
         break;
