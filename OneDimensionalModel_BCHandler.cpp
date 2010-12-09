@@ -92,8 +92,8 @@ OneDimensionalModel_BCHandler::applyBC( const Real&              time,
                                         const Real&              timeStep,
                                         const Solution_Type&     solution,
                                         const Flux_PtrType&      flux,
-                                        Container2D_Type&  leftBC,
-                                        Container2D_Type&  rightBC )
+                                        container2D_Type&  leftBC,
+                                        container2D_Type&  rightBC )
 {
     ASSERT_PRE( leftBC.size() == 2 && rightBC.size() == 2, "applyBC works only for 2D vectors" );
 

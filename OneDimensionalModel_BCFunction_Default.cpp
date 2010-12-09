@@ -270,17 +270,17 @@ OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalue, const Container2D_Type& eigenvector, const Container2D_Type& deltaEigenvector, const Real& timeStep )
+OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector, const container2D_Type& deltaEigenvector, const Real& timeStep )
 {
     Real cfl = computeCFL( eigenvalue, timeStep );
 
-    Container2D_Type U_interpolated;
+    container2D_Type U_interpolated;
     U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_Solution)["A"])( M_bcInternalNode );
     U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_Solution)["Q"])( M_bcInternalNode );
 
-    Container2D_Type U;
+    container2D_Type U;
 
-    Container2D_Type bcNodes;
+    container2D_Type bcNodes;
     switch ( M_bcSide )
     {
     case OneD_left:

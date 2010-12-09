@@ -182,10 +182,10 @@ protected:
     //@}
 
     //! Value of U at the boundary
-    Container2D_Type                         M_bcU;
+    container2D_Type                         M_bcU;
 
     //! Value of W at the boundary
-    Container2D_Type                         M_bcW;
+    container2D_Type                         M_bcW;
 };
 
 
@@ -248,7 +248,7 @@ protected:
 
     void computeEigenValuesVectors();
 
-    Real evaluateRHS( const Real& eigenvalue, const Container2D_Type& eigenvector, const Container2D_Type& deltaEigenvector, const Real& timeStep );
+    Real evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector, const container2D_Type& deltaEigenvector, const Real& timeStep );
 
     Real computeCFL( const Real& eigenvalue, const Real& timeStep ) const;
 
@@ -262,14 +262,14 @@ protected:
     boost::array< Real, NDIM >                         M_internalBdPoint;
 
     //! Eigen values of the jacobian diffFlux (= dF/dU = H)
-    Container2D_Type                                   M_eigenvalues;
-    Container2D_Type                                   M_deltaEigenvalues;
+    container2D_Type                                   M_eigenvalues;
+    container2D_Type                                   M_deltaEigenvalues;
 
     //! Left eigen vectors for the two eigen values
-    Container2D_Type                                   M_leftEigenvector1;
-    Container2D_Type                                   M_leftEigenvector2;
-    Container2D_Type                                   M_deltaLeftEigenvector1;
-    Container2D_Type                                   M_deltaLeftEigenvector2;
+    container2D_Type                                   M_leftEigenvector1;
+    container2D_Type                                   M_leftEigenvector2;
+    container2D_Type                                   M_deltaLeftEigenvector1;
+    container2D_Type                                   M_deltaLeftEigenvector2;
 };
 
 

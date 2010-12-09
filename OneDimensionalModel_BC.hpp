@@ -95,11 +95,11 @@ public:
     //@{
 
     //! Compute [A,Q] at the boundary
-    Container2D_Type Uboundary( const ScalVec& U1, const ScalVec& U2 ) const;
+    container2D_Type Uboundary( const scalVec_Type& U1, const scalVec_Type& U2 ) const;
 
     //! Apply boundary conditions
     void applyBC( const Real& time, const Real& timeStep, const Solution_Type& solution,
-                  const Flux_PtrType& flux, Container2D_Type& BC );
+                  const Flux_PtrType& flux, container2D_Type& BC );
 
     //@}
 
@@ -113,7 +113,7 @@ public:
 
     void setInternalFlag( const bool& flag );
 
-    //void setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow );
+    //void setMatrixRow( const OneD_BCLine& line, const container2D_Type& matrixrow );
 
     //@}
 
@@ -136,7 +136,7 @@ private:
 
     //! Compute the matrix and the RHS for the BC 2x2 linear system
     void computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
-                              const Container2D_Type& leftEigenvector1, const Container2D_Type& leftEigenvector2,
+                              const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                               const UInt& dof, Real& rhs );
 
     //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
@@ -146,9 +146,9 @@ private:
      *       M_matrixrow_at_line["second"] ]
      * @return A^{-1} * rhs2d
      */
-    Container2D_Type solveLinearSystem( const Container2D_Type& line1,
-                                        const Container2D_Type& line2,
-                                        const Container2D_Type& rhs ) const;
+    container2D_Type solveLinearSystem( const container2D_Type& line1,
+                                        const container2D_Type& line2,
+                                        const container2D_Type& rhs ) const;
 
     //@}
 
@@ -160,9 +160,9 @@ private:
 
     bool                                          M_isInternal;
 
-    std::map<OneD_BCLine, Container2D_Type>       M_bcMatrix;
+    std::map<OneD_BCLine, container2D_Type>       M_bcMatrix;
 
-    Container2D_Type                              M_bcRHS;
+    container2D_Type                              M_bcRHS;
 };
 
 }

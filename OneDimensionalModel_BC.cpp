@@ -54,8 +54,8 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
         M_bcMatrix                  (),
         M_bcRHS                     ()
 {
-    M_bcMatrix[ OneD_first ]  = Container2D_Type();
-    M_bcMatrix[ OneD_second ] = Container2D_Type();
+    M_bcMatrix[ OneD_first ]  = container2D_Type();
+    M_bcMatrix[ OneD_second ] = container2D_Type();
 }
 
 OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& BC ) :
@@ -75,7 +75,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
                                  const Real&             timeStep,
                                  const Solution_Type&    solution,
                                  const Flux_PtrType&     flux,
-                                 Container2D_Type& BC )
+                                 container2D_Type& BC )
 {
     ASSERT_PRE( BC.size() == 2, "applyBC works only for 2D vectors");
 
@@ -88,13 +88,13 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         UInt dof;
         ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->Physics()->Data()->NumberOfNodes() - 1;
 
-        Container2D_Type U_boundary;
+        container2D_Type U_boundary;
         U_boundary[0] = (*solution.find("A")->second)(dof + 1);
         U_boundary[1] = (*solution.find("Q")->second)(dof + 1);
 
         // Eigenvalues and eigenvectors of the jacobian diffFlux (= dF/dU = H)
-        Container2D_Type eigenvalues;
-        Container2D_Type leftEigenvector1, leftEigenvector2;
+        container2D_Type eigenvalues;
+        container2D_Type leftEigenvector1, leftEigenvector2;
 
         flux->EigenValuesEigenVectors( U_boundary[0], U_boundary[1],
                                        eigenvalues, leftEigenvector1, leftEigenvector2, dof );
@@ -167,7 +167,7 @@ OneDimensionalModel_BC::isInternal()
 // ===================================================
 void
 OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
-                                             const Container2D_Type& leftEigenvector1, const Container2D_Type& leftEigenvector2,
+                                             const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                                              const UInt& dof, Real& rhs )
 {
     // This is not general (typical situation):
@@ -214,10 +214,10 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
     << M_bcMatrix[line][1] << "\n";
 }
 
-Container2D_Type
-OneDimensionalModel_BC::solveLinearSystem( const Container2D_Type& line1,
-                                           const Container2D_Type& line2,
-                                           const Container2D_Type& rhs ) const
+container2D_Type
+OneDimensionalModel_BC::solveLinearSystem( const container2D_Type& line1,
+                                           const container2D_Type& line2,
+                                           const container2D_Type& rhs ) const
 {
     ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs.size() == 2,
                 "_solveLinearSyst2x2 works only for 2D vectors");
@@ -228,7 +228,7 @@ OneDimensionalModel_BC::solveLinearSystem( const Container2D_Type& line1,
             "Error: the 2x2 system on the boundary is not invertible."
             "\nCheck the boundary conditions.");
 
-    Container2D_Type solution;
+    container2D_Type solution;
 
     solution[0] = (   line2[1] * rhs[0] - line1[1] * rhs[1] ) / determinant;
     solution[1] = ( - line2[0] * rhs[0] + line1[0] * rhs[1] ) / determinant;
