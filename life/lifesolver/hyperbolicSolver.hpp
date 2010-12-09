@@ -92,12 +92,11 @@ public:
 
     //@}
 
-    // Constructors and destructor.
-    //! @name Constructors and destructor
+    //! @name Constructors & Destructor
     //@{
 
+    //! Full constructor for the class.
     /*!
-      Full constructor for the class.
       @param dataFile Data for the problem.
       @param fESpace Discontinuous finite element space.
       @param bcHandler Boundary conditions for the problem.
@@ -108,8 +107,8 @@ public:
                        bchandler_Type&           bcHandler,
                        commPtr_Type&             comm );
 
+    //! Constructor for the class without the definition of the boundary handler.
     /*!
-      Constructor for the class without the definition of the boundary handler.
       @param dataFile Data for the problem.
       @param fESpace Discontinuous finite element space.
       @param comm Shared pointer of the Epetra communicator.
@@ -123,32 +122,30 @@ public:
 
     //@}
 
-    // Update & set methos.
-    //! @name Update & set methos
+    //! @name Methods
     //@{
 
-    /*!
-      Set up the linear solver, the preconditioner for the linear system
-      and the exporter to save the solution.
-    */
+    //! Setup the local mass matrices.
     void setup ();
 
+    //! Solve one time step of the hyperbolic problem.
+    void solveOneStep();
+
+    //! Compute the global CFL condition.
+    Real CFL() const;
+
+    //@}
+
+    //! @name Set Methos
+    //@{
+
+    //! Set the initial solution for the computation.
     /*!
       Compute the initial solution as an interpolation on the analytical
       initial solution.
       @param initialSolution The initial solution function.
     */
-    inline void setInitialSolution ( const Function_Type& initialSolution )
-    {
-
-        // Interpolate the initial solution.
-        M_FESpace.interpolate( initialSolution,
-                               *M_uOld,
-                               M_data.dataTime()->getInitialTime() );
-
-        // Update the solution
-        *M_u = *M_uOld;
-    }
+    void setInitialSolution ( const Function_Type& initialSolution );
 
     //! Set the boundary conditions.
     /*!
@@ -162,7 +159,7 @@ public:
 
     //! Set the source term.
     /*
-      The default setted source term is the zero function.
+      The default setted source term is \f$ f( \mathbf{x}, t ) \equiv 0 \f$.
       @param source Source term for the problem.
     */
     inline void setSourceTerm ( const Function_Type& source )
@@ -170,9 +167,9 @@ public:
         M_source = source;
     }
 
-    //! Set the mass term.
+    //! Set the mass function term.
     /*!
-      The default setted source term is the one function, it does not depend on time.
+      It does not depend on time. The default setted source term is \f$ \phi( \mathbf{x} ) \equiv 1 \f$.
       @param mass Mass term for the problem.
     */
     inline void setMassTerm ( const Function_Type& mass )
@@ -234,8 +231,8 @@ public:
         return M_BCh;
     }
 
+    //! Return the Epetra local map.
     /*!
-      Return the Epetra local map.
       @return Constant EpetraMap reference of the problem.
     */
     inline EpetraMap const& getMap () const
@@ -255,43 +252,30 @@ public:
 
     //@}
 
-    // Solve functions.
-    //! @name Solve functions
-    //@{
-
-    //! Solve one time step of the hyperbolic problem.
-    void solveOneStep();
-
-    //! Compute the global CFL condition.
-    Real CFL() const;
-
-    //@}
-
 protected:
 
-    //! @name Local solve functions
+    //! @name Protected Methods
     //@{
 
+    //! Reconstruct locally the solution.
     void localReconstruct ( const UInt& Elem );
 
+    //! Compute the local contribute
     void localEvolve      ( const UInt& iElem );
 
+    //! Apply the flux limiters locally.
     void localAverage     ( const UInt& iElem );
 
     //@}
 
-    // Parallel stuff.
-    //! @name Parallel stuff
-    //@{
-
     //! MPI process identifier.
-    UInt                M_me;
+    const UInt                M_me;
 
     //! Local map.
-    EpetraMap           M_localMap;
+    EpetraMap                 M_localMap;
 
     //! Parallel displayer
-    Displayer M_displayer;
+    Displayer                 M_displayer;
 
     //@}
 
@@ -300,71 +284,52 @@ protected:
     //@{
 
     //! Data for Darcy solvers.
-    const data_Type&    M_data;
+    const data_Type&          M_data;
 
     //! Source function.
-    Function_Type       M_source;
+    Function_Type             M_source;
 
     //! Mass function, it does not depend on time
-    Function_Type       M_mass;
+    Function_Type             M_mass;
 
     //! Bondary conditions handler.
-    bchandlerPtr_Type   M_BCh;
+    bchandlerPtr_Type         M_BCh;
 
     //! Flag if the boundary conditions are setted or not.
-    bool                M_setBC;
+    bool                      M_setBC;
 
     //! Function of initial solution.
-    Function_Type       M_initialSolution;
+    Function_Type             M_initialSolution;
 
     //! Class of type AbstractNumericalFlux for local flux computations.
-    fluxPtr_Type        M_numericalFlux;
-
-    //@}
-
-    // Finite element spaces.
-    //! @name Finite element spaces
-    //@{
+    fluxPtr_Type              M_numericalFlux;
 
     //! Finite element space.
     FESpace<Mesh, EpetraMap>& M_FESpace;
 
-    //@}
-
-    // Algebraic stuff.
-    //! @name Algebraic stuff
-    //@{
-
     //! Right hand side.
-    vectorPtr_Type M_rhs;
+    vectorPtr_Type            M_rhs;
 
     //! Solution at current time step.
-    vectorPtr_Type M_u;
+    vectorPtr_Type            M_u;
 
     //! Solution at previous time step.
-    vectorPtr_Type M_uOld;
+    vectorPtr_Type            M_uOld;
 
     //! Computed numerical flux.
-    vectorPtr_Type M_globalFlux;
+    vectorPtr_Type            M_globalFlux;
 
-    //@}
-
-    // Elementary matrices and vectors used for the static condensation.
-    //! @name Elementary matrices and vectors used for the static condensation.
-    //@{
-
-    ElemVec              M_localFlux;
+    //! Auxiliary vector for local fluxes.
+    ElemVec                   M_localFlux;
 
     //! Vector of all local mass matrices, possibly with mass function.
-    std::vector<ElemMat> M_elmatMass;
-
-    //@}
+    std::vector<ElemMat>      M_elmatMass;
 
 }; // class HyperbolicSolver
 
-//
-// IMPLEMENTATION
-//
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 
 // Complete constructor.
 template<typename Mesh, typename SolverType>
@@ -444,7 +409,11 @@ HyperbolicSolver<Mesh, SolverType>::
 
 } // Destructor
 
-// Set up the linear solver, the preconditioner and the exporter.
+// ===================================================
+// Methods
+// ===================================================
+
+// Setup the local mass matrices.
 template<typename Mesh, typename SolverType>
 void
 HyperbolicSolver<Mesh, SolverType>::
@@ -504,7 +473,192 @@ setup ()
 
 } // setup
 
+// Solve one time step of the hyperbolic problem.
+template<typename Mesh, typename SolverType>
+void
+HyperbolicSolver<Mesh, SolverType>::
+solveOneStep ()
+{
 
+    // Total number of elements in the mesh
+    const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
+
+    // Loop on all the elements to perform the fluxes
+    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    {
+
+        // Update the property of the current element
+        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
+                               UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+
+        // Reconstruct step of the current element
+        localReconstruct( iElem );
+
+        // Evolve step of the current element
+        localEvolve( iElem  );
+
+        // Put the total flux of the current element in the global vector of fluxes
+        assembleVector( *M_globalFlux,
+                        M_FESpace.fe().currentLocalId(),
+                        M_localFlux,
+                        M_FESpace.refFE().nbDof(),
+                        M_FESpace.dof(), 0 );
+
+        // Average step of the current element
+        localAverage( iElem );
+
+    }
+
+    // Assemble the global hybrid vector.
+    M_globalFlux->GlobalAssemble();
+
+    // Update the value of the solution
+    (*M_u) = (*M_uOld) - M_data.dataTime()->getTimeStep() * (*M_globalFlux);
+
+    // Clean the vector of fluxes
+    M_globalFlux.reset( new vector_Type( M_FESpace.map(), Repeated ) );
+
+    // Update the solution at previous time step
+    *M_uOld = *M_u;
+
+} // solveOneStep
+
+// Compute the global CFL condition.
+template<typename Mesh, typename SolverType>
+Real
+HyperbolicSolver<Mesh, SolverType>::
+CFL() const
+{
+
+    // Total number of elements in the mesh
+    const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
+
+    // The local value for the CFL condition, without the time step
+    Real localCFL(0.), localCFLOld( - 1. );
+
+    // Loop on all the elements to perform the fluxes
+    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    {
+        // Update the property of the current element
+        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
+                               UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+
+        // Volumetric measure of the current element
+        const Real K( M_FESpace.fe().measure() );
+
+        // Loop on the faces of the element iElem and compute the local contribution
+        for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
+        {
+
+            const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+
+            // Update the normal vector of the current face in each quadrature point
+            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+
+            // Take the left element to the face, see regionMesh for the meaning of left element
+            const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
+
+            // Take the right element to the face, see regionMesh for the meaning of right element
+            const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
+
+            // Solution in the left element
+            ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
+
+            // Solution in the right element
+            ElemVec rightValue ( M_FESpace.refFE().nbDof(), 1 );
+
+            // Extract the solution in the current element, now is the leftElement
+            extract_vec( *M_uOld,
+                         leftValue,
+                         M_FESpace.refFE(),
+                         M_FESpace.dof(),
+                         leftElement , 0 );
+
+            if ( rightElement )
+            {
+
+                // Extract the solution in the current element, now is the leftElement
+                extract_vec( *M_uOld,
+                             rightValue,
+                             M_FESpace.refFE(),
+                             M_FESpace.dof(),
+                             rightElement , 0 );
+            }
+            else
+            {
+                rightValue = leftValue;
+            }
+
+            // Area of the current face
+            const Real e( M_FESpace.feBd().measure() );
+
+            // Loop on all the quadrature points
+            for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig )
+            {
+
+                // Coordinates of the current quadrature point
+                Real x(0), y(0), z(0);
+
+                // Set the coordinates of the current quatrature point
+                x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
+                y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
+                z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
+
+                const KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
+
+                // Compute the local CFL without the time step
+                localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
+                                                                   M_data.dataTime()->getTime(), x, y, z );
+
+                // Select the maximum between the old CFL condition and the new CFL condition
+                if ( localCFL > localCFLOld  )
+                {
+                    localCFLOld = localCFL;
+                }
+                else
+                {
+                    localCFL = localCFLOld;
+                }
+
+            }
+
+        }
+
+    }
+
+    // Compute the timeStep according to CLF
+    const Real timeStep( M_data.getCFLrelax() / localCFL );
+
+    // Return the correct value of the time step
+    return timeStep;
+
+} //CFL
+
+// ===================================================
+// Set Methods
+// ===================================================
+
+// Set the initial solution for the computation.
+template<typename Mesh,typename SolverType>
+void
+HyperbolicSolver<Mesh, SolverType>::
+setInitialSolution ( const Function_Type& initialSolution )
+{
+
+    // Interpolate the initial solution.
+    M_FESpace.interpolate( initialSolution,
+                           *M_uOld,
+                           M_data.dataTime()->getInitialTime() );
+
+    // Update the solution
+    *M_u = *M_uOld;
+} // setInitialSolution
+
+// ===================================================
+// Protected Methods
+// ===================================================
+
+// Reconstruct locally the solution.
 template<typename Mesh,typename SolverType>
 void
 HyperbolicSolver<Mesh, SolverType>::
@@ -515,6 +669,7 @@ localReconstruct ( const UInt& iElem )
 
 } // localReconstruct
 
+// Compute the local contribute
 template<typename Mesh, typename SolverType>
 void
 HyperbolicSolver<Mesh, SolverType>::
@@ -706,6 +861,7 @@ localEvolve ( const UInt& iElem )
 
 } // localEvolve
 
+// Apply the flux limiters locally.
 template<typename Mesh, typename SolverType>
 void
 HyperbolicSolver<Mesh, SolverType>::
@@ -716,173 +872,6 @@ localAverage ( const UInt& iElem )
 
 } // localAverage
 
-template<typename Mesh, typename SolverType>
-Real
-HyperbolicSolver<Mesh, SolverType>::
-CFL() const
-{
-//    return M_data.dataTime()->getTimeStep();
-
-    // Total number of elements in the mesh
-    const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
-
-    // The local value for the CFL condition, without the time step
-    Real localCFL(0.), localCFLOld( - 1. );
-
-    // Loop on all the elements to perform the fluxes
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
-    {
-        // Update the property of the current element
-        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
-                               UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
-
-        // Volumetric measure of the current element
-        const Real K( M_FESpace.fe().measure() );
-
-        // Loop on the faces of the element iElem and compute the local contribution
-        for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
-        {
-
-            const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
-
-            // Update the normal vector of the current face in each quadrature point
-            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
-
-            // Take the left element to the face, see regionMesh for the meaning of left element
-            const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
-
-            // Take the right element to the face, see regionMesh for the meaning of right element
-            const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
-
-            // Solution in the left element
-            ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
-
-            // Solution in the right element
-            ElemVec rightValue ( M_FESpace.refFE().nbDof(), 1 );
-
-            // Extract the solution in the current element, now is the leftElement
-            extract_vec( *M_uOld,
-                         leftValue,
-                         M_FESpace.refFE(),
-                         M_FESpace.dof(),
-                         leftElement , 0 );
-
-            if ( rightElement )
-            {
-
-                // Extract the solution in the current element, now is the leftElement
-                extract_vec( *M_uOld,
-                             rightValue,
-                             M_FESpace.refFE(),
-                             M_FESpace.dof(),
-                             rightElement , 0 );
-            }
-            else
-            {
-                rightValue = leftValue;
-            }
-
-            // Area of the current face
-            const Real e( M_FESpace.feBd().measure() );
-
-            // Loop on all the quadrature points
-            for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig )
-            {
-
-                // Coordinates of the current quadrature point
-                Real x(0), y(0), z(0);
-
-                // Set the coordinates of the current quatrature point
-                x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
-                y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
-                z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
-
-                const KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
-
-                // Compute the local CFL without the time step
-                localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
-                                                                   M_data.dataTime()->getTime(), x, y, z );
-
-                // Select the maximum between the old CFL condition and the new CFL condition
-                if ( localCFL > localCFLOld  )
-                {
-                    localCFLOld = localCFL;
-                }
-                else
-                {
-                    localCFL = localCFLOld;
-                }
-
-            }
-
-        }
-
-    }
-
-    // Compute the timeStep according to CLF
-    const Real timeStep( M_data.getCFLrelax() / localCFL );
-
-    // Return the correct value of the time step
-    return timeStep;
-
-} //CFL
-
-// Solve one time step of the hyperbolic problem.
-template<typename Mesh, typename SolverType>
-void
-HyperbolicSolver<Mesh, SolverType>::
-solveOneStep ()
-{
-
-    // Total number of elements in the mesh
-    const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
-
-    // Loop on all the elements to perform the fluxes
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
-    {
-
-        // Update the property of the current element
-        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
-                               UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
-
-        // Reconstruct step of the current element
-        localReconstruct( iElem );
-
-        // Evolve step of the current element
-        localEvolve( iElem  );
-
-        // Put the total flux of the current element in the global vector of fluxes
-        assembleVector( *M_globalFlux,
-                        M_FESpace.fe().currentLocalId(),
-                        M_localFlux,
-                        M_FESpace.refFE().nbDof(),
-                        M_FESpace.dof(), 0 );
-
-        // Average step of the current element
-        localAverage( iElem );
-
-    }
-
-    // Assemble the global hybrid vector.
-    M_globalFlux->GlobalAssemble();
-
-    // Update the value of the solution
-    (*M_u) = (*M_uOld) - M_data.dataTime()->getTimeStep() * (*M_globalFlux);
-
-    // Clean the vector of fluxes
-    M_globalFlux.reset( new vector_Type( M_FESpace.map(), Repeated ) );
-
-    // Update the solution at previous time step
-    *M_uOld = *M_u;
-
-} // run
-
 } // namespace LifeV
 
-
 #endif /*_HYPERBOLICSOLVER_H_ */
-
-
-/*
-
-*/
