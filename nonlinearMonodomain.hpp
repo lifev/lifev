@@ -59,7 +59,7 @@ namespace LifeV
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class Nonlinearmonodomain
+class NonlinearMonodomain
 {
 
 public:
@@ -101,14 +101,14 @@ public:
      * @param Epetra communicator
      */
 
-    Nonlinearmonodomain( const data_type&          dataType,
+    NonlinearMonodomain( const data_type&          dataType,
                          FESpace<Mesh, EpetraMap>& uFESpace,
                          BCHandler&                bcHandler,
                          boost::shared_ptr<Epetra_Comm> comm );
 
 
     //! virtual destructor
-    virtual ~Nonlinearmonodomain();
+    virtual ~NonlinearMonodomain();
 
     //@}
 
@@ -270,7 +270,7 @@ private:
     Real 						   massCoeff;
     UInt dim_u() const           { return M_uFESpace.dim(); }
 
-}; // class Nonlinearmonodomain
+}; // class NonlinearMonodomain
 
 
 
@@ -280,8 +280,8 @@ private:
 
 //! Constructors
 template<typename Mesh, typename SolverType>
-Nonlinearmonodomain<Mesh, SolverType>::
-Nonlinearmonodomain( const data_type&          dataType,
+NonlinearMonodomain<Mesh, SolverType>::
+NonlinearMonodomain( const data_type&          dataType,
                      FESpace<Mesh, EpetraMap>& uFESpace,
                      BCHandler&                BCh_u,
                      boost::shared_ptr<Epetra_Comm> comm):
@@ -337,14 +337,14 @@ Nonlinearmonodomain( const data_type&          dataType,
 }
 
 template<typename Mesh, typename SolverType>
-Nonlinearmonodomain<Mesh, SolverType>::
-~Nonlinearmonodomain()
+NonlinearMonodomain<Mesh, SolverType>::
+~NonlinearMonodomain()
 {
 }
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::setUp( const GetPot& dataFile )
+void NonlinearMonodomain<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
 
     M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1 );
@@ -358,14 +358,14 @@ void Nonlinearmonodomain<Mesh, SolverType>::setUp( const GetPot& dataFile )
     std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
 
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "Nonlinearmonodomain : Preconditioner not set");
+    ASSERT(M_prec.get() != 0, "NonlinearMonodomain : Preconditioner not set");
 
     M_prec->setDataFromGetPot( dataFile, "electric/prec" );
 }
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
+void NonlinearMonodomain<Mesh, SolverType>::buildSystem()
 {
     M_matrMass.reset  ( new matrix_Type(M_localMap) );
     M_matrStiff.reset( new matrix_Type(M_localMap) );
@@ -383,7 +383,6 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
     Chrono chronoMassAssemble;
     Chrono chronoZero;
 
-    // vector with repeated nodes over the processors
     vector_Type M_sol_uRep(M_sol_u, Repeated );
 
     M_comm->Barrier();
@@ -408,12 +407,26 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
         M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
         if (M_data.has_fibers() )
         {
-            stiffNL( M_sol_uRep,  M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+            stiffNL( M_sol_uRep,
+                     M_data.sigmal(),
+                     M_data.sigmat(),
+                     M_fiber_vector,
+                     M_elmatStiff,
+                     M_uFESpace.fe(),
+                     M_uFESpace.dof(),
+                     0,
+                     0 );
         }
         else
         {
-            stiffNL( M_sol_uRep, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
-            // linear:
+            stiffNL( M_sol_uRep,
+                     M_data.D(),
+                     M_elmatStiff,
+                     M_uFESpace.fe(),
+                     M_uFESpace.dof(),
+                     0,
+                     0 );
+            // Only used for the linear case:
             //stiff( M_data.D(), M_elmatStiff,  M_uFESpace.fe(), 0, 0 );
         }
         chronoStiff.stop();
@@ -488,7 +501,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::buildSystem()
 }
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::
+void NonlinearMonodomain<Mesh, SolverType>::
 initialize( const source_type& u0 )
 {
 
@@ -501,7 +514,7 @@ initialize( const source_type& u0 )
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::
+void NonlinearMonodomain<Mesh, SolverType>::
 initialize( const Function& u0 )
 {
 
@@ -513,7 +526,7 @@ initialize( const Function& u0 )
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::
+void NonlinearMonodomain<Mesh, SolverType>::
 initialize( const vector_Type& u0 )
 {
 
@@ -523,7 +536,7 @@ initialize( const vector_Type& u0 )
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
+void NonlinearMonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
                                                             vector_Type& sourceVec)
 {
     Chrono chrono;
@@ -555,17 +568,13 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
 
     M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
-    //! Computing alpha * M + K
     *M_matrNoBC += *M_matrStiff;
 
     *M_matrNoBC += *M_matrMass*alpha;
 
-
     chrono.stop();
     if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
                              << std::flush;
-
-
 
     M_updated = true;
     M_matrNoBC->GlobalAssemble();
@@ -573,7 +582,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::updatePDESystem(Real alpha,
 }
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::
+void NonlinearMonodomain<Mesh, SolverType>::
 updatePDESystem(vector_Type& sourceVec )
 {
 
@@ -598,14 +607,11 @@ updatePDESystem(vector_Type& sourceVec )
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
+void NonlinearMonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
 {
 
     Chrono chrono;
-
-
     chrono.start();
-
 
     matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
     vector_Type    rhsFull = M_rhsNoBC;
@@ -616,9 +622,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch 
         std::cout << "done in " << chrono.diff() << " s.\n"
                   << std::flush;
 
-    // boundary conditions update
     M_comm->Barrier();
-    if (M_verbose) std::cout << "  f-  Applying boundary conditions ...         "
+    if (M_verbose) std::cout << "  f-  Updating boundary conditions ...         "
               << std::flush;
 
     chrono.start();
@@ -642,8 +647,8 @@ void Nonlinearmonodomain<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch 
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
-                                           vector_Type&    rhsFull )
+void NonlinearMonodomain<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
+                                                         vector_Type&    rhsFull )
 {
     Chrono chrono;
     for ( Int i = 0 ; i < rhsFull.getEpetraVector().MyLength() ; i++ )
@@ -715,7 +720,7 @@ void Nonlinearmonodomain<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFul
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::moveMesh(vector_Type const &dep)
+void NonlinearMonodomain<Mesh, SolverType>::moveMesh(vector_Type const &dep)
 {
     std::cout <<"  Moving the mesh ... "<< std::endl;
     M_uFESpace.mesh()->moveMesh(dep, this->M_uFESpace.dof().numTotalDof());
@@ -727,18 +732,26 @@ void Nonlinearmonodomain<Mesh, SolverType>::moveMesh(vector_Type const &dep)
 
 
 template<typename Mesh, typename SolverType>
-void Nonlinearmonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+void NonlinearMonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
                                                                      vector_Type&        rhs,
                                                                      bchandler_raw_type& BCh )
 {
     if ( !BCh.bdUpdateDone() )
     {
-        BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+        BCh.bdUpdate( *M_uFESpace.mesh(),
+                      M_uFESpace.feBd(),
+                      M_uFESpace.dof() );
     }
 
     vector_Type rhsFull(M_rhsNoBC,Repeated,Zero);
 
-    bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
+    bcManage( matrix,
+              rhs,
+              *M_uFESpace.mesh(),
+              M_uFESpace.dof(),
+              BCh,
+              M_uFESpace.feBd(),
+              1.,
               M_data.getTime() );
 
     rhs=rhsFull;
