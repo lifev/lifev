@@ -26,16 +26,18 @@
 
 
 /*!
- *  @file
- *  @brief File containing a class for 1D model data handling.
- *
- *  @version 1.0
- *  @author Vincent Martin
- *  @date 01-07-2004
- *
- *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 12-04-2010
+    @file
+    @brief File containing a class for 1D model data handling.
+
+    @version 1.0
+    @author Vincent Martin
+    @date 01-07-2004
+
+    @version 2.0
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+    @date 12-04-2010
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
@@ -1114,7 +1116,7 @@ OneDimensionalModel_Data::Source22( const UInt& i ) const
 // Private methods
 // ===================================================
 void
-OneDimensionalModel_Data::linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea )
+OneDimensionalModel_Data::linearInterpolation( scalVec_Type& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea )
 {
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );

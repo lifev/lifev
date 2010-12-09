@@ -1,37 +1,41 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a base class for 1D model flux function.
- *
- *  @version 1.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 15-04-2010
+    @file
+    @brief File containing a base class for 1D model flux function.
+
+    @date 15-04-2010
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
+
 
 #ifndef ONEDIMENSIONALMODEL_FLUX_H
 #define ONEDIMENSIONALMODEL_FLUX_H
@@ -51,8 +55,8 @@ class OneDimensionalModel_Flux
 
 public:
 
-    typedef OneDimensionalModel_Physics              Physics_Type;
-    typedef boost::shared_ptr< Physics_Type >        Physics_PtrType;
+    typedef OneDimensionalModel_Physics              physics_Type;
+    typedef boost::shared_ptr< physics_Type >        physicsPtr_Type;
 
     //! @name Constructors & Destructor
     //@{
@@ -60,7 +64,7 @@ public:
     //! Constructor
     OneDimensionalModel_Flux();
 
-    OneDimensionalModel_Flux( const Physics_PtrType Physics );
+    OneDimensionalModel_Flux( const physicsPtr_Type Physics );
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux() {}
@@ -111,16 +115,16 @@ public:
      * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
      */
     virtual void EigenValuesEigenVectors( const Real& A, const Real& Q,
-                                          Container2D_Type& eigenvalues,
-                                          Container2D_Type& leftEigenvector1,
-                                          Container2D_Type& leftEigenvector2,
+                                          container2D_Type& eigenvalues,
+                                          container2D_Type& leftEigenvector1,
+                                          container2D_Type& leftEigenvector2,
                                           const UInt& indz = 0 ) const = 0;
 
     //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
     virtual void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
-                                               Container2D_Type& deltaEigenvalues,
-                                               Container2D_Type& deltaLeftEigenvector1,
-                                               Container2D_Type& deltaLeftEigenvector2,
+                                               container2D_Type& deltaEigenvalues,
+                                               container2D_Type& deltaLeftEigenvector1,
+                                               container2D_Type& deltaLeftEigenvector2,
                                                const UInt& indz = 0 ) const = 0;
 
     //@}
@@ -129,7 +133,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void SetPhysics( const Physics_PtrType& Physics );
+    void SetPhysics( const physicsPtr_Type& Physics );
 
     //@}
 
@@ -137,13 +141,13 @@ public:
     //! @name Get Methods
     //@{
 
-    Physics_PtrType Physics() const ;
+    physicsPtr_Type Physics() const ;
 
     //@}
 
 protected:
 
-    Physics_PtrType                 M_Physics;
+    physicsPtr_Type                 M_physics;
 };
 
 }

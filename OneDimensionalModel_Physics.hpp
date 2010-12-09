@@ -1,40 +1,44 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a base class providing physical operations for the 1D model data.
- *
- *  @version 1.0
- *  @author Vincent Martin
- *  @date 01-07-2004
- *
- *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 13-04-2010
+    @file
+    @brief File containing a base class providing physical operations for the 1D model data.
+
+    @version 1.0
+    @date 01-07-2004
+    @author Vincent Martin
+
+    @version 2.0
+    @date 13-04-2010
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_PHYSICS_H
@@ -54,8 +58,8 @@ class OneDimensionalModel_Physics
 {
 public :
 
-    typedef OneDimensionalModel_Data              Data_Type;
-    typedef boost::shared_ptr< Data_Type >        Data_PtrType;
+    typedef OneDimensionalModel_Data              data_Type;
+    typedef boost::shared_ptr< data_Type >        dataPtr_Type;
 
     //! @name Constructors & Destructor
     //@{
@@ -63,7 +67,7 @@ public :
     //! Constructor
     OneDimensionalModel_Physics();
 
-    OneDimensionalModel_Physics( const Data_PtrType Data );
+    OneDimensionalModel_Physics( const dataPtr_Type Data );
 
     //! Destructor
     virtual ~OneDimensionalModel_Physics() {}
@@ -185,20 +189,20 @@ public :
     //! @name Set Methods
     //@{
 
-    void SetData( const Data_PtrType& Data );
+    void SetData( const dataPtr_Type& Data );
 
     //@}
 
     //! @name Get Methods
     //@{
 
-    Data_PtrType Data() const ;
+    dataPtr_Type Data() const ;
 
     //@}
 
 protected:
 
-    Data_PtrType                      M_Data;
+    dataPtr_Type                      M_data;
 
 };
 

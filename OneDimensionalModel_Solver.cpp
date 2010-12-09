@@ -1,47 +1,50 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a solver class for the 1D model.
- *
- *  @version 1.0
- *  @author Vincent Martin
- *  @author Tiziano Passerini
- *  @author Lucia Mirabella
- *  @date 01-10-2006
- *
- *  @version 2.0
- *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- *  @date 01-08-2009
- *
- *  @version 2.1
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 21-04-2010
- *
+    @file
+    @brief File containing a solver class for the 1D model.
+
+    @version 1.0
+    @date 01-10-2006
+    @author Vincent Martin
+    @author Tiziano Passerini
+    @author Lucia Mirabella
+
+    @version 2.0
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @date 01-08-2009
+
+    @version 2.1
+    @date 21-04-2010
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
@@ -53,37 +56,37 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_Solver::OneDimensionalModel_Solver():
-        M_Physics               (),
-        M_Flux                  (),
-        M_Source                (),
-        M_FESpace               (),
-        M_Comm                  (),
-        M_leftNodeId            (),
-        M_leftInternalNodeId    (),
-        M_rightNodeId           (),
-        M_rightInternalNodeId   (),
-        M_coeffMass             (),
-        M_coeffStiff            (),
-        M_coeffGrad             (),
-        M_coeffDiv              (),
-        M_elmatMass             (),
-        M_elmatStiff            (),
-        M_elmatGrad             (),
-        M_elmatDiv              (),
-        M_rhs                   (),
-        M_FluxVector            (),
-        M_diffFlux              ( 4 ),
-        M_SourceVector          (),
-        M_diffSrc               ( 4 ),
-        M_massMatrix            (),
-        M_massMatrixDiffSrc     ( 4  ),
-        M_stiffMatrixDiffFlux   ( 4  ),
-        M_gradMatrix            (),
-        M_gradMatrixDiffFlux    ( 4  ),
-        M_divMatrixDiffSrc      ( 4 ),
-        M_linearSolver          (),
-        M_bcDirLeft             (),
-        M_bcDirRight            ()
+    M_physics               (),
+    M_flux                  (),
+    M_source                (),
+    M_FESpace               (),
+    M_comm                  (),
+    M_leftNodeId            (),
+    M_leftInternalNodeId    (),
+    M_rightNodeId           (),
+    M_rightInternalNodeId   (),
+    M_coeffMass             (),
+    M_coeffStiff            (),
+    M_coeffGrad             (),
+    M_coeffDiv              (),
+    M_elmatMass             (),
+    M_elmatStiff            (),
+    M_elmatGrad             (),
+    M_elmatDiv              (),
+    M_rhs                   (),
+    M_fluxVector            (),
+    M_diffFlux              ( 4 ),
+    M_sourceVector          (),
+    M_diffSrc               ( 4 ),
+    M_massMatrix            (),
+    M_massMatrixDiffSrc     ( 4  ),
+    M_stiffMatrixDiffFlux   ( 4  ),
+    M_gradMatrix            (),
+    M_gradMatrixDiffFlux    ( 4  ),
+    M_divMatrixDiffSrc      ( 4 ),
+    M_linearSolver          (),
+    M_bcDirLeft             (),
+    M_bcDirRight            ()
 {
 }
 
@@ -93,15 +96,15 @@ OneDimensionalModel_Solver::OneDimensionalModel_Solver():
 void
 OneDimensionalModel_Solver::buildConstantMatrices()
 {
-    std::fill( M_diffFlux.begin(), M_diffFlux.end(), ublas::zero_vector<Real>(M_FESpace->dim()) );
-    std::fill( M_diffSrc.begin(),  M_diffSrc.end(),  ublas::zero_vector<Real>(M_FESpace->dim()) );
+    std::fill( M_diffFlux.begin(), M_diffFlux.end(), ublas::zero_vector<Real>( M_FESpace -> dim()) );
+    std::fill( M_diffSrc.begin(),  M_diffSrc.end(),  ublas::zero_vector<Real>( M_FESpace -> dim()) );
 
     for ( UInt i = 0; i < 4; ++i )
     {
-        M_massMatrixDiffSrc[i].reset( new Matrix_Type( M_FESpace->map() ));
-        M_stiffMatrixDiffFlux[i].reset( new Matrix_Type( M_FESpace->map() ));
-        M_gradMatrixDiffFlux[i].reset( new Matrix_Type( M_FESpace->map() ));
-        M_divMatrixDiffSrc[i].reset( new Matrix_Type( M_FESpace->map() ));
+        M_massMatrixDiffSrc[i].reset( new matrix_Type( M_FESpace -> map() ));
+        M_stiffMatrixDiffFlux[i].reset( new matrix_Type( M_FESpace -> map() ));
+        M_gradMatrixDiffFlux[i].reset( new matrix_Type( M_FESpace -> map() ));
+        M_divMatrixDiffSrc[i].reset( new matrix_Type( M_FESpace -> map() ));
     }
 
     // set the coeff to 1.
@@ -109,69 +112,69 @@ OneDimensionalModel_Solver::buildConstantMatrices()
     M_coeffGrad = 1.;
 
     // Elementary computation and matrix assembling
-    for ( UInt iedge(1); iedge <= M_FESpace->mesh()->numEdges(); ++iedge )
+    for ( UInt iedge(1); iedge <= M_FESpace -> mesh() -> numEdges(); ++iedge )
     {
         // set the elementary matrices to 0.
-        M_elmatMass->zero();
-        M_elmatGrad->zero();
+        M_elmatMass -> zero();
+        M_elmatGrad -> zero();
 
         // update the current element
-        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->edgeList(iedge) );
+        M_FESpace -> fe().updateFirstDerivQuadPt( M_FESpace -> mesh() -> edgeList(iedge) );
 
         // update the mass and grad matrices
-        mass(      M_coeffMass, *M_elmatMass, M_FESpace->fe(),0, 0 );
-        grad( 0 , -M_coeffGrad, *M_elmatGrad, M_FESpace->fe(), M_FESpace->fe(), 0, 0 );
+        mass(      M_coeffMass, *M_elmatMass, M_FESpace -> fe(),0, 0 );
+        grad( 0 , -M_coeffGrad, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> fe(), 0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( *M_massMatrix, *M_elmatMass, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
-        assemb_mat( *M_gradMatrix, *M_elmatGrad, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( *M_massMatrix, *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assemb_mat( *M_gradMatrix, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
     }
 
     // Dirichlet boundary conditions set in the mass matrix
-    M_massMatrix->GlobalAssemble();
-    M_gradMatrix->GlobalAssemble();
+    M_massMatrix -> GlobalAssemble();
+    M_gradMatrix -> GlobalAssemble();
 
     // In the classical case the linear system use a mass matrix (with Dirichlet BC)
-    //Matrix_PtrType matrFull( new Matrix_Type( M_FESpace->map() ) );
-    //matrFull->insertValueDiagonal( M_Physics->Data()->mesh()->meanH() );
-    //matrFull->GlobalAssemble();
-    Matrix_PtrType matrFull( new Matrix_Type( *M_massMatrix ));
+    //matrixPtr_Type matrFull( new matrix_Type( M_FESpace -> map() ) );
+    //matrFull -> insertValueDiagonal( M_physics -> Data() -> mesh() -> meanH() );
+    //matrFull -> GlobalAssemble();
+    matrixPtr_Type matrFull( new matrix_Type( *M_massMatrix ));
     updateBCDirichletMatrix( *matrFull );
-    M_linearSolver->setMatrix( *matrFull );
+    M_linearSolver -> setMatrix( *matrFull );
 }
 
 void
 OneDimensionalModel_Solver::setupSolution( Solution_Type& solution )
 {
-    solution["A"].reset( new Vector_Type( M_FESpace->map() ) );
-    solution["A/A0-1"].reset( new Vector_Type( M_FESpace->map() ) );
-    solution["Q"].reset( new Vector_Type( M_FESpace->map() ) );
-    solution["W1"].reset( new Vector_Type( M_FESpace->map() ) );
-    solution["W2"].reset( new Vector_Type( M_FESpace->map() ) );
-    solution["P"].reset( new Vector_Type( M_FESpace->map() ) );
+    solution["A"].reset( new vector_Type( M_FESpace -> map() ) );
+    solution["A/A0-1"].reset( new vector_Type( M_FESpace -> map() ) );
+    solution["Q"].reset( new vector_Type( M_FESpace -> map() ) );
+    solution["W1"].reset( new vector_Type( M_FESpace -> map() ) );
+    solution["W2"].reset( new vector_Type( M_FESpace -> map() ) );
+    solution["P"].reset( new vector_Type( M_FESpace -> map() ) );
 
     // Flux correction with viscoelastic term
-    if ( M_Physics->Data()->viscoelasticWall() )
+    if ( M_physics -> Data() -> viscoelasticWall() )
     {
-        solution["Q_visc"].reset( new Vector_Type( M_FESpace->map() ) ); // viscoelastic contribution to the flux
-        solution["P_visc"].reset( new Vector_Type( M_FESpace->map() ) ); // viscoelastic contribution to the pressure
+        solution["Q_visc"].reset( new vector_Type( M_FESpace -> map() ) ); // viscoelastic contribution to the flux
+        solution["P_visc"].reset( new vector_Type( M_FESpace -> map() ) ); // viscoelastic contribution to the pressure
     }
 
     // flux second derivative
-    if ( M_Physics->Data()->fluxSecondDer() )
-        solution["d2Q_dx2"].reset( new Vector_Type( M_FESpace->map() ) );
+    if ( M_physics -> Data() -> fluxSecondDer() )
+        solution["d2Q_dx2"].reset( new vector_Type( M_FESpace -> map() ) );
 
     // correction flux with inertial term
-    if ( M_Physics->Data()->inertialWall() )
-        solution["Q_inert"].reset( new Vector_Type( M_FESpace->map() ) );
+    if ( M_physics -> Data() -> inertialWall() )
+        solution["Q_inert"].reset( new vector_Type( M_FESpace -> map() ) );
 
     // correction flux with longitudinal term
-    if ( M_Physics->Data()->longitudinalWall() )
-        solution["Q_long"].reset( new Vector_Type( M_FESpace->map() ) );
+    if ( M_physics -> Data() -> longitudinalWall() )
+        solution["Q_long"].reset( new vector_Type( M_FESpace -> map() ) );
 
     // Initialize solution to zero
-    for ( Solution_ConstIterator i = solution.begin(); i != solution.end(); ++i )
-        *i->second = 0.;
+    for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
+        *i -> second = 0.;
 }
 
 void
@@ -179,7 +182,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
 {
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
     {
-        (*solution["A"])[inode] = M_Physics->Data()->Area0(inode - 1);
+        (*solution["A"])[inode] = M_physics -> Data() -> Area0(inode - 1);
         (*solution["Q"])[inode] = 0;
     }
 
@@ -190,34 +193,34 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_physics -> Data() -> dataTime() -> getTimeStep() );
 }
 
 void
 OneDimensionalModel_Solver::computeW1W2( Solution_Type& solution )
 {
-    for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
+    for (UInt ielem = 0; ielem < M_FESpace -> dim() ; ++ielem )
     {
-        M_Physics->W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
-                             (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1], ielem);
+        M_physics -> W_from_U( ( *solution["W1"]) [ielem + 1], (*solution["W2"]) [ielem + 1],
+                               ( *solution["A"] ) [ielem + 1], (*solution["Q"] ) [ielem + 1], ielem);
     }
 }
 
 void
 OneDimensionalModel_Solver::computePressure( Solution_Type& solution, const Real& TimeStep )
 {
-    for ( UInt i(0); i < M_FESpace->dim() ; ++i )
+    for ( UInt i(0); i < M_FESpace -> dim() ; ++i )
     {
-        (*solution["P"])[i+1] = M_Physics->elasticPressure( (*solution["A"])[i+1], i );
+        ( *solution["P"] ) [i+1] = M_physics -> elasticPressure( ( *solution["A"] ) [i+1], i );
 
-        if ( M_Physics->Data()->viscoelasticWall() )
+        if ( M_physics -> Data() -> viscoelasticWall() )
         {
             // Viscoelastic pressure is not working right now!
             // We need to pass from outside U_prevtime and U_2prevtime
-            (*solution["P_visc"])[i+1] = M_Physics->viscoelasticPressure( (*solution["A"])[i+1],
-                                                                          (*M_U_prevtime["A"])[i+1],
-                                                                          (*M_U_2prevtime["A"])[i+1], TimeStep, i );
-            (*solution["P"])[i+1] += (*solution["P_visc"])[i+1];
+            ( *solution["P_visc"] ) [i+1] = M_physics -> viscoelasticPressure( ( *solution["A"]) [i+1],
+                                                                            ( *M_UPreviousTime["A"]) [i+1],
+                                                                            ( *M_U2PreviousTime["A"]) [i+1], TimeStep, i );
+            ( *solution["P"] ) [i+1] += ( *solution["P_visc"] ) [i+1];
         }
     }
 }
@@ -226,26 +229,26 @@ void
 OneDimensionalModel_Solver::computeAreaRatio( Solution_Type& solution )
 {
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
-        (*solution["A/A0-1"])[inode] = (*solution["A"])[inode] / M_Physics->Data()->Area0(inode - 1) - 1;
+        ( *solution["A/A0-1"] ) [inode] = ( *solution["A"] ) [inode] / M_physics -> Data() -> Area0(inode - 1) - 1;
 }
 
 void
 OneDimensionalModel_Solver::computeArea( Solution_Type& solution )
 {
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
-        (*solution["A"])[inode] = ( (*solution["A/A0-1"])[inode] + 1 ) * M_Physics->Data()->Area0(inode - 1);
+        ( *solution["A"] ) [inode] = ( (*solution["A/A0-1"] ) [inode] + 1 ) * M_physics -> Data() -> Area0(inode - 1);
 }
 
 /*
 void
 OneDimensionalModel_Solver::initialize( Solution_Type& solution )
 {
-    ASSERT_PRE( (M_leftNodeId <= M_rightNodeId) && (M_rightNodeId <= M_FESpace->dim()),
+    ASSERT_PRE( (M_leftNodeId <= M_rightNodeId) && (M_rightNodeId <= M_FESpace -> dim()),
                 "[initialize] outside tube boundaries" );
 
     Real value1, value2;
 
-    Vector exponent( M_FESpace->dim() );
+    Vector exponent( M_FESpace -> dim() );
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
     {
         exponent[inode - 1] *= 0.;
@@ -257,25 +260,25 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
         if( (inode < M_leftNodeId) || (inode > M_rightNodeId) )
         {
             exponent[inode - 1]  = - std::pow( Real(int( inode - M_leftNodeId )), 2 );
-            exponent[inode - 1] /= 2*std::pow( M_Physics->Data()->Length(), 2 );
+            exponent[inode - 1] /= 2*std::pow( M_physics -> Data() -> Length(), 2 );
         }
     }
 
-    switch( M_Physics->Data()->initialVariable() )
+    switch( M_physics -> Data() -> initialVariable() )
     {
         case OneD_InitializeArea:
             Debug( 6310 ) << "[initialize] 0- OneDInitArea\n";
 
-            value1 = M_Physics->Data()->initialValue();
+            value1 = M_physics -> Data() -> initialValue();
             value2 = 0;
 
             *solution["Q"] = value2;
 
             for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
             {
-                (*solution["A"])[inode] = value1 * ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
+                (*solution["A"])[inode] = value1 * ( 1 + M_physics -> Data() -> multiplier() * std::exp( exponent[inode - 1] ) );
 
-                M_Physics->W_from_U( (*solution["W1"])[inode], (*solution["W2"])[inode],
+                M_physics -> W_from_U( (*solution["W1"])[inode], (*solution["W2"])[inode],
                                      (*solution["A"])[inode],  (*solution["Q"])[inode], inode - 1 );
             }
             break;
@@ -284,15 +287,15 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
             // HYPOTHESIS: when initializing flux, area is equal to Area0
             Debug( 6310 ) << "[initialize] 0- OneDInitFlux\n";
 
-            value1 = M_Physics->Data()->Area0(0); // this if Area0 is constant
-            value2 = M_Physics->Data()->initialValue();
+            value1 = M_physics -> Data() -> Area0(0); // this if Area0 is constant
+            value2 = M_physics -> Data() -> initialValue();
 
             for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
             {
-                (*solution["A"])[inode] = M_Physics->Data()->Area0(inode - 1);
-                (*solution["Q"])[inode] = value2*( 1 + M_Physics->Data()->multiplier()*std::exp( exponent[inode - 1] ) );
+                (*solution["A"])[inode] = M_physics -> Data() -> Area0(inode - 1);
+                (*solution["Q"])[inode] = value2*( 1 + M_physics -> Data() -> multiplier()*std::exp( exponent[inode - 1] ) );
 
-                M_Physics->W_from_U( (*solution["W1"])[inode], (*solution["W2"])[inode],
+                M_physics -> W_from_U( (*solution["W1"])[inode], (*solution["W2"])[inode],
                                      (*solution["A"])[inode],  (*solution["Q"])[inode], inode - 1 );
             }
             break;
@@ -300,7 +303,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
         case OneD_InitializeRiemann1:
             Debug( 6310 ) << "[initialize] 0- OneDInitRiemann1\n";
 
-            value1 = M_Physics->Data()->initialValue();
+            value1 = M_physics -> Data() -> initialValue();
             value2 = -value1;
 
             std::cout << "[initialize] WARNING! Initializing W2 = - W1" << " (assuming Q = 0)" << std::endl;
@@ -308,11 +311,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
             for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
             {
                 (*solution["W1"])[inode] = value1 *
-                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_physics -> Data() -> multiplier() * std::exp( exponent[inode - 1] ) );
                 (*solution["W2"])[inode] = value2 *
-                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_physics -> Data() -> multiplier() * std::exp( exponent[inode - 1] ) );
 
-                M_Physics->U_from_W( (*solution["A"])[inode],  (*solution["Q"])[inode],
+                M_physics -> U_from_W( (*solution["A"])[inode],  (*solution["Q"])[inode],
                                      (*solution["W1"])[inode], (*solution["W2"])[inode], inode - 1);
             }
 
@@ -321,7 +324,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
         case OneD_InitializeRiemann2:
             Debug( 6310 ) << "[initialize] 0- OneDInitRiemann2\n";
 
-            value1 = M_Physics->Data()->initialValue();
+            value1 = M_physics -> Data() -> initialValue();
             value2 = - value1;
 
             std::cout << "[initialize] WARNING! Initializing W1 = - W2" << " (assuming Q = 0)" << std::endl;
@@ -329,11 +332,11 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
             for (UInt inode = M_leftNodeId; inode <= M_rightNodeId; ++inode )
             {
                 (*solution["W2"])[inode] = value1 *
-                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_physics -> Data() -> multiplier() * std::exp( exponent[inode - 1] ) );
                 (*solution["W1"])[inode] = value2 *
-                  ( 1 + M_Physics->Data()->multiplier() * std::exp( exponent[inode - 1] ) );
+                  ( 1 + M_physics -> Data() -> multiplier() * std::exp( exponent[inode - 1] ) );
 
-                M_Physics->U_from_W( (*solution["A"])[inode],  (*solution["Q"])[inode],
+                M_physics -> U_from_W( (*solution["A"])[inode],  (*solution["Q"])[inode],
                                      (*solution["W1"])[inode], (*solution["W2"])[inode], inode -1 );
             }
 
@@ -342,18 +345,18 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
         case OneD_InitializePressure:
             Debug( 6310 ) << "[initialize] 0- OneDInitPressure\n";
 
-            value1 = M_Physics->Data()->restValue();
+            value1 = M_physics -> Data() -> restValue();
             value2 = 0; // HYPOTHESIS: when initializing pressure, flux is imposed constant = 0
 
             *solution["Q"] = value2;
 
             for ( UInt inode = M_leftNodeId; inode <= M_rightNodeId ; ++inode )
             {
-                value2 = value1*( 1 + M_Physics->Data()->multiplier()*std::exp( exponent[inode - 1] ) );
+                value2 = value1*( 1 + M_physics -> Data() -> multiplier()*std::exp( exponent[inode - 1] ) );
 
-                (*solution["A"])[inode] = M_Physics->A_from_P( value2 );
+                (*solution["A"])[inode] = M_physics -> A_from_P( value2 );
 
-                M_Physics->W_from_U( (*solution["W1"])[inode], (*solution["W2"])[inode],
+                M_physics -> W_from_U( (*solution["W1"])[inode], (*solution["W2"])[inode],
                                      (*solution["A"])[inode],  (*solution["Q"])[inode], inode - 1);
 
             }
@@ -364,14 +367,14 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution )
     }
 
     Debug( 6310 ) << "[initialize]\t\tvalue1         = " << value1 << "\n";
-    Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * M_Physics->Data()->multiplier() << "\n";
+    Debug( 6310 ) << "[initialize]\t\tvalue1_step    = " << value1 * M_physics -> Data() -> multiplier() << "\n";
     Debug( 6310 ) << "[initialize]\t\tvalue2         = " << value2 << "\n";
 
     // Compute A/A0 from A
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_physics -> Data() -> dataTime() -> getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -388,12 +391,12 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
         Debug( 6310 ) << "[OneDimensionalModel_Solver::initialize] O- A0 = " << u10 << "\n";
         Debug( 6310 ) << "[OneDimensionalModel_Solver::initialize] O- Q0 = " << u20 << "\n";
 
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
+        for (UInt ielem = 0; ielem < M_FESpace -> dim() ; ++ielem )
         {
             (*solution["A"])[ielem + 1] = u10;
             (*solution["Q"])[ielem + 1] = u20;
 
-            M_Physics->W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
+            M_physics -> W_from_U( (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
                                  (*solution["A"])[ielem + 1], (*solution["Q"])[ielem + 1],
                                  ielem );
         }
@@ -401,13 +404,13 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
     }
     else if( var == "Riemann" )
     {
-        (*solution["W1"]) = Vector_Type( M_FESpace->map() );
+        (*solution["W1"]) = vector_Type( M_FESpace -> map() );
         (*solution["W1"]) = u10;
-        (*solution["W2"]) = Vector_Type( M_FESpace->map() );
+        (*solution["W2"]) = vector_Type( M_FESpace -> map() );
         (*solution["W2"]) = u20;
 
-        for (UInt ielem = 0; ielem < M_FESpace->dim() ; ++ielem )
-            M_Physics->U_from_W( (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1],
+        for (UInt ielem = 0; ielem < M_FESpace -> dim() ; ++ielem )
+            M_physics -> U_from_W( (*solution["A"])[ielem + 1],  (*solution["Q"])[ielem + 1],
                                  (*solution["W1"])[ielem + 1], (*solution["W2"])[ielem + 1],
                                    ielem + 1 ); // WARNING the +1 is not debugged yet (GF 12/2009)
     }
@@ -421,21 +424,21 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u10
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_physics -> Data() -> dataTime() -> getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
 }
 
 void
-OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Vector_Type& u10, const Vector_Type& u20 )
+OneDimensionalModel_Solver::initialize( Solution_Type& solution, const vector_Type& u10, const vector_Type& u20 )
 {
     (*solution["A"]) = u10;
     (*solution["Q"]) = u20;
 
-    for (UInt ielem=0; ielem <= M_FESpace->dim() ; ++ielem )
+    for (UInt ielem=0; ielem <= M_FESpace -> dim() ; ++ielem )
     {
-        M_Physics->W_from_U( (*solution["W1"])[ielem], (*solution["W2"])[ielem],
+        M_physics -> W_from_U( (*solution["W1"])[ielem], (*solution["W2"])[ielem],
                              (*solution["A"])[ielem], (*solution["Q"])[ielem], ielem );
     }
 
@@ -443,7 +446,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Vector_Ty
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_physics -> Data() -> dataTime() -> getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -452,13 +455,13 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Vector_Ty
 void
 OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u20 )
 {
-    (*solution["Q"]) = Vector_Type( M_FESpace->map() );
+    (*solution["Q"]) = vector_Type( M_FESpace -> map() );
     (*solution["Q"]) = u20;
 
-    for (UInt ielem = 0; ielem <= M_FESpace->dim() ; ++ielem )
+    for (UInt ielem = 0; ielem <= M_FESpace -> dim() ; ++ielem )
     {
-        (*solution["A"])[ielem]=M_Physics->Data()->Area0(ielem);
-        M_Physics->W_from_U( (*solution["W1"])[ielem], (*solution["W2"])[ielem],
+        (*solution["A"])[ielem]=M_physics -> Data() -> Area0(ielem);
+        M_physics -> W_from_U( (*solution["W1"])[ielem], (*solution["W2"])[ielem],
                              (*solution["A"])[ielem], (*solution["Q"])[ielem], ielem );
     }
 
@@ -466,7 +469,7 @@ OneDimensionalModel_Solver::initialize( Solution_Type& solution, const Real& u20
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    computePressure( solution, M_Physics->Data()->dataTime()->getTimeStep() );
+    computePressure( solution, M_physics -> Data() -> dataTime() -> getTimeStep() );
 
     // Prepare the buffers
     //openFileBuffers( solution );
@@ -492,33 +495,33 @@ OneDimensionalModel_Solver::updateRHS( const Solution_Type& solution, const Real
     Real dt2over2 = TimeStep * TimeStep * 0.5;
 
     // rhs = mass * Un
-    M_rhs[0]  = (*M_massMatrix) * *solution.find("A")->second;
-    M_rhs[1]  = (*M_massMatrix) * *solution.find("Q")->second;
+    M_rhs[0]  = ( *M_massMatrix ) * *solution.find("A") -> second;
+    M_rhs[1]  = ( *M_massMatrix ) * *solution.find("Q") -> second;
     for ( UInt i(0); i < 2; ++i )
     {
         // rhs = rhs + dt * grad * F(Un)
-        M_rhs[i] += (*M_gradMatrix) * (TimeStep*M_FluxVector[i]);
+        M_rhs[i] += ( *M_gradMatrix ) * ( TimeStep * M_fluxVector[i] );
 
         // rhs = rhs - dt * mass * S(Un)
-        M_rhs[i] += (*M_massMatrix) * (-TimeStep*M_SourceVector[i]);
+        M_rhs[i] += ( *M_massMatrix ) * ( - TimeStep * M_sourceVector[i] );
 
         for ( UInt j(0); j < 2; ++j )
         {
             // rhs = rhs - dt^2/2 * gradDiffFlux * S(Un)
-            M_gradMatrixDiffFlux[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j]*(-dt2over2*M_SourceVector[j]);
+            M_gradMatrixDiffFlux[2*i + j] -> GlobalAssemble();
+            M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j] * ( -dt2over2 * M_sourceVector[j] );
 
             // rhs = rhs + dt^2/2 * divDiffSrc * F(Un)
-            M_divMatrixDiffSrc[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_divMatrixDiffSrc[2*i + j]*(dt2over2*M_FluxVector[j]);
+            M_divMatrixDiffSrc[2*i + j] -> GlobalAssemble();
+            M_rhs[i] += *M_divMatrixDiffSrc[2*i + j] * ( dt2over2 * M_fluxVector[j] );
 
             // rhs = rhs - dt^2/2 * stiffDiffFlux * F(Un)
-            M_stiffMatrixDiffFlux[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(-dt2over2*M_FluxVector[j]);
+            M_stiffMatrixDiffFlux[2*i + j] -> GlobalAssemble();
+            M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(-dt2over2*M_fluxVector[j]);
 
             // rhs = rhs + dt^2/2 * massDiffSrc * S(Un)
-            M_massMatrixDiffSrc[2*i + j]->GlobalAssemble();
-            M_rhs[i] += *M_massMatrixDiffSrc[2*i + j]*(dt2over2*M_SourceVector[j]);
+            M_massMatrixDiffSrc[2*i + j] -> GlobalAssemble();
+            M_rhs[i] += *M_massMatrixDiffSrc[2*i + j] * ( dt2over2 * M_sourceVector[j] );
         }
     }
 }
@@ -528,13 +531,13 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
 {
     // Compute BC
     Debug( 6310 ) << "[timeAdvance] \tcompute BC\n";
-    bcH.applyBC( Time, TimeStep, solution, M_Flux, M_bcDirLeft, M_bcDirRight );
+    bcH.applyBC( Time, TimeStep, solution, M_flux, M_bcDirLeft, M_bcDirRight );
 
     // Apply BC to RHS
     Debug( 6310 ) << "[timeAdvance] \tcompute BC dirichlet vector\n";
     updateBCDirichletVector();
 
-    if ( M_Physics->Data()->UW() )
+    if ( M_physics -> Data() -> UW() )
     {
         Real Ainode, Qinode;
 
@@ -544,36 +547,36 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
         Real lambda1_minus = 0.;
         Real lambda2_minus = 0.;
 
-        Container2D_Type eigenvalues;
-        Container2D_Type leftEigenvector1;
-        Container2D_Type leftEigenvector2;
+        container2D_Type eigenvalues;
+        container2D_Type leftEigenvector1;
+        container2D_Type leftEigenvector2;
 
-        //Real deltaX = M_FESpace->mesh()->edgeList( 1 ).point(1).x() - M_FESpace->mesh()->edgeList( 1 ).point(2).x();
-        Real delta  = - std::sqrt( ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).x() ) *
-                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).x() ) +
-                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).y() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).y() ) *
-                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).y() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).y() ) +
-                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).z() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).z() ) *
-                                   ( ( M_FESpace->mesh()->edgeList[ 1 ].point( 2 ) ).z() - ( M_FESpace->mesh()->edgeList[ 1 ].point( 1 ) ).z() )
+        //Real deltaX = M_FESpace -> mesh() -> edgeList( 1 ).point(1).x() - M_FESpace -> mesh() -> edgeList( 1 ).point(2).x();
+        Real delta  = - std::sqrt( ( ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 1 ) ).x() ) *
+                                   ( ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 2 ) ).x() - ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 1 ) ).x() ) +
+                                   ( ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 2 ) ).y() - ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 1 ) ).y() ) *
+                                   ( ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 2 ) ).y() - ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 1 ) ).y() ) +
+                                   ( ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 2 ) ).z() - ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 1 ) ).z() ) *
+                                   ( ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 2 ) ).z() - ( M_FESpace -> mesh() -> edgeList[ 1 ].point( 1 ) ).z() )
                                  );
 
         // working on riemann invariants
-        Vector_Type W1_UW(M_FESpace->map());
-        Vector_Type W2_UW(M_FESpace->map());
+        vector_Type W1_UW(M_FESpace -> map());
+        vector_Type W2_UW(M_FESpace -> map());
 
         // converting boundary conditions on physical variables
         // in boundary conditions on characteristic variables
-        M_Physics->W_from_U( W1_UW(0), W2_UW(0), M_rhs[0][0], M_rhs[1][0], 0 );
-        M_Physics->W_from_U( W1_UW(M_FESpace->dim()-1), W2_UW(M_FESpace->dim()-1),
-                             M_rhs[0][M_FESpace->dim()-1], M_rhs[1][M_FESpace->dim()-1],
-                             M_FESpace->dim() - 1 );
+        M_physics -> W_from_U( W1_UW(0), W2_UW(0), M_rhs[0][0], M_rhs[1][0], 0 );
+        M_physics -> W_from_U( W1_UW(M_FESpace -> dim()-1), W2_UW(M_FESpace -> dim()-1),
+                             M_rhs[0][M_FESpace -> dim()-1], M_rhs[1][M_FESpace -> dim()-1],
+                             M_FESpace -> dim() - 1 );
 
-        for ( UInt ii=1; ii < (M_FESpace->dim()-1) ; ++ii )
+        for ( UInt ii=1; ii < (M_FESpace -> dim()-1) ; ++ii )
         {
             // compute the eigenvalues at node
             Ainode = (*solution["A"])( ii );
             Qinode = (*solution["Q"])( ii );
-            M_Flux->EigenValuesEigenVectors( Ainode, Qinode,
+            M_flux -> EigenValuesEigenVectors( Ainode, Qinode,
                                              eigenvalues,
                                              leftEigenvector1,
                                              leftEigenvector2,
@@ -585,55 +588,55 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, Solutio
             lambda2_minus = std::min<Real>( eigenvalues[1], 0. );
 
             // update the solution for the next time step
-            W1_UW[ii] = (*solution["W1"])[ii]
-                        - (TimeStep / delta)  * lambda1_plus  * ( (*solution["W1"])[ii]   - (*solution["W1"])[ii-1])
-                        - (TimeStep / delta)  * lambda1_minus * ( (*solution["W1"])[ii+1] - (*solution["W1"])[ii])
-                        -  TimeStep * ( leftEigenvector1[0] * M_SourceVector[0][ii] + leftEigenvector1[1] * M_SourceVector[1][ii] );
-            W2_UW[ii] = (*solution["W2"])[ii]
-                        - (TimeStep / delta)  * lambda2_plus  * ( (*solution["W2"])[ii]   - (*solution["W2"])[ii-1])
-                        - (TimeStep / delta)  * lambda2_minus * ( (*solution["W2"])[ii+1] - (*solution["W2"])[ii])
-                        -  TimeStep * ( leftEigenvector2[0] * M_SourceVector[0][ii] + leftEigenvector2[1] * M_SourceVector[1][ii] );
+            W1_UW[ii] = ( *solution["W1"] ) [ii]
+                        - ( TimeStep / delta )  * lambda1_plus  * ( ( *solution["W1"] ) [ii]   - ( *solution["W1"] ) [ii-1] )
+                        - ( TimeStep / delta )  * lambda1_minus * ( ( *solution["W1"] ) [ii+1] - ( *solution["W1"] ) [ii] )
+                        -  TimeStep * ( leftEigenvector1[0] * M_sourceVector[0][ii] + leftEigenvector1[1] * M_sourceVector[1][ii] );
+            W2_UW[ii] = ( *solution["W2"] ) [ii]
+                        - ( TimeStep / delta )  * lambda2_plus  * ( ( *solution["W2"] ) [ii]   - ( *solution["W2"] ) [ii-1] )
+                        - ( TimeStep / delta )  * lambda2_minus * ( ( *solution["W2"] ) [ii+1] - ( *solution["W2"] ) [ii] )
+                        -   TimeStep * ( leftEigenvector2[0] * M_sourceVector[0][ii] + leftEigenvector2[1] * M_sourceVector[1][ii] );
         }
 
         (*solution["W1"]) = W1_UW;
         (*solution["W2"]) = W2_UW;
 
-        for (UInt ielem=0; ielem <= M_FESpace->dim() ; ++ielem )
-            M_Physics->U_from_W( (*solution["A"])[ielem], (*solution["Q"])[ielem],
-                                 (*solution["W1"])[ielem], (*solution["W2"])[ielem],
-                                 ielem );
+        for (UInt ielem=0; ielem <= M_FESpace -> dim() ; ++ielem )
+            M_physics -> U_from_W( ( *solution["A"] ) [ielem], ( *solution["Q"] ) [ielem],
+                                   ( *solution["W1"] ) [ielem], ( *solution["W2"] ) [ielem],
+                                     ielem );
     }
     else
     {
         // Compute A^n+1
-        Vector_Type area( M_rhs[0] );
-        M_linearSolver->solveSystem( M_rhs[0], area, M_massMatrix );
+        vector_Type area( M_rhs[0] );
+        M_linearSolver -> solveSystem( M_rhs[0], area, M_massMatrix );
 
         // Compute Q^n+1
-        Vector_Type flowrate( M_rhs[1] );
-        M_linearSolver->solveSystem( M_rhs[1], flowrate, M_massMatrix );
+        vector_Type flowrate( M_rhs[1] );
+        M_linearSolver -> solveSystem( M_rhs[1], flowrate, M_massMatrix );
 
         // Correct flux with inertial, viscoelastic and longitudinal terms
-        if ( M_Physics->Data()->inertialWall() )
+        if ( M_physics -> Data() -> inertialWall() )
         {
             *solution["Q_inert"] = inertialFluxCorrection( flowrate );
             flowrate += *solution["Q_inert"];
         }
 
-        if ( M_Physics->Data()->viscoelasticWall() )
+        if ( M_physics -> Data() -> viscoelasticWall() )
         {
             *solution["Q_visc"] = viscoelasticFluxCorrection( flowrate, TimeStep );
             flowrate += *solution["Q_visc"];
         }
 
-        if ( M_Physics->Data()->longitudinalWall() )
+        if ( M_physics -> Data() -> longitudinalWall() )
         {
             *solution["Q_long"] = longitudinalFluxCorrection();
             flowrate += *solution["Q_long"];
         }
 
         // compute L2 projection of d2Q_dx2
-        //    if( M_Physics->Data()->fluxSecondDer() )
+        //    if( M_physics -> Data() -> fluxSecondDer() )
         //      M_d2_U2_dx2 = _compute_d2Q_dx2( flowrate );
 
         // Update the solution container
@@ -656,43 +659,43 @@ OneDimensionalModel_Solver::ComputeCFL( const Solution_Type& solution, const Rea
 {
     Real lambdaMax = 0.;
 
-    Container2D_Type eigenvalues;
-    Container2D_Type leftEigenvector1;
-    Container2D_Type leftEigenvector2;
+    container2D_Type eigenvalues;
+    container2D_Type leftEigenvector1;
+    container2D_Type leftEigenvector2;
 
-    for ( UInt inode(0); inode < M_FESpace->dim() ; ++inode )
+    for ( UInt inode(0); inode < M_FESpace -> dim() ; ++inode )
     {
         // compute the eigenvalues at node
-        M_Flux->EigenValuesEigenVectors( (*solution.find("A")->second)( inode + 1 ),
-                                         (*solution.find("Q")->second)( inode + 1 ),
-                                         eigenvalues, leftEigenvector1, leftEigenvector2, inode );
+        M_flux -> EigenValuesEigenVectors( ( *solution.find("A") -> second ) ( inode + 1 ),
+                                           ( *solution.find("Q") -> second ) ( inode + 1 ),
+                                             eigenvalues, leftEigenvector1, leftEigenvector2, inode );
 
         lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigenvalues[0]), std::fabs(eigenvalues[1]) ), lambdaMax );
     }
 
-    return lambdaMax * timeStep / M_FESpace->mesh()->minH();
+    return lambdaMax * timeStep / M_FESpace -> mesh() -> minH();
 }
 
 /*
 void
 OneDimensionalModel_Solver::savesol()
 {
-    M_U_prevtime[0] = (*M_U_thistime)[0];
-    M_U_prevtime[1] = (*M_U_thistime)[1];
+    M_UPreviousTime[0] = (*M_U_thistime)[0];
+    M_UPreviousTime[1] = (*M_U_thistime)[1];
 }
 
 void
 OneDimensionalModel_Solver::loadsol()
 {
-    Container2D_Type U_leftbd, U_rightbd;
+    container2D_Type U_leftbd, U_rightbd;
     for( UInt i=0; i<2; ++i )
     {
         U_leftbd[i] = (*M_U_thistime)[i]( M_leftNodeId );
         U_rightbd[i] = (*M_U_thistime)[i]( M_rightNodeId );
     }
 
-    (*M_U_thistime)[0] = M_U_prevtime[0];
-    (*M_U_thistime)[1] = M_U_prevtime[1];
+    (*M_U_thistime)[0] = M_UPreviousTime[0];
+    (*M_U_thistime)[1] = M_UPreviousTime[1];
 
     for( UInt i=0; i<2; ++i )
     {
@@ -701,7 +704,7 @@ OneDimensionalModel_Solver::loadsol()
     }
 
     for ( UInt inode=M_leftNodeId; inode <= M_rightNodeId ; ++inode )
-        M_Physics->W_from_U( (*M_U_thistime)[2][inode], (*M_U_thistime)[3][inode],
+        M_physics -> W_from_U( (*M_U_thistime)[2][inode], (*M_U_thistime)[3][inode],
                              (*M_U_thistime)[0][inode], (*M_U_thistime)[1][inode],
                              inode - 1 );
 }
@@ -711,9 +714,9 @@ void
 OneDimensionalModel_Solver::resetOutput( const Solution_Type& solution )
 {
     std::ofstream outfile;
-    for ( Solution_ConstIterator i = solution.begin(); i != solution.end(); ++i )
+    for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_Physics->Data()->postprocessingDirectory() + "/" + M_Physics->Data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physics -> Data() -> postprocessingDirectory() + "/" + M_physics -> Data() -> postprocessingFile() + "_" + i -> first + ".m";
         outfile.open( file.c_str(), std::ios::trunc );
         outfile.close();
     }
@@ -723,13 +726,13 @@ void
 OneDimensionalModel_Solver::postProcess( const Solution_Type& solution )
 {
     std::ofstream outfile;
-    for ( Solution_ConstIterator i = solution.begin(); i != solution.end(); ++i )
+    for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_Physics->Data()->postprocessingDirectory() + "/" + M_Physics->Data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physics -> Data() -> postprocessingDirectory() + "/" + M_physics -> Data() -> postprocessingFile() + "_" + i -> first + ".m";
         outfile.open( file.c_str(), std::ios::app );
 
-        for ( UInt ii(0); ii < M_FESpace->dim(); ++ii )
-            outfile << (*i->second)(ii + 1) << " ";
+        for ( UInt ii(0); ii < M_FESpace -> dim(); ++ii )
+            outfile << (*i -> second)(ii + 1) << " ";
 
         outfile << std::endl;
         outfile.close();
@@ -742,15 +745,15 @@ OneDimensionalModel_Solver::create_movie_file()
 {
     std::ofstream outfile;
     std::string file_output;
-    file_output = M_Physics->Data()->PostDirectory() + "/" + "areamovie"+M_Physics->Data()->PostFile()+".m";
+    file_output = M_physics -> Data() -> PostDirectory() + "/" + "areamovie"+M_physics -> Data() -> PostFile()+".m";
     outfile.open(file_output.c_str(), std::ios::out);
-    outfile <<"Area"<<M_Physics->Data()->PostFile()<<";\n"
-            <<"[n,m]=size(A" << M_Physics->Data()->PostFile() << ");\n"
-            <<"Max=max(max(A" << M_Physics->Data()->PostFile() << "));\n"
-            <<"Min=min(min(A" << M_Physics->Data()->PostFile() << "));\n"
+    outfile <<"Area"<<M_physics -> Data() -> PostFile()<<";\n"
+            <<"[n,m]=size(A" << M_physics -> Data() -> PostFile() << ");\n"
+            <<"Max=max(max(A" << M_physics -> Data() -> PostFile() << "));\n"
+            <<"Min=min(min(A" << M_physics -> Data() -> PostFile() << "));\n"
             <<"for i=1:n\n"
-            <<"  plot(A" << M_Physics->Data()->PostFile() << "(i,:));\n"
-            <<"  title((i-1)*"<<M_Physics->Data()->dataTime()->getTimeStep()<<"*"<<M_Physics->Data()->verbose()<<");\n"
+            <<"  plot(A" << M_physics -> Data() -> PostFile() << "(i,:));\n"
+            <<"  title((i-1)*"<<M_physics -> Data() -> dataTime() -> getTimeStep()<<"*"<<M_physics -> Data() -> verbose()<<");\n"
             <<"  axis([0 m Min-(Min/100) Max+(Min/100)]);\n"
             <<"  %pause;\n"
             <<"  F(i) = getframe;\n"
@@ -758,15 +761,15 @@ OneDimensionalModel_Solver::create_movie_file()
             <<"movie(F)";
 
     outfile.close();
-    file_output = M_Physics->Data()->PostDirectory() + "/" + "portatamovie"+M_Physics->Data()->PostFile()+".m";
+    file_output = M_physics -> Data() -> PostDirectory() + "/" + "portatamovie"+M_physics -> Data() -> PostFile()+".m";
     outfile.open(file_output.c_str(), std::ios::out);
-    outfile <<"Portata"<<M_Physics->Data()->PostFile()<<";\n"
-            <<"[n,m]=size(Q" << M_Physics->Data()->PostFile() << ");\n"
-            <<"Max=max(max(Q" << M_Physics->Data()->PostFile() << "));\n"
-            <<"Min=min(min(Q" << M_Physics->Data()->PostFile() << "));\n"
+    outfile <<"Portata"<<M_physics -> Data() -> PostFile()<<";\n"
+            <<"[n,m]=size(Q" << M_physics -> Data() -> PostFile() << ");\n"
+            <<"Max=max(max(Q" << M_physics -> Data() -> PostFile() << "));\n"
+            <<"Min=min(min(Q" << M_physics -> Data() -> PostFile() << "));\n"
             <<"for i=1:n\n"
-            <<"  plot(Q" << M_Physics->Data()->PostFile() << "(i,:));\n"
-            <<"  title((i-1)*"<< M_Physics->Data()->dataTime()->getTimeStep() <<"*"<<M_Physics->Data()->verbose()<<");\n"
+            <<"  plot(Q" << M_physics -> Data() -> PostFile() << "(i,:));\n"
+            <<"  title((i-1)*"<< M_physics -> Data() -> dataTime() -> getTimeStep() <<"*"<<M_physics -> Data() -> verbose()<<");\n"
             <<"  axis([0 m Min-(Min/100) Max+(Min/100)]);\n"
             <<"  %pause;\n"
             <<"  F(i) = getframe;\n"
@@ -781,18 +784,18 @@ OneDimensionalModel_Solver::openFileBuffers( const Solution_Type& solution )
     std::string file_output;
     boost::shared_ptr<std::ostringstream> buf;
 
-    for ( Solution_ConstIterator i = solution.begin(); i != solution.end(); ++i )
+    for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        file_output = M_Physics->Data()->PostDirectory() + "/" + M_Physics->Data()->PostFile() + i->first + ".m";
+        file_output = M_physics -> Data() -> PostDirectory() + "/" + M_physics -> Data() -> PostFile() + i -> first + ".m";
         Debug( 6310 ) << "[openFileBuffers] setting output for file " << file_output << "\n";
 
         buf.reset( new std::ostringstream() );
-        buf->setf(std::ios_base::scientific);
-        buf->precision(5);
-        buf->width(13);
+        buf -> setf(std::ios_base::scientific);
+        buf -> precision(5);
+        buf -> width(13);
 
         M_post_process_buffer.insert( std::map<std::string, boost::shared_ptr<std::ostringstream> >::value_type( file_output, buf ) );
-        M_post_process_buffer_offset.insert( std::map<std::string, long>::value_type( file_output, buf->tellp() ) );
+        M_post_process_buffer_offset.insert( std::map<std::string, long>::value_type( file_output, buf -> tellp() ) );
     }
 }
 
@@ -809,7 +812,7 @@ OneDimensionalModel_Solver::seekpFileBuffers()
     std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator iter;
 
     for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter )
-        (*iter).second->seekp( M_post_process_buffer_offset[(*iter).first] );
+        (*iter).second -> seekp( M_post_process_buffer_offset[(*iter).first] );
 }
 
 void
@@ -818,7 +821,7 @@ OneDimensionalModel_Solver::tellpFileBuffers()
     std::map< std::string, boost::shared_ptr<std::ostringstream> >::iterator iter;
 
     for( iter = M_post_process_buffer.begin(); iter != M_post_process_buffer.end(); ++iter )
-        M_post_process_buffer_offset[(*iter).first] = (*iter).second->tellp();
+        M_post_process_buffer_offset[(*iter).first] = (*iter).second -> tellp();
 }
 
 void
@@ -837,51 +840,51 @@ OneDimensionalModel_Solver::closeFileBuffers()
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Solver::setProblem( const Physics_PtrType Physics,
-                                        const Flux_PtrType    Flux,
-                                        const Source_PtrType  Source )
+OneDimensionalModel_Solver::setProblem( const physicsPtr_Type Physics,
+                                        const fluxPtr_Type    Flux,
+                                        const sourcePtr_Type  Source )
 {
-    M_Physics = Physics;
-    M_Flux    = Flux;
-    M_Source  = Source;
+    M_physics = Physics;
+    M_flux    = Flux;
+    M_source  = Source;
 }
 
 void
-OneDimensionalModel_Solver::setCommunicator( const Comm_PtrType Comm )
+OneDimensionalModel_Solver::setCommunicator( const commPtr_Type Comm )
 {
-    M_Comm = Comm;
-    M_Displayer.setCommunicator( Comm );
+    M_comm = Comm;
+    M_displayer.setCommunicator( Comm );
 }
 
 void
-OneDimensionalModel_Solver::setFESpace( const FESpace_PtrType FESpace )
+OneDimensionalModel_Solver::setFESpace( const FESpacePtr_Type FESpace )
 {
     M_FESpace = FESpace;
 
     //Id of left and right bc nodes
     M_leftNodeId          = 1;
     M_leftInternalNodeId  = M_leftNodeId + 1;
-    M_rightNodeId         = M_FESpace->dim();
+    M_rightNodeId         = M_FESpace -> dim();
     M_rightInternalNodeId = M_rightNodeId - 1;
 
     //Elementary Matrices
-    M_elmatMass.reset(  new ElemMat ( M_FESpace->fe().nbNode, 1, 1 ) );
-    M_elmatStiff.reset( new ElemMat ( M_FESpace->fe().nbNode, 1, 1 ) );
-    M_elmatGrad.reset(  new ElemMat ( M_FESpace->fe().nbNode, 1, 1 ) );
-    M_elmatDiv.reset(   new ElemMat ( M_FESpace->fe().nbNode, 1, 1 ) );
+    M_elmatMass.reset ( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
+    M_elmatStiff.reset( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
+    M_elmatGrad.reset ( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
+    M_elmatDiv.reset  ( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
 
     //Vectors
-    M_rhs.resize(          2, Vector_Type( M_FESpace->map() ) );
-    M_FluxVector.resize(   2, Vector_Type( M_FESpace->map() ) );
-    M_SourceVector.resize( 2, Vector_Type( M_FESpace->map() ) );
+    M_rhs.resize(          2, vector_Type( M_FESpace -> map() ) );
+    M_fluxVector.resize(   2, vector_Type( M_FESpace -> map() ) );
+    M_sourceVector.resize( 2, vector_Type( M_FESpace -> map() ) );
 
     //Matrix
-    M_massMatrix.reset( new Matrix_Type( M_FESpace->map() ) );
-    M_gradMatrix.reset( new Matrix_Type( M_FESpace->map() ) );
+    M_massMatrix.reset( new matrix_Type( M_FESpace -> map() ) );
+    M_gradMatrix.reset( new matrix_Type( M_FESpace -> map() ) );
 }
 
 void
-OneDimensionalModel_Solver::setLinearSolver( const LinearSolver_PtrType linearSolver )
+OneDimensionalModel_Solver::setLinearSolver( const linearSolverPtr_Type linearSolver )
 {
     M_linearSolver = linearSolver;
 }
@@ -903,22 +906,22 @@ OneDimensionalModel_Solver::setBCValuesRight( const Real& bcR1, const Real& bcR2
 // ===================================================
 // Get Methods
 // ===================================================
-const OneDimensionalModel_Solver::Physics_PtrType&
+const OneDimensionalModel_Solver::physicsPtr_Type&
 OneDimensionalModel_Solver::Physics() const
 {
-    return M_Physics;
+    return M_physics;
 }
 
-const OneDimensionalModel_Solver::Flux_PtrType&
+const OneDimensionalModel_Solver::fluxPtr_Type&
 OneDimensionalModel_Solver::Flux() const
 {
-    return M_Flux;
+    return M_flux;
 }
 
-const OneDimensionalModel_Solver::Source_PtrType&
+const OneDimensionalModel_Solver::sourcePtr_Type&
 OneDimensionalModel_Solver::Source() const
 {
-    return M_Source;
+    return M_source;
 }
 
 const UInt&
@@ -945,46 +948,46 @@ OneDimensionalModel_Solver::RightInternalNodeId() const
     return M_rightInternalNodeId;
 }
 
-Container2D_Type
+container2D_Type
 OneDimensionalModel_Solver::BCValuesLeft( const Solution_Type& solution ) const
 {
-    Container2D_Type temp;
+    container2D_Type temp;
 
-    temp[0] = (*solution.find("A")->second)( LeftNodeId() );
-    temp[1] = (*solution.find("Q")->second)( LeftNodeId() );
+    temp[0] = (*solution.find("A") -> second)( LeftNodeId() );
+    temp[1] = (*solution.find("Q") -> second)( LeftNodeId() );
 
     return temp;
 }
 
-Container2D_Type
+container2D_Type
 OneDimensionalModel_Solver::BCValuesInternalLeft( const Solution_Type& solution ) const
 {
-    Container2D_Type temp;
+    container2D_Type temp;
 
-    temp[0] = (*solution.find("A")->second)( LeftInternalNodeId() );
-    temp[1] = (*solution.find("Q")->second)( LeftInternalNodeId() );
+    temp[0] = (*solution.find("A") -> second)( LeftInternalNodeId() );
+    temp[1] = (*solution.find("Q") -> second)( LeftInternalNodeId() );
 
     return temp;
 }
 
-Container2D_Type
+container2D_Type
 OneDimensionalModel_Solver::BCValuesRight( const Solution_Type& solution ) const
 {
-    Container2D_Type temp;
+    container2D_Type temp;
 
-    temp[0] = (*solution.find("A")->second)( RightNodeId() );
-    temp[1] = (*solution.find("Q")->second)( RightNodeId() );
+    temp[0] = (*solution.find("A") -> second)( RightNodeId() );
+    temp[1] = (*solution.find("Q") -> second)( RightNodeId() );
 
     return temp;
 }
 
-Container2D_Type
+container2D_Type
 OneDimensionalModel_Solver::BCValuesInternalRight( const Solution_Type& solution ) const
 {
-    Container2D_Type temp;
+    container2D_Type temp;
 
-    temp[0] = (*solution.find("A")->second)( RightInternalNodeId() );
-    temp[1] = (*solution.find("Q")->second)( RightInternalNodeId() );
+    temp[0] = (*solution.find("A") -> second)( RightInternalNodeId() );
+    temp[1] = (*solution.find("Q") -> second)( RightInternalNodeId() );
 
     return temp;
 }
@@ -1000,7 +1003,7 @@ OneDimensionalModel_Solver::BoundaryValue( const Solution_Type& solution, const 
         boundaryDof = 1;
         break;
     case OneD_right:
-        boundaryDof = M_Flux->Physics()->Data()->NumberOfElements() + 1;
+        boundaryDof = M_flux -> Physics() -> Data() -> NumberOfElements() + 1;
         break;
     default:
         std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
@@ -1011,16 +1014,16 @@ OneDimensionalModel_Solver::BoundaryValue( const Solution_Type& solution, const 
     switch ( bcType )
     {
     case OneD_A:
-        return (*solution.find("A")->second)( boundaryDof );
+        return (*solution.find("A") -> second)( boundaryDof );
     case OneD_Q:
         // Flow rate is positive with respect to the outgoing normal
-        return (*solution.find("Q")->second)( boundaryDof ) * ( ( bcSide == OneD_left ) ? -1. : 1. );
+        return (*solution.find("Q") -> second)( boundaryDof ) * ( ( bcSide == OneD_left ) ? -1. : 1. );
     case OneD_W1:
-        return (*solution.find("W1")->second)( boundaryDof );
+        return (*solution.find("W1") -> second)( boundaryDof );
     case OneD_W2:
-        return (*solution.find("W2")->second)( boundaryDof );
+        return (*solution.find("W2") -> second)( boundaryDof );
     case OneD_P:
-        return (*solution.find("P")->second)( boundaryDof );
+        return (*solution.find("P") -> second)( boundaryDof );
     default:
         std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;
         return 0.;
@@ -1030,9 +1033,9 @@ OneDimensionalModel_Solver::BoundaryValue( const Solution_Type& solution, const 
 void
 OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide,
                                                              const Solution_Type& solution,
-                                                             Container2D_Type& eigenvalues,
-                                                             Container2D_Type& leftEigenvector1,
-                                                             Container2D_Type& leftEigenvector2 )
+                                                             container2D_Type& eigenvalues,
+                                                             container2D_Type& leftEigenvector1,
+                                                             container2D_Type& leftEigenvector2 )
 {
     UInt boundaryDof;
 
@@ -1042,15 +1045,15 @@ OneDimensionalModel_Solver::BoundaryEigenValuesEigenVectors( const OneD_BCSide& 
         boundaryDof = 0;
         break;
     case OneD_right:
-        boundaryDof = M_Flux->Physics()->Data()->NumberOfElements();
+        boundaryDof = M_flux -> Physics() -> Data() -> NumberOfElements();
         break;
     default:
         std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
         return;
     }
 
-    M_Flux->EigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof + 1 ),
-                                     (*solution.find("Q")->second)( boundaryDof + 1 ),
+    M_flux -> EigenValuesEigenVectors( (*solution.find("A") -> second)( boundaryDof + 1 ),
+                                     (*solution.find("Q") -> second)( boundaryDof + 1 ),
                                      eigenvalues, leftEigenvector1, leftEigenvector2,
                                      boundaryDof );
 }
@@ -1063,12 +1066,12 @@ OneDimensionalModel_Solver::updateFlux( const Solution_Type& solution )
 {
     Real Aii, Qii;
 
-    for ( UInt ii = 1; ii <= M_FESpace->dim() ; ++ii )
+    for ( UInt ii = 1; ii <= M_FESpace -> dim() ; ++ii )
     {
-        Aii = (*solution.find("A")->second)( ii );
-        Qii = (*solution.find("Q")->second)( ii );
-        M_FluxVector[0]( ii ) = ( *M_Flux )( Aii, Qii, 1, ii - 1 );
-        M_FluxVector[1]( ii ) = ( *M_Flux )( Aii, Qii, 2, ii - 1 );
+        Aii = (*solution.find("A") -> second)( ii );
+        Qii = (*solution.find("Q") -> second)( ii );
+        M_fluxVector[0]( ii ) = ( *M_flux )( Aii, Qii, 1, ii - 1 );
+        M_fluxVector[1]( ii ) = ( *M_flux )( Aii, Qii, 2, ii - 1 );
     }
 }
 
@@ -1084,24 +1087,24 @@ OneDimensionalModel_Solver::updateFluxDer( const Solution_Type& solution )
     Real Aiip1, Qiip1;
     UInt ii, iip1;
 
-    for ( UInt ielem = 0; ielem < M_FESpace->dim() - 1; ++ielem )
+    for ( UInt ielem = 0; ielem < M_FESpace -> dim() - 1; ++ielem )
     {
         // for P1Seg and appropriate mesh only!
         ii    = ielem;      // left node of current element
         iip1  = ielem + 1;  // right node of current element
 
-        Aii   = (*solution.find("A")->second)( ielem + 1 );
-        Qii   = (*solution.find("Q")->second)( ielem + 1 );
+        Aii   = (*solution.find("A") -> second)( ielem + 1 );
+        Qii   = (*solution.find("Q") -> second)( ielem + 1 );
 
-        Aiip1 = (*solution.find("A")->second)( ielem + 2 );
-        Qiip1 = (*solution.find("Q")->second)( ielem + 2 );
+        Aiip1 = (*solution.find("A") -> second)( ielem + 2 );
+        Qiip1 = (*solution.find("Q") -> second)( ielem + 2 );
 
         for ( UInt ii=1; ii<3; ++ii )
         {
             for ( UInt jj=1; jj<3; ++jj )
             {
-                tmp  = M_Flux->diff(   Aii,   Qii, ii, jj, ii );
-                tmp += M_Flux->diff( Aiip1, Qiip1, ii, jj, iip1 );
+                tmp  = M_flux -> diff(   Aii,   Qii, ii, jj, ii );
+                tmp += M_flux -> diff( Aiip1, Qiip1, ii, jj, iip1 );
 
                 M_diffFlux[ 2*(ii - 1) + jj - 1 ]( ielem ) = 0.5*tmp;
             }
@@ -1114,12 +1117,12 @@ OneDimensionalModel_Solver::updateSource( const Solution_Type& solution )
 {
     Real Aii, Qii;
 
-    for ( UInt ii = 1; ii <= M_FESpace->dim() ; ++ii )
+    for ( UInt ii = 1; ii <= M_FESpace -> dim() ; ++ii )
     {
-        Aii = (*solution.find("A")->second)( ii );
-        Qii = (*solution.find("Q")->second)( ii );
+        Aii = (*solution.find("A") -> second)( ii );
+        Qii = (*solution.find("Q") -> second)( ii );
         for (UInt k=0; k<2; ++k)
-            M_SourceVector[k]( ii ) = ( *M_Source )( Aii, Qii, k+1, ii - 1);
+            M_sourceVector[k]( ii ) = ( *M_source )( Aii, Qii, k+1, ii - 1);
     }
 }
 
@@ -1135,23 +1138,23 @@ OneDimensionalModel_Solver::updateSourceDer( const Solution_Type& solution )
     Real Aiip1, Qiip1;
     UInt ii, iip1;
 
-    for ( UInt ielem=0; ielem < M_FESpace->dim() - 1 ; ++ielem )
+    for ( UInt ielem=0; ielem < M_FESpace -> dim() - 1 ; ++ielem )
     {
         // for P1Seg and appropriate mesh only!
         ii = ielem;        // left node of current element
         iip1 = ielem + 1;  // right node of current element
 
-        Aii   = (*solution.find("A")->second)( ielem + 1);
-        Qii   = (*solution.find("Q")->second)( ielem + 1);
-        Aiip1 = (*solution.find("A")->second)( ielem + 2 );
-        Qiip1 = (*solution.find("Q")->second)( ielem + 2 );
+        Aii   = (*solution.find("A") -> second)( ielem + 1);
+        Qii   = (*solution.find("Q") -> second)( ielem + 1);
+        Aiip1 = (*solution.find("A") -> second)( ielem + 2 );
+        Qiip1 = (*solution.find("Q") -> second)( ielem + 2 );
 
         for ( UInt ii=1; ii<3; ++ii )
         {
             for ( UInt jj=1; jj<3; ++jj )
             {
-                tmp =  M_Source->diff(   Aii,   Qii, ii, jj, ii );
-                tmp += M_Source->diff( Aiip1, Qiip1, ii, jj, iip1 );
+                tmp =  M_source -> diff(   Aii,   Qii, ii, jj, ii );
+                tmp += M_source -> diff( Aiip1, Qiip1, ii, jj, iip1 );
                 M_diffSrc[ 2*(ii - 1) + jj - 1 ]( ielem ) = 0.5 * tmp;
             }
         }
@@ -1164,17 +1167,17 @@ OneDimensionalModel_Solver::updateMatrices()
     // Matrices initialization
     for ( UInt i = 0; i < 4; ++i )
     {
-        M_massMatrixDiffSrc[i].reset(new Matrix_Type( M_FESpace->map() ));
-        M_stiffMatrixDiffFlux[i].reset( new Matrix_Type( M_FESpace->map() ));
-        M_gradMatrixDiffFlux[i].reset( new Matrix_Type( M_FESpace->map() ));
-        M_divMatrixDiffSrc[i].reset( new Matrix_Type( M_FESpace->map() ));
+        M_massMatrixDiffSrc[i].reset  ( new matrix_Type( M_FESpace -> map() ));
+        M_stiffMatrixDiffFlux[i].reset( new matrix_Type( M_FESpace -> map() ));
+        M_gradMatrixDiffFlux[i].reset ( new matrix_Type( M_FESpace -> map() ));
+        M_divMatrixDiffSrc[i].reset   ( new matrix_Type( M_FESpace -> map() ));
     }
 
     // Elementary computation and matrix assembling
-    for (UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
+    for (UInt iedge = 1; iedge <= M_FESpace -> mesh() -> numEdges(); ++iedge)
     {
         // update the current element
-        M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
+        M_FESpace -> fe().updateFirstDerivQuadPt(M_FESpace -> mesh() -> edgeList(iedge));
 
         for (UInt ii = 1; ii <= 2; ++ii)
         {
@@ -1213,19 +1216,19 @@ void
 OneDimensionalModel_Solver::updateElemMatrices()
 {
     // set the elementary matrices to 0.
-    M_elmatMass->zero();
-    M_elmatStiff->zero();
-    M_elmatGrad->zero();
-    M_elmatDiv->zero();
+    M_elmatMass -> zero();
+    M_elmatStiff -> zero();
+    M_elmatGrad -> zero();
+    M_elmatDiv -> zero();
 
     // update the mass matrix
-    mass( M_coeffMass, *M_elmatMass, M_FESpace->fe(),0, 0 );
-    //  M_elmatMass->showMe( std::cout );
+    mass( M_coeffMass, *M_elmatMass, M_FESpace -> fe(),0, 0 );
+    //  M_elmatMass -> showMe( std::cout );
 
     // update the stiffness matrix
-    stiff( M_coeffStiff, *M_elmatStiff, M_FESpace->fe(),0 ,0 );
+    stiff( M_coeffStiff, *M_elmatStiff, M_FESpace -> fe(),0 ,0 );
     // std::cout << "Elem Stiff matrix :" << std::endl;
-    // M_elmatStiff->showMe( std::cout );
+    // M_elmatStiff -> showMe( std::cout );
 
     /*! update the gradient matrix
       gradient operator:
@@ -1239,9 +1242,9 @@ OneDimensionalModel_Solver::updateElemMatrices()
       is added to correspond to the described operator.
       (There is a minus in the elemOper implementation).
     */
-    grad( 0 , - M_coeffGrad, *M_elmatGrad, M_FESpace->fe(), M_FESpace->fe(), 0, 0 );
+    grad( 0 , - M_coeffGrad, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> fe(), 0, 0 );
     //  std::cout << "Elem Grad matrix :" << std::endl;
-    //  M_elmatGrad->showMe( std::cout );
+    //  M_elmatGrad -> showMe( std::cout );
 
     /*! update the divergence matrix
       divergence operator: (transpose of the gradient)
@@ -1253,9 +1256,9 @@ OneDimensionalModel_Solver::updateElemMatrices()
 
       BEWARE : same remarks as grad (see above).
     */
-    div( 0 , - M_coeffDiv, *M_elmatDiv, M_FESpace->fe(), M_FESpace->fe(), 0, 0 );
+    div( 0 , - M_coeffDiv, *M_elmatDiv, M_FESpace -> fe(), M_FESpace -> fe(), 0, 0 );
     //  std::cout << "Elem Div matrix :" << std::endl;
-    //  M_elmatDiv->showMe( std::cout );
+    //  M_elmatDiv -> showMe( std::cout );
 }
 
 void
@@ -1264,16 +1267,16 @@ OneDimensionalModel_Solver::matrixAssemble( const UInt& ii, const UInt& jj )
     ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
 
     // assemble the mass matrix
-    assemb_mat( *M_massMatrixDiffSrc[ 2*(ii-1) + jj-1 ]  , *M_elmatMass, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+    assemb_mat( *M_massMatrixDiffSrc[ 2*(ii-1) + jj-1 ]  , *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
     // assemble the stiffness matrix
-    assemb_mat( *M_stiffMatrixDiffFlux[ 2*(ii-1) + jj-1 ], *M_elmatStiff, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+    assemb_mat( *M_stiffMatrixDiffFlux[ 2*(ii-1) + jj-1 ], *M_elmatStiff, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
     // assemble the gradient matrix
-    assemb_mat( *M_gradMatrixDiffFlux[ 2*(ii-1) + jj-1 ] , *M_elmatGrad, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+    assemb_mat( *M_gradMatrixDiffFlux[ 2*(ii-1) + jj-1 ] , *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
     // assemble the divergence matrix
-    assemb_mat( *M_divMatrixDiffSrc[ 2*(ii-1) + jj-1 ]   , *M_elmatDiv, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+    assemb_mat( *M_divMatrixDiffSrc[ 2*(ii-1) + jj-1 ]   , *M_elmatDiv, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 }
 
 void
@@ -1312,7 +1315,7 @@ OneDimensionalModel_Solver::updateBCDirichletVector()
 }
 
 void
-OneDimensionalModel_Solver::updateBCDirichletMatrix( Matrix_Type& mat )
+OneDimensionalModel_Solver::updateBCDirichletMatrix( matrix_Type& mat )
 {
 
     // unsymmetric treatment (LU must be used!)
@@ -1329,17 +1332,17 @@ OneDimensionalModel_Solver::updateBCDirichletMatrix( Matrix_Type& mat )
 //     mat.LowDiag()( lastDof-1 ) = 0.;
 }
 
-OneDimensionalModel_Solver::Vector_Type
-OneDimensionalModel_Solver::inertialFluxCorrection( const Vector_Type& flux )
+OneDimensionalModel_Solver::vector_Type
+OneDimensionalModel_Solver::inertialFluxCorrection( const vector_Type& flux )
 {
-    Matrix_Type _matrixLHS(M_FESpace->map());
-    Matrix_Type _stiffRHS (M_FESpace->map());
+    matrix_Type _matrixLHS(M_FESpace -> map());
+    matrix_Type _stiffRHS (M_FESpace -> map());
 
-    ElemMat _elmatMassLHS  (M_FESpace->fe().nbNode, 1, 1);
-    ElemMat _elmatStiffLHS (M_FESpace->fe().nbNode, 1, 1);
-    ElemMat _elmatStiffRHS (M_FESpace->fe().nbNode, 1, 1);
+    ElemMat _elmatMassLHS  (M_FESpace -> fe().nbNode, 1, 1);
+    ElemMat _elmatStiffLHS (M_FESpace -> fe().nbNode, 1, 1);
+    ElemMat _elmatStiffRHS (M_FESpace -> fe().nbNode, 1, 1);
 
-    Vector_Type _rhs(M_FESpace->map());
+    vector_Type _rhs(M_FESpace -> map());
 
     Real _coeffMass;
     Real _coeffStiff;
@@ -1353,7 +1356,7 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const Vector_Type& flux )
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for (UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
+    for (UInt iedge = 1; iedge <= M_FESpace -> mesh() -> numEdges(); ++iedge)
     {
         // set the elementary matrices to 0.
         _elmatMassLHS. zero();
@@ -1364,26 +1367,26 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const Vector_Type& flux )
         _coeffMass /= 2;
         _coeffMass  = 1./_coeffMass;
 
-        meanA0  = M_Physics->Data()->Area0(iedge - 1) + M_Physics->Data()->Area0(iedge);
+        meanA0  = M_physics -> Data() -> Area0(iedge - 1) + M_physics -> Data() -> Area0(iedge);
         meanA0 /= 2;
 
-        m = M_Physics->Data()->DensityWall()*M_Physics->Data()->Thickness(iedge)/
+        m = M_physics -> Data() -> DensityWall()*M_physics -> Data() -> Thickness(iedge)/
             ( 2*std::sqrt(4*std::atan(1))*std::sqrt(meanA0) );
 
-        _coeffStiff = m/M_Physics->Data()->DensityRho();
+        _coeffStiff = m/M_physics -> Data() -> DensityRho();
 
         // update the current element
-        M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
+        M_FESpace -> fe().updateFirstDerivQuadPt(M_FESpace -> mesh() -> edgeList(iedge));
 
-        mass (   _coeffMass,  _elmatMassLHS,  M_FESpace->fe(), 0, 0 );
-        stiff(   _coeffStiff, _elmatStiffLHS, M_FESpace->fe(), 0, 0 );
-        stiff( - _coeffStiff, _elmatStiffRHS, M_FESpace->fe(), 0, 0 );
+        mass (   _coeffMass,  _elmatMassLHS,  M_FESpace -> fe(), 0, 0 );
+        stiff(   _coeffStiff, _elmatStiffLHS, M_FESpace -> fe(), 0, 0 );
+        stiff( - _coeffStiff, _elmatStiffRHS, M_FESpace -> fe(), 0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( _matrixLHS, _elmatMassLHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
-        assemb_mat( _matrixLHS, _elmatStiffLHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( _matrixLHS, _elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assemb_mat( _matrixLHS, _elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
-        assemb_mat( _stiffRHS, _elmatStiffRHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( _stiffRHS, _elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
         Debug( 6310 ) << "\n\tm = "           << m
         << "\n\t_coeffMass = "  << _coeffMass
@@ -1417,29 +1420,29 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const Vector_Type& flux )
     // solve the system: rhs1 = massFactor^{-1} * rhs1
     //_tridiagsolver.Solve( _matrixLHS, _rhs );
 
-    Vector_Type _sol(_rhs);
+    vector_Type _sol(_rhs);
 
-    M_linearSolver->setMatrix(_matrixLHS);
-    //@int numIter = M_linearSolver->solveSystem( _rhs, _sol, _matrixLHS, true);
+    M_linearSolver -> setMatrix(_matrixLHS);
+    //@int numIter = M_linearSolver -> solveSystem( _rhs, _sol, _matrixLHS, true);
 
     //std::cout <<" iterations number :  " << numIter << std::endl;
 
     return _sol;
 }
 
-OneDimensionalModel_Solver::Vector_Type
-OneDimensionalModel_Solver::viscoelasticFluxCorrection( const Vector_Type& flux, const Real& TimeStep )
+OneDimensionalModel_Solver::vector_Type
+OneDimensionalModel_Solver::viscoelasticFluxCorrection( const vector_Type& flux, const Real& TimeStep )
 {
-    Matrix_Type _matrixLHS(M_FESpace->map());
-    Matrix_Type _stiffRHS (M_FESpace->map());
+    matrix_Type _matrixLHS(M_FESpace -> map());
+    matrix_Type _stiffRHS (M_FESpace -> map());
 
-    //TriDiagCholesky< Real, Matrix_Type, Vector > _tridiagsolver(M_FESpace->dim());
+    //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat _elmatMassLHS  (M_FESpace->fe().nbNode,1,1);
-    ElemMat _elmatStiffLHS (M_FESpace->fe().nbNode,1,1);
-    ElemMat _elmatStiffRHS (M_FESpace->fe().nbNode,1,1);
+    ElemMat _elmatMassLHS  (M_FESpace -> fe().nbNode,1,1);
+    ElemMat _elmatStiffLHS (M_FESpace -> fe().nbNode,1,1);
+    ElemMat _elmatStiffRHS (M_FESpace -> fe().nbNode,1,1);
 
-    Vector_Type _rhs(M_FESpace->map());
+    vector_Type _rhs(M_FESpace -> map());
 
     Real _coeffMass;
     Real _coeffStiff;
@@ -1451,7 +1454,7 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const Vector_Type& flux,
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for (UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
+    for (UInt iedge = 1; iedge <= M_FESpace -> mesh() -> numEdges(); ++iedge)
     {
         // set the elementary matrices to 0.
         _elmatMassLHS.zero();
@@ -1464,37 +1467,37 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const Vector_Type& flux,
         _coeffMass *= 0.5;
         _coeffMass = 1./std::sqrt(_coeffMass);
 
-        if (M_Physics->Data()->linearizeStringModel())
+        if (M_physics -> Data() -> linearizeStringModel())
         {
             // this is to recover the linearized version (_coeffMass = 1/A)
             _coeffMass *= _coeffMass;
 
-            meanA0  = M_Physics->Data()->Area0( iedge - 1 ) + M_Physics->Data()->Area0( iedge );
+            meanA0  = M_physics -> Data() -> Area0( iedge - 1 ) + M_physics -> Data() -> Area0( iedge );
             meanA0 *= 0.5;
 
-            if (M_Physics->Data()->linearizeEquations())
+            if (M_physics -> Data() -> linearizeEquations())
             {
                 // when using linearized equations, A \simeq A0
                 _coeffMass = 1./ meanA0;
             }
         }
-        gamma = M_Physics->Data()->ViscoelasticModulus() / ( 2 * std::sqrt(4*std::atan(1)) );
+        gamma = M_physics -> Data() -> ViscoelasticModulus() / ( 2 * std::sqrt(4*std::atan(1)) );
         gamma *= 1 / std::sqrt( meanA0 );
-        _coeffStiff = TimeStep * gamma / M_Physics->Data()->DensityRho();
+        _coeffStiff = TimeStep * gamma / M_physics -> Data() -> DensityRho();
 
         // update the current element
-        M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
-        //std::cout << M_FESpace->fe().currentId() << std::endl;
+        M_FESpace -> fe().updateFirstDerivQuadPt(M_FESpace -> mesh() -> edgeList(iedge));
+        //std::cout << M_FESpace -> fe().currentId() << std::endl;
 
-        mass (   _coeffMass,  _elmatMassLHS,  M_FESpace->fe(),0, 0 );
-        stiff(   _coeffStiff, _elmatStiffLHS, M_FESpace->fe(),0, 0 );
-        stiff( - _coeffStiff, _elmatStiffRHS, M_FESpace->fe(),0, 0 );
+        mass (   _coeffMass,  _elmatMassLHS,  M_FESpace -> fe(),0, 0 );
+        stiff(   _coeffStiff, _elmatStiffLHS, M_FESpace -> fe(),0, 0 );
+        stiff( - _coeffStiff, _elmatStiffRHS, M_FESpace -> fe(),0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( _matrixLHS, _elmatMassLHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
-        assemb_mat( _matrixLHS, _elmatStiffLHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( _matrixLHS, _elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assemb_mat( _matrixLHS, _elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
-        assemb_mat( _stiffRHS, _elmatStiffRHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( _stiffRHS, _elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
         Debug( 6310 ) << "\n\tgamma = " << gamma
         << "\n\t_coeffMass = " << _coeffMass
@@ -1527,34 +1530,34 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const Vector_Type& flux,
 
     updateBCDirichletMatrix(_matrixLHS);
 
-    Vector_Type _sol(_rhs);
+    vector_Type _sol(_rhs);
 
-    M_linearSolver->setMatrix(_matrixLHS);
-    //int numIter = M_linearSolver->solveSystem( _rhs, _sol, _matrixLHS, true);
+    M_linearSolver -> setMatrix(_matrixLHS);
+    //int numIter = M_linearSolver -> solveSystem( _rhs, _sol, _matrixLHS, true);
 
     return _sol;
 }
 
-OneDimensionalModel_Solver::Vector_Type
+OneDimensionalModel_Solver::vector_Type
 OneDimensionalModel_Solver::longitudinalFluxCorrection()
 {
-    Matrix_Type _massLHS(M_FESpace->map());
-    Matrix_Type _massRHS(M_FESpace->map());
+    matrix_Type _massLHS(M_FESpace -> map());
+    matrix_Type _massRHS(M_FESpace -> map());
 
-    //TriDiagCholesky< Real, Matrix_Type, Vector > _tridiagsolver(M_FESpace->dim());
+    //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat _elmatMassLHS (M_FESpace->fe().nbNode,1,1);
-    ElemMat _elmatMassRHS (M_FESpace->fe().nbNode,1,1);
+    ElemMat _elmatMassLHS (M_FESpace -> fe().nbNode,1,1);
+    ElemMat _elmatMassRHS (M_FESpace -> fe().nbNode,1,1);
 
-    Vector_Type _rhs(M_FESpace->map());
+    vector_Type _rhs(M_FESpace -> map());
     // let g = sqrt(A) - sqrt(A0)
     // now f = _d3g_dz3
-    Vector_Type _g(M_FESpace->map());
-    Vector_Type _f(M_FESpace->map());
+    vector_Type _g(M_FESpace -> map());
+    vector_Type _f(M_FESpace -> map());
 
     //          _g = M_rhs[0];
-    for ( UInt i=0; i<M_FESpace->dim(); ++i )
-        _g(i) = std::sqrt(M_rhs[0](i)) - std::sqrt(M_Physics->Data()->Area0(i));
+    for ( UInt i=0; i<M_FESpace -> dim(); ++i )
+        _g(i) = std::sqrt(M_rhs[0](i)) - std::sqrt(M_physics -> Data() -> Area0(i));
 
     UInt inode;
 
@@ -1566,11 +1569,11 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
     _massLHS *= 0.;
     _massRHS *= 0.;
 
-    Real _h( M_Physics->Data()->Length() / static_cast<Real>(M_Physics->Data()->NumberOfElements() - 1) );
+    Real _h( M_physics -> Data() -> Length() / static_cast<Real>(M_physics -> Data() -> NumberOfElements() - 1) );
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for (UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge)
+    for (UInt iedge = 1; iedge <= M_FESpace -> mesh() -> numEdges(); ++iedge)
     {
         inode = iedge - 1;
 
@@ -1583,8 +1586,8 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
         _coeffMassLHS /= 2;
         _coeffMassLHS = 1./_coeffMassLHS;
 
-        _a = M_Physics->Data()->InertialModulus() / std::sqrt(4*std::atan(1));
-        _coeffMassRHS = M_Physics->Data()->dataTime()->getTimeStep() * _a / M_Physics->Data()->DensityRho();
+        _a = M_physics -> Data() -> InertialModulus() / std::sqrt(4*std::atan(1));
+        _coeffMassRHS = M_physics -> Data() -> dataTime() -> getTimeStep() * _a / M_physics -> Data() -> DensityRho();
 
         // backward differentiation when near to the left boundary
         // d3 A (xi)/ dz3 = (1/h^3) * ( -A(xi) + A(xi+3) - 3A(xi+2) + 3A(xi+1) )
@@ -1602,7 +1605,7 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
                           - 3*_g( inode+2 ) + 3*_g( inode+1 );
             Debug( 6310 ) << "\n\tbackward differentiation = " << _coeffMassLHS << "\n";
         }
-        else if (inode>M_FESpace->mesh()->numEdges()-2)
+        else if (inode>M_FESpace -> mesh() -> numEdges()-2)
         { // forward differentiation
             _f( inode ) = _g( inode ) - _g( inode-3 )
                           + 3*_g( inode-2 ) - 3*_g( inode-1 );
@@ -1618,14 +1621,14 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
         _f(inode) *= 1/(2*std::pow(_h,3));
 
         // update the current element
-        M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
+        M_FESpace -> fe().updateFirstDerivQuadPt(M_FESpace -> mesh() -> edgeList(iedge));
 
-        mass( _coeffMassLHS, _elmatMassLHS, M_FESpace->fe(),0, 0 );
-        mass( _coeffMassRHS, _elmatMassRHS, M_FESpace->fe(),0, 0 );
+        mass( _coeffMassLHS, _elmatMassLHS, M_FESpace -> fe(),0, 0 );
+        mass( _coeffMassRHS, _elmatMassRHS, M_FESpace -> fe(),0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( _massLHS, _elmatMassLHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
-        assemb_mat( _massRHS, _elmatMassRHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( _massLHS, _elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assemb_mat( _massRHS, _elmatMassRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
         Debug( 6310 ) << "\n\t_coeffMassLHS = " << _coeffMassLHS << "\n";
         Debug( 6310 ) << "\n\t_coeffMassRHS = " << _coeffMassRHS << "\n";
@@ -1666,37 +1669,37 @@ template< class Params, class Flux, class Source >
 ScalVec
 OneDimensionalModel_Solver::_compute_d2Q_dx2( const ScalVec& flux )
 {
-    Matrix_Type _massLHS (M_FESpace->dim());
-    Matrix_Type _stiffRHS(M_FESpace->dim());
+    matrix_Type _massLHS (M_FESpace -> dim());
+    matrix_Type _stiffRHS(M_FESpace -> dim());
 
-    TriDiagCholesky< Real, Matrix_Type, Vector > _tridiagsolver(M_FESpace->dim());
+    TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat _elmatMassLHS (M_FESpace->fe().nbNode,1,1);
-    ElemMat _elmatStiffRHS (M_FESpace->fe().nbNode,1,1);
+    ElemMat _elmatMassLHS (M_FESpace -> fe().nbNode,1,1);
+    ElemMat _elmatStiffRHS (M_FESpace -> fe().nbNode,1,1);
 
-    ScalVec _rhs(M_FESpace->dim());
+    ScalVec _rhs(M_FESpace -> dim());
 
     _massLHS  *= 0.;
     _stiffRHS *= 0.;
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for(UInt iedge = 1; iedge <= M_FESpace->mesh()->numEdges(); ++iedge){
+    for(UInt iedge = 1; iedge <= M_FESpace -> mesh() -> numEdges(); ++iedge){
 
         // set the elementary matrices to 0.
         _elmatMassLHS *= 0.;
         _elmatStiffRHS *= 0.;
 
         // update the current element
-        M_FESpace->fe().updateFirstDerivQuadPt(M_FESpace->mesh()->edgeList(iedge));
-        //std::cout << M_FESpace->fe().currentId() << std::endl;
+        M_FESpace -> fe().updateFirstDerivQuadPt(M_FESpace -> mesh() -> edgeList(iedge));
+        //std::cout << M_FESpace -> fe().currentId() << std::endl;
 
-        mass( 1., _elmatMassLHS, M_FESpace->fe(),0, 0 );
-        stiff( -1., _elmatStiffRHS, M_FESpace->fe(),0, 0 );
+        mass( 1., _elmatMassLHS, M_FESpace -> fe(),0, 0 );
+        stiff( -1., _elmatStiffRHS, M_FESpace -> fe(),0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( _massLHS, _elmatMassLHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
-        assemb_mat( _stiffRHS, _elmatStiffRHS, M_FESpace->fe(), M_FESpace->dof() , 0, 0 );
+        assemb_mat( _massLHS, _elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assemb_mat( _stiffRHS, _elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
 
     } // end loop on elements
 

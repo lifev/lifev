@@ -1,40 +1,45 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief One Dimensional Model Global Definitions
- *
- *  @version 1.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 15-04-2010
+    @file
+    @brief One Dimensional Model Global Definitions
+
+    @version 1.0
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+    @date 15-04-2010
+
+     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_DEFINITIONS_H
 #define ONEDIMENSIONALMODEL_DEFINITIONS_H
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // STD
 #include <string>
@@ -48,6 +53,9 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
 #include <life/lifecore/life.hpp>
@@ -101,18 +109,18 @@ class OneDimensionalModel_BCFunction;
 
 // Type definitions
 typedef singleton< factory< OneDimensionalModel_Physics,
-OneDimensionalModel_PhysicsTypes > > Factory_OneDimensionalModel_Physics;
+OneDimensionalModel_PhysicsTypes > > factoryOneDimensionalPhysics_Type;
 typedef singleton< factory< OneDimensionalModel_Flux,
-OneDimensionalModel_FluxTypes > >    Factory_OneDimensionalModel_Flux;
+OneDimensionalModel_FluxTypes > >    factoryOneDimensionalFlux_Type;
 typedef singleton< factory< OneDimensionalModel_Source,
-OneDimensionalModel_SourceTypes > >  Factory_OneDimensionalModel_Source;
+OneDimensionalModel_SourceTypes > >  factoryOneDimensionalSource_Type;
 
 //typedef singleton< factoryClone< OneDimensionalModel_BCFunction > > FactoryClone_OneDimensionalModel_BCFunction;
 
-typedef boost::array< Real, 2 >                 Container2D_Type;
+typedef boost::array< Real, 2 >                 container2D_Type;
 
 // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
-typedef ublas::vector< Real >                   ScalVec;
+typedef ublas::vector< Real >                   scalVec_Type;
 
 enum OneD_BC
 {
@@ -155,8 +163,8 @@ OneDimensionalModel_MapsDefinition()
 
 //! Scalar product between 2D vectors
 inline Real
-dot( const Container2D_Type& vector1,
-     const Container2D_Type& vector2 )
+dot( const container2D_Type& vector1,
+     const container2D_Type& vector2 )
 {
     ASSERT_PRE( vector1.size() == 2 && vector2.size() == 2, "dot works only for 2D vectors" );
 

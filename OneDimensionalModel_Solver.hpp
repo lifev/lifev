@@ -1,47 +1,52 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a solver class for the 1D model.
- *
- *  @version 1.0
- *  @author Vincent Martin
- *  @author Tiziano Passerini
- *  @author Lucia Mirabella
- *  @date 01-10-2006
- *
- *  @version 2.0
- *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- *  @date 01-08-2009
- *
- *  @version 2.1
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 21-04-2010
+    @file
+    @brief File containing a solver class for the 1D model.
+
+    @version 1.0
+    @date 01-10-2006
+    @author Vincent Martin
+    @author Tiziano Passerini
+    @author Lucia Mirabella
+
+    @version 2.0
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @date 01-08-2009
+
+    @version 2.1
+    @date 21-04-2010
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
+
 
 #ifndef ONEDMODELSOLVER_H
 #define ONEDMODELSOLVER_H
@@ -58,8 +63,9 @@
 #include <life/lifefem/FESpace.hpp>
 
 // LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
+#include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
+
 
 namespace LifeV
 {
@@ -84,8 +90,8 @@ namespace LifeV
  *  More precisely:
  *  two functions (M_fluxFun and M_sourceFun) have to be defined
  *  separately to allow the update (_updateFluxDer, _updateSourceDer)
- *  of the corresponding vectors (M_Fluxi, M_diffFluxij,
- *  M_Sourcei, M_diffSrcij). I also separated the treatment of the
+ *  of the corresponding vectors (M_fluxi, M_diffFluxij,
+ *  M_sourcei, M_diffSrcij). I also separated the treatment of the
  *  parameters that exist in the functions.
  *  Normally, one should be able to create a template to allow
  *  the user to select between different problems (linear, non-linear,
@@ -155,35 +161,35 @@ public:
     //! @name Typedef & Enumerator
     //@{
 
-    typedef OneDimensionalModel_Physics             Physics_Type;
-    typedef boost::shared_ptr< Physics_Type >       Physics_PtrType;
+    typedef OneDimensionalModel_Physics             physics_Type;
+    typedef boost::shared_ptr< physics_Type >       physicsPtr_Type;
 
-    typedef OneDimensionalModel_Flux                Flux_Type;
-    typedef boost::shared_ptr< Flux_Type >          Flux_PtrType;
+    typedef OneDimensionalModel_Flux                flux_Type;
+    typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
 
-    typedef OneDimensionalModel_Source              Source_Type;
-    typedef boost::shared_ptr< Source_Type >        Source_PtrType;
+    typedef OneDimensionalModel_Source              source_Type;
+    typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
-    typedef OneDimensionalModel_Data                Data_Type;
-    typedef Data_Type::Mesh_Type                    Mesh_Type;
+    typedef OneDimensionalModel_Data                data_Type;
+    typedef data_Type::Mesh_Type                    mesh_Type;
 
-    typedef FESpace< Mesh_Type, EpetraMap >         FESpace_Type;
-    typedef boost::shared_ptr< FESpace_Type >       FESpace_PtrType;
+    typedef FESpace< mesh_Type, EpetraMap >         FESpace_Type;
+    typedef boost::shared_ptr< FESpace_Type >       FESpacePtr_Type;
 
-    typedef Epetra_Comm                             Comm_Type;
-    typedef boost::shared_ptr< Comm_Type >          Comm_PtrType;
+    typedef Epetra_Comm                             comm_Type;
+    typedef boost::shared_ptr< comm_Type >          commPtr_Type;
 
-    typedef SolverAmesos                            LinearSolver_Type;
-    typedef boost::shared_ptr< LinearSolver_Type >  LinearSolver_PtrType;
-    typedef LinearSolver_Type::vector_type          Vector_Type;
-    typedef boost::shared_ptr< Vector_Type >        Vector_PtrType;
+    typedef SolverAmesos                            linearSolver_Type;
+    typedef boost::shared_ptr< linearSolver_Type >  linearSolverPtr_Type;
+    typedef linearSolver_Type::vector_type          vector_Type;
+    typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
 
-    typedef LinearSolver_Type::matrix_type          Matrix_Type;
-    typedef boost::shared_ptr<Matrix_Type>          Matrix_PtrType;
+    typedef linearSolver_Type::matrix_type          matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
 
-    typedef std::map< std::string, Vector_PtrType > Solution_Type;
-    typedef boost::shared_ptr< Solution_Type >      Solution_PtrType;
-    typedef Solution_Type::const_iterator           Solution_ConstIterator;
+    typedef std::map< std::string, vectorPtr_Type > solution_Type;
+    typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
+    typedef solution_Type::const_iterator           solutionConstIterator_Type;
 
     //@}
 
@@ -198,7 +204,7 @@ public:
     OneDimensionalModel_Solver();
 
     //! Destructor
-    ~OneDimensionalModel_Solver() {}
+    virtual ~OneDimensionalModel_Solver() {}
 
     //@}
 
@@ -210,19 +216,19 @@ public:
     void buildConstantMatrices();
 
     //! setup
-    void setupSolution( Solution_Type& solution );
+    void setupSolution( solution_Type& solution );
 
     //! Initialize all the variables of the solution to a reference condition with Q=0, A=A0, and P=P_ext
     /*!
      * @param solution the solution container
      */
-    void initialize( Solution_Type& solution );
+    void initialize( solution_Type& solution );
 
     //! Update the Riemann variables.
     /*!
      *  @param solution the solution container is passed with A^n, Q^n and it is updated with W1^n, W2^n
      */
-    void computeW1W2( Solution_Type& solution );
+    void computeW1W2( solution_Type& solution );
 
     //! Update the pressure.
     /*!
@@ -231,19 +237,19 @@ public:
      *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
      *  @param TimeStep time step
      */
-    void computePressure( Solution_Type& solution, const Real& TimeStep );
+    void computePressure( solution_Type& solution, const Real& TimeStep );
 
     //! Update the ratio between A and A0.
     /*!
      *  @param solution the solution container is passed with A^n, is updated with A^n/A0-1
      */
-    void computeAreaRatio( Solution_Type& solution );
+    void computeAreaRatio( solution_Type& solution );
 
     //! Compute A from the area ratio: A/A0-1.
     /*!
      *  @param solution the solution container is passed with A^n/A0-1 and is updated with A^n
      */
-    void computeArea( Solution_Type& solution );
+    void computeArea( solution_Type& solution );
 
     //! Sets initial condition for the unknowns
     /*!
@@ -259,32 +265,32 @@ public:
      *  X = rest_value ( 1 + multiplier * exp( - ( z - node ) / ( 2 * width^2 ) ) )
      *  where node is alternatively firstnode or lastnode
      */
-    //void initialize( Solution_Type& solution );
+    //void initialize( solution_Type& solution );
 
     //! Sets initial condition for the unknowns
     /*!
      * @param var if var == "physical" then A  = u10 and Q  = u20
      *            if var == "Riemann"  then W1 = u10 and W2 = u20
      */
-    //void initialize( Solution_Type& solution, const Real& u10, const Real& u20, const std::string& var = "physical" );
+    //void initialize( solution_Type& solution, const Real& u10, const Real& u20, const std::string& var = "physical" );
 
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize with vectors containing all the nodal values
      */
-    //void initialize( Solution_Type& solution, const Vector_Type& u10, const Vector_Type& u20 );
+    //void initialize( solution_Type& solution, const vector_Type& u10, const vector_Type& u20 );
 
     //! Sets initial condition for the unknowns
     /*!
      *  Initialize only Flux ( Area read from OneDNonLinParam )
      */
-    //void initialize( Solution_Type& solution, const Real& u20 );
+    //void initialize( solution_Type& solution, const Real& u20 );
 
     //! Compute the right hand side
     /*!
      *  @param TimeStep The time step.
      */
-    void updateRHS( const Solution_Type& solution, const Real& TimeStep );
+    void updateRHS( const solution_Type& solution, const Real& TimeStep );
 
     //! Update convective term and BC. Then solve the linearized NS system
     /*!
@@ -292,14 +298,14 @@ public:
      * @param Time the time
      * @param TimeStep the time step
      */
-    void iterate( OneDimensionalModel_BCHandler& bcH, Solution_Type& solution, const Real& Time, const Real& TimeStep );
+    void iterate( OneDimensionalModel_BCHandler& bcH, solution_Type& solution, const Real& Time, const Real& TimeStep );
 
     //! CFL computation (correct for constant mesh)
     /*!
      * @param TimeStep the time step
      * @return CFL
      */
-    Real ComputeCFL( const Solution_Type& solution, const Real& timeStep ) const;
+    Real ComputeCFL( const solution_Type& solution, const Real& timeStep ) const;
 
     //! Save the solution for the next timestep
     //void savesol();
@@ -308,19 +314,19 @@ public:
     //void loadsol();
 
     //! Reset the output files
-    void resetOutput( const Solution_Type& solution );
+    void resetOutput( const solution_Type& solution );
 
     //! Save results on output files
-    void postProcess( const Solution_Type& solution );
+    void postProcess( const solution_Type& solution );
 
     //! Create matlab file for postprocessing
     //void create_movie_file();
 
     //! Prepare ostringstream buffer to receive the solution before sending it to file stream
-    //void openFileBuffers( const Solution_Type& solution );
+    //void openFileBuffers( const solution_Type& solution );
 
     //! Empty the buffers
-    //void resetFileBuffers( const Solution_Type& solution );
+    //void resetFileBuffers( const solution_Type& solution );
 
     //! Move the pointer to the stored position in the ostringstream
     //void seekpFileBuffers();
@@ -338,18 +344,18 @@ public:
     //@{
 
     //! Set problem elements
-    void setProblem( const Physics_PtrType Physics,
-                     const Flux_PtrType    Flux,
-                     const Source_PtrType  Source );
+    void setProblem( const physicsPtr_Type Physics,
+                     const fluxPtr_Type    Flux,
+                     const sourcePtr_Type  Source );
 
     //! Set the communicator
-    void setCommunicator( const Comm_PtrType Comm );
+    void setCommunicator( const commPtr_Type Comm );
 
     //! Set the FEspace
-    void setFESpace( const FESpace_PtrType FESpace );
+    void setFESpace( const FESpacePtr_Type FESpace );
 
     //! Set the linear solver
-    void setLinearSolver( const LinearSolver_PtrType linearSolver );
+    void setLinearSolver( const linearSolverPtr_Type linearSolver );
 
     //! Set the Dirichlet boundary conditions (left)
     void setBCValuesLeft( const Real& bcL1, const Real& bcL2 );
@@ -364,13 +370,13 @@ public:
     //@{
 
     //! Get the Physics function
-    const Physics_PtrType& Physics() const;
+    const physicsPtr_Type& Physics() const;
 
     //! Get the flux function
-    const Flux_PtrType& Flux() const;
+    const fluxPtr_Type& Flux() const;
 
     //! Get the source function
-    const Source_PtrType& Source() const;
+    const sourcePtr_Type& Source() const;
 
     //! Get the left node identifier
     const UInt& LeftNodeId() const;
@@ -385,16 +391,16 @@ public:
     const UInt& RightInternalNodeId() const;
 
     //! Get the Dirichlet boundary conditions (left)
-    Container2D_Type BCValuesLeft( const Solution_Type& solution ) const;
+    container2D_Type BCValuesLeft( const solution_Type& solution ) const;
 
     //! Get the value at neighboring node (left)
-    Container2D_Type BCValuesInternalLeft( const Solution_Type& solution ) const;
+    container2D_Type BCValuesInternalLeft( const solution_Type& solution ) const;
 
     //! Get the Dirichlet boundary conditions (right)
-    Container2D_Type BCValuesRight( const Solution_Type& solution ) const;
+    container2D_Type BCValuesRight( const solution_Type& solution ) const;
 
     //! Get the value at neighboring node (right)
-    Container2D_Type BCValuesInternalRight( const Solution_Type& solution ) const;
+    container2D_Type BCValuesInternalRight( const solution_Type& solution ) const;
 
     //! Return the value of a quantity (P, A, Q, W1, W2) on a specified boundary.
     /*!
@@ -403,7 +409,7 @@ public:
      *  @param bcSide Side of the boundary.
      *  @return value of the quantity on the specified side.
      */
-    Real BoundaryValue( const Solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
+    Real BoundaryValue( const solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
 
     //! Return the value of the eigenvalues and eigenvectors on a specified boundary.
     /*!
@@ -413,10 +419,10 @@ public:
      *  @param leftEigenvector1 output left eigenvector associated to the first eigenvalue.
      *  @param leftEigenvector1 output left eigenvector associated to the second eigenvalue.
      */
-    void BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const Solution_Type& solution,
-                                          Container2D_Type& eigenvalues,
-                                          Container2D_Type& leftEigenvector1,
-                                          Container2D_Type& leftEigenvector2 );
+    void BoundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const solution_Type& solution,
+                                          container2D_Type& eigenvalues,
+                                          container2D_Type& leftEigenvector1,
+                                          container2D_Type& leftEigenvector2 );
 
     //@}
 
@@ -425,8 +431,8 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Update the P1 flux vector from U: M_Fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
-    void updateFlux( const Solution_Type& solution );
+    //! Update the P1 flux vector from U: M_fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
+    void updateFlux( const solution_Type& solution );
 
     //! Call _updateFlux and update the P0 derivative of flux vector from U:
     /*!
@@ -436,10 +442,10 @@ private:
      *  (mean value of the two extremal values of dF/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void updateFluxDer( const Solution_Type& solution );
+    void updateFluxDer( const solution_Type& solution );
 
-    //! Update the P1 source vector from U: M_Sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
-    void updateSource( const Solution_Type& solution );
+    //! Update the P1 source vector from U: M_sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
+    void updateSource( const solution_Type& solution );
 
     //! Call _updateSource and update the P0 derivative of source vector from U:
     /*!
@@ -449,7 +455,7 @@ private:
      *  (mean value of the two extremal values of dS/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void updateSourceDer( const Solution_Type& solution );
+    void updateSourceDer( const solution_Type& solution );
 
     //! Update the matrices
     /*!
@@ -487,7 +493,7 @@ private:
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void updateBCDirichletMatrix( Matrix_Type& mat );
+    void updateBCDirichletMatrix( matrix_Type& mat );
 
     //! Apply the inertial Flux correction:
     /*!
@@ -499,7 +505,7 @@ private:
      *
      *  m = rho_w h0 / ( 2 sqrt(pi) sqrt(A0) )
      */
-    Vector_Type inertialFluxCorrection( const Vector_Type& );
+    vector_Type inertialFluxCorrection( const vector_Type& );
 
     //! Apply the viscoelastic Flux correction:
     /*!
@@ -511,7 +517,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    Vector_Type viscoelasticFluxCorrection( const Vector_Type&, const Real& TimeStep );
+    vector_Type viscoelasticFluxCorrection( const vector_Type&, const Real& TimeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -521,19 +527,19 @@ private:
      *  = ( 1/Ah(n+1) Qtildeh(n), phi) +             //! 1/A * massFactor^{-1} * Un+1
      *  + ( a / rho ) *       ( d3Ahath(n+1)/dz3, phi )  //! mass * d3Ahat(U)/dz
      */
-    Vector_Type longitudinalFluxCorrection();
+    vector_Type longitudinalFluxCorrection();
 
     //! L2 Projection of the second derivative of Q over P1 space.
-    //ScalVec                       _compute_d2Q_dx2( const ScalVec& );
+    //scalVec_Type                       _compute_d2Q_dx2( const scalVec_Type& );
 
     //@}
 
-    Physics_PtrType                    M_Physics;
-    Flux_PtrType                       M_Flux;
-    Source_PtrType                     M_Source;
-    FESpace_PtrType                    M_FESpace;
-    Comm_PtrType                       M_Comm;
-    Displayer                          M_Displayer;
+    physicsPtr_Type                    M_physics;
+    fluxPtr_Type                       M_flux;
+    sourcePtr_Type                     M_source;
+    FESpacePtr_Type                    M_FESpace;
+    commPtr_Type                       M_comm;
+    Displayer                          M_displayer;
 
     UInt                               M_leftNodeId;
     UInt                               M_leftInternalNodeId;
@@ -552,47 +558,47 @@ private:
     boost::shared_ptr< ElemMat >       M_elmatDiv;   //!< element divergence matrix
 
     //! Unknowns at previous time step (see savesol() )
-    Solution_Type                      M_U_prevtime;
-    Solution_Type                      M_U_2prevtime;
+    solution_Type                      M_UPreviousTime;
+    solution_Type                      M_U2PreviousTime;
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
-    std::vector<Vector_Type>           M_rhs;
+    std::vector<vector_Type>           M_rhs;
 
     //! Flux F(U) (in P1)
-    std::vector<Vector_Type>           M_FluxVector;
+    std::vector<vector_Type>           M_fluxVector;
 
     //! diffFlux = dF(U)/dU (in P0)
-    std::vector<ScalVec>               M_diffFlux;
+    std::vector<scalVec_Type>               M_diffFlux;
 
     //! Source term S (in P1)
-    std::vector<Vector_Type>           M_SourceVector;
+    std::vector<vector_Type>           M_sourceVector;
 
     //! diffSrc = dSource(U)/dU (in P0)
-    std::vector<ScalVec>               M_diffSrc;
+    std::vector<scalVec_Type>               M_diffSrc;
 
     //! tridiagonal mass matrix
-    Matrix_PtrType                     M_massMatrix;
+    matrixPtr_Type                     M_massMatrix;
 
     //! tridiagonal mass matrices multiplied by diffSrcij
-    std::vector<Matrix_PtrType >       M_massMatrixDiffSrc;
+    std::vector<matrixPtr_Type >       M_massMatrixDiffSrc;
 
     //! tridiagonal stiffness matrices multiplied by diffFluxij
-    std::vector<Matrix_PtrType >       M_stiffMatrixDiffFlux;
+    std::vector<matrixPtr_Type >       M_stiffMatrixDiffFlux;
 
     //! tridiagonal gradient matrix
-    Matrix_PtrType                     M_gradMatrix;
+    matrixPtr_Type                     M_gradMatrix;
 
     //! tridiagonal gradient matrices multiplied by diffFluxij
-    std::vector<Matrix_PtrType >       M_gradMatrixDiffFlux;
+    std::vector<matrixPtr_Type >       M_gradMatrixDiffFlux;
 
     //! tridiagonal divergence matrices multiplied by diffSrcij
-    std::vector<Matrix_PtrType >       M_divMatrixDiffSrc;
+    std::vector<matrixPtr_Type >       M_divMatrixDiffSrc;
 
     //! The linear solver
-    boost::shared_ptr<LinearSolver_Type> M_linearSolver;
+    boost::shared_ptr<linearSolver_Type> M_linearSolver;
 
-    Container2D_Type                     M_bcDirLeft;  //! first -> U1, second ->U2
-    Container2D_Type                     M_bcDirRight; //
+    container2D_Type                     M_bcDirLeft;  //! first -> U1, second ->U2
+    container2D_Type                     M_bcDirRight; //
 };
 
 }
