@@ -80,6 +80,8 @@ class partitionMesh
 {
 public:
     //@{
+    // Make the template's type available to the outside
+    typedef MeshType mesh_Type;
     typedef boost::shared_ptr<MeshType> mesh_ptrtype;
     typedef std::vector<std::vector<Int> > graph_type;
     typedef boost::shared_ptr<graph_type> graph_ptrtype;
