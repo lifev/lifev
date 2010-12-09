@@ -1,34 +1,39 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with LifeV. If not, see <http://www.gnu.org/licences/>.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
+
 /*!
- * @file
- * @brief File containing a solver class for the Monodomain equations in electrophysiology
- * @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
- * @date 11-2007
- * @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- * @mantainer Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- * @last update 11-2010
+  @file
+  @brief Class for solving the Monodomain equations in electrophysiology.
+
+  @date 11-2007
+  @author Lucia Mirabella <lucia.mirabella@mail.polimi.it> and Mauro Perego <mauro.perego@polimi.it>
+
+  @contributors J.Castelneau (INRIA), Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+  @mantainer Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+  @last update 11-2010
  */
 
 #ifndef _MONODOMAINSOLVER_H_
@@ -69,8 +74,11 @@ public:
     //@{
 
     typedef DataMonodomain data_type;
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-                                 const Real&, const ID& );
+    typedef Real ( *Function ) ( const Real& t,
+                                 const Real& x,
+                                 const Real& y,
+                                 const Real& z,
+                                 const ID& id );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> source_type;
 
@@ -418,29 +426,62 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         	    }
         	    else
         	    {
-        	        stiff( M_data.red_sigma_sphere, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+        	        stiff( M_data.red_sigma_sphere,
+                           M_data.D(), M_elmatStiff,
+                           M_uFESpace.fe(),
+                           M_uFESpace.dof(),
+                           0,
+                           0);
         	    }
         		break;
         case 2:
             M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
             if (M_data.has_fibers() )
             {
-                stiff( M_data.red_sigma_cyl, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
+                stiff( M_data.red_sigma_cyl,
+                       M_data.sigmal(),
+                       M_data.sigmat(),
+                       M_fiber_vector,
+                       M_elmatStiff,
+                       M_uFESpace.fe(),
+                       M_uFESpace.dof(),
+                       0,
+                       0);
             }
             else
             {
-                stiff( M_data.red_sigma_cyl, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+                stiff( M_data.red_sigma_cyl,
+                       M_data.D(),
+                       M_elmatStiff,
+                       M_uFESpace.fe(),
+                       M_uFESpace.dof(),
+                       0,
+                       0);
             }
             break;
         case 3:
             M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
             if (M_data.has_fibers() )
             {
-                stiff( M_data.red_sigma_box, M_data.sigmal(), M_data.sigmat(), M_fiber_vector, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.dof(), 0, 0);
+                stiff( M_data.red_sigma_box,
+                       M_data.sigmal(),
+                       M_data.sigmat(),
+                       M_fiber_vector,
+                       M_elmatStiff,
+                       M_uFESpace.fe(),
+                       M_uFESpace.dof(),
+                       0,
+                       0);
             }
             else
             {
-                stiff( M_data.red_sigma_box, M_data.D(), M_elmatStiff,  M_uFESpace.fe(), M_uFESpace.dof(), 0, 0 );
+                stiff( M_data.red_sigma_box,
+                       M_data.D(),
+                       M_elmatStiff,
+                       M_uFESpace.fe(),
+                       M_uFESpace.dof(),
+                       0,
+                       0);
             }
             break;
         }
