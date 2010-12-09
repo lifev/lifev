@@ -231,7 +231,7 @@ int main(int argc, char** argv)
     if ( check )
     {
         bool ok = true;
-        int rightnodeid = OneDModel.GetSolver()->RightNodeId();
+        int rightnodeid = OneDModel.GetSolver()->rightNodeId();
 
         ok = ok && checkValue( 0.999998  , (*OneDModel.GetSolution("A"))[rightnodeid - 0]);
         ok = ok && checkValue(-0.00138076, (*OneDModel.GetSolution("Q"))[rightnodeid - 0]);

@@ -85,14 +85,14 @@ MS_Model_1D::MS_Model_1D() :
     OneDimensionalModel_MapsDefinition();
 
     //Register the objects
-    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_LinearPhysics,    &Create_OneDimensionalModel_Physics_Linear );
-    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_NonLinearPhysics, &Create_OneDimensionalModel_Physics_NonLinear );
+    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_LinearPhysics,    &createOneDimensionalPhysicsLinear );
+    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_NonLinearPhysics, &createOneDimensionalPhysicsNonLinear );
 
     factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_LinearFlux,       &createOneDimensionalFluxLinear );
     factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_NonLinearFlux,    &createOneDimensionalFluxNonLinear );
 
-    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_LinearSource,     &Create_OneDimensionalModel_Source_Linear );
-    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_NonLinearSource,  &Create_OneDimensionalModel_Source_NonLinear );
+    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_LinearSource,     &createOneDimensionalSourceLinear );
+    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_NonLinearSource,  &createOneDimensionalSourceNonLinear );
 }
 
 // ===================================================
@@ -124,16 +124,16 @@ MS_Model_1D::SetupData( const std::string& FileName )
         SetupGlobalData( FileName );
 
     //1D Model Physics
-    M_Physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( M_Data->PhysicsType() ) );
-    M_Physics->SetData( M_Data );
+    M_Physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( M_Data->physicsType() ) );
+    M_Physics->setData( M_Data );
 
     //1D Model Flux
-    M_Flux = Flux_PtrType( factoryOneDimensionalFlux_Type::instance().createObject( M_Data->FluxType() ) );
-    M_Flux->SetPhysics( M_Physics );
+    M_Flux = Flux_PtrType( factoryOneDimensionalFlux_Type::instance().createObject( M_Data->fluxType() ) );
+    M_Flux->setPhysics( M_Physics );
 
     //1D Model Source
-    M_Source = Source_PtrType( factoryOneDimensionalSource_Type::instance().createObject( M_Data->SourceType() ) );
-    M_Source->SetPhysics( M_Physics );
+    M_Source = Source_PtrType( factoryOneDimensionalSource_Type::instance().createObject( M_Data->sourceType() ) );
+    M_Source->setPhysics( M_Physics );
 
     //Linear Solver
     M_LinearSolver.reset( new LinearSolver_Type( M_comm ) );
@@ -159,7 +159,7 @@ MS_Model_1D::SetupData( const std::string& FileName )
     M_Exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
     M_Exporter->setDirectory( MS_ProblemFolder );
 
-    M_ExporterMesh->setup( M_Data->Length(), M_Data->NumberOfElements() );
+    M_ExporterMesh->setup( M_Data->length(), M_Data->numberOfElements() );
 
     M_Importer->setDataFromGetPot( DataFile );
     M_Importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
@@ -402,31 +402,31 @@ MS_Model_1D::GetBCInterface() const
 Real
 MS_Model_1D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
 {
-    return M_Data->DensityRho();
+    return M_Data->densityRho();
 }
 
 Real
 MS_Model_1D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
 {
-    return M_Data->Viscosity();
+    return M_Data->viscosity();
 }
 
 Real
 MS_Model_1D::GetBoundaryArea( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( *M_Solution, OneD_A, FlagConverter( Flag ) );
+    return M_Solver->boundaryValue( *M_Solution, OneD_A, FlagConverter( Flag ) );
 }
 
 Real
 MS_Model_1D::GetBoundaryFlowRate( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( *M_Solution, OneD_Q, FlagConverter( Flag ) );
+    return M_Solver->boundaryValue( *M_Solution, OneD_Q, FlagConverter( Flag ) );
 }
 
 Real
 MS_Model_1D::GetBoundaryPressure( const BCFlag& Flag ) const
 {
-    return M_Solver->BoundaryValue( *M_Solution, OneD_P, FlagConverter( Flag ) );
+    return M_Solver->boundaryValue( *M_Solution, OneD_P, FlagConverter( Flag ) );
 }
 
 Real
@@ -468,8 +468,8 @@ MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSyst
 
     SolveLinearModel( SolveLinearSystem );
 
-    Real Q      = M_Solver->BoundaryValue( *M_Solution, OneD_Q, bcSide );
-    Real Qdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_Q, bcSide );
+    Real Q      = M_Solver->boundaryValue( *M_Solution, OneD_Q, bcSide );
+    Real Qdelta = M_Solver->boundaryValue( *M_LinearSolution, OneD_Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) \n";
@@ -482,7 +482,7 @@ MS_Model_1D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSyst
     if ( M_BCDeltaType == OneD_A )
     {
         // dQ/dP
-        return ( (Qdelta - Q) / M_BCDelta ) * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, bcSide ), 0 );
+        return ( (Qdelta - Q) / M_BCDelta ) * M_Physics->dAdP( M_Solver->boundaryValue( *M_Solution, OneD_P, bcSide ), 0 );
     }
     else
     {
@@ -507,8 +507,8 @@ MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSyst
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 
-    Real A      = M_Solver->BoundaryValue( *M_Solution, OneD_A, bcSide );
-    Real Adelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_A, bcSide );
+    Real A      = M_Solver->boundaryValue( *M_Solution, OneD_A, bcSide );
+    Real Adelta = M_Solver->boundaryValue( *M_LinearSolution, OneD_A, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) \n";
@@ -519,19 +519,19 @@ MS_Model_1D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSyst
     if ( M_BCDeltaType == OneD_A )
     {
         // dP/dP
-        return ( (Adelta - A) / M_BCDelta ) * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, bcSide ), 0 )
-               * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, bcSide ), 0 );
+        return ( (Adelta - A) / M_BCDelta ) * M_Physics->dPdA( M_Solver->boundaryValue( *M_Solution, OneD_A, bcSide ), 0 )
+               * M_Physics->dAdP( M_Solver->boundaryValue( *M_Solution, OneD_P, bcSide ), 0 );
     }
     else
     {
         // dP/dQ
-        return ( (Adelta - A) / M_BCDelta ) * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, bcSide ), 0 );
+        return ( (Adelta - A) / M_BCDelta ) * M_Physics->dPdA( M_Solver->boundaryValue( *M_Solution, OneD_A, bcSide ), 0 );
     }
 
 #else
 
-    Real P      = M_Solver->BoundaryValue( *M_Solution, OneD_P, bcSide );
-    Real Pdelta = M_Solver->BoundaryValue( *M_LinearSolution, OneD_P, bcSide );
+    Real P      = M_Solver->boundaryValue( *M_Solution, OneD_P, bcSide );
+    Real Pdelta = M_Solver->boundaryValue( *M_LinearSolution, OneD_P, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) \n";
@@ -681,7 +681,7 @@ MS_Model_1D::SetupGlobalData( const std::string& FileName )
         M_Data->setYoung( M_globalData->GetStructureYoungModulus() );
 
     //After changing some parameters we need to update the coefficients
-    M_Data->UpdateCoefficients();
+    M_Data->updateCoefficients();
 }
 
 void
@@ -701,11 +701,11 @@ MS_Model_1D::SetupFESpace()
     //The real mesh can be only scaled due to OneDimensionalModel_Solver conventions
     M_Data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
 
-    for ( UInt i(0); i < M_Data->NumberOfNodes() ; ++i )
-        M_Data->setArea0( M_Data->Area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area (y-z dimensions)
+    for ( UInt i(0); i < M_Data->numberOfNodes() ; ++i )
+        M_Data->setArea0( M_Data->area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area (y-z dimensions)
 
     //After changing some parameters we need to update the coefficients
-    M_Data->UpdateCoefficients();
+    M_Data->updateCoefficients();
 
 #ifdef HAVE_HDF5
     //The mesh for the post-processing can be rotated
@@ -785,7 +785,7 @@ MS_Model_1D::Solve( BC_Type& bc, Solution_Type& solution, const std::string& sol
     UInt SubiterationNumber(1);
     Real timeStep = M_Data->dataTime()->getTimeStep();
 
-    Real CFL = M_Solver->ComputeCFL( solution, M_Data->dataTime()->getTimeStep() );
+    Real CFL = M_Solver->computeCFL( solution, M_Data->dataTime()->getTimeStep() );
     if ( CFL > M_Data->CFLmax() )
     {
         SubiterationNumber = std::ceil( CFL / M_Data->CFLmax() );
@@ -836,12 +836,12 @@ MS_Model_1D::CreateLinearBC()
 void
 MS_Model_1D::UpdateLinearBC( const Solution_Type& solution )
 {
-    M_BCPreviousTimeSteps[0][OneD_left][OneD_A]  = M_Solver->BoundaryValue( solution, OneD_A, OneD_left );
-    M_BCPreviousTimeSteps[0][OneD_left][OneD_P]  = M_Solver->BoundaryValue( solution, OneD_P, OneD_left );
-    M_BCPreviousTimeSteps[0][OneD_left][OneD_Q]  = M_Solver->BoundaryValue( solution, OneD_Q, OneD_left );
-    M_BCPreviousTimeSteps[0][OneD_right][OneD_A] = M_Solver->BoundaryValue( solution, OneD_A, OneD_right );
-    M_BCPreviousTimeSteps[0][OneD_right][OneD_P] = M_Solver->BoundaryValue( solution, OneD_P, OneD_right );
-    M_BCPreviousTimeSteps[0][OneD_right][OneD_Q] = M_Solver->BoundaryValue( solution, OneD_Q, OneD_right );
+    M_BCPreviousTimeSteps[0][OneD_left][OneD_A]  = M_Solver->boundaryValue( solution, OneD_A, OneD_left );
+    M_BCPreviousTimeSteps[0][OneD_left][OneD_P]  = M_Solver->boundaryValue( solution, OneD_P, OneD_left );
+    M_BCPreviousTimeSteps[0][OneD_left][OneD_Q]  = M_Solver->boundaryValue( solution, OneD_Q, OneD_left );
+    M_BCPreviousTimeSteps[0][OneD_right][OneD_A] = M_Solver->boundaryValue( solution, OneD_A, OneD_right );
+    M_BCPreviousTimeSteps[0][OneD_right][OneD_P] = M_Solver->boundaryValue( solution, OneD_P, OneD_right );
+    M_BCPreviousTimeSteps[0][OneD_right][OneD_Q] = M_Solver->boundaryValue( solution, OneD_Q, OneD_right );
 }
 
 void
@@ -879,18 +879,18 @@ MS_Model_1D::ImposePerturbation()
             {
             case OneD_A:
 
-                M_BCDelta = M_Data->JacobianPerturbationArea();
+                M_BCDelta = M_Data->jacobianPerturbationArea();
                 break;
 
             case OneD_Q:
 
-                M_BCDelta = M_Data->JacobianPerturbationFlowRate();
+                M_BCDelta = M_Data->jacobianPerturbationFlowRate();
 
                 break;
 
             case OneD_P:
 
-                M_BCDelta = 5; //M_Data->JacobianPerturbationPressure();
+                M_BCDelta = 5; //M_Data->jacobianPerturbationPressure();
 
                 break;
 
@@ -963,7 +963,7 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
     Debug( 8130 ) << "MS_Model_1D::TangentProblem( bcOutputSide, bcOutputType ) \n";
 #endif
 
-    Real JacobianCoefficient(0);
+    Real jacobianCoefficient(0);
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->IsPerturbed() )
@@ -985,12 +985,12 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
                 switch ( bcOutputType )
                 {
                 case OneD_Q: // dQ_L/dP_L
-                    JacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
-                                          * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, OneD_left ), 0 );
+                    jacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
+                                          * M_Physics->dAdP( M_Solver->boundaryValue( *M_Solution, OneD_P, OneD_left ), 0 );
                     break;
                 case OneD_P: // dP_L/dQ_L
-                    JacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
-                                          * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, OneD_left ), 0 );
+                    jacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
+                                          * M_Physics->dPdA( M_Solver->boundaryValue( *M_Solution, OneD_A, OneD_left ), 0 );
                     break;
                 default:
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
@@ -1000,12 +1000,12 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
                 switch ( bcOutputType )
                 {
                 case OneD_Q: // dQ_R/dP_R
-                    JacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
-                                          * M_Physics->dAdP( M_Solver->BoundaryValue( *M_Solution, OneD_P, OneD_right ), M_Data->NumberOfElements() );
+                    jacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
+                                          * M_Physics->dAdP( M_Solver->boundaryValue( *M_Solution, OneD_P, OneD_right ), M_Data->NumberOfElements() );
                     break;
                 case OneD_P: // dP_R/dQ_R
-                    JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
-                                          * M_Physics->dPdA( M_Solver->BoundaryValue( *M_Solution, OneD_A, OneD_right ), M_Data->NumberOfElements() );
+                    jacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
+                                          * M_Physics->dPdA( M_Solver->boundaryValue( *M_Solution, OneD_A, OneD_right ), M_Data->NumberOfElements() );
                     break;
                 default:
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
@@ -1018,7 +1018,7 @@ MS_Model_1D::TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcO
             break;
         }
 
-    return JacobianCoefficient;
+    return jacobianCoefficient;
 }
 
 #endif
