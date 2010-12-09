@@ -35,7 +35,7 @@
     @version 2.0
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @date 12-04-2010
-
+    @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
@@ -172,7 +172,7 @@ public:
      */
     void oldStyleSetup( const GetPot& dataFile, const std::string& section = "1dnetwork" );
 
-    void UpdateCoefficients();
+    void updateCoefficients();
 
     void initLinearParam( const GetPot& dataFile ); // TO BE CHECKED - DON'T USE IT!
 
@@ -194,23 +194,23 @@ public:
      */
     void setDataTime( const Time_PtrType DataTime );
 
-    void setDensity( const Real& Density );
+    void setDensity( const Real& density );
 
-    void setViscosity( const Real& Viscosity );
+    void setViscosity( const Real& discosity );
 
-    void setDensityWall( const Real& DensityWall );
+    void setDensityWall( const Real& densityWall );
 
-    void setThickness( const Real& Thickness, const UInt& i );
+    void setThickness( const Real& thickness, const UInt& i );
 
-    void setYoung( const Real& Young );
+    void setYoung( const Real& young );
 
-    void setPoisson( const Real& Poisson );
+    void setPoisson( const Real& poisson );
 
     void setExternalPressure( const Real& externalPressure );
 
-    void setArea0( const Real& Area0, const UInt& i );
+    void setArea0( const Real& area0, const UInt& i );
 
-    void setBeta0( const Real& Beta0, const UInt& i );
+    void setBeta0( const Real& beta0, const UInt& i );
 
     void setdBeta0dz( const Real& dBeta0dz, const UInt& i );
 
@@ -224,19 +224,19 @@ public:
     /*!
      * @return Physics Type
      */
-    const OneDimensionalModel_PhysicsTypes& PhysicsType() const;
+    const OneDimensionalModel_PhysicsTypes& physicsType() const;
 
     //! Get the flux type
     /*!
      * @return Flux Type
      */
-    const OneDimensionalModel_FluxTypes& FluxType() const;
+    const OneDimensionalModel_FluxTypes& fluxType() const;
 
     //! Get the source type
     /*!
      * @return Source Type
      */
-    const OneDimensionalModel_SourceTypes& SourceType() const;
+    const OneDimensionalModel_SourceTypes& sourceType() const;
 
     //! Get data time container
     /*!
@@ -245,9 +245,9 @@ public:
     Time_PtrType       dataTime() const;
 
     Mesh_PtrType       mesh() const;
-    Real               Length() const;
-    UInt               NumberOfElements() const;
-    UInt               NumberOfNodes() const;
+    Real               length() const;
+    UInt               numberOfElements() const;
+    UInt               numberOfNodes() const;
 
     const std::string& postprocessingDirectory() const;
     const std::string& postprocessingFile() const;
@@ -272,26 +272,26 @@ public:
 //    const Real&        multiplier() const;
 
     // Physical Parameters
-    const Real& DensityRho() const;
-    const Real& Viscosity() const;
+    const Real& densityRho() const;
+    const Real& viscosity() const;
 
-    const Real& DensityWall() const;
-    const Real& Young() const;
-    const Real& Poisson() const;
+    const Real& densityWall() const;
+    const Real& young() const;
+    const Real& poisson() const;
 
     const Real& externalPressure() const;
 
-    const Real& ViscoelasticModulus() const;
-    const Real& InertialModulus() const;
-    const Real& RobertsonCorrection() const;
+    const Real& viscoelasticModulus() const;
+    const Real& inertialModulus() const;
+    const Real& robertsonCorrection() const;
 
-    const Real& Thickness( const UInt& i ) const;
-    const Real& Friction() const;
+    const Real& thickness( const UInt& i ) const;
+    const Real& friction() const;
 
-    const Real& Area0( const UInt& i ) const;
-    const Real& Alpha( const UInt& i ) const;
-    const Real& Beta0( const UInt& i ) const;
-    const Real& Beta1( const UInt& i ) const;
+    const Real& area0( const UInt& i ) const;
+    const Real& alpha( const UInt& i ) const;
+    const Real& beta0( const UInt& i ) const;
+    const Real& beta1( const UInt& i ) const;
 
     const Real& dArea0dz( const UInt& i ) const;
     const Real& dAlphadz( const UInt& i ) const;
@@ -299,30 +299,30 @@ public:
     const Real& dBeta1dz( const UInt& i ) const;
 
     // Jacobian perturbation parameters
-    const Real& JacobianPerturbationArea() const;
-    const Real& JacobianPerturbationFlowRate() const;
-    const Real& JacobianPerturbationPressure() const;
+    const Real& jacobianPerturbationArea() const;
+    const Real& jacobianPerturbationFlowRate() const;
+    const Real& jacobianPerturbationPressure() const;
 
     // Linear Parameters
-    const Real& Flux11( const UInt& i ) const;
-    const Real& Flux12( const UInt& i ) const;
-    const Real& Flux21( const UInt& i ) const;
-    const Real& Flux22( const UInt& i ) const;
+    const Real& flux11( const UInt& i ) const;
+    const Real& flux12( const UInt& i ) const;
+    const Real& flux21( const UInt& i ) const;
+    const Real& flux22( const UInt& i ) const;
 
-    const Real& Celerity1( const UInt& i ) const;
-    const Real& Celerity2( const UInt& i ) const;
+    const Real& celerity1( const UInt& i ) const;
+    const Real& celerity2( const UInt& i ) const;
 
-    const Real& LeftEigenVector11( const UInt& i ) const;
-    const Real& LeftEigenVector12( const UInt& i ) const;
-    const Real& LeftEigenVector21( const UInt& i ) const;
-    const Real& LeftEigenVector22( const UInt& i ) const;
+    const Real& leftEigenVector11( const UInt& i ) const;
+    const Real& leftEigenVector12( const UInt& i ) const;
+    const Real& leftEigenVector21( const UInt& i ) const;
+    const Real& leftEigenVector22( const UInt& i ) const;
 
-    const Real& Source10( const UInt& i ) const;
-    const Real& Source20( const UInt& i ) const;
-    const Real& Source11( const UInt& i ) const;
-    const Real& Source12( const UInt& i ) const;
-    const Real& Source21( const UInt& i ) const;
-    const Real& Source22( const UInt& i ) const;
+    const Real& source10( const UInt& i ) const;
+    const Real& source20( const UInt& i ) const;
+    const Real& source11( const UInt& i ) const;
+    const Real& source12( const UInt& i ) const;
+    const Real& source21( const UInt& i ) const;
+    const Real& source22( const UInt& i ) const;
 
     //@}
 
@@ -335,7 +335,11 @@ private:
     /*!
      * Useful for tapering.
      */
-    void linearInterpolation( scalVec_Type& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea = false );
+    void linearInterpolation( scalVec_Type& vector,
+                              const GetPot& dataFile,
+                              const std::string& quantity,
+                              const Real& defaultValue,
+                              const bool& isArea = false );
 
     //! Compute the derivatives of alpha, area0, beta0, and beta1 using centered differences.
     /*!
@@ -346,13 +350,13 @@ private:
     //@}
 
     //! Model
-    OneDimensionalModel_PhysicsTypes M_PhysicsType;
-    OneDimensionalModel_FluxTypes    M_FluxType;
-    OneDimensionalModel_SourceTypes  M_SourceType;
+    OneDimensionalModel_PhysicsTypes M_physicsType;
+    OneDimensionalModel_FluxTypes    M_fluxType;
+    OneDimensionalModel_SourceTypes  M_sourceType;
 
     //! Data containers for time and mesh
-    Time_PtrType      M_Time;
-    Mesh_PtrType      M_Mesh;
+    Time_PtrType      M_time;
+    Mesh_PtrType      M_mesh;
 
     //! Miscellaneous
     std::string       M_postprocessingDirectory; //! full directory name (including path)
@@ -378,35 +382,35 @@ private:
 //    Real              M_multiplier;
 
     //! Jacobian perturbation
-    Real M_JacobianPerturbationArea;
-    Real M_JacobianPerturbationFlowRate;
-    Real M_JacobianPerturbationPressure;
+    Real M_jacobianPerturbationArea;
+    Real M_jacobianPerturbationFlowRate;
+    Real M_jacobianPerturbationPressure;
 
     //! Physical Parameters
-    bool M_ComputeCoefficients;
-    Int  M_PowerlawCoefficient;
+    bool M_computeCoefficients;
+    Int  M_powerLawCoefficient;
 
-    Real M_Density;     // Density rho (always taken constant along the vessel)
-    Real M_Viscosity;
+    Real M_density;     // Density rho (always taken constant along the vessel)
+    Real M_viscosity;
 
-    Real M_DensityWall;
-    bool M_ThickVessel;
-    Real M_Young;
-    Real M_Poisson;
+    Real M_densityWall;
+    bool M_thickVessel;
+    Real M_young;
+    Real M_poisson;
 
     Real M_externalPressure;
 
-    Real M_ViscoelasticModulus;
-    Real M_InertialModulus;
-    Real M_RobertsonCorrection;
+    Real M_viscoelasticModulus;
+    Real M_inertialModulus;
+    Real M_robertsonCorrection;
 
-    scalVec_Type M_Thickness;
-    Real M_Friction; // Friction parameter
+    scalVec_Type M_thickness;
+    Real M_friction; // Friction parameter
 
-    scalVec_Type M_Area0;      // area
-    scalVec_Type M_Alpha;      // Coriolis coefficient (often called alpha)
-    scalVec_Type M_Beta0;      // homogeneous to a pressure
-    scalVec_Type M_Beta1;      // power coeff (>0, often=1/2)
+    scalVec_Type M_area0;      // area
+    scalVec_Type M_alpha;      // Coriolis coefficient (often called alpha)
+    scalVec_Type M_beta0;      // homogeneous to a pressure
+    scalVec_Type M_beta1;      // power coeff (>0, often=1/2)
 
     //! Derivatives of main coefficients
     scalVec_Type M_dArea0dz;
@@ -415,28 +419,28 @@ private:
     scalVec_Type M_dBeta1dz; // power coeff (>0, often=1/2)
 
     //! Flux matrix
-    scalVec_Type M_Flux11;
-    scalVec_Type M_Flux12;
-    scalVec_Type M_Flux21;
-    scalVec_Type M_Flux22;
+    scalVec_Type M_flux11;
+    scalVec_Type M_flux12;
+    scalVec_Type M_flux21;
+    scalVec_Type M_flux22;
 
     //! Celerities of the linear problem (eigenvalues of the flux matrix)
-    scalVec_Type M_Celerity1;
-    scalVec_Type M_Celerity2;
+    scalVec_Type M_celerity1;
+    scalVec_Type M_celerity2;
 
     //! Eigenvector for first and second eigenvalue
-    scalVec_Type M_Celerity1LeftEigenvector1;
-    scalVec_Type M_Celerity1LeftEigenvector2;
-    scalVec_Type M_Celerity2LeftEigenvector1;
-    scalVec_Type M_Celerity2LeftEigenvector2;
+    scalVec_Type M_celerity1LeftEigenvector1;
+    scalVec_Type M_celerity1LeftEigenvector2;
+    scalVec_Type M_celerity2LeftEigenvector1;
+    scalVec_Type M_celerity2LeftEigenvector2;
 
     //! Source matrix
-    scalVec_Type M_Source10;
-    scalVec_Type M_Source20;
-    scalVec_Type M_Source11;
-    scalVec_Type M_Source12;
-    scalVec_Type M_Source21;
-    scalVec_Type M_Source22;
+    scalVec_Type M_source10;
+    scalVec_Type M_source20;
+    scalVec_Type M_source11;
+    scalVec_Type M_source12;
+    scalVec_Type M_source21;
+    scalVec_Type M_source22;
 };
 
 }

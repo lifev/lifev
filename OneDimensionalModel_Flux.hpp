@@ -133,7 +133,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void SetPhysics( const physicsPtr_Type& physics );
+    void setPhysics( const physicsPtr_Type& physics );
 
     //@}
 

@@ -65,7 +65,7 @@ public:
     //! Constructor
     OneDimensionalModel_Source();
 
-    OneDimensionalModel_Source( const physicsPtr_Type Physics );
+    OneDimensionalModel_Source( const physicsPtr_Type physics );
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Source() {}
@@ -88,11 +88,11 @@ public:
      *
      *  \param indz : is the index position for the parameter
      */
-    virtual Real operator()( const Real& _A, const Real& _Q,
+    virtual Real operator()( const Real& A, const Real& Q,
                              const ID& ii,   const UInt& indz = 0 ) const = 0;
 
     //! Jacobian matrix dBi/dxj
-    virtual Real diff( const Real& _A, const Real& _Q,
+    virtual Real diff( const Real& A, const Real& Q,
                        const ID& ii,   const ID& jj,
                        const UInt& indz = 0 ) const = 0;
 
@@ -118,7 +118,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void SetPhysics( const physicsPtr_Type& Physics );
+    void setPhysics( const physicsPtr_Type& physics );
 
     //@}
 
@@ -126,13 +126,22 @@ public:
     //! @name Get Methods
     //@{
 
-    physicsPtr_Type Physics() const ;
+    physicsPtr_Type physics() const ;
 
     //@}
 
 protected:
 
     physicsPtr_Type                 M_physics;
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_Source& operator=( const physicsPtr_Type physics );
+
+    //@}
 };
 
 }

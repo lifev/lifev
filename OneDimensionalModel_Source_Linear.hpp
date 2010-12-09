@@ -69,7 +69,7 @@ public:
     //! Constructor
     OneDimensionalModel_Source_Linear();
 
-    OneDimensionalModel_Source_Linear( const physicsPtr_Type Physics );
+    OneDimensionalModel_Source_Linear( const physicsPtr_Type physics );
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Source_Linear() {}
@@ -88,12 +88,12 @@ public:
      *
      * \param indz : is the index position for the parameter
      */
-    Real operator()( const Real& _U1, const Real& _U2,
+    Real operator()( const Real& U1, const Real& U2,
                      const ID& ii,
                      const UInt& indz = 0 ) const ;
 
     //! Jacobian matrix dSi/dxj
-    Real diff( const Real& _U1, const Real& _U2,
+    Real diff( const Real& U1, const Real& U2,
                const ID& ii,    const ID& jj,
                const UInt& indz = 0 ) const;
 
@@ -113,15 +113,23 @@ public:
      *
      *  \param indz : is the index position for the parameter
      */
-    Real interpolatedQuasiLinearSource( const Real& _U1, const Real& _U2,
+    Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
                                         const ID& ii,    const container2D_Type& bcNodes, const Real& cfl ) const ;
+
+    //@}
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_Source_Linear& operator=( const physicsPtr_Type physics );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalModel_Source* Create_OneDimensionalModel_Source_Linear()
+inline OneDimensionalModel_Source* createOneDimensionalSourceLinear()
 {
     return new OneDimensionalModel_Source_Linear();
 }

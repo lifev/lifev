@@ -59,7 +59,7 @@ OneDimensionalModel_Flux::OneDimensionalModel_Flux( const physicsPtr_Type physic
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Flux::SetPhysics( const physicsPtr_Type& physics )
+OneDimensionalModel_Flux::setPhysics( const physicsPtr_Type& physics )
 {
     M_physics = physics;
 }
