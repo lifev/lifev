@@ -35,7 +35,7 @@
  *  @version 2.0
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
- *
+ *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
  */
 
 #include <lifemc/lifefem/OneDimensionalModel_BCFunction_Default.hpp>
@@ -105,7 +105,7 @@ OneDimensionalModel_BCFunction_Default::setupNode()
         break;
 
     case OneD_right:
-        M_bcNode = M_Flux->Physics()->Data()->NumberOfNodes();
+        M_bcNode = M_Flux->physics()->Data()->NumberOfNodes();
         break;
 
     default:
@@ -210,7 +210,7 @@ OneDimensionalModel_BCFunction_Compatibility::setupNode()
     {
     case OneD_left:
         M_bcInternalNode      = M_bcNode + 1;
-        boundaryEdge          = M_Flux->Physics()->Data()->mesh()->edgeList(1);
+        boundaryEdge          = M_Flux->physics()->Data()->mesh()->edgeList(1);
         M_boundaryPoint[0]    = boundaryEdge.point(1).x();
         M_boundaryPoint[1]    = boundaryEdge.point(1).y();
         M_boundaryPoint[2]    = boundaryEdge.point(1).z();
@@ -221,7 +221,7 @@ OneDimensionalModel_BCFunction_Compatibility::setupNode()
 
     case OneD_right:
         M_bcInternalNode      = M_bcNode - 1;
-        boundaryEdge          = M_Flux->Physics()->Data()->mesh()->edgeList(M_bcNode - 1);
+        boundaryEdge          = M_Flux->physics()->Data()->mesh()->edgeList(M_bcNode - 1);
         M_boundaryPoint[0]    = boundaryEdge.point(2).x();
         M_boundaryPoint[1]    = boundaryEdge.point(2).y();
         M_boundaryPoint[2]    = boundaryEdge.point(2).z();
@@ -260,7 +260,7 @@ OneDimensionalModel_BCFunction_Compatibility::computeRHS( const Real& timeStep )
 void
 OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 {
-    M_Flux->EigenValuesEigenVectors( M_bcU[0], M_bcU[1],
+    M_Flux->eigenValuesEigenVectors( M_bcU[0], M_bcU[1],
                                      M_eigenvalues, M_leftEigenvector1, M_leftEigenvector2,
                                      M_bcNode - 1 );
 
@@ -312,11 +312,11 @@ OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue
     switch ( M_bcSide )
     {
     case OneD_left:
-        deltaX = M_Flux->Physics()->Data()->mesh()->edgeLength( 0 );
+        deltaX = M_Flux->physics()->Data()->mesh()->edgeLength( 0 );
         break;
 
     case OneD_right:
-        deltaX = M_Flux->Physics()->Data()->mesh()->edgeLength( M_bcNode - 2 );
+        deltaX = M_Flux->physics()->Data()->mesh()->edgeLength( M_bcNode - 2 );
         break;
 
     default:
@@ -378,13 +378,13 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, cons
     }
 
     Real a1, a2, a11, a22, b1, b2, c1, c2;
-    a1 = M_Flux->Physics()->elasticPressure(M_bcU[0], M_bcNode - 1) - M_Flux->Physics()->Data()->externalPressure(); // pressure at previous time step
+    a1 = M_Flux->physics()->elasticPressure(M_bcU[0], M_bcNode - 1) - M_Flux->physics()->Data()->externalPressure(); // pressure at previous time step
     a2 = M_bcU[1]; // flux at previous time step
 
-    b1 = M_Flux->Physics()->pressure_WDiff( M_bcW[0], M_bcW[1], 1, M_bcNode - 1);  // dP / dW1
+    b1 = M_Flux->physics()->pressure_WDiff( M_bcW[0], M_bcW[1], 1, M_bcNode - 1);  // dP / dW1
     b2 = M_bcU[0] / 2; // dQ / dW1
 
-    c1 = M_Flux->Physics()->pressure_WDiff( M_bcW[0], M_bcW[1], 2, M_bcNode - 1);  // dP / dW2
+    c1 = M_Flux->physics()->pressure_WDiff( M_bcW[0], M_bcW[1], 2, M_bcNode - 1);  // dP / dW2
     c2 = b2; // dQ / dW2
 
     a11 = a1 - b1*M_bcW[0] - c1*M_bcW[1];
@@ -497,7 +497,7 @@ OneDimensionalModel_BCFunction_Windkessel3::operator()( const Real& time, const 
 
     if ( M_absorbing1 )
     {
-        Real b1( M_Flux->Physics()->pressure_WDiff( A, Q, 1, M_bcNode) );  // dP / dW1
+        Real b1( M_Flux->physics()->pressure_WDiff( A, Q, 1, M_bcNode) );  // dP / dW1
         Real b2( A / 2 ); // dQ / dW1
         M_resistance1 = b1 / b2;
     }
@@ -530,7 +530,7 @@ OneDimensionalModel_BCFunction_Windkessel3::operator()( const Real& time, const 
     M_dQdt_tn     = dQdt;
     M_Q_tn        = Q;
 
-    return  M_Flux->Physics()->W_from_P( P, W_out, W_outID, M_bcNode ); // W_in
+    return  M_Flux->physics()->W_from_P( P, W_out, W_outID, M_bcNode ); // W_in
 }
 
 }

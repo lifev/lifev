@@ -36,6 +36,7 @@
  *  @version 2.0
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
  */
 
 #include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
@@ -86,7 +87,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         //Container2D_Type leftEigenvector_first, leftEigenvector_second;
 
         UInt dof;
-        ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->Physics()->Data()->NumberOfNodes() - 1;
+        ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->physics()->Data()->NumberOfNodes() - 1;
 
         container2D_Type U_boundary;
         U_boundary[0] = (*solution.find("A")->second)(dof + 1);
@@ -96,7 +97,7 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         container2D_Type eigenvalues;
         container2D_Type leftEigenvector1, leftEigenvector2;
 
-        flux->EigenValuesEigenVectors( U_boundary[0], U_boundary[1],
+        flux->eigenValuesEigenVectors( U_boundary[0], U_boundary[1],
                                        eigenvalues, leftEigenvector1, leftEigenvector2, dof );
 
         computeMatrixAndRHS( time, timeStep, flux, OneD_first,
@@ -192,7 +193,7 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
         M_bcMatrix[line][1] = 0.;
         break;
     case OneD_P:
-        rhs = flux->Physics()->A_from_P( rhs, dof );
+        rhs = flux->physics()->A_from_P( rhs, dof );
         M_bcMatrix[line][0] = 1.;
         M_bcMatrix[line][1] = 0.;
         break;
